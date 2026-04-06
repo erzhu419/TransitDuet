@@ -1,0 +1,64 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Why TAP works.}
+Temporal Advantage Propagation succeeds because it closes a feedback loop that is absent when the two levels train independently.
+Without TAP, the upper policy receives reward signals only from its own sparse dispatch events, learning that a particular target headway yields a certain fleet cost---but remaining oblivious to whether the lower policy can actually realize that headway under stochastic conditions.
+Conversely, the lower policy optimizes holding actions against a headway target it treats as exogenous, unable to signal the upper level that a target is infeasible or wasteful.
+TAP bridges this gap by propagating discounted lower-level rewards back to the dispatch decision that spawned them, and by augmenting the lower advantage with the upper-level value of the dispatch context.
+The cosine-annealed $\beta$ schedule ensures that these cross-level signals are introduced only after each policy has developed a reasonable standalone strategy, preventing the gradient noise of one immature policy from destabilizing the other.
+
+\paragraph{Connection to RoboDuet.}
+TransitDuet draws direct inspiration from the RoboDuet framework of \citet{he2024roboduet}, which introduced cross-advantage augmentation for bi-level robot locomotion control.
+\Cref{tab:analogy} makes the structural analogy explicit.
+The key generalization is temporal: RoboDuet's two levels share a common state clock, permitting direct advantage summation at each time step, whereas TransitDuet operates across asynchronous timescales that require trip-lifecycle aggregation.
+
+\begin{table}[t]
+\centering
+\caption{Structural analogy between RoboDuet and TransitDuet.}
+\label{tab:analogy}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Aspect} & \textbf{RoboDuet} & \textbf{TransitDuet} \\
+\midrule
+Upper policy     & Locomotion style selector    & Timetable planner ($\piU$) \\
+Lower policy     & Joint-level tracking controller & Holding controller ($\piL$) \\
+Upper action     & Style parameters             & Target headways $[\Hpeak, \Hoff, \Htrans]$ \\
+Lower action     & Joint torques                & Holding duration (s) \\
+Coupling         & Synchronous cross-advantage  & Asynchronous TAP \\
+Timescale        & Shared clock (same $\Delta t$) & Heterogeneous ($300$\,s vs.\ $1$\,s) \\
+Constraint       & Joint-limit penalties        & Fleet ($\thetavec$-OGD) + headway (Lagrangian) \\
+$\beta$ schedule & Fixed $\beta$                & Cosine-annealed warmup \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Limitations.}
+Several limitations qualify the present results and motivate future work.
+
+\emph{Single-route scope.}
+TransitDuet is evaluated on a single bidirectional corridor.
+Real transit networks involve multiple interacting routes with shared terminals, transfer passengers, and fleet rebalancing across lines.
+Extending the framework to a multi-route setting would require the upper policy to allocate a shared fleet across routes, substantially expanding the action space and introducing inter-route coordination constraints.
+
+\emph{Simplified demand model.}
+Passenger arrivals follow stationary OD rates within each time period.
+In practice, demand is non-stationary, exhibits day-of-week and seasonal variation, and responds endogenously to service quality (e.g., passengers abandoning a stop after excessive waits).
+Incorporating demand elasticity and real-time demand forecasting would improve realism but introduce additional model complexity.
+
+\emph{No real-world deployment.}
+All experiments are conducted in a stochastic microsimulation.
+While the simulator reproduces key phenomena---bunching, load-dependent dwell times, stochastic travel times---it abstracts away traffic signal interactions, driver behavior heterogeneity, and vehicle breakdowns.
+Sim-to-real transfer would require domain randomization or a calibrated digital twin.
+
+\emph{Computational cost.}
+Each episode requires approximately 7\,s of environment simulation time plus training overhead.
+At 300 episodes with 3 seeds, the total wall-clock time is approximately \textcolor{red}{\textbf{[TBD]}} hours on a single GPU.
+While acceptable for research, real-time retraining for schedule disruptions would require further acceleration, for instance through model distillation or warm-starting from a pre-trained policy.
+
+\paragraph{Scalability considerations.}
+Scaling to multi-route networks introduces two challenges.
+First, the upper-level action space grows combinatorially with the number of routes, since headway targets must be set jointly to respect shared fleet constraints.
+Factored action representations or attention-based architectures over route embeddings could mitigate this.
+Second, the lower-level parameter sharing, which currently treats all buses on a single route identically, would need to incorporate route-specific context to generalize across heterogeneous lines.
+Graph neural networks operating on the transit network topology offer a promising direction for encoding such structure.

@@ -1,0 +1,10 @@
+\begin{abstract}
+We present TransitDuet, a bi-level reinforcement learning framework that jointly optimizes bus timetable planning and real-time holding control.
+This joint problem is fundamentally harder than either task in isolation: the planning and control layers operate on different timescales, observe different state spaces, and interact through delayed, asynchronous feedback---properties that violate the synchronous co-execution assumption underlying existing hierarchical reinforcement learning methods.
+TransitDuet addresses this through three mechanisms.
+First, Temporal Advantage Propagation aggregates cross-level rewards over complete trip lifecycles to couple an upper dispatch policy with a lower holding policy, generalizing synchronous cross-advantage to asynchronous multi-timescale settings.
+Second, a measurement-projection scheme based on online gradient descent enforces fleet-size constraints without reward shaping.
+Third, Lagrangian relaxation within the lower policy penalizes headway deviations, converting a hard service-regularity requirement into a soft dual objective.
+We evaluate TransitDuet in a calibrated microsimulation of a high-frequency bus corridor with stochastic demand and traffic.
+Compared to fixed-timetable holding control and single-level planning baselines, TransitDuet reduces passenger waiting time by \textcolor{red}{\textbf{[TBD]}}\% while satisfying fleet and headway constraints, demonstrating that tightly coupling planning and control through asynchronous advantage propagation yields benefits unattainable by either layer alone.
+\end{abstract}

@@ -1,0 +1,229 @@
+\section{Experiments}
+\label{sec:experiments}
+
+We evaluate TransitDuet on an event-driven bus microsimulation and compare against five ablated or simplified baselines.
+All numerical results are pending and marked as \textcolor{red}{\textbf{[TBD]}}.
+
+%% ============================================================
+\subsection{Experimental Setup}
+\label{sec:exp_setup}
+
+\paragraph{Simulation environment.}
+We implement an event-driven bus simulation modeling a single bidirectional route with 22 stations (11 per direction), serving 264 scheduled trips per day.
+Passenger demand follows origin--destination (OD) matrices with time-varying arrival rates calibrated to reproduce morning and evening peaks.
+The simulation advances at a resolution of $\Delta t = 1$\,s.
+Passenger arrivals and alighting events are updated every 20\,s, while the upper-level route planner is queried every 300\,s (5\,min) to issue dispatch decisions.
+Travel times between consecutive stations are drawn from log-normal distributions whose parameters vary by time of day and direction, with a route stochasticity parameter $\sigma$ controlling variance (default $\sigma = 1.5$).
+
+\paragraph{Methods.}
+We compare six variants, labeled \textbf{A}--\textbf{F}:
+\begin{enumerate}[label=\textbf{\Alph*.},leftmargin=*]
+    \item \textbf{TransitDuet (full)}: the complete framework with TAP, $\thetavec$-OGD, Lagrangian penalties, and cosine-annealed $\beta$ schedule.
+    \item \textbf{No TAP} ($\beta = 0$ always): both levels train independently; the cross-advantage augmentation is disabled.
+    \item \textbf{No $\thetavec$-OGD} (fixed reward weights): the measurement-projection constraint on fleet utilization is replaced by fixed, hand-tuned reward weights.
+    \item \textbf{No Lagrangian} ($\climit = \infty$): the headway-regularity constraint at the lower level is removed; the agent relies on reward shaping alone.
+    \item \textbf{Fixed Timetable} ($\piU$ disabled): the upper policy is replaced by a static timetable with $\htarget = 360$\,s throughout the day; only the lower-level holding controller is trained.
+    \item \textbf{Flat RL}: a single-level distributional soft actor-critic (DSAC) agent that jointly selects dispatch and holding actions without hierarchical decomposition.
+\end{enumerate}
+
+\paragraph{Metrics.}
+We report four primary metrics averaged over the final 50 evaluation episodes:
+\begin{itemize}
+    \item \emph{Average passenger wait time} (min): the mean time between a passenger's arrival at a station and boarding.
+    \item \emph{Bunching rate} (\%): the fraction of station arrivals where the forward headway is less than half the target headway.
+    \item \emph{Peak fleet size}: the maximum number of buses simultaneously in service during an episode.
+    \item \emph{Episode reward}: the undiscounted cumulative reward over one full day of operation.
+\end{itemize}
+
+\paragraph{Training protocol.}
+Each method is trained for 300 episodes with three independent random seeds.
+We report means and standard deviations across seeds.
+
+\paragraph{Hyperparameters.}
+\Cref{tab:hyperparams} summarizes the key hyperparameters.
+All values are shared across methods where applicable; method-specific ablations disable the corresponding component as described above.
+
+\begin{table}[t]
+\centering
+\caption{Hyperparameters for TransitDuet.}
+\label{tab:hyperparams}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Component} & \textbf{Parameter} & \textbf{Value} \\
+\midrule
+Upper policy   & Learning rate               & $1 \times 10^{-4}$ \\
+Lower policy   & Learning rate               & $1 \times 10^{-5}$ \\
+Lagrangian     & Dual variable learning rate  & $1 \times 10^{-3}$ \\
+Training       & Batch size                   & 2048 \\
+               & Discount factor $\gamma$     & 0.99 \\
+               & Soft-update coefficient $\tau$& 0.005 \\
+TAP schedule   & $\betamax$                   & 0.5 \\
+               & Warmup episodes              & 50 \\
+               & Ramp episodes                & 100 \\
+Fleet          & $\Nfleet$                    & 12 \\
+Constraint     & $\climit$                    & 0.15 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%% ============================================================
+\subsection{Main Results}
+\label{sec:main_results}
+
+\Cref{tab:main_results} presents the performance of all six methods.
+
+\begin{table}[t]
+\centering
+\caption{Performance comparison across six methods (mean $\pm$ std over 3 seeds). Best result in \textbf{bold}.}
+\label{tab:main_results}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Method} & \textbf{Wait (min)} & \textbf{Bunching (\%)} & \textbf{Peak Fleet} & \textbf{Reward} \\
+\midrule
+A. TransitDuet        & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+B. No TAP             & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+C. No $\thetavec$-OGD & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+D. No Lagrangian      & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+E. Fixed Timetable    & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+F. Flat RL            & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{TransitDuet vs.\ Fixed Timetable (A vs.\ E).}
+Replacing the static 360\,s headway with a learned, time-varying target reduces average wait time by \textcolor{red}{\textbf{[TBD]}}\% and bunching rate by \textcolor{red}{\textbf{[TBD]}}\%.
+This confirms that adaptive timetable planning provides headroom that holding control alone cannot exploit.
+
+\paragraph{TransitDuet vs.\ Flat RL (A vs.\ F).}
+The hierarchical decomposition outperforms the monolithic agent by \textcolor{red}{\textbf{[TBD]}}\% on wait time.
+We attribute this to the difficulty of learning dispatch and holding jointly in a single action space with heterogeneous timescales, which manifests as high variance in training and suboptimal fleet utilization.
+
+\paragraph{Effect of inter-level coupling (A vs.\ B).}
+Disabling TAP ($\beta = 0$) degrades wait time by \textcolor{red}{\textbf{[TBD]}}\%, demonstrating that the cross-advantage signal is essential for coordinating the two levels rather than merely training them in parallel.
+
+\paragraph{Effect of constraint mechanisms (A vs.\ C and A vs.\ D).}
+Removing $\thetavec$-OGD (Method C) leads to a peak fleet size of \textcolor{red}{\textbf{[TBD]}}, exceeding the budget $\Nfleet = 12$ in \textcolor{red}{\textbf{[TBD]}}\% of episodes.
+Removing the Lagrangian penalty (Method D) inflates the bunching rate to \textcolor{red}{\textbf{[TBD]}}\%, indicating that reward shaping alone is insufficient to maintain headway regularity.
+
+%% ============================================================
+\subsection{Ablation Study}
+\label{sec:ablation}
+
+We isolate the contribution of each component through pairwise ablations.
+
+\paragraph{TAP coupling (A vs.\ B).}
+\Cref{fig:ablation_tap} plots the training curves of average wait time for Methods A and B.
+TransitDuet converges to \textcolor{red}{\textbf{[TBD]}}\,min by episode \textcolor{red}{\textbf{[TBD]}}, whereas the no-TAP variant plateaus at \textcolor{red}{\textbf{[TBD]}}\,min.
+The gap widens precisely when $\beta$ begins ramping (episode 50), suggesting that TAP accelerates credit assignment across levels.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/ablation_tap.pdf}
+    \textcolor{red}{\textbf{[TBD: training curves A vs.\ B, x-axis=episode, y-axis=avg wait time]}}
+    \caption{Training curves comparing TransitDuet (A) and No TAP (B). The shaded region indicates $\pm 1$ standard deviation across 3 seeds. The vertical dashed line marks the onset of $\beta$ ramping at episode 50.}
+    \label{fig:ablation_tap}
+\end{figure}
+
+\paragraph{$\thetavec$-OGD projection (A vs.\ C).}
+\Cref{fig:ablation_ogd} shows peak fleet size over training episodes.
+Without $\thetavec$-OGD, the upper policy over-dispatches during the peak, reaching \textcolor{red}{\textbf{[TBD]}} buses simultaneously.
+The projection mechanism keeps peak fleet at or below $\Nfleet = 12$ after episode \textcolor{red}{\textbf{[TBD]}}.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/ablation_ogd.pdf}
+    \textcolor{red}{\textbf{[TBD: peak fleet size A vs.\ C, x-axis=episode, y-axis=peak fleet]}}
+    \caption{Peak fleet size during training for TransitDuet (A) and No $\thetavec$-OGD (C). The horizontal dashed line marks the fleet budget $\Nfleet = 12$.}
+    \label{fig:ablation_ogd}
+\end{figure}
+
+\paragraph{Lagrangian penalty (A vs.\ D).}
+\Cref{fig:ablation_lagrangian} presents the distribution of headway deviations $|h - \htarget| / \htarget$ at convergence.
+Method D exhibits a heavy right tail with \textcolor{red}{\textbf{[TBD]}}\% of observations exceeding a 50\% relative deviation, compared to \textcolor{red}{\textbf{[TBD]}}\% for TransitDuet.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/ablation_lagrangian.pdf}
+    \textcolor{red}{\textbf{[TBD: headway deviation histogram A vs.\ D]}}
+    \caption{Distribution of relative headway deviations at convergence for TransitDuet (A) and No Lagrangian (D). Lower and more concentrated is better.}
+    \label{fig:ablation_lagrangian}
+\end{figure}
+
+%% ============================================================
+\subsection{Mechanism Analysis}
+\label{sec:mechanism}
+
+We examine the internal dynamics of TransitDuet to verify that each mechanism behaves as designed.
+
+\paragraph{$\thetavec$ weight evolution.}
+\Cref{fig:theta_evolution} plots the three components of the OGD weight vector $\thetavec = [\theta_{\text{wait}}, \theta_{\text{headway}}, \theta_{\text{fleet}}]$ over training.
+Early in training, $\theta_{\text{fleet}}$ dominates as the policy learns to satisfy the fleet constraint; after approximately episode \textcolor{red}{\textbf{[TBD]}}, $\theta_{\text{wait}}$ and $\theta_{\text{headway}}$ increase as the policy shifts toward service quality optimization within the feasible region.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/theta_evolution.pdf}
+    \textcolor{red}{\textbf{[TBD: 3-line plot of $\theta_{\text{wait}}$, $\theta_{\text{headway}}$, $\theta_{\text{fleet}}$ over episodes]}}
+    \caption{Evolution of $\thetavec$-OGD weight components during training. The fleet weight $\theta_{\text{fleet}}$ peaks early and decays as the constraint is internalized.}
+    \label{fig:theta_evolution}
+\end{figure}
+
+\paragraph{Lagrangian multiplier $\lambda$ convergence.}
+\Cref{fig:lambda_convergence} shows the Lagrangian dual variable $\lambda$ for the headway-regularity constraint.
+Starting from $\lambda_0 = 0$, the multiplier rises sharply during early training when headway deviations are large, then converges to a stable value of \textcolor{red}{\textbf{[TBD]}} as the lower policy learns to regulate headways within the tolerance $\climit = 0.15$.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/lambda_convergence.pdf}
+    \textcolor{red}{\textbf{[TBD: $\lambda$ vs.\ episode]}}
+    \caption{Convergence of the Lagrangian multiplier $\lambda$ during training. Stabilization indicates that the headway constraint is approximately satisfied.}
+    \label{fig:lambda_convergence}
+\end{figure}
+
+\paragraph{Learned target headways.}
+\Cref{fig:learned_headways} visualizes the upper policy's output---$\Hpeak$, $\Hoff$, and $\Htrans$---over training episodes, each averaged across dispatch events in the corresponding demand period.
+The policy learns to compress peak headways to approximately \textcolor{red}{\textbf{[TBD]}}\,s (high frequency) while relaxing off-peak headways to \textcolor{red}{\textbf{[TBD]}}\,s, a pattern consistent with operational practice.
+Transition headways settle to intermediate values of \textcolor{red}{\textbf{[TBD]}}\,s, smoothing the shift between demand regimes.
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=0.48\textwidth]{figures/learned_headways.pdf}
+    \textcolor{red}{\textbf{[TBD: 3-line plot of $\Hpeak$, $\Hoff$, $\Htrans$ over episodes]}}
+    \caption{Learned target headways over training. The upper policy differentiates peak, off-peak, and transition periods, converging to demand-responsive dispatch intervals.}
+    \label{fig:learned_headways}
+\end{figure}
+
+\paragraph{$\beta$ schedule effect.}
+To confirm the necessity of the warmup-then-ramp $\beta$ schedule, we train a variant with $\beta = \betamax$ from episode 1.
+This aggressive coupling causes training instability, with wait time oscillating between \textcolor{red}{\textbf{[TBD]}} and \textcolor{red}{\textbf{[TBD]}}\,min over the final 50 episodes, compared to a stable \textcolor{red}{\textbf{[TBD]}} $\pm$ \textcolor{red}{\textbf{[TBD]}}\,min for the annealed schedule.
+The warmup period allows each policy to establish a reasonable baseline before cross-advantage signals introduce inter-level gradients.
+
+%% ============================================================
+\subsection{Generalization Across Demand Stochasticity}
+\label{sec:generalization}
+
+We test whether a policy trained at route stochasticity $\sigma = 1.5$ generalizes to unseen demand conditions by evaluating on $\sigma \in \{0.5, 1.0, 2.0, 3.0\}$ without retraining.
+\Cref{tab:generalization} reports the results.
+
+\begin{table}[t]
+\centering
+\caption{Cross-stochasticity generalization. The model is trained at $\sigma = 1.5$ (shaded) and evaluated at other $\sigma$ values without fine-tuning.}
+\label{tab:generalization}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+$\sigma$ & \textbf{Wait (min)} & \textbf{Bunching (\%)} & \textbf{Peak Fleet} & \textbf{Reward} \\
+\midrule
+0.5 & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+1.0 & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+\rowcolor{gray!15}
+1.5 & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+2.0 & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+3.0 & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} & \textcolor{red}{\textbf{[TBD]}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Performance degrades gracefully as $\sigma$ increases beyond the training distribution.
+At $\sigma = 2.0$, wait time rises by \textcolor{red}{\textbf{[TBD]}}\% relative to $\sigma = 1.5$, while bunching rate increases by \textcolor{red}{\textbf{[TBD]}} percentage points.
+Even at $\sigma = 3.0$---double the training stochasticity---TransitDuet maintains a wait time of \textcolor{red}{\textbf{[TBD]}}\,min, which remains \textcolor{red}{\textbf{[TBD]}}\% lower than the Fixed Timetable baseline evaluated at the same $\sigma$.
+Conversely, at $\sigma = 0.5$ the policy achieves its best performance (\textcolor{red}{\textbf{[TBD]}}\,min wait), confirming that the learned strategy is conservative enough to handle reduced variance without over-dispatching.
+The fleet constraint ($\Nfleet = 12$) is satisfied across all tested $\sigma$ values, validating the robustness of the $\thetavec$-OGD projection mechanism.

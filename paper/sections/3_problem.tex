@@ -1,0 +1,142 @@
+\section{Problem Formulation}
+\label{sec:problem}
+
+We formalize joint timetable planning and holding control as a bi-level Markov decision process (MDP) operating over a single bus route with time-varying passenger demand.
+This section first describes the transit system model (\Cref{sec:transit_model}), then defines the upper- and lower-level MDPs (\Cref{sec:bilevel_mdp}), states the constraint specification (\Cref{sec:constraints}), and concludes with a discussion of the timescale separation that motivates our algorithmic design (\Cref{sec:timescale}).
+
+%% ---------------------------------------------------------------
+\subsection{Bus Transit System Model}
+\label{sec:transit_model}
+
+We consider a single bidirectional bus route consisting of $M$ stations indexed $\{1,\dots,M\}$.
+Service is provided according to a timetable that dispatches a total of 264~trips per day, alternating between the two directions.
+Passenger demand is drawn from time-varying origin--destination (OD) matrices that capture morning, midday, and evening peaks.
+At any point in time, at most $\Nfleet^{\max}=25$ buses may be concurrently in service; each trip is characterized by a launch time and a travel direction.
+The dispatch headway---the time between consecutive launches in the same direction---is the primary planning lever, while per-station holding times constitute the real-time control lever.
+
+%% ---------------------------------------------------------------
+\subsection{Bi-Level MDP Formulation}
+\label{sec:bilevel_mdp}
+
+We decompose the joint optimization into two coupled MDPs that share a common environment but differ in observation granularity, action semantics, and decision frequency.
+
+\subsubsection{Upper-Level MDP (Timetable Planning)}
+\label{sec:upper_mdp}
+
+The upper-level policy $\piU$ determines dispatch headways.
+It is triggered at each dispatch event, yielding approximately 132 decision epochs per episode (one full service day).
+
+\paragraph{State.}
+The upper state encodes system-level summary statistics:
+\begin{equation}
+  \label{eq:upper_state}
+  \sU = \Bigl[\,
+    \tfrac{\text{hour}}{24},\;
+    \tfrac{\text{demand}}{1000},\;
+    \tfrac{\text{fleet\_on\_route}}{\Nfleet^{\max}},\;
+    \tfrac{\text{prev\_headway}}{600},\;
+    \text{unhealthy\_rate}
+  \,\Bigr] \;\in\; \R^{5},
+\end{equation}
+where each component is normalized to facilitate learning.
+The \emph{unhealthy\_rate} captures the fraction of active buses whose observed headway deviates from the target by more than a tolerance threshold.
+
+\paragraph{Action.}
+The upper action specifies headways for three demand regimes:
+\begin{equation}
+  \label{eq:upper_action}
+  \aU = \bigl[\,\Hpeak,\;\Hoff,\;\Htrans\,\bigr] \;\in\; \R^{3},
+\end{equation}
+with ranges $\Hpeak\in[180,600]$, $\Hoff\in[300,1200]$, and $\Htrans\in[240,900]$, all in seconds.
+These three headways correspond to peak, off-peak, and transitional periods, respectively.
+The environment selects the applicable headway based on the current time of day and uses it as both the dispatch interval and the target headway $\htarget$ communicated to the lower level.
+
+\paragraph{Reward.}
+The upper reward is computed at the episode level from a measurement vector (defined in \Cref{sec:constraints}).
+Because each upper action influences the system over an extended horizon through the downstream holding decisions it induces, assigning credit to individual dispatch events is nontrivial; we defer the reward construction to~\Cref{sec:method}.
+
+\subsubsection{Lower-Level MDP (Holding Control)}
+\label{sec:lower_mdp}
+
+The lower-level policy $\piL$ decides how long each bus should dwell beyond its minimum stop time at every station.
+A decision is triggered at each station arrival for each active bus, producing a high volume of decision epochs throughout the day.
+
+\paragraph{State.}
+The lower state captures the local context of an individual bus:
+\begin{equation}
+  \label{eq:lower_state}
+  \sL = \bigl[\,
+    \text{bus\_id},\;
+    \text{station\_id},\;
+    \text{hour},\;
+    \text{direction},\;
+    h_{\mathrm{fwd}},\;
+    h_{\mathrm{bwd}},\;
+    \hat{d},\;
+    \Delta h,\;
+    v_1,\dots,v_K
+  \,\bigr] \;\in\; \R^{8+K},
+\end{equation}
+where $h_{\mathrm{fwd}}$ and $h_{\mathrm{bwd}}$ denote the forward and backward headways, $\hat{d}$ is the estimated dwell time, $\Delta h$ is the deviation of the current headway from $\htarget$, and $v_1,\dots,v_K$ are recent inter-station speeds that encode local traffic conditions.
+
+\paragraph{Action.}
+The lower action is a scalar holding time:
+\begin{equation}
+  \label{eq:lower_action}
+  \aL \;\in\; [0,\,60] \;\text{seconds}.
+\end{equation}
+
+\paragraph{Reward and cost.}
+The immediate lower reward is a function of headway deviation from the target set by the upper level.
+We define the per-step cost as
+\begin{equation}
+  \label{eq:lower_cost}
+  c(\sL,\aL) = \min\!\Bigl(\frac{(h_{\mathrm{fwd}} - \htarget)^{2}}{(\htarget)^{2}},\;1\Bigr),
+\end{equation}
+which penalizes headway irregularity in a scale-invariant manner and is clipped at~1 for numerical stability.
+
+%% ---------------------------------------------------------------
+\subsection{Constraint Specification}
+\label{sec:constraints}
+
+The bi-level MDP is subject to one hard and one soft constraint, both evaluated through a measurement vector collected at the end of each episode.
+
+\paragraph{Measurement vector.}
+At the conclusion of a service day, we compute:
+\begin{equation}
+  \label{eq:measurement}
+  \zvec = \bigl[\,\text{avg\_wait\_min},\;\text{peak\_fleet},\;\text{bunching\_rate}\,\bigr].
+\end{equation}
+
+\paragraph{Hard constraint (fleet capacity).}
+The peak number of buses simultaneously on route must not exceed the available fleet:
+\begin{equation}
+  \label{eq:hard_constraint}
+  \text{peak\_fleet} \;\leq\; \Nfleet, \qquad \Nfleet = 12.
+\end{equation}
+This constraint is enforced structurally: the environment blocks a dispatch if it would violate the fleet limit.
+
+\paragraph{Soft constraint (headway uniformity).}
+The expected per-step cost must remain below a threshold:
+\begin{equation}
+  \label{eq:soft_constraint}
+  \E_{\piU,\piL}\!\bigl[\,c(\sL,\aL)\,\bigr] \;\leq\; \climit,
+\end{equation}
+which encourages even spacing of buses along the route.
+Satisfaction of this constraint is enforced via Lagrangian relaxation within the lower-level policy (see \Cref{sec:method}).
+
+%% ---------------------------------------------------------------
+\subsection{Timescale Separation}
+\label{sec:timescale}
+
+A defining characteristic of the bi-level formulation above is the pronounced separation of timescales between the two decision layers.
+The upper policy $\piU$ acts at dispatch events, which occur roughly every five~minutes on average.
+The lower policy $\piL$, by contrast, acts at every station arrival for every active bus---a frequency on the order of once every 30~seconds system-wide when multiple buses are in service.
+Consequently, hundreds of lower-level decisions may intervene between two consecutive upper-level decisions, and the two layers never act simultaneously.
+
+This asynchrony distinguishes our setting from the semi-Markov options framework~\citep{sutton1999between} and feudal reinforcement learning~\citep{dayan1992feudal,vezhnevets2017feudal}, which assume that (i)~the manager and worker share a common state space or a fixed abstraction thereof, and (ii)~the manager selects a subgoal that the worker executes to completion before the manager acts again.
+Neither assumption holds here: the upper state $\sU\in\R^{5}$ summarizes fleet-level statistics whereas the lower state $\sL\in\R^{8+K}$ encodes bus-level kinematics, and both policies issue decisions driven by environment events rather than by a synchronous clock or a predefined option duration.
+
+More concretely, a single upper action (a headway triple) remains in effect while many buses traverse multiple stations under independent lower-level control; the upper policy cannot pause and wait for all induced lower decisions to conclude.
+Standard hierarchical RL methods that propagate value or advantage across levels therefore require modification to handle the fully asynchronous, event-driven interaction between $\piU$ and $\piL$.
+We address this challenge through \emph{Temporal Advantage Propagation}, detailed in \Cref{sec:method}.

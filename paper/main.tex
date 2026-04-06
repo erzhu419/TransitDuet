@@ -1,0 +1,68 @@
+\documentclass[preprint,review,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{colortbl}
+
+% Math commands
+\input{math_commands}
+
+% Placeholder command for TBD results
+\newcommand{\tbd}[1][]{\textcolor{red}{\textbf{[TBD#1]}}}
+
+\journal{Transportation Research Part C}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{TransitDuet: Bi-Level Reinforcement Learning with Temporal Advantage Propagation for Joint Bus Timetable Planning and Holding Control}
+
+\author[anon]{Anonymous Authors}
+\address[anon]{Anonymous Institution}
+
+\input{sections/0_abstract}
+
+\begin{keyword}
+Bus holding control \sep Timetable optimization \sep Hierarchical reinforcement learning \sep Multi-timescale control \sep Constrained optimization
+\end{keyword}
+
+\end{frontmatter}
+
+\input{sections/1_introduction}
+\input{sections/2_related_work}
+\input{sections/3_problem}
+\input{sections/4_method}
+\input{sections/5_experiments}
+\input{sections/6_discussion}
+\input{sections/7_conclusion}
+
+\section*{CRediT authorship contribution statement}
+\textbf{Anonymous Authors}: Conceptualization, Methodology, Software, Validation, Writing -- Original Draft.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Data availability}
+Code and data will be made available upon publication.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\appendix
+\input{sections/A_appendix}
+
+\end{document}

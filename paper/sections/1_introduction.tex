@@ -1,0 +1,56 @@
+\section{Introduction}
+\label{sec:intro}
+
+High-frequency bus systems face a persistent coordination failure.
+Timetables are planned offline to balance fleet utilization against passenger demand, yet the headways they prescribe degrade within minutes once buses encounter stochastic traffic and boarding delays.
+Real-time holding control can restore regularity, but only within the headway structure it inherits.
+When the timetable itself is poorly matched to demand---dispatching too few buses in the peak or too many in the off-peak---no amount of holding can recover acceptable service.
+Planning and control are thus coupled: the quality of one layer bounds the achievable performance of the other.
+
+Despite this coupling, existing work treats the two problems separately.
+The timetable optimization literature formulates headway or frequency design as mixed-integer programs solved offline \citep{gkiotsalitis2021bus}, while the holding control literature trains reinforcement learning (RL) agents that take the timetable as given \citep{wang2020real}.
+Joint optimization would seem a natural application of hierarchical RL, yet three gaps prevent a straightforward application.
+
+\paragraph{Asynchrony between planning and control.}
+Hierarchical RL frameworks such as the options framework \citep{sutton1999between} and goal-conditioned methods like HIRO \citep{nachum2018data} assume that the upper and lower levels share a common state clock or that the upper level sets subgoals consumed by the lower level within a fixed horizon.
+In bus operations, the upper policy acts at dispatch events (once per bus departure), while the lower policy acts at every station arrival across all active buses.
+The two levels observe different state spaces---the upper level sees route-level demand forecasts and fleet status, whereas the lower level sees per-bus headway deviations and passenger loads---and interact through delayed feedback spanning an entire trip lifecycle.
+No shared clock or fixed subgoal horizon exists.
+
+\paragraph{Cross-advantage under asynchrony.}
+\citet{he2024roboduet} recently introduced cross-advantage augmentation for bi-level robot locomotion, where an upper style policy and a lower tracking policy execute synchronously on the same state.
+Their augmented advantage $\AUaug = \AU + \beta \AL$ directly sums the two advantages at each time step.
+This elegant mechanism breaks down when the two levels operate on different timescales with different state and action spaces: there is no single time step at which $\AU$ and $\AL$ are jointly defined.
+Generalizing cross-advantage to the asynchronous, multi-timescale setting requires aggregating lower-level feedback over variable-length intervals aligned with upper-level decisions.
+
+\paragraph{Fleet and regularity constraints.}
+Bus operations impose hard constraints---a fixed fleet size $\Nfleet$ and bounded headway deviation---that reward shaping handles poorly.
+Constrained RL methods such as RCPO \citep{tessler2019reward} address single-level constraint satisfaction but do not account for constraints that span a bi-level structure, where the upper level controls resource allocation and the lower level controls service regularity.
+
+\medskip
+
+We propose \textbf{TransitDuet}, a bi-level RL framework that addresses all three gaps.
+The upper policy $\piU$ outputs target headways $[\Hpeak, \Hoff, \Htrans]$ at each dispatch event, while the lower policy $\piL$, a distributional soft actor-critic with Lagrangian penalties \citep{haarnoja2018soft}, selects holding times at every station arrival with parameter sharing across buses.
+The two levels are coupled through \emph{Temporal Advantage Propagation} (TAP): the upper advantage is augmented with discounted lower-level rewards accumulated over the trip lifecycle triggered by each dispatch, and vice versa.
+A cosine-annealed coupling coefficient $\beta$ ramps from zero to $\betamax$ after an initial warmup phase, preventing premature coupling before either policy has learned a reasonable baseline.
+Fleet-size feasibility is enforced by a $\thetavec$-weighted online gradient descent projection on the measurement vector $\zvec$ of dispatched buses, inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}, while headway uniformity enters the lower-level objective through Lagrangian relaxation.
+
+\paragraph{Contributions.}
+The specific contributions of this paper are:
+\begin{enumerate}
+    \item \textbf{Temporal Advantage Propagation.} We formalize TAP, an asynchronous cross-advantage mechanism that aggregates rewards across timescales via trip-lifecycle alignment. We prove that TAP preserves policy-gradient unbiasedness under standard assumptions and reduces to the synchronous cross-advantage of \citet{he2024roboduet} when both levels share a common clock.
+    \item \textbf{Joint timetable--holding formulation.} We cast bus timetable planning and holding control as a bi-level Markov decision process with heterogeneous state-action spaces and asynchronous transitions, providing a formal problem structure absent from prior bus RL work.
+    \item \textbf{Constraint satisfaction via $\thetavec$-OGD and Lagrangian relaxation.} We integrate measurement-projection constraints at the upper level and dual-variable penalties at the lower level, handling fleet feasibility and headway regularity without reward shaping.
+    \item \textbf{Empirical evaluation on a calibrated corridor.} We demonstrate on a stochastic microsimulation that TransitDuet reduces passenger waiting time by \textcolor{red}{\textbf{[TBD]}}\% over the best single-level baseline while maintaining fleet and headway constraint satisfaction, and ablations confirm that each component---TAP, $\beta$ annealing, $\thetavec$-OGD---is necessary for this result.
+\end{enumerate}
+
+\paragraph{Results preview.}
+In experiments on a high-frequency bus corridor with \textcolor{red}{\textbf{[TBD]}} stops and calibrated demand profiles, TransitDuet achieves a \textcolor{red}{\textbf{[TBD]}}\% reduction in mean passenger waiting time and a \textcolor{red}{\textbf{[TBD]}}\% reduction in headway coefficient of variation compared to a fixed-timetable DSAC holding controller, while satisfying the fleet constraint in \textcolor{red}{\textbf{[TBD]}}\% of episodes.
+
+\paragraph{Paper organization.}
+\Cref{sec:related} reviews related work in timetable optimization, bus holding RL, and hierarchical RL.
+\Cref{sec:problem} formalizes the bi-level MDP.
+\Cref{sec:method} presents the TransitDuet architecture, TAP, and constraint-handling mechanisms.
+\Cref{sec:experiments} describes the simulation environment and reports results.
+\Cref{sec:discussion} discusses limitations and extensions.
+\Cref{sec:conclusion} concludes.

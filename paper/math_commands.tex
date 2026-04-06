@@ -1,0 +1,40 @@
+% math_commands.tex — shared notation for TransitDuet paper
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\N}{\mathbb{N}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+% Policies
+\newcommand{\piU}{\pi_{\mathrm{U}}}   % upper policy
+\newcommand{\piL}{\pi_{\mathrm{L}}}   % lower policy
+
+% State/action spaces
+\newcommand{\sU}{s_{\mathrm{U}}}      % upper state
+\newcommand{\sL}{s_{\mathrm{L}}}      % lower state
+\newcommand{\aU}{a_{\mathrm{U}}}      % upper action
+\newcommand{\aL}{a_{\mathrm{L}}}      % lower action
+
+% Advantages
+\newcommand{\AU}{A_{\mathrm{U}}}      % upper advantage
+\newcommand{\AL}{A_{\mathrm{L}}}      % lower advantage
+\newcommand{\AUaug}{\tilde{A}_{\mathrm{U}}}  % augmented upper advantage
+\newcommand{\ALaug}{\tilde{A}_{\mathrm{L}}}  % augmented lower advantage
+
+% Target headway
+\newcommand{\htarget}{h^{\mathrm{target}}}
+\newcommand{\Hpeak}{H_{\mathrm{peak}}}
+\newcommand{\Hoff}{H_{\mathrm{off}}}
+\newcommand{\Htrans}{H_{\mathrm{trans}}}
+
+% Measurement / constraint
+\newcommand{\zvec}{\mathbf{z}}        % measurement vector
+\newcommand{\thetavec}{\boldsymbol{\theta}} % OGD weight vector
+\newcommand{\Nfleet}{N_{\mathrm{fleet}}}
+
+% Replay buffer, cost
+\newcommand{\D}{\mathcal{D}}          % replay buffer
+\newcommand{\climit}{c_{\mathrm{lim}}}
+
+% Beta schedule
+\newcommand{\betamax}{\beta_{\max}}

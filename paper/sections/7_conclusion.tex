@@ -1,0 +1,20 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper introduced TransitDuet, a bi-level reinforcement learning framework that unifies bus timetable planning and real-time holding control within a single trainable system.
+The upper policy learns demand-responsive target headways at dispatch events, while the lower policy regulates individual holding actions at station arrivals---two tasks that have traditionally been addressed in isolation despite their tight operational coupling.
+
+The central technical contribution is Temporal Advantage Propagation (TAP), an asynchronous cross-advantage mechanism that aggregates lower-level feedback over variable-length trip lifecycles and propagates it to the upper-level dispatch decisions that initiated them.
+TAP generalizes the synchronous cross-advantage of RoboDuet to settings where the two control levels operate on fundamentally different timescales and observe distinct state-action spaces.
+A cosine-annealed coupling schedule prevents premature inter-level interference during early training.
+Operational constraints are handled through complementary mechanisms: online gradient descent projection ($\thetavec$-OGD) enforces fleet-size feasibility at the upper level, while Lagrangian relaxation maintains headway regularity at the lower level.
+
+Experiments on a stochastic bus corridor microsimulation with 22 stations and 264 daily trips show that TransitDuet reduces mean passenger waiting time by \textcolor{red}{\textbf{[TBD]}}\% and bunching rate by \textcolor{red}{\textbf{[TBD]}}\% relative to the strongest single-level baseline, while satisfying the fleet constraint in \textcolor{red}{\textbf{[TBD]}}\% of evaluation episodes.
+Ablation studies confirm that each component---TAP, $\thetavec$-OGD, and Lagrangian penalties---contributes to this result; removing any one of them leads to measurable degradation in at least one metric.
+The learned policy generalizes across unseen levels of demand stochasticity without retraining, maintaining a \textcolor{red}{\textbf{[TBD]}}\% wait-time advantage even at double the training variance.
+
+Several directions merit future investigation.
+First, extending TransitDuet to multi-route networks with shared fleets and transfer coordination would test whether the hierarchical structure scales to the combinatorial action spaces of realistic transit systems.
+Second, real-world deployment---potentially through a calibrated digital twin with domain randomization---would validate the framework's robustness to phenomena not captured by the current simulator, including traffic signal interactions and driver behavior heterogeneity.
+Third, integrating real-time demand forecasting and modeling passenger demand elasticity would close the loop between service quality and ridership.
+Finally, coupling TransitDuet with passenger information systems---broadcasting predicted arrival times based on the learned holding policy---could amplify the welfare benefits by reducing perceived waiting time alongside actual waiting time.

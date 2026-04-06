@@ -1,0 +1,338 @@
+\section{TransitDuet Framework}
+\label{sec:method}
+
+This section presents the TransitDuet architecture and its constituent algorithms.
+\Cref{sec:arch} motivates the decoupled dual-network design.
+\Cref{sec:upper} and \Cref{sec:lower} detail the upper-level timetable policy and lower-level holding control policy, respectively.
+\Cref{sec:tap} introduces Temporal Advantage Propagation (TAP), the central mechanism that couples the two levels across timescales.
+\Cref{sec:meas_proj} describes the measurement-projection scheme that enforces fleet and service constraints on the upper level.
+\Cref{sec:training} assembles the full training procedure.
+
+%% ====================================================================
+\subsection{Architecture Overview}
+\label{sec:arch}
+
+TransitDuet comprises two independent policy networks operating at different timescales and over different state-action spaces .
+The upper policy $\piU$ is a lightweight Gaussian MLP that selects target headways at each dispatch event.
+The lower policy $\piL$ is a DSAC-Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
+
+A key design choice is that the two networks share \emph{no} encoder parameters.
+This stands in contrast to the shared-body, dual-head architecture of RoboDuet \citep{he2024roboduet}, which couples an upper style policy and a lower tracking policy through a common proprioceptive encoder.
+Shared encoders are appropriate when the two levels observe the same state at each time step---as in synchronous robot locomotion---but are ill-suited here for two reasons.
+First, $\sU$ and $\sL$ live in different spaces: $\sU$ encodes route-level demand forecasts and fleet status, whereas $\sL$ encodes per-bus headway deviation, passenger load, and local occupancy.
+Second, the two levels are triggered asynchronously.
+The upper policy acts once per dispatch event (roughly once per $\htarget$ seconds), while the lower policy acts at every station arrival of every active bus, producing hundreds of decisions per upper-level step.
+Forcing these heterogeneous signals through a shared trunk would create conflicting gradient directions.
+
+The coupling between the two levels is instead handled entirely through the reward channel, via the Temporal Advantage Propagation mechanism described in \cref{sec:tap}.
+This clean separation permits each network to be trained with the algorithm best suited to its structure: REINFORCE for the episodic, low-dimensional upper policy and soft actor-critic with Lagrangian constraints for the high-frequency, constraint-aware lower policy.
+
+%% ====================================================================
+\subsection{Upper-Level Timetable Policy}
+\label{sec:upper}
+
+The upper policy $\piU$ maps the route-level state $\sU$ to a three-dimensional action $\aU = [\Hpeak, \Hoff, \Htrans]$ specifying target headways for peak, off-peak, and transition periods, respectively.
+At each dispatch event, the current time-of-day selects the applicable headway component, which is communicated to the lower level as $\htarget$.
+
+\paragraph{Network architecture.}
+The policy is parameterized as a two-layer MLP with 64 hidden units per layer and ReLU activations:
+\begin{equation}
+\label{eq:upper_net}
+    \mu_{\phi}(\sU) = \sigma\!\bigl(W_3 \, \mathrm{ReLU}(W_2 \, \mathrm{ReLU}(W_1 \sU + b_1) + b_2) + b_3\bigr),
+\end{equation}
+where $\sigma(\cdot)$ denotes the element-wise sigmoid function and $\phi$ collects all weights and biases.
+The sigmoid output is affinely mapped to the per-dimension action range:
+\begin{equation}
+\label{eq:upper_action_method}
+    \aU^{(k)} = a_{\mathrm{low}}^{(k)} + \mu_{\phi}^{(k)}(\sU) \cdot \bigl(a_{\mathrm{high}}^{(k)} - a_{\mathrm{low}}^{(k)}\bigr), \quad k \in \{1, 2, 3\}.
+\end{equation}
+Exploration is achieved by additive Gaussian noise with a learnable log-standard-deviation vector $\log \boldsymbol{\sigma}_{\phi}$ shared across states:
+\begin{equation}
+\label{eq:upper_explore}
+    \aU \sim \mathcal{N}\!\bigl(\mu_{\phi}(\sU),\; \mathrm{diag}(\boldsymbol{\sigma}_{\phi}^2)\bigr).
+\end{equation}
+
+\paragraph{Policy gradient.}
+Because the upper level produces only a single action per dispatch event and the episode length is moderate (one simulated day), we adopt a REINFORCE estimator with normalized returns.
+Let $\{(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_i^{\mathrm{U}})\}_{i=1}^{M}$ denote the sequence of $M$ dispatch events in one episode.
+The policy gradient is
+\begin{equation}
+\label{eq:reinforce}
+    \nabla_{\phi} J(\piU) = \frac{1}{M} \sum_{i=1}^{M} \nabla_{\phi} \log \piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i}) \cdot \hat{A}_{\mathrm{U},i},
+\end{equation}
+where $\hat{A}_{\mathrm{U},i}$ is the TAP-augmented advantage defined in \cref{sec:tap} and returns are normalized to zero mean and unit variance within the episode to reduce gradient variance.
+
+%% ====================================================================
+\subsection{Lower-Level Holding Control Policy}
+\label{sec:lower}
+
+The lower policy $\piL$ selects a holding duration $\aL \in [0, a_{\max}]$ at each station arrival, where $a_{\max} = 60$\,s.
+It is trained with a distributional soft actor-critic augmented by a Lagrangian cost term for headway-deviation constraint enforcement \citep{haarnoja2018soft}.
+All buses share the same policy parameters, enabling fleet-wide generalization.
+
+\paragraph{Gaussian policy with tanh squashing.}
+A two-layer MLP with 32 hidden units per layer and ReLU activations produces a mean $\mu_{\psi}(\sL)$ and log-standard-deviation $\log \sigma_{\psi}(\sL)$.
+The raw sample $u \sim \mathcal{N}(\mu_{\psi}, \sigma_{\psi}^2)$ is squashed through a $\tanh$ transform and rescaled:
+\begin{equation}
+\label{eq:lower_action_method}
+    \aL = \frac{a_{\max}}{2}\bigl(\tanh(u) + 1\bigr).
+\end{equation}
+The log-probability accounts for the change of variables:
+\begin{equation}
+\label{eq:log_prob}
+    \log \piL(\aL \mid \sL) = \log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2) - \log\bigl(1 - \tanh^2(u)\bigr) - \log\frac{a_{\max}}{2}.
+\end{equation}
+
+\paragraph{Twin Q-networks.}
+Two independent critics $Q_{\omega_1}(\sL, \aL)$ and $Q_{\omega_2}(\sL, \aL)$, each a two-layer MLP with 32 hidden units, are trained to minimize the clipped double-Q Bellman error:
+\begin{equation}
+\label{eq:twin_q}
+    \mathcal{L}_Q(\omega_j) = \E_{(\sL, \aL, r, \sL') \sim \D}\Bigl[\bigl(Q_{\omega_j}(\sL, \aL) - y\bigr)^2\Bigr], \quad j \in \{1,2\},
+\end{equation}
+where the target is
+\begin{equation}
+\label{eq:q_target}
+    y = r + \gamma \Bigl(\min_{j=1,2} Q_{\bar{\omega}_j}(\sL', \aL') - \alpha \log \piL(\aL' \mid \sL')\Bigr), \quad \aL' \sim \piL(\cdot \mid \sL'),
+\end{equation}
+and $\bar{\omega}_j$ denotes target-network parameters updated via soft interpolation with coefficient $\tau = 0.005$.
+
+\paragraph{Cost Q-network and Lagrangian relaxation.}
+A separate cost critic $Q^c_{\xi}(\sL, \aL)$ estimates the expected cumulative headway-deviation cost.
+The lower-level policy objective balances reward maximization, entropy regularization, and constraint satisfaction:
+\begin{equation}
+\label{eq:lower_policy_loss}
+    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\Bigl[\alpha \log \piL(\aL \mid \sL) - \min_{j} Q_{\omega_j}(\sL, \aL) + \lambda \, Q^c_{\xi}(\sL, \aL)\Bigr],
+\end{equation}
+where $\lambda \geq 0$ is the Lagrange multiplier.
+The dual variable is updated to satisfy the cost-limit constraint $\climit$:
+\begin{equation}
+\label{eq:lambda_update}
+    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}(\climit - \E[Q^c_{\xi}]),\; -10,\; 5\bigr)\Bigr].
+\end{equation}
+Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability.
+
+\paragraph{Auto-entropy tuning.}
+The temperature $\alpha$ is adjusted to maintain a target entropy $\bar{\mathcal{H}} = -\dim(\aL)$:
+\begin{equation}
+\label{eq:alpha_update}
+    \alpha \leftarrow \min\!\Bigl(\alpha_{\max},\; \exp\!\bigl(\log\alpha - \eta_{\alpha}\,(\log \piL(\aL \mid \sL) + \bar{\mathcal{H}})\bigr)\Bigr),
+\end{equation}
+with $\alpha_{\max} = 0.3$ to prevent entropy collapse from dominating the Q-values in the early training phase.
+
+%% ====================================================================
+\subsection{Temporal Advantage Propagation}
+\label{sec:tap}
+
+Temporal Advantage Propagation (TAP) is the central mechanism by which TransitDuet couples the upper and lower levels despite their operating on different timescales with different state-action spaces.
+We first review the synchronous cross-advantage of \citet{he2024roboduet}, then present the asynchronous generalization that constitutes our primary contribution.
+
+\subsubsection{Synchronous Cross-Advantage (Background)}
+\label{sec:sync_ca}
+
+In RoboDuet, the upper and lower policies share a common state clock.
+At each time step $t$, both policies execute, and both advantages $A_{\mathrm{U},t}$ and $A_{\mathrm{L},t}$ are well-defined.
+The augmented objective for the upper policy is
+\begin{equation}
+\label{eq:roboduet}
+    \mathcal{L}_{\mathrm{RoboDuet}}^{\mathrm{U}} = -\bigl(A_{\mathrm{U},t} + \beta \, A_{\mathrm{L},t}\bigr) \cdot \rho_t,
+\end{equation}
+where $\rho_t$ is the importance-sampling ratio from PPO.
+This formulation requires that $A_{\mathrm{U},t}$ and $A_{\mathrm{L},t}$ are computed at the same time step $t$, which is possible only when both levels share a common clock and state representation.
+
+\subsubsection{Asynchronous Generalization}
+\label{sec:async_tap}
+
+In bus operations, the upper policy acts at dispatch event $i$ (when bus $i$ departs the terminal), while the lower policy acts at every station arrival of every bus throughout the simulation.
+Let $\mathrm{trip}(i)$ denote the set of lower-level transitions that occur between dispatch event $i$ and dispatch event $i+1$---that is, all station arrivals across the fleet during the lifecycle of the trip initiated by dispatch $i$.
+
+\paragraph{Forward direction: lower $\to$ upper.}
+We augment the upper advantage at dispatch $i$ with the mean lower-level reward accumulated during $\mathrm{trip}(i)$:
+\begin{equation}
+\label{eq:tap_forward}
+    \AUaug[i] = \AU[i] + \beta \cdot \overline{R}_{\mathrm{L}}^{(i)}, \quad \text{where} \quad \overline{R}_{\mathrm{L}}^{(i)} = \frac{1}{|\mathrm{trip}(i)|} \sum_{j \in \mathrm{trip}(i)} r_{\mathrm{L},j}.
+\end{equation}
+The mean operator, rather than a sum, normalizes for the variable number of lower-level transitions per trip, which fluctuates with the dispatched headway: a short headway produces fewer intermediate station arrivals than a long one.
+
+\paragraph{Reverse direction: upper $\to$ lower.}
+The lower-level training reward for each transition $j \in \mathrm{trip}(i)$ is augmented with the upper-level reward of the initiating dispatch:
+\begin{equation}
+\label{eq:tap_reverse}
+    \tilde{r}_{\mathrm{L},j} = r_{\mathrm{L},j} + \beta \cdot R_{\mathrm{U}}^{(i)}, \quad \forall\, j \in \mathrm{trip}(i).
+\end{equation}
+This injects global timetable-quality feedback into the local holding decisions, enabling the lower policy to distinguish states that arise from good timetables (worth exploiting) from those arising from poor ones (requiring compensatory holding).
+
+\paragraph{Physical intuition.}
+Suppose the upper policy dispatches a bus with an unrealistically long headway $\htarget = 180$\,s during peak demand.
+The lower policy will encounter overcrowded stops and large headway deviations, generating consistently negative $r_{\mathrm{L},j}$.
+Through the forward direction of TAP, the mean of these negative rewards feeds back into $\AUaug$, penalizing the dispatch decision and guiding the upper policy toward more feasible headways.
+Conversely, if the lower policy consistently fails to hold buses despite receiving a reasonable headway target, the reverse direction of TAP injects the positive upper reward into lower transitions, signaling that the timetable context was favorable and encouraging the lower policy to improve its holding behavior.
+
+\paragraph{Relationship to synchronous cross-advantage.}
+When both levels share a common clock---i.e., $|\mathrm{trip}(i)| = 1$ for all $i$ and $r_{\mathrm{L},j} = A_{\mathrm{L},t}$---\cref{eq:tap_forward} reduces to $\AUaug = \AU + \beta \, \AL$, recovering \cref{eq:roboduet}.
+TAP is thus a strict generalization of the synchronous cross-advantage to multi-timescale, asynchronous bi-level systems.
+
+\subsubsection{Coupling Coefficient Schedule}
+\label{sec:beta_schedule}
+
+Coupling the two levels from the start of training is harmful: the lower policy has not yet learned reasonable holding behavior, so its rewards carry no useful signal for the upper policy, and vice versa.
+We therefore anneal $\beta$ through three stages:
+\begin{equation}
+\label{eq:beta_schedule}
+    \beta(e) =
+    \begin{cases}
+        0, & e \leq e_1, \\[2pt]
+        \betamax \cdot \dfrac{e - e_1}{e_2 - e_1}, & e_1 < e < e_2, \\[6pt]
+        \betamax, & e \geq e_2,
+    \end{cases}
+\end{equation}
+where $e$ is the episode index, $e_1 = 50$, $e_2 = 150$, and $\betamax = 0.5$.
+Stage~1 ($e \leq e_1$) is a lower-only warmup in which the upper policy is frozen and $\piL$ trains against a fixed default timetable.
+Stage~2 ($e_1 < e < e_2$) activates the upper policy and linearly ramps $\beta$ from zero to $\betamax$, progressively strengthening the cross-level coupling.
+Stage~3 ($e \geq e_2$) maintains full coupling at $\beta = \betamax$.
+
+The linear ramp is intentionally simple; we found empirically that more elaborate schedules (cosine annealing, step functions) produced no consistent improvement while introducing additional hyperparameters.
+
+\subsubsection{Algorithm}
+
+The TAP computation for one episode is summarized in \cref{alg:tap}.
+
+\begin{algorithm}[t]
+\caption{Temporal Advantage Propagation (one episode)}
+\label{alg:tap}
+\begin{algorithmic}[1]
+\REQUIRE Upper trajectory $\{(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U},i})\}_{i=1}^{M}$, lower transitions $\{(s_{\mathrm{L},j}, a_{\mathrm{L},j}, r_{\mathrm{L},j})\}_{j=1}^{N}$, trip mapping $\mathrm{trip}(\cdot)$, coupling coefficient $\beta$
+\ENSURE Augmented upper advantages $\{\AUaug[i]\}$, augmented lower rewards $\{\tilde{r}_{\mathrm{L},j}\}$
+\medskip
+\STATE \textbf{// Forward: lower $\to$ upper}
+\FOR{$i = 1, \ldots, M$}
+    \STATE $\overline{R}_{\mathrm{L}}^{(i)} \leftarrow \frac{1}{|\mathrm{trip}(i)|} \sum_{j \in \mathrm{trip}(i)} r_{\mathrm{L},j}$
+    \STATE Compute baseline: $\hat{A}_{\mathrm{U},i} \leftarrow R_{\mathrm{U},i} - \bar{R}_{\mathrm{U}}$ \hfill \COMMENT{normalized return}
+    \STATE $\AUaug[i] \leftarrow \hat{A}_{\mathrm{U},i} + \beta \cdot \overline{R}_{\mathrm{L}}^{(i)}$
+\ENDFOR
+\medskip
+\STATE \textbf{// Reverse: upper $\to$ lower}
+\FOR{$j = 1, \ldots, N$}
+    \STATE Let $i(j)$ be the dispatch index such that $j \in \mathrm{trip}(i(j))$
+    \STATE $\tilde{r}_{\mathrm{L},j} \leftarrow r_{\mathrm{L},j} + \beta \cdot R_{\mathrm{U},i(j)}$
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+%% ====================================================================
+\subsection{Measurement Projection for Fleet Constraint}
+\label{sec:meas_proj}
+
+The upper policy must satisfy operational constraints on fleet size, average passenger waiting time, and bus bunching rate.
+Rather than adding penalty terms to the reward---which requires manual tuning and conflates constraint satisfaction with reward maximization---we adopt a measurement-projection approach inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}, simplified to avoid the nested best-response oracle that ApproPO requires.
+
+\paragraph{Measurement vector.}
+At the end of each episode, we compute a three-dimensional measurement vector:
+\begin{equation}
+\label{eq:measurement_method}
+    \zvec = \bigl[\bar{w},\; n_{\mathrm{peak}},\; b_{\mathrm{rate}}\bigr] \in \R^3,
+\end{equation}
+where $\bar{w}$ is the average passenger waiting time, $n_{\mathrm{peak}}$ is the peak fleet size (maximum number of buses simultaneously in service), and $b_{\mathrm{rate}}$ is the bunching rate (fraction of arrivals with headway below a threshold).
+
+\paragraph{Weight vector and reward modulation.}
+A weight vector $\thetavec \in \R^3$, initialized as $\thetavec_0 = [-0.5,\, -0.3,\, -0.2]$, modulates the upper-level reward:
+\begin{equation}
+\label{eq:upper_reward}
+    R_{\mathrm{U}} = \thetavec^\top \mathbf{p}, \quad \text{where} \quad \mathbf{p} = \bigl[\bar{w},\; (\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2,\; b_{\mathrm{rate}}\bigr].
+\end{equation}
+The quadratic penalty on fleet overshoot $(\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2$ ensures that small violations incur proportionally less cost than large ones, providing a smooth gradient.
+
+\paragraph{Online gradient descent update.}
+The weight vector is updated by online gradient descent (OGD) on a loss that drives each measurement toward its target:
+\begin{equation}
+\label{eq:ogd_loss}
+    \ell_t = \bigl[-\bar{w}_t,\; -\max(0,\, n_{\mathrm{peak},t} - \Nfleet),\; -b_{\mathrm{rate},t}\bigr],
+\end{equation}
+\begin{equation}
+\label{eq:ogd_update}
+    \thetavec_{t+1} = \Pi_{\mathcal{B}}\!\bigl(\thetavec_t + \eta_t \, \ell_t\bigr), \quad \eta_t = \frac{\eta_0}{\sqrt{t}},
+\end{equation}
+where $\Pi_{\mathcal{B}}$ projects onto the unit ball $\{\thetavec : \|\thetavec\|_2 \leq 1\}$ and $\eta_0$ is the base learning rate.
+The $1/\sqrt{t}$ decay guarantees that the cumulative constraint violation grows sublinearly, yielding an $O(\sqrt{T})$ regret bound standard in online convex optimization.
+
+The simplification relative to ApproPO is deliberate: because the upper policy is trained via REINFORCE with the $\thetavec$-modulated reward, the policy update itself serves as the approximate best-response oracle, eliminating the inner optimization loop that ApproPO requires.
+
+%% ====================================================================
+\subsection{Training Procedure}
+\label{sec:training}
+
+\Cref{alg:training} presents the full TransitDuet training loop, which coordinates the three-stage $\beta$ schedule with the upper and lower policy updates, TAP, and measurement projection.
+
+\begin{algorithm}[t]
+\caption{TransitDuet Training Procedure}
+\label{alg:training}
+\begin{algorithmic}[1]
+\REQUIRE Episode budget $E$, stage boundaries $e_1, e_2$, coupling limit $\betamax$, lower update frequency $f_{\mathrm{L}}$, batch size $B$, fleet limit $\Nfleet$
+\STATE Initialize upper policy $\piU$ with parameters $\phi$
+\STATE Initialize lower policy $\piL$ with parameters $\psi$, twin critics $Q_{\omega_1}, Q_{\omega_2}$, cost critic $Q^c_{\xi}$, target networks $\bar{\omega}_1, \bar{\omega}_2, \bar{\xi}$
+\STATE Initialize replay buffer $\D \leftarrow \emptyset$, Lagrange multiplier $\lambda \leftarrow 0$, entropy temperature $\alpha$
+\STATE Initialize weight vector $\thetavec \leftarrow [-0.5,\, -0.3,\, -0.2]$
+\FOR{episode $e = 1, \ldots, E$}
+    \STATE Compute $\beta(e)$ via \cref{eq:beta_schedule}
+    \IF{$e \leq e_1$}
+        \STATE Set $\htarget \leftarrow 360$\,s (fixed default timetable)
+    \ELSE
+        \STATE Sample $\aU \sim \piU(\cdot \mid \sU)$; extract $[\Hpeak, \Hoff, \Htrans]$
+    \ENDIF
+    \STATE Reset simulation environment
+    \STATE $\mathcal{T}_{\mathrm{U}} \leftarrow \emptyset$, $\mathcal{T}_{\mathrm{L}} \leftarrow \emptyset$, step $\leftarrow 0$
+    \WHILE{episode not done}
+        \IF{dispatch event triggered}
+            \STATE Record $(s_{\mathrm{U},i}, a_{\mathrm{U},i})$ in $\mathcal{T}_{\mathrm{U}}$; select $\htarget$ based on time-of-day
+        \ENDIF
+        \IF{station arrival for any bus $b$}
+            \STATE Observe $\sL$; sample $\aL \sim \piL(\cdot \mid \sL)$; apply holding $\aL$
+            \STATE Observe $r_{\mathrm{L}}, c_{\mathrm{L}}, \sL'$; store $(\sL, \aL, r_{\mathrm{L}}, c_{\mathrm{L}}, \sL')$ in $\D$ and $\mathcal{T}_{\mathrm{L}}$
+            \STATE step $\leftarrow$ step $+ 1$
+            \IF{step $\bmod\; f_{\mathrm{L}} = 0$ \AND $|\D| \geq B$}
+                \STATE Sample batch of size $B$ from $\D$
+                \STATE Update $Q_{\omega_1}, Q_{\omega_2}$ via \cref{eq:twin_q}
+                \STATE Update $Q^c_{\xi}$ analogously
+                \STATE Update $\piL$ via \cref{eq:lower_policy_loss}
+                \STATE Update $\lambda$ via \cref{eq:lambda_update}; update $\alpha$ via \cref{eq:alpha_update}
+                \STATE Soft-update target networks: $\bar{\omega}_j \leftarrow \tau \omega_j + (1-\tau)\bar{\omega}_j$, similarly for $\bar{\xi}$
+            \ENDIF
+        \ENDIF
+    \ENDWHILE
+    \STATE Compute episode measurements $\zvec$ via \cref{eq:measurement}
+    \STATE Compute upper reward $R_{\mathrm{U}}$ via \cref{eq:upper_reward}
+    \STATE \textbf{// TAP (\cref{alg:tap})}
+    \STATE Compute augmented advantages $\{\AUaug[i]\}$ and augmented lower rewards $\{\tilde{r}_{\mathrm{L},j}\}$
+    \STATE Re-insert augmented lower transitions into $\D$ \hfill \COMMENT{reward relabeling}
+    \IF{$e > e_1$}
+        \STATE Update $\piU$ via REINFORCE with $\AUaug$ (\cref{eq:reinforce})
+        \STATE Update $\thetavec$ via OGD (\cref{eq:ogd_update})
+    \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Stage~1: lower-only warmup ($e \leq e_1 = 50$).}
+The upper policy is frozen and all buses are dispatched with a fixed default headway of $\htarget = 360$\,s.
+The lower policy trains in isolation via DSAC-Lagrangian, building a competent holding controller before any cross-level coupling is introduced.
+This warmup is critical: without it, the upper policy receives TAP feedback from a random lower policy, which amounts to noise and destabilizes upper-level learning.
+
+\paragraph{Stage~2: ramp-up ($e_1 < e < e_2$).}
+The upper policy is activated and begins selecting headways.
+The coupling coefficient $\beta$ increases linearly from $0$ to $\betamax = 0.5$, progressively strengthening the bidirectional reward augmentation.
+Both policies are updated at their respective frequencies: the lower policy every $f_{\mathrm{L}} = 5$ station arrivals with batch size $B = 2048$, and the upper policy once per episode.
+The measurement-projection weight $\thetavec$ is also updated at each episode boundary via OGD.
+
+\paragraph{Stage~3: full coupling ($e \geq e_2 = 150$).}
+The coupling coefficient is held at $\betamax = 0.5$ for the remainder of training.
+Both policies continue to update, and the OGD weight $\thetavec$ continues to adapt, gradually shifting the upper reward emphasis toward whichever constraint is most frequently violated.
+
+\paragraph{Computational cost.}
+The lower policy update dominates computation due to the twin Q-network and cost Q-network gradient steps.
+Each lower update involves five backward passes (two Q-critics, one cost critic, one policy, one entropy temperature), performed on GPU-batched samples from $\D$.
+The upper policy update is negligible by comparison: a single REINFORCE gradient step over $M \approx 30$--$50$ dispatch events.
+The TAP computation adds only $O(M + N)$ scalar operations per episode and is not a bottleneck.
+
+\paragraph{Convergence considerations.}
+The three-stage schedule ensures that coupling is introduced only after both policies have reached a reasonable performance baseline.
+The linear $\beta$ ramp avoids the discontinuity that a step-function activation would introduce, which in preliminary experiments caused oscillatory instabilities in both the upper and lower value estimates.
+We did not observe sensitivity to the precise values of $e_1$ and $e_2$ within a factor of two of the defaults, but setting $e_1$ too small (before the lower policy converges to a stable holding strategy) consistently degraded final performance, as confirmed by the ablation study in \cref{sec:experiments}.
