@@ -127,7 +127,7 @@ def run_baseline(args):
             t1 = time.time()
             for _ in range(updates_per_episode):
                 train_metrics = trainer.update(
-                    replay_buffer, batch_size, reward_scale=10.0)
+                    replay_buffer, batch_size, reward_scale=1.0)
             train_time = time.time() - t1
 
         # ---- Collect measurements ----

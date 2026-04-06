@@ -239,21 +239,24 @@ class Bus(object):
             speed_list = [all_route[i].speed_limit for i in range(len(all_route))]
             self.obs.extend(speed_list)
 
+            # Normalized reward in [-1, 0]: deviation / target_hw, clamped
             def headway_reward(headway):
-                return -abs(headway - target_hw)
+                return -min(abs(headway - target_hw) / target_hw, 1.0)
 
             forward_reward = headway_reward(self.forward_headway) if len(self.forward_bus) != 0 else None
             backward_reward = headway_reward(self.backward_headway) if len(self.backward_bus) != 0 else None
             if forward_reward is not None and backward_reward is not None:
-                weight = abs(self.forward_headway - target_hw) / (abs(self.forward_headway - target_hw) + abs(self.backward_headway - target_hw) + 1e-6)
-                similarity_bonus = -abs(self.forward_headway - self.backward_headway) * 0.5
+                fwd_dev = abs(self.forward_headway - target_hw)
+                bwd_dev = abs(self.backward_headway - target_hw)
+                weight = fwd_dev / (fwd_dev + bwd_dev + 1e-6)
+                similarity_bonus = -min(abs(self.forward_headway - self.backward_headway) / target_hw, 1.0) * 0.3
                 self.reward = forward_reward * weight + backward_reward * (1 - weight) + similarity_bonus
             elif forward_reward is not None:
                 self.reward = forward_reward
             elif backward_reward is not None:
                 self.reward = backward_reward
             else:
-                self.reward = -50
+                self.reward = -1.0
 
             # Lagrangian cost: headway deviation squared, clamped to [0,1]
             self.cost = min(headway_dev ** 2, 1.0)
