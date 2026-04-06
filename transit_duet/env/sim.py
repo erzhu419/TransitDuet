@@ -155,6 +155,7 @@ class env_bus(object):
         self.cost = {key: 0.0 for key in range(self.max_agent_num)}
         self.done = False
         self._peak_concurrent = 0
+        self._cached_measurement = None
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
 
@@ -269,14 +270,15 @@ class env_bus(object):
 
 
         self.current_time += self.time_step
-        unhealthy_all = [bus.is_unhealthy for bus in self.bus_all]
         if sum([trip.launched for trip in self.timetables]) == len(self.timetables) and sum([bus.on_route for bus in self.bus_all]) == 0:
             self.done = True
+            # Cache measurement_vector BEFORE clearing data
+            self._cached_measurement = self._compute_measurement_vector()
             if not debug:
                 for bus in self.bus_all:
-                    bus.trajectory.clear()  # 清空轨迹列表
-                    bus.trajectory_dict.clear()  # 清空轨迹字典
-                    del bus.trajectory  # 强制删除对象，帮助 GC
+                    bus.trajectory.clear()
+                    bus.trajectory_dict.clear()
+                    del bus.trajectory
                     del bus.trajectory_dict
                 for station in self.stations:
                     station.waiting_passengers = np.array([])
@@ -339,23 +341,26 @@ class env_bus(object):
         else:
             prev_actual_headway = 360.0
 
-        unhealthy_rate = (sum(1 for bus in self.bus_all if bus.is_unhealthy)
-                          / max(len(self.bus_all), 1))
+        # Fraction of on-route buses currently holding (signal of fleet pressure)
+        from env.bus import BusState
+        holding_count = sum(1 for bus in self.bus_all
+                            if bus.on_route and bus.state == BusState.HOLDING)
+        holding_ratio = holding_count / max(fleet_on_route, 1)
 
         return np.array([
             hour / 24.0,
             total_demand / 1000.0,
             fleet_on_route / self.max_agent_num,
             prev_actual_headway / 600.0,
-            unhealthy_rate,
+            holding_ratio,
         ], dtype=np.float32)
 
-    @property
-    def measurement_vector(self):
+    def _compute_measurement_vector(self):
         """
-        ApproPO long-term measurement z(π), computed at episode end.
-        Returns: np.array [avg_wait_min, peak_fleet, bunching_rate]
+        Compute measurement z(π) from live data. Must be called BEFORE cleanup.
+        Returns: np.array [avg_wait_min, peak_fleet, headway_cv]
         """
+        # z[0]: average passenger wait time (minutes)
         total_wait, pax_count = 0.0, 0
         for s in self.stations:
             for p in s.total_passenger:
@@ -364,12 +369,29 @@ class env_bus(object):
                     pax_count += 1
         avg_wait = (total_wait / max(pax_count, 1)) / 60.0
 
+        # z[1]: peak concurrent fleet size
         peak_fleet = self._peak_concurrent
 
-        unhealthy = sum(1 for bus in self.bus_all if bus.is_unhealthy)
-        bunching_rate = unhealthy / max(len(self.bus_all), 1)
+        # z[2]: headway coefficient of variation (replaces bunching_rate)
+        headways = [bus.forward_headway for bus in self.bus_all
+                    if hasattr(bus, 'forward_headway') and bus.forward_headway > 0]
+        if len(headways) >= 2:
+            hw_arr = np.array(headways)
+            headway_cv = float(hw_arr.std() / max(hw_arr.mean(), 1.0))
+        else:
+            headway_cv = 0.0
 
-        return np.array([avg_wait, peak_fleet, bunching_rate])
+        return np.array([avg_wait, peak_fleet, headway_cv])
+
+    @property
+    def measurement_vector(self):
+        """
+        ApproPO long-term measurement z(π), computed at episode end.
+        Returns: np.array [avg_wait_min, peak_fleet, headway_cv]
+        """
+        if hasattr(self, '_cached_measurement') and self._cached_measurement is not None:
+            return self._cached_measurement
+        return self._compute_measurement_vector()
 
     def set_timetable_from_planner(self, headway_params):
         """

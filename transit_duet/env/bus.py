@@ -61,7 +61,6 @@ class Bus(object):
         self.dwelling_time = 0. # 驻站时间，用于执行动作，停车等待
 
         self.headway_dif = []
-        self.is_unhealthy = False # False if the bus is healthy, True if the bus is unhealthy, then terminate env early
 
         # record of stop intervals [station_name, start_time, end_time]
         self.stop_records = []
@@ -256,10 +255,6 @@ class Bus(object):
             else:
                 self.reward = -50
 
-            if abs(self.forward_headway - target_hw) > 180 or abs(self.backward_headway - target_hw) > 180:
-                self.reward -= 20
-                self.is_unhealthy = True
-
             # Lagrangian cost: headway deviation squared, clamped to [0,1]
             self.cost = min(headway_dev ** 2, 1.0)
 
@@ -402,5 +397,4 @@ class Bus(object):
         self.state = BusState.TRAVEL
         self.on_route = True
         self.trip_turn = len(self.trip_id_list)
-        self.is_unhealthy = False # False if the bus is healthy, True if the bus is unhealthy, then terminate env early
 
