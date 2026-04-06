@@ -56,6 +56,7 @@ class TransitDuetRunner:
         env_path = os.path.join(str(SCRIPT_DIR), config['env']['path'])
         self.env = env_bus(env_path, route_sigma=config['env']['route_sigma'])
         self.env.enable_plot = False
+        self.env._n_fleet_target = config['upper']['N_fleet']
 
         state_dim = self.env.state_dim
 
@@ -224,10 +225,17 @@ class TransitDuetRunner:
 
         # TAP forward: compute augmented upper returns & update upper policy
         if ep > self.beta_schedule.warmup and training:
+            # Per-dispatch proxy rewards (dense signal) + episode-level bonus
+            dispatch_rewards = getattr(self.env, '_dispatch_rewards', {})
             n_dispatches = max(self.tap.num_upper_transitions, 1)
+            ep_bonus = r_upper / n_dispatches  # small episode-level component
+
             upper_reward_per_trip = {}
             for trans in self.tap._upper_transitions:
-                upper_reward_per_trip[trans['trip_id']] = r_upper / n_dispatches
+                tid = trans['trip_id']
+                # Dense proxy reward (per-dispatch) + small episode bonus
+                proxy = dispatch_rewards.get(tid, 0.0)
+                upper_reward_per_trip[tid] = proxy + 0.2 * ep_bonus
 
             # Store for next episode's TAP reverse signal
             self._prev_upper_reward_per_trip = upper_reward_per_trip

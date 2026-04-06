@@ -156,6 +156,8 @@ class env_bus(object):
         self.done = False
         self._peak_concurrent = 0
         self._cached_measurement = None
+        self._dispatch_rewards = {}
+        self._last_dispatch_trip = {}
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
 
@@ -197,6 +199,8 @@ class env_bus(object):
                     s_upper = self._build_upper_state(trip)
                     target_hw = self._upper_policy_callback(s_upper, trip)
                     trip.target_headway = float(target_hw)
+                    # Compute per-dispatch proxy reward for previous dispatch
+                    self._compute_dispatch_proxy_reward(trip)
                 trip.launched = True
                 self.launch_bus(trip)
         # route
@@ -305,6 +309,53 @@ class env_bus(object):
         return self.state, self.reward, self.cost, self.done
 
     # ---- TransitDuet helper methods ----
+
+    def _compute_dispatch_proxy_reward(self, current_trip):
+        """
+        Compute per-dispatch proxy reward for the PREVIOUS same-direction dispatch.
+        Measures what happened between the last dispatch and this one:
+          - headway regularity of on-route buses (negative CV)
+          - fleet utilization penalty (over N_fleet)
+          - passenger wait proxy (waiting passengers at stations)
+
+        Stored in self._dispatch_rewards[trip_id] for runner to collect.
+        """
+        if not hasattr(self, '_dispatch_rewards'):
+            self._dispatch_rewards = {}
+        if not hasattr(self, '_last_dispatch_trip'):
+            self._last_dispatch_trip = {}
+
+        direction = current_trip.direction
+        prev_trip_id = self._last_dispatch_trip.get(direction, None)
+        self._last_dispatch_trip[direction] = current_trip.launch_turn
+
+        if prev_trip_id is None:
+            return  # first dispatch in this direction, no reward yet
+
+        # Headway regularity: negative CV of active buses' forward headways
+        active_buses = [b for b in self.bus_all
+                        if b.on_route and b.direction == direction
+                        and b.forward_headway > 0]
+        if len(active_buses) >= 2:
+            hws = np.array([b.forward_headway for b in active_buses])
+            hw_cv = hws.std() / max(hws.mean(), 1.0)
+            r_regularity = -min(hw_cv, 2.0)  # in [-2, 0]
+        else:
+            r_regularity = 0.0
+
+        # Fleet penalty: penalize exceeding N_fleet
+        concurrent = sum(1 for b in self.bus_all if b.on_route)
+        n_fleet = getattr(self, '_n_fleet_target', 12)
+        r_fleet = -max(0.0, concurrent - n_fleet) / n_fleet  # in [-1, 0] roughly
+
+        # Waiting passengers proxy (normalized)
+        total_waiting = sum(len(s.waiting_passengers) for s in self.stations)
+        r_wait = -min(total_waiting / 500.0, 2.0)  # in [-2, 0]
+
+        # Combined proxy reward (normalized to roughly [-1, 0])
+        proxy_reward = 0.5 * r_regularity + 0.3 * r_fleet + 0.2 * r_wait
+
+        self._dispatch_rewards[prev_trip_id] = float(proxy_reward)
 
     def _get_target_headway_for_bus(self, bus):
         """Look up the target_headway from the timetable that launched this bus."""
