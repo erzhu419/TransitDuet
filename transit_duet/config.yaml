@@ -2,33 +2,38 @@
 # =========================
 
 env:
-  path: "env"                   # relative to transit_duet/
+  path: "env"
   route_sigma: 1.5
   max_agent_num: 25
   effective_trip_num: 264
 
 upper:
-  state_dim: 5                  # [hour, demand, fleet, prev_hw, unhealthy_rate]
+  state_dim: 5                  # [hour, demand, fleet, prev_hw, holding_ratio]
   action_dim: 3                 # [H_peak, H_off_peak, H_transition]
   action_low: [180, 300, 240]   # min headway per period (seconds)
   action_high: [600, 1200, 900] # max headway per period (seconds)
   hidden_dim: 64
-  lr: 0.0001                    # upper policy learning rate
+  lr: 0.0001
   N_fleet: 12                   # fleet size hard constraint
 
 lower:
-  hidden_dim: 32
+  hidden_dim: 64
   action_range: 60.0            # max holding time (seconds)
   cost_limit: 0.15              # Lagrangian cost budget
-  batch_size: 2048
-  lr: 0.00001                   # critic + policy learning rate
-  lambda_lr: 0.001              # Lagrangian multiplier learning rate
+  batch_size: 512
+  updates_per_episode: 30       # batch updates at episode end
+  lr: 0.0003                    # RE-SAC learning rate
+  lambda_lr: 0.001
   gamma: 0.99
   soft_tau: 0.005
   auto_entropy: true
   maximum_alpha: 0.3
-  reward_scale: 10.0
-  training_freq: 5              # train every N transitions
+  reward_scale: 1.0             # no scaling (reward already in [-1,0])
+  # RE-SAC specific
+  ensemble_size: 10
+  resac_beta: -2.0              # pessimistic (LCB)
+  beta_ood: 0.01                # OOD regularization
+  weight_reg: 0.01              # L1 critic regularization
 
 coupling:
   beta_warmup_eps: 50           # Stage 1: only lower trains
@@ -38,6 +43,6 @@ coupling:
 
 training:
   total_episodes: 300
-  eval_freq: 5                  # evaluate every N episodes
-  save_freq: 50                 # checkpoint every N episodes
-  replay_buffer_size: 1000000
+  eval_freq: 5
+  save_freq: 50
+  replay_buffer_size: 500000
