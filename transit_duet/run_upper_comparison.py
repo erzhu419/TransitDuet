@@ -33,6 +33,7 @@ from upper.upper_cmaes import CMAESUpperPolicy
 from upper.upper_ga import GAUpperPolicy
 from upper.resac_upper import RESACUpperTrainer
 from upper.upper_contextual_cmaes import ContextualCMAESUpperPolicy
+from upper.upper_cmaes_rl import CMAESRLUpperPolicy
 
 
 def create_upper(method, device='cpu'):
@@ -51,6 +52,13 @@ def create_upper(method, device='cpu'):
             state_dim=5, action_dim=3,
             action_low=action_low, action_high=action_high,
             pop_size=12, sigma0=0.5)
+    elif method == 'cmaes_rl':
+        return CMAESRLUpperPolicy(
+            state_dim=5, action_dim=3,
+            action_low=action_low, action_high=action_high,
+            cmaes_pop_size=10, cmaes_sigma=0.3,
+            cmaes_budget=60,  # 60 eps CMA-ES, then RL residual
+            rl_lr=3e-4, device=device)
     elif method == 'ga':
         return GAUpperPolicy(action_low=action_low, action_high=action_high,
                              pop_size=15, mutation_sigma=0.15)
@@ -160,7 +168,7 @@ def compute_system_reward(z, N_fleet=12):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--method', type=str, required=True,
-                        choices=['bo', 'cmaes', 'contextual_cmaes', 'ga', 'resac', 'fixed'])
+                        choices=['bo', 'cmaes', 'contextual_cmaes', 'cmaes_rl', 'ga', 'resac', 'fixed'])
     parser.add_argument('--episodes', type=int, default=100)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--gpu', action='store_true')
@@ -219,19 +227,80 @@ def main():
             if args.method == 'fixed':
                 upper_params = np.array([360., 360., 360.])
             elif args.method == 'contextual_cmaes':
-                # Contextual: suggest returns a policy, not params
                 contextual_policy = upper.suggest()
                 upper_params = contextual_policy(
-                    np.array([0.5, 0.5, 0.5, 0.5, 0.5]))  # for logging
+                    np.array([0.5, 0.5, 0.5, 0.5, 0.5]))
+            elif args.method == 'cmaes_rl':
+                upper_params = upper.suggest()
+                # In Phase 2, use state-dependent callback
+                if upper.phase == 2:
+                    def _cmaes_rl_cb(s_upper, trip):
+                        trip._upper_queried = True
+                        hw = upper.suggest_with_state(s_upper)
+                        hour = 6 + trip.launch_time // 3600
+                        if 7 <= hour <= 9 or 17 <= hour <= 19:
+                            return float(hw[0])
+                        elif 9 < hour < 17:
+                            return float(hw[1])
+                        else:
+                            return float(hw[2])
+                    contextual_policy = None  # use custom callback
+                    # We'll set env callback directly below
             elif args.method == 'resac':
                 s_upper = np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype=np.float32)
                 upper_params = upper.policy_net.get_action(s_upper, deterministic=False)
             else:
                 upper_params = upper.suggest()
 
-            avg_r, z, steps = run_episode_with_upper(
-                env, lower, upper_params, replay_buffer, device,
-                training=True, contextual_policy=contextual_policy)
+            # Special handling for cmaes_rl Phase 2
+            if args.method == 'cmaes_rl' and upper.phase == 2:
+                env.reset()
+                env._upper_policy_callback = _cmaes_rl_cb
+                env._n_fleet_target = 12
+                state_dict, reward_dict, _ = env.initialize_state()
+                action_dict_local = {k: None for k in range(env.max_agent_num)}
+                ep_reward_local = 0.0
+                ep_steps_local = 0
+                while not env.done:
+                    for key in state_dict:
+                        if len(state_dict[key]) == 1:
+                            if action_dict_local[key] is None:
+                                obs = np.array(state_dict[key][0], dtype=np.float32)
+                                a = lower.policy_net.get_action(
+                                    torch.from_numpy(obs).float().to(device),
+                                    deterministic=False)
+                                action_dict_local[key] = a
+                        elif len(state_dict[key]) == 2:
+                            if state_dict[key][0][1] != state_dict[key][1][1]:
+                                state_arr = np.array(state_dict[key][0], dtype=np.float32)
+                                ns_arr = np.array(state_dict[key][1], dtype=np.float32)
+                                rwd = reward_dict[key]
+                                cst = env.cost.get(key, 0.0)
+                                tid = int(state_dict[key][0][0])
+                                replay_buffer.push(state_arr, action_dict_local[key],
+                                                   rwd, cst, ns_arr, False, tid)
+                                ep_reward_local += rwd
+                                ep_steps_local += 1
+                            state_dict[key] = state_dict[key][1:]
+                            obs = np.array(state_dict[key][0], dtype=np.float32)
+                            action_dict_local[key] = lower.policy_net.get_action(
+                                torch.from_numpy(obs).float().to(device),
+                                deterministic=False)
+                    state_dict, reward_dict, cost_dict, done = env.step(
+                        action_dict_local, render=False)
+                z = env.measurement_vector
+                avg_r = ep_reward_local / max(ep_steps_local, 1)
+                steps = ep_steps_local
+                # Report dispatch rewards to RL
+                dispatch_rewards = getattr(env, '_dispatch_rewards', {})
+                for tid, dr in dispatch_rewards.items():
+                    s_dummy = np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype=np.float32)
+                    upper.report_dispatch(s_dummy, dr, s_dummy, False)
+                upper.train_rl(n_updates=10)
+            else:
+                avg_r, z, steps = run_episode_with_upper(
+                    env, lower, upper_params, replay_buffer, device,
+                    training=True, contextual_policy=contextual_policy)
 
             # Report reward to upper optimizer
             sys_reward = compute_system_reward(z)
@@ -245,7 +314,8 @@ def main():
             elif upper is not None:
                 upper.report(sys_reward)
 
-            phase = args.method.upper()
+            phase = (f"CMA({upper.phase})" if args.method == 'cmaes_rl'
+                     else args.method.upper())
 
         env_time = time.time() - t0
 
