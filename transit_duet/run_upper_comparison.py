@@ -32,6 +32,7 @@ from upper.upper_bo import BOUpperPolicy
 from upper.upper_cmaes import CMAESUpperPolicy
 from upper.upper_ga import GAUpperPolicy
 from upper.resac_upper import RESACUpperTrainer
+from upper.upper_contextual_cmaes import ContextualCMAESUpperPolicy
 
 
 def create_upper(method, device='cpu'):
@@ -45,6 +46,11 @@ def create_upper(method, device='cpu'):
     elif method == 'cmaes':
         return CMAESUpperPolicy(action_low=action_low, action_high=action_high,
                                 pop_size=10, sigma0=0.3)
+    elif method == 'contextual_cmaes':
+        return ContextualCMAESUpperPolicy(
+            state_dim=5, action_dim=3,
+            action_low=action_low, action_high=action_high,
+            pop_size=12, sigma0=0.5)
     elif method == 'ga':
         return GAUpperPolicy(action_low=action_low, action_high=action_high,
                              pop_size=15, mutation_sigma=0.15)
@@ -61,24 +67,38 @@ def create_upper(method, device='cpu'):
 
 
 def run_episode_with_upper(env, lower_trainer, upper_params, replay_buffer,
-                           device='cpu', training=True):
+                           device='cpu', training=True, contextual_policy=None):
     """
-    Run one episode with fixed upper headway params and lower RE-SAC.
-    Returns (episode_reward, episode_metrics, z_measurement).
+    Run one episode with upper headway control and lower RE-SAC.
+    upper_params: np.array(3) for static methods, or None.
+    contextual_policy: callable(state) → headway(3) for contextual methods.
+    Returns (avg_reward, z_measurement, steps).
     """
     env.reset()
 
-    # Set upper headway enforcement
-    if upper_params is not None:
+    if contextual_policy is not None:
+        # State-dependent: call policy with each dispatch's state
+        def upper_cb(s_upper, trip):
+            trip._upper_queried = True
+            hw = contextual_policy(s_upper)
+            hour = 6 + trip.launch_time // 3600
+            if 7 <= hour <= 9 or 17 <= hour <= 19:
+                return float(hw[0])
+            elif 9 < hour < 17:
+                return float(hw[1])
+            else:
+                return float(hw[2])
+        env._upper_policy_callback = upper_cb
+    elif upper_params is not None:
         def upper_cb(s_upper, trip):
             trip._upper_queried = True
             hour = 6 + trip.launch_time // 3600
             if 7 <= hour <= 9 or 17 <= hour <= 19:
-                return float(upper_params[0])  # H_peak
+                return float(upper_params[0])
             elif 9 < hour < 17:
-                return float(upper_params[1])  # H_off_peak
+                return float(upper_params[1])
             else:
-                return float(upper_params[2])  # H_transition
+                return float(upper_params[2])
         env._upper_policy_callback = upper_cb
     else:
         env._upper_policy_callback = None
@@ -140,7 +160,7 @@ def compute_system_reward(z, N_fleet=12):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--method', type=str, required=True,
-                        choices=['bo', 'cmaes', 'ga', 'resac', 'fixed'])
+                        choices=['bo', 'cmaes', 'contextual_cmaes', 'ga', 'resac', 'fixed'])
     parser.add_argument('--episodes', type=int, default=100)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--gpu', action='store_true')
@@ -194,18 +214,24 @@ def main():
             phase = "Warmup"
         else:
             # Stage 2: upper active
+            contextual_policy = None
+
             if args.method == 'fixed':
                 upper_params = np.array([360., 360., 360.])
+            elif args.method == 'contextual_cmaes':
+                # Contextual: suggest returns a policy, not params
+                contextual_policy = upper.suggest()
+                upper_params = contextual_policy(
+                    np.array([0.5, 0.5, 0.5, 0.5, 0.5]))  # for logging
             elif args.method == 'resac':
-                # For RE-SAC, use policy_net directly (already handles state-dependent)
-                # Simplified: use a representative state
                 s_upper = np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype=np.float32)
                 upper_params = upper.policy_net.get_action(s_upper, deterministic=False)
             else:
                 upper_params = upper.suggest()
 
             avg_r, z, steps = run_episode_with_upper(
-                env, lower, upper_params, replay_buffer, device, training=True)
+                env, lower, upper_params, replay_buffer, device,
+                training=True, contextual_policy=contextual_policy)
 
             # Report reward to upper optimizer
             sys_reward = compute_system_reward(z)
