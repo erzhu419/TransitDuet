@@ -3,8 +3,12 @@ runner.py
 =========
 TransitDuet main training loop — full 3-stage bi-level training.
 
-Stage 1 (warmup):  β=0, only lower πL trains, fixed target_headway=360s
-Stage 2 (ramp):    β ramps 0→0.5, upper πU activates, TAP couples layers
+Both levels use RE-SAC:
+  - Upper: RE-SAC (no Lagrangian) with per-dispatch proxy reward
+  - Lower: RE-SAC Lagrangian with headway cost constraint
+
+Stage 1 (warmup):  β=0, only lower trains, fixed target_headway=360s
+Stage 2 (ramp):    β ramps 0→0.5, upper activates, TAP couples layers
 Stage 3 (full):    β=0.5, full coupling
 
 Usage:
@@ -32,7 +36,7 @@ if str(SCRIPT_DIR.parent) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR.parent))
 
 from env.sim import env_bus
-from upper.upper_policy import UpperPolicy
+from upper.resac_upper import RESACUpperTrainer
 from upper.measurement_proj import MeasurementProjection
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
@@ -60,20 +64,22 @@ class TransitDuetRunner:
 
         state_dim = self.env.state_dim
 
-        # Upper policy (independent network)
-        self.upper_policy = UpperPolicy(
+        # ── Upper policy: RE-SAC (no Lagrangian) ──
+        self.upper_trainer = RESACUpperTrainer(
             state_dim=config['upper']['state_dim'],
-            K=config['upper']['action_dim'],
+            action_dim=config['upper']['action_dim'],
             hidden_dim=config['upper']['hidden_dim'],
             action_low=config['upper']['action_low'],
             action_high=config['upper']['action_high'],
+            ensemble_size=config['upper'].get('ensemble_size', 10),
+            beta=config['upper'].get('resac_beta', -2.0),
+            lr=config['upper']['lr'],
+            gamma=config['upper'].get('gamma', 0.95),  # shorter horizon for planning
+            replay_capacity=config['upper'].get('replay_capacity', 50000),
             device=device,
-        ).to(device)
-        self.upper_optimizer = torch.optim.Adam(
-            self.upper_policy.parameters(), lr=config['upper']['lr']
         )
 
-        # Lower policy (RE-SAC Lagrangian, parameter-sharing single-agent)
+        # ── Lower policy: RE-SAC Lagrangian ──
         self.replay_buffer = CostReplayBuffer(config['training']['replay_buffer_size'])
         self.lower_trainer = RESACLagrangianTrainer(
             state_dim=state_dim,
@@ -111,9 +117,15 @@ class TransitDuetRunner:
         # Training params
         self.batch_size = config['lower']['batch_size']
         self.updates_per_episode = config['lower'].get('updates_per_episode', 30)
+        self.upper_batch_size = config['upper'].get('batch_size', 64)
+        self.upper_updates = config['upper'].get('updates_per_episode', 10)
 
-        # Previous episode's upper reward per trip (for TAP reverse)
+        # TAP reverse signal from previous episode
         self._prev_upper_reward_per_trip = {}
+
+        # Track upper transitions within episode for replay buffer
+        self._episode_upper_transitions = []
+        self._prev_upper_state = None
 
         # Logging
         self.log_dir = os.path.join(str(SCRIPT_DIR), 'logs', 'full_training')
@@ -122,20 +134,37 @@ class TransitDuetRunner:
 
     def _upper_callback(self, s_upper, trip):
         """Called by env.step() at each dispatch event."""
-        action = self.upper_policy.get_action(s_upper, deterministic=False)
+        action = self.upper_trainer.policy_net.get_action(
+            s_upper, deterministic=False)
         trip_id = trip.launch_turn
 
         # Record for TAP
         self.tap.record_upper_transition(s_upper, action, trip_id)
 
+        # Store transition: when next dispatch happens, we get (s, a, r, s')
+        dispatch_rewards = getattr(self.env, '_dispatch_rewards', {})
+        if self._prev_upper_state is not None:
+            prev_s, prev_a, prev_tid = self._prev_upper_state
+            r = dispatch_rewards.get(prev_tid, 0.0)
+            # TAP forward: augment with lower rewards from this trip
+            beta = self.beta_schedule.get_beta(self._current_ep)
+            if beta > 0:
+                lower_rs = self.tap._lower_rewards_by_trip.get(prev_tid, [])
+                if lower_rs:
+                    r += beta * np.mean(lower_rs)
+            self._episode_upper_transitions.append(
+                (prev_s, prev_a, r, s_upper.copy(), False))
+
+        self._prev_upper_state = (s_upper.copy(), action.copy(), trip_id)
+
         # Select headway based on time-of-day
         hour = 6 + trip.launch_time // 3600
         if 7 <= hour <= 9 or 17 <= hour <= 19:
-            target_hw = action[0]  # H_peak
+            target_hw = action[0]
         elif 9 < hour < 17:
-            target_hw = action[1]  # H_off_peak
+            target_hw = action[1]
         else:
-            target_hw = action[2]  # H_transition
+            target_hw = action[2]
 
         return float(target_hw)
 
@@ -144,6 +173,9 @@ class TransitDuetRunner:
         t0 = time.time()
         self.tap.clear()
         self.env.reset()
+        self._current_ep = ep
+        self._episode_upper_transitions = []
+        self._prev_upper_state = None
 
         beta = self.beta_schedule.get_beta(ep)
 
@@ -200,51 +232,51 @@ class TransitDuetRunner:
 
         env_time = time.time() - t0
 
+        # ──── Episode-end: finalize last upper transition ────
+        if self._prev_upper_state is not None:
+            prev_s, prev_a, prev_tid = self._prev_upper_state
+            dispatch_rewards = getattr(self.env, '_dispatch_rewards', {})
+            r = dispatch_rewards.get(prev_tid, 0.0)
+            # Terminal transition — use s as next_state (doesn't matter much)
+            self._episode_upper_transitions.append(
+                (prev_s, prev_a, r, prev_s, True))
+
         # ──── Episode-end training ────
         t1 = time.time()
         train_metrics = {}
+        upper_metrics = {}
 
-        # Lower policy: batch training at episode end
+        # Lower policy training
         if training and len(self.replay_buffer) > self.batch_size:
-            # Build TAP reverse signal: inject upper reward into lower transitions
             tap_signal = None
             if beta > 0 and self._prev_upper_reward_per_trip:
-                tap_signal = {}
-                for tid, r_up in self._prev_upper_reward_per_trip.items():
-                    tap_signal[tid] = beta * r_up
+                tap_signal = {tid: beta * r for tid, r in
+                              self._prev_upper_reward_per_trip.items()}
 
             for _ in range(self.updates_per_episode):
                 train_metrics = self.lower_trainer.update(
                     self.replay_buffer, self.batch_size,
                     reward_scale=1.0, tap_signal=tap_signal)
 
+        # Upper policy training (only after warmup)
+        if ep > self.beta_schedule.warmup and training:
+            # Push episode's upper transitions into upper replay buffer
+            for (s, a, r, ns, d) in self._episode_upper_transitions:
+                self.upper_trainer.replay_buffer.push(s, a, r, ns, d)
+
+            # Train upper RE-SAC
+            if len(self.upper_trainer.replay_buffer) > self.upper_batch_size:
+                for _ in range(self.upper_updates):
+                    upper_metrics = self.upper_trainer.update(self.upper_batch_size)
+
+            # Store per-trip rewards for next episode's TAP reverse
+            dispatch_rewards = getattr(self.env, '_dispatch_rewards', {})
+            self._prev_upper_reward_per_trip = dict(dispatch_rewards)
+
         # Measurement projection update
         z = self.env.measurement_vector
         self.measurement_proj.update(z)
         r_upper = self.measurement_proj.compute_upper_reward(z)
-
-        # TAP forward: compute augmented upper returns & update upper policy
-        if ep > self.beta_schedule.warmup and training:
-            # Per-dispatch proxy rewards (dense signal) + episode-level bonus
-            dispatch_rewards = getattr(self.env, '_dispatch_rewards', {})
-            n_dispatches = max(self.tap.num_upper_transitions, 1)
-            ep_bonus = r_upper / n_dispatches  # small episode-level component
-
-            upper_reward_per_trip = {}
-            for trans in self.tap._upper_transitions:
-                tid = trans['trip_id']
-                # Dense proxy reward (per-dispatch) + small episode bonus
-                proxy = dispatch_rewards.get(tid, 0.0)
-                upper_reward_per_trip[tid] = proxy + 0.2 * ep_bonus
-
-            # Store for next episode's TAP reverse signal
-            self._prev_upper_reward_per_trip = upper_reward_per_trip
-
-            augmented = self.tap.compute_augmented_upper_returns(
-                ep, upper_reward_per_trip)
-
-            if augmented:
-                self._update_upper_policy(augmented)
 
         train_time = time.time() - t1
 
@@ -252,6 +284,8 @@ class TransitDuetRunner:
         avg_r = episode_reward / max(episode_steps, 1)
         q_mean = train_metrics.get('q_mean', 0)
         q_std = train_metrics.get('q_std', 0)
+        uq_mean = upper_metrics.get('upper_q_mean', 0)
+        uq_std = upper_metrics.get('upper_q_std', 0)
 
         self.history['ep_reward'].append(episode_reward)
         self.history['avg_reward'].append(avg_r)
@@ -265,6 +299,9 @@ class TransitDuetRunner:
         self.history['beta'].append(beta)
         self.history['q_mean'].append(q_mean)
         self.history['q_std'].append(q_std)
+        self.history['upper_q_mean'].append(uq_mean)
+        self.history['upper_q_std'].append(uq_std)
+        self.history['n_upper_trans'].append(len(self._episode_upper_transitions))
         self.history['theta_weights'].append(
             self.measurement_proj.get_reward_weights().tolist())
 
@@ -274,34 +311,10 @@ class TransitDuetRunner:
             'z': z.tolist(), 'lambda': self.lower_trainer.lambda_param,
             'beta': beta, 'stage': self.beta_schedule.stage_name(ep),
             'q_mean': q_mean, 'q_std': q_std,
+            'uq_mean': uq_mean, 'uq_std': uq_std,
+            'n_upper': len(self._episode_upper_transitions),
             'env_time': env_time, 'train_time': train_time,
         }
-
-    def _update_upper_policy(self, augmented_returns):
-        """REINFORCE update for upper policy with TAP-augmented returns."""
-        states, actions, returns = [], [], []
-        for item in augmented_returns:
-            if isinstance(item['state'], np.ndarray):
-                states.append(item['state'])
-                actions.append(item['action'])
-                returns.append(item['augmented_return'])
-
-        if not states:
-            return
-
-        states_t = torch.FloatTensor(np.array(states)).to(self.device)
-        returns_t = torch.FloatTensor(returns).to(self.device)
-
-        if len(returns_t) > 1:
-            returns_t = (returns_t - returns_t.mean()) / (returns_t.std() + 1e-8)
-
-        _, log_probs, _ = self.upper_policy.evaluate(states_t)
-        loss = -(log_probs * returns_t).mean()
-
-        self.upper_optimizer.zero_grad()
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.upper_policy.parameters(), 1.0)
-        self.upper_optimizer.step()
 
     def train(self, total_episodes=None):
         """Full 3-stage training loop."""
@@ -314,19 +327,21 @@ class TransitDuetRunner:
               f"{self.beta_schedule.warmup + self.beta_schedule.ramp}")
         print(f"  Stage 3 full:   ep {self.beta_schedule.warmup + self.beta_schedule.ramp}+")
         print(f"  Device: {self.device}, state_dim: {self.env.state_dim}")
-        print("=" * 80)
+        print(f"  Upper: RE-SAC (K={self.upper_trainer.ensemble_size})")
+        print(f"  Lower: RE-SAC Lagrangian (K={self.lower_trainer.ensemble_size})")
+        print("=" * 90)
 
         for ep in range(total_episodes):
             info = self.run_episode(ep, training=True)
 
             if ep % 5 == 0 or ep < 5:
                 print(f"[Ep {ep:3d}] {info['stage']:15s} | "
-                      f"R={info['avg_r']:6.3f} | "
-                      f"R_up={info['r_upper']:7.2f} | "
-                      f"wait={info['z'][0]:4.1f}m fleet={info['z'][1]:2.0f} "
-                      f"cv={info['z'][2]:.3f} | "
-                      f"Q={info['q_mean']:.1f}±{info['q_std']:.1f} | "
-                      f"λ={info['lambda']:.3f} β={info['beta']:.2f} | "
+                      f"R={info['avg_r']:6.3f} R_up={info['r_upper']:6.1f} | "
+                      f"w={info['z'][0]:3.1f}m f={info['z'][1]:2.0f} "
+                      f"cv={info['z'][2]:.2f} | "
+                      f"Ql={info['q_mean']:.1f}±{info['q_std']:.1f} "
+                      f"Qu={info['uq_mean']:.2f}±{info['uq_std']:.2f} | "
+                      f"λ={info['lambda']:.2f} β={info['beta']:.2f} | "
                       f"{info['env_time']:.0f}+{info['train_time']:.0f}s")
 
             if (ep + 1) % self.cfg['training']['save_freq'] == 0:
@@ -340,8 +355,7 @@ class TransitDuetRunner:
         ckpt_dir = os.path.join(self.log_dir, 'checkpoints')
         os.makedirs(ckpt_dir, exist_ok=True)
         self.lower_trainer.save(os.path.join(ckpt_dir, f'lower_ep{ep}.pt'))
-        torch.save(self.upper_policy.state_dict(),
-                   os.path.join(ckpt_dir, f'upper_ep{ep}.pt'))
+        self.upper_trainer.save(os.path.join(ckpt_dir, f'upper_ep{ep}.pt'))
         print(f"  [Checkpoint ep {ep}]")
 
     def _save_history(self):
