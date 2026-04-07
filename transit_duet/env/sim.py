@@ -158,6 +158,8 @@ class env_bus(object):
         self._cached_measurement = None
         self._dispatch_rewards = {}
         self._last_dispatch_trip = {}
+        # Track last dispatch time per direction for headway enforcement
+        self._last_dispatch_time = {True: -9999, False: -9999}  # direction → time
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
 
@@ -194,15 +196,24 @@ class env_bus(object):
         # But [6:00] is launched, so next is [6:05]
         for i, trip in enumerate(self.timetables):
             if trip.launch_time <= self.current_time and not trip.launched:
-                # TransitDuet: let upper policy set target_headway before launch
                 if self._upper_policy_callback is not None:
-                    s_upper = self._build_upper_state(trip)
-                    target_hw = self._upper_policy_callback(s_upper, trip)
-                    trip.target_headway = float(target_hw)
-                    # Compute per-dispatch proxy reward for previous dispatch
-                    self._compute_dispatch_proxy_reward(trip)
+                    # Call upper policy ONCE per trip (when it first becomes eligible)
+                    if not hasattr(trip, '_upper_queried') or not trip._upper_queried:
+                        s_upper = self._build_upper_state(trip)
+                        target_hw = self._upper_policy_callback(s_upper, trip)
+                        trip.target_headway = float(target_hw)
+                        trip._upper_queried = True
+                        self._compute_dispatch_proxy_reward(trip)
+
+                    # ENFORCE headway: don't launch until gap >= target_headway
+                    actual_gap = self.current_time - self._last_dispatch_time[trip.direction]
+                    if actual_gap < trip.target_headway:
+                        continue  # hold this trip — wait for headway to be met
+
+                # Launch (either no upper callback, or headway condition met)
                 trip.launched = True
                 self.launch_bus(trip)
+                self._last_dispatch_time[trip.direction] = self.current_time
         # route
         route_state = []
         # update route speed limit by freq
