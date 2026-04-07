@@ -210,7 +210,13 @@ class env_bus(object):
                     if actual_gap < trip.target_headway:
                         continue  # hold this trip — wait for headway to be met
 
-                # Launch (either no upper callback, or headway condition met)
+                # HARD fleet constraint: don't launch if at capacity
+                n_fleet = getattr(self, '_n_fleet_target', 25)
+                concurrent = sum(1 for bus in self.bus_all if bus.on_route)
+                if concurrent >= n_fleet:
+                    continue  # hold trip — fleet at capacity
+
+                # Launch (either no upper callback, or headway + fleet conditions met)
                 trip.launched = True
                 self.launch_bus(trip)
                 self._last_dispatch_time[trip.direction] = self.current_time
