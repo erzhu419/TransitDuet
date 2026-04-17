@@ -61,6 +61,7 @@ class Bus(object):
         self.dwelling_time = 0. # 驻站时间，用于执行动作，停车等待
 
         self.headway_dif = []
+        self.applied_actions = []  # v2: track holding actions per trip for feedback
 
         # record of stop intervals [station_name, start_time, end_time]
         self.stop_records = []
@@ -266,10 +267,12 @@ class Bus(object):
     def _start_dwelling(self, action):
         dwell_time = self._normalize_action(action)
 
-        if (self.trip_id in [0, 1] and action is None) or dwell_time == 0:
+        if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
         else:
             self.dwelling_time = dwell_time
+            # v2: record applied holding action for feedback to upper level
+            self.applied_actions.append(float(dwell_time))
 
         self.state = BusState.DWELLING
 
@@ -390,6 +393,7 @@ class Bus(object):
         self.back_to_terminal_time = None
         self.board_num = 0.
         self.alight_num = 0.
+        self.applied_actions = []  # v2: reset per-trip action tracking
         self.in_station = False
         self.forward_bus = None
         self.backward_bus = None

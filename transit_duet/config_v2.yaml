@@ -1,0 +1,60 @@
+# TransitDuet v2 Configuration
+# ============================
+# Per-trip departure adjustment + holding feedback coupling
+
+env:
+  path: "env"
+  route_sigma: 1.5
+  demand_noise: 0.15             # per-hour multiplier std (0=deterministic, 0.15=±15%)
+  max_agent_num: 25
+  effective_trip_num: 264
+
+upper:
+  state_dim: 10                 # v2: enriched with holding feedback stats
+  action_dim: 1                 # v2: single δ_t per dispatch
+  delta_max: 120.0              # max departure shift (seconds)
+  hidden_dim: 64
+  lr: 0.0003
+  gamma: 0.95
+  N_fleet: 12
+  ensemble_size: 10
+  resac_beta: -2.0
+  maximum_alpha: 0.05             # low: 1D action needs less entropy
+  replay_capacity: 50000
+  batch_size: 64
+  updates_per_episode: 10
+
+lower:
+  hidden_dim: 64
+  action_range: 60.0
+  cost_limit: 0.5
+  batch_size: 512
+  updates_per_episode: 30
+  lr: 0.0003
+  lambda_lr: 0.0001              # reduced: prevent λ oscillation
+  gamma: 0.99
+  soft_tau: 0.005
+  auto_entropy: true
+  maximum_alpha: 0.1               # reduced: let δ_t converge
+  reward_scale: 1.0
+  ensemble_size: 10
+  resac_beta: -2.0
+  beta_ood: 0.1               # increased: accelerate ensemble convergence
+  weight_reg: 0.01
+
+coupling:
+  upper_warmup_eps: 30          # lower trains alone first
+  alpha_holding: 0.5            # weight on holding penalty in upper reward
+  feedback_window: 10           # rolling window for holding stats
+  measurement_lr: 0.01          # θ-OGD learning rate
+  # CS-BAPR belief (non-stationarity detection)
+  surprise_ema: 0.3
+  belief_max_H: 20
+  belief_hazard: 0.05
+  belief_alpha_boost: 2.0        # max exploration boost on changepoint
+
+training:
+  total_episodes: 300
+  eval_freq: 5
+  save_freq: 50
+  replay_buffer_size: 500000

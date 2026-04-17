@@ -222,12 +222,17 @@ class RESACUpperTrainer:
         with torch.no_grad():
             next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
             target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
-            target_q_all = target_q_all - self.alpha * next_log_prob.squeeze(-1)
+            # Shared mean target → prevents ensemble divergence
+            target_q_mean = target_q_all.mean(dim=0)  # [B]
+            target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)
             r = reward.squeeze(-1)
             d = done.squeeze(-1)
-            target_value = r.unsqueeze(0) + (1.0 - d.unsqueeze(0)) * self.gamma * target_q_all
+            shared_target = r + (1.0 - d) * self.gamma * target_q_mean
+            shared_target = shared_target.clamp(-50.0, 50.0)
 
         predicted_q = self.q_net(state, action)
+        target_value = shared_target.unsqueeze(0).expand(
+            predicted_q.shape[0], -1)  # [K, B]
         q_mse = F.mse_loss(predicted_q, target_value)
         ood_loss = predicted_q.std(dim=0).mean()
         l1_norm = self.q_net.compute_l1_norm().mean()
@@ -235,7 +240,7 @@ class RESACUpperTrainer:
 
         self.q_optimizer.zero_grad()
         q_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 1.0)
+        q_grad_norm = torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 50.0)
         self.q_optimizer.step()
 
         # ── Policy update ──
@@ -249,7 +254,7 @@ class RESACUpperTrainer:
 
         self.policy_optimizer.zero_grad()
         policy_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1.0)
+        pi_grad_norm = torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 5.0)
         self.policy_optimizer.step()
 
         # ── Alpha update ──
@@ -269,7 +274,16 @@ class RESACUpperTrainer:
             'upper_q_mean': q_mean.mean().item(),
             'upper_q_std': q_std.mean().item(),
             'upper_policy_loss': policy_loss.item(),
+            'upper_q_loss': q_loss.item(),
+            'upper_q_mse': q_mse.item(),
+            'upper_ood_loss': ood_loss.item(),
             'upper_alpha': self.alpha,
+            'upper_pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
+            'upper_q_grad_norm': q_grad_norm.item() if isinstance(q_grad_norm, torch.Tensor) else float(q_grad_norm),
+            'upper_reward_batch_mean': reward.mean().item(),
+            'upper_reward_batch_std': reward.std().item(),
+            'upper_action_batch_mean': action.mean().item(),
+            'upper_action_batch_std': action.std().item(),
         }
 
     def save(self, path):

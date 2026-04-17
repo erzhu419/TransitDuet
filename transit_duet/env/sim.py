@@ -143,6 +143,23 @@ class env_bus(object):
         self.routes = self.set_routes()
         self.timetables = self.set_timetables()
 
+        # Episode-level demand stochasticity:
+        # - Per-hour multiplier: uniform(0.7, 1.3) → demand intensity varies
+        # - Peak hour shift: ±30min (0 or 1 hour granularity in OD)
+        # Stored on env so station_update can use it
+        demand_noise = getattr(self, 'demand_noise', 0.0)
+        if demand_noise > 0:
+            # Per-hour demand multipliers (14 hours: 6:00-19:00)
+            self._demand_multipliers = {
+                h: np.clip(np.random.normal(1.0, demand_noise), 0.3, 2.0)
+                for h in range(6, 20)
+            }
+            # Random peak shift: shift peak demand pattern by ±1 hour
+            self._peak_shift = np.random.choice([-1, 0, 0, 0, 1])
+        else:
+            self._demand_multipliers = None
+            self._peak_shift = 0
+
         # initial list of bus on route
         self.bus_id = 0
         self.bus_all = []
@@ -200,15 +217,22 @@ class env_bus(object):
                     # Call upper policy ONCE per trip (when it first becomes eligible)
                     if not hasattr(trip, '_upper_queried') or not trip._upper_queried:
                         s_upper = self._build_upper_state(trip)
-                        target_hw = self._upper_policy_callback(s_upper, trip)
-                        trip.target_headway = float(target_hw)
+                        result = self._upper_policy_callback(s_upper, trip)
+                        trip.target_headway = float(result)
                         trip._upper_queried = True
                         self._compute_dispatch_proxy_reward(trip)
 
-                    # ENFORCE headway: don't launch until gap >= target_headway
-                    actual_gap = self.current_time - self._last_dispatch_time[trip.direction]
-                    if actual_gap < trip.target_headway:
-                        continue  # hold this trip — wait for headway to be met
+                    # v2g mode: if trip has _delta_t, use direct time offset
+                    # (no headway enforcement cascade)
+                    if hasattr(trip, '_delta_t'):
+                        effective_launch = trip._original_launch + trip._delta_t
+                        if self.current_time < effective_launch:
+                            continue  # not yet time to launch (δ_t delay)
+                    else:
+                        # v1 mode: headway enforcement
+                        actual_gap = self.current_time - self._last_dispatch_time[trip.direction]
+                        if actual_gap < trip.target_headway:
+                            continue
 
                 # HARD fleet constraint: don't launch if at capacity
                 n_fleet = getattr(self, '_n_fleet_target', 25)
@@ -216,8 +240,9 @@ class env_bus(object):
                 if concurrent >= n_fleet:
                     continue  # hold trip — fleet at capacity
 
-                # Launch (either no upper callback, or headway + fleet conditions met)
+                # Launch
                 trip.launched = True
+                trip._actual_launch_time = self.current_time  # v2g: record real launch
                 self.launch_bus(trip)
                 self._last_dispatch_time[trip.direction] = self.current_time
         # route
@@ -232,7 +257,9 @@ class env_bus(object):
         # station_state = []
         if self.current_time % self.passenger_update_freq == 0:
             for station in self.stations:
-                station.station_update(self.current_time, self.stations, self.passenger_update_freq)
+                station.station_update(self.current_time, self.stations, self.passenger_update_freq,
+                                       demand_multipliers=self._demand_multipliers,
+                                       peak_shift=self._peak_shift)
             # station_state.append(len(station.waiting_passengers))
         # update bus state
         for bus in self.bus_all:
@@ -460,6 +487,103 @@ class env_bus(object):
         if hasattr(self, '_cached_measurement') and self._cached_measurement is not None:
             return self._cached_measurement
         return self._compute_measurement_vector()
+
+    # ---- v2: per-trip holding feedback support ----
+
+    def get_completed_trip_holdings(self):
+        """
+        Collect applied holding actions for all buses that have completed trips
+        (off-route) since last call.
+
+        Returns: dict {trip_id: [action_1, action_2, ...]}
+        """
+        result = {}
+        for bus in self.bus_all:
+            if not bus.on_route and hasattr(bus, 'applied_actions') and bus.applied_actions:
+                # Bus completed its trip; collect actions keyed by trip_id
+                result[bus.trip_id] = list(bus.applied_actions)
+        return result
+
+    def get_direction_holding_stats(self, direction, n_recent=5):
+        """
+        Get holding statistics from recent completed trips in a given direction.
+
+        Returns: dict with rolling_mean, rolling_std (of per-trip mean holdings)
+        """
+        completed = []
+        for bus in self.bus_all:
+            if not bus.on_route and bus.direction == direction:
+                if hasattr(bus, 'applied_actions') and bus.applied_actions:
+                    completed.append({
+                        'trip_id': bus.trip_id,
+                        'mean': float(np.mean(bus.applied_actions)),
+                        'n_stops': len(bus.applied_actions),
+                    })
+        # Sort by trip_id (proxy for time order), take last n_recent
+        completed.sort(key=lambda x: x['trip_id'])
+        recent = completed[-n_recent:] if len(completed) > n_recent else completed
+
+        if not recent:
+            return {'rolling_mean': 0.0, 'rolling_std': 0.0, 'n_trips': 0}
+        means = [c['mean'] for c in recent]
+        return {
+            'rolling_mean': float(np.mean(means)),
+            'rolling_std': float(np.std(means)) if len(means) > 1 else 0.0,
+            'n_trips': len(recent),
+        }
+
+    def _build_upper_state_v2(self, trip):
+        """
+        Build enriched upper state for v2 coupling.
+
+        Returns: np.array of shape (upper_state_dim_v2,)
+            [hour_norm, demand_norm, fleet_norm, gap_to_prev_norm,
+             holding_ratio, holding_mean_same_dir, holding_std_same_dir,
+             holding_mean_other_dir, scheduled_headway_norm, direction]
+        """
+        hour = 6 + self.current_time // 3600
+
+        # Demand
+        effective_period_str = f"{min(int(hour), 19):02}:00:00"
+        total_demand = 0.0
+        for s in self.stations:
+            if s.od is not None:
+                period_data = s.od.get(effective_period_str, {})
+                if isinstance(period_data, dict):
+                    total_demand += sum(period_data.values())
+
+        fleet_on_route = sum(1 for bus in self.bus_all if bus.on_route)
+
+        # Actual headway gap to previous dispatch in same direction
+        actual_gap = self.current_time - self._last_dispatch_time.get(trip.direction, -9999)
+        if actual_gap > 9000:
+            actual_gap = 360.0  # first trip
+
+        # Holding ratio (fraction of active buses currently holding)
+        from env.bus import BusState
+        holding_count = sum(1 for bus in self.bus_all
+                            if bus.on_route and bus.state == BusState.HOLDING)
+        holding_ratio = holding_count / max(fleet_on_route, 1)
+
+        # v2 KEY: holding statistics from recent trips (lower → upper feedback)
+        same_dir_stats = self.get_direction_holding_stats(trip.direction, n_recent=5)
+        other_dir_stats = self.get_direction_holding_stats(not trip.direction, n_recent=5)
+
+        # Scheduled headway from original timetable
+        scheduled_hw = trip.target_headway if hasattr(trip, 'target_headway') else 360.0
+
+        return np.array([
+            hour / 24.0,                                   # [0] time of day
+            total_demand / 1000.0,                         # [1] demand level
+            fleet_on_route / self.max_agent_num,           # [2] fleet utilization
+            actual_gap / 600.0,                            # [3] gap to prev dispatch
+            holding_ratio,                                 # [4] fraction of fleet holding
+            same_dir_stats['rolling_mean'] / 60.0,         # [5] mean holding, same dir
+            same_dir_stats['rolling_std'] / 60.0,          # [6] std holding, same dir
+            other_dir_stats['rolling_mean'] / 60.0,        # [7] mean holding, other dir
+            scheduled_hw / 600.0,                          # [8] base scheduled headway
+            float(trip.direction),                         # [9] direction (0 or 1)
+        ], dtype=np.float32)
 
     def set_timetable_from_planner(self, headway_params):
         """

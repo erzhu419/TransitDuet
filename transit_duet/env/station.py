@@ -48,22 +48,30 @@ class Station(object):
     #                     self.waiting_passengers = np.append(self.waiting_passengers, new_passengers)
     #                     self.total_passenger.extend(new_passengers)
 
-    def station_update(self, current_time, stations, passenger_update_interval=1):
+    def station_update(self, current_time, stations, passenger_update_interval=1,
+                        demand_multipliers=None, peak_shift=0):
         """
-        每秒更新一次，减少不必要的泊松分布计算,GPT优化
+        每秒更新一次，减少不必要的泊松分布计算
+        demand_multipliers: dict {hour: float} episode-level demand noise
+        peak_shift: int, shift OD lookup hour by this amount
         """
-        if self.od is not None:  # 确保存在OD矩阵
-            effective_period_str = f"{6 + min(current_time // 3600, 13):02}:00:00"  # 每小时的有效时间段
-            period_od = self.od[effective_period_str]  # 获取该时间段的OD需求
+        if self.od is not None:
+            hour = 6 + min(current_time // 3600, 13)
+            # Apply peak shift: look up demand from shifted hour
+            lookup_hour = max(6, min(19, hour + peak_shift))
+            effective_period_str = f"{lookup_hour:02}:00:00"
+            period_od = self.od[effective_period_str]
 
-            # 计算每秒的平均需求
+            # Episode-level demand multiplier
+            demand_mult = 1.0
+            if demand_multipliers is not None and hour in demand_multipliers:
+                demand_mult = demand_multipliers[hour]
+
             for destination_name, demand in period_od.items():
                 if demand > 0:
-                    # 计算每秒的平均需求量
-                    demand_per_second = demand / 3600.0  # 每秒的需求量
+                    demand_per_second = demand * demand_mult / 3600.0
 
-                    # 用每秒的需求量进行泊松分布采样
-                    destination_demand_num = np.random.poisson(demand_per_second * passenger_update_interval)  # 乘以时间段s
+                    destination_demand_num = np.random.poisson(demand_per_second * passenger_update_interval)
 
                     if destination_demand_num > 0:
                         destination = next(

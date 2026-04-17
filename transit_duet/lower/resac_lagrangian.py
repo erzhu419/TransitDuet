@@ -229,16 +229,20 @@ class RESACLagrangianTrainer:
         # ──── Ensemble Critic update ────
         with torch.no_grad():
             next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
-            # Independent targets per ensemble member (NOT min)
             target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
-            target_q_all = target_q_all - self.alpha * next_log_prob.squeeze(-1)  # [K, B]
-            # reward is [B, 1], done is [B, 1] → squeeze for broadcast
+            # Use ensemble MEAN for shared target → prevents member divergence
+            target_q_mean = target_q_all.mean(dim=0)  # [B]
+            target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)  # [B]
             r = reward.squeeze(-1)   # [B]
             d = done.squeeze(-1)     # [B]
-            target_value = r.unsqueeze(0) + (1.0 - d.unsqueeze(0)) * self.gamma * target_q_all  # [K, B]
+            # Shared target broadcast to all K members
+            shared_target = r + (1.0 - d) * self.gamma * target_q_mean  # [B]
+            # Clamp target to prevent runaway values
+            shared_target = shared_target.clamp(-100.0, 100.0)
 
         predicted_q = self.q_net(state, action)  # [K, B]
-        # MSE loss per ensemble member, averaged
+        target_value = shared_target.unsqueeze(0).expand(
+            predicted_q.shape[0], -1)  # [K, B]
         q_mse_loss = F.mse_loss(predicted_q, target_value)
 
         # OOD regularization: penalize cross-ensemble disagreement
@@ -251,7 +255,7 @@ class RESACLagrangianTrainer:
 
         self.q_optimizer.zero_grad()
         q_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 1.0)
+        q_grad_norm = torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 50.0)
         self.q_optimizer.step()
 
         # ──── Cost critic update ────
@@ -259,13 +263,14 @@ class RESACLagrangianTrainer:
             next_action_c, _, _, _, _ = self.policy_net.evaluate(next_state)
             target_cost_q = self.target_cost_q_net(next_state, next_action_c)
             target_cost_value = cost + (1.0 - done) * self.gamma * target_cost_q
+            target_cost_value = target_cost_value.clamp(0.0, 50.0)  # cost is non-negative
 
         cost_q = self.cost_q_net(state, action)
         cost_q_loss = F.mse_loss(cost_q, target_cost_value)
 
         self.cost_q_optimizer.zero_grad()
         cost_q_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.cost_q_net.parameters(), 1.0)
+        cq_grad_norm = torch.nn.utils.clip_grad_norm_(self.cost_q_net.parameters(), 50.0)
         self.cost_q_optimizer.step()
 
         # ──── Policy update ────
@@ -274,6 +279,12 @@ class RESACLagrangianTrainer:
             'q_mse': q_mse_loss.item(),
             'ood_loss': ood_loss.item(),
             'cost_q_loss': cost_q_loss.item(),
+            'q_grad_norm': q_grad_norm.item() if isinstance(q_grad_norm, torch.Tensor) else float(q_grad_norm),
+            'cq_grad_norm': cq_grad_norm.item() if isinstance(cq_grad_norm, torch.Tensor) else float(cq_grad_norm),
+            'reward_batch_mean': reward.mean().item(),
+            'reward_batch_std': reward.std().item(),
+            'action_batch_mean': action.mean().item(),
+            'action_batch_std': action.std().item(),
         }
 
         if update_policy:
@@ -296,7 +307,7 @@ class RESACLagrangianTrainer:
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1.0)
+            pi_grad_norm = torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 5.0)
             self.policy_optimizer.step()
 
             # ──── Alpha update ────
@@ -309,12 +320,14 @@ class RESACLagrangianTrainer:
                 self.alpha = min(self.log_alpha.exp().item(), self.maximum_alpha)
 
             # ──── Lambda update ────
+            # Use batch cost mean (robust) instead of cost Q prediction
+            batch_cost_mean = cost.mean().detach()
             lambda_loss = -self.log_lambda.exp() * (
-                self.cost_limit - cost_q_new.mean().detach())
+                self.cost_limit - batch_cost_mean)
             self.lambda_optimizer.zero_grad()
             lambda_loss.backward()
             self.lambda_optimizer.step()
-            self.log_lambda.data.clamp_(min=-10.0, max=5.0)
+            self.log_lambda.data.clamp_(min=-5.0, max=1.5)  # λ ∈ [e^-5, e^1.5] ≈ [0.007, 4.5]
 
             metrics.update({
                 'policy_loss': policy_loss.item(),
@@ -323,6 +336,8 @@ class RESACLagrangianTrainer:
                 'q_mean': q_mean.mean().item(),
                 'q_std': q_std.mean().item(),
                 'cost_q_mean': cost_q_new.mean().item(),
+                'batch_cost_mean': batch_cost_mean.item(),
+                'pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
             })
 
         # ──── Soft target update ────
