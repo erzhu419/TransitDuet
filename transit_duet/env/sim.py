@@ -234,11 +234,13 @@ class env_bus(object):
                         if actual_gap < trip.target_headway:
                             continue
 
-                # HARD fleet constraint: don't launch if at capacity
+                # Soft fleet constraint: buffer of 3 over target allows overshoot
+                # but hard cap prevents unbounded fleet growth
                 n_fleet = getattr(self, '_n_fleet_target', 25)
+                buffer = getattr(self, '_fleet_buffer', 3)
                 concurrent = sum(1 for bus in self.bus_all if bus.on_route)
-                if concurrent >= n_fleet:
-                    continue  # hold trip — fleet at capacity
+                if concurrent >= n_fleet + buffer:
+                    continue  # hard cap — only prevents catastrophic overshoot
 
                 # Launch
                 trip.launched = True

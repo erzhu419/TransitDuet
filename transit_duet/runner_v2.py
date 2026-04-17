@@ -97,6 +97,8 @@ class DiagnosticLog:
         'theta_wait', 'theta_fleet', 'theta_cv',
         # CS-BAPR belief
         'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
+        # v2j belief-weighted MORL
+        'w_wait', 'w_fleet', 'w_cv',
     ]
 
     def __init__(self, log_dir):
@@ -221,13 +223,72 @@ class TransitDuetV2Runner:
     @staticmethod
     def compute_system_reward(z, N_fleet=12):
         """
-        System-level reward from measurement vector (same scale as CMA-ES).
-        z = [avg_wait_min, peak_fleet, headway_cv]
+        Default scalar system reward (fallback, unused when belief-weighted).
         """
         wait_penalty = -z[0] / 10.0
         fleet_penalty = -max(0, z[1] - N_fleet) ** 2 / N_fleet
         cv_penalty = -z[2]
         return wait_penalty + fleet_penalty + cv_penalty
+
+    def compute_belief_weighted_reward(self, z, N_fleet=12):
+        """
+        BAMOR-style multi-objective scalarization with belief-aware weights.
+
+        Three objective penalties (all negative, higher=better):
+          p_wait  = -wait / 10
+          p_fleet = -(fleet - N_fleet)² / N_fleet  (only counts overshoot)
+          p_cv    = -cv
+
+        Weighting policy:
+          Base weights w_base from θ-OGD (long-term adaptation over episodes)
+          Belief modulation (short-term shift detection):
+            - cp_prob high → changepoint detected → boost fleet weight (safety)
+            - window long → stable → shift weight to wait/cv (quality)
+
+        Returns: scalar reward + weight dict for logging
+        """
+        wait_p = -z[0] / 10.0
+        fleet_p = -max(0, z[1] - N_fleet) ** 2 / N_fleet
+        cv_p = -z[2]
+
+        # Base weights from θ-OGD (long-term adaptation, already in [0,1] sum=1)
+        base_w = self.measurement_proj.get_reward_weights()  # [w_wait, w_fleet, w_cv]
+
+        # Belief modulation
+        cp_prob = self.belief_tracker.changepoint_prob
+        window = self.belief_tracker.effective_window
+
+        # Crisis modulation: if changepoint detected, boost fleet safety
+        if cp_prob > 0.1:
+            # Shift up to 30% mass toward fleet term
+            crisis_strength = min(1.0, (cp_prob - 0.1) / 0.2)
+            boost = 0.3 * crisis_strength
+            adj_w = base_w.copy()
+            # Take mass from wait+cv, add to fleet
+            adj_w[0] *= (1 - boost)
+            adj_w[2] *= (1 - boost)
+            adj_w[1] += boost * (base_w[0] + base_w[2])
+        # Stable modulation: if very stable, shift toward quality
+        elif window > 15:
+            stability = min(1.0, (window - 15) / 5)
+            shift = 0.15 * stability
+            adj_w = base_w.copy()
+            # Take from fleet (already safe), add to quality
+            adj_w[1] *= (1 - shift)
+            adj_w[0] += shift * base_w[1] * 0.6
+            adj_w[2] += shift * base_w[1] * 0.4
+        else:
+            adj_w = base_w
+
+        # Normalize
+        adj_w = adj_w / max(adj_w.sum(), 1e-6)
+
+        # Scalarize with M=3 dimensions
+        r = adj_w[0] * wait_p + adj_w[1] * fleet_p + adj_w[2] * cv_p
+        # Rescale to match old magnitude (old reward range ≈ [-2, 0])
+        r = r * 3.0
+
+        return float(r), adj_w
 
     def _upper_callback_v2(self, s_upper_v1, trip):
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
@@ -382,7 +443,9 @@ class TransitDuetV2Runner:
         #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
         z = self.env.measurement_vector
         N_fleet = self.cfg['upper']['N_fleet']
-        sys_r = self.compute_system_reward(z, N_fleet)
+        # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
+        sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
+        self._last_adj_weights = adj_w
 
         # Compute per-trip gap deviation using ACTUAL launch times from env
         trip_gap_devs = {}
@@ -584,6 +647,10 @@ class TransitDuetV2Runner:
             'belief_window': round(self.belief_tracker.effective_window, 2),
             'belief_cp_prob': round(self.belief_tracker.changepoint_prob, 4),
             'belief_entropy': round(self.belief_tracker.entropy, 3),
+            # v2j: belief-weighted MORL weights
+            'w_wait': round(float(self._last_adj_weights[0]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            'w_fleet': round(float(self._last_adj_weights[1]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            'w_cv': round(float(self._last_adj_weights[2]), 3) if hasattr(self, '_last_adj_weights') else 0.,
         }
         self.diag.append(row)
 
