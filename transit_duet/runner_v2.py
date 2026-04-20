@@ -47,9 +47,34 @@ from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
 
 
+def _deep_merge(base, override):
+    """Recursively merge override dict into base dict."""
+    for k, v in override.items():
+        if k in base and isinstance(base[k], dict) and isinstance(v, dict):
+            _deep_merge(base[k], v)
+        else:
+            base[k] = v
+    return base
+
+
 def load_config(path):
+    """Load YAML config, supporting _extends: <parent_file>."""
     with open(path, 'r') as f:
-        return yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
+    if cfg is None:
+        cfg = {}
+    if '_extends' in cfg:
+        parent_path = cfg.pop('_extends')
+        base_dir = os.path.dirname(os.path.abspath(path))
+        parent_full = os.path.join(base_dir, '..', parent_path) if not os.path.isabs(parent_path) else parent_path
+        if not os.path.exists(parent_full):
+            parent_full = os.path.join(base_dir, parent_path)
+        if not os.path.exists(parent_full):
+            # try relative to script dir
+            parent_full = os.path.join(str(SCRIPT_DIR), parent_path)
+        parent = load_config(parent_full)
+        cfg = _deep_merge(parent, cfg)
+    return cfg
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -99,6 +124,8 @@ class DiagnosticLog:
         'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
         # v2j belief-weighted MORL
         'w_wait', 'w_fleet', 'w_cv',
+        # v2k elastic fleet
+        'N_fleet', 'fleet_overshoot',
     ]
 
     def __init__(self, log_dir):
@@ -144,6 +171,12 @@ class TransitDuetV2Runner:
         # ── Upper policy ──
         upper_cfg = config['upper']
         self.delta_max = upper_cfg.get('delta_max', 120.0)
+        # v2k: elastic fleet — sample N_fleet per episode
+        self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
+        self.fleet_min = upper_cfg.get('fleet_min', 8)
+        self.fleet_max = upper_cfg.get('fleet_max', 16)
+        self.N_fleet_default = upper_cfg['N_fleet']
+        self._current_N_fleet = self.N_fleet_default  # set per-episode in elastic mode
         self.upper_state_dim = upper_cfg.get('state_dim', 10)
 
         self.upper_trainer = RESACUpperTrainer(
@@ -178,6 +211,12 @@ class TransitDuetV2Runner:
 
         # ── Coupling ──
         coupling_cfg = config['coupling']
+        # Ablation flags (for paper experiments)
+        self.ablate_holding_feedback = coupling_cfg.get('ablate_holding_feedback', False)
+        self.ablate_csbapr = coupling_cfg.get('ablate_csbapr', False)
+        self.ablate_hindsight_credit = coupling_cfg.get('ablate_hindsight_credit', False)
+        self.ablate_morl = coupling_cfg.get('ablate_morl', False)
+
         self.holding_feedback = HoldingFeedback(
             window_size=coupling_cfg.get('feedback_window', 10))
         self.measurement_proj = MeasurementProjection(
@@ -213,7 +252,8 @@ class TransitDuetV2Runner:
 
         # Logging
         seed = config.get('seed', 42)
-        self.log_dir = os.path.join(str(SCRIPT_DIR), 'logs', f'v2_seed{seed}')
+        exp_name = config.get('_name', 'v2')
+        self.log_dir = os.path.join(str(SCRIPT_DIR), 'logs', f'{exp_name}_seed{seed}')
         os.makedirs(self.log_dir, exist_ok=True)
         self.history = defaultdict(list)
         self.diag = DiagnosticLog(self.log_dir)
@@ -250,6 +290,12 @@ class TransitDuetV2Runner:
         wait_p = -z[0] / 10.0
         fleet_p = -max(0, z[1] - N_fleet) ** 2 / N_fleet
         cv_p = -z[2]
+
+        # Ablation: fixed equal weights instead of belief-driven
+        if self.ablate_morl:
+            fixed_w = np.array([0.5, 0.25, 0.25])
+            r = fixed_w[0] * wait_p + fixed_w[1] * fleet_p + fixed_w[2] * cv_p
+            return float(r * 3.0), fixed_w
 
         # Base weights from θ-OGD (long-term adaptation, already in [0,1] sum=1)
         base_w = self.measurement_proj.get_reward_weights()  # [w_wait, w_fleet, w_cv]
@@ -294,6 +340,9 @@ class TransitDuetV2Runner:
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
         Reward is backfilled at episode end via hindsight credit assignment."""
         s_upper = self.env._build_upper_state_v2(trip)
+        if self.ablate_holding_feedback:
+            # Zero out holding feedback state dims [5,6,7]
+            s_upper[5:8] = 0.0
 
         delta_t = self.upper_trainer.policy_net.get_action(
             s_upper, deterministic=False)
@@ -351,7 +400,7 @@ class TransitDuetV2Runner:
 
     # ────────────────── Episode ──────────────────
 
-    def run_episode(self, ep, training=True):
+    def run_episode(self, ep, training=True, N_fleet_override=None):
         t0 = time.time()
         self.env.reset()
         self.holding_feedback.clear()
@@ -364,6 +413,16 @@ class TransitDuetV2Runner:
         self._ep_upper_rewards = []
         self._ep_trip_records = []
         self._ep_dispatch_times = {'up': [], 'down': []}
+
+        # v2k: elastic fleet sampling per-episode
+        if N_fleet_override is not None:
+            self._current_N_fleet = int(N_fleet_override)
+        elif self.fleet_mode == 'elastic' and training:
+            self._current_N_fleet = int(np.random.randint(
+                self.fleet_min, self.fleet_max + 1))
+        else:
+            self._current_N_fleet = self.N_fleet_default
+        self.env._n_fleet_target = self._current_N_fleet
 
         upper_active = ep >= self.upper_warmup and training
         self.env._upper_policy_callback = (
@@ -442,7 +501,7 @@ class TransitDuetV2Runner:
         # New: credit based on dispatch gap uniformity → directly causal
         #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
         z = self.env.measurement_vector
-        N_fleet = self.cfg['upper']['N_fleet']
+        N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
         # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
         sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
         self._last_adj_weights = adj_w
@@ -487,11 +546,13 @@ class TransitDuetV2Runner:
         backfilled = []
         for trans in self._episode_upper_transitions:
             tid = trans['tid']
-            gap_dev = trip_gap_devs.get(tid, dev_mean)
-            # Negative credit for high gap deviation (uneven dispatch)
-            # Positive credit for low gap deviation (uniform dispatch)
-            credit = -(gap_dev - dev_mean) / dev_std * 0.5
-            r = sys_r + credit  # pure system reward + gap-based credit
+            if self.ablate_hindsight_credit:
+                # Ablation: all transitions get same episode reward
+                credit = 0.0
+            else:
+                gap_dev = trip_gap_devs.get(tid, dev_mean)
+                credit = -(gap_dev - dev_mean) / dev_std * 0.5
+            r = sys_r + credit
             backfilled.append(
                 (trans['s'], trans['a'], r, trans['ns'], trans['done']))
             self._ep_upper_rewards.append(r)
@@ -536,7 +597,7 @@ class TransitDuetV2Runner:
             base_alpha, max_boost=self.belief_alpha_boost_max)
         # Temporarily set alpha for this episode's training
         # (auto-entropy will correct it over time, this just gives a nudge)
-        if surprise > 0.5 and upper_active:
+        if not self.ablate_csbapr and surprise > 0.5 and upper_active:
             self.lower_trainer.alpha = min(boosted_alpha,
                                            self.lower_trainer.maximum_alpha)
 
@@ -651,6 +712,9 @@ class TransitDuetV2Runner:
             'w_wait': round(float(self._last_adj_weights[0]), 3) if hasattr(self, '_last_adj_weights') else 0.,
             'w_fleet': round(float(self._last_adj_weights[1]), 3) if hasattr(self, '_last_adj_weights') else 0.,
             'w_cv': round(float(self._last_adj_weights[2]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            # v2k: elastic fleet
+            'N_fleet': self._current_N_fleet,
+            'fleet_overshoot': max(0, int(z[1]) - self._current_N_fleet),
         }
         self.diag.append(row)
 
@@ -800,7 +864,7 @@ class TransitDuetV2Runner:
 
             # ── Compact per-episode line ──
             if ep % 5 == 0 or ep < 5:
-                line = (f"[{ep:3d}] {row['stage']:7s} | "
+                line = (f"[{ep:3d}] {row['stage']:7s} N={row.get('N_fleet',12):2d} | "
                         f"w={row['avg_wait_min']:4.1f} f={row['peak_fleet']:2d} "
                         f"cv={row['headway_cv']:.2f} | "
                         f"Lπ a={row['lower_action_mean']:+5.1f}±{row['lower_action_std']:4.1f} "
@@ -849,12 +913,40 @@ class TransitDuetV2Runner:
             json.dump(results, f)
 
 
+def eval_pareto_frontier(runner, n_eval=10, fleet_values=None):
+    """v2k: Sweep N_fleet values and record (fleet, wait, cv) Pareto points."""
+    if fleet_values is None:
+        fleet_values = list(range(8, 17))
+    results = []
+    for N in fleet_values:
+        waits, cvs, overshoots = [], [], []
+        for i in range(n_eval):
+            row = runner.run_episode(ep=9999, training=False, N_fleet_override=N)
+            waits.append(row['avg_wait_min'])
+            cvs.append(row['headway_cv'])
+            overshoots.append(row.get('fleet_overshoot', 0))
+        results.append({
+            'N_fleet': N,
+            'wait_mean': float(np.mean(waits)),
+            'wait_std': float(np.std(waits)),
+            'cv_mean': float(np.mean(cvs)),
+            'cv_std': float(np.std(cvs)),
+            'overshoot_mean': float(np.mean(overshoots)),
+        })
+        print(f"  N_fleet={N:2d}: wait={np.mean(waits):4.1f}±{np.std(waits):.1f}m  "
+              f"cv={np.mean(cvs):.2f}  overshoot={np.mean(overshoots):.1f}")
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser(description='TransitDuet v2')
     parser.add_argument('--config', type=str, default='config_v2.yaml')
     parser.add_argument('--episodes', type=int, default=300)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--gpu', action='store_true')
+    parser.add_argument('--eval_pareto', action='store_true',
+                        help='After training, evaluate Pareto frontier over N_fleet ∈ [8,16]')
+    parser.add_argument('--n_eval', type=int, default=5, help='eps per N_fleet for eval')
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -870,6 +962,15 @@ def main():
 
     runner = TransitDuetV2Runner(config, device=device)
     runner.train(total_episodes=args.episodes)
+
+    if args.eval_pareto:
+        print("\n" + "="*80)
+        print("  PARETO FRONTIER EVALUATION")
+        print("="*80)
+        results = eval_pareto_frontier(runner, n_eval=args.n_eval)
+        with open(os.path.join(runner.log_dir, 'pareto_frontier.json'), 'w') as f:
+            json.dump(results, f, indent=2)
+        print(f"\nSaved to {runner.log_dir}/pareto_frontier.json")
 
 
 if __name__ == '__main__':

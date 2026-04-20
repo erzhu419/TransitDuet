@@ -10,13 +10,16 @@ env:
   effective_trip_num: 264
 
 upper:
-  state_dim: 10                 # v2: enriched with holding feedback stats
+  state_dim: 11                 # v2k: +1 for N_fleet budget
   action_dim: 1                 # v2: single δ_t per dispatch
   delta_max: 120.0              # max departure shift (seconds)
   hidden_dim: 64
   lr: 0.0003
   gamma: 0.95
-  N_fleet: 12
+  N_fleet: 12                   # default when fleet_mode=fixed
+  fleet_mode: elastic           # 'fixed' or 'elastic'
+  fleet_min: 8                  # min N_fleet for elastic sampling
+  fleet_max: 16                 # max N_fleet for elastic sampling
   ensemble_size: 10
   resac_beta: -2.0
   maximum_alpha: 0.05             # low: 1D action needs less entropy

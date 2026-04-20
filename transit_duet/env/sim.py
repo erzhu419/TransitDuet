@@ -574,6 +574,9 @@ class env_bus(object):
         # Scheduled headway from original timetable
         scheduled_hw = trip.target_headway if hasattr(trip, 'target_headway') else 360.0
 
+        # v2k: include current fleet budget in state (for Pareto-aware policy)
+        n_fleet_norm = getattr(self, '_n_fleet_target', 12) / 20.0
+
         return np.array([
             hour / 24.0,                                   # [0] time of day
             total_demand / 1000.0,                         # [1] demand level
@@ -585,6 +588,7 @@ class env_bus(object):
             other_dir_stats['rolling_mean'] / 60.0,        # [7] mean holding, other dir
             scheduled_hw / 600.0,                          # [8] base scheduled headway
             float(trip.direction),                         # [9] direction (0 or 1)
+            n_fleet_norm,                                  # [10] v2k: fleet budget
         ], dtype=np.float32)
 
     def set_timetable_from_planner(self, headway_params):
