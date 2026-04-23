@@ -160,7 +160,7 @@ def run_job(job, gpu_id=None):
             result = subprocess.run(
                 job['cmd'], stdout=f, stderr=subprocess.STDOUT,
                 env=env, cwd=str(PROJECT_DIR),
-                timeout=3600 * 2)  # 2h timeout
+                timeout=3600 * 24)  # 24h timeout (A_full can be slow under contention)
         status = 'ok' if result.returncode == 0 else f'fail({result.returncode})'
     except subprocess.TimeoutExpired:
         status = 'timeout'

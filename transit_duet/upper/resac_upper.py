@@ -108,6 +108,7 @@ class BoundedGaussianPolicy(nn.Module):
             state = torch.from_numpy(state).float()
         if state.dim() == 1:
             state = state.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
         with torch.no_grad():
             mean, log_std = self.forward(state)
             if deterministic:

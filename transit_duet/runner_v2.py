@@ -128,13 +128,14 @@ class DiagnosticLog:
         'N_fleet', 'fleet_overshoot',
     ]
 
-    def __init__(self, log_dir):
+    def __init__(self, log_dir, resume=False):
         self.csv_path = os.path.join(log_dir, 'diagnostics.csv')
         self.json_path = os.path.join(log_dir, 'diagnostics.json')
         self._rows = []
-        # Write CSV header
-        with open(self.csv_path, 'w', newline='') as f:
-            csv.writer(f).writerow(self.HEADER)
+        # Write CSV header only if not resuming or CSV missing
+        if not (resume and os.path.exists(self.csv_path)):
+            with open(self.csv_path, 'w', newline='') as f:
+                csv.writer(f).writerow(self.HEADER)
 
     def append(self, row_dict):
         """Append one episode row. Missing keys default to 0."""
@@ -256,7 +257,8 @@ class TransitDuetV2Runner:
         self.log_dir = os.path.join(str(SCRIPT_DIR), 'logs', f'{exp_name}_seed{seed}')
         os.makedirs(self.log_dir, exist_ok=True)
         self.history = defaultdict(list)
-        self.diag = DiagnosticLog(self.log_dir)
+        self.resume_from_ep = 0  # set by maybe_resume() before train()
+        self.diag = None  # created after resume decision in train()
 
     # ────────────────── Upper callback ──────────────────
 
@@ -845,9 +847,38 @@ class TransitDuetV2Runner:
 
     # ────────────────── Train loop ──────────────────
 
+    def maybe_resume(self):
+        """Scan checkpoints/ for latest ep; if found, load networks and set resume_from_ep.
+        Returns the ep to start from (0 if no resume, last_ep+1 otherwise).
+        """
+        ckpt_dir = os.path.join(self.log_dir, 'checkpoints')
+        if not os.path.isdir(ckpt_dir):
+            return 0
+        import re
+        eps = []
+        for fn in os.listdir(ckpt_dir):
+            m = re.match(r'lower_ep(\d+)\.pt$', fn)
+            if m and os.path.exists(os.path.join(ckpt_dir, f'upper_ep{m.group(1)}.pt')):
+                eps.append(int(m.group(1)))
+        if not eps:
+            return 0
+        last_ep = max(eps)
+        try:
+            self.lower_trainer.load(os.path.join(ckpt_dir, f'lower_ep{last_ep}.pt'))
+            self.upper_trainer.load(os.path.join(ckpt_dir, f'upper_ep{last_ep}.pt'))
+        except Exception as e:
+            print(f"  [Resume] Failed to load ep{last_ep} checkpoint: {e}. Starting fresh.")
+            return 0
+        self.resume_from_ep = last_ep + 1
+        print(f"  [Resume] Loaded checkpoint ep{last_ep}. Resuming from ep{self.resume_from_ep}.")
+        return self.resume_from_ep
+
     def train(self, total_episodes=300):
         diag_freq = self.cfg.get('training', {}).get('diag_freq', 10)
         trip_dump_freq = self.cfg.get('training', {}).get('trip_dump_freq', 25)
+        # Init diag now (after resume decision so CSV header handled correctly)
+        if self.diag is None:
+            self.diag = DiagnosticLog(self.log_dir, resume=(self.resume_from_ep > 0))
 
         print(f"TransitDuet v2 | eps={total_episodes} | warmup={self.upper_warmup} | "
               f"δ∈[-{self.delta_max},+{self.delta_max}] | α_hold={self.alpha_holding} | "
@@ -859,7 +890,7 @@ class TransitDuetV2Runner:
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
 
-        for ep in range(total_episodes):
+        for ep in range(self.resume_from_ep, total_episodes):
             row = self.run_episode(ep, training=True)
 
             # ── Compact per-episode line ──
@@ -947,6 +978,10 @@ def main():
     parser.add_argument('--eval_pareto', action='store_true',
                         help='After training, evaluate Pareto frontier over N_fleet ∈ [8,16]')
     parser.add_argument('--n_eval', type=int, default=5, help='eps per N_fleet for eval')
+    parser.add_argument('--resume', dest='resume', action='store_true', default=True,
+                        help='Resume from latest checkpoint if found (default: on)')
+    parser.add_argument('--no-resume', dest='resume', action='store_false',
+                        help='Start from scratch even if checkpoints exist')
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -961,6 +996,8 @@ def main():
         device = 'cuda:0'
 
     runner = TransitDuetV2Runner(config, device=device)
+    if args.resume:
+        runner.maybe_resume()
     runner.train(total_episodes=args.episodes)
 
     if args.eval_pareto:
