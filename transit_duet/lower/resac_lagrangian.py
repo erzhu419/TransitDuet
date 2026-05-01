@@ -206,8 +206,14 @@ class RESACLagrangianTrainer:
         return self.log_lambda.exp().item()
 
     def update(self, replay_buffer, batch_size, reward_scale=10.0,
-               update_policy=True, tap_signal=None):
-        """One gradient step for ensemble critic, policy, cost critic, and lambda."""
+               update_policy=True, tap_signal=None, weight_fn=None):
+        """One gradient step for ensemble critic, policy, cost critic, and lambda.
+
+        Args:
+            weight_fn: optional callable(trip_ids: np.ndarray) -> np.ndarray of shape [B]
+                       returning per-sample IS weights for TPC-Lower. Weights should
+                       already be clipped + normalised (mean ≈ 1).
+        """
         state, action, reward, cost, next_state, done, trip_ids = \
             replay_buffer.sample(batch_size)
 
@@ -217,6 +223,15 @@ class RESACLagrangianTrainer:
         cost = torch.FloatTensor(cost).to(self.device)
         next_state = torch.FloatTensor(next_state).to(self.device)
         done = torch.FloatTensor(done).to(self.device)
+
+        # TPC-Lower: per-sample IS weights for lower SAC losses
+        if weight_fn is not None:
+            w_np = weight_fn(trip_ids)
+            w = torch.FloatTensor(w_np).to(self.device)  # [B]
+            ess = float((w.sum() ** 2) / ((w ** 2).sum() + 1e-8))
+        else:
+            w = torch.ones(state.shape[0], device=self.device)
+            ess = float(state.shape[0])
 
         # TAP bonus
         if tap_signal is not None:
@@ -243,7 +258,9 @@ class RESACLagrangianTrainer:
         predicted_q = self.q_net(state, action)  # [K, B]
         target_value = shared_target.unsqueeze(0).expand(
             predicted_q.shape[0], -1)  # [K, B]
-        q_mse_loss = F.mse_loss(predicted_q, target_value)
+        # Weighted Q MSE (per-sample IS weights w broadcast across ensemble axis)
+        sq_err = (predicted_q - target_value).pow(2)            # [K, B]
+        q_mse_loss = (sq_err * w.unsqueeze(0)).mean()
 
         # OOD regularization: penalize cross-ensemble disagreement
         ood_loss = predicted_q.std(dim=0).mean()
@@ -266,7 +283,9 @@ class RESACLagrangianTrainer:
             target_cost_value = target_cost_value.clamp(0.0, 50.0)  # cost is non-negative
 
         cost_q = self.cost_q_net(state, action)
-        cost_q_loss = F.mse_loss(cost_q, target_cost_value)
+        # Weighted cost-critic MSE
+        cost_sq_err = (cost_q - target_cost_value).pow(2)
+        cost_q_loss = (cost_sq_err * w.view(-1, 1)).mean()
 
         self.cost_q_optimizer.zero_grad()
         cost_q_loss.backward()
@@ -301,9 +320,11 @@ class RESACLagrangianTrainer:
             cost_q_new = self.cost_q_net(state, new_action)
             lam = self.log_lambda.exp().detach()
 
-            policy_loss = (self.alpha * log_prob.squeeze(-1)
-                           - q_lcb
-                           + lam * cost_q_new.squeeze(-1)).mean()
+            # Weighted policy loss (TPC: emphasize transitions consistent with EMA upper)
+            policy_terms = (self.alpha * log_prob.squeeze(-1)
+                            - q_lcb
+                            + lam * cost_q_new.squeeze(-1))
+            policy_loss = (policy_terms * w).mean()
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -320,10 +341,14 @@ class RESACLagrangianTrainer:
                 self.alpha = min(self.log_alpha.exp().item(), self.maximum_alpha)
 
             # ──── Lambda update ────
-            # Use batch cost mean (robust) instead of cost Q prediction
+            # Constraint:  E[cost] <= cost_limit. Standard primal-dual SGD form:
+            #   loss = - λ · (cost - cost_limit)
+            # so that ∂loss/∂(log λ) = -λ·(cost - clim);  Adam minimisation gives
+            # log λ ← log λ + lr·λ·(cost - clim), i.e. λ INCREASES when violated
+            # and DECREASES when slack. (The previous form had this sign reversed.)
             batch_cost_mean = cost.mean().detach()
             lambda_loss = -self.log_lambda.exp() * (
-                self.cost_limit - batch_cost_mean)
+                batch_cost_mean - self.cost_limit)
             self.lambda_optimizer.zero_grad()
             lambda_loss.backward()
             self.lambda_optimizer.step()
@@ -338,6 +363,7 @@ class RESACLagrangianTrainer:
                 'cost_q_mean': cost_q_new.mean().item(),
                 'batch_cost_mean': batch_cost_mean.item(),
                 'pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
+                'tpc_ess': ess,
             })
 
         # ──── Soft target update ────

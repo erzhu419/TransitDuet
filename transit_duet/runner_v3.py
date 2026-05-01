@@ -154,6 +154,47 @@ class DiagnosticLog:
 #  Runner
 # ═══════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════
+#  v3 helpers: PIPER-style reachability classifier
+# ═══════════════════════════════════════════════════════════════
+
+class ReachabilityMLP(torch.nn.Module):
+    """Small MLP that maps (s_upper, δ_t, hold_summary) → P(plan reachable) ∈ [0,1].
+
+    Used by HAAR-mode coupling as a gate on the per-trip advantage signal
+    injected into lower-level rewards. Trained with binary cross-entropy
+    against post-hoc labels: 1[|gap_dev_i| < threshold].
+    """
+
+    def __init__(self, state_dim, hidden_dim=32):
+        super().__init__()
+        # input = state_dim (upper state) + 1 (δ_t) + 1 (avg hold) + 1 (hold std) = state_dim + 3
+        in_dim = state_dim + 3
+        self.fc = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, 1),
+        )
+
+    def forward(self, x):
+        return torch.sigmoid(self.fc(x)).squeeze(-1)
+
+
+def _reach_features(s_upper, delta_t, hold_mean, hold_std):
+    """Concat upper state with the action and lower-feedback summary."""
+    feats = list(s_upper)
+    feats.append(delta_t / 120.0)        # normalised δ
+    feats.append(hold_mean / 60.0)
+    feats.append(hold_std / 60.0)
+    return np.array(feats, dtype=np.float32)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Runner
+# ═══════════════════════════════════════════════════════════════
+
 class TransitDuetV2Runner:
     """v2 training loop: per-trip upper decisions + holding feedback coupling."""
 
@@ -226,6 +267,23 @@ class TransitDuetV2Runner:
             lr=coupling_cfg.get('measurement_lr', 0.01))
         self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
         self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+
+        # ─── v3 cross-level coupling mode ───
+        # 'channels' (default v2 behaviour: HoldFB + hindsight credit, action = launch shift)
+        # 'haar'     (HAAR + PIPER: inject β·clip(A_U,-c,c)·f_k into lower reward via tap_signal)
+        # 'hiro'     (HIRO/SHIRO style: δ_t reinterpreted as target-headway shift, lower's
+        #             Lagrangian cost becomes goal-conditioned; no upper advantage flow)
+        self.coupling_mode = coupling_cfg.get('coupling_mode', 'channels')
+        haar_cfg = coupling_cfg.get('haar', {})
+        self.haar_beta = float(haar_cfg.get('beta', 0.5))
+        self.haar_clip = float(haar_cfg.get('clip', 0.5))
+        self.haar_use_reach_gate = bool(haar_cfg.get('use_reach_gate', True))
+        self.haar_reach_lr = float(haar_cfg.get('reach_lr', 1e-3))
+        self.haar_reach_threshold = float(haar_cfg.get('reach_threshold', 0.5))
+        self.reach_net = None        # lazy-init (depends on state_dim)
+        self.reach_optimizer = None
+        # buffer for reach training: (s_upper, delta, hold_summary, label)
+        self._reach_buffer = []
 
         # ─── TPC-Lower (Target-Policy-Corrected lower SAC) ───
         # Mitigates the "noisy upper contaminates lower" failure mode that loses
@@ -397,6 +455,98 @@ class TransitDuetV2Runner:
             return w
         return fn
 
+    # ─── v3: HAAR / PIPER reachability + advantage helpers ──────────
+
+    def _ensure_reach_net(self):
+        if self.reach_net is None and self.coupling_mode == 'haar' \
+                and self.haar_use_reach_gate:
+            self.reach_net = ReachabilityMLP(self.upper_state_dim).to(self.device)
+            self.reach_optimizer = torch.optim.Adam(
+                self.reach_net.parameters(), lr=self.haar_reach_lr)
+
+    def _compute_upper_advantage(self, s_upper, delta_t):
+        """Estimate A_U(s, a) = Q(s, a) − V(s), with V(s) = Q(s, π(s))."""
+        try:
+            with torch.no_grad():
+                s_t = torch.FloatTensor(s_upper).unsqueeze(0).to(self.device)
+                a_t = torch.FloatTensor([[float(delta_t)]]).to(self.device)
+                q_sa = self.upper_trainer.q_net(s_t, a_t).mean().item()
+                a_pi, _, _, _, _ = self.upper_trainer.policy_net.evaluate(s_t)
+                v_s = self.upper_trainer.q_net(s_t, a_pi).mean().item()
+            return q_sa - v_s
+        except Exception:
+            return 0.0
+
+    def _reachability_score(self, s_upper, delta_t, hold_mean, hold_std):
+        if not self.haar_use_reach_gate or self.reach_net is None:
+            return 1.0
+        try:
+            x = _reach_features(s_upper, delta_t, hold_mean, hold_std)
+            with torch.no_grad():
+                t = torch.FloatTensor(x).unsqueeze(0).to(self.device)
+                f = float(self.reach_net(t).item())
+            return f
+        except Exception:
+            return 1.0
+
+    def _build_haar_tap_signal(self, trip_gap_devs):
+        """HAAR-style per-trip reward bonus: β · clip(A_U, -c, c) · f_k."""
+        self._ensure_reach_net()
+        if not self._episode_upper_transitions:
+            return None
+        tap = {}
+        for trans in self._episode_upper_transitions:
+            tid = int(trans['tid'])
+            s_U = np.asarray(trans['s'], dtype=np.float32)
+            a_U = float(np.asarray(trans['a']).flatten()[0])
+            adv = self._compute_upper_advantage(s_U, a_U)
+            adv_clip = float(np.clip(adv, -self.haar_clip, self.haar_clip))
+            stats = self.holding_feedback.get_trip_stats(tid)
+            hm = float(stats['mean']) if stats else 0.0
+            hs = float(stats['std']) if stats else 0.0
+            f_k = self._reachability_score(s_U, a_U, hm, hs)
+            bonus = self.haar_beta * adv_clip * f_k
+            global_tid = self._current_ep * 1000 + tid
+            tap[global_tid] = float(bonus)
+            # Buffer for reach training (label assigned in _train_reach_classifier)
+            if self.haar_use_reach_gate:
+                self._reach_buffer.append({
+                    'x': _reach_features(s_U, a_U, hm, hs),
+                    'tid': tid,
+                })
+        return tap
+
+    def _train_reach_classifier(self, trip_gap_devs, max_train_size=2048):
+        """Binary cross-entropy on (s_U, δ, hold) → 1[gap_dev < threshold]."""
+        if not self._reach_buffer:
+            return
+        # Assign labels to recent buffer entries using current-episode gap_devs
+        for entry in self._reach_buffer:
+            if 'label' in entry:
+                continue
+            dev = trip_gap_devs.get(entry['tid'], None)
+            if dev is None:
+                entry['label'] = 1.0  # treat unobserved as reachable (skip)
+            else:
+                entry['label'] = 1.0 if dev < self.haar_reach_threshold else 0.0
+        # Trim buffer to keep memory bounded
+        if len(self._reach_buffer) > max_train_size:
+            self._reach_buffer = self._reach_buffer[-max_train_size:]
+        # One small gradient step per episode on a sampled batch
+        bs = min(len(self._reach_buffer), 128)
+        if bs < 8:
+            return
+        idx = np.random.choice(len(self._reach_buffer), bs, replace=False)
+        xs = np.stack([self._reach_buffer[i]['x'] for i in idx])
+        ys = np.array([self._reach_buffer[i]['label'] for i in idx], dtype=np.float32)
+        x_t = torch.FloatTensor(xs).to(self.device)
+        y_t = torch.FloatTensor(ys).to(self.device)
+        self.reach_optimizer.zero_grad()
+        p = self.reach_net(x_t)
+        loss = torch.nn.functional.binary_cross_entropy(p.clamp(1e-6, 1 - 1e-6), y_t)
+        loss.backward()
+        self.reach_optimizer.step()
+
     def _upper_callback_v2(self, s_upper_v1, trip):
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
         Reward is backfilled at episode end via hindsight credit assignment."""
@@ -437,11 +587,23 @@ class TransitDuetV2Runner:
                 s_upper, deterministic=False)[0])
         self._ep_upper_deltas.append(delta_t)
 
-        # v2g: δ_t directly sets launch time offset (no headway cascade).
-        # Store on trip object so env.step() uses direct time gating.
+        # Action channel:
+        #   default (channels/haar): δ_t directly shifts launch time, target_headway
+        #                            communicated to lower stays at the baseline value
+        #   hiro mode:               δ_t shifts target_headway only; launch time stays
+        #                            at the baseline schedule. The lower's Lagrangian
+        #                            cost is then on (realised_headway - (H_base + δ_t))^2,
+        #                            i.e. goal-conditioned holding control.
         if not hasattr(trip, '_original_launch'):
             trip._original_launch = trip.launch_time
-        trip._delta_t = int(delta_t)
+        if self.coupling_mode == 'hiro':
+            trip._delta_t = 0  # no launch shift
+            # Override the trip's target_headway so the lower's cost is goal-conditioned
+            base_hw_default = (trip.target_headway
+                               if hasattr(trip, 'target_headway') else 360.0)
+            trip.target_headway = base_hw_default + float(delta_t)
+        else:
+            trip._delta_t = int(delta_t)
 
         # TPC-Lower: store dispatch metadata for IS weight lookup. Use a global
         # trip id (episode * 1000 + local tid) so cross-episode samples in the
@@ -501,7 +663,10 @@ class TransitDuetV2Runner:
             's_hold_std': round(s_upper[6] * 60, 1),
         })
 
-        return base_hw  # return original headway (δ_t already applied to launch_time)
+        # In HIRO mode the target headway has been adjusted to base_hw + δ_t (above);
+        # in default/HAAR mode the base headway is unchanged because δ_t was applied
+        # via launch-time gating instead. Either way, return the trip's current target.
+        return trip.target_headway if hasattr(trip, 'target_headway') else base_hw
 
     # ────────────────── Episode ──────────────────
 
@@ -668,8 +833,10 @@ class TransitDuetV2Runner:
                 gap_dev = trip_gap_devs.get(tid, dev_mean)
                 credit = -(gap_dev - dev_mean) / dev_std * 0.5
             r = sys_r + credit
-            backfilled.append(
-                (trans['s'], trans['a'], r, trans['ns'], trans['done']))
+            backfilled.append({
+                's': trans['s'], 'a': trans['a'], 'r': r,
+                'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
+            })
             self._ep_upper_rewards.append(r)
         self._episode_upper_transitions = backfilled
 
@@ -733,17 +900,31 @@ class TransitDuetV2Runner:
         # Build per-sample IS weight function for lower SAC
         weight_fn = self._build_tpc_weight_fn() if self.tpc_enable else None
 
+        # ─── v3: HAAR/PIPER tap signal for lower reward shaping ───
+        # Each completed trip k gets a per-trip bonus β · clip(A_U(s_k, δ_k), -c, c) · f_k
+        # where A_U is the upper advantage and f_k is the reachability gate.
+        haar_tap_signal = None
+        if self.coupling_mode == 'haar' and upper_active:
+            haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
+
         # Lower
         if training and len(self.replay_buffer) > self.batch_size:
             for _ in range(self.updates_per_episode):
                 lower_m = self.lower_trainer.update(
                     self.replay_buffer, self.batch_size, reward_scale=1.0,
-                    weight_fn=weight_fn)
+                    weight_fn=weight_fn,
+                    tap_signal=haar_tap_signal)
+
+        # Train reachability classifier (HAAR mode only)
+        if (self.coupling_mode == 'haar' and self.haar_use_reach_gate
+                and upper_active and self.reach_net is not None):
+            self._train_reach_classifier(trip_gap_devs)
 
         # Upper
         if upper_active:
-            for (s, a, r, ns, d) in self._episode_upper_transitions:
-                self.upper_trainer.replay_buffer.push(s, a, r, ns, d)
+            for trans in self._episode_upper_transitions:
+                self.upper_trainer.replay_buffer.push(
+                    trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
             if len(self.upper_trainer.replay_buffer) > self.upper_batch_size:
                 for _ in range(self.upper_updates):
                     upper_m = self.upper_trainer.update(self.upper_batch_size)

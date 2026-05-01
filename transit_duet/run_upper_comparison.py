@@ -174,6 +174,18 @@ def main():
     parser.add_argument('--gpu', action='store_true')
     parser.add_argument('--lower_warmup', type=int, default=20,
                         help='Episodes to pretrain lower before upper starts')
+    # v2k-fair: match runner_v2 evaluation conditions so A_full and baselines
+    # train/evaluate under identical environment stochasticity.
+    parser.add_argument('--demand_noise', type=float, default=0.15,
+                        help='Per-hour demand multiplier std (runner_v2 default 0.15)')
+    parser.add_argument('--fleet_mode', choices=['fixed', 'elastic'], default='elastic',
+                        help='Sample N_fleet per episode from [fleet_min,fleet_max] if elastic')
+    parser.add_argument('--fleet_min', type=int, default=8)
+    parser.add_argument('--fleet_max', type=int, default=16)
+    parser.add_argument('--N_fleet', type=int, default=12,
+                        help='N_fleet when fleet_mode=fixed')
+    parser.add_argument('--resume', action='store_true',
+                        help='Resume from latest checkpoint in log_dir if any')
     args = parser.parse_args()
 
     device = 'cuda:0' if args.gpu and torch.cuda.is_available() else 'cpu'
@@ -184,7 +196,8 @@ def main():
     env_path = str(SCRIPT_DIR / 'env')
     env = env_bus(env_path, route_sigma=1.5)
     env.enable_plot = False
-    env._n_fleet_target = 12
+    env._n_fleet_target = args.N_fleet
+    env.demand_noise = args.demand_noise          # fair comparison with runner_v2
     state_dim = env.state_dim
 
     # Lower policy (RE-SAC Lagrangian)
@@ -204,15 +217,51 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
     history = defaultdict(list)
 
+    # ─── Resume from latest checkpoint if requested ───
+    start_ep = 0
+    if args.resume:
+        ckpt_dir = log_dir / 'checkpoints'
+        if ckpt_dir.is_dir():
+            import re as _re
+            avail = sorted(int(m.group(1)) for p in ckpt_dir.glob('lower_ep*.pt')
+                           if (m := _re.match(r'lower_ep(\d+)\.pt$', p.name)))
+            if avail:
+                last_ep = avail[-1]
+                try:
+                    lower.load(str(ckpt_dir / f'lower_ep{last_ep}.pt'))
+                    start_ep = last_ep + 1
+                    print(f"  [Resume] loaded lower_ep{last_ep}.pt; starting from ep {start_ep}")
+                    # Try to resume history.json too
+                    hist_p = log_dir / 'history.json'
+                    if hist_p.exists():
+                        try:
+                            old = json.load(open(hist_p))
+                            for k, v in old.items():
+                                history[k].extend(v[:start_ep])
+                        except Exception as e:
+                            print(f"  [Resume] history.json load skipped: {e}")
+                except Exception as e:
+                    print(f"  [Resume] failed: {e}; starting fresh")
+
     print(f"Upper Comparison: method={args.method}, episodes={args.episodes}, seed={args.seed}")
     print(f"  Lower warmup: {args.lower_warmup} eps, then upper activates")
+    print(f"  Env: demand_noise={args.demand_noise}  fleet_mode={args.fleet_mode}"
+          + (f"  N∈[{args.fleet_min},{args.fleet_max}]" if args.fleet_mode == 'elastic'
+             else f"  N={args.N_fleet}"))
     print("=" * 80)
 
     batch_size = 512
     total_eps = args.lower_warmup + args.episodes
 
-    for ep in range(total_eps):
+    for ep in range(start_ep, total_eps):
         t0 = time.time()
+
+        # v2k-fair: per-episode fleet sampling for apples-to-apples comparison
+        if args.fleet_mode == 'elastic':
+            ep_N_fleet = int(np.random.randint(args.fleet_min, args.fleet_max + 1))
+        else:
+            ep_N_fleet = args.N_fleet
+        env._n_fleet_target = ep_N_fleet
 
         if ep < args.lower_warmup:
             # Stage 1: lower warmup, no upper
@@ -256,7 +305,7 @@ def main():
             if args.method == 'cmaes_rl' and upper.phase == 2:
                 env.reset()
                 env._upper_policy_callback = _cmaes_rl_cb
-                env._n_fleet_target = 12
+                env._n_fleet_target = ep_N_fleet
                 state_dict, reward_dict, _ = env.initialize_state()
                 action_dict_local = {k: None for k in range(env.max_agent_num)}
                 ep_reward_local = 0.0
@@ -302,8 +351,8 @@ def main():
                     env, lower, upper_params, replay_buffer, device,
                     training=True, contextual_policy=contextual_policy)
 
-            # Report reward to upper optimizer
-            sys_reward = compute_system_reward(z)
+            # Report reward to upper optimizer (use episode's actual N_fleet)
+            sys_reward = compute_system_reward(z, N_fleet=ep_N_fleet)
             if args.method == 'resac':
                 s_upper = np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype=np.float32)
                 upper.replay_buffer.push(s_upper, upper_params, sys_reward,
@@ -329,8 +378,9 @@ def main():
         else:
             train_time = 0
 
-        # Log
-        sys_r = compute_system_reward(z)
+        # Log (use per-episode N_fleet so wait/overshoot are directly comparable
+        # with A_full's diagnostics.csv under the same elastic/noisy regime)
+        sys_r = compute_system_reward(z, N_fleet=ep_N_fleet)
         history['avg_reward'].append(avg_r)
         history['sys_reward'].append(sys_r)
         history['avg_wait'].append(float(z[0]))
@@ -338,14 +388,23 @@ def main():
         history['headway_cv'].append(float(z[2]))
         history['upper_params'].append(upper_params.tolist())
         history['lambda'].append(lower.lambda_param)
+        history['N_fleet'].append(ep_N_fleet)
+        history['fleet_overshoot'].append(max(0, float(z[1]) - ep_N_fleet))
 
         if ep % 5 == 0 or ep < 3:
-            print(f"[Ep {ep:3d}] {phase:8s} | "
+            print(f"[Ep {ep:3d}] {phase:8s} N={ep_N_fleet:2d} | "
                   f"R={avg_r:.3f} sys={sys_r:.3f} | "
                   f"w={z[0]:.1f}m f={z[1]:.0f} cv={z[2]:.2f} | "
                   f"H=[{upper_params[0]:.0f},{upper_params[1]:.0f},{upper_params[2]:.0f}] | "
                   f"λ={lower.lambda_param:.2f} | "
                   f"{env_time:.0f}+{train_time:.0f}s")
+
+        # Periodic checkpoint of the lower controller so that downstream eval
+        # can pick a fairer ckpt (same protocol as runner_v2.py / TPC).
+        if (ep + 1) % 50 == 0 or ep == total_eps - 1:
+            ckpt_dir = log_dir / 'checkpoints'
+            ckpt_dir.mkdir(exist_ok=True)
+            lower.save(str(ckpt_dir / f'lower_ep{ep}.pt'))
 
     # Save
     results = {k: [float(x) if not isinstance(x, list) else x

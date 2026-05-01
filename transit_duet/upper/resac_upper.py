@@ -120,6 +120,30 @@ class BoundedGaussianPolicy(nn.Module):
             action = self.action_low + u * self.action_range
         return action.squeeze(0).cpu().numpy()
 
+    def log_prob(self, state, action, epsilon=1e-6):
+        """Compute log-prob of a given action under the current policy.
+        Used by TPC-Lower for importance-weighted lower training."""
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
+        if isinstance(action, np.ndarray):
+            action = torch.from_numpy(action).float()
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        if action.dim() == 1:
+            action = action.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
+        action = action.to(next(self.parameters()).device)
+        with torch.no_grad():
+            mean, log_std = self.forward(state)
+            std = log_std.exp()
+            # Invert sigmoid: u = (action - low) / range, z = log(u/(1-u))
+            u = ((action - self.action_low) / self.action_range).clamp(epsilon, 1.0 - epsilon)
+            z = torch.log(u / (1.0 - u))
+            dist = Normal(mean, std)
+            lp = dist.log_prob(z) - torch.log(u * (1.0 - u) + epsilon)
+            lp = lp.sum(-1)
+        return lp.cpu().numpy().squeeze()
+
 
 class EnsembleQNetwork(nn.Module):
     """Ensemble of K Q-networks (same as lower)."""

@@ -1,9 +1,9 @@
-\section{Hyperparameter Details}
+\section{Hyperparameter details}
 \label{app:hyperparams}
 
 \Cref{tab:hyperparams} lists all hyperparameters used in the experiments. Values correspond to the default configuration; no per-experiment tuning was performed.
 
-\begin{table}[h]
+\begin{table*}[!t]
 \centering
 \caption{Complete hyperparameter specification.}
 \label{tab:hyperparams_full}
@@ -12,23 +12,25 @@
 \toprule
 \textbf{Group} & \textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
 \midrule
-\multirow{3}{*}{Environment}
+\multirow{4}{*}{Environment}
   & \texttt{route\_sigma}        & 1.5    & Log-normal speed noise $\sigma$ \\
-  & \texttt{max\_agent\_num}     & 25     & Maximum concurrent buses \\
+  & \texttt{max\_agent\_num}     & 25     & Hard cap on concurrent buses (env-side, $> \Nfleet^{\max}$) \\
   & \texttt{effective\_trip\_num} & 264   & Total trips per service day \\
+  & \texttt{demand\_noise}        & 0.15  & Per-hour demand multiplier std \\
 \midrule
-\multirow{6}{*}{Upper policy}
+\multirow{8}{*}{Upper policy}
   & \texttt{state\_dim}    & 5              & $[\text{hour},\text{demand},\text{fleet},\text{prev\_hw},\text{unhealthy}]$ \\
-  & \texttt{action\_dim}   & 3              & $[\Hpeak, \Hoff, \Htrans]$ \\
-  & \texttt{action\_low}   & $[180,300,240]$  & Min headway per period (s) \\
-  & \texttt{action\_high}  & $[600,1200,900]$ & Max headway per period (s) \\
+  & \texttt{action\_dim}   & 1              & per-dispatch offset $\delta_t \in [-120, 120]$\,s \\
+  & \texttt{action\_low}   & $-120$         & Min offset (s) \\
+  & \texttt{action\_high}  & $+120$         & Max offset (s) \\
   & \texttt{hidden\_dim}   & 64             & MLP hidden layer width \\
   & \texttt{lr}            & $10^{-4}$      & Policy learning rate (Adam) \\
-  & $\Nfleet$              & 12             & Fleet size hard constraint \\
+  & $\Nfleet^{\min},\Nfleet^{\max}$ & $8, 16$ & Elastic fleet sampling range \\
+  & $\Nfleet$ (default)    & 12             & Soft fleet target (overshoot$^2$ penalty) \\
 \midrule
 \multirow{11}{*}{Lower policy}
   & \texttt{hidden\_dim}     & 32      & MLP hidden layer width \\
-  & \texttt{action\_range}   & 60      & Max holding time (s) \\
+  & \texttt{action\_range}   & 60      & Holding time bound (action $\in [-60, 60]$\,s) \\
   & $\climit$                & 0.15    & Lagrangian cost budget \\
   & \texttt{batch\_size}     & 2048    & Replay buffer mini-batch \\
   & \texttt{lr}              & $10^{-5}$ & Critic + policy learning rate \\
@@ -39,10 +41,13 @@
   & $\alpha_{\max}$          & 0.3     & Maximum entropy temperature \\
   & \texttt{reward\_scale}   & 10      & Reward scaling factor \\
 \midrule
-\multirow{4}{*}{Coupling (TAP)}
-  & $\beta_{\text{warmup}}$   & 50 episodes   & Stage~1: only lower trains \\
-  & $\beta_{\text{ramp}}$     & 100 episodes  & Stage~2: $\beta$ ramps $0 \to \betamax$ \\
-  & $\betamax$                & 0.5           & Maximum cross-advantage weight \\
+\multirow{6}{*}{Coupling}
+  & $e_{\mathrm{warm}}$       & 30 episodes   & Lower-only warmup ($\delta_t = 0$) \\
+  & $\alpha_{\mathrm H}$      & 0.5           & Hindsight-credit weight (Eq.~\ref{eq:hindsight_reward}) \\
+  & TPC $\epsilon$            & 0.25          & Behaviour-mixture exploratory probability \\
+  & TPC $\sigma_{\mathrm{tgt}}$ & 20 s        & Target-mode Gaussian std \\
+  & TPC $w_{\max}$            & 5             & IS-weight clip \\
+  & TPC EMA $\tau$            & 0.005         & Polyak rate of EMA target upper \\
   & $\eta_{\thetavec}$        & 0.01          & ApproPO $\thetavec$-OGD step size \\
 \midrule
 \multirow{3}{*}{Training}
@@ -51,10 +56,10 @@
   & \texttt{replay\_buffer\_size}  & $10^6$  & Replay buffer capacity \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 %% ---------------------------------------------------------------
-\section{Environment Details}
+\section{Environment details}
 \label{app:env}
 
 The simulation models a single bidirectional bus route calibrated from operational data of an urban bus corridor.
@@ -98,7 +103,7 @@ The upper policy controls the dispatch headway---the time gap between consecutiv
 An episode ends when all 264 trips have been launched and every bus has completed its trip (i.e., no bus remains on-route). At this point the measurement vector $\zvec$ (\Cref{eq:measurement}) is computed for the ApproPO $\thetavec$-OGD update.
 
 %% ---------------------------------------------------------------
-\section{Network Architectures}
+\section{Network architectures}
 \label{app:networks}
 
 All networks use ReLU activations and are trained with Adam. Weight initialization follows PyTorch defaults unless otherwise noted.
@@ -137,7 +142,7 @@ Log-std head & $32 \to 1$ & Clamp$[-20, 2]$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-The raw sample $z \sim \mathcal{N}(\mu, \sigma^2)$ is squashed via $a = \tanh(z) \times 60$ to produce a holding time in $[0, 60]$\,s.
+The raw sample $z \sim \mathcal{N}(\mu, \sigma^2)$ is squashed via $a = \tanh(z) \times 60$ to produce a holding action in $[-60, 60]$\,s. Negative values are interpreted as a request for early dispatch (clipped at the bus's earliest feasible time); the deployment-time effective range is $[0, 60]$\,s.
 Log-probabilities include the standard tanh Jacobian correction \citep{haarnoja2018soft}.
 Weights in the output heads are initialized uniformly in $[-3{\times}10^{-3}, 3{\times}10^{-3}]$.
 The same network is shared across all buses (parameter sharing), with bus-specific behavior arising from heterogeneous input states.
@@ -178,83 +183,67 @@ The cost critic is trained with the same target-network mechanism and soft updat
 Its output enters the policy loss through the Lagrangian multiplier $\lambda$: the policy minimizes $\alpha \log \pi - Q + \lambda Q_c$.
 
 %% ---------------------------------------------------------------
-\section{TAP Derivation: From Synchronous to Asynchronous Cross-Advantage}
-\label{app:tap_derivation}
+\section{Cross-level coupling: derivation of the hindsight credit}
+\label{app:coupling_derivation}
 
-This appendix formalizes the connection between the synchronous cross-advantage of \citet{he2024roboduet} and the asynchronous Temporal Advantage Propagation (TAP) used in TransitDuet.
+This appendix details the trip-lifecycle hindsight credit on the upper-level reward (Eq.~\ref{eq:hindsight_reward} in \cref{sec:tap}) and connects it to the synchronous cross-advantage objective of \citet{pan2024roboduet}.
 
-\subsection{Synchronous Cross-Advantage (RoboDuet)}
+\subsection{Synchronous cross-advantage (RoboDuet, background)}
 
-In the synchronous setting of \citet{he2024roboduet}, two agents---an upper-body controller and a lower-body locomotor---act at every time step $t$ on a shared state $s_t$.
-The cross-advantage augmented objectives are:
-\begin{align}
-  \mathcal{L}_{\text{upper}}^{\text{sync}} &= -\mathbb{E}_{t}\bigl[(A_{\mathrm{U}}(s_t, a_t^{\mathrm{U}}) + \beta\, A_{\mathrm{L}}(s_t, a_t^{\mathrm{L}}))\,\nabla\!\log\piU(a_t^{\mathrm{U}} \mid s_t)\bigr], \label{eq:roboduet_upper} \\
-  \mathcal{L}_{\text{lower}}^{\text{sync}} &= -\mathbb{E}_{t}\bigl[(A_{\mathrm{L}}(s_t, a_t^{\mathrm{L}}) + \beta\, A_{\mathrm{U}}(s_t, a_t^{\mathrm{U}}))\,\nabla\!\log\piL(a_t^{\mathrm{L}} \mid s_t)\bigr], \label{eq:roboduet_lower}
-\end{align}
-where $\beta \in [0,1]$ controls coupling strength and both advantages are evaluated at the same state-action pair $(s_t, a_t^{\mathrm{U}}, a_t^{\mathrm{L}})$.
-This formulation is valid because the two policies share a common clock and state space.
-
-\subsection{The Asynchrony Challenge}
-
-In TransitDuet, the upper policy $\piU$ and lower policy $\piL$ operate on different timescales with different state-action spaces.
-Let the upper policy act at dispatch events $\{t_1^{\mathrm{U}}, t_2^{\mathrm{U}}, \ldots, t_N^{\mathrm{U}}\}$, and the lower policy act at station arrivals $\{t_1^{\mathrm{L}}, t_2^{\mathrm{L}}, \ldots, t_M^{\mathrm{L}}\}$, where $M \gg N$.
-These event sets are disjoint in general, and the state spaces differ: $\sU \in \R^5$ versus $\sL \in \R^{8+K}$.
-Thus, there is no single time step at which $\AU$ and $\AL$ are jointly defined on a shared state, and the direct sum in \Cref{eq:roboduet_upper,eq:roboduet_lower} is undefined.
-
-\subsection{Trip-Lifecycle Alignment}
-
-We resolve this by introducing a \emph{trip-lifecycle} alignment.
-Each upper action $a_{\mathrm{U},i}$ at dispatch event $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$.
-During the lifecycle of trip $\tau_i$, the lower policy makes a variable number of holding decisions $\{(s_j^{\mathrm{L}}, a_j^{\mathrm{L}}, r_j^{\mathrm{L}})\}_{j \in \mathcal{J}(i)}$, where $\mathcal{J}(i)$ indexes all lower-level transitions belonging to trip~$i$.
-
-\begin{definition}[Trip-aggregated lower signal]
-For trip $i$, the aggregated lower signal is:
+In the synchronous setting of \citet{pan2024roboduet}, two agents act at every time step $t$ on a shared state $s_t$. The cross-advantage augmented objective is
 \begin{equation}
-  \bar{R}_{\mathrm{L}}^{(i)} = \frac{1}{|\mathcal{J}(i)|} \sum_{j \in \mathcal{J}(i)} r_j^{\mathrm{L}}.
-  \label{eq:trip_agg_lower}
+  \mathcal{L}_{\text{upper}}^{\text{sync}} = -\mathbb{E}_{t}\bigl[(A_{\mathrm{U}}(s_t, a_t^{\mathrm{U}}) + \beta\, A_{\mathrm{L}}(s_t, a_t^{\mathrm{L}}))\,\nabla\!\log\piU(a_t^{\mathrm{U}} \mid s_t)\bigr],
+  \label{eq:roboduet_upper}
 \end{equation}
-\end{definition}
+which is well-defined because both advantages are evaluated at the same shared state-action pair.
 
-\subsection{TAP Augmented Objectives}
+\subsection{The asynchrony challenge}
 
-Using the trip-lifecycle alignment, we define the TAP-augmented objectives:
-\begin{align}
-  \text{Upper:}\quad \tilde{R}_{\mathrm{U}}^{(i)} &= R_{\mathrm{U}}^{(i)} + \beta \,\bar{R}_{\mathrm{L}}^{(i)}, \label{eq:tap_upper} \\
-  \text{Lower:}\quad \tilde{r}_j^{\mathrm{L}} &= r_j^{\mathrm{L}} + \beta \, R_{\mathrm{U}}^{(\text{trip}(j))}, \quad \forall\, j, \label{eq:tap_lower}
-\end{align}
-where $R_{\mathrm{U}}^{(i)}$ is the upper-level reward attributed to trip~$i$ (computed from the measurement vector at episode end), and $\text{trip}(j)$ maps lower transition $j$ to its parent trip.
+In TransitDuet, $\piU$ acts at dispatch events $\{t_1^{\mathrm{U}}, \ldots, t_N^{\mathrm{U}}\}$ while $\piL$ acts at station arrivals $\{t_1^{\mathrm{L}}, \ldots, t_M^{\mathrm{L}}\}$ with $M \gg N$, on disjoint event sets and different state spaces. There is no single time step at which $\AU$ and $\AL$ are jointly defined on a shared state, so the direct sum in Eq.~\eqref{eq:roboduet_upper} is undefined.
 
-\subsection{Reduction to the Synchronous Case}
+\subsection{Trip-lifecycle alignment and the realised gap}
 
-\begin{proposition}
-\label{prop:sync_reduction}
-If both policies share a common clock (i.e., each upper action triggers exactly one lower action at the same time step) and a common state space, then TAP reduces to the synchronous cross-advantage of \citet{he2024roboduet}.
-\end{proposition}
+We resolve this through a \emph{trip-lifecycle} alignment. Each upper action $a_{\mathrm{U},i}$ at dispatch $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$ whose actual launch time is $t_{\mathrm{base},i} + \delta_{t,i}$. The realised inter-dispatch gap is
+\begin{equation}
+  g_i = (t_{\mathrm{base},i+1} + \delta_{t,i+1}) - (t_{\mathrm{base},i} + \delta_{t,i}),
+\end{equation}
+computed per direction so that buses operating on opposite legs do not interleave. The per-direction mean and standard deviation of $\{g_i\}$ define the deviation
+\begin{equation}
+  \Delta_i = \frac{|g_i - \bar{g}|}{\sigma_g}.
+  \label{eq:gap_dev}
+\end{equation}
 
-\begin{proof}
-When $|\mathcal{J}(i)| = 1$ for all trips $i$, the aggregation in \Cref{eq:trip_agg_lower} becomes $\bar{R}_{\mathrm{L}}^{(i)} = r_j^{\mathrm{L}}$ for the unique $j \in \mathcal{J}(i)$.
-The upper augmented return (\Cref{eq:tap_upper}) becomes $\tilde{R}_{\mathrm{U}}^{(i)} = R_{\mathrm{U}}^{(i)} + \beta\, r_j^{\mathrm{L}}$, which is the per-step sum $A_{\mathrm{U}} + \beta\, A_{\mathrm{L}}$ evaluated at the shared time step.
-Similarly, the lower augmentation (\Cref{eq:tap_lower}) reduces to $\tilde{r}_j = r_j^{\mathrm{L}} + \beta\, R_{\mathrm{U}}^{(i)}$, recovering $A_{\mathrm{L}} + \beta\, A_{\mathrm{U}}$.
-When the state spaces further coincide ($\sU = \sL = s_t$), this is exactly \Cref{eq:roboduet_upper,eq:roboduet_lower}.
-\end{proof}
+\subsection{Hindsight-credited upper reward}
 
-\subsection{Policy-Gradient Unbiasedness}
+The upper reward at dispatch $i$ is the sum of the episode-level system reward (a belief-weighted MORL scalarisation of wait, fleet overshoot, and headway CV; Eq.~\ref{eq:morl_reward}) and a per-dispatch hindsight credit derived from $\Delta_i$:
+\begin{equation}
+  R_{\mathrm{U}}^{(i)} = R_{\mathrm{sys}}(\zvec) - \alpha_{\mathrm{H}} \cdot \frac{\Delta_i - \bar{\Delta}}{\sigma_{\Delta}}, \qquad \alpha_{\mathrm{H}} = 0.5.
+  \label{eq:hindsight_reward_app}
+\end{equation}
+The credit is recentred per episode so that dispatches with above-average gap deviation receive a negative credit and dispatches with below-average deviation receive a positive one; the system reward is shared across all dispatches in an episode.
+
+\subsection{Why we did not use literal cross-advantage}
+
+A literal asynchronous extension of Eq.~\eqref{eq:roboduet_upper} would aggregate per-trip lower advantages into the upper objective:
+\begin{equation}
+  \tilde{R}^{\text{lit},(i)}_{\mathrm{U}} = R_{\mathrm{U}}^{(i)} + \beta \cdot \tfrac{1}{|\mathcal{J}(i)|}\sum_{j \in \mathcal{J}(i)} A_{\mathrm{L}}(s_{\mathrm{L},j}, a_{\mathrm{L},j}),
+  \label{eq:cross_adv_literal}
+\end{equation}
+where $\mathcal{J}(i)$ is the set of lower-level transitions during trip~$i$. We tried this in early prototypes and found it unstable. Two diagnostics: (i) the per-step lower advantage and the per-dispatch upper advantage differ in scale by 1--2 orders of magnitude across a trip lifecycle, so a single scalar $\beta$ either suppresses cross-level signal or destabilises lower training; (ii) the lower's advantage estimator uses an LCB-discounted ensemble Q (\cref{sec:lower}), which is a non-linear function of the policy parameters, breaking the simple unbiasedness argument that holds in the synchronous setting. The hindsight-credit formulation in Eq.~\eqref{eq:hindsight_reward_app} is a coarser but markedly more stable alternative: it injects per-trip execution outcome (gap regularity) into upper credit assignment without requiring lower advantage backflow.
+
+\subsection{Policy-gradient unbiasedness}
 
 \begin{proposition}
 \label{prop:unbiased}
-Under the standard assumptions of the policy gradient theorem (ergodicity and differentiability of $\piU$, $\piL$), the TAP-augmented policy gradient for the upper level,
+Under the standard policy-gradient assumptions and conditional on $\piL$ being fixed during one upper update, the REINFORCE estimator using the hindsight-credited reward,
 \begin{equation}
-  g_{\mathrm{U}}^{\text{TAP}} = \frac{1}{N}\sum_{i=1}^{N} \tilde{R}_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i}),
+  g_{\mathrm{U}} = \frac{1}{N}\sum_{i=1}^{N} R_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i}),
 \end{equation}
-is an unbiased estimator of $\nabla_{\piU} J(\piU)$ when $\beta = 0$, and for $\beta > 0$ it is an unbiased estimator of $\nabla_{\piU}[J_{\mathrm{U}}(\piU) + \beta\, J_{\mathrm{cross}}(\piU, \piL)]$, where $J_{\mathrm{cross}}$ is the expected trip-aggregated lower return induced by the upper policy's dispatch decisions.
+is an unbiased estimator of $\nabla_{\piU} J_{\mathrm{credit}}(\piU)$, where $J_{\mathrm{credit}} = \E[\sum_i R_{\mathrm{U}}^{(i)}]$ is the expected sum of hindsight-credited per-dispatch rewards under $\piU$.
 \end{proposition}
 
 \begin{proof}[Proof sketch]
-The term $R_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU$ is the standard REINFORCE estimator for $\nabla J_{\mathrm{U}}$.
-The cross-term $\beta\,\bar{R}_{\mathrm{L}}^{(i)}\,\nabla\!\log\piU$ has the form of a REINFORCE estimator where the ``reward'' for the upper policy at dispatch~$i$ is replaced by $\bar{R}_{\mathrm{L}}^{(i)}$, the average lower reward accumulated during the trip that dispatch~$i$ initiated.
-Conditional on $\piL$ being fixed, $\bar{R}_{\mathrm{L}}^{(i)}$ is a function of the environment trajectory seeded by the upper action $a_{\mathrm{U},i}$, so the REINFORCE identity applies and
-$\E[\bar{R}_{\mathrm{L}}^{(i)}\,\nabla\!\log\piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i})] = \nabla_{\piU}\E[\bar{R}_{\mathrm{L}}^{(i)}]$.
-Linearity of expectation yields the result.
+$R_{\mathrm{U}}^{(i)}$ is a function of the environment trajectory seeded by the upper actions $\{a_{\mathrm{U},i}\}$. Conditional on $\piL$ fixed, the standard REINFORCE identity gives $\E[R_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU] = \nabla_{\piU}\E[R_{\mathrm{U}}^{(i)}]$; linearity of expectation yields the result. The hindsight-credit term in Eq.~\eqref{eq:hindsight_reward_app} is recentred to zero mean per episode, so its contribution to $J_{\mathrm{credit}}$ relative to $J_{\mathrm{sys}}$ is a per-dispatch reweighting that does not change the population gradient at the episode level.
 \end{proof}
 
-An analogous argument holds for the lower-level augmentation: the injected term $\beta\, R_{\mathrm{U}}^{(\text{trip}(j))}$ acts as a state-independent baseline shift (constant within a trip), which does not introduce bias in the lower policy gradient but can reduce variance by aligning lower-level credit assignment with upper-level performance.
+We emphasise that this is unbiasedness for the hindsight-credited objective $J_{\mathrm{credit}}$, not for the original system-only objective $J_{\mathrm{sys}}$. The two objectives differ by the per-dispatch credit term, which we deliberately introduce as a denser learning signal. As $\piL$ also updates between upper REINFORCE steps, our practical training loop is closer to a coordinate-descent on a coupled objective than to an idealised single-policy gradient ascent; we found this acceptable in practice, with TPC (\cref{sec:tpc}) handling the lower-side covariate shift.

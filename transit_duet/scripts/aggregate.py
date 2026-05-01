@@ -23,20 +23,25 @@ LOGS_DIR = ROOT / 'logs'
 RESULTS_DIR = ROOT / 'results'
 RESULTS_DIR.mkdir(exist_ok=True)
 
+EVAL_EP_MARKER = 9000  # rows with ep >= this are Pareto eval rows
+
 
 def load_diag(path):
-    """Load diagnostics.csv from a run directory."""
+    """Load diagnostics.csv from a run directory, excluding Pareto eval rows."""
     p = Path(path) / 'diagnostics.csv'
     if not p.exists():
         return None
     try:
-        return pd.read_csv(p)
+        df = pd.read_csv(p)
     except Exception:
         return None
+    if 'ep' in df.columns:
+        df = df[df['ep'] < EVAL_EP_MARKER].reset_index(drop=True)
+    return df
 
 
 def last30_stats(df, metric):
-    """Return mean, std over last 30 episodes."""
+    """Return mean, std over last 30 training episodes."""
     if df is None or len(df) == 0:
         return np.nan, np.nan
     last = df.iloc[-30:]

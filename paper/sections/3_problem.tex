@@ -1,11 +1,11 @@
-\section{Problem Formulation}
+\section{Problem formulation}
 \label{sec:problem}
 
 We formalize joint timetable planning and holding control as a bi-level Markov decision process (MDP) operating over a single bus route with time-varying passenger demand.
 This section first describes the transit system model (\Cref{sec:transit_model}), then defines the upper- and lower-level MDPs (\Cref{sec:bilevel_mdp}), states the constraint specification (\Cref{sec:constraints}), and concludes with a discussion of the timescale separation that motivates our algorithmic design (\Cref{sec:timescale}).
 
 %% ---------------------------------------------------------------
-\subsection{Bus Transit System Model}
+\subsection{Bus transit system model}
 \label{sec:transit_model}
 
 We consider a single bidirectional bus route consisting of $M$ stations indexed $\{1,\dots,M\}$.
@@ -15,12 +15,12 @@ At any point in time, at most $\Nfleet^{\max}=25$ buses may be concurrently in s
 The dispatch headway---the time between consecutive launches in the same direction---is the primary planning lever, while per-station holding times constitute the real-time control lever.
 
 %% ---------------------------------------------------------------
-\subsection{Bi-Level MDP Formulation}
+\subsection{Bi-level MDP formulation}
 \label{sec:bilevel_mdp}
 
 We decompose the joint optimization into two coupled MDPs that share a common environment but differ in observation granularity, action semantics, and decision frequency.
 
-\subsubsection{Upper-Level MDP (Timetable Planning)}
+\subsubsection{Upper-level MDP (timetable planning)}
 \label{sec:upper_mdp}
 
 The upper-level policy $\piU$ determines dispatch headways.
@@ -42,20 +42,18 @@ where each component is normalized to facilitate learning.
 The \emph{unhealthy\_rate} captures the fraction of active buses whose observed headway deviates from the target by more than a tolerance threshold.
 
 \paragraph{Action.}
-The upper action specifies headways for three demand regimes:
+At each dispatch event the upper policy outputs a scalar offset that shifts the scheduled launch time of the dispatched bus:
 \begin{equation}
   \label{eq:upper_action}
-  \aU = \bigl[\,\Hpeak,\;\Hoff,\;\Htrans\,\bigr] \;\in\; \R^{3},
+  \aU = \delta_t \;\in\; [-120,\, 120]\;\text{s}.
 \end{equation}
-with ranges $\Hpeak\in[180,600]$, $\Hoff\in[300,1200]$, and $\Htrans\in[240,900]$, all in seconds.
-These three headways correspond to peak, off-peak, and transitional periods, respectively.
-The environment selects the applicable headway based on the current time of day and uses it as both the dispatch interval and the target headway $\htarget$ communicated to the lower level.
+The effective launch time of the bus is $t_{\text{base}} + \delta_t$, where $t_{\text{base}}$ is the bus's scheduled launch from a baseline timetable with $H = 360$\,s. The target headway $\htarget$ communicated to the lower level remains $360$\,s, so the upper policy adjusts \emph{when} a bus departs without changing the lower's regulation target. This formulation produces the same expressive power as a triple-headway action over peak/off-peak/transition periods (used by the search-based baselines below) while admitting per-trip granularity and online adaptation that the static triple cannot.
 
 \paragraph{Reward.}
 The upper reward is computed at the episode level from a measurement vector (defined in \Cref{sec:constraints}).
 Because each upper action influences the system over an extended horizon through the downstream holding decisions it induces, assigning credit to individual dispatch events is nontrivial; we defer the reward construction to~\Cref{sec:method}.
 
-\subsubsection{Lower-Level MDP (Holding Control)}
+\subsubsection{Lower-level MDP (holding control)}
 \label{sec:lower_mdp}
 
 The lower-level policy $\piL$ decides how long each bus should dwell beyond its minimum stop time at every station.
@@ -96,10 +94,10 @@ We define the per-step cost as
 which penalizes headway irregularity in a scale-invariant manner and is clipped at~1 for numerical stability.
 
 %% ---------------------------------------------------------------
-\subsection{Constraint Specification}
+\subsection{Constraint specification}
 \label{sec:constraints}
 
-The bi-level MDP is subject to one hard and one soft constraint, both evaluated through a measurement vector collected at the end of each episode.
+The bi-level MDP is subject to two soft constraints, both evaluated through a measurement vector collected at the end of each episode.
 
 \paragraph{Measurement vector.}
 At the conclusion of a service day, we compute:
@@ -108,13 +106,13 @@ At the conclusion of a service day, we compute:
   \zvec = \bigl[\,\text{avg\_wait\_min},\;\text{peak\_fleet},\;\text{bunching\_rate}\,\bigr].
 \end{equation}
 
-\paragraph{Hard constraint (fleet capacity).}
-The peak number of buses simultaneously on route must not exceed the available fleet:
+\paragraph{Soft constraint (fleet budget).}
+The peak number of buses simultaneously on route should respect the per-episode fleet budget $\Nfleet \in [\Nfleet^{\min}, \Nfleet^{\max}]$ sampled at episode start. We enforce this softly via an overshoot$^2$ penalty in the upper reward:
 \begin{equation}
-  \label{eq:hard_constraint}
-  \text{peak\_fleet} \;\leq\; \Nfleet, \qquad \Nfleet = 12.
+  \label{eq:soft_fleet}
+  \mathrm{overshoot}(\zvec, \Nfleet) = \max(0,\, \text{peak\_fleet} - \Nfleet)^2,
 \end{equation}
-This constraint is enforced structurally: the environment blocks a dispatch if it would violate the fleet limit.
+weighted by an adaptive coefficient maintained by $\thetavec$-OGD (see~\Cref{sec:meas_proj}). To prevent unbounded violation under noisy demand, the environment imposes an outer ceiling $\Nfleet^{\max} + 3$ buses, which bounds but does not zero out the realised overshoot.
 
 \paragraph{Soft constraint (headway uniformity).}
 The expected per-step cost must remain below a threshold:
@@ -126,7 +124,7 @@ which encourages even spacing of buses along the route.
 Satisfaction of this constraint is enforced via Lagrangian relaxation within the lower-level policy (see \Cref{sec:method}).
 
 %% ---------------------------------------------------------------
-\subsection{Timescale Separation}
+\subsection{Timescale separation}
 \label{sec:timescale}
 
 A defining characteristic of the bi-level formulation above is the pronounced separation of timescales between the two decision layers.

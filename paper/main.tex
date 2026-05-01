@@ -1,4 +1,6 @@
-\documentclass[preprint,review,12pt]{elsarticle}
+\documentclass[journal]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{booktabs}
@@ -6,16 +8,20 @@
 \newtheorem{definition}{Definition}
 \newtheorem{proposition}{Proposition}
 \newtheorem{remark}{Remark}
+
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan}
+\urlstyle{same}
 \usepackage{cleveref}
 \usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{colortbl}
+\usepackage[numbers]{natbib}
 
 % Math commands
 \input{math_commands}
@@ -23,24 +29,23 @@
 % Placeholder command for TBD results
 \newcommand{\tbd}[1][]{\textcolor{red}{\textbf{[TBD#1]}}}
 
-\journal{Transportation Research Part C}
+\title{TransitDuet: Bi-level reinforcement learning with temporal advantage propagation for joint bus timetable planning and holding control}
+
+\author{Anonymous~Authors%
+\thanks{Anonymous Institution.}%
+}
+
+\markboth{Submitted to IEEE Transactions, 2026}%
+{Anonymous \MakeLowercase{\textit{et~al.}}: TransitDuet}
 
 \begin{document}
-
-\begin{frontmatter}
-
-\title{TransitDuet: Bi-Level Reinforcement Learning with Temporal Advantage Propagation for Joint Bus Timetable Planning and Holding Control}
-
-\author[anon]{Anonymous Authors}
-\address[anon]{Anonymous Institution}
+\maketitle
 
 \input{sections/0_abstract}
 
-\begin{keyword}
-Bus holding control \sep Timetable optimization \sep Hierarchical reinforcement learning \sep Multi-timescale control \sep Constrained optimization
-\end{keyword}
-
-\end{frontmatter}
+\begin{IEEEkeywords}
+Bus holding control, timetable optimization, hierarchical reinforcement learning, multi-timescale control, constrained optimization.
+\end{IEEEkeywords}
 
 \input{sections/1_introduction}
 \input{sections/2_related_work}
@@ -50,16 +55,7 @@ Bus holding control \sep Timetable optimization \sep Hierarchical reinforcement 
 \input{sections/6_discussion}
 \input{sections/7_conclusion}
 
-\section*{CRediT authorship contribution statement}
-\textbf{Anonymous Authors}: Conceptualization, Methodology, Software, Validation, Writing -- Original Draft.
-
-\section*{Declaration of competing interest}
-The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
-
-\section*{Data availability}
-Code and data will be made available upon publication.
-
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{IEEEtranN}
 \bibliography{references}
 
 \appendix
