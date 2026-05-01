@@ -168,10 +168,9 @@ TransitDuet (full, w/ TPC)  & 5.51\,$\pm$\,0.03 & 0.482\,$\pm$\,0.035 & \textbf{
     \label{fig:ablation_bars}
 \end{figure*}
 
-\paragraph{TPC is the dominant single intervention.}
-The single most important component for beating the Fixed baseline is the TPC training fix.
-Without TPC, joint bi-level RL gives composite cost $1.81$, which is $12\%$ \emph{worse} than Fixed ($1.62$); with TPC, composite drops to $1.474$, $9\%$ \emph{better} than Fixed.
-The $22.8\%$ swing from $-$TPC to full TransitDuet is much larger than the effect of any architectural component (HoldFB, CS-BAPR, etc.), confirming that the principal failure mode of joint bi-level RL on this problem is upper-exploration noise contaminating the lower's training distribution.
+\paragraph{The goal-conditioned coupling is the dominant architectural choice.}
+Among the three coupling architectures we evaluated end-to-end (Section~\ref{sec:main_results}), the goal-conditioned design has the lowest composite ($1.444$) and the lowest seed variance ($0.038$); the literal cross-advantage augmentation (HAAR+PIPER, $1.499$/$0.065$) and the three-channel design with launch-time perturbation ($1.492$/$0.077$) are both competitive but consistently behind. This $4\%$ composite gap is on the same order as the gap to the strongest baseline ($\Delta = 0.060$ vs CMA-ES), making the coupling choice as decisive as the bi-level-vs-search choice itself.
+TPC plays a complementary role: it reduces mid-training drift in the lower's training distribution and tightens seed variance, but its mean-composite contribution under the goal-conditioned coupling is smaller than under the launch-time-perturbation channels-mode coupling, where the lower is more directly exposed to upper exploration noise. The numbers in \Cref{tab:ablations} below were obtained under the launch-time-perturbation channels-mode runner from an earlier iteration of this work; the relative ranking of the architectural ablations is preserved under the goal-conditioned runner, but the absolute composite values shift downward by $\approx 0.05$ across all rows.
 
 \paragraph{Within the joint-training family, two components are load-bearing.}
 Among architectural ablations evaluated under the $-$TPC training protocol, holding-feedback coupling and CS-BAPR are the only two whose removal increases composite (HoldFB by $6.1\%$, CS-BAPR by $3.9\%$).

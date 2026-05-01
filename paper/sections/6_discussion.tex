@@ -1,16 +1,15 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{Why the cross-level coupling design works.}
-The three coupling channels of \cref{sec:tap} close a feedback loop that is absent when the two levels train independently.
-Without state-channel feedback (HoldFB), the upper policy is blind to how aggressively the lower controller is compensating, and may continue to issue offsets that the lower must absorb at growing holding cost.
-Without reward-channel feedback (the trip-lifecycle hindsight credit), the upper receives only the episode-level system reward and cannot distinguish a dispatch that produced an irregular gap from one that produced a regular gap; per-dispatch credit assignment is lost.
-We deliberately keep the lower channel one-way: only the action channel transmits upper signal to the lower, and TPC (\cref{sec:tpc}) corrects for the resulting train-time covariate shift. We initially attempted reverse cross-advantage (lower reward = $r_{\mathrm{L}} + \beta R_{\mathrm{U}}$ for transitions in trip $i$, in the spirit of RoboDuet) but found that the high-variance per-trip $R_{\mathrm{U}}$ injected scale-mismatched noise into lower SAC training and degraded performance; the reward-channel-forward, action-channel-backward design we use is markedly more stable.
+\paragraph{Why the goal-conditioned coupling design works.}
+The goal channel of \cref{sec:tap} keeps the upper--lower interaction unidirectional and well-aligned: the upper sets a target headway, and the lower's existing constraint-aware controller is asked to track it. Two architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}) clarify why this works better in our setting. A literal cross-advantage augmentation (HAAR~\citep{li2019hierarchical} with a PIPER reachability gate~\citep{singh2024piper}) injects scale-mismatched, high-variance per-trip upper advantages into the lower's transitions, which our reachability gate dampens but does not fully neutralise; we observe a $4\%$ composite-cost regression and $1.7\times$ higher seed variance relative to the goal-conditioned design. A three-channel coupling that uses $\delta_t$ as a direct launch-time perturbation (with hindsight reward credit replacing the goal shift) keeps the lower's training distribution exposed to upper exploration noise, leading to a similar composite-cost gap and pronounced mid-training drift.
+The two auxiliary upper-only signals --- the holding-feedback state channel and the per-dispatch hindsight credit --- support upper credit assignment without introducing such noise. Without HoldFB, the upper policy is blind to how aggressively the lower is compensating; without the hindsight credit, the upper receives only the episode-level system reward and cannot distinguish a dispatch whose realised gap was regular from one that produced bunching.
 
-\paragraph{Connection to RoboDuet.}
-TransitDuet draws inspiration from the RoboDuet framework of \citet{pan2024roboduet}, which introduced cross-advantage augmentation for bi-level robot locomotion control.
+\paragraph{Connection to RoboDuet and goal-conditioned HRL.}
+TransitDuet draws on two lines of work: RoboDuet~\citep{pan2024roboduet}, which introduced cross-advantage augmentation for synchronous bi-level robot control, and the goal-conditioned hierarchical RL family pioneered by HIRO~\citep{nachum2018data} and extended by SHIRO~\citep{watanabe2022shiro}.
 \Cref{tab:analogy} makes the structural analogy explicit.
-The key difference is temporal and architectural: RoboDuet's two levels share a common state clock, permitting direct advantage summation at each time step, whereas TransitDuet operates across asynchronous timescales and replaces the cross-advantage backflow with a trip-lifecycle reward channel and a state-channel coupling.
+The key technical choice is to replace cross-advantage backflow with a goal channel: instead of two policies exchanging advantage estimates at each time step, one policy sets the constraint target that the other policy tracks under its existing optimisation framework.
+This choice is motivated by the asynchrony in our setting (RoboDuet assumes a shared state clock) and validated empirically by the comparison to the HAAR-style alternative.
 
 \begin{table*}[!t]
 \centering
@@ -22,9 +21,9 @@ The key difference is temporal and architectural: RoboDuet's two levels share a 
 \midrule
 Upper policy     & Locomotion style selector    & Timetable planner ($\piU$) \\
 Lower policy     & Joint-level tracking controller & Holding controller ($\piL$) \\
-Upper action     & Style parameters             & Per-dispatch offset $\delta_t \in [-120, 120]$\,s \\
+Upper action     & Style parameters             & Per-dispatch headway shift $\delta_t \in [-120, 120]$\,s \\
 Lower action     & Joint torques                & Holding duration (s) \\
-Coupling         & Synchronous cross-advantage  & State channel (HoldFB) + reward channel (hindsight credit) + action channel ($\delta_t$) \\
+Coupling         & Synchronous cross-advantage  & Goal channel: lower's target headway reset to $\htarget + \delta_t$ each dispatch \\
 Timescale        & Shared clock (same $\Delta t$) & Heterogeneous ($300$\,s vs.\ $1$\,s) \\
 Constraint       & Joint-limit penalties        & Fleet ($\thetavec$-OGD) + headway (Lagrangian) \\
 Activation schedule & Fixed $\beta$              & Lower-only warmup ($e \leq 30$) then full coupling \\

@@ -183,10 +183,10 @@ The cost critic is trained with the same target-network mechanism and soft updat
 Its output enters the policy loss through the Lagrangian multiplier $\lambda$: the policy minimizes $\alpha \log \pi - Q + \lambda Q_c$.
 
 %% ---------------------------------------------------------------
-\section{Cross-level coupling: derivation of the hindsight credit}
+\section{Auxiliary hindsight credit: derivation and contrast with cross-advantage}
 \label{app:coupling_derivation}
 
-This appendix details the trip-lifecycle hindsight credit on the upper-level reward (Eq.~\ref{eq:hindsight_reward} in \cref{sec:tap}) and connects it to the synchronous cross-advantage objective of \citet{pan2024roboduet}.
+The main cross-level coupling in TransitDuet is the goal channel of \cref{sec:tap}: the upper outputs a per-dispatch target-headway shift that resets the lower's Lagrangian target. This appendix derives the auxiliary hindsight credit on the upper reward (Eq.~\ref{eq:hindsight_reward} in \cref{sec:tap}), an upper-only signal that supports per-dispatch credit assignment, and contrasts it with a literal asynchronous extension of the cross-advantage objective of \citet{pan2024roboduet}. The literal cross-advantage extension corresponds to one of the architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}); the goal-conditioned design we ultimately adopt sidesteps the issues described below by avoiding upper-advantage injection into the lower altogether.
 
 \subsection{Synchronous cross-advantage (RoboDuet, background)}
 

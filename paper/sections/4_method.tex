@@ -239,10 +239,10 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
 \end{algorithm}
 
 \paragraph{Lower-only warmup ($e \leq e_{\mathrm{warm}} = 30$).}
-The upper policy is forced to $\delta_t = 0$ for every dispatch and the lower policy trains in isolation against the baseline timetable. This warmup is critical: without it, the upper policy would receive coupling-channel feedback from a random lower policy, which amounts to noise and destabilises upper-level learning. We set $e_{\mathrm{warm}} = 30$ episodes.
+The upper policy is forced to $\delta_t = 0$ for every dispatch and the lower policy trains in isolation against the baseline timetable. This warmup is critical: without it, the upper policy would receive auxiliary-channel feedback (HoldFB and hindsight credit) from a random lower policy, which amounts to noise and destabilises upper-level learning. We set $e_{\mathrm{warm}} = 30$ episodes.
 
 \paragraph{Coupled training ($e > e_{\mathrm{warm}}$).}
-The upper policy activates and the three coupling channels of \cref{sec:tap} engage simultaneously. We do not anneal a coupling coefficient; the channels operate at their designed strengths from activation onward, with TPC's IS reweighting (\cref{sec:tpc}) taking over the role of mediating the train-time covariate shift induced by upper exploration.
+The upper policy activates and the goal channel of \cref{sec:tap} engages: each dispatch's target headway is reset to $\htarget + \delta_t$, and the lower's Lagrangian cost is computed against this dispatch-specific target. The state and reward channels are upper-only and are inactive during warmup by construction. We do not anneal a coupling coefficient; the channel operates at its designed strength from activation onward, with TPC's IS reweighting (\cref{sec:tpc}) handling any residual covariate shift from changing target headways during upper exploration.
 
 \paragraph{Computational cost.}
 The lower policy update dominates computation due to the twin Q-network and cost Q-network gradient steps.

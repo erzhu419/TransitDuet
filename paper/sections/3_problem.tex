@@ -137,4 +137,4 @@ Neither assumption holds here: the upper state $\sU\in\R^{5}$ summarizes fleet-l
 
 More concretely, a single upper action (a headway triple) remains in effect while many buses traverse multiple stations under independent lower-level control; the upper policy cannot pause and wait for all induced lower decisions to conclude.
 Standard hierarchical RL methods that propagate value or advantage across levels therefore require modification to handle the fully asynchronous, event-driven interaction between $\piU$ and $\piL$.
-We address this challenge through \emph{Temporal Advantage Propagation}, detailed in \Cref{sec:method}.
+We address this challenge through a goal-conditioned cross-level coupling, detailed in \Cref{sec:method}.

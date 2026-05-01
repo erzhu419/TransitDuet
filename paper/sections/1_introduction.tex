@@ -30,9 +30,9 @@ Constrained RL methods such as RCPO \citep{tessler2019reward} address single-lev
 \medskip
 
 We propose TransitDuet, a bi-level RL framework that addresses all three gaps.
-The upper policy $\piU$ outputs a per-dispatch departure offset $\delta_t \in [-120, 120]$\,s at each dispatch event, applied as a direct shift on the scheduled launch time of that bus. The lower policy $\piL$, a soft actor-critic with Lagrangian penalties \citep{haarnoja2018soft}, selects holding times at every station arrival with parameter sharing across buses.
-The two levels are coupled through three channels (Section~\ref{sec:tap}): a state channel that exposes the lower's recent holding statistics to the upper, an action channel through which $\delta_t$ directly perturbs the lower's environment, and a reward channel that backfills each dispatch's reward with a hindsight credit derived from the realised inter-dispatch gap deviation.
-A cosine-annealed coupling coefficient $\beta$ ramps from zero to $\betamax$ after an initial warmup phase, preventing premature coupling before either policy has learned a reasonable baseline.
+The upper policy $\piU$ outputs a per-dispatch target-headway shift $\delta_t \in [-120, 120]$\,s at each dispatch event; the lower's headway target for that trip is reset to $\htarget + \delta_t$. The lower policy $\piL$, a soft actor-critic with Lagrangian penalties \citep{haarnoja2018soft}, selects holding times at every station arrival with parameter sharing across buses, and its constraint is computed against the dispatch-specific goal headway.
+This goal-conditioned coupling, in the spirit of HIRO~\citep{nachum2018data}, replaces the literal cross-advantage augmentation of RoboDuet~\citep{pan2024roboduet} (Section~\ref{sec:tap}); two auxiliary upper-only signals (a holding-feedback state channel and a per-dispatch hindsight credit on the upper reward) provide credit assignment without injecting upper signals into the lower's transitions.
+Lower-policy training begins with a $30$-episode warmup during which the upper is held at $\delta_t = 0$, after which the goal channel engages.
 Fleet-size feasibility is enforced by a $\thetavec$-weighted online gradient descent projection on the measurement vector $\zvec$ of dispatched buses, inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}, while headway uniformity enters the lower-level objective through Lagrangian relaxation.
 
 \paragraph{Contributions.}
