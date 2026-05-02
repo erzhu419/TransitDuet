@@ -19,8 +19,8 @@
   & \texttt{demand\_noise}        & 0.15  & Per-hour demand multiplier std \\
 \midrule
 \multirow{8}{*}{Upper policy}
-  & \texttt{state\_dim}    & 5              & $[\text{hour},\text{demand},\text{fleet},\text{prev\_hw},\text{unhealthy}]$ \\
-  & \texttt{action\_dim}   & 1              & per-dispatch offset $\delta_t \in [-120, 120]$\,s \\
+  & \texttt{state\_dim}    & 11             & system summary (5) + HoldFB (3) + trip ctx (3); see Eq.~\ref{eq:upper_state} \\
+  & \texttt{action\_dim}   & 1              & per-dispatch headway shift $\delta_t \in [-120, 120]$\,s \\
   & \texttt{action\_low}   & $-120$         & Min offset (s) \\
   & \texttt{action\_high}  & $+120$         & Max offset (s) \\
   & \texttt{hidden\_dim}   & 64             & MLP hidden layer width \\
@@ -31,7 +31,7 @@
 \multirow{11}{*}{Lower policy}
   & \texttt{hidden\_dim}     & 32      & MLP hidden layer width \\
   & \texttt{action\_range}   & 60      & Holding time bound (action $\in [-60, 60]$\,s) \\
-  & $\climit$                & 0.15    & Lagrangian cost budget \\
+  & $\climit$                & 0.5     & Lagrangian cost budget \\
   & \texttt{batch\_size}     & 2048    & Replay buffer mini-batch \\
   & \texttt{lr}              & $10^{-5}$ & Critic + policy learning rate \\
   & $\lambda_{\text{lr}}$    & $10^{-3}$ & Lagrangian multiplier LR \\
@@ -203,9 +203,9 @@ In TransitDuet, $\piU$ acts at dispatch events $\{t_1^{\mathrm{U}}, \ldots, t_N^
 
 \subsection{Trip-lifecycle alignment and the realised gap}
 
-We resolve this through a \emph{trip-lifecycle} alignment. Each upper action $a_{\mathrm{U},i}$ at dispatch $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$ whose actual launch time is $t_{\mathrm{base},i} + \delta_{t,i}$. The realised inter-dispatch gap is
+We resolve this through a \emph{trip-lifecycle} alignment. Each upper action $a_{\mathrm{U},i}$ at dispatch $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$ launched at the baseline time $t_{\mathrm{base},i}$ with a dispatch-specific target headway $\htarget + \delta_{t,i}$. The realised inter-dispatch gap is the actual elapsed time between consecutive bus departures as carried out by the lower controller (which may hold individual buses to track its target):
 \begin{equation}
-  g_i = (t_{\mathrm{base},i+1} + \delta_{t,i+1}) - (t_{\mathrm{base},i} + \delta_{t,i}),
+  g_i = t_{\mathrm{actual},i+1} - t_{\mathrm{actual},i},
 \end{equation}
 computed per direction so that buses operating on opposite legs do not interleave. The per-direction mean and standard deviation of $\{g_i\}$ define the deviation
 \begin{equation}

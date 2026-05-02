@@ -54,6 +54,9 @@ Each episode requires approximately 7\,s of environment simulation time plus tra
 At 300 episodes with 3 seeds, the total wall-clock time is approximately 14 hours per seed on a single 12\,GB GPU.
 While acceptable for research, real-time retraining for schedule disruptions would require further acceleration, for instance through model distillation or warm-starting from a pre-trained policy.
 
+\emph{Baseline coverage and seed budget.}
+Our external baselines (Fixed, GA, CMA-ES) cover the static-timetable and population-search families that the bus-planning literature most commonly compares against, but they do not include MPC / rolling-horizon optimisation, time-of-day MILP, or RL approaches that train the upper but not the lower in a bi-level fashion. The cost of integrating these baselines under the same shared-lower protocol used in this paper is substantial (per-candidate lower training, or replacing the lower with an MPC-internal model), and we leave this comparison for future work along with raising the seed count from $n{=}3$ to $n{=}10$ and reporting paired significance tests on a fixed evaluation seed set.
+
 \paragraph{Scalability considerations.}
 Scaling to multi-route networks introduces two challenges.
 First, the upper-level action space grows combinatorially with the number of routes, since headway targets must be set jointly to respect shared fleet constraints.

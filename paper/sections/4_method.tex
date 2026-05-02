@@ -6,7 +6,7 @@ This section presents the TransitDuet architecture and its constituent algorithm
 \Cref{sec:arch} motivates the decoupled dual-network design.
 \Cref{sec:upper} and \Cref{sec:lower} detail the upper-level timetable policy and lower-level holding control policy, respectively.
 \Cref{sec:tap} describes the goal-conditioned cross-level coupling that links the two levels across timescales.
-\Cref{sec:meas_proj} describes the measurement-projection scheme that enforces fleet and service constraints on the upper level.
+\Cref{sec:meas_proj} describes the measurement-driven scheme that adaptively penalises fleet-overshoot at the upper level.
 \Cref{sec:training} assembles the full training procedure.
 \Cref{sec:tpc} introduces the target-policy-corrected lower SAC (TPC) training fix that closes the gap to a hand-tuned fixed timetable.
 
@@ -22,7 +22,7 @@ This section presents the TransitDuet architecture and its constituent algorithm
 \label{sec:arch}
 
 TransitDuet comprises two independent policy networks operating at different timescales and over different state-action spaces .
-The upper policy $\piU$ is a lightweight Gaussian MLP that selects a per-dispatch departure offset at each dispatch event.
+The upper policy $\piU$ is a lightweight Gaussian MLP that selects a per-dispatch headway shift at each dispatch event.
 The lower policy $\piL$ is a DSAC-Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
 
 A key design choice is that the two networks share no encoder parameters.
@@ -75,7 +75,7 @@ where $\hat{A}_{\mathrm{U},i} = R_{\mathrm{U}}^{(i)} - \bar{R}_{\mathrm{U}}$ is 
 \subsection{Lower-level holding control policy}
 \label{sec:lower}
 
-The lower policy $\piL$ selects a holding duration $\aL \in [0, a_{\max}]$ at each station arrival, where $a_{\max} = 60$\,s.
+The lower policy $\piL$ selects a signed holding adjustment $\aL \in [-a_{\max}, a_{\max}]$ at each station arrival, where $a_{\max} = 60$\,s. A positive $\aL$ holds the bus at the station for $\aL$ extra seconds beyond the minimum dwell, while a negative $\aL$ shortens the next inter-station idle by $|\aL|$ seconds (capped by the realised idle slack); the simulator clips the realised holding to $[0, a_{\max}]$ so a release action that would advance the bus past its physical readiness has no effect.
 It is trained with a distributional soft actor-critic augmented by a Lagrangian cost term for headway-deviation constraint enforcement \citep{haarnoja2018soft}.
 All buses share the same policy parameters, enabling fleet-wide generalization.
 
@@ -84,12 +84,12 @@ A two-layer MLP with 32 hidden units per layer and ReLU activations produces a m
 The raw sample $u \sim \mathcal{N}(\mu_{\psi}, \sigma_{\psi}^2)$ is squashed through a $\tanh$ transform and rescaled:
 \begin{equation}
 \label{eq:lower_action_method}
-    \aL = \frac{a_{\max}}{2}\bigl(\tanh(u) + 1\bigr).
+    \aL = a_{\max}\,\tanh(u).
 \end{equation}
 The log-probability accounts for the change of variables:
 \begin{equation}
 \label{eq:log_prob}
-    \log \piL(\aL \mid \sL) = \log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2) - \log\bigl(1 - \tanh^2(u)\bigr) - \log\frac{a_{\max}}{2}.
+    \log \piL(\aL \mid \sL) = \log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2) - \log\bigl(1 - \tanh^2(u)\bigr) - \log a_{\max}.
 \end{equation}
 
 \paragraph{Twin Q-networks.}
@@ -116,7 +116,7 @@ where $\lambda \geq 0$ is the Lagrange multiplier.
 The dual variable is updated to satisfy the cost-limit constraint $\climit$:
 \begin{equation}
 \label{eq:lambda_update}
-    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}(\climit - \E[Q^c_{\xi}]),\; -10,\; 5\bigr)\Bigr].
+    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}(\E[Q^c_{\xi}] - \climit),\; -10,\; 5\bigr)\Bigr].
 \end{equation}
 Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability.
 
@@ -143,7 +143,7 @@ At each dispatch event, the upper outputs $\delta_t \in [-120, 120]$\,s. In cont
 where $H_{\mathrm{real}}(\tau)$ is the realised inter-bus headway over the trip lifecycle $\tau$. The upper policy thus learns to steer the lower's constraint target rather than to inject noise into its observations. By construction, an active upper policy can only adjust the goal that an already-trained lower controller is asked to satisfy; this preserves the lower's training distribution and avoids the covariate shift that destabilises three-channel coupling under heavy upper exploration.
 
 \paragraph{State channel: holding feedback (HoldFB).}
-The upper state $\sU$ contains a holding-feedback block (Section~\ref{sec:aux}) carrying a rolling 10-trip summary of the lower policy's recent holding decisions: $[\mu_{\mathrm{hold}}, \sigma_{\mathrm{hold}}, \mu^{\mathrm{up}}_{\mathrm{hold}}, \mu^{\mathrm{down}}_{\mathrm{hold}}]$ normalised to the action range. Through this channel, the upper policy observes how aggressively the lower controller is intervening to satisfy the goal and adapts $\delta_t$ to avoid setting goals that systematically force the lower into prolonged over-holding.
+The upper state $\sU$ contains a 3-dimensional holding-feedback block at indices 5--7 (Eq.~\ref{eq:upper_state}; Section~\ref{sec:aux}) carrying a rolling 10-trip summary of the lower policy's recent holding decisions: $[\bar{h}^{\mathrm{up}}_{\mathrm{hold}}, \sigma^{\mathrm{up}}_{\mathrm{hold}}, \bar{h}^{\mathrm{down}}_{\mathrm{hold}}]$ normalised to the action range. Through this channel, the upper policy observes how aggressively the lower controller is intervening to satisfy the goal and adapts $\delta_t$ to avoid setting goals that systematically force the lower into prolonged over-holding.
 
 \paragraph{Reward channel: trip-lifecycle hindsight credit.}
 At episode end, we compute the realised inter-dispatch gap $g_i$ for each dispatch $i$ from the actual launch times of each bus, and form a per-dispatch deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$ where $(\bar{g}, \sigma_g)$ are the per-direction mean and standard deviation. The upper reward at dispatch $i$ is then composed of the episode-level system reward and a per-dispatch hindsight credit:
@@ -160,11 +160,11 @@ The lower's reward is unchanged from Section~\ref{sec:lower}: the standard envir
 Cross-level coupling is gated by a simple two-stage schedule. During the first $e_{\mathrm{warm}} = 30$ episodes the upper policy is inactive ($\delta_t = 0$ so the lower trains against the baseline target $\htarget$); from episode $e_{\mathrm{warm}}$ onward the upper activates and the goal channel engages. The state and reward channels operate only on the upper side and so are inactive during warmup by construction.
 
 %% ====================================================================
-\subsection{Measurement projection for fleet constraint}
+\subsection{Measurement-driven adaptive penalty for fleet utilisation}
 \label{sec:meas_proj}
 
-The upper policy must satisfy operational constraints on fleet size, average passenger waiting time, and bus bunching rate.
-Rather than adding penalty terms to the reward---which requires manual tuning and conflates constraint satisfaction with reward maximization---we adopt a measurement-projection approach inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}, simplified to avoid the nested best-response oracle that ApproPO requires.
+The upper policy must respect operational targets on fleet size, average passenger waiting time, and bus bunching rate.
+Rather than adding fixed penalty terms to the reward (which requires hand-tuning a coefficient per metric), we use an adaptive scheme inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}: a measurement-driven online gradient descent ($\thetavec$-OGD) on the reward-weight vector, which adapts the relative penalty strengths to the realised episode statistics. Unlike full ApproPO, our scheme does not solve a nested best-response oracle and therefore does not provide ApproPO's feasibility guarantees; in practice it reweights the reward toward the directions where the recent measurement is furthest from its target, and we observe in \cref{sec:experiments} that fleet overshoot stabilises at a small bounded value but is not driven to zero.
 
 \paragraph{Measurement vector.}
 At the end of each episode, we compute a three-dimensional measurement vector:
@@ -217,7 +217,7 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
             \IF{$e \leq e_{\mathrm{warm}}$}
                 \STATE Set $\delta_t = 0$ (baseline timetable; upper inactive)
             \ELSE
-                \STATE Sample $\delta_t$ from the TPC behaviour mixture (\cref{sec:tpc}); effective launch $\leftarrow t_{\mathrm{base}} + \delta_t$
+                \STATE Sample $\delta_t$ from the TPC behaviour mixture (\cref{sec:tpc}); set the trip's target headway $\leftarrow \htarget + \delta_t$ (launch time unchanged)
                 \STATE Record $(s_{\mathrm{U},i}, a_{\mathrm{U},i})$ in $\mathcal{T}_{\mathrm{U}}$
             \ENDIF
         \ENDIF
@@ -257,7 +257,7 @@ The TPC IS-weight computation and Polyak target update add $O(M + B)$ scalar/for
 This subsection collects four secondary mechanisms that interact with the bi-level core. They are isolated as separate ablation rows in Section~\ref{sec:ablation}.
 
 \paragraph{Holding feedback (HoldFB).}
-The upper state $\sU$ contains a holding-feedback block consisting of the lower's rolling holding statistics $[\mu_{\text{hold}}, \sigma_{\text{hold}}, \mu_{\text{hold}}^{\text{up}}, \mu_{\text{hold}}^{\text{down}}]$ over a window of the last 10 completed trips, normalised to the action range. This conveys to the upper policy how heavily the lower controller is intervening, allowing $\delta_t$ adjustments that reduce systematic over-holding. The $-$HoldFB ablation zeros out these state dimensions.
+The upper state $\sU$ contains a 3-dimensional holding-feedback block (state indices 5--7) consisting of the lower's rolling holding statistics $[\bar{h}_{\text{hold}}^{\text{up}}, \sigma_{\text{hold}}^{\text{up}}, \bar{h}_{\text{hold}}^{\text{down}}]$ over a window of the last 10 completed trips, normalised to the action range. This conveys to the upper policy how heavily the lower controller is intervening, allowing $\delta_t$ adjustments that reduce systematic over-holding. The $-$HoldFB ablation zeros out these three state dimensions.
 
 \paragraph{Belief-weighted MORL (MORL).}
 The upper reward is a scalarisation of three measurement components:
@@ -271,11 +271,7 @@ where $\boldsymbol{w} = (w_{\mathrm{wait}}, w_{\mathrm{fleet}}, w_{\mathrm{cv}})
 A Bayesian online changepoint detector tracks the run length of the upper reward stream and the standard deviation of the lower's $Q$-ensemble. When the changepoint posterior exceeds 0.1 (signalling a regime shift in demand or fleet realisation) the lower's entropy temperature $\alpha$ is transiently boosted by up to $2\times$ to encourage exploration in the new regime. The $-$CS-BAPR ablation disables this boost; the belief weights in MORL also degenerate to the long-run $\thetavec$-OGD weights without any short-term modulation.
 
 \paragraph{Hindsight credit assignment.}
-The upper reward of dispatch $i$ is composed of the episode-level system reward (Eq.~\ref{eq:morl_reward}) plus a per-dispatch credit term proportional to that dispatch's gap deviation from the target headway:
-\begin{equation}
-    r^{\mathrm{U},i}_{\text{hindsight}} = -\alpha_{\mathrm{H}} \, |g_i - \htarget|, \qquad \alpha_{\mathrm{H}} = 0.1,
-\end{equation}
-where $g_i$ is the actual realised inter-dispatch gap (which depends on $\delta_t$ and on physical congestion). This local signal lets the upper policy attribute responsibility for poor episodes to the specific dispatches that produced abnormal gaps. The $-$Hindsight ablation drops this term and uses only the episode-level reward, weakening per-dispatch credit assignment.
+We summarise the hindsight credit term used by the upper reward; the full derivation is given in \cref{sec:tap} (Eq.~\ref{eq:hindsight_reward}). At episode end we compute the realised inter-dispatch gap $g_i$ per direction, normalise it to a deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$, and recentre across the episode so the average dispatch gets zero credit. The $-$Hindsight ablation drops this term and uses only the episode-level reward, weakening per-dispatch credit assignment.
 
 \paragraph{Elastic fleet (Elastic) and demand stochasticity (DemandNoise).}
 Two environment-side mechanisms further shape training: $\Nfleet \sim \mathrm{Uniform}\{8, 9, \ldots, 16\}$ is sampled per episode (Elastic), and the per-hour demand multiplier is sampled from $\mathcal{N}(1, 0.15^2)$ clipped to $[0.3, 2.0]$ (DemandNoise). The $-$Elastic and $-$DemandNoise ablations fix $\Nfleet = 12$ and remove the demand multiplier, respectively, reducing TransitDuet to a deterministic-environment specialist.

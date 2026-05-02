@@ -82,8 +82,8 @@ def fig_lambda(dfs):
     sd = stack.std(axis=0)
     ax.plot(eps, m, color='#d62728', linewidth=1.5, label=r'$\lambda$ (mean $\pm$ std, 3 seeds)')
     ax.fill_between(eps, m - sd, m + sd, alpha=0.2, color='#d62728')
-    ax.axhline(1.89, linestyle='--', color='gray', linewidth=0.8,
-               label=r'converged $\lambda = 1.89$')
+    ax.axhline(0.57, linestyle='--', color='gray', linewidth=0.8,
+               label=r'converged $\lambda = 0.57$')
     ax.set_xlabel('Episode')
     ax.set_ylabel(r'Lagrangian $\lambda$')
     ax.set_xlim(0, eps[-1])

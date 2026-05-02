@@ -13,7 +13,7 @@ We implement an event-driven bus simulation modeling a single bidirectional rout
 Passenger demand follows origin--destination (OD) matrices with time-varying arrival rates calibrated to reproduce morning and evening peaks.
 The simulation advances at a resolution of $\Delta t = 1$\,s.
 Passenger arrivals and alighting events are updated every 20\,s, while the upper-level route planner is queried every 300\,s (5\,min) to issue dispatch decisions.
-Travel times between consecutive stations are drawn from log-normal distributions whose parameters vary by time of day and direction, with a route stochasticity parameter $\sigma$ controlling variance (default $\sigma = 1.5$).
+Travel times between consecutive stations are drawn from log-normal distributions whose parameters vary by time of day and direction, with a route stochasticity parameter $\sigma$ controlling variance (default $\sigma_{\mathrm{route}} =1.5$).
 
 \paragraph{Methods.}
 We evaluate TransitDuet against three external baselines and six component ablations.
@@ -28,9 +28,12 @@ and elastic fleet budget $\Nfleet \sim \mathrm{Uniform}[8, 16]$ sampled per epis
     \item \textbf{CMA-ES}: covariance-matrix adaptation evolution strategy (pop\,size\,10, $\sigma_0 = 0.3$).
 \end{itemize}
 
+\paragraph{Baseline fairness.}
+All four methods (Fixed, GA, CMA-ES, TransitDuet) share the \emph{same} lower-level RE-SAC Lagrangian holding controller, the \emph{same} elastic-fleet sampling, and the \emph{same} 300-episode training budget; only the upper-level decision logic differs. Concretely: each method trains a single shared lower controller end-to-end against its upper, so the comparison isolates the effect of the upper-level decision rule rather than confounding it with a different lower-controller architecture. For GA and CMA-ES, we run a single search loop (one population that evolves in place), evaluating each candidate timetable triple with the shared lower controller; the population size and per-candidate evaluation budget are tuned so the total wall-clock training cost matches that of TransitDuet to within $5\%$. We do not retrain the lower controller per candidate (which would 15--30$\times$ the GA/CMA-ES cost); instead, both search baselines share the same lower training schedule as TransitDuet. We acknowledge this is a soft choice: a search baseline given a per-candidate dedicated lower training budget might close some of the gap to TransitDuet, at correspondingly higher cost. Stronger baselines such as MPC / rolling-horizon optimisation and time-of-day MILP are out of scope here and discussed in~\Cref{sec:discussion}.
+
 \noindent\textit{Component ablations} (all start from TransitDuet full):
 \begin{itemize}[leftmargin=*]
-    \item \textbf{--HoldFB}: remove holding-feedback coupling from the upper state (state dims $[5{:}8]$ zeroed).
+    \item \textbf{--HoldFB}: remove holding-feedback coupling from the upper state (state dims $5$--$7$ zeroed).
     \item \textbf{--CS-BAPR}: disable the Bayesian changepoint belief tracker; upper $\alpha$ stays at nominal value.
     \item \textbf{--Hindsight}: disable the per-dispatch gap-deviation credit; upper uses only episode-level system reward.
     \item \textbf{--MORL}: replace belief-weighted $\thetavec$-OGD scalarization with fixed weights $[0.5, 0.25, 0.25]$.
@@ -76,7 +79,7 @@ Coupling sched.& Lower-only warmup            & 30 episodes \\
                & TPC IS clip $w_{\max}$       & 5 \\
                & EMA Polyak rate $\tau$       & 0.005 \\
 Fleet          & $\Nfleet$                    & 12 \\
-Constraint     & $\climit$                    & 0.15 \\
+Constraint     & $\climit$                    & 0.5 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -105,7 +108,7 @@ CMA-ES               & 5.46\,$\pm$\,0.27 & 0.465\,$\pm$\,0.032 & 1.73\,$\pm$\,0.
 \end{table*}
 
 \paragraph{TransitDuet improves on every metric.}
-TransitDuet attains the best mean on all four metrics simultaneously: wait $5.29$ vs the next-best baseline GA's $5.33$ ($-0.8\%$), CV $0.457$ vs CMA-ES's $0.465$ ($-1.7\%$), overshoot $1.55$ vs Fixed's $1.73$ ($-10.4\%$), and composite cost $1.444$ vs CMA-ES's $1.504$ ($-4.0\%$).
+TransitDuet matches or marginally outperforms every baseline on all four metrics, with simultaneous best mean: wait $5.29$ vs the next-best GA's $5.33$ ($-0.8\%$, within seed noise), CV $0.457$ vs CMA-ES's $0.465$ ($-1.7\%$, within seed noise), overshoot $1.55$ vs Fixed's $1.73$ ($-10.4\%$), and composite cost $1.444$ vs CMA-ES's $1.504$ ($-4.0\%$). With $n{=}3$ seeds the wait and CV margins to the search baselines are not statistically distinguishable from chance under any standard test, but the simultaneous best-mean status across four metrics is itself notable.
 Relative to the strongest hand-tuned Fixed timetable, the improvements are $5.5\%$ on wait, $6.4\%$ on CV, $10.4\%$ on overshoot, and $6.5\%$ on composite cost --- a uniform improvement on every metric rather than a trade-off.
 Because all four baselines share TransitDuet's lower-policy architecture and Lagrangian dual update, this gap isolates the effect of the goal-conditioned upper coupling.
 
@@ -291,19 +294,19 @@ The seed-best composites (1.491, 1.398, 1.444 for seeds 42/123/456) are within $
 \end{figure*}
 
 %% ============================================================
-\subsection{Generalization across demand stochasticity}
+\subsection{Generalization across travel-time stochasticity}
 \label{sec:generalization}
 
-We test whether a policy trained at route stochasticity $\sigma = 1.5$ generalizes to unseen demand conditions by evaluating on $\sigma \in \{0.5, 1.0, 2.0, 3.0\}$ without retraining.
+We test whether a policy trained at travel-time stochasticity $\sigma_{\mathrm{route}} = 1.5$ (the log-normal speed-noise multiplier in our microsimulator; this is distinct from passenger demand noise $\sigma_{\mathrm{demand}} = 0.15$ and from the per-episode elastic fleet $\Nfleet \in [8, 16]$) generalises to unseen travel-time conditions by evaluating on $\sigma_{\mathrm{route}} \in \{0.5, 1.0, 2.0, 3.0\}$ without retraining; demand noise and fleet sampling are held at training values throughout.
 \Cref{tab:generalization} reports the results.
 
 \begin{table*}[t]
 \centering
-\caption{Cross-stochasticity generalization. The model is trained at $\sigma = 1.5$ (shaded) and evaluated at the other $\sigma$ values without any fine-tuning. Mean $\pm$ std over 3 seeds $\times$ 10 evaluation episodes each.}
+\caption{Travel-time stochasticity generalization. The model is trained at $\sigma_{\mathrm{route}} = 1.5$ (shaded; the log-normal speed-noise multiplier in the simulator) and evaluated at the other $\sigma_{\mathrm{route}}$ values without any fine-tuning; demand noise and elastic fleet are held at training values. Mean $\pm$ std over 3 seeds $\times$ 10 evaluation episodes each.}
 \label{tab:generalization}
 \begin{tabular}{@{}cccc@{}}
 \toprule
-$\sigma$ & \textbf{Wait (min)} & \textbf{CV} & \textbf{Overshoot} \\
+$\sigma_{\mathrm{route}}$ & \textbf{Wait (min)} & \textbf{CV} & \textbf{Overshoot} \\
 \midrule
 0.5 & 6.44\,$\pm$\,0.54 & 0.339\,$\pm$\,0.004 & 2.53\,$\pm$\,0.17 \\
 1.0 & 6.78\,$\pm$\,1.77 & 0.488\,$\pm$\,0.033 & 2.53\,$\pm$\,0.17 \\
@@ -318,13 +321,13 @@ $\sigma$ & \textbf{Wait (min)} & \textbf{CV} & \textbf{Overshoot} \\
 \begin{figure*}[!htbp]
     \centering
     \includegraphics[width=0.55\textwidth]{figures/generalization.pdf}
-    \caption{Cross-stochasticity generalization. The model trained at $\sigma = 1.5$ (dashed gray line) generalizes symmetrically: wait stays within $8\%$ of the training-$\sigma$ value for $\sigma \in \{0.5, 1.0\}$, degrades by $25\%$ at $\sigma = 2.0$, and by $48\%$ at $\sigma = 3.0$. CV tracks $\sigma$ monotonically --- a larger-variance route produces less regular headways, but the policy does not collapse.}
+    \caption{Travel-time stochasticity generalization. The model trained at $\sigma_{\mathrm{route}} = 1.5$ (dashed gray line) generalizes symmetrically: wait stays within $8\%$ of the training-$\sigma_{\mathrm{route}}$ value for $\sigma_{\mathrm{route}} \in \{0.5, 1.0\}$, degrades by $25\%$ at $\sigma_{\mathrm{route}} = 2.0$, and by $48\%$ at $\sigma_{\mathrm{route}} = 3.0$. CV tracks $\sigma_{\mathrm{route}}$ monotonically --- a larger speed-noise multiplier produces less regular headways, but the policy does not collapse.}
     \label{fig:generalization}
 \end{figure*}
 
 Performance degrades gracefully as $\sigma$ increases beyond the training distribution.
-At $\sigma = 2.0$ wait time rises by $25\%$ relative to $\sigma = 1.5$ ($7.94$ vs $6.34$\,min);
-at $\sigma = 3.0$ --- double the training stochasticity --- TransitDuet still achieves $9.41$\,min wait,
+At $\sigma_{\mathrm{route}} =2.0$ wait time rises by $25\%$ relative to $\sigma_{\mathrm{route}} =1.5$ ($7.94$ vs $6.34$\,min);
+at $\sigma_{\mathrm{route}} =3.0$ --- double the training stochasticity --- TransitDuet still achieves $9.41$\,min wait,
 with CV rising from $0.58$ to $0.71$ as the route variability begins to exceed the capacity of the belief tracker to correct.
-Conversely, at $\sigma = 0.5$ and $\sigma = 1.0$ the policy runs within noise of its training-$\sigma$ performance (within $8\%$ wait), confirming that the learned strategy is not over-fit to high variance.
+Conversely, at $\sigma_{\mathrm{route}} =0.5$ and $\sigma_{\mathrm{route}} =1.0$ the policy runs within noise of its training-$\sigma$ performance (within $8\%$ wait), confirming that the learned strategy is not over-fit to high variance.
 Overshoot is essentially unchanged across $\sigma$, indicating that the fleet constraint is internalized rather than $\sigma$-specific.
