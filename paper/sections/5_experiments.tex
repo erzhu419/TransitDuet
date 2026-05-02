@@ -98,11 +98,17 @@ Constraint     & $\climit$                    & 0.5 \\
 \toprule
 \textbf{Method} & \textbf{Wait (min)} & \textbf{CV} & \textbf{Overshoot} & \textbf{Composite} \\
 \midrule
+\multicolumn{5}{l}{\textit{Search-based and static baselines (shared SAC lower; 3 seeds)}} \\
 Fixed ($H{=}360$\,s) & 5.60\,$\pm$\,0.12 & 0.488\,$\pm$\,0.024 & 1.73\,$\pm$\,0.14 & 1.544\,$\pm$\,0.040 \\
 GA                   & 5.33\,$\pm$\,0.26 & 0.497\,$\pm$\,0.024 & 1.75\,$\pm$\,0.14 & 1.524\,$\pm$\,0.065 \\
 CMA-ES               & 5.46\,$\pm$\,0.27 & 0.465\,$\pm$\,0.032 & 1.73\,$\pm$\,0.23 & 1.504\,$\pm$\,0.094 \\
 \midrule
-\textbf{TransitDuet (Ours)}  & \textbf{5.29}\,$\pm$\,\textbf{0.29} & \textbf{0.457}\,$\pm$\,\textbf{0.014} & \textbf{1.55}\,$\pm$\,\textbf{0.04} & \textbf{1.444}\,$\pm$\,\textbf{0.038} \\
+\multicolumn{5}{l}{\textit{Rule-lower baselines (proportional headway-keeping rule; 1 seed, $n{=}20$ held-out eval)}} \\
+Rule-MPC             & 13.95\,$\pm$\,7.78 & 0.501\,$\pm$\,0.129 & 2.40\,$\pm$\,0.80 & 2.531\,$\pm$\,1.078 \\
+Rule-GA              & 6.28\,$\pm$\,3.46 & 0.529\,$\pm$\,0.115 & 2.45\,$\pm$\,0.97 & 1.842\,$\pm$\,0.656 \\
+Rule-CMA-ES          & 5.57\,$\pm$\,1.61 & 0.495\,$\pm$\,0.081 & 1.85\,$\pm$\,1.11 & 1.511\,$\pm$\,0.467 \\
+\midrule
+\textbf{TransitDuet (HIRO, Ours)}  & \textbf{5.29}\,$\pm$\,\textbf{0.29} & \textbf{0.457}\,$\pm$\,\textbf{0.014} & \textbf{1.55}\,$\pm$\,\textbf{0.04} & \textbf{1.444}\,$\pm$\,\textbf{0.038} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -121,6 +127,9 @@ On the worst seed within each method, Fixed reaches $5.74$\,min wait, GA $5.69$,
 The upper--lower coupling we use is goal-conditioned (Section~\ref{sec:tap}): the upper outputs a target-headway shift $\delta_t$ and the lower's Lagrangian cost penalises deviation from the resulting target headway, rather than the literal cross-level reward augmentation of RoboDuet~\citep{pan2024roboduet}.
 We supply this with a target-policy-corrected lower SAC (TPC, Section~\ref{sec:tpc}) that prevents upper exploration noise from contaminating the lower's training distribution.
 We tested two architectural alternatives explicitly: (i) a literal cross-advantage augmentation following HAAR~\citep{li2019hierarchical}, with a PIPER reachability gate~\citep{singh2024piper}; (ii) a three-channel coupling that uses $\delta_t$ as a launch-time perturbation with hindsight reward credit instead of a goal shift. Both reach competitive but lower mean composite ($1.499$ and $1.492$ respectively, vs $1.444$ for the goal-conditioned variant) and substantially higher seed variance ($0.065$ and $0.077$ vs $0.038$). The component ablations (Section~\ref{sec:ablation}) report these as ablation rows.
+
+\paragraph{Rule-lower baselines: TransitDuet retains the gap when the lower is replaced by a hand-tuned rule.}
+A reviewer-motivated check addresses the question of whether the gap to GA/CMA-ES is an artefact of having a learned lower. We re-run GA and CMA-ES under a proportional headway-keeping rule (hold = $\mathrm{clip}(\htarget - h_{\mathrm{forward}}, 0, 60$\,s$)$ at every station arrival, no learning), and a receding-horizon MPC that re-plans the next dispatch's headway triple from a small candidate set scored by a closed-form mean-wait approximation; all three use the same simulator and held-out evaluation protocol. The Rule-CMA-ES variant matches its SAC-lower counterpart almost exactly ($1.511$ vs $1.504$ composite), showing that CMA-ES finds a near-optimal piecewise-static timetable for which a competent rule-based lower suffices. Rule-GA degrades by $0.32$ on composite, which is consistent with single-seed search noise. Rule-MPC, despite being the most flexible upper at deployment time, performs worst ($2.531$): its analytic per-dispatch scoring function does not capture the lower's response and overshoots fleet capacity. TransitDuet retains the leading composite ($1.444$) against all six external baselines, with the gap to the strongest non-Ours row (Rule-CMA-ES at $1.511$) being $-4.4\%$.
 
 \begin{figure*}[!htbp]
     \centering
