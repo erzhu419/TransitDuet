@@ -50,7 +50,7 @@ def smooth(s, w=10):
 
 # ═══════════════════════════════════════════════════════════════
 # fig:training_curves
-# All methods' actual training trajectories. TransitDuet (H_tpc)
+# All methods' actual training trajectories. TransitDuet (H_hiro)
 # trains for 300 episodes; the search/static baselines train for
 # 120 episodes (their convergence rate does not require longer).
 # A vertical dashed line at episode 120 marks where the baselines
@@ -69,7 +69,7 @@ def fig_training_curves():
     eps = np.arange(stack.shape[1])
     m = stack.mean(axis=0); sd = stack.std(axis=0)
     ax.plot(eps, m, color=METHOD_COLOR['A_full'], linewidth=1.8,
-            label='TransitDuet (Ours)')
+            label='TransitDuet (HIRO, Ours)')
     ax.fill_between(eps, m - sd, m + sd, color=METHOD_COLOR['A_full'], alpha=0.2)
 
     x_max = stack.shape[1]
