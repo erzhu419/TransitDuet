@@ -140,7 +140,7 @@ A separate reviewer concern is whether the GA and CMA-ES baselines are unfair be
 \begin{figure*}[!htbp]
     \centering
     \includegraphics[width=0.55\textwidth]{figures/training_curves.pdf}
-    \caption{Training curves of all four methods on the same 300-episode unified protocol (3-seed mean $\pm$ std, smoothed window 15). All methods share the same lower controller and elastic-fleet sampling. The two visible peaks on the GA and CMA-ES curves (near episodes 30--50 and 130--140) reflect their population-based search evaluating poor candidate timetables under noisy single-episode fitness; the second peak corresponds to a checkpoint-resume mid-run, after which the population re-explores. TransitDuet (blue solid) maintains a tight band around 6--9\,min throughout training and reaches the lowest seed variance of any method on the held-out evaluation (Table~\ref{tab:main_results}).}
+    \caption{Training curves of all four methods on the same 300-episode unified protocol (3-seed mean $\pm$ std, smoothed window 15). All methods share the same lower controller and elastic-fleet sampling. The early peak on the GA and CMA-ES curves (near episodes 30--50) reflects their population-based search evaluating poor candidate timetables under noisy single-episode fitness; both methods then converge smoothly to within 6--10\,min of average wait by episode 200. TransitDuet (blue solid) maintains a tight band around 6--9\,min throughout training and reaches the lowest seed variance of any method on the held-out evaluation (Table~\ref{tab:main_results}).}
     \label{fig:training_curves}
 \end{figure*}
 
