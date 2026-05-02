@@ -185,10 +185,8 @@ Removing the belief-weighted MORL scalarisation produces a $0.7\%$ regression th
 \paragraph{Elastic fleet sampling is the strongest individual contributor to in-distribution composite.}
 Fixing the fleet to $N{=}12$ rather than sampling from $\Nfleet \in [8,16]$ raises composite by $15.3\%$, the largest gap of any single ablation; the fixed-$N{=}12$ policy is over-fitted to the median budget and cannot adapt to per-episode realisations of the budget. Combined with the Pareto frontier results (Section~\ref{sec:pareto}), this confirms that the elastic-fleet protocol is doing more than enabling Pareto coverage --- it is also the most direct contributor to in-distribution composite.
 
-\paragraph{Demand-noise ablation validates the robustness claim.}
-Training under deterministic demand ($-$DemandNoise) gives $3\%$ lower composite cost at training time because by construction the policy never sees the per-hour demand variability that would appear at deployment.
-Re-evaluating the $-$DemandNoise policy on the stochastic environment reverses the ranking: wait time climbs from $4.62$\,min (in-distribution, deterministic) to $6.68$\,min (OOD, $\sigma_{\text{demand}} = 0.15$) --- a $45\%$ degradation.
-By contrast, the full TransitDuet policy trained with noise achieves $6.34$\,min on the same stochastic environment, validating that in-training demand exposure is what buys robustness, not merely the architecture.
+\paragraph{Demand-noise ablation: low in-distribution wait, high seed variance.}
+Training under deterministic demand ($-$DemandNoise) achieves the lowest in-distribution wait of any variant ($4.44$\,min, $0.85$\,min lower than the full model) when evaluated under the standard $\sigma_{\mathrm{demand}} = 0.15$ protocol, but at the cost of $3.7\times$ higher seed variance on composite ($0.140$ vs $0.038$): without exposure to the demand fluctuation at training time, the policy fits a brittle peak-period schedule that two of three seeds happen to land on. The generalisation study in Section~\ref{sec:generalization} confirms that the noise-trained full policy is also more robust under route-stochasticity shifts beyond the training distribution.
 
 %% ============================================================
 \subsection{Pareto frontier across fleet budgets}
@@ -259,7 +257,7 @@ We examine the internal dynamics of TransitDuet to verify that each mechanism be
 
 \paragraph{$\thetavec$ weight evolution.}
 \Cref{fig:theta_evolution} plots the three components of the OGD weight vector $\thetavec = [\theta_{\text{wait}}, \theta_{\text{headway}}, \theta_{\text{fleet}}]$ over training.
-Early in training, $\theta_{\text{fleet}}$ dominates as the policy learns to satisfy the fleet constraint; after approximately episode $10$, $\theta_{\text{wait}}$ and $\theta_{\text{cv}}$ increase as the policy shifts toward service quality optimization within the feasible region. In steady state, $\thetavec$ stabilizes at roughly $[0.69, 0.23, 0.08]$ (wait, fleet, CV) --- wait dominates, matching the operational priority.
+Early in training, $\theta_{\text{fleet}}$ dominates as the policy learns to satisfy the fleet constraint; after approximately episode $10$, $\theta_{\text{wait}}$ and $\theta_{\text{cv}}$ increase as the policy shifts toward service quality optimization within the feasible region. In steady state, $\thetavec$ stabilizes at roughly $[0.71, 0.21, 0.07]$ (wait, fleet, CV) --- wait dominates, matching the operational priority.
 
 \begin{figure*}[!htbp]
     \centering
@@ -270,7 +268,7 @@ Early in training, $\theta_{\text{fleet}}$ dominates as the policy learns to sat
 
 \paragraph{Lagrangian multiplier $\lambda$ convergence.}
 \Cref{fig:lambda_convergence} shows the Lagrangian dual variable $\lambda$ for the headway-regularity constraint.
-Starting from $\lambda_0 = 0$, the multiplier rises sharply during early training when headway deviations are large, then converges to $\lambda = 1.89 \pm 0.80$ (mean over last 30 episodes across 3 seeds) as the lower policy learns to regulate headways within the tolerance $\climit = 0.15$. The non-trivial magnitude of $\lambda$ at convergence indicates the constraint is active (not slack), which is expected under elastic fleet where overshoot is an unavoidable cost during peak-demand episodes.
+Starting from $\lambda_0 = 1$, the multiplier rises early when headway deviations exceed the tolerance $\climit = 0.5$ and then settles to $\lambda = 0.57 \pm 0.16$ (mean over last 30 episodes across 3 seeds) under the goal-conditioned coupling. The fact that $\lambda$ remains below its initialisation in steady state indicates that the lower satisfies its dispatch-specific target headway most of the time; the residual non-zero magnitude reflects the constraint occasionally activating during peak-demand episodes when the elastic fleet sample is small.
 
 \begin{figure*}[!htbp]
     \centering
@@ -280,16 +278,15 @@ Starting from $\lambda_0 = 0$, the multiplier rises sharply during early trainin
 \end{figure*}
 
 \paragraph{Action-space utilization.}
-The upper policy outputs a per-dispatch departure offset $\delta_t \in [-120, 120]$\,s relative to the baseline schedule.
+The upper policy outputs a per-dispatch headway shift $\delta_t \in [-120, 120]$\,s on top of the baseline target $\htarget = 360$\,s.
 \Cref{fig:delta_utilization} plots the per-episode mean and std of $\delta_t$ across training.
-Two of the three seeds exhibit active offsetting ($\mu_{\delta} \approx -30$\,s, $\sigma_{\delta} \approx 47$\,s, range spanning nearly the full $[-112, 96]$\,s bracket), while one seed converges to a near-zero policy ($\mu_{\delta} \approx -0.1$\,s, $\sigma_{\delta} \approx 0.4$\,s) that defers entirely to the baseline schedule.
-Crucially, all three seeds achieve comparable composite cost (1.72, 1.81, 1.91 across the 3 seeds; Table~\ref{tab:main_results}): both the active and the passive solutions are viable local optima under our bi-level objective.
-The active seeds win on peak-period wait via small anticipatory advances; the passive seed recovers on off-peak CV by letting the lower holding controller absorb stochasticity.
+All three seeds actively exercise the goal channel in late training ($\mu_{\delta}$ within $\pm 6$\,s, $\sigma_{\delta}$ between $19$ and $30$\,s), but with seed-dependent breadth: seed 123 settles into a tighter ($\sigma_{\delta} \approx 19$\,s) low-amplitude regime, while seeds 42 and 456 use a wider band ($\sigma_{\delta} \approx 30$\,s).
+The seed-best composites (1.491, 1.398, 1.444 for seeds 42/123/456) are within $0.1$ of one another, confirming that both the tight and the broad goal-utilisation regimes are viable local optima under the goal-conditioned objective.
 
 \begin{figure*}[!htbp]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/delta_utilization.pdf}
-    \caption{Per-episode utilization of the per-dispatch offset $\delta_t$ across three seeds. Two seeds (42, 456) converge to active offsetting, one seed (123) converges to a near-passive policy; all three reach comparable composite cost.}
+    \caption{Per-episode utilization of the per-dispatch goal shift $\delta_t$ across three seeds (3-seed mean $\pm$ std, smoothed). All three seeds actively use the goal channel; seed 123 stabilises at a tighter low-amplitude regime ($\sigma_{\delta} \approx 19$\,s) while seeds 42 and 456 use a wider band ($\sigma_{\delta} \approx 30$\,s). Best-checkpoint composite cost is within $0.1$ across seeds.}
     \label{fig:delta_utilization}
 \end{figure*}
 
