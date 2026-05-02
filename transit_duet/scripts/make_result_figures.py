@@ -107,37 +107,36 @@ def fig_training_curves():
 # fig:ablation_bars
 # ═══════════════════════════════════════════════════════════════
 def fig_ablation_bars():
+    # HIRO-mode ablations, sorted by ΔComposite (best to worst); reads from
+    # the per-ckpt eval CSVs (best-ckpt-per-seed aggregation).
     ablations = [
-        ('A_full', 'Full'),
-        ('B_no_holding_feedback', r'$-$HoldFB'),
-        ('C_no_csbapr', r'$-$CS-BAPR'),
-        ('D_no_hindsight', r'$-$Hindsight'),
-        ('E_no_morl', r'$-$MORL'),
-        ('F_fixed_fleet', r'$-$Elastic'),
-        ('G_no_demand_noise', r'$-$DemNoise'),
+        ('H_hiro',                'Full'),
+        ('H_hiro_no_morl',        r'$-$MORL'),
+        ('H_hiro_no_tpc',         r'$-$TPC'),
+        ('H_hiro_no_demand_noise',r'$-$DemNoise'),
+        ('H_hiro_no_csbapr',      r'$-$CS-BAPR'),
+        ('H_hiro_no_holdfb',      r'$-$HoldFB'),
+        ('H_hiro_no_hindsight',   r'$-$Hindsight'),
+        ('H_hiro_fixed_fleet',    r'$-$Elastic'),
     ]
-
-    def composite(row):
-        return row['avg_wait_min'] / 10 + row['fleet_overshoot']**2 / max(row['N_fleet'], 1) \
-               + row['headway_cv']
+    EVAL_ROOT = LOGS.parent / 'logs_remote' / 'eval_per_ckpt'
 
     means = []
     stds = []
     labels = []
     for key, disp in ablations:
-        vals = []
-        for s in SEEDS:
-            csv = LOGS / f'{key}_seed{s}' / 'diagnostics.csv'
-            if not csv.exists():
-                continue
-            df = pd.read_csv(csv)
-            df = df[df['ep'] < 9000]
-            tail = df.iloc[-30:]
-            c = (tail['avg_wait_min']/10 + tail['fleet_overshoot']**2/tail['N_fleet'].clip(lower=1)
-                 + tail['headway_cv']).mean()
-            vals.append(c)
-        means.append(np.mean(vals))
-        stds.append(np.std(vals))
+        csv_path = EVAL_ROOT / key / f'{key}_per_ckpt.csv'
+        if not csv_path.exists():
+            continue
+        rows = list(pd.read_csv(csv_path).itertuples())
+        seeds = sorted(set(int(r.seed) for r in rows))
+        bests = []
+        for s in seeds:
+            seed_rows = [r for r in rows if int(r.seed) == s]
+            seed_rows.sort(key=lambda r: r.composite_mean)
+            bests.append(seed_rows[0].composite_mean)
+        means.append(np.mean(bests))
+        stds.append(np.std(bests))
         labels.append(disp)
 
     fig, ax = plt.subplots(figsize=(4.8, 2.6))

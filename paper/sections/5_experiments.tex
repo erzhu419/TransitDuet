@@ -130,33 +130,30 @@ We tested two architectural alternatives explicitly: (i) a literal cross-advanta
 \subsection{Component ablations}
 \label{sec:ablation}
 
-\Cref{tab:ablations} ablates the six distinguishing components of TransitDuet one-at-a-time
-(each row removes or disables a single mechanism; all other components remain active).
+\Cref{tab:ablations} ablates the seven distinguishing mechanisms of TransitDuet one-at-a-time
+(each row removes or disables a single mechanism; all other components remain active),
+trained for 300 episodes per seed under the goal-conditioned coupling and evaluated
+under the same held-out validation protocol as Section~\ref{sec:main_results}.
 Columns are reported as mean $\pm$ std over 3 seeds; $\Delta$Composite is the relative
-degradation versus the full model (negative values indicate the ablation is slightly better
-on the training objective).
+degradation versus the full model.
 
 \begin{table*}[t]
 \centering
-\caption{Ablation of TransitDuet components. The TPC effect (top block) is the gap between the full model (w/ TPC, validation-selected checkpoint) and the same architecture trained jointly without TPC (last 30 training episodes). Component ablations (bottom block) are evaluated within the $-$TPC training protocol so that each row isolates the contribution of one architectural feature from the TPC training fix. Positive $\Delta$ values are degradations relative to the row's reference.}
+\caption{Component ablations of TransitDuet under the goal-conditioned (HIRO-style) coupling. Each row disables one mechanism and trains/evaluates under the unified 300-episode protocol; positive $\Delta$Composite values are degradations relative to the full model. Lower is better on all four metrics.}
 \label{tab:ablations}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 \textbf{Variant} & \textbf{Wait (min)} & \textbf{CV} & \textbf{Composite} & \textbf{$\Delta$Composite} \\
 \midrule
-\multicolumn{5}{l}{\textit{(a) TPC training fix (vs.\ joint training)}} \\
+TransitDuet (full)          & 5.29\,$\pm$\,0.29 & 0.457\,$\pm$\,0.014 & \textbf{1.444}\,$\pm$\,\textbf{0.038} & \;--- \\
 \midrule
-TransitDuet (full, w/ TPC)  & 5.51\,$\pm$\,0.03 & 0.482\,$\pm$\,0.035 & \textbf{1.474}\,$\pm$\,\textbf{0.071} & \;--- \\
-\;$-$TPC (joint training)   & 7.54\,$\pm$\,0.26 & 0.561\,$\pm$\,0.009 & 1.81\,$\pm$\,0.09 & $+22.8\%$ \\
-\midrule
-\multicolumn{5}{l}{\textit{(b) Component ablations within $-$TPC family (reference: $-$TPC at $1.81$)}} \\
-\midrule
-\;$-$TPC, $-$HoldFB         & 9.48\,$\pm$\,2.14 & 0.546\,$\pm$\,0.032 & 1.92\,$\pm$\,0.36 & $+6.1\%$ \\
-\;$-$TPC, $-$CS-BAPR        & 7.52\,$\pm$\,1.28 & 0.565\,$\pm$\,0.014 & 1.88\,$\pm$\,0.13 & $+3.9\%$ \\
-\;$-$TPC, $-$Hindsight      & 7.67\,$\pm$\,0.71 & 0.543\,$\pm$\,0.044 & 1.77\,$\pm$\,0.06 & $-2.2\%$ \\
-\;$-$TPC, $-$MORL           & 7.08\,$\pm$\,0.06 & 0.542\,$\pm$\,0.006 & 1.70\,$\pm$\,0.09 & $-6.1\%$ \\
-\;$-$TPC, $-$Elastic        & 5.40\,$\pm$\,0.23 & 0.511\,$\pm$\,0.013 & 1.79\,$\pm$\,0.05 & $-1.1\%$ \\
-\;$-$TPC, $-$DemandNoise    & 6.54\,$\pm$\,0.45 & 0.558\,$\pm$\,0.028 & 1.75\,$\pm$\,0.06 & $-3.3\%$ \\
+\;$-$MORL                   & 5.22\,$\pm$\,0.14 & 0.458\,$\pm$\,0.020 & 1.455\,$\pm$\,0.035 & $+0.7\%$ \\
+\;$-$TPC                    & 5.13\,$\pm$\,0.11 & 0.483\,$\pm$\,0.046 & 1.468\,$\pm$\,0.067 & $+1.6\%$ \\
+\;$-$DemandNoise            & 4.44\,$\pm$\,0.48 & 0.511\,$\pm$\,0.046 & 1.484\,$\pm$\,0.140 & $+2.7\%$ \\
+\;$-$CS-BAPR                & 5.79\,$\pm$\,0.26 & 0.478\,$\pm$\,0.037 & 1.516\,$\pm$\,0.058 & $+5.0\%$ \\
+\;$-$HoldFB                 & 5.74\,$\pm$\,0.45 & 0.462\,$\pm$\,0.059 & 1.548\,$\pm$\,0.165 & $+7.2\%$ \\
+\;$-$Hindsight              & 5.93\,$\pm$\,0.94 & 0.488\,$\pm$\,0.048 & 1.605\,$\pm$\,0.218 & $+11.1\%$ \\
+\;$-$Elastic ($N{=}12$)     & 6.29\,$\pm$\,0.62 & 0.512\,$\pm$\,0.020 & 1.666\,$\pm$\,0.131 & $+15.3\%$ \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -164,29 +161,29 @@ TransitDuet (full, w/ TPC)  & 5.51\,$\pm$\,0.03 & 0.482\,$\pm$\,0.035 & \textbf{
 \begin{figure*}[!htbp]
     \centering
     \includegraphics[width=0.55\textwidth]{figures/ablation_bars.pdf}
-    \caption{Composite cost (lower is better) per ablation, 3-seed mean $\pm$ std. The full model (blue) sets the reference line; $-$HoldFB and $-$CS-BAPR are the only ablations that are clearly worse on the mean in-distribution objective. The remaining four ablations are within noise on this metric but fail on out-of-distribution generalization (see Table~\ref{tab:generalization}).}
+    \caption{Composite cost (lower is better) per HIRO-mode ablation, 3-seed best-ckpt mean $\pm$ std on the unified held-out evaluation protocol; ablations sorted by $\Delta$Composite. The full model (blue) sets the reference line. Within the goal-conditioned coupling, four mechanisms are clearly load-bearing on in-distribution composite ($-$Hindsight, $-$HoldFB, $-$CS-BAPR, and $-$Elastic), while $-$TPC and $-$MORL produce regressions within seed noise; $-$DemNoise wins on in-distribution wait but fails out-of-distribution (Section~\ref{sec:generalization}).}
     \label{fig:ablation_bars}
 \end{figure*}
 
 \paragraph{The goal-conditioned coupling is the dominant architectural choice.}
 Among the three coupling architectures we evaluated end-to-end (Section~\ref{sec:main_results}), the goal-conditioned design has the lowest composite ($1.444$) and the lowest seed variance ($0.038$); the literal cross-advantage augmentation (HAAR+PIPER, $1.499$/$0.065$) and the three-channel design with launch-time perturbation ($1.492$/$0.077$) are both competitive but consistently behind. This $4\%$ composite gap is on the same order as the gap to the strongest baseline ($\Delta = 0.060$ vs CMA-ES), making the coupling choice as decisive as the bi-level-vs-search choice itself.
-TPC plays a complementary role: it reduces mid-training drift in the lower's training distribution and tightens seed variance, but its mean-composite contribution under the goal-conditioned coupling is smaller than under the launch-time-perturbation channels-mode coupling, where the lower is more directly exposed to upper exploration noise. The numbers in \Cref{tab:ablations} below were obtained under the launch-time-perturbation channels-mode runner from an earlier iteration of this work; the relative ranking of the architectural ablations is preserved under the goal-conditioned runner, but the absolute composite values shift downward by $\approx 0.05$ across all rows.
 
-\paragraph{Within the joint-training family, two components are load-bearing.}
-Among architectural ablations evaluated under the $-$TPC training protocol, holding-feedback coupling and CS-BAPR are the only two whose removal increases composite (HoldFB by $6.1\%$, CS-BAPR by $3.9\%$).
-Removing HoldFB also quadruples the wait-time std (from $0.26$ to $2.14$): without the lower's observed dispatch-gap statistics in its state, the upper policy cannot react to realised congestion.
-Removing CS-BAPR raises wait std from $0.26$ to $1.28$ for a similar reason: the belief tracker boosts exploration on non-stationarity, and without it the policy sticks to a prior that is wrong out-of-distribution.
+\paragraph{Hindsight credit is the most load-bearing component within the goal-conditioned family.}
+Removing the trip-lifecycle hindsight credit on the upper reward (Section~\ref{sec:tap}) is the single largest in-distribution regression, raising composite by $11.1\%$ ($1.444\!\to\!1.605$) and inflating the seed std by nearly $6\times$ ($0.038\!\to\!0.218$).
+Without per-dispatch credit, the upper sees only the episode-level system reward and cannot distinguish a goal whose realised lifecycle produced regular gaps from one that produced bunching, so seeds drift toward different local optima.
+Removing the holding-feedback (HoldFB) state channel is the second-largest hit ($+7.2\%$, std $4\times$ larger): without observing how aggressively the lower is intervening, the upper sets goals that the lower must absorb at growing holding cost.
+Removing the CS-BAPR belief tracker degrades composite by $5.0\%$, primarily through worsened wait variance under regime changes.
 
-\paragraph{Four ablations are not in-distribution-load-bearing.}
-$-$Hindsight, $-$MORL, $-$Elastic, and $-$DemandNoise each produce composite scores within one $\sigma$ of the $-$TPC reference, and three of them are slightly better on average.
-This is not a failure of the method --- it reflects that these components address distributional properties (Pareto coverage, multi-objective trade-offs, training-distribution robustness) that the in-distribution composite score does not measure.
-\Cref{sec:generalization} and \Cref{sec:pareto} evaluate those properties directly.
+\paragraph{TPC has a smaller mean effect under the goal-conditioned coupling than under three-channel coupling.}
+Removing TPC from the goal-conditioned configuration produces only a $1.6\%$ composite regression in the mean, in contrast to the $\approx 23\%$ swing we observed under the launch-time-perturbation three-channel coupling in earlier preliminary runs.
+The asymmetry has a clean explanation: under the goal channel, the upper changes the lower's \emph{constraint target} but not the distribution of states the lower observes, so the lower's covariate shift from upper exploration is much milder.
+TPC still tightens variance somewhat (composite std $0.067\!\to\!0.038$) and reduces mid-training drift in the lower's $\alpha$/$\lambda$ trajectories, but it is no longer the decisive intervention it was for the channels-mode coupling.
 
-\paragraph{Elastic $\Nfleet$ trades in-distribution optimality for Pareto coverage.}
-The $-$Elastic variant ($\Nfleet = 12$ fixed) achieves the lowest wait ($5.40$\,min) and lowest composite among the ablations.
-This is expected: a policy specialized to $\Nfleet = 12$ can over-fit to that single budget.
-But the specialized policy cannot be deployed at $\Nfleet = 8$ or $\Nfleet = 16$ without re-training; the elastic policy produces the full Pareto frontier with one training run (\Cref{sec:pareto}).
-The $1.2\%$ composite gap is the amortization premium.
+\paragraph{MORL and DemandNoise are not in-distribution-load-bearing.}
+Removing the belief-weighted MORL scalarisation produces a $0.7\%$ regression that is well within seed noise, and removing demand stochasticity at training time even improves in-distribution wait (a deterministic policy can over-fit to deterministic demand). Both components address out-of-distribution properties --- Pareto coverage across the 8--16 fleet range and robustness to demand variability respectively --- that are evaluated separately in Sections~\ref{sec:pareto} and~\ref{sec:generalization}; the in-distribution composite is not the right axis to judge them on.
+
+\paragraph{Elastic fleet sampling is the strongest individual contributor to in-distribution composite.}
+Fixing the fleet to $N{=}12$ rather than sampling from $\Nfleet \in [8,16]$ raises composite by $15.3\%$, the largest gap of any single ablation; the fixed-$N{=}12$ policy is over-fitted to the median budget and cannot adapt to per-episode realisations of the budget. Combined with the Pareto frontier results (Section~\ref{sec:pareto}), this confirms that the elastic-fleet protocol is doing more than enabling Pareto coverage --- it is also the most direct contributor to in-distribution composite.
 
 \paragraph{Demand-noise ablation validates the robustness claim.}
 Training under deterministic demand ($-$DemandNoise) gives $3\%$ lower composite cost at training time because by construction the policy never sees the per-hour demand variability that would appear at deployment.
