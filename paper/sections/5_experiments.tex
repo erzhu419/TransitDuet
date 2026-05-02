@@ -108,6 +108,9 @@ Rule-MPC             & 13.95\,$\pm$\,7.78 & 0.501\,$\pm$\,0.129 & 2.40\,$\pm$\,0
 Rule-GA              & 6.28\,$\pm$\,3.46 & 0.529\,$\pm$\,0.115 & 2.45\,$\pm$\,0.97 & 1.842\,$\pm$\,0.656 \\
 Rule-CMA-ES          & 5.57\,$\pm$\,1.61 & 0.495\,$\pm$\,0.081 & 1.85\,$\pm$\,1.11 & 1.511\,$\pm$\,0.467 \\
 \midrule
+\multicolumn{5}{l}{\textit{Per-candidate-retrain GA (each candidate fine-tunes a fresh-from-warm-start lower; 1 seed)}} \\
+Per-cand-GA          & 16.82\,$\pm$\,5.95 & 0.567\,$\pm$\,0.096 & 2.15\,$\pm$\,1.24 & 2.917\,$\pm$\,0.911 \\
+\midrule
 \textbf{TransitDuet (HIRO, Ours)}  & \textbf{5.29}\,$\pm$\,\textbf{0.29} & \textbf{0.457}\,$\pm$\,\textbf{0.014} & \textbf{1.55}\,$\pm$\,\textbf{0.04} & \textbf{1.444}\,$\pm$\,\textbf{0.038} \\
 \bottomrule
 \end{tabular}
@@ -130,6 +133,9 @@ We tested two architectural alternatives explicitly: (i) a literal cross-advanta
 
 \paragraph{Rule-lower baselines: TransitDuet retains the gap when the lower is replaced by a hand-tuned rule.}
 A reviewer-motivated check addresses the question of whether the gap to GA/CMA-ES is an artefact of having a learned lower. We re-run GA and CMA-ES under a proportional headway-keeping rule (hold = $\mathrm{clip}(\htarget - h_{\mathrm{forward}}, 0, 60$\,s$)$ at every station arrival, no learning), and a receding-horizon MPC that re-plans the next dispatch's headway triple from a small candidate set scored by a closed-form mean-wait approximation; all three use the same simulator and held-out evaluation protocol. The Rule-CMA-ES variant matches its SAC-lower counterpart almost exactly ($1.511$ vs $1.504$ composite), showing that CMA-ES finds a near-optimal piecewise-static timetable for which a competent rule-based lower suffices. Rule-GA degrades by $0.32$ on composite, which is consistent with single-seed search noise. Rule-MPC, despite being the most flexible upper at deployment time, performs worst ($2.531$): its analytic per-dispatch scoring function does not capture the lower's response and overshoots fleet capacity. TransitDuet retains the leading composite ($1.444$) against all six external baselines, with the gap to the strongest non-Ours row (Rule-CMA-ES at $1.511$) being $-4.4\%$.
+
+\paragraph{Per-candidate-retrain GA: budget-matched per-candidate fine-tuning is markedly worse than sharing a lower across the search.}
+A separate reviewer concern is whether the GA and CMA-ES baselines are unfair because they share a single lower controller across the search rather than retraining a fresh lower per candidate. We tested the alternative directly under a budget-matched setup: 6 generations $\times$ 6 candidates $\times$ (6 train + 2 eval) episodes $\approx$ 288 simulator episodes, comparable to the 300-episode budget of the shared-lower GA, with each candidate's lower warm-started from the converged TransitDuet-HIRO lower (Section~\ref{sec:main_results}) and fine-tuned for 6 episodes against the candidate's timetable. The result is the bottom row of \Cref{tab:main_results}: composite $2.917 \pm 0.911$, wait $16.82$\,min --- markedly worse than every other row. The cause is clear: 6 episodes of fine-tuning on a candidate's specific timetable is not enough for the lower to adapt away from its warm-start regime, and search candidates that explore extreme headways (e.g., $H_{\mathrm{off}} > 1000$\,s) cannot be rescued by an under-adapted controller. Spending the same simulator budget on a shared lower trained against many candidates --- the protocol used by all other rows --- is markedly more sample-efficient. This validates the shared-lower experimental design as the appropriate comparison and is itself a useful empirical observation about cost-aware bi-level search.
 
 \begin{figure*}[!htbp]
     \centering
