@@ -128,7 +128,7 @@ A two-layer MLP maps the 11-dimensional upper state (5 system summary dims + 3 h
 \midrule
 Linear & $11 \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
-Mean head & $64 \to 1$ & Sigmoid $\to$ affine rescale to $[-120, 120]$\,s \\
+Mean head & $64 \to 1$ & Sigmoid $\to [-120, 120]$\,s \\
 Log-std head & $64 \to 1$ & Clamp$[-5, 0]$ \\
 \bottomrule
 \end{tabular}

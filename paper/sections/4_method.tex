@@ -62,17 +62,25 @@ Exploration is achieved by additive Gaussian noise with a learnable log-standard
 \end{equation}
 
 \paragraph{Off-policy SAC training (RE-SAC upper).}
-The upper policy is trained as an off-policy soft actor-critic with an ensemble of $K{=}10$ Q-networks and a lower-confidence-bound (LCB) value used in the policy improvement step --- the same RE-SAC-style structure used at the lower level (\cref{sec:lower}), without the Lagrangian. Each dispatch event $i$ contributes a transition $(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U}}^{(i)}, s_{\mathrm{U},i+1}, d_i)$ to a 50k-capacity replay buffer; the per-dispatch reward $R_{\mathrm{U}}^{(i)}$ is the hindsight-credited reward of \Cref{eq:hindsight_reward} (\cref{sec:tap}). The ensemble Q-networks are trained against a single shared mean-target to prevent ensemble divergence,
+The upper policy is trained as an off-policy soft actor-critic with an ensemble of $K{=}10$ Q-networks and a lower-confidence-bound (LCB) value used in the policy improvement step --- the same RE-SAC-style structure~\citep{resac2026} used at the lower level (\cref{sec:lower}), without the Lagrangian. Each dispatch event $i$ contributes a transition $(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U}}^{(i)}, s_{\mathrm{U},i+1}, d_i)$ to a 50k-capacity replay buffer; the per-dispatch reward $R_{\mathrm{U}}^{(i)}$ is the hindsight-credited reward of \Cref{eq:hindsight_reward} (\cref{sec:tap}). The ensemble Q-networks are trained against a single shared mean-target to prevent ensemble divergence,
 \begin{equation}
 \label{eq:upper_q_target}
-    y_i = R_{\mathrm{U}}^{(i)} + \gamma\,(1 - d_i)\,\Bigl(\tfrac{1}{K}\sum_{k=1}^{K} \bar{Q}_{k}(s_{\mathrm{U},i+1}, \tilde{a}) - \alpha_{\mathrm{U}} \log\piU(\tilde{a}\mid s_{\mathrm{U},i+1})\Bigr),
+\begin{aligned}
+    y_i = R_{\mathrm{U}}^{(i)} + \gamma\,(1 - d_i)\,\Bigl(\,
+      &\tfrac{1}{K}\sum_{k=1}^{K} \bar{Q}_{k}(s_{\mathrm{U},i+1}, \tilde{a})\\[-2pt]
+      &-\, \alpha_{\mathrm{U}} \log\piU(\tilde{a}\mid s_{\mathrm{U},i+1})\Bigr),
+\end{aligned}
 \end{equation}
 where $\bar{Q}_{k}$ is the $k$-th target network, $\tilde{a} \sim \piU(\cdot\mid s_{\mathrm{U},i+1})$, and the target is clamped to $[-50, 50]$; the per-Q MSE is augmented with a small ensemble-spread penalty $\beta_{\mathrm{ood}} \cdot \mathrm{std}_k(Q_k)$ that encourages the ensemble to disagree on out-of-distribution actions. The policy is improved by maximising the LCB value:
 \begin{equation}
 \label{eq:upper_policy_loss}
-    \mathcal{L}_{\piU}(\phi) = \mathbb{E}_{s\sim\mathcal{D}_{\mathrm{U}},\,a\sim\piU}\!\Bigl[\alpha_{\mathrm{U}}\,\log\piU(a\mid s) - \bigl(\bar{Q}(s,a) + \beta_{\mathrm{LCB}}\,\sigma_Q(s,a)\bigr)\Bigr],\;\; \beta_{\mathrm{LCB}} = -2,
+\begin{aligned}
+    \mathcal{L}_{\piU}(\phi) = \mathbb{E}_{s\sim\mathcal{D}_{\mathrm{U}},\,a\sim\piU}\!\Bigl[\,
+      &\alpha_{\mathrm{U}}\,\log\piU(a\mid s)\\[-2pt]
+      &-\,\bigl(\bar{Q}(s,a) + \beta_{\mathrm{LCB}}\,\sigma_Q(s,a)\bigr)\Bigr],
+\end{aligned}
 \end{equation}
-i.e., the LCB value $\bar{Q} + \beta_{\mathrm{LCB}}\sigma_Q$ subtracts twice the ensemble disagreement from the mean. Auto-entropy adjusts $\alpha_{\mathrm{U}}$ toward the target entropy $-\dim(\aU) = -1$, capped at $\alpha_{\max}^{\mathrm{U}} = 0.05$ in the goal-conditioned configuration (the upper action is a 1-dimensional headway shift, so the entropy target $-\dim(\aU) = -1$ saturates quickly without a low cap). The choice of an off-policy SAC upper rather than an on-policy estimator is deliberate: dispatches are scarce ($M\!\approx\!264$ per episode), so a replay buffer reuses each transition many times across gradient updates.
+where $\beta_{\mathrm{LCB}} = -2$, so the LCB value $\bar{Q} + \beta_{\mathrm{LCB}}\sigma_Q$ subtracts twice the ensemble disagreement from the mean. Auto-entropy adjusts $\alpha_{\mathrm{U}}$ toward the target entropy $-\dim(\aU) = -1$, capped at $\alpha_{\max}^{\mathrm{U}} = 0.05$ in the goal-conditioned configuration (the upper action is a 1-dimensional headway shift, so the entropy target $-\dim(\aU) = -1$ saturates quickly without a low cap). The choice of an off-policy SAC upper rather than an on-policy estimator is deliberate: dispatches are scarce ($M\!\approx\!264$ per episode), so a replay buffer reuses each transition many times across gradient updates.
 
 %% ====================================================================
 \subsection{Lower-level holding control policy}
@@ -92,20 +100,32 @@ The raw sample $u \sim \mathcal{N}(\mu_{\psi}, \sigma_{\psi}^2)$ is squashed thr
 The log-probability accounts for the change of variables:
 \begin{equation}
 \label{eq:log_prob}
-    \log \piL(\aL \mid \sL) = \log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2) - \log\bigl(1 - \tanh^2(u)\bigr) - \log a_{\max}.
+\begin{aligned}
+    \log \piL(\aL \mid \sL) =\, &\log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2)\\
+    &- \log\bigl(1 - \tanh^2(u)\bigr) - \log a_{\max}.
+\end{aligned}
 \end{equation}
 
 \paragraph{Reward Q-ensemble (RE-SAC, $K{=}10$).}
-Rather than the standard twin-Q double-clipped critic of SAC, the lower uses an ensemble of $K{=}10$ independently-initialised Q-networks $\{Q_{\omega_k}\}_{k=1}^{K}$, each a two-layer MLP with 64 hidden units. To prevent ensemble divergence, all members are trained against a single shared mean target,
+Rather than the standard twin-Q double-clipped critic of SAC, the lower uses the RE-SAC critic of \citet{resac2026}, which replaces the double-clip with an ensemble of $K{=}10$ independently-initialised Q-networks $\{Q_{\omega_k}\}_{k=1}^{K}$, each a two-layer MLP with 64 hidden units, and uses a lower-confidence bound rather than the min-of-twin for policy improvement. To prevent ensemble divergence, all members are trained against a single shared mean target,
 \begin{equation}
 \label{eq:lower_q_target}
-    y = r + \gamma\,\Bigl(\tfrac{1}{K}\sum_{k=1}^{K} Q_{\bar{\omega}_k}(\sL', \aL') - \alpha \log \piL(\aL' \mid \sL')\Bigr),\quad \aL' \sim \piL(\cdot \mid \sL'),
+\begin{aligned}
+    y = r + \gamma\,\Bigl(\,
+      &\tfrac{1}{K}\sum_{k=1}^{K} Q_{\bar{\omega}_k}(\sL', \aL')\\[-2pt]
+      &-\, \alpha \log \piL(\aL' \mid \sL')\Bigr),
+\end{aligned}
 \end{equation}
+with $\aL' \sim \piL(\cdot \mid \sL')$,
 and the per-$Q_k$ loss is augmented with a small ensemble-spread regulariser,
 \begin{equation}
 \label{eq:lower_q_loss}
-    \mathcal{L}_Q(\omega_k) = \E_{(\sL,\aL,r,\sL') \sim \D}\!\Bigl[\bigl(Q_{\omega_k}(\sL,\aL) - y\bigr)^2\Bigr] + \beta_{\mathrm{ood}}\,\mathrm{std}_k\bigl(Q_{\omega_k}(\sL,\aL)\bigr),\quad \beta_{\mathrm{ood}} = 0.1,
+\begin{aligned}
+    \mathcal{L}_Q(\omega_k) =\, &\E_{(\sL,\aL,r,\sL') \sim \D}\!\Bigl[\bigl(Q_{\omega_k}(\sL,\aL) - y\bigr)^2\Bigr]\\
+    &+ \beta_{\mathrm{ood}}\,\mathrm{std}_k\bigl(Q_{\omega_k}(\sL,\aL)\bigr),
+\end{aligned}
 \end{equation}
+with $\beta_{\mathrm{ood}} = 0.1$,
 which encourages members to disagree on out-of-distribution actions. Target parameters $\bar{\omega}_k$ track $\omega_k$ via Polyak averaging with $\tau = 0.005$. Policy improvement is performed against the ensemble lower-confidence bound (LCB),
 \begin{equation}
 \label{eq:lower_lcb}
@@ -117,13 +137,23 @@ A standard SAC twin-Q critic corresponds to the special case $K{=}2$ without the
 A separate single-MLP cost critic $Q^c_{\xi}(\sL, \aL)$ (same hidden width 64) estimates the expected cumulative headway-deviation cost. The lower-level actor loss balances entropy, the ensemble LCB value, and the constraint:
 \begin{equation}
 \label{eq:lower_policy_loss}
-    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\!\Bigl[\alpha \log \piL(\aL \mid \sL) - \bigl(\bar{Q}(\sL, \aL) + \beta_{\mathrm{LCB}}\,\sigma_Q(\sL, \aL)\bigr) + \lambda\, Q^c_{\xi}(\sL, \aL)\Bigr],
+\begin{aligned}
+    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\!\Bigl[\,
+      &\alpha \log \piL(\aL \mid \sL)\\[-2pt]
+      &-\, \bigl(\bar{Q}(\sL, \aL) + \beta_{\mathrm{LCB}}\,\sigma_Q(\sL, \aL)\bigr)\\
+      &+\, \lambda\, Q^c_{\xi}(\sL, \aL)\Bigr],
+\end{aligned}
 \end{equation}
 with $\beta_{\mathrm{LCB}} = -2$ (the policy is improved against the lower confidence bound) and $\lambda \geq 0$ the Lagrange multiplier. The dual is updated to satisfy the cost-limit constraint $\climit$:
 \begin{equation}
 \label{eq:lambda_update}
-    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}\,(\E[Q^c_{\xi}] - \climit),\; -10,\; 5\bigr)\Bigr],\qquad \eta_{\lambda} = 10^{-4}.
+\begin{aligned}
+    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(
+      &\log\lambda + \eta_{\lambda}\,(\E[Q^c_{\xi}] - \climit),\\[-2pt]
+      &-10,\; 5\bigr)\Bigr],
+\end{aligned}
 \end{equation}
+with $\eta_{\lambda} = 10^{-4}$.
 Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability.
 
 \paragraph{Auto-entropy tuning.}
@@ -184,7 +214,10 @@ where $\bar{w}$ is the average passenger waiting time, $n_{\mathrm{peak}}$ is th
 A weight vector $\thetavec \in \R^3$, initialized as $\thetavec_0 = [-0.5,\, -0.3,\, -0.2]$, modulates the upper-level reward:
 \begin{equation}
 \label{eq:upper_reward}
-    R_{\mathrm{U}} = \thetavec^\top \mathbf{p}, \quad \text{where} \quad \mathbf{p} = \bigl[\bar{w},\; (\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2,\; b_{\mathrm{rate}}\bigr].
+\begin{aligned}
+    R_{\mathrm{U}} &= \thetavec^\top \mathbf{p},\\
+    \mathbf{p} &= \bigl[\bar{w},\; (\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2,\; b_{\mathrm{rate}}\bigr].
+\end{aligned}
 \end{equation}
 The quadratic penalty on fleet overshoot $(\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2$ ensures that small violations incur proportionally less cost than large ones, providing a smooth gradient.
 

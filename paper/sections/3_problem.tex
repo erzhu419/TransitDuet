@@ -30,19 +30,21 @@ It is invoked once per dispatch event ($M \approx 264$ events per episode, $\app
 The upper state encodes both system-level summary statistics and the holding-feedback (HoldFB) block that closes the lower-to-upper loop (\Cref{sec:tap}):
 \begin{equation}
   \label{eq:upper_state}
-  \sU = \Bigl[\,
-    \underbrace{\tfrac{\text{hour}}{24},\;
-                \tfrac{\text{demand}}{1000},\;
-                \tfrac{\text{fleet\_on\_route}}{\Nfleet^{\max}},\;
-                \tfrac{\text{prev\_headway}}{600},\;
-                \text{holding\_ratio}}_{\text{system summary, dims 0--4}},\;
-    \underbrace{\tfrac{\bar{h}^{\mathrm{up}}_{\mathrm{hold}}}{60},\;
-                \tfrac{\sigma^{\mathrm{up}}_{\mathrm{hold}}}{60},\;
-                \tfrac{\bar{h}^{\mathrm{down}}_{\mathrm{hold}}}{60}}_{\text{HoldFB, dims 5--7}},\;
-    \underbrace{\tfrac{\htarget}{600},\;
-                \mathrm{dir},\;
-                \tfrac{\Nfleet}{20}}_{\text{trip context, dims 8--10}}
-  \,\Bigr] \;\in\; \R^{11},
+  \begin{aligned}
+    \sU = \bigl[\,
+      &\underbrace{\tfrac{\text{hour}}{24},\,
+                   \tfrac{\text{demand}}{1000},\,
+                   \tfrac{\text{fleet\_on\_route}}{\Nfleet^{\max}},\,
+                   \tfrac{\text{prev\_headway}}{600},\,
+                   \text{holding\_ratio}}_{\text{system summary, dims 0--4}},\\
+      &\underbrace{\tfrac{\bar{h}^{\mathrm{up}}_{\mathrm{hold}}}{60},\,
+                   \tfrac{\sigma^{\mathrm{up}}_{\mathrm{hold}}}{60},\,
+                   \tfrac{\bar{h}^{\mathrm{down}}_{\mathrm{hold}}}{60}}_{\text{HoldFB, dims 5--7}},\\
+      &\underbrace{\tfrac{\htarget}{600},\,
+                   \mathrm{dir},\,
+                   \tfrac{\Nfleet}{20}}_{\text{trip context, dims 8--10}}
+    \,\bigr] \;\in\; \R^{11}.
+  \end{aligned}
 \end{equation}
 where each component is normalized to facilitate learning. Dims 5--7 are the rolling holding statistics over the last 10 completed trips (see~\Cref{sec:tap}); the $-$HoldFB ablation in~\Cref{sec:ablation} zeroes these three dimensions. Dim 10 is the per-episode elastic fleet budget $\Nfleet \in [8, 16]$, which the policy must condition on to produce the Pareto frontier of~\Cref{sec:pareto}.
 
@@ -68,17 +70,19 @@ A decision is triggered at each station arrival for each active bus, producing a
 The lower state captures the local context of an individual bus:
 \begin{equation}
   \label{eq:lower_state}
-  \sL = \bigl[\,
-    \text{bus\_id},\;
-    \text{station\_id},\;
-    \text{hour},\;
-    \text{direction},\;
-    h_{\mathrm{fwd}},\;
-    h_{\mathrm{bwd}},\;
-    \hat{d},\;
-    \Delta h,\;
-    v_1,\dots,v_K
-  \,\bigr] \;\in\; \R^{8+K},
+  \begin{aligned}
+    \sL = \bigl[\,
+      &\text{bus\_id},\,
+       \text{station\_id},\,
+       \text{hour},\,
+       \text{direction},\\
+      &h_{\mathrm{fwd}},\,
+       h_{\mathrm{bwd}},\,
+       \hat{d},\,
+       \Delta h,\,
+       v_1,\dots,v_K
+    \,\bigr] \;\in\; \R^{8+K},
+  \end{aligned}
 \end{equation}
 where $h_{\mathrm{fwd}}$ and $h_{\mathrm{bwd}}$ denote the forward and backward headways, $\hat{d}$ is the estimated dwell time, $\Delta h$ is the deviation of the current headway from $\htarget$, and $v_1,\dots,v_K$ are recent inter-station speeds that encode local traffic conditions.
 
