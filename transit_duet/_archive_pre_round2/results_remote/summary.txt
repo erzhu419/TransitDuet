@@ -1,0 +1,28 @@
+================================================================================
+  TransitDuet Experiment Summary
+================================================================================
+
+## Ablation Study (wait_min, mean±std over seeds)
+  A_full                        wait= 7.5±0.3  cv=0.56  (n=3)
+  B_no_holding_feedback         wait= 9.5±2.1  cv=0.55  (n=3)
+  C_no_csbapr                   wait= 7.5±1.3  cv=0.57  (n=3)
+  D_no_hindsight                wait= 7.7±0.7  cv=0.54  (n=3)
+  E_no_morl                     wait= 7.1±0.1  cv=0.54  (n=3)
+  F_fixed_fleet                 wait= 5.4±0.2  cv=0.51  (n=3)
+  G_no_demand_noise             wait= 6.5±0.4  cv=0.56  (n=3)
+
+## Pareto Frontier (wait_mean ± std)
+  N_fleet= 8  wait=20.9±9.3  cv=0.64  overshoot=3.0
+  N_fleet= 9  wait=12.1±6.7  cv=0.59  overshoot=3.0
+  N_fleet=10  wait= 6.2±1.0  cv=0.52  overshoot=3.0
+  N_fleet=11  wait= 6.7±1.5  cv=0.56  overshoot=3.0
+  N_fleet=12  wait= 6.0±0.7  cv=0.55  overshoot=3.0
+  N_fleet=13  wait= 6.0±1.3  cv=0.55  overshoot=3.0
+  N_fleet=14  wait= 5.8±0.3  cv=0.52  overshoot=2.3
+  N_fleet=15  wait= 4.8±0.1  cv=0.51  overshoot=1.3
+  N_fleet=16  wait= 5.8±1.1  cv=0.57  overshoot=0.5
+
+## Baseline Comparison
+  cmaes                 wait= 8.2±2.8  cv=0.70  n=3
+  ga                    wait= 6.1±0.3  cv=0.56  n=3
+  fixed                 wait= 4.6±1.5  cv=0.54  n=3

@@ -1,13 +1,17 @@
 """
 upper/resac_upper.py
 ====================
-RE-SAC for upper-level timetable policy.
+RE-SAC for the adaptive target-headway upper policy.
 
-Same ensemble Q + epistemic penalty as lower RE-SAC, but:
-  - No Lagrangian cost constraint (fleet constraint via θ-OGD instead)
-  - Action dim=3: [H_peak, H_off, H_trans] mapped to [action_low, action_high]
-  - Uses sigmoid (not tanh) for bounded action space
-  - Own replay buffer for dispatch-level transitions
+Same ensemble Q + epistemic penalty as the lower RE-SAC, but:
+  - No Lagrangian cost constraint (fleet constraint via θ-OGD instead).
+  - Action dim is 1 in the main HIRO configuration (per-dispatch
+    target-headway shift δ_t ∈ [-120, +120] s); the constructor still accepts
+    arbitrary action_dim so the legacy 3-action [H_peak, H_off, H_trans]
+    headway-triple variant remains usable for ablations.
+  - Bounded action via sigmoid + affine rescale to [action_low, action_high]
+    (matches paper Section IV-B; not tanh).
+  - Own replay buffer for dispatch-level transitions.
 """
 
 import torch

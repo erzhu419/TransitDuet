@@ -18,28 +18,38 @@
   & \texttt{effective\_trip\_num} & 264   & Total trips per service day \\
   & \texttt{demand\_noise}        & 0.15  & Per-hour demand multiplier std \\
 \midrule
-\multirow{8}{*}{Upper policy}
+\multirow{13}{*}{Upper policy}
   & \texttt{state\_dim}    & 11             & system summary (5) + HoldFB (3) + trip ctx (3); see Eq.~\ref{eq:upper_state} \\
   & \texttt{action\_dim}   & 1              & per-dispatch headway shift $\delta_t \in [-120, 120]$\,s \\
   & \texttt{action\_low}   & $-120$         & Min offset (s) \\
   & \texttt{action\_high}  & $+120$         & Max offset (s) \\
   & \texttt{hidden\_dim}   & 64             & MLP hidden layer width \\
-  & \texttt{lr}            & $10^{-4}$      & Policy learning rate (Adam) \\
+  & \texttt{lr}            & $3 \times 10^{-4}$ & Policy / critic learning rate (Adam) \\
+  & \texttt{batch\_size}   & 64             & Replay buffer mini-batch \\
+  & \texttt{updates\_per\_episode} & 10     & SAC gradient steps per training episode \\
+  & \texttt{replay\_capacity}      & 50{,}000 & Upper transitions stored \\
+  & \texttt{ensemble\_size} $K$    & 10     & RE-SAC critic ensemble size \\
+  & $\beta_{\mathrm{LCB}}$         & $-2.0$ & LCB coefficient in policy improvement \\
+  & $\gamma_{\mathrm U}$           & 0.95   & Discount factor (per-dispatch) \\
+  & $\alpha_{\max}^{\mathrm U}$    & 0.05   & Maximum entropy temperature (auto-tuned) \\
   & $\Nfleet^{\min},\Nfleet^{\max}$ & $8, 16$ & Elastic fleet sampling range \\
   & $\Nfleet$ (default)    & 12             & Soft fleet target (overshoot$^2$ penalty) \\
 \midrule
-\multirow{11}{*}{Lower policy}
-  & \texttt{hidden\_dim}     & 32      & MLP hidden layer width \\
+\multirow{14}{*}{Lower policy}
+  & \texttt{hidden\_dim}     & 64      & MLP hidden layer width \\
   & \texttt{action\_range}   & 60      & Holding time bound (action $\in [-60, 60]$\,s) \\
   & $\climit$                & 0.5     & Lagrangian cost budget \\
-  & \texttt{batch\_size}     & 2048    & Replay buffer mini-batch \\
-  & \texttt{lr}              & $10^{-5}$ & Critic + policy learning rate \\
-  & $\lambda_{\text{lr}}$    & $10^{-3}$ & Lagrangian multiplier LR \\
+  & \texttt{batch\_size}     & 512     & Replay buffer mini-batch \\
+  & \texttt{updates\_per\_episode} & 30 & SAC gradient steps per training episode \\
+  & \texttt{lr}              & $3 \times 10^{-4}$ & Critic + policy learning rate \\
+  & $\lambda_{\text{lr}}$    & $10^{-4}$ & Lagrangian multiplier LR \\
   & $\gamma$                 & 0.99    & Discount factor \\
   & $\tau$                   & 0.005   & Soft target update rate \\
   & \texttt{auto\_entropy}   & true    & Automatic entropy tuning \\
-  & $\alpha_{\max}$          & 0.3     & Maximum entropy temperature \\
-  & \texttt{reward\_scale}   & 10      & Reward scaling factor \\
+  & $\alpha_{\max}^{\mathrm L}$ & 0.1   & Maximum entropy temperature \\
+  & \texttt{ensemble\_size} $K$ & 10   & RE-SAC critic ensemble size \\
+  & $\beta_{\mathrm{ood}}$   & 0.1     & Ensemble-spread regulariser weight \\
+  & \texttt{reward\_scale}   & 1.0     & Reward scaling factor \\
 \midrule
 \multirow{6}{*}{Coupling}
   & $e_{\mathrm{warm}}$       & 30 episodes   & Lower-only warmup ($\delta_t = 0$) \\
@@ -51,9 +61,9 @@
   & $\eta_{\thetavec}$        & 0.01          & ApproPO $\thetavec$-OGD step size \\
 \midrule
 \multirow{3}{*}{Training}
-  & \texttt{total\_episodes}       & 300     & Total training episodes \\
+  & \texttt{total\_episodes}       & 300     & Total training episodes per seed \\
   & \texttt{save\_freq}            & 50      & Checkpoint frequency (episodes) \\
-  & \texttt{replay\_buffer\_size}  & $10^6$  & Replay buffer capacity \\
+  & \texttt{replay\_buffer\_size}  & $5 \times 10^{5}$ & Lower replay buffer capacity \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -97,7 +107,7 @@ Forward and backward headways are computed with respect to the preceding and fol
 \paragraph{Timetable structure.}
 A service day consists of 264 trips alternating between the two directions, truncated from a full operational schedule to keep simulation tractable.
 At most 25 buses may be concurrently active (\texttt{max\_agent\_num}).
-The upper policy controls the dispatch headway---the time gap between consecutive launches in the same direction---which also serves as the target headway $\htarget$ communicated to the lower-level controller.
+The upper policy outputs a per-dispatch target-headway shift $\delta_t$; the lower's constraint is then computed against the resulting goal headway $h^{\mathrm{target}} + \delta_t$. The nominal launch times of the underlying timetable remain unchanged (no launch-time perturbation in the main HIRO mode).
 
 \paragraph{Episode termination.}
 An episode ends when all 264 trips have been launched and every bus has completed its trip (i.e., no bus remains on-route). At this point the measurement vector $\zvec$ (\Cref{eq:measurement}) is computed for the ApproPO $\thetavec$-OGD update.
@@ -108,24 +118,24 @@ An episode ends when all 264 trips have been launched and every bus has complete
 
 All networks use ReLU activations and are trained with Adam. Weight initialization follows PyTorch defaults unless otherwise noted.
 
-\paragraph{Upper policy $\piU$ (Gaussian).}
-A two-layer MLP maps the 5-dimensional upper state to headway parameters:
+\paragraph{Upper policy $\piU$ (Gaussian, scalar action).}
+A two-layer MLP maps the 11-dimensional upper state (5 system summary dims + 3 holding-feedback dims + 3 trip-context dims; \cref{eq:upper_state}) to a scalar per-dispatch target-headway shift $\delta_t \in [-120, +120]$\,s:
 \begin{center}
 \small
 \begin{tabular}{lll}
 \toprule
 \textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
 \midrule
-Linear & $5 \to 64$ & ReLU \\
+Linear & $11 \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
-Mean head & $64 \to 3$ & Sigmoid $\to$ affine rescale to $[\texttt{action\_low}, \texttt{action\_high}]$ \\
-Log-std head & $64 \to 3$ & Clamp$[-5, 0]$ \\
+Mean head & $64 \to 1$ & Sigmoid $\to$ affine rescale to $[-120, 120]$\,s \\
+Log-std head & $64 \to 1$ & Clamp$[-5, 0]$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-The mean and log-std heads are initialized with zero bias to start near the midpoint of the action range.
-During rollout, actions are sampled from $\mathcal{N}(\mu, \sigma^2)$ and clamped to the valid range.
-For policy-gradient evaluation, the reparameterization trick is used and log-probabilities are summed across the 3 action dimensions.
+The mean and log-std heads are initialized with zero bias to start near $\delta_t = 0$ (no shift relative to the nominal timetable).
+During rollout, the pre-squash sample $z \sim \mathcal{N}(\mu, \sigma^2)$ is passed through the sigmoid + affine rescale to give $\delta_t \in [-120, 120]$\,s, which the runner uses as a goal-headway shift (HIRO coupling).
+The reparameterization trick is used for policy-gradient evaluation; log-probabilities are computed for the 1-dimensional action.
 
 \paragraph{Lower policy $\piL$ (Squashed Gaussian).}
 A two-layer MLP with tanh squashing maps the lower state to a scalar holding time:
@@ -135,10 +145,10 @@ A two-layer MLP with tanh squashing maps the lower state to a scalar holding tim
 \toprule
 \textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
 \midrule
-Linear & $(8{+}K) \to 32$ & ReLU \\
-Linear & $32 \to 32$ & ReLU \\
-Mean head & $32 \to 1$ & --- \\
-Log-std head & $32 \to 1$ & Clamp$[-20, 2]$ \\
+Linear & $(8{+}K) \to 64$ & ReLU \\
+Linear & $64 \to 64$ & ReLU \\
+Mean head & $64 \to 1$ & --- \\
+Log-std head & $64 \to 1$ & Clamp$[-20, 2]$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -147,35 +157,33 @@ Log-probabilities include the standard tanh Jacobian correction \citep{haarnoja2
 Weights in the output heads are initialized uniformly in $[-3{\times}10^{-3}, 3{\times}10^{-3}]$.
 The same network is shared across all buses (parameter sharing), with bus-specific behavior arising from heterogeneous input states.
 
-\paragraph{Twin reward Q-network $Q_1, Q_2$.}
-Two independent MLPs implement clipped double Q-learning for the lower level:
+\paragraph{Reward Q-ensemble $\{Q_k\}_{k=1}^{K}$ (RE-SAC, $K{=}10$).}
+The lower replaces the standard twin-Q SAC critic by an ensemble of $K{=}10$ independently-initialised Q-networks; the policy is improved against a lower-confidence-bound (LCB) value $\bar{Q} + \beta_{\mathrm{LCB}} \sigma_Q$ with $\beta_{\mathrm{LCB}} = -2$, computed across the ensemble at every gradient step. Each ensemble member shares the same MLP shape:
 \begin{center}
 \small
 \begin{tabular}{lll}
 \toprule
 \textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
 \midrule
-Linear & $(8{+}K{+}1) \to 32$ & ReLU \\
-Linear & $32 \to 32$ & ReLU \\
-Linear & $32 \to 1$ & --- \\
+Linear & $(8{+}K{+}1) \to 64$ & ReLU \\
+Linear & $64 \to 64$ & ReLU \\
+Linear & $64 \to 1$ & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
-Each Q-network takes the concatenation of the lower state and the scalar action as input.
-The minimum of $Q_1$ and $Q_2$ is used for target computation.
-Both networks are accompanied by exponential moving average target networks with rate $\tau = 0.005$.
+Each $Q_k$ takes the concatenation of the lower state and the scalar action as input. All members share a common mean target $(1/K)\sum_k \bar{Q}_k$ during temporal-difference learning to prevent ensemble divergence; per-Q MSE is augmented with a small ensemble-spread penalty $\beta_{\mathrm{ood}}\,\mathrm{std}_k(Q_k)$ ($\beta_{\mathrm{ood}}{=}0.1$) that encourages disagreement on out-of-distribution actions. All ensemble members are accompanied by exponential moving average target networks with Polyak rate $\tau = 0.005$. (We use a Q-ensemble rather than a twin Q to obtain calibrated lower-confidence bounds; the twin-Q variant in standard SAC corresponds to $K{=}2$ without the LCB.)
 
 \paragraph{Cost Q-network $Q_c$.}
-A single MLP with the same architecture as one branch of the twin Q-network estimates the expected cumulative cost (headway deviation) under the current policy:
+A single MLP with the same MLP shape as one ensemble member estimates the expected cumulative cost (headway deviation) under the current policy:
 \begin{center}
 \small
 \begin{tabular}{lll}
 \toprule
 \textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
 \midrule
-Linear & $(8{+}K{+}1) \to 32$ & ReLU \\
-Linear & $32 \to 32$ & ReLU \\
-Linear & $32 \to 1$ & --- \\
+Linear & $(8{+}K{+}1) \to 64$ & ReLU \\
+Linear & $64 \to 64$ & ReLU \\
+Linear & $64 \to 1$ & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -231,19 +239,5 @@ A literal asynchronous extension of Eq.~\eqref{eq:roboduet_upper} would aggregat
 \end{equation}
 where $\mathcal{J}(i)$ is the set of lower-level transitions during trip~$i$. We tried this in early prototypes and found it unstable. Two diagnostics: (i) the per-step lower advantage and the per-dispatch upper advantage differ in scale by 1--2 orders of magnitude across a trip lifecycle, so a single scalar $\beta$ either suppresses cross-level signal or destabilises lower training; (ii) the lower's advantage estimator uses an LCB-discounted ensemble Q (\cref{sec:lower}), which is a non-linear function of the policy parameters, breaking the simple unbiasedness argument that holds in the synchronous setting. The hindsight-credit formulation in Eq.~\eqref{eq:hindsight_reward_app} is a coarser but markedly more stable alternative: it injects per-trip execution outcome (gap regularity) into upper credit assignment without requiring lower advantage backflow.
 
-\subsection{Policy-gradient unbiasedness}
-
-\begin{proposition}
-\label{prop:unbiased}
-Under the standard policy-gradient assumptions and conditional on $\piL$ being fixed during one upper update, the REINFORCE estimator using the hindsight-credited reward,
-\begin{equation}
-  g_{\mathrm{U}} = \frac{1}{N}\sum_{i=1}^{N} R_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i}),
-\end{equation}
-is an unbiased estimator of $\nabla_{\piU} J_{\mathrm{credit}}(\piU)$, where $J_{\mathrm{credit}} = \E[\sum_i R_{\mathrm{U}}^{(i)}]$ is the expected sum of hindsight-credited per-dispatch rewards under $\piU$.
-\end{proposition}
-
-\begin{proof}[Proof sketch]
-$R_{\mathrm{U}}^{(i)}$ is a function of the environment trajectory seeded by the upper actions $\{a_{\mathrm{U},i}\}$. Conditional on $\piL$ fixed, the standard REINFORCE identity gives $\E[R_{\mathrm{U}}^{(i)}\,\nabla\!\log\piU] = \nabla_{\piU}\E[R_{\mathrm{U}}^{(i)}]$; linearity of expectation yields the result. The hindsight-credit term in Eq.~\eqref{eq:hindsight_reward_app} is recentred to zero mean per episode, so its contribution to $J_{\mathrm{credit}}$ relative to $J_{\mathrm{sys}}$ is a per-dispatch reweighting that does not change the population gradient at the episode level.
-\end{proof}
-
-We emphasise that this is unbiasedness for the hindsight-credited objective $J_{\mathrm{credit}}$, not for the original system-only objective $J_{\mathrm{sys}}$. The two objectives differ by the per-dispatch credit term, which we deliberately introduce as a denser learning signal. As $\piL$ also updates between upper REINFORCE steps, our practical training loop is closer to a coordinate-descent on a coupled objective than to an idealised single-policy gradient ascent; we found this acceptable in practice, with TPC (\cref{sec:tpc}) handling the lower-side covariate shift.
+\subsection{What changes for our off-policy SAC upper}
+The TransitDuet upper is trained as RE-SAC (\cref{sec:upper}, Eqs.~\ref{eq:upper_q_target}--\ref{eq:upper_policy_loss}), not as REINFORCE: each per-dispatch transition is pushed to a replay buffer, and the policy/critic are updated by repeated mini-batch SAC gradient steps. The REINFORCE-based unbiasedness argument that applies to a synchronous on-policy estimator is therefore not the right analytical lens for our setup. In practice the lower is also being updated between upper SAC gradient steps, so the upper's training distribution is non-stationary; the goal-conditioned coupling (\cref{sec:tap}) and TPC's importance reweighting (\cref{sec:tpc}) together control this non-stationarity at the lower side, and the upper's ensemble-LCB Q value provides conservatism against epistemic uncertainty in the upper's own off-policy training.

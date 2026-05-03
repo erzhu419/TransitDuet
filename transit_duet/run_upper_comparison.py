@@ -173,7 +173,10 @@ def main():
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--gpu', action='store_true')
     parser.add_argument('--lower_warmup', type=int, default=20,
-                        help='Episodes to pretrain lower before upper starts')
+                        help='Episodes to pretrain lower before upper starts. '
+                             'Note: baseline runs use total_eps = lower_warmup + episodes; '
+                             'the H_hiro main path folds the warmup into the 300-episode budget '
+                             'instead. The paper acknowledges this as an approximate unified protocol.')
     # v2k-fair: match runner_v2 evaluation conditions so A_full and baselines
     # train/evaluate under identical environment stochasticity.
     parser.add_argument('--demand_noise', type=float, default=0.15,
@@ -200,13 +203,14 @@ def main():
     env.demand_noise = args.demand_noise          # fair comparison with runner_v2
     state_dim = env.state_dim
 
-    # Lower policy (RE-SAC Lagrangian)
+    # Lower policy (RE-SAC Lagrangian) -- aligned with config_v2.yaml so that
+    # baselines and the H_hiro main run share identical lower hyperparameters.
     lower = RESACLagrangianTrainer(
         state_dim=state_dim, action_dim=1, hidden_dim=64,
         action_range=60.0, cost_limit=0.5,
         ensemble_size=10, beta=-2.0, lr=3e-4,
-        lambda_lr=1e-3, gamma=0.99, soft_tau=0.005,
-        auto_entropy=True, maximum_alpha=0.3, device=device)
+        lambda_lr=1e-4, gamma=0.99, soft_tau=0.005,
+        auto_entropy=True, maximum_alpha=0.1, device=device)
     replay_buffer = CostReplayBuffer(500_000)
 
     # Upper policy

@@ -1,23 +1,34 @@
 """
-runner_v2.py
+runner_v3.py
 ============
-TransitDuet v2: bi-level bus control with genuine upper-lower coupling.
+TransitDuet v3: bi-level bus control with switchable cross-level coupling
+(``coupling_mode``: ``hiro`` | ``haar`` | ``channels``). Used by every paper
+result in the current paper pipeline (Tables I/II + every figure); the legacy
+``runner_v2.py`` is retained only as a frozen reference of the channels-mode
+v2 baseline and is not used by any active script (see ``scripts/README.md``).
 
-Key difference from v1:
-  v1: upper outputs 3 static headway params → CMA-ES solves trivially
-  v2: upper outputs per-trip departure ADJUSTMENT δ_t ∈ [-120, +120]s
-      state includes lower-level holding statistics (the feedback signal)
-      reward penalizes total lower-level intervention
+Coupling modes (all share the same lower-level RE-SAC Lagrangian holding
+controller; they differ only in how the upper output δ_t is consumed):
+  hiro      The upper output is a per-dispatch target-headway shift; the
+            lower's Lagrangian cost penalises deviation from
+            (h_target + δ_t). Launch time is unchanged. This is the main
+            paper result (H_hiro).
+  channels  v2 channels-mode: δ_t directly perturbs launch time; the upper
+            still gets holding-feedback in its state, so behaves like v2.
+  haar      v2 channels-mode launch shift PLUS a clipped upper advantage
+            injected into the lower's reward as a HAAR-style cross-advantage
+            bonus, gated by a PIPER reachability classifier.
 
-Coupling mechanism:
-  Lower holding ≫ 0 at all stops → trip departed too early
-    → upper state shows high holding_mean → upper learns to shift later
-    → holding drops → system converges to minimal-intervention timetable
-
-  Ideal steady state: holding → 0 everywhere (timetable is perfect)
+Mechanism (HIRO mode):
+  Upper outputs δ_t for the next dispatch event (one decision per dispatch,
+  ~264 events per simulated service day in our calibrated corridor; not a
+  fixed-period 300 s timer). The lower then tracks the resulting target
+  headway via Lagrangian holding control; CS-BAPR + HoldFB close the
+  upper--lower loop and θ-OGD adaptively penalises fleet overshoot.
 
 Usage:
-    python -u runner_v2.py [--episodes 300] [--seed 42] [--gpu]
+    python -u runner_v3.py --config configs_ablation/H_hiro.yaml \
+        [--episodes 300] [--seed 42] [--gpu]
 """
 
 import copy
@@ -638,13 +649,21 @@ class TransitDuetV2Runner:
             np.array([delta_t], dtype=np.float32),
             trip.launch_turn, trip.direction)
 
-        # Record dispatch info (actual launch time captured post-episode from env)
+        # Record dispatch info (actual launch time captured post-episode from env).
+        # `effective_launch` reflects the launch time the env actually uses, which
+        # is `_original_launch + trip._delta_t`. In HIRO mode `_delta_t == 0` (the
+        # policy's δ_t shifts the target headway, not the launch time), so
+        # effective_launch == scheduled there; only channels/haar modes apply δ_t
+        # as a launch-time shift. Recording `int(delta_t)` instead of
+        # `trip._delta_t` here would mis-report HIRO runs as if they were launch-
+        # shifted.
         dir_key = 'up' if trip.direction else 'down'
         self._ep_dispatch_times[dir_key].append({
             'tid': trip.launch_turn,
             'scheduled': trip._original_launch,
-            'delta_t': delta_t,
-            'effective_launch': trip._original_launch + int(delta_t),
+            'delta_t': float(delta_t),                 # raw policy output (any mode)
+            'launch_shift': int(trip._delta_t),        # what was actually applied to launch
+            'effective_launch': trip._original_launch + int(trip._delta_t),
         })
 
         # Per-trip record for step-level diagnostics
@@ -1195,7 +1214,8 @@ class TransitDuetV2Runner:
         if self.diag is None:
             self.diag = DiagnosticLog(self.log_dir, resume=(self.resume_from_ep > 0))
 
-        print(f"TransitDuet v2 | eps={total_episodes} | warmup={self.upper_warmup} | "
+        print(f"TransitDuet v3 [{self.coupling_mode}] | eps={total_episodes} | "
+              f"warmup={self.upper_warmup} | "
               f"δ∈[-{self.delta_max},+{self.delta_max}] | α_hold={self.alpha_holding} | "
               f"dev={self.device}")
         print(f"  Lower: state={self.env.state_dim}  K={self.lower_trainer.ensemble_size}  "
@@ -1285,7 +1305,8 @@ def eval_pareto_frontier(runner, n_eval=10, fleet_values=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='TransitDuet v2')
+    parser = argparse.ArgumentParser(
+        description='TransitDuet v3 (HIRO/HAAR/channels coupling-mode runner)')
     parser.add_argument('--config', type=str, default='config_v2.yaml')
     parser.add_argument('--episodes', type=int, default=300)
     parser.add_argument('--seed', type=int, default=42)

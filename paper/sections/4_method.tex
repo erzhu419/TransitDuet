@@ -23,7 +23,7 @@ This section presents the TransitDuet architecture and its constituent algorithm
 
 TransitDuet comprises two independent policy networks operating at different timescales and over different state-action spaces .
 The upper policy $\piU$ is a lightweight Gaussian MLP that selects a per-dispatch headway shift at each dispatch event.
-The lower policy $\piL$ is a DSAC-Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
+The lower policy $\piL$ is a RE-SAC--Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
 
 A key design choice is that the two networks share no encoder parameters.
 This stands in contrast to the shared-body, dual-head architecture of RoboDuet \citep{pan2024roboduet}, which couples an upper style policy and a lower tracking policy through a common proprioceptive encoder.
@@ -34,7 +34,7 @@ The upper policy acts once per dispatch event (roughly once per $\htarget$ secon
 Forcing these heterogeneous signals through a shared trunk would create conflicting gradient directions.
 
 The coupling between the two levels is instead a goal-conditioned action channel: the upper sets the lower's headway target each dispatch, as described in \cref{sec:tap}.
-This clean separation permits each network to be trained with the algorithm best suited to its structure: REINFORCE for the episodic, low-dimensional upper policy and soft actor-critic with Lagrangian constraints for the high-frequency, constraint-aware lower policy.
+This clean separation lets us train both networks with off-policy soft actor-critic: a RE-SAC ensemble Q upper that reuses each per-dispatch transition many times via a replay buffer, and the same RE-SAC ensemble structure augmented with a Lagrangian dual variable at the lower level for headway-constraint satisfaction.
 
 %% ====================================================================
 \subsection{Upper-level timetable policy}
@@ -61,15 +61,18 @@ Exploration is achieved by additive Gaussian noise with a learnable log-standard
     \aU \sim \mathcal{N}\!\bigl(\mu_{\phi}(\sU),\; \sigma_{\phi}^2\bigr).
 \end{equation}
 
-\paragraph{Policy gradient.}
-Because the upper level produces only a single action per dispatch event and the episode length is moderate (one simulated day), we adopt a REINFORCE estimator with normalized returns.
-Let $\{(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_i^{\mathrm{U}})\}_{i=1}^{M}$ denote the sequence of $M$ dispatch events in one episode.
-The policy gradient is
+\paragraph{Off-policy SAC training (RE-SAC upper).}
+The upper policy is trained as an off-policy soft actor-critic with an ensemble of $K{=}10$ Q-networks and a lower-confidence-bound (LCB) value used in the policy improvement step --- the same RE-SAC-style structure used at the lower level (\cref{sec:lower}), without the Lagrangian. Each dispatch event $i$ contributes a transition $(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U}}^{(i)}, s_{\mathrm{U},i+1}, d_i)$ to a 50k-capacity replay buffer; the per-dispatch reward $R_{\mathrm{U}}^{(i)}$ is the hindsight-credited reward of \Cref{eq:hindsight_reward} (\cref{sec:tap}). The ensemble Q-networks are trained against a single shared mean-target to prevent ensemble divergence,
 \begin{equation}
-\label{eq:reinforce}
-    \nabla_{\phi} J(\piU) = \frac{1}{M} \sum_{i=1}^{M} \nabla_{\phi} \log \piU(a_{\mathrm{U},i} \mid s_{\mathrm{U},i}) \cdot \hat{A}_{\mathrm{U},i},
+\label{eq:upper_q_target}
+    y_i = R_{\mathrm{U}}^{(i)} + \gamma\,(1 - d_i)\,\Bigl(\tfrac{1}{K}\sum_{k=1}^{K} \bar{Q}_{k}(s_{\mathrm{U},i+1}, \tilde{a}) - \alpha_{\mathrm{U}} \log\piU(\tilde{a}\mid s_{\mathrm{U},i+1})\Bigr),
 \end{equation}
-where $\hat{A}_{\mathrm{U},i} = R_{\mathrm{U}}^{(i)} - \bar{R}_{\mathrm{U}}$ is computed from the hindsight-credited per-dispatch reward (Eq.~\ref{eq:hindsight_reward} in \cref{sec:tap}) with the episode mean as baseline; returns are normalised to zero mean and unit variance within the episode to reduce gradient variance.
+where $\bar{Q}_{k}$ is the $k$-th target network, $\tilde{a} \sim \piU(\cdot\mid s_{\mathrm{U},i+1})$, and the target is clamped to $[-50, 50]$; the per-Q MSE is augmented with a small ensemble-spread penalty $\beta_{\mathrm{ood}} \cdot \mathrm{std}_k(Q_k)$ that encourages the ensemble to disagree on out-of-distribution actions. The policy is improved by maximising the LCB value:
+\begin{equation}
+\label{eq:upper_policy_loss}
+    \mathcal{L}_{\piU}(\phi) = \mathbb{E}_{s\sim\mathcal{D}_{\mathrm{U}},\,a\sim\piU}\!\Bigl[\alpha_{\mathrm{U}}\,\log\piU(a\mid s) - \bigl(\bar{Q}(s,a) + \beta_{\mathrm{LCB}}\,\sigma_Q(s,a)\bigr)\Bigr],\;\; \beta_{\mathrm{LCB}} = -2,
+\end{equation}
+i.e., the LCB value $\bar{Q} + \beta_{\mathrm{LCB}}\sigma_Q$ subtracts twice the ensemble disagreement from the mean. Auto-entropy adjusts $\alpha_{\mathrm{U}}$ toward the target entropy $-\dim(\aU) = -1$, capped at $\alpha_{\max}^{\mathrm{U}} = 0.05$ in the goal-conditioned configuration (the upper action is a 1-dimensional headway shift, so the entropy target $-\dim(\aU) = -1$ saturates quickly without a low cap). The choice of an off-policy SAC upper rather than an on-policy estimator is deliberate: dispatches are scarce ($M\!\approx\!264$ per episode), so a replay buffer reuses each transition many times across gradient updates.
 
 %% ====================================================================
 \subsection{Lower-level holding control policy}
@@ -80,7 +83,7 @@ It is trained with a distributional soft actor-critic augmented by a Lagrangian 
 All buses share the same policy parameters, enabling fleet-wide generalization.
 
 \paragraph{Gaussian policy with tanh squashing.}
-A two-layer MLP with 32 hidden units per layer and ReLU activations produces a mean $\mu_{\psi}(\sL)$ and log-standard-deviation $\log \sigma_{\psi}(\sL)$.
+A two-layer MLP with 64 hidden units per layer and ReLU activations produces a mean $\mu_{\psi}(\sL)$ and log-standard-deviation $\log \sigma_{\psi}(\sL)$.
 The raw sample $u \sim \mathcal{N}(\mu_{\psi}, \sigma_{\psi}^2)$ is squashed through a $\tanh$ transform and rescaled:
 \begin{equation}
 \label{eq:lower_action_method}
@@ -92,41 +95,44 @@ The log-probability accounts for the change of variables:
     \log \piL(\aL \mid \sL) = \log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2) - \log\bigl(1 - \tanh^2(u)\bigr) - \log a_{\max}.
 \end{equation}
 
-\paragraph{Twin Q-networks.}
-Two independent critics $Q_{\omega_1}(\sL, \aL)$ and $Q_{\omega_2}(\sL, \aL)$, each a two-layer MLP with 32 hidden units, are trained to minimize the clipped double-Q Bellman error:
+\paragraph{Reward Q-ensemble (RE-SAC, $K{=}10$).}
+Rather than the standard twin-Q double-clipped critic of SAC, the lower uses an ensemble of $K{=}10$ independently-initialised Q-networks $\{Q_{\omega_k}\}_{k=1}^{K}$, each a two-layer MLP with 64 hidden units. To prevent ensemble divergence, all members are trained against a single shared mean target,
 \begin{equation}
-\label{eq:twin_q}
-    \mathcal{L}_Q(\omega_j) = \E_{(\sL, \aL, r, \sL') \sim \D}\Bigl[\bigl(Q_{\omega_j}(\sL, \aL) - y\bigr)^2\Bigr], \quad j \in \{1,2\},
+\label{eq:lower_q_target}
+    y = r + \gamma\,\Bigl(\tfrac{1}{K}\sum_{k=1}^{K} Q_{\bar{\omega}_k}(\sL', \aL') - \alpha \log \piL(\aL' \mid \sL')\Bigr),\quad \aL' \sim \piL(\cdot \mid \sL'),
 \end{equation}
-where the target is
+and the per-$Q_k$ loss is augmented with a small ensemble-spread regulariser,
 \begin{equation}
-\label{eq:q_target}
-    y = r + \gamma \Bigl(\min_{j=1,2} Q_{\bar{\omega}_j}(\sL', \aL') - \alpha \log \piL(\aL' \mid \sL')\Bigr), \quad \aL' \sim \piL(\cdot \mid \sL'),
+\label{eq:lower_q_loss}
+    \mathcal{L}_Q(\omega_k) = \E_{(\sL,\aL,r,\sL') \sim \D}\!\Bigl[\bigl(Q_{\omega_k}(\sL,\aL) - y\bigr)^2\Bigr] + \beta_{\mathrm{ood}}\,\mathrm{std}_k\bigl(Q_{\omega_k}(\sL,\aL)\bigr),\quad \beta_{\mathrm{ood}} = 0.1,
 \end{equation}
-and $\bar{\omega}_j$ denotes target-network parameters updated via soft interpolation with coefficient $\tau = 0.005$.
+which encourages members to disagree on out-of-distribution actions. Target parameters $\bar{\omega}_k$ track $\omega_k$ via Polyak averaging with $\tau = 0.005$. Policy improvement is performed against the ensemble lower-confidence bound (LCB),
+\begin{equation}
+\label{eq:lower_lcb}
+    \bar{Q}(s, a) = \tfrac{1}{K}\sum_{k} Q_{\omega_k}(s, a),\qquad \sigma_Q(s, a) = \mathrm{std}_k\bigl(Q_{\omega_k}(s, a)\bigr).
+\end{equation}
+A standard SAC twin-Q critic corresponds to the special case $K{=}2$ without the LCB; we adopt the $K{=}10$ ensemble to obtain calibrated uncertainty for the lower's actor loss below.
 
 \paragraph{Cost Q-network and Lagrangian relaxation.}
-A separate cost critic $Q^c_{\xi}(\sL, \aL)$ estimates the expected cumulative headway-deviation cost.
-The lower-level policy objective balances reward maximization, entropy regularization, and constraint satisfaction:
+A separate single-MLP cost critic $Q^c_{\xi}(\sL, \aL)$ (same hidden width 64) estimates the expected cumulative headway-deviation cost. The lower-level actor loss balances entropy, the ensemble LCB value, and the constraint:
 \begin{equation}
 \label{eq:lower_policy_loss}
-    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\Bigl[\alpha \log \piL(\aL \mid \sL) - \min_{j} Q_{\omega_j}(\sL, \aL) + \lambda \, Q^c_{\xi}(\sL, \aL)\Bigr],
+    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\!\Bigl[\alpha \log \piL(\aL \mid \sL) - \bigl(\bar{Q}(\sL, \aL) + \beta_{\mathrm{LCB}}\,\sigma_Q(\sL, \aL)\bigr) + \lambda\, Q^c_{\xi}(\sL, \aL)\Bigr],
 \end{equation}
-where $\lambda \geq 0$ is the Lagrange multiplier.
-The dual variable is updated to satisfy the cost-limit constraint $\climit$:
+with $\beta_{\mathrm{LCB}} = -2$ (the policy is improved against the lower confidence bound) and $\lambda \geq 0$ the Lagrange multiplier. The dual is updated to satisfy the cost-limit constraint $\climit$:
 \begin{equation}
 \label{eq:lambda_update}
-    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}(\E[Q^c_{\xi}] - \climit),\; -10,\; 5\bigr)\Bigr].
+    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(\log\lambda + \eta_{\lambda}\,(\E[Q^c_{\xi}] - \climit),\; -10,\; 5\bigr)\Bigr],\qquad \eta_{\lambda} = 10^{-4}.
 \end{equation}
 Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability.
 
 \paragraph{Auto-entropy tuning.}
-The temperature $\alpha$ is adjusted to maintain a target entropy $\bar{\mathcal{H}} = -\dim(\aL)$:
+The temperature $\alpha$ is adjusted to maintain a target entropy $\bar{\mathcal{H}} = -\dim(\aL) = -1$:
 \begin{equation}
 \label{eq:alpha_update}
-    \alpha \leftarrow \min\!\Bigl(\alpha_{\max},\; \exp\!\bigl(\log\alpha - \eta_{\alpha}\,(\log \piL(\aL \mid \sL) + \bar{\mathcal{H}})\bigr)\Bigr),
+    \alpha \leftarrow \min\!\Bigl(\alpha_{\max}^{\mathrm{L}},\; \exp\!\bigl(\log\alpha - \eta_{\alpha}\,(\log \piL(\aL \mid \sL) + \bar{\mathcal{H}})\bigr)\Bigr),
 \end{equation}
-with $\alpha_{\max} = 0.3$ to prevent entropy collapse from dominating the Q-values in the early training phase.
+with $\alpha_{\max}^{\mathrm{L}} = 0.1$ to prevent entropy collapse and to let the goal-conditioned coupling settle as the policy gains confidence.
 
 %% ====================================================================
 \subsection{Cross-level coupling: goal-conditioned design}
@@ -193,9 +199,9 @@ The weight vector is updated by online gradient descent (OGD) on a loss that dri
     \thetavec_{t+1} = \Pi_{\mathcal{B}}\!\bigl(\thetavec_t + \eta_t \, \ell_t\bigr), \quad \eta_t = \frac{\eta_0}{\sqrt{t}},
 \end{equation}
 where $\Pi_{\mathcal{B}}$ projects onto the unit ball $\{\thetavec : \|\thetavec\|_2 \leq 1\}$ and $\eta_0$ is the base learning rate.
-The $1/\sqrt{t}$ decay guarantees that the cumulative constraint violation grows sublinearly, yielding an $O(\sqrt{T})$ regret bound standard in online convex optimization.
+The $1/\sqrt{t}$ schedule is motivated by standard online-convex-optimisation regret analysis (where projected OGD on a convex loss enjoys an $O(\sqrt{T})$ regret bound and a sublinear cumulative-constraint-violation guarantee). We do not claim the same guarantee holds for our learned policy: the inner optimisation here is a non-convex SAC update on a replay buffer rather than the convex best-response oracle that ApproPO requires, and we do not project onto an occupancy-measure feasibility set. We therefore use $\thetavec$-OGD as a stabilising adaptive penalty whose schedule is principled in its OCO origin but whose feasibility properties on the resulting deep-RL policy are empirical (\cref{fig:theta_evolution}, \cref{fig:lambda_convergence}) rather than provable.
 
-The simplification relative to ApproPO is deliberate: because the upper policy is trained via REINFORCE with the $\thetavec$-modulated reward, the policy update itself serves as the approximate best-response oracle, eliminating the inner optimization loop that ApproPO requires.
+The simplification relative to ApproPO is deliberate: because the upper policy is trained off-policy with the $\thetavec$-modulated reward, repeated SAC gradient updates on the replay buffer act as an approximate best-response step, eliminating the inner optimization loop that ApproPO requires --- at the cost of the formal guarantee discussed above.
 
 %% ====================================================================
 \subsection{Training procedure}
@@ -208,7 +214,7 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
 \label{alg:training}
 \begin{algorithmic}[1]
 \REQUIRE Episode budget $E$, upper warmup $e_{\mathrm{warm}} = 30$, lower update frequency $f_{\mathrm{L}}$, batch size $B$, hindsight credit weight $\alpha_{\mathrm{H}}$
-\STATE Initialise upper policy $\piU$, lower policy $\piL$ (twin Q ensemble + cost critic), replay buffer $\D$, Lagrange multiplier $\lambda$, entropy temperature $\alpha$, $\thetavec$-OGD weights, EMA target upper $\bar{\piU}$
+\STATE Initialise upper policy $\piU$, lower policy $\piL$ (RE-SAC ensemble of $K{=}10$ reward critics + single cost critic), replay buffer $\D$, Lagrange multiplier $\lambda$, entropy temperature $\alpha$, $\thetavec$-OGD weights, EMA target upper $\bar{\piU}$
 \FOR{episode $e = 1, \ldots, E$}
     \STATE Reset simulation; sample $\Nfleet \sim \mathrm{Uniform}\{8, \ldots, 16\}$ if elastic
     \STATE $\mathcal{T}_{\mathrm{U}} \leftarrow \emptyset$, $\mathcal{T}_{\mathrm{L}} \leftarrow \emptyset$
@@ -232,7 +238,7 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
         \ENDIF
     \ENDWHILE
     \STATE Compute episode measurements $\zvec$, system reward $R_{\mathrm{sys}}$, and per-dispatch hindsight credits via \cref{eq:hindsight_reward}
-    \STATE Backfill upper transitions in $\mathcal{T}_{\mathrm{U}}$ with $R_{\mathrm{U}}^{(i)}$ and update $\piU$ via REINFORCE (\cref{eq:reinforce})
+    \STATE Backfill upper transitions in $\mathcal{T}_{\mathrm{U}}$ with $R_{\mathrm{U}}^{(i)}$, push them to the upper replay buffer, and run $f_{\mathrm{U}}$ RE-SAC gradient updates (\cref{eq:upper_q_target}--\ref{eq:upper_policy_loss}) on a sampled mini-batch
     \STATE Polyak-update EMA target upper $\bar{\piU}$; update $\thetavec$ via OGD on $\zvec$
 \ENDFOR
 \end{algorithmic}
@@ -245,9 +251,9 @@ The upper policy is forced to $\delta_t = 0$ for every dispatch and the lower po
 The upper policy activates and the goal channel of \cref{sec:tap} engages: each dispatch's target headway is reset to $\htarget + \delta_t$, and the lower's Lagrangian cost is computed against this dispatch-specific target. The state and reward channels are upper-only and are inactive during warmup by construction. We do not anneal a coupling coefficient; the channel operates at its designed strength from activation onward, with TPC's IS reweighting (\cref{sec:tpc}) handling any residual covariate shift from changing target headways during upper exploration.
 
 \paragraph{Computational cost.}
-The lower policy update dominates computation due to the twin Q-network and cost Q-network gradient steps.
-Each lower update involves five backward passes (two Q-critics, one cost critic, one policy, one entropy temperature), performed on GPU-batched samples from $\D$.
-The upper policy update is negligible by comparison: a single REINFORCE gradient step over $M \approx 30$--$50$ dispatch events per episode.
+The lower policy update dominates computation due to the $K{=}10$ Q-ensemble and cost-critic gradient steps.
+Each lower update performs $K{+}3$ backward passes ($K$ ensemble reward critics, one cost critic, one policy, one entropy temperature) on GPU-batched samples from $\D$; the ensemble is implemented as a single batched forward+backward, so wall-clock cost grows sub-linearly with $K$.
+The upper policy update is much cheaper: each episode contributes $M \approx 264$ dispatch transitions to a 50k-capacity replay buffer, and we run $f_{\mathrm{U}} = 10$ RE-SAC gradient updates per episode on a 64-sample mini-batch.
 The TPC IS-weight computation and Polyak target update add $O(M + B)$ scalar/forward-pass operations per episode and are not a bottleneck.
 
 %% ====================================================================

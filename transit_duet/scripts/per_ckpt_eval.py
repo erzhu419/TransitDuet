@@ -24,7 +24,7 @@ import torch
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SCRIPT_DIR))
-from runner_v2 import TransitDuetV2Runner, load_config
+from runner_v3 import TransitDuetV2Runner, load_config
 
 
 class _NullDiag:
@@ -33,6 +33,12 @@ class _NullDiag:
 
 
 def load_ckpt(exp_dir: Path, ep: int, config_path: Path, device: str):
+    """
+    Load a checkpoint using runner_v3, which honours coupling_mode
+    {channels, haar, hiro} from the config. Using runner_v2 here would
+    silently fall back to channels-mode and evaluate HIRO checkpoints
+    under launch-time-shift semantics rather than goal-shift semantics.
+    """
     cfg = load_config(str(config_path))
     runner = TransitDuetV2Runner(cfg, device=device)
     runner.log_dir = str(exp_dir)

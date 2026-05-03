@@ -35,58 +35,90 @@ os.chdir(str(PROJECT_DIR))
 #  Experiment plan
 # ═══════════════════════════════════════════════════════════════
 
-ABLATIONS = ['A_full', 'B_no_holding_feedback', 'C_no_csbapr',
-             'D_no_hindsight', 'E_no_morl', 'F_fixed_fleet',
-             'G_no_demand_noise']
+# Paper main result is TransitDuet HIRO (goal-conditioned coupling) trained
+# with runner_v3.py. The legacy A_full / channels-mode runner_v2.py
+# configurations are kept only for the ablation alternative-coupling rows.
+MAIN_CONFIG = 'configs_ablation/H_hiro.yaml'
 
-BASELINES = ['cmaes', 'ga', 'fixed']  # existing run_upper_comparison methods
+# HIRO-mode ablations (Section 5.2 / Table III). Each removes or disables
+# one mechanism of the goal-conditioned coupling.
+HIRO_ABLATIONS = ['H_hiro_no_tpc', 'H_hiro_no_holdfb', 'H_hiro_no_csbapr',
+                  'H_hiro_no_hindsight', 'H_hiro_no_morl',
+                  'H_hiro_fixed_fleet', 'H_hiro_no_demand_noise']
+
+# Coupling-mode comparison rows (Section 5.1): channels (H_tpc) and HAAR.
+COUPLING_VARIANTS = ['H_tpc', 'H_haar']
+
+BASELINES = ['cmaes', 'ga', 'fixed']  # search-based + static baselines
 
 SEEDS = [42, 123, 456]
 
-# Tier 1: main results + Pareto
-# Tier 2: ablations + generalization
-
+# Tier 1: main results + coupling-comparison rows + baselines
+# Tier 2: HIRO-mode ablations + generalization
 def build_jobs(tier, episodes, quick):
     jobs = []
     eps = 50 if quick else episodes
 
     if tier in (0, 1):
-        # Tier 1: main (A_full + Pareto)
+        # Tier 1: main (H_hiro + Pareto)
         for seed in SEEDS:
             jobs.append({
-                'name': f'A_full_seed{seed}',
-                'cmd': ['python', '-u', 'runner_v2.py',
-                        '--config', 'configs_ablation/A_full.yaml',
+                'name': f'H_hiro_seed{seed}',
+                'cmd': ['python', '-u', 'runner_v3.py',
+                        '--config', MAIN_CONFIG,
                         '--episodes', str(eps),
                         '--seed', str(seed),
+                        '--gpu',
                         '--eval_pareto', '--n_eval', '5'],
-                'log_dir': f'logs/A_full_seed{seed}',
+                'log_dir': f'logs/H_hiro_seed{seed}',
                 'time_est': 55 if not quick else 10,
             })
 
-        # Tier 1: baselines (existing scripts)
+        # Tier 1: coupling-mode comparison (H_tpc, H_haar)
+        for seed in SEEDS:
+            for variant in COUPLING_VARIANTS:
+                jobs.append({
+                    'name': f'{variant}_seed{seed}',
+                    'cmd': ['python', '-u', 'runner_v3.py',
+                            '--config', f'configs_ablation/{variant}.yaml',
+                            '--episodes', str(eps),
+                            '--seed', str(seed),
+                            '--gpu'],
+                    'log_dir': f'logs/{variant}_seed{seed}',
+                    'time_est': 55 if not quick else 10,
+                })
+
+        # Tier 1: search baselines (run_upper_comparison handles its own runner)
+        # Budget per the paper protocol: GA/CMA-ES use 20 lower-only warmup +
+        # 300 search-evaluation episodes (320 total); the static Fixed baseline
+        # has no upper search at all and skips the warmup, so it stays at the
+        # exact 300-episode budget that matches TransitDuet's main run.
         for seed in SEEDS:
             for method in BASELINES:
+                lower_warmup = 0 if method == 'fixed' else 20
                 jobs.append({
                     'name': f'baseline_{method}_seed{seed}',
                     'cmd': ['python', '-u', 'run_upper_comparison.py',
                             '--method', method,
-                            '--episodes', str(100 if not quick else 30),
-                            '--seed', str(seed)],
+                            '--episodes', str(eps),
+                            '--lower_warmup', str(lower_warmup),
+                            '--seed', str(seed),
+                            '--gpu'],
                     'log_dir': f'logs/upper_{method}_seed{seed}',
-                    'time_est': 20 if not quick else 5,
+                    'time_est': 30 if not quick else 5,
                 })
 
     if tier in (0, 2):
-        # Tier 2: ablations
+        # Tier 2: HIRO-mode ablations
         for seed in SEEDS:
-            for ablation in ABLATIONS[1:]:  # skip A_full (already in Tier 1)
+            for ablation in HIRO_ABLATIONS:
                 jobs.append({
                     'name': f'{ablation}_seed{seed}',
-                    'cmd': ['python', '-u', 'runner_v2.py',
+                    'cmd': ['python', '-u', 'runner_v3.py',
                             '--config', f'configs_ablation/{ablation}.yaml',
                             '--episodes', str(eps),
-                            '--seed', str(seed)],
+                            '--seed', str(seed),
+                            '--gpu'],
                     'log_dir': f'logs/{ablation}_seed{seed}',
                     'time_est': 55 if not quick else 10,
                 })
@@ -160,7 +192,7 @@ def run_job(job, gpu_id=None):
             result = subprocess.run(
                 job['cmd'], stdout=f, stderr=subprocess.STDOUT,
                 env=env, cwd=str(PROJECT_DIR),
-                timeout=3600 * 24)  # 24h timeout (A_full can be slow under contention)
+                timeout=3600 * 24)  # 24h timeout (training jobs can be slow under contention)
         status = 'ok' if result.returncode == 0 else f'fail({result.returncode})'
     except subprocess.TimeoutExpired:
         status = 'timeout'

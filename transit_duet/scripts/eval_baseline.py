@@ -32,8 +32,8 @@ def make_env_and_lower(device):
         state_dim=state_dim, action_dim=1, hidden_dim=64,
         action_range=60.0, cost_limit=0.5,
         ensemble_size=10, beta=-2.0, lr=3e-4,
-        lambda_lr=1e-3, gamma=0.99, soft_tau=0.005,
-        auto_entropy=True, maximum_alpha=0.3, device=device)
+        lambda_lr=1e-4, gamma=0.99, soft_tau=0.005,
+        auto_entropy=True, maximum_alpha=0.1, device=device)
     return env, lower
 
 
@@ -110,8 +110,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--method', choices=['fixed', 'ga', 'cmaes'], required=True)
     ap.add_argument('--seeds', default='42,123,456')
-    ap.add_argument('--eps', default='49,99,119')
-    ap.add_argument('--n_eval', type=int, default=20)
+    ap.add_argument('--eps', default='49,99,149,199,249,299',
+                    help='paper protocol: 6 evenly-spaced ckpts across 300-ep training')
+    ap.add_argument('--n_eval', type=int, default=20,
+                    help='paper protocol: 20 fresh eval episodes per ckpt')
     ap.add_argument('--fleet_min', type=int, default=8)
     ap.add_argument('--fleet_max', type=int, default=16)
     ap.add_argument('--device', default='cuda:0')

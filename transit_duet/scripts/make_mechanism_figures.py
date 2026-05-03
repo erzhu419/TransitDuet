@@ -7,7 +7,7 @@ Generate the three mechanism-analysis figures referenced by the paper:
   fig:lambda_convergence — lower-level Lagrangian multiplier
   fig:delta_utilization  — per-episode upper action mean ± std
 
-Reads 3-seed A_full diagnostics from logs_remote/ and writes PDFs
+Reads 3-seed H_hiro diagnostics from logs_remote/ and writes PDFs
 to paper/figures/.
 """
 
@@ -36,7 +36,7 @@ plt.rcParams.update({
 })
 
 
-def load_dfs(name='A_full'):
+def load_dfs(name='H_hiro'):
     out = {}
     for s in SEEDS:
         p = LOGS / f'{name}_seed{s}' / 'diagnostics.csv'

@@ -1,7 +1,7 @@
 \section{Problem formulation}
 \label{sec:problem}
 
-We formalize joint timetable planning and holding control as a bi-level Markov decision process (MDP) operating over a single bus route with time-varying passenger demand.
+We formalise joint adaptive target-headway planning and holding control as a bi-level Markov decision process (MDP) operating over a single bus route with time-varying passenger demand. Concretely, the upper level is responsible for setting per-dispatch target headways (a discrete-time, low-frequency decision atop a fixed nominal timetable) and the lower level enacts those targets through real-time holding decisions; we use ``planning'' in the closed-loop adaptive sense throughout, not in the offline mixed-integer-programming sense common in the bus-timetable optimisation literature.
 This section first describes the transit system model (\Cref{sec:transit_model}), then defines the upper- and lower-level MDPs (\Cref{sec:bilevel_mdp}), states the constraint specification (\Cref{sec:constraints}), and concludes with a discussion of the timescale separation that motivates our algorithmic design (\Cref{sec:timescale}).
 
 %% ---------------------------------------------------------------
@@ -12,7 +12,7 @@ We consider a single bidirectional bus route consisting of $M$ stations indexed 
 Service is provided according to a timetable that dispatches a total of 264~trips per day, alternating between the two directions.
 Passenger demand is drawn from time-varying origin--destination (OD) matrices that capture morning, midday, and evening peaks.
 At any point in time, at most $\Nfleet^{\max}=25$ buses may be concurrently in service; each trip is characterized by a launch time and a travel direction.
-The dispatch headway---the time between consecutive launches in the same direction---is the primary planning lever, while per-station holding times constitute the real-time control lever.
+The per-dispatch target headway---the desired time gap between consecutive launches in the same direction, communicated to the lower-level controller as a goal---is the primary planning lever, while per-station holding times constitute the real-time control lever.
 
 %% ---------------------------------------------------------------
 \subsection{Bi-level MDP formulation}
@@ -20,11 +20,11 @@ The dispatch headway---the time between consecutive launches in the same directi
 
 We decompose the joint optimization into two coupled MDPs that share a common environment but differ in observation granularity, action semantics, and decision frequency.
 
-\subsubsection{Upper-level MDP (timetable planning)}
+\subsubsection{Upper-level MDP (adaptive target-headway planning)}
 \label{sec:upper_mdp}
 
-The upper-level policy $\piU$ determines dispatch headways.
-It is triggered at each dispatch event, yielding approximately 132 decision epochs per episode (one full service day).
+The upper-level policy $\piU$ sets a per-dispatch target headway atop the fixed nominal timetable.
+It is invoked once per dispatch event ($M \approx 264$ events per episode, $\approx 132$ per direction; one episode is one full service day), so its sampling cadence is the realised headway itself rather than a fixed wall-clock timer.
 
 \paragraph{State.}
 The upper state encodes both system-level summary statistics and the holding-feedback (HoldFB) block that closes the lower-to-upper loop (\Cref{sec:tap}):
@@ -140,6 +140,6 @@ Consequently, hundreds of lower-level decisions may intervene between two consec
 This asynchrony distinguishes our setting from the semi-Markov options framework~\citep{sutton1999between} and feudal reinforcement learning~\citep{dayan1992feudal,vezhnevets2017feudal}, which assume that (i)~the manager and worker share a common state space or a fixed abstraction thereof, and (ii)~the manager selects a subgoal that the worker executes to completion before the manager acts again.
 Neither assumption holds here: the upper state $\sU\in\R^{11}$ summarizes fleet-level statistics plus the HoldFB block whereas the lower state $\sL\in\R^{8+K}$ encodes bus-level kinematics, and both policies issue decisions driven by environment events rather than by a synchronous clock or a predefined option duration.
 
-More concretely, a single upper action (a headway triple) remains in effect while many buses traverse multiple stations under independent lower-level control; the upper policy cannot pause and wait for all induced lower decisions to conclude.
+More concretely, a single upper action (a target-headway shift $\delta_t$) remains in effect for the next dispatch while many buses traverse multiple stations under independent lower-level control; the upper policy cannot pause and wait for all induced lower decisions to conclude.
 Standard hierarchical RL methods that propagate value or advantage across levels therefore require modification to handle the fully asynchronous, event-driven interaction between $\piU$ and $\piL$.
 We address this challenge through a goal-conditioned cross-level coupling, detailed in \Cref{sec:method}.
