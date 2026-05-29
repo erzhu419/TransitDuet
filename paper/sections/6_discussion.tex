@@ -11,13 +11,14 @@ TransitDuet draws on two lines of work: RoboDuet~\citep{pan2024roboduet}, which 
 The key technical choice is to replace cross-advantage backflow with a goal channel: instead of two policies exchanging advantage estimates at each time step, one policy sets the constraint target that the other policy tracks under its existing optimisation framework.
 This choice is motivated by the asynchrony in our setting (RoboDuet assumes a shared state clock) and validated empirically by the comparison to the HAAR-style alternative.
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Structural analogy between RoboDuet and TransitDuet.}
 \label{tab:analogy}
-\begin{tabular}{@{}lll@{}}
+\small
+\begin{tabular}{@{}p{0.20\textwidth}p{0.27\textwidth}p{0.45\textwidth}@{}}
 \toprule
-\textbf{Aspect} & \textbf{RoboDuet} & \textbf{TransitDuet} \\
+Aspect & RoboDuet & TransitDuet \\
 \midrule
 Upper policy     & Locomotion style selector    & Timetable planner ($\piU$) \\
 Lower policy     & Joint-level tracking controller & Holding controller ($\piL$) \\
@@ -29,35 +30,35 @@ Constraint       & Joint-limit penalties        & Fleet ($\thetavec$-OGD) + head
 Activation schedule & Fixed $\beta$              & Lower-only warmup ($e \leq 30$) then full coupling \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \paragraph{Limitations.}
 Several limitations qualify the present results and motivate future work.
 
-\emph{Single-route scope.}
+Single-route scope.
 TransitDuet is evaluated on a single bidirectional corridor.
 Real transit networks involve multiple interacting routes with shared terminals, transfer passengers, and fleet rebalancing across lines.
 Extending the framework to a multi-route setting would require the upper policy to allocate a shared fleet across routes, substantially expanding the action space and introducing inter-route coordination constraints.
 
-\emph{Simplified demand model.}
+Simplified demand model.
 Passenger arrivals follow stationary OD rates within each time period.
 In practice, demand is non-stationary, exhibits day-of-week and seasonal variation, and responds endogenously to service quality (e.g., passengers abandoning a stop after excessive waits).
 Incorporating demand elasticity and real-time demand forecasting would improve realism but introduce additional model complexity.
 
-\emph{No real-world deployment.}
+No real-world deployment.
 All experiments are conducted in a stochastic microsimulation.
 While the simulator reproduces key phenomena---bunching, load-dependent dwell times, stochastic travel times---it abstracts away traffic signal interactions, driver behavior heterogeneity, and vehicle breakdowns.
 Sim-to-real transfer would require domain randomization or a calibrated digital twin.
 
-\emph{Computational cost.}
+Computational cost.
 Each episode requires approximately 7\,s of environment simulation time plus training overhead.
 At 300 episodes with 3 seeds, the total wall-clock time is approximately 14 hours per seed on a single 12\,GB GPU.
 While acceptable for research, real-time retraining for schedule disruptions would require further acceleration, for instance through model distillation or warm-starting from a pre-trained policy.
 
-\emph{Baseline coverage and seed budget.}
+Baseline coverage and seed budget.
 Our external baselines (Fixed, GA, CMA-ES) cover the static-timetable and population-search families that the bus-planning literature most commonly compares against, but they do not include MPC / rolling-horizon optimisation, time-of-day MILP, or RL approaches that train the upper but not the lower in a bi-level fashion. The cost of integrating these baselines under the same shared-lower protocol used in this paper is substantial (per-candidate lower training, or replacing the lower with an MPC-internal model), and we leave this comparison for future work along with raising the seed count from $n{=}3$ to $n{=}10$ and reporting paired significance tests on a fixed evaluation seed set.
 
-\emph{Approximate unified protocol with the search baselines.}
+Approximate unified protocol with the search baselines.
 The protocol described in \cref{sec:exp_setup} is a near-unified comparison rather than an exact one. Three residual differences are worth flagging explicitly. (i) The search baselines run a 20-episode lower-only warmup before the upper search starts, so their total simulator budget is 320 episodes versus TransitDuet's 300; we have aligned the lower hyperparameters (hidden width, $\lambda_{\mathrm{lr}} = 10^{-4}$, $\alpha_{\max}^{\mathrm L} = 0.1$, ensemble size, $\beta_{\mathrm{LCB}}$) so the lower controller architecture is identical across methods, but the budget asymmetry remains. (ii) For GA and CMA-ES we evaluate at the validation-best lower checkpoint paired with the search's final upper triple; this is not a strict checkpoint-pair selection, and a tighter implementation would re-evaluate at matched (lower\_ep, upper\_search\_iter) pairs. (iii) The Rule-MPC and Rule-GA / Rule-CMA-ES baselines in \Cref{tab:main_results} are reported at $n{=}1$ seed and should be treated as sanity checks rather than head-to-head comparisons. We do not claim that these residual differences shift the qualitative ranking, but a fully strict re-comparison would require an additional round of from-scratch baseline training and is left for the camera-ready or extended version of this work.
 
 \paragraph{Scalability considerations.}

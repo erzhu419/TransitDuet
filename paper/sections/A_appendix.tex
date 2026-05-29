@@ -3,14 +3,14 @@
 
 \Cref{tab:hyperparams} lists all hyperparameters used in the experiments. Values correspond to the default configuration; no per-experiment tuning was performed.
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Complete hyperparameter specification.}
 \label{tab:hyperparams_full}
-\small
-\begin{tabular}{@{}llll@{}}
+\footnotesize
+\begin{tabular}{@{}p{0.14\textwidth}p{0.24\textwidth}p{0.17\textwidth}p{0.38\textwidth}@{}}
 \toprule
-\textbf{Group} & \textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+Group & Parameter & Value & Description \\
 \midrule
 \multirow{4}{*}{Environment}
   & \texttt{route\_sigma}        & 1.5    & Log-normal speed noise $\sigma$ \\
@@ -66,7 +66,7 @@
   & \texttt{replay\_buffer\_size}  & $5 \times 10^{5}$ & Lower replay buffer capacity \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 %% ---------------------------------------------------------------
 \section{Environment details}
@@ -97,10 +97,10 @@ Each passenger records an appearance time, an origin, and a destination; waiting
 \paragraph{Bus operations.}
 Each bus maintains a state machine with four phases:
 \begin{enumerate}
-  \item \textbf{Holding} --- the bus is held at a station for the duration specified by the lower-level policy (0--60\,s).
-  \item \textbf{Dwelling} --- passengers alight and board. Boarding proceeds until the bus reaches capacity ($C = 50$ passengers) or no more waiting passengers have a valid destination downstream.
-  \item \textbf{Travel} --- the bus moves toward the next station at the current stochastic speed. Acceleration ($3\;\text{m/s}^2$) and deceleration ($5\;\text{m/s}^2$) are modeled at departure and arrival.
-  \item \textbf{Waiting for action} --- upon arriving at a station, the bus waits for the next holding action from the lower-level policy.
+  \item Holding --- the bus is held at a station for the duration specified by the lower-level policy (0--60\,s).
+  \item Dwelling --- passengers alight and board. Boarding proceeds until the bus reaches capacity ($C = 50$ passengers) or no more waiting passengers have a valid destination downstream.
+  \item Travel --- the bus moves toward the next station at the current stochastic speed. Acceleration ($3\;\text{m/s}^2$) and deceleration ($5\;\text{m/s}^2$) are modeled at departure and arrival.
+  \item Waiting for action --- upon arriving at a station, the bus waits for the next holding action from the lower-level policy.
 \end{enumerate}
 Forward and backward headways are computed with respect to the preceding and following buses in the same direction, and the headway deviation from the target set by the upper policy defines the per-step cost (\Cref{eq:lower_cost}).
 
@@ -124,7 +124,7 @@ A two-layer MLP maps the 11-dimensional upper state (5 system summary dims + 3 h
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
+Layer & Shape & Activation \\
 \midrule
 Linear & $11 \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
@@ -143,7 +143,7 @@ A two-layer MLP with tanh squashing maps the lower state to a scalar holding tim
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
+Layer & Shape & Activation \\
 \midrule
 Linear & $(8{+}K) \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
@@ -163,7 +163,7 @@ The lower replaces the standard twin-Q SAC critic by an ensemble of $K{=}10$ ind
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
+Layer & Shape & Activation \\
 \midrule
 Linear & $(8{+}K{+}1) \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
@@ -179,7 +179,7 @@ A single MLP with the same MLP shape as one ensemble member estimates the expect
 \small
 \begin{tabular}{lll}
 \toprule
-\textbf{Layer} & \textbf{Shape} & \textbf{Activation} \\
+Layer & Shape & Activation \\
 \midrule
 Linear & $(8{+}K{+}1) \to 64$ & ReLU \\
 Linear & $64 \to 64$ & ReLU \\
@@ -211,7 +211,7 @@ In TransitDuet, $\piU$ acts at dispatch events $\{t_1^{\mathrm{U}}, \ldots, t_N^
 
 \subsection{Trip-lifecycle alignment and the realised gap}
 
-We resolve this through a \emph{trip-lifecycle} alignment. Each upper action $a_{\mathrm{U},i}$ at dispatch $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$ launched at the baseline time $t_{\mathrm{base},i}$ with a dispatch-specific target headway $\htarget + \delta_{t,i}$. The realised inter-dispatch gap is the actual elapsed time between consecutive bus departures as carried out by the lower controller (which may hold individual buses to track its target):
+We resolve this through a trip-lifecycle alignment. Each upper action $a_{\mathrm{U},i}$ at dispatch $t_i^{\mathrm{U}}$ initiates a trip $\tau_i$ launched at the baseline time $t_{\mathrm{base},i}$ with a dispatch-specific target headway $\htarget + \delta_{t,i}$. The realised inter-dispatch gap is the actual elapsed time between consecutive bus departures as carried out by the lower controller (which may hold individual buses to track its target):
 \begin{equation}
   g_i = t_{\mathrm{actual},i+1} - t_{\mathrm{actual},i},
 \end{equation}

@@ -1,0 +1,1385 @@
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                  1
+
+
+
+
+   TransitDuet: Bi-level reinforcement learning with
+     temporal advantage propagation for joint bus
+        timetable planning and holding control
+                                                         Anonymous Authors
+
+
+
+   Abstract—We present TransitDuet, a bi-level reinforcement           solved offline [1], while the holding control literature trains
+learning framework that jointly optimizes bus timetable planning       reinforcement learning (RL) agents that take the timetable as
+and real-time holding control. This joint problem is fundamen-         given [2]. Joint optimization would seem a natural application
+tally harder than either task in isolation: the planning and control
+layers operate on different timescales, observe different state        of hierarchical RL, yet three gaps prevent a straightforward
+spaces, and interact through delayed, asynchronous feedback—           application.
+properties that violate the synchronous co-execution assumption              a) Asynchrony between planning and control.: Hierar-
+underlying existing hierarchical reinforcement learning methods.       chical RL frameworks such as the options framework [3] and
+TransitDuet addresses this through three mechanisms. First,
+Temporal Advantage Propagation aggregates cross-level rewards
+                                                                       goal-conditioned methods like HIRO [4] assume that the upper
+over complete trip lifecycles to couple an upper dispatch policy       and lower levels share a common state clock or that the upper
+with a lower holding policy, generalizing synchronous cross-           level sets subgoals consumed by the lower level within a fixed
+advantage to asynchronous multi-timescale settings. Second, a          horizon. In bus operations, the upper policy acts at dispatch
+measurement-projection scheme based on online gradient descent         events (once per bus departure), while the lower policy acts
+enforces fleet-size constraints without reward shaping. Third,
+Lagrangian relaxation within the lower policy penalizes headway
+                                                                       at every station arrival across all active buses. The two levels
+deviations, converting a hard service-regularity requirement into      observe different state spaces—the upper level sees route-level
+a soft dual objective. We evaluate TransitDuet in a calibrated         demand forecasts and fleet status, whereas the lower level sees
+microsimulation of a high-frequency bus corridor with stochastic       per-bus headway deviations and passenger loads—and interact
+demand and traffic. Across three random seeds and an elas-             through delayed feedback spanning an entire trip lifecycle. No
+tic fleet budget sampled per episode from [8, 16], TransitDuet
+achieves 28% lower composite cost than a genetic-algorithm
+                                                                       shared clock or fixed subgoal horizon exists.
+timetable optimizer and 43% lower than CMA-ES, matches a                     b) Cross-advantage under asynchrony.: Pan et al. [5]
+hand-tuned fixed timetable on the mean while reducing seed             recently introduced cross-advantage augmentation for bi-level
+variance by 3×, and produces a complete Pareto frontier across         robot locomotion, where an upper style policy and a lower
+nine fleet sizes from a single training run. The learned policy        tracking policy execute synchronously on the same state. Their
+degrades gracefully under demand stochasticity well beyond the
+training distribution, with wait time rising only 25% when route       augmented advantage ÃU = AU + βAL directly sums the two
+variance is doubled.                                                   advantages at each time step. This elegant mechanism breaks
+                                                                       down when the two levels operate on different timescales
+   Index Terms—Bus holding control, timetable optimization,
+hierarchical reinforcement learning, multi-timescale control, con-     with different state and action spaces: there is no single time
+strained optimization.                                                 step at which AU and AL are jointly defined. Generalizing
+                                                                       cross-advantage to the asynchronous, multi-timescale setting
+                                                                       requires aggregating lower-level feedback over variable-length
+                           I. I NTRODUCTION                            intervals aligned with upper-level decisions.
+   High-frequency bus systems face a persistent coordination                 c) Fleet and regularity constraints.: Bus operations im-
+failure. Timetables are planned offline to balance fleet utiliza-      pose hard constraints—a fixed fleet size Nfleet and bounded
+tion against passenger demand, yet the headways they pre-              headway deviation—that reward shaping handles poorly. Con-
+scribe degrade within minutes once buses encounter stochastic          strained RL methods such as RCPO [6] address single-level
+traffic and boarding delays. Real-time holding control can             constraint satisfaction but do not account for constraints that
+restore regularity, but only within the headway structure it           span a bi-level structure, where the upper level controls
+inherits. When the timetable itself is poorly matched to               resource allocation and the lower level controls service regu-
+demand—dispatching too few buses in the peak or too many               larity.
+in the off-peak—no amount of holding can recover acceptable
+service. Planning and control are thus coupled: the quality of            We propose TransitDuet, a bi-level RL framework that
+one layer bounds the achievable performance of the other.              addresses all three gaps. The upper policy πU outputs target
+   Despite this coupling, existing work treats the two problems        headways [Hpeak , Hoff , Htrans ] at each dispatch event, while
+separately. The timetable optimization literature formulates           the lower policy πL , a distributional soft actor-critic with
+headway or frequency design as mixed-integer programs                  Lagrangian penalties [7], selects holding times at every station
+                                                                       arrival with parameter sharing across buses. The two levels
+  Anonymous Institution.                                               are coupled through Temporal Advantage Propagation (TAP):
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                              2
+
+
+
+the upper advantage is augmented with discounted lower-                                 II. R ELATED WORK
+level rewards accumulated over the trip lifecycle triggered         A. Reinforcement learning for bus holding control
+by each dispatch, and vice versa. A cosine-annealed coupling
+                                                                       The application of reinforcement learning to real-time bus
+coefficient β ramps from zero to βmax after an initial warmup
+                                                                    holding control has attracted considerable attention in recent
+phase, preventing premature coupling before either policy has
+                                                                    years, driven by the promise of adaptive policies that can
+learned a reasonable baseline. Fleet-size feasibility is enforced
+                                                                    respond to stochastic passenger demand and traffic conditions.
+by a θ-weighted online gradient descent projection on the
+                                                                    Alesiani and Gkiotsalitis [9] formulated holding for high-
+measurement vector z of dispatched buses, inspired by the
+                                                                    frequency services as a value-based RL problem, showing that
+ApproPO framework [8], while headway uniformity enters the
+                                                                    a Q-learning controller could reduce headway dispersion com-
+lower-level objective through Lagrangian relaxation.
+                                                                    pared to schedule-based rules. Wang and Sun [2] subsequently
+     d) Contributions.: The specific contributions of this pa-      studied multi-agent deep RL for the bus-bunching problem,
+per are:                                                            casting each bus as an independent agent with a shared
+                                                                    policy network and demonstrating that learned holding actions
+                                                                    stabilize headways across an entire corridor without explicit
+ 1) Temporal Advantage Propagation. We formalize TAP,
+                                                                    communication. The shared-parameter paradigm common to
+    an asynchronous cross-advantage mechanism that aggre-
+                                                                    these works scales gracefully with fleet size and implicitly
+    gates rewards across timescales via trip-lifecycle align-
+                                                                    encourages cooperative behavior through shared gradient up-
+    ment. We prove that TAP preserves policy-gradient unbi-
+                                                                    dates.
+    asedness under standard assumptions and reduces to the
+                                                                       Despite these advances, existing RL-based holding con-
+    synchronous cross-advantage of Pan et al. [5] when both
+                                                                    trollers share a fundamental limitation: they operate under a
+    levels share a common clock.
+                                                                    fixed, externally supplied timetable. The planned departure
+ 2) Joint timetable–holding formulation. We cast bus
+                                                                    times and target headways are treated as immutable inputs,
+    timetable planning and holding control as a bi-level
+                                                                    meaning that the holding policy has no mechanism to commu-
+    Markov decision process with heterogeneous state-action
+                                                                    nicate execution-level feedback—such as systematic schedule
+    spaces and asynchronous transitions, providing a formal
+                                                                    infeasibility or recurrent bunching patterns—back to the plan-
+    problem structure absent from prior bus RL work.
+                                                                    ning stage. When the timetable itself is poorly calibrated to
+ 3) Constraint satisfaction via θ-OGD and Lagrangian
+                                                                    actual operating conditions, even an optimal holding policy can
+    relaxation. We integrate measurement-projection con-
+                                                                    only mitigate, not resolve, the resulting service irregularity.
+    straints at the upper level and dual-variable penalties at
+                                                                    TransitDuet addresses this gap by embedding the holding
+    the lower level, handling fleet feasibility and headway
+                                                                    controller as the low-level agent within a bi-level framework,
+    regularity without reward shaping.
+                                                                    where real-time execution performance directly shapes the
+ 4) Empirical evaluation on a calibrated corridor. On
+                                                                    timetable through Temporal Advantage Propagation.
+    a stochastic microsimulation, TransitDuet attains 28%
+    lower composite cost than a genetic-algorithm timetable
+    optimizer and 43% lower than CMA-ES, matches a hand-            B. Bus timetable optimization
+    tuned fixed timetable on the mean while reducing seed              Timetable design has traditionally been approached through
+    variance by 3×, and produces a Pareto frontier across           mathematical programming and metaheuristic search. Ibarra-
+    nine fleet budgets from a single training run; ablations        Rojas et al. [10] formulated the problem as a mixed-integer
+    confirm that the holding-feedback coupling and the CS-          program that jointly determines departure times and vehicle
+    BAPR belief tracker are the load-bearing components for         assignments to minimize a weighted combination of passenger
+    this robustness.                                                waiting time and operator cost, solving it via branch-and-
+                                                                    bound with valid inequalities. Gkiotsalitis and Cats [1] pro-
+      e) Results preview.: We evaluate on a high-frequency bus      posed a bi-level model in which the upper level selects head-
+corridor with 22 stations, 264 daily trips, demand stochasticity    ways to minimize total passenger cost while the lower level
+σdemand = 0.15, and elastic fleet Nfleet ∈ [8, 16] sampled          solves a vehicle scheduling problem, solved using an adaptive
+per episode. TransitDuet matches the strongest fixed-timetable      large neighborhood search. Frequency-setting variants, such
+baseline within noise on mean wait and CV while attaining           as the work of Cats and Glück [11], optimize the number of
+3× lower seed variance, and degrades only 25% on wait               departures per period rather than individual departure times,
+when route stochasticity is doubled relative to the training        and typically rely on assignment models to estimate passenger
+distribution.                                                       flows under each candidate frequency vector.
+                                                                       A common thread in this literature is the reliance on static
+     f) Paper organization.: Section II reviews related work        demand forecasts and deterministic travel-time assumptions.
+in timetable optimization, bus holding RL, and hierarchical         Timetables are optimized offline against expected conditions
+RL. Section III formalizes the bi-level MDP. Section IV             and then handed off to operations without a feedback loop.
+presents the TransitDuet architecture, TAP, and constraint-         When actual conditions deviate—due to traffic incidents, de-
+handling mechanisms. Section V describes the simulation en-         mand surges, or driver variability—the timetable may be-
+vironment and reports results. Section VI discusses limitations     come infeasible, and holding controllers are left to absorb
+and extensions. Section VII concludes.                              the mismatch. Moreover, the combinatorial structure of these
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                 3
+
+
+
+formulations limits scalability: solution times grow rapidly         feasibility. Stooke et al. [15] improved upon this with PID-
+with the number of trips and stops, making re-optimization           based Lagrange multiplier updates that reduce oscillation and
+during the operating day impractical. TransitDuet replaces           speed convergence in the constrained setting. These methods
+this open-loop paradigm with a closed-loop one. The high-            are effective for soft constraints, where occasional small vio-
+level agent learns a timetable policy that maps aggregate state      lations are tolerable, but they offer no worst-case guarantees—
+features to departure-time adjustments, and it receives gradient     the Lagrange multiplier may fail to grow fast enough to
+signals from low-level execution via TAP, enabling the planner       prevent persistent violations during training.
+to adapt its decisions based on how well the resulting schedule         For settings that demand hard constraint satisfaction, Miry-
+can actually be executed.                                            oosefi et al. [8] introduced ApproPO, which formulates the
+                                                                     constrained problem as an online convex optimization over
+C. Hierarchical and multi-timescale reinforcement learning           the space of occupancy measures and applies a measurement-
+                                                                     based projection oracle to enforce feasibility at every iter-
+   Hierarchical reinforcement learning decomposes complex
+                                                                     ate. The θ-OGD variant provides a practical implementation
+tasks into temporally extended sub-problems. The options
+                                                                     that projects policy parameters onto the feasible set using
+framework of Sutton et al. [3] introduced the notion of
+                                                                     online gradient descent with approximate projections. In the
+temporally abstract actions, each consisting of an initiation set,
+                                                                     multi-agent domain, Pan et al. [5] proposed RoboDuet for
+an intra-option policy, and a termination condition, enabling
+                                                                     humanoid locomotion, where two coupled agents—an upper-
+planning over multiple timescales within a single MDP. Feudal
+                                                                     body controller and a lower-body locomotor—exchange cross-
+networks [12] operationalize this idea with a manager that
+                                                                     advantage terms that capture how each agent’s action quality
+sets sub-goals in a learned latent space and a worker that
+                                                                     is perceived under the other’s value function, enabling tight
+executes primitive actions to reach them, training both levels
+                                                                     coordination without centralized control.
+end-to-end with the manager’s policy gradient modulated by
+                                                                        TransitDuet combines elements from both lines of work
+the worker’s goal-reaching success. HIRO [4] further improved
+                                                                     to address the distinct constraint structure of transit opera-
+sample efficiency by introducing off-policy corrections that
+                                                                     tions. Fleet-size and capacity constraints are hard operational
+relabel high-level goals in hindsight, making hierarchical
+                                                                     requirements that must never be violated; we enforce these
+training practical in continuous-control domains. Beyond goal-
+                                                                     through ApproPO θ-OGD applied to the high-level timetable
+conditioned hierarchies, Lee et al. [13] and Metelli et al. [14]
+                                                                     policy, guaranteeing that planned departures respect vehicle
+studied the multi-timescale setting more broadly, analyzing
+                                                                     availability at every training iterate. Headway uniformity,
+the interaction between agents operating at different decision
+                                                                     by contrast, is a softer service-quality objective that admits
+frequencies and establishing regret bounds for the resulting
+                                                                     graceful degradation; we handle it via a Lagrangian penalty
+non-stationary sub-problems.
+                                                                     with adaptive multiplier updates in the low-level holding
+   While these methods provide powerful abstractions for tem-
+                                                                     policy. The cross-level coordination itself is managed by TAP,
+poral hierarchy, most assume either synchronous execution—
+                                                                     which extends RoboDuet’s synchronous cross-advantage to the
+where the high-level decision triggers immediately before a
+                                                                     asynchronous, multi-timescale regime that characterizes the
+fixed-length sequence of low-level steps—or a shared state
+                                                                     planning–control interface. This layered constraint architecture
+space across levels. In transit operations, the planning and con-
+                                                                     allows TransitDuet to provide hard guarantees where they are
+trol timescales are fundamentally asynchronous: the timetable
+                                                                     operationally necessary while retaining the flexibility of soft
+agent acts once per planning horizon (e.g., every 15–30 min-
+                                                                     penalties where service trade-offs are acceptable.
+utes), while the holding agent acts at every stop visit (every 1–
+3 minutes), and the two levels observe different state represen-
+tations at non-aligned decision epochs. TransitDuet introduces                       III. P ROBLEM FORMULATION
+Temporal Advantage Propagation to handle this asynchrony.               We formalize joint timetable planning and holding control
+TAP generalizes the cross-advantage mechanism of RoboDuet            as a bi-level Markov decision process (MDP) operating over
+from synchronized paired decisions to temporally misaligned          a single bus route with time-varying passenger demand. This
+ones, accumulating discounted low-level advantages over the          section first describes the transit system model (Section III-A),
+variable-length interval between consecutive high-level actions      then defines the upper- and lower-level MDPs (Section III-B),
+and injecting the resulting signal into the high-level policy        states the constraint specification (Section III-C), and con-
+gradient. This allows the planner to receive credit assignment       cludes with a discussion of the timescale separation that
+from execution outcomes without requiring the two levels to          motivates our algorithmic design (Section III-D).
+share a clock or a state space.
+                                                                     A. Bus transit system model
+D. Constrained reinforcement learning                                   We consider a single bidirectional bus route consisting of
+  Many practical RL deployments must satisfy constraints             M stations indexed {1, . . . , M }. Service is provided according
+beyond reward maximization. Lagrangian relaxation is the             to a timetable that dispatches a total of 264 trips per day,
+most widely used approach: Tessler et al. [6] proposed reward-       alternating between the two directions. Passenger demand is
+constrained policy optimization, which augments the policy           drawn from time-varying origin–destination (OD) matrices
+gradient with dual variables corresponding to cost constraints       that capture morning, midday, and evening peaks. At any point
+                                                                                          max
+and performs primal-dual updates to steer the policy toward          in time, at most Nfleet     = 25 buses may be concurrently
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                         4
+
+
+
+in service; each trip is characterized by a launch time and                  c) Reward and cost.: The immediate lower reward is a
+a travel direction. The dispatch headway—the time between               function of headway deviation from the target set by the upper
+consecutive launches in the same direction—is the primary               level. We define the per-step cost as
+planning lever, while per-station holding times constitute the                                                  target 2
+                                                                                                        fwd − h
+                                                                                                     (h              )     
+real-time control lever.                                                           c(sL , aL ) = min                     , 1  ,    (5)
+                                                                                                          (htarget )2
+                                                                        which penalizes headway irregularity in a scale-invariant man-
+B. Bi-level MDP formulation                                             ner and is clipped at 1 for numerical stability.
+   We decompose the joint optimization into two coupled
+MDPs that share a common environment but differ in obser- C. Constraint specification
+vation granularity, action semantics, and decision frequency.
+                                                                          The bi-level MDP is subject to one hard and one soft con-
+   1) Upper-level MDP (timetable planning): The upper-level
+                                                                       straint, both evaluated through a measurement vector collected
+policy πU determines dispatch headways. It is triggered at each
+                                                                       at the end of each episode.
+dispatch event, yielding approximately 132 decision epochs
+                                                                             a) Measurement vector.: At the conclusion of a service
+per episode (one full service day).
+                                                                       day, we compute:
+      a) State.: The upper state encodes system-level summary                                                                
+statistics:                                                                   z = avg_wait_min, peak_fleet, bunching_rate . (6)
+       h                                                            i
+                demand fleet_on_route prev_headway
+sU = hour 24 ,   1000  ,     max
+                           Nfleet    ,     600     , unhealthy_rate   ∈ R5 , b) Hard constraint (fleet capacity).: The peak number of
+                                                                  (1) buses simultaneously on route must not exceed the available
+where each component is normalized to facilitate learning. The fleet:
+unhealthy_rate captures the fraction of active buses whose                          peak_fleet ≤ Nfleet ,      Nfleet = 12.       (7)
+observed headway deviates from the target by more than a This constraint is enforced structurally: the environment blocks
+tolerance threshold.                                                   a dispatch if it would violate the fleet limit.
+      b) Action.: The upper action specifies headways for three              c) Soft constraint (headway uniformity).: The expected
+demand regimes:                                                        per-step cost must remain below a threshold:
+               aU = Hpeak , Hoff , Htrans ∈ R3 ,
+                                              
+                                                                  (2)
+                                                                                                           
+                                                                                         EπU ,πL c(sL , aL ) ≤ clim ,             (8)
+with ranges Hpeak ∈ [180, 600], Hoff ∈ [300, 1200], and which encourages even spacing of buses along the route.
+Htrans ∈ [240, 900], all in seconds. These three headways Satisfaction of this constraint is enforced via Lagrangian
+correspond to peak, off-peak, and transitional periods, respec- relaxation within the lower-level policy (see Section IV).
+tively. The environment selects the applicable headway based
+on the current time of day and uses it as both the dispatch D. Timescale separation
+interval and the target headway htarget communicated to the
+lower level.                                                               A defining characteristic of the bi-level formulation above
+                                                                        is the pronounced separation of timescales between the two
+      c) Reward.: The upper reward is computed at the episode
+                                                                        decision layers. The upper policy πU acts at dispatch events,
+level from a measurement vector (defined in Section III-C).
+                                                                        which occur roughly every five minutes on average. The lower
+Because each upper action influences the system over an
+                                                                        policy πL , by contrast, acts at every station arrival for every
+extended horizon through the downstream holding decisions
+                                                                        active bus—a frequency on the order of once every 30 seconds
+it induces, assigning credit to individual dispatch events is
+                                                                        system-wide when multiple buses are in service. Consequently,
+nontrivial; we defer the reward construction to Section IV.
+                                                                        hundreds of lower-level decisions may intervene between two
+   2) Lower-level MDP (holding control): The lower-level
+                                                                        consecutive upper-level decisions, and the two layers never act
+policy πL decides how long each bus should dwell beyond its
+                                                                        simultaneously.
+minimum stop time at every station. A decision is triggered
+                                                                           This asynchrony distinguishes our setting from the semi-
+at each station arrival for each active bus, producing a high
+                                                                        Markov options framework [3] and feudal reinforcement learn-
+volume of decision epochs throughout the day.
+                                                                        ing [16, 12], which assume that (i) the manager and worker
+      a) State.: The lower state captures the local context of
+                                                                        share a common state space or a fixed abstraction thereof, and
+an individual bus:
+                                                                        (ii) the manager selects a subgoal that the worker executes to
+sL = bus_id, station_id, hour, direction, hfwd , hbwd , d, ∆h, completion
+                                                                  ˆ      v1 , . . . , vK before
+                                                                                            ∈ Rthe
+                                                                                                8+Kmanager acts again. Neither assumption
+                                                                                        
+                                                                                                     ,
+                                                                    (3) holds      here:  the upper  state sU ∈ R5 summarizes fleet-level
+                                                                                                                           8+K
+where hfwd and hbwd denote the forward and backward statistics whereas the lower state sL ∈ R                                    encodes bus-
+             ˆ
+headways, d is the estimated dwell time, ∆h is the deviation            level    kinematics,   and  both   policies issue decisions  driven by
+of the current headway from h  target
+                                      , and v1 , . . . , vK are recent  environment        events rather  than  by  a synchronous   clock or a
+inter-station speeds that encode local traffic conditions.              predefined      option  duration.
+      b) Action.: The lower action is a scalar holding time:               More concretely, a single upper action (a headway triple)
+                                                                        remains in effect while many buses traverse multiple stations
+                    aL ∈ [0, 60] seconds.                           (4) under independent lower-level control; the upper policy cannot
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                               5
+
+
+
+pause and wait for all induced lower decisions to conclude.         target headways for peak, off-peak, and transition periods,
+Standard hierarchical RL methods that propagate value or            respectively. At each dispatch event, the current time-of-day
+advantage across levels therefore require modification to han-      selects the applicable headway component, which is commu-
+dle the fully asynchronous, event-driven interaction between        nicated to the lower level as htarget .
+πU and πL . We address this challenge through Temporal                   a) Network architecture.: The policy is parameterized as
+Advantage Propagation, detailed in Section IV.                      a two-layer MLP with 64 hidden units per layer and ReLU
+                                                                    activations:
+              IV. T RANSIT D UET FRAMEWORK                                                                                      
+   This section presents the TransitDuet architecture and its        µϕ (sU ) = σ W3 ReLU(W2 ReLU(W1 sU + b1 ) + b2 ) + b3 ,
+constituent algorithms. Section IV-A motivates the decoupled                                                                    (9)
+dual-network design. Section IV-B and Section IV-C detail the       where σ(·) denotes the element-wise sigmoid function and ϕ
+upper-level timetable policy and lower-level holding control        collects all weights and biases. The sigmoid output is affinely
+policy, respectively. Section IV-D introduces Temporal Advan-       mapped to the per-dimension action range:
+tage Propagation (TAP), the central mechanism that couples            (k)  (k)    (k)        (k)     (k) 
+the two levels across timescales. Section IV-E describes the         aU = alow + µϕ (sU ) · ahigh − alow ,       k ∈ {1, 2, 3}. (10)
+measurement-projection scheme that enforces fleet and service
+constraints on the upper level. Section IV-F assembles the full     Exploration is achieved by additive Gaussian noise with a
+training procedure.                                                 learnable log-standard-deviation vector log σ ϕ shared across
+                                                                    states:
+                                                                                    aU ∼ N µϕ (sU ), diag(σ 2ϕ ) .
+                                                                                                                
+A. Architecture overview                                                                                                     (11)
+   TransitDuet comprises two independent policy networks
+operating at different timescales and over different state-action        b) Policy gradient.: Because the upper level produces
+spaces . The upper policy πU is a lightweight Gaussian MLP          only a single action per dispatch event and the episode length
+that selects target headways at each dispatch event. The lower      is moderate (one simulated day), we adopt a REINFORCE
+policy πL is a DSAC-Lagrangian controller that selects holding      estimator with normalized returns. Let {(sU,i , aU,i , RiU )}M
+                                                                                                                                 i=1
+durations at every station arrival, with parameters shared          denote the sequence of M dispatch events in one episode. The
+across all buses in the fleet.                                      policy gradient is
+   A key design choice is that the two networks share no                                 M
+encoder parameters. This stands in contrast to the shared-                           1 X
+                                                                       ∇ϕ J(πU ) =         ∇ϕ log πU (aU,i | sU,i ) · ÂU,i ,   (12)
+body, dual-head architecture of RoboDuet [5], which couples                          M i=1
+an upper style policy and a lower tracking policy through
+a common proprioceptive encoder. Shared encoders are ap-            where ÂU,i is the TAP-augmented advantage defined in sec-
+propriate when the two levels observe the same state at             tion IV-D and returns are normalized to zero mean and unit
+each time step—as in synchronous robot locomotion—but               variance within the episode to reduce gradient variance.
+are ill-suited here for two reasons. First, sU and sL live in
+different spaces: sU encodes route-level demand forecasts and
+fleet status, whereas sL encodes per-bus headway deviation,
+                                                                    C. Lower-level holding control policy
+passenger load, and local occupancy. Second, the two levels
+are triggered asynchronously. The upper policy acts once per           The lower policy πL selects a holding duration aL ∈
+dispatch event (roughly once per htarget seconds), while the        [0, amax ] at each station arrival, where amax = 60 s. It
+lower policy acts at every station arrival of every active bus,     is trained with a distributional soft actor-critic augmented
+producing hundreds of decisions per upper-level step. Forcing       by a Lagrangian cost term for headway-deviation constraint
+these heterogeneous signals through a shared trunk would            enforcement [7]. All buses share the same policy parameters,
+create conflicting gradient directions.                             enabling fleet-wide generalization.
+   The coupling between the two levels is instead handled                a) Gaussian policy with tanh squashing.: A two-layer
+entirely through the reward channel, via the Temporal Advan-        MLP with 32 hidden units per layer and ReLU activations pro-
+tage Propagation mechanism described in section IV-D. This          duces a mean µψ (sL ) and log-standard-deviation log σψ (sL ).
+clean separation permits each network to be trained with the        The raw sample u ∼ N (µψ , σψ2 ) is squashed through a tanh
+algorithm best suited to its structure: REINFORCE for the           transform and rescaled:
+episodic, low-dimensional upper policy and soft actor-critic
+with Lagrangian constraints for the high-frequency, constraint-                              amax            
+                                                                                      aL =        tanh(u) + 1 .                 (13)
+aware lower policy.                                                                           2
+                                                                    The log-probability accounts for the change of variables:
+B. Upper-level timetable policy
+                                                                                                                                   amax
+                                                                    log πL (aL | sL ) = log N (u; µψ , σψ2 )−log 1−tanh2 (u) −log
+                                                                                                                            
+  The upper policy πU maps the route-level state sU to a three-                                                                         .
+                                                                                                                                    2
+dimensional action aU = [Hpeak , Hoff , Htrans ] specifying                                                                   (14)
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                    6
+
+
+
+      b) Twin Q-networks.:           Two independent critics           2) Asynchronous generalization: In bus operations, the
+Qω1 (sL , aL ) and Qω2 (sL , aL ), each a two-layer MLP upper policy acts at dispatch event i (when bus i departs the
+with 32 hidden units, are trained to minimize the clipped terminal), while the lower policy acts at every station arrival
+double-Q Bellman error:                                             of every bus throughout the simulation. Let trip(i) denote the
+                               h                  2 i              set of lower-level transitions that occur between dispatch event
+LQ (ωj ) = E(sL ,aL ,r,s′L )∼D Qωj (sL , aL )−y , j ∈ {1, 2}, i and dispatch event i + 1—that is, all station arrivals across
+                                                               (15) the fleet during the lifecycle of the trip initiated by dispatch i.
+where the target is                                                        a) Forward direction: lower → upper.: We augment the
+                                                                  upper advantage at dispatch i with the mean lower-level reward
+y = r+γ min Qω̄j (s′L , a′L )−α log πL (a′L | s′L ) , a′L ∼ πL (· | accumulated
+                                                                    s′L ),         during trip(i):
+            j=1,2
+                                                               (16)                       (i)               (i)        1      X
+and ω̄j denotes target-network parameters updated via soft ÃU [i] = AU [i]+β·RL , where RL = |trip(i)|                               rL,j .
+                                                                                                                            j∈trip(i)
+interpolation with coefficient τ = 0.005.
+                                                                                                                                   (21)
+      c) Cost Q-network and Lagrangian relaxation.: A sep- The mean operator, rather than a sum, normalizes for the
+arate cost critic Qcξ (sL , aL ) estimates the expected cumula- variable number of lower-level transitions per trip, which
+tive headway-deviation cost. The lower-level policy objective fluctuates with the dispatched headway: a short headway
+balances reward maximization, entropy regularization, and produces fewer intermediate station arrivals than a long one.
+constraint satisfaction:
+                                                                           b) Reverse direction: upper → lower.: The lower-level
+                                                                    training  reward for each transition j ∈ trip(i) is augmented
+                             h                                                    i
+                                                                         c
+LπL (ψ) = EsL ∼D, aL ∼πL α log πL (aL | sL )−min Qωj (sL , aL )+λ Qξ (sL , aL ) ,
+                                                     j              with the upper-level reward of the initiating dispatch:
+                                                               (17)
+                                                                                                      (i)
+where λ ≥ 0 is the Lagrange multiplier. The dual variable is                     r̃L,j = rL,j + β · RU , ∀ j ∈ trip(i).            (22)
+updated to satisfy the cost-limit constraint clim :
+           h                                                        This injects global timetable-quality feedback into the local
+                                                           i
+  λ ← exp clamp log λ + ηλ (clim − E[Qcξ ]), −10, 5 . (18) holding decisions, enabling the lower policy to distinguish
+                                                                    states that arise from good timetables (worth exploiting)
+Updating in log-space ensures λ > 0 and the clamp prevents from those arising from poor ones (requiring compensatory
+numerical instability.                                              holding).
+      d) Auto-entropy tuning.: The temperature α is adjusted               c) Physical intuition.: Suppose the upper policy dis-
+to maintain a target entropy H̄ = − dim(aL ):                       patches   a bus with an unrealistically long headway htarget =
+                                                                    180 s during peak demand. The lower policy will encounter
+                                                                    overcrowded stops and large headway deviations, generating
+                                                             
+  α ← min αmax , exp log α − ηα (log πL (aL | sL ) + H̄) ,
+                                                                    consistently negative rL,j . Through the forward direction of
+                                                               (19)
+                                                                    TAP, the mean of these negative rewards feeds back into
+with αmax = 0.3 to prevent entropy collapse from dominating
+                                                                    ÃU , penalizing the dispatch decision and guiding the upper
+the Q-values in the early training phase.
+                                                                    policy toward more feasible headways. Conversely, if the lower
+                                                                    policy consistently fails to hold buses despite receiving a
+                                                                    reasonable headway target, the reverse direction of TAP injects
+D. Temporal advantage propagation
+                                                                    the positive upper reward into lower transitions, signaling that
+   Temporal Advantage Propagation (TAP) is the central mech- the timetable context was favorable and encouraging the lower
+anism by which TransitDuet couples the upper and lower levels policy to improve its holding behavior.
+despite their operating on different timescales with different             d) Relationship to synchronous cross-advantage.: When
+state-action spaces. We first review the synchronous cross- both levels share a common clock—i.e., |trip(i)| = 1 for all
+advantage of Pan et al. [5], then present the asynchronous i and rL,j = AL,t —eq. (21) reduces to ÃU = AU + β AL ,
+generalization that constitutes our primary contribution.           recovering eq. (20). TAP is thus a strict generalization of the
+   1) Synchronous cross-advantage (background): In Robo- synchronous cross-advantage to multi-timescale, asynchronous
+Duet, the upper and lower policies share a common state clock. bi-level systems.
+At each time step t, both policies execute, and both advantages        3) Coupling coefficient schedule: Coupling the two levels
+AU,t and AL,t are well-defined. The augmented objective for from the start of training is harmful: the lower policy has
+the upper policy is                                                 not yet learned reasonable holding behavior, so its rewards
+                                                                    carry no useful signal for the upper policy, and vice versa. We
+              LU
+                                                 
+                RoboDuet    =  − A U,t + β A L,t   · ρ t ,     (20) therefore anneal β through three stages:
+                                                                                        
+where ρt is the importance-sampling ratio from PPO. This                                
+                                                                                        
+                                                                                         0,                  e ≤ e1 ,
+formulation requires that AU,t and AL,t are computed at the
+                                                                                                  e − e1
+                                                                                β(e) = βmax ·             , e1 < e < e 2 ,         (23)
+same time step t, which is possible only when both levels                               
+                                                                                                 e2 − e1
+share a common clock and state representation.
+                                                                                        
+                                                                                        β
+                                                                                            max ,             e ≥ e2 ,
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                    7
+
+
+
+Algorithm 1 Temporal Advantage Propagation (one episode)               The quadratic penalty on fleet overshoot (max(0, npeak −
+Require: Upper trajectory {(sU,i , aU,i , RU,i )}M                     Nfleet ))2 ensures that small violations incur proportionally less
+                                                   i=1 , lower tran-
+   sitions {(sL,j , aL,j , rL,j )}N   , trip mapping  trip(·), cou-    cost than large ones, providing a smooth gradient.
+                                  j=1
+   pling coefficient β                                                       c) Online gradient descent update.: The weight vector
+Ensure: Augmented upper advantages {ÃU [i]}, augmented                is updated by online gradient descent (OGD) on a loss that
+   lower rewards {r̃L,j }                                              drives each measurement toward its target:
+ 1: // Forward: lower → upper
+                                                                                                                              
+                                                                           ℓt = −w̄t , − max(0, npeak,t − Nfleet ), −brate,t , (26)
+ 2: for i = 1, . . . , M do
+        (i)       1
+                      P                                                                                               η0
+ 3:   RL ← |trip(i)|     j∈trip(i) rL,j
+                                                                                                          
+                                                                                    θ t+1 = ΠB θ t + ηt ℓt ,     ηt = √ ,           (27)
+ 4:   Compute baseline: ÂU,i ← RU,i − R̄U            {normalized                                                       t
+      return}                                                          where ΠB projects onto the unit√ball {θ : ∥θ∥2 ≤ 1} and η0
+                              (i)
+ 5:   ÃU [i] ← ÂU,i + β · RL                                         is the base learning rate. The 1/ t decay guarantees that the
+ 6: end for                                                            cumulative  constraint violation grows sublinearly, yielding an
+                                                                           √
+ 7: // Reverse: upper → lower                                          O( T ) regret bound standard in online convex optimization.
+ 8: for j = 1, . . . , N do                                               The simplification relative to ApproPO is deliberate: be-
+ 9:    Let i(j) be the dispatch index such that j ∈ trip(i(j))         cause the upper policy is trained via REINFORCE with
+10:    r̃L,j ← rL,j + β · RU,i(j)                                      the θ-modulated reward, the policy update itself serves as
+11: end for                                                            the approximate best-response oracle, eliminating the inner
+                                                                       optimization loop that ApproPO requires.
+
+where e is the episode index, e1 = 50, e2 = 150, and
+βmax = 0.5. Stage 1 (e ≤ e1 ) is a lower-only warmup                   F. Training procedure
+in which the upper policy is frozen and πL trains against          Algorithm 2 presents the full TransitDuet training loop,
+a fixed default timetable. Stage 2 (e1 < e < e2 ) activates     which coordinates the three-stage β schedule with the upper
+the upper policy and linearly ramps β from zero to βmax ,       and lower policy updates, TAP, and measurement projection.
+progressively strengthening the cross-level coupling. Stage 3        a) Stage 1: lower-only warmup (e ≤ e1 = 50).: The
+(e ≥ e2 ) maintains full coupling at β = βmax .                 upper policy is frozen and all buses are dispatched with a fixed
+   The linear ramp is intentionally simple; we found em-        default headway of htarget = 360 s. The lower policy trains in
+pirically that more elaborate schedules (cosine annealing,      isolation via DSAC-Lagrangian, building a competent holding
+step functions) produced no consistent improvement while        controller before any cross-level coupling is introduced. This
+introducing additional hyperparameters.                         warmup is critical: without it, the upper policy receives TAP
+   4) Algorithm: The TAP computation for one episode is         feedback from a random lower policy, which amounts to noise
+summarized in algorithm 1.                                      and destabilizes upper-level learning.
+                                                                     b) Stage 2: ramp-up (e1 < e < e2 ).: The upper policy is
+E. Measurement projection for fleet constraint
+                                                                activated and begins selecting headways. The coupling coeffi-
+   The upper policy must satisfy operational constraints on cient β increases linearly from 0 to βmax = 0.5, progressively
+fleet size, average passenger waiting time, and bus bunch- strengthening the bidirectional reward augmentation. Both
+ing rate. Rather than adding penalty terms to the reward— policies are updated at their respective frequencies: the lower
+which requires manual tuning and conflates constraint satis- policy every fL = 5 station arrivals with batch size B = 2048,
+faction with reward maximization—we adopt a measurement- and the upper policy once per episode. The measurement-
+projection approach inspired by the ApproPO framework projection weight θ is also updated at each episode boundary
+[8], simplified to avoid the nested best-response oracle that via OGD.
+ApproPO requires.                                                    c) Stage 3: full coupling (e ≥ e2 = 150).: The coupling
+      a) Measurement vector.: At the end of each episode, we coefficient is held at β
+                                                                                       max = 0.5 for the remainder of training.
+compute a three-dimensional measurement vector:                 Both policies continue to update, and the OGD weight θ con-
+                 z = w̄, npeak , brate ∈ R3 ,             (24) tinues to adapt, gradually shifting the upper reward emphasis
+                                     
+                                                                toward whichever constraint is most frequently violated.
+where w̄ is the average passenger waiting time, npeak is the
+                                                                     d) Computational cost.: The lower policy update dom-
+peak fleet size (maximum number of buses simultaneously in
+                                                                inates computation due to the twin Q-network and cost Q-
+service), and brate is the bunching rate (fraction of arrivals
+                                                                network gradient steps. Each lower update involves five back-
+with headway below a threshold).
+                                                                ward passes (two Q-critics, one cost critic, one policy, one
+      b) Weight vector and reward modulation.: A weight
+                                                                entropy temperature), performed on GPU-batched samples
+vector θ ∈ R3 , initialized as θ 0 = [−0.5, −0.3, −0.2],
+                                                                from D. The upper policy update is negligible by comparison:
+modulates the upper-level reward:
+                                                               a single REINFORCE gradient step over M ≈ 30–50 dispatch
+RU = θ ⊤ p, where p = w̄, (max(0, npeak −Nfleet ))2 , brate events.
+                            
+                                                                 .       The TAP computation adds only O(M + N ) scalar
+                                                          (25) operations per episode and is not a bottleneck.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                 8
+
+
+
+     e) Convergence considerations.: The three-stage sched-        •  –Elastic: fix Nfleet = 12 during training (policy does not
+ule ensures that coupling is introduced only after both policies      see elastic budget).
+have reached a reasonable performance baseline. The linear β       • –DemandNoise: deterministic demand (remove the per-hour
+ramp avoids the discontinuity that a step-function activation         multiplier and peak-time shift).
+would introduce, which in preliminary experiments caused                 c) Metrics.: We report four metrics, aggregated over the
+oscillatory instabilities in both the upper and lower value        final 30 training episodes across 3 seeds:
+estimates. We did not observe sensitivity to the precise values       • Average passenger wait time (min): time between a
+of e1 and e2 within a factor of two of the defaults, but setting         passenger’s arrival at a station and boarding.
+e1 too small (before the lower policy converges to a stable           • Headway coefficient of variation (CV): σh /µh across
+holding strategy) consistently degraded final performance, as            inter-dispatch gaps within an episode; captures regularity.
+confirmed by the ablation study in section V.                         • Fleet overshoot: max(0, peak fleet − Nfleet ); non-zero
+                                                                         when the policy exceeds the sampled budget.
+                                                                                                                2
+                      V. E XPERIMENTS                                 • Composite cost: wait/10 + overshoot /Nfleet + CV, the
+
+   We evaluate TransitDuet on an event-driven bus microsim-              upper-level training objective. Lower is better on all four.
+ulation against three external baselines and six component               d) Training protocol.: Each method is trained for 300
+ablations. All results are from three independent random seeds;    episodes with three independent random seeds. We report
+figures in the mechanism-analysis section are placeholders         means and standard deviations across seeds.
+pending final figure generation.                                         e) Hyperparameters.: Table I summarizes the key hyper-
+                                                                   parameters. All values are shared across methods where ap-
+                                                                   plicable; method-specific ablations disable the corresponding
+A. Experimental setup
+                                                                   component as described above.
+      a) Simulation environment.: We implement an event-
+driven bus simulation modeling a single bidirectional route        B. Main results
+with 22 stations (11 per direction), serving 264 scheduled trips
+per day. Passenger demand follows origin–destination (OD)             Table II compares TransitDuet against three external base-
+matrices with time-varying arrival rates calibrated to reproduce   lines.
+morning and evening peaks. The simulation advances at a                  a) TransitDuet dominates search-based upper-level
+resolution of ∆t = 1 s. Passenger arrivals and alighting events    methods.: Against GA and CMA-ES, TransitDuet achieves
+are updated every 20 s, while the upper-level route planner        46% and 60% lower wait time (7.54 vs 13.94 and 18.74),
+is queried every 300 s (5 min) to issue dispatch decisions.        28% and 43% lower composite cost, and 4× to 14× lower
+Travel times between consecutive stations are drawn from log-      seed variance. CMA-ES in particular is destabilized by
+normal distributions whose parameters vary by time of day and      the noisy single-episode fitness it must rank candidates
+direction, with a route stochasticity parameter σ controlling      on: one of its three seeds converges to a degenerate triple
+variance (default σ = 1.5).                                        [Hpeak , Hoff , Htrans ] = [280, 339, 763] s, inflating transition-
+      b) Methods.: We evaluate TransitDuet against three ex-       period wait time to 31.24 min and contributing most of the
+ternal baselines and six component ablations. All methods          σwait = 9.35 in Table II. Search-based upper-level controllers
+operate on the same environment with demand stochasticity          are thus unreliable under the stochasticity that any real
+(per-hour multiplier N (1, 0.152 ), clipped to [0.3, 2.0]) and     deployment faces.
+elastic fleet budget Nfleet ∼ Uniform[8, 16] sampled per                 b) TransitDuet matches the Fixed baseline within noise,
+episode.                                                           with sharply lower variance.: The Fixed H = 360 s baseline
+External baselines:                                                is a surprisingly competitive baseline because 360 s is close
+                                                                   to the average-demand service frequency. TransitDuet’s mean
+• Fixed: static timetable with H = 360 s throughout the day;
+                                                                   composite cost (1.81) is 12% higher than Fixed (1.62), which
+   only the lower-level holding controller is trained. A strong    is within the combined seed std. The decisive difference is
+   hand-tuned baseline.                                            variance: TransitDuet’s composite std (0.09) is 3× smaller
+• GA: genetic-algorithm search over [Hpeak , Hoff , Htrans ]
+                                                                   than Fixed’s (0.27), and its wait std (0.26) is 6× smaller (1.63).
+   (pop size 15, σmut = 0.15).                                     Fixed’s worst seed reaches 9.31 min wait while TransitDuet’s
+• CMA-ES: covariance-matrix adaptation evolution strategy
+                                                                   worst seed is 7.8 min — in a service-level agreement with
+   (pop size 10, σ0 = 0.3).                                        bounded wait, the learned policy is the deployable option.
+Component ablations (all start from TransitDuet full):                   c) Interpretation: robustness, not raw mean, is the con-
+• –HoldFB: remove holding-feedback coupling from the up-           tribution.: A static timetable can be hand-tuned by an operator
+   per state (state dims [5:8] zeroed).                            to match average demand, and on average it does well. What
+• –CS-BAPR: disable the Bayesian changepoint belief                a static timetable cannot do is adapt to episode-to-episode
+   tracker; upper α stays at nominal value.                        demand realization. TransitDuet’s per-dispatch δt offset, driven
+• –Hindsight: disable the per-dispatch gap-deviation credit;       by the belief-weighted CS-BAPR tracker, is the mechanism
+   upper uses only episode-level system reward.                    that converts episode-level noise into per-trip corrections; the
+• –MORL: replace belief-weighted θ-OGD scalarization with          resulting 3−14× variance reduction is the empirical signature
+   fixed weights [0.5, 0.25, 0.25].                                of this adaptation.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                                          9
+
+
+
+                                                                TABLE I: Hyperparameters for TransitDuet.
+                                                               Component          Parameter                            Value
+                                                               Upper policy       Learning rate                    1 × 10−4
+                                                               Lower policy       Learning rate                    1 × 10−5
+                                                               Lagrangian         Dual variable learning rate      1 × 10−3
+                                                               Training           Batch size                            2048
+                                                                                  Discount factor γ                      0.99
+                                                                                  Soft-update coefficient τ            0.005
+                                                               TAP schedule       βmax                                    0.5
+                                                                                  Warmup episodes                          50
+                                                                                  Ramp episodes                          100
+                                                               Fleet              Nfleet                                   12
+                                                               Constraint         clim                                   0.15
+
+TABLE II: Main comparison (3 seeds, last 30 training episodes, demand noise 0.15, elastic Nfleet ∈ [8, 16]). Lower is better
+on all four metrics. Best in bold; ties within one σ are both bolded.
+                                Method                                      Wait (min)           CV             Overshoot        Composite
+                                Fixed (H=360 s)                             7.03 ± 1.63    0.526 ± 0.027        2.17 ± 0.33      1.62 ± 0.27
+                                GA                                          13.94 ± 2.47   0.722 ± 0.084        2.22 ± 0.20      2.52 ± 0.35
+                                CMA-ES                                      18.74 ± 9.35   0.800 ± 0.167        2.36 ± 0.48      3.16 ± 1.25
+                                TransitDuet (Ours)                          7.54 ± 0.26    0.561 ± 0.009        2.43 ± 0.17      1.81 ± 0.09
+
+
+
+                                                      30
+                                                                                              TransitDuet (Ours)                GA
+                                                      25                                      Fixed (H = 360\,s)                CMA-ES
+                                 Average wait (min)
+
+
+
+
+                                                      20
+
+                                                      15
+
+                                                      10
+
+                                                       5
+
+                                                       0
+                                                           0         50           100         150          200          250           300
+                                                                                           Episode
+
+Fig. 1: Training curves (3-seed mean ± std, smoothed window 15). TransitDuet converges to ≈ 7.5 min wait by episode
+100 and remains tight-banded thereafter. Fixed sees its wait settle quickly (no upper-level training) but with 6× higher seed
+variance. GA and CMA-ES exhibit large oscillations because each episode evaluates a different population candidate under
+noisy fitness.
+
+
+C. Component ablations                                                                         wrong out-of-distribution.
+                                                                                                    b) Four components are not load-bearing on the mean
+   Table III ablates the six distinguishing components of Tran-                                objective.: Removing Hindsight, MORL, Elastic, or Demand-
+sitDuet one-at-a-time (each row removes or disables a single                                   Noise each produces composite scores within one σ of the full
+mechanism; all other components remain active). Columns                                        model, and three of them are slightly better on average. This
+are reported as mean ± std over 3 seeds; ∆Composite is                                         is not a failure of the method — it reflects that these compo-
+the relative degradation versus the full model (negative values                                nents address distributional properties (Pareto coverage, multi-
+indicate the ablation is slightly better on the training objective).                           objective trade-offs, training-distribution robustness) that the
+      a) Two components are load-bearing.: Holding-feedback                                    in-distribution composite score does not measure. Section V-F
+coupling and CS-BAPR together account for the model’s                                          and Section V-D evaluate those properties directly.
+robustness. Removing HoldFB inflates composite cost by 6.1%                                         c) Elastic Nfleet trades in-distribution optimality for
+and, more strikingly, quadruples the wait-time std (from 0.26                                  Pareto coverage.: The −Elastic variant (Nfleet = 12 fixed)
+to 2.14): without the lower’s observed dispatch-gap statistics in                              achieves the lowest wait (5.40 min) and lowest composite
+its state, the upper policy cannot react to realized congestion.                               among the ablations. This is expected: a policy specialized
+Removing CS-BAPR raises wait std from 0.26 to 1.28 for a                                       to Nfleet = 12 can over-fit to that single budget. But the
+similar reason: the belief tracker boosts exploration on non-                                  specialized policy cannot be deployed at Nfleet = 8 or
+stationarity, and without it the policy sticks to a prior that is                              Nfleet = 16 without re-training; the elastic policy produces
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                                    10
+
+
+
+TABLE III: Ablation of TransitDuet components on the full environment (demand noise 0.15, elastic Nfleet ). Positive
+∆Composite indicates the full model is better; near-zero or negative values indicate the ablation is not load-bearing on the
+training objective.
+                                Variant                          Wait (min)          CV          Composite     ∆Composite
+                                TransitDuet (full)                7.54 ± 0.26   0.561 ± 0.009    1.81 ± 0.09           —
+                                   −HoldFB                        9.48 ± 2.14   0.546 ± 0.032    1.92 ± 0.36     +6.1%
+                                   −CS-BAPR                       7.52 ± 1.28   0.565 ± 0.014    1.88 ± 0.13     +4.2%
+                                   −Hindsight                     7.67 ± 0.71   0.543 ± 0.044    1.77 ± 0.06     −2.2%
+                                   −MORL                          7.08 ± 0.06   0.542 ± 0.006    1.70 ± 0.09     −5.7%
+                                   −Elastic Nfleet                5.40 ± 0.23   0.511 ± 0.013    1.79 ± 0.05     −1.2%
+                                   −DemandNoise                   6.54 ± 0.45   0.558 ± 0.028    1.75 ± 0.06     −3.0%
+
+
+
+
+                                                2.5
+                               Composite cost
+
+
+
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+                                                         ll        FB          R       ht       L      tic         e
+                                                      Fu
+                                                                old      -B
+                                                                            AP      sig       OR    las         ois
+                                                               H        S        ind        −M    −E         mN
+                                                              −      −C        −H                       −D
+                                                                                                           e
+
+
+
+Fig. 2: Composite cost (lower is better) per ablation, 3-seed mean ± std. The full model (blue) sets the reference line; −HoldFB
+and −CS-BAPR are the only ablations that are clearly worse on the mean in-distribution objective. The remaining four ablations
+are within noise on this metric but fail on out-of-distribution generalization (see Table V).
+
+
+the full Pareto frontier with one training run (Section V-D).                         relatively insensitive to the budget. At Nfleet = 15 the knee
+The 1.2% composite gap is the amortization premium.                                   delivers the lowest wait and CV simultaneously with overshoot
+     d) Demand-noise ablation validates the robustness                                collapsing to 1.3; above that, additional capacity is unused. An
+claim.:       Training    under      deterministic    demand                          operator can read this table directly to size their fleet against
+(−DemandNoise) gives 3% lower composite cost at training                              an SLA: e.g., wait ≤ 6 min at ≥ 95% reliability is achieved
+time because by construction the policy never sees the                                from Nfleet = 12 onward.
+per-hour demand variability that would appear at deployment.                                b) Amortization over multiple fleet sizes.: Producing
+Re-evaluating the −DemandNoise policy on the stochastic                               this frontier with the Fixed baseline requires re-searching
+environment reverses the ranking: wait time climbs from                               [Hpeak , Hoff , Htrans ] for each Nfleet independently (9 CMA-
+4.62 min (in-distribution, deterministic) to 6.68 min (OOD,                           ES or GA runs). In our setup each baseline search takes
+σdemand = 0.15) — a 45% degradation. By contrast, the full                            ≈ 1 h; so a Fixed-based frontier costs ≈ 9 h while TransitDuet
+TransitDuet policy trained with noise achieves 6.34 min on                            delivers it from the same 14 h training run used for the main
+the same stochastic environment, validating that in-training                          comparison. Beyond Nfleet = 3, the TransitDuet training pays
+demand exposure is what buys robustness, not merely the                               for itself.
+architecture.
+
+
+D. Pareto frontier across fleet budgets                                               E. Mechanism analysis
+
+   A single trained TransitDuet policy can be evaluated at any                           We examine the internal dynamics of TransitDuet to verify
+Nfleet ∈ [8, 16] without re-training; the resulting (wait, over-                      that each mechanism behaves as designed.
+shoot) curve forms the operational Pareto frontier. Table IV                                a) θ weight evolution.: Figure 4 plots the three compo-
+reports this frontier averaged over 3 seeds, with 5 evaluation                        nents of the OGD weight vector θ = [θwait , θheadway , θfleet ] over
+episodes per Nfleet per seed.                                                         training. Early in training, θfleet dominates as the policy learns
+     a) The frontier has a clear knee at Nfleet = 15.: Below                          to satisfy the fleet constraint; after approximately episode 10,
+Nfleet = 10 the route is under-resourced; wait time explodes                          θwait and θcv increase as the policy shifts toward service quality
+(20.9 min at Nfleet = 8) because overshoot cannot absorb                              optimization within the feasible region. In steady state, θ
+the peak-hour demand without exceeding the hard cap. From                             stabilizes at roughly [0.69, 0.23, 0.08] (wait, fleet, CV) — wait
+Nfleet = 10 to Nfleet = 14 wait hovers in 5.8–6.7 min and is                          dominates, matching the operational priority.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                                      11
+
+
+
+TABLE IV: Pareto frontier from one TransitDuet policy, evaluated at each Nfleet ∈ [8, 16]. All ± values are std over 3 seeds.
+Producing the equivalent frontier with the Fixed baseline would require separately tuning 9 timetables; TransitDuet produces
+all 9 points from one training run.
+                                                                Nfleet        Wait (min)      CV     Overshoot
+                                                                 8            20.9 ± 9.3     0.64         3.0
+                                                                 9            12.1 ± 6.7     0.59         3.0
+                                                                 10            6.2 ± 1.0     0.52         3.0
+                                                                 11            6.7 ± 1.5     0.56         3.0
+                                                                 12            6.0 ± 0.7     0.55         3.0
+                                                                 13            6.0 ± 1.3     0.55         3.0
+                                                                 14            5.8 ± 0.3     0.52         2.3
+                                                                 15            4.8 ± 0.1     0.51         1.3
+                                                                 16            5.8 ± 1.1     0.57         0.5
+
+
+
+                                                                                                                             3.0
+
+                                           25                                                                                2.5
+                              Wait (min)
+
+
+
+
+                                                                                                                                   Overshoot
+                                           20                                                                                2.0
+
+                                                                                                                             1.5
+                                           15
+
+                                                                                                                             1.0
+                                                                                                      knee
+                                           10                                                         (4.8 min)
+                                                                                                                             0.5
+                                             5
+                                                                                                                             0.0
+                                                            8            10            12            14              16
+                                                                              Fleet budget Nfleet
+
+
+Fig. 3: Pareto frontier produced by one trained TransitDuet policy evaluated across fleet budgets Nfleet ∈ [8, 16] (blue, left
+axis: wait; red bars, right axis: overshoot). The knee at N = 15 simultaneously minimizes wait and reduces overshoot to 1.3.
+Below N = 10 the route is under-resourced; above N = 15 additional capacity is unused.
+
+
+                                                      1.0
+                                                                                             θwait          θfleet         θcv
+
+                                                      0.8
+                                           θ weight
+
+
+
+
+                                                      0.6
+
+                                                      0.4
+
+                                                      0.2
+
+                                                      0.0
+                                                            0      50            100         150      200            250
+                                                                                           Episode
+
+Fig. 4: Evolution of θ-OGD weight components during training. The fleet weight θfleet peaks early and decays as the constraint
+is internalized.
+
+
+      b) Lagrangian multiplier λ convergence.: Figure 5                                     where overshoot is an unavoidable cost during peak-demand
+shows the Lagrangian dual variable λ for the headway-                                       episodes.
+regularity constraint. Starting from λ0 = 0, the multiplier                                      c) Action-space utilization.: The upper policy outputs a
+rises sharply during early training when headway deviations                                 per-dispatch departure offset δt ∈ [−120, 120] s relative to the
+are large, then converges to λ = 1.89 ± 0.80 (mean over                                     baseline schedule. Figure 6 plots the per-episode mean and
+last 30 episodes across 3 seeds) as the lower policy learns to                              std of δt across training. Two of the three seeds exhibit active
+regulate headways within the tolerance clim = 0.15. The non-                                offsetting (µδ ≈ −30 s, σδ ≈ 47 s, range spanning nearly
+trivial magnitude of λ at convergence indicates the constraint                              the full [−112, 96] s bracket), while one seed converges to
+is active (not slack), which is expected under elastic fleet                                a near-zero policy (µδ ≈ −0.1 s, σδ ≈ 0.4 s) that defers
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                  12
+
+
+
+
+                                                  2.5
+
+
+
+
+                                   Lagrangian λ
+                                                  2.0
+
+
+                                                  1.5
+
+                                                                               λ (mean ± std, 3 seeds)
+                                                  1.0                          converged λ = 1.89
+
+                                                        0   50   100     150      200       250
+                                                                       Episode
+
+Fig. 5: Convergence of the Lagrangian multiplier λ during training. Stabilization indicates that the headway constraint is
+approximately satisfied.
+
+
+entirely to the baseline schedule. Crucially, all three seeds           and by augmenting the lower advantage with the upper-level
+achieve comparable composite cost (1.72, 1.81, 1.91 across              value of the dispatch context. The cosine-annealed β schedule
+the 3 seeds; Table II): both the active and the passive solutions       ensures that these cross-level signals are introduced only after
+are viable local optima under our bi-level objective. The active        each policy has developed a reasonable standalone strategy,
+seeds win on peak-period wait via small anticipatory advances;          preventing the gradient noise of one immature policy from
+the passive seed recovers on off-peak CV by letting the lower           destabilizing the other.
+holding controller absorb stochasticity.                                     b) Connection to RoboDuet.: TransitDuet draws direct
+                                                                        inspiration from the RoboDuet framework of Pan et al. [5],
+F. Generalization across demand stochasticity                           which introduced cross-advantage augmentation for bi-level
+                                                                        robot locomotion control. Table VI makes the structural anal-
+   We test whether a policy trained at route stochasticity σ =          ogy explicit. The key generalization is temporal: RoboDuet’s
+1.5 generalizes to unseen demand conditions by evaluating on            two levels share a common state clock, permitting direct
+σ ∈ {0.5, 1.0, 2.0, 3.0} without retraining. Table V reports the        advantage summation at each time step, whereas TransitDuet
+results.                                                                operates across asynchronous timescales that require trip-
+   Performance degrades gracefully as σ increases beyond the            lifecycle aggregation.
+training distribution. At σ = 2.0 wait time rises by 25%                     c) Limitations.: Several limitations qualify the present
+relative to σ = 1.5 (7.94 vs 6.34 min); at σ = 3.0 —                    results and motivate future work.
+double the training stochasticity — TransitDuet still achieves
+                                                                           Single-route scope. TransitDuet is evaluated on a single
+9.41 min wait, with CV rising from 0.58 to 0.71 as the route
+                                                                        bidirectional corridor. Real transit networks involve multiple
+variability begins to exceed the capacity of the belief tracker
+                                                                        interacting routes with shared terminals, transfer passengers,
+to correct. Conversely, at σ = 0.5 and σ = 1.0 the policy
+                                                                        and fleet rebalancing across lines. Extending the framework to
+runs within noise of its training-σ performance (within 8%
+                                                                        a multi-route setting would require the upper policy to allocate
+wait), confirming that the learned strategy is not over-fit to
+                                                                        a shared fleet across routes, substantially expanding the action
+high variance. Overshoot is essentially unchanged across σ,
+                                                                        space and introducing inter-route coordination constraints.
+indicating that the fleet constraint is internalized rather than
+                                                                           Simplified demand model. Passenger arrivals follow station-
+σ-specific.
+                                                                        ary OD rates within each time period. In practice, demand
+                                                                        is non-stationary, exhibits day-of-week and seasonal variation,
+                       VI. D ISCUSSION                                  and responds endogenously to service quality (e.g., passen-
+     a) Why TAP works.: Temporal Advantage Propagation                  gers abandoning a stop after excessive waits). Incorporating
+succeeds because it closes a feedback loop that is absent               demand elasticity and real-time demand forecasting would
+when the two levels train independently. Without TAP, the               improve realism but introduce additional model complexity.
+upper policy receives reward signals only from its own sparse              No real-world deployment. All experiments are conducted
+dispatch events, learning that a particular target headway yields       in a stochastic microsimulation. While the simulator re-
+a certain fleet cost—but remaining oblivious to whether the             produces key phenomena—bunching, load-dependent dwell
+lower policy can actually realize that headway under stochastic         times, stochastic travel times—it abstracts away traffic signal
+conditions. Conversely, the lower policy optimizes holding              interactions, driver behavior heterogeneity, and vehicle break-
+actions against a headway target it treats as exogenous, unable         downs. Sim-to-real transfer would require domain randomiza-
+to signal the upper level that a target is infeasible or wasteful.      tion or a calibrated digital twin.
+TAP bridges this gap by propagating discounted lower-level                 Computational cost. Each episode requires approximately
+rewards back to the dispatch decision that spawned them,                7 s of environment simulation time plus training overhead.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                                      13
+
+
+
+
+                                                      100
+
+
+                                                       50
+
+
+
+
+                                            δt (s)
+                                                           0
+
+
+                                                     −50
+
+
+                                                     −100                       seed 42            seed 123           seed 456
+
+                                                               0           50        100        150       200       250
+                                                                                              Episode
+
+Fig. 6: Per-episode utilization of the per-dispatch offset δt across three seeds. Two seeds (42, 456) converge to active offsetting,
+one seed (123) converges to a near-passive policy; all three reach comparable composite cost.
+
+TABLE V: Cross-stochasticity generalization. The model is trained at σ = 1.5 (shaded) and evaluated at the other σ values
+without any fine-tuning. Mean ± std over 3 seeds × 10 evaluation episodes each.
+                                                               σ     Wait (min)               CV          Overshoot
+                                                               0.5    6.44 ± 0.54         0.339 ± 0.004   2.53 ± 0.17
+                                                               1.0    6.78 ± 1.77         0.488 ± 0.033   2.53 ± 0.17
+                                                               1.5    6.34 ± 1.42         0.577 ± 0.030   2.50 ± 0.20
+                                                               2.0    7.94 ± 2.24         0.560 ± 0.030   2.77 ± 0.12
+                                                               3.0    9.41 ± 2.70         0.710 ± 0.044   2.93 ± 0.05
+
+
+
+                                            12
+
+                                            11                                                                                0.7
+
+                                            10
+
+
+                                                                                                                                    Headway CV
+                               Wait (min)
+
+
+
+
+                                                                                                                              0.6
+                                             9
+
+                                             8                                                                                0.5
+                                             7
+
+                                             6                                                                                0.4
+
+                                             5
+                                                     0.5             1.0           1.5          2.0           2.5       3.0
+                                                                            Route stochasticity σ
+
+
+Fig. 7: Cross-stochasticity generalization. The model trained at σ = 1.5 (dashed gray line) generalizes symmetrically: wait
+stays within 8% of the training-σ value for σ ∈ {0.5, 1.0}, degrades by 25% at σ = 2.0, and by 48% at σ = 3.0. CV tracks
+σ monotonically — a larger-variance route produces less regular headways, but the policy does not collapse.
+
+                              TABLE VI: Structural analogy between RoboDuet and TransitDuet.
+                            Aspect                     RoboDuet                                  TransitDuet
+                            Upper policy               Locomotion style selector                 Timetable planner (πU )
+                            Lower policy               Joint-level tracking controller           Holding controller (πL )
+                            Upper action               Style parameters                          Target headways [Hpeak , Hoff , Htrans ]
+                            Lower action               Joint torques                             Holding duration (s)
+                            Coupling                   Synchronous cross-advantage               Asynchronous TAP
+                            Timescale                  Shared clock (same ∆t)                    Heterogeneous (300 s vs. 1 s)
+                            Constraint                 Joint-limit penalties                     Fleet (θ-OGD) + headway (Lagrangian)
+                            β schedule                 Fixed β                                   Cosine-annealed warmup
+
+
+
+At 300 episodes with 3 seeds, the total wall-clock time is                                    disruptions would require further acceleration, for instance
+approximately 14 hours per seed on a single 12 GB GPU.                                        through model distillation or warm-starting from a pre-trained
+While acceptable for research, real-time retraining for schedule                              policy.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                              14
+
+
+
+      d) Scalability considerations.: Scaling to multi-route        and transfer coordination would test whether the hierarchical
+networks introduces two challenges. First, the upper-level          structure scales to the combinatorial action spaces of realistic
+action space grows combinatorially with the number of routes,       transit systems. Second, real-world deployment—potentially
+since headway targets must be set jointly to respect shared         through a calibrated digital twin with domain randomization—
+fleet constraints. Factored action representations or attention-    would validate the framework’s robustness to phenomena not
+based architectures over route embeddings could mitigate this.      captured by the current simulator, including traffic signal in-
+Second, the lower-level parameter sharing, which currently          teractions and driver behavior heterogeneity. Third, integrating
+treats all buses on a single route identically, would need to       real-time demand forecasting and modeling passenger demand
+incorporate route-specific context to generalize across hetero-     elasticity would close the loop between service quality and
+geneous lines. Graph neural networks operating on the transit       ridership. Finally, coupling TransitDuet with passenger infor-
+network topology offer a promising direction for encoding           mation systems—broadcasting predicted arrival times based on
+such structure.                                                     the learned holding policy—could amplify the welfare benefits
+                                                                    by reducing perceived waiting time alongside actual waiting
+                       VII. C ONCLUSION                             time.
+   This paper introduced TransitDuet, a bi-level reinforcement
+learning framework that unifies bus timetable planning and                                  R EFERENCES
+real-time holding control within a single trainable system.          [1] K. Gkiotsalitis and O. Cats, “At-stop control measures in
+The upper policy learns demand-responsive target headways                public transport: Literature review and research agenda,”
+at dispatch events, while the lower policy regulates individ-            Transportation Research Part E: Logistics and Trans-
+ual holding actions at station arrivals—two tasks that have              portation Review, vol. 145, p. 102176, 2021.
+traditionally been addressed in isolation despite their tight        [2] J. Wang and L. Sun, “Dynamic holding control to avoid
+operational coupling.                                                    bus bunching: A multi-agent deep reinforcement learning
+   The central technical contribution is Temporal Advantage              framework,” Transportation Research Part C: Emerging
+Propagation (TAP), an asynchronous cross-advantage mecha-                Technologies, vol. 116, p. 102661, 2020.
+nism that aggregates lower-level feedback over variable-length       [3] R. S. Sutton, D. Precup, and S. Singh, “Between MDPs
+trip lifecycles and propagates it to the upper-level dispatch            and semi-MDPs: A framework for temporal abstraction
+decisions that initiated them. TAP generalizes the synchronous           in reinforcement learning,” Artificial Intelligence, vol.
+cross-advantage of RoboDuet to settings where the two control            112, no. 1–2, pp. 181–211, 1999.
+levels operate on fundamentally different timescales and ob-         [4] O. Nachum, S. Gu, H. Lee, and S. Levine, “Data-efficient
+serve distinct state-action spaces. A cosine-annealed coupling           hierarchical reinforcement learning,” in Advances in Neu-
+schedule prevents premature inter-level interference during              ral Information Processing Systems, 2018.
+early training. Operational constraints are handled through          [5] G. Pan, Q. Ben, Z. Yuan, G. Jiang, Y. Ji, S. Li,
+complementary mechanisms: online gradient descent projec-                J. Pang, H. Liu, and H. Xu, “RoboDuet: Learn-
+tion (θ-OGD) enforces fleet-size feasibility at the upper level,         ing a cooperative policy for whole-body legged loco-
+while Lagrangian relaxation maintains headway regularity at              manipulation,” IEEE Robotics and Automation Letters,
+the lower level.                                                         2025, arXiv:2403.17367.
+   Experiments on a stochastic bus corridor microsimulation          [6] C. Tessler, D. J. Mankowitz, and S. Mannor, “Reward
+with 22 stations and 264 daily trips show that TransitDuet               constrained policy optimization,” in Proceedings of the
+attains 28% lower composite cost than a genetic-algorithm                7th International Conference on Learning Representa-
+timetable optimizer and 43% lower than CMA-ES under                      tions, 2019.
+stochastic demand and elastic fleet, while matching a hand-          [7] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft
+tuned fixed timetable on the mean and reducing seed variance             actor-critic: Off-policy maximum entropy deep reinforce-
+by 3×. From a single training run, the learned policy produces           ment learning with a stochastic actor,” in Proceedings of
+a Pareto frontier across nine fleet budgets (Nfleet ∈ [8, 16]),          the 35th International Conference on Machine Learning,
+removing the need for separate optimization per budget.                  2018, pp. 1861–1870.
+Ablation studies confirm that the holding-feedback coupling          [8] S. Miryoosefi, K. Brantley, H. Daume III, M. Dudik,
+and the CS-BAPR belief tracker are the two load-bearing                  and R. E. Schapire, “Reinforcement learning with convex
+components; removing either one degrades the in-distribution             constraints,” in Advances in Neural Information Process-
+composite cost by 4%–6% and inflates seed variance by an                 ing Systems, 2019.
+order of magnitude, while four other components address out-         [9] F. Alesiani and K. Gkiotsalitis, “Reinforcement learning-
+of-distribution properties measured separately in the general-           based bus holding for high-frequency services,” in Pro-
+ization study. Without retraining, the learned policy retains its        ceedings of the 21st IEEE International Conference
+performance under route stochasticity up to σ = 1.0 (within              on Intelligent Transportation Systems (ITSC), 2018, pp.
+8% of training), degrades by 25% at σ = 2.0, and remains                 3206–3211.
+operational at σ = 3.0 with 48% wait increase relative to the       [10] O. J. Ibarra-Rojas, F. Delgado, R. Giesen, and J. C.
+training distribution.                                                   Muñoz, “Planning, operation, and control of bus transport
+   Several directions merit future investigation. First, extend-         systems: A literature review,” Transportation Research
+ing TransitDuet to multi-route networks with shared fleets               Part B: Methodological, vol. 77, pp. 38–75, 2015.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                            15
+
+
+
+[11] O. Cats and M. Glück, “Frequency and vehicle ca-                   d) Bus operations.: Each bus maintains a state machine
+     pacity determination using a dynamic transit assign-          with four phases:
+     ment model,” Transportation Research Record, vol. 2673,        1) Holding — the bus is held at a station for the duration
+     no. 3, pp. 574–585, 2019.                                         specified by the lower-level policy (0–60 s).
+[12] A. S. Vezhnevets, S. Osindero, T. Schaul, N. Heess,            2) Dwelling — passengers alight and board. Boarding pro-
+     M. Jaderberg, D. Silver, and K. Kavukcuoglu, “FeU-                ceeds until the bus reaches capacity (C = 50 passengers)
+     dal networks for hierarchical reinforcement learning,”            or no more waiting passengers have a valid destination
+     in Proceedings of the 34th International Conference on            downstream.
+     Machine Learning, 2017, pp. 3540–3549.                         3) Travel — the bus moves toward the next station at the
+[13] J. Lee, B.-J. Lee, and K.-E. Kim, “Reinforcement learn-           current stochastic speed. Acceleration (3 m/s2 ) and de-
+     ing for control with multiple frequencies,” in Advances           celeration (5 m/s2 ) are modeled at departure and arrival.
+     in Neural Information Processing Systems, 2020.                4) Waiting for action — upon arriving at a station, the bus
+[14] A. M. Metelli, F. Mazzolini, L. Bisi, L. Sabbioni, and            waits for the next holding action from the lower-level
+     M. Restelli, “Control frequency adaptation via action             policy.
+     persistence in batch reinforcement learning,” in Proceed-
+                                                                   Forward and backward headways are computed with respect
+     ings of the 37th International Conference on Machine
+                                                                   to the preceding and following buses in the same direction,
+     Learning, 2020.
+                                                                   and the headway deviation from the target set by the upper
+[15] A. Stooke, J. Achiam, and P. Abbeel, “Responsive safety
+                                                                   policy defines the per-step cost (Equation (5)).
+     in reinforcement learning by PID Lagrangian methods,”
+     in Proceedings of the 37th International Conference on               e) Timetable structure.: A service day consists of 264
+     Machine Learning, 2020.                                       trips alternating between the two directions, truncated from a
+[16] P. Dayan and G. E. Hinton, “Feudal reinforcement              full operational schedule to keep simulation tractable. At most
+     learning,” Advances in Neural Information Processing          25 buses may be concurrently active (max_agent_num). The
+     Systems, vol. 5, 1993.                                        upper policy controls the dispatch headway—the time gap
+                                                                   between consecutive launches in the same direction—which
+                                                                   also serves as the target headway htarget communicated to the
+                          A PPENDIX                                lower-level controller.
+   Table I lists all hyperparameters used in the experiments.             f) Episode termination.: An episode ends when all 264
+Values correspond to the default configuration; no per-            trips have been launched and every bus has completed its trip
+experiment tuning was performed.                                   (i.e., no bus remains on-route). At this point the measurement
+   The simulation models a single bidirectional bus route          vector z (Equation (6)) is computed for the ApproPO θ-OGD
+calibrated from operational data of an urban bus corridor.         update.
+     a) Route topology.: The route comprises M stations               All networks use ReLU activations and are trained with
+connected by inter-station segments. Each direction (up-           Adam. Weight initialization follows PyTorch defaults unless
+stream and downstream) traverses all M stations in se-             otherwise noted.
+quence, with terminal turnaround at each end. Station positions           g) Upper policy πU (Gaussian).: A two-layer MLP maps
+and inter-station distances are read from operational records      the 5-dimensional upper state to headway parameters:
+(stop_news.xlsx), and segment-level speed profiles are
+specified per hour of day (route_news.xlsx).                        Layer           Shape     Activation
+     b) Stochastic travel speed.: Inter-station travel times are
+driven by a stochastic speed model. At each route-state update,     Linear          5 → 64    ReLU
+                                                                    Linear          64 → 64   ReLU
+the speed limit on segment (i, i+1) is drawn as                     Mean head       64 → 3    Sigmoid → affine rescale to [action_low, actio
+                                                                  Log-std head    64 → 3    Clamp[−5, 0]
+      vi = min Vmax , max 0, ⌊ln LN (µi (t), σ)⌋ ,          (28)
+                                                                   The mean and log-std heads are initialized with zero bias to
+where µi (t) is the historical mean log-speed for segment i
+                                                                   start near the midpoint of the action range. During rollout,
+at hour t, σ = 1.5 is the log-normal dispersion parameter
+                                                                   actions are sampled from N (µ, σ 2 ) and clamped to the valid
+(route_sigma), and Vmax is the segment maximum speed.
+                                                                   range. For policy-gradient evaluation, the reparameterization
+This produces realistic speed variability that induces headway
+                                                                   trick is used and log-probabilities are summed across the 3
+deviations even under a well-designed timetable.
+                                                                   action dimensions.
+      c) Passenger generation.: Passenger arrivals follow a
+Poisson process governed by time-varying origin–destination              h) Lower policy πL (Squashed Gaussian).: A two-layer
+(OD) matrices (passenger_OD.xlsx). The OD data speci-              MLP with tanh squashing maps the lower state to a scalar
+fies hourly demand rates between all station pairs. At each sim-   holding time:
+ulation second, for every origin station with non-zero demand               Layer           Shape          Activation
+to a given destination, a Poisson draw with rate λod /3600
+                                                                            Linear          (8+K) → 32     ReLU
+determines the number of new passengers. Each passenger                     Linear          32 → 32        ReLU
+records an appearance time, an origin, and a destination;                   Mean head       32 → 1         —
+waiting time is measured from appearance to boarding.                       Log-std head    32 → 1         Clamp[−20, 2]
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                              16
+
+
+
+                                       TABLE VII: Complete hyperparameter specification.
+
+              Group             Parameter                 Value               Description
+                                route_sigma               1.5                 Log-normal speed noise σ
+              Environment       max_agent_num             25                  Maximum concurrent buses
+                                effective_trip_num        264                 Total trips per service day
+                                state_dim                 5                   [hour, demand, fleet, prev_hw, unhealthy]
+                                action_dim                3                   [Hpeak , Hoff , Htrans ]
+                                action_low                [180, 300, 240]     Min headway per period (s)
+              Upper policy
+                                action_high               [600, 1200, 900]    Max headway per period (s)
+                                hidden_dim                64                  MLP hidden layer width
+                                lr                        10−4                Policy learning rate (Adam)
+                                Nfleet                    12                  Fleet size hard constraint
+                                hidden_dim                32                  MLP hidden layer width
+                                action_range              60                  Max holding time (s)
+                                clim                      0.15                Lagrangian cost budget
+                                batch_size                2048                Replay buffer mini-batch
+                                lr                        10−5                Critic + policy learning rate
+              Lower policy      λlr                       10−3                Lagrangian multiplier LR
+                                γ                         0.99                Discount factor
+                                τ                         0.005               Soft target update rate
+                                auto_entropy              true                Automatic entropy tuning
+                                αmax                      0.3                 Maximum entropy temperature
+                                reward_scale              10                  Reward scaling factor
+                                βwarmup                   50 episodes         Stage 1: only lower trains
+                                βramp                     100 episodes        Stage 2: β ramps 0 → βmax
+              Coupling (TAP)
+                                βmax                      0.5                 Maximum cross-advantage weight
+                                ηθ                        0.01                ApproPO θ-OGD step size
+                                total_episodes            300                 Total training episodes
+              Training          save_freq                 50                  Checkpoint frequency (episodes)
+                                replay_buffer_size        106                 Replay buffer capacity
+
+
+
+The raw sample z ∼ N (µ, σ 2 ) is squashed via a =                             Layer     Shape                Activation
+tanh(z) × 60 to produce a holding time in [0, 60] s. Log-                      Linear    (8+K+1) → 32         ReLU
+probabilities include the standard tanh Jacobian correction                    Linear    32 → 32              ReLU
+[7]. Weights in the output heads are initialized uniformly in                  Linear    32 → 1               —
+[−3×10−3 , 3×10−3 ]. The same network is shared across all        The cost critic is trained with the same target-network mech-
+buses (parameter sharing), with bus-specific behavior arising     anism and soft update rate as the reward critics. Its output
+from heterogeneous input states.                                  enters the policy loss through the Lagrangian multiplier λ: the
+                                                                  policy minimizes α log π − Q + λQc .
+     i) Twin reward Q-network Q1 , Q2 .: Two independent            This appendix formalizes the connection between the syn-
+MLPs implement clipped double Q-learning for the lower            chronous cross-advantage of Pan et al. [5] and the asyn-
+level:                                                            chronous Temporal Advantage Propagation (TAP) used in
+                                                                  TransitDuet.
+            Layer     Shape               Activation
+                                                                  A. Synchronous cross-advantage (RoboDuet)
+            Linear    (8+K+1) → 32        ReLU
+            Linear    32 → 32             ReLU                       In the synchronous setting of Pan et al. [5], two agents—
+            Linear    32 → 1              —                       an upper-body controller and a lower-body locomotor—act at
+                                                                  every time step t on a shared state st . The cross-advantage
+Each Q-network takes the concatenation of the lower state         augmented objectives are:
+and the scalar action as input. The minimum of Q1 and Q2 is       Lsync                    U                 L              U
+                                                                                                                                   
+                                                                    upper = −Et (AU (st , at ) + β AL (st , at )) ∇log πU (at | st ) ,
+used for target computation. Both networks are accompanied                                                                     (29)
+by exponential moving average target networks with rate τ =         sync                  L                 U              L
+                                                                                                                                    
+                                                                  Llower = −Et (AL (st , at ) + β AU (st , at )) ∇log πL (at | st ) ,
+0.005.
+                                                                                                                               (30)
+     j) Cost Q-network Qc .: A single MLP with the same           where β ∈ [0, 1] controls coupling strength and both advan-
+architecture as one branch of the twin Q-network estimates        tages are evaluated at the same state-action pair (st , aU    L
+                                                                                                                           t , at ).
+the expected cumulative cost (headway deviation) under the        This formulation is valid because the two policies share a
+current policy:                                                   common clock and state space.
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                                                                                       17
+
+
+
+B. The asynchrony challenge                                               is an unbiased estimator of ∇πU J(πU ) when β = 0, and
+   In TransitDuet, the upper policy πU and lower policy πL op-            for β > 0 it is an unbiased estimator of ∇πU [JU (πU ) +
+erate on different timescales with different state-action spaces.         β Jcross (πU , πL )], where Jcross is the expected trip-aggregated
+Let the upper policy act at dispatch events {tU       U            U      lower return induced by the upper policy’s dispatch decisions.
+                                                 1 , t2 , . . . , tN },
+                                                  L L              L
+and the lower policy act at station arrivals {t1 , t2 , . . . , tM },                                 (i)
+                                                                          Proof sketch. The term RU ∇log πU is the standard REIN-
+where M ≫ N . These event sets are disjoint in general, and                                                                 (i)
+                                                                          FORCE estimator for ∇JU . The cross-term β R̄L ∇log πU
+the state spaces differ: sU ∈ R5 versus sL ∈ R8+K . Thus,                 has the form of a REINFORCE estimator where the “re-
+there is no single time step at which AU and AL are jointly               ward” for the upper policy at dispatch i is replaced by
+defined on a shared state, and the direct sum in Equations (29)             (i)
+                                                                          R̄L , the average lower reward accumulated during the trip
+and (30) is undefined.                                                                                                                (i)
+                                                                          that dispatch i initiated. Conditional on πL being fixed, R̄L
+                                                                          is a function of the environment trajectory seeded by the
+C. Trip-lifecycle alignment
+                                                                          upper action aU,i , so the REINFORCE identity applies and
+    We resolve this by introducing a trip-lifecycle alignment.                  (i)                                    (i)
+                                                                          E[R̄L ∇log πU (aU,i | sU,i )] = ∇πU E[R̄L ]. Linearity of
+Each upper action aU,i at dispatch event tU   i initiates a trip          expectation yields the result.
+τi . During the lifecycle of trip τi , the lower policy makes
+a variable number of holding decisions {(sLj , aLj , rjL )}j∈J (i) ,         An analogous argument holds for the lower-level augmen-
+                                                                                                        (trip(j))
+where J (i) indexes all lower-level transitions belonging to              tation: the injected term β RU          acts as a state-independent
+trip i.                                                                   baseline shift (constant within a trip), which does not introduce
+                                                                          bias in the lower policy gradient but can reduce variance
+Definition 1 (Trip-aggregated lower signal). For trip i, the
+                                                                          by aligning lower-level credit assignment with upper-level
+aggregated lower signal is:
+                                                                          performance.
+                    (i)     1     X
+                  R̄L =               rjL .             (31)
+                          |J (i)|
+                                         j∈J (i)
+
+
+D. TAP augmented objectives
+  Using the trip-lifecycle alignment, we define the TAP-
+augmented objectives:
+                          (i)      (i)         (i)
+            Upper:       R̃U = RU + β R̄L ,                       (32)
+                                          (trip(j))
+                Lower:    r̃jL = rjL + β RU         ,   ∀ j,      (33)
+          (i)
+where RU is the upper-level reward attributed to trip i
+(computed from the measurement vector at episode end), and
+trip(j) maps lower transition j to its parent trip.
+
+E. Reduction to the synchronous case
+Proposition 1. If both policies share a common clock (i.e.,
+each upper action triggers exactly one lower action at the
+same time step) and a common state space, then TAP reduces
+to the synchronous cross-advantage of Pan et al. [5].
+Proof. When |J (i)| = 1 for all trips i, the aggregation in
+                            (i)
+Equation (31) becomes R̄L = rjL for the unique j ∈ J (i).
+                                                          (i)
+The upper augmented return (Equation (32)) becomes R̃U =
+  (i)
+RU + β rjL , which is the per-step sum AU + β AL evaluated at
+the shared time step. Similarly, the lower augmentation (Equa-
+                                      (i)
+tion (33)) reduces to r̃j = rjL + β RU , recovering AL + β AU .
+When the state spaces further coincide (sU = sL = st ), this
+is exactly Equations (29) and (30).
+
+F. Policy-gradient unbiasedness
+Proposition 2. Under the standard assumptions of the policy
+gradient theorem (ergodicity and differentiability of πU , πL ),
+the TAP-augmented policy gradient for the upper level,
+                          N
+             TAP     1 X (i)
+            gU   =        R̃ ∇log πU (aU,i | sU,i ),              (34)
+                     N i=1 U
+SUBMITTED TO IEEE TRANSACTIONS, 2026                                         18
+
+
+
+
+Algorithm 2 TransitDuet Training Procedure
+Require: Episode budget E, stage boundaries e1 , e2 , coupling
+    limit βmax , lower update frequency fL , batch size B, fleet
+    limit Nfleet
+ 1: Initialize upper policy πU with parameters ϕ
+ 2: Initialize lower policy πL with parameters ψ, twin critics
+    Qω1 , Qω2 , cost critic Qcξ , target networks ω̄1 , ω̄2 , ξ¯
+ 3: Initialize replay buffer D ← ∅, Lagrange multiplier λ ←
+    0, entropy temperature α
+ 4: Initialize weight vector θ ← [−0.5, −0.3, −0.2]
+ 5: for episode e = 1, . . . , E do
+ 6:    Compute β(e) via eq. (23)
+ 7:    if e ≤ e1 then
+ 8:       Set htarget ← 360 s (fixed default timetable)
+ 9:    else
+10:       Sample aU             ∼      πU (·      |     sU ); extract
+          [Hpeak , Hoff , Htrans ]
+11:    end if
+12:    Reset simulation environment
+13:    TU ← ∅, TL ← ∅, step ← 0
+14:    while episode not done do
+15:       if dispatch event triggered then
+16:          Record (sU,i , aU,i ) in TU ; select htarget based on
+             time-of-day
+17:       end if
+18:       if station arrival for any bus b then
+19:          Observe sL ; sample aL ∼ πL (· | sL ); apply
+             holding aL
+20:          Observe rL , cL , s′L ; store (sL , aL , rL , cL , s′L ) in D
+             and TL
+21:          step ← step +1
+22:          if step mod fL = 0 and |D| ≥ B then
+23:             Sample batch of size B from D
+24:             Update Qω1 , Qω2 via eq. (15)
+25:             Update Qcξ analogously
+26:             Update πL via eq. (17)
+27:             Update λ via eq. (18); update α via eq. (19)
+28:             Soft-update target networks: ω̄j ← τ ωj + (1 −
+                τ )ω̄j , similarly for ξ¯
+29:          end if
+30:       end if
+31:    end while
+32:    Compute episode measurements z via eq. (6)
+33:    Compute upper reward RU via eq. (25)
+34:    // TAP (algorithm 1)
+35:    Compute augmented advantages {ÃU [i]} and aug-
+       mented lower rewards {r̃L,j }
+36:    Re-insert augmented lower transitions into D {reward
+       relabeling}
+37:    if e > e1 then
+38:       Update πU via REINFORCE with ÃU (eq. (12))
+39:       Update θ via OGD (eq. (27))
+40:    end if
+41: end for
+

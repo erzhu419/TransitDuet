@@ -1,8 +1,9 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage[margin=1in, left=1.25in, right=1.25in, top=1in, bottom=1in]{geometry}
 \usepackage{booktabs}
 
 \newtheorem{definition}{Definition}
@@ -12,40 +13,55 @@
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algorithmic}
-\usepackage{hyperref}
+\usepackage[linktoc=all, bookmarksdepth=3, pdfstartview=FitH]{hyperref}
 \hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan}
 \urlstyle{same}
-\usepackage{cleveref}
 \usepackage{multirow}
-\usepackage{xcolor}
+\usepackage[table,dvipsnames]{xcolor}
 \usepackage{subcaption}
+\usepackage{caption}
+\captionsetup[figure]{name=Fig., labelsep=period}
 \usepackage{enumitem}
-\usepackage{colortbl}
 \usepackage[numbers]{natbib}
+\usepackage{cleveref}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {1.0ex plus .2ex minus .1ex}{0.4ex}%
+  {\normalfont\normalsize}}
+\makeatother
+\renewcommand{\algorithmicrequire}{\textup{Require:}}
+\renewcommand{\algorithmicensure}{\textup{Ensure:}}
+\renewcommand{\algorithmicif}{\textup{if}}
+\renewcommand{\algorithmicthen}{\textup{then}}
+\renewcommand{\algorithmicelse}{\textup{else}}
+\renewcommand{\algorithmicelsif}{\textup{else if}}
+\renewcommand{\algorithmicendif}{\textup{end if}}
+\renewcommand{\algorithmicfor}{\textup{for}}
+\renewcommand{\algorithmicforall}{\textup{for all}}
+\renewcommand{\algorithmicdo}{\textup{do}}
+\renewcommand{\algorithmicendfor}{\textup{end for}}
+\renewcommand{\algorithmicwhile}{\textup{while}}
+\renewcommand{\algorithmicendwhile}{\textup{end while}}
 
 % Math commands
 \input{math_commands}
 
 % Placeholder command for TBD results
-\newcommand{\tbd}[1][]{\textcolor{red}{\textbf{[TBD#1]}}}
+\newcommand{\tbd}[1][]{\textcolor{red}{[TBD#1]}}
 
-\title{TransitDuet: Bi-level reinforcement learning for joint bus target-headway planning and holding control}
+\title{TransitDuet: bi-level reinforcement learning for joint bus target-headway planning and holding control}
 
-\author{Anonymous~Authors%
-\thanks{Anonymous Institution.}%
-}
-
-\markboth{Submitted to IEEE Transactions, 2026}%
-{Anonymous \MakeLowercase{\textit{et~al.}}: TransitDuet}
+% \author{Anonymous Authors}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
 
 \input{sections/0_abstract}
 
-\begin{IEEEkeywords}
-Bus holding control, target-headway planning, hierarchical reinforcement learning, multi-timescale control, constrained optimization.
-\end{IEEEkeywords}
+\noindent Keywords: bus holding control; target-headway planning; hierarchical reinforcement learning; multi-timescale control; constrained optimization.
 
 \input{sections/1_introduction}
 \input{sections/2_related_work}
@@ -55,10 +71,10 @@ Bus holding control, target-headway planning, hierarchical reinforcement learnin
 \input{sections/6_discussion}
 \input{sections/7_conclusion}
 
-\bibliographystyle{IEEEtranN}
-\bibliography{references}
-
 \appendix
 \input{sections/A_appendix}
+
+\bibliographystyle{gbt7714-numerical}
+\bibliography{references}
 
 \end{document}

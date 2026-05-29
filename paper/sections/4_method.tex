@@ -10,12 +10,12 @@ This section presents the TransitDuet architecture and its constituent algorithm
 \Cref{sec:training} assembles the full training procedure.
 \Cref{sec:tpc} introduces the target-policy-corrected lower SAC (TPC) training fix that closes the gap to a hand-tuned fixed timetable.
 
-\begin{figure*}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{figures/architecture.png}
     \caption{TransitDuet bi-level architecture. The upper policy $\piU$ acts at each dispatch event (timescale: minutes), choosing a per-dispatch goal shift $\delta_t$ that adjusts the lower's target headway from $\htarget$ to $\htarget + \delta_t$. The lower policy $\piL$ acts at each station arrival (timescale: seconds), choosing a holding duration that drives the realised headway toward this goal. The coupling is goal-conditioned (HIRO-style): no upper signal is injected into the lower's transitions or reward beyond the shifted target. TPC importance-weighted training of the lower SAC corrects for any residual covariate shift induced by changing target headways during upper exploration.}
     \label{fig:arch}
-\end{figure*}
+\end{figure}
 
 %% ====================================================================
 \subsection{Architecture overview}
@@ -168,7 +168,7 @@ with $\alpha_{\max}^{\mathrm{L}} = 0.1$ to prevent entropy collapse and to let t
 \subsection{Cross-level coupling: goal-conditioned design}
 \label{sec:tap}
 
-Following the goal-conditioned hierarchical RL design of HIRO~\citep{nachum2018data} and SHIRO~\citep{watanabe2022shiro}, TransitDuet couples the two policies through a single \emph{goal channel} on the action side, complemented by two auxiliary signals (state and reward) used only in the upper direction. The upper outputs a target-headway shift; the lower's Lagrangian cost is then a function of how closely the realised headway tracks the resulting goal headway. There is no upper-advantage injection into the lower reward; the lower remains a constraint-aware controller whose constraint target is set by the upper. This turned out to be more reliable than two architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}): a direct cross-advantage augmentation in the spirit of HAAR~\citep{li2019hierarchical} with a PIPER-style reachability gate~\citep{singh2024piper}, and a three-channel coupling that uses $\delta_t$ as a launch-time perturbation with hindsight reward credit instead of a goal shift.
+Following the goal-conditioned hierarchical RL design of HIRO~\citep{nachum2018data} and SHIRO~\citep{watanabe2022shiro}, TransitDuet couples the two policies through a single goal channel on the action side, complemented by two auxiliary signals (state and reward) used only in the upper direction. The upper outputs a target-headway shift; the lower's Lagrangian cost is then a function of how closely the realised headway tracks the resulting goal headway. There is no upper-advantage injection into the lower reward; the lower remains a constraint-aware controller whose constraint target is set by the upper. This turned out to be more reliable than two architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}): a direct cross-advantage augmentation in the spirit of HAAR~\citep{li2019hierarchical} with a PIPER-style reachability gate~\citep{singh2024piper}, and a three-channel coupling that uses $\delta_t$ as a launch-time perturbation with hindsight reward credit instead of a goal shift.
 
 \paragraph{Goal channel: target-headway shift.}
 At each dispatch event, the upper outputs $\delta_t \in [-120, 120]$\,s. In contrast to a direct timetable perturbation that would shift the bus's effective launch time, $\delta_t$ instead reinterprets the lower's target headway from $\htarget$ (the baseline $360$\,s value) to $\htarget + \delta_t$ for the duration of that trip. The launch schedule itself is left untouched, while the lower's Lagrangian constraint becomes
@@ -243,7 +243,7 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
 \Cref{alg:training} presents the full TransitDuet training loop, which coordinates the upper-warmup schedule with the upper and lower policy updates, the cross-level coupling channels of \cref{sec:tap}, and the measurement projection.
 
 \begin{algorithm}[t]
-\caption{TransitDuet Training Procedure}
+\caption{TransitDuet training procedure}
 \label{alg:training}
 \begin{algorithmic}[1]
 \REQUIRE Episode budget $E$, upper warmup $e_{\mathrm{warm}} = 30$, lower update frequency $f_{\mathrm{L}}$, batch size $B$, hindsight credit weight $\alpha_{\mathrm{H}}$
