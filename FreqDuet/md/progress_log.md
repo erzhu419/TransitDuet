@@ -217,3 +217,29 @@ Hold60 improves mean wait but costs too much in CV/overshoot, and hold45 is
 worse than hold30. Keep no-early-launch hold30 as the promoted executable
 terminal schedule bound for the current main path. The release/hold45/hold60
 configs remain as ablations documenting the operational-bound sweep.
+
+## 2026-05-30 step-4 promotion gate v2
+
+Implemented promotion-adaptive low-frequency absorption for the harmonic demand
+state. When configured, a persistent residual gate can nudge the current
+harmonic low-intensity estimate toward the sustained residual and logs
+`freq_promotion_absorptions` / `freq_promotion_absorbed`. This completes the
+dev-manual mechanism where persistent high-frequency shock can be promoted into
+the low-frequency state, but it is only used by explicit configs.
+
+Corrected same-run protocol, 5 seeds, 20 episodes, `upper_warmup_eps=10`, last
+10 BiLevel episodes:
+
+```text
+spline2dir main:          wait=5.39±0.64, cv=0.441±0.012, comp=1.440±0.162
+promotion adapt-low:      wait=5.43±0.64, cv=0.455±0.010, comp=1.485±0.170
+promotion trigger:        wait=5.68±0.79, cv=0.437±0.026, comp=1.493±0.222
+promotion conservative:   wait=5.59±0.36, cv=0.452±0.024, comp=1.342±0.080
+```
+
+Promote `F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro`
+as the next main candidate. The useful mechanism is conservative trigger-only
+replanning: it raises upper plan decisions moderately (about 95 vs 88 per
+BiLevel episode tail) and lowers composite variance. Do not promote adapt-low
+yet; it proves the high-to-low absorption mechanism is wired, but the current
+gain (`adapt_gain=0.10`) over-adjusts under the short protocol.

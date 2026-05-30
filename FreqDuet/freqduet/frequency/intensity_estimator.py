@@ -160,6 +160,45 @@ class CausalHarmonicBandState:
         self.uncertainty = float(math.sqrt(max(float(phi @ cov_phi), 0.0)))
         self.n += 1
 
+    def promote_residual(self, strength=1.0, gain=0.10):
+        """Absorb part of a persistent innovation into the low-frequency state.
+
+        The update is causal and local in the current harmonic feature phase:
+        it nudges the Fourier coefficients just enough to move the current
+        low-rate prediction toward the persistent residual, then removes the
+        absorbed component from the high residual.
+        """
+        if self.n <= 0:
+            return 0.0
+        residual = float(self.high)
+        if abs(residual) < 1e-9:
+            return 0.0
+        strength = float(np.clip(strength, 0.0, 1.0))
+        gain = max(float(gain), 0.0)
+        if strength <= 0.0 or gain <= 0.0:
+            return 0.0
+
+        feature_step = max(0, self.n - 1)
+        phi = self._features(feature_step)
+        low_before = max(float(self.low), 0.0)
+        target_low = max(0.0, low_before + gain * strength * residual)
+        delta_log = math.log1p(target_low) - math.log1p(low_before)
+        denom = max(float(phi @ phi), 1e-9)
+        self.theta += phi * (delta_log / denom)
+
+        low_after = self._rate_from_log(float(phi @ self.theta))
+        absorbed = low_after - low_before
+        self.prev_low = self.low
+        self.low = low_after
+        self.prev_high = self.high
+        self.high = residual - absorbed
+        self._raw_high -= absorbed
+        self.high_energy = max(
+            0.0,
+            (1.0 - self.energy_alpha) * self.high_energy
+            + self.energy_alpha * (self.high ** 2))
+        return float(absorbed)
+
     @property
     def low_slope(self):
         return self.low - self.prev_low if self.n > 1 else 0.0

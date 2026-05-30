@@ -220,6 +220,10 @@ class DemandFrequencyTracker:
         promotion_persistence_ratio=0.35,
         promotion_cooldown_s=600.0,
         promotion_state_features=True,
+        promotion_adapt_low=False,
+        promotion_adapt_gain=0.10,
+        promotion_adapt_strength_min=0.15,
+        promotion_adapt_local=False,
     ):
         self.update_interval_s = float(update_interval_s)
         self.method = str(method).lower()
@@ -244,6 +248,13 @@ class DemandFrequencyTracker:
         self.promotion_state_features = (
             self.promotion_enabled and bool(promotion_state_features))
         self.promotion_feature_dim = 3 if self.promotion_state_features else 0
+        self.promotion_adapt_low = bool(promotion_adapt_low)
+        self.promotion_adapt_gain = max(float(promotion_adapt_gain), 0.0)
+        self.promotion_adapt_strength_min = max(
+            float(promotion_adapt_strength_min), 0.0)
+        self.promotion_adapt_local = bool(promotion_adapt_local)
+        self.promotion_absorptions = 0
+        self.promotion_absorbed_rate = 0.0
 
         if self.method == "ema":
             low_alpha = _alpha_from_period(update_interval_s, low_period_s)
@@ -350,6 +361,15 @@ class DemandFrequencyTracker:
             promotion_cooldown_s=cooldown_s,
             promotion_state_features=promotion_cfg.get(
                 "state_features", cfg.get("promotion_state_features", True)),
+            promotion_adapt_low=promotion_cfg.get(
+                "adapt_low", cfg.get("promotion_adapt_low", False)),
+            promotion_adapt_gain=promotion_cfg.get(
+                "adapt_gain", cfg.get("promotion_adapt_gain", 0.10)),
+            promotion_adapt_strength_min=promotion_cfg.get(
+                "adapt_strength_min",
+                cfg.get("promotion_adapt_strength_min", 0.15)),
+            promotion_adapt_local=promotion_cfg.get(
+                "adapt_local", cfg.get("promotion_adapt_local", False)),
         )
 
     def _new_state(self, prior_theta=None):
@@ -399,6 +419,8 @@ class DemandFrequencyTracker:
         if self.global_promotion_gate is not None:
             self.global_promotion_gate.reset()
         self.local_promotion_gates.clear()
+        self.promotion_absorptions = 0
+        self.promotion_absorbed_rate = 0.0
         self._pending_station.clear()
         self._pending_od.clear()
         self._pending_steps = 0
@@ -432,8 +454,9 @@ class DemandFrequencyTracker:
         bin_step = int(self.total_updates)
         self._update_state(self.global_state, total_count * scale, bin_step)
         if self.global_promotion_gate is not None:
-            self.global_promotion_gate.update(
-                self.global_state.high, self.global_state.low)
+            gate = self.global_promotion_gate
+            gate.update(self.global_state.high, self.global_state.low)
+            self._maybe_promote_state(self.global_state, gate)
 
         local_keys = set(self.local_states.keys()) | set(arrivals_by_station.keys())
         for key in local_keys:
@@ -441,7 +464,10 @@ class DemandFrequencyTracker:
             self._update_state(
                 state, float(arrivals_by_station.get(key, 0.0)) * scale, bin_step)
             if self.promotion_enabled:
-                self._get_local_promotion_gate(key).update(state.high, state.low)
+                gate = self._get_local_promotion_gate(key)
+                gate.update(state.high, state.low)
+                if self.promotion_adapt_local:
+                    self._maybe_promote_state(state, gate)
 
         if self.od_features_enabled:
             od_keys = set(self.od_states.keys()) | set(arrivals_by_od.keys())
@@ -452,6 +478,23 @@ class DemandFrequencyTracker:
                     bin_step)
         self.total_updates += 1
         self._od_summary_cache_updates = -1
+
+    def _maybe_promote_state(self, state, gate):
+        if (not self.promotion_adapt_low
+                or self.method != "harmonic"
+                or gate is None
+                or not getattr(gate, "flag", 0.0)
+                or float(getattr(gate, "strength", 0.0))
+                < self.promotion_adapt_strength_min
+                or not hasattr(state, "promote_residual")):
+            return 0.0
+        absorbed = float(state.promote_residual(
+            strength=gate.strength,
+            gain=self.promotion_adapt_gain))
+        if abs(absorbed) > 1e-9:
+            self.promotion_absorptions += 1
+            self.promotion_absorbed_rate += absorbed
+        return absorbed
 
     def _forecast_value(self, state):
         return max(0.0, state.low + state.low_slope * self.forecast_steps)
@@ -639,4 +682,7 @@ class DemandFrequencyTracker:
             "freq_promotion_strength": float(promotion["strength"]),
             "freq_promotion_age": float(promotion["age"]),
             "freq_promotion_score": float(promotion["score"]),
+            "freq_promotion_absorptions": int(self.promotion_absorptions),
+            "freq_promotion_absorbed": float(
+                self.promotion_absorbed_rate / self.global_demand_norm),
         }

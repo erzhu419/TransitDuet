@@ -217,6 +217,7 @@ class DiagnosticLog:
         'freq_od_active', 'freq_updates',
         'freq_promotion_flag', 'freq_promotion_strength',
         'freq_promotion_age', 'freq_promotion_score',
+        'freq_promotion_absorptions', 'freq_promotion_absorbed',
         # FreqDuet frequency-leakage regularization
         'lower_drift_penalty_mean', 'lower_drift_penalty_max',
         'upper_hf_penalty_mean', 'upper_hf_penalty_max',
@@ -1597,6 +1598,10 @@ class TransitDuetV2Runner:
             'freq_promotion_strength': freq_summary.get('freq_promotion_strength', 0.0),
             'freq_promotion_age': freq_summary.get('freq_promotion_age', 0.0),
             'freq_promotion_score': freq_summary.get('freq_promotion_score', 0.0),
+            'freq_promotion_absorptions': freq_summary.get(
+                'freq_promotion_absorptions', 0),
+            'freq_promotion_absorbed': freq_summary.get(
+                'freq_promotion_absorbed', 0.0),
             'lower_drift_penalty_mean': lower_drift_stat['mean'],
             'lower_drift_penalty_max': lower_drift_stat['max'],
             'upper_hf_penalty_mean': upper_hf_stat['mean'],
@@ -1635,7 +1640,8 @@ class TransitDuetV2Runner:
                    'freq_wait_low_share_mean',
                    'upper_plan_target_mean', 'upper_plan_decisions',
                    'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
-                   'freq_promotion_flag', 'freq_promotion_strength']:
+                   'freq_promotion_flag', 'freq_promotion_strength',
+                   'freq_promotion_absorbed']:
             self.history[k].append(row[k])
 
         return row
@@ -1711,7 +1717,8 @@ class TransitDuetV2Runner:
               f"L_LF={row.get('lower_lf_drift_ratio',0):.3f}  "
               f"attr={row.get('demand_attr_score',0):.3f}  "
               f"prom={row.get('freq_promotion_flag',0):.0f}/"
-              f"{row.get('freq_promotion_strength',0):.2f}")
+              f"{row.get('freq_promotion_strength',0):.2f}  "
+              f"absorb={row.get('freq_promotion_absorbed',0):+.3f}")
         if self.freq_wait_enable:
             print(f"  WAIT-F   lower_pen={row.get('freq_wait_lower_penalty_mean',0):.4f}  "
                   f"upper_credit={row.get('freq_wait_upper_credit_mean',0):+.4f}"

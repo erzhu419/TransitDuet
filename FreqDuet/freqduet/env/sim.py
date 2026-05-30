@@ -532,6 +532,8 @@ class env_bus(object):
                 'freq_promotion_strength': 0.0,
                 'freq_promotion_age': 0.0,
                 'freq_promotion_score': 0.0,
+                'freq_promotion_absorptions': 0,
+                'freq_promotion_absorbed': 0.0,
             }
         return self.frequency_tracker.summary()
 
