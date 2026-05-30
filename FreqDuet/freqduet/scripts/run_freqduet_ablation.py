@@ -123,17 +123,32 @@ def run_one(config, seed, episodes, logs_dir, gpu=False, clean=False,
     return config, int(seed), run_dir
 
 
-def run_jobs(configs, seeds, episodes, logs_dir, workers, gpu=False,
-             clean=False, skip_existing=False, upper_warmup_eps=None,
-             worker_threads=None):
+def selected_jobs(configs, seeds, job_start=None, job_end=None):
     jobs = []
     for cfg in configs:
         for seed in seeds:
-            run_dir = run_dir_for(cfg, seed, logs_dir)
-            if skip_existing and diagnostics_complete(run_dir, episodes):
-                print(f"SKIP {cfg} seed={seed}: diagnostics already has >= {episodes} rows")
-                continue
             jobs.append((cfg, seed))
+    total = len(jobs)
+    if job_start is None and job_end is None:
+        return jobs
+    start = 0 if job_start is None else max(0, int(job_start))
+    end = total if job_end is None else min(total, int(job_end))
+    if end < start:
+        end = start
+    print(f"Shard jobs [{start},{end}) of {total}")
+    return jobs[start:end]
+
+
+def run_jobs(configs, seeds, episodes, logs_dir, workers, gpu=False,
+             clean=False, skip_existing=False, upper_warmup_eps=None,
+             worker_threads=None, job_start=None, job_end=None):
+    jobs = []
+    for cfg, seed in selected_jobs(configs, seeds, job_start, job_end):
+        run_dir = run_dir_for(cfg, seed, logs_dir)
+        if skip_existing and diagnostics_complete(run_dir, episodes):
+            print(f"SKIP {cfg} seed={seed}: diagnostics already has >= {episodes} rows")
+            continue
+        jobs.append((cfg, seed))
     if not jobs:
         return
 
@@ -236,18 +251,32 @@ def summarize_seed(csv_path, last_k):
     return row
 
 
-def aggregate(configs, seeds, last_k, logs_dir, out_dir):
+def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
+    if isinstance(logs_dirs, (str, Path)):
+        logs_dirs = [Path(logs_dirs)]
+    else:
+        logs_dirs = [Path(p) for p in logs_dirs]
     per_seed = []
     for cfg in configs:
         for seed in seeds:
-            run_dir = logs_dir / f"{cfg}_seed{seed}"
-            csv_path = run_dir / "diagnostics.csv"
+            csv_path = None
+            source_logs_dir = None
+            for logs_dir in logs_dirs:
+                candidate = logs_dir / f"{cfg}_seed{seed}" / "diagnostics.csv"
+                if candidate.exists():
+                    csv_path = candidate
+                    source_logs_dir = logs_dir
+                    break
+            if csv_path is None:
+                continue
             if not csv_path.exists():
                 continue
             row = summarize_seed(csv_path, last_k)
             if row is None:
                 continue
             row.update({"config": cfg, "seed": int(seed)})
+            if source_logs_dir is not None:
+                row["logs_dir"] = str(source_logs_dir)
             per_seed.append(row)
 
     metrics = [
@@ -339,6 +368,8 @@ def main():
     ap.add_argument("--episodes", type=int, default=30)
     ap.add_argument("--last-k", type=int, default=10)
     ap.add_argument("--logs-dir", default="logs")
+    ap.add_argument("--aggregate-logs-dirs", default=None,
+                    help="comma-separated log roots to merge during aggregation")
     ap.add_argument("--out-dir", default="results_freqduet/ablation")
     ap.add_argument("--aggregate-only", action="store_true")
     ap.add_argument("--gpu", action="store_true")
@@ -352,11 +383,23 @@ def main():
                     help="skip runs whose diagnostics already has enough rows")
     ap.add_argument("--upper-warmup-eps", type=int, default=None,
                     help="override coupling.upper_warmup_eps, useful for short pilots")
+    ap.add_argument("--job-start", type=int, default=None,
+                    help="flattened config x seed start index for scheduler shards")
+    ap.add_argument("--job-end", type=int, default=None,
+                    help="flattened config x seed end index for scheduler shards")
     args = ap.parse_args()
 
     configs = parse_csv_list(args.configs, str)
     seeds = parse_csv_list(args.seeds, int)
     logs_dir = ROOT / args.logs_dir
+    env_job_start = os.environ.get("SCHEDULEURM_CPU_START")
+    env_job_end = os.environ.get("SCHEDULEURM_CPU_END")
+    job_start = args.job_start
+    job_end = args.job_end
+    if job_start is None and env_job_start is not None:
+        job_start = int(env_job_start)
+    if job_end is None and env_job_end is not None:
+        job_end = int(env_job_end)
     if not args.aggregate_only:
         run_jobs(
             configs=configs,
@@ -369,13 +412,21 @@ def main():
             skip_existing=args.skip_existing,
             upper_warmup_eps=args.upper_warmup_eps,
             worker_threads=args.worker_threads,
+            job_start=job_start,
+            job_end=job_end,
         )
 
+    if args.aggregate_logs_dirs:
+        aggregate_logs_dirs = [
+            ROOT / p for p in parse_csv_list(args.aggregate_logs_dirs, str)
+        ]
+    else:
+        aggregate_logs_dirs = [logs_dir]
     summary = aggregate(
         configs=configs,
         seeds=seeds,
         last_k=args.last_k,
-        logs_dir=logs_dir,
+        logs_dirs=aggregate_logs_dirs,
         out_dir=ROOT / args.out_dir,
     )
     print_summary(summary)
