@@ -21,6 +21,7 @@ F_freqduet_terminal_final_allfreq_hiro,\
 F_freqduet_terminal_final_swapped_hiro,\
 F_freqduet_terminal_final_nopromotion_hiro,\
 F_freqduet_terminal_main_hiro,\
+F_freqduet_terminal_final_promotion_hiro,\
 F_freqduet_terminal_final_noleakage_hiro
 )"
 

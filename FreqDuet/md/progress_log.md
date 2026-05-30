@@ -545,3 +545,32 @@ allfreq all layers:    wait=6.43±0.71, cv=0.456±0.019, comp=1.611±0.192
 
 Do not promote `high_prior` or `lower_all`. The useful post-matrix adjustment
 is promotion replan, not exposing more low-frequency lower-state features.
+
+## 2026-05-31 current-name final matrix rerun
+
+Reran the final matrix after `F_freqduet_terminal_main_hiro` had been changed
+to the promotion+leakage alias, so the matrix row names matched the current
+config graph.
+
+Protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20 BiLevel
+episodes, 8 workers, one numeric thread per worker:
+
+```text
+nofreq:        wait=5.43±0.51, cv=0.443±0.013, comp=1.474±0.119
+rawhistory:    wait=5.42±0.43, cv=0.455±0.016, comp=1.483±0.109
+LF-upper only: wait=5.95±1.03, cv=0.461±0.032, comp=1.679±0.208
+HF-lower only: wait=7.37±2.84, cv=0.480±0.037, comp=1.823±0.473
+allfreq:       wait=6.11±0.80, cv=0.479±0.027, comp=1.593±0.149
+swapped:       wait=5.95±1.17, cv=0.465±0.033, comp=1.563±0.192
+nopromotion:   wait=5.63±0.26, cv=0.448±0.017, comp=1.472±0.116
+main/promotion wait=5.65±0.27, cv=0.460±0.014, comp=1.531±0.076
+no-leakage:    wait=7.11±0.90, cv=0.484±0.026, comp=1.755±0.110
+```
+
+This rerun does not support keeping trigger-only promotion as the default. It
+only fires sparsely (`prom=0.033±0.033`) and raises CV/composite relative to
+the no-promotion localcap path. Revert `F_freqduet_terminal_main_hiro` to the
+no-promotion localcap path and keep
+`F_freqduet_terminal_final_promotion_hiro` as the explicit promotion ablation.
+This is the conservative choice before the longer-training and generalization
+steps.
