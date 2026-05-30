@@ -1,0 +1,7 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_timetable_cap30_hiro
+
+lower:
+  # More aggressive variant for checking whether the remaining long-tail
+  # failures are caused by over-wide lower holding actions.
+  action_range: 30.0

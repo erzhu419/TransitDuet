@@ -32,6 +32,21 @@ drift tight:        wait=7.39, cv=0.506, comp=1.840, lower_action=13.70
 drift strong:       wait=6.56, cv=0.448, comp=1.723, lower_action=7.04
 ```
 
+Follow-up lower action cap sweep:
+
+```text
+base strong drift, 4 hard seeds: comp=1.787±0.300
+cap30:                         comp=1.589±0.323
+cap40:                         comp=1.584±0.243
+cap45:                         comp=1.545±0.149
+cap50:                         comp=1.639±0.340
+cap45, full 5 seeds:           wait=5.13±0.56, cv=0.477±0.041, comp=1.529±0.137
+```
+
+The 45s lower action range is promoted into `F_freqduet_timetable_hiro`
+because it removes the `seed2026` long-tail failure without the cap40 slowdown
+or cap50 drift relapse.
+
 Experimental modules not yet promoted:
 
 - Terminal dispatch: 3-seed looked promising, but 5-seed was unstable
