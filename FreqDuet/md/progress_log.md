@@ -66,6 +66,26 @@ cap40: wait=6.35±1.24, comp=1.585±0.344
 cap50: wait=6.53±0.47, comp=1.688±0.156
 ```
 
+SUMO exp39-style lower stabilization:
+
+```text
+main target-headway, 5 seeds:       wait=5.84±0.62, cv=0.476±0.023, comp=1.527±0.097
+disc5, 4 hard seeds:                wait=5.53±0.25, cv=0.448±0.015, comp=1.498±0.118
+disc7, 4 hard seeds:                wait=7.82±3.12, cv=0.470±0.038, comp=1.887±0.395
+disc7 + last action, 5 seeds:             wait=5.55±0.35, cv=0.448±0.017, comp=1.438±0.154
+pre-discrete terminal current, 5 seeds:   wait=6.02±0.82, cv=0.478±0.041, comp=1.659±0.192
+pre-discrete terminal hold30, 5 seeds:    wait=6.76±1.86, cv=0.472±0.035, comp=1.658±0.335
+pre-discrete terminal hold60, 5 seeds:    wait=6.67±1.63, cv=0.452±0.031, comp=1.673±0.206
+```
+
+The lower controller now uses discrete holding bins
+`[0, 5, 10, 15, 20, 30, 45]` and appends previous holding action to the lower
+state. This follows the SUMO exp39 lesson that continuous online holding can
+be too high-variance; reducing the action alphabet plus adding action history
+made the online controller beat the previous target-headway main path. Terminal
+dispatch remains experimental because executable launch timing still trails the
+target-headway path.
+
 Experimental modules not yet promoted:
 
 - Terminal dispatch: 3-seed looked promising, but 5-seed was unstable

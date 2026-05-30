@@ -385,10 +385,22 @@ class TransitDuetV2Runner:
         # ── Lower policy ──
         lower_cfg = config['lower']
         self.replay_buffer = CostReplayBuffer(config['training']['replay_buffer_size'])
+        self.lower_action_bins = None
+        bins = lower_cfg.get('action_bins', None)
+        if bins:
+            action_bins = np.asarray([float(x) for x in bins], dtype=np.float32)
+            action_bins = np.unique(np.clip(
+                action_bins, 0.0, float(lower_cfg['action_range'])))
+            if action_bins.size < 2:
+                raise ValueError("lower.action_bins must contain at least two values")
+            self.lower_action_bins = action_bins
+        self.lower_use_last_action_feature = bool(
+            lower_cfg.get('use_last_action_feature', False))
+        lower_state_dim = state_dim + (1 if self.lower_use_last_action_feature else 0)
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 2001)
         self.lower_trainer = RESACLagrangianTrainer(
-            state_dim=state_dim, action_dim=1,
+            state_dim=lower_state_dim, action_dim=1,
             hidden_dim=lower_cfg['hidden_dim'],
             action_range=lower_cfg['action_range'],
             cost_limit=lower_cfg['cost_limit'],
@@ -401,6 +413,7 @@ class TransitDuetV2Runner:
             auto_entropy=lower_cfg['auto_entropy'],
             maximum_alpha=lower_cfg['maximum_alpha'],
             device=device)
+        self.lower_state_dim = lower_state_dim
 
         # ── Coupling ──
         coupling_cfg = config['coupling']
@@ -649,6 +662,32 @@ class TransitDuetV2Runner:
         penalty = self.lower_drift_penalty * (
             excess / max(self.lower_drift_budget_s, 1e-6))
         return float(penalty)
+
+    def _quantize_lower_action(self, action):
+        """Project continuous holding to configured bins for smaller action space."""
+        value = self._lower_action_scalar(action)
+        if self.lower_action_bins is not None:
+            idx = int(np.argmin(np.abs(self.lower_action_bins - value)))
+            value = float(self.lower_action_bins[idx])
+        return np.asarray([value], dtype=np.float32)
+
+    @staticmethod
+    def _lower_action_scalar(action):
+        return float(np.asarray(action, dtype=np.float32).reshape(-1)[0])
+
+    def _augment_lower_state(self, obs, last_action=0.0):
+        obs = np.asarray(obs, dtype=np.float32).reshape(-1)
+        if not self.lower_use_last_action_feature:
+            return obs
+        return np.concatenate(
+            [obs, np.asarray([float(last_action)], dtype=np.float32)])
+
+    def _lower_policy_action(self, obs, last_action=0.0, deterministic=False):
+        state = self._augment_lower_state(obs, last_action)
+        action = self.lower_trainer.policy_net.get_action(
+            torch.from_numpy(state).float().to(self.device),
+            deterministic=deterministic)
+        return self._quantize_lower_action(action)
 
     def _upper_delta_hf_penalty(self, direction, delta_t, prev_delta_by_dir):
         """Penalty for high-frequency upper target-headway oscillation."""
@@ -1026,6 +1065,7 @@ class TransitDuetV2Runner:
 
         state_dict, reward_dict, _ = self.env.initialize_state()
         action_dict = {k: None for k in range(self.env.max_agent_num)}
+        lower_last_action = {k: 0.0 for k in range(self.env.max_agent_num)}
         episode_reward = 0.0
         episode_cost = 0.0
         episode_steps = 0
@@ -1034,22 +1074,26 @@ class TransitDuetV2Runner:
             for key in state_dict:
                 if len(state_dict[key]) == 1:
                     if action_dict[key] is None:
-                        obs = np.array(state_dict[key][0], dtype=np.float32)
-                        a = self.lower_trainer.policy_net.get_action(
-                            torch.from_numpy(obs).float().to(self.device),
+                        action_dict[key] = self._lower_policy_action(
+                            state_dict[key][0],
+                            last_action=lower_last_action.get(key, 0.0),
                             deterministic=not training)
-                        action_dict[key] = a
 
                 elif len(state_dict[key]) == 2:
                     if state_dict[key][0][1] != state_dict[key][1][1]:
-                        state = np.array(state_dict[key][0], dtype=np.float32)
-                        next_state = np.array(state_dict[key][1], dtype=np.float32)
+                        raw_state = np.array(state_dict[key][0], dtype=np.float32)
+                        raw_next_state = np.array(state_dict[key][1], dtype=np.float32)
+                        act_val = (
+                            self._lower_action_scalar(action_dict[key])
+                            if action_dict[key] is not None else 0.0)
+                        state = self._augment_lower_state(
+                            raw_state, lower_last_action.get(key, 0.0))
+                        next_state = self._augment_lower_state(raw_next_state, act_val)
                         reward = reward_dict[key]
                         cost = self.env.cost.get(key, 0.0)
 
                         # Track for diagnostics
-                        act_val = float(action_dict[key]) if action_dict[key] is not None else 0.0
-                        bus_id_key = int(state[0])
+                        bus_id_key = int(raw_state[0])
                         cur_tid = -1
                         cur_dir = True
                         cur_bus = None
@@ -1089,16 +1133,17 @@ class TransitDuetV2Runner:
                             # v2: record holding action for feedback
                             if cur_bus is not None:
                                 self.holding_feedback.record_action(
-                                    cur_bus.trip_id, action_dict[key])
+                                    cur_bus.trip_id, act_val)
 
                         episode_reward += shaped_reward
                         episode_cost += cost
                         episode_steps += 1
+                        lower_last_action[key] = act_val
 
                     state_dict[key] = state_dict[key][1:]
-                    obs = np.array(state_dict[key][0], dtype=np.float32)
-                    action_dict[key] = self.lower_trainer.policy_net.get_action(
-                        torch.from_numpy(obs).float().to(self.device),
+                    action_dict[key] = self._lower_policy_action(
+                        state_dict[key][0],
+                        last_action=lower_last_action.get(key, 0.0),
                         deterministic=not training)
 
             state_dict, reward_dict, cost_dict, done = self.env.step(
@@ -1614,8 +1659,13 @@ class TransitDuetV2Runner:
               f"δ∈[{self.upper_action_low.min():+.0f},{self.upper_action_high.max():+.0f}] "
               f"| α_hold={self.alpha_holding} | "
               f"dev={self.device}")
-        print(f"  Lower: state={self.env.state_dim}  K={self.lower_trainer.ensemble_size}  "
-              f"batch={self.batch_size}  updates/ep={self.updates_per_episode}")
+        bins_note = (
+            f"  bins={self.lower_action_bins.tolist()}"
+            if self.lower_action_bins is not None else "")
+        last_note = "  +last_action" if self.lower_use_last_action_feature else ""
+        print(f"  Lower: state={self.lower_state_dim}  K={self.lower_trainer.ensemble_size}  "
+              f"batch={self.batch_size}  updates/ep={self.updates_per_episode}"
+              f"{bins_note}{last_note}")
         print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
         print(f"  Diag CSV: {self.diag.csv_path}")
