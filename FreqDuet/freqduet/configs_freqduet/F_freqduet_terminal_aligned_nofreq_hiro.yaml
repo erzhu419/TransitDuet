@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_aligned_nofreq_hiro
+
+upper:
+  state_dim: 11
+
+frequency:
+  enable: false
+
+reward_attribution:
+  # No frequency split exists in this baseline, so do not give it the
+  # frequency-attributed passenger-wait shaping used by FreqDuet.
+  enable: false

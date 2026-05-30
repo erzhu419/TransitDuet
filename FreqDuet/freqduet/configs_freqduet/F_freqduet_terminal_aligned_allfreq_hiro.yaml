@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_aligned_allfreq_hiro
+
+frequency:
+  # Give both layers both low and high frequency summaries. This tests whether
+  # the layer-frequency allocation is better than "give everything to both".
+  upper_mode: all
+  lower_mode: all
