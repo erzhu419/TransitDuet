@@ -49,7 +49,8 @@ class Station(object):
     #                     self.total_passenger.extend(new_passengers)
 
     def station_update(self, current_time, stations, passenger_update_interval=1,
-                        demand_multipliers=None, peak_shift=0,
+                        demand_multipliers=None, demand_scale=1.0,
+                        od_multipliers=None, peak_shift=0,
                         return_details=False):
         """
         每秒更新一次，减少不必要的泊松分布计算
@@ -69,10 +70,19 @@ class Station(object):
             demand_mult = 1.0
             if demand_multipliers is not None and hour in demand_multipliers:
                 demand_mult = demand_multipliers[hour]
+            demand_mult *= max(0.0, float(demand_scale))
 
             for destination_name, demand in period_od.items():
                 if demand > 0:
-                    demand_per_second = demand * demand_mult / 3600.0
+                    od_mult = 1.0
+                    if od_multipliers is not None:
+                        od_key = (
+                            int(self.station_id),
+                            bool(self.direction),
+                            str(destination_name),
+                        )
+                        od_mult = float(od_multipliers.get(od_key, 1.0))
+                    demand_per_second = demand * demand_mult * od_mult / 3600.0
 
                     destination_demand_num = np.random.poisson(demand_per_second * passenger_update_interval)
 

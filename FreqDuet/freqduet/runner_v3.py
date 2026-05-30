@@ -334,7 +334,11 @@ class TransitDuetV2Runner:
         self.env.configure_frequency_features(config.get('frequency', {}))
         self.env.enable_plot = False
         self.env._n_fleet_target = config['upper']['N_fleet']
-        self.env.demand_noise = config['env'].get('demand_noise', 0.0)
+        env_cfg = config.get('env', {})
+        self.env.demand_noise = env_cfg.get('demand_noise', 0.0)
+        self.env.demand_scale = env_cfg.get('demand_scale', 1.0)
+        self.env.od_noise = env_cfg.get('od_noise', 0.0)
+        self.env.od_noise_clip = env_cfg.get('od_noise_clip', [0.3, 2.0])
 
         state_dim = self.env.state_dim
 

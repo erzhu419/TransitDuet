@@ -176,6 +176,9 @@ class env_bus(object):
         else:
             self._demand_multipliers = None
             self._peak_shift = 0
+        self._demand_scale = max(
+            0.0, float(getattr(self, 'demand_scale', 1.0)))
+        self._od_multipliers = self._sample_od_multipliers()
 
         if self.frequency_tracker is not None:
             self.frequency_tracker.reset()
@@ -202,6 +205,39 @@ class env_bus(object):
         self._last_dispatch_time = {True: -9999, False: -9999}  # direction → time
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
+
+    def _sample_od_multipliers(self):
+        """Episode-level OD pair demand multipliers for generalization tests."""
+        od_noise = float(getattr(self, 'od_noise', 0.0))
+        if od_noise <= 0:
+            return None
+        clip = getattr(self, 'od_noise_clip', [0.3, 2.0])
+        try:
+            lo, hi = float(clip[0]), float(clip[1])
+        except Exception:
+            lo, hi = 0.3, 2.0
+        if hi < lo:
+            lo, hi = hi, lo
+        multipliers = {}
+        mean = -0.5 * od_noise * od_noise
+        for station in self.stations:
+            if station.od is None:
+                continue
+            for period_od in station.od.values():
+                if not isinstance(period_od, dict):
+                    continue
+                for destination_name, demand in period_od.items():
+                    if float(demand) <= 0:
+                        continue
+                    key = (
+                        int(station.station_id),
+                        bool(station.direction),
+                        str(destination_name),
+                    )
+                    if key not in multipliers:
+                        sample = np.random.lognormal(mean=mean, sigma=od_noise)
+                        multipliers[key] = float(np.clip(sample, lo, hi))
+        return multipliers
 
     def initialize_state(self, render=False):
         def count_non_empty_sublist(lst):
@@ -303,12 +339,16 @@ class env_bus(object):
                     new_count, od_counts = station.station_update(
                         self.current_time, self.stations, self.passenger_update_freq,
                         demand_multipliers=self._demand_multipliers,
+                        demand_scale=self._demand_scale,
+                        od_multipliers=self._od_multipliers,
                         peak_shift=self._peak_shift,
                         return_details=True)
                 else:
                     new_count = station.station_update(
                         self.current_time, self.stations, self.passenger_update_freq,
                         demand_multipliers=self._demand_multipliers,
+                        demand_scale=self._demand_scale,
+                        od_multipliers=self._od_multipliers,
                         peak_shift=self._peak_shift,
                         return_details=False)
                     od_counts = {}
