@@ -57,7 +57,7 @@ class Station(object):
         peak_shift: int, shift OD lookup hour by this amount
         """
         new_passenger_count = 0
-        new_passenger_od = {}
+        new_passenger_od = {} if return_details else None
         if self.od is not None:
             hour = 6 + min(current_time // 3600, 13)
             # Apply peak shift: look up demand from shifted hour
@@ -81,15 +81,16 @@ class Station(object):
                             x for x in stations
                             if x.station_name == destination_name and x.direction == self.direction
                         )
-                        od_key = (
-                            int(self.station_id),
-                            int(destination.station_id),
-                            bool(self.direction),
-                        )
-                        new_passenger_od[od_key] = (
-                            new_passenger_od.get(od_key, 0)
-                            + int(destination_demand_num)
-                        )
+                        if return_details:
+                            od_key = (
+                                int(self.station_id),
+                                int(destination.station_id),
+                                bool(self.direction),
+                            )
+                            new_passenger_od[od_key] = (
+                                new_passenger_od.get(od_key, 0)
+                                + int(destination_demand_num)
+                            )
 
                         # 创建新乘客并更新等候队列
                         new_passengers = [

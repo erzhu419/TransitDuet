@@ -283,18 +283,32 @@ class env_bus(object):
         if self.current_time % self.passenger_update_freq == 0:
             freq_arrivals = {}
             freq_od_arrivals = {}
+            collect_od_frequency = (
+                self.frequency_enabled
+                and self.frequency_tracker is not None
+                and getattr(self.frequency_tracker, 'od_features_enabled', False)
+            )
             for station in self.stations:
-                new_count, od_counts = station.station_update(
-                    self.current_time, self.stations, self.passenger_update_freq,
-                    demand_multipliers=self._demand_multipliers,
-                    peak_shift=self._peak_shift,
-                    return_details=True)
+                if collect_od_frequency:
+                    new_count, od_counts = station.station_update(
+                        self.current_time, self.stations, self.passenger_update_freq,
+                        demand_multipliers=self._demand_multipliers,
+                        peak_shift=self._peak_shift,
+                        return_details=True)
+                else:
+                    new_count = station.station_update(
+                        self.current_time, self.stations, self.passenger_update_freq,
+                        demand_multipliers=self._demand_multipliers,
+                        peak_shift=self._peak_shift,
+                        return_details=False)
+                    od_counts = {}
                 if self.frequency_enabled and new_count:
                     key = (int(station.station_id), bool(station.direction))
                     freq_arrivals[key] = freq_arrivals.get(key, 0) + int(new_count)
-                    for od_key, od_count in od_counts.items():
-                        freq_od_arrivals[od_key] = (
-                            freq_od_arrivals.get(od_key, 0) + int(od_count))
+                    if collect_od_frequency:
+                        for od_key, od_count in od_counts.items():
+                            freq_od_arrivals[od_key] = (
+                                freq_od_arrivals.get(od_key, 0) + int(od_count))
             if self.frequency_enabled and self.frequency_tracker is not None:
                 self.frequency_tracker.update(freq_arrivals, freq_od_arrivals)
             # station_state.append(len(station.waiting_passengers))

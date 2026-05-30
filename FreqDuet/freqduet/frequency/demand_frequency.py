@@ -412,14 +412,15 @@ class DemandFrequencyTracker:
         arrivals_by_od = arrivals_by_od or {}
         for key, count in arrivals_by_station.items():
             self._pending_station[key] += float(count)
-        for key, count in arrivals_by_od.items():
-            self._pending_od[key] += float(count)
+        if self.od_features_enabled:
+            for key, count in arrivals_by_od.items():
+                self._pending_od[key] += float(count)
         self._pending_steps += 1
         if self._pending_steps < self.bin_steps:
             return
 
         station_counts = dict(self._pending_station)
-        od_counts = dict(self._pending_od)
+        od_counts = dict(self._pending_od) if self.od_features_enabled else {}
         self._pending_station.clear()
         self._pending_od.clear()
         self._pending_steps = 0
@@ -442,12 +443,13 @@ class DemandFrequencyTracker:
             if self.promotion_enabled:
                 self._get_local_promotion_gate(key).update(state.high, state.low)
 
-        od_keys = set(self.od_states.keys()) | set(arrivals_by_od.keys())
-        for key in od_keys:
-            self._update_state(
-                self._get_od_state(key),
-                float(arrivals_by_od.get(key, 0.0)) * scale,
-                bin_step)
+        if self.od_features_enabled:
+            od_keys = set(self.od_states.keys()) | set(arrivals_by_od.keys())
+            for key in od_keys:
+                self._update_state(
+                    self._get_od_state(key),
+                    float(arrivals_by_od.get(key, 0.0)) * scale,
+                    bin_step)
         self.total_updates += 1
         self._od_summary_cache_updates = -1
 

@@ -97,6 +97,7 @@ terminal baseline no-leakage, 3 seeds:    wait=6.20±1.83, cv=0.504±0.021, comp
 terminal close main, 5 seeds:             wait=5.38±0.46, cv=0.461±0.013, comp=1.501±0.099
 terminal close nofreq, 5 seeds:           wait=6.06±0.32, cv=0.467±0.036, comp=1.663±0.214
 terminal close no-leakage, 5 seeds:       wait=6.03±1.44, cv=0.477±0.039, comp=1.535±0.206
+cProfile terminal ep1:                    19.95s, 43.8M calls; top hotspot harmonic updates
 ```
 
 The lower controller now uses discrete holding bins
@@ -130,6 +131,13 @@ the 5-seed close check restored the main path advantage. No-Leakage still
 occasionally reduces overshoot, but it does so by allowing much larger lower
 holding drift and higher wait variance, which is exactly the leakage mechanism
 the method is meant to prevent.
+
+The current profile shows that harmonic state updates dominate the remaining
+non-neural-network overhead. The first safe optimization is scoped to baselines:
+when a config has `od_features: false`, station-level updates no longer build OD
+detail dictionaries and the frequency tracker no longer stores or updates OD
+states. The promoted main path keeps OD features enabled, so its behavior is
+unchanged.
 
 Experimental modules not yet promoted:
 
