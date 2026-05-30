@@ -26,6 +26,7 @@ class TimetableCurvePlanner:
     delta_min_s: float = -120.0
     delta_max_s: float = 120.0
     shared_directions: bool = False
+    plan_all_directions: bool = False
     terminal_shift_min_s: float = -180.0
     terminal_shift_max_s: float = 120.0
 
@@ -40,6 +41,7 @@ class TimetableCurvePlanner:
             delta_min_s=float(cfg.get("delta_min_s", -float(cfg.get("delta_max_s", delta_max_s)))),
             delta_max_s=float(cfg.get("delta_max_s", delta_max_s)),
             shared_directions=bool(cfg.get("shared_directions", False)),
+            plan_all_directions=bool(cfg.get("plan_all_directions", False)),
             terminal_shift_min_s=float(cfg.get("terminal_shift_min_s", -180.0)),
             terminal_shift_max_s=float(cfg.get("terminal_shift_max_s", 120.0)),
         )
@@ -98,7 +100,7 @@ class TimetableCurvePlanner:
 
     def apply(self, timetables, current_trip, action, origin_launch_s=None,
               write_scheduled_launch=False):
-        """Write target headways for current and future same-direction trips.
+        """Write target headways for current and future trips.
 
         Returns:
             dict with current target, effective current delta, and plan summary.
@@ -110,44 +112,50 @@ class TimetableCurvePlanner:
         scheduled_launches = []
         current_seen = False
 
-        same_direction = [
-            tt for tt in timetables
-            if bool(tt.direction) == current_direction
-            and not getattr(tt, "launched", False)
-        ]
-        same_direction.sort(key=lambda tt: float(tt.launch_time))
+        plan_directions = (
+            [True, False] if self.plan_all_directions else [current_direction]
+        )
+        for plan_direction in plan_directions:
+            direction_trips = [
+                tt for tt in timetables
+                if bool(tt.direction) == bool(plan_direction)
+                and not getattr(tt, "launched", False)
+            ]
+            direction_trips.sort(key=lambda tt: float(tt.launch_time))
 
-        prev_scheduled = None
-        for tt in same_direction:
-            offset = float(tt.launch_time) - origin_launch
-            if offset < -1e-6 or offset > self.horizon_s:
-                continue
-            base = self._base_headway(tt)
-            target = self.target_headway(base, action, current_direction, offset)
-            tt.target_headway = target
-            tt._freqduet_planned_by = int(current_trip.launch_turn)
-            tt._freqduet_plan_offset_s = offset
-            planned_targets.append(target)
-            if write_scheduled_launch:
-                existing = getattr(tt, "_freqduet_scheduled_launch", None)
-                if prev_scheduled is None:
-                    scheduled = (
-                        float(existing) if existing is not None
-                        else float(tt.launch_time)
-                    )
-                else:
-                    scheduled = prev_scheduled + target
-                scheduled = float(np.clip(
-                    scheduled,
-                    float(tt.launch_time) + self.terminal_shift_min_s,
-                    float(tt.launch_time) + self.terminal_shift_max_s,
-                ))
-                tt._freqduet_scheduled_launch = int(round(scheduled))
-                tt._freqduet_terminal_dispatch = True
-                scheduled_launches.append(float(tt._freqduet_scheduled_launch))
-                prev_scheduled = float(tt._freqduet_scheduled_launch)
-            if tt is current_trip:
-                current_seen = True
+            prev_scheduled = None
+            for tt in direction_trips:
+                offset = float(tt.launch_time) - origin_launch
+                if offset < -1e-6 or offset > self.horizon_s:
+                    continue
+                base = self._base_headway(tt)
+                target = self.target_headway(
+                    base, action, bool(plan_direction), offset)
+                tt.target_headway = target
+                tt._freqduet_planned_by = int(current_trip.launch_turn)
+                tt._freqduet_plan_offset_s = offset
+                planned_targets.append(target)
+                if write_scheduled_launch:
+                    existing = getattr(tt, "_freqduet_scheduled_launch", None)
+                    if prev_scheduled is None:
+                        scheduled = (
+                            float(existing) if existing is not None
+                            else float(tt.launch_time)
+                        )
+                    else:
+                        scheduled = prev_scheduled + target
+                    scheduled = float(np.clip(
+                        scheduled,
+                        float(tt.launch_time) + self.terminal_shift_min_s,
+                        float(tt.launch_time) + self.terminal_shift_max_s,
+                    ))
+                    tt._freqduet_scheduled_launch = int(round(scheduled))
+                    tt._freqduet_terminal_dispatch = True
+                    scheduled_launches.append(
+                        float(tt._freqduet_scheduled_launch))
+                    prev_scheduled = float(tt._freqduet_scheduled_launch)
+                if tt is current_trip:
+                    current_seen = True
 
         base_current = self._base_headway(current_trip)
         current_offset = current_launch - origin_launch
@@ -193,8 +201,10 @@ class TimetableCurvePlanner:
             max(abs(self.delta_min_s), abs(self.delta_max_s)) ** 2, 1.0)
         vals = []
         for coeffs in blocks:
-            if coeffs.size < 3:
-                continue
-            curvature = np.diff(coeffs, n=2)
-            vals.append(float(np.mean(curvature * curvature) / denom))
+            if coeffs.size >= 3:
+                curvature = np.diff(coeffs, n=2)
+                vals.append(float(np.mean(curvature * curvature) / denom))
+            elif coeffs.size == 2:
+                slope = np.diff(coeffs)
+                vals.append(float(0.25 * np.mean(slope * slope) / denom))
         return float(np.mean(vals)) if vals else 0.0

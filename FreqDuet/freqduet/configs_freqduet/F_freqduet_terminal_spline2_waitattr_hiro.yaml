@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_waitattr_hiro.yaml
+_name: F_freqduet_terminal_spline2_waitattr_hiro
+
+upper:
+  timetable_planner:
+    # Lower-variance Step-2 candidate: direction-specific linear headway curve
+    # over the rolling horizon, planned for both directions at each replan.
+    basis_per_direction: 2
+    shared_directions: false
+    plan_all_directions: true
+    action_ema_alpha: 0.20
+    smooth_penalty: 0.04
+    delta_min_s: -35.0
+    delta_max_s: 15.0

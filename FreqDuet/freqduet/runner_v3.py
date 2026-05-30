@@ -331,6 +331,7 @@ class TransitDuetV2Runner:
         self.timetable_terminal_dispatch = False
         self.timetable_promotion_replan = False
         self.timetable_promotion_replan_strength_min = 0.0
+        self.timetable_plan_all_directions = False
         self._active_timetable_plans = {}
         if bool(planner_cfg.get('enable', False)):
             self.timetable_planner = TimetableCurvePlanner.from_config(
@@ -347,6 +348,8 @@ class TransitDuetV2Runner:
                 planner_cfg.get('promotion_replan', False))
             self.timetable_promotion_replan_strength_min = float(
                 planner_cfg.get('promotion_replan_strength_min', 0.0))
+            self.timetable_plan_all_directions = bool(
+                planner_cfg.get('plan_all_directions', False))
         # v2k: elastic fleet — sample N_fleet per episode
         self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
         self.fleet_min = upper_cfg.get('fleet_min', 8)
@@ -914,8 +917,9 @@ class TransitDuetV2Runner:
         upper_decision_taken = True
         plan_origin_launch = None
         planner_dir = bool(trip.direction)
+        planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
-            active_plan = self._active_timetable_plans.get(planner_dir)
+            active_plan = self._active_timetable_plans.get(planner_key)
             if active_plan is not None:
                 elapsed = float(trip.launch_time) - float(active_plan['origin'])
                 promotion_replan = False
@@ -974,7 +978,7 @@ class TransitDuetV2Runner:
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
             plan_origin_launch = float(trip.launch_time)
-            prev_plan = self._active_timetable_plans.get(planner_dir)
+            prev_plan = self._active_timetable_plans.get(planner_key)
             if prev_plan is not None and self.timetable_action_ema_alpha < 1.0:
                 prev_action = np.asarray(
                     prev_plan['action'], dtype=np.float32).reshape(-1)
@@ -986,7 +990,7 @@ class TransitDuetV2Runner:
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
-            self._active_timetable_plans[planner_dir] = {
+            self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
             }

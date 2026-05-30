@@ -156,11 +156,12 @@ of that wait to upper timetable credit and the high-frequency local shock share
 to lower holding reward shaping. The older `F_freqduet_terminal_hiro` is left
 unchanged so reviewer baselines that extend it do not inherit the new reward.
 
-Same-run 5-seed check, 20 episodes, last 10 episodes, workers=8:
+Corrected same-run 5-seed check, 20 episodes, `upper_warmup_eps=10`, last 10
+BiLevel episodes, workers=8:
 
 ```text
-terminal main:      wait=5.75±0.71, cv=0.447±0.028, comp=1.534±0.210
-terminal waitattr:  wait=5.40±0.18, cv=0.451±0.013, comp=1.407±0.131
+terminal main:      wait=5.84±0.62, cv=0.449±0.013, comp=1.590±0.170
+terminal waitattr:  wait=5.66±0.70, cv=0.442±0.020, comp=1.501±0.162
 ```
 
 The result is strong enough to use `F_freqduet_terminal_waitattr_hiro` as the
@@ -168,3 +169,28 @@ next main candidate for subsequent dev-manual modules. The lower wait penalty
 is deliberately small (`~0.00145` mean) and the upper wait credit is zero-mean
 within episode (`std=0.15`), so this adds frequency-attributed passenger-wait
 credit without overwhelming the existing headway/cost learning signal.
+
+## 2026-05-30 step-2 timetable curve action
+
+Implemented direction-specific multi-coefficient timetable planning support.
+`TimetableCurvePlanner` can now optionally write a rolling plan for both
+directions at once (`plan_all_directions: true`), and active plan reuse can use
+a global timetable-plan key. A slope penalty was added for 2-basis curves so
+linear timetable actions are not unconstrained.
+
+Corrected same-run protocol, 5 seeds, 20 episodes, `upper_warmup_eps=10`, last
+10 BiLevel episodes:
+
+```text
+scalar waitattr:        wait=5.66±0.70, cv=0.442±0.020, comp=1.501±0.162, U_HF=0.090±0.019
+spline3 all-dir:        wait=5.67±0.36, cv=0.471±0.019, comp=1.567±0.147, U_HF=0.040±0.007
+spline2 all-dir r10:    wait=5.71±0.40, cv=0.455±0.013, comp=1.522±0.160, U_HF=0.054±0.011
+spline2 per-dir:        wait=5.39±0.64, cv=0.441±0.012, comp=1.440±0.162, U_HF=0.041±0.005
+```
+
+Promote `F_freqduet_terminal_spline2dir_waitattr_hiro` as the next main
+candidate. It keeps the upper as a direction-specific 2-basis timetable curve
+while preserving the scalar path's per-direction event timing and upper decision
+count. The all-direction variants are implemented and kept as ablations, but
+are not promoted because they reduce upper decision count or add variance under
+the current short training protocol.
