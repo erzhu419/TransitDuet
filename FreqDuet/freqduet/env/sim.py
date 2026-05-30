@@ -91,6 +91,10 @@ class env_bus(object):
         self.frequency_lower_enabled = False
         self.frequency_replace_upper_demand = True
         self.frequency_tracker = None
+        self.lower_context_enabled = False
+        self.lower_context_dim = 0
+        self.lower_context_queue_norm = 50.0
+        self.lower_context_features = []
 
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
@@ -322,7 +326,10 @@ class env_bus(object):
                 bus.drive(self.current_time, action[bus.bus_id], self.bus_all,
                           debug=debug, target_headway=target_hw,
                           frequency_tracker=self.frequency_tracker,
-                          lower_frequency_enabled=self.frequency_lower_enabled)
+                          lower_frequency_enabled=self.frequency_lower_enabled,
+                          lower_context_enabled=self.lower_context_enabled,
+                          lower_context_queue_norm=self.lower_context_queue_norm,
+                          lower_context_features=self.lower_context_features)
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))
@@ -415,6 +422,19 @@ class env_bus(object):
         self.frequency_lower_enabled = bool(cfg.get('lower_features', True))
         self.frequency_replace_upper_demand = bool(
             cfg.get('replace_upper_demand_with_low', True))
+        lower_context_cfg = cfg.get('lower_context', {}) or {}
+        self.lower_context_enabled = bool(lower_context_cfg.get('enable', False))
+        default_context = [
+            'load', 'capacity', 'queue', 'speed_residual',
+            'shock_age', 'schedule_slack']
+        requested_context = lower_context_cfg.get('features', default_context)
+        allowed_context = set(default_context)
+        self.lower_context_features = [
+            str(x) for x in requested_context if str(x) in allowed_context
+        ] if self.lower_context_enabled else []
+        self.lower_context_dim = len(self.lower_context_features)
+        self.lower_context_queue_norm = max(
+            float(lower_context_cfg.get('queue_norm', 50.0)), 1e-6)
 
         if self.frequency_enabled:
             method = str(cfg.get('method', '')).lower()
@@ -427,7 +447,7 @@ class env_bus(object):
                 cfg, update_interval_s=self.passenger_update_freq)
             self.state_dim = self._base_state_dim + (
                 self.frequency_tracker.lower_feature_dim
-                if self.frequency_lower_enabled else 0)
+                if self.frequency_lower_enabled else 0) + self.lower_context_dim
             upper_extra = 0
             if self.frequency_upper_enabled:
                 upper_extra = (
@@ -437,7 +457,7 @@ class env_bus(object):
             self.upper_state_dim = 11 + upper_extra
         else:
             self.frequency_tracker = None
-            self.state_dim = self._base_state_dim
+            self.state_dim = self._base_state_dim + self.lower_context_dim
             self.upper_state_dim = 11
 
     def _build_harmonic_prior(self, cfg):

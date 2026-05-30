@@ -266,3 +266,25 @@ The mechanism is now implemented and visible for diagnostics/longer ablations,
 but adding these state dimensions increases wait variance and degrades
 composite. Keep `F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro`
 as the current main candidate.
+
+## 2026-05-30 step-6 lower operational context
+
+Implemented optional lower operational context features: load, remaining
+capacity, station queue, speed residual, local shock age, and schedule slack.
+The feature list is configurable through `frequency.lower_context.features`, so
+full and lite lower-state variants can be tested without changing the promoted
+main path.
+
+Corrected same-run protocol, 5 seeds, 20 episodes, `upper_warmup_eps=10`, last
+10 BiLevel episodes:
+
+```text
+conservative main:   wait=5.59±0.36, cv=0.452±0.024, comp=1.342±0.080
+lowerctx full:       wait=6.93±1.54, cv=0.467±0.051, comp=1.761±0.216
+lowerctx lite:       wait=6.61±2.69, cv=0.492±0.049, comp=1.707±0.356
+```
+
+Do not promote lower context under the current short training protocol. The
+dev-manual state fields are now implemented, but adding them directly makes the
+lower SAC higher-variance and increases holding. Keep them as ablations for
+longer training or future normalization/network-capacity changes.

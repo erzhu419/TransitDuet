@@ -48,6 +48,9 @@ class Bus(object):
         self._target_headway = 360.0  # set by sim via drive()
         self._frequency_tracker = None
         self._lower_frequency_enabled = False
+        self._lower_context_enabled = False
+        self._lower_context_queue_norm = 50.0
+        self._lower_context_features = []
 
         self.alight_num = 0. # 下车人数
         self.board_num = 0. # 上车人数
@@ -168,10 +171,15 @@ class Bus(object):
         self.next_station_dis = self.current_route.distance
 
     def drive(self, current_time, action, bus_all, debug, target_headway=360.0,
-              frequency_tracker=None, lower_frequency_enabled=False):
+              frequency_tracker=None, lower_frequency_enabled=False,
+              lower_context_enabled=False, lower_context_queue_norm=50.0,
+              lower_context_features=None):
         self._target_headway = target_headway
         self._frequency_tracker = frequency_tracker
         self._lower_frequency_enabled = lower_frequency_enabled
+        self._lower_context_enabled = lower_context_enabled
+        self._lower_context_queue_norm = max(float(lower_context_queue_norm), 1e-6)
+        self._lower_context_features = list(lower_context_features or [])
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -253,6 +261,40 @@ class Bus(object):
             all_route = self.routes_list[:len(self.routes_list) // 2] if self.direction else self.routes_list[len(self.routes_list) // 2:]
             speed_list = [all_route[i].speed_limit for i in range(len(all_route))]
             self.obs.extend(speed_list)
+
+            if self._lower_context_enabled:
+                load_norm = len(self.passengers) / max(float(self.capacity), 1.0)
+                cap_remain_norm = max(0.0, 1.0 - load_norm)
+                queue_norm = (
+                    len(self.next_station.waiting_passengers)
+                    / self._lower_context_queue_norm)
+                route_speed_mean = max(float(np.mean(speed_list)), 1e-6)
+                speed_residual = (
+                    float(self.current_route.speed_limit) - route_speed_mean
+                ) / route_speed_mean
+                shock_age = 0.0
+                if (self._frequency_tracker is not None
+                        and hasattr(self._frequency_tracker,
+                                    "local_promotion_summary")):
+                    station_id = getattr(
+                        self.last_station, 'station_id', self.next_station.station_id)
+                    shock_age = float(
+                        self._frequency_tracker.local_promotion_summary(
+                            station_id, self.direction).get("age", 0.0))
+                schedule_slack = (target_hw - self.forward_headway) / max(target_hw, 1.0)
+                context_values = {
+                    'load': float(np.clip(load_norm, 0.0, 2.0)),
+                    'capacity': float(np.clip(cap_remain_norm, 0.0, 1.0)),
+                    'queue': float(np.clip(queue_norm, 0.0, 2.0)),
+                    'speed_residual': float(np.clip(speed_residual, -2.0, 2.0)),
+                    'shock_age': float(np.clip(shock_age, 0.0, 1.0)),
+                    'schedule_slack': float(np.clip(schedule_slack, -2.0, 2.0)),
+                }
+                self.obs.extend([
+                    context_values[name]
+                    for name in self._lower_context_features
+                    if name in context_values
+                ])
 
             if self._lower_frequency_enabled and self._frequency_tracker is not None:
                 station_id = getattr(self.last_station, 'station_id', self.next_station.station_id)

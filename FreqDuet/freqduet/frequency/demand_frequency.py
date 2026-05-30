@@ -687,6 +687,13 @@ class DemandFrequencyTracker:
             return 0.0
         return float(s.high / self.local_demand_norm)
 
+    def local_promotion_summary(self, station_id, direction):
+        key = (int(station_id), bool(direction))
+        gate = self.local_promotion_gates.get(key)
+        if gate is None:
+            return {"flag": 0.0, "strength": 0.0, "age": 0.0, "score": 0.0}
+        return gate.summary()
+
     def summary(self):
         s = self.global_state
         high_energy = math.sqrt(max(s.high_energy, 0.0))

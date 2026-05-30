@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_lowerctx_promotion_conservative_spline2dir_waitattr_hiro
+
+frequency:
+  lower_context:
+    # Step-6 candidate: explicit lower operational state beyond headway and
+    # frequency residuals.
+    enable: true
+    queue_norm: 50.0
