@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_lowerhf_priorstate_hiro
+
+frequency:
+  # Keep the lower policy high-frequency driven, but expose a bounded local
+  # low-frequency prior so burst residuals are interpreted relative to station
+  # demand scale instead of as uncalibrated residual magnitudes.
+  lower_mode: high_prior

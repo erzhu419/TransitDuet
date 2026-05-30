@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_final_allfreq_hiro
+
+frequency:
+  # Give both layers both LF and HF summaries. This tests whether aligned
+  # allocation is better than simply exposing every frequency feature.
+  upper_mode: all
+  lower_mode: all

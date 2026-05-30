@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_lowerall_localcap10_w06_hiro
+
+frequency:
+  # Diagnostic only: isolate whether the final allfreq gain comes mainly from
+  # giving extra low-frequency context to the lower controller.
+  lower_mode: all

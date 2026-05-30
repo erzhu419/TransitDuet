@@ -480,3 +480,68 @@ Promote `F_freqduet_terminal_main_hiro` to alias
 `F_freqduet_terminal_lowerhf_localcap10_w06_hiro`. This is now the strongest
 validated lower HF-credit path: it strengthens local burst responsibility
 without the instability of uncapped local attribution.
+
+## 2026-05-30 final aligned matrix after local lower-HF credit
+
+Added a reviewer-facing final matrix script and explicit final configs so the
+baselines are reproducible under the same terminal timetable, lower
+stabilization, reward-attribution, and leakage surface. The matrix includes
+nofreq, raw history, LF-upper only, HF-lower only, allfreq, swapped,
+no-promotion, main, and no-leakage variants.
+
+Protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20 BiLevel
+episodes, 8 workers, one numeric thread per worker:
+
+```text
+nofreq:          wait=5.65±0.36, cv=0.448±0.010, comp=1.542±0.151
+rawhistory:      wait=5.87±0.44, cv=0.454±0.012, comp=1.604±0.097
+LF-upper only:   wait=6.60±2.20, cv=0.449±0.029, comp=1.650±0.332
+HF-lower only:   wait=6.56±2.42, cv=0.462±0.022, comp=1.652±0.383
+allfreq:         wait=5.37±0.19, cv=0.454±0.013, comp=1.513±0.081
+swapped:         wait=5.79±0.69, cv=0.457±0.023, comp=1.623±0.191
+no-promotion:    wait=5.78±0.25, cv=0.439±0.016, comp=1.551±0.129
+no-leakage:      wait=6.67±1.12, cv=0.495±0.013, comp=1.709±0.190
+promotion main:  wait=5.77±0.24, cv=0.443±0.015, comp=1.513±0.120
+```
+
+The matrix no longer supports keeping the no-promotion variant as the default:
+promotion has essentially the same wait, slightly higher CV, lower overshoot,
+and lower composite. It also matches allfreq composite while preserving the
+paper claim: upper state remains LF-oriented, lower state remains HF-oriented,
+and allfreq's lower action/drift is much larger (`lower_action=4.39` and
+`lower_drift_penalty=0.091` versus promotion main `1.92` and `0.003`).
+
+Promote `F_freqduet_terminal_main_hiro` to alias
+`F_freqduet_terminal_promotion_localcap10_w06_hiro`. Keep
+`F_freqduet_terminal_final_nopromotion_hiro` as the explicit no-promotion
+baseline, and keep `F_freqduet_terminal_final_promotion_hiro` as a historical
+alias for reproducing the matrix row.
+
+## 2026-05-30 lower prior-state repair attempt
+
+Because allfreq tied the promoted main on composite, tested whether the gain
+came from giving the lower controller enough local low-frequency scale context.
+Implemented optional lower `high_prior` mode:
+
+```text
+lower high-prior features =
+  [local_high, local_high_slope, local_high_energy, global_high_energy,
+   local_low_prior, positive_high_share]
+```
+
+This is deliberately narrower than allfreq: it gives the lower layer a local
+prior scale and bounded positive-residual share, but not the low-frequency
+slope or forecast curve.
+
+Screening protocol: 5 seeds, 20 episodes, `upper_warmup_eps=10`, last 10
+BiLevel episodes:
+
+```text
+main/no-promotion:     wait=5.61±0.57, cv=0.470±0.014, comp=1.536±0.266
+lower high-prior:      wait=5.72±0.47, cv=0.455±0.038, comp=1.590±0.229
+lower all:             wait=6.54±1.12, cv=0.481±0.033, comp=1.723±0.167
+allfreq all layers:    wait=6.43±0.71, cv=0.456±0.019, comp=1.611±0.192
+```
+
+Do not promote `high_prior` or `lower_all`. The useful post-matrix adjustment
+is promotion replan, not exposing more low-frequency lower-state features.

@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_final_swapped_hiro
+
+frequency:
+  # Deliberately wrong allocation: upper gets HF residual state, lower gets LF
+  # demand state, while final reward/timetable settings are unchanged.
+  upper_mode: high
+  lower_mode: low
