@@ -1,7 +1,8 @@
-_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_extends: F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
 # Current promoted FreqDuet main path. It keeps the aligned LF-upper/HF-lower
 # split, capped station-local lower high-frequency wait attribution, and
-# leakage regularization. Trigger-only promotion remains available as an
-# ablation, but the current 5-seed rerun did not support it as the default.
+# leakage regularization. Trigger-only promotion is enabled after the 100/200ep
+# long-training confirmation; the 40ep rerun is kept as a short-training
+# conflict, not as the default selector.

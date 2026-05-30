@@ -574,3 +574,48 @@ no-promotion localcap path and keep
 `F_freqduet_terminal_final_promotion_hiro` as the explicit promotion ablation.
 This is the conservative choice before the longer-training and generalization
 steps.
+
+## 2026-05-31 long-training confirmation
+
+Added `scripts/run_freqduet_longtrain_matrix.sh` so the long-horizon check can
+be reproduced without hand-assembling the config list. It runs the core final
+matrix candidates with explicit 8-worker settings by default:
+
+```text
+nofreq, rawhistory, allfreq, main, promotion, noleakage
+```
+
+First pass: 5 seeds, 100 episodes, `upper_warmup_eps=10`, last 50 BiLevel
+episodes:
+
+```text
+nofreq:        wait=5.53±0.65, cv=0.463±0.021, comp=1.547±0.114
+rawhistory:    wait=5.49±0.22, cv=0.448±0.009, comp=1.516±0.052
+allfreq:       wait=5.58±0.26, cv=0.457±0.011, comp=1.516±0.029
+main/noprom:   wait=5.60±0.23, cv=0.449±0.013, comp=1.512±0.075
+promotion:     wait=5.48±0.16, cv=0.446±0.005, comp=1.476±0.044
+no-leakage:    wait=6.25±0.60, cv=0.494±0.022, comp=1.686±0.125
+```
+
+Because this contradicted the 40ep short-training matrix, reran the same key
+set at 200 episodes, last 100 BiLevel episodes:
+
+```text
+nofreq:        wait=5.95±0.52, cv=0.485±0.017, comp=1.626±0.070
+rawhistory:    wait=5.74±0.10, cv=0.474±0.017, comp=1.533±0.051
+allfreq:       wait=5.95±0.43, cv=0.491±0.014, comp=1.614±0.076
+main/noprom:   wait=5.60±0.31, cv=0.471±0.015, comp=1.555±0.071
+promotion:     wait=5.59±0.16, cv=0.465±0.024, comp=1.544±0.044
+no-leakage:    wait=7.41±0.79, cv=0.520±0.016, comp=1.835±0.129
+```
+
+The 200ep paired seed check is modest but consistent enough to restore
+promotion as the main path: promotion beats no-promotion on wait/CV/composite
+in 3/5 seeds, lowers the mean composite by about `0.0107`, and reduces
+composite variance. No-leakage remains clearly invalid, so the leakage feature
+is not just a short-training artifact.
+
+Set `F_freqduet_terminal_main_hiro` back to
+`F_freqduet_terminal_promotion_localcap10_w06_hiro`. Keep
+`F_freqduet_terminal_final_nopromotion_hiro` as the explicit no-promotion
+ablation because the 40ep matrix remains a documented short-training conflict.
