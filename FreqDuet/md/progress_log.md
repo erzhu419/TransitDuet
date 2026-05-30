@@ -311,3 +311,36 @@ BiLevel ep1: wait=6.57, cv=0.339, comp=1.896,
 This step is diagnostic-only and does not change policy behavior. It completes
 the dev-manual requirement that the paper can show both frequency focus and
 fast lower-layer response instead of relying only on wait/CV/composite.
+
+## 2026-05-30 step-8 aligned long baseline matrix
+
+Added aligned baseline configs so reviewer-facing comparisons share the current
+spline2dir terminal timetable surface. The matrix covers no-frequency,
+raw-history, LF-upper only, HF-lower only, allfreq, swapped, no-promotion,
+no-leakage, and conservative-promotion variants.
+
+Protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20 BiLevel
+episodes, 8 workers, one numeric thread per worker:
+
+```text
+nopromotion main:     wait=5.48±0.35, cv=0.452±0.018, comp=1.399±0.107
+LF-upper only:        wait=5.43±0.29, cv=0.450±0.015, comp=1.434±0.103
+allfreq all layers:   wait=5.55±0.30, cv=0.462±0.024, comp=1.439±0.122
+swapped:              wait=5.67±0.54, cv=0.455±0.029, comp=1.474±0.154
+promotion conservative wait=5.58±0.36, cv=0.446±0.014, comp=1.502±0.065
+nofreq:               wait=5.77±0.29, cv=0.442±0.008, comp=1.525±0.047
+rawhistory:           wait=5.64±0.74, cv=0.460±0.012, comp=1.532±0.155
+no-leakage:           wait=6.30±0.86, cv=0.483±0.036, comp=1.593±0.113
+HF-lower only:        wait=6.95±1.68, cv=0.482±0.042, comp=1.674±0.361
+```
+
+The longer matrix does not support keeping conservative promotion as the
+default. It lowers CV slightly but increases composite versus no-promotion.
+Promote `F_freqduet_terminal_main_hiro`, which aliases the no-promotion
+spline2dir + wait-attribution path. Keep promotion implemented and documented
+as an ablation/non-stationary hook, not as the current default.
+
+The matrix still supports the dev-manual line: aligned FreqDuet beats nofreq,
+raw-history, swapped allocation, no-leakage, and HF-lower-only. The narrow gap
+to LF-upper/allfreq means future work should improve lower high-frequency
+credit rather than adding more state dimensions blindly.
