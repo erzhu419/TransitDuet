@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_hold60_spline2dir_waitattr_hiro
+
+upper:
+  timetable_planner:
+    # Step-3 candidate: keep operational no-early-launch semantics but allow a
+    # wider executable terminal delay window for rolling schedule repair.
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 60.0

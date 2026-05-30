@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_hold45_spline2dir_waitattr_hiro
+
+upper:
+  timetable_planner:
+    # Step-3 candidate: midpoint between promoted hold30 and wait-improving
+    # hold60, still no early launch.
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0

@@ -194,3 +194,26 @@ while preserving the scalar path's per-direction event timing and upper decision
 count. The all-direction variants are implemented and kept as ablations, but
 are not promoted because they reduce upper decision count or add variance under
 the current short training protocol.
+
+## 2026-05-30 step-3 terminal schedule bounds
+
+Tested fuller executable terminal schedule bounds on top of the promoted
+`F_freqduet_terminal_spline2dir_waitattr_hiro` path. The planner implementation
+already writes rolling scheduled launches; this sweep checks whether allowing
+early release or wider terminal delay improves the executable schedule.
+
+Corrected same-run protocol, 5 seeds, 20 episodes, `upper_warmup_eps=10`, last
+10 BiLevel episodes:
+
+```text
+spline2dir hold30:      wait=5.39±0.64, cv=0.441±0.012, comp=1.440±0.162
+release15/hold30:       wait=6.13±0.72, cv=0.438±0.011, comp=1.517±0.152
+spline2dir hold45:      wait=5.62±0.35, cv=0.470±0.011, comp=1.513±0.169
+spline2dir hold60:      wait=5.19±0.48, cv=0.452±0.033, comp=1.468±0.151
+```
+
+Do not promote early release: even a 15s early window raises wait and composite.
+Hold60 improves mean wait but costs too much in CV/overshoot, and hold45 is
+worse than hold30. Keep no-early-launch hold30 as the promoted executable
+terminal schedule bound for the current main path. The release/hold45/hold60
+configs remain as ablations documenting the operational-bound sweep.
