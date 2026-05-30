@@ -76,6 +76,9 @@ disc7 + last action, 5 seeds:             wait=5.55±0.35, cv=0.448±0.017, comp
 pre-discrete terminal current, 5 seeds:   wait=6.02±0.82, cv=0.478±0.041, comp=1.659±0.192
 pre-discrete terminal hold30, 5 seeds:    wait=6.76±1.86, cv=0.472±0.035, comp=1.658±0.335
 pre-discrete terminal hold60, 5 seeds:    wait=6.67±1.63, cv=0.452±0.031, comp=1.673±0.206
+post-discrete terminal current, 5 seeds:  wait=5.73±0.60, cv=0.444±0.013, comp=1.556±0.172
+post-discrete terminal hold30, 5 seeds:   wait=5.13±0.19, cv=0.438±0.009, comp=1.347±0.127
+post-discrete terminal hold60, 5 seeds:   wait=5.59±0.33, cv=0.434±0.014, comp=1.383±0.060
 ```
 
 The lower controller now uses discrete holding bins
@@ -83,8 +86,8 @@ The lower controller now uses discrete holding bins
 state. This follows the SUMO exp39 lesson that continuous online holding can
 be too high-variance; reducing the action alphabet plus adding action history
 made the online controller beat the previous target-headway main path. Terminal
-dispatch remains experimental because executable launch timing still trails the
-target-headway path.
+dispatch became effective only after the lower stabilization; `F_freqduet_terminal_hiro`
+now uses the no-early-launch hold30 setting.
 
 Experimental modules not yet promoted:
 
