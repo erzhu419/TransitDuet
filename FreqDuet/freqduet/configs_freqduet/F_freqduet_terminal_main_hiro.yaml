@@ -1,6 +1,6 @@
-_extends: F_freqduet_terminal_aligned_nopromotion_hiro.yaml
+_extends: F_freqduet_terminal_lowerhf_poswait_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
-# Current promoted FreqDuet main path after the 40-episode aligned baseline
-# matrix. Conservative promotion remains implemented and tested, but is not the
-# default because it degraded composite under the longer protocol.
+# Current promoted FreqDuet main path. It keeps the stable no-promotion
+# spline2dir terminal timetable, and only attributes lower high-frequency wait
+# responsibility to positive local burst residuals.

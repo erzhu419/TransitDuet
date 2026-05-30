@@ -236,6 +236,9 @@ class DiagnosticLog:
         'shock_response_hit_rate', 'shock_events', 'shock_action_mean_s',
         # FreqDuet frequency-attributed passenger-wait reward diagnostics
         'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
+        'freq_wait_lower_board_credit_mean',
+        'freq_wait_lower_board_credit_max',
+        'freq_wait_lower_net_mean',
         'freq_wait_upper_credit_mean', 'freq_wait_upper_credit_std',
         'freq_wait_low_share_mean', 'freq_wait_boarded_pax',
         # FreqDuet timetable-curve upper diagnostics
@@ -497,6 +500,14 @@ class TransitDuetV2Runner:
             attr_cfg.get('upper_wait_weight', 0.0))
         self.freq_wait_lower_weight = float(
             attr_cfg.get('lower_wait_weight', 0.0))
+        self.freq_wait_lower_board_credit_weight = float(
+            attr_cfg.get('lower_board_credit_weight', 0.0))
+        self.freq_wait_lower_board_norm = max(
+            float(attr_cfg.get('lower_board_norm', 10.0)), 1e-6)
+        self.freq_wait_lower_board_clip = max(
+            float(attr_cfg.get('lower_board_clip', 2.0)), 0.0)
+        self.freq_wait_lower_positive_high_only = bool(
+            attr_cfg.get('lower_positive_high_only', False))
         self.freq_wait_norm_s = max(
             float(attr_cfg.get('wait_norm_s', 600.0)), 1e-6)
         self.freq_wait_clip = max(float(attr_cfg.get('wait_clip', 2.0)), 0.0)
@@ -505,6 +516,8 @@ class TransitDuetV2Runner:
         self.freq_wait_normalize_upper = bool(
             attr_cfg.get('normalize_upper_credit', True))
         self._ep_lower_wait_penalties = []
+        self._ep_lower_board_credits = []
+        self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
         self._ep_freq_wait_boarded_pax = 0
@@ -759,9 +772,10 @@ class TransitDuetV2Runner:
         prev_delta_by_dir[direction] = delta_t
         return float(self.upper_hf_penalty * diff / max(self.delta_max, 1e-6))
 
-    def _freq_wait_high_share(self, low_demand, local_high):
+    def _freq_wait_high_share(self, low_demand, local_high, positive_only=False):
         """Share of local passenger wait attributed to high-frequency demand."""
-        high = abs(float(local_high))
+        high_raw = float(local_high)
+        high = max(high_raw, 0.0) if positive_only else abs(high_raw)
         low = max(abs(float(low_demand)), self.freq_wait_low_floor)
         if high <= 0.0 and low <= 0.0:
             return 0.0
@@ -769,10 +783,8 @@ class TransitDuetV2Runner:
 
     def _record_frequency_wait_credit(
             self, trip_id, wait_sum_s, boarded_count, low_demand, local_high):
-        """Return lower high-frequency wait penalty and store upper wait credit."""
-        if (not self.freq_wait_enable
-                or boarded_count <= 0
-                or wait_sum_s <= 0.0):
+        """Return lower net high-frequency wait shaping and store upper credit."""
+        if not self.freq_wait_enable or boarded_count <= 0:
             return 0.0
 
         wait_mean_s = float(wait_sum_s) / max(int(boarded_count), 1)
@@ -781,8 +793,19 @@ class TransitDuetV2Runner:
             wait_norm = min(wait_norm, self.freq_wait_clip)
 
         high_share = self._freq_wait_high_share(low_demand, local_high)
+        lower_high_share = self._freq_wait_high_share(
+            low_demand, local_high,
+            positive_only=self.freq_wait_lower_positive_high_only)
         low_share = 1.0 - high_share
-        lower_penalty = self.freq_wait_lower_weight * high_share * wait_norm
+        lower_penalty = (
+            self.freq_wait_lower_weight * lower_high_share * wait_norm)
+        boarded_norm = int(boarded_count) / self.freq_wait_lower_board_norm
+        if self.freq_wait_lower_board_clip > 0.0:
+            boarded_norm = min(boarded_norm, self.freq_wait_lower_board_clip)
+        lower_board_credit = (
+            self.freq_wait_lower_board_credit_weight
+            * lower_high_share
+            * boarded_norm)
 
         stats = self._ep_trip_wait_stats[int(trip_id)]
         stats['pax'] += int(boarded_count)
@@ -792,9 +815,12 @@ class TransitDuetV2Runner:
         stats['events'] += 1
 
         self._ep_lower_wait_penalties.append(float(lower_penalty))
+        self._ep_lower_board_credits.append(float(lower_board_credit))
+        self._ep_lower_wait_net.append(
+            float(lower_board_credit - lower_penalty))
         self._ep_freq_wait_low_shares.append(float(low_share))
         self._ep_freq_wait_boarded_pax += int(boarded_count)
-        return float(lower_penalty)
+        return float(lower_penalty - lower_board_credit)
 
     def _upper_frequency_wait_credits(self, transitions):
         """Per-trip zero-mean upper credit from low-frequency passenger wait."""
@@ -1165,6 +1191,8 @@ class TransitDuetV2Runner:
         self._ep_lower_demand_action = []
         self._ep_shock_response_events = []
         self._ep_lower_wait_penalties = []
+        self._ep_lower_board_credits = []
+        self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
         self._ep_freq_wait_boarded_pax = 0
@@ -1521,6 +1549,8 @@ class TransitDuetV2Runner:
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
+        lower_board_credit_stat = _stat(self._ep_lower_board_credits)
+        lower_wait_net_stat = _stat(self._ep_lower_wait_net)
         upper_wait_credit_stat = _stat(self._ep_upper_wait_credits)
         wait_low_share_stat = _stat(self._ep_freq_wait_low_shares)
         upper_plan_penalty_stat = _stat(self._ep_upper_plan_penalties)
@@ -1671,6 +1701,9 @@ class TransitDuetV2Runner:
             'shock_action_mean_s': shock_metrics['shock_action_mean_s'],
             'freq_wait_lower_penalty_mean': lower_wait_stat['mean'],
             'freq_wait_lower_penalty_max': lower_wait_stat['max'],
+            'freq_wait_lower_board_credit_mean': lower_board_credit_stat['mean'],
+            'freq_wait_lower_board_credit_max': lower_board_credit_stat['max'],
+            'freq_wait_lower_net_mean': lower_wait_net_stat['mean'],
             'freq_wait_upper_credit_mean': upper_wait_credit_stat['mean'],
             'freq_wait_upper_credit_std': upper_wait_credit_stat['std'],
             'freq_wait_low_share_mean': wait_low_share_stat['mean'],
@@ -1699,6 +1732,8 @@ class TransitDuetV2Runner:
                    'shock_response_hit_rate',
                    'upper_plan_penalty_mean',
                    'freq_wait_lower_penalty_mean',
+                   'freq_wait_lower_board_credit_mean',
+                   'freq_wait_lower_net_mean',
                    'freq_wait_upper_credit_mean',
                    'freq_wait_low_share_mean',
                    'freq_middle', 'freq_middle_energy',
@@ -1790,6 +1825,8 @@ class TransitDuetV2Runner:
               f"absorb={row.get('freq_promotion_absorbed',0):+.3f}")
         if self.freq_wait_enable:
             print(f"  WAIT-F   lower_pen={row.get('freq_wait_lower_penalty_mean',0):.4f}  "
+                  f"board_credit={row.get('freq_wait_lower_board_credit_mean',0):+.4f}  "
+                  f"net={row.get('freq_wait_lower_net_mean',0):+.4f}  "
                   f"upper_credit={row.get('freq_wait_upper_credit_mean',0):+.4f}"
                   f"±{row.get('freq_wait_upper_credit_std',0):.4f}  "
                   f"low_share={row.get('freq_wait_low_share_mean',0):.3f}  "

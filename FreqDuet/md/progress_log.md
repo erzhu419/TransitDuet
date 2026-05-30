@@ -344,3 +344,39 @@ The matrix still supports the dev-manual line: aligned FreqDuet beats nofreq,
 raw-history, swapped allocation, no-leakage, and HF-lower-only. The narrow gap
 to LF-upper/allfreq means future work should improve lower high-frequency
 credit rather than adding more state dimensions blindly.
+
+## 2026-05-30 lower high-frequency credit follow-up
+
+Tested three lower high-frequency reward fixes after the aligned matrix showed
+the lower branch was not carrying enough useful high-frequency credit:
+
+- `lowerhf_poswait`: keep the wait penalty, but attribute lower responsibility
+  only to positive local high-frequency residuals.
+- `lowerhf_credit_tiny`: add a small boarded-passenger burst-serving credit.
+- `lowerhf_credit`: add a larger boarded-passenger burst-serving credit.
+
+Screening protocol: 5 seeds, 20 episodes, `upper_warmup_eps=10`, last 10
+BiLevel episodes:
+
+```text
+main before:      wait=5.07±0.21, cv=0.451±0.013, comp=1.456±0.143
+poswait:          wait=5.42±0.39, cv=0.439±0.021, comp=1.327±0.109
+credit tiny:      wait=5.70±0.67, cv=0.442±0.024, comp=1.418±0.233
+credit moderate:  wait=5.33±0.26, cv=0.451±0.020, comp=1.532±0.136
+```
+
+The explicit boarded-passenger credit is too noisy; it can improve a few seeds
+but worsens stability. The useful change is the directional residual fix:
+negative high-frequency residuals should not be treated as burst demand.
+
+Confirmation protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20
+BiLevel episodes:
+
+```text
+main before:      wait=5.40±0.22, cv=0.444±0.018, comp=1.461±0.128
+poswait main:     wait=5.19±0.16, cv=0.459±0.014, comp=1.428±0.086
+```
+
+Promote `F_freqduet_terminal_main_hiro` to alias
+`F_freqduet_terminal_lowerhf_poswait_hiro`. Keep the boarded-credit configs as
+ablations only.
