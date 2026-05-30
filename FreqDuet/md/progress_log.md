@@ -47,6 +47,25 @@ The 45s lower action range is promoted into `F_freqduet_timetable_hiro`
 because it removes the `seed2026` long-tail failure without the cap40 slowdown
 or cap50 drift relapse.
 
+Performance and prior-alignment follow-up:
+
+```text
+cProfile main cap45 ep1:        24.329s, 49.5M calls
+after frequency-cache/RLS opt:   21.764s, 42.8M calls
+time-aligned harmonic prior 5s:  wait=5.84±0.62, cv=0.476±0.023, comp=1.527±0.097
+```
+
+The harmonic prior now uses the global service-day bin when updating local and
+OD states, instead of each state starting its Fourier clock at first arrival.
+That preserves the historical 6:00-19:00 prior alignment. A second cap sweep
+under the aligned prior did not beat the 45s main setting:
+
+```text
+cap30: wait=5.60±0.43, comp=1.583±0.090
+cap40: wait=6.35±1.24, comp=1.585±0.344
+cap50: wait=6.53±0.47, comp=1.688±0.156
+```
+
 Experimental modules not yet promoted:
 
 - Terminal dispatch: 3-seed looked promising, but 5-seed was unstable

@@ -284,6 +284,8 @@ class DemandFrequencyTracker:
         self.global_state = self._new_state(self._prior_for("global", None))
         self.local_states = {}
         self.od_states = {}
+        self._od_summary_cache = (0.0, 0.0, 0)
+        self._od_summary_cache_updates = -1
         self.global_promotion_gate = (
             CausalPromotionGate(
                 update_interval_s=self.bin_interval_s,
@@ -379,6 +381,12 @@ class DemandFrequencyTracker:
             )
         return self.local_promotion_gates[key]
 
+    def _update_state(self, state, value, step):
+        if self.method == "harmonic":
+            state.update(value, step=step)
+        else:
+            state.update(value)
+
     def reset(self):
         self.global_state.reset()
         self.local_states.clear()
@@ -390,6 +398,8 @@ class DemandFrequencyTracker:
         self._pending_od.clear()
         self._pending_steps = 0
         self.total_updates = 0
+        self._od_summary_cache = (0.0, 0.0, 0)
+        self._od_summary_cache_updates = -1
 
     def update(self, arrivals_by_station, arrivals_by_od=None):
         """Update filters from {(station_id, direction): count} arrivals."""
@@ -413,7 +423,8 @@ class DemandFrequencyTracker:
     def _apply_update(self, arrivals_by_station, arrivals_by_od):
         total_count = float(sum(arrivals_by_station.values()))
         scale = 60.0 / max(self.bin_interval_s, 1e-6)
-        self.global_state.update(total_count * scale)
+        bin_step = int(self.total_updates)
+        self._update_state(self.global_state, total_count * scale, bin_step)
         if self.global_promotion_gate is not None:
             self.global_promotion_gate.update(
                 self.global_state.high, self.global_state.low)
@@ -421,14 +432,19 @@ class DemandFrequencyTracker:
         local_keys = set(self.local_states.keys()) | set(arrivals_by_station.keys())
         for key in local_keys:
             state = self._get_local_state(key)
-            state.update(float(arrivals_by_station.get(key, 0.0)) * scale)
+            self._update_state(
+                state, float(arrivals_by_station.get(key, 0.0)) * scale, bin_step)
             if self.promotion_enabled:
                 self._get_local_promotion_gate(key).update(state.high, state.low)
 
         od_keys = set(self.od_states.keys()) | set(arrivals_by_od.keys())
         for key in od_keys:
-            self._get_od_state(key).update(float(arrivals_by_od.get(key, 0.0)) * scale)
+            self._update_state(
+                self._get_od_state(key),
+                float(arrivals_by_od.get(key, 0.0)) * scale,
+                bin_step)
         self.total_updates += 1
+        self._od_summary_cache_updates = -1
 
     def _forecast_value(self, state):
         return max(0.0, state.low + state.low_slope * self.forecast_steps)
@@ -459,9 +475,13 @@ class DemandFrequencyTracker:
         raise ValueError(f"Unknown lower frequency mode: {mode}")
 
     def _od_summary_features(self):
+        if self._od_summary_cache_updates == self.total_updates:
+            return self._od_summary_cache
         states = [s for s in self.od_states.values() if s.n > 0]
         if not states:
-            return 0.0, 0.0, 0
+            self._od_summary_cache = (0.0, 0.0, 0)
+            self._od_summary_cache_updates = self.total_updates
+            return self._od_summary_cache
         lows = np.asarray([max(s.low, 0.0) for s in states], dtype=np.float64)
         total = float(lows.sum())
         if total <= 1e-9 or lows.size <= 1:
@@ -471,7 +491,10 @@ class DemandFrequencyTracker:
             entropy = float(-np.sum(p * np.log(p + 1e-12)) / np.log(lows.size))
         od_high_energy = math.sqrt(
             max(sum(max(s.high_energy, 0.0) for s in states), 0.0))
-        return entropy, od_high_energy / self.global_demand_norm, len(states)
+        self._od_summary_cache = (
+            entropy, od_high_energy / self.global_demand_norm, len(states))
+        self._od_summary_cache_updates = self.total_updates
+        return self._od_summary_cache
 
     def _upper_od_features(self):
         if not self.od_features_enabled:

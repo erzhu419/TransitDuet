@@ -73,10 +73,13 @@ class CausalHarmonicBandState:
         self.period_s = max(float(period_s), self.update_interval_s)
         self.fourier_k = max(0, int(fourier_k))
         self.forgetting_factor = float(np.clip(forgetting_factor, 0.90, 0.9999))
+        self._inv_forgetting_factor = 1.0 / self.forgetting_factor
         self.prior_var = max(float(prior_var), 1e-6)
         self.energy_alpha = float(np.clip(energy_alpha, 1e-6, 1.0))
         self.residual_alpha = float(np.clip(residual_alpha, 1e-6, 1.0))
         self.dim = 2 + 2 * self.fourier_k
+        self._cov_phi = np.empty(self.dim, dtype=np.float64)
+        self._outer_buf = np.empty((self.dim, self.dim), dtype=np.float64)
         if prior_theta is None:
             self.initial_theta = np.zeros(self.dim, dtype=np.float64)
         else:
@@ -112,22 +115,24 @@ class CausalHarmonicBandState:
             x = 20.0
         return max(0.0, float(math.expm1(x)))
 
-    def update(self, value):
+    def update(self, value, step=None):
         value = max(float(value), 0.0)
-        phi = self._features(self.n)
+        feature_step = self.n if step is None else int(step)
+        phi = self._features(feature_step)
         pred_log_before = float(phi @ self.theta)
         pred_rate_before = self._rate_from_log(pred_log_before)
 
         y = math.log1p(value)
-        cov_phi = self.cov @ phi
+        cov_phi = self._cov_phi
+        np.dot(self.cov, phi, out=cov_phi)
         denom = self.forgetting_factor + float(phi @ cov_phi)
-        gain = cov_phi / max(denom, 1e-9)
+        denom = max(denom, 1e-9)
         innovation = y - pred_log_before
-        self.theta = self.theta + gain * innovation
-        phi_cov = phi @ self.cov
-        self.cov = (
-            self.cov - np.outer(gain, phi_cov)
-        ) / self.forgetting_factor
+        self.theta += cov_phi * (innovation / denom)
+        np.multiply(cov_phi[:, None], cov_phi[None, :], out=self._outer_buf)
+        self._outer_buf *= 1.0 / denom
+        self.cov -= self._outer_buf
+        self.cov *= self._inv_forgetting_factor
 
         pred_log_after = float(phi @ self.theta)
         pred_rate_after = self._rate_from_log(pred_log_after)
@@ -151,7 +156,8 @@ class CausalHarmonicBandState:
                 (1.0 - self.energy_alpha) * self.high_energy
                 + self.energy_alpha * (self.high ** 2)
             )
-        self.uncertainty = float(math.sqrt(max(phi @ self.cov @ phi, 0.0)))
+        np.dot(self.cov, phi, out=cov_phi)
+        self.uncertainty = float(math.sqrt(max(float(phi @ cov_phi), 0.0)))
         self.n += 1
 
     @property
