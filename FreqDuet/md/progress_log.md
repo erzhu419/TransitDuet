@@ -82,6 +82,9 @@ post-discrete terminal hold60, 5 seeds:   wait=5.59±0.33, cv=0.434±0.014, comp
 terminal promotion state, 3 seeds:        wait=6.01±0.78, cv=0.422±0.007, comp=1.578±0.147
 terminal promotion replan, 3 seeds:       wait=5.80±0.66, cv=0.441±0.022, comp=1.535±0.091
 terminal promotion trigger, 5 seeds:      wait=5.82±0.42, cv=0.427±0.021, comp=1.417±0.139
+fixed 360s + rule lower, 5 seeds:         wait=8.86±0.92, cv=0.521±0.029, comp=2.133±0.118
+terminal upper disc5, 3 seeds:            wait=5.95±0.38, cv=0.477±0.009, comp=1.618±0.100
+terminal upper disc9, 3 seeds:            wait=5.63±0.74, cv=0.472±0.017, comp=1.566±0.129
 ```
 
 The lower controller now uses discrete holding bins
@@ -99,6 +102,13 @@ residuals and can trigger rolling timetable replans, but `[flag, strength, age]`
 are not appended to the upper/lower policy state. It improved the same-run
 5-seed terminal rerun (`comp=1.580±0.214` to `1.417±0.139`), but is kept as an
 experimental config until it beats the best hold30 terminal record.
+
+The simple fixed-rule check does not currently explain the gap: fixed 360s
+headway with the proportional lower rule was worse than FreqDuet under the same
+short elastic-fleet 5-seed protocol. SUMO-style action discretization remains
+useful for lower holding, but not for the current upper planner: the upper
+action is already a single low-frequency scalar with EMA smoothing, and forcing
+disc5/disc9 bins worsened the terminal pilot.
 
 Experimental modules not yet promoted:
 
