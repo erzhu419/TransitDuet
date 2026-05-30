@@ -60,6 +60,10 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from env.sim import env_bus
+from frequency.diagnostics import (
+    demand_attribution_mi,
+    shock_response_metrics,
+)
 from upper.resac_upper import RESACUpperTrainer
 from upper.measurement_proj import MeasurementProjection
 from upper.timetable_planner import TimetableCurvePlanner
@@ -225,6 +229,11 @@ class DiagnosticLog:
         # FreqDuet layer-frequency allocation diagnostics
         'upper_hf_power_ratio', 'lower_lf_drift_ratio',
         'demand_attr_score',
+        'demand_attr_mi_score',
+        'demand_attr_mi_upper_low', 'demand_attr_mi_upper_high',
+        'demand_attr_mi_lower_high', 'demand_attr_mi_lower_low',
+        'shock_response_time_mean_s', 'shock_response_time_std_s',
+        'shock_response_hit_rate', 'shock_events', 'shock_action_mean_s',
         # FreqDuet frequency-attributed passenger-wait reward diagnostics
         'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
         'freq_wait_upper_credit_mean', 'freq_wait_upper_credit_std',
@@ -467,6 +476,17 @@ class TransitDuetV2Runner:
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
+        diag_cfg = config.get('diagnostics', {})
+        self.freq_diag_mi_bins = int(diag_cfg.get('mi_bins', 8))
+        self.freq_diag_shock_threshold = float(
+            diag_cfg.get('shock_threshold', 0.10))
+        self.freq_diag_shock_action_threshold_s = float(
+            diag_cfg.get('shock_action_threshold_s', 10.0))
+        self.freq_diag_shock_response_window_s = float(
+            diag_cfg.get('shock_response_window_s', 900.0))
+        self.freq_diag_shock_same_station = bool(
+            diag_cfg.get('shock_same_station', False))
+        self._ep_shock_response_events = []
 
         # Frequency-attributed passenger wait reward. This uses actual boarded
         # passenger waiting time and assigns its low-frequency share to upper
@@ -1143,6 +1163,7 @@ class TransitDuetV2Runner:
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
+        self._ep_shock_response_events = []
         self._ep_lower_wait_penalties = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
@@ -1226,15 +1247,17 @@ class TransitDuetV2Runner:
                         drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
                         low_demand = 0.0
                         local_high = 0.0
+                        station_id = -1
                         if getattr(self.env, 'frequency_tracker', None) is not None:
                             freq_summary = self.env.frequency_tracker.summary()
                             low_demand = float(
                                 freq_summary.get('freq_low_demand', 0.0))
                             if cur_bus is not None:
+                                station_id = int(getattr(
+                                    cur_bus, 'last_board_station_id',
+                                    getattr(cur_bus.last_station, 'station_id', 0)))
                                 local_high = self.env.frequency_tracker.local_high_value(
-                                    getattr(cur_bus, 'last_board_station_id',
-                                            getattr(cur_bus.last_station, 'station_id', 0)),
-                                    cur_dir)
+                                    station_id, cur_dir)
                         wait_penalty = 0.0
                         if cur_bus is not None:
                             wait_penalty = self._record_frequency_wait_credit(
@@ -1254,6 +1277,13 @@ class TransitDuetV2Runner:
                                 local_high,
                                 act_val,
                             ))
+                            self._ep_shock_response_events.append({
+                                'time_s': float(getattr(self.env, 'current_time', 0.0)),
+                                'station_id': station_id,
+                                'direction': bool(cur_dir),
+                                'high': local_high,
+                                'action_s': act_val,
+                            })
 
                         if training:
                             # Look up the bus's current trip_id (launch_turn) so
@@ -1502,6 +1532,16 @@ class TransitDuetV2Runner:
             self._ep_lower_actions_by_dir, self.lower_drift_window)
         demand_attr_score = _demand_attribution_score(
             self._ep_upper_demand_action, self._ep_lower_demand_action)
+        demand_attr_mi = demand_attribution_mi(
+            self._ep_upper_demand_action,
+            self._ep_lower_demand_action,
+            bins=self.freq_diag_mi_bins)
+        shock_metrics = shock_response_metrics(
+            self._ep_shock_response_events,
+            shock_threshold=self.freq_diag_shock_threshold,
+            action_threshold_s=self.freq_diag_shock_action_threshold_s,
+            response_window_s=self.freq_diag_shock_response_window_s,
+            same_station=self.freq_diag_shock_same_station)
         plan_total = self._ep_upper_plan_decisions + self._ep_upper_plan_reuses
         plan_reuse_ratio = (
             self._ep_upper_plan_reuses / max(plan_total, 1)
@@ -1612,6 +1652,23 @@ class TransitDuetV2Runner:
             'upper_hf_power_ratio': upper_hf_power_ratio,
             'lower_lf_drift_ratio': lower_lf_drift_ratio,
             'demand_attr_score': demand_attr_score,
+            'demand_attr_mi_score': demand_attr_mi['demand_attr_mi_score'],
+            'demand_attr_mi_upper_low': demand_attr_mi[
+                'demand_attr_mi_upper_low'],
+            'demand_attr_mi_upper_high': demand_attr_mi[
+                'demand_attr_mi_upper_high'],
+            'demand_attr_mi_lower_high': demand_attr_mi[
+                'demand_attr_mi_lower_high'],
+            'demand_attr_mi_lower_low': demand_attr_mi[
+                'demand_attr_mi_lower_low'],
+            'shock_response_time_mean_s': shock_metrics[
+                'shock_response_time_mean_s'],
+            'shock_response_time_std_s': shock_metrics[
+                'shock_response_time_std_s'],
+            'shock_response_hit_rate': shock_metrics[
+                'shock_response_hit_rate'],
+            'shock_events': shock_metrics['shock_events'],
+            'shock_action_mean_s': shock_metrics['shock_action_mean_s'],
             'freq_wait_lower_penalty_mean': lower_wait_stat['mean'],
             'freq_wait_lower_penalty_max': lower_wait_stat['max'],
             'freq_wait_upper_credit_mean': upper_wait_credit_stat['mean'],
@@ -1637,7 +1694,10 @@ class TransitDuetV2Runner:
                    'theta_wait', 'theta_fleet',
                    'surprise', 'belief_window',
                    'upper_hf_power_ratio', 'lower_lf_drift_ratio',
-                   'demand_attr_score', 'upper_plan_penalty_mean',
+                   'demand_attr_score', 'demand_attr_mi_score',
+                   'shock_response_time_mean_s',
+                   'shock_response_hit_rate',
+                   'upper_plan_penalty_mean',
                    'freq_wait_lower_penalty_mean',
                    'freq_wait_upper_credit_mean',
                    'freq_wait_low_share_mean',
@@ -1722,6 +1782,9 @@ class TransitDuetV2Runner:
               f"U_HF={row.get('upper_hf_power_ratio',0):.3f}  "
               f"L_LF={row.get('lower_lf_drift_ratio',0):.3f}  "
               f"attr={row.get('demand_attr_score',0):.3f}  "
+              f"MI={row.get('demand_attr_mi_score',0):+.3f}  "
+              f"shock={row.get('shock_response_time_mean_s',0):.0f}s/"
+              f"{row.get('shock_response_hit_rate',0):.2f}  "
               f"prom={row.get('freq_promotion_flag',0):.0f}/"
               f"{row.get('freq_promotion_strength',0):.2f}  "
               f"absorb={row.get('freq_promotion_absorbed',0):+.3f}")

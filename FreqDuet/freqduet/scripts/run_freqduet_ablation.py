@@ -206,6 +206,16 @@ def summarize_seed(csv_path, last_k):
         "freq_promotion_score",
         "freq_promotion_absorptions",
         "freq_promotion_absorbed",
+        "demand_attr_mi_score",
+        "demand_attr_mi_upper_low",
+        "demand_attr_mi_upper_high",
+        "demand_attr_mi_lower_high",
+        "demand_attr_mi_lower_low",
+        "shock_response_time_mean_s",
+        "shock_response_time_std_s",
+        "shock_response_hit_rate",
+        "shock_events",
+        "shock_action_mean_s",
         "lower_drift_penalty_mean",
         "upper_hf_penalty_mean",
         "freq_wait_lower_penalty_mean",
@@ -248,6 +258,11 @@ def aggregate(configs, seeds, last_k, logs_dir, out_dir):
         "freq_promotion_strength",
         "freq_promotion_absorptions",
         "freq_promotion_absorbed",
+        "demand_attr_mi_score",
+        "shock_response_time_mean_s",
+        "shock_response_hit_rate",
+        "shock_events",
+        "shock_action_mean_s",
         "lower_drift_penalty_mean",
         "upper_hf_penalty_mean",
         "freq_wait_lower_penalty_mean",
@@ -276,10 +291,11 @@ def aggregate(configs, seeds, last_k, logs_dir, out_dir):
 
 
 def print_summary(summary):
-    print("=" * 124)
+    print("=" * 148)
     print(f"{'config':30s} {'wait':>12s} {'cv':>10s} {'comp':>12s} "
-          f"{'U_HF':>10s} {'L_LF':>10s} {'attr':>10s} {'prom':>10s}")
-    print("-" * 124)
+          f"{'U_HF':>10s} {'L_LF':>10s} {'attr':>10s} {'MI':>10s} "
+          f"{'shock':>10s} {'prom':>10s}")
+    print("-" * 148)
     for r in summary:
         print(
             f"{r['config']:30s} "
@@ -289,10 +305,14 @@ def print_summary(summary):
             f"{r['upper_hf_power_ratio_mean']:5.3f}±{r['upper_hf_power_ratio_std']:<5.3f} "
             f"{r['lower_lf_drift_ratio_mean']:5.3f}±{r['lower_lf_drift_ratio_std']:<5.3f} "
             f"{r['demand_attr_score_mean']:5.3f}±{r['demand_attr_score_std']:<5.3f} "
+            f"{r.get('demand_attr_mi_score_mean', 0.0):+5.3f}±"
+            f"{r.get('demand_attr_mi_score_std', 0.0):<5.3f} "
+            f"{r.get('shock_response_time_mean_s_mean', 0.0):5.0f}±"
+            f"{r.get('shock_response_time_mean_s_std', 0.0):<5.0f} "
             f"{r.get('freq_promotion_strength_mean', 0.0):5.3f}±"
             f"{r.get('freq_promotion_strength_std', 0.0):<5.3f}"
         )
-    print("=" * 124)
+    print("=" * 148)
 
 
 def main():

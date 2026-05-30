@@ -288,3 +288,26 @@ Do not promote lower context under the current short training protocol. The
 dev-manual state fields are now implemented, but adding them directly makes the
 lower SAC higher-variance and increases holding. Keep them as ablations for
 longer training or future normalization/network-capacity changes.
+
+## 2026-05-30 step-7 paper-grade diagnostics
+
+Added reusable frequency diagnostics in `freqduet/frequency/diagnostics.py` and
+wired them into `runner_v3.py` plus the ablation aggregator. The runner now logs
+the mutual-information focus score
+`I(a_U;lambda_L)-I(a_U;lambda_H)+I(a_L;lambda_H)-I(a_L;lambda_L)` alongside the
+existing correlation proxy, and logs operational `ShockResponseTime`,
+shock-response hit rate, shock count, and action-at-shock mean.
+
+Smoke protocol, current conservative main, seed 31415, 2 episodes,
+`upper_warmup_eps=1`:
+
+```text
+BiLevel ep1: wait=6.57, cv=0.339, comp=1.896,
+             U_HF=0.050, L_LF=0.986,
+             attr=-0.115, MI=+0.037,
+             shock_response=3s, hit_rate=1.00
+```
+
+This step is diagnostic-only and does not change policy behavior. It completes
+the dev-manual requirement that the paper can show both frequency focus and
+fast lower-layer response instead of relying only on wait/CV/composite.
