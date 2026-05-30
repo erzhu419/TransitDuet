@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_middle_upper_spline2dir_waitattr_hiro
+
+frequency:
+  # Step-5 lower-risk candidate: middle-band regime buffer only informs the
+  # upper timetable planner; lower remains focused on high-frequency residuals.
+  middle_period_s: 1800.0
+  upper_mode: low_mid
+  lower_mode: high

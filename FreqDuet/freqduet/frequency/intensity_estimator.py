@@ -67,6 +67,7 @@ class CausalHarmonicBandState:
         prior_var=100.0,
         energy_alpha=0.01,
         residual_alpha=0.2,
+        middle_alpha=0.05,
         prior_theta=None,
     ):
         self.update_interval_s = max(float(update_interval_s), 1e-6)
@@ -77,6 +78,7 @@ class CausalHarmonicBandState:
         self.prior_var = max(float(prior_var), 1e-6)
         self.energy_alpha = float(np.clip(energy_alpha, 1e-6, 1.0))
         self.residual_alpha = float(np.clip(residual_alpha, 1e-6, 1.0))
+        self.middle_alpha = float(np.clip(middle_alpha, 1e-6, 1.0))
         self.dim = 2 + 2 * self.fourier_k
         self._cov_phi = np.empty(self.dim, dtype=np.float64)
         self._outer_buf = np.empty((self.dim, self.dim), dtype=np.float64)
@@ -99,6 +101,9 @@ class CausalHarmonicBandState:
         self.high = 0.0
         self.prev_high = 0.0
         self.high_energy = 0.0
+        self.middle = 0.0
+        self.prev_middle = 0.0
+        self.middle_energy = 0.0
         self._raw_high = 0.0
         self.uncertainty = 1.0
         self.n = 0
@@ -139,9 +144,17 @@ class CausalHarmonicBandState:
 
         self.prev_low = self.low
         self.prev_high = self.high
+        self.prev_middle = self.middle
         self.low = pred_rate_after
         self.fast = value
         self._raw_high = value - pred_rate_before
+        if self.n == 0:
+            self.middle = self._raw_high
+        else:
+            self.middle = (
+                (1.0 - self.middle_alpha) * self.middle
+                + self.middle_alpha * self._raw_high
+            )
         if self.n == 0:
             self.high = self._raw_high
         else:
@@ -151,10 +164,15 @@ class CausalHarmonicBandState:
             )
         if self.n == 0:
             self.high_energy = 0.0
+            self.middle_energy = 0.0
         else:
             self.high_energy = (
                 (1.0 - self.energy_alpha) * self.high_energy
                 + self.energy_alpha * (self.high ** 2)
+            )
+            self.middle_energy = (
+                (1.0 - self.middle_alpha) * self.middle_energy
+                + self.middle_alpha * (self.middle ** 2)
             )
         np.dot(self.cov, phi, out=cov_phi)
         self.uncertainty = float(math.sqrt(max(float(phi @ cov_phi), 0.0)))
@@ -192,11 +210,17 @@ class CausalHarmonicBandState:
         self.low = low_after
         self.prev_high = self.high
         self.high = residual - absorbed
+        self.prev_middle = self.middle
+        self.middle -= absorbed
         self._raw_high -= absorbed
         self.high_energy = max(
             0.0,
             (1.0 - self.energy_alpha) * self.high_energy
             + self.energy_alpha * (self.high ** 2))
+        self.middle_energy = max(
+            0.0,
+            (1.0 - self.middle_alpha) * self.middle_energy
+            + self.middle_alpha * (self.middle ** 2))
         return float(absorbed)
 
     @property
@@ -206,3 +230,7 @@ class CausalHarmonicBandState:
     @property
     def high_slope(self):
         return self.high - self.prev_high if self.n > 1 else 0.0
+
+    @property
+    def middle_slope(self):
+        return self.middle - self.prev_middle if self.n > 1 else 0.0

@@ -524,6 +524,8 @@ class env_bus(object):
                 'freq_low_slope': 0.0,
                 'freq_low_forecast': 0.0,
                 'freq_high_energy': 0.0,
+                'freq_middle': 0.0,
+                'freq_middle_energy': 0.0,
                 'freq_od_entropy': 0.0,
                 'freq_od_high_energy': 0.0,
                 'freq_od_active': 0,

@@ -213,7 +213,8 @@ class DiagnosticLog:
         'N_fleet', 'fleet_overshoot',
         # FreqDuet causal demand-frequency diagnostics
         'freq_low_demand', 'freq_low_slope', 'freq_low_forecast',
-        'freq_high_energy', 'freq_od_entropy', 'freq_od_high_energy',
+        'freq_high_energy', 'freq_middle', 'freq_middle_energy',
+        'freq_od_entropy', 'freq_od_high_energy',
         'freq_od_active', 'freq_updates',
         'freq_promotion_flag', 'freq_promotion_strength',
         'freq_promotion_age', 'freq_promotion_score',
@@ -1590,6 +1591,8 @@ class TransitDuetV2Runner:
             'freq_low_slope': freq_summary['freq_low_slope'],
             'freq_low_forecast': freq_summary.get('freq_low_forecast', 0.0),
             'freq_high_energy': freq_summary['freq_high_energy'],
+            'freq_middle': freq_summary.get('freq_middle', 0.0),
+            'freq_middle_energy': freq_summary.get('freq_middle_energy', 0.0),
             'freq_od_entropy': freq_summary.get('freq_od_entropy', 0.0),
             'freq_od_high_energy': freq_summary.get('freq_od_high_energy', 0.0),
             'freq_od_active': freq_summary.get('freq_od_active', 0),
@@ -1638,6 +1641,7 @@ class TransitDuetV2Runner:
                    'freq_wait_lower_penalty_mean',
                    'freq_wait_upper_credit_mean',
                    'freq_wait_low_share_mean',
+                   'freq_middle', 'freq_middle_energy',
                    'upper_plan_target_mean', 'upper_plan_decisions',
                    'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
                    'freq_promotion_flag', 'freq_promotion_strength',
@@ -1712,6 +1716,8 @@ class TransitDuetV2Runner:
         print(f"  FREQ     low={row.get('freq_low_demand',0):.3f}  "
               f"forecast={row.get('freq_low_forecast',0):.3f}  "
               f"hf_energy={row.get('freq_high_energy',0):.3f}  "
+              f"mid={row.get('freq_middle',0):+.3f}/"
+              f"{row.get('freq_middle_energy',0):.3f}  "
               f"odH={row.get('freq_od_entropy',0):.3f}  "
               f"U_HF={row.get('upper_hf_power_ratio',0):.3f}  "
               f"L_LF={row.get('lower_lf_drift_ratio',0):.3f}  "

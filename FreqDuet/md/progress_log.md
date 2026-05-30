@@ -243,3 +243,26 @@ replanning: it raises upper plan decisions moderately (about 95 vs 88 per
 BiLevel episode tail) and lowers composite variance. Do not promote adapt-low
 yet; it proves the high-to-low absorption mechanism is wired, but the current
 gain (`adapt_gain=0.10`) over-adjusts under the short protocol.
+
+## 2026-05-30 step-5 middle-band regime buffer
+
+Implemented explicit middle-band residual tracking in the harmonic demand state.
+The estimator now keeps a 5-30 minute residual EMA (`middle`,
+`middle_energy`) alongside low/high components, and `low_mid` / `high_mid`
+feature modes expose it to the upper/lower policies. Diagnostics now log
+`freq_middle` and `freq_middle_energy`.
+
+Corrected same-run protocol, 5 seeds, 20 episodes, `upper_warmup_eps=10`, last
+10 BiLevel episodes:
+
+```text
+conservative main:       wait=5.59±0.36, cv=0.452±0.024, comp=1.342±0.080
+middle shared U+L:       wait=6.53±1.91, cv=0.451±0.014, comp=1.608±0.344
+middle upper-only:       wait=6.06±0.94, cv=0.468±0.038, comp=1.717±0.220
+```
+
+Do not promote middle-band state under the current short training protocol.
+The mechanism is now implemented and visible for diagnostics/longer ablations,
+but adding these state dimensions increases wait variance and degrades
+composite. Keep `F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro`
+as the current main candidate.

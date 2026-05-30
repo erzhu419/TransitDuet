@@ -197,6 +197,7 @@ class DemandFrequencyTracker:
         low_period_s=3600.0,
         fast_period_s=300.0,
         energy_period_s=600.0,
+        middle_period_s=1800.0,
         global_demand_norm=50.0,
         local_demand_norm=10.0,
         slope_norm=5.0,
@@ -238,6 +239,7 @@ class DemandFrequencyTracker:
         self.bin_steps = max(1, int(round(self.bin_sec / self.update_interval_s)))
         self.bin_interval_s = self.bin_steps * self.update_interval_s
         energy_alpha = _alpha_from_period(self.bin_interval_s, energy_period_s)
+        middle_alpha = _alpha_from_period(self.bin_interval_s, middle_period_s)
         residual_alpha = _alpha_from_period(
             self.bin_interval_s, harmonic_residual_period_s or fast_period_s)
         self._pending_station = defaultdict(float)
@@ -283,6 +285,7 @@ class DemandFrequencyTracker:
                 prior_var=harmonic_prior_var,
                 energy_alpha=energy_alpha,
                 residual_alpha=residual_alpha,
+                middle_alpha=middle_alpha,
                 prior_theta=prior_theta)
         elif self.method in {"raw_history", "history"}:
             self.method = "raw_history"
@@ -332,6 +335,7 @@ class DemandFrequencyTracker:
             low_period_s=cfg.get("low_period_s", 3600.0),
             fast_period_s=cfg.get("fast_period_s", 300.0),
             energy_period_s=cfg.get("energy_period_s", 600.0),
+            middle_period_s=cfg.get("middle_period_s", 1800.0),
             global_demand_norm=cfg.get("global_demand_norm", 50.0),
             local_demand_norm=cfg.get("local_demand_norm", 10.0),
             slope_norm=cfg.get("slope_norm", 5.0),
@@ -506,6 +510,8 @@ class DemandFrequencyTracker:
         od_dim = 2 if self.od_features_enabled else 0
         if mode in {"low", "lf", "split"}:
             return 4 + od_dim + self.promotion_feature_dim
+        if mode in {"low_mid", "low_middle", "regime"}:
+            return 7 + od_dim + self.promotion_feature_dim
         if mode in {"high", "hf"}:
             return 3 + od_dim + self.promotion_feature_dim
         if mode in {"all", "allfreq", "all_freq"}:
@@ -518,6 +524,8 @@ class DemandFrequencyTracker:
         mode = str(mode or "high").lower()
         if mode in {"high", "hf", "split"}:
             return 4 + self.promotion_feature_dim
+        if mode in {"high_mid", "high_middle", "regime"}:
+            return 7 + self.promotion_feature_dim
         if mode in {"low", "lf"}:
             return 4 + self.promotion_feature_dim
         if mode in {"all", "allfreq", "all_freq"}:
@@ -568,6 +576,14 @@ class DemandFrequencyTracker:
             high_energy / self.global_demand_norm,
         ]
 
+    def _upper_middle_features(self, state):
+        middle_energy = math.sqrt(max(getattr(state, "middle_energy", 0.0), 0.0))
+        return [
+            getattr(state, "middle", 0.0) / self.global_demand_norm,
+            getattr(state, "middle_slope", 0.0) / self.slope_norm,
+            middle_energy / self.global_demand_norm,
+        ]
+
     def upper_features(self, mode=None):
         """Return upper demand features normalized for policy input.
 
@@ -588,6 +604,8 @@ class DemandFrequencyTracker:
         mode = str(mode or self.upper_mode).lower()
         if mode in {"low", "lf", "split"}:
             feats = self._upper_low_features(s)
+        elif mode in {"low_mid", "low_middle", "regime"}:
+            feats = self._upper_low_features(s) + self._upper_middle_features(s)
         elif mode in {"high", "hf"}:
             feats = self._upper_high_features(s)
         elif mode in {"all", "allfreq", "all_freq"}:
@@ -632,9 +650,20 @@ class DemandFrequencyTracker:
             self._forecast_value(s) / self.local_demand_norm,
             self.global_state.low / self.global_demand_norm,
         ]
+        local_middle_energy = math.sqrt(max(getattr(s, "middle_energy", 0.0), 0.0))
+        global_middle_energy = math.sqrt(
+            max(getattr(self.global_state, "middle_energy", 0.0), 0.0))
+        middle_feats = [
+            getattr(s, "middle", 0.0) / self.local_demand_norm,
+            getattr(s, "middle_slope", 0.0) / self.local_demand_norm,
+            local_middle_energy / self.local_demand_norm,
+        ]
         mode = str(mode or self.lower_mode).lower()
         if mode in {"high", "hf", "split"}:
             feats = high_feats
+        elif mode in {"high_mid", "high_middle", "regime"}:
+            feats = high_feats[:3] + middle_feats + [
+                global_middle_energy / self.global_demand_norm]
         elif mode in {"low", "lf"}:
             feats = low_feats
         elif mode in {"all", "allfreq", "all_freq"}:
@@ -661,6 +690,7 @@ class DemandFrequencyTracker:
     def summary(self):
         s = self.global_state
         high_energy = math.sqrt(max(s.high_energy, 0.0))
+        middle_energy = math.sqrt(max(getattr(s, "middle_energy", 0.0), 0.0))
         od_entropy, od_high_energy, od_active = self._od_summary_features()
         promotion = (
             self.global_promotion_gate.summary()
@@ -673,6 +703,9 @@ class DemandFrequencyTracker:
             "freq_low_forecast": float(
                 self._forecast_value(s) / self.global_demand_norm),
             "freq_high_energy": float(high_energy / self.global_demand_norm),
+            "freq_middle": float(
+                getattr(s, "middle", 0.0) / self.global_demand_norm),
+            "freq_middle_energy": float(middle_energy / self.global_demand_norm),
             "freq_od_entropy": float(od_entropy),
             "freq_od_high_energy": float(od_high_energy),
             "freq_od_active": int(od_active),
