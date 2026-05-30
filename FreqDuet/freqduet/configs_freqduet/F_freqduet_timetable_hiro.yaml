@@ -1,0 +1,27 @@
+_extends: F_freqduet_harmonic_hiro.yaml
+_name: F_freqduet_timetable_hiro
+
+upper:
+  # Stable MVP timetable generator: one low-frequency headway-plan adjustment
+  # is replanned every 15 minutes and applied over a 45-minute horizon.
+  action_dim: 1
+  timetable_planner:
+    enable: true
+    horizon_s: 2700.0
+    replan_interval_s: 900.0
+    action_ema_alpha: 0.35
+    basis_per_direction: 1
+    shared_directions: true
+    delta_min_s: -60.0
+    delta_max_s: 20.0
+    min_headway_s: 180.0
+    max_headway_s: 720.0
+    smooth_penalty: 0.02
+
+leakage:
+  enable: true
+  lower_drift_window: 24
+  lower_drift_budget_s: 90.0
+  lower_drift_penalty: 0.25
+  upper_hf_penalty: 0.04
+  upper_lpf_window: 6
