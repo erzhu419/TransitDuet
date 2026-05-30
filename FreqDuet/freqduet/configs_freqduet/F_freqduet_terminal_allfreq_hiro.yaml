@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_hiro.yaml
+_name: F_freqduet_terminal_allfreq_hiro
+
+frequency:
+  # Reviewer-facing baseline: give both layers both low and high frequency
+  # summaries, instead of enforcing the intended upper-LF/lower-HF split.
+  upper_mode: all
+  lower_mode: all

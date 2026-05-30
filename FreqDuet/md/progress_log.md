@@ -7,8 +7,8 @@ Validated main-path modules:
 - Harmonic prior demand decomposer remains the effective causal intensity path:
   `harmonic_prior` had the best synthetic low-frequency RMSE in
   `scripts/eval_frequency_modules.py --seed 7`.
-- Target-headway timetable planner remains the Phase 3 main path. The default
-  path does not change terminal launch time.
+- Target-headway timetable planner remains the Phase 3 stable path. Phase 4
+  terminal hold30 dispatch is the current promoted executable-timetable path.
 - Stronger lower drift leakage is effective and has been promoted into
   `F_freqduet_timetable_hiro`.
 
@@ -85,6 +85,18 @@ terminal promotion trigger, 5 seeds:      wait=5.82±0.42, cv=0.427±0.021, comp
 fixed 360s + rule lower, 5 seeds:         wait=8.86±0.92, cv=0.521±0.029, comp=2.133±0.118
 terminal upper disc5, 3 seeds:            wait=5.95±0.38, cv=0.477±0.009, comp=1.618±0.100
 terminal upper disc9, 3 seeds:            wait=5.63±0.74, cv=0.472±0.017, comp=1.566±0.129
+terminal baseline main, 3 seeds:          wait=5.40±0.59, cv=0.453±0.009, comp=1.549±0.099
+terminal baseline promotion, 3 seeds:     wait=5.38±0.24, cv=0.467±0.018, comp=1.612±0.066
+terminal baseline nofreq, 3 seeds:        wait=5.93±0.30, cv=0.445±0.008, comp=1.527±0.174
+terminal baseline rawhistory, 3 seeds:    wait=5.85±0.40, cv=0.464±0.020, comp=1.595±0.229
+terminal baseline allfreq, 3 seeds:       wait=7.62±2.96, cv=0.457±0.064, comp=1.795±0.360
+terminal baseline swapped, 3 seeds:       wait=8.13±3.38, cv=0.458±0.022, comp=1.942±0.483
+terminal baseline lf-upper, 3 seeds:      wait=6.94±2.05, cv=0.449±0.028, comp=1.767±0.401
+terminal baseline hf-lower, 3 seeds:      wait=5.81±0.47, cv=0.439±0.009, comp=1.675±0.160
+terminal baseline no-leakage, 3 seeds:    wait=6.20±1.83, cv=0.504±0.021, comp=1.504±0.259
+terminal close main, 5 seeds:             wait=5.38±0.46, cv=0.461±0.013, comp=1.501±0.099
+terminal close nofreq, 5 seeds:           wait=6.06±0.32, cv=0.467±0.036, comp=1.663±0.214
+terminal close no-leakage, 5 seeds:       wait=6.03±1.44, cv=0.477±0.039, comp=1.535±0.206
 ```
 
 The lower controller now uses discrete holding bins
@@ -109,6 +121,15 @@ short elastic-fleet 5-seed protocol. SUMO-style action discretization remains
 useful for lower holding, but not for the current upper planner: the upper
 action is already a single low-frequency scalar with EMA smoothing, and forcing
 disc5/disc9 bins worsened the terminal pilot.
+
+The terminal baseline family now uses the same executable terminal hold30 path
+and lower stabilization for all reviewer-facing comparisons. In the 3-seed
+pilot, AllFreq/Swapped/single-side frequency variants were clearly worse or
+unstable. Nofreq and No-Leakage looked close enough to require 5-seed retesting;
+the 5-seed close check restored the main path advantage. No-Leakage still
+occasionally reduces overshoot, but it does so by allowing much larger lower
+holding drift and higher wait variance, which is exactly the leakage mechanism
+the method is meant to prevent.
 
 Experimental modules not yet promoted:
 

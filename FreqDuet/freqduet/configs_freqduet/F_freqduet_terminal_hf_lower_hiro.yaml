@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_hiro.yaml
+_name: F_freqduet_terminal_hf_lower_hiro
+
+upper:
+  state_dim: 11
+
+frequency:
+  # Isolate the contribution of the high-frequency lower state.
+  upper_features: false
+  lower_features: true
+  lower_mode: high
