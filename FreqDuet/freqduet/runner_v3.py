@@ -208,6 +208,9 @@ class DiagnosticLog:
         'hold_fb_mean', 'hold_fb_std', 'hold_fb_n_trips',
         'hold_fb_dir0_mean', 'hold_fb_dir1_mean',
         'hold_penalty_mean',
+        'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
+        'freq_holdfb_other_hold', 'freq_holdfb_other_wait',
+        'freq_holdfb_decisions',
         'theta_wait', 'theta_fleet', 'theta_cv',
         # CS-BAPR belief
         'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
@@ -370,9 +373,26 @@ class TransitDuetV2Runner:
         self.fleet_max = upper_cfg.get('fleet_max', 16)
         self.N_fleet_default = upper_cfg['N_fleet']
         self._current_N_fleet = self.N_fleet_default  # set per-episode in elastic mode
+        freq_cfg = config.get('frequency', {})
         self.upper_state_dim = upper_cfg.get('state_dim', 10)
-        if config.get('frequency', {}).get('enable', False):
+        if freq_cfg.get('enable', False):
             self.upper_state_dim = self.env.upper_state_dim
+        freq_holdfb_cfg = freq_cfg.get('hold_feedback', {}) or {}
+        self.freq_holdfb_enable = bool(freq_holdfb_cfg.get('enable', False))
+        self.freq_holdfb_window = max(
+            1, int(freq_holdfb_cfg.get('window', 512)))
+        self.freq_holdfb_wait_norm_s = max(
+            float(freq_holdfb_cfg.get('wait_norm_s', 600.0)), 1e-6)
+        self.freq_holdfb_wait_clip = max(
+            float(freq_holdfb_cfg.get('wait_clip', 2.0)), 0.0)
+        self.freq_holdfb_board_norm = max(
+            float(freq_holdfb_cfg.get('board_norm', 8.0)), 1e-6)
+        self.freq_holdfb_high_threshold = max(
+            float(freq_holdfb_cfg.get('high_threshold', 0.0)), 0.0)
+        # Features appended to upper state:
+        # [same-dir HF-hold, same-dir HF-wait, other-dir HF-hold, other-dir HF-wait].
+        self.freq_holdfb_dim = 4 if self.freq_holdfb_enable else 0
+        self.upper_state_dim += self.freq_holdfb_dim
         self.upper_action_dim = int(upper_cfg.get('action_dim', 1))
         if self.timetable_planner is not None:
             self.upper_action_dim = self.timetable_planner.action_dim
@@ -479,6 +499,11 @@ class TransitDuetV2Runner:
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
+        self._freq_holdfb_events = {
+            True: deque(maxlen=self.freq_holdfb_window),
+            False: deque(maxlen=self.freq_holdfb_window),
+        }
+        self._ep_freq_holdfb_features = []
         diag_cfg = config.get('diagnostics', {})
         self.freq_diag_mi_bins = int(diag_cfg.get('mi_bins', 8))
         self.freq_diag_shock_threshold = float(
@@ -595,6 +620,7 @@ class TransitDuetV2Runner:
             log_base = os.path.join(str(SCRIPT_DIR), log_base)
         self.log_dir = os.path.join(log_base, f'{exp_name}_seed{seed}')
         os.makedirs(self.log_dir, exist_ok=True)
+        self.env.configure_frequency_logging(self.log_dir)
         self.history = defaultdict(list)
         self.resume_from_ep = 0  # set by maybe_resume() before train()
         self.diag = None  # created after resume decision in train()
@@ -744,6 +770,54 @@ class TransitDuetV2Runner:
     @staticmethod
     def _lower_action_scalar(action):
         return float(np.asarray(action, dtype=np.float32).reshape(-1)[0])
+
+    def _record_frequency_hold_feedback(
+            self, direction, local_high, action_s, wait_sum_s, boarded_count):
+        """Track lower interventions under positive high-frequency demand."""
+        if not self.freq_holdfb_enable:
+            return
+        pos_high = max(float(local_high), 0.0)
+        if pos_high < self.freq_holdfb_high_threshold:
+            pos_high = 0.0
+        wait_norm = 0.0
+        if boarded_count > 0 and wait_sum_s > 0.0:
+            wait_norm = (
+                float(wait_sum_s)
+                / max(int(boarded_count), 1)
+                / self.freq_holdfb_wait_norm_s)
+            if self.freq_holdfb_wait_clip > 0.0:
+                wait_norm = min(wait_norm, self.freq_holdfb_wait_clip)
+        board_norm = int(boarded_count) / self.freq_holdfb_board_norm
+        board_norm = min(board_norm, 2.0)
+        self._freq_holdfb_events[bool(direction)].append((
+            pos_high,
+            max(float(action_s), 0.0) / 60.0,
+            wait_norm,
+            board_norm,
+        ))
+
+    def _frequency_hold_feedback_stats(self, direction):
+        events = list(self._freq_holdfb_events[bool(direction)])
+        if not events:
+            return (0.0, 0.0)
+        arr = np.asarray(events, dtype=np.float64)
+        high = arr[:, 0]
+        weight = high.sum()
+        if weight <= 1e-9:
+            return (0.0, 0.0)
+        hf_hold = float(np.dot(high, arr[:, 1]) / weight)
+        hf_wait = float(np.dot(high, arr[:, 2]) / weight)
+        return (hf_hold, hf_wait)
+
+    def _frequency_hold_feedback_features(self, direction):
+        if not self.freq_holdfb_enable:
+            return np.zeros(0, dtype=np.float32)
+        same = self._frequency_hold_feedback_stats(direction)
+        other = self._frequency_hold_feedback_stats(not bool(direction))
+        feats = np.asarray([same[0], same[1], other[0], other[1]],
+                           dtype=np.float32)
+        self._ep_freq_holdfb_features.append(feats.copy())
+        return feats
 
     def _augment_lower_state(self, obs, last_action=0.0):
         obs = np.asarray(obs, dtype=np.float32).reshape(-1)
@@ -952,9 +1026,16 @@ class TransitDuetV2Runner:
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
         Reward is backfilled at episode end via hindsight credit assignment."""
         s_upper = self.env._build_upper_state_v2(trip)
+        if self.freq_holdfb_enable:
+            s_upper = np.concatenate([
+                np.asarray(s_upper, dtype=np.float32),
+                self._frequency_hold_feedback_features(bool(trip.direction)),
+            ]).astype(np.float32)
         if self.ablate_holding_feedback:
             # Zero out holding feedback state dims [5,6,7]
             s_upper[5:8] = 0.0
+            if self.freq_holdfb_enable:
+                s_upper[-self.freq_holdfb_dim:] = 0.0
 
         # ─── TPC-Lower behaviour-policy sampling ───
         # During Phase 1 (after warmup, target_upper_trainer initialised), sample
@@ -1176,6 +1257,7 @@ class TransitDuetV2Runner:
 
     def run_episode(self, ep, training=True, N_fleet_override=None):
         t0 = time.time()
+        self.env._freqduet_episode = int(ep)
         self.env.reset()
         self.holding_feedback.clear()
         self._current_ep = ep
@@ -1190,6 +1272,11 @@ class TransitDuetV2Runner:
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
         self._ep_shock_response_events = []
+        self._freq_holdfb_events = {
+            True: deque(maxlen=self.freq_holdfb_window),
+            False: deque(maxlen=self.freq_holdfb_window),
+        }
+        self._ep_freq_holdfb_features = []
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
         self._ep_lower_wait_net = []
@@ -1287,13 +1374,22 @@ class TransitDuetV2Runner:
                                 local_high = self.env.frequency_tracker.local_high_value(
                                     station_id, cur_dir)
                         wait_penalty = 0.0
+                        board_wait_sum_s = 0.0
+                        board_count = 0
                         if cur_bus is not None:
+                            board_wait_sum_s = float(getattr(
+                                cur_bus, 'last_board_wait_sum_s', 0.0))
+                            board_count = int(getattr(
+                                cur_bus, 'last_board_count', 0))
                             wait_penalty = self._record_frequency_wait_credit(
                                 cur_tid,
-                                float(getattr(cur_bus, 'last_board_wait_sum_s', 0.0)),
-                                int(getattr(cur_bus, 'last_board_count', 0)),
+                                board_wait_sum_s,
+                                board_count,
                                 low_demand,
                                 local_high)
+                        self._record_frequency_hold_feedback(
+                            cur_dir, local_high, act_val,
+                            board_wait_sum_s, board_count)
                         shaped_reward = float(reward) - drift_penalty - wait_penalty
                         self._ep_lower_actions.append(act_val)
                         self._ep_lower_actions_by_dir[cur_dir].append(act_val)
@@ -1541,6 +1637,11 @@ class TransitDuetV2Runner:
         hold_summary = self.holding_feedback.episode_summary
         hold_dir0 = self.holding_feedback.get_direction_stats(False)
         hold_dir1 = self.holding_feedback.get_direction_stats(True)
+        if self._ep_freq_holdfb_features:
+            freq_holdfb_arr = np.vstack(self._ep_freq_holdfb_features)
+            freq_holdfb_mean = freq_holdfb_arr.mean(axis=0)
+        else:
+            freq_holdfb_mean = np.zeros(4, dtype=np.float64)
         la_stat = _stat(self._ep_lower_actions)
         lr_stat = _stat(self._ep_lower_rewards)
         ud_stat = _stat(self._ep_upper_deltas)
@@ -1641,6 +1742,11 @@ class TransitDuetV2Runner:
             'hold_fb_dir0_mean': hold_dir0['rolling_mean'],
             'hold_fb_dir1_mean': hold_dir1['rolling_mean'],
             'hold_penalty_mean': hp_stat['mean'],
+            'freq_holdfb_same_hold': float(freq_holdfb_mean[0]),
+            'freq_holdfb_same_wait': float(freq_holdfb_mean[1]),
+            'freq_holdfb_other_hold': float(freq_holdfb_mean[2]),
+            'freq_holdfb_other_wait': float(freq_holdfb_mean[3]),
+            'freq_holdfb_decisions': len(self._ep_freq_holdfb_features),
             'theta_wait': float(theta_w[0]),
             'theta_fleet': float(theta_w[1]),
             'theta_cv': float(theta_w[2]),
@@ -1724,6 +1830,7 @@ class TransitDuetV2Runner:
                    'lower_lambda', 'lower_alpha', 'lower_q_mean', 'lower_q_std',
                    'upper_delta_mean', 'upper_q_mean',
                    'hold_fb_mean', 'hold_penalty_mean',
+                   'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
                    'theta_wait', 'theta_fleet',
                    'surprise', 'belief_window',
                    'upper_hf_power_ratio', 'lower_lf_drift_ratio',
@@ -1800,6 +1907,12 @@ class TransitDuetV2Runner:
               f"dir0={row['hold_fb_dir0_mean']:.1f}  "
               f"dir1={row['hold_fb_dir1_mean']:.1f}  "
               f"penalty={row['hold_penalty_mean']:.3f}")
+        if self.freq_holdfb_enable:
+            print(f"  F-HOLDFB same={row.get('freq_holdfb_same_hold',0):.3f}/"
+                  f"{row.get('freq_holdfb_same_wait',0):.3f}  "
+                  f"other={row.get('freq_holdfb_other_hold',0):.3f}/"
+                  f"{row.get('freq_holdfb_other_wait',0):.3f}  "
+                  f"n={int(row.get('freq_holdfb_decisions',0))}")
 
         print(f"  θ-OGD    w=[{row['theta_wait']:.3f}, "
               f"{row['theta_fleet']:.3f}, {row['theta_cv']:.3f}]")

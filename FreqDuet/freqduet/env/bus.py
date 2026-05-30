@@ -57,6 +57,10 @@ class Bus(object):
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
+        self.last_board_time = None
+        self.last_action_s = 0.0
+        self.last_action_time = None
+        self.last_action_station_id = int(self.last_station.station_id)
         self.back_to_terminal_time = None
 
         self.acceleration = 3 # 加速度
@@ -128,6 +132,7 @@ class Bus(object):
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
+        self.last_board_time = current_time
         # passengers alight from bus(self)
         for i, passenger in enumerate(self.passengers):
             if passenger.destination_station.station_name == self.next_station.station_name:
@@ -205,7 +210,7 @@ class Bus(object):
         elif self.state == BusState.HOLDING:
             self._process_holding(current_time, bus_all, debug)
         elif self.state == BusState.WAITING_ACTION:
-            self._start_dwelling(action)
+            self._start_dwelling(action, current_time)
         elif self.state == BusState.DWELLING:
             self._process_dwelling(current_time)
         else:
@@ -327,17 +332,24 @@ class Bus(object):
 
         self.state = BusState.WAITING_ACTION
 
-    def _start_dwelling(self, action):
+    def _start_dwelling(self, action, current_time=None):
         dwell_time = self._normalize_action(action)
         if dwell_time is not None:
             dwell_time = max(0.0, dwell_time)
 
         if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
+            if dwell_time == 0:
+                self.last_action_s = 0.0
+                self.last_action_time = current_time
+                self.last_action_station_id = int(self.last_station.station_id)
         else:
             self.dwelling_time = dwell_time
             # v2: record applied holding action for feedback to upper level
             self.applied_actions.append(float(dwell_time))
+            self.last_action_s = float(dwell_time)
+            self.last_action_time = current_time
+            self.last_action_station_id = int(self.last_station.station_id)
 
         self.state = BusState.DWELLING
 
@@ -461,6 +473,10 @@ class Bus(object):
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
+        self.last_board_time = None
+        self.last_action_s = 0.0
+        self.last_action_time = None
+        self.last_action_station_id = int(self.last_station.station_id)
         self.applied_actions = []  # v2: reset per-trip action tracking
         self.in_station = False
         self.forward_bus = None

@@ -20,7 +20,7 @@ from env.bus import Bus
 from env.route import Route
 from env.station import Station
 from env.visualize import visualize
-from frequency import DemandFrequencyTracker, fit_harmonic_prior
+from frequency import DemandEventLogger, DemandFrequencyTracker, fit_harmonic_prior
 from gym.spaces.box import Box
 from gym.spaces import MultiDiscrete
 
@@ -91,6 +91,9 @@ class env_bus(object):
         self.frequency_lower_enabled = False
         self.frequency_replace_upper_demand = True
         self.frequency_tracker = None
+        self.frequency_logger = None
+        self.frequency_logging_enabled = False
+        self.frequency_logger_cfg = {}
         self.lower_context_enabled = False
         self.lower_context_dim = 0
         self.lower_context_queue_norm = 50.0
@@ -176,6 +179,9 @@ class env_bus(object):
 
         if self.frequency_tracker is not None:
             self.frequency_tracker.reset()
+        if self.frequency_logger is not None:
+            self.frequency_logger.start_episode(
+                int(getattr(self, '_freqduet_episode', 0)))
 
         # initial list of bus on route
         self.bus_id = 0
@@ -314,7 +320,17 @@ class env_bus(object):
                             freq_od_arrivals[od_key] = (
                                 freq_od_arrivals.get(od_key, 0) + int(od_count))
             if self.frequency_enabled and self.frequency_tracker is not None:
+                prev_freq_updates = int(self.frequency_tracker.total_updates)
                 self.frequency_tracker.update(freq_arrivals, freq_od_arrivals)
+                bin_applied = int(self.frequency_tracker.total_updates) > prev_freq_updates
+                if self.frequency_logger is not None:
+                    self.frequency_logger.log_step(
+                        self.current_time,
+                        freq_arrivals,
+                        self.stations,
+                        self.bus_all,
+                        self.frequency_tracker,
+                        bin_applied=bin_applied)
             # station_state.append(len(station.waiting_passengers))
         # update bus state
         for bus in self.bus_all:
@@ -382,6 +398,8 @@ class env_bus(object):
             self.done = True
             # Cache measurement_vector BEFORE clearing data
             self._cached_measurement = self._compute_measurement_vector()
+            if self.frequency_logger is not None:
+                self.frequency_logger.flush()
             if not debug:
                 for bus in self.bus_all:
                     bus.trajectory.clear()
@@ -422,6 +440,11 @@ class env_bus(object):
         self.frequency_lower_enabled = bool(cfg.get('lower_features', True))
         self.frequency_replace_upper_demand = bool(
             cfg.get('replace_upper_demand_with_low', True))
+        self.frequency_logger_cfg = dict(cfg.get('logging', {}) or {})
+        self.frequency_logging_enabled = (
+            self.frequency_enabled
+            and bool(self.frequency_logger_cfg.get('enable', False)))
+        self.frequency_logger = None
         lower_context_cfg = cfg.get('lower_context', {}) or {}
         self.lower_context_enabled = bool(lower_context_cfg.get('enable', False))
         default_context = [
@@ -459,6 +482,29 @@ class env_bus(object):
             self.frequency_tracker = None
             self.state_dim = self._base_state_dim + self.lower_context_dim
             self.upper_state_dim = 11
+        log_output_dir = self.frequency_logger_cfg.get('output_dir', None)
+        if log_output_dir:
+            self.configure_frequency_logging(log_output_dir)
+
+    def configure_frequency_logging(self, output_dir=None):
+        """Create the optional passive demand/frequency trace logger."""
+        self.frequency_logger = None
+        if not self.frequency_logging_enabled:
+            return
+        if output_dir is None:
+            output_dir = self.frequency_logger_cfg.get('output_dir', None)
+        if output_dir is None:
+            output_dir = os.path.join(self.path, 'pic')
+        self.frequency_logger = DemandEventLogger(
+            output_dir=output_dir,
+            aggregate_filename=self.frequency_logger_cfg.get(
+                'aggregate_filename', 'demand_trace.csv'),
+            station_filename=self.frequency_logger_cfg.get(
+                'station_filename', 'demand_station_trace.csv'),
+            station_rows=self.frequency_logger_cfg.get('station_rows', True),
+            bin_only=self.frequency_logger_cfg.get('bin_only', True),
+            include_empty_stations=self.frequency_logger_cfg.get(
+                'include_empty_stations', False))
 
     def _build_harmonic_prior(self, cfg):
         """Fit harmonic priors from the historical OD table used by the env.

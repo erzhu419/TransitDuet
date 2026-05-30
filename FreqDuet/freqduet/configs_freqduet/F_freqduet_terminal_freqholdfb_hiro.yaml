@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_freqholdfb_hiro
+
+frequency:
+  hold_feedback:
+    # Dev-manual frequency-aware HoldFB: expose same/other-direction lower
+    # holding and passenger-wait pressure under positive local HF residuals.
+    enable: true
+    window: 512
+    high_threshold: 0.0
+    wait_norm_s: 600.0
+    wait_clip: 2.0
+    board_norm: 8.0

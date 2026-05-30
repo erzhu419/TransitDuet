@@ -380,3 +380,55 @@ poswait main:     wait=5.19±0.16, cv=0.459±0.014, comp=1.428±0.086
 Promote `F_freqduet_terminal_main_hiro` to alias
 `F_freqduet_terminal_lowerhf_poswait_hiro`. Keep the boarded-credit configs as
 ablations only.
+
+## 2026-05-30 frequency-aware HoldFB follow-up
+
+Implemented the dev-manual frequency-aware HoldFB interface as an optional
+upper-state extension. When enabled, the runner appends
+`[same HF-hold, same HF-wait, other HF-hold, other HF-wait]`, computed only from
+positive local high-frequency residual events, so the upper layer can see when
+lower holding is repeatedly serving burst pressure.
+
+Screening protocol: 5 seeds, 20 episodes, `upper_warmup_eps=10`, last 10
+BiLevel episodes:
+
+```text
+main:             wait=5.57±0.47, cv=0.453±0.023, comp=1.570±0.088
+freqholdfb long:  wait=6.04±1.46, cv=0.437±0.032, comp=1.478±0.174
+freqholdfb short: wait=5.91±0.84, cv=0.461±0.011, comp=1.650±0.145
+```
+
+Confirmation protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20
+BiLevel episodes:
+
+```text
+main:        wait=5.72±0.68, cv=0.437±0.019, comp=1.503±0.126
+freqholdfb:  wait=5.63±0.56, cv=0.446±0.034, comp=1.582±0.109
+```
+
+Do not promote the current HoldFB extension. It records the intended signal and
+slightly lowers wait in the long confirmation, but it raises composite and CV.
+Keep `F_freqduet_terminal_freqholdfb_hiro` and the short-window variant as
+ablations for longer training or a better upper reward.
+
+## 2026-05-30 Phase-0 demand trace logger
+
+Added passive demand/frequency trace logging for the dev-manual Phase-0 audit.
+`frequency.logging.enable: true` now writes `demand_trace.csv` and
+`demand_station_trace.csv` into the run log directory with realized arrivals,
+station queues, boarding wait, lower holding actions, headway/target-headway
+summaries, and global/local LF-HF states. The default main config leaves this
+off, so policy behavior is unchanged.
+
+Smoke protocol: `F_freqduet_terminal_main_trace_hiro`, seed 42, 1 episode:
+
+```text
+demand_trace.csv:          824 data rows
+demand_station_trace.csv:  11237 data rows
+audit: corr_low_queue=0.451, corr_hf_energy_board_wait=0.065,
+       corr_station_high_queue=0.342
+```
+
+This fills the remaining logging gap in the manual: before adding more policy
+features, we can now audit whether demand frequency components, lower actions,
+queues, and wait spikes are aligned in raw rollouts.
