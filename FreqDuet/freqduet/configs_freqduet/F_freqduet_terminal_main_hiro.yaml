@@ -1,6 +1,7 @@
-_extends: F_freqduet_terminal_lowerhf_poswait_hiro.yaml
+_extends: F_freqduet_terminal_lowerhf_localcap10_w06_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
 # Current promoted FreqDuet main path. It keeps the stable no-promotion
-# spline2dir terminal timetable, and only attributes lower high-frequency wait
-# responsibility to positive local burst residuals.
+# spline2dir terminal timetable, attributes lower high-frequency wait
+# responsibility to positive local burst residuals, and uses a capped
+# station-local low-frequency prior for lower-side high-share credit.

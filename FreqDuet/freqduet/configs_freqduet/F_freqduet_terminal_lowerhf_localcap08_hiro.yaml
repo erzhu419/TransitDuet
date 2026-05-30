@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_lowerhf_poswait_hiro.yaml
+_name: F_freqduet_terminal_lowerhf_localcap08_hiro
+
+reward_attribution:
+  # Conservative local-prior lower HF credit. The local prior fixes the
+  # attribution reference, while the cap keeps the short-run reward scale close
+  # to the promoted main path.
+  lower_share_source: local_low
+  lower_high_share_cap: 0.08

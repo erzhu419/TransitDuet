@@ -687,6 +687,13 @@ class DemandFrequencyTracker:
             return 0.0
         return float(s.high / self.local_demand_norm)
 
+    def local_low_value(self, station_id, direction):
+        key = (int(station_id), bool(direction))
+        s = self.local_states.get(key)
+        if s is None:
+            return 0.0
+        return float(s.low / self.local_demand_norm)
+
     def local_promotion_summary(self, station_id, direction):
         key = (int(station_id), bool(direction))
         gate = self.local_promotion_gates.get(key)

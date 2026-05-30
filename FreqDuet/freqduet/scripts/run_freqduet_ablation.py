@@ -228,6 +228,7 @@ def summarize_seed(csv_path, last_k):
         "freq_wait_lower_net_mean",
         "freq_wait_upper_credit_std",
         "freq_wait_low_share_mean",
+        "freq_wait_lower_high_share_mean",
         "freq_wait_boarded_pax",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
@@ -282,6 +283,7 @@ def aggregate(configs, seeds, last_k, logs_dir, out_dir):
         "freq_wait_lower_net_mean",
         "freq_wait_upper_credit_std",
         "freq_wait_low_share_mean",
+        "freq_wait_lower_high_share_mean",
         "freq_wait_boarded_pax",
     ]
     summary = []

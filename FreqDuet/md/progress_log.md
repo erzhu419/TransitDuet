@@ -432,3 +432,51 @@ audit: corr_low_queue=0.451, corr_hf_energy_board_wait=0.065,
 This fills the remaining logging gap in the manual: before adding more policy
 features, we can now audit whether demand frequency components, lower actions,
 queues, and wait spikes are aligned in raw rollouts.
+
+## 2026-05-30 lower high-frequency local-prior credit
+
+The trace logger showed the lower high-frequency wait share was still too weak:
+the promoted main used positive local residuals, but compared them against the
+route-global low-frequency level. That kept `freq_wait_lower_high_share_mean`
+near 0.033, so lower credit was only a small perturbation.
+
+Implemented configurable lower-side wait attribution:
+
+- `lower_share_source: global` keeps the previous behavior.
+- `lower_share_source: local_low` compares the positive local residual against
+  the station-direction local low-frequency prior from the harmonic tracker.
+- `lower_high_share_cap` limits the reward-scale change so local attribution
+  does not become the unstable full-local variant.
+
+The direct local-share variants were too aggressive in smoke testing:
+`lower_hshare` jumped to about 0.16-0.18 and produced unstable wait/composite.
+Two capped variants were screened instead.
+
+Screening protocol: 5 seeds, 20 episodes, `upper_warmup_eps=10`, last 10
+BiLevel episodes:
+
+```text
+main:             wait=5.53±0.24, cv=0.441±0.015, comp=1.588±0.081,
+                  lower_hshare=0.033
+localcap08:       wait=5.44±0.85, cv=0.458±0.012, comp=1.478±0.147,
+                  lower_hshare=0.050
+localcap10_w06:   wait=5.87±0.62, cv=0.459±0.023, comp=1.466±0.156,
+                  lower_hshare=0.061
+```
+
+Confirmation protocol: 5 seeds, 40 episodes, `upper_warmup_eps=10`, last 20
+BiLevel episodes:
+
+```text
+main before:      wait=5.71±0.26, cv=0.447±0.015, comp=1.480±0.174,
+                  lower_hshare=0.033
+localcap08:       wait=5.74±0.38, cv=0.453±0.019, comp=1.502±0.093,
+                  lower_hshare=0.050
+localcap10_w06:   wait=5.38±0.25, cv=0.450±0.010, comp=1.415±0.092,
+                  lower_hshare=0.062
+```
+
+Promote `F_freqduet_terminal_main_hiro` to alias
+`F_freqduet_terminal_lowerhf_localcap10_w06_hiro`. This is now the strongest
+validated lower HF-credit path: it strengthens local burst responsibility
+without the instability of uncapped local attribution.

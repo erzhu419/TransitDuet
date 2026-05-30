@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_lowerhf_poswait_hiro.yaml
+_name: F_freqduet_terminal_lowerhf_localshare_hiro
+
+reward_attribution:
+  # Lower high-frequency wait credit should compare a local burst against the
+  # station-direction local low-frequency prior, not the route-global LF level.
+  lower_share_source: local_low
+  lower_high_share_cap: 0.75
