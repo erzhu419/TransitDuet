@@ -79,6 +79,9 @@ pre-discrete terminal hold60, 5 seeds:    wait=6.67±1.63, cv=0.452±0.031, comp
 post-discrete terminal current, 5 seeds:  wait=5.73±0.60, cv=0.444±0.013, comp=1.556±0.172
 post-discrete terminal hold30, 5 seeds:   wait=5.13±0.19, cv=0.438±0.009, comp=1.347±0.127
 post-discrete terminal hold60, 5 seeds:   wait=5.59±0.33, cv=0.434±0.014, comp=1.383±0.060
+terminal promotion state, 3 seeds:        wait=6.01±0.78, cv=0.422±0.007, comp=1.578±0.147
+terminal promotion replan, 3 seeds:       wait=5.80±0.66, cv=0.441±0.022, comp=1.535±0.091
+terminal promotion trigger, 5 seeds:      wait=5.82±0.42, cv=0.427±0.021, comp=1.417±0.139
 ```
 
 The lower controller now uses discrete holding bins
@@ -89,9 +92,18 @@ made the online controller beat the previous target-headway main path. Terminal
 dispatch became effective only after the lower stabilization; `F_freqduet_terminal_hiro`
 now uses the no-early-launch hold30 setting.
 
+The first terminal promotion re-test showed that exposing promotion gate
+features directly to the policy state added variance. The useful variant is
+trigger-only promotion: gate diagnostics still detect persistent high-frequency
+residuals and can trigger rolling timetable replans, but `[flag, strength, age]`
+are not appended to the upper/lower policy state. It improved the same-run
+5-seed terminal rerun (`comp=1.580±0.214` to `1.417±0.139`), but is kept as an
+experimental config until it beats the best hold30 terminal record.
+
 Experimental modules not yet promoted:
 
-- Terminal dispatch: 3-seed looked promising, but 5-seed was unstable
-  (`comp=1.689±0.421`), so it remains an experimental config.
-- Promotion gate: state-only and conservative replan variants did not beat the
-  current timetable path in 3-seed validation, so it remains experimental.
+- Earlier terminal dispatch with early launch was unstable, but the current
+  no-early-launch hold30 terminal timetable has been promoted after 5-seed
+  validation.
+- Promotion gate: trigger-only promotion is the current useful candidate;
+  state-feature and conservative-trigger variants are not promoted.

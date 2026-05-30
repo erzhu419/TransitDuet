@@ -219,6 +219,7 @@ class DemandFrequencyTracker:
         promotion_residual_threshold=1.0,
         promotion_persistence_ratio=0.35,
         promotion_cooldown_s=600.0,
+        promotion_state_features=True,
     ):
         self.update_interval_s = float(update_interval_s)
         self.method = str(method).lower()
@@ -240,7 +241,9 @@ class DemandFrequencyTracker:
         self._pending_steps = 0
         self.harmonic_prior = harmonic_prior or {}
         self.promotion_enabled = bool(promotion_enable)
-        self.promotion_feature_dim = 3 if self.promotion_enabled else 0
+        self.promotion_state_features = (
+            self.promotion_enabled and bool(promotion_state_features))
+        self.promotion_feature_dim = 3 if self.promotion_state_features else 0
 
         if self.method == "ema":
             low_alpha = _alpha_from_period(update_interval_s, low_period_s)
@@ -345,6 +348,8 @@ class DemandFrequencyTracker:
             promotion_persistence_ratio=promotion_cfg.get(
                 "persistence_ratio", cfg.get("promotion_persistence_ratio", 0.35)),
             promotion_cooldown_s=cooldown_s,
+            promotion_state_features=promotion_cfg.get(
+                "state_features", cfg.get("promotion_state_features", True)),
         )
 
     def _new_state(self, prior_theta=None):
@@ -530,7 +535,7 @@ class DemandFrequencyTracker:
                 np.array(s.history(self.upper_history_bins), dtype=np.float32)
                 / self.global_demand_norm
             )
-            if self.global_promotion_gate is not None:
+            if self.promotion_state_features and self.global_promotion_gate is not None:
                 feats = np.concatenate(
                     [feats, self.global_promotion_gate.features()])
             return feats.astype(np.float32)
@@ -545,7 +550,7 @@ class DemandFrequencyTracker:
         else:
             raise ValueError(f"Unknown upper frequency mode: {mode}")
         feats = feats + self._upper_od_features()
-        if self.global_promotion_gate is not None:
+        if self.promotion_state_features and self.global_promotion_gate is not None:
             feats.extend(self.global_promotion_gate.features().tolist())
         return np.array(feats, dtype=np.float32)
 
@@ -561,9 +566,9 @@ class DemandFrequencyTracker:
                 / self.local_demand_norm
             )
             gate = self.local_promotion_gates.get(key)
-            if gate is not None:
+            if self.promotion_state_features and gate is not None:
                 feats = np.concatenate([feats, gate.features()])
-            elif self.promotion_enabled:
+            elif self.promotion_state_features:
                 feats = np.concatenate(
                     [feats, np.zeros(self.promotion_feature_dim, dtype=np.float32)])
             return feats.astype(np.float32)
@@ -591,7 +596,7 @@ class DemandFrequencyTracker:
             feats = low_feats[:3] + high_feats
         else:
             raise ValueError(f"Unknown lower frequency mode: {mode}")
-        if self.promotion_enabled:
+        if self.promotion_state_features:
             gate = self.local_promotion_gates.get(key)
             gate_feats = (
                 gate.features().tolist()
