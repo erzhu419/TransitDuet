@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_hiro.yaml
+_name: F_freqduet_terminal_waitattr_hiro
+
+reward_attribution:
+  # Actual boarded passenger waiting time is split by frequency share:
+  # low-frequency wait becomes upper timetable credit, while high-frequency
+  # local shock wait shapes the lower holding reward.
+  enable: true
+  upper_wait_weight: 0.15
+  lower_wait_weight: 0.08
+  wait_norm_s: 600.0
+  wait_clip: 2.0
+  low_share_floor: 0.05
+  normalize_upper_credit: true

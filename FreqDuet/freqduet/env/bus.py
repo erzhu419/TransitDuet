@@ -51,6 +51,9 @@ class Bus(object):
 
         self.alight_num = 0. # 下车人数
         self.board_num = 0. # 上车人数
+        self.last_board_wait_sum_s = 0.0
+        self.last_board_count = 0
+        self.last_board_station_id = int(self.next_station.station_id)
         self.back_to_terminal_time = None
 
         self.acceleration = 3 # 加速度
@@ -119,6 +122,9 @@ class Bus(object):
         # original passengers list then remove them with the pre-record index
         index_of_passenger_on_bus = []
         index_of_passenger_in_station = []
+        self.last_board_wait_sum_s = 0.0
+        self.last_board_count = 0
+        self.last_board_station_id = int(self.next_station.station_id)
         # passengers alight from bus(self)
         for i, passenger in enumerate(self.passengers):
             if passenger.destination_station.station_name == self.next_station.station_name:
@@ -136,6 +142,9 @@ class Bus(object):
                 passenger.boarded = True
                 passenger.boarding_time = current_time
                 passenger.travel_bus = self
+                self.last_board_wait_sum_s += max(
+                    0.0, float(current_time - passenger.appear_time))
+                self.last_board_count += 1
                 self.passengers = np.append(self.passengers, passenger)
                 self.board_num += 1
                 index_of_passenger_in_station.append(i)
@@ -407,6 +416,9 @@ class Bus(object):
         self.back_to_terminal_time = None
         self.board_num = 0.
         self.alight_num = 0.
+        self.last_board_wait_sum_s = 0.0
+        self.last_board_count = 0
+        self.last_board_station_id = int(self.next_station.station_id)
         self.applied_actions = []  # v2: reset per-trip action tracking
         self.in_station = False
         self.forward_bus = None

@@ -146,3 +146,25 @@ Experimental modules not yet promoted:
   validation.
 - Promotion gate: trigger-only promotion is the current useful candidate;
   state-feature and conservative-trigger variants are not promoted.
+
+## 2026-05-30 step-1 reward attribution
+
+Implemented actual passenger-wait frequency attribution as a candidate main
+path in `F_freqduet_terminal_waitattr_hiro`. The simulator now records boarded
+passenger waiting time at each stop; the runner assigns the low-frequency share
+of that wait to upper timetable credit and the high-frequency local shock share
+to lower holding reward shaping. The older `F_freqduet_terminal_hiro` is left
+unchanged so reviewer baselines that extend it do not inherit the new reward.
+
+Same-run 5-seed check, 20 episodes, last 10 episodes, workers=8:
+
+```text
+terminal main:      wait=5.75±0.71, cv=0.447±0.028, comp=1.534±0.210
+terminal waitattr:  wait=5.40±0.18, cv=0.451±0.013, comp=1.407±0.131
+```
+
+The result is strong enough to use `F_freqduet_terminal_waitattr_hiro` as the
+next main candidate for subsequent dev-manual modules. The lower wait penalty
+is deliberately small (`~0.00145` mean) and the upper wait credit is zero-mean
+within episode (`std=0.15`), so this adds frequency-attributed passenger-wait
+credit without overwhelming the existing headway/cost learning signal.
