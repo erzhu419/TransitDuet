@@ -23,17 +23,31 @@ from freq_hrl.policies import (
     LinearFrequencyTradingController,
     LinearFrequencyTradingPlanner,
     LinearTradingParams,
+    PolicyGradientTradingController,
+    PolicyGradientTradingParams,
+    PolicyGradientTradingPlanner,
 )
 
 from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
 
 
-def make_policy(policy: str, params: LinearTradingParams | None = None) -> tuple[Any, Any]:
+def make_policy(
+    policy: str,
+    params: LinearTradingParams | PolicyGradientTradingParams | None = None,
+    sample: bool = False,
+    rng: np.random.Generator | None = None,
+) -> tuple[Any, Any]:
     if policy == "heuristic":
         return FrequencyTradingPlanner(promotion_mid_gain=0.5), FrequencyTradingController()
     if policy == "linear":
-        params = params or LinearTradingParams()
+        params = params if isinstance(params, LinearTradingParams) else LinearTradingParams()
         return LinearFrequencyTradingPlanner(params), LinearFrequencyTradingController(params)
+    if policy == "pg_linear":
+        params = params if isinstance(params, PolicyGradientTradingParams) else PolicyGradientTradingParams()
+        return (
+            PolicyGradientTradingPlanner(params, sample=sample, rng=rng),
+            PolicyGradientTradingController(params, sample=sample, rng=rng),
+        )
     raise ValueError(f"unknown policy: {policy}")
 
 
@@ -42,7 +56,7 @@ def run_eval(
     steps: int,
     assets: int,
     policy: str = "heuristic",
-    params: LinearTradingParams | None = None,
+    params: LinearTradingParams | PolicyGradientTradingParams | None = None,
     scenario: str = "persistent_shift",
 ) -> dict[str, float]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
@@ -70,10 +84,11 @@ def run_eval(
         promotion_enable=True,
         promotion_window_s=30 * 60.0,
         promotion_residual_threshold=0.00035,
-        promotion_persistence_ratio=0.40,
-        promotion_cooldown_s=60 * 60.0,
+        promotion_persistence_ratio=0.50,
+        promotion_cooldown_s=10 * 60.0,
+        promotion_regime_threshold=3e-05,
         promotion_adapt_low=True,
-        promotion_adapt_gain=0.25,
+        promotion_adapt_gain=0.05,
     )
     planner, controller = make_policy(policy, params)
     env.reset()
@@ -144,6 +159,114 @@ def score_candidate(case: tuple[list[float], list[int], int, int, str]) -> tuple
     vector, train_seeds, steps, assets, scenario = case
     score, _ = evaluate_params(np.asarray(vector, dtype=np.float64), train_seeds, steps, assets, scenario)
     return score, list(vector)
+
+
+def run_pg_episode(
+    params: PolicyGradientTradingParams,
+    seed: int,
+    steps: int,
+    assets: int,
+    scenario: str,
+    rng_seed: int,
+    discount: float = 0.995,
+) -> tuple[np.ndarray, dict[str, float]]:
+    data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
+    env = PortfolioExecutionEnv(
+        data["returns"],
+        volumes=data["volume"],
+        config=PortfolioExecutionConfig(
+            transaction_cost_bps=50.0,
+            slippage_bps=10.0,
+            max_leverage=1.0,
+            inventory_drift_penalty=0.002,
+            drawdown_penalty=0.0,
+        ),
+    )
+    tracker = TradingFrequencyTracker(
+        bar_sec=60.0,
+        method="ema",
+        low_period_s=120 * 60.0,
+        fast_period_s=5 * 60.0,
+        mid_period_s=30 * 60.0,
+        energy_period_s=10 * 60.0,
+        persistence_period_s=30 * 60.0,
+        persistence_threshold=0.0010,
+        feature_norm=np.ones(assets) * 0.0015,
+        promotion_enable=True,
+        promotion_window_s=30 * 60.0,
+        promotion_residual_threshold=0.00035,
+        promotion_persistence_ratio=0.50,
+        promotion_cooldown_s=10 * 60.0,
+        promotion_regime_threshold=3e-05,
+        promotion_adapt_low=True,
+        promotion_adapt_gain=0.05,
+    )
+    rng = np.random.default_rng(rng_seed)
+    planner, controller = make_policy("pg_linear", params=params, sample=True, rng=rng)
+    grads: list[np.ndarray] = []
+    rewards: list[float] = []
+    pnl_returns: list[float] = []
+    equity: list[float] = []
+    turnover: list[float] = []
+    promotion_count = 0
+    env.reset()
+    for t in range(steps):
+        raw_signal = data["predictor"][t]
+        freq = tracker.update_bar(raw_signal, t=float(t * 60.0))
+        if bool(dict(freq.get("promotion", {}) or {}).get("promote", False)):
+            promotion_count += 1
+        obs = {
+            "raw_signal": raw_signal,
+            "position": env.position.copy(),
+            "t": t,
+        }
+        upper = planner.plan(obs, tracker.upper_features(), context={"frequency": freq, "n_assets": assets})
+        env.set_target(upper.action)
+        lower = controller.act(obs, tracker.lower_features(upper.action, env.position), upper, context={"frequency": freq})
+        _, reward, done, info = env.lower_step(lower.action)
+        step_reward = float(info["portfolio_return"] - info["transaction_cost"])
+        rewards.append(step_reward)
+        pnl_returns.append(step_reward)
+        equity.append(float(info["equity"]))
+        turnover.append(float(info["turnover"]))
+        grad = np.asarray(upper.metadata.get("policy_grad_logp", 0.0), dtype=np.float64)
+        grad = grad + np.asarray(lower.metadata.get("policy_grad_logp", 0.0), dtype=np.float64)
+        grads.append(grad)
+        if done:
+            break
+    rewards_arr = np.asarray(rewards, dtype=np.float64)
+    returns = np.zeros_like(rewards_arr)
+    running = 0.0
+    gamma = float(np.clip(discount, 0.0, 1.0))
+    for idx in range(rewards_arr.size - 1, -1, -1):
+        running = rewards_arr[idx] + gamma * running
+        returns[idx] = running
+    if returns.size:
+        advantages = returns - float(np.mean(returns))
+        std = float(np.std(advantages))
+        if std > 1e-12:
+            advantages = advantages / std
+    else:
+        advantages = returns
+    grad_arr = np.asarray(grads, dtype=np.float64)
+    if grad_arr.size:
+        grad_estimate = np.mean(grad_arr * advantages[:, None], axis=0)
+    else:
+        grad_estimate = np.zeros_like(params.to_vector())
+    pnl = np.asarray(pnl_returns, dtype=np.float64)
+    eq = np.asarray(equity, dtype=np.float64)
+    total_return = float(eq[-1] - 1.0) if eq.size else 0.0
+    sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
+    row = {
+        "seed": int(seed),
+        "scenario": scenario,
+        "total_return": total_return,
+        "sharpe": sharpe,
+        "max_drawdown": max_drawdown(eq),
+        "turnover": float(np.sum(turnover)),
+        "promotion_count": int(promotion_count),
+    }
+    return grad_estimate, row
 
 
 def effective_workers(requested: int, case_count: int) -> int:
@@ -218,6 +341,75 @@ def train_linear_policy(
     }
 
 
+def train_policy_gradient(
+    train_seeds: list[int],
+    steps: int,
+    assets: int,
+    scenario: str,
+    iterations: int,
+    learning_rate: float,
+    seed: int,
+    discount: float = 0.995,
+) -> dict[str, Any]:
+    rng = np.random.default_rng(seed)
+    params = PolicyGradientTradingParams()
+    vector = params.to_vector()
+    best_vector = vector.copy()
+    best_score = -float("inf")
+    history = []
+    lr = max(float(learning_rate), 0.0)
+    for iteration in range(max(1, int(iterations))):
+        grads = []
+        sampled_rows = []
+        for train_seed in train_seeds:
+            grad, row = run_pg_episode(
+                PolicyGradientTradingParams.from_vector(vector, template=params),
+                seed=int(train_seed),
+                steps=steps,
+                assets=assets,
+                scenario=scenario,
+                rng_seed=int(rng.integers(0, 2**31 - 1)),
+                discount=discount,
+            )
+            grads.append(grad)
+            sampled_rows.append(row)
+        grad_mean = np.mean(np.asarray(grads, dtype=np.float64), axis=0)
+        grad_norm = float(np.linalg.norm(grad_mean))
+        if grad_norm > 10.0:
+            grad_mean = grad_mean * (10.0 / grad_norm)
+        vector = vector + lr * grad_mean
+        vector = np.clip(vector, -4.0, 4.0)
+        current_params = PolicyGradientTradingParams.from_vector(vector, template=params)
+        eval_rows = [
+            run_eval(seed=int(eval_seed), steps=steps, assets=assets, policy="pg_linear", params=current_params, scenario=scenario)
+            for eval_seed in train_seeds
+        ]
+        score = float(np.mean([objective(row) for row in eval_rows]))
+        if score > best_score:
+            best_score = score
+            best_vector = vector.copy()
+        history.append({
+            "iteration": int(iteration),
+            "sampled_objective": float(np.mean([objective(row) for row in sampled_rows])),
+            "deterministic_objective": score,
+            "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
+            "grad_norm": float(np.linalg.norm(grad_mean)),
+            "params": current_params.to_mapping(),
+        })
+    best_params = PolicyGradientTradingParams.from_vector(best_vector, template=params)
+    return {
+        "policy": "pg_linear",
+        "trainer": "on_policy_reinforce",
+        "scenario": scenario,
+        "train_seeds": list(train_seeds),
+        "steps": int(steps),
+        "assets": int(assets),
+        "best_score": float(best_score),
+        "params": best_params.to_mapping(),
+        "history": history,
+    }
+
+
 def summarize(rows: list[dict[str, float]], mode: str, policy: str) -> dict[str, Any]:
     return {
         "mode": mode,
@@ -241,7 +433,7 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def load_params(path: Path | None) -> LinearTradingParams:
+def load_linear_params(path: Path | None) -> LinearTradingParams:
     if path is None:
         return LinearTradingParams()
     with path.open("r", encoding="utf-8") as f:
@@ -249,10 +441,18 @@ def load_params(path: Path | None) -> LinearTradingParams:
     return LinearTradingParams.from_mapping(payload.get("params", payload))
 
 
+def load_pg_params(path: Path | None) -> PolicyGradientTradingParams:
+    if path is None:
+        return PolicyGradientTradingParams()
+    with path.open("r", encoding="utf-8") as f:
+        payload = json.load(f)
+    return PolicyGradientTradingParams.from_mapping(payload.get("params", payload))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["eval", "train"], default="eval")
-    parser.add_argument("--policy", choices=["heuristic", "linear"], default="heuristic")
+    parser.add_argument("--policy", choices=["heuristic", "linear", "pg_linear"], default="heuristic")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42])
     parser.add_argument("--train-seeds", type=int, nargs="+", default=[42, 123, 456])
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=None)
@@ -263,6 +463,9 @@ def main() -> None:
     parser.add_argument("--population", type=int, default=12)
     parser.add_argument("--elite-frac", type=float, default=0.25)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
+    parser.add_argument("--pg-iterations", type=int, default=12)
+    parser.add_argument("--pg-learning-rate", type=float, default=0.05)
+    parser.add_argument("--pg-discount", type=float, default=0.995)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--model-path", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_policy_entry"))
@@ -275,24 +478,40 @@ def main() -> None:
     eval_seeds = args.eval_seeds if args.eval_seeds is not None else args.seeds
 
     if args.mode == "train":
-        policy = "linear"
-        model_payload = train_linear_policy(
-            train_seeds=list(args.train_seeds),
-            steps=args.steps,
-            assets=args.assets,
-            scenario=args.scenario,
-            generations=args.generations,
-            population=args.population,
-            elite_frac=args.elite_frac,
-            seed=args.optimizer_seed,
-            workers=args.workers,
-        )
-        model_path = args.model_path or (args.output_dir / "linear_policy.json")
+        if policy == "pg_linear":
+            model_payload = train_policy_gradient(
+                train_seeds=list(args.train_seeds),
+                steps=args.steps,
+                assets=args.assets,
+                scenario=args.scenario,
+                iterations=args.pg_iterations,
+                learning_rate=args.pg_learning_rate,
+                seed=args.optimizer_seed,
+                discount=args.pg_discount,
+            )
+            model_path = args.model_path or (args.output_dir / "pg_linear_policy.json")
+            params = PolicyGradientTradingParams.from_mapping(model_payload["params"])
+        else:
+            policy = "linear"
+            model_payload = train_linear_policy(
+                train_seeds=list(args.train_seeds),
+                steps=args.steps,
+                assets=args.assets,
+                scenario=args.scenario,
+                generations=args.generations,
+                population=args.population,
+                elite_frac=args.elite_frac,
+                seed=args.optimizer_seed,
+                workers=args.workers,
+            )
+            model_path = args.model_path or (args.output_dir / "linear_policy.json")
+            params = LinearTradingParams.from_mapping(model_payload["params"])
         with model_path.open("w", encoding="utf-8") as f:
             json.dump(model_payload, f, indent=2)
-        params = LinearTradingParams.from_mapping(model_payload["params"])
     elif policy == "linear":
-        params = load_params(args.model_path)
+        params = load_linear_params(args.model_path)
+    elif policy == "pg_linear":
+        params = load_pg_params(args.model_path)
 
     rows = [
         run_eval(seed, args.steps, args.assets, policy=policy, params=params, scenario=args.scenario)
@@ -319,7 +538,7 @@ def main() -> None:
         f"- max drawdown mean: {summary['max_drawdown_mean']:.4f}",
         f"- turnover mean: {summary['turnover_mean']:.2f}",
         "",
-        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. It is a lightweight learned-policy validation path for the Freq-HRL protocol, not a full SAC/PPO implementation.",
+        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. The `pg_linear` policy is trained by on-policy Gaussian REINFORCE over upper targets and lower execution speeds. These are learned-policy validation paths, not full SAC/PPO implementations.",
     ]
     if model_payload is not None:
         report.extend([

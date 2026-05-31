@@ -13,6 +13,11 @@ from .linear_trading import (
     LinearFrequencyTradingPlanner,
     LinearTradingParams,
 )
+from .pg_trading import (
+    PolicyGradientTradingController,
+    PolicyGradientTradingParams,
+    PolicyGradientTradingPlanner,
+)
 
 __all__ = [
     "BernsteinPlanCurve",
@@ -25,4 +30,7 @@ __all__ = [
     "LinearTradingParams",
     "LowLevelController",
     "LowLevelDecision",
+    "PolicyGradientTradingController",
+    "PolicyGradientTradingParams",
+    "PolicyGradientTradingPlanner",
 ]

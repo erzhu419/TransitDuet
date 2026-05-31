@@ -37,6 +37,9 @@ Implemented:
 - Transit config-isolation diff audit.
 - Pluggable high-level planner and low-level controller policy interfaces.
 - Lightweight learned linear trading policy and cross-entropy training entry.
+- On-policy Gaussian policy-gradient trading policy (`pg_linear`) that samples
+  upper targets and lower execution speeds and trains with reward-to-go
+  REINFORCE updates.
 - Trading pressure-test matrix across five synthetic market regimes.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
 - Trading decomposer ablation across causal EMA, Fourier, state-space, and
@@ -141,11 +144,16 @@ Implemented:
 ## Not Done: Required For Full Freq-HRL Claim
 
 1. Learned-policy integration.
-   - Partial: `freq_hrl.experiments.trading.policy_entry` now trains/evaluates
-     a lightweight learned linear policy with cross-entropy search. The current
-     learned-linear run reaches mean Sharpe `16.016` and mean return `0.284`
-     on five held-out seeds.
-   - Still missing: actual SAC/PPO-style RL-trained policy implementation.
+   - Partial but stronger: `freq_hrl.experiments.trading.policy_entry` now
+     supports two learned policy paths. `linear` trains shared frequency-routing
+     coefficients with cross-entropy search; the refreshed run reaches held-out
+     Sharpe `15.419` and return `0.280`. `pg_linear` trains an on-policy
+     Gaussian actor with REINFORCE over upper targets and lower execution
+     speeds; the current held-out run reaches Sharpe `15.915` and return
+     `0.249`, above the same held-out heuristic run (`15.663` Sharpe,
+     `0.244` return).
+   - Still missing: actual SAC/PPO/TD3-style actor-critic implementation with
+     replay/advantage estimators and explicit lower/upper value functions.
 
 2. HighLevelPlanner and LowLevelController policy interfaces.
    - Done: `HighLevelPlanner`, `LowLevelController`, `HighLevelDecision`, and

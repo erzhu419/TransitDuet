@@ -8,6 +8,9 @@ from freq_hrl.policies import (
     LinearFrequencyTradingController,
     LinearFrequencyTradingPlanner,
     LinearTradingParams,
+    PolicyGradientTradingController,
+    PolicyGradientTradingParams,
+    PolicyGradientTradingPlanner,
 )
 
 
@@ -50,6 +53,29 @@ class PolicyInterfacesTest(unittest.TestCase):
         self.assertEqual(upper.action.shape, (2,))
         self.assertEqual(lower.action["execution_speed"].shape, (2,))
         self.assertEqual(LinearTradingParams.from_mapping(params.to_mapping()).to_vector().shape, (7,))
+
+    def test_policy_gradient_trading_policy_exposes_logprob_gradients(self):
+        params = PolicyGradientTradingParams()
+        rng = np.random.default_rng(7)
+        planner = PolicyGradientTradingPlanner(params, sample=True, rng=rng)
+        controller = PolicyGradientTradingController(params, sample=True, rng=rng)
+        freq = {
+            "x_low": np.asarray([0.001, -0.001]),
+            "x_mid": np.asarray([0.0002, 0.0001]),
+            "x_high": np.asarray([0.0003, -0.0002]),
+            "x_high_energy": np.asarray([1e-7, 1e-7]),
+            "promotion": {"promote": True, "promotion_strength": 0.5},
+        }
+        obs = {
+            "raw_signal": np.asarray([0.001, -0.001]),
+            "position": np.asarray([0.0, 0.0]),
+        }
+        upper = planner.plan(obs, np.zeros(1), context={"frequency": freq, "n_assets": 2})
+        lower = controller.act(obs, np.zeros(1), upper, context={"frequency": freq})
+        self.assertEqual(upper.action.shape, (2,))
+        self.assertEqual(lower.action["execution_speed"].shape, (2,))
+        self.assertEqual(upper.metadata["policy_grad_logp"].shape, params.to_vector().shape)
+        self.assertEqual(lower.metadata["policy_grad_logp"].shape, params.to_vector().shape)
 
 
 if __name__ == "__main__":

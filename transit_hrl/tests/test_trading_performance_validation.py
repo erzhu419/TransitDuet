@@ -7,7 +7,7 @@ from freq_hrl.experiments.trading.performance_validation import (
     run_baseline,
 )
 from freq_hrl.experiments.trading.encoder_ablation import run_encoder_ablation
-from freq_hrl.experiments.trading.policy_entry import run_eval, train_linear_policy
+from freq_hrl.experiments.trading.policy_entry import run_eval, train_linear_policy, train_policy_gradient
 from freq_hrl.experiments.trading.pressure_test_matrix import summarize as summarize_pressure
 
 
@@ -107,6 +107,21 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         self.assertEqual(model["policy"], "linear")
         self.assertIn("params", model)
         row = run_eval(seed=123, steps=50, assets=2, policy="linear")
+        self.assertIn("sharpe", row)
+
+    def test_policy_gradient_entry_trains_and_evaluates(self):
+        model = train_policy_gradient(
+            train_seeds=[42],
+            steps=40,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            learning_rate=0.01,
+            seed=1,
+        )
+        self.assertEqual(model["policy"], "pg_linear")
+        self.assertIn("params", model)
+        row = run_eval(seed=123, steps=40, assets=2, policy="pg_linear")
         self.assertIn("sharpe", row)
 
 
