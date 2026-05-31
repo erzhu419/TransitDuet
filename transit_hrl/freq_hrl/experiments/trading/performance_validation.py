@@ -30,6 +30,7 @@ from freq_hrl.domains.trading import (
     TradingActionEffectOperator,
     TradingFrequencyTracker,
 )
+from freq_hrl.policies import BernsteinPlanCurve, CausalPlanCurveState
 
 
 BASELINES = (
@@ -288,6 +289,8 @@ def policy_action(
     promotion_residual_plan_gain: float = 0.0,
     promotion_speed_boost: float = 0.0,
     seed_phase: float = 0.0,
+    plan_curve_state: CausalPlanCurveState | None = None,
+    plan_curve_now_s: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
     feats = tracker.features()
     dim = raw_signal.size
@@ -320,7 +323,25 @@ def policy_action(
             + (promotion_mid_gain * strength * x_mid if promote_for_plan else 0.0)
             + promoted_residual
         )
-        target = normalize_target(plan_signal, max_gross=1.0)
+        desired_target = normalize_target(plan_signal, max_gross=1.0)
+        plan_curve_info: dict[str, Any] = {"enabled": False}
+        if plan_curve_state is not None:
+            plan_step = plan_curve_state.target_toward(
+                now_s=plan_curve_now_s,
+                current_value=current_position,
+                desired_value=desired_target,
+            )
+            target = np.asarray(plan_step["target"], dtype=np.float64)
+            plan_curve_info = {
+                "enabled": True,
+                "replan": bool(plan_step["replan"]),
+                "offset_s": float(plan_step["offset_s"]),
+                "smoothness_penalty": float(plan_step["smoothness_penalty"]),
+                "reuse_ratio": float(plan_step["reuse_ratio"]),
+                "desired_gap": float(np.linalg.norm(desired_target - target)),
+            }
+        else:
+            target = desired_target
         gap = target - current_position
         align = np.sign(gap) * x_high / 0.0014
         residual, energy_gate = _bounded_hf_residual(
@@ -423,6 +444,7 @@ def policy_action(
         "shock_age": shock_age,
         "hf_utility": hf_utility,
         "promotion": promotion,
+        "plan_curve": locals().get("plan_curve_info", {"enabled": False}),
     }
     return target, lower_action, diag_features
 
@@ -561,6 +583,11 @@ def run_baseline(
     promotion_speed_boost: float = 0.0,
     leakage_reward_scale: float = 0.00005,
     promotion_adaptation_cost_scale: float = 0.00005,
+    plan_curve_enable: bool = False,
+    plan_curve_horizon_s: float = 15 * 60.0,
+    plan_curve_replan_interval_s: float = 5 * 60.0,
+    plan_curve_basis_dim: int = 2,
+    plan_curve_desired_change_threshold: float = 0.25,
 ) -> dict[str, Any]:
     data = make_synthetic_market(
         seed=seed,
@@ -619,6 +646,25 @@ def run_baseline(
         enabled=(baseline != "no_leakage"),
     )
     reward_attribution = RewardAttributionAccumulator()
+    plan_curve_state = (
+        CausalPlanCurveState(
+            curve=BernsteinPlanCurve(
+                horizon_s=plan_curve_horizon_s,
+                basis_dim=plan_curve_basis_dim,
+                min_value=-1.0,
+                max_value=1.0,
+                delta_min=-1.0,
+                delta_max=1.0,
+                n_entities=n_assets,
+                shared_entities=False,
+            ),
+            replan_interval_s=plan_curve_replan_interval_s,
+            desired_change_threshold=plan_curve_desired_change_threshold,
+            gross_cap=1.0,
+        )
+        if plan_curve_enable and baseline == "freq_hrl"
+        else None
+    )
     raw_history: list[np.ndarray] = []
     high_history: list[np.ndarray] = []
     return_history: list[np.ndarray] = []
@@ -635,6 +681,10 @@ def run_baseline(
     trades: list[np.ndarray] = []
     promotion_count = 0
     promotion_flags: list[bool] = []
+    plan_curve_decisions = 0
+    plan_curve_reuses = 0
+    plan_curve_smoothness: list[float] = []
+    plan_curve_desired_gaps: list[float] = []
     first_promotion_after_shift = None
     regime_shift_t = int(data["regime_shift_t"][0])
     prev_promotion_absorbed_norm = 0.0
@@ -659,10 +709,20 @@ def run_baseline(
             hf_energy_speed_gain=hf_energy_speed_gain,
             promotion_residual_plan_gain=promotion_residual_plan_gain,
             promotion_speed_boost=promotion_speed_boost,
+            plan_curve_state=plan_curve_state,
+            plan_curve_now_s=float(t * 60.0),
         )
         raw_history.append(raw_signal.copy())
         high_history.append(np.asarray(diag_features.get("x_high", np.zeros(n_assets)), dtype=np.float64).copy())
         promotion = diag_features.get("promotion", {})
+        plan_info = dict(diag_features.get("plan_curve", {}) or {})
+        if plan_info.get("enabled", False):
+            if bool(plan_info.get("replan", False)):
+                plan_curve_decisions += 1
+                plan_curve_smoothness.append(float(plan_info.get("smoothness_penalty", 0.0)))
+            else:
+                plan_curve_reuses += 1
+            plan_curve_desired_gaps.append(float(plan_info.get("desired_gap", 0.0)))
         promoted = bool(promotion.get("promote", False))
         promotion_flags.append(promoted)
         if promoted:
@@ -748,7 +808,7 @@ def run_baseline(
         if done:
             break
 
-    return summarize_run(
+    row = summarize_run(
         baseline=baseline,
         seed=seed,
         rewards=rewards,
@@ -769,6 +829,16 @@ def run_baseline(
         first_promotion_after_shift=first_promotion_after_shift,
         regime_shift_t=regime_shift_t,
     ) | {"scenario": scenario, "freq_method": str(freq_method)}
+    total_plan = plan_curve_decisions + plan_curve_reuses
+    row.update({
+        "plan_curve_enabled": float(plan_curve_state is not None),
+        "plan_curve_decisions": int(plan_curve_decisions),
+        "plan_curve_reuses": int(plan_curve_reuses),
+        "plan_curve_reuse_ratio": float(plan_curve_reuses / max(total_plan, 1)),
+        "plan_curve_smoothness_mean": float(np.mean(plan_curve_smoothness)) if plan_curve_smoothness else 0.0,
+        "plan_curve_desired_gap_mean": float(np.mean(plan_curve_desired_gaps)) if plan_curve_desired_gaps else 0.0,
+    })
+    return row
 
 
 def aggregate(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -835,6 +905,9 @@ def write_report(
     promotion_speed_boost: float,
     leakage_reward_scale: float,
     promotion_adaptation_cost_scale: float,
+    plan_curve_enable: bool,
+    plan_curve_horizon_s: float,
+    plan_curve_replan_interval_s: float,
 ) -> None:
     by_name = {row["baseline"]: row for row in summary}
     freq = by_name["freq_hrl"]
@@ -862,6 +935,7 @@ def write_report(
         f"- HF lower config: residual_gain={hf_residual_gain}, recenter_gain={hf_recenter_gain}, speed_gain={hf_speed_gain}, energy_speed_gain={hf_energy_speed_gain}",
         f"- leakage reward scale: {leakage_reward_scale}",
         f"- promotion adaptation cost scale: {promotion_adaptation_cost_scale}",
+        f"- plan curve: enable={plan_curve_enable}, horizon_s={plan_curve_horizon_s}, replan_interval_s={plan_curve_replan_interval_s}",
         "- policies are deterministic heuristics, not trained RL policies",
         "- task metrics include return, Sharpe, drawdown, turnover, transaction cost, and inventory drift",
         "- frequency diagnostics include UpperHFPower, LowerLFDrift, FocusScore, PromotionDelay, ShockResponseTime, regime-promotion accuracy, recovery cost, and oracle-regime recovery regret",
@@ -897,8 +971,8 @@ def write_report(
         "",
         "## Summary Table",
         "",
-        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | recovery_regret | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | recovery_regret | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions | plan_reuse |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary:
         rows.append(
@@ -922,7 +996,8 @@ def write_report(
             f"| {row['UpperHFPower_mean']:.4f} "
             f"| {row['LowerLFDrift_mean']:.3f} "
             f"| {row['FocusScore_mean']:.3f} "
-            f"| {row['promotion_count_mean']:.1f} |"
+            f"| {row['promotion_count_mean']:.1f} "
+            f"| {row.get('plan_curve_reuse_ratio_mean', 0.0):.3f} |"
         )
     rows.extend([
         "",
@@ -963,6 +1038,11 @@ def main() -> None:
     parser.add_argument("--promotion-speed-boost", type=float, default=0.0)
     parser.add_argument("--leakage-reward-scale", type=float, default=0.00005)
     parser.add_argument("--promotion-adaptation-cost-scale", type=float, default=0.00005)
+    parser.add_argument("--plan-curve-enable", action="store_true")
+    parser.add_argument("--plan-curve-horizon-s", type=float, default=15 * 60.0)
+    parser.add_argument("--plan-curve-replan-interval-s", type=float, default=5 * 60.0)
+    parser.add_argument("--plan-curve-basis-dim", type=int, default=2)
+    parser.add_argument("--plan-curve-desired-change-threshold", type=float, default=0.25)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -999,6 +1079,11 @@ def main() -> None:
                 promotion_speed_boost=args.promotion_speed_boost,
                 leakage_reward_scale=args.leakage_reward_scale,
                 promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
+                plan_curve_enable=args.plan_curve_enable,
+                plan_curve_horizon_s=args.plan_curve_horizon_s,
+                plan_curve_replan_interval_s=args.plan_curve_replan_interval_s,
+                plan_curve_basis_dim=args.plan_curve_basis_dim,
+                plan_curve_desired_change_threshold=args.plan_curve_desired_change_threshold,
             ))
 
     summary = aggregate(rows)
@@ -1033,6 +1118,9 @@ def main() -> None:
         promotion_speed_boost=args.promotion_speed_boost,
         leakage_reward_scale=args.leakage_reward_scale,
         promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
+        plan_curve_enable=args.plan_curve_enable,
+        plan_curve_horizon_s=args.plan_curve_horizon_s,
+        plan_curve_replan_interval_s=args.plan_curve_replan_interval_s,
     )
 
     best = max(summary, key=lambda row: row["sharpe_mean"])

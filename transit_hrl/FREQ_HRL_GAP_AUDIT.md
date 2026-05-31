@@ -16,6 +16,8 @@ Implemented:
 - Generic action-effect leakage regularizer.
 - Frequency diagnostics with FocusScore and leakage metrics.
 - Generic Bernstein plan curve.
+- Causal rolling plan-curve state for vector-valued upper plans; the synthetic
+  trading loop can now route `freq_hrl` target weights through this plan curve.
 - Transit and Trading action-effect operators.
 - Transit-compatible frequency tracker.
 - Trading market-bar tracker and toy portfolio/execution environment.
@@ -54,6 +56,10 @@ Implemented:
   including oracle-regime `recovery_regret_120`.
 - Trading decomposer ablation across causal EMA, Fourier, state-space, and
   trailing-window Haar wavelet encoders.
+- Trading plan-curve validation: enabling the upper portfolio plan curve on
+  persistent-shift `freq_hrl` raises Sharpe from `16.062` to `16.106`, reduces
+  turnover from `5.76` to `5.34`, and reduces total leakage from `1.822` to
+  `0.969`, with a `0.667` plan reuse ratio.
 - Public Level-1 ETF daily-bar validation path using local CSV inputs.
 - Public ETF encoder ablation across EMA, state-space, and Haar wavelet
   decomposers.
@@ -201,9 +207,18 @@ Implemented:
    - Done: trading heuristic planner/controller implementations exercise the
      interface and can be replaced by learned policies.
 
-3. High-level plan curve is not deployed in real runners.
-   - Generic Bernstein curve exists.
-   - Transit timetable/headway spline and Quant target portfolio curve are not yet connected to training.
+3. High-level plan curve deployment.
+   - Done in copied Transit: `runner_v3` uses `TimetableCurvePlanner` in the
+     actual dispatch/headway callback, with executable terminal launch plans,
+     plan reuse, smoothness penalties, and plan diagnostics.
+   - Done in shared core: `TimetableCurvePlanner` now delegates Bernstein basis,
+     clipping, and smoothness semantics to the generic `BernsteinPlanCurve`.
+   - Done in Quant synthetic validation: `freq_hrl` can route desired portfolio
+     targets through `CausalPlanCurveState`; the current validation improves
+     Sharpe and strongly reduces lower LF drift/leakage at a small return cost.
+   - Still partial: learned actor-critic training does not yet optimize plan
+     coefficients directly, and public-data evaluation does not yet expose the
+     plan-curve switch.
 
 4. Cross-domain validation is partial.
    - Quant has synthetic validation, pressure testing, learned-policy
@@ -277,6 +292,10 @@ now mixed rather than uniformly positive:
   burst. Stationary low-noise remains an effective tie. This makes the pressure
   result stronger than the earlier five-scenario matrix, but also shows that
   promotion tuning should be scenario-aware.
+- The new Quant plan-curve path is a positive control-loop result on the
+  default persistent-shift validation: it gives `freq_hrl` the best Sharpe
+  (`16.106`) while lowering turnover and lower LF drift, but total return
+  drops slightly (`0.2402` vs `0.2436` without plan smoothing).
 - Filter ablations found the remaining localized-burst loss comes from early
   promotion during EMA startup in one seed, not from the localized burst itself.
   A 130-minute hard warm-up or a startup activation-strength threshold can

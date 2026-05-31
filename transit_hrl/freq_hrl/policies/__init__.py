@@ -1,6 +1,6 @@
 """Policy-side helpers for Freq-HRL."""
 
-from .plan_curve import BernsteinPlanCurve
+from .plan_curve import BernsteinPlanCurve, CausalPlanCurveState
 from .interfaces import (
     HighLevelDecision,
     HighLevelPlanner,
@@ -29,6 +29,7 @@ __all__ = [
     "ActorCriticTradingParams",
     "ActorCriticTradingPlanner",
     "BernsteinPlanCurve",
+    "CausalPlanCurveState",
     "FrequencyTradingController",
     "FrequencyTradingPlanner",
     "HighLevelDecision",

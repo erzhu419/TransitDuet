@@ -74,6 +74,20 @@ class TradingPerformanceValidationTest(unittest.TestCase):
                 )
                 self.assertEqual(row["scenario"], scenario)
 
+    def test_freq_hrl_can_use_portfolio_plan_curve(self):
+        row = run_baseline(
+            seed=3,
+            baseline="freq_hrl",
+            steps=80,
+            n_assets=2,
+            plan_curve_enable=True,
+            plan_curve_horizon_s=10 * 60.0,
+            plan_curve_replan_interval_s=5 * 60.0,
+        )
+        self.assertEqual(row["plan_curve_enabled"], 1.0)
+        self.assertGreater(row["plan_curve_decisions"], 0)
+        self.assertGreater(row["plan_curve_reuse_ratio"], 0.0)
+
     def test_state_space_and_wavelet_encoders_run_in_trading_validation(self):
         for method in ("state_space", "haar_wavelet"):
             with self.subTest(method=method):

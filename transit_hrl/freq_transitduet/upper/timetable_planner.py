@@ -9,10 +9,17 @@ terminal-dispatch path it also writes executable scheduled_launch times.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import comb
+import sys
+from pathlib import Path
 from typing import Iterable
 
 import numpy as np
+
+TRANSIT_HRL_ROOT = Path(__file__).resolve().parents[2]
+if str(TRANSIT_HRL_ROOT) not in sys.path:
+    sys.path.insert(0, str(TRANSIT_HRL_ROOT))
+
+from freq_hrl.policies import BernsteinPlanCurve
 
 
 @dataclass
@@ -29,6 +36,33 @@ class TimetableCurvePlanner:
     plan_all_directions: bool = False
     terminal_shift_min_s: float = -180.0
     terminal_shift_max_s: float = 120.0
+
+    def _shared_curve(self) -> BernsteinPlanCurve:
+        return BernsteinPlanCurve(
+            horizon_s=self.horizon_s,
+            basis_dim=self.basis_per_direction,
+            min_value=self.min_headway_s,
+            max_value=self.max_headway_s,
+            delta_min=self.delta_min_s,
+            delta_max=self.delta_max_s,
+            n_entities=1 if self.shared_directions else 2,
+            shared_entities=self.shared_directions,
+        )
+
+    def _curve_for_action(self, action: Iterable[float]) -> BernsteinPlanCurve:
+        action_arr = np.asarray(action, dtype=np.float64).reshape(-1)
+        if action_arr.size == self.basis_per_direction:
+            return BernsteinPlanCurve(
+                horizon_s=self.horizon_s,
+                basis_dim=self.basis_per_direction,
+                min_value=self.min_headway_s,
+                max_value=self.max_headway_s,
+                delta_min=self.delta_min_s,
+                delta_max=self.delta_max_s,
+                n_entities=1,
+                shared_entities=True,
+            )
+        return self._shared_curve()
 
     @classmethod
     def from_config(cls, cfg, delta_max_s=120.0):
@@ -62,13 +96,7 @@ class TimetableCurvePlanner:
 
     def _basis(self, offset_s: float) -> np.ndarray:
         """Cubic Bernstein basis when basis_per_direction=4."""
-        n = max(0, self.basis_per_direction - 1)
-        if n == 0:
-            return np.ones(1, dtype=np.float64)
-        x = float(np.clip(offset_s / max(self.horizon_s, 1.0), 0.0, 1.0))
-        vals = [comb(n, i) * (x ** i) * ((1.0 - x) ** (n - i))
-                for i in range(n + 1)]
-        return np.asarray(vals, dtype=np.float64)
+        return self._shared_curve().basis(offset_s)
 
     def _coefficients(self, action: Iterable[float], direction: bool) -> np.ndarray:
         a = np.asarray(action, dtype=np.float64).reshape(-1)
@@ -88,8 +116,19 @@ class TimetableCurvePlanner:
 
     def target_headway(self, base_headway_s: float, action: Iterable[float],
                        direction: bool, offset_s: float) -> float:
-        target = float(base_headway_s) + self.delta_at(action, direction, offset_s)
-        return float(np.clip(target, self.min_headway_s, self.max_headway_s))
+        action_arr = np.asarray(action, dtype=np.float64).reshape(-1)
+        if self.shared_directions or action_arr.size == self.basis_per_direction:
+            entity_index = 0
+        else:
+            # Shared core convention maps entity 0/1 to action blocks.
+            # Transit env convention is True=up, False=down.
+            entity_index = 0 if bool(direction) else 1
+        return self._curve_for_action(action_arr).value_at(
+            base_headway_s,
+            action_arr,
+            offset_s,
+            entity_index=entity_index,
+        )
 
     @staticmethod
     def _base_headway(tt, fallback=360.0) -> float:
@@ -194,17 +233,4 @@ class TimetableCurvePlanner:
 
     def smoothness_penalty(self, action) -> float:
         """Dimensionless coefficient curvature penalty for upper reward shaping."""
-        a = np.asarray(action, dtype=np.float64).reshape(-1)
-        b = self.basis_per_direction
-        blocks = [a] if a.size == b else [a[:b], a[b:]]
-        denom = max(
-            max(abs(self.delta_min_s), abs(self.delta_max_s)) ** 2, 1.0)
-        vals = []
-        for coeffs in blocks:
-            if coeffs.size >= 3:
-                curvature = np.diff(coeffs, n=2)
-                vals.append(float(np.mean(curvature * curvature) / denom))
-            elif coeffs.size == 2:
-                slope = np.diff(coeffs)
-                vals.append(float(0.25 * np.mean(slope * slope) / denom))
-        return float(np.mean(vals)) if vals else 0.0
+        return self._curve_for_action(action).smoothness_penalty(action)
