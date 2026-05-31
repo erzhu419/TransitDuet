@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_hiro.yaml
+_name: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro
+
+# Same strict LF absorption, also allowing station-local persistent residuals
+# to update their local LF states. This is useful only if it improves wait
+# without raising lower LF drift.
+frequency:
+  promotion:
+    adapt_local: true

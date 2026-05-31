@@ -1,0 +1,18 @@
+_extends: F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml
+_name: F_freqduet_terminal_energydenoise_hold45_hiro
+
+# Terminal-domain version of the OOD-selected energy-gated denoising path
+# without the extra hold-through-positive-HF penalty. This isolates whether the
+# current main line is losing wait/composite because the hold penalty suppresses
+# useful high-frequency correction.
+frequency:
+  lower_high_noise_z: 1.0
+  lower_high_noise_energy_min: 0.08
+  promotion:
+    residual_mode: positive
+
+upper:
+  timetable_planner:
+    promotion_replan_cooldown_s: 900.0
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0

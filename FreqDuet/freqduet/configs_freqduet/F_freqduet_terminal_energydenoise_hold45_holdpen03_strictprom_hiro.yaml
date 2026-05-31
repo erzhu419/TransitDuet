@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_hiro.yaml
+_name: F_freqduet_terminal_energydenoise_hold45_holdpen03_strictprom_hiro
+
+# Promotion should mean persistent regime shift, not ordinary base-day burst.
+# Require stronger residual persistence before interrupting the rolling upper
+# timetable.
+frequency:
+  promotion:
+    residual_threshold: 1.35
+    persistence_ratio: 0.60
+    cooldown_min: 15.0
+
+upper:
+  timetable_planner:
+    promotion_replan_strength_min: 0.50
+    promotion_replan_cooldown_s: 1200.0

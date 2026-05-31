@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_strictprom_hiro.yaml
+_name: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_hiro
+
+# Dev-manual promotion step 2: when the strict gate fires, let the harmonic LF
+# state absorb part of the persistent residual instead of relying only on an
+# immediate upper replan.
+frequency:
+  promotion:
+    adapt_low: true
+    adapt_gain: 0.15
+    adapt_strength_min: 0.02

@@ -1,6 +1,7 @@
-_extends: F_freqduet_terminal_energydenoise_hold45_holdpen06_hiro.yaml
+_extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
-# Current promoted FreqDuet main path. The high-noise and OD-shift screen on
-# 2026-05-31 selected the HF-energy-gated denoising + hold45 + holdpen06 path
-# because it beat both highnoise nofreq and odshift allfreq acceptance targets.
+# Current promoted FreqDuet main path. The 2026-05-31 strict-promotion screen
+# selected the history-prior LF/HF split with HF-energy denoising, 45s terminal
+# hold cap, lighter hold-through-positive-HF penalty, and adaptive strict local
+# promotion absorption.
