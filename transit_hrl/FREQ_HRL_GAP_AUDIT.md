@@ -57,6 +57,14 @@ Implemented:
   training checkpoints but currently trade away return/Sharpe, so this is
   trainer-completeness evidence rather than the strongest learned-policy
   performance result.
+- Shared `train_dual_ppo` loop under `freq_hrl.rl.training` now drives both
+  Trading and Transit adapters through the same upper/lower trajectory batch,
+  objective, summary, checkpoint-selection, and held-out evaluation path.
+- Transit PPO surrogate adapter using `TransitFrequencyTracker` features and
+  the same shared PPO loop as Trading. The current persistent-shift held-out
+  run reaches reward `-4.460`, wait proxy `4.203`, and
+  `LowerLFDrift=1.000`; this closes the shared-core plumbing gap but is still a
+  surrogate, not the copied Transit runner's native simulator loop.
 - Lower-LF drift can now be constrained explicitly at two levels: learned
   `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
   and Lagrange controls, and the synthetic trading controller has an optional
@@ -257,7 +265,11 @@ Implemented:
      validation, and Level-1 public daily-bar validation.
    - Transit now has a copied-runner 27-seed x 10-episode performance report
      on a 9-config matrix, not just tracker smoke coverage.
-   - The same core has not yet been used in two real training/evaluation loops.
+   - Done for shared training-core plumbing: Trading PPO and Transit surrogate
+     PPO now use the same `freq_hrl.rl.train_dual_ppo` loop.
+   - Still partial: the copied Transit runner still trains through its copied
+     RESAC/runner stack; shared PPO is not yet embedded as the native trainer
+     for that simulator.
 
 5. Environment pressure-test matrix.
    - Done: pressure matrix now covers persistent shift, promotion recovery,

@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+from freq_hrl.experiments.transit.ppo_surrogate import train_transit_surrogate_ppo
 from freq_hrl.experiments.trading.ppo_actor_critic import train_ppo_actor_critic
 from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
 
@@ -47,6 +48,21 @@ class DualActorCriticTest(unittest.TestCase):
         self.assertEqual(payload["trainer"], "shared_dual_level_ppo")
         self.assertEqual(len(rows), 1)
         self.assertIn("sharpe_mean", payload["summary"])
+
+    def test_transit_surrogate_ppo_smoke(self):
+        payload, rows, _ = train_transit_surrogate_ppo(
+            train_seeds=[11],
+            eval_seeds=[101],
+            steps=30,
+            corridors=2,
+            scenario="persistent_shift",
+            iterations=1,
+            seed=7,
+        )
+        self.assertEqual(payload["trainer"], "shared_dual_level_ppo")
+        self.assertEqual(payload["domain"], "transit_surrogate")
+        self.assertEqual(len(rows), 1)
+        self.assertIn("wait_proxy_mean", payload["summary"])
 
 
 if __name__ == "__main__":

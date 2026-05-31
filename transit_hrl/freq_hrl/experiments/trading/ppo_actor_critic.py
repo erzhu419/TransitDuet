@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import copy
 import csv
 import json
 from pathlib import Path
@@ -14,7 +13,7 @@ import torch
 
 from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
+from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch, summarize_numeric_rows, train_dual_ppo
 
 from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
 
@@ -231,28 +230,13 @@ def rollout(
     return batch, row
 
 
-def concat_batches(batches: list[TrajectoryBatch]) -> TrajectoryBatch:
-    return TrajectoryBatch(
-        upper_state=np.concatenate([b.upper_state for b in batches], axis=0),
-        lower_state=np.concatenate([b.lower_state for b in batches], axis=0),
-        upper_action=np.concatenate([b.upper_action for b in batches], axis=0),
-        lower_action=np.concatenate([b.lower_action for b in batches], axis=0),
-        reward=np.concatenate([b.reward for b in batches], axis=0),
-        done=np.concatenate([b.done for b in batches], axis=0),
-        old_upper_logp=np.concatenate([b.old_upper_logp for b in batches], axis=0),
-        old_lower_logp=np.concatenate([b.old_lower_logp for b in batches], axis=0),
-        old_upper_value=np.concatenate([b.old_upper_value for b in batches], axis=0),
-        old_lower_value=np.concatenate([b.old_lower_value for b in batches], axis=0),
-    )
-
-
 def objective(row: dict[str, float]) -> float:
     return float(row["total_return"]) + 0.01 * float(row["sharpe"]) - 0.25 * float(row["max_drawdown"]) - 0.0005 * float(row["turnover"])
 
 
 def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
     keys = ["total_return", "sharpe", "max_drawdown", "turnover", "promotion_count", "leakage_penalty", "UpperHFPower", "LowerLFDrift"]
-    return {f"{key}_mean": float(np.mean([row[key] for row in rows])) for key in keys} | {"n": len(rows)}
+    return summarize_numeric_rows(rows, keys=keys)
 
 
 def train_ppo_actor_critic(
@@ -280,67 +264,32 @@ def train_ppo_actor_critic(
     )
     model = DualActorCriticPPO(config)
     initialize_frequency_prior(model, assets)
-    best_state = copy.deepcopy(model.state_dict())
-    initial_rows = [
-        rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
-        for eval_seed in train_seeds
-    ]
-    best_score = float(np.mean([objective(row) for row in initial_rows]))
-    initial_summary = summarize(initial_rows)
-    history: list[dict[str, Any]] = [{
-        "iteration": -1,
-        "score": best_score,
-        "sampled_sharpe": 0.0,
-        **initial_summary,
-        "loss": 0.0,
-        "policy_loss": 0.0,
-        "value_loss": 0.0,
-        "entropy": 0.0,
-    }]
-    for iteration in range(max(1, int(iterations))):
-        batches = []
-        sampled_rows = []
-        for train_seed in train_seeds:
-            batch, row = rollout(model, int(train_seed), steps, assets, scenario, sample=True, leakage_scale=leakage_scale)
-            if batch is not None:
-                batches.append(batch)
-            sampled_rows.append(row)
-        metrics = model.update(concat_batches(batches))
-        eval_rows = [
-            rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
-            for eval_seed in train_seeds
-        ]
-        score = float(np.mean([objective(row) for row in eval_rows]))
-        if score > best_score:
-            best_score = score
-            best_state = copy.deepcopy(model.state_dict())
-        summary = summarize(eval_rows)
-        history.append({
-            "iteration": int(iteration),
-            "score": score,
-            "sampled_sharpe": float(np.mean([row["sharpe"] for row in sampled_rows])),
-            **summary,
-            **metrics,
-        })
-    model.load_state_dict(best_state)
-    heldout_rows = [
-        rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
-        for eval_seed in eval_seeds
-    ]
-    payload = {
-        "policy": "ppo_dual_actor_critic",
-        "trainer": "shared_dual_level_ppo",
-        "scenario": scenario,
-        "train_seeds": list(train_seeds),
-        "eval_seeds": list(eval_seeds),
-        "steps": int(steps),
-        "assets": int(assets),
-        "best_score": float(best_score),
-        "leakage_scale": float(leakage_scale),
-        "config": config.__dict__,
-        "history": history,
-        "summary": summarize(heldout_rows),
-    }
+    payload, heldout_rows, model = train_dual_ppo(
+        model=model,
+        train_seeds=train_seeds,
+        eval_seeds=eval_seeds,
+        iterations=iterations,
+        rollout_fn=lambda ppo_model, rollout_seed, sample: rollout(
+            ppo_model,
+            seed=rollout_seed,
+            steps=steps,
+            assets=assets,
+            scenario=scenario,
+            sample=sample,
+            leakage_scale=leakage_scale if sample else 0.0,
+        ),
+        objective_fn=objective,
+        summary_fn=summarize,
+        policy="ppo_dual_actor_critic",
+        trainer="shared_dual_level_ppo",
+        domain="trading",
+        metadata={
+            "scenario": scenario,
+            "steps": int(steps),
+            "assets": int(assets),
+            "leakage_scale": float(leakage_scale),
+        },
+    )
     return payload, heldout_rows, model
 
 
