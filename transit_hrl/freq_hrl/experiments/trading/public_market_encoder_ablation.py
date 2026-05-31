@@ -31,8 +31,10 @@ def load_series(args: argparse.Namespace) -> tuple[list[str], list[str], np.ndar
             (path.stem, _read_price_csv(path, close_col=args.close_col))
             for path in args.csv_files
         ]
-    elif args.source == "yahoo":
-        series = [(symbol, _fetch_yahoo(symbol)) for symbol in args.symbols]
+    elif args.source in {"yahoo", "yahoo_intraday"}:
+        range_ = args.yahoo_range if args.source == "yahoo_intraday" else "10y"
+        interval = args.yahoo_interval if args.source == "yahoo_intraday" else "1d"
+        series = [(symbol, _fetch_yahoo(symbol, range_=range_, interval=interval)) for symbol in args.symbols]
     else:
         series = [
             (
@@ -76,6 +78,7 @@ def write_report(
         f"- source: `{source}`",
         f"- symbols: {symbols}",
         f"- date range: {first_date} through {last_date}",
+        f"- bar seconds: {rows[0].get('bar_sec', 24 * 3600.0)}",
         "- predictor: previous-bar log return only",
         f"- best Sharpe encoder: `{best_sharpe['freq_method']}` ({best_sharpe['sharpe']:.3f})",
         f"- best return encoder: `{best_return['freq_method']}` ({best_return['total_return']:.4f})",
@@ -102,12 +105,15 @@ def write_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["csv", "stooq", "yahoo"], default="csv")
+    parser.add_argument("--source", choices=["csv", "stooq", "yahoo", "yahoo_intraday"], default="csv")
     parser.add_argument("--csv-files", type=Path, nargs="*", default=[])
     parser.add_argument("--symbols", nargs="*", default=["spy.us", "qqq.us", "iwm.us"])
     parser.add_argument("--close-col", default="Close")
     parser.add_argument("--stooq-apikey", default="")
     parser.add_argument("--no-stooq-yahoo-fallback", action="store_true")
+    parser.add_argument("--yahoo-range", default="10y")
+    parser.add_argument("--yahoo-interval", default="1d")
+    parser.add_argument("--bar-sec", type=float, default=24 * 3600.0)
     parser.add_argument("--steps", type=int, default=1500)
     parser.add_argument("--methods", nargs="+", choices=PUBLIC_ENCODERS, default=list(PUBLIC_ENCODERS))
     parser.add_argument(
@@ -120,12 +126,14 @@ def main() -> None:
     symbols, dates, returns = load_series(args)
     rows = []
     for method in args.methods:
-        row = run_dataset_eval(returns, steps=args.steps, freq_method=method)
+        row = run_dataset_eval(returns, steps=args.steps, freq_method=method, bar_sec=args.bar_sec)
         row.update({
             "source": args.source,
             "symbols": symbols,
             "first_date": dates[1],
             "last_date": dates[-1],
+            "yahoo_range": args.yahoo_range if args.source == "yahoo_intraday" else "",
+            "yahoo_interval": args.yahoo_interval if args.source == "yahoo_intraday" else "",
         })
         rows.append(row)
     rows.sort(key=lambda row: list(PUBLIC_ENCODERS).index(row["freq_method"]))

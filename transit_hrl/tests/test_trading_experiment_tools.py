@@ -31,6 +31,9 @@ class TradingExperimentToolsTest(unittest.TestCase):
         self.assertIn("sharpe", row)
         state_row = run_dataset_eval(returns, freq_method="state_space")
         self.assertEqual(state_row["freq_method"], "state_space")
+        minute_row = run_dataset_eval(returns, freq_method="adaptive_wavelet", bar_sec=300)
+        self.assertEqual(minute_row["freq_method"], "adaptive_wavelet")
+        self.assertEqual(minute_row["bar_sec"], 300.0)
 
     def test_signal_plot_smoke(self):
         if importlib.util.find_spec("matplotlib") is None:

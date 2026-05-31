@@ -39,7 +39,17 @@ def _read_price_csv(path: Path, close_col: str = "Close") -> list[dict[str, Any]
             raise ValueError(f"CSV {path} missing close column {close_col!r}")
     out = []
     for row in rows:
-        date = row.get("Date") or row.get("date") or str(len(out))
+        date = (
+            row.get("Datetime")
+            or row.get("datetime")
+            or row.get("Timestamp")
+            or row.get("timestamp")
+            or row.get("Time")
+            or row.get("time")
+            or row.get("Date")
+            or row.get("date")
+            or str(len(out))
+        )
         try:
             close = float(row[close_col])
         except (TypeError, ValueError):
@@ -64,12 +74,14 @@ def _symbol_to_yahoo(symbol: str) -> str:
     return symbol.upper()
 
 
-def _fetch_yahoo(symbol: str) -> list[dict[str, Any]]:
+def _fetch_yahoo(symbol: str, range_: str = "10y", interval: str = "1d") -> list[dict[str, Any]]:
     ticker = _symbol_to_yahoo(symbol)
     encoded = urllib.parse.quote(ticker, safe="")
     url = (
         f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded}"
-        "?range=10y&interval=1d&events=history&includeAdjustedClose=true"
+        f"?range={urllib.parse.quote(str(range_), safe='')}"
+        f"&interval={urllib.parse.quote(str(interval), safe='')}"
+        "&events=history&includeAdjustedClose=true"
     )
     payload = _download_text(url)
     data = json.loads(payload)
@@ -89,7 +101,8 @@ def _fetch_yahoo(symbol: str) -> list[dict[str, Any]]:
         except (TypeError, ValueError):
             continue
         if math.isfinite(close_f) and close_f > 0.0:
-            date = datetime.fromtimestamp(float(ts), tz=timezone.utc).date().isoformat()
+            dt = datetime.fromtimestamp(float(ts), tz=timezone.utc)
+            date = dt.date().isoformat() if interval == "1d" else dt.isoformat()
             out.append({"date": date, "close": close_f})
     if len(out) < 3:
         raise ValueError(f"not enough Yahoo rows for {symbol}")
@@ -145,6 +158,7 @@ def run_dataset_eval(
     returns: np.ndarray,
     steps: int | None = None,
     freq_method: str = "ema",
+    bar_sec: float = 24 * 3600.0,
 ) -> dict[str, Any]:
     if steps is not None:
         returns = returns[-int(steps):]
@@ -154,6 +168,8 @@ def run_dataset_eval(
     predictor = np.zeros_like(returns)
     predictor[1:] = returns[:-1]
     volume_proxy = 1.0 + 100.0 * np.abs(returns)
+    bar_sec = max(float(bar_sec), 1.0)
+    periods_per_year = 252.0 if bar_sec >= 12 * 3600.0 else 252.0 * 6.5 * 3600.0 / bar_sec
     env = PortfolioExecutionEnv(
         returns,
         volumes=volume_proxy,
@@ -165,20 +181,20 @@ def run_dataset_eval(
         ),
     )
     tracker = TradingFrequencyTracker(
-        bar_sec=24 * 3600.0,
+        bar_sec=bar_sec,
         method=freq_method,
-        low_period_s=90 * 24 * 3600.0,
-        fast_period_s=5 * 24 * 3600.0,
-        mid_period_s=30 * 24 * 3600.0,
-        energy_period_s=10 * 24 * 3600.0,
-        persistence_period_s=30 * 24 * 3600.0,
+        low_period_s=90 * bar_sec,
+        fast_period_s=5 * bar_sec,
+        mid_period_s=30 * bar_sec,
+        energy_period_s=10 * bar_sec,
+        persistence_period_s=30 * bar_sec,
         persistence_threshold=0.010,
         feature_norm=np.ones(assets) * 0.015,
         promotion_enable=True,
-        promotion_window_s=30 * 24 * 3600.0,
+        promotion_window_s=30 * bar_sec,
         promotion_residual_threshold=0.006,
         promotion_persistence_ratio=0.40,
-        promotion_cooldown_s=60 * 24 * 3600.0,
+        promotion_cooldown_s=60 * bar_sec,
         promotion_adapt_low=True,
         promotion_adapt_gain=0.25,
     )
@@ -190,7 +206,7 @@ def run_dataset_eval(
     turnover = []
     promotions = 0
     for t in range(returns.shape[0]):
-        freq = tracker.update_bar(predictor[t], t=float(t * 24 * 3600.0))
+        freq = tracker.update_bar(predictor[t], t=float(t * bar_sec))
         promotions += 1 if dict(freq.get("promotion", {}) or {}).get("promote", False) else 0
         obs = {"raw_signal": predictor[t], "position": env.position.copy(), "t": t}
         upper = planner.plan(obs, tracker.upper_features(), context={"frequency": freq, "n_assets": assets})
@@ -207,9 +223,10 @@ def run_dataset_eval(
     return {
         "bars": int(returns.shape[0]),
         "assets": int(assets),
+        "bar_sec": float(bar_sec),
         "freq_method": str(freq_method),
         "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(252.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
+        "sharpe": float(np.sqrt(periods_per_year) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
         "max_drawdown": max_drawdown(eq),
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotions),
@@ -223,6 +240,7 @@ def write_report(path: Path, symbols: list[str], summary: dict[str, Any], source
         f"- source: `{source}`",
         f"- symbols: {symbols}",
         f"- frequency encoder: `{summary.get('freq_method', 'ema')}`",
+        f"- bar seconds: {summary.get('bar_sec', 24 * 3600.0)}",
         "- predictor: previous-bar log return only, so current/future returns are not used as policy input",
         f"- bars: {summary['bars']}",
         f"- total return: {summary['total_return']:.4f}",
@@ -238,14 +256,17 @@ def write_report(path: Path, symbols: list[str], summary: dict[str, Any], source
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", choices=["csv", "stooq", "yahoo"], default="csv")
+    parser.add_argument("--source", choices=["csv", "stooq", "yahoo", "yahoo_intraday"], default="csv")
     parser.add_argument("--csv-files", type=Path, nargs="*", default=[])
     parser.add_argument("--symbols", nargs="*", default=["spy.us", "qqq.us", "iwm.us"])
     parser.add_argument("--close-col", default="Close")
     parser.add_argument("--stooq-apikey", default=os.environ.get("STOOQ_APIKEY", ""))
     parser.add_argument("--no-stooq-yahoo-fallback", action="store_true")
+    parser.add_argument("--yahoo-range", default="10y")
+    parser.add_argument("--yahoo-interval", default="1d")
+    parser.add_argument("--bar-sec", type=float, default=24 * 3600.0)
     parser.add_argument("--steps", type=int, default=None)
-    parser.add_argument("--freq-method", choices=["ema", "state_space", "haar_wavelet"], default="ema")
+    parser.add_argument("--freq-method", choices=["ema", "state_space", "haar_wavelet", "adaptive_wavelet"], default="ema")
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_public_market"))
     args = parser.parse_args()
 
@@ -256,8 +277,10 @@ def main() -> None:
             (path.stem, _read_price_csv(path, close_col=args.close_col))
             for path in args.csv_files
         ]
-    elif args.source == "yahoo":
-        series = [(symbol, _fetch_yahoo(symbol)) for symbol in args.symbols]
+    elif args.source in {"yahoo", "yahoo_intraday"}:
+        range_ = args.yahoo_range if args.source == "yahoo_intraday" else "10y"
+        interval = args.yahoo_interval if args.source == "yahoo_intraday" else "1d"
+        series = [(symbol, _fetch_yahoo(symbol, range_=range_, interval=interval)) for symbol in args.symbols]
     else:
         series = [
             (
@@ -273,12 +296,14 @@ def main() -> None:
     symbols = [name for name, _ in series]
     dates, prices = align_prices(series)
     returns = price_returns(prices)
-    summary = run_dataset_eval(returns, steps=args.steps, freq_method=args.freq_method)
+    summary = run_dataset_eval(returns, steps=args.steps, freq_method=args.freq_method, bar_sec=args.bar_sec)
     summary.update({
         "source": args.source,
         "symbols": symbols,
         "first_date": dates[1],
         "last_date": dates[-1],
+        "yahoo_range": args.yahoo_range if args.source == "yahoo_intraday" else "",
+        "yahoo_interval": args.yahoo_interval if args.source == "yahoo_intraday" else "",
     })
     args.output_dir.mkdir(parents=True, exist_ok=True)
     with (args.output_dir / "summary.json").open("w", encoding="utf-8") as f:

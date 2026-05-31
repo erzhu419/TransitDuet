@@ -111,6 +111,12 @@ Implemented:
 - Public Level-1 ETF daily-bar validation path using local CSV inputs.
 - Public ETF encoder ablation across EMA, state-space, and Haar wavelet
   decomposers.
+- Public intraday Yahoo/CSV validation path with configurable bar seconds,
+  range, and interval. A 5-minute SPY/QQQ/IWM encoder ablation over
+  2026-05-22 through 2026-05-29 ran 390 aligned bars; adaptive wavelet had the
+  best Sharpe among tested encoders (`-9.220`) while EMA had the best return
+  (`-0.0034`). This is real intraday data depth, but still Level-1 trades,
+  not order-book execution.
 - Diagnostic plot generation for signal decomposition, promotion, ablations,
   FocusScore, NoLeakage drift comparison, pressure matrix, and promotion
   recovery.
@@ -354,7 +360,11 @@ Implemented:
      drawdown `0.279`.
    - Done: public-data encoder ablation on the same SPY/QQQ/IWM slice shows
      Haar wavelet as the best Level-1 public-data encoder.
-   - No Level-2 minute crypto/stock validation.
+   - Done: Level-2-style minute/intraday bar support for public Yahoo and CSV
+     inputs. The current 5-minute SPY/QQQ/IWM run covers 2026-05-22T13:35:00Z
+     through 2026-05-29T20:00:00Z with 390 aligned bars; all tested policies
+     lose money on this short slice, but adaptive wavelet has the least bad
+     Sharpe (`-9.220`) and EMA has the best return (`-0.0034`).
    - No Level-3 order-book/market-making validation.
 
 ## Current Blocking Evidence
@@ -448,8 +458,10 @@ fully validated, domain-general Frequency-Separated HRL
 4. Extend the shared PPO path with plan-coefficient actions and/or add
    off-policy SAC/TD3-style replay so the current control-level lower-drift
    constraint can be learned end-to-end instead of hand-coded.
-5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
+5. Broaden Level-2 minute/intraday validation beyond the current short Yahoo
+   5-minute ETF slice, and add Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
 7. Tune state-space, Haar, and adaptive wavelet encoder hyperparameters by
-   domain, add neural state-space/PINN variants, and add Level-2 minute data to
-   check whether the public daily-bar Haar result survives at higher frequency.
+   domain, add neural state-space/PINN variants, and use broader Level-2
+   minute data to check whether the public daily-bar Haar result survives at
+   higher frequency.
