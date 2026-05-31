@@ -4,7 +4,8 @@ import numpy as np
 
 from freq_hrl.experiments.transit.ppo_surrogate import train_transit_surrogate_ppo
 from freq_hrl.experiments.trading.ppo_actor_critic import train_ppo_actor_critic
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
+from freq_hrl.policies import BernsteinPlanCurve
+from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, LearnedPlanActionMapper, TrajectoryBatch
 
 
 class DualActorCriticTest(unittest.TestCase):
@@ -34,6 +35,17 @@ class DualActorCriticTest(unittest.TestCase):
         metrics = model.update(batch)
         self.assertIn("policy_loss", metrics)
         self.assertIn("value_loss", metrics)
+
+    def test_learned_plan_action_mapper(self):
+        mapper = LearnedPlanActionMapper(
+            curve=BernsteinPlanCurve(horizon_s=600.0, basis_dim=3, n_entities=2, delta_min=-0.5, delta_max=0.5),
+            coefficient_scale=0.5,
+            eval_offset_s=300.0,
+        )
+        out = mapper.target(np.zeros(2, dtype=np.float64), np.ones(mapper.action_dim, dtype=np.float64) * 0.25)
+        self.assertEqual(out.target.shape, (2,))
+        self.assertEqual(out.coefficients.shape, (6,))
+        self.assertGreaterEqual(out.smoothness_penalty, 0.0)
 
     def test_trading_ppo_actor_critic_smoke(self):
         payload, rows, _ = train_ppo_actor_critic(

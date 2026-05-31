@@ -13,7 +13,15 @@ import torch
 
 from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch, summarize_numeric_rows, train_dual_ppo
+from freq_hrl.policies import BernsteinPlanCurve
+from freq_hrl.rl import (
+    DualActorCriticPPO,
+    DualPPOConfig,
+    LearnedPlanActionMapper,
+    TrajectoryBatch,
+    summarize_numeric_rows,
+    train_dual_ppo,
+)
 
 from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
 
@@ -85,7 +93,7 @@ def feature_vectors(freq: dict[str, Any], position: np.ndarray, target: np.ndarr
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
-def initialize_frequency_prior(model: DualActorCriticPPO, assets: int) -> None:
+def initialize_frequency_prior(model: DualActorCriticPPO, assets: int, plan_basis_dim: int = 0) -> None:
     """Initialize the linear actors near the existing frequency-routing prior."""
     if model.config.hidden_dim != 0:
         return
@@ -97,10 +105,15 @@ def initialize_frequency_prior(model: DualActorCriticPPO, assets: int) -> None:
         lower_linear.weight.zero_()
         lower_linear.bias.zero_()
         for i in range(assets):
-            upper_linear.weight[i, i] = 1.0
-            upper_linear.weight[i, assets + i] = 0.20
-            upper_linear.weight[i, 3 * assets + i] = 0.40
-            upper_linear.weight[i, 4 * assets + i] = -0.05
+            upper_rows = [i] if int(plan_basis_dim) <= 0 else [
+                i * int(plan_basis_dim) + k for k in range(int(plan_basis_dim))
+            ]
+            for k, row in enumerate(upper_rows):
+                ramp = float(k + 1) / max(float(len(upper_rows)), 1.0)
+                upper_linear.weight[row, i] = 0.75 * ramp
+                upper_linear.weight[row, assets + i] = 0.18 * ramp
+                upper_linear.weight[row, 3 * assets + i] = 0.32 * ramp
+                upper_linear.weight[row, 4 * assets + i] = -0.10 * ramp
             lower_linear.weight[i, assets + i] = 0.20
             lower_linear.weight[i, 2 * assets + i] = 0.02
             lower_linear.bias[i] = 0.20
@@ -108,6 +121,31 @@ def initialize_frequency_prior(model: DualActorCriticPPO, assets: int) -> None:
 
 def latent_target(latent: np.ndarray) -> np.ndarray:
     return gross_cap(np.tanh(np.asarray(latent, dtype=np.float64)))
+
+
+def make_plan_mapper(
+    assets: int,
+    plan_basis_dim: int,
+    plan_horizon_s: float,
+    plan_eval_offset_s: float,
+    plan_coefficient_scale: float,
+) -> LearnedPlanActionMapper | None:
+    if int(plan_basis_dim) <= 0:
+        return None
+    curve = BernsteinPlanCurve(
+        horizon_s=float(plan_horizon_s),
+        basis_dim=int(plan_basis_dim),
+        min_value=-1.0,
+        max_value=1.0,
+        delta_min=-float(plan_coefficient_scale),
+        delta_max=float(plan_coefficient_scale),
+        n_entities=int(assets),
+    )
+    return LearnedPlanActionMapper(
+        curve=curve,
+        coefficient_scale=float(plan_coefficient_scale),
+        eval_offset_s=float(plan_eval_offset_s),
+    )
 
 
 def latent_speed(latent: np.ndarray) -> np.ndarray:
@@ -122,6 +160,7 @@ def rollout(
     scenario: str,
     sample: bool,
     leakage_scale: float = 0.0,
+    plan_mapper: LearnedPlanActionMapper | None = None,
 ) -> tuple[TrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -156,6 +195,8 @@ def rollout(
     turnover: list[float] = []
     targets: list[np.ndarray] = []
     lower_effects: list[np.ndarray] = []
+    plan_smoothness: list[float] = []
+    plan_coeff_abs: list[float] = []
     promotions = 0
     env.reset()
     for t in range(steps):
@@ -164,7 +205,13 @@ def rollout(
             promotions += 1
         upper_state, lower_state_probe = feature_vectors(dict(freq), env.position.copy())
         upper_out = model.act_upper(upper_state, sample=sample)
-        target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
+        if plan_mapper is None:
+            target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
+        else:
+            plan = plan_mapper.target(env.position.copy(), np.asarray(upper_out["action"], dtype=np.float64))
+            target = gross_cap(plan.target)
+            plan_smoothness.append(float(plan.smoothness_penalty))
+            plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
         _, lower_state = feature_vectors(dict(freq), env.position.copy(), target=target)
         lower_out = model.act_lower(lower_state, sample=sample)
         speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
@@ -212,6 +259,8 @@ def rollout(
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
+        "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
+        "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
     }
     if not sample:
         return None, row
@@ -235,7 +284,18 @@ def objective(row: dict[str, float]) -> float:
 
 
 def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
-    keys = ["total_return", "sharpe", "max_drawdown", "turnover", "promotion_count", "leakage_penalty", "UpperHFPower", "LowerLFDrift"]
+    keys = [
+        "total_return",
+        "sharpe",
+        "max_drawdown",
+        "turnover",
+        "promotion_count",
+        "leakage_penalty",
+        "UpperHFPower",
+        "LowerLFDrift",
+        "plan_smoothness",
+        "plan_coeff_abs",
+    ]
     return summarize_numeric_rows(rows, keys=keys)
 
 
@@ -248,13 +308,24 @@ def train_ppo_actor_critic(
     iterations: int,
     seed: int,
     leakage_scale: float = 0.0,
+    plan_basis_dim: int = 0,
+    plan_horizon_s: float = 1800.0,
+    plan_eval_offset_s: float = 300.0,
+    plan_coefficient_scale: float = 0.75,
 ) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
+    plan_mapper = make_plan_mapper(
+        assets=assets,
+        plan_basis_dim=plan_basis_dim,
+        plan_horizon_s=plan_horizon_s,
+        plan_eval_offset_s=plan_eval_offset_s,
+        plan_coefficient_scale=plan_coefficient_scale,
+    )
     config = DualPPOConfig(
         upper_state_dim=5 * assets + 1,
         lower_state_dim=3 * assets + 1,
-        upper_action_dim=assets,
+        upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=assets,
         hidden_dim=0,
         learning_rate=0.003,
@@ -263,7 +334,7 @@ def train_ppo_actor_critic(
         init_log_std=-2.5,
     )
     model = DualActorCriticPPO(config)
-    initialize_frequency_prior(model, assets)
+    initialize_frequency_prior(model, assets, plan_basis_dim=plan_basis_dim)
     payload, heldout_rows, model = train_dual_ppo(
         model=model,
         train_seeds=train_seeds,
@@ -277,6 +348,7 @@ def train_ppo_actor_critic(
             scenario=scenario,
             sample=sample,
             leakage_scale=leakage_scale if sample else 0.0,
+            plan_mapper=plan_mapper,
         ),
         objective_fn=objective,
         summary_fn=summarize,
@@ -288,6 +360,14 @@ def train_ppo_actor_critic(
             "steps": int(steps),
             "assets": int(assets),
             "leakage_scale": float(leakage_scale),
+            "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
+            **(plan_mapper.to_metadata() if plan_mapper is not None else {
+                "plan_basis_dim": 0,
+                "plan_horizon_s": 0.0,
+                "plan_eval_offset_s": 0.0,
+                "plan_coefficient_scale": 0.0,
+                "plan_action_dim": int(assets),
+            }),
         },
     )
     return payload, heldout_rows, model
@@ -309,6 +389,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "# PPO Dual Actor-Critic Trading Validation",
         "",
         f"- trainer: `{payload['trainer']}`",
+        f"- plan mode: `{payload['plan_mode']}`",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -318,6 +399,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- turnover mean: {summary['turnover_mean']:.2f}",
         f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
         f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
+        f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         "",
         "This validates the shared upper/lower PPO actor-critic training core. It uses trading as a domain adapter; the trainer itself only depends on upper/lower states, latent actions, rewards, and done flags.",
     ]
@@ -334,6 +417,10 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=8)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
     parser.add_argument("--leakage-scale", type=float, default=0.0)
+    parser.add_argument("--plan-basis-dim", type=int, default=0)
+    parser.add_argument("--plan-horizon-s", type=float, default=1800.0)
+    parser.add_argument("--plan-eval-offset-s", type=float, default=300.0)
+    parser.add_argument("--plan-coefficient-scale", type=float, default=0.75)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -345,6 +432,10 @@ def main() -> None:
         iterations=args.iterations,
         seed=args.optimizer_seed,
         leakage_scale=args.leakage_scale,
+        plan_basis_dim=args.plan_basis_dim,
+        plan_horizon_s=args.plan_horizon_s,
+        plan_eval_offset_s=args.plan_eval_offset_s,
+        plan_coefficient_scale=args.plan_coefficient_scale,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

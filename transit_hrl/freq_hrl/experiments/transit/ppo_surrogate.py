@@ -13,7 +13,15 @@ import torch
 
 from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
 from freq_hrl.domains.transit import TransitFrequencyTracker
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch, summarize_numeric_rows, train_dual_ppo
+from freq_hrl.policies import BernsteinPlanCurve
+from freq_hrl.rl import (
+    DualActorCriticPPO,
+    DualPPOConfig,
+    LearnedPlanActionMapper,
+    TrajectoryBatch,
+    summarize_numeric_rows,
+    train_dual_ppo,
+)
 
 SCENARIOS = ("persistent_shift", "localized_burst", "stationary")
 
@@ -93,11 +101,36 @@ def latent_headway_delta(latent: np.ndarray, max_delta_s: float = 30.0) -> np.nd
     return np.tanh(np.asarray(latent, dtype=np.float64)) * float(max_delta_s)
 
 
+def make_plan_mapper(
+    corridors: int,
+    plan_basis_dim: int,
+    plan_horizon_s: float,
+    plan_eval_offset_s: float,
+    plan_coefficient_scale_s: float,
+) -> LearnedPlanActionMapper | None:
+    if int(plan_basis_dim) <= 0:
+        return None
+    curve = BernsteinPlanCurve(
+        horizon_s=float(plan_horizon_s),
+        basis_dim=int(plan_basis_dim),
+        min_value=-30.0,
+        max_value=30.0,
+        delta_min=-float(plan_coefficient_scale_s),
+        delta_max=float(plan_coefficient_scale_s),
+        n_entities=int(corridors),
+    )
+    return LearnedPlanActionMapper(
+        curve=curve,
+        coefficient_scale=float(plan_coefficient_scale_s),
+        eval_offset_s=float(plan_eval_offset_s),
+    )
+
+
 def latent_hold(latent: np.ndarray, max_hold_s: float = 45.0) -> np.ndarray:
     return float(max_hold_s) / (1.0 + np.exp(-np.asarray(latent, dtype=np.float64)))
 
 
-def initialize_transit_prior(model: DualActorCriticPPO, corridors: int) -> None:
+def initialize_transit_prior(model: DualActorCriticPPO, corridors: int, plan_basis_dim: int = 0) -> None:
     if model.config.hidden_dim != 0:
         return
     with torch.no_grad():
@@ -108,8 +141,13 @@ def initialize_transit_prior(model: DualActorCriticPPO, corridors: int) -> None:
         lower_linear.weight.zero_()
         lower_linear.bias.zero_()
         for i in range(int(corridors)):
-            upper_linear.weight[i, 0] = -0.75
-            upper_linear.weight[i, 2] = -0.35
+            upper_rows = [i] if int(plan_basis_dim) <= 0 else [
+                i * int(plan_basis_dim) + k for k in range(int(plan_basis_dim))
+            ]
+            for k, row in enumerate(upper_rows):
+                ramp = float(k + 1) / max(float(len(upper_rows)), 1.0)
+                upper_linear.weight[row, 0] = -0.75 * ramp
+                upper_linear.weight[row, 2] = -0.35 * ramp
             lower_linear.bias[i] = -1.6
 
 
@@ -121,6 +159,7 @@ def rollout(
     scenario: str,
     sample: bool,
     leakage_scale: float = 0.0,
+    plan_mapper: LearnedPlanActionMapper | None = None,
 ) -> tuple[TrajectoryBatch | None, dict[str, Any]]:
     demand = make_synthetic_transit_demand(seed, steps, corridors, scenario)
     tracker = make_tracker()
@@ -146,7 +185,10 @@ def rollout(
     cv_proxy: list[float] = []
     hold_trace: list[np.ndarray] = []
     target_trace: list[np.ndarray] = []
+    plan_smoothness: list[float] = []
+    plan_coeff_abs: list[float] = []
     promotions = 0
+    current_plan_delta = np.zeros(corridors, dtype=np.float64)
     for t in range(int(steps)):
         arrivals = {(i, True): float(demand[t, i]) for i in range(corridors)}
         tracker.update(arrivals)
@@ -154,7 +196,14 @@ def rollout(
             promotions += 1
         upper_state, _ = feature_vectors(tracker, service_gap)
         upper_out = model.act_upper(upper_state, sample=sample)
-        target_delta = latent_headway_delta(np.asarray(upper_out["action"], dtype=np.float64))
+        if plan_mapper is None:
+            target_delta = latent_headway_delta(np.asarray(upper_out["action"], dtype=np.float64))
+        else:
+            plan = plan_mapper.target(current_plan_delta, np.asarray(upper_out["action"], dtype=np.float64))
+            target_delta = np.clip(plan.target, -30.0, 30.0)
+            current_plan_delta = target_delta.copy()
+            plan_smoothness.append(float(plan.smoothness_penalty))
+            plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
         _, lower_state = feature_vectors(tracker, service_gap, target_delta)
         lower_out = model.act_lower(lower_state, sample=sample)
         hold_s = latent_hold(np.asarray(lower_out["action"], dtype=np.float64))
@@ -202,6 +251,8 @@ def rollout(
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
+        "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
+        "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
     }
     if not sample:
         return None, row
@@ -235,6 +286,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "leakage_penalty",
         "UpperHFPower",
         "LowerLFDrift",
+        "plan_smoothness",
+        "plan_coeff_abs",
     ]
     return summarize_numeric_rows(rows, keys=keys)
 
@@ -248,16 +301,27 @@ def train_transit_surrogate_ppo(
     iterations: int,
     seed: int,
     leakage_scale: float = 0.0,
+    plan_basis_dim: int = 0,
+    plan_horizon_s: float = 1800.0,
+    plan_eval_offset_s: float = 300.0,
+    plan_coefficient_scale_s: float = 18.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
+    plan_mapper = make_plan_mapper(
+        corridors=corridors,
+        plan_basis_dim=plan_basis_dim,
+        plan_horizon_s=plan_horizon_s,
+        plan_eval_offset_s=plan_eval_offset_s,
+        plan_coefficient_scale_s=plan_coefficient_scale_s,
+    )
     probe = make_tracker()
     upper_dim = int(probe.upper_features("low_mid").size + corridors + 1)
     lower_dim = int(corridors * probe.lower_features(0, True, "high_mid").size + 2 * corridors + 1)
     config = DualPPOConfig(
         upper_state_dim=upper_dim,
         lower_state_dim=lower_dim,
-        upper_action_dim=corridors,
+        upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else corridors,
         lower_action_dim=corridors,
         hidden_dim=0,
         learning_rate=0.002,
@@ -266,7 +330,7 @@ def train_transit_surrogate_ppo(
         init_log_std=-2.0,
     )
     model = DualActorCriticPPO(config)
-    initialize_transit_prior(model, corridors)
+    initialize_transit_prior(model, corridors, plan_basis_dim=plan_basis_dim)
     return train_dual_ppo(
         model=model,
         train_seeds=train_seeds,
@@ -280,6 +344,7 @@ def train_transit_surrogate_ppo(
             scenario=scenario,
             sample=sample,
             leakage_scale=leakage_scale if sample else 0.0,
+            plan_mapper=plan_mapper,
         ),
         objective_fn=objective,
         summary_fn=summarize,
@@ -291,6 +356,14 @@ def train_transit_surrogate_ppo(
             "steps": int(steps),
             "corridors": int(corridors),
             "leakage_scale": float(leakage_scale),
+            "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_delta",
+            **(plan_mapper.to_metadata() if plan_mapper is not None else {
+                "plan_basis_dim": 0,
+                "plan_horizon_s": 0.0,
+                "plan_eval_offset_s": 0.0,
+                "plan_coefficient_scale": 0.0,
+                "plan_action_dim": int(corridors),
+            }),
         },
     )
 
@@ -312,6 +385,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "",
         f"- trainer: `{payload['trainer']}`",
         f"- domain: `{payload['domain']}`",
+        f"- plan mode: `{payload['plan_mode']}`",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -321,6 +395,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- hold mean: {summary['hold_mean_mean']:.2f}",
         f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
         f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
+        f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         "",
         "This uses the same `freq_hrl.rl.train_dual_ppo` loop as the trading PPO validation, with Transit frequency features and a transit-control surrogate adapter.",
     ]
@@ -337,6 +413,10 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=8)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
     parser.add_argument("--leakage-scale", type=float, default=0.0)
+    parser.add_argument("--plan-basis-dim", type=int, default=0)
+    parser.add_argument("--plan-horizon-s", type=float, default=1800.0)
+    parser.add_argument("--plan-eval-offset-s", type=float, default=300.0)
+    parser.add_argument("--plan-coefficient-scale-s", type=float, default=18.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/transit_ppo_surrogate"))
     args = parser.parse_args()
     payload, rows, model = train_transit_surrogate_ppo(
@@ -348,6 +428,10 @@ def main() -> None:
         iterations=args.iterations,
         seed=args.optimizer_seed,
         leakage_scale=args.leakage_scale,
+        plan_basis_dim=args.plan_basis_dim,
+        plan_horizon_s=args.plan_horizon_s,
+        plan_eval_offset_s=args.plan_eval_offset_s,
+        plan_coefficient_scale_s=args.plan_coefficient_scale_s,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

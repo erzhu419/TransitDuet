@@ -5,11 +5,14 @@ from .dual_actor_critic import (
     DualPPOConfig,
     TrajectoryBatch,
 )
+from .plan_actions import LearnedPlanActionMapper, PlanActionResult
 from .training import concat_batches, summarize_numeric_rows, train_dual_ppo
 
 __all__ = [
     "DualActorCriticPPO",
     "DualPPOConfig",
+    "LearnedPlanActionMapper",
+    "PlanActionResult",
     "TrajectoryBatch",
     "concat_batches",
     "summarize_numeric_rows",

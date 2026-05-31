@@ -65,6 +65,13 @@ Implemented:
   run reaches reward `-4.460`, wait proxy `4.203`, and
   `LowerLFDrift=1.000`; this closes the shared-core plumbing gap but is still a
   surrogate, not the copied Transit runner's native simulator loop.
+- Learned Bernstein plan-curve actions for PPO upper policies. The upper actor
+  can now output plan coefficients instead of one-step targets, and a shared
+  mapper converts those coefficients into executable portfolio/headway targets
+  for lower control. The trading plan-action run reaches return `0.2991`,
+  Sharpe `14.750`, `LowerLFDrift=1.548`, and plan smoothness
+  `0.000008`; the Transit surrogate plan-action run reaches reward `-4.500`,
+  wait proxy `4.200`, and `LowerLFDrift=1.000`.
 - Lower-LF drift can now be constrained explicitly at two levels: learned
   `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
   and Lagrange controls, and the synthetic trading controller has an optional
@@ -256,9 +263,11 @@ Implemented:
    - Done in Quant synthetic validation: `freq_hrl` can route desired portfolio
      targets through `CausalPlanCurveState`; the current validation improves
      Sharpe and strongly reduces lower LF drift/leakage at a small return cost.
-   - Still partial: learned actor-critic training does not yet optimize plan
-     coefficients directly, and public-data evaluation does not yet expose the
-     plan-curve switch.
+   - Done in shared PPO adapters: upper actors can optimize Bernstein plan
+     coefficients directly for both Trading and Transit surrogate control.
+   - Still partial: public-data evaluation does not yet expose the plan-curve
+     switch, and the copied Transit simulator still uses hand-coded timetable
+     replanning rather than shared PPO plan-coefficient training.
 
 4. Cross-domain validation is partial.
    - Quant has synthetic validation, pressure testing, learned-policy
