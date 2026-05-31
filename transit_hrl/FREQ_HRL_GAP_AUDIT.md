@@ -8,8 +8,8 @@ This audit compares the current `transit_hrl/freq_hrl` implementation against
 Implemented:
 
 - Domain-agnostic core package under `freq_hrl`.
-- Causal EMA, causal Fourier, causal state-space, and trailing-window Haar
-  wavelet encoders.
+- Causal EMA, causal Fourier, causal state-space, trailing-window Haar wavelet,
+  and causal adaptive lifting-wavelet encoders.
 - Causal stream binning adapter.
 - Upper/lower frequency router with mask tests.
 - Promotion gate with persistence, hysteresis, and cooldown.
@@ -98,8 +98,8 @@ Implemented:
 - Promotion recovery sweep with sharded scheduler execution and merge output.
 - Dedicated promotion-recovery validation on a persistent reversal shock,
   including oracle-regime `recovery_regret_120`.
-- Trading decomposer ablation across causal EMA, Fourier, state-space, and
-  trailing-window Haar wavelet encoders.
+- Trading decomposer ablation across causal EMA, Fourier, state-space,
+  trailing-window Haar wavelet, and adaptive lifting-wavelet encoders.
 - Trading plan-curve validation: enabling the upper portfolio plan curve on
   persistent-shift `freq_hrl` raises Sharpe from `16.062` to `16.106`, reduces
   turnover from `5.76` to `5.34`, and reduces total leakage from `1.822` to
@@ -330,17 +330,21 @@ Implemented:
 7. Advanced encoders.
    - Done: Level-2 causal state-space encoder with uncertainty.
    - Done: Level-3 trailing-window causal Haar wavelet-style encoder.
-   - Done: trading encoder ablation was run for EMA, Fourier, state-space, and
-     Haar wavelet on the persistent-shift scenario.
+   - Done: causal adaptive lifting-wavelet encoder with online normalized-LMS
+     predictor learning; it is available in both Trading and Transit trackers.
+   - Done: trading encoder ablation was run for EMA, Fourier, state-space,
+     Haar wavelet, and adaptive wavelet on the persistent-shift scenario.
    - Current evidence: EMA is still strongest in that ablation
-     (Sharpe `16.062` vs Fourier `7.011`, state-space `8.931`, and Haar
-     wavelet `12.712`), so the new encoders are not the source of the
-     persistent-shift synthetic gains.
+     (Sharpe `16.062` vs Fourier `7.011`, state-space `8.931`, Haar wavelet
+     `12.712`, and adaptive wavelet `13.075`), so the advanced encoders are
+     not the source of the persistent-shift synthetic gains. Adaptive wavelet
+     improves over Haar on this synthetic task but remains below EMA.
    - Done: public SPY/QQQ/IWM daily-bar encoder ablation now gives the Haar
      wavelet encoder the best Sharpe/return on the 1500-bar public CSV slice
      (`0.596` Sharpe, `0.7667` return) versus EMA (`0.406`, `0.3957`) and
      state-space (`0.066`, `-0.0214`).
-   - No learnable wavelet or neural state-space encoder.
+   - Done for a causal online learned wavelet-style encoder; still no neural
+     state-space encoder.
    - No PINN-constrained encoder.
 
 8. Public/real market data experiments.
@@ -412,10 +416,11 @@ now mixed rather than uniformly positive:
 - Reward attribution is now logged in the trading validation as LF cost, HF
   cost, leakage cost, promotion adaptation cost, upper credit, and lower credit.
 - The synthetic decomposer ablation still shows that replacing EMA with Fourier,
-  state-space, or Haar wavelet reduces Sharpe on the persistent-shift synthetic
-  task. However, the public SPY/QQQ/IWM encoder ablation now gives the Haar
-  wavelet encoder the best daily-bar Sharpe/return, so encoder sophistication
-  has real-data upside but is not a universal default.
+  state-space, Haar wavelet, or adaptive wavelet reduces Sharpe on the
+  persistent-shift synthetic task. Adaptive wavelet improves over Haar in that
+  synthetic ablation, and the public SPY/QQQ/IWM encoder ablation gives the
+  Haar wavelet encoder the best daily-bar Sharpe/return, so encoder
+  sophistication has real-data upside but is not a universal default.
 - HF speed and residual-order lower actions did not improve the default
   high-cost trading environment; the default now disables them, while keeping
   them as explicit sweep parameters for lower-cost execution settings.
@@ -445,6 +450,6 @@ fully validated, domain-general Frequency-Separated HRL
    constraint can be learned end-to-end instead of hand-coded.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
-7. Tune state-space and Haar wavelet encoder hyperparameters by domain, and add
-   Level-2 minute data to check whether the public daily-bar Haar result
-   survives at higher frequency.
+7. Tune state-space, Haar, and adaptive wavelet encoder hyperparameters by
+   domain, add neural state-space/PINN variants, and add Level-2 minute data to
+   check whether the public daily-bar Haar result survives at higher frequency.

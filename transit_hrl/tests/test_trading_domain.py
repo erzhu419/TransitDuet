@@ -58,6 +58,18 @@ class TradingDomainTest(unittest.TestCase):
         with_future = run(values)[3]
         np.testing.assert_allclose(before_future, with_future)
 
+    def test_trading_tracker_adaptive_wavelet_runs(self):
+        tracker = TradingFrequencyTracker(
+            bar_sec=60,
+            method="adaptive_wavelet",
+            feature_norm=[0.01, 0.01],
+            promotion_enable=False,
+        )
+        tracker.update_bar([0.001, -0.001])
+        tracker.update_bar([0.002, -0.002])
+        self.assertEqual(tracker.summary()["freq_method"], "adaptive_wavelet")
+        self.assertGreater(tracker.upper_features().shape[0], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

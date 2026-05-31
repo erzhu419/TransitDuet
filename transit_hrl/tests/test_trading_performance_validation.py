@@ -108,8 +108,8 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         self.assertEqual(row["plan_curve_enabled"], 1.0)
         self.assertGreaterEqual(row["plan_curve_forced_replans"], 1)
 
-    def test_state_space_and_wavelet_encoders_run_in_trading_validation(self):
-        for method in ("state_space", "haar_wavelet"):
+    def test_advanced_encoders_run_in_trading_validation(self):
+        for method in ("state_space", "haar_wavelet", "adaptive_wavelet"):
             with self.subTest(method=method):
                 row = run_baseline(
                     seed=5,
@@ -127,10 +127,10 @@ class TradingPerformanceValidationTest(unittest.TestCase):
             steps=40,
             assets=2,
             scenario="persistent_shift",
-            methods=["ema", "state_space"],
+            methods=["ema", "adaptive_wavelet"],
         )
         self.assertEqual(len(rows), 2)
-        self.assertEqual({row["freq_method"] for row in summary}, {"ema", "state_space"})
+        self.assertEqual({row["freq_method"] for row in summary}, {"ema", "adaptive_wavelet"})
 
     def test_pressure_summary_ignores_encoder_name_field(self):
         rows = [

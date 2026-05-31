@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from freq_hrl.encoders import (
+    CausalAdaptiveWaveletEncoder,
     CausalEMAEncoder,
     CausalFourierEncoder,
     CausalHaarWaveletEncoder,
@@ -73,6 +74,25 @@ class CausalityTest(unittest.TestCase):
                 forecast_horizon_s=300,
             )
         )
+
+    def test_adaptive_wavelet_encoder_is_causal(self):
+        self._assert_encoder_causal(
+            CausalAdaptiveWaveletEncoder(
+                update_interval_s=60,
+                low_period_s=600,
+                residual_period_s=180,
+                forecast_horizon_s=300,
+                learn_rate=0.05,
+            )
+        )
+
+    def test_adaptive_wavelet_exposes_learned_metadata(self):
+        encoder = CausalAdaptiveWaveletEncoder(update_interval_s=60, learn_rate=0.05)
+        for t, value in enumerate([0.0, 1.0, 1.5, 2.0, 3.0]):
+            encoder.update({"timestamp": t, "x_raw": [value]})
+        feats = encoder.features()
+        self.assertEqual(feats["encoder"], "causal_adaptive_wavelet")
+        self.assertIn("predictor_mean", feats)
 
     def test_state_space_uncertainty_is_nonnegative(self):
         encoder = CausalStateSpaceEncoder(

@@ -9,6 +9,7 @@ import numpy as np
 
 from ...core import CausalPromotionGate
 from ...encoders import (
+    CausalAdaptiveWaveletEncoder,
     CausalEMAEncoder,
     CausalFourierEncoder,
     CausalHaarWaveletEncoder,
@@ -55,6 +56,9 @@ class TradingFrequencyTracker:
         state_process_var: float = 1e-7,
         state_measurement_var: float = 1e-5,
         state_slope_period_s: float = 1800.0,
+        adaptive_learn_rate: float = 0.02,
+        adaptive_ridge: float = 1e-6,
+        adaptive_max_predictor: float = 3.0,
         feature_norm: Sequence[float] | float = 1.0,
         upper_mode: str = "low",
         lower_mode: str = "high",
@@ -125,6 +129,22 @@ class TradingFrequencyTracker:
                 persistence_threshold=persistence_threshold,
                 forecast_horizon_s=forecast_horizon_s,
             )
+        elif self.method in {"adaptive_wavelet", "learnable_wavelet", "lifting_wavelet"}:
+            self.method = "adaptive_wavelet"
+            self.encoder = CausalAdaptiveWaveletEncoder(
+                update_interval_s=self.bar_sec,
+                low_period_s=low_period_s,
+                residual_period_s=fast_period_s,
+                mid_period_s=mid_period_s,
+                slope_period_s=state_slope_period_s,
+                energy_period_s=energy_period_s,
+                persistence_period_s=persistence_period_s,
+                persistence_threshold=persistence_threshold,
+                forecast_horizon_s=forecast_horizon_s,
+                learn_rate=adaptive_learn_rate,
+                ridge=adaptive_ridge,
+                max_predictor=adaptive_max_predictor,
+            )
         elif self.method in {"ema", "causal_ema"}:
             self.method = "ema"
             self.encoder = CausalEMAEncoder(
@@ -176,6 +196,9 @@ class TradingFrequencyTracker:
             state_process_var=cfg.get("state_process_var", 1e-7),
             state_measurement_var=cfg.get("state_measurement_var", 1e-5),
             state_slope_period_s=cfg.get("state_slope_period_s", cfg.get("slope_period_s", 1800.0)),
+            adaptive_learn_rate=cfg.get("adaptive_learn_rate", 0.02),
+            adaptive_ridge=cfg.get("adaptive_ridge", 1e-6),
+            adaptive_max_predictor=cfg.get("adaptive_max_predictor", 3.0),
             feature_norm=cfg.get("feature_norm", 1.0),
             upper_mode=cfg.get("upper_mode", "low"),
             lower_mode=cfg.get("lower_mode", "high"),

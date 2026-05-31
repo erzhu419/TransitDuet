@@ -9,7 +9,7 @@ import math
 import numpy as np
 
 from ...core import CausalPromotionGate, MultiEntityBinnedStream
-from ...encoders import CausalEMAEncoder, CausalFourierEncoder
+from ...encoders import CausalAdaptiveWaveletEncoder, CausalEMAEncoder, CausalFourierEncoder
 
 
 def _as_scalar(value: Any) -> float:
@@ -48,6 +48,9 @@ class TransitFrequencyTracker:
         harmonic_period_s: float = 14 * 3600.0,
         fourier_k: int = 4,
         harmonic_forgetting: float = 0.995,
+        adaptive_learn_rate: float = 0.02,
+        adaptive_ridge: float = 1e-6,
+        adaptive_max_predictor: float = 3.0,
         global_demand_norm: float = 50.0,
         local_demand_norm: float = 10.0,
         slope_norm: float = 5.0,
@@ -92,6 +95,22 @@ class TransitFrequencyTracker:
                 persistence_period_s=persistence_period_s,
                 persistence_threshold=persistence_threshold,
                 forecast_horizon_s=forecast_horizon_s,
+            )
+        elif self.method in {"adaptive_wavelet", "learnable_wavelet", "lifting_wavelet"}:
+            self.method = "adaptive_wavelet"
+            self.encoder = CausalAdaptiveWaveletEncoder(
+                update_interval_s=self.bin_interval_s,
+                low_period_s=low_period_s,
+                residual_period_s=fast_period_s,
+                mid_period_s=mid_period_s,
+                slope_period_s=mid_period_s,
+                energy_period_s=energy_period_s,
+                persistence_period_s=persistence_period_s,
+                persistence_threshold=persistence_threshold,
+                forecast_horizon_s=forecast_horizon_s,
+                learn_rate=adaptive_learn_rate,
+                ridge=adaptive_ridge,
+                max_predictor=adaptive_max_predictor,
             )
         elif self.method in {"ema", "causal_ema", "raw_history", "history", "raw"}:
             raw_history_mode = self.method in {"raw_history", "history", "raw"}
@@ -147,6 +166,9 @@ class TransitFrequencyTracker:
             harmonic_period_s=cfg.get("harmonic_period_s", 14 * 3600.0),
             fourier_k=cfg.get("fourier_k", cfg.get("fourier_K", 4)),
             harmonic_forgetting=cfg.get("harmonic_forgetting", 0.995),
+            adaptive_learn_rate=cfg.get("adaptive_learn_rate", 0.02),
+            adaptive_ridge=cfg.get("adaptive_ridge", 1e-6),
+            adaptive_max_predictor=cfg.get("adaptive_max_predictor", 3.0),
             global_demand_norm=cfg.get("global_demand_norm", 50.0),
             local_demand_norm=cfg.get("local_demand_norm", 10.0),
             slope_norm=cfg.get("slope_norm", 5.0),

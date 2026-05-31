@@ -13,7 +13,7 @@ import numpy as np
 from .performance_validation import SCENARIOS, run_baseline
 
 
-ENCODER_METHODS = ("ema", "fourier", "state_space", "haar_wavelet")
+ENCODER_METHODS = ("ema", "fourier", "state_space", "haar_wavelet", "adaptive_wavelet")
 
 
 def aggregate_by_encoder(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
