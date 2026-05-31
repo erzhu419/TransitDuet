@@ -1,0 +1,46 @@
+{
+  "claims": [
+    {
+      "claim": "C1: frequency-separated HRL can share one training core",
+      "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters.",
+      "metric": "trading plan return=0.2991; transit composite=1.6950337432937435",
+      "status": "partial",
+      "remaining_gap": "Copied Transit native simulator still uses copied RESAC runner."
+    },
+    {
+      "claim": "C2: high-level plan variables can be learned as curves",
+      "evidence": "Upper PPO action can parameterize Bernstein coefficients.",
+      "metric": "plan-PPO return=0.2991, LowerLFDrift=1.5481",
+      "status": "supported synthetic",
+      "remaining_gap": "Public-data and copied-Transit learned plan-coefficient training remain open."
+    },
+    {
+      "claim": "C3: promotion should trigger replanning after persistent shocks",
+      "evidence": "Promotion-forced plan replan beats interval-only replan on recovery scenario.",
+      "metric": "return delta=0.0014, recovery regret delta=-0.0007",
+      "status": "supported deterministic",
+      "remaining_gap": "Not yet embedded in learned PPO/off-policy runner."
+    },
+    {
+      "claim": "C4: leakage can be constrained at loss level",
+      "evidence": "PPO trajectory constraints with primal-dual multiplier reduce lower-LF drift.",
+      "metric": "constrained LowerLFDrift=0.8560, return=0.1649",
+      "status": "supported with tradeoff",
+      "remaining_gap": "Constraint trades off return/Sharpe and did not improve Transit surrogate drift."
+    },
+    {
+      "claim": "C5: advanced causal encoders can be swapped by domain",
+      "evidence": "Adaptive lifting wavelet runs in Trading and Transit trackers and ablation.",
+      "metric": "adaptive Sharpe=13.0749; EMA Sharpe=16.0625",
+      "status": "mixed",
+      "remaining_gap": "Neural state-space and PINN-constrained encoders remain open."
+    },
+    {
+      "claim": "C6: public-data validation covers more than daily bars",
+      "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation artifact.",
+      "metric": "best intraday encoder=adaptive_wavelet, Sharpe=-9.2200",
+      "status": "supported path",
+      "remaining_gap": "Short Level-1 intraday slice only; no order book or execution simulator."
+    }
+  ]
+}

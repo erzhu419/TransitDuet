@@ -117,6 +117,8 @@ Implemented:
   best Sharpe among tested encoders (`-9.220`) while EMA had the best return
   (`-0.0034`). This is real intraday data depth, but still Level-1 trades,
   not order-book execution.
+- Paper-diagnostics generator that writes formal objects, diagnostic bounds,
+  and a claim/evidence/remaining-gap matrix from committed result artifacts.
 - Diagnostic plot generation for signal decomposition, promotion, ablations,
   FocusScore, NoLeakage drift comparison, pressure matrix, and promotion
   recovery.
@@ -366,6 +368,19 @@ Implemented:
      lose money on this short slice, but adaptive wavelet has the least bad
      Sharpe (`-9.220`) and EMA has the best return (`-0.0034`).
    - No Level-3 order-book/market-making validation.
+
+9. Theory and paper diagnostics.
+   - Done: `freq_hrl.experiments.paper_diagnostics` generates a claim matrix
+     and report from local artifacts.
+   - Done: the report states formal objects (`x_t`, frequency encoder state,
+     upper plan action, lower control action, promotion gate, leakage) and a
+     shaped-return/leakage bound.
+   - Done: the claim matrix maps six claims to concrete evidence and remaining
+     gaps, including shared training core, learned plan curves, promotion
+     replanning, loss-level leakage constraints, advanced encoders, and
+     intraday public data.
+   - Still partial: this is a paper-diagnostics scaffold, not a formal theorem
+     proof or a full statistical significance appendix across every result.
 
 ## Current Blocking Evidence
 
