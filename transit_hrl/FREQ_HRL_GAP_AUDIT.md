@@ -80,6 +80,14 @@ Implemented:
   `+0.075`, post-shift-120 PnL by `+0.00075`, recovery regret by `-0.00075`,
   and `LowerLFDrift` by `-0.0326` versus interval-only plan reuse over
   10 paired seeds.
+- Shared PPO now supports loss-level primal-dual constraints via trajectory
+  cost fields, fixed constraint coefficients, and a dual multiplier. Trading
+  and Transit surrogate adapters feed online lower-LF leakage costs into this
+  path. The constrained trading plan-PPO run reduces `LowerLFDrift` to `0.856`
+  versus `1.548` for unconstrained plan-PPO and `1.716` for direct PPO, but
+  trades off return (`0.1649`) and Sharpe (`8.756`). The Transit surrogate
+  constrained run activates the dual multiplier but does not materially reduce
+  `LowerLFDrift`, so the strong leakage claim is still clearest on trading.
 - Lower-LF drift can now be constrained explicitly at two levels: learned
   `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
   and Lagrange controls, and the synthetic trading controller has an optional
@@ -164,6 +172,10 @@ Implemented:
      multiplier driven by causal action-effect leakage.
    - Done in learned trading paths: `pg_linear` and `ac_linear` now expose
      separate `LowerLFDrift` policy-loss and Lagrange constraint controls.
+   - Done in shared PPO: `TrajectoryBatch` now carries constraint costs and the
+     clipped PPO objective supports a primal-dual constraint term. The trading
+     constrained plan-PPO run cuts `LowerLFDrift` from `1.548` to `0.856`,
+     with a large performance tradeoff.
    - Done in the deterministic trading control loop: an optional
      lower-drift-speed constraint directly boosts lower execution speed when
      the lower state drifts from the upper plan.
@@ -177,9 +189,10 @@ Implemented:
      original default (`16.080` vs `16.062`). The lower-LF constrained AC run
      gives a smaller learned-policy improvement (`1.647` to `1.640`) while
      improving Sharpe (`15.528` to `15.619`).
-   - Still partial: the strongest lower-drift reduction is currently
-     control-level/plan-curve assisted. A differentiable neural actor-critic
-     that learns this constraint end-to-end remains open.
+   - Still partial: the strongest lower-drift reduction is now available in
+     both deterministic control and PPO loss-level training, but the PPO
+     constraint is a clear performance/leakage tradeoff and did not yet improve
+     the Transit surrogate.
 
 4. Reward and credit attribution are incomplete.
    - Done for the shared core and trading harness:

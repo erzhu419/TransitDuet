@@ -29,6 +29,10 @@ def concat_batches(batches: Iterable[TrajectoryBatch]) -> TrajectoryBatch:
         old_lower_logp=np.concatenate([b.old_lower_logp for b in items], axis=0),
         old_upper_value=np.concatenate([b.old_upper_value for b in items], axis=0),
         old_lower_value=np.concatenate([b.old_lower_value for b in items], axis=0),
+        constraint=(
+            np.concatenate([np.asarray(b.constraint, dtype=np.float32).reshape(-1) for b in items], axis=0)
+            if all(b.constraint is not None for b in items) else None
+        ),
     )
 
 
@@ -86,6 +90,9 @@ def train_dual_ppo(
         "policy_loss": 0.0,
         "value_loss": 0.0,
         "entropy": 0.0,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.0,
+        "constraint_lambda": float(model.constraint_lambda),
     }]
 
     for iteration in range(max(1, int(iterations))):

@@ -31,10 +31,12 @@ class DualActorCriticTest(unittest.TestCase):
             old_lower_logp=np.zeros(4, dtype=np.float32),
             old_upper_value=np.zeros(4, dtype=np.float32),
             old_lower_value=np.zeros(4, dtype=np.float32),
+            constraint=np.ones(4, dtype=np.float32) * 0.2,
         )
         metrics = model.update(batch)
         self.assertIn("policy_loss", metrics)
         self.assertIn("value_loss", metrics)
+        self.assertIn("constraint_mean", metrics)
 
     def test_learned_plan_action_mapper(self):
         mapper = LearnedPlanActionMapper(

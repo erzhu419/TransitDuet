@@ -27,6 +27,11 @@ class DualPPOConfig:
     epochs: int = 4
     minibatch_size: int = 512
     init_log_std: float = -1.0
+    constraint_coef: float = 0.0
+    constraint_target: float = 0.0
+    constraint_dual_lr: float = 0.0
+    constraint_lambda_init: float = 0.0
+    constraint_max_lambda: float = 100.0
     device: str = "cpu"
 
 
@@ -42,6 +47,7 @@ class TrajectoryBatch:
     old_lower_logp: np.ndarray
     old_upper_value: np.ndarray
     old_lower_value: np.ndarray
+    constraint: np.ndarray | None = None
 
 
 def _mlp(in_dim: int, out_dim: int, hidden_dim: int) -> nn.Sequential:
@@ -118,6 +124,7 @@ class DualActorCriticPPO:
             + list(self.lower_value.parameters())
         )
         self.optimizer = torch.optim.Adam(params, lr=float(config.learning_rate))
+        self.constraint_lambda = float(config.constraint_lambda_init)
 
     def state_dict(self) -> dict[str, Any]:
         return {
@@ -126,6 +133,7 @@ class DualActorCriticPPO:
             "lower_actor": self.lower_actor.state_dict(),
             "upper_value": self.upper_value.state_dict(),
             "lower_value": self.lower_value.state_dict(),
+            "constraint_lambda": float(self.constraint_lambda),
         }
 
     def load_state_dict(self, payload: dict[str, Any]) -> None:
@@ -133,6 +141,7 @@ class DualActorCriticPPO:
         self.lower_actor.load_state_dict(payload["lower_actor"])
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
+        self.constraint_lambda = float(payload.get("constraint_lambda", self.constraint_lambda))
 
     def _state_tensor(self, state: np.ndarray) -> torch.Tensor:
         return torch.as_tensor(state, dtype=torch.float32, device=self.device).view(1, -1)
@@ -202,6 +211,9 @@ class DualActorCriticPPO:
         lower_action = torch.as_tensor(batch.lower_action, dtype=torch.float32, device=self.device)
         old_upper_logp = torch.as_tensor(batch.old_upper_logp, dtype=torch.float32, device=self.device)
         old_lower_logp = torch.as_tensor(batch.old_lower_logp, dtype=torch.float32, device=self.device)
+        constraint = None
+        if batch.constraint is not None:
+            constraint = torch.as_tensor(batch.constraint, dtype=torch.float32, device=self.device).reshape(-1)
         combined_values = np.asarray(batch.old_upper_value, dtype=np.float32) + np.asarray(batch.old_lower_value, dtype=np.float32)
         adv_np, ret_np = self._gae(batch.reward, batch.done, combined_values)
         if adv_np.size:
@@ -211,7 +223,15 @@ class DualActorCriticPPO:
 
         n = int(upper_state.shape[0])
         if n == 0:
-            return {"loss": 0.0, "policy_loss": 0.0, "value_loss": 0.0, "entropy": 0.0}
+            return {
+                "loss": 0.0,
+                "policy_loss": 0.0,
+                "value_loss": 0.0,
+                "entropy": 0.0,
+                "constraint_loss": 0.0,
+                "constraint_mean": 0.0,
+                "constraint_lambda": float(self.constraint_lambda),
+            }
         indices = np.arange(n)
         metrics: list[dict[str, float]] = []
         minibatch = max(1, min(int(cfg.minibatch_size), n))
@@ -226,11 +246,17 @@ class DualActorCriticPPO:
                 ratio = torch.exp(log_ratio.clamp(-20.0, 20.0))
                 clipped = torch.clamp(ratio, 1.0 - cfg.clip_ratio, 1.0 + cfg.clip_ratio)
                 policy_loss = -torch.mean(torch.minimum(ratio * advantage[idx], clipped * advantage[idx]))
+                constraint_loss = torch.zeros((), dtype=torch.float32, device=self.device)
+                if constraint is not None:
+                    weight = float(cfg.constraint_coef) + float(self.constraint_lambda)
+                    if weight > 0.0:
+                        excess = constraint[idx] - float(cfg.constraint_target)
+                        constraint_loss = weight * torch.mean(ratio * excess)
                 u_value = self.upper_value(upper_state[idx])
                 l_value = self.lower_value(lower_state[idx])
                 value_loss = torch.mean((u_value + l_value - returns[idx]) ** 2)
                 entropy = torch.mean(u_ent + l_ent)
-                loss = policy_loss + cfg.value_coef * value_loss - cfg.entropy_coef * entropy
+                loss = policy_loss + cfg.value_coef * value_loss + constraint_loss - cfg.entropy_coef * entropy
                 self.optimizer.zero_grad()
                 loss.backward()
                 nn.utils.clip_grad_norm_(
@@ -246,8 +272,20 @@ class DualActorCriticPPO:
                     "policy_loss": float(policy_loss.detach().cpu().item()),
                     "value_loss": float(value_loss.detach().cpu().item()),
                     "entropy": float(entropy.detach().cpu().item()),
+                    "constraint_loss": float(constraint_loss.detach().cpu().item()),
                 })
+        constraint_mean = 0.0
+        if constraint is not None:
+            constraint_mean = float(constraint.detach().cpu().mean().item())
+            if float(cfg.constraint_dual_lr) > 0.0:
+                updated = self.constraint_lambda + float(cfg.constraint_dual_lr) * (
+                    constraint_mean - float(cfg.constraint_target)
+                )
+                self.constraint_lambda = float(np.clip(updated, 0.0, float(cfg.constraint_max_lambda)))
         return {
             key: float(np.mean([m[key] for m in metrics]))
             for key in metrics[0]
+        } | {
+            "constraint_mean": float(constraint_mean),
+            "constraint_lambda": float(self.constraint_lambda),
         }

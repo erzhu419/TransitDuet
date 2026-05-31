@@ -188,6 +188,7 @@ def rollout(
     old_lower_logp: list[float] = []
     old_upper_value: list[float] = []
     old_lower_value: list[float] = []
+    constraints: list[float] = []
     rewards: list[float] = []
     dones: list[float] = []
     pnl_returns: list[float] = []
@@ -231,6 +232,7 @@ def rollout(
         old_lower_logp.append(float(lower_out["logp"]))
         old_upper_value.append(float(upper_out["value"]))
         old_lower_value.append(float(lower_out["value"]))
+        constraints.append(float(leak_info.get("lower_lf_penalty", 0.0)))
         rewards.append(step_reward)
         dones.append(float(done))
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
@@ -275,6 +277,7 @@ def rollout(
         old_lower_logp=np.asarray(old_lower_logp, dtype=np.float32),
         old_upper_value=np.asarray(old_upper_value, dtype=np.float32),
         old_lower_value=np.asarray(old_lower_value, dtype=np.float32),
+        constraint=np.asarray(constraints, dtype=np.float32),
     )
     return batch, row
 
@@ -312,6 +315,10 @@ def train_ppo_actor_critic(
     plan_horizon_s: float = 1800.0,
     plan_eval_offset_s: float = 300.0,
     plan_coefficient_scale: float = 0.75,
+    lower_lf_constraint_coef: float = 0.0,
+    lower_lf_constraint_target: float = 0.0,
+    lower_lf_dual_lr: float = 0.0,
+    lower_lf_objective_weight: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
@@ -332,6 +339,11 @@ def train_ppo_actor_critic(
         epochs=4,
         minibatch_size=512,
         init_log_std=-2.5,
+        constraint_coef=float(lower_lf_constraint_coef),
+        constraint_target=float(lower_lf_constraint_target),
+        constraint_dual_lr=float(lower_lf_dual_lr),
+        constraint_lambda_init=0.0,
+        constraint_max_lambda=20.0,
     )
     model = DualActorCriticPPO(config)
     initialize_frequency_prior(model, assets, plan_basis_dim=plan_basis_dim)
@@ -350,7 +362,7 @@ def train_ppo_actor_critic(
             leakage_scale=leakage_scale if sample else 0.0,
             plan_mapper=plan_mapper,
         ),
-        objective_fn=objective,
+        objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
         summary_fn=summarize,
         policy="ppo_dual_actor_critic",
         trainer="shared_dual_level_ppo",
@@ -361,6 +373,10 @@ def train_ppo_actor_critic(
             "assets": int(assets),
             "leakage_scale": float(leakage_scale),
             "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
+            "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
+            "lower_lf_constraint_target": float(lower_lf_constraint_target),
+            "lower_lf_dual_lr": float(lower_lf_dual_lr),
+            "lower_lf_objective_weight": float(lower_lf_objective_weight),
             **(plan_mapper.to_metadata() if plan_mapper is not None else {
                 "plan_basis_dim": 0,
                 "plan_horizon_s": 0.0,
@@ -390,6 +406,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "",
         f"- trainer: `{payload['trainer']}`",
         f"- plan mode: `{payload['plan_mode']}`",
+        f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -421,6 +438,10 @@ def main() -> None:
     parser.add_argument("--plan-horizon-s", type=float, default=1800.0)
     parser.add_argument("--plan-eval-offset-s", type=float, default=300.0)
     parser.add_argument("--plan-coefficient-scale", type=float, default=0.75)
+    parser.add_argument("--lower-lf-constraint-coef", type=float, default=0.0)
+    parser.add_argument("--lower-lf-constraint-target", type=float, default=0.0)
+    parser.add_argument("--lower-lf-dual-lr", type=float, default=0.0)
+    parser.add_argument("--lower-lf-objective-weight", type=float, default=0.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -436,6 +457,10 @@ def main() -> None:
         plan_horizon_s=args.plan_horizon_s,
         plan_eval_offset_s=args.plan_eval_offset_s,
         plan_coefficient_scale=args.plan_coefficient_scale,
+        lower_lf_constraint_coef=args.lower_lf_constraint_coef,
+        lower_lf_constraint_target=args.lower_lf_constraint_target,
+        lower_lf_dual_lr=args.lower_lf_dual_lr,
+        lower_lf_objective_weight=args.lower_lf_objective_weight,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)
