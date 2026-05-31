@@ -49,6 +49,14 @@ Implemented:
   held-out run reaches return `0.2804`, objective `0.4436`, and total leakage
   `1.6475`, improving return/objective and leakage versus the previous
   `pg_linear` runs while giving up Sharpe.
+- Shared dual-level PPO actor-critic trainer under `freq_hrl.rl`, with
+  separate upper/lower Gaussian actors, separate value functions, clipped PPO
+  updates, GAE, entropy/value losses, gradient clipping, and a trading domain
+  adapter. The current persistent-shift held-out run reaches Sharpe `15.402`,
+  return `0.2351`, and `LowerLFDrift=1.716`; PPO updates reduce lower drift in
+  training checkpoints but currently trade away return/Sharpe, so this is
+  trainer-completeness evidence rather than the strongest learned-policy
+  performance result.
 - Lower-LF drift can now be constrained explicitly at two levels: learned
   `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
   and Lagrange controls, and the synthetic trading controller has an optional
@@ -203,10 +211,11 @@ Implemented:
 ## Not Done: Required For Full Freq-HRL Claim
 
 1. Learned-policy integration.
-   - Partial but stronger: `freq_hrl.experiments.trading.policy_entry` now
-     supports three learned policy paths. `linear` trains shared
-     frequency-routing coefficients with cross-entropy search; the refreshed
-     run reaches held-out Sharpe `15.419` and return `0.280`. `pg_linear`
+   - Partial but stronger: `freq_hrl.experiments.trading.policy_entry` plus the
+     shared PPO trainer now support four learned policy paths. `linear` trains
+     shared frequency-routing coefficients with cross-entropy search; the
+     refreshed run reaches held-out Sharpe `15.419` and return `0.280`.
+     `pg_linear`
      trains an on-policy Gaussian actor with REINFORCE over upper targets and
      lower execution speeds; the current held-out run reaches Sharpe `15.915`
      and return `0.249`, above the same held-out heuristic run (`15.663`
@@ -214,10 +223,15 @@ Implemented:
      Sharpe `15.993` and return `0.2495` with lower turnover and lower upper-HF
      action leakage. `ac_linear` adds explicit upper/lower value functions and
      TD(0) bootstrapped actor updates; the current held-out run reaches return
-     `0.2804`, objective `0.4436`, and leakage penalty `1.6475`.
-   - Still missing: SAC/PPO/TD3-style neural/off-policy actor-critic with
-     replay or GAE, separate high/low replay buffers, and a real domain runner
-     training loop.
+     `0.2804`, objective `0.4436`, and leakage penalty `1.6475`. The shared
+     `ppo_dual_actor_critic` path adds a domain-agnostic clipped-PPO/GAE
+     trainer with separated upper/lower actors and critics; its current
+     held-out result is Sharpe `15.402`, return `0.2351`, and
+     `LowerLFDrift=1.716`.
+   - Still missing: SAC/TD3-style off-policy actor-critic with replay,
+     separate high/low replay buffers, plan-coefficient actions, and a real
+     domain runner training loop. PPO exists now, but it is not yet the best
+     performance path.
 
 2. HighLevelPlanner and LowLevelController policy interfaces.
    - Done: `HighLevelPlanner`, `LowLevelController`, `HighLevelDecision`, and
@@ -376,9 +390,9 @@ fully validated, domain-general Frequency-Separated HRL
    composite score.
 3. Carry the recovery-tuned promotion gate into learned runners with explicit
    high-level replanning or process-noise adaptation.
-4. Extend the new `ac_linear` path toward neural/off-policy SAC/PPO/TD3-style
-   training so the current control-level lower-drift constraint can be learned
-   end-to-end instead of hand-coded.
+4. Extend the shared PPO path with plan-coefficient actions and/or add
+   off-policy SAC/TD3-style replay so the current control-level lower-drift
+   constraint can be learned end-to-end instead of hand-coded.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
 7. Tune state-space and Haar wavelet encoder hyperparameters by domain, and add

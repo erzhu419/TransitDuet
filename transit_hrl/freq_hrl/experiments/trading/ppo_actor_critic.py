@@ -1,0 +1,416 @@
+"""PPO-style dual actor-critic validation for Freq-HRL trading."""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import csv
+import json
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import torch
+
+from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
+from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
+from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
+
+from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
+
+
+def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
+    out = np.asarray(target, dtype=np.float64).reshape(-1)
+    gross = float(np.sum(np.abs(out)))
+    if gross > max_gross and gross > 1e-12:
+        out = out * (max_gross / gross)
+    return out
+
+
+def resize(value: Any, dim: int) -> np.ndarray:
+    arr = np.asarray(value, dtype=np.float64).reshape(-1)
+    if arr.size != dim:
+        arr = np.resize(arr, dim)
+    return arr
+
+
+def make_tracker(assets: int) -> TradingFrequencyTracker:
+    return TradingFrequencyTracker(
+        bar_sec=60.0,
+        method="ema",
+        low_period_s=120 * 60.0,
+        fast_period_s=5 * 60.0,
+        mid_period_s=30 * 60.0,
+        energy_period_s=10 * 60.0,
+        persistence_period_s=30 * 60.0,
+        persistence_threshold=0.0010,
+        feature_norm=np.ones(assets) * 0.0015,
+        promotion_enable=True,
+        promotion_window_s=30 * 60.0,
+        promotion_residual_threshold=0.00035,
+        promotion_persistence_ratio=0.50,
+        promotion_cooldown_s=10 * 60.0,
+        promotion_regime_threshold=3e-05,
+        promotion_adapt_low=True,
+        promotion_adapt_gain=0.05,
+    )
+
+
+def feature_vectors(freq: dict[str, Any], position: np.ndarray, target: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+    dim = int(position.size)
+    scale = 0.0014
+    x_low = resize(freq.get("x_low", np.zeros(dim)), dim) / scale
+    x_mid = resize(freq.get("x_mid", np.zeros(dim)), dim) / scale
+    x_high = resize(freq.get("x_high", np.zeros(dim)), dim) / scale
+    promotion = dict(freq.get("promotion", {}) or {})
+    strength = float(promotion.get("promotion_strength", 0.0)) if promotion.get("promote", False) else 0.0
+    upper_state = np.concatenate([
+        x_low,
+        x_mid,
+        x_high,
+        strength * x_mid,
+        np.asarray(position, dtype=np.float64),
+        np.ones(1, dtype=np.float64),
+    ])
+    if target is None:
+        target = np.zeros(dim, dtype=np.float64)
+    gap = np.asarray(target, dtype=np.float64) - np.asarray(position, dtype=np.float64)
+    energy = np.sqrt(np.maximum(resize(freq.get("x_high_energy", np.zeros(dim)), dim), 0.0)) / scale
+    align = np.tanh(np.sign(gap) * x_high)
+    lower_state = np.concatenate([
+        gap,
+        align,
+        np.tanh(energy),
+        np.ones(1, dtype=np.float64),
+    ])
+    return upper_state.astype(np.float32), lower_state.astype(np.float32)
+
+
+def initialize_frequency_prior(model: DualActorCriticPPO, assets: int) -> None:
+    """Initialize the linear actors near the existing frequency-routing prior."""
+    if model.config.hidden_dim != 0:
+        return
+    with torch.no_grad():
+        upper_linear = model.upper_actor.net[0]
+        lower_linear = model.lower_actor.net[0]
+        upper_linear.weight.zero_()
+        upper_linear.bias.zero_()
+        lower_linear.weight.zero_()
+        lower_linear.bias.zero_()
+        for i in range(assets):
+            upper_linear.weight[i, i] = 1.0
+            upper_linear.weight[i, assets + i] = 0.20
+            upper_linear.weight[i, 3 * assets + i] = 0.40
+            upper_linear.weight[i, 4 * assets + i] = -0.05
+            lower_linear.weight[i, assets + i] = 0.20
+            lower_linear.weight[i, 2 * assets + i] = 0.02
+            lower_linear.bias[i] = 0.20
+
+
+def latent_target(latent: np.ndarray) -> np.ndarray:
+    return gross_cap(np.tanh(np.asarray(latent, dtype=np.float64)))
+
+
+def latent_speed(latent: np.ndarray) -> np.ndarray:
+    return np.clip(0.05 + 0.95 / (1.0 + np.exp(-np.asarray(latent, dtype=np.float64))), 0.05, 1.0)
+
+
+def rollout(
+    model: DualActorCriticPPO,
+    seed: int,
+    steps: int,
+    assets: int,
+    scenario: str,
+    sample: bool,
+    leakage_scale: float = 0.0,
+) -> tuple[TrajectoryBatch | None, dict[str, float]]:
+    data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
+    env = PortfolioExecutionEnv(
+        data["returns"],
+        volumes=data["volume"],
+        config=PortfolioExecutionConfig(
+            transaction_cost_bps=50.0,
+            slippage_bps=10.0,
+            max_leverage=1.0,
+            inventory_drift_penalty=0.002,
+            drawdown_penalty=0.0,
+        ),
+    )
+    tracker = make_tracker(assets)
+    leakage = CausalLeakageRewardShaper(
+        regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
+        reward_penalty_scale=leakage_scale,
+        enabled=leakage_scale > 0.0,
+    )
+    upper_states: list[np.ndarray] = []
+    lower_states: list[np.ndarray] = []
+    upper_actions: list[np.ndarray] = []
+    lower_actions: list[np.ndarray] = []
+    old_upper_logp: list[float] = []
+    old_lower_logp: list[float] = []
+    old_upper_value: list[float] = []
+    old_lower_value: list[float] = []
+    rewards: list[float] = []
+    dones: list[float] = []
+    pnl_returns: list[float] = []
+    equity: list[float] = []
+    turnover: list[float] = []
+    targets: list[np.ndarray] = []
+    lower_effects: list[np.ndarray] = []
+    promotions = 0
+    env.reset()
+    for t in range(steps):
+        freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
+        if bool(dict(freq.get("promotion", {}) or {}).get("promote", False)):
+            promotions += 1
+        upper_state, lower_state_probe = feature_vectors(dict(freq), env.position.copy())
+        upper_out = model.act_upper(upper_state, sample=sample)
+        target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
+        _, lower_state = feature_vectors(dict(freq), env.position.copy(), target=target)
+        lower_out = model.act_lower(lower_state, sample=sample)
+        speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        env.set_target(target)
+        _, reward, done, info = env.lower_step({
+            "execution_speed": speed,
+            "residual_order": np.zeros(assets, dtype=np.float64),
+        })
+        lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(info["target"], dtype=np.float64)
+        leak_info = leakage.update(upper_effect=target, lower_effect=lower_effect, reward=float(reward))
+        step_reward = float(leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward)
+        upper_states.append(upper_state)
+        lower_states.append(lower_state)
+        upper_actions.append(np.asarray(upper_out["action"], dtype=np.float32))
+        lower_actions.append(np.asarray(lower_out["action"], dtype=np.float32))
+        old_upper_logp.append(float(upper_out["logp"]))
+        old_lower_logp.append(float(lower_out["logp"]))
+        old_upper_value.append(float(upper_out["value"]))
+        old_lower_value.append(float(lower_out["value"]))
+        rewards.append(step_reward)
+        dones.append(float(done))
+        pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
+        equity.append(float(info["equity"]))
+        turnover.append(float(info["turnover"]))
+        targets.append(np.asarray(info["target"], dtype=np.float64).copy())
+        lower_effects.append(lower_effect.copy())
+        if done:
+            break
+    pnl = np.asarray(pnl_returns, dtype=np.float64)
+    eq = np.asarray(equity, dtype=np.float64)
+    reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
+    leak = reg.compute(np.asarray(targets, dtype=np.float64), np.asarray(lower_effects, dtype=np.float64)) if targets else {
+        "leakage_penalty": 0.0,
+        "UpperHFPower": 0.0,
+        "LowerLFDrift": 0.0,
+    }
+    row = {
+        "seed": int(seed),
+        "scenario": scenario,
+        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
+        "sharpe": float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
+        "max_drawdown": max_drawdown(eq),
+        "turnover": float(np.sum(turnover)),
+        "promotion_count": int(promotions),
+        "leakage_penalty": float(leak["leakage_penalty"]),
+        "UpperHFPower": float(leak["UpperHFPower"]),
+        "LowerLFDrift": float(leak["LowerLFDrift"]),
+    }
+    if not sample:
+        return None, row
+    batch = TrajectoryBatch(
+        upper_state=np.asarray(upper_states, dtype=np.float32),
+        lower_state=np.asarray(lower_states, dtype=np.float32),
+        upper_action=np.asarray(upper_actions, dtype=np.float32),
+        lower_action=np.asarray(lower_actions, dtype=np.float32),
+        reward=np.asarray(rewards, dtype=np.float32),
+        done=np.asarray(dones, dtype=np.float32),
+        old_upper_logp=np.asarray(old_upper_logp, dtype=np.float32),
+        old_lower_logp=np.asarray(old_lower_logp, dtype=np.float32),
+        old_upper_value=np.asarray(old_upper_value, dtype=np.float32),
+        old_lower_value=np.asarray(old_lower_value, dtype=np.float32),
+    )
+    return batch, row
+
+
+def concat_batches(batches: list[TrajectoryBatch]) -> TrajectoryBatch:
+    return TrajectoryBatch(
+        upper_state=np.concatenate([b.upper_state for b in batches], axis=0),
+        lower_state=np.concatenate([b.lower_state for b in batches], axis=0),
+        upper_action=np.concatenate([b.upper_action for b in batches], axis=0),
+        lower_action=np.concatenate([b.lower_action for b in batches], axis=0),
+        reward=np.concatenate([b.reward for b in batches], axis=0),
+        done=np.concatenate([b.done for b in batches], axis=0),
+        old_upper_logp=np.concatenate([b.old_upper_logp for b in batches], axis=0),
+        old_lower_logp=np.concatenate([b.old_lower_logp for b in batches], axis=0),
+        old_upper_value=np.concatenate([b.old_upper_value for b in batches], axis=0),
+        old_lower_value=np.concatenate([b.old_lower_value for b in batches], axis=0),
+    )
+
+
+def objective(row: dict[str, float]) -> float:
+    return float(row["total_return"]) + 0.01 * float(row["sharpe"]) - 0.25 * float(row["max_drawdown"]) - 0.0005 * float(row["turnover"])
+
+
+def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
+    keys = ["total_return", "sharpe", "max_drawdown", "turnover", "promotion_count", "leakage_penalty", "UpperHFPower", "LowerLFDrift"]
+    return {f"{key}_mean": float(np.mean([row[key] for row in rows])) for key in keys} | {"n": len(rows)}
+
+
+def train_ppo_actor_critic(
+    train_seeds: list[int],
+    eval_seeds: list[int],
+    steps: int,
+    assets: int,
+    scenario: str,
+    iterations: int,
+    seed: int,
+    leakage_scale: float = 0.0,
+) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
+    torch.manual_seed(int(seed))
+    np.random.seed(int(seed))
+    config = DualPPOConfig(
+        upper_state_dim=5 * assets + 1,
+        lower_state_dim=3 * assets + 1,
+        upper_action_dim=assets,
+        lower_action_dim=assets,
+        hidden_dim=0,
+        learning_rate=0.003,
+        epochs=4,
+        minibatch_size=512,
+        init_log_std=-2.5,
+    )
+    model = DualActorCriticPPO(config)
+    initialize_frequency_prior(model, assets)
+    best_state = copy.deepcopy(model.state_dict())
+    initial_rows = [
+        rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
+        for eval_seed in train_seeds
+    ]
+    best_score = float(np.mean([objective(row) for row in initial_rows]))
+    initial_summary = summarize(initial_rows)
+    history: list[dict[str, Any]] = [{
+        "iteration": -1,
+        "score": best_score,
+        "sampled_sharpe": 0.0,
+        **initial_summary,
+        "loss": 0.0,
+        "policy_loss": 0.0,
+        "value_loss": 0.0,
+        "entropy": 0.0,
+    }]
+    for iteration in range(max(1, int(iterations))):
+        batches = []
+        sampled_rows = []
+        for train_seed in train_seeds:
+            batch, row = rollout(model, int(train_seed), steps, assets, scenario, sample=True, leakage_scale=leakage_scale)
+            if batch is not None:
+                batches.append(batch)
+            sampled_rows.append(row)
+        metrics = model.update(concat_batches(batches))
+        eval_rows = [
+            rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
+            for eval_seed in train_seeds
+        ]
+        score = float(np.mean([objective(row) for row in eval_rows]))
+        if score > best_score:
+            best_score = score
+            best_state = copy.deepcopy(model.state_dict())
+        summary = summarize(eval_rows)
+        history.append({
+            "iteration": int(iteration),
+            "score": score,
+            "sampled_sharpe": float(np.mean([row["sharpe"] for row in sampled_rows])),
+            **summary,
+            **metrics,
+        })
+    model.load_state_dict(best_state)
+    heldout_rows = [
+        rollout(model, int(eval_seed), steps, assets, scenario, sample=False, leakage_scale=0.0)[1]
+        for eval_seed in eval_seeds
+    ]
+    payload = {
+        "policy": "ppo_dual_actor_critic",
+        "trainer": "shared_dual_level_ppo",
+        "scenario": scenario,
+        "train_seeds": list(train_seeds),
+        "eval_seeds": list(eval_seeds),
+        "steps": int(steps),
+        "assets": int(assets),
+        "best_score": float(best_score),
+        "leakage_scale": float(leakage_scale),
+        "config": config.__dict__,
+        "history": history,
+        "summary": summarize(heldout_rows),
+    }
+    return payload, heldout_rows, model
+
+
+def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        return
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def write_report(path: Path, payload: dict[str, Any]) -> None:
+    summary = payload["summary"]
+    lines = [
+        "# PPO Dual Actor-Critic Trading Validation",
+        "",
+        f"- trainer: `{payload['trainer']}`",
+        f"- scenario: `{payload['scenario']}`",
+        f"- train seeds: {payload['train_seeds']}",
+        f"- eval seeds: {payload['eval_seeds']}",
+        f"- return mean: {summary['total_return_mean']:.4f}",
+        f"- Sharpe mean: {summary['sharpe_mean']:.3f}",
+        f"- max drawdown mean: {summary['max_drawdown_mean']:.4f}",
+        f"- turnover mean: {summary['turnover_mean']:.2f}",
+        f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
+        f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        "",
+        "This validates the shared upper/lower PPO actor-critic training core. It uses trading as a domain adapter; the trainer itself only depends on upper/lower states, latent actions, rewards, and done flags.",
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train-seeds", type=int, nargs="+", default=[42, 123, 456])
+    parser.add_argument("--eval-seeds", type=int, nargs="+", default=[31415, 27182, 16180])
+    parser.add_argument("--steps", type=int, default=360)
+    parser.add_argument("--assets", type=int, default=3)
+    parser.add_argument("--scenario", choices=SCENARIOS, default="persistent_shift")
+    parser.add_argument("--iterations", type=int, default=8)
+    parser.add_argument("--optimizer-seed", type=int, default=2026)
+    parser.add_argument("--leakage-scale", type=float, default=0.0)
+    parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
+    args = parser.parse_args()
+    payload, rows, model = train_ppo_actor_critic(
+        train_seeds=list(args.train_seeds),
+        eval_seeds=list(args.eval_seeds),
+        steps=args.steps,
+        assets=args.assets,
+        scenario=args.scenario,
+        iterations=args.iterations,
+        seed=args.optimizer_seed,
+        leakage_scale=args.leakage_scale,
+    )
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    write_rows(args.output_dir / "per_seed.csv", rows)
+    with (args.output_dir / "summary.json").open("w", encoding="utf-8") as f:
+        json.dump({"model": payload, "per_seed": rows, "summary": payload["summary"]}, f, indent=2)
+    torch.save(model.state_dict(), args.output_dir / "ppo_dual_actor_critic.pt")
+    write_report(args.output_dir / "report.md", payload)
+    print(f"wrote {args.output_dir}")
+    print(
+        "ppo_dual_actor_critic "
+        f"sharpe={payload['summary']['sharpe_mean']:.3f} "
+        f"return={payload['summary']['total_return_mean']:.4f} "
+        f"LowerLFDrift={payload['summary']['LowerLFDrift_mean']:.3f}"
+    )
+
+
+if __name__ == "__main__":
+    main()
