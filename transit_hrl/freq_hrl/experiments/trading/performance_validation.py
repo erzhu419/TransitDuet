@@ -292,6 +292,8 @@ def policy_action(
     seed_phase: float = 0.0,
     plan_curve_state: CausalPlanCurveState | None = None,
     plan_curve_now_s: float = 0.0,
+    promotion_force_replan: bool = False,
+    promotion_replan_strength_min: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
     feats = tracker.features()
     dim = raw_signal.size
@@ -327,15 +329,22 @@ def policy_action(
         desired_target = normalize_target(plan_signal, max_gross=1.0)
         plan_curve_info: dict[str, Any] = {"enabled": False}
         if plan_curve_state is not None:
+            force_replan = bool(
+                promotion_force_replan
+                and promote_for_plan
+                and strength >= max(float(promotion_replan_strength_min), 0.0)
+            )
             plan_step = plan_curve_state.target_toward(
                 now_s=plan_curve_now_s,
                 current_value=current_position,
                 desired_value=desired_target,
+                force_replan=force_replan,
             )
             target = np.asarray(plan_step["target"], dtype=np.float64)
             plan_curve_info = {
                 "enabled": True,
                 "replan": bool(plan_step["replan"]),
+                "promotion_forced_replan": bool(force_replan and plan_step["replan"]),
                 "offset_s": float(plan_step["offset_s"]),
                 "smoothness_penalty": float(plan_step["smoothness_penalty"]),
                 "reuse_ratio": float(plan_step["reuse_ratio"]),
@@ -597,6 +606,8 @@ def run_baseline(
     plan_curve_replan_interval_s: float = 5 * 60.0,
     plan_curve_basis_dim: int = 2,
     plan_curve_desired_change_threshold: float = 0.25,
+    promotion_force_replan: bool = False,
+    promotion_replan_strength_min: float = 0.0,
 ) -> dict[str, Any]:
     data = make_synthetic_market(
         seed=seed,
@@ -692,6 +703,7 @@ def run_baseline(
     promotion_flags: list[bool] = []
     plan_curve_decisions = 0
     plan_curve_reuses = 0
+    plan_curve_forced_replans = 0
     plan_curve_smoothness: list[float] = []
     plan_curve_desired_gaps: list[float] = []
     first_promotion_after_shift = None
@@ -721,6 +733,8 @@ def run_baseline(
             lower_lf_drift_speed_gain=lower_lf_drift_speed_gain,
             plan_curve_state=plan_curve_state,
             plan_curve_now_s=float(t * 60.0),
+            promotion_force_replan=promotion_force_replan,
+            promotion_replan_strength_min=promotion_replan_strength_min,
         )
         raw_history.append(raw_signal.copy())
         high_history.append(np.asarray(diag_features.get("x_high", np.zeros(n_assets)), dtype=np.float64).copy())
@@ -732,6 +746,8 @@ def run_baseline(
                 plan_curve_smoothness.append(float(plan_info.get("smoothness_penalty", 0.0)))
             else:
                 plan_curve_reuses += 1
+            if bool(plan_info.get("promotion_forced_replan", False)):
+                plan_curve_forced_replans += 1
             plan_curve_desired_gaps.append(float(plan_info.get("desired_gap", 0.0)))
         promoted = bool(promotion.get("promote", False))
         promotion_flags.append(promoted)
@@ -844,6 +860,7 @@ def run_baseline(
         "plan_curve_enabled": float(plan_curve_state is not None),
         "plan_curve_decisions": int(plan_curve_decisions),
         "plan_curve_reuses": int(plan_curve_reuses),
+        "plan_curve_forced_replans": int(plan_curve_forced_replans),
         "plan_curve_reuse_ratio": float(plan_curve_reuses / max(total_plan, 1)),
         "plan_curve_smoothness_mean": float(np.mean(plan_curve_smoothness)) if plan_curve_smoothness else 0.0,
         "plan_curve_desired_gap_mean": float(np.mean(plan_curve_desired_gaps)) if plan_curve_desired_gaps else 0.0,
@@ -920,6 +937,8 @@ def write_report(
     plan_curve_enable: bool,
     plan_curve_horizon_s: float,
     plan_curve_replan_interval_s: float,
+    promotion_force_replan: bool,
+    promotion_replan_strength_min: float,
 ) -> None:
     by_name = {row["baseline"]: row for row in summary}
     freq = by_name["freq_hrl"]
@@ -948,7 +967,7 @@ def write_report(
         f"- lower LF drift speed constraint gain: {lower_lf_drift_speed_gain}",
         f"- leakage reward scale: {leakage_reward_scale}",
         f"- promotion adaptation cost scale: {promotion_adaptation_cost_scale}",
-        f"- plan curve: enable={plan_curve_enable}, horizon_s={plan_curve_horizon_s}, replan_interval_s={plan_curve_replan_interval_s}",
+        f"- plan curve: enable={plan_curve_enable}, horizon_s={plan_curve_horizon_s}, replan_interval_s={plan_curve_replan_interval_s}, promotion_force_replan={promotion_force_replan}, promotion_replan_strength_min={promotion_replan_strength_min}",
         "- policies are deterministic heuristics, not trained RL policies",
         "- task metrics include return, Sharpe, drawdown, turnover, transaction cost, and inventory drift",
         "- frequency diagnostics include UpperHFPower, LowerLFDrift, FocusScore, PromotionDelay, ShockResponseTime, regime-promotion accuracy, recovery cost, and oracle-regime recovery regret",
@@ -984,8 +1003,8 @@ def write_report(
         "",
         "## Summary Table",
         "",
-        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | recovery_regret | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions | plan_reuse |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | recovery_regret | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions | plan_reuse | forced_replans |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary:
         rows.append(
@@ -1010,7 +1029,8 @@ def write_report(
             f"| {row['LowerLFDrift_mean']:.3f} "
             f"| {row['FocusScore_mean']:.3f} "
             f"| {row['promotion_count_mean']:.1f} "
-            f"| {row.get('plan_curve_reuse_ratio_mean', 0.0):.3f} |"
+            f"| {row.get('plan_curve_reuse_ratio_mean', 0.0):.3f} "
+            f"| {row.get('plan_curve_forced_replans_mean', 0.0):.1f} |"
         )
     rows.extend([
         "",
@@ -1057,6 +1077,8 @@ def main() -> None:
     parser.add_argument("--plan-curve-replan-interval-s", type=float, default=5 * 60.0)
     parser.add_argument("--plan-curve-basis-dim", type=int, default=2)
     parser.add_argument("--plan-curve-desired-change-threshold", type=float, default=0.25)
+    parser.add_argument("--promotion-force-replan", action="store_true")
+    parser.add_argument("--promotion-replan-strength-min", type=float, default=0.0)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -1099,6 +1121,8 @@ def main() -> None:
                 plan_curve_replan_interval_s=args.plan_curve_replan_interval_s,
                 plan_curve_basis_dim=args.plan_curve_basis_dim,
                 plan_curve_desired_change_threshold=args.plan_curve_desired_change_threshold,
+                promotion_force_replan=args.promotion_force_replan,
+                promotion_replan_strength_min=args.promotion_replan_strength_min,
             ))
 
     summary = aggregate(rows)
@@ -1137,6 +1161,8 @@ def main() -> None:
         plan_curve_enable=args.plan_curve_enable,
         plan_curve_horizon_s=args.plan_curve_horizon_s,
         plan_curve_replan_interval_s=args.plan_curve_replan_interval_s,
+        promotion_force_replan=args.promotion_force_replan,
+        promotion_replan_strength_min=args.promotion_replan_strength_min,
     )
 
     best = max(summary, key=lambda row: row["sharpe_mean"])

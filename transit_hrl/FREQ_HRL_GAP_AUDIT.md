@@ -72,6 +72,14 @@ Implemented:
   Sharpe `14.750`, `LowerLFDrift=1.548`, and plan smoothness
   `0.000008`; the Transit surrogate plan-action run reaches reward `-4.500`,
   wait proxy `4.200`, and `LowerLFDrift=1.000`.
+- Promotion-triggered high-level replanning for deterministic plan-curve
+  control. Promotion can now force `CausalPlanCurveState` to replan immediately
+  instead of waiting for the regular replan interval, and the validation logs
+  forced replan counts. On the promotion-recovery trading scenario,
+  promotion-triggered replanning improves return by `+0.0014`, Sharpe by
+  `+0.075`, post-shift-120 PnL by `+0.00075`, recovery regret by `-0.00075`,
+  and `LowerLFDrift` by `-0.0326` versus interval-only plan reuse over
+  10 paired seeds.
 - Lower-LF drift can now be constrained explicitly at two levels: learned
   `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
   and Lagrange controls, and the synthetic trading controller has an optional
@@ -139,7 +147,10 @@ Implemented:
      (CI95 `[+0.0087, +0.0145]`), post-shift-120 PnL delta `+0.00854`
      (CI95 `[+0.00622, +0.01090]`), and oracle-regime recovery-regret delta
      `-0.00839` (CI95 `[-0.01075, -0.00613]`).
-   - Promotion does not yet trigger high-level replanning or low-model process-noise adaptation in a learned runner.
+   - Done for deterministic plan-curve control: promotion can force immediate
+     upper replan and improves recovery metrics versus interval-only plan reuse.
+   - Still partial: promotion-triggered replanning is not yet embedded in the
+     learned PPO/off-policy runners or low-model process-noise adaptation.
 
 3. Leakage regularization in learned rewards/losses.
    - Done for the shared core and trading harness: `CausalLeakageRewardShaper`
@@ -373,7 +384,12 @@ now mixed rather than uniformly positive:
   (`16.6` bars mean delay vs `45.9` for the conservative default), improves
   post-shift-120 PnL by `+0.00854`, and reduces oracle-regime recovery regret
   by `-0.00839` against `no_promotion` over 20 paired seeds. This is evidence
-  for the promotion mechanism, not yet a learned-runner replanning result.
+  for the promotion mechanism.
+- Promotion-triggered plan replanning now supports the stronger replan claim at
+  the deterministic controller level: forced replan improves return by
+  `+0.0014`, post-shift-120 PnL by `+0.00075`, recovery regret by `-0.00075`,
+  and `LowerLFDrift` by `-0.0326` against interval-only plan reuse over
+  10 paired seeds. It is still not yet a learned-runner replanning result.
 - Leakage shaping is now in the online reward path, learned policy paths have
   explicit policy-loss / Lagrange-style constraints for total leakage and lower
   LF drift, and the deterministic lower-drift-speed constraint now cuts lower
@@ -409,8 +425,8 @@ fully validated, domain-general Frequency-Separated HRL
    out-of-sample matrix before deciding whether to enable them by default.
 2. Investigate the Transit `swapped` raw-wait edge despite `freq_hrl` winning
    composite score.
-3. Carry the recovery-tuned promotion gate into learned runners with explicit
-   high-level replanning or process-noise adaptation.
+3. Carry promotion-triggered replanning into learned PPO/off-policy runners and
+   copied Transit native training, plus low-model process-noise adaptation.
 4. Extend the shared PPO path with plan-coefficient actions and/or add
    off-policy SAC/TD3-style replay so the current control-level lower-drift
    constraint can be learned end-to-end instead of hand-coded.
