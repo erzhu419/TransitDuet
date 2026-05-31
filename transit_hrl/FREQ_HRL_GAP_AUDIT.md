@@ -49,6 +49,8 @@ Implemented:
   FocusScore, NoLeakage drift comparison, pressure matrix, and promotion
   recovery.
 - 27-seed x 10-episode copied-Transit ablation validation on the 9-config matrix.
+- Paired copied-Transit performance report with bootstrap confidence intervals
+  and per-metric winners for the 27-seed matrix.
 - Unit/smoke tests for causality, router masks, promotion, leakage, plan curves, stream adapter, domain trackers, and validation harness.
 
 ## MVP-Critical Checklist
@@ -57,10 +59,18 @@ Implemented:
    - Done: `freq_transitduet` contains a copied Transit runner/env under `transit_hrl`.
    - Done: copied `frequency` entry point is bridged to `TransitFrequencyTracker` from the shared core.
    - Done: a 27-seed x 10-episode validation was run for the 9-config Transit matrix.
+   - Done: paired statistical report
+     `freq_transitduet/results_freqhrl/transit_performance_validation/report.md`
+     summarizes bootstrap CIs and per-metric winners from the copied runner logs.
    - Current evidence: `T_freqhrl_terminal` has the best composite score
-     (`1.695`) in the merged 9-config summary, but `T_swapped_terminal` has
-     slightly lower raw wait (`6.817` vs `6.917`), so this is positive but not
-     a clean dominance result on every metric.
+     (`1.695`) in the 9-config matrix and wins paired composite deltas against
+     all baselines. The strongest paired composite deltas are against
+     `T_hf_lower_terminal` (`-0.346`, CI95 `[-0.643, -0.087]`),
+     `T_rawhistory_terminal` (`-0.338`, CI95 `[-0.621, -0.070]`), and
+     `T_allfreq_terminal` (`-0.325`, CI95 `[-0.518, -0.133]`).
+     `T_swapped_terminal` still has slightly lower raw wait (`6.817` vs
+     `6.917`), so this is positive performance validation but not clean
+     dominance on every metric.
 
 2. Promotion validation.
    - Done for the current synthetic trading validation: the tuned promotion setting
@@ -166,8 +176,10 @@ Implemented:
    - Transit timetable/headway spline and Quant target portfolio curve are not yet connected to training.
 
 4. Cross-domain validation is partial.
-   - Quant has synthetic validation.
-   - Transit has a tracker adapter only.
+   - Quant has synthetic validation, pressure testing, learned-policy
+     validation, and Level-1 public daily-bar validation.
+   - Transit now has a copied-runner 27-seed x 10-episode performance report
+     on a 9-config matrix, not just tracker smoke coverage.
    - The same core has not yet been used in two real training/evaluation loops.
 
 5. Environment pressure-test matrix.
@@ -230,7 +242,12 @@ now mixed rather than uniformly positive:
   remove that loss, but those settings also reduce either OOD or stationary
   high-noise performance, so the default keeps them disabled.
 - In copied Transit, `T_freqhrl_terminal` is best on the composite metric over
-  27 seeds x 10 episodes, but `T_swapped_terminal` has slightly lower raw wait.
+  27 seeds x 10 episodes. The paired report shows negative composite deltas
+  against every baseline and statistically clearer improvements against
+  `T_allfreq_terminal`, `T_hf_lower_terminal`, `T_lf_upper_terminal`, and
+  `T_rawhistory_terminal`; the comparison to `T_swapped_terminal` remains close
+  (`-0.037` composite, CI95 `[-0.198, +0.135]`) and `T_swapped_terminal` has
+  slightly lower raw wait.
 - Against `no_promotion`, tuned promotion improves persistent-shift Sharpe by
   about `+0.015` over 5 seeds. This is more conservative than the earlier
   setting but avoids more false promotion in pressure tests.
