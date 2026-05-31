@@ -50,6 +50,8 @@ Implemented:
 - Trading decomposer ablation across causal EMA, Fourier, state-space, and
   trailing-window Haar wavelet encoders.
 - Public Level-1 ETF daily-bar validation path using local CSV inputs.
+- Public ETF encoder ablation across EMA, state-space, and Haar wavelet
+  decomposers.
 - Diagnostic plot generation for signal decomposition, promotion, ablations,
   FocusScore, NoLeakage drift comparison, pressure matrix, and promotion
   recovery.
@@ -225,23 +227,29 @@ Implemented:
    - Still partial: plot generation is a separate command and is not yet
      automatically included in every experiment report.
 
-7. Advanced encoders are missing.
+7. Advanced encoders.
    - Done: Level-2 causal state-space encoder with uncertainty.
    - Done: Level-3 trailing-window causal Haar wavelet-style encoder.
    - Done: trading encoder ablation was run for EMA, Fourier, state-space, and
      Haar wavelet on the persistent-shift scenario.
    - Current evidence: EMA is still strongest in that ablation
      (Sharpe `16.062` vs Fourier `7.011`, state-space `8.931`, and Haar
-     wavelet `12.656`), so the new encoders are implemented baselines, not a
-     performance upgrade yet.
+     wavelet `12.712`), so the new encoders are not the source of the
+     persistent-shift synthetic gains.
+   - Done: public SPY/QQQ/IWM daily-bar encoder ablation now gives the Haar
+     wavelet encoder the best Sharpe/return on the 1500-bar public CSV slice
+     (`0.596` Sharpe, `0.7667` return) versus EMA (`0.406`, `0.3957`) and
+     state-space (`0.066`, `-0.0214`).
    - No learnable wavelet or neural state-space encoder.
    - No PINN-constrained encoder.
 
 8. Public/real market data experiments.
    - Done: Level-1 public ETF daily-bar validation path is implemented and run
-     on SPY/QQQ/IWM CSVs covering 2016-05-31 through 2026-05-29. The current
-     1500-bar evaluation reports return `0.639`, Sharpe `0.558`, and max
-     drawdown `0.210`.
+     on SPY/QQQ/IWM CSVs covering 2016-06-01 through 2026-05-29. The refreshed
+     EMA 1500-bar evaluation reports return `0.3957`, Sharpe `0.406`, and max
+     drawdown `0.279`.
+   - Done: public-data encoder ablation on the same SPY/QQQ/IWM slice shows
+     Haar wavelet as the best Level-1 public-data encoder.
    - No Level-2 minute crypto/stock validation.
    - No Level-3 order-book/market-making validation.
 
@@ -288,10 +296,11 @@ now mixed rather than uniformly positive:
   but not total leakage because lower LF drift remains the dominant term.
 - Reward attribution is now logged in the trading validation as LF cost, HF
   cost, leakage cost, promotion adaptation cost, upper credit, and lower credit.
-- The first decomposer ablation shows that replacing EMA with Fourier,
-  state-space, or Haar wavelet currently reduces Sharpe on the persistent-shift
-  synthetic task, so encoder sophistication should not be claimed as the source
-  of the current gains.
+- The synthetic decomposer ablation still shows that replacing EMA with Fourier,
+  state-space, or Haar wavelet reduces Sharpe on the persistent-shift synthetic
+  task. However, the public SPY/QQQ/IWM encoder ablation now gives the Haar
+  wavelet encoder the best daily-bar Sharpe/return, so encoder sophistication
+  has real-data upside but is not a universal default.
 - HF speed and residual-order lower actions did not improve the default
   high-cost trading environment; the default now disables them, while keeping
   them as explicit sweep parameters for lower-cost execution settings.
@@ -321,5 +330,6 @@ fully validated, domain-general Frequency-Separated HRL
    well as upper HF action leakage.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
-7. Tune state-space and Haar wavelet encoder hyperparameters, or keep them as
-   causal ablation baselines rather than default methods.
+7. Tune state-space and Haar wavelet encoder hyperparameters by domain, and add
+   Level-2 minute data to check whether the public daily-bar Haar result
+   survives at higher frequency.

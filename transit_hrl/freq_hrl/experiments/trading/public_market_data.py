@@ -144,6 +144,7 @@ def price_returns(prices: np.ndarray) -> np.ndarray:
 def run_dataset_eval(
     returns: np.ndarray,
     steps: int | None = None,
+    freq_method: str = "ema",
 ) -> dict[str, Any]:
     if steps is not None:
         returns = returns[-int(steps):]
@@ -165,7 +166,7 @@ def run_dataset_eval(
     )
     tracker = TradingFrequencyTracker(
         bar_sec=24 * 3600.0,
-        method="ema",
+        method=freq_method,
         low_period_s=90 * 24 * 3600.0,
         fast_period_s=5 * 24 * 3600.0,
         mid_period_s=30 * 24 * 3600.0,
@@ -206,6 +207,7 @@ def run_dataset_eval(
     return {
         "bars": int(returns.shape[0]),
         "assets": int(assets),
+        "freq_method": str(freq_method),
         "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
         "sharpe": float(np.sqrt(252.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
         "max_drawdown": max_drawdown(eq),
@@ -220,6 +222,7 @@ def write_report(path: Path, symbols: list[str], summary: dict[str, Any], source
         "",
         f"- source: `{source}`",
         f"- symbols: {symbols}",
+        f"- frequency encoder: `{summary.get('freq_method', 'ema')}`",
         "- predictor: previous-bar log return only, so current/future returns are not used as policy input",
         f"- bars: {summary['bars']}",
         f"- total return: {summary['total_return']:.4f}",
@@ -242,6 +245,7 @@ def main() -> None:
     parser.add_argument("--stooq-apikey", default=os.environ.get("STOOQ_APIKEY", ""))
     parser.add_argument("--no-stooq-yahoo-fallback", action="store_true")
     parser.add_argument("--steps", type=int, default=None)
+    parser.add_argument("--freq-method", choices=["ema", "state_space", "haar_wavelet"], default="ema")
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_public_market"))
     args = parser.parse_args()
 
@@ -269,7 +273,7 @@ def main() -> None:
     symbols = [name for name, _ in series]
     dates, prices = align_prices(series)
     returns = price_returns(prices)
-    summary = run_dataset_eval(returns, steps=args.steps)
+    summary = run_dataset_eval(returns, steps=args.steps, freq_method=args.freq_method)
     summary.update({
         "source": args.source,
         "symbols": symbols,

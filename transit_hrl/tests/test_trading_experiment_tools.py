@@ -27,7 +27,10 @@ class TradingExperimentToolsTest(unittest.TestCase):
         returns = price_returns(prices)
         row = run_dataset_eval(returns)
         self.assertEqual(row["assets"], 2)
+        self.assertEqual(row["freq_method"], "ema")
         self.assertIn("sharpe", row)
+        state_row = run_dataset_eval(returns, freq_method="state_space")
+        self.assertEqual(state_row["freq_method"], "state_space")
 
     def test_signal_plot_smoke(self):
         if importlib.util.find_spec("matplotlib") is None:
