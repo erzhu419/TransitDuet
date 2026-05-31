@@ -15,6 +15,18 @@ import numpy as np
 from .performance_validation import BASELINES, SCENARIOS, run_baseline
 
 
+PRESSURE_BASELINES = tuple(BASELINES) + ("freq_hrl_recovery_tuned",)
+
+RECOVERY_TUNED_PROMOTION = {
+    "promotion_threshold": 0.00025,
+    "promotion_ratio": 0.20,
+    "promotion_window_s": 5 * 60.0,
+    "promotion_regime_threshold": 8e-05,
+    "promotion_mid_gain": 0.5,
+    "promotion_adapt_gain": 0.05,
+}
+
+
 def run_case(case: tuple[str, int, str, int, int, float, float, float, float]) -> dict[str, Any]:
     (
         scenario,
@@ -27,9 +39,11 @@ def run_case(case: tuple[str, int, str, int, int, float, float, float, float]) -
         promotion_startup_strength_age_s,
         promotion_startup_strength_threshold,
     ) = case
-    return run_baseline(
+    baseline_for_run = "freq_hrl" if baseline == "freq_hrl_recovery_tuned" else baseline
+    extra = dict(RECOVERY_TUNED_PROMOTION) if baseline == "freq_hrl_recovery_tuned" else {}
+    row = run_baseline(
         seed=seed,
-        baseline=baseline,
+        baseline=baseline_for_run,
         steps=steps,
         n_assets=assets,
         scenario=scenario,
@@ -37,7 +51,10 @@ def run_case(case: tuple[str, int, str, int, int, float, float, float, float]) -
         promotion_activation_strength_threshold=promotion_activation_strength_threshold,
         promotion_startup_strength_age_s=promotion_startup_strength_age_s,
         promotion_startup_strength_threshold=promotion_startup_strength_threshold,
+        **extra,
     )
+    row["baseline"] = baseline
+    return row
 
 
 def effective_workers(requested: int, case_count: int) -> int:
@@ -55,7 +72,7 @@ def summarize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
     out = []
     for scenario in SCENARIOS:
-        for baseline in BASELINES:
+        for baseline in PRESSURE_BASELINES:
             group = [
                 row for row in rows
                 if row["scenario"] == scenario and row["baseline"] == baseline
@@ -105,7 +122,7 @@ def write_report(
         "",
         "## Scenario Winners",
         "",
-        "| scenario | best Sharpe | best return | Freq-HRL Sharpe | Freq-HRL return | LF-only Sharpe | NoPromotion Sharpe |",
+        "| scenario | best Sharpe | best return | Freq-HRL Sharpe | Recovery-tuned Sharpe | LF-only Sharpe | NoPromotion Sharpe |",
         "|---|---|---|---:|---:|---:|---:|",
     ]
     by_scenario: dict[str, list[dict[str, Any]]] = {}
@@ -119,6 +136,7 @@ def write_report(
         best_return = max(rows, key=lambda row: row["total_return_mean"])
         by_name = {row["baseline"]: row for row in rows}
         freq = by_name.get("freq_hrl", {})
+        tuned = by_name.get("freq_hrl_recovery_tuned", {})
         lf = by_name.get("lf_upper_only", {})
         nop = by_name.get("no_promotion", {})
         lines.append(
@@ -126,7 +144,7 @@ def write_report(
             f"| {best_sharpe['baseline']} ({best_sharpe['sharpe_mean']:.3f}) "
             f"| {best_return['baseline']} ({best_return['total_return_mean']:.4f}) "
             f"| {freq.get('sharpe_mean', 0.0):.3f} "
-            f"| {freq.get('total_return_mean', 0.0):.4f} "
+            f"| {tuned.get('sharpe_mean', 0.0):.3f} "
             f"| {lf.get('sharpe_mean', 0.0):.3f} "
             f"| {nop.get('sharpe_mean', 0.0):.3f} |"
         )
@@ -136,7 +154,8 @@ def write_report(
         "",
         "- This matrix checks whether the frequency-responsibility claim survives beyond the default persistent-shift setting.",
         "- `lf_upper_only` is tracked explicitly because it is close to `freq_hrl` in the default validation.",
-        "- Rows where `freq_hrl` is not the scenario winner should drive the next policy or promotion tuning pass.",
+        "- `freq_hrl_recovery_tuned` is the shorter-window, stricter-regime-buffer promotion gate from the dedicated recovery validation.",
+        "- Rows where neither default nor recovery-tuned `freq_hrl` is the scenario winner should drive the next policy or promotion tuning pass.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -144,7 +163,7 @@ def write_report(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
-    parser.add_argument("--baselines", nargs="+", choices=BASELINES, default=list(BASELINES))
+    parser.add_argument("--baselines", nargs="+", choices=PRESSURE_BASELINES, default=list(PRESSURE_BASELINES))
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 123, 456, 789, 2026])
     parser.add_argument("--steps", type=int, default=720)
     parser.add_argument("--assets", type=int, default=3)
@@ -184,7 +203,7 @@ def main() -> None:
     rows.sort(key=lambda row: (
         list(SCENARIOS).index(row["scenario"]),
         int(row["seed"]),
-        list(BASELINES).index(row["baseline"]),
+        list(PRESSURE_BASELINES).index(row["baseline"]),
     ))
     summary = summarize(rows)
     args.output_dir.mkdir(parents=True, exist_ok=True)

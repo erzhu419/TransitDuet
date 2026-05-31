@@ -42,7 +42,8 @@ Implemented:
   REINFORCE updates.
 - Leakage-constrained `pg_linear` training path with policy-loss leakage
   penalties and a Lagrange-style constraint multiplier.
-- Trading pressure-test matrix across five synthetic market regimes.
+- Trading pressure-test matrix across six synthetic market regimes, including
+  the persistent reversal recovery shock.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
 - Dedicated promotion-recovery validation on a persistent reversal shock,
   including oracle-regime `recovery_regret_120`.
@@ -202,16 +203,20 @@ Implemented:
    - The same core has not yet been used in two real training/evaluation loops.
 
 5. Environment pressure-test matrix.
-   - Done: pressure matrix now covers persistent shift, stationary low-noise,
-     stationary high-noise, localized burst, and OOD period.
-   - Current evidence is mixed but improved after conservative promotion and
-     HF-utility gating: `freq_hrl` wins persistent shift, stationary high-noise,
-     and OOD period; it ties stationary low-noise and remains slightly behind
-     `lf_upper_only` on localized burst by Sharpe (`2.301` vs `2.306`).
-   - Additional filter probes show that hard warm-up or high activation-strength
-     gates can eliminate the localized-burst gap, but they also reduce OOD or
-     stationary high-noise gains, so they remain sweep parameters rather than
-     defaults.
+   - Done: pressure matrix now covers persistent shift, promotion recovery,
+     stationary low-noise, stationary high-noise, localized burst, and OOD
+     period.
+   - Done: the matrix includes both conservative `freq_hrl` and
+     `freq_hrl_recovery_tuned` so the recovery gate can be evaluated as a
+     scenario-specific variant instead of silently replacing the robust default.
+   - Current evidence: conservative `freq_hrl` wins persistent shift
+     (`16.062` Sharpe), stationary high-noise (`-0.679`), and OOD period
+     (`13.901`); `freq_hrl_recovery_tuned` wins promotion recovery (`21.133`)
+     and localized burst (`2.312`); stationary low-noise is an effective tie
+     where LF-only/no-promotion/frequency variants all report `8.440`.
+   - Boundary: the recovery-tuned gate hurts stationary high-noise
+     (`-1.788` vs conservative `-0.679`), so it should remain a
+     scenario-specific promotion profile rather than the global default.
 
 6. Required figures.
    - Done for trading diagnostics: raw/LF/HF signal decomposition, promotion
@@ -250,11 +255,12 @@ now mixed rather than uniformly positive:
   `lf_upper_only`, `hf_lower_only`, `allfreq_alllayers`, `swapped`,
   `no_promotion`, and `no_leakage` on Sharpe. The edge over `lf_upper_only`
   is small (`16.062` vs `16.047`) and should not be overstated.
-- In the wider pressure matrix, `freq_hrl` now wins persistent shift,
-  stationary high-noise, and OOD period; it ties stationary low-noise and is
-  still slightly behind `lf_upper_only` on localized burst. The regime-buffer
-  filter reduced the localized gap from about `-0.016` Sharpe to about
-  `-0.005`.
+- In the wider pressure matrix, conservative `freq_hrl` wins persistent shift,
+  stationary high-noise, and OOD period, while the explicit
+  `freq_hrl_recovery_tuned` profile wins promotion recovery and localized
+  burst. Stationary low-noise remains an effective tie. This makes the pressure
+  result stronger than the earlier five-scenario matrix, but also shows that
+  promotion tuning should be scenario-aware.
 - Filter ablations found the remaining localized-burst loss comes from early
   promotion during EMA startup in one seed, not from the localized burst itself.
   A 130-minute hard warm-up or a startup activation-strength threshold can
