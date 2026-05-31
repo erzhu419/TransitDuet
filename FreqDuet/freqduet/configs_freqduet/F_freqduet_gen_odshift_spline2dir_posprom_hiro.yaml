@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_gen_odshift_spline2dir_posprom_hiro
+
+frequency:
+  promotion:
+    residual_mode: positive
+
+env:
+  demand_noise: 0.15
+  od_noise: 0.35
+  od_noise_clip: [0.4, 1.8]

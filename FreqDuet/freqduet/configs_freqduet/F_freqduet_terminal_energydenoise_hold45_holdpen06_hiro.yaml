@@ -1,0 +1,24 @@
+_extends: F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml
+_name: F_freqduet_terminal_energydenoise_hold45_holdpen06_hiro
+
+# Current validated main FreqDuet path:
+# causal harmonic prior + LF upper/HF lower split, positive-residual promotion,
+# HF-energy-gated lower denoising, 45s terminal holding cap, and a small
+# action-conditioned penalty against holding through positive local HF bursts.
+frequency:
+  lower_high_noise_z: 1.0
+  lower_high_noise_energy_min: 0.08
+  promotion:
+    residual_mode: positive
+
+reward_attribution:
+  lower_hold_high_source: raw
+  lower_hold_positive_high_only: true
+  lower_hold_penalty_weight: 0.06
+  lower_hold_norm_s: 45.0
+  lower_hold_clip: 2.0
+
+upper:
+  timetable_planner:
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0

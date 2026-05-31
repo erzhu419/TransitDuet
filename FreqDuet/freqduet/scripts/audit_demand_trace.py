@@ -27,6 +27,31 @@ def _corr(df, a, b):
     return float(x[mask].corr(y[mask]))
 
 
+def _mean_col(df, name):
+    if name not in df.columns:
+        return 0.0
+    vals = pd.to_numeric(df[name], errors="coerce")
+    return float(vals.mean()) if vals.notna().any() else 0.0
+
+
+def _abs_mean_col(df, name):
+    if name not in df.columns:
+        return 0.0
+    vals = pd.to_numeric(df[name], errors="coerce").abs()
+    return float(vals.mean()) if vals.notna().any() else 0.0
+
+
+def _suppression_share(df, raw_col, feature_col):
+    if raw_col not in df.columns or feature_col not in df.columns:
+        return 0.0
+    raw = pd.to_numeric(df[raw_col], errors="coerce").abs()
+    feat = pd.to_numeric(df[feature_col], errors="coerce").abs()
+    mask = raw.notna() & feat.notna() & (raw > 1e-9)
+    if mask.sum() == 0:
+        return 0.0
+    return float(((raw[mask] - feat[mask]).clip(lower=0.0) / raw[mask]).mean())
+
+
 def _find_trace_files(paths, filename):
     result = []
     for raw in paths:
@@ -73,6 +98,43 @@ def summarize_run(trace_path, station_path=None):
         row.update({
             "station_rows": int(len(sdf)),
             "active_station_rows": int(len(active)),
+            "mean_abs_local_high_raw": _abs_mean_col(
+                active, "local_high_raw"
+                if "local_high_raw" in active.columns else "local_high"),
+            "mean_abs_local_high_feature": _abs_mean_col(
+                active, "local_high_feature"
+                if "local_high_feature" in active.columns else "local_high"),
+            "mean_local_high_noise_floor": _mean_col(
+                active, "local_high_noise_floor"),
+            "mean_local_high_prior_share": _mean_col(
+                active, "local_high_prior_share"),
+            "local_high_suppression_share": _suppression_share(
+                active,
+                "local_high_raw" if "local_high_raw" in active.columns else "local_high",
+                "local_high_feature"
+                if "local_high_feature" in active.columns else "local_high"),
+            "corr_station_raw_high_action": _corr(
+                active,
+                "local_high_raw" if "local_high_raw" in active.columns else "local_high",
+                "lower_action_mean_s"),
+            "corr_station_raw_high_board_wait": _corr(
+                active,
+                "local_high_raw" if "local_high_raw" in active.columns else "local_high",
+                "board_wait_mean_s"),
+            "corr_station_feature_high_action": _corr(
+                active,
+                "local_high_feature"
+                if "local_high_feature" in active.columns else "local_high",
+                "lower_action_mean_s"),
+            "corr_station_feature_high_board_wait": _corr(
+                active,
+                "local_high_feature"
+                if "local_high_feature" in active.columns else "local_high",
+                "board_wait_mean_s"),
+            "corr_station_high_floor_action": _corr(
+                active, "local_high_noise_floor", "lower_action_mean_s"),
+            "corr_station_high_prior_action": _corr(
+                active, "local_high_prior_share", "lower_action_mean_s"),
             "corr_station_high_action": _corr(
                 active, "local_high_energy", "lower_action_mean_s"),
             "corr_station_high_board_wait": _corr(
@@ -83,6 +145,17 @@ def summarize_run(trace_path, station_path=None):
     else:
         row.update({
             "active_station_rows": 0,
+            "mean_abs_local_high_raw": 0.0,
+            "mean_abs_local_high_feature": 0.0,
+            "mean_local_high_noise_floor": 0.0,
+            "mean_local_high_prior_share": 0.0,
+            "local_high_suppression_share": 0.0,
+            "corr_station_raw_high_action": 0.0,
+            "corr_station_raw_high_board_wait": 0.0,
+            "corr_station_feature_high_action": 0.0,
+            "corr_station_feature_high_board_wait": 0.0,
+            "corr_station_high_floor_action": 0.0,
+            "corr_station_high_prior_action": 0.0,
             "corr_station_high_action": 0.0,
             "corr_station_high_board_wait": 0.0,
             "corr_station_high_queue": 0.0,

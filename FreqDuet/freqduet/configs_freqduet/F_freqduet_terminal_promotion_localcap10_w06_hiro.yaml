@@ -8,6 +8,10 @@ frequency:
     window_min: 10.0
     cooldown_min: 10.0
     residual_threshold: 1.10
+    # Directional persistence keeps the dev-manual |r| shock criterion, but
+    # prevents mixed-sign high-noise residuals from masquerading as a regime
+    # shift.
+    residual_mode: directional_abs
     persistence_ratio: 0.45
     adapt_low: false
 

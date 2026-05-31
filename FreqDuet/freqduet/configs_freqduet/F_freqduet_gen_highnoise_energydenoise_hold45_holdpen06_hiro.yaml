@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_highnoise_energydenoise_hold45_hiro.yaml
+_name: F_freqduet_gen_highnoise_energydenoise_hold45_holdpen06_hiro
+
+reward_attribution:
+  lower_hold_high_source: raw
+  lower_hold_positive_high_only: true
+  lower_hold_penalty_weight: 0.06
+  lower_hold_norm_s: 45.0
+  lower_hold_clip: 2.0

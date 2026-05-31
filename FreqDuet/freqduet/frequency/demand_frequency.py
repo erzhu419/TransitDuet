@@ -215,6 +215,8 @@ class DemandFrequencyTracker:
         harmonic_prior_var=100.0,
         harmonic_residual_period_s=None,
         harmonic_prior=None,
+        lower_high_noise_z=0.0,
+        lower_high_noise_energy_min=0.0,
         promotion_enable=False,
         promotion_window_s=900.0,
         promotion_residual_threshold=1.0,
@@ -225,6 +227,7 @@ class DemandFrequencyTracker:
         promotion_adapt_gain=0.10,
         promotion_adapt_strength_min=0.15,
         promotion_adapt_local=False,
+        promotion_residual_mode="abs",
     ):
         self.update_interval_s = float(update_interval_s)
         self.method = str(method).lower()
@@ -246,6 +249,9 @@ class DemandFrequencyTracker:
         self._pending_od = defaultdict(float)
         self._pending_steps = 0
         self.harmonic_prior = harmonic_prior or {}
+        self.lower_high_noise_z = max(float(lower_high_noise_z), 0.0)
+        self.lower_high_noise_energy_min = max(
+            float(lower_high_noise_energy_min), 0.0)
         self.promotion_enabled = bool(promotion_enable)
         self.promotion_state_features = (
             self.promotion_enabled and bool(promotion_state_features))
@@ -255,6 +261,8 @@ class DemandFrequencyTracker:
         self.promotion_adapt_strength_min = max(
             float(promotion_adapt_strength_min), 0.0)
         self.promotion_adapt_local = bool(promotion_adapt_local)
+        self.promotion_residual_mode = str(
+            promotion_residual_mode or "abs").lower()
         self.promotion_absorptions = 0
         self.promotion_absorbed_rate = 0.0
 
@@ -310,6 +318,7 @@ class DemandFrequencyTracker:
                 residual_threshold=promotion_residual_threshold,
                 persistence_ratio=promotion_persistence_ratio,
                 cooldown_s=promotion_cooldown_s,
+                residual_mode=self.promotion_residual_mode,
             )
             if self.promotion_enabled else None
         )
@@ -355,6 +364,9 @@ class DemandFrequencyTracker:
                 "harmonic_residual_period_s",
                 cfg.get("fast_period_s", 300.0)),
             harmonic_prior=cfg.get("harmonic_prior", None),
+            lower_high_noise_z=cfg.get("lower_high_noise_z", 0.0),
+            lower_high_noise_energy_min=cfg.get(
+                "lower_high_noise_energy_min", 0.0),
             promotion_enable=promotion_cfg.get(
                 "enable", cfg.get("promotion_enable", False)),
             promotion_window_s=window_s,
@@ -374,6 +386,8 @@ class DemandFrequencyTracker:
                 cfg.get("promotion_adapt_strength_min", 0.15)),
             promotion_adapt_local=promotion_cfg.get(
                 "adapt_local", cfg.get("promotion_adapt_local", False)),
+            promotion_residual_mode=promotion_cfg.get(
+                "residual_mode", cfg.get("promotion_residual_mode", "abs")),
         )
 
     def _new_state(self, prior_theta=None):
@@ -407,6 +421,7 @@ class DemandFrequencyTracker:
                 residual_threshold=self.global_promotion_gate.residual_threshold,
                 persistence_ratio=self.global_promotion_gate.persistence_ratio,
                 cooldown_s=self.global_promotion_gate.cooldown_bins * self.bin_interval_s,
+                residual_mode=self.global_promotion_gate.residual_mode,
             )
         return self.local_promotion_gates[key]
 
@@ -502,6 +517,33 @@ class DemandFrequencyTracker:
 
     def _forecast_value(self, state):
         return max(0.0, state.low + state.low_slope * self.forecast_steps)
+
+    def _high_noise_floor(self, state):
+        if self.lower_high_noise_z <= 0.0 or not self._lower_high_noise_active():
+            return 0.0
+        return self._high_noise_floor_for_low(state.low)
+
+    def _high_noise_floor_for_low(self, low):
+        if self.lower_high_noise_z <= 0.0 or not self._lower_high_noise_active():
+            return 0.0
+        return self.lower_high_noise_z * math.sqrt(max(float(low), 0.0) + 1.0)
+
+    def _lower_high_noise_active(self):
+        if self.lower_high_noise_energy_min <= 0.0:
+            return True
+        high_energy = math.sqrt(max(self.global_state.high_energy, 0.0))
+        high_norm = high_energy / max(self.global_demand_norm, 1e-6)
+        return high_norm >= self.lower_high_noise_energy_min
+
+    def _denoise_high_value(self, high, state):
+        return self._denoise_high_for_low(high, state.low)
+
+    def _denoise_high_for_low(self, high, low):
+        if self.lower_high_noise_z <= 0.0:
+            return float(high)
+        high = float(high)
+        floor = self._high_noise_floor_for_low(low)
+        return math.copysign(max(abs(high) - floor, 0.0), high)
 
     def _upper_dim_for_mode(self, mode):
         if self.method == "raw_history":
@@ -640,9 +682,13 @@ class DemandFrequencyTracker:
 
         local_energy = math.sqrt(max(s.high_energy, 0.0))
         global_energy = math.sqrt(max(self.global_state.high_energy, 0.0))
+        local_high = self._denoise_high_value(s.high, s)
+        prev_local_high = self._denoise_high_for_low(
+            s.prev_high, getattr(s, "prev_low", s.low))
+        local_energy = max(local_energy - self._high_noise_floor(s), 0.0)
         high_feats = [
-            s.high / self.local_demand_norm,
-            s.high_slope / self.local_demand_norm,
+            local_high / self.local_demand_norm,
+            (local_high - prev_local_high) / self.local_demand_norm,
             local_energy / self.local_demand_norm,
             global_energy / self.global_demand_norm,
         ]
@@ -652,7 +698,7 @@ class DemandFrequencyTracker:
             self._forecast_value(s) / self.local_demand_norm,
             self.global_state.low / self.global_demand_norm,
         ]
-        pos_high = max(float(s.high), 0.0)
+        pos_high = max(float(local_high), 0.0)
         low_prior = max(float(s.low), 1.0)
         high_prior_share = pos_high / (low_prior + pos_high + 1e-6)
         high_prior_feats = high_feats + [
@@ -696,7 +742,52 @@ class DemandFrequencyTracker:
         s = self.local_states.get(key)
         if s is None:
             return 0.0
+        return float(self._denoise_high_value(s.high, s) / self.local_demand_norm)
+
+    def local_high_raw_value(self, station_id, direction):
+        key = (int(station_id), bool(direction))
+        s = self.local_states.get(key)
+        if s is None:
+            return 0.0
         return float(s.high / self.local_demand_norm)
+
+    def local_trace_summary(self, station_id, direction):
+        key = (int(station_id), bool(direction))
+        s = self.local_states.get(key)
+        if s is None:
+            return {
+                "local_low": 0.0,
+                "local_high": 0.0,
+                "local_high_raw": 0.0,
+                "local_high_feature": 0.0,
+                "local_high_noise_floor": 0.0,
+                "local_high_energy": 0.0,
+                "local_high_energy_feature": 0.0,
+                "local_high_prior_share": 0.0,
+                "local_middle": 0.0,
+                "local_middle_energy": 0.0,
+            }
+        raw_high = float(s.high)
+        feature_high = float(self._denoise_high_value(raw_high, s))
+        noise_floor = float(self._high_noise_floor(s))
+        high_energy = float(math.sqrt(max(s.high_energy, 0.0)))
+        high_energy_feature = max(high_energy - noise_floor, 0.0)
+        pos_high = max(feature_high, 0.0)
+        low_prior = max(float(s.low), 1.0)
+        high_prior_share = pos_high / (low_prior + pos_high + 1e-6)
+        return {
+            "local_low": float(s.low),
+            "local_high": raw_high,
+            "local_high_raw": raw_high,
+            "local_high_feature": feature_high,
+            "local_high_noise_floor": noise_floor,
+            "local_high_energy": high_energy,
+            "local_high_energy_feature": high_energy_feature,
+            "local_high_prior_share": float(high_prior_share),
+            "local_middle": float(getattr(s, "middle", 0.0)),
+            "local_middle_energy": float(math.sqrt(max(
+                getattr(s, "middle_energy", 0.0), 0.0))),
+        }
 
     def local_low_value(self, station_id, direction):
         key = (int(station_id), bool(direction))
@@ -740,6 +831,8 @@ class DemandFrequencyTracker:
             "freq_promotion_strength": float(promotion["strength"]),
             "freq_promotion_age": float(promotion["age"]),
             "freq_promotion_score": float(promotion["score"]),
+            "freq_promotion_direction": float(
+                promotion.get("direction", 0.0)),
             "freq_promotion_absorptions": int(self.promotion_absorptions),
             "freq_promotion_absorbed": float(
                 self.promotion_absorbed_rate / self.global_demand_norm),

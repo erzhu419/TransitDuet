@@ -43,6 +43,7 @@ class DemandEventLogger:
         "freq_promotion_strength",
         "freq_promotion_age",
         "freq_promotion_score",
+        "freq_promotion_direction",
     ]
 
     STATION_HEADER = [
@@ -59,12 +60,19 @@ class DemandEventLogger:
         "lower_action_mean_s",
         "local_low",
         "local_high",
+        "local_high_raw",
+        "local_high_feature",
+        "local_high_noise_floor",
         "local_high_energy",
+        "local_high_energy_feature",
+        "local_high_prior_share",
         "local_middle",
         "local_middle_energy",
         "local_promotion_flag",
         "local_promotion_strength",
         "local_promotion_age",
+        "local_promotion_score",
+        "local_promotion_direction",
     ]
 
     def __init__(
@@ -173,20 +181,33 @@ class DemandEventLogger:
 
     @staticmethod
     def _local_state_summary(tracker, key):
+        if tracker is not None and hasattr(tracker, "local_trace_summary"):
+            return tracker.local_trace_summary(*key)
         state = getattr(tracker, "local_states", {}).get(key)
         if state is None:
             return {
                 "local_low": 0.0,
                 "local_high": 0.0,
+                "local_high_raw": 0.0,
+                "local_high_feature": 0.0,
+                "local_high_noise_floor": 0.0,
                 "local_high_energy": 0.0,
+                "local_high_energy_feature": 0.0,
+                "local_high_prior_share": 0.0,
                 "local_middle": 0.0,
                 "local_middle_energy": 0.0,
             }
         return {
             "local_low": float(getattr(state, "low", 0.0)),
             "local_high": float(getattr(state, "high", 0.0)),
+            "local_high_raw": float(getattr(state, "high", 0.0)),
+            "local_high_feature": float(getattr(state, "high", 0.0)),
+            "local_high_noise_floor": 0.0,
             "local_high_energy": float(
                 np.sqrt(max(getattr(state, "high_energy", 0.0), 0.0))),
+            "local_high_energy_feature": float(
+                np.sqrt(max(getattr(state, "high_energy", 0.0), 0.0))),
+            "local_high_prior_share": 0.0,
             "local_middle": float(getattr(state, "middle", 0.0)),
             "local_middle_energy": float(
                 np.sqrt(max(getattr(state, "middle_energy", 0.0), 0.0))),
@@ -296,5 +317,8 @@ class DemandEventLogger:
                 "local_promotion_flag": float(promotion.get("flag", 0.0)),
                 "local_promotion_strength": float(promotion.get("strength", 0.0)),
                 "local_promotion_age": float(promotion.get("age", 0.0)),
+                "local_promotion_score": float(promotion.get("score", 0.0)),
+                "local_promotion_direction": float(
+                    promotion.get("direction", 0.0)),
             }
             self._append_row(self.station_path, self.STATION_HEADER, row)

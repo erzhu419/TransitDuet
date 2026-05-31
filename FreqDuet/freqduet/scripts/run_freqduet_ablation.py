@@ -215,6 +215,8 @@ def summarize_seed(csv_path, last_k):
         "freq_middle",
         "freq_middle_energy",
         "freq_od_entropy",
+        "freq_od_high_energy",
+        "freq_od_active",
         "freq_promotion_flag",
         "freq_promotion_strength",
         "freq_promotion_age",
@@ -240,11 +242,14 @@ def summarize_seed(csv_path, last_k):
         "freq_holdfb_decisions",
         "freq_wait_lower_penalty_mean",
         "freq_wait_lower_board_credit_mean",
+        "freq_wait_lower_hold_penalty_mean",
         "freq_wait_lower_net_mean",
         "freq_wait_upper_credit_std",
         "freq_wait_low_share_mean",
         "freq_wait_lower_high_share_mean",
         "freq_wait_boarded_pax",
+        "terminal_shift_cap_mean",
+        "terminal_shift_cap_max",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
     row["episodes"] = int(len(df))
@@ -291,6 +296,8 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "freq_high_energy",
         "freq_middle",
         "freq_middle_energy",
+        "freq_od_high_energy",
+        "freq_od_active",
         "freq_promotion_flag",
         "freq_promotion_strength",
         "freq_promotion_absorptions",
@@ -309,11 +316,14 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "freq_holdfb_decisions",
         "freq_wait_lower_penalty_mean",
         "freq_wait_lower_board_credit_mean",
+        "freq_wait_lower_hold_penalty_mean",
         "freq_wait_lower_net_mean",
         "freq_wait_upper_credit_std",
         "freq_wait_low_share_mean",
         "freq_wait_lower_high_share_mean",
         "freq_wait_boarded_pax",
+        "terminal_shift_cap_mean",
+        "terminal_shift_cap_max",
     ]
     summary = []
     for cfg in configs:

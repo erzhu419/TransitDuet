@@ -1,0 +1,18 @@
+_extends: F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml
+_name: F_freqduet_gen_odshift_energydenoise07_hold45_hiro
+
+frequency:
+  lower_high_noise_z: 1.0
+  lower_high_noise_energy_min: 0.07
+  promotion:
+    residual_mode: positive
+
+upper:
+  timetable_planner:
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0
+
+env:
+  demand_noise: 0.15
+  od_noise: 0.35
+  od_noise_clip: [0.4, 1.8]

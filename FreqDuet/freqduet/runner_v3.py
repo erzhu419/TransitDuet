@@ -241,6 +241,8 @@ class DiagnosticLog:
         'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
         'freq_wait_lower_board_credit_mean',
         'freq_wait_lower_board_credit_max',
+        'freq_wait_lower_hold_penalty_mean',
+        'freq_wait_lower_hold_penalty_max',
         'freq_wait_lower_net_mean',
         'freq_wait_upper_credit_mean', 'freq_wait_upper_credit_std',
         'freq_wait_low_share_mean', 'freq_wait_lower_high_share_mean',
@@ -250,6 +252,7 @@ class DiagnosticLog:
         'upper_plan_target_mean', 'upper_plan_target_std',
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
+        'terminal_shift_cap_mean', 'terminal_shift_cap_max',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -354,6 +357,8 @@ class TransitDuetV2Runner:
         self.timetable_promotion_replan = False
         self.timetable_promotion_replan_strength_min = 0.0
         self.timetable_plan_all_directions = False
+        self.timetable_terminal_hf_shift_max_s = None
+        self.timetable_terminal_hf_energy_min = 0.0
         self._active_timetable_plans = {}
         if bool(planner_cfg.get('enable', False)):
             self.timetable_planner = TimetableCurvePlanner.from_config(
@@ -372,6 +377,15 @@ class TransitDuetV2Runner:
                 planner_cfg.get('promotion_replan_strength_min', 0.0))
             self.timetable_plan_all_directions = bool(
                 planner_cfg.get('plan_all_directions', False))
+            hf_shift_max = planner_cfg.get(
+                'terminal_shift_high_energy_max_s',
+                planner_cfg.get('terminal_high_energy_shift_max_s', None))
+            if hf_shift_max is not None:
+                self.timetable_terminal_hf_shift_max_s = float(hf_shift_max)
+            self.timetable_terminal_hf_energy_min = max(float(
+                planner_cfg.get('terminal_shift_high_energy_min',
+                                planner_cfg.get('terminal_high_energy_min',
+                                                0.0))), 0.0)
         # v2k: elastic fleet — sample N_fleet per episode
         self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
         self.fleet_min = upper_cfg.get('fleet_min', 8)
@@ -499,6 +513,7 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
+        self._ep_terminal_shift_caps = []
         self._active_timetable_plans = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
         self._ep_upper_deltas_by_dir = {True: [], False: []}
@@ -540,8 +555,22 @@ class TransitDuetV2Runner:
             attr_cfg.get('lower_positive_high_only', False))
         self.freq_wait_lower_share_source = str(
             attr_cfg.get('lower_share_source', 'global')).lower()
+        self.freq_wait_lower_high_source = str(
+            attr_cfg.get('lower_high_source', 'feature')).lower()
+        self.freq_wait_lower_hold_high_source = str(
+            attr_cfg.get(
+                'lower_hold_high_source',
+                attr_cfg.get('lower_high_source', 'feature'))).lower()
         self.freq_wait_lower_high_share_cap = float(
             attr_cfg.get('lower_high_share_cap', 1.0))
+        self.freq_wait_lower_hold_penalty_weight = float(
+            attr_cfg.get('lower_hold_penalty_weight', 0.0))
+        self.freq_wait_lower_hold_norm_s = max(
+            float(attr_cfg.get('lower_hold_norm_s', 45.0)), 1e-6)
+        self.freq_wait_lower_hold_clip = max(
+            float(attr_cfg.get('lower_hold_clip', 2.0)), 0.0)
+        self.freq_wait_lower_hold_positive_only = bool(
+            attr_cfg.get('lower_hold_positive_high_only', True))
         self.freq_wait_norm_s = max(
             float(attr_cfg.get('wait_norm_s', 600.0)), 1e-6)
         self.freq_wait_clip = max(float(attr_cfg.get('wait_clip', 2.0)), 0.0)
@@ -551,6 +580,7 @@ class TransitDuetV2Runner:
             attr_cfg.get('normalize_upper_credit', True))
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_high_hold_penalties = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
@@ -856,6 +886,17 @@ class TransitDuetV2Runner:
         prev_delta_by_dir[direction] = delta_t
         return float(self.upper_hf_penalty * diff / max(self.delta_max, 1e-6))
 
+    def _terminal_shift_max_for_frequency(self):
+        if self.timetable_terminal_hf_shift_max_s is None:
+            return None
+        if getattr(self.env, 'frequency_tracker', None) is None:
+            return None
+        freq_summary = self.env.frequency_summary()
+        if (float(freq_summary.get('freq_high_energy', 0.0))
+                < self.timetable_terminal_hf_energy_min):
+            return None
+        return float(self.timetable_terminal_hf_shift_max_s)
+
     def _freq_wait_high_share(self, low_demand, local_high, positive_only=False):
         """Share of local passenger wait attributed to high-frequency demand."""
         high_raw = float(local_high)
@@ -864,6 +905,32 @@ class TransitDuetV2Runner:
         if high <= 0.0 and low <= 0.0:
             return 0.0
         return float(np.clip(high / (high + low + 1e-9), 0.0, 1.0))
+
+    def _lower_high_hold_penalty(
+            self, local_high, lower_low_demand, action_s):
+        """Penalty for holding through positive local high-frequency bursts."""
+        if (not self.freq_wait_enable
+                or self.freq_wait_lower_hold_penalty_weight <= 0.0):
+            return 0.0
+        action_norm = max(float(action_s), 0.0) / self.freq_wait_lower_hold_norm_s
+        if self.freq_wait_lower_hold_clip > 0.0:
+            action_norm = min(action_norm, self.freq_wait_lower_hold_clip)
+        if action_norm <= 0.0:
+            penalty = 0.0
+        else:
+            high_share = self._freq_wait_high_share(
+                lower_low_demand,
+                local_high,
+                positive_only=self.freq_wait_lower_hold_positive_only)
+            if self.freq_wait_lower_high_share_cap >= 0.0:
+                high_share = min(
+                    high_share, self.freq_wait_lower_high_share_cap)
+            penalty = (
+                self.freq_wait_lower_hold_penalty_weight
+                * high_share
+                * action_norm)
+        self._ep_lower_high_hold_penalties.append(float(penalty))
+        return float(penalty)
 
     def _record_frequency_wait_credit(
             self, trip_id, wait_sum_s, boarded_count, low_demand, local_high,
@@ -1149,12 +1216,20 @@ class TransitDuetV2Runner:
         plan_summary = None
         plan_penalty = 0.0
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            terminal_shift_max_s = (
+                self._terminal_shift_max_for_frequency()
+                if self.timetable_terminal_dispatch else None)
             plan_summary = self.timetable_planner.apply(
                 self.env.timetables, trip, action_vec,
                 origin_launch_s=plan_origin_launch,
-                write_scheduled_launch=self.timetable_terminal_dispatch)
+                write_scheduled_launch=self.timetable_terminal_dispatch,
+                terminal_shift_max_s=terminal_shift_max_s)
             delta_t = float(plan_summary['effective_delta'])
             base_hw = float(plan_summary['base_headway'])
+            self._ep_terminal_shift_caps.append(
+                float(plan_summary.get(
+                    'terminal_shift_max_s',
+                    self.timetable_planner.terminal_shift_max_s)))
             if upper_decision_taken:
                 plan_penalty = (
                     self.upper_plan_penalty_weight
@@ -1298,6 +1373,7 @@ class TransitDuetV2Runner:
         self._ep_freq_holdfb_features = []
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_high_hold_penalties = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
@@ -1323,6 +1399,7 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
+        self._ep_terminal_shift_caps = []
         self._active_timetable_plans = {}
 
         # v2k: elastic fleet sampling per-episode
@@ -1382,6 +1459,8 @@ class TransitDuetV2Runner:
                         drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
                         low_demand = 0.0
                         local_high = 0.0
+                        credit_high = 0.0
+                        hold_credit_high = 0.0
                         local_low = None
                         station_id = -1
                         if getattr(self.env, 'frequency_tracker', None) is not None:
@@ -1394,9 +1473,36 @@ class TransitDuetV2Runner:
                                     getattr(cur_bus.last_station, 'station_id', 0)))
                                 local_high = self.env.frequency_tracker.local_high_value(
                                     station_id, cur_dir)
+                                credit_high = local_high
+                                raw_high = None
+                                if (self.freq_wait_lower_high_source
+                                        in {'raw', 'raw_residual'}
+                                        and hasattr(
+                                            self.env.frequency_tracker,
+                                            'local_high_raw_value')):
+                                    raw_high = self.env.frequency_tracker.local_high_raw_value(
+                                        station_id, cur_dir)
+                                    credit_high = raw_high
+                                if raw_high is None and hasattr(
+                                        self.env.frequency_tracker,
+                                        'local_high_raw_value'):
+                                    raw_high = self.env.frequency_tracker.local_high_raw_value(
+                                        station_id, cur_dir)
+                                hold_credit_high = credit_high
+                                if (self.freq_wait_lower_hold_high_source
+                                        in {'raw', 'raw_residual'}
+                                        and raw_high is not None):
+                                    hold_credit_high = raw_high
+                                elif (self.freq_wait_lower_hold_high_source
+                                      in {'feature', 'denoised'}):
+                                    hold_credit_high = local_high
                                 local_low = self.env.frequency_tracker.local_low_value(
                                     station_id, cur_dir)
                         wait_penalty = 0.0
+                        high_hold_penalty = self._lower_high_hold_penalty(
+                            hold_credit_high,
+                            low_demand if local_low is None else local_low,
+                            act_val)
                         board_wait_sum_s = 0.0
                         board_count = 0
                         if cur_bus is not None:
@@ -1409,12 +1515,16 @@ class TransitDuetV2Runner:
                                 board_wait_sum_s,
                                 board_count,
                                 low_demand,
-                                local_high,
+                                credit_high,
                                 local_low)
                         self._record_frequency_hold_feedback(
-                            cur_dir, local_high, act_val,
+                            cur_dir, credit_high, act_val,
                             board_wait_sum_s, board_count)
-                        shaped_reward = float(reward) - drift_penalty - wait_penalty
+                        shaped_reward = (
+                            float(reward)
+                            - drift_penalty
+                            - wait_penalty
+                            - high_hold_penalty)
                         self._ep_lower_actions.append(act_val)
                         self._ep_lower_actions_by_dir[cur_dir].append(act_val)
                         self._ep_lower_rewards.append(shaped_reward)
@@ -1422,14 +1532,14 @@ class TransitDuetV2Runner:
                         if getattr(self.env, 'frequency_tracker', None) is not None:
                             self._ep_lower_demand_action.append((
                                 low_demand,
-                                local_high,
+                                credit_high,
                                 act_val,
                             ))
                             self._ep_shock_response_events.append({
                                 'time_s': float(getattr(self.env, 'current_time', 0.0)),
                                 'station_id': station_id,
                                 'direction': bool(cur_dir),
-                                'high': local_high,
+                                'high': credit_high,
                                 'action_s': act_val,
                             })
 
@@ -1675,6 +1785,7 @@ class TransitDuetV2Runner:
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
+        lower_hold_penalty_stat = _stat(self._ep_lower_high_hold_penalties)
         lower_wait_net_stat = _stat(self._ep_lower_wait_net)
         upper_wait_credit_stat = _stat(self._ep_upper_wait_credits)
         wait_low_share_stat = _stat(self._ep_freq_wait_low_shares)
@@ -1682,6 +1793,7 @@ class TransitDuetV2Runner:
         upper_plan_penalty_stat = _stat(self._ep_upper_plan_penalties)
         upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
         terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
+        terminal_shift_cap_stat = _stat(self._ep_terminal_shift_caps)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -1834,6 +1946,8 @@ class TransitDuetV2Runner:
             'freq_wait_lower_penalty_max': lower_wait_stat['max'],
             'freq_wait_lower_board_credit_mean': lower_board_credit_stat['mean'],
             'freq_wait_lower_board_credit_max': lower_board_credit_stat['max'],
+            'freq_wait_lower_hold_penalty_mean': lower_hold_penalty_stat['mean'],
+            'freq_wait_lower_hold_penalty_max': lower_hold_penalty_stat['max'],
             'freq_wait_lower_net_mean': lower_wait_net_stat['mean'],
             'freq_wait_upper_credit_mean': upper_wait_credit_stat['mean'],
             'freq_wait_upper_credit_std': upper_wait_credit_stat['std'],
@@ -1848,6 +1962,8 @@ class TransitDuetV2Runner:
             'upper_plan_reuse_ratio': plan_reuse_ratio,
             'terminal_launch_shift_mean': terminal_launch_shift_stat['mean'],
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
+            'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],
+            'terminal_shift_cap_max': terminal_shift_cap_stat['max'],
         }
         self.diag.append(row)
 
@@ -1866,6 +1982,7 @@ class TransitDuetV2Runner:
                    'upper_plan_penalty_mean',
                    'freq_wait_lower_penalty_mean',
                    'freq_wait_lower_board_credit_mean',
+                   'freq_wait_lower_hold_penalty_mean',
                    'freq_wait_lower_net_mean',
                    'freq_wait_upper_credit_mean',
                    'freq_wait_low_share_mean',
@@ -1966,6 +2083,7 @@ class TransitDuetV2Runner:
         if self.freq_wait_enable:
             print(f"  WAIT-F   lower_pen={row.get('freq_wait_lower_penalty_mean',0):.4f}  "
                   f"board_credit={row.get('freq_wait_lower_board_credit_mean',0):+.4f}  "
+                  f"hold_pen={row.get('freq_wait_lower_hold_penalty_mean',0):.4f}  "
                   f"net={row.get('freq_wait_lower_net_mean',0):+.4f}  "
                   f"upper_credit={row.get('freq_wait_upper_credit_mean',0):+.4f}"
                   f"±{row.get('freq_wait_upper_credit_std',0):.4f}  "
@@ -1974,7 +2092,8 @@ class TransitDuetV2Runner:
                   f"pax={int(row.get('freq_wait_boarded_pax',0))}")
         if self.timetable_terminal_dispatch:
             print(f"  TERM     launch_shift={row.get('terminal_launch_shift_mean',0):+.1f}"
-                  f"±{row.get('terminal_launch_shift_std',0):.1f}s")
+                  f"±{row.get('terminal_launch_shift_std',0):.1f}s  "
+                  f"cap={row.get('terminal_shift_cap_mean',0):.1f}s")
         print(f"{'─'*90}\n")
 
     # ────────────────── Per-trip dump ──────────────────

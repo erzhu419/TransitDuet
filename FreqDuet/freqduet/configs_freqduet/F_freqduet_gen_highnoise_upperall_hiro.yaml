@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_gen_highnoise_upperall_hiro
+
+frequency:
+  # Diagnostic: test whether high-noise robustness comes from exposing
+  # high-frequency summary to the upper planner while lower remains HF-focused.
+  upper_mode: all
+
+env:
+  demand_noise: 0.30
