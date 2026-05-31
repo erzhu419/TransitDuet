@@ -169,12 +169,19 @@ def objective(
     leakage_policy_loss_scale: float = 0.0,
     leakage_constraint_threshold: float = 0.0,
     leakage_lagrange_multiplier: float = 0.0,
+    lower_lf_policy_loss_scale: float = 0.0,
+    lower_lf_constraint_threshold: float = 0.0,
+    lower_lf_lagrange_multiplier: float = 0.0,
 ) -> float:
     leakage = float(row.get("leakage_penalty", 0.0))
     violation = max(0.0, leakage - max(float(leakage_constraint_threshold), 0.0))
+    lower_lf = float(row.get("LowerLFDrift", 0.0))
+    lower_violation = max(0.0, lower_lf - max(float(lower_lf_constraint_threshold), 0.0))
     leakage_penalty = (
         max(float(leakage_policy_loss_scale), 0.0) * leakage
         + max(float(leakage_lagrange_multiplier), 0.0) * violation
+        + max(float(lower_lf_policy_loss_scale), 0.0) * lower_lf
+        + max(float(lower_lf_lagrange_multiplier), 0.0) * lower_violation
     )
     return (
         float(row["total_return"])
@@ -267,6 +274,9 @@ def run_pg_episode(
     leakage_policy_loss_scale: float = 0.0,
     leakage_constraint_threshold: float = 0.0,
     leakage_lagrange_multiplier: float = 0.0,
+    lower_lf_policy_loss_scale: float = 0.0,
+    lower_lf_constraint_threshold: float = 0.0,
+    lower_lf_lagrange_multiplier: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -308,6 +318,8 @@ def run_pg_episode(
     turnover: list[float] = []
     leakage_loss_penalties: list[float] = []
     leakage_constraint_violations: list[float] = []
+    lower_lf_loss_penalties: list[float] = []
+    lower_lf_constraint_violations: list[float] = []
     promotion_count = 0
     leakage_shaper = CausalLeakageRewardShaper(
         regularizer=LeakageRegularizer(
@@ -346,13 +358,22 @@ def run_pg_episode(
         )
         raw_leakage = float(leakage_info["leakage_penalty"])
         violation = max(0.0, raw_leakage - max(float(leakage_constraint_threshold), 0.0))
+        lower_lf = float(leakage_info.get("LowerLFDrift", 0.0))
+        lower_violation = max(0.0, lower_lf - max(float(lower_lf_constraint_threshold), 0.0))
+        lower_lf_loss_penalty = (
+            max(float(lower_lf_policy_loss_scale), 0.0) * lower_lf
+            + max(float(lower_lf_lagrange_multiplier), 0.0) * lower_violation
+        )
         leakage_loss_penalty = (
             max(float(leakage_policy_loss_scale), 0.0) * raw_leakage
             + max(float(leakage_lagrange_multiplier), 0.0) * violation
+            + lower_lf_loss_penalty
         )
         objective_rewards.append(step_reward - leakage_loss_penalty)
         leakage_loss_penalties.append(leakage_loss_penalty)
         leakage_constraint_violations.append(violation)
+        lower_lf_loss_penalties.append(lower_lf_loss_penalty)
+        lower_lf_constraint_violations.append(lower_violation)
         pnl_returns.append(step_reward)
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -396,6 +417,11 @@ def run_pg_episode(
         "policy_loss_leakage_penalty_total": float(np.sum(leakage_loss_penalties)) if leakage_loss_penalties else 0.0,
         "leakage_constraint_violation": float(np.mean(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
         "leakage_constraint_violation_total": float(np.sum(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
+        "lower_lf_policy_loss_penalty": float(np.mean(lower_lf_loss_penalties)) if lower_lf_loss_penalties else 0.0,
+        "lower_lf_constraint_violation": float(np.mean(lower_lf_constraint_violations)) if lower_lf_constraint_violations else 0.0,
+        "leakage_penalty": float(leakage_shaper.last_info.get("leakage_penalty", 0.0)),
+        "UpperHFPower": float(leakage_shaper.last_info.get("UpperHFPower", 0.0)),
+        "LowerLFDrift": float(leakage_shaper.last_info.get("LowerLFDrift", 0.0)),
     }
     return grad_estimate, row
 
@@ -411,6 +437,9 @@ def run_actor_critic_episode(
     leakage_policy_loss_scale: float = 0.0,
     leakage_constraint_threshold: float = 0.0,
     leakage_lagrange_multiplier: float = 0.0,
+    lower_lf_policy_loss_scale: float = 0.0,
+    lower_lf_constraint_threshold: float = 0.0,
+    lower_lf_lagrange_multiplier: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -454,6 +483,8 @@ def run_actor_critic_episode(
     turnover: list[float] = []
     leakage_loss_penalties: list[float] = []
     leakage_constraint_violations: list[float] = []
+    lower_lf_loss_penalties: list[float] = []
+    lower_lf_constraint_violations: list[float] = []
     promotion_count = 0
     leakage_shaper = CausalLeakageRewardShaper(
         regularizer=LeakageRegularizer(
@@ -495,13 +526,22 @@ def run_actor_critic_episode(
         )
         raw_leakage = float(leakage_info["leakage_penalty"])
         violation = max(0.0, raw_leakage - max(float(leakage_constraint_threshold), 0.0))
+        lower_lf = float(leakage_info.get("LowerLFDrift", 0.0))
+        lower_violation = max(0.0, lower_lf - max(float(lower_lf_constraint_threshold), 0.0))
+        lower_lf_loss_penalty = (
+            max(float(lower_lf_policy_loss_scale), 0.0) * lower_lf
+            + max(float(lower_lf_lagrange_multiplier), 0.0) * lower_violation
+        )
         leakage_loss_penalty = (
             max(float(leakage_policy_loss_scale), 0.0) * raw_leakage
             + max(float(leakage_lagrange_multiplier), 0.0) * violation
+            + lower_lf_loss_penalty
         )
         objective_rewards.append(step_reward - leakage_loss_penalty)
         leakage_loss_penalties.append(leakage_loss_penalty)
         leakage_constraint_violations.append(violation)
+        lower_lf_loss_penalties.append(lower_lf_loss_penalty)
+        lower_lf_constraint_violations.append(lower_violation)
         pnl_returns.append(step_reward)
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -554,6 +594,11 @@ def run_actor_critic_episode(
         "policy_loss_leakage_penalty_total": float(np.sum(leakage_loss_penalties)) if leakage_loss_penalties else 0.0,
         "leakage_constraint_violation": float(np.mean(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
         "leakage_constraint_violation_total": float(np.sum(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
+        "lower_lf_policy_loss_penalty": float(np.mean(lower_lf_loss_penalties)) if lower_lf_loss_penalties else 0.0,
+        "lower_lf_constraint_violation": float(np.mean(lower_lf_constraint_violations)) if lower_lf_constraint_violations else 0.0,
+        "leakage_penalty": float(leakage_shaper.last_info.get("leakage_penalty", 0.0)),
+        "UpperHFPower": float(leakage_shaper.last_info.get("UpperHFPower", 0.0)),
+        "LowerLFDrift": float(leakage_shaper.last_info.get("LowerLFDrift", 0.0)),
     }
     return actor_grad, upper_grad, lower_grad, row
 
@@ -642,6 +687,9 @@ def train_policy_gradient(
     leakage_policy_loss_scale: float = 0.0,
     leakage_constraint_threshold: float = 0.0,
     leakage_lagrange_lr: float = 0.0,
+    lower_lf_policy_loss_scale: float = 0.0,
+    lower_lf_constraint_threshold: float = 0.0,
+    lower_lf_lagrange_lr: float = 0.0,
 ) -> dict[str, Any]:
     rng = np.random.default_rng(seed)
     params = PolicyGradientTradingParams()
@@ -651,6 +699,7 @@ def train_policy_gradient(
     history = []
     lr = max(float(learning_rate), 0.0)
     lagrange_multiplier = 0.0
+    lower_lf_lagrange_multiplier = 0.0
     for iteration in range(max(1, int(iterations))):
         grads = []
         sampled_rows = []
@@ -666,6 +715,9 @@ def train_policy_gradient(
                 leakage_policy_loss_scale=leakage_policy_loss_scale,
                 leakage_constraint_threshold=leakage_constraint_threshold,
                 leakage_lagrange_multiplier=lagrange_multiplier,
+                lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
             )
             grads.append(grad)
             sampled_rows.append(row)
@@ -686,6 +738,9 @@ def train_policy_gradient(
                 leakage_policy_loss_scale=leakage_policy_loss_scale,
                 leakage_constraint_threshold=leakage_constraint_threshold,
                 leakage_lagrange_multiplier=lagrange_multiplier,
+                lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
             )
             for row in eval_rows
         ]))
@@ -700,6 +755,15 @@ def train_policy_gradient(
             0.0,
             lagrange_multiplier + max(float(leakage_lagrange_lr), 0.0) * mean_violation,
         )
+        mean_lower_violation = float(np.mean([
+            row.get("lower_lf_constraint_violation", 0.0)
+            for row in sampled_rows
+        ]))
+        lower_lf_lagrange_multiplier = max(
+            0.0,
+            lower_lf_lagrange_multiplier
+            + max(float(lower_lf_lagrange_lr), 0.0) * mean_lower_violation,
+        )
         history.append({
             "iteration": int(iteration),
             "sampled_objective": float(np.mean([
@@ -708,6 +772,9 @@ def train_policy_gradient(
                     leakage_policy_loss_scale=leakage_policy_loss_scale,
                     leakage_constraint_threshold=leakage_constraint_threshold,
                     leakage_lagrange_multiplier=lagrange_multiplier,
+                    lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                    lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                    lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
                 )
                 for row in sampled_rows
             ])),
@@ -721,6 +788,12 @@ def train_policy_gradient(
             ])),
             "leakage_constraint_violation": mean_violation,
             "leakage_lagrange_multiplier": float(lagrange_multiplier),
+            "lower_lf_policy_loss_penalty": float(np.mean([
+                row.get("lower_lf_policy_loss_penalty", 0.0)
+                for row in sampled_rows
+            ])),
+            "lower_lf_constraint_violation": mean_lower_violation,
+            "lower_lf_lagrange_multiplier": float(lower_lf_lagrange_multiplier),
             "params": current_params.to_mapping(),
         })
     best_params = PolicyGradientTradingParams.from_vector(best_vector, template=params)
@@ -729,6 +802,7 @@ def train_policy_gradient(
         "trainer": (
             "on_policy_reinforce_leakage_constrained"
             if leakage_policy_loss_scale > 0.0 or leakage_lagrange_lr > 0.0
+            or lower_lf_policy_loss_scale > 0.0 or lower_lf_lagrange_lr > 0.0
             else "on_policy_reinforce"
         ),
         "scenario": scenario,
@@ -739,6 +813,9 @@ def train_policy_gradient(
         "leakage_policy_loss_scale": float(leakage_policy_loss_scale),
         "leakage_constraint_threshold": float(leakage_constraint_threshold),
         "leakage_lagrange_lr": float(leakage_lagrange_lr),
+        "lower_lf_policy_loss_scale": float(lower_lf_policy_loss_scale),
+        "lower_lf_constraint_threshold": float(lower_lf_constraint_threshold),
+        "lower_lf_lagrange_lr": float(lower_lf_lagrange_lr),
         "params": best_params.to_mapping(),
         "history": history,
     }
@@ -757,6 +834,9 @@ def train_actor_critic(
     leakage_policy_loss_scale: float = 0.0,
     leakage_constraint_threshold: float = 0.0,
     leakage_lagrange_lr: float = 0.0,
+    lower_lf_policy_loss_scale: float = 0.0,
+    lower_lf_constraint_threshold: float = 0.0,
+    lower_lf_lagrange_lr: float = 0.0,
 ) -> dict[str, Any]:
     rng = np.random.default_rng(seed)
     params = ActorCriticTradingParams()
@@ -769,6 +849,7 @@ def train_actor_critic(
     actor_lr = max(float(actor_learning_rate), 0.0)
     critic_lr = max(float(critic_learning_rate), 0.0)
     lagrange_multiplier = 0.0
+    lower_lf_lagrange_multiplier = 0.0
     for iteration in range(max(1, int(iterations))):
         current_params = params.with_vectors(actor_vector, upper_value, lower_value)
         actor_grads = []
@@ -787,6 +868,9 @@ def train_actor_critic(
                 leakage_policy_loss_scale=leakage_policy_loss_scale,
                 leakage_constraint_threshold=leakage_constraint_threshold,
                 leakage_lagrange_multiplier=lagrange_multiplier,
+                lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
             )
             actor_grads.append(actor_grad)
             upper_grads.append(upper_grad)
@@ -819,6 +903,9 @@ def train_actor_critic(
                 leakage_policy_loss_scale=leakage_policy_loss_scale,
                 leakage_constraint_threshold=leakage_constraint_threshold,
                 leakage_lagrange_multiplier=lagrange_multiplier,
+                lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
             )
             for row in eval_rows
         ]))
@@ -833,6 +920,15 @@ def train_actor_critic(
             0.0,
             lagrange_multiplier + max(float(leakage_lagrange_lr), 0.0) * mean_violation,
         )
+        mean_lower_violation = float(np.mean([
+            row.get("lower_lf_constraint_violation", 0.0)
+            for row in sampled_rows
+        ]))
+        lower_lf_lagrange_multiplier = max(
+            0.0,
+            lower_lf_lagrange_multiplier
+            + max(float(lower_lf_lagrange_lr), 0.0) * mean_lower_violation,
+        )
         history.append({
             "iteration": int(iteration),
             "sampled_objective": float(np.mean([
@@ -841,6 +937,9 @@ def train_actor_critic(
                     leakage_policy_loss_scale=leakage_policy_loss_scale,
                     leakage_constraint_threshold=leakage_constraint_threshold,
                     leakage_lagrange_multiplier=lagrange_multiplier,
+                    lower_lf_policy_loss_scale=lower_lf_policy_loss_scale,
+                    lower_lf_constraint_threshold=lower_lf_constraint_threshold,
+                    lower_lf_lagrange_multiplier=lower_lf_lagrange_multiplier,
                 )
                 for row in sampled_rows
             ])),
@@ -857,6 +956,12 @@ def train_actor_critic(
             ])),
             "leakage_constraint_violation": mean_violation,
             "leakage_lagrange_multiplier": float(lagrange_multiplier),
+            "lower_lf_policy_loss_penalty": float(np.mean([
+                row.get("lower_lf_policy_loss_penalty", 0.0)
+                for row in sampled_rows
+            ])),
+            "lower_lf_constraint_violation": mean_lower_violation,
+            "lower_lf_lagrange_multiplier": float(lower_lf_lagrange_multiplier),
             "params": current_params.to_mapping(),
         })
 
@@ -865,6 +970,7 @@ def train_actor_critic(
         "trainer": (
             "td0_actor_critic_leakage_constrained"
             if leakage_policy_loss_scale > 0.0 or leakage_lagrange_lr > 0.0
+            or lower_lf_policy_loss_scale > 0.0 or lower_lf_lagrange_lr > 0.0
             else "td0_actor_critic"
         ),
         "scenario": scenario,
@@ -878,6 +984,9 @@ def train_actor_critic(
         "leakage_policy_loss_scale": float(leakage_policy_loss_scale),
         "leakage_constraint_threshold": float(leakage_constraint_threshold),
         "leakage_lagrange_lr": float(leakage_lagrange_lr),
+        "lower_lf_policy_loss_scale": float(lower_lf_policy_loss_scale),
+        "lower_lf_constraint_threshold": float(lower_lf_constraint_threshold),
+        "lower_lf_lagrange_lr": float(lower_lf_lagrange_lr),
         "params": best_params.to_mapping(),
         "history": history,
     }
@@ -968,6 +1077,9 @@ def main() -> None:
     parser.add_argument("--pg-leakage-policy-loss-scale", type=float, default=0.0)
     parser.add_argument("--pg-leakage-constraint-threshold", type=float, default=0.0)
     parser.add_argument("--pg-leakage-lagrange-lr", type=float, default=0.0)
+    parser.add_argument("--pg-lower-lf-policy-loss-scale", type=float, default=0.0)
+    parser.add_argument("--pg-lower-lf-constraint-threshold", type=float, default=0.0)
+    parser.add_argument("--pg-lower-lf-lagrange-lr", type=float, default=0.0)
     parser.add_argument("--ac-iterations", type=int, default=20)
     parser.add_argument("--ac-actor-learning-rate", type=float, default=0.03)
     parser.add_argument("--ac-critic-learning-rate", type=float, default=0.08)
@@ -997,6 +1109,9 @@ def main() -> None:
                 leakage_policy_loss_scale=args.pg_leakage_policy_loss_scale,
                 leakage_constraint_threshold=args.pg_leakage_constraint_threshold,
                 leakage_lagrange_lr=args.pg_leakage_lagrange_lr,
+                lower_lf_policy_loss_scale=args.pg_lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=args.pg_lower_lf_constraint_threshold,
+                lower_lf_lagrange_lr=args.pg_lower_lf_lagrange_lr,
             )
             model_path = args.model_path or (args.output_dir / "pg_linear_policy.json")
             params = PolicyGradientTradingParams.from_mapping(model_payload["params"])
@@ -1014,6 +1129,9 @@ def main() -> None:
                 leakage_policy_loss_scale=args.pg_leakage_policy_loss_scale,
                 leakage_constraint_threshold=args.pg_leakage_constraint_threshold,
                 leakage_lagrange_lr=args.pg_leakage_lagrange_lr,
+                lower_lf_policy_loss_scale=args.pg_lower_lf_policy_loss_scale,
+                lower_lf_constraint_threshold=args.pg_lower_lf_constraint_threshold,
+                lower_lf_lagrange_lr=args.pg_lower_lf_lagrange_lr,
             )
             model_path = args.model_path or (args.output_dir / "ac_linear_policy.json")
             params = ActorCriticTradingParams.from_mapping(model_payload["params"])
@@ -1067,7 +1185,7 @@ def main() -> None:
         f"- turnover mean: {summary['turnover_mean']:.2f}",
         f"- leakage penalty mean: {summary.get('leakage_penalty_mean', 0.0):.4f}",
         "",
-        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. The `pg_linear` policy is trained by on-policy Gaussian REINFORCE over upper targets and lower execution speeds. The `ac_linear` policy uses separated upper low-frequency and lower high-frequency TD(0) critics to train the same actor with bootstrapped advantages. Optional leakage flags add a policy-loss penalty and Lagrange-style constraint update using causal action-effect leakage.",
+        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. The `pg_linear` policy is trained by on-policy Gaussian REINFORCE over upper targets and lower execution speeds. The `ac_linear` policy uses separated upper low-frequency and lower high-frequency TD(0) critics to train the same actor with bootstrapped advantages. Optional leakage flags add policy-loss penalties and Lagrange-style constraints for both total causal action-effect leakage and lower LF drift.",
     ]
     if model_payload is not None:
         report.extend([

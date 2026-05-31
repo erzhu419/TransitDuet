@@ -1,0 +1,1637 @@
+{
+  "summary": {
+    "mode": "train",
+    "policy": "ac_linear",
+    "n": 5,
+    "total_return_mean": 0.2798164228926761,
+    "sharpe_mean": 15.619003023963732,
+    "max_drawdown_mean": 0.016194750729096864,
+    "turnover_mean": 6.640906412770479,
+    "promotion_count_mean": 30.0,
+    "leakage_penalty_mean": 1.6404751147656227,
+    "UpperHFPower_mean": 0.0006519672537292638,
+    "LowerLFDrift_mean": 1.6398231475118934
+  },
+  "per_seed": [
+    {
+      "seed": 31415,
+      "scenario": "persistent_shift",
+      "total_return": 0.27534182676917296,
+      "sharpe": 16.526871985105803,
+      "max_drawdown": 0.0121888026327025,
+      "turnover": 6.99667841165513,
+      "promotion_count": 38,
+      "leakage_penalty": 0.7485181741055642,
+      "UpperHFPower": 0.0011452904062240836,
+      "LowerLFDrift": 0.7473728836993401
+    },
+    {
+      "seed": 27182,
+      "scenario": "persistent_shift",
+      "total_return": 0.26186619127367816,
+      "sharpe": 14.617619089588624,
+      "max_drawdown": 0.014218760690989818,
+      "turnover": 6.507954632496325,
+      "promotion_count": 54,
+      "leakage_penalty": 1.9109638801584368,
+      "UpperHFPower": 0.0004860907880724294,
+      "LowerLFDrift": 1.9104777893703644
+    },
+    {
+      "seed": 16180,
+      "scenario": "persistent_shift",
+      "total_return": 0.2709330752338195,
+      "sharpe": 14.683682378118942,
+      "max_drawdown": 0.019150139988896808,
+      "turnover": 6.243640173525336,
+      "promotion_count": 58,
+      "leakage_penalty": 1.8659569617046405,
+      "UpperHFPower": 0.000498909013787339,
+      "LowerLFDrift": 1.8654580526908533
+    },
+    {
+      "seed": 11235,
+      "scenario": "persistent_shift",
+      "total_return": 0.2816058468439311,
+      "sharpe": 15.152797521757961,
+      "max_drawdown": 0.019498268506722982,
+      "turnover": 6.445229268519006,
+      "promotion_count": 0,
+      "leakage_penalty": 1.8889189692074417,
+      "UpperHFPower": 0.0004626513700216554,
+      "LowerLFDrift": 1.88845631783742
+    },
+    {
+      "seed": 4242,
+      "scenario": "persistent_shift",
+      "total_return": 0.3093351743427788,
+      "sharpe": 17.114044145247316,
+      "max_drawdown": 0.015917781826172206,
+      "turnover": 7.0110295776566,
+      "promotion_count": 0,
+      "leakage_penalty": 1.7880175886520298,
+      "UpperHFPower": 0.0006668946905408116,
+      "LowerLFDrift": 1.787350693961489
+    }
+  ],
+  "model": {
+    "policy": "ac_linear",
+    "trainer": "td0_actor_critic_leakage_constrained",
+    "scenario": "persistent_shift",
+    "train_seeds": [
+      42,
+      123,
+      456,
+      789,
+      2026
+    ],
+    "steps": 720,
+    "assets": 3,
+    "best_score": 0.439697060543049,
+    "discount": 0.995,
+    "actor_learning_rate": 0.05,
+    "critic_learning_rate": 0.2,
+    "leakage_policy_loss_scale": 0.0,
+    "leakage_constraint_threshold": 0.0,
+    "leakage_lagrange_lr": 0.0,
+    "lower_lf_policy_loss_scale": 0.002,
+    "lower_lf_constraint_threshold": 1.0,
+    "lower_lf_lagrange_lr": 0.0001,
+    "params": {
+      "actor": {
+        "upper_low": 1.126287294304183,
+        "upper_mid": 0.19674612219382567,
+        "upper_high": -0.004028037312643388,
+        "upper_promotion": 0.3999752215933087,
+        "upper_position": 0.19911584092433482,
+        "upper_bias": 0.19440527848081574,
+        "lower_base_logit": -0.05140525442806554,
+        "lower_align": 0.2020493580151791,
+        "lower_energy": -0.0657414793075031,
+        "upper_std": 0.25,
+        "lower_std": 0.2
+      },
+      "upper_value": [
+        -0.00017919683684840894,
+        -0.00043780491108561003,
+        -3.560117719812356e-06,
+        -6.783697528936872e-05,
+        -5.198921817701183e-06,
+        -0.0004913533238337737
+      ],
+      "lower_value": [
+        -0.0005345054859081191,
+        -1.0350633887427434e-05,
+        -0.0005646988071738458,
+        -0.0006202224580350837,
+        -0.002322659135615371
+      ]
+    },
+    "history": [
+      {
+        "iteration": 0,
+        "sampled_objective": -1.4014552330644374,
+        "deterministic_objective": 0.387294672315942,
+        "deterministic_task_objective": 0.3906631590007975,
+        "deterministic_sharpe": 15.725424207437808,
+        "td_error_abs_mean": 0.0018006764738402133,
+        "critic_value_loss": 4.451574802326476e-06,
+        "actor_grad_norm": 1.186720332946945,
+        "critic_grad_norm": 0.0019937808011917997,
+        "policy_loss_leakage_penalty": 7.219132343097134e-05,
+        "leakage_constraint_violation": 0.49365420930281434,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 7.219132343097134e-05,
+        "lower_lf_constraint_violation": 5.610316629077782e-05,
+        "lower_lf_lagrange_multiplier": 5.610316629077783e-09,
+        "params": {
+          "actor": {
+            "upper_low": 1.0164040473608793,
+            "upper_mid": 0.19956320359438645,
+            "upper_high": -0.0001274468230875095,
+            "upper_promotion": 0.39999032678462737,
+            "upper_position": -0.01561692886625398,
+            "upper_bias": 0.014616930518851498,
+            "lower_base_logit": 0.15861274107426587,
+            "lower_align": 0.19889878156238203,
+            "lower_energy": -0.01189516088912844,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -2.8511656514907798e-05,
+            -7.006706934758749e-05,
+            -5.133967909924015e-07,
+            -1.0323634192289952e-05,
+            -8.5908461706111e-07,
+            -6.760787555190877e-05
+          ],
+          "lower_value": [
+            -8.766114232284913e-05,
+            -8.591920628928705e-07,
+            -8.599285793451809e-05,
+            -9.472850727934844e-05,
+            -0.0003529196607022149
+          ]
+        }
+      },
+      {
+        "iteration": 1,
+        "sampled_objective": -1.3382638151506565,
+        "deterministic_objective": 0.39448917615767887,
+        "deterministic_task_objective": 0.3978789684416421,
+        "deterministic_sharpe": 15.844953909309897,
+        "td_error_abs_mean": 0.0016967745480236753,
+        "critic_value_loss": 4.017217969923124e-06,
+        "actor_grad_norm": 1.0026156173508263,
+        "critic_grad_norm": 0.001855708196676057,
+        "policy_loss_leakage_penalty": 6.927298343736573e-05,
+        "leakage_constraint_violation": 0.4742110201827289,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 6.927298343736573e-05,
+        "lower_lf_constraint_violation": 0.00015188278697410794,
+        "lower_lf_lagrange_multiplier": 2.0798595326488578e-08,
+        "params": {
+          "actor": {
+            "upper_low": 1.033119876583066,
+            "upper_mid": 0.199355228577241,
+            "upper_high": 0.0015548691955886774,
+            "upper_promotion": 0.3999719416470465,
+            "upper_position": 0.01782057470760614,
+            "upper_bias": 0.02760967726839275,
+            "lower_base_logit": 0.12884328494793743,
+            "lower_align": 0.20076547575077036,
+            "lower_energy": -0.019258535550003647,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -5.4390734283333206e-05,
+            -0.00013373990985305945,
+            -1.0116869587400232e-06,
+            -1.991467728331515e-05,
+            -1.6273216492721487e-06,
+            -0.00013209762565727238
+          ],
+          "lower_value": [
+            -0.00016776514611794923,
+            -2.2732052611701054e-06,
+            -0.00016629507893259771,
+            -0.00018316244967470248,
+            -0.0006816790635862298
+          ]
+        }
+      },
+      {
+        "iteration": 2,
+        "sampled_objective": -1.2818977291287665,
+        "deterministic_objective": 0.4041610802754674,
+        "deterministic_task_objective": 0.4076372208725504,
+        "deterministic_sharpe": 16.046093618052378,
+        "td_error_abs_mean": 0.0016153640366192597,
+        "critic_value_loss": 3.660103814740727e-06,
+        "actor_grad_norm": 1.1163580676555582,
+        "critic_grad_norm": 0.0017445242507662818,
+        "policy_loss_leakage_penalty": 9.086420778580129e-05,
+        "leakage_constraint_violation": 0.4483154652932482,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 9.086420778580129e-05,
+        "lower_lf_constraint_violation": 0.00026168388412391017,
+        "lower_lf_lagrange_multiplier": 4.6966983738879596e-08,
+        "params": {
+          "actor": {
+            "upper_low": 1.050039516158458,
+            "upper_mid": 0.1986024871623032,
+            "upper_high": -0.0018356947840202779,
+            "upper_promotion": 0.3999721720174992,
+            "upper_position": 0.04853629880445205,
+            "upper_bias": 0.046652538270753025,
+            "lower_base_logit": 0.09138250598428962,
+            "lower_align": 0.2030636732722713,
+            "lower_energy": -0.029388869035996405,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -7.874027019487455e-05,
+            -0.00019312407301505296,
+            -1.491158896980986e-06,
+            -2.8924369270607025e-05,
+            -2.2901515583294094e-06,
+            -0.0001941957440184801
+          ],
+          "lower_value": [
+            -0.0002403815888003692,
+            -2.9733755088205334e-06,
+            -0.00024111644739743267,
+            -0.00026567083636339295,
+            -0.000991513998022659
+          ]
+        }
+      },
+      {
+        "iteration": 3,
+        "sampled_objective": -1.2502747524449593,
+        "deterministic_objective": 0.4114540809839563,
+        "deterministic_task_objective": 0.4149701906051086,
+        "deterministic_sharpe": 16.162147069421604,
+        "td_error_abs_mean": 0.0015423436586872517,
+        "critic_value_loss": 3.3313972043860895e-06,
+        "actor_grad_norm": 0.9468972041649376,
+        "critic_grad_norm": 0.0016582467077436288,
+        "policy_loss_leakage_penalty": 8.644180070217269e-05,
+        "leakage_constraint_violation": 0.41953732188983955,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 8.644180070217269e-05,
+        "lower_lf_constraint_violation": 0.0004787611761452523,
+        "lower_lf_lagrange_multiplier": 9.484310135340482e-08,
+        "params": {
+          "actor": {
+            "upper_low": 1.0668801812038102,
+            "upper_mid": 0.19802115540018314,
+            "upper_high": -0.0030588988436528104,
+            "upper_promotion": 0.39997724101552645,
+            "upper_position": 0.07970361580746088,
+            "upper_bias": 0.06293577179805959,
+            "lower_base_logit": 0.06551553491801042,
+            "lower_align": 0.20232280135407069,
+            "lower_energy": -0.03645280291670673,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0001014178297484684,
+            -0.0002488998873910523,
+            -1.9573543534851402e-06,
+            -3.752425125281252e-05,
+            -2.8515395941663822e-06,
+            -0.00025455625435528203
+          ],
+          "lower_value": [
+            -0.00030819132384705326,
+            -5.067228787386931e-06,
+            -0.00031256697946220103,
+            -0.000344300565527747,
+            -0.001286060825659083
+          ]
+        }
+      },
+      {
+        "iteration": 4,
+        "sampled_objective": -1.1856568045177216,
+        "deterministic_objective": 0.41999255327795754,
+        "deterministic_task_objective": 0.4235700980150415,
+        "deterministic_sharpe": 16.27635132736575,
+        "td_error_abs_mean": 0.0015082658367659727,
+        "critic_value_loss": 3.2470848522464585e-06,
+        "actor_grad_norm": 1.1856321077352572,
+        "critic_grad_norm": 0.0015999127190765286,
+        "policy_loss_leakage_penalty": 0.00012847826347648093,
+        "leakage_constraint_violation": 0.40087042091461156,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00012847826347648093,
+        "lower_lf_constraint_violation": 0.0011590843708358905,
+        "lower_lf_lagrange_multiplier": 2.1075153843699388e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.081349014380091,
+            "upper_mid": 0.19737788946493093,
+            "upper_high": -0.0048283701257897625,
+            "upper_promotion": 0.3999738774985134,
+            "upper_position": 0.10994442954918399,
+            "upper_bias": 0.08916284948909887,
+            "lower_base_logit": 0.025775213392978336,
+            "lower_align": 0.20132674026117703,
+            "lower_energy": -0.04735074126149082,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00012306330537081842,
+            -0.0003020419833911559,
+            -2.404920329623788e-06,
+            -4.583454486470666e-05,
+            -3.484551020703628e-06,
+            -0.0003155582574243523
+          ],
+          "lower_value": [
+            -0.00037237955674416547,
+            -7.068112817072777e-06,
+            -0.0003821100954666387,
+            -0.0004203306025813686,
+            -0.0015698994570852022
+          ]
+        }
+      },
+      {
+        "iteration": 5,
+        "sampled_objective": -1.1557918088428736,
+        "deterministic_objective": 0.42625940348756286,
+        "deterministic_task_objective": 0.4298646176436803,
+        "deterministic_sharpe": 16.272404244106134,
+        "td_error_abs_mean": 0.0014366083827977712,
+        "critic_value_loss": 2.976526356307848e-06,
+        "actor_grad_norm": 0.8729603310807299,
+        "critic_grad_norm": 0.0015164793691307197,
+        "policy_loss_leakage_penalty": 0.00011706712294908877,
+        "leakage_constraint_violation": 0.3703363252250598,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00011706712294908877,
+        "lower_lf_constraint_violation": 0.0006309428106543804,
+        "lower_lf_lagrange_multiplier": 2.738458195024319e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.0933523625890442,
+            "upper_mid": 0.19712775083701808,
+            "upper_high": -0.00470772335519213,
+            "upper_promotion": 0.3999752276024329,
+            "upper_position": 0.1374580350699344,
+            "upper_bias": 0.11618663486435266,
+            "lower_base_logit": 0.009954360412902603,
+            "lower_align": 0.20169298669238347,
+            "lower_energy": -0.05217514421440252,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00014328578030088664,
+            -0.0003509549433638686,
+            -2.836203094353171e-06,
+            -5.371876930682435e-05,
+            -4.031436598931093e-06,
+            -0.0003747248283699878
+          ],
+          "lower_value": [
+            -0.0004326277605911222,
+            -7.558351525424739e-06,
+            -0.0004474904327874766,
+            -0.0004918681640493383,
+            -0.0018393458044782438
+          ]
+        }
+      },
+      {
+        "iteration": 6,
+        "sampled_objective": -1.0898778022144562,
+        "deterministic_objective": 0.4333653950089425,
+        "deterministic_task_objective": 0.43700631142267443,
+        "deterministic_sharpe": 16.231907858458932,
+        "td_error_abs_mean": 0.001353806015853479,
+        "critic_value_loss": 2.6869486127887954e-06,
+        "actor_grad_norm": 1.2502018896298464,
+        "critic_grad_norm": 0.0014118923529449047,
+        "policy_loss_leakage_penalty": 0.00013104420142688765,
+        "leakage_constraint_violation": 0.33625415804227105,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00013104420142688765,
+        "lower_lf_constraint_violation": 0.000968179907891504,
+        "lower_lf_lagrange_multiplier": 3.706638102915823e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.1100508083828178,
+            "upper_mid": 0.19692111162351753,
+            "upper_high": -0.005592290309117452,
+            "upper_promotion": 0.39997726612656564,
+            "upper_position": 0.16837599765578243,
+            "upper_bias": 0.14832731836387117,
+            "lower_base_logit": -0.029429957823232808,
+            "lower_align": 0.19859437704987312,
+            "lower_energy": -0.06101702221759962,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00016205149200332187,
+            -0.0003967640583514632,
+            -3.2900578568117808e-06,
+            -6.10346473466706e-05,
+            -4.648763845894764e-06,
+            -0.00043342999796567124
+          ],
+          "lower_value": [
+            -0.0004861421500154455,
+            -9.292009467557894e-06,
+            -0.0005085389073829169,
+            -0.0005586685454170243,
+            -0.002089806509915409
+          ]
+        }
+      },
+      {
+        "iteration": 7,
+        "sampled_objective": -1.0169641789672064,
+        "deterministic_objective": 0.439697060543049,
+        "deterministic_task_objective": 0.44338467479637006,
+        "deterministic_sharpe": 16.06110035191491,
+        "td_error_abs_mean": 0.0012867581497706345,
+        "critic_value_loss": 2.4786602150109346e-06,
+        "actor_grad_norm": 1.241191106935838,
+        "critic_grad_norm": 0.001312282078451544,
+        "policy_loss_leakage_penalty": 0.00014884228130963265,
+        "leakage_constraint_violation": 0.3079079156464989,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00014884228130963265,
+        "lower_lf_constraint_violation": 0.001527528157182103,
+        "lower_lf_lagrange_multiplier": 5.234166260097927e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.126287294304183,
+            "upper_mid": 0.19674612219382567,
+            "upper_high": -0.004028037312643388,
+            "upper_promotion": 0.3999752215933087,
+            "upper_position": 0.19911584092433482,
+            "upper_bias": 0.19440527848081574,
+            "lower_base_logit": -0.05140525442806554,
+            "lower_align": 0.2020493580151791,
+            "lower_energy": -0.0657414793075031,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00017919683684840894,
+            -0.00043780491108561003,
+            -3.560117719812356e-06,
+            -6.783697528936872e-05,
+            -5.198921817701183e-06,
+            -0.0004913533238337737
+          ],
+          "lower_value": [
+            -0.0005345054859081191,
+            -1.0350633887427434e-05,
+            -0.0005646988071738458,
+            -0.0006202224580350837,
+            -0.002322659135615371
+          ]
+        }
+      },
+      {
+        "iteration": 8,
+        "sampled_objective": -0.9000637791134135,
+        "deterministic_objective": 0.43888954581796613,
+        "deterministic_task_objective": 0.4426648948545668,
+        "deterministic_sharpe": 15.846832414463648,
+        "td_error_abs_mean": 0.0011607076789995952,
+        "critic_value_loss": 2.064529109307808e-06,
+        "actor_grad_norm": 1.215542636233544,
+        "critic_grad_norm": 0.0011377246936763413,
+        "policy_loss_leakage_penalty": 0.00016165865158685851,
+        "leakage_constraint_violation": 0.26569159626945055,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00016165865158685851,
+        "lower_lf_constraint_violation": 0.0015452038256464637,
+        "lower_lf_lagrange_multiplier": 6.77937008574439e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.1411561679281925,
+            "upper_mid": 0.19624470019261586,
+            "upper_high": -0.005712505074009744,
+            "upper_promotion": 0.39998000261480265,
+            "upper_position": 0.2272794305787189,
+            "upper_bias": 0.23653434063177034,
+            "lower_base_logit": -0.08027169575243737,
+            "lower_align": 0.2060072461206974,
+            "lower_energy": -0.07300133446845095,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00019347705980657615,
+            -0.0004729906012076598,
+            -3.866246718407466e-06,
+            -7.37451619427249e-05,
+            -5.636636019584923e-06,
+            -0.0005451738948155321
+          ],
+          "lower_value": [
+            -0.0005730142637212143,
+            -1.2355812530654228e-05,
+            -0.0006135882711675017,
+            -0.0006732473172381461,
+            -0.002524436571556004
+          ]
+        }
+      },
+      {
+        "iteration": 9,
+        "sampled_objective": -0.8481933871851259,
+        "deterministic_objective": 0.4339045261832699,
+        "deterministic_task_objective": 0.4377545523241951,
+        "deterministic_sharpe": 15.706711347788858,
+        "td_error_abs_mean": 0.0010833975769602702,
+        "critic_value_loss": 1.844308542825217e-06,
+        "actor_grad_norm": 1.3884614710414767,
+        "critic_grad_norm": 0.001058045696013716,
+        "policy_loss_leakage_penalty": 0.0001600628249439863,
+        "leakage_constraint_violation": 0.23531063625691787,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0001600628249439863,
+        "lower_lf_constraint_violation": 0.0010481636617356324,
+        "lower_lf_lagrange_multiplier": 7.827533747480022e-07,
+        "params": {
+          "actor": {
+            "upper_low": 1.1515090194955735,
+            "upper_mid": 0.19620825000009168,
+            "upper_high": -0.004777690155587114,
+            "upper_promotion": 0.39997825222074296,
+            "upper_position": 0.25440457429324,
+            "upper_bias": 0.28241577286308917,
+            "lower_base_logit": -0.12230789663341404,
+            "lower_align": 0.20362704349617453,
+            "lower_energy": -0.08289676781207835,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00020707019448969486,
+            -0.0005056514978398882,
+            -4.0776960416335996e-06,
+            -7.915084199969975e-05,
+            -6.0656802324852115e-06,
+            -0.0005983089860762166
+          ],
+          "lower_value": [
+            -0.000607144135169952,
+            -1.3961341740845404e-05,
+            -0.0006588592946775888,
+            -0.0007227248110162041,
+            -0.0027115440765244528
+          ]
+        }
+      },
+      {
+        "iteration": 10,
+        "sampled_objective": -0.7569868616112864,
+        "deterministic_objective": 0.428059513764034,
+        "deterministic_task_objective": 0.4319865715412968,
+        "deterministic_sharpe": 15.579396910022052,
+        "td_error_abs_mean": 0.0010328700518564503,
+        "critic_value_loss": 1.6962752497758077e-06,
+        "actor_grad_norm": 1.1965447227678836,
+        "critic_grad_norm": 0.000986489515683634,
+        "policy_loss_leakage_penalty": 0.00021748092749941696,
+        "leakage_constraint_violation": 0.22981612222443637,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00021748092749941696,
+        "lower_lf_constraint_violation": 0.003477547442021752,
+        "lower_lf_lagrange_multiplier": 1.1305081189501775e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.16301793018324,
+            "upper_mid": 0.19584323985558547,
+            "upper_high": -0.005922178132233557,
+            "upper_promotion": 0.39998429757962917,
+            "upper_position": 0.2809630954953968,
+            "upper_bias": 0.33062822824497495,
+            "lower_base_logit": -0.14226718744639133,
+            "lower_align": 0.20201930099344034,
+            "lower_energy": -0.08672377825810668,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00021973831848419562,
+            -0.0005363847629428322,
+            -4.26659016517987e-06,
+            -8.429096303528526e-05,
+            -6.609316473052e-06,
+            -0.0006501848273620789
+          ],
+          "lower_value": [
+            -0.0006356633250596633,
+            -1.5340762147026773e-05,
+            -0.0007016994544743354,
+            -0.0007688681636997893,
+            -0.0028856815434208046
+          ]
+        }
+      },
+      {
+        "iteration": 11,
+        "sampled_objective": -0.6702498362563996,
+        "deterministic_objective": 0.4227655952745034,
+        "deterministic_task_objective": 0.4267393877725906,
+        "deterministic_sharpe": 15.468219585775108,
+        "td_error_abs_mean": 0.0009740003633211213,
+        "critic_value_loss": 1.5399666239914053e-06,
+        "actor_grad_norm": 0.838311059374553,
+        "critic_grad_norm": 0.0009082703637249089,
+        "policy_loss_leakage_penalty": 0.00025624328971219127,
+        "leakage_constraint_violation": 0.2287120949768508,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00025624328971219127,
+        "lower_lf_constraint_violation": 0.004673881031727329,
+        "lower_lf_lagrange_multiplier": 1.5978962221229105e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.1670553253744989,
+            "upper_mid": 0.19573609045099918,
+            "upper_high": -0.00661778024679512,
+            "upper_promotion": 0.39998831194452994,
+            "upper_position": 0.2988171995222735,
+            "upper_bias": 0.36368704771860655,
+            "lower_base_logit": -0.15996327270134764,
+            "lower_align": 0.20296962045488884,
+            "lower_energy": -0.09051963722674813,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00023174248142047025,
+            -0.0005648107017988903,
+            -4.312058380275492e-06,
+            -8.895300558504683e-05,
+            -7.088460738177436e-06,
+            -0.0006996962354270274
+          ],
+          "lower_value": [
+            -0.000659237291275106,
+            -1.637159448718477e-05,
+            -0.0007405772667708721,
+            -0.0008106547998001258,
+            -0.003046175532894891
+          ]
+        }
+      },
+      {
+        "iteration": 12,
+        "sampled_objective": -0.6117041416511908,
+        "deterministic_objective": 0.4153857620913771,
+        "deterministic_task_objective": 0.41941338915326754,
+        "deterministic_sharpe": 15.30865451844321,
+        "td_error_abs_mean": 0.000947183816995546,
+        "critic_value_loss": 1.480463743365257e-06,
+        "actor_grad_norm": 0.8950719172098315,
+        "critic_grad_norm": 0.0008659265750579713,
+        "policy_loss_leakage_penalty": 0.0002800075381605015,
+        "leakage_constraint_violation": 0.22881142688580747,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0002800075381605015,
+        "lower_lf_constraint_violation": 0.003684276815901792,
+        "lower_lf_lagrange_multiplier": 1.9663239037130896e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.1729805988917024,
+            "upper_mid": 0.19541649019155788,
+            "upper_high": -0.010359078631941736,
+            "upper_promotion": 0.39999336859985274,
+            "upper_position": 0.31797861880181894,
+            "upper_bias": 0.40335181063621406,
+            "lower_base_logit": -0.16243600638895037,
+            "lower_align": 0.20315808096446236,
+            "lower_energy": -0.09317908403355159,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00024314977477065398,
+            -0.0005916547945629737,
+            -4.376576427986932e-06,
+            -9.341757078695983e-05,
+            -7.540237832787382e-06,
+            -0.0007475390395811133
+          ],
+          "lower_value": [
+            -0.0006806259666433825,
+            -1.8101861485186327e-05,
+            -0.0007779948903776493,
+            -0.0008507524634913147,
+            -0.0031990315982410433
+          ]
+        }
+      },
+      {
+        "iteration": 13,
+        "sampled_objective": -0.5533107179196936,
+        "deterministic_objective": 0.40589495127624237,
+        "deterministic_task_objective": 0.4099644383442135,
+        "deterministic_sharpe": 15.101711314969034,
+        "td_error_abs_mean": 0.0009287485024767987,
+        "critic_value_loss": 1.4632503979094821e-06,
+        "actor_grad_norm": 1.0522705158019288,
+        "critic_grad_norm": 0.0008445854587934865,
+        "policy_loss_leakage_penalty": 0.0003239232316948516,
+        "leakage_constraint_violation": 0.23744914036781584,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0003239232316948516,
+        "lower_lf_constraint_violation": 0.008623287759878348,
+        "lower_lf_lagrange_multiplier": 2.8286526797009245e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.1819581951599978,
+            "upper_mid": 0.19537961613908486,
+            "upper_high": -0.010890422075127401,
+            "upper_promotion": 0.3999897818024171,
+            "upper_position": 0.3389665473428192,
+            "upper_bias": 0.4456426125669137,
+            "lower_base_logit": -0.18297102429562825,
+            "lower_align": 0.2035586244666214,
+            "lower_energy": -0.09921644231219008,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0002546827609606828,
+            -0.0006188029059270253,
+            -4.4289703256533285e-06,
+            -9.776317406180752e-05,
+            -8.033550324965029e-06,
+            -0.0007948994968637986
+          ],
+          "lower_value": [
+            -0.0006996240265873283,
+            -1.8852340172832006e-05,
+            -0.0008144223125980273,
+            -0.0008897653089887579,
+            -0.003347995896579993
+          ]
+        }
+      },
+      {
+        "iteration": 14,
+        "sampled_objective": -0.4877553294328159,
+        "deterministic_objective": 0.39841340282896065,
+        "deterministic_task_objective": 0.4025145450521072,
+        "deterministic_sharpe": 14.947691434188084,
+        "td_error_abs_mean": 0.0009124761035625903,
+        "critic_value_loss": 1.4514181294633963e-06,
+        "actor_grad_norm": 0.9431577122129734,
+        "critic_grad_norm": 0.0008249498281683143,
+        "policy_loss_leakage_penalty": 0.00037449248582783573,
+        "leakage_constraint_violation": 0.24974071606940593,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00037449248582783573,
+        "lower_lf_constraint_violation": 0.012151439965403481,
+        "lower_lf_lagrange_multiplier": 4.043796676241273e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.1850804192906326,
+            "upper_mid": 0.19518752779455195,
+            "upper_high": -0.011403690810120975,
+            "upper_promotion": 0.39999835187224286,
+            "upper_position": 0.3524861004123877,
+            "upper_bias": 0.47376862662239827,
+            "lower_base_logit": -0.21734532257222058,
+            "lower_align": 0.20440877770308333,
+            "lower_energy": -0.10680929099952621,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0002668239285566323,
+            -0.0006456535043008361,
+            -4.35828296640978e-06,
+            -0.00010199823897506212,
+            -8.598998342749583e-06,
+            -0.0008416475804702881
+          ],
+          "lower_value": [
+            -0.0007158703945383795,
+            -1.980710196759687e-05,
+            -0.0008502236913098738,
+            -0.0009279027509105681,
+            -0.00349342155840285
+          ]
+        }
+      },
+      {
+        "iteration": 15,
+        "sampled_objective": -0.4420614161384259,
+        "deterministic_objective": 0.39014133146740804,
+        "deterministic_task_objective": 0.3942780942699531,
+        "deterministic_sharpe": 14.767446648389633,
+        "td_error_abs_mean": 0.0009081535134958183,
+        "critic_value_loss": 1.4542507149993732e-06,
+        "actor_grad_norm": 0.7648991273150381,
+        "critic_grad_norm": 0.0008266762125676109,
+        "policy_loss_leakage_penalty": 0.00042213737018645175,
+        "leakage_constraint_violation": 0.26915747004258206,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00042213737018645175,
+        "lower_lf_constraint_violation": 0.011316414984303181,
+        "lower_lf_lagrange_multiplier": 5.175438174671591e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.187896505501779,
+            "upper_mid": 0.19484046845931602,
+            "upper_high": -0.017226616585682565,
+            "upper_promotion": 0.40000780327931884,
+            "upper_position": 0.36646283814089625,
+            "upper_bias": 0.5039212475888022,
+            "lower_base_logit": -0.23434339343137495,
+            "lower_align": 0.20447520603550318,
+            "lower_energy": -0.11202951776082454,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00027795017386629783,
+            -0.0006726540682231686,
+            -4.3723318945591945e-06,
+            -0.00010628072092740403,
+            -9.08195277056237e-06,
+            -0.0008883688411803678
+          ],
+          "lower_value": [
+            -0.0007314371882982267,
+            -2.107780116187474e-05,
+            -0.0008867059729210738,
+            -0.0009665732166017567,
+            -0.003639062101525605
+          ]
+        }
+      },
+      {
+        "iteration": 16,
+        "sampled_objective": -0.4063663062142749,
+        "deterministic_objective": 0.3816239319571823,
+        "deterministic_task_objective": 0.3857787808457965,
+        "deterministic_sharpe": 14.572352340834652,
+        "td_error_abs_mean": 0.0008759491602751372,
+        "critic_value_loss": 1.3482535613316334e-06,
+        "actor_grad_norm": 0.7900638057492714,
+        "critic_grad_norm": 0.0007891351626250904,
+        "policy_loss_leakage_penalty": 0.00042689715327865195,
+        "leakage_constraint_violation": 0.26403361474982306,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00042689715327865195,
+        "lower_lf_constraint_violation": 0.007935225162918648,
+        "lower_lf_lagrange_multiplier": 5.968960690963455e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.189050642992682,
+            "upper_mid": 0.19477094420944194,
+            "upper_high": -0.017696997532190544,
+            "upper_promotion": 0.4000155377316754,
+            "upper_position": 0.377846723282214,
+            "upper_bias": 0.5341974549414096,
+            "lower_base_logit": -0.25551592499063214,
+            "lower_align": 0.20445819247279984,
+            "lower_energy": -0.12005609257227978,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0002891366584580565,
+            -0.0006983377315624184,
+            -4.363573536299487e-06,
+            -0.00011031163481966044,
+            -9.609165906788054e-06,
+            -0.0009334014644457177
+          ],
+          "lower_value": [
+            -0.0007450437818302712,
+            -2.1986673284354077e-05,
+            -0.0009205725643273444,
+            -0.001002753403397226,
+            -0.0037784830589679005
+          ]
+        }
+      },
+      {
+        "iteration": 17,
+        "sampled_objective": -0.3628950676497691,
+        "deterministic_objective": 0.37011138619411676,
+        "deterministic_task_objective": 0.3742846653267839,
+        "deterministic_sharpe": 14.299538466380747,
+        "td_error_abs_mean": 0.0009027981760844128,
+        "critic_value_loss": 1.4599116038892165e-06,
+        "actor_grad_norm": 0.8684996731740044,
+        "critic_grad_norm": 0.0008159908211143842,
+        "policy_loss_leakage_penalty": 0.00048809239658875834,
+        "leakage_constraint_violation": 0.29059102587232116,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.00048809239658875834,
+        "lower_lf_constraint_violation": 0.014849536099938217,
+        "lower_lf_lagrange_multiplier": 7.453914300957277e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.192427383013406,
+            "upper_mid": 0.1946857582125465,
+            "upper_high": -0.01906360276189173,
+            "upper_promotion": 0.4000050004983432,
+            "upper_position": 0.39403836072616466,
+            "upper_bias": 0.573497693532827,
+            "lower_base_logit": -0.2632690889627112,
+            "lower_align": 0.20339487948749874,
+            "lower_energy": -0.12218489329294127,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00030121812051977614,
+            -0.0007256816875990384,
+            -4.262926254160632e-06,
+            -0.00011450891151049956,
+            -1.0201820023514398e-05,
+            -0.0009798536024494206
+          ],
+          "lower_value": [
+            -0.0007583674098150603,
+            -2.2809310409212143e-05,
+            -0.0009559688382412538,
+            -0.0010403829859807225,
+            -0.003922417523346696
+          ]
+        }
+      },
+      {
+        "iteration": 18,
+        "sampled_objective": -0.32287215941436914,
+        "deterministic_objective": 0.3642902082644074,
+        "deterministic_task_objective": 0.36848048564529623,
+        "deterministic_sharpe": 14.163189049005826,
+        "td_error_abs_mean": 0.0009335099998283126,
+        "critic_value_loss": 1.5336099788570002e-06,
+        "actor_grad_norm": 0.5553844542582034,
+        "critic_grad_norm": 0.0008635809756061791,
+        "policy_loss_leakage_penalty": 0.0005672554802504209,
+        "leakage_constraint_violation": 0.322195905391535,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0005672554802504209,
+        "lower_lf_constraint_violation": 0.016865177365321705,
+        "lower_lf_lagrange_multiplier": 9.140432037489449e-06,
+        "params": {
+          "actor": {
+            "upper_low": 1.1955682260762721,
+            "upper_mid": 0.19457075825731637,
+            "upper_high": -0.020138521817318907,
+            "upper_promotion": 0.40000534973159174,
+            "upper_position": 0.40312778173323144,
+            "upper_bias": 0.5924358923238654,
+            "lower_base_logit": -0.2803796761649254,
+            "lower_align": 0.20511892036336066,
+            "lower_energy": -0.1269889228315112,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003135211899543392,
+            -0.0007542312646725645,
+            -4.215740117442925e-06,
+            -0.00011893321548700181,
+            -1.0774531941443946e-05,
+            -0.0010292887007693477
+          ],
+          "lower_value": [
+            -0.0007709126769918343,
+            -2.3451921239165105e-05,
+            -0.0009935229815194247,
+            -0.001080360457700233,
+            -0.004074845860449287
+          ]
+        }
+      },
+      {
+        "iteration": 19,
+        "sampled_objective": -0.3010743130837001,
+        "deterministic_objective": 0.35300582102726324,
+        "deterministic_task_objective": 0.3572161900545732,
+        "deterministic_sharpe": 13.892775397808228,
+        "td_error_abs_mean": 0.0009248666853126442,
+        "critic_value_loss": 1.5817117963463512e-06,
+        "actor_grad_norm": 0.9035649636894425,
+        "critic_grad_norm": 0.0008534475761579144,
+        "policy_loss_leakage_penalty": 0.0005776000410850753,
+        "leakage_constraint_violation": 0.32557880056992106,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0005776000410850753,
+        "lower_lf_constraint_violation": 0.02220696625321235,
+        "lower_lf_lagrange_multiplier": 1.1361128662810683e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.199406785689889,
+            "upper_mid": 0.19483643745856588,
+            "upper_high": -0.017081558449818533,
+            "upper_promotion": 0.40001658447503907,
+            "upper_position": 0.4167685800470384,
+            "upper_bias": 0.6277270568350308,
+            "lower_base_logit": -0.30408551213652374,
+            "lower_align": 0.20609975937797215,
+            "lower_energy": -0.1317278527682993,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003264784892443432,
+            -0.0007823238673638768,
+            -4.113460393012348e-06,
+            -0.0001232800046930184,
+            -1.1458909266495076e-05,
+            -0.0010781523529887584
+          ],
+          "lower_value": [
+            -0.0007827382251024025,
+            -2.4280777771119717e-05,
+            -0.0010305116185658312,
+            -0.001119755504672596,
+            -0.004225544683182819
+          ]
+        }
+      },
+      {
+        "iteration": 20,
+        "sampled_objective": -0.2673942005509211,
+        "deterministic_objective": 0.3465546307077382,
+        "deterministic_task_objective": 0.35078158112645275,
+        "deterministic_sharpe": 13.731120426894796,
+        "td_error_abs_mean": 0.0009268151711822152,
+        "critic_value_loss": 1.5687903369926557e-06,
+        "actor_grad_norm": 0.47117640789768267,
+        "critic_grad_norm": 0.0008604759969744602,
+        "policy_loss_leakage_penalty": 0.0006141230316732625,
+        "leakage_constraint_violation": 0.3389289365215153,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0006141230316732625,
+        "lower_lf_constraint_violation": 0.02244847191925697,
+        "lower_lf_lagrange_multiplier": 1.360597585473638e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2007617529072059,
+            "upper_mid": 0.19459076889654342,
+            "upper_high": -0.019167900522973635,
+            "upper_promotion": 0.4000236216545024,
+            "upper_position": 0.4258705127181481,
+            "upper_bias": 0.6480058058237701,
+            "lower_base_logit": -0.3108863964207759,
+            "lower_align": 0.2089921891429555,
+            "lower_energy": -0.13200685193867714,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00033955432294230847,
+            -0.0008109285162911533,
+            -4.053517624908168e-06,
+            -0.00012769259924115783,
+            -1.2098532129001355e-05,
+            -0.001127554488714776
+          ],
+          "lower_value": [
+            -0.000793698465484005,
+            -2.5843471772597692e-05,
+            -0.0010678239678798297,
+            -0.0011595098671961103,
+            -0.004377439087093538
+          ]
+        }
+      },
+      {
+        "iteration": 21,
+        "sampled_objective": -0.2560132873438878,
+        "deterministic_objective": 0.34253394556204175,
+        "deterministic_task_objective": 0.3467760875665603,
+        "deterministic_sharpe": 13.628970438660861,
+        "td_error_abs_mean": 0.0008897606418654022,
+        "critic_value_loss": 1.4484994238238432e-06,
+        "actor_grad_norm": 0.3522764020522312,
+        "critic_grad_norm": 0.0008145202831420011,
+        "policy_loss_leakage_penalty": 0.000584512022281268,
+        "leakage_constraint_violation": 0.32285711154037056,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.000584512022281268,
+        "lower_lf_constraint_violation": 0.018395207156006354,
+        "lower_lf_lagrange_multiplier": 1.5445496570337016e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2034281512409764,
+            "upper_mid": 0.194094223354107,
+            "upper_high": -0.023285538721596423,
+            "upper_promotion": 0.4000316179931906,
+            "upper_position": 0.4334457424927398,
+            "upper_bias": 0.6615339876015073,
+            "lower_base_logit": -0.3168634542446935,
+            "lower_align": 0.2063118225945713,
+            "lower_energy": -0.13362858538391767,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003517657383285035,
+            -0.0008378692687227875,
+            -4.006745482538953e-06,
+            -0.00013186735917961075,
+            -1.2730250079396881e-05,
+            -0.00117430695703794
+          ],
+          "lower_value": [
+            -0.0008039152151907451,
+            -2.7417258027596172e-05,
+            -0.001103130903355012,
+            -0.0011969062812296374,
+            -0.004521339244965778
+          ]
+        }
+      },
+      {
+        "iteration": 22,
+        "sampled_objective": -0.23177338964726385,
+        "deterministic_objective": 0.3370609501468939,
+        "deterministic_task_objective": 0.3413174152831193,
+        "deterministic_sharpe": 13.488521733050638,
+        "td_error_abs_mean": 0.0009263737254599348,
+        "critic_value_loss": 1.5733673234239567e-06,
+        "actor_grad_norm": 0.49695067765206524,
+        "critic_grad_norm": 0.000872200315124456,
+        "policy_loss_leakage_penalty": 0.0006540389891060066,
+        "leakage_constraint_violation": 0.35587408150483124,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0006540389891060066,
+        "lower_lf_constraint_violation": 0.02238397084607533,
+        "lower_lf_lagrange_multiplier": 1.768389365494455e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2051198641392753,
+            "upper_mid": 0.1940513233364781,
+            "upper_high": -0.024100011718413843,
+            "upper_promotion": 0.4000301747773995,
+            "upper_position": 0.4410693502400418,
+            "upper_bias": 0.6797237540125376,
+            "lower_base_logit": -0.33161520620174834,
+            "lower_align": 0.20689493315721377,
+            "lower_energy": -0.13626138576689611,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003650514008225837,
+            -0.0008672448107256531,
+            -3.948977974005927e-06,
+            -0.0001363217354554026,
+            -1.3315843330590576e-05,
+            -0.0012243422790033979
+          ],
+          "lower_value": [
+            -0.0008142884955907984,
+            -2.8478929032027934e-05,
+            -0.0011411801464138046,
+            -0.0012375153949695274,
+            -0.004675159289224837
+          ]
+        }
+      },
+      {
+        "iteration": 23,
+        "sampled_objective": -0.21942326065327208,
+        "deterministic_objective": 0.32981868026341576,
+        "deterministic_task_objective": 0.3340944259651737,
+        "deterministic_sharpe": 13.296855402557469,
+        "td_error_abs_mean": 0.0009500614206858795,
+        "critic_value_loss": 1.6426082471971165e-06,
+        "actor_grad_norm": 0.6352347411679528,
+        "critic_grad_norm": 0.0009138899209893854,
+        "policy_loss_leakage_penalty": 0.0007027788664984094,
+        "leakage_constraint_violation": 0.3786151708868374,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0007027788664984094,
+        "lower_lf_constraint_violation": 0.02400257587377593,
+        "lower_lf_lagrange_multiplier": 2.0084151242322143e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2092768323864755,
+            "upper_mid": 0.19353014206883876,
+            "upper_high": -0.02761557497212716,
+            "upper_promotion": 0.4000367892679992,
+            "upper_position": 0.4517845495491104,
+            "upper_bias": 0.7055354768740307,
+            "lower_base_logit": -0.3452434165504523,
+            "lower_align": 0.2093133410081478,
+            "lower_energy": -0.1387632550977964,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003785965946507476,
+            -0.0008979410936641311,
+            -3.900713006189558e-06,
+            -0.0001410062764451377,
+            -1.3985954860977722e-05,
+            -0.0012768000873170742
+          ],
+          "lower_value": [
+            -0.0008248219381786574,
+            -3.085681199500467e-05,
+            -0.0011810885174216184,
+            -0.0012800788557378409,
+            -0.0048363638346936855
+          ]
+        }
+      },
+      {
+        "iteration": 24,
+        "sampled_objective": -0.200009229034705,
+        "deterministic_objective": 0.3244215109968088,
+        "deterministic_task_objective": 0.3287044415978516,
+        "deterministic_sharpe": 13.1477229811838,
+        "td_error_abs_mean": 0.000952481832564902,
+        "critic_value_loss": 1.666598787525491e-06,
+        "actor_grad_norm": 0.46444225013949764,
+        "critic_grad_norm": 0.0009147952491978376,
+        "policy_loss_leakage_penalty": 0.000720411039180023,
+        "leakage_constraint_violation": 0.38454435744145454,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.000720411039180023,
+        "lower_lf_constraint_violation": 0.026706160773660448,
+        "lower_lf_lagrange_multiplier": 2.275476731968819e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.213398558837163,
+            "upper_mid": 0.1935680149602566,
+            "upper_high": -0.027112850880621,
+            "upper_promotion": 0.40003907292630364,
+            "upper_position": 0.4613145500272715,
+            "upper_bias": 0.7257776471011377,
+            "lower_base_logit": -0.34257374903252097,
+            "lower_align": 0.20554955751940987,
+            "lower_energy": -0.13835809606012794,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0003928807769684358,
+            -0.0009292386909334346,
+            -3.840367684607004e-06,
+            -0.00014566288581301174,
+            -1.4656615532611684e-05,
+            -0.0013294476852814291
+          ],
+          "lower_value": [
+            -0.0008346511591576192,
+            -3.17615776470668e-05,
+            -0.0012203571863868747,
+            -0.0013220415406903123,
+            -0.004997907023880675
+          ]
+        }
+      },
+      {
+        "iteration": 25,
+        "sampled_objective": -0.19682034932473846,
+        "deterministic_objective": 0.31834008698123784,
+        "deterministic_task_objective": 0.32263735065390514,
+        "deterministic_sharpe": 12.980599400170073,
+        "td_error_abs_mean": 0.000941199270112129,
+        "critic_value_loss": 1.6127970967715897e-06,
+        "actor_grad_norm": 0.6589411452172853,
+        "critic_grad_norm": 0.0009104673921314017,
+        "policy_loss_leakage_penalty": 0.0007196829409403998,
+        "leakage_constraint_violation": 0.38312392313254756,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0007196829409403998,
+        "lower_lf_constraint_violation": 0.024042016391538846,
+        "lower_lf_lagrange_multiplier": 2.5158968958842072e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2133605406018735,
+            "upper_mid": 0.19375069571992717,
+            "upper_high": -0.025455643242216774,
+            "upper_promotion": 0.4000447684914153,
+            "upper_position": 0.4702245279114799,
+            "upper_bias": 0.7480345217866472,
+            "lower_base_logit": -0.3642098417559082,
+            "lower_align": 0.2022822808155318,
+            "lower_energy": -0.14375954150093173,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00040674104689129425,
+            -0.0009602544007747873,
+            -3.7979421996778165e-06,
+            -0.00015030724951663662,
+            -1.5287003515029255e-05,
+            -0.0013818531522937208
+          ],
+          "lower_value": [
+            -0.0008442395689008447,
+            -3.28449833351015e-05,
+            -0.0012597154829676986,
+            -0.0013640564816180581,
+            -0.005158618595119251
+          ]
+        }
+      },
+      {
+        "iteration": 26,
+        "sampled_objective": -0.16211079025204234,
+        "deterministic_objective": 0.31399794456194813,
+        "deterministic_task_objective": 0.3183075770568019,
+        "deterministic_sharpe": 12.858912976527401,
+        "td_error_abs_mean": 0.0010972661154081838,
+        "critic_value_loss": 2.1287770455615785e-06,
+        "actor_grad_norm": 0.4993430139936277,
+        "critic_grad_norm": 0.0011182470627287093,
+        "policy_loss_leakage_penalty": 0.0009298762341504206,
+        "leakage_constraint_violation": 0.48465962076800506,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0009298762341504206,
+        "lower_lf_constraint_violation": 0.04452575643669775,
+        "lower_lf_lagrange_multiplier": 2.961154460251185e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2141066050417293,
+            "upper_mid": 0.19373766654652033,
+            "upper_high": -0.026608112977863547,
+            "upper_promotion": 0.4000424918383763,
+            "upper_position": 0.47656451931648985,
+            "upper_bias": 0.764965365711161,
+            "lower_base_logit": -0.38056011297702136,
+            "lower_align": 0.20222602332208248,
+            "lower_energy": -0.14898353801286746,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0004241296516025745,
+            -0.0009987842595505995,
+            -3.6960179198483714e-06,
+            -0.00015600127035789925,
+            -1.6062962720284964e-05,
+            -0.0014463786355118156
+          ],
+          "lower_value": [
+            -0.0008546618821461434,
+            -3.30948769345146e-05,
+            -0.0013081078279933362,
+            -0.0014161460775859466,
+            -0.005355777773593086
+          ]
+        }
+      },
+      {
+        "iteration": 27,
+        "sampled_objective": -0.15384503840085867,
+        "deterministic_objective": 0.31134794901292906,
+        "deterministic_task_objective": 0.31566871603933144,
+        "deterministic_sharpe": 12.783176809731655,
+        "td_error_abs_mean": 0.0010663052474590377,
+        "critic_value_loss": 2.041860882190026e-06,
+        "actor_grad_norm": 0.28054750076592366,
+        "critic_grad_norm": 0.0010730575640328188,
+        "policy_loss_leakage_penalty": 0.0008978625234918299,
+        "leakage_constraint_violation": 0.46833186136956756,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0008978625234918299,
+        "lower_lf_constraint_violation": 0.04275099253446385,
+        "lower_lf_lagrange_multiplier": 3.3886643855958234e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2127878909094418,
+            "upper_mid": 0.19357008510266246,
+            "upper_high": -0.028670376289535508,
+            "upper_promotion": 0.40004843648213173,
+            "upper_position": 0.48019523181823326,
+            "upper_bias": 0.7747740951670751,
+            "lower_base_logit": -0.38892121207707603,
+            "lower_align": 0.2017363464779326,
+            "lower_energy": -0.15233110224291205,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0004408630096846967,
+            -0.0010354113009378029,
+            -3.6778595360502855e-06,
+            -0.0001614909453248421,
+            -1.6879880461600626e-05,
+            -0.0015082800751723188
+          ],
+          "lower_value": [
+            -0.0008645619615975219,
+            -3.5113257837152515e-05,
+            -0.0013545444323729086,
+            -0.0014660574375875632,
+            -0.005545051057576593
+          ]
+        }
+      },
+      {
+        "iteration": 28,
+        "sampled_objective": -0.14784002230738427,
+        "deterministic_objective": 0.3061832738944177,
+        "deterministic_task_objective": 0.31051493737488006,
+        "deterministic_sharpe": 12.631063593786019,
+        "td_error_abs_mean": 0.0010571863648616785,
+        "critic_value_loss": 2.0396317763739066e-06,
+        "actor_grad_norm": 0.4901387373159467,
+        "critic_grad_norm": 0.001061532470160831,
+        "policy_loss_leakage_penalty": 0.0008933323671393599,
+        "leakage_constraint_violation": 0.46485951044609014,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0008933323671393599,
+        "lower_lf_constraint_violation": 0.04248159512449403,
+        "lower_lf_lagrange_multiplier": 3.813480336840764e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2144021855535516,
+            "upper_mid": 0.19334874823249437,
+            "upper_high": -0.03024378092443033,
+            "upper_promotion": 0.4000459609799317,
+            "upper_position": 0.48786197291795824,
+            "upper_bias": 0.7963457407222162,
+            "lower_base_logit": -0.3970217912461825,
+            "lower_align": 0.2003481307991937,
+            "lower_energy": -0.15427996662258295,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.00045740128288368183,
+            -0.0010718643441024241,
+            -3.589884029186674e-06,
+            -0.00016691983485409055,
+            -1.7625257514492746e-05,
+            -0.00156952534750169
+          ],
+          "lower_value": [
+            -0.0008743605842696875,
+            -3.641049663887733e-05,
+            -0.0014006923368831505,
+            -0.0015155024760977992,
+            -0.0057321835033529965
+          ]
+        }
+      },
+      {
+        "iteration": 29,
+        "sampled_objective": -0.1324241749556848,
+        "deterministic_objective": 0.3024980531567659,
+        "deterministic_task_objective": 0.30683997044875466,
+        "deterministic_sharpe": 12.522512039200013,
+        "td_error_abs_mean": 0.001090832263879331,
+        "critic_value_loss": 2.133817964900914e-06,
+        "actor_grad_norm": 0.4412971474518823,
+        "critic_grad_norm": 0.0011017515535670095,
+        "policy_loss_leakage_penalty": 0.0009427095777658863,
+        "leakage_constraint_violation": 0.4888046665584526,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0009427095777658863,
+        "lower_lf_constraint_violation": 0.04645821821733011,
+        "lower_lf_lagrange_multiplier": 4.2780625190140645e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.214549854413358,
+            "upper_mid": 0.19327931329200854,
+            "upper_high": -0.03158784403308525,
+            "upper_promotion": 0.40005833113476386,
+            "upper_position": 0.4935435504692509,
+            "upper_bias": 0.8120029941702552,
+            "lower_base_logit": -0.41122366784095316,
+            "lower_align": 0.19989526547278902,
+            "lower_energy": -0.15666666938677226,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0004745588261696414,
+            -0.0011091256044565537,
+            -3.501103943271008e-06,
+            -0.0001725353560868099,
+            -1.8429894487004203e-05,
+            -0.0016332139001613195
+          ],
+          "lower_value": [
+            -0.0008840326003025695,
+            -3.861496185415547e-05,
+            -0.0014480356917426274,
+            -0.0015664380016646034,
+            -0.0059267312530197755
+          ]
+        }
+      },
+      {
+        "iteration": 30,
+        "sampled_objective": -0.11249241353624902,
+        "deterministic_objective": 0.29826239978620317,
+        "deterministic_task_objective": 0.30261271379174537,
+        "deterministic_sharpe": 12.396526234258207,
+        "td_error_abs_mean": 0.0010890333024441688,
+        "critic_value_loss": 2.1610443583003713e-06,
+        "actor_grad_norm": 0.5348710769377122,
+        "critic_grad_norm": 0.001096839568528229,
+        "policy_loss_leakage_penalty": 0.0009547747370506713,
+        "leakage_constraint_violation": 0.49210818690233865,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0009547747370506713,
+        "lower_lf_constraint_violation": 0.04958958858982811,
+        "lower_lf_lagrange_multiplier": 4.7739584049123455e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.2159975058550563,
+            "upper_mid": 0.19326011345826796,
+            "upper_high": -0.03163538824543525,
+            "upper_promotion": 0.4000672943996511,
+            "upper_position": 0.501004790827005,
+            "upper_bias": 0.8313915103905697,
+            "lower_base_logit": -0.42749361585526835,
+            "lower_align": 0.20129209998822453,
+            "lower_energy": -0.16052312427243481,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0004918929183206212,
+            -0.001146008168925946,
+            -3.4508106816047974e-06,
+            -0.00017815104175533618,
+            -1.9253901183638974e-05,
+            -0.0016966254848986993
+          ],
+          "lower_value": [
+            -0.000892970251223722,
+            -3.955024105350167e-05,
+            -0.0014954850677261818,
+            -0.0016173680213534155,
+            -0.006120334388821465
+          ]
+        }
+      },
+      {
+        "iteration": 31,
+        "sampled_objective": -0.09740681139996268,
+        "deterministic_objective": 0.29470921912158216,
+        "deterministic_task_objective": 0.2990696191011484,
+        "deterministic_sharpe": 12.288982554059501,
+        "td_error_abs_mean": 0.0011765469127013389,
+        "critic_value_loss": 2.4337876254556125e-06,
+        "actor_grad_norm": 0.460996650460925,
+        "critic_grad_norm": 0.001233562976722618,
+        "policy_loss_leakage_penalty": 0.0010868214488170742,
+        "leakage_constraint_violation": 0.5574107022318546,
+        "leakage_lagrange_multiplier": 0.0,
+        "lower_lf_policy_loss_penalty": 0.0010868214488170742,
+        "lower_lf_constraint_violation": 0.058780769390390064,
+        "lower_lf_lagrange_multiplier": 5.3617660988162464e-05,
+        "params": {
+          "actor": {
+            "upper_low": 1.216889199701537,
+            "upper_mid": 0.19328040098233532,
+            "upper_high": -0.03214401384378244,
+            "upper_promotion": 0.4000660177232631,
+            "upper_position": 0.5070023933296586,
+            "upper_bias": 0.8480982275815524,
+            "lower_base_logit": -0.4417313309102789,
+            "lower_align": 0.1999254466688167,
+            "lower_energy": -0.16377499171274712,
+            "upper_std": 0.25,
+            "lower_std": 0.2
+          },
+          "upper_value": [
+            -0.0005109387428923216,
+            -0.0011884926443871502,
+            -3.410468459582158e-06,
+            -0.00018445882229778786,
+            -2.0144290338563256e-05,
+            -0.0017679133030849752
+          ],
+          "lower_value": [
+            -0.0009027379426192013,
+            -4.053160127818019e-05,
+            -0.0015490307845385308,
+            -0.0016750371127875142,
+            -0.006337791640520407
+          ]
+        }
+      }
+    ]
+  }
+}

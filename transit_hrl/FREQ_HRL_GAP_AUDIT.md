@@ -49,6 +49,11 @@ Implemented:
   held-out run reaches return `0.2804`, objective `0.4436`, and total leakage
   `1.6475`, improving return/objective and leakage versus the previous
   `pg_linear` runs while giving up Sharpe.
+- Lower-LF drift can now be constrained explicitly at two levels: learned
+  `pg_linear`/`ac_linear` policy losses have separate `LowerLFDrift` penalty
+  and Lagrange controls, and the synthetic trading controller has an optional
+  drift-speed constraint that increases lower execution speed when the lower
+  effect persistently lags the upper plan.
 - Trading pressure-test matrix across six synthetic market regimes, including
   the persistent reversal recovery shock.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
@@ -60,6 +65,10 @@ Implemented:
   persistent-shift `freq_hrl` raises Sharpe from `16.062` to `16.106`, reduces
   turnover from `5.76` to `5.34`, and reduces total leakage from `1.822` to
   `0.969`, with a `0.667` plan reuse ratio.
+- Lower-LF constraint validation: combining the portfolio plan curve with
+  `lower_lf_drift_speed_gain=0.1` keeps `freq_hrl` as the best Sharpe baseline
+  (`16.080`) while reducing `LowerLFDrift` to `0.916` versus the original
+  default `1.821`.
 - Public Level-1 ETF daily-bar validation path using local CSV inputs.
 - Public ETF encoder ablation across EMA, state-space, and Haar wavelet
   decomposers.
@@ -119,15 +128,24 @@ Implemented:
    - Done in the policy-gradient trading path: `pg_linear` now supports
      explicit policy-loss leakage penalties plus a Lagrange-style constraint
      multiplier driven by causal action-effect leakage.
+   - Done in learned trading paths: `pg_linear` and `ac_linear` now expose
+     separate `LowerLFDrift` policy-loss and Lagrange constraint controls.
+   - Done in the deterministic trading control loop: an optional
+     lower-drift-speed constraint directly boosts lower execution speed when
+     the lower state drifts from the upper plan.
    - Current evidence: the leakage-regularized PG run reaches Sharpe `15.993`
      and return `0.2495` versus the refreshed unregularized PG run at Sharpe
      `15.915` and return `0.2487`; it also reduces turnover (`5.98` vs
      `6.41`) and upper HF action leakage (`UpperHFPower=0.000677` vs
      `0.000776`).
-   - Still partial: total leakage remains dominated by lower LF drift, and the
-     first regularized run increases total leakage penalty (`1.790` vs
-     `1.745`). The loss path exists, but lower-drift constraint tuning and a
-     differentiable neural actor-critic implementation remain open.
+   - Current lower-drift evidence: the lower-drift-speed validation reduces
+     `LowerLFDrift` from `1.821` to `0.916` while keeping Sharpe above the
+     original default (`16.080` vs `16.062`). The lower-LF constrained AC run
+     gives a smaller learned-policy improvement (`1.647` to `1.640`) while
+     improving Sharpe (`15.528` to `15.619`).
+   - Still partial: the strongest lower-drift reduction is currently
+     control-level/plan-curve assisted. A differentiable neural actor-critic
+     that learns this constraint end-to-end remains open.
 
 4. Reward and credit attribution are incomplete.
    - Done for the shared core and trading harness:
@@ -296,6 +314,10 @@ now mixed rather than uniformly positive:
   default persistent-shift validation: it gives `freq_hrl` the best Sharpe
   (`16.106`) while lowering turnover and lower LF drift, but total return
   drops slightly (`0.2402` vs `0.2436` without plan smoothing).
+- Adding the lower-drift speed constraint to the plan-curve control loop
+  further reduces `LowerLFDrift` (`0.916`) and keeps `freq_hrl` best on Sharpe
+  (`16.080`). This supports the lower-drift constraint mechanism, but the
+  return tradeoff remains (`0.2403` vs original `0.2436`).
 - Filter ablations found the remaining localized-burst loss comes from early
   promotion during EMA startup in one seed, not from the localized burst itself.
   A 130-minute hard warm-up or a startup activation-strength threshold can
@@ -317,11 +339,12 @@ now mixed rather than uniformly positive:
   post-shift-120 PnL by `+0.00854`, and reduces oracle-regime recovery regret
   by `-0.00839` against `no_promotion` over 20 paired seeds. This is evidence
   for the promotion mechanism, not yet a learned-runner replanning result.
-- Leakage shaping is now in the online reward path, `pg_linear` has an explicit
-  policy-loss / Lagrange-style leakage constraint path, and `ac_linear` reduces
-  total action-effect leakage in the unregularized actor-critic run. The first
-  constrained PG run improves Sharpe, return, turnover, and upper-HF leakage,
-  but not total leakage because lower LF drift remains the dominant term.
+- Leakage shaping is now in the online reward path, learned policy paths have
+  explicit policy-loss / Lagrange-style constraints for total leakage and lower
+  LF drift, and the deterministic lower-drift-speed constraint now cuts lower
+  LF drift by about half in the main synthetic validation. The learned
+  lower-drift constraint is positive but still much weaker than the
+  control-level result.
 - Reward attribution is now logged in the trading validation as LF cost, HF
   cost, leakage cost, promotion adaptation cost, upper credit, and lower credit.
 - The synthetic decomposer ablation still shows that replacing EMA with Fourier,
@@ -354,8 +377,8 @@ fully validated, domain-general Frequency-Separated HRL
 3. Carry the recovery-tuned promotion gate into learned runners with explicit
    high-level replanning or process-noise adaptation.
 4. Extend the new `ac_linear` path toward neural/off-policy SAC/PPO/TD3-style
-   training, and tune the leakage constraint so it reduces lower LF drift as
-   well as upper HF action leakage.
+   training so the current control-level lower-drift constraint can be learned
+   end-to-end instead of hand-coded.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
 7. Tune state-space and Haar wavelet encoder hyperparameters by domain, and add

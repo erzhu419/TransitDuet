@@ -202,9 +202,13 @@ class TradingPerformanceValidationTest(unittest.TestCase):
             leakage_policy_loss_scale=0.01,
             leakage_constraint_threshold=0.0,
             leakage_lagrange_multiplier=0.1,
+            lower_lf_policy_loss_scale=0.01,
+            lower_lf_constraint_threshold=0.0,
+            lower_lf_lagrange_multiplier=0.1,
         )
         self.assertIn("policy_loss_leakage_penalty", row)
         self.assertIn("leakage_constraint_violation", row)
+        self.assertIn("lower_lf_constraint_violation", row)
         self.assertGreaterEqual(row["policy_loss_leakage_penalty"], 0.0)
 
         model = train_policy_gradient(
@@ -218,9 +222,13 @@ class TradingPerformanceValidationTest(unittest.TestCase):
             leakage_policy_loss_scale=0.01,
             leakage_constraint_threshold=0.0,
             leakage_lagrange_lr=0.1,
+            lower_lf_policy_loss_scale=0.01,
+            lower_lf_constraint_threshold=0.0,
+            lower_lf_lagrange_lr=0.1,
         )
         self.assertEqual(model["trainer"], "on_policy_reinforce_leakage_constrained")
         self.assertIn("leakage_lagrange_multiplier", model["history"][0])
+        self.assertIn("lower_lf_lagrange_multiplier", model["history"][0])
 
     def test_actor_critic_entry_trains_and_evaluates(self):
         actor_grad, upper_grad, lower_grad, row = run_actor_critic_episode(
@@ -245,10 +253,14 @@ class TradingPerformanceValidationTest(unittest.TestCase):
             actor_learning_rate=0.01,
             critic_learning_rate=0.01,
             seed=1,
+            lower_lf_policy_loss_scale=0.01,
+            lower_lf_constraint_threshold=0.0,
+            lower_lf_lagrange_lr=0.1,
         )
         self.assertEqual(model["policy"], "ac_linear")
-        self.assertEqual(model["trainer"], "td0_actor_critic")
+        self.assertEqual(model["trainer"], "td0_actor_critic_leakage_constrained")
         self.assertIn("critic_value_loss", model["history"][0])
+        self.assertIn("lower_lf_constraint_violation", model["history"][0])
         row = run_eval(seed=123, steps=35, assets=2, policy="ac_linear")
         self.assertIn("sharpe", row)
 

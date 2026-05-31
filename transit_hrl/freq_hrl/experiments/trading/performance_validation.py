@@ -288,6 +288,7 @@ def policy_action(
     hf_energy_speed_gain: float = 0.0,
     promotion_residual_plan_gain: float = 0.0,
     promotion_speed_boost: float = 0.0,
+    lower_lf_drift_speed_gain: float = 0.0,
     seed_phase: float = 0.0,
     plan_curve_state: CausalPlanCurveState | None = None,
     plan_curve_now_s: float = 0.0,
@@ -364,6 +365,9 @@ def policy_action(
             0.15,
             1.0,
         )
+        if lower_lf_drift_speed_gain > 0.0:
+            drift_boost = max(float(lower_lf_drift_speed_gain), 0.0) * np.tanh(np.abs(gap) / 0.10)
+            alpha = np.clip(alpha + drift_boost, 0.15, 1.0)
     elif name == "vanilla_rl":
         target = normalize_target(raw_signal)
         alpha = np.ones(dim, dtype=np.float64) * 0.75
@@ -392,6 +396,9 @@ def policy_action(
             0.15,
             1.0,
         )
+        if lower_lf_drift_speed_gain > 0.0:
+            drift_boost = max(float(lower_lf_drift_speed_gain), 0.0) * np.tanh(np.abs(gap) / 0.10)
+            alpha = np.clip(alpha + drift_boost, 0.15, 1.0)
         promotion = {"promote": False, "promotion_strength": 0.0}
     elif name == "freq_single_policy":
         signal = x_low + x_mid + x_high
@@ -445,6 +452,7 @@ def policy_action(
         "hf_utility": hf_utility,
         "promotion": promotion,
         "plan_curve": locals().get("plan_curve_info", {"enabled": False}),
+        "lower_lf_drift_speed_gain": float(lower_lf_drift_speed_gain),
     }
     return target, lower_action, diag_features
 
@@ -581,6 +589,7 @@ def run_baseline(
     hf_energy_speed_gain: float = 0.0,
     promotion_residual_plan_gain: float = 0.0,
     promotion_speed_boost: float = 0.0,
+    lower_lf_drift_speed_gain: float = 0.0,
     leakage_reward_scale: float = 0.00005,
     promotion_adaptation_cost_scale: float = 0.00005,
     plan_curve_enable: bool = False,
@@ -709,6 +718,7 @@ def run_baseline(
             hf_energy_speed_gain=hf_energy_speed_gain,
             promotion_residual_plan_gain=promotion_residual_plan_gain,
             promotion_speed_boost=promotion_speed_boost,
+            lower_lf_drift_speed_gain=lower_lf_drift_speed_gain,
             plan_curve_state=plan_curve_state,
             plan_curve_now_s=float(t * 60.0),
         )
@@ -837,6 +847,7 @@ def run_baseline(
         "plan_curve_reuse_ratio": float(plan_curve_reuses / max(total_plan, 1)),
         "plan_curve_smoothness_mean": float(np.mean(plan_curve_smoothness)) if plan_curve_smoothness else 0.0,
         "plan_curve_desired_gap_mean": float(np.mean(plan_curve_desired_gaps)) if plan_curve_desired_gaps else 0.0,
+        "lower_lf_drift_speed_gain": float(lower_lf_drift_speed_gain if baseline == "freq_hrl" else 0.0),
     })
     return row
 
@@ -903,6 +914,7 @@ def write_report(
     hf_energy_speed_gain: float,
     promotion_residual_plan_gain: float,
     promotion_speed_boost: float,
+    lower_lf_drift_speed_gain: float,
     leakage_reward_scale: float,
     promotion_adaptation_cost_scale: float,
     plan_curve_enable: bool,
@@ -933,6 +945,7 @@ def write_report(
         f"- frequency encoder: `{freq_method}`",
         f"- promotion config: threshold={promotion_threshold}, persistence_ratio={promotion_ratio}, window_s={promotion_window_s}, cooldown_s={promotion_cooldown_s}, regime_threshold={promotion_regime_threshold}, min_age_s={promotion_min_age_s}, activation_strength_threshold={promotion_activation_strength_threshold}, startup_strength_age_s={promotion_startup_strength_age_s}, startup_strength_threshold={promotion_startup_strength_threshold}, mid_gain={promotion_mid_gain}, adapt_gain={promotion_adapt_gain}, residual_plan_gain={promotion_residual_plan_gain}, speed_boost={promotion_speed_boost}",
         f"- HF lower config: residual_gain={hf_residual_gain}, recenter_gain={hf_recenter_gain}, speed_gain={hf_speed_gain}, energy_speed_gain={hf_energy_speed_gain}",
+        f"- lower LF drift speed constraint gain: {lower_lf_drift_speed_gain}",
         f"- leakage reward scale: {leakage_reward_scale}",
         f"- promotion adaptation cost scale: {promotion_adaptation_cost_scale}",
         f"- plan curve: enable={plan_curve_enable}, horizon_s={plan_curve_horizon_s}, replan_interval_s={plan_curve_replan_interval_s}",
@@ -1036,6 +1049,7 @@ def main() -> None:
     parser.add_argument("--hf-energy-speed-gain", type=float, default=0.0)
     parser.add_argument("--promotion-residual-plan-gain", type=float, default=0.0)
     parser.add_argument("--promotion-speed-boost", type=float, default=0.0)
+    parser.add_argument("--lower-lf-drift-speed-gain", type=float, default=0.0)
     parser.add_argument("--leakage-reward-scale", type=float, default=0.00005)
     parser.add_argument("--promotion-adaptation-cost-scale", type=float, default=0.00005)
     parser.add_argument("--plan-curve-enable", action="store_true")
@@ -1077,6 +1091,7 @@ def main() -> None:
                 hf_energy_speed_gain=args.hf_energy_speed_gain,
                 promotion_residual_plan_gain=args.promotion_residual_plan_gain,
                 promotion_speed_boost=args.promotion_speed_boost,
+                lower_lf_drift_speed_gain=args.lower_lf_drift_speed_gain,
                 leakage_reward_scale=args.leakage_reward_scale,
                 promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
                 plan_curve_enable=args.plan_curve_enable,
@@ -1116,6 +1131,7 @@ def main() -> None:
         hf_energy_speed_gain=args.hf_energy_speed_gain,
         promotion_residual_plan_gain=args.promotion_residual_plan_gain,
         promotion_speed_boost=args.promotion_speed_boost,
+        lower_lf_drift_speed_gain=args.lower_lf_drift_speed_gain,
         leakage_reward_scale=args.leakage_reward_scale,
         promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
         plan_curve_enable=args.plan_curve_enable,
