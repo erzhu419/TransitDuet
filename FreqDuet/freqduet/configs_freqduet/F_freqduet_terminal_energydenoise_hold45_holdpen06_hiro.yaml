@@ -20,5 +20,9 @@ reward_attribution:
 
 upper:
   timetable_planner:
+    # A persistent HF shock should pull the next upper replan earlier once,
+    # then let the rolling timetable execute instead of repeatedly interrupting
+    # it while the promotion gate cools down.
+    promotion_replan_cooldown_s: 900.0
     terminal_shift_min_s: 0.0
     terminal_shift_max_s: 45.0

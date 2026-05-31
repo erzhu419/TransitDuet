@@ -1,2 +1,6 @@
-_extends: F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml
+_extends: F_freqduet_terminal_main_hiro.yaml
 _name: F_freqduet_terminal_final_promotion_hiro
+
+# Final-matrix alias for the current promoted main path. Keep this separate
+# from F_freqduet_terminal_main_hiro so paper tables can use stable final_* row
+# names while the main alias remains the runnable default.

@@ -356,10 +356,12 @@ class TransitDuetV2Runner:
         self.timetable_terminal_dispatch = False
         self.timetable_promotion_replan = False
         self.timetable_promotion_replan_strength_min = 0.0
+        self.timetable_promotion_replan_cooldown_s = 0.0
         self.timetable_plan_all_directions = False
         self.timetable_terminal_hf_shift_max_s = None
         self.timetable_terminal_hf_energy_min = 0.0
         self._active_timetable_plans = {}
+        self._last_promotion_replan_launch = {}
         if bool(planner_cfg.get('enable', False)):
             self.timetable_planner = TimetableCurvePlanner.from_config(
                 planner_cfg, delta_max_s=self.delta_max)
@@ -375,6 +377,8 @@ class TransitDuetV2Runner:
                 planner_cfg.get('promotion_replan', False))
             self.timetable_promotion_replan_strength_min = float(
                 planner_cfg.get('promotion_replan_strength_min', 0.0))
+            self.timetable_promotion_replan_cooldown_s = max(float(
+                planner_cfg.get('promotion_replan_cooldown_s', 0.0)), 0.0)
             self.timetable_plan_all_directions = bool(
                 planner_cfg.get('plan_all_directions', False))
             hf_shift_max = planner_cfg.get(
@@ -515,6 +519,7 @@ class TransitDuetV2Runner:
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
         self._active_timetable_plans = {}
+        self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
@@ -1133,11 +1138,11 @@ class TransitDuetV2Runner:
         plan_origin_launch = None
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
+        promotion_replan = False
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
             active_plan = self._active_timetable_plans.get(planner_key)
             if active_plan is not None:
                 elapsed = float(trip.launch_time) - float(active_plan['origin'])
-                promotion_replan = False
                 if (self.timetable_promotion_replan
                         and getattr(self.env, 'frequency_tracker', None) is not None):
                     freq_summary = self.env.frequency_summary()
@@ -1146,6 +1151,13 @@ class TransitDuetV2Runner:
                         and float(freq_summary.get('freq_promotion_strength', 0.0))
                         >= self.timetable_promotion_replan_strength_min
                     )
+                    if promotion_replan and self.timetable_promotion_replan_cooldown_s > 0.0:
+                        last_replan = self._last_promotion_replan_launch.get(
+                            planner_key)
+                        if (last_replan is not None
+                                and float(trip.launch_time) - float(last_replan)
+                                < self.timetable_promotion_replan_cooldown_s):
+                            promotion_replan = False
                 if (0.0 <= elapsed < self.timetable_replan_interval_s
                         and elapsed <= self.timetable_planner.horizon_s
                         and not promotion_replan):
@@ -1209,6 +1221,9 @@ class TransitDuetV2Runner:
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
             }
+            if promotion_replan:
+                self._last_promotion_replan_launch[planner_key] = float(
+                    trip.launch_time)
             self._ep_upper_plan_decisions += 1
 
         delta_t = float(action_vec[0])
@@ -1401,6 +1416,7 @@ class TransitDuetV2Runner:
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
         self._active_timetable_plans = {}
+        self._last_promotion_replan_launch = {}
 
         # v2k: elastic fleet sampling per-episode
         if N_fleet_override is not None:
