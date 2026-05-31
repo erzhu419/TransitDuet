@@ -9,6 +9,10 @@ from freq_hrl.experiments.trading.performance_validation import (
 from freq_hrl.experiments.trading.encoder_ablation import run_encoder_ablation
 from freq_hrl.experiments.trading.policy_entry import run_eval, train_linear_policy, train_policy_gradient
 from freq_hrl.experiments.trading.pressure_test_matrix import summarize as summarize_pressure
+from freq_hrl.experiments.trading.promotion_recovery_validation import (
+    aggregate_variants,
+    paired_deltas as promotion_paired_deltas,
+)
 
 
 class TradingPerformanceValidationTest(unittest.TestCase):
@@ -30,6 +34,7 @@ class TradingPerformanceValidationTest(unittest.TestCase):
             "ShockResponseTime",
             "regime_promotion_accuracy",
             "recovery_cost_120",
+            "recovery_regret_120",
             "post_shift_cum_pnl_120",
             "UpperHFPower",
             "LowerLFDrift",
@@ -92,6 +97,46 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         ]
         summary = summarize_pressure(rows)
         self.assertEqual({row["baseline"] for row in summary}, {"freq_hrl", "no_promotion"})
+
+    def test_promotion_recovery_validation_pairs_regret_direction(self):
+        rows = []
+        for seed in [1, 2]:
+            rows.append({
+                "variant": "no_promotion",
+                "baseline": "no_promotion",
+                "seed": seed,
+                "scenario": "promotion_recovery",
+                "freq_method": "ema",
+                "sharpe": 1.0,
+                "total_return": 0.10,
+                "post_shift_cum_pnl_120": 0.20,
+                "recovery_regret_120": 0.30,
+            })
+            rows.append({
+                "variant": "recovery_tuned",
+                "baseline": "freq_hrl",
+                "seed": seed,
+                "scenario": "promotion_recovery",
+                "freq_method": "ema",
+                "sharpe": 1.5,
+                "total_return": 0.12,
+                "post_shift_cum_pnl_120": 0.25,
+                "recovery_regret_120": 0.20,
+            })
+        paired = promotion_paired_deltas(
+            rows,
+            reference="no_promotion",
+            metrics=["post_shift_cum_pnl_120", "recovery_regret_120"],
+            n_boot=100,
+            seed=7,
+        )
+        tuned = next(row for row in paired if row["variant"] == "recovery_tuned")
+        summary = aggregate_variants(rows)
+        self.assertEqual(next(row for row in summary if row["variant"] == "recovery_tuned")["n"], 2)
+        self.assertAlmostEqual(tuned["post_shift_cum_pnl_120_delta_mean"], 0.05)
+        self.assertAlmostEqual(tuned["recovery_regret_120_delta_mean"], -0.10)
+        self.assertEqual(tuned["post_shift_cum_pnl_120_win_rate"], 1.0)
+        self.assertEqual(tuned["recovery_regret_120_win_rate"], 1.0)
 
     def test_learned_linear_policy_entry_trains_and_evaluates(self):
         model = train_linear_policy(

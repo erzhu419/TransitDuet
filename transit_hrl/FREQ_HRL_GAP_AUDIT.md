@@ -42,6 +42,8 @@ Implemented:
   REINFORCE updates.
 - Trading pressure-test matrix across five synthetic market regimes.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
+- Dedicated promotion-recovery validation on a persistent reversal shock,
+  including oracle-regime `recovery_regret_120`.
 - Trading decomposer ablation across causal EMA, Fourier, state-space, and
   trailing-window Haar wavelet encoders.
 - Public Level-1 ETF daily-bar validation path using local CSV inputs.
@@ -82,10 +84,13 @@ Implemented:
    - Done: Promotion delay and post-shift cumulative PnL are reported in the
      validation output.
    - Done: a larger promotion recovery sweep was run and merged.
-   - Still partial: the best merged sweep setting improves headline Sharpe
-     (`+0.230`) and total return (`+0.0032`) against `no_promotion`, but its
-     immediate post-shift 120-bar PnL delta is still slightly negative
-     (`-0.00015`), so shock-recovery tuning remains open.
+   - Done: a dedicated `promotion_recovery` reversal-shock validation now shows
+     the recovery-tuned gate improving both headline and recovery metrics
+     against `no_promotion` over 20 paired seeds: Sharpe delta `+0.430`
+     (CI95 `[+0.315, +0.536]`), return delta `+0.0115`
+     (CI95 `[+0.0087, +0.0145]`), post-shift-120 PnL delta `+0.00854`
+     (CI95 `[+0.00622, +0.01090]`), and oracle-regime recovery-regret delta
+     `-0.00839` (CI95 `[-0.01075, -0.00613]`).
    - Promotion does not yet trigger high-level replanning or low-model process-noise adaptation in a learned runner.
 
 3. Leakage is not integrated into learned rewards/losses.
@@ -249,12 +254,14 @@ now mixed rather than uniformly positive:
   (`-0.037` composite, CI95 `[-0.198, +0.135]`) and `T_swapped_terminal` has
   slightly lower raw wait.
 - Against `no_promotion`, tuned promotion improves persistent-shift Sharpe by
-  about `+0.015` over 5 seeds. This is more conservative than the earlier
-  setting but avoids more false promotion in pressure tests.
-- The larger promotion sweep improves headline Sharpe/return further, but the
-  best headline setting is still slightly worse on immediate post-shift 120-bar
-  cumulative PnL, so promotion is not yet a fully optimized shock-recovery
-  mechanism.
+  about `+0.015` over 5 seeds. This conservative default is still chosen for
+  the broad pressure matrix.
+- A separate recovery-tuned promotion gate now supports the shock-recovery
+  claim on a controlled persistent reversal shock: it triggers earlier
+  (`16.6` bars mean delay vs `45.9` for the conservative default), improves
+  post-shift-120 PnL by `+0.00854`, and reduces oracle-regime recovery regret
+  by `-0.00839` against `no_promotion` over 20 paired seeds. This is evidence
+  for the promotion mechanism, not yet a learned-runner replanning result.
 - Leakage shaping is now in the online reward path. The synthetic trading
   report shows nonzero leakage reward penalties for leakage-enabled baselines
   and zero penalty for `no_leakage`.
@@ -286,8 +293,8 @@ fully validated, domain-general Frequency-Separated HRL
    out-of-sample matrix before deciding whether to enable them by default.
 2. Investigate the Transit `swapped` raw-wait edge despite `freq_hrl` winning
    composite score.
-3. Continue promotion tuning specifically for persistent-shift recovery, or add
-   explicit high-level replanning in learned runners.
+3. Carry the recovery-tuned promotion gate into learned runners with explicit
+   high-level replanning or process-noise adaptation.
 4. Replace the lightweight linear policy search with actual learned policy training, then
    decide whether reward-shaped leakage is sufficient or explicit policy-loss
    regularization is needed.

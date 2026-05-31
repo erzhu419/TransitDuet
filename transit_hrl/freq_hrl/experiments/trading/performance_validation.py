@@ -49,6 +49,7 @@ BASELINES = (
 
 SCENARIOS = (
     "persistent_shift",
+    "promotion_recovery",
     "stationary_low_noise",
     "stationary_high_noise",
     "localized_burst",
@@ -86,17 +87,28 @@ def make_synthetic_market(
         base[:, 2] = 0.00005
 
     shift_t = int(0.55 * steps)
-    has_shift = scenario in {"persistent_shift", "ood_period"}
+    has_shift = scenario in {"persistent_shift", "promotion_recovery", "ood_period"}
     if has_shift:
-        base[shift_t:, 0] += 0.00075
-        base[shift_t:, 1] -= 0.00055
-        if n_assets > 2:
-            base[shift_t:, 2] += 0.00040
+        if scenario == "promotion_recovery":
+            shift_t = int(0.45 * steps)
+            # Abrupt low-frequency reversal: the pre-shift target is now wrong,
+            # so recovery depends on how quickly persistent innovations are
+            # promoted into the upper plan.
+            base[shift_t:, 0] -= 0.00125
+            base[shift_t:, 1] += 0.00105
+            if n_assets > 2:
+                base[shift_t:, 2] -= 0.00070
+        else:
+            base[shift_t:, 0] += 0.00075
+            base[shift_t:, 1] -= 0.00055
+            if n_assets > 2:
+                base[shift_t:, 2] += 0.00040
     else:
         shift_t = steps + 1
 
     high_sigma = {
         "persistent_shift": 0.00045,
+        "promotion_recovery": 0.00040,
         "stationary_low_noise": 0.00020,
         "stationary_high_noise": 0.00075,
         "localized_burst": 0.00035,
@@ -109,6 +121,7 @@ def make_synthetic_market(
     shock_mask = np.zeros((steps, n_assets), dtype=bool)
     shock_count = {
         "persistent_shift": 10,
+        "promotion_recovery": 8,
         "stationary_low_noise": 3,
         "stationary_high_noise": 14,
         "localized_burst": 2,
@@ -142,6 +155,7 @@ def make_synthetic_market(
     # into the upper planner should overtrade in this setting.
     return_noise = {
         "persistent_shift": 0.00075,
+        "promotion_recovery": 0.00065,
         "stationary_low_noise": 0.00035,
         "stationary_high_noise": 0.00110,
         "localized_burst": 0.00065,
@@ -149,6 +163,7 @@ def make_synthetic_market(
     }[scenario]
     high_alpha = {
         "persistent_shift": 0.08,
+        "promotion_recovery": 0.12,
         "stationary_low_noise": 0.02,
         "stationary_high_noise": 0.02,
         "localized_burst": 0.35,
@@ -270,6 +285,8 @@ def policy_action(
     hf_recenter_gain: float = 0.0,
     hf_speed_gain: float = 0.0,
     hf_energy_speed_gain: float = 0.0,
+    promotion_residual_plan_gain: float = 0.0,
+    promotion_speed_boost: float = 0.0,
     seed_phase: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
     feats = tracker.features()
@@ -294,7 +311,15 @@ def policy_action(
     hf_utility = _causal_hf_utility(high_history or [], return_history or [], dim)
 
     if name == "freq_hrl":
-        plan_signal = x_low + (promotion_mid_gain * strength * x_mid if promote_for_plan else 0.0)
+        promoted_residual = (
+            max(float(promotion_residual_plan_gain), 0.0) * strength * x_high
+            if promote_for_plan else 0.0
+        )
+        plan_signal = (
+            x_low
+            + (promotion_mid_gain * strength * x_mid if promote_for_plan else 0.0)
+            + promoted_residual
+        )
         target = normalize_target(plan_signal, max_gross=1.0)
         gap = target - current_position
         align = np.sign(gap) * x_high / 0.0014
@@ -313,7 +338,8 @@ def policy_action(
             0.55 + hf_utility * (
                 max(float(hf_speed_gain), 0.0) * np.tanh(align)
                 + max(float(hf_energy_speed_gain), 0.0) * energy_gate
-            ),
+            )
+            + (max(float(promotion_speed_boost), 0.0) * strength if promote_for_plan else 0.0),
             0.15,
             1.0,
         )
@@ -416,6 +442,7 @@ def summarize_run(
     raw_rewards: list[float],
     leakage_reward_penalties: list[float],
     pnl_returns: list[float],
+    oracle_pnl_returns: list[float],
     costs: list[float],
     turnovers: list[float],
     inventory_drifts: list[float],
@@ -451,6 +478,12 @@ def summarize_run(
     post_shift_pnl = pnl[regime_shift_t:min(pnl.size, regime_shift_t + 120)]
     post_shift_cum_pnl = float(np.sum(post_shift_pnl)) if post_shift_pnl.size else 0.0
     post_shift_recovery_cost = float(-np.sum(np.minimum(post_shift_pnl, 0.0))) if post_shift_pnl.size else 0.0
+    oracle = np.asarray(oracle_pnl_returns, dtype=np.float64)
+    post_shift_oracle = oracle[regime_shift_t:min(oracle.size, regime_shift_t + 120)]
+    post_shift_regret = (
+        float(np.sum(np.maximum(post_shift_oracle - post_shift_pnl[:post_shift_oracle.size], 0.0)))
+        if post_shift_pnl.size and post_shift_oracle.size else 0.0
+    )
     promotion_delay = (
         -1.0 if first_promotion_after_shift is None
         else float(first_promotion_after_shift - regime_shift_t)
@@ -486,6 +519,7 @@ def summarize_run(
         "post_shift_mean_pnl": float(post_shift_pnl.mean()) if post_shift_pnl.size else 0.0,
         "post_shift_cum_pnl_120": post_shift_cum_pnl,
         "recovery_cost_120": post_shift_recovery_cost,
+        "recovery_regret_120": post_shift_regret,
         "promotion_count": int(promotion_count),
         "promotion_delay": promotion_delay,
         "PromotionDelay": promotion_delay,
@@ -510,6 +544,7 @@ def run_baseline(
     freq_method: str = "ema",
     promotion_threshold: float = 0.00035,
     promotion_ratio: float = 0.50,
+    promotion_window_s: float = 30 * 60.0,
     promotion_cooldown_s: float = 10 * 60.0,
     promotion_regime_threshold: float = 3e-05,
     promotion_min_age_s: float = 0.0,
@@ -522,6 +557,8 @@ def run_baseline(
     hf_recenter_gain: float = 0.0,
     hf_speed_gain: float = 0.0,
     hf_energy_speed_gain: float = 0.0,
+    promotion_residual_plan_gain: float = 0.0,
+    promotion_speed_boost: float = 0.0,
     leakage_reward_scale: float = 0.00005,
     promotion_adaptation_cost_scale: float = 0.00005,
 ) -> dict[str, Any]:
@@ -558,7 +595,7 @@ def run_baseline(
             "swapped",
             "no_leakage",
         },
-        promotion_window_s=30 * 60.0,
+        promotion_window_s=promotion_window_s,
         promotion_residual_threshold=promotion_threshold,
         promotion_persistence_ratio=promotion_ratio,
         promotion_cooldown_s=promotion_cooldown_s,
@@ -589,6 +626,7 @@ def run_baseline(
     raw_rewards: list[float] = []
     leakage_reward_penalties: list[float] = []
     pnl_returns: list[float] = []
+    oracle_pnl_returns: list[float] = []
     costs: list[float] = []
     turnovers: list[float] = []
     inventory_drifts: list[float] = []
@@ -619,6 +657,8 @@ def run_baseline(
             hf_recenter_gain=hf_recenter_gain,
             hf_speed_gain=hf_speed_gain,
             hf_energy_speed_gain=hf_energy_speed_gain,
+            promotion_residual_plan_gain=promotion_residual_plan_gain,
+            promotion_speed_boost=promotion_speed_boost,
         )
         raw_history.append(raw_signal.copy())
         high_history.append(np.asarray(diag_features.get("x_high", np.zeros(n_assets)), dtype=np.float64).copy())
@@ -654,10 +694,13 @@ def run_baseline(
         )
         shaped_reward = float(leakage_info["shaped_reward"]) - promotion_adaptation_cost
         pnl = float(info["portfolio_return"] - info["transaction_cost"])
+        oracle_target = normalize_target(data["low_truth"][t], max_gross=1.0)
+        oracle_pnl = float(np.dot(oracle_target, data["returns"][t]))
         rewards.append(shaped_reward)
         raw_rewards.append(float(reward))
         leakage_reward_penalties.append(float(leakage_info["leakage_reward_penalty"]))
         pnl_returns.append(pnl)
+        oracle_pnl_returns.append(oracle_pnl)
         return_history.append(np.asarray(data["returns"][t], dtype=np.float64).copy())
         costs.append(float(info["transaction_cost"]))
         turnovers.append(float(info["turnover"]))
@@ -712,6 +755,7 @@ def run_baseline(
         raw_rewards=raw_rewards,
         leakage_reward_penalties=leakage_reward_penalties,
         pnl_returns=pnl_returns,
+        oracle_pnl_returns=oracle_pnl_returns,
         costs=costs,
         turnovers=turnovers,
         inventory_drifts=inventory_drifts,
@@ -774,6 +818,7 @@ def write_report(
     freq_method: str,
     promotion_threshold: float,
     promotion_ratio: float,
+    promotion_window_s: float,
     promotion_cooldown_s: float,
     promotion_regime_threshold: float,
     promotion_min_age_s: float,
@@ -786,6 +831,8 @@ def write_report(
     hf_recenter_gain: float,
     hf_speed_gain: float,
     hf_energy_speed_gain: float,
+    promotion_residual_plan_gain: float,
+    promotion_speed_boost: float,
     leakage_reward_scale: float,
     promotion_adaptation_cost_scale: float,
 ) -> None:
@@ -811,13 +858,13 @@ def write_report(
         f"- bars per seed: {steps}",
         f"- scenario: `{scenario}`",
         f"- frequency encoder: `{freq_method}`",
-        f"- promotion config: threshold={promotion_threshold}, persistence_ratio={promotion_ratio}, cooldown_s={promotion_cooldown_s}, regime_threshold={promotion_regime_threshold}, min_age_s={promotion_min_age_s}, activation_strength_threshold={promotion_activation_strength_threshold}, startup_strength_age_s={promotion_startup_strength_age_s}, startup_strength_threshold={promotion_startup_strength_threshold}, mid_gain={promotion_mid_gain}, adapt_gain={promotion_adapt_gain}",
+        f"- promotion config: threshold={promotion_threshold}, persistence_ratio={promotion_ratio}, window_s={promotion_window_s}, cooldown_s={promotion_cooldown_s}, regime_threshold={promotion_regime_threshold}, min_age_s={promotion_min_age_s}, activation_strength_threshold={promotion_activation_strength_threshold}, startup_strength_age_s={promotion_startup_strength_age_s}, startup_strength_threshold={promotion_startup_strength_threshold}, mid_gain={promotion_mid_gain}, adapt_gain={promotion_adapt_gain}, residual_plan_gain={promotion_residual_plan_gain}, speed_boost={promotion_speed_boost}",
         f"- HF lower config: residual_gain={hf_residual_gain}, recenter_gain={hf_recenter_gain}, speed_gain={hf_speed_gain}, energy_speed_gain={hf_energy_speed_gain}",
         f"- leakage reward scale: {leakage_reward_scale}",
         f"- promotion adaptation cost scale: {promotion_adaptation_cost_scale}",
         "- policies are deterministic heuristics, not trained RL policies",
         "- task metrics include return, Sharpe, drawdown, turnover, transaction cost, and inventory drift",
-        "- frequency diagnostics include UpperHFPower, LowerLFDrift, FocusScore, PromotionDelay, ShockResponseTime, regime-promotion accuracy, and recovery cost",
+        "- frequency diagnostics include UpperHFPower, LowerLFDrift, FocusScore, PromotionDelay, ShockResponseTime, regime-promotion accuracy, recovery cost, and oracle-regime recovery regret",
         "",
         "## Headline",
         "",
@@ -850,8 +897,8 @@ def write_report(
         "",
         "## Summary Table",
         "",
-        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| baseline | return | Sharpe | shaped reward | LF cost | HF cost | leak cost | promo cost | max DD | turnover | cost | post_shift_120 | recovery_cost | recovery_regret | PromotionDelay | ShockResponse | promo_acc | UpperHFPower | LowerLFDrift | FocusScore | promotions |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in summary:
         rows.append(
@@ -868,6 +915,7 @@ def write_report(
             f"| {row['transaction_cost_mean']:.4f} "
             f"| {row['post_shift_cum_pnl_120_mean']:.5f} "
             f"| {row['recovery_cost_120_mean']:.5f} "
+            f"| {row['recovery_regret_120_mean']:.5f} "
             f"| {row['PromotionDelay_mean']:.1f} "
             f"| {row['ShockResponseTime_mean']:.1f} "
             f"| {row['regime_promotion_accuracy_mean']:.3f} "
@@ -898,6 +946,7 @@ def main() -> None:
     )
     parser.add_argument("--promotion-threshold", type=float, default=0.00035)
     parser.add_argument("--promotion-ratio", type=float, default=0.50)
+    parser.add_argument("--promotion-window-s", type=float, default=30 * 60.0)
     parser.add_argument("--promotion-cooldown-s", type=float, default=10 * 60.0)
     parser.add_argument("--promotion-regime-threshold", type=float, default=3e-05)
     parser.add_argument("--promotion-min-age-s", type=float, default=0.0)
@@ -910,6 +959,8 @@ def main() -> None:
     parser.add_argument("--hf-recenter-gain", type=float, default=0.0)
     parser.add_argument("--hf-speed-gain", type=float, default=0.0)
     parser.add_argument("--hf-energy-speed-gain", type=float, default=0.0)
+    parser.add_argument("--promotion-residual-plan-gain", type=float, default=0.0)
+    parser.add_argument("--promotion-speed-boost", type=float, default=0.0)
     parser.add_argument("--leakage-reward-scale", type=float, default=0.00005)
     parser.add_argument("--promotion-adaptation-cost-scale", type=float, default=0.00005)
     parser.add_argument(
@@ -931,6 +982,7 @@ def main() -> None:
                 freq_method=args.freq_method,
                 promotion_threshold=args.promotion_threshold,
                 promotion_ratio=args.promotion_ratio,
+                promotion_window_s=args.promotion_window_s,
                 promotion_cooldown_s=args.promotion_cooldown_s,
                 promotion_regime_threshold=args.promotion_regime_threshold,
                 promotion_min_age_s=args.promotion_min_age_s,
@@ -943,6 +995,8 @@ def main() -> None:
                 hf_recenter_gain=args.hf_recenter_gain,
                 hf_speed_gain=args.hf_speed_gain,
                 hf_energy_speed_gain=args.hf_energy_speed_gain,
+                promotion_residual_plan_gain=args.promotion_residual_plan_gain,
+                promotion_speed_boost=args.promotion_speed_boost,
                 leakage_reward_scale=args.leakage_reward_scale,
                 promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
             ))
@@ -962,6 +1016,7 @@ def main() -> None:
         freq_method=args.freq_method,
         promotion_threshold=args.promotion_threshold,
         promotion_ratio=args.promotion_ratio,
+        promotion_window_s=args.promotion_window_s,
         promotion_cooldown_s=args.promotion_cooldown_s,
         promotion_regime_threshold=args.promotion_regime_threshold,
         promotion_min_age_s=args.promotion_min_age_s,
@@ -974,6 +1029,8 @@ def main() -> None:
         hf_recenter_gain=args.hf_recenter_gain,
         hf_speed_gain=args.hf_speed_gain,
         hf_energy_speed_gain=args.hf_energy_speed_gain,
+        promotion_residual_plan_gain=args.promotion_residual_plan_gain,
+        promotion_speed_boost=args.promotion_speed_boost,
         leakage_reward_scale=args.leakage_reward_scale,
         promotion_adaptation_cost_scale=args.promotion_adaptation_cost_scale,
     )
