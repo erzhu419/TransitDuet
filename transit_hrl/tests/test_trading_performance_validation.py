@@ -7,12 +7,18 @@ from freq_hrl.experiments.trading.performance_validation import (
     run_baseline,
 )
 from freq_hrl.experiments.trading.encoder_ablation import run_encoder_ablation
-from freq_hrl.experiments.trading.policy_entry import run_eval, train_linear_policy, train_policy_gradient
+from freq_hrl.experiments.trading.policy_entry import (
+    run_eval,
+    run_pg_episode,
+    train_linear_policy,
+    train_policy_gradient,
+)
 from freq_hrl.experiments.trading.pressure_test_matrix import summarize as summarize_pressure
 from freq_hrl.experiments.trading.promotion_recovery_validation import (
     aggregate_variants,
     paired_deltas as promotion_paired_deltas,
 )
+from freq_hrl.policies import PolicyGradientTradingParams
 
 
 class TradingPerformanceValidationTest(unittest.TestCase):
@@ -168,6 +174,37 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         self.assertIn("params", model)
         row = run_eval(seed=123, steps=40, assets=2, policy="pg_linear")
         self.assertIn("sharpe", row)
+
+    def test_policy_gradient_leakage_regularizer_enters_policy_loss(self):
+        _, row = run_pg_episode(
+            PolicyGradientTradingParams(),
+            seed=42,
+            steps=40,
+            assets=2,
+            scenario="persistent_shift",
+            rng_seed=7,
+            leakage_policy_loss_scale=0.01,
+            leakage_constraint_threshold=0.0,
+            leakage_lagrange_multiplier=0.1,
+        )
+        self.assertIn("policy_loss_leakage_penalty", row)
+        self.assertIn("leakage_constraint_violation", row)
+        self.assertGreaterEqual(row["policy_loss_leakage_penalty"], 0.0)
+
+        model = train_policy_gradient(
+            train_seeds=[42],
+            steps=30,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            learning_rate=0.01,
+            seed=1,
+            leakage_policy_loss_scale=0.01,
+            leakage_constraint_threshold=0.0,
+            leakage_lagrange_lr=0.1,
+        )
+        self.assertEqual(model["trainer"], "on_policy_reinforce_leakage_constrained")
+        self.assertIn("leakage_lagrange_multiplier", model["history"][0])
 
 
 if __name__ == "__main__":

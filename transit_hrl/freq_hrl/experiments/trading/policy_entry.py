@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 
+from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
 from freq_hrl.domains.trading import (
     PortfolioExecutionConfig,
     PortfolioExecutionEnv,
@@ -95,6 +96,8 @@ def run_eval(
     pnl_returns = []
     equity = []
     turnover = []
+    targets = []
+    lower_effects = []
     promotion_count = 0
     for t in range(steps):
         raw_signal = data["predictor"][t]
@@ -110,15 +113,34 @@ def run_eval(
         env.set_target(upper.action)
         lower = controller.act(obs, tracker.lower_features(upper.action, env.position), upper, context={"frequency": freq})
         _, _, done, info = env.lower_step(lower.action)
+        lower_effect = (
+            np.asarray(info["position"], dtype=np.float64)
+            - np.asarray(info["target"], dtype=np.float64)
+        )
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
+        targets.append(np.asarray(info["target"], dtype=np.float64).copy())
+        lower_effects.append(lower_effect.copy())
         if done:
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
     total_return = float(eq[-1] - 1.0) if eq.size else 0.0
     sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
+    leakage = LeakageRegularizer(
+        upper_hf_window=6,
+        lower_lf_window=24,
+        upper_hf_weight=1.0,
+        lower_lf_weight=1.0,
+    ).compute(
+        upper_effect=np.asarray(targets, dtype=np.float64),
+        lower_effect=np.asarray(lower_effects, dtype=np.float64),
+    ) if targets else {
+        "leakage_penalty": 0.0,
+        "UpperHFPower": 0.0,
+        "LowerLFDrift": 0.0,
+    }
     return {
         "seed": int(seed),
         "scenario": scenario,
@@ -127,15 +149,30 @@ def run_eval(
         "max_drawdown": max_drawdown(eq),
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_count),
+        "leakage_penalty": float(leakage["leakage_penalty"]),
+        "UpperHFPower": float(leakage["UpperHFPower"]),
+        "LowerLFDrift": float(leakage["LowerLFDrift"]),
     }
 
 
-def objective(row: dict[str, float]) -> float:
+def objective(
+    row: dict[str, float],
+    leakage_policy_loss_scale: float = 0.0,
+    leakage_constraint_threshold: float = 0.0,
+    leakage_lagrange_multiplier: float = 0.0,
+) -> float:
+    leakage = float(row.get("leakage_penalty", 0.0))
+    violation = max(0.0, leakage - max(float(leakage_constraint_threshold), 0.0))
+    leakage_penalty = (
+        max(float(leakage_policy_loss_scale), 0.0) * leakage
+        + max(float(leakage_lagrange_multiplier), 0.0) * violation
+    )
     return (
         float(row["total_return"])
         + 0.01 * float(row["sharpe"])
         - 0.25 * float(row["max_drawdown"])
         - 0.0005 * float(row["turnover"])
+        - leakage_penalty
     )
 
 
@@ -169,6 +206,9 @@ def run_pg_episode(
     scenario: str,
     rng_seed: int,
     discount: float = 0.995,
+    leakage_policy_loss_scale: float = 0.0,
+    leakage_constraint_threshold: float = 0.0,
+    leakage_lagrange_multiplier: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -204,11 +244,23 @@ def run_pg_episode(
     rng = np.random.default_rng(rng_seed)
     planner, controller = make_policy("pg_linear", params=params, sample=True, rng=rng)
     grads: list[np.ndarray] = []
-    rewards: list[float] = []
+    objective_rewards: list[float] = []
     pnl_returns: list[float] = []
     equity: list[float] = []
     turnover: list[float] = []
+    leakage_loss_penalties: list[float] = []
+    leakage_constraint_violations: list[float] = []
     promotion_count = 0
+    leakage_shaper = CausalLeakageRewardShaper(
+        regularizer=LeakageRegularizer(
+            upper_hf_window=6,
+            lower_lf_window=24,
+            upper_hf_weight=1.0,
+            lower_lf_weight=1.0,
+        ),
+        reward_penalty_scale=0.0,
+        enabled=True,
+    )
     env.reset()
     for t in range(steps):
         raw_signal = data["predictor"][t]
@@ -225,7 +277,24 @@ def run_pg_episode(
         lower = controller.act(obs, tracker.lower_features(upper.action, env.position), upper, context={"frequency": freq})
         _, reward, done, info = env.lower_step(lower.action)
         step_reward = float(info["portfolio_return"] - info["transaction_cost"])
-        rewards.append(step_reward)
+        lower_effect = (
+            np.asarray(info["position"], dtype=np.float64)
+            - np.asarray(info["target"], dtype=np.float64)
+        )
+        leakage_info = leakage_shaper.update(
+            upper_effect=np.asarray(info["target"], dtype=np.float64),
+            lower_effect=lower_effect,
+            reward=None,
+        )
+        raw_leakage = float(leakage_info["leakage_penalty"])
+        violation = max(0.0, raw_leakage - max(float(leakage_constraint_threshold), 0.0))
+        leakage_loss_penalty = (
+            max(float(leakage_policy_loss_scale), 0.0) * raw_leakage
+            + max(float(leakage_lagrange_multiplier), 0.0) * violation
+        )
+        objective_rewards.append(step_reward - leakage_loss_penalty)
+        leakage_loss_penalties.append(leakage_loss_penalty)
+        leakage_constraint_violations.append(violation)
         pnl_returns.append(step_reward)
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -234,7 +303,7 @@ def run_pg_episode(
         grads.append(grad)
         if done:
             break
-    rewards_arr = np.asarray(rewards, dtype=np.float64)
+    rewards_arr = np.asarray(objective_rewards, dtype=np.float64)
     returns = np.zeros_like(rewards_arr)
     running = 0.0
     gamma = float(np.clip(discount, 0.0, 1.0))
@@ -265,6 +334,10 @@ def run_pg_episode(
         "max_drawdown": max_drawdown(eq),
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_count),
+        "policy_loss_leakage_penalty": float(np.mean(leakage_loss_penalties)) if leakage_loss_penalties else 0.0,
+        "policy_loss_leakage_penalty_total": float(np.sum(leakage_loss_penalties)) if leakage_loss_penalties else 0.0,
+        "leakage_constraint_violation": float(np.mean(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
+        "leakage_constraint_violation_total": float(np.sum(leakage_constraint_violations)) if leakage_constraint_violations else 0.0,
     }
     return grad_estimate, row
 
@@ -350,6 +423,9 @@ def train_policy_gradient(
     learning_rate: float,
     seed: int,
     discount: float = 0.995,
+    leakage_policy_loss_scale: float = 0.0,
+    leakage_constraint_threshold: float = 0.0,
+    leakage_lagrange_lr: float = 0.0,
 ) -> dict[str, Any]:
     rng = np.random.default_rng(seed)
     params = PolicyGradientTradingParams()
@@ -358,6 +434,7 @@ def train_policy_gradient(
     best_score = -float("inf")
     history = []
     lr = max(float(learning_rate), 0.0)
+    lagrange_multiplier = 0.0
     for iteration in range(max(1, int(iterations))):
         grads = []
         sampled_rows = []
@@ -370,6 +447,9 @@ def train_policy_gradient(
                 scenario=scenario,
                 rng_seed=int(rng.integers(0, 2**31 - 1)),
                 discount=discount,
+                leakage_policy_loss_scale=leakage_policy_loss_scale,
+                leakage_constraint_threshold=leakage_constraint_threshold,
+                leakage_lagrange_multiplier=lagrange_multiplier,
             )
             grads.append(grad)
             sampled_rows.append(row)
@@ -384,34 +464,72 @@ def train_policy_gradient(
             run_eval(seed=int(eval_seed), steps=steps, assets=assets, policy="pg_linear", params=current_params, scenario=scenario)
             for eval_seed in train_seeds
         ]
-        score = float(np.mean([objective(row) for row in eval_rows]))
+        score = float(np.mean([
+            objective(
+                row,
+                leakage_policy_loss_scale=leakage_policy_loss_scale,
+                leakage_constraint_threshold=leakage_constraint_threshold,
+                leakage_lagrange_multiplier=lagrange_multiplier,
+            )
+            for row in eval_rows
+        ]))
         if score > best_score:
             best_score = score
             best_vector = vector.copy()
+        mean_violation = float(np.mean([
+            row.get("leakage_constraint_violation", 0.0)
+            for row in sampled_rows
+        ]))
+        lagrange_multiplier = max(
+            0.0,
+            lagrange_multiplier + max(float(leakage_lagrange_lr), 0.0) * mean_violation,
+        )
         history.append({
             "iteration": int(iteration),
-            "sampled_objective": float(np.mean([objective(row) for row in sampled_rows])),
+            "sampled_objective": float(np.mean([
+                objective(
+                    row,
+                    leakage_policy_loss_scale=leakage_policy_loss_scale,
+                    leakage_constraint_threshold=leakage_constraint_threshold,
+                    leakage_lagrange_multiplier=lagrange_multiplier,
+                )
+                for row in sampled_rows
+            ])),
             "deterministic_objective": score,
+            "deterministic_task_objective": float(np.mean([objective(row) for row in eval_rows])),
             "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
             "grad_norm": float(np.linalg.norm(grad_mean)),
+            "policy_loss_leakage_penalty": float(np.mean([
+                row.get("policy_loss_leakage_penalty", 0.0)
+                for row in sampled_rows
+            ])),
+            "leakage_constraint_violation": mean_violation,
+            "leakage_lagrange_multiplier": float(lagrange_multiplier),
             "params": current_params.to_mapping(),
         })
     best_params = PolicyGradientTradingParams.from_vector(best_vector, template=params)
     return {
         "policy": "pg_linear",
-        "trainer": "on_policy_reinforce",
+        "trainer": (
+            "on_policy_reinforce_leakage_constrained"
+            if leakage_policy_loss_scale > 0.0 or leakage_lagrange_lr > 0.0
+            else "on_policy_reinforce"
+        ),
         "scenario": scenario,
         "train_seeds": list(train_seeds),
         "steps": int(steps),
         "assets": int(assets),
         "best_score": float(best_score),
+        "leakage_policy_loss_scale": float(leakage_policy_loss_scale),
+        "leakage_constraint_threshold": float(leakage_constraint_threshold),
+        "leakage_lagrange_lr": float(leakage_lagrange_lr),
         "params": best_params.to_mapping(),
         "history": history,
     }
 
 
 def summarize(rows: list[dict[str, float]], mode: str, policy: str) -> dict[str, Any]:
-    return {
+    summary = {
         "mode": mode,
         "policy": policy,
         "n": len(rows),
@@ -421,6 +539,10 @@ def summarize(rows: list[dict[str, float]], mode: str, policy: str) -> dict[str,
         "turnover_mean": float(np.mean([r["turnover"] for r in rows])),
         "promotion_count_mean": float(np.mean([r["promotion_count"] for r in rows])),
     }
+    for key in ["leakage_penalty", "UpperHFPower", "LowerLFDrift"]:
+        if rows and key in rows[0]:
+            summary[f"{key}_mean"] = float(np.mean([r[key] for r in rows]))
+    return summary
 
 
 def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -466,6 +588,9 @@ def main() -> None:
     parser.add_argument("--pg-iterations", type=int, default=12)
     parser.add_argument("--pg-learning-rate", type=float, default=0.05)
     parser.add_argument("--pg-discount", type=float, default=0.995)
+    parser.add_argument("--pg-leakage-policy-loss-scale", type=float, default=0.0)
+    parser.add_argument("--pg-leakage-constraint-threshold", type=float, default=0.0)
+    parser.add_argument("--pg-leakage-lagrange-lr", type=float, default=0.0)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--model-path", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_policy_entry"))
@@ -488,6 +613,9 @@ def main() -> None:
                 learning_rate=args.pg_learning_rate,
                 seed=args.optimizer_seed,
                 discount=args.pg_discount,
+                leakage_policy_loss_scale=args.pg_leakage_policy_loss_scale,
+                leakage_constraint_threshold=args.pg_leakage_constraint_threshold,
+                leakage_lagrange_lr=args.pg_leakage_lagrange_lr,
             )
             model_path = args.model_path or (args.output_dir / "pg_linear_policy.json")
             params = PolicyGradientTradingParams.from_mapping(model_payload["params"])
@@ -537,8 +665,9 @@ def main() -> None:
         f"- Sharpe mean: {summary['sharpe_mean']:.3f}",
         f"- max drawdown mean: {summary['max_drawdown_mean']:.4f}",
         f"- turnover mean: {summary['turnover_mean']:.2f}",
+        f"- leakage penalty mean: {summary.get('leakage_penalty_mean', 0.0):.4f}",
         "",
-        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. The `pg_linear` policy is trained by on-policy Gaussian REINFORCE over upper targets and lower execution speeds. These are learned-policy validation paths, not full SAC/PPO implementations.",
+        "The `linear` policy is trained by cross-entropy policy search over shared frequency-routing coefficients. The `pg_linear` policy is trained by on-policy Gaussian REINFORCE over upper targets and lower execution speeds. Optional PG leakage flags add a policy-loss penalty and Lagrange-style constraint update using causal action-effect leakage. These are learned-policy validation paths, not full SAC/PPO implementations.",
     ]
     if model_payload is not None:
         report.extend([

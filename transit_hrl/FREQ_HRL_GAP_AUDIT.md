@@ -40,6 +40,8 @@ Implemented:
 - On-policy Gaussian policy-gradient trading policy (`pg_linear`) that samples
   upper targets and lower execution speeds and trains with reward-to-go
   REINFORCE updates.
+- Leakage-constrained `pg_linear` training path with policy-loss leakage
+  penalties and a Lagrange-style constraint multiplier.
 - Trading pressure-test matrix across five synthetic market regimes.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
 - Dedicated promotion-recovery validation on a persistent reversal shock,
@@ -93,15 +95,25 @@ Implemented:
      `-0.00839` (CI95 `[-0.01075, -0.00613]`).
    - Promotion does not yet trigger high-level replanning or low-model process-noise adaptation in a learned runner.
 
-3. Leakage is not integrated into learned rewards/losses.
+3. Leakage regularization in learned rewards/losses.
    - Done for the shared core and trading harness: `CausalLeakageRewardShaper`
      computes causal leakage from online action effects and subtracts a scaled
      penalty from the learner-facing reward.
    - Done in the copied Transit runner path: `runner_v3.py` already applies
      lower drift and upper high-frequency penalties to lower/upper rewards when
      `leakage.enable` is true.
-   - Still partial: leakage is reward-shaped into Bellman targets, not yet added
-     as an explicit differentiable policy-loss regularizer.
+   - Done in the policy-gradient trading path: `pg_linear` now supports
+     explicit policy-loss leakage penalties plus a Lagrange-style constraint
+     multiplier driven by causal action-effect leakage.
+   - Current evidence: the leakage-regularized PG run reaches Sharpe `15.993`
+     and return `0.2495` versus the refreshed unregularized PG run at Sharpe
+     `15.915` and return `0.2487`; it also reduces turnover (`5.98` vs
+     `6.41`) and upper HF action leakage (`UpperHFPower=0.000677` vs
+     `0.000776`).
+   - Still partial: total leakage remains dominated by lower LF drift, and the
+     first regularized run increases total leakage penalty (`1.790` vs
+     `1.745`). The loss path exists, but lower-drift constraint tuning and a
+     differentiable neural actor-critic implementation remain open.
 
 4. Reward and credit attribution are incomplete.
    - Done for the shared core and trading harness:
@@ -166,7 +178,9 @@ Implemented:
      Gaussian actor with REINFORCE over upper targets and lower execution
      speeds; the current held-out run reaches Sharpe `15.915` and return
      `0.249`, above the same held-out heuristic run (`15.663` Sharpe,
-     `0.244` return).
+     `0.244` return). A leakage-constrained `pg_linear` variant reaches Sharpe
+     `15.993` and return `0.2495` with lower turnover and lower upper-HF
+     action leakage.
    - Still missing: actual SAC/PPO/TD3-style actor-critic implementation with
      replay/advantage estimators and explicit lower/upper value functions.
 
@@ -262,9 +276,10 @@ now mixed rather than uniformly positive:
   post-shift-120 PnL by `+0.00854`, and reduces oracle-regime recovery regret
   by `-0.00839` against `no_promotion` over 20 paired seeds. This is evidence
   for the promotion mechanism, not yet a learned-runner replanning result.
-- Leakage shaping is now in the online reward path. The synthetic trading
-  report shows nonzero leakage reward penalties for leakage-enabled baselines
-  and zero penalty for `no_leakage`.
+- Leakage shaping is now in the online reward path, and `pg_linear` also has
+  an explicit policy-loss / Lagrange-style leakage constraint path. The first
+  constrained PG run improves Sharpe, return, turnover, and upper-HF leakage,
+  but not total leakage because lower LF drift remains the dominant term.
 - Reward attribution is now logged in the trading validation as LF cost, HF
   cost, leakage cost, promotion adaptation cost, upper credit, and lower credit.
 - The first decomposer ablation shows that replacing EMA with Fourier,
@@ -295,9 +310,9 @@ fully validated, domain-general Frequency-Separated HRL
    composite score.
 3. Carry the recovery-tuned promotion gate into learned runners with explicit
    high-level replanning or process-noise adaptation.
-4. Replace the lightweight linear policy search with actual learned policy training, then
-   decide whether reward-shaped leakage is sufficient or explicit policy-loss
-   regularization is needed.
+4. Replace the lightweight linear/REINFORCE policy paths with actual actor-critic
+   training, and tune the leakage constraint so it reduces lower LF drift as
+   well as upper HF action leakage.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
 7. Tune state-space and Haar wavelet encoder hyperparameters, or keep them as
