@@ -9,7 +9,9 @@ from freq_hrl.experiments.trading.performance_validation import (
 from freq_hrl.experiments.trading.encoder_ablation import run_encoder_ablation
 from freq_hrl.experiments.trading.policy_entry import (
     run_eval,
+    run_actor_critic_episode,
     run_pg_episode,
+    train_actor_critic,
     train_linear_policy,
     train_policy_gradient,
 )
@@ -18,7 +20,7 @@ from freq_hrl.experiments.trading.promotion_recovery_validation import (
     aggregate_variants,
     paired_deltas as promotion_paired_deltas,
 )
-from freq_hrl.policies import PolicyGradientTradingParams
+from freq_hrl.policies import ActorCriticTradingParams, PolicyGradientTradingParams
 
 
 class TradingPerformanceValidationTest(unittest.TestCase):
@@ -205,6 +207,36 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         )
         self.assertEqual(model["trainer"], "on_policy_reinforce_leakage_constrained")
         self.assertIn("leakage_lagrange_multiplier", model["history"][0])
+
+    def test_actor_critic_entry_trains_and_evaluates(self):
+        actor_grad, upper_grad, lower_grad, row = run_actor_critic_episode(
+            ActorCriticTradingParams(),
+            seed=42,
+            steps=35,
+            assets=2,
+            scenario="persistent_shift",
+            rng_seed=7,
+        )
+        self.assertEqual(actor_grad.shape[0], len(PolicyGradientTradingParams.trainable_names()))
+        self.assertEqual(upper_grad.shape[0], ActorCriticTradingParams.upper_value_dim())
+        self.assertEqual(lower_grad.shape[0], ActorCriticTradingParams.lower_value_dim())
+        self.assertIn("td_error_abs_mean", row)
+
+        model = train_actor_critic(
+            train_seeds=[42],
+            steps=35,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            actor_learning_rate=0.01,
+            critic_learning_rate=0.01,
+            seed=1,
+        )
+        self.assertEqual(model["policy"], "ac_linear")
+        self.assertEqual(model["trainer"], "td0_actor_critic")
+        self.assertIn("critic_value_loss", model["history"][0])
+        row = run_eval(seed=123, steps=35, assets=2, policy="ac_linear")
+        self.assertIn("sharpe", row)
 
 
 if __name__ == "__main__":

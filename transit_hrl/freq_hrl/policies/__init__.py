@@ -18,8 +18,16 @@ from .pg_trading import (
     PolicyGradientTradingParams,
     PolicyGradientTradingPlanner,
 )
+from .ac_trading import (
+    ActorCriticTradingController,
+    ActorCriticTradingParams,
+    ActorCriticTradingPlanner,
+)
 
 __all__ = [
+    "ActorCriticTradingController",
+    "ActorCriticTradingParams",
+    "ActorCriticTradingPlanner",
     "BernsteinPlanCurve",
     "FrequencyTradingController",
     "FrequencyTradingPlanner",

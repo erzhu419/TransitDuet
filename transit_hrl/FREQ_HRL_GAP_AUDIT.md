@@ -42,6 +42,11 @@ Implemented:
   REINFORCE updates.
 - Leakage-constrained `pg_linear` training path with policy-loss leakage
   penalties and a Lagrange-style constraint multiplier.
+- Linear Gaussian actor-critic trading policy (`ac_linear`) with separated
+  upper low-frequency and lower high-frequency TD(0) critics. The current
+  held-out run reaches return `0.2804`, objective `0.4436`, and total leakage
+  `1.6475`, improving return/objective and leakage versus the previous
+  `pg_linear` runs while giving up Sharpe.
 - Trading pressure-test matrix across six synthetic market regimes, including
   the persistent reversal recovery shock.
 - Promotion recovery sweep with sharded scheduler execution and merge output.
@@ -175,17 +180,20 @@ Implemented:
 
 1. Learned-policy integration.
    - Partial but stronger: `freq_hrl.experiments.trading.policy_entry` now
-     supports two learned policy paths. `linear` trains shared frequency-routing
-     coefficients with cross-entropy search; the refreshed run reaches held-out
-     Sharpe `15.419` and return `0.280`. `pg_linear` trains an on-policy
-     Gaussian actor with REINFORCE over upper targets and lower execution
-     speeds; the current held-out run reaches Sharpe `15.915` and return
-     `0.249`, above the same held-out heuristic run (`15.663` Sharpe,
-     `0.244` return). A leakage-constrained `pg_linear` variant reaches Sharpe
-     `15.993` and return `0.2495` with lower turnover and lower upper-HF
-     action leakage.
-   - Still missing: actual SAC/PPO/TD3-style actor-critic implementation with
-     replay/advantage estimators and explicit lower/upper value functions.
+     supports three learned policy paths. `linear` trains shared
+     frequency-routing coefficients with cross-entropy search; the refreshed
+     run reaches held-out Sharpe `15.419` and return `0.280`. `pg_linear`
+     trains an on-policy Gaussian actor with REINFORCE over upper targets and
+     lower execution speeds; the current held-out run reaches Sharpe `15.915`
+     and return `0.249`, above the same held-out heuristic run (`15.663`
+     Sharpe, `0.244` return). A leakage-constrained `pg_linear` variant reaches
+     Sharpe `15.993` and return `0.2495` with lower turnover and lower upper-HF
+     action leakage. `ac_linear` adds explicit upper/lower value functions and
+     TD(0) bootstrapped actor updates; the current held-out run reaches return
+     `0.2804`, objective `0.4436`, and leakage penalty `1.6475`.
+   - Still missing: SAC/PPO/TD3-style neural/off-policy actor-critic with
+     replay or GAE, separate high/low replay buffers, and a real domain runner
+     training loop.
 
 2. HighLevelPlanner and LowLevelController policy interfaces.
    - Done: `HighLevelPlanner`, `LowLevelController`, `HighLevelDecision`, and
@@ -290,8 +298,9 @@ now mixed rather than uniformly positive:
   post-shift-120 PnL by `+0.00854`, and reduces oracle-regime recovery regret
   by `-0.00839` against `no_promotion` over 20 paired seeds. This is evidence
   for the promotion mechanism, not yet a learned-runner replanning result.
-- Leakage shaping is now in the online reward path, and `pg_linear` also has
-  an explicit policy-loss / Lagrange-style leakage constraint path. The first
+- Leakage shaping is now in the online reward path, `pg_linear` has an explicit
+  policy-loss / Lagrange-style leakage constraint path, and `ac_linear` reduces
+  total action-effect leakage in the unregularized actor-critic run. The first
   constrained PG run improves Sharpe, return, turnover, and upper-HF leakage,
   but not total leakage because lower LF drift remains the dominant term.
 - Reward attribution is now logged in the trading validation as LF cost, HF
@@ -325,7 +334,7 @@ fully validated, domain-general Frequency-Separated HRL
    composite score.
 3. Carry the recovery-tuned promotion gate into learned runners with explicit
    high-level replanning or process-noise adaptation.
-4. Replace the lightweight linear/REINFORCE policy paths with actual actor-critic
+4. Extend the new `ac_linear` path toward neural/off-policy SAC/PPO/TD3-style
    training, and tune the leakage constraint so it reduces lower LF drift as
    well as upper HF action leakage.
 5. Add Level-2 public minute data and Level-3 order-book/market-making validation.
