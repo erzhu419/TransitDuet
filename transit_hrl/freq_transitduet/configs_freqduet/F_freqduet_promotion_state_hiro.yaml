@@ -1,0 +1,14 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_promotion_state_hiro
+
+frequency:
+  promotion:
+    enable: true
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.85
+    persistence_ratio: 0.35
+
+upper:
+  timetable_planner:
+    promotion_replan: false

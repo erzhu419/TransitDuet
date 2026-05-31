@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_gen_odshift_upperall_hiro
+
+frequency:
+  upper_mode: all
+
+env:
+  demand_noise: 0.15
+  od_noise: 0.35
+  od_noise_clip: [0.4, 1.8]

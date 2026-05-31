@@ -1,0 +1,32 @@
+market:
+  bar_sec: 60
+  transaction_cost_bps: 5
+  slippage_bps: 1
+  max_leverage: 1.0
+
+frequency:
+  enable: true
+  bar_sec: 60
+  method: ema
+  high_cut_min: 5
+  low_cut_min: 120
+  mid_cut_min: 30
+  forecast_horizon_s: 14400
+  upper_mode: low
+  lower_mode: high
+
+promotion:
+  enable: true
+  window_min: 30
+  residual_threshold: 2.0
+  persistence_ratio: 0.4
+  cooldown_min: 60
+  adaptation_cost_scale: 0.00005
+
+leakage:
+  enable: true
+  upper_hf_window: 4
+  lower_lf_window: 24
+  upper_hf_weight: 0.05
+  lower_lf_weight: 0.05
+  reward_penalty_scale: 0.00005

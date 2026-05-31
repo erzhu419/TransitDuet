@@ -1,0 +1,10 @@
+_extends: T_freqhrl_terminal.yaml
+_name: T_nopromotion_terminal
+
+frequency:
+  promotion:
+    enable: false
+
+upper:
+  timetable_planner:
+    promotion_replan: false

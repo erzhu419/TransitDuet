@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_aligned_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_lowerhf_poswait_hiro
+
+reward_attribution:
+  # Keep the original lower wait penalty, but only attribute positive local
+  # high-frequency residuals to lower. Negative residuals are not burst demand.
+  lower_positive_high_only: true

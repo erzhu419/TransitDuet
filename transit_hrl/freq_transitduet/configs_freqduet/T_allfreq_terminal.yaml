@@ -1,0 +1,15 @@
+_extends: T_freqhrl_terminal.yaml
+_name: T_allfreq_terminal
+
+frequency:
+  upper_mode: all
+  lower_mode: all
+  promotion:
+    enable: true
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.85
+    persistence_ratio: 0.35
+
+leakage:
+  enable: false

@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_lowerhf_credit_hiro
+
+reward_attribution:
+  # Lower credit for actually serving positive high-frequency bursts. This is
+  # directional: negative residuals should not look like local burst demand.
+  lower_positive_high_only: true
+  lower_board_credit_weight: 0.08
+  lower_board_norm: 8.0
+  lower_board_clip: 2.0

@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_trace_hiro
+
+frequency:
+  logging:
+    # Passive Phase-0 trace logging only; no policy/state behavior changes.
+    enable: true
+    bin_only: true
+    station_rows: true
+    include_empty_stations: false

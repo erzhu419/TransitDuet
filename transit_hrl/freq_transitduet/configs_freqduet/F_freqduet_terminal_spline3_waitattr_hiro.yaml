@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_waitattr_hiro.yaml
+_name: F_freqduet_terminal_spline3_waitattr_hiro
+
+upper:
+  timetable_planner:
+    # Step-2 candidate: upper action is a direction-specific rolling
+    # timetable curve instead of the scalar MVP headway shift.
+    basis_per_direction: 3
+    shared_directions: false
+    plan_all_directions: true
+    action_ema_alpha: 0.25
+    smooth_penalty: 0.08
+    delta_min_s: -45.0
+    delta_max_s: 20.0

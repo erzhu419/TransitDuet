@@ -1,0 +1,27 @@
+frequency:
+  enable: true
+  bin_sec: 60
+  method: ema
+  low_cut_min: 30
+  high_cut_min: 5
+  mid_cut_min: 15
+  forecast_horizon_s: 1800
+  upper_mode: low
+  lower_mode: high
+  global_demand_norm: 50
+  local_demand_norm: 10
+  slope_norm: 5
+
+promotion:
+  enable: true
+  window_min: 15
+  residual_threshold: 2.0
+  persistence_ratio: 0.4
+  cooldown_min: 30
+
+leakage:
+  enable: true
+  upper_hf_window: 6
+  lower_lf_window: 24
+  upper_hf_weight: 0.01
+  lower_lf_weight: 0.05

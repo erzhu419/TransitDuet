@@ -1,0 +1,10 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_timetable_drift_strong_hiro
+
+leakage:
+  enable: true
+  lower_drift_window: 24
+  lower_drift_budget_s: 90.0
+  lower_drift_penalty: 0.25
+  upper_hf_penalty: 0.04
+  upper_lpf_window: 6

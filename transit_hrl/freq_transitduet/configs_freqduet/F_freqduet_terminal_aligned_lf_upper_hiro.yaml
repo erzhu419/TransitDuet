@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_aligned_lf_upper_hiro
+
+frequency:
+  # Isolate the contribution of low-frequency state to the upper planner.
+  upper_features: true
+  lower_features: false
+  upper_mode: low

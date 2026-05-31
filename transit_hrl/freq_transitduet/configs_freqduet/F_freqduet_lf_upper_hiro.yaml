@@ -1,0 +1,26 @@
+_extends: config_v2.yaml
+_name: F_freqduet_lf_upper_hiro
+
+upper:
+  state_dim: 16
+
+coupling:
+  coupling_mode: hiro
+
+frequency:
+  enable: true
+  method: haar
+  upper_features: true
+  lower_features: false
+  od_features: true
+  replace_upper_demand_with_low: true
+  low_period_s: 3600.0
+  fast_period_s: 300.0
+  energy_period_s: 600.0
+  forecast_horizon_s: 1800.0
+  global_demand_norm: 50.0
+  local_demand_norm: 10.0
+  slope_norm: 5.0
+
+leakage:
+  enable: false

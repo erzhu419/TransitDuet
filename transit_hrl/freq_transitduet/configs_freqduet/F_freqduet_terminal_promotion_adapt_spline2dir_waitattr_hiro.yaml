@@ -1,0 +1,20 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_promotion_adapt_spline2dir_waitattr_hiro
+
+frequency:
+  promotion:
+    enable: true
+    state_features: false
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.85
+    persistence_ratio: 0.35
+    adapt_low: true
+    adapt_gain: 0.10
+    adapt_strength_min: 0.15
+    adapt_local: false
+
+upper:
+  timetable_planner:
+    promotion_replan: true
+    promotion_replan_strength_min: 0.15

@@ -1,0 +1,73 @@
+{
+  "base": "T_freqhrl_terminal.yaml",
+  "reports": [
+    {
+      "config": "T_allfreq_terminal.yaml",
+      "changed_paths": [
+        "_name",
+        "frequency.lower_mode",
+        "frequency.upper_mode",
+        "leakage.enable"
+      ],
+      "allowed_paths": [
+        "_name",
+        "frequency.lower_mode",
+        "frequency.upper_mode",
+        "leakage.enable"
+      ],
+      "unexpected_paths": [],
+      "missing_expected_paths": [],
+      "passed": true
+    },
+    {
+      "config": "T_swapped_terminal.yaml",
+      "changed_paths": [
+        "_name",
+        "frequency.lower_mode",
+        "frequency.upper_mode",
+        "leakage.enable"
+      ],
+      "allowed_paths": [
+        "_name",
+        "frequency.lower_mode",
+        "frequency.upper_mode",
+        "leakage.enable"
+      ],
+      "unexpected_paths": [],
+      "missing_expected_paths": [],
+      "passed": true
+    },
+    {
+      "config": "T_nopromotion_terminal.yaml",
+      "changed_paths": [
+        "_name",
+        "frequency.promotion.enable",
+        "upper.timetable_planner.promotion_replan"
+      ],
+      "allowed_paths": [
+        "_name",
+        "frequency.promotion.enable",
+        "upper.timetable_planner.promotion_replan"
+      ],
+      "unexpected_paths": [],
+      "missing_expected_paths": [],
+      "passed": true
+    },
+    {
+      "config": "T_noleakage_terminal.yaml",
+      "changed_paths": [
+        "_name",
+        "leakage.enable"
+      ],
+      "allowed_paths": [
+        "_name",
+        "leakage.enable"
+      ],
+      "unexpected_paths": [],
+      "missing_expected_paths": [],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "violations": []
+}

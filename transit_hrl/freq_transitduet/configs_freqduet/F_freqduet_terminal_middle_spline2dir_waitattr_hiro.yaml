@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_middle_spline2dir_waitattr_hiro
+
+frequency:
+  # Step-5 candidate: expose a 5-30 minute regime buffer in addition to
+  # low-frequency trend and high-frequency shock.
+  middle_period_s: 1800.0
+  upper_mode: low_mid
+  lower_mode: high_mid

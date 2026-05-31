@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_lowerhf_localcap10_w06_hiro.yaml
+_name: F_freqduet_terminal_promotion_localcap10_w06_hiro
+
+frequency:
+  promotion:
+    enable: true
+    state_features: false
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 1.10
+    # Directional persistence keeps the dev-manual |r| shock criterion, but
+    # prevents mixed-sign high-noise residuals from masquerading as a regime
+    # shift.
+    residual_mode: directional_abs
+    persistence_ratio: 0.45
+    adapt_low: false
+
+upper:
+  timetable_planner:
+    promotion_replan: true
+    promotion_replan_strength_min: 0.35

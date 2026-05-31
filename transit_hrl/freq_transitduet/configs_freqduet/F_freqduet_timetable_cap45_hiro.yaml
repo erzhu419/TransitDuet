@@ -1,0 +1,7 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_timetable_cap45_hiro
+
+lower:
+  # Keep the lower controller in the high-frequency holding band so
+  # it cannot silently rebuild a low-frequency timetable offset.
+  action_range: 45.0

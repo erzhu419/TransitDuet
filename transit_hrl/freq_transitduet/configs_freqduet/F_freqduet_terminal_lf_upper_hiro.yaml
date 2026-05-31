@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_hiro.yaml
+_name: F_freqduet_terminal_lf_upper_hiro
+
+frequency:
+  # Isolate the contribution of the low-frequency upper state.
+  upper_features: true
+  lower_features: false
+  upper_mode: low

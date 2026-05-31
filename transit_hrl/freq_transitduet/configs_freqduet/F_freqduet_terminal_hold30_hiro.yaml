@@ -1,0 +1,10 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_terminal_hold30_hiro
+
+upper:
+  # Phase-4 terminal holding variant: executable launch times may delay
+  # terminal departure, but never launch earlier than the original ready time.
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 30.0

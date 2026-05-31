@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_release15_spline2dir_waitattr_hiro
+
+upper:
+  timetable_planner:
+    # Step-3 candidate: executable terminal schedule can both release slightly
+    # early and delay, instead of no-early-launch hold only.
+    terminal_shift_min_s: -15.0
+    terminal_shift_max_s: 30.0

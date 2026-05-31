@@ -1,0 +1,30 @@
+_extends: F_freqduet_terminal_hiro.yaml
+_name: T_freqhrl_terminal
+
+frequency:
+  enable: true
+  method: fourier
+  upper_features: true
+  lower_features: true
+  upper_mode: low
+  lower_mode: high
+  replace_upper_demand_with_low: true
+  bin_sec: 60
+  harmonic_period_s: 50400.0
+  fourier_k: 4
+  harmonic_forgetting: 0.9995
+  forecast_horizon_s: 1800.0
+  global_demand_norm: 50.0
+  local_demand_norm: 10.0
+  slope_norm: 5.0
+  promotion:
+    enable: true
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.85
+    persistence_ratio: 0.35
+
+upper:
+  timetable_planner:
+    promotion_replan: true
+    promotion_replan_strength_min: 0.15

@@ -1,0 +1,30 @@
+_extends: config_v2.yaml
+_name: F_freqduet_ema_hiro
+
+upper:
+  # 11 original v2k upper dims, with raw demand replaced by low-frequency
+  # realized demand, three frequency diagnostics, and two OD-structure features.
+  state_dim: 16
+
+coupling:
+  coupling_mode: hiro
+
+frequency:
+  enable: true
+  method: ema
+  upper_features: true
+  lower_features: true
+  od_features: true
+  replace_upper_demand_with_low: true
+
+  # EMA baseline. The main FreqDuet config uses the Haar-style splitter in
+  # F_freqduet_haar_hiro.yaml.
+  low_period_s: 3600.0
+  fast_period_s: 300.0
+  energy_period_s: 600.0
+  forecast_horizon_s: 1800.0
+
+  # Normalizers map passenger-per-minute rates to network-friendly magnitudes.
+  global_demand_norm: 50.0
+  local_demand_norm: 10.0
+  slope_norm: 5.0

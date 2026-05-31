@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_final_hf_lower_hiro
+
+frequency:
+  # Isolate high-frequency lower state contribution under the final reward,
+  # timetable, terminal-dispatch, and leakage settings.
+  upper_features: false
+  lower_features: true
+  lower_mode: high
+  od_features: false

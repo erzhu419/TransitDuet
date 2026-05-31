@@ -1,0 +1,17 @@
+_extends: F_freqduet_timetable_hiro.yaml
+_name: F_freqduet_promotion_hiro
+
+frequency:
+  # Phase 7 in dev_manual.md: persistent high-frequency residuals can be
+  # promoted into upper-level replanning instead of being treated as isolated
+  # lower-level shocks forever.
+  promotion:
+    enable: true
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.85
+    persistence_ratio: 0.35
+
+upper:
+  timetable_planner:
+    promotion_replan: true

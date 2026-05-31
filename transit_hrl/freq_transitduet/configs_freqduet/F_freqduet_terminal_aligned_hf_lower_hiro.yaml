@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_aligned_hf_lower_hiro
+
+frequency:
+  # Isolate the contribution of high-frequency local state to lower holding.
+  upper_features: false
+  lower_features: true
+  lower_mode: high
+  od_features: false

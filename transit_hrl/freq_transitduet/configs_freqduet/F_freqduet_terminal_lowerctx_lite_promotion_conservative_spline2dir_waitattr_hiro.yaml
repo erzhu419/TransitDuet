@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: F_freqduet_terminal_lowerctx_lite_promotion_conservative_spline2dir_waitattr_hiro
+
+frequency:
+  lower_context:
+    # Step-6 lite candidate: only the lower operational signals that are most
+    # directly tied to holding decisions.
+    enable: true
+    queue_norm: 50.0
+    features: [load, queue, schedule_slack]

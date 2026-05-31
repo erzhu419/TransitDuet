@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_final_nopromotion_hiro.yaml
+_name: F_freqduet_terminal_final_rawhistory_hiro
+
+frequency:
+  # Expose trailing realized demand history instead of causal LF/HF split.
+  method: raw_history
+  upper_features: true
+  lower_features: true
+  replace_upper_demand_with_low: true
+  upper_history_bins: 6
+  lower_history_bins: 6
+  od_features: false
+
+reward_attribution:
+  enable: false

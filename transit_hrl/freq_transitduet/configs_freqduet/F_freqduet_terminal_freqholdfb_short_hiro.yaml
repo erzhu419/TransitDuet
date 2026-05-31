@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_freqholdfb_short_hiro
+
+frequency:
+  hold_feedback:
+    # Shorter feedback memory for faster upper response to local bursts.
+    enable: true
+    window: 128
+    high_threshold: 0.0
+    wait_norm_s: 600.0
+    wait_clip: 2.0
+    board_norm: 8.0

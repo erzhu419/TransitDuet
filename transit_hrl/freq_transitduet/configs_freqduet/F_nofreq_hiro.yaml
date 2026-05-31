@@ -1,0 +1,14 @@
+_extends: config_v2.yaml
+_name: F_nofreq_hiro
+
+upper:
+  state_dim: 11
+
+coupling:
+  coupling_mode: hiro
+
+frequency:
+  enable: false
+
+leakage:
+  enable: false

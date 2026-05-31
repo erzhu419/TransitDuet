@@ -1,0 +1,2211 @@
+"""
+runner_v3.py
+============
+TransitDuet v3: bi-level bus control with switchable cross-level coupling
+(``coupling_mode``: ``hiro`` | ``haar`` | ``channels``). Used by every paper
+result in the current paper pipeline (Tables I/II + every figure); the legacy
+``runner_v2.py`` is retained only as a frozen reference of the channels-mode
+v2 baseline and is not used by any active script (see ``scripts/README.md``).
+
+Coupling modes (all share the same lower-level RE-SAC Lagrangian holding
+controller; they differ only in how the upper output δ_t is consumed):
+  hiro      The upper output is a per-dispatch target-headway shift; the
+            lower's Lagrangian cost penalises deviation from
+            (h_target + δ_t). Launch time is unchanged. This is the main
+            paper result (H_hiro).
+  channels  v2 channels-mode: δ_t directly perturbs launch time; the upper
+            still gets holding-feedback in its state, so behaves like v2.
+  haar      v2 channels-mode launch shift PLUS a clipped upper advantage
+            injected into the lower's reward as a HAAR-style cross-advantage
+            bonus, gated by a PIPER reachability classifier.
+
+Mechanism (HIRO mode):
+  Upper outputs δ_t for the next dispatch event (one decision per dispatch,
+  ~264 events per simulated service day in our calibrated corridor; not a
+  fixed-period 300 s timer). The lower then tracks the resulting target
+  headway via Lagrangian holding control; CS-BAPR + HoldFB close the
+  upper--lower loop and θ-OGD adaptively penalises fleet overshoot.
+
+Usage:
+    python -u runner_v3.py --config configs_ablation/H_hiro.yaml \
+        [--episodes 300] [--seed 42] [--gpu]
+"""
+
+import copy
+import os
+import sys
+import argparse
+import csv
+import json
+import time
+import yaml
+import numpy as np
+import torch
+from pathlib import Path
+from collections import defaultdict, deque
+
+sys.stdout.reconfigure(line_buffering=True)
+
+_torch_threads = os.environ.get("FREQDUET_TORCH_THREADS") or os.environ.get("TORCH_NUM_THREADS")
+if _torch_threads:
+    try:
+        _torch_threads = max(1, int(_torch_threads))
+        torch.set_num_threads(_torch_threads)
+        torch.set_num_interop_threads(_torch_threads)
+    except Exception:
+        pass
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from env.sim import env_bus
+from frequency.diagnostics import (
+    demand_attribution_mi,
+    shock_response_metrics,
+)
+from upper.resac_upper import RESACUpperTrainer
+from upper.measurement_proj import MeasurementProjection
+from upper.timetable_planner import TimetableCurvePlanner
+from lower.resac_lagrangian import RESACLagrangianTrainer
+from lower.cost_replay_buffer import CostReplayBuffer
+from coupling.holding_feedback import HoldingFeedback
+from coupling.belief_tracker import BeliefTracker, SurpriseComputer
+
+
+def _deep_merge(base, override):
+    """Recursively merge override dict into base dict."""
+    for k, v in override.items():
+        if k in base and isinstance(base[k], dict) and isinstance(v, dict):
+            _deep_merge(base[k], v)
+        else:
+            base[k] = v
+    return base
+
+
+def load_config(path):
+    """Load YAML config, supporting _extends: <parent_file>."""
+    with open(path, 'r') as f:
+        cfg = yaml.safe_load(f)
+    if cfg is None:
+        cfg = {}
+    if '_extends' in cfg:
+        parent_path = cfg.pop('_extends')
+        base_dir = os.path.dirname(os.path.abspath(path))
+        parent_full = os.path.join(base_dir, '..', parent_path) if not os.path.isabs(parent_path) else parent_path
+        if not os.path.exists(parent_full):
+            parent_full = os.path.join(base_dir, parent_path)
+        if not os.path.exists(parent_full):
+            # try relative to script dir
+            parent_full = os.path.join(str(SCRIPT_DIR), parent_path)
+        parent = load_config(parent_full)
+        cfg = _deep_merge(parent, cfg)
+    return cfg
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Diagnostic helpers
+# ═══════════════════════════════════════════════════════════════
+
+def _stat(arr):
+    """μ / σ / min / max for a list of floats."""
+    if not arr:
+        return {'mean': 0., 'std': 0., 'min': 0., 'max': 0., 'n': 0}
+    a = np.asarray(arr, dtype=np.float64)
+    return {'mean': float(a.mean()), 'std': float(a.std()),
+            'min': float(a.min()), 'max': float(a.max()), 'n': len(a)}
+
+
+def _causal_moving_average(values, window):
+    a = np.asarray(values, dtype=np.float64)
+    if a.size == 0:
+        return a
+    window = max(1, int(window))
+    out = np.empty_like(a)
+    for i in range(a.size):
+        j0 = max(0, i - window + 1)
+        out[i] = a[j0:i + 1].mean()
+    return out
+
+
+def _upper_hf_power_ratio(delta_by_dir, window):
+    """Approximate |HPF(delta_t)|^2 / |delta_t|^2 for upper actions."""
+    high_power = 0.0
+    total_power = 0.0
+    for seq in delta_by_dir.values():
+        if len(seq) < 2:
+            continue
+        a = np.asarray(seq, dtype=np.float64)
+        low = _causal_moving_average(a, window)
+        high = a - low
+        high_power += float(np.dot(high, high))
+        total_power += float(np.dot(a, a))
+    return high_power / max(total_power, 1e-9) if total_power > 0 else 0.0
+
+
+def _lower_lf_drift_ratio(actions_by_dir, window):
+    """Approximate |LPF(cumsum(a_L))|^2 / |cumsum(a_L)|^2."""
+    low_power = 0.0
+    total_power = 0.0
+    for seq in actions_by_dir.values():
+        if len(seq) < 2:
+            continue
+        drift = np.cumsum(np.asarray(seq, dtype=np.float64))
+        low = _causal_moving_average(drift, window)
+        low_power += float(np.dot(low, low))
+        total_power += float(np.dot(drift, drift))
+    return low_power / max(total_power, 1e-9) if total_power > 0 else 0.0
+
+
+def _abs_corr(xs, ys):
+    if len(xs) < 3 or len(ys) < 3:
+        return 0.0
+    x = np.asarray(xs, dtype=np.float64)
+    y = np.asarray(ys, dtype=np.float64)
+    if x.std() < 1e-9 or y.std() < 1e-9:
+        return 0.0
+    return float(abs(np.corrcoef(x, y)[0, 1]))
+
+
+def _demand_attribution_score(upper_samples, lower_samples):
+    """Correlation proxy for the demand attribution diagnostic in GPT.md."""
+    score = 0.0
+    if upper_samples:
+        low_u, high_u, act_u = zip(*upper_samples)
+        score += _abs_corr(low_u, act_u) - _abs_corr(high_u, act_u)
+    if lower_samples:
+        low_l, high_l, act_l = zip(*lower_samples)
+        score += _abs_corr(high_l, act_l) - _abs_corr(low_l, act_l)
+    return float(score)
+
+
+class DiagnosticLog:
+    """Collects per-episode diagnostics and writes them as CSV + JSON."""
+
+    HEADER = [
+        'ep', 'stage', 'wall_env_s', 'wall_train_s',
+        # env
+        'avg_wait_min', 'peak_fleet', 'headway_cv', 'ep_reward', 'ep_cost',
+        'ep_steps', 'n_dispatches',
+        # lower policy
+        'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
+        'lower_reward_mean', 'lower_reward_std',
+        # lower training
+        'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
+        'lower_ood_loss', 'lower_cost_q_mean', 'lower_cost_q_loss',
+        'lower_policy_loss', 'lower_pi_grad_norm', 'lower_q_grad_norm',
+        'lower_alpha', 'lower_lambda',
+        'lower_replay_size',
+        # upper policy (only after warmup)
+        'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
+        'upper_reward_mean', 'upper_reward_std',
+        # upper training
+        'upper_q_mean', 'upper_q_std', 'upper_q_loss', 'upper_q_mse',
+        'upper_ood_loss', 'upper_policy_loss',
+        'upper_pi_grad_norm', 'upper_q_grad_norm',
+        'upper_alpha', 'upper_replay_size',
+        # coupling
+        'hold_fb_mean', 'hold_fb_std', 'hold_fb_n_trips',
+        'hold_fb_dir0_mean', 'hold_fb_dir1_mean',
+        'hold_penalty_mean',
+        'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
+        'freq_holdfb_other_hold', 'freq_holdfb_other_wait',
+        'freq_holdfb_decisions',
+        'theta_wait', 'theta_fleet', 'theta_cv',
+        # CS-BAPR belief
+        'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
+        # v2j belief-weighted MORL
+        'w_wait', 'w_fleet', 'w_cv',
+        # v2k elastic fleet
+        'N_fleet', 'fleet_overshoot',
+        # FreqDuet causal demand-frequency diagnostics
+        'freq_low_demand', 'freq_low_slope', 'freq_low_forecast',
+        'freq_high_energy', 'freq_middle', 'freq_middle_energy',
+        'freq_od_entropy', 'freq_od_high_energy',
+        'freq_od_active', 'freq_updates',
+        'freq_promotion_flag', 'freq_promotion_strength',
+        'freq_promotion_age', 'freq_promotion_score',
+        'freq_promotion_absorptions', 'freq_promotion_absorbed',
+        # FreqDuet frequency-leakage regularization
+        'lower_drift_penalty_mean', 'lower_drift_penalty_max',
+        'upper_hf_penalty_mean', 'upper_hf_penalty_max',
+        # FreqDuet layer-frequency allocation diagnostics
+        'upper_hf_power_ratio', 'lower_lf_drift_ratio',
+        'demand_attr_score',
+        'demand_attr_mi_score',
+        'demand_attr_mi_upper_low', 'demand_attr_mi_upper_high',
+        'demand_attr_mi_lower_high', 'demand_attr_mi_lower_low',
+        'shock_response_time_mean_s', 'shock_response_time_std_s',
+        'shock_response_hit_rate', 'shock_events', 'shock_action_mean_s',
+        # FreqDuet frequency-attributed passenger-wait reward diagnostics
+        'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
+        'freq_wait_lower_board_credit_mean',
+        'freq_wait_lower_board_credit_max',
+        'freq_wait_lower_net_mean',
+        'freq_wait_upper_credit_mean', 'freq_wait_upper_credit_std',
+        'freq_wait_low_share_mean', 'freq_wait_lower_high_share_mean',
+        'freq_wait_boarded_pax',
+        # FreqDuet timetable-curve upper diagnostics
+        'upper_plan_penalty_mean', 'upper_plan_penalty_max',
+        'upper_plan_target_mean', 'upper_plan_target_std',
+        'upper_plan_decisions', 'upper_plan_reuse_ratio',
+        'terminal_launch_shift_mean', 'terminal_launch_shift_std',
+    ]
+
+    def __init__(self, log_dir, resume=False):
+        self.csv_path = os.path.join(log_dir, 'diagnostics.csv')
+        self.json_path = os.path.join(log_dir, 'diagnostics.json')
+        self._rows = []
+        # Write CSV header only if not resuming or CSV missing
+        if not (resume and os.path.exists(self.csv_path)):
+            with open(self.csv_path, 'w', newline='') as f:
+                csv.writer(f).writerow(self.HEADER)
+
+    def append(self, row_dict):
+        """Append one episode row. Missing keys default to 0."""
+        self._rows.append(row_dict)
+        row = [row_dict.get(k, 0.) for k in self.HEADER]
+        with open(self.csv_path, 'a', newline='') as f:
+            csv.writer(f).writerow(row)
+
+    def save_json(self):
+        with open(self.json_path, 'w') as f:
+            json.dump(self._rows, f, indent=1, default=str)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Runner
+# ═══════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════
+#  v3 helpers: PIPER-style reachability classifier
+# ═══════════════════════════════════════════════════════════════
+
+class ReachabilityMLP(torch.nn.Module):
+    """Small MLP that maps (s_upper, δ_t, hold_summary) → P(plan reachable) ∈ [0,1].
+
+    Used by HAAR-mode coupling as a gate on the per-trip advantage signal
+    injected into lower-level rewards. Trained with binary cross-entropy
+    against post-hoc labels: 1[|gap_dev_i| < threshold].
+    """
+
+    def __init__(self, state_dim, hidden_dim=32):
+        super().__init__()
+        # input = state_dim (upper state) + 1 (δ_t) + 1 (avg hold) + 1 (hold std) = state_dim + 3
+        in_dim = state_dim + 3
+        self.fc = torch.nn.Sequential(
+            torch.nn.Linear(in_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_dim, 1),
+        )
+
+    def forward(self, x):
+        return torch.sigmoid(self.fc(x)).squeeze(-1)
+
+
+def _reach_features(s_upper, delta_t, hold_mean, hold_std):
+    """Concat upper state with the action and lower-feedback summary."""
+    feats = list(s_upper)
+    feats.append(delta_t / 120.0)        # normalised δ
+    feats.append(hold_mean / 60.0)
+    feats.append(hold_std / 60.0)
+    return np.array(feats, dtype=np.float32)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Runner
+# ═══════════════════════════════════════════════════════════════
+
+class TransitDuetV2Runner:
+    """v2 training loop: per-trip upper decisions + holding feedback coupling."""
+
+    def __init__(self, config, device='cpu'):
+        self.cfg = config
+        self.device = device
+        self.base_seed = int(config.get('seed', 0))
+        self.decouple_init_seeds = bool(
+            config.get('training', {}).get('decouple_init_seeds', False))
+
+        # Environment
+        env_path = os.path.join(str(SCRIPT_DIR), config['env']['path'])
+        self.env = env_bus(env_path, route_sigma=config['env']['route_sigma'])
+        self.env.configure_frequency_features(config.get('frequency', {}))
+        self.env.enable_plot = False
+        self.env._n_fleet_target = config['upper']['N_fleet']
+        env_cfg = config.get('env', {})
+        self.env.demand_noise = env_cfg.get('demand_noise', 0.0)
+        self.env.demand_scale = env_cfg.get('demand_scale', 1.0)
+        self.env.od_noise = env_cfg.get('od_noise', 0.0)
+        self.env.od_noise_clip = env_cfg.get('od_noise_clip', [0.3, 2.0])
+
+        state_dim = self.env.state_dim
+
+        # ── Upper policy ──
+        upper_cfg = config['upper']
+        self.delta_max = upper_cfg.get('delta_max', 120.0)
+        planner_cfg = upper_cfg.get('timetable_planner', {})
+        self.timetable_planner = None
+        self.upper_plan_penalty_weight = 0.0
+        self.timetable_replan_interval_s = 0.0
+        self.timetable_action_ema_alpha = 1.0
+        self.timetable_terminal_dispatch = False
+        self.timetable_promotion_replan = False
+        self.timetable_promotion_replan_strength_min = 0.0
+        self.timetable_plan_all_directions = False
+        self._active_timetable_plans = {}
+        if bool(planner_cfg.get('enable', False)):
+            self.timetable_planner = TimetableCurvePlanner.from_config(
+                planner_cfg, delta_max_s=self.delta_max)
+            self.upper_plan_penalty_weight = float(
+                planner_cfg.get('smooth_penalty', 0.0))
+            self.timetable_replan_interval_s = float(
+                planner_cfg.get('replan_interval_s', 900.0))
+            self.timetable_action_ema_alpha = float(
+                np.clip(planner_cfg.get('action_ema_alpha', 1.0), 0.0, 1.0))
+            self.timetable_terminal_dispatch = bool(
+                planner_cfg.get('terminal_dispatch', False))
+            self.timetable_promotion_replan = bool(
+                planner_cfg.get('promotion_replan', False))
+            self.timetable_promotion_replan_strength_min = float(
+                planner_cfg.get('promotion_replan_strength_min', 0.0))
+            self.timetable_plan_all_directions = bool(
+                planner_cfg.get('plan_all_directions', False))
+        # v2k: elastic fleet — sample N_fleet per episode
+        self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
+        self.fleet_min = upper_cfg.get('fleet_min', 8)
+        self.fleet_max = upper_cfg.get('fleet_max', 16)
+        self.N_fleet_default = upper_cfg['N_fleet']
+        self._current_N_fleet = self.N_fleet_default  # set per-episode in elastic mode
+        freq_cfg = config.get('frequency', {})
+        self.upper_state_dim = upper_cfg.get('state_dim', 10)
+        if freq_cfg.get('enable', False):
+            self.upper_state_dim = self.env.upper_state_dim
+        freq_holdfb_cfg = freq_cfg.get('hold_feedback', {}) or {}
+        self.freq_holdfb_enable = bool(freq_holdfb_cfg.get('enable', False))
+        self.freq_holdfb_window = max(
+            1, int(freq_holdfb_cfg.get('window', 512)))
+        self.freq_holdfb_wait_norm_s = max(
+            float(freq_holdfb_cfg.get('wait_norm_s', 600.0)), 1e-6)
+        self.freq_holdfb_wait_clip = max(
+            float(freq_holdfb_cfg.get('wait_clip', 2.0)), 0.0)
+        self.freq_holdfb_board_norm = max(
+            float(freq_holdfb_cfg.get('board_norm', 8.0)), 1e-6)
+        self.freq_holdfb_high_threshold = max(
+            float(freq_holdfb_cfg.get('high_threshold', 0.0)), 0.0)
+        # Features appended to upper state:
+        # [same-dir HF-hold, same-dir HF-wait, other-dir HF-hold, other-dir HF-wait].
+        self.freq_holdfb_dim = 4 if self.freq_holdfb_enable else 0
+        self.upper_state_dim += self.freq_holdfb_dim
+        self.upper_action_dim = int(upper_cfg.get('action_dim', 1))
+        if self.timetable_planner is not None:
+            self.upper_action_dim = self.timetable_planner.action_dim
+        action_low = upper_cfg.get('action_low', None)
+        action_high = upper_cfg.get('action_high', None)
+        if self.timetable_planner is not None:
+            action_low = self.timetable_planner.action_low
+            action_high = self.timetable_planner.action_high
+        if action_low is None:
+            action_low = [-self.delta_max] * self.upper_action_dim
+        if action_high is None:
+            action_high = [self.delta_max] * self.upper_action_dim
+        self.upper_action_low = np.asarray(action_low, dtype=np.float32)
+        self.upper_action_high = np.asarray(action_high, dtype=np.float32)
+
+        if self.decouple_init_seeds:
+            torch.manual_seed(self.base_seed + 1001)
+        self.upper_trainer = RESACUpperTrainer(
+            state_dim=self.upper_state_dim, action_dim=self.upper_action_dim,
+            hidden_dim=upper_cfg.get('hidden_dim', 64),
+            action_low=self.upper_action_low.tolist(),
+            action_high=self.upper_action_high.tolist(),
+            ensemble_size=upper_cfg.get('ensemble_size', 10),
+            beta=upper_cfg.get('resac_beta', -2.0),
+            lr=upper_cfg.get('lr', 3e-4),
+            gamma=upper_cfg.get('gamma', 0.95),
+            maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
+            replay_capacity=upper_cfg.get('replay_capacity', 50000),
+            device=device)
+
+        # ── Lower policy ──
+        lower_cfg = config['lower']
+        self.replay_buffer = CostReplayBuffer(config['training']['replay_buffer_size'])
+        self.lower_action_bins = None
+        bins = lower_cfg.get('action_bins', None)
+        if bins:
+            action_bins = np.asarray([float(x) for x in bins], dtype=np.float32)
+            action_bins = np.unique(np.clip(
+                action_bins, 0.0, float(lower_cfg['action_range'])))
+            if action_bins.size < 2:
+                raise ValueError("lower.action_bins must contain at least two values")
+            self.lower_action_bins = action_bins
+        self.lower_use_last_action_feature = bool(
+            lower_cfg.get('use_last_action_feature', False))
+        lower_state_dim = state_dim + (1 if self.lower_use_last_action_feature else 0)
+        if self.decouple_init_seeds:
+            torch.manual_seed(self.base_seed + 2001)
+        self.lower_trainer = RESACLagrangianTrainer(
+            state_dim=lower_state_dim, action_dim=1,
+            hidden_dim=lower_cfg['hidden_dim'],
+            action_range=lower_cfg['action_range'],
+            cost_limit=lower_cfg['cost_limit'],
+            ensemble_size=lower_cfg.get('ensemble_size', 10),
+            beta=lower_cfg.get('resac_beta', -2.0),
+            beta_ood=lower_cfg.get('beta_ood', 0.01),
+            weight_reg=lower_cfg.get('weight_reg', 0.01),
+            lr=lower_cfg['lr'], lambda_lr=lower_cfg['lambda_lr'],
+            gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
+            auto_entropy=lower_cfg['auto_entropy'],
+            maximum_alpha=lower_cfg['maximum_alpha'],
+            device=device)
+        self.lower_state_dim = lower_state_dim
+
+        # ── Coupling ──
+        coupling_cfg = config['coupling']
+        # Ablation flags (for paper experiments)
+        self.ablate_holding_feedback = coupling_cfg.get('ablate_holding_feedback', False)
+        self.ablate_csbapr = coupling_cfg.get('ablate_csbapr', False)
+        self.ablate_hindsight_credit = coupling_cfg.get('ablate_hindsight_credit', False)
+        self.ablate_morl = coupling_cfg.get('ablate_morl', False)
+
+        self.holding_feedback = HoldingFeedback(
+            window_size=coupling_cfg.get('feedback_window', 10))
+        self.measurement_proj = MeasurementProjection(
+            N_fleet=upper_cfg['N_fleet'],
+            lr=coupling_cfg.get('measurement_lr', 0.01))
+        self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
+        self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+
+        # FreqDuet leakage regularization:
+        # upper should not emit high-frequency timetable shifts, and lower
+        # station holding should not accumulate into a low-frequency timetable
+        # drift. These are disabled unless configured.
+        leak_cfg = config.get('leakage', {})
+        self.leakage_enable = bool(leak_cfg.get('enable', False))
+        self.lower_drift_window = int(leak_cfg.get('lower_drift_window', 24))
+        self.lower_drift_budget_s = float(leak_cfg.get('lower_drift_budget_s', 180.0))
+        self.lower_drift_penalty = float(leak_cfg.get('lower_drift_penalty', 0.0))
+        self.upper_hf_penalty = float(leak_cfg.get('upper_hf_penalty', 0.0))
+        self.upper_lpf_window = int(leak_cfg.get('upper_lpf_window', 6))
+        self._lower_drift_by_dir = {
+            True: deque(maxlen=max(1, self.lower_drift_window)),
+            False: deque(maxlen=max(1, self.lower_drift_window)),
+        }
+        self._ep_lower_drift_penalties = []
+        self._ep_upper_hf_penalties = []
+        self._ep_upper_plan_penalties = []
+        self._ep_upper_plan_targets = []
+        self._ep_upper_plan_decisions = 0
+        self._ep_upper_plan_reuses = 0
+        self._ep_terminal_launch_shifts = []
+        self._active_timetable_plans = {}
+        self._ep_lower_actions_by_dir = {True: [], False: []}
+        self._ep_upper_deltas_by_dir = {True: [], False: []}
+        self._ep_upper_demand_action = []
+        self._ep_lower_demand_action = []
+        self._freq_holdfb_events = {
+            True: deque(maxlen=self.freq_holdfb_window),
+            False: deque(maxlen=self.freq_holdfb_window),
+        }
+        self._ep_freq_holdfb_features = []
+        diag_cfg = config.get('diagnostics', {})
+        self.freq_diag_mi_bins = int(diag_cfg.get('mi_bins', 8))
+        self.freq_diag_shock_threshold = float(
+            diag_cfg.get('shock_threshold', 0.10))
+        self.freq_diag_shock_action_threshold_s = float(
+            diag_cfg.get('shock_action_threshold_s', 10.0))
+        self.freq_diag_shock_response_window_s = float(
+            diag_cfg.get('shock_response_window_s', 900.0))
+        self.freq_diag_shock_same_station = bool(
+            diag_cfg.get('shock_same_station', False))
+        self._ep_shock_response_events = []
+
+        # Frequency-attributed passenger wait reward. This uses actual boarded
+        # passenger waiting time and assigns its low-frequency share to upper
+        # planning credit while the high-frequency share shapes lower holding.
+        attr_cfg = config.get('reward_attribution', {})
+        self.freq_wait_enable = bool(attr_cfg.get('enable', False))
+        self.freq_wait_upper_weight = float(
+            attr_cfg.get('upper_wait_weight', 0.0))
+        self.freq_wait_lower_weight = float(
+            attr_cfg.get('lower_wait_weight', 0.0))
+        self.freq_wait_lower_board_credit_weight = float(
+            attr_cfg.get('lower_board_credit_weight', 0.0))
+        self.freq_wait_lower_board_norm = max(
+            float(attr_cfg.get('lower_board_norm', 10.0)), 1e-6)
+        self.freq_wait_lower_board_clip = max(
+            float(attr_cfg.get('lower_board_clip', 2.0)), 0.0)
+        self.freq_wait_lower_positive_high_only = bool(
+            attr_cfg.get('lower_positive_high_only', False))
+        self.freq_wait_lower_share_source = str(
+            attr_cfg.get('lower_share_source', 'global')).lower()
+        self.freq_wait_lower_high_share_cap = float(
+            attr_cfg.get('lower_high_share_cap', 1.0))
+        self.freq_wait_norm_s = max(
+            float(attr_cfg.get('wait_norm_s', 600.0)), 1e-6)
+        self.freq_wait_clip = max(float(attr_cfg.get('wait_clip', 2.0)), 0.0)
+        self.freq_wait_low_floor = max(
+            float(attr_cfg.get('low_share_floor', 0.05)), 0.0)
+        self.freq_wait_normalize_upper = bool(
+            attr_cfg.get('normalize_upper_credit', True))
+        self._ep_lower_wait_penalties = []
+        self._ep_lower_board_credits = []
+        self._ep_lower_wait_net = []
+        self._ep_upper_wait_credits = []
+        self._ep_freq_wait_low_shares = []
+        self._ep_freq_wait_lower_high_shares = []
+        self._ep_freq_wait_boarded_pax = 0
+        self._ep_trip_wait_stats = defaultdict(lambda: {
+            'pax': 0,
+            'wait_s': 0.0,
+            'upper_wait_norm_sum': 0.0,
+            'low_share_sum': 0.0,
+            'events': 0,
+        })
+
+        # ─── v3 cross-level coupling mode ───
+        # 'channels' (default v2 behaviour: HoldFB + hindsight credit, action = launch shift)
+        # 'haar'     (HAAR + PIPER: inject β·clip(A_U,-c,c)·f_k into lower reward via tap_signal)
+        # 'hiro'     (HIRO/SHIRO style: δ_t reinterpreted as target-headway shift, lower's
+        #             Lagrangian cost becomes goal-conditioned; no upper advantage flow)
+        self.coupling_mode = coupling_cfg.get('coupling_mode', 'channels')
+        haar_cfg = coupling_cfg.get('haar', {})
+        self.haar_beta = float(haar_cfg.get('beta', 0.5))
+        self.haar_clip = float(haar_cfg.get('clip', 0.5))
+        self.haar_use_reach_gate = bool(haar_cfg.get('use_reach_gate', True))
+        self.haar_reach_lr = float(haar_cfg.get('reach_lr', 1e-3))
+        self.haar_reach_threshold = float(haar_cfg.get('reach_threshold', 0.5))
+        self.reach_net = None        # lazy-init (depends on state_dim)
+        self.reach_optimizer = None
+        # buffer for reach training: (s_upper, delta, hold_summary, label)
+        self._reach_buffer = []
+
+        # ─── TPC-Lower (Target-Policy-Corrected lower SAC) ───
+        # Mitigates the "noisy upper contaminates lower" failure mode that loses
+        # to the Fixed baseline. Enabled via coupling.tpc_enable in config.
+        tpc = coupling_cfg.get('tpc', {})
+        self.tpc_enable = bool(tpc.get('enable', False))
+        self.tpc_eps = float(tpc.get('eps_explore', 0.25))
+        self.tpc_sigma_tgt = float(tpc.get('sigma_tgt', 20.0))
+        self.tpc_w_max = float(tpc.get('w_max', 5.0))
+        self.tpc_ema_tau = float(tpc.get('ema_tau', 0.005))
+        self.tpc_warmstart_lower_from = tpc.get('warmstart_lower_from', None)
+        self.target_upper_trainer = None  # initialised at end of upper_warmup
+        # global_tid -> {z, delta, log_mu} for IS weight lookup
+        self.dispatch_meta = {}
+        # bound the metadata dict size (replay capacity / trips_per_episode + buffer)
+        self._dispatch_meta_max = int(tpc.get('meta_max_size', 200_000))
+
+        # CS-BAPR belief tracker: detect non-stationarity from upper changes
+        self.surprise_computer = SurpriseComputer(
+            ema_alpha=coupling_cfg.get('surprise_ema', 0.3))
+        self.belief_tracker = BeliefTracker(
+            max_run_length=coupling_cfg.get('belief_max_H', 20),
+            hazard_rate=coupling_cfg.get('belief_hazard', 0.05))
+        self.belief_alpha_boost_max = coupling_cfg.get('belief_alpha_boost', 2.0)
+
+        # Training params
+        self.batch_size = lower_cfg.get('batch_size', 512)
+        self.updates_per_episode = lower_cfg.get('updates_per_episode', 30)
+        self.upper_batch_size = upper_cfg.get('batch_size', 64)
+        self.upper_updates = upper_cfg.get('updates_per_episode', 10)
+
+        # Episode bookkeeping
+        self._episode_upper_transitions = []
+        self._prev_upper_state = None
+        self._ep_lower_actions = []     # all lower actions this episode
+        self._ep_lower_rewards = []     # all lower rewards this episode
+        self._ep_upper_deltas = []      # all δ_t this episode
+        self._ep_trip_records = []      # per-trip detail for step-level diag
+        self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
+        self._ep_upper_rewards = []     # all upper rewards this episode
+        self._current_ep = 0
+
+        # Logging
+        seed = config.get('seed', 42)
+        exp_name = config.get('_name', 'v2')
+        log_base = config.get('logging', {}).get('logs_dir', 'logs')
+        if not os.path.isabs(log_base):
+            log_base = os.path.join(str(SCRIPT_DIR), log_base)
+        self.log_dir = os.path.join(log_base, f'{exp_name}_seed{seed}')
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.env.configure_frequency_logging(self.log_dir)
+        self.history = defaultdict(list)
+        self.resume_from_ep = 0  # set by maybe_resume() before train()
+        self.diag = None  # created after resume decision in train()
+
+    # ────────────────── Upper callback ──────────────────
+
+    @staticmethod
+    def compute_system_reward(z, N_fleet=12):
+        """
+        Default scalar system reward (fallback, unused when belief-weighted).
+        """
+        wait_penalty = -z[0] / 10.0
+        fleet_penalty = -max(0, z[1] - N_fleet) ** 2 / N_fleet
+        cv_penalty = -z[2]
+        return wait_penalty + fleet_penalty + cv_penalty
+
+    def compute_belief_weighted_reward(self, z, N_fleet=12):
+        """
+        BAMOR-style multi-objective scalarization with belief-aware weights.
+
+        Three objective penalties (all negative, higher=better):
+          p_wait  = -wait / 10
+          p_fleet = -(fleet - N_fleet)² / N_fleet  (only counts overshoot)
+          p_cv    = -cv
+
+        Weighting policy:
+          Base weights w_base from θ-OGD (long-term adaptation over episodes)
+          Belief modulation (short-term shift detection):
+            - cp_prob high → changepoint detected → boost fleet weight (safety)
+            - window long → stable → shift weight to wait/cv (quality)
+
+        Returns: scalar reward + weight dict for logging
+        """
+        wait_p = -z[0] / 10.0
+        fleet_p = -max(0, z[1] - N_fleet) ** 2 / N_fleet
+        cv_p = -z[2]
+
+        # Ablation: fixed equal weights instead of belief-driven
+        if self.ablate_morl:
+            fixed_w = np.array([0.5, 0.25, 0.25])
+            r = fixed_w[0] * wait_p + fixed_w[1] * fleet_p + fixed_w[2] * cv_p
+            return float(r * 3.0), fixed_w
+
+        # Base weights from θ-OGD (long-term adaptation, already in [0,1] sum=1)
+        base_w = self.measurement_proj.get_reward_weights()  # [w_wait, w_fleet, w_cv]
+
+        # Belief modulation
+        cp_prob = self.belief_tracker.changepoint_prob
+        window = self.belief_tracker.effective_window
+
+        # Crisis modulation: if changepoint detected, boost fleet safety
+        if cp_prob > 0.1:
+            # Shift up to 30% mass toward fleet term
+            crisis_strength = min(1.0, (cp_prob - 0.1) / 0.2)
+            boost = 0.3 * crisis_strength
+            adj_w = base_w.copy()
+            # Take mass from wait+cv, add to fleet
+            adj_w[0] *= (1 - boost)
+            adj_w[2] *= (1 - boost)
+            adj_w[1] += boost * (base_w[0] + base_w[2])
+        # Stable modulation: if very stable, shift toward quality
+        elif window > 15:
+            stability = min(1.0, (window - 15) / 5)
+            shift = 0.15 * stability
+            adj_w = base_w.copy()
+            # Take from fleet (already safe), add to quality
+            adj_w[1] *= (1 - shift)
+            adj_w[0] += shift * base_w[1] * 0.6
+            adj_w[2] += shift * base_w[1] * 0.4
+        else:
+            adj_w = base_w
+
+        # Normalize
+        adj_w = adj_w / max(adj_w.sum(), 1e-6)
+
+        # Scalarize with M=3 dimensions
+        r = adj_w[0] * wait_p + adj_w[1] * fleet_p + adj_w[2] * cv_p
+        # Rescale to match old magnitude (old reward range ≈ [-2, 0])
+        r = r * 3.0
+
+        return float(r), adj_w
+
+    def _build_tpc_weight_fn(self):
+        """Return a closure that maps batch trip_ids → per-sample IS weights.
+
+        Weight per sample = clip( π_target(δ|z) / μ_behavior(δ|z), 0, w_max ),
+        normalised so the batch mean ≈ 1. Samples whose trip_id has no metadata
+        in self.dispatch_meta (e.g., evicted by size cap or pre-Phase-1) get 1.
+        """
+        if self.target_upper_trainer is None or not self.dispatch_meta:
+            return None
+        target_pi = self.target_upper_trainer.policy_net
+        meta = self.dispatch_meta
+        w_max = self.tpc_w_max
+
+        def fn(trip_ids):
+            # Vectorise where possible: gather z and δ for samples with metadata.
+            n = len(trip_ids)
+            w = np.ones(n, dtype=np.float32)
+            zs, ds, log_mus, idx = [], [], [], []
+            for i, tid in enumerate(trip_ids):
+                m = meta.get(int(tid))
+                if m is not None:
+                    zs.append(m['z']); ds.append(m['delta']); log_mus.append(m['log_mu'])
+                    idx.append(i)
+            if zs:
+                zs = np.stack(zs).astype(np.float32)
+                ds = np.stack(ds).astype(np.float32)
+                log_mus = np.array(log_mus, dtype=np.float32)
+                # Batched log_prob under EMA target upper policy
+                log_p_target = target_pi.log_prob(zs, ds)
+                if np.isscalar(log_p_target):
+                    log_p_target = np.array([float(log_p_target)])
+                log_w = log_p_target - log_mus
+                w_corr = np.clip(np.exp(log_w), 0.0, w_max)
+                for j, i in enumerate(idx):
+                    w[i] = float(w_corr[j])
+            # Normalise to mean ≈ 1
+            mean_w = w.mean()
+            if mean_w > 1e-6:
+                w = w / mean_w
+            return w
+        return fn
+
+    def _lower_drift_penalty(self, direction, action_s):
+        """Rolling penalty for lower holding that accumulates as timetable drift."""
+        if not self.leakage_enable or self.lower_drift_penalty <= 0:
+            return 0.0
+        direction = bool(direction)
+        action_s = max(float(action_s), 0.0)
+        hist = self._lower_drift_by_dir[direction]
+        hist.append(action_s)
+        rolling_hold = float(sum(hist))
+        excess = max(0.0, rolling_hold - self.lower_drift_budget_s)
+        penalty = self.lower_drift_penalty * (
+            excess / max(self.lower_drift_budget_s, 1e-6))
+        return float(penalty)
+
+    def _quantize_lower_action(self, action):
+        """Project continuous holding to configured bins for smaller action space."""
+        value = self._lower_action_scalar(action)
+        if self.lower_action_bins is not None:
+            idx = int(np.argmin(np.abs(self.lower_action_bins - value)))
+            value = float(self.lower_action_bins[idx])
+        return np.asarray([value], dtype=np.float32)
+
+    @staticmethod
+    def _lower_action_scalar(action):
+        return float(np.asarray(action, dtype=np.float32).reshape(-1)[0])
+
+    def _record_frequency_hold_feedback(
+            self, direction, local_high, action_s, wait_sum_s, boarded_count):
+        """Track lower interventions under positive high-frequency demand."""
+        if not self.freq_holdfb_enable:
+            return
+        pos_high = max(float(local_high), 0.0)
+        if pos_high < self.freq_holdfb_high_threshold:
+            pos_high = 0.0
+        wait_norm = 0.0
+        if boarded_count > 0 and wait_sum_s > 0.0:
+            wait_norm = (
+                float(wait_sum_s)
+                / max(int(boarded_count), 1)
+                / self.freq_holdfb_wait_norm_s)
+            if self.freq_holdfb_wait_clip > 0.0:
+                wait_norm = min(wait_norm, self.freq_holdfb_wait_clip)
+        board_norm = int(boarded_count) / self.freq_holdfb_board_norm
+        board_norm = min(board_norm, 2.0)
+        self._freq_holdfb_events[bool(direction)].append((
+            pos_high,
+            max(float(action_s), 0.0) / 60.0,
+            wait_norm,
+            board_norm,
+        ))
+
+    def _frequency_hold_feedback_stats(self, direction):
+        events = list(self._freq_holdfb_events[bool(direction)])
+        if not events:
+            return (0.0, 0.0)
+        arr = np.asarray(events, dtype=np.float64)
+        high = arr[:, 0]
+        weight = high.sum()
+        if weight <= 1e-9:
+            return (0.0, 0.0)
+        hf_hold = float(np.dot(high, arr[:, 1]) / weight)
+        hf_wait = float(np.dot(high, arr[:, 2]) / weight)
+        return (hf_hold, hf_wait)
+
+    def _frequency_hold_feedback_features(self, direction):
+        if not self.freq_holdfb_enable:
+            return np.zeros(0, dtype=np.float32)
+        same = self._frequency_hold_feedback_stats(direction)
+        other = self._frequency_hold_feedback_stats(not bool(direction))
+        feats = np.asarray([same[0], same[1], other[0], other[1]],
+                           dtype=np.float32)
+        self._ep_freq_holdfb_features.append(feats.copy())
+        return feats
+
+    def _augment_lower_state(self, obs, last_action=0.0):
+        obs = np.asarray(obs, dtype=np.float32).reshape(-1)
+        if not self.lower_use_last_action_feature:
+            return obs
+        return np.concatenate(
+            [obs, np.asarray([float(last_action)], dtype=np.float32)])
+
+    def _lower_policy_action(self, obs, last_action=0.0, deterministic=False):
+        state = self._augment_lower_state(obs, last_action)
+        action = self.lower_trainer.policy_net.get_action(
+            torch.from_numpy(state).float().to(self.device),
+            deterministic=deterministic)
+        return self._quantize_lower_action(action)
+
+    def _upper_delta_hf_penalty(self, direction, delta_t, prev_delta_by_dir):
+        """Penalty for high-frequency upper target-headway oscillation."""
+        if not self.leakage_enable or self.upper_hf_penalty <= 0:
+            return 0.0
+        direction = bool(direction)
+        delta_t = float(delta_t)
+        if direction not in prev_delta_by_dir:
+            prev_delta_by_dir[direction] = delta_t
+            return 0.0
+        diff = abs(delta_t - prev_delta_by_dir[direction])
+        prev_delta_by_dir[direction] = delta_t
+        return float(self.upper_hf_penalty * diff / max(self.delta_max, 1e-6))
+
+    def _freq_wait_high_share(self, low_demand, local_high, positive_only=False):
+        """Share of local passenger wait attributed to high-frequency demand."""
+        high_raw = float(local_high)
+        high = max(high_raw, 0.0) if positive_only else abs(high_raw)
+        low = max(abs(float(low_demand)), self.freq_wait_low_floor)
+        if high <= 0.0 and low <= 0.0:
+            return 0.0
+        return float(np.clip(high / (high + low + 1e-9), 0.0, 1.0))
+
+    def _record_frequency_wait_credit(
+            self, trip_id, wait_sum_s, boarded_count, low_demand, local_high,
+            lower_low_demand=None):
+        """Return lower net high-frequency wait shaping and store upper credit."""
+        if not self.freq_wait_enable or boarded_count <= 0:
+            return 0.0
+
+        wait_mean_s = float(wait_sum_s) / max(int(boarded_count), 1)
+        wait_norm = wait_mean_s / self.freq_wait_norm_s
+        if self.freq_wait_clip > 0.0:
+            wait_norm = min(wait_norm, self.freq_wait_clip)
+
+        high_share = self._freq_wait_high_share(low_demand, local_high)
+        lower_low_ref = low_demand
+        if self.freq_wait_lower_share_source in {'local', 'local_low'}:
+            lower_low_ref = (
+                low_demand if lower_low_demand is None else lower_low_demand)
+        lower_high_share = self._freq_wait_high_share(
+            lower_low_ref, local_high,
+            positive_only=self.freq_wait_lower_positive_high_only)
+        if self.freq_wait_lower_high_share_cap >= 0.0:
+            lower_high_share = min(
+                lower_high_share, self.freq_wait_lower_high_share_cap)
+        low_share = 1.0 - high_share
+        lower_penalty = (
+            self.freq_wait_lower_weight * lower_high_share * wait_norm)
+        boarded_norm = int(boarded_count) / self.freq_wait_lower_board_norm
+        if self.freq_wait_lower_board_clip > 0.0:
+            boarded_norm = min(boarded_norm, self.freq_wait_lower_board_clip)
+        lower_board_credit = (
+            self.freq_wait_lower_board_credit_weight
+            * lower_high_share
+            * boarded_norm)
+
+        stats = self._ep_trip_wait_stats[int(trip_id)]
+        stats['pax'] += int(boarded_count)
+        stats['wait_s'] += float(wait_sum_s)
+        stats['upper_wait_norm_sum'] += low_share * wait_norm * int(boarded_count)
+        stats['low_share_sum'] += low_share
+        stats['events'] += 1
+
+        self._ep_lower_wait_penalties.append(float(lower_penalty))
+        self._ep_lower_board_credits.append(float(lower_board_credit))
+        self._ep_lower_wait_net.append(
+            float(lower_board_credit - lower_penalty))
+        self._ep_freq_wait_low_shares.append(float(low_share))
+        self._ep_freq_wait_lower_high_shares.append(float(lower_high_share))
+        self._ep_freq_wait_boarded_pax += int(boarded_count)
+        return float(lower_penalty - lower_board_credit)
+
+    def _upper_frequency_wait_credits(self, transitions):
+        """Per-trip zero-mean upper credit from low-frequency passenger wait."""
+        if (not self.freq_wait_enable
+                or self.freq_wait_upper_weight <= 0.0
+                or not transitions
+                or not self._ep_trip_wait_stats):
+            return {}
+
+        raw_by_tid = {}
+        for tid, stats in self._ep_trip_wait_stats.items():
+            pax = max(int(stats.get('pax', 0)), 1)
+            raw_by_tid[int(tid)] = float(stats['upper_wait_norm_sum'] / pax)
+
+        values = []
+        for trans in transitions:
+            tid = int(trans['tid'])
+            if tid in raw_by_tid:
+                values.append(raw_by_tid[tid])
+        if not values:
+            return {}
+
+        mean = float(np.mean(values))
+        std = float(max(np.std(values), 1e-6))
+        credits = {}
+        for trans in transitions:
+            tid = int(trans['tid'])
+            raw = raw_by_tid.get(tid, mean)
+            if self.freq_wait_normalize_upper:
+                credit = -self.freq_wait_upper_weight * ((raw - mean) / std)
+            else:
+                credit = -self.freq_wait_upper_weight * raw
+            credits[tid] = float(credit)
+        return credits
+
+    # ─── v3: HAAR / PIPER reachability + advantage helpers ──────────
+
+    def _ensure_reach_net(self):
+        if self.reach_net is None and self.coupling_mode == 'haar' \
+                and self.haar_use_reach_gate:
+            self.reach_net = ReachabilityMLP(self.upper_state_dim).to(self.device)
+            self.reach_optimizer = torch.optim.Adam(
+                self.reach_net.parameters(), lr=self.haar_reach_lr)
+
+    def _compute_upper_advantage(self, s_upper, delta_t):
+        """Estimate A_U(s, a) = Q(s, a) − V(s), with V(s) = Q(s, π(s))."""
+        try:
+            with torch.no_grad():
+                s_t = torch.FloatTensor(s_upper).unsqueeze(0).to(self.device)
+                a_t = torch.FloatTensor([[float(delta_t)]]).to(self.device)
+                q_sa = self.upper_trainer.q_net(s_t, a_t).mean().item()
+                a_pi, _, _, _, _ = self.upper_trainer.policy_net.evaluate(s_t)
+                v_s = self.upper_trainer.q_net(s_t, a_pi).mean().item()
+            return q_sa - v_s
+        except Exception:
+            return 0.0
+
+    def _reachability_score(self, s_upper, delta_t, hold_mean, hold_std):
+        if not self.haar_use_reach_gate or self.reach_net is None:
+            return 1.0
+        try:
+            x = _reach_features(s_upper, delta_t, hold_mean, hold_std)
+            with torch.no_grad():
+                t = torch.FloatTensor(x).unsqueeze(0).to(self.device)
+                f = float(self.reach_net(t).item())
+            return f
+        except Exception:
+            return 1.0
+
+    def _build_haar_tap_signal(self, trip_gap_devs):
+        """HAAR-style per-trip reward bonus: β · clip(A_U, -c, c) · f_k."""
+        self._ensure_reach_net()
+        if not self._episode_upper_transitions:
+            return None
+        tap = {}
+        for trans in self._episode_upper_transitions:
+            tid = int(trans['tid'])
+            s_U = np.asarray(trans['s'], dtype=np.float32)
+            a_U = float(np.asarray(trans['a']).flatten()[0])
+            adv = self._compute_upper_advantage(s_U, a_U)
+            adv_clip = float(np.clip(adv, -self.haar_clip, self.haar_clip))
+            stats = self.holding_feedback.get_trip_stats(tid)
+            hm = float(stats['mean']) if stats else 0.0
+            hs = float(stats['std']) if stats else 0.0
+            f_k = self._reachability_score(s_U, a_U, hm, hs)
+            bonus = self.haar_beta * adv_clip * f_k
+            global_tid = self._current_ep * 1000 + tid
+            tap[global_tid] = float(bonus)
+            # Buffer for reach training (label assigned in _train_reach_classifier)
+            if self.haar_use_reach_gate:
+                self._reach_buffer.append({
+                    'x': _reach_features(s_U, a_U, hm, hs),
+                    'tid': tid,
+                })
+        return tap
+
+    def _train_reach_classifier(self, trip_gap_devs, max_train_size=2048):
+        """Binary cross-entropy on (s_U, δ, hold) → 1[gap_dev < threshold]."""
+        if not self._reach_buffer:
+            return
+        # Assign labels to recent buffer entries using current-episode gap_devs
+        for entry in self._reach_buffer:
+            if 'label' in entry:
+                continue
+            dev = trip_gap_devs.get(entry['tid'], None)
+            if dev is None:
+                entry['label'] = 1.0  # treat unobserved as reachable (skip)
+            else:
+                entry['label'] = 1.0 if dev < self.haar_reach_threshold else 0.0
+        # Trim buffer to keep memory bounded
+        if len(self._reach_buffer) > max_train_size:
+            self._reach_buffer = self._reach_buffer[-max_train_size:]
+        # One small gradient step per episode on a sampled batch
+        bs = min(len(self._reach_buffer), 128)
+        if bs < 8:
+            return
+        idx = np.random.choice(len(self._reach_buffer), bs, replace=False)
+        xs = np.stack([self._reach_buffer[i]['x'] for i in idx])
+        ys = np.array([self._reach_buffer[i]['label'] for i in idx], dtype=np.float32)
+        x_t = torch.FloatTensor(xs).to(self.device)
+        y_t = torch.FloatTensor(ys).to(self.device)
+        self.reach_optimizer.zero_grad()
+        p = self.reach_net(x_t)
+        loss = torch.nn.functional.binary_cross_entropy(p.clamp(1e-6, 1 - 1e-6), y_t)
+        loss.backward()
+        self.reach_optimizer.step()
+
+    def _upper_callback_v2(self, s_upper_v1, trip):
+        """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
+        Reward is backfilled at episode end via hindsight credit assignment."""
+        s_upper = self.env._build_upper_state_v2(trip)
+        if self.freq_holdfb_enable:
+            s_upper = np.concatenate([
+                np.asarray(s_upper, dtype=np.float32),
+                self._frequency_hold_feedback_features(bool(trip.direction)),
+            ]).astype(np.float32)
+        if self.ablate_holding_feedback:
+            # Zero out holding feedback state dims [5,6,7]
+            s_upper[5:8] = 0.0
+            if self.freq_holdfb_enable:
+                s_upper[-self.freq_holdfb_dim:] = 0.0
+
+        # ─── TPC-Lower behaviour-policy sampling ───
+        # During Phase 1 (after warmup, target_upper_trainer initialised), sample
+        # δ_t from a mixture: ε from current upper (exploratory) + (1−ε) from
+        # N(target_mean, σ_tgt) so the lower's training distribution can be
+        # importance-corrected back toward the EMA "deployment" upper.
+        log_mu = None
+        upper_decision_taken = True
+        plan_origin_launch = None
+        planner_dir = bool(trip.direction)
+        planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
+        if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            active_plan = self._active_timetable_plans.get(planner_key)
+            if active_plan is not None:
+                elapsed = float(trip.launch_time) - float(active_plan['origin'])
+                promotion_replan = False
+                if (self.timetable_promotion_replan
+                        and getattr(self.env, 'frequency_tracker', None) is not None):
+                    freq_summary = self.env.frequency_summary()
+                    promotion_replan = (
+                        bool(freq_summary.get('freq_promotion_flag', 0.0))
+                        and float(freq_summary.get('freq_promotion_strength', 0.0))
+                        >= self.timetable_promotion_replan_strength_min
+                    )
+                if (0.0 <= elapsed < self.timetable_replan_interval_s
+                        and elapsed <= self.timetable_planner.horizon_s
+                        and not promotion_replan):
+                    action_vec = np.asarray(
+                        active_plan['action'], dtype=np.float32).reshape(-1)
+                    plan_origin_launch = float(active_plan['origin'])
+                    upper_decision_taken = False
+                    self._ep_upper_plan_reuses += 1
+
+        if (upper_decision_taken and self.tpc_enable
+                and self.target_upper_trainer is not None):
+            target_mean_arr = np.asarray(
+                self.target_upper_trainer.policy_net.get_action(
+                    s_upper, deterministic=True),
+                dtype=np.float32).reshape(-1)
+            if np.random.random() < self.tpc_eps:
+                # exploratory: sample from current π_U
+                action_vec = np.asarray(
+                    self.upper_trainer.policy_net.get_action(
+                        s_upper, deterministic=False),
+                    dtype=np.float32).reshape(-1)
+            else:
+                # target: independent N(target_mean, σ_tgt), clipped to range
+                action_vec = np.clip(
+                    target_mean_arr
+                    + np.random.randn(self.upper_action_dim) * self.tpc_sigma_tgt,
+                    self.upper_action_low, self.upper_action_high).astype(np.float32)
+            # Mixture log-prob log_mu = log( ε π_U + (1-ε) N(target_mean, σ_tgt) )
+            log_p_explore = float(self.upper_trainer.policy_net.log_prob(
+                s_upper, action_vec))
+            z = (action_vec - target_mean_arr) / max(self.tpc_sigma_tgt, 1e-6)
+            log_p_target = float(
+                -0.5 * np.dot(z, z)
+                - action_vec.size * np.log(
+                    max(self.tpc_sigma_tgt, 1e-6) * np.sqrt(2 * np.pi)))
+            log_mu = float(np.logaddexp(
+                np.log(self.tpc_eps + 1e-12) + log_p_explore,
+                np.log(1.0 - self.tpc_eps + 1e-12) + log_p_target))
+        elif upper_decision_taken:
+            action_vec = np.asarray(
+                self.upper_trainer.policy_net.get_action(
+                    s_upper, deterministic=False),
+                dtype=np.float32).reshape(-1)
+
+        if (upper_decision_taken and self.timetable_planner is not None
+                and self.coupling_mode == 'hiro'):
+            plan_origin_launch = float(trip.launch_time)
+            prev_plan = self._active_timetable_plans.get(planner_key)
+            if prev_plan is not None and self.timetable_action_ema_alpha < 1.0:
+                prev_action = np.asarray(
+                    prev_plan['action'], dtype=np.float32).reshape(-1)
+                action_vec = (
+                    self.timetable_action_ema_alpha * action_vec
+                    + (1.0 - self.timetable_action_ema_alpha) * prev_action
+                ).astype(np.float32)
+            elif self.timetable_action_ema_alpha < 1.0:
+                action_vec = (
+                    self.timetable_action_ema_alpha * action_vec
+                ).astype(np.float32)
+            self._active_timetable_plans[planner_key] = {
+                'origin': plan_origin_launch,
+                'action': action_vec.astype(np.float32).copy(),
+            }
+            self._ep_upper_plan_decisions += 1
+
+        delta_t = float(action_vec[0])
+        base_hw = trip.target_headway if hasattr(trip, 'target_headway') else 360.0
+        plan_summary = None
+        plan_penalty = 0.0
+        if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            plan_summary = self.timetable_planner.apply(
+                self.env.timetables, trip, action_vec,
+                origin_launch_s=plan_origin_launch,
+                write_scheduled_launch=self.timetable_terminal_dispatch)
+            delta_t = float(plan_summary['effective_delta'])
+            base_hw = float(plan_summary['base_headway'])
+            if upper_decision_taken:
+                plan_penalty = (
+                    self.upper_plan_penalty_weight
+                    * self.timetable_planner.smoothness_penalty(action_vec))
+                self._ep_upper_plan_penalties.append(plan_penalty)
+            self._ep_upper_plan_targets.append(
+                float(plan_summary.get('planned_mean', trip.target_headway)))
+        self._ep_upper_deltas.append(delta_t)
+        self._ep_upper_deltas_by_dir[bool(trip.direction)].append(delta_t)
+        if getattr(self.env, 'frequency_tracker', None) is not None:
+            freq_summary = self.env.frequency_tracker.summary()
+            self._ep_upper_demand_action.append((
+                float(freq_summary.get('freq_low_demand', 0.0)),
+                float(freq_summary.get('freq_high_energy', 0.0)),
+                float(delta_t),
+            ))
+
+        # Action channel:
+        #   default (channels/haar): δ_t directly shifts launch time, target_headway
+        #                            communicated to lower stays at the baseline value
+        #   hiro mode:               δ_t shifts target_headway only; launch time stays
+        #                            at the baseline schedule. The lower's Lagrangian
+        #                            cost is then on (realised_headway - (H_base + δ_t))^2,
+        #                            i.e. goal-conditioned holding control.
+        if not hasattr(trip, '_original_launch'):
+            trip._original_launch = trip.launch_time
+        if self.coupling_mode == 'hiro':
+            trip._delta_t = 0  # no launch shift
+            if self.timetable_terminal_dispatch:
+                trip._freqduet_terminal_dispatch = True
+                if not hasattr(trip, '_freqduet_scheduled_launch'):
+                    trip._freqduet_scheduled_launch = int(round(trip.launch_time))
+            if plan_summary is None:
+                # Override the trip's target_headway so the lower's cost is goal-conditioned.
+                base_hw = (trip.target_headway
+                           if hasattr(trip, 'target_headway') else 360.0)
+                trip.target_headway = base_hw + float(delta_t)
+        else:
+            trip._delta_t = int(delta_t)
+
+        # TPC-Lower: store dispatch metadata for IS weight lookup. Use a global
+        # trip id (episode * 1000 + local tid) so cross-episode samples in the
+        # replay buffer can still be reweighted (or default to 1 if pruned).
+        if log_mu is not None:
+            global_tid = self._current_ep * 1000 + int(trip.launch_turn)
+            self.dispatch_meta[global_tid] = {
+                'z': s_upper.astype(np.float32),
+                'delta': action_vec.astype(np.float32),
+                'log_mu': log_mu,
+            }
+            # Bound metadata size: drop oldest when over budget
+            if len(self.dispatch_meta) > self._dispatch_meta_max:
+                # delete the oldest 10% in one pass
+                k_drop = max(1, self._dispatch_meta_max // 10)
+                for old_key in sorted(self.dispatch_meta.keys())[:k_drop]:
+                    del self.dispatch_meta[old_key]
+
+        # Store only actual upper decisions. Cached timetable points are
+        # executions of the previous low-frequency plan, not new policy actions.
+        if upper_decision_taken:
+            if self._prev_upper_state is not None:
+                prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
+                    self._prev_upper_state)
+                self._episode_upper_transitions.append({
+                    's': prev_s, 'a': prev_a, 'tid': prev_tid,
+                    'dir': prev_dir, 'ns': s_upper.copy(), 'done': False,
+                    'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
+                })
+
+            self._prev_upper_state = (
+                s_upper.copy(),
+                action_vec.astype(np.float32),
+                trip.launch_turn, trip.direction, float(delta_t), float(plan_penalty))
+
+        # Record dispatch info (actual launch time captured post-episode from env).
+        # Terminal-dispatch mode uses the planner's executable launch schedule.
+        # Otherwise channels/haar apply _delta_t to launch time and HIRO keeps the
+        # baseline launch schedule.
+        planned_launch = None
+        if self.timetable_terminal_dispatch:
+            planned_launch = getattr(trip, '_freqduet_scheduled_launch', None)
+        if planned_launch is None:
+            planned_launch = (
+                trip._original_launch + int(getattr(trip, '_delta_t', 0)))
+        launch_shift = int(planned_launch) - int(trip._original_launch)
+        self._ep_terminal_launch_shifts.append(float(launch_shift))
+        dir_key = 'up' if trip.direction else 'down'
+        self._ep_dispatch_times[dir_key].append({
+            'tid': trip.launch_turn,
+            'scheduled': trip._original_launch,
+            'delta_t': float(delta_t),                 # effective current target shift
+            'launch_shift': launch_shift,
+            'effective_launch': int(planned_launch),
+            'target_headway': float(getattr(trip, 'target_headway', base_hw)),
+        })
+
+        # Per-trip record for step-level diagnostics
+        hour = 6 + trip.launch_time // 3600
+        period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
+            'off' if 9 < hour < 17 else 'trans')
+        self._ep_trip_records.append({
+            'tid': trip.launch_turn,
+            'dir': int(trip.direction),
+            'hour': hour,
+            'period': period,
+            'delta_t': round(delta_t, 1),
+            'base_hw': round(base_hw, 0),
+            'eff_hw': round(float(getattr(trip, 'target_headway', base_hw)), 0),
+            's_hold_mean': round(s_upper[5] * 60, 1),
+            's_hold_std': round(s_upper[6] * 60, 1),
+        })
+
+        # In HIRO mode the target headway has been adjusted to base_hw + δ_t (above);
+        # in default/HAAR mode the base headway is unchanged because δ_t was applied
+        # via launch-time gating instead. Either way, return the trip's current target.
+        return trip.target_headway if hasattr(trip, 'target_headway') else base_hw
+
+    # ────────────────── Episode ──────────────────
+
+    def run_episode(self, ep, training=True, N_fleet_override=None):
+        t0 = time.time()
+        self.env._freqduet_episode = int(ep)
+        self.env.reset()
+        self.holding_feedback.clear()
+        self._current_ep = ep
+        self._episode_upper_transitions = []
+        self._prev_upper_state = None
+        self._ep_lower_actions = []
+        self._ep_lower_rewards = []
+        self._ep_upper_deltas = []
+        self._ep_upper_rewards = []
+        self._ep_lower_actions_by_dir = {True: [], False: []}
+        self._ep_upper_deltas_by_dir = {True: [], False: []}
+        self._ep_upper_demand_action = []
+        self._ep_lower_demand_action = []
+        self._ep_shock_response_events = []
+        self._freq_holdfb_events = {
+            True: deque(maxlen=self.freq_holdfb_window),
+            False: deque(maxlen=self.freq_holdfb_window),
+        }
+        self._ep_freq_holdfb_features = []
+        self._ep_lower_wait_penalties = []
+        self._ep_lower_board_credits = []
+        self._ep_lower_wait_net = []
+        self._ep_upper_wait_credits = []
+        self._ep_freq_wait_low_shares = []
+        self._ep_freq_wait_lower_high_shares = []
+        self._ep_freq_wait_boarded_pax = 0
+        self._ep_trip_wait_stats = defaultdict(lambda: {
+            'pax': 0,
+            'wait_s': 0.0,
+            'upper_wait_norm_sum': 0.0,
+            'low_share_sum': 0.0,
+            'events': 0,
+        })
+        self._ep_trip_records = []
+        self._ep_dispatch_times = {'up': [], 'down': []}
+        self._lower_drift_by_dir = {
+            True: deque(maxlen=max(1, self.lower_drift_window)),
+            False: deque(maxlen=max(1, self.lower_drift_window)),
+        }
+        self._ep_lower_drift_penalties = []
+        self._ep_upper_hf_penalties = []
+        self._ep_upper_plan_penalties = []
+        self._ep_upper_plan_targets = []
+        self._ep_upper_plan_decisions = 0
+        self._ep_upper_plan_reuses = 0
+        self._ep_terminal_launch_shifts = []
+        self._active_timetable_plans = {}
+
+        # v2k: elastic fleet sampling per-episode
+        if N_fleet_override is not None:
+            self._current_N_fleet = int(N_fleet_override)
+        elif self.fleet_mode == 'elastic' and training:
+            self._current_N_fleet = int(np.random.randint(
+                self.fleet_min, self.fleet_max + 1))
+        else:
+            self._current_N_fleet = self.N_fleet_default
+        self.env._n_fleet_target = self._current_N_fleet
+
+        upper_active = ep >= self.upper_warmup and training
+        self.env._upper_policy_callback = (
+            self._upper_callback_v2 if upper_active else None)
+
+        state_dict, reward_dict, _ = self.env.initialize_state()
+        action_dict = {k: None for k in range(self.env.max_agent_num)}
+        lower_last_action = {k: 0.0 for k in range(self.env.max_agent_num)}
+        episode_reward = 0.0
+        episode_cost = 0.0
+        episode_steps = 0
+
+        while not self.env.done:
+            for key in state_dict:
+                if len(state_dict[key]) == 1:
+                    if action_dict[key] is None:
+                        action_dict[key] = self._lower_policy_action(
+                            state_dict[key][0],
+                            last_action=lower_last_action.get(key, 0.0),
+                            deterministic=not training)
+
+                elif len(state_dict[key]) == 2:
+                    if state_dict[key][0][1] != state_dict[key][1][1]:
+                        raw_state = np.array(state_dict[key][0], dtype=np.float32)
+                        raw_next_state = np.array(state_dict[key][1], dtype=np.float32)
+                        act_val = (
+                            self._lower_action_scalar(action_dict[key])
+                            if action_dict[key] is not None else 0.0)
+                        state = self._augment_lower_state(
+                            raw_state, lower_last_action.get(key, 0.0))
+                        next_state = self._augment_lower_state(raw_next_state, act_val)
+                        reward = reward_dict[key]
+                        cost = self.env.cost.get(key, 0.0)
+
+                        # Track for diagnostics
+                        bus_id_key = int(raw_state[0])
+                        cur_tid = -1
+                        cur_dir = True
+                        cur_bus = None
+                        for bus in self.env.bus_all:
+                            if bus.bus_id == bus_id_key:
+                                cur_bus = bus
+                                cur_tid = int(getattr(bus, 'trip_id', -1))
+                                cur_dir = bool(getattr(bus, 'direction', True))
+                                break
+                        drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
+                        low_demand = 0.0
+                        local_high = 0.0
+                        local_low = None
+                        station_id = -1
+                        if getattr(self.env, 'frequency_tracker', None) is not None:
+                            freq_summary = self.env.frequency_tracker.summary()
+                            low_demand = float(
+                                freq_summary.get('freq_low_demand', 0.0))
+                            if cur_bus is not None:
+                                station_id = int(getattr(
+                                    cur_bus, 'last_board_station_id',
+                                    getattr(cur_bus.last_station, 'station_id', 0)))
+                                local_high = self.env.frequency_tracker.local_high_value(
+                                    station_id, cur_dir)
+                                local_low = self.env.frequency_tracker.local_low_value(
+                                    station_id, cur_dir)
+                        wait_penalty = 0.0
+                        board_wait_sum_s = 0.0
+                        board_count = 0
+                        if cur_bus is not None:
+                            board_wait_sum_s = float(getattr(
+                                cur_bus, 'last_board_wait_sum_s', 0.0))
+                            board_count = int(getattr(
+                                cur_bus, 'last_board_count', 0))
+                            wait_penalty = self._record_frequency_wait_credit(
+                                cur_tid,
+                                board_wait_sum_s,
+                                board_count,
+                                low_demand,
+                                local_high,
+                                local_low)
+                        self._record_frequency_hold_feedback(
+                            cur_dir, local_high, act_val,
+                            board_wait_sum_s, board_count)
+                        shaped_reward = float(reward) - drift_penalty - wait_penalty
+                        self._ep_lower_actions.append(act_val)
+                        self._ep_lower_actions_by_dir[cur_dir].append(act_val)
+                        self._ep_lower_rewards.append(shaped_reward)
+                        self._ep_lower_drift_penalties.append(drift_penalty)
+                        if getattr(self.env, 'frequency_tracker', None) is not None:
+                            self._ep_lower_demand_action.append((
+                                low_demand,
+                                local_high,
+                                act_val,
+                            ))
+                            self._ep_shock_response_events.append({
+                                'time_s': float(getattr(self.env, 'current_time', 0.0)),
+                                'station_id': station_id,
+                                'direction': bool(cur_dir),
+                                'high': local_high,
+                                'action_s': act_val,
+                            })
+
+                        if training:
+                            # Look up the bus's current trip_id (launch_turn) so
+                            # downstream TPC IS-weight lookup can match dispatch_meta.
+                            global_tid = (self._current_ep * 1000 + cur_tid
+                                          if cur_tid >= 0 else int(state[0]))
+                            self.replay_buffer.push(
+                                state, action_dict[key], shaped_reward, cost,
+                                next_state, False, global_tid)
+                            # v2: record holding action for feedback
+                            if cur_bus is not None:
+                                self.holding_feedback.record_action(
+                                    cur_bus.trip_id, act_val)
+
+                        episode_reward += shaped_reward
+                        episode_cost += cost
+                        episode_steps += 1
+                        lower_last_action[key] = act_val
+
+                    state_dict[key] = state_dict[key][1:]
+                    action_dict[key] = self._lower_policy_action(
+                        state_dict[key][0],
+                        last_action=lower_last_action.get(key, 0.0),
+                        deterministic=not training)
+
+            state_dict, reward_dict, cost_dict, done = self.env.step(
+                action_dict, render=False)
+
+        env_time = time.time() - t0
+
+        # ── Finalize trip holdings ──
+        for bus in self.env.bus_all:
+            if not bus.on_route and hasattr(bus, 'applied_actions') and bus.applied_actions:
+                self.holding_feedback.finalize_trip(bus.trip_id, bus.direction)
+
+        # ── Finalize last upper transition ──
+        if self._prev_upper_state is not None:
+            prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
+                self._prev_upper_state)
+            self._episode_upper_transitions.append({
+                's': prev_s, 'a': prev_a, 'tid': prev_tid,
+                'dir': prev_dir, 'ns': prev_s, 'done': True,
+                'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
+            })
+
+        # ── Hindsight Credit Assignment (v2g: gap-based, not holding-based) ──
+        # Old: credit based on holding magnitude → corr(δ_t, hold)=0, BROKEN
+        # New: credit based on dispatch gap uniformity → directly causal
+        #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
+        z = self.env.measurement_vector
+        N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
+        # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
+        sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
+        self._last_adj_weights = adj_w
+
+        # Compute per-trip gap deviation using ACTUAL launch times from env
+        trip_gap_devs = {}
+        for dir_key_bool in [True, False]:  # direction
+            dir_key = 'up' if dir_key_bool else 'down'
+            # Get actual launch times from timetable objects
+            launched = [(tt.launch_turn, tt._actual_launch_time)
+                        for tt in self.env.timetables
+                        if tt.launched and tt.direction == dir_key_bool
+                        and hasattr(tt, '_actual_launch_time')]
+            if len(launched) < 2:
+                continue
+            launched.sort(key=lambda x: x[1])  # sort by actual time
+            tids = [l[0] for l in launched]
+            times = [l[1] for l in launched]
+            gaps = [times[i+1] - times[i] for i in range(len(times)-1)]
+            if not gaps:
+                continue
+            mean_gap = np.mean(gaps)
+            std_gap = max(np.std(gaps), 1.0)
+            # Assign deviation to each trip (trip i created gap[i-1])
+            for i in range(len(tids)):
+                if i == 0:
+                    dev = abs(gaps[0] - mean_gap) / std_gap if gaps else 0.0
+                elif i < len(gaps):
+                    dev = (abs(gaps[i-1] - mean_gap) + abs(gaps[i] - mean_gap)) / (2 * std_gap)
+                else:
+                    dev = abs(gaps[-1] - mean_gap) / std_gap
+                trip_gap_devs[tids[i]] = dev
+
+        # Normalize gap devs to zero-mean credit
+        if trip_gap_devs:
+            devs = np.array(list(trip_gap_devs.values()))
+            dev_mean = devs.mean()
+            dev_std = max(devs.std(), 1e-6)
+        else:
+            dev_mean, dev_std = 0.0, 1.0
+
+        backfilled = []
+        prev_delta_by_dir = {}
+        upper_wait_credits = self._upper_frequency_wait_credits(
+            self._episode_upper_transitions)
+        for trans in self._episode_upper_transitions:
+            tid = trans['tid']
+            if self.ablate_hindsight_credit:
+                # Ablation: all transitions get same episode reward
+                credit = 0.0
+            else:
+                gap_dev = trip_gap_devs.get(tid, dev_mean)
+                credit = -(gap_dev - dev_mean) / dev_std * 0.5
+            a_u = float(trans.get(
+                'a_eff', float(np.asarray(trans['a']).reshape(-1)[0])))
+            upper_hf_pen = self._upper_delta_hf_penalty(
+                trans.get('dir', True), a_u, prev_delta_by_dir)
+            self._ep_upper_hf_penalties.append(upper_hf_pen)
+            plan_pen = float(trans.get('plan_penalty', 0.0))
+            wait_credit = float(upper_wait_credits.get(int(tid), 0.0))
+            self._ep_upper_wait_credits.append(wait_credit)
+            r = sys_r + credit + wait_credit - upper_hf_pen - plan_pen
+            backfilled.append({
+                's': trans['s'], 'a': trans['a'], 'r': r,
+                'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
+                'dir': trans.get('dir', True),
+            })
+            self._ep_upper_rewards.append(r)
+        self._episode_upper_transitions = backfilled
+
+        # ── Enrich per-trip records with holding + gap deviation ──
+        for rec in self._ep_trip_records:
+            tid = rec['tid']
+            stats = self.holding_feedback.get_trip_stats(tid)
+            if stats:
+                rec['hold_mean'] = round(stats['mean'], 1)
+                rec['hold_std'] = round(stats['std'], 1)
+                rec['hold_max'] = round(stats['max'], 1)
+                rec['hold_n'] = stats['n_stops']
+            else:
+                rec['hold_mean'] = 0.0
+                rec['hold_std'] = 0.0
+                rec['hold_max'] = 0.0
+                rec['hold_n'] = 0
+            gap_dev = trip_gap_devs.get(tid, 0.0)
+            rec['gap_dev'] = round(gap_dev, 3)
+            rec['penalty'] = round(gap_dev, 3)  # now gap-based
+            credit = -(gap_dev - dev_mean) / dev_std * 0.5
+            rec['reward'] = round(sys_r + credit, 3)
+
+        # ══════════════ CS-BAPR: Belief Update ══════════════
+        # Detect non-stationarity from upper-level timetable changes
+        ep_reward_mean = episode_reward / max(episode_steps, 1)
+        # Use Q_std from previous episode's training (history), or 0 if first ep
+        prev_q_stds = self.history.get('lower_q_std', [])
+        ep_q_std = prev_q_stds[-1] if prev_q_stds else 0.0
+        ep_delta_mean = (np.mean(self._ep_upper_deltas)
+                         if self._ep_upper_deltas else 0.0)
+
+        surprise = self.surprise_computer.compute(
+            ep_reward_mean, ep_q_std, ep_delta_mean)
+        self.belief_tracker.update(surprise)
+
+        # Adaptive alpha: boost exploration after detected changepoint
+        base_alpha = self.lower_trainer.alpha
+        boosted_alpha = self.belief_tracker.adaptive_alpha_boost(
+            base_alpha, max_boost=self.belief_alpha_boost_max)
+        # Temporarily set alpha for this episode's training
+        # (auto-entropy will correct it over time, this just gives a nudge)
+        if not self.ablate_csbapr and surprise > 0.5 and upper_active:
+            self.lower_trainer.alpha = min(boosted_alpha,
+                                           self.lower_trainer.maximum_alpha)
+
+        # ══════════════ Training ══════════════
+        t1 = time.time()
+        lower_m = {}
+        upper_m = {}
+
+        # ─── TPC: lazy-init EMA target upper at start of Phase 1 ───
+        # We snapshot the current upper at end of warmup; subsequent Polyak
+        # averaging keeps this "deployment" copy as a slow-moving anchor for
+        # importance reweighting on the lower SAC.
+        if (self.tpc_enable and upper_active
+                and self.target_upper_trainer is None):
+            self.target_upper_trainer = copy.deepcopy(self.upper_trainer)
+            print(f"  [TPC] initialised EMA target upper at ep {ep}")
+
+        # Build per-sample IS weight function for lower SAC
+        weight_fn = self._build_tpc_weight_fn() if self.tpc_enable else None
+
+        # ─── v3: HAAR/PIPER tap signal for lower reward shaping ───
+        # Each completed trip k gets a per-trip bonus β · clip(A_U(s_k, δ_k), -c, c) · f_k
+        # where A_U is the upper advantage and f_k is the reachability gate.
+        haar_tap_signal = None
+        if self.coupling_mode == 'haar' and upper_active:
+            haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
+
+        # Lower
+        if training and len(self.replay_buffer) > self.batch_size:
+            for _ in range(self.updates_per_episode):
+                lower_m = self.lower_trainer.update(
+                    self.replay_buffer, self.batch_size, reward_scale=1.0,
+                    weight_fn=weight_fn,
+                    tap_signal=haar_tap_signal)
+
+        # Train reachability classifier (HAAR mode only)
+        if (self.coupling_mode == 'haar' and self.haar_use_reach_gate
+                and upper_active and self.reach_net is not None):
+            self._train_reach_classifier(trip_gap_devs)
+
+        # Upper
+        if upper_active:
+            for trans in self._episode_upper_transitions:
+                self.upper_trainer.replay_buffer.push(
+                    trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
+            if len(self.upper_trainer.replay_buffer) > self.upper_batch_size:
+                for _ in range(self.upper_updates):
+                    upper_m = self.upper_trainer.update(self.upper_batch_size)
+
+            # ─── TPC: Polyak update EMA target after each upper training step ───
+            if self.tpc_enable and self.target_upper_trainer is not None:
+                with torch.no_grad():
+                    for p_t, p in zip(self.target_upper_trainer.policy_net.parameters(),
+                                      self.upper_trainer.policy_net.parameters()):
+                        p_t.data.mul_(1.0 - self.tpc_ema_tau).add_(
+                            p.data, alpha=self.tpc_ema_tau)
+
+        # Measurement projection (z already computed above for upper reward)
+        self.measurement_proj.update(z)
+        theta_w = self.measurement_proj.get_reward_weights()
+
+        train_time = time.time() - t1
+
+        # ══════════════ Diagnostics ══════════════
+        stage = "Warmup" if ep < self.upper_warmup else "BiLevel"
+        hold_summary = self.holding_feedback.episode_summary
+        hold_dir0 = self.holding_feedback.get_direction_stats(False)
+        hold_dir1 = self.holding_feedback.get_direction_stats(True)
+        if self._ep_freq_holdfb_features:
+            freq_holdfb_arr = np.vstack(self._ep_freq_holdfb_features)
+            freq_holdfb_mean = freq_holdfb_arr.mean(axis=0)
+        else:
+            freq_holdfb_mean = np.zeros(4, dtype=np.float64)
+        la_stat = _stat(self._ep_lower_actions)
+        lr_stat = _stat(self._ep_lower_rewards)
+        ud_stat = _stat(self._ep_upper_deltas)
+        ur_stat = _stat(self._ep_upper_rewards)
+        freq_summary = self.env.frequency_summary()
+        lower_drift_stat = _stat(self._ep_lower_drift_penalties)
+        upper_hf_stat = _stat(self._ep_upper_hf_penalties)
+        lower_wait_stat = _stat(self._ep_lower_wait_penalties)
+        lower_board_credit_stat = _stat(self._ep_lower_board_credits)
+        lower_wait_net_stat = _stat(self._ep_lower_wait_net)
+        upper_wait_credit_stat = _stat(self._ep_upper_wait_credits)
+        wait_low_share_stat = _stat(self._ep_freq_wait_low_shares)
+        lower_high_share_stat = _stat(self._ep_freq_wait_lower_high_shares)
+        upper_plan_penalty_stat = _stat(self._ep_upper_plan_penalties)
+        upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
+        terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
+        upper_hf_power_ratio = _upper_hf_power_ratio(
+            self._ep_upper_deltas_by_dir, self.upper_lpf_window)
+        lower_lf_drift_ratio = _lower_lf_drift_ratio(
+            self._ep_lower_actions_by_dir, self.lower_drift_window)
+        demand_attr_score = _demand_attribution_score(
+            self._ep_upper_demand_action, self._ep_lower_demand_action)
+        demand_attr_mi = demand_attribution_mi(
+            self._ep_upper_demand_action,
+            self._ep_lower_demand_action,
+            bins=self.freq_diag_mi_bins)
+        shock_metrics = shock_response_metrics(
+            self._ep_shock_response_events,
+            shock_threshold=self.freq_diag_shock_threshold,
+            action_threshold_s=self.freq_diag_shock_action_threshold_s,
+            response_window_s=self.freq_diag_shock_response_window_s,
+            same_station=self.freq_diag_shock_same_station)
+        plan_total = self._ep_upper_plan_decisions + self._ep_upper_plan_reuses
+        plan_reuse_ratio = (
+            self._ep_upper_plan_reuses / max(plan_total, 1)
+            if self.timetable_planner is not None else 0.0)
+
+        # Holding penalties across all trips this episode
+        hold_pens = []
+        for tid in self.holding_feedback._trip_actions:
+            hold_pens.append(self.holding_feedback.holding_penalty(tid))
+        hp_stat = _stat(hold_pens)
+
+        row = {
+            'ep': ep, 'stage': stage,
+            'wall_env_s': round(env_time, 1),
+            'wall_train_s': round(train_time, 1),
+            # env
+            'avg_wait_min': round(z[0], 3),
+            'peak_fleet': int(z[1]),
+            'headway_cv': round(z[2], 4),
+            'ep_reward': round(episode_reward, 3),
+            'ep_cost': round(episode_cost, 3),
+            'ep_steps': episode_steps,
+            'n_dispatches': len(self._ep_upper_deltas) if upper_active else 0,
+            # lower policy
+            'lower_action_mean': round(la_stat['mean'], 2),
+            'lower_action_std': round(la_stat['std'], 2),
+            'lower_action_min': round(la_stat['min'], 2),
+            'lower_action_max': round(la_stat['max'], 2),
+            'lower_reward_mean': round(lr_stat['mean'], 4),
+            'lower_reward_std': round(lr_stat['std'], 4),
+            # lower training
+            'lower_q_mean': lower_m.get('q_mean', 0.),
+            'lower_q_std': lower_m.get('q_std', 0.),
+            'lower_q_loss': lower_m.get('q_loss', 0.),
+            'lower_q_mse': lower_m.get('q_mse', 0.),
+            'lower_ood_loss': lower_m.get('ood_loss', 0.),
+            'lower_cost_q_mean': lower_m.get('cost_q_mean', 0.),
+            'lower_cost_q_loss': lower_m.get('cost_q_loss', 0.),
+            'lower_policy_loss': lower_m.get('policy_loss', 0.),
+            'lower_pi_grad_norm': lower_m.get('pi_grad_norm', 0.),
+            'lower_q_grad_norm': lower_m.get('q_grad_norm', 0.),
+            'lower_alpha': lower_m.get('alpha', 0.),
+            'lower_lambda': lower_m.get('lambda', self.lower_trainer.lambda_param),
+            'lower_replay_size': len(self.replay_buffer),
+            # upper policy
+            'upper_delta_mean': round(ud_stat['mean'], 2),
+            'upper_delta_std': round(ud_stat['std'], 2),
+            'upper_delta_min': round(ud_stat['min'], 2),
+            'upper_delta_max': round(ud_stat['max'], 2),
+            'upper_reward_mean': round(ur_stat['mean'], 4),
+            'upper_reward_std': round(ur_stat['std'], 4),
+            # upper training
+            'upper_q_mean': upper_m.get('upper_q_mean', 0.),
+            'upper_q_std': upper_m.get('upper_q_std', 0.),
+            'upper_q_loss': upper_m.get('upper_q_loss', 0.),
+            'upper_q_mse': upper_m.get('upper_q_mse', 0.),
+            'upper_ood_loss': upper_m.get('upper_ood_loss', 0.),
+            'upper_policy_loss': upper_m.get('upper_policy_loss', 0.),
+            'upper_pi_grad_norm': upper_m.get('upper_pi_grad_norm', 0.),
+            'upper_q_grad_norm': upper_m.get('upper_q_grad_norm', 0.),
+            'upper_alpha': upper_m.get('upper_alpha', 0.),
+            'upper_replay_size': len(self.upper_trainer.replay_buffer),
+            # coupling
+            'hold_fb_mean': hold_summary.get('mean', 0.),
+            'hold_fb_std': hold_summary.get('std', 0.),
+            'hold_fb_n_trips': hold_summary.get('n_trips', 0),
+            'hold_fb_dir0_mean': hold_dir0['rolling_mean'],
+            'hold_fb_dir1_mean': hold_dir1['rolling_mean'],
+            'hold_penalty_mean': hp_stat['mean'],
+            'freq_holdfb_same_hold': float(freq_holdfb_mean[0]),
+            'freq_holdfb_same_wait': float(freq_holdfb_mean[1]),
+            'freq_holdfb_other_hold': float(freq_holdfb_mean[2]),
+            'freq_holdfb_other_wait': float(freq_holdfb_mean[3]),
+            'freq_holdfb_decisions': len(self._ep_freq_holdfb_features),
+            'theta_wait': float(theta_w[0]),
+            'theta_fleet': float(theta_w[1]),
+            'theta_cv': float(theta_w[2]),
+            # CS-BAPR belief
+            'surprise': round(surprise, 4),
+            'belief_window': round(self.belief_tracker.effective_window, 2),
+            'belief_cp_prob': round(self.belief_tracker.changepoint_prob, 4),
+            'belief_entropy': round(self.belief_tracker.entropy, 3),
+            # v2j: belief-weighted MORL weights
+            'w_wait': round(float(self._last_adj_weights[0]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            'w_fleet': round(float(self._last_adj_weights[1]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            'w_cv': round(float(self._last_adj_weights[2]), 3) if hasattr(self, '_last_adj_weights') else 0.,
+            # v2k: elastic fleet
+            'N_fleet': self._current_N_fleet,
+            'fleet_overshoot': max(0, int(z[1]) - self._current_N_fleet),
+            # FreqDuet
+            'freq_low_demand': freq_summary['freq_low_demand'],
+            'freq_low_slope': freq_summary['freq_low_slope'],
+            'freq_low_forecast': freq_summary.get('freq_low_forecast', 0.0),
+            'freq_high_energy': freq_summary['freq_high_energy'],
+            'freq_middle': freq_summary.get('freq_middle', 0.0),
+            'freq_middle_energy': freq_summary.get('freq_middle_energy', 0.0),
+            'freq_od_entropy': freq_summary.get('freq_od_entropy', 0.0),
+            'freq_od_high_energy': freq_summary.get('freq_od_high_energy', 0.0),
+            'freq_od_active': freq_summary.get('freq_od_active', 0),
+            'freq_updates': freq_summary['freq_updates'],
+            'freq_promotion_flag': freq_summary.get('freq_promotion_flag', 0.0),
+            'freq_promotion_strength': freq_summary.get('freq_promotion_strength', 0.0),
+            'freq_promotion_age': freq_summary.get('freq_promotion_age', 0.0),
+            'freq_promotion_score': freq_summary.get('freq_promotion_score', 0.0),
+            'freq_promotion_absorptions': freq_summary.get(
+                'freq_promotion_absorptions', 0),
+            'freq_promotion_absorbed': freq_summary.get(
+                'freq_promotion_absorbed', 0.0),
+            'lower_drift_penalty_mean': lower_drift_stat['mean'],
+            'lower_drift_penalty_max': lower_drift_stat['max'],
+            'upper_hf_penalty_mean': upper_hf_stat['mean'],
+            'upper_hf_penalty_max': upper_hf_stat['max'],
+            'upper_hf_power_ratio': upper_hf_power_ratio,
+            'lower_lf_drift_ratio': lower_lf_drift_ratio,
+            'demand_attr_score': demand_attr_score,
+            'demand_attr_mi_score': demand_attr_mi['demand_attr_mi_score'],
+            'demand_attr_mi_upper_low': demand_attr_mi[
+                'demand_attr_mi_upper_low'],
+            'demand_attr_mi_upper_high': demand_attr_mi[
+                'demand_attr_mi_upper_high'],
+            'demand_attr_mi_lower_high': demand_attr_mi[
+                'demand_attr_mi_lower_high'],
+            'demand_attr_mi_lower_low': demand_attr_mi[
+                'demand_attr_mi_lower_low'],
+            'shock_response_time_mean_s': shock_metrics[
+                'shock_response_time_mean_s'],
+            'shock_response_time_std_s': shock_metrics[
+                'shock_response_time_std_s'],
+            'shock_response_hit_rate': shock_metrics[
+                'shock_response_hit_rate'],
+            'shock_events': shock_metrics['shock_events'],
+            'shock_action_mean_s': shock_metrics['shock_action_mean_s'],
+            'freq_wait_lower_penalty_mean': lower_wait_stat['mean'],
+            'freq_wait_lower_penalty_max': lower_wait_stat['max'],
+            'freq_wait_lower_board_credit_mean': lower_board_credit_stat['mean'],
+            'freq_wait_lower_board_credit_max': lower_board_credit_stat['max'],
+            'freq_wait_lower_net_mean': lower_wait_net_stat['mean'],
+            'freq_wait_upper_credit_mean': upper_wait_credit_stat['mean'],
+            'freq_wait_upper_credit_std': upper_wait_credit_stat['std'],
+            'freq_wait_low_share_mean': wait_low_share_stat['mean'],
+            'freq_wait_lower_high_share_mean': lower_high_share_stat['mean'],
+            'freq_wait_boarded_pax': int(self._ep_freq_wait_boarded_pax),
+            'upper_plan_penalty_mean': upper_plan_penalty_stat['mean'],
+            'upper_plan_penalty_max': upper_plan_penalty_stat['max'],
+            'upper_plan_target_mean': upper_plan_target_stat['mean'],
+            'upper_plan_target_std': upper_plan_target_stat['std'],
+            'upper_plan_decisions': self._ep_upper_plan_decisions,
+            'upper_plan_reuse_ratio': plan_reuse_ratio,
+            'terminal_launch_shift_mean': terminal_launch_shift_stat['mean'],
+            'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
+        }
+        self.diag.append(row)
+
+        # Also keep lightweight history for quick plotting
+        for k in ['avg_wait_min', 'peak_fleet', 'headway_cv',
+                   'lower_lambda', 'lower_alpha', 'lower_q_mean', 'lower_q_std',
+                   'upper_delta_mean', 'upper_q_mean',
+                   'hold_fb_mean', 'hold_penalty_mean',
+                   'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
+                   'theta_wait', 'theta_fleet',
+                   'surprise', 'belief_window',
+                   'upper_hf_power_ratio', 'lower_lf_drift_ratio',
+                   'demand_attr_score', 'demand_attr_mi_score',
+                   'shock_response_time_mean_s',
+                   'shock_response_hit_rate',
+                   'upper_plan_penalty_mean',
+                   'freq_wait_lower_penalty_mean',
+                   'freq_wait_lower_board_credit_mean',
+                   'freq_wait_lower_net_mean',
+                   'freq_wait_upper_credit_mean',
+                   'freq_wait_low_share_mean',
+                   'freq_wait_lower_high_share_mean',
+                   'freq_middle', 'freq_middle_energy',
+                   'upper_plan_target_mean', 'upper_plan_decisions',
+                   'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
+                   'freq_promotion_flag', 'freq_promotion_strength',
+                   'freq_promotion_absorbed']:
+            self.history[k].append(row[k])
+
+        return row
+
+    # ────────────────── Periodic deep dump ──────────────────
+
+    def _print_diagnostic_block(self, row):
+        """Print a detailed diagnostic block (every N episodes)."""
+        ep = row['ep']
+        print(f"\n{'─'*90}")
+        print(f"  DIAGNOSTIC  ep={ep}  stage={row['stage']}  "
+              f"wall={row['wall_env_s']}+{row['wall_train_s']}s")
+        print(f"{'─'*90}")
+
+        print(f"  ENV      wait={row['avg_wait_min']:.2f}m  fleet={row['peak_fleet']}  "
+              f"cv={row['headway_cv']:.3f}  "
+              f"R={row['ep_reward']:.2f}  C={row['ep_cost']:.2f}  "
+              f"steps={row['ep_steps']}")
+
+        print(f"  LOWER π  action μ={row['lower_action_mean']:.1f} "
+              f"σ={row['lower_action_std']:.1f} "
+              f"[{row['lower_action_min']:.1f}, {row['lower_action_max']:.1f}]  "
+              f"reward μ={row['lower_reward_mean']:.3f} "
+              f"σ={row['lower_reward_std']:.3f}")
+
+        print(f"  LOWER Q  Q={row['lower_q_mean']:.2f}±{row['lower_q_std']:.2f}  "
+              f"loss={row['lower_q_loss']:.4f} (mse={row['lower_q_mse']:.4f} "
+              f"ood={row['lower_ood_loss']:.4f})  "
+              f"CQ={row['lower_cost_q_mean']:.3f} "
+              f"CQ_loss={row['lower_cost_q_loss']:.4f}")
+
+        print(f"  LOWER ∇  π_grad={row['lower_pi_grad_norm']:.4f}  "
+              f"Q_grad={row['lower_q_grad_norm']:.4f}  "
+              f"α={row['lower_alpha']:.4f}  λ={row['lower_lambda']:.3f}  "
+              f"buf={row['lower_replay_size']}")
+
+        if row['stage'] == 'BiLevel':
+            print(f"  UPPER δ  δ_t μ={row['upper_delta_mean']:.1f} "
+                  f"σ={row['upper_delta_std']:.1f} "
+                  f"[{row['upper_delta_min']:.1f}, {row['upper_delta_max']:.1f}]  "
+                  f"reward μ={row['upper_reward_mean']:.3f} "
+                  f"σ={row['upper_reward_std']:.3f}  "
+                  f"n={row['n_dispatches']}")
+
+            print(f"  UPPER Q  Q={row['upper_q_mean']:.3f}±{row['upper_q_std']:.3f}  "
+                  f"loss={row['upper_q_loss']:.4f} (mse={row['upper_q_mse']:.4f} "
+                  f"ood={row['upper_ood_loss']:.4f})  "
+                  f"π_loss={row['upper_policy_loss']:.4f}")
+
+            print(f"  UPPER ∇  π_grad={row['upper_pi_grad_norm']:.4f}  "
+                  f"Q_grad={row['upper_q_grad_norm']:.4f}  "
+                  f"α={row['upper_alpha']:.4f}  buf={row['upper_replay_size']}")
+
+        print(f"  COUPLE   hold μ={row['hold_fb_mean']:.1f}s  "
+              f"σ={row['hold_fb_std']:.1f}  "
+              f"n_trips={row['hold_fb_n_trips']}  "
+              f"dir0={row['hold_fb_dir0_mean']:.1f}  "
+              f"dir1={row['hold_fb_dir1_mean']:.1f}  "
+              f"penalty={row['hold_penalty_mean']:.3f}")
+        if self.freq_holdfb_enable:
+            print(f"  F-HOLDFB same={row.get('freq_holdfb_same_hold',0):.3f}/"
+                  f"{row.get('freq_holdfb_same_wait',0):.3f}  "
+                  f"other={row.get('freq_holdfb_other_hold',0):.3f}/"
+                  f"{row.get('freq_holdfb_other_wait',0):.3f}  "
+                  f"n={int(row.get('freq_holdfb_decisions',0))}")
+
+        print(f"  θ-OGD    w=[{row['theta_wait']:.3f}, "
+              f"{row['theta_fleet']:.3f}, {row['theta_cv']:.3f}]")
+
+        print(f"  BELIEF   surprise={row.get('surprise',0):.3f}  "
+              f"window={row.get('belief_window',0):.1f}  "
+              f"cp_prob={row.get('belief_cp_prob',0):.3f}  "
+              f"entropy={row.get('belief_entropy',0):.2f}")
+        print(f"  FREQ     low={row.get('freq_low_demand',0):.3f}  "
+              f"forecast={row.get('freq_low_forecast',0):.3f}  "
+              f"hf_energy={row.get('freq_high_energy',0):.3f}  "
+              f"mid={row.get('freq_middle',0):+.3f}/"
+              f"{row.get('freq_middle_energy',0):.3f}  "
+              f"odH={row.get('freq_od_entropy',0):.3f}  "
+              f"U_HF={row.get('upper_hf_power_ratio',0):.3f}  "
+              f"L_LF={row.get('lower_lf_drift_ratio',0):.3f}  "
+              f"attr={row.get('demand_attr_score',0):.3f}  "
+              f"MI={row.get('demand_attr_mi_score',0):+.3f}  "
+              f"shock={row.get('shock_response_time_mean_s',0):.0f}s/"
+              f"{row.get('shock_response_hit_rate',0):.2f}  "
+              f"prom={row.get('freq_promotion_flag',0):.0f}/"
+              f"{row.get('freq_promotion_strength',0):.2f}  "
+              f"absorb={row.get('freq_promotion_absorbed',0):+.3f}")
+        if self.freq_wait_enable:
+            print(f"  WAIT-F   lower_pen={row.get('freq_wait_lower_penalty_mean',0):.4f}  "
+                  f"board_credit={row.get('freq_wait_lower_board_credit_mean',0):+.4f}  "
+                  f"net={row.get('freq_wait_lower_net_mean',0):+.4f}  "
+                  f"upper_credit={row.get('freq_wait_upper_credit_mean',0):+.4f}"
+                  f"±{row.get('freq_wait_upper_credit_std',0):.4f}  "
+                  f"low_share={row.get('freq_wait_low_share_mean',0):.3f}  "
+                  f"lower_hshare={row.get('freq_wait_lower_high_share_mean',0):.3f}  "
+                  f"pax={int(row.get('freq_wait_boarded_pax',0))}")
+        if self.timetable_terminal_dispatch:
+            print(f"  TERM     launch_shift={row.get('terminal_launch_shift_mean',0):+.1f}"
+                  f"±{row.get('terminal_launch_shift_std',0):.1f}s")
+        print(f"{'─'*90}\n")
+
+    # ────────────────── Per-trip dump ──────────────────
+
+    def _dump_trip_breakdown(self, ep):
+        """Write per-trip detail to CSV and print summary."""
+        if not self._ep_trip_records:
+            return
+
+        trip_csv = os.path.join(self.log_dir, 'trip_details.csv')
+        write_header = not os.path.exists(trip_csv)
+        fields = ['ep', 'tid', 'dir', 'hour', 'period', 'delta_t',
+                  'base_hw', 'eff_hw', 's_hold_mean', 's_hold_std',
+                  'hold_mean', 'hold_std', 'hold_max', 'hold_n',
+                  'gap_dev', 'penalty', 'reward']
+
+        with open(trip_csv, 'a', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
+            if write_header:
+                w.writeheader()
+            for rec in self._ep_trip_records:
+                rec['ep'] = ep
+                w.writerow(rec)
+
+        # Print per-period summary
+        from collections import defaultdict
+        by_period = defaultdict(list)
+        for r in self._ep_trip_records:
+            by_period[r['period']].append(r)
+
+        print(f"  TRIPS    ep={ep}  n={len(self._ep_trip_records)}")
+        for period in ['peak', 'off', 'trans']:
+            recs = by_period.get(period, [])
+            if not recs:
+                continue
+            deltas = [r['delta_t'] for r in recs]
+            holds = [r['hold_mean'] for r in recs]
+            pens = [r['penalty'] for r in recs]
+            print(f"    {period:5s} n={len(recs):3d}  "
+                  f"δ={np.mean(deltas):+5.1f}±{np.std(deltas):4.1f}  "
+                  f"hold={np.mean(holds):+5.1f}±{np.std(holds):4.1f}  "
+                  f"pen={np.mean(pens):.3f}")
+
+            # Flag worst trips
+            worst = sorted(recs, key=lambda r: -abs(r['hold_mean']))[:3]
+            for w in worst:
+                if abs(w['hold_mean']) > 20:
+                    print(f"      ⚠ tid={w['tid']} h={w['hour']}:00 "
+                          f"δ={w['delta_t']:+.0f}s hold_μ={w['hold_mean']:+.0f}s "
+                          f"pen={w['penalty']:.2f}")
+
+    # ────────────────── Train loop ──────────────────
+
+    def maybe_resume(self):
+        """Scan checkpoints/ for latest ep; if found, load networks and set resume_from_ep.
+        Returns the ep to start from (0 if no resume, last_ep+1 otherwise).
+        """
+        ckpt_dir = os.path.join(self.log_dir, 'checkpoints')
+        if not os.path.isdir(ckpt_dir):
+            return 0
+        import re
+        eps = []
+        for fn in os.listdir(ckpt_dir):
+            m = re.match(r'lower_ep(\d+)\.pt$', fn)
+            if m and os.path.exists(os.path.join(ckpt_dir, f'upper_ep{m.group(1)}.pt')):
+                eps.append(int(m.group(1)))
+        if not eps:
+            return 0
+        last_ep = max(eps)
+        try:
+            self.lower_trainer.load(os.path.join(ckpt_dir, f'lower_ep{last_ep}.pt'))
+            self.upper_trainer.load(os.path.join(ckpt_dir, f'upper_ep{last_ep}.pt'))
+        except Exception as e:
+            print(f"  [Resume] Failed to load ep{last_ep} checkpoint: {e}. Starting fresh.")
+            return 0
+        self.resume_from_ep = last_ep + 1
+        print(f"  [Resume] Loaded checkpoint ep{last_ep}. Resuming from ep{self.resume_from_ep}.")
+        return self.resume_from_ep
+
+    def train(self, total_episodes=300):
+        diag_freq = self.cfg.get('training', {}).get('diag_freq', 10)
+        trip_dump_freq = self.cfg.get('training', {}).get('trip_dump_freq', 25)
+        # Init diag now (after resume decision so CSV header handled correctly)
+        if self.diag is None:
+            self.diag = DiagnosticLog(self.log_dir, resume=(self.resume_from_ep > 0))
+
+        print(f"TransitDuet v3 [{self.coupling_mode}] | eps={total_episodes} | "
+              f"warmup={self.upper_warmup} | "
+              f"δ∈[{self.upper_action_low.min():+.0f},{self.upper_action_high.max():+.0f}] "
+              f"| α_hold={self.alpha_holding} | "
+              f"dev={self.device}")
+        bins_note = (
+            f"  bins={self.lower_action_bins.tolist()}"
+            if self.lower_action_bins is not None else "")
+        last_note = "  +last_action" if self.lower_use_last_action_feature else ""
+        print(f"  Lower: state={self.lower_state_dim}  K={self.lower_trainer.ensemble_size}  "
+              f"batch={self.batch_size}  updates/ep={self.updates_per_episode}"
+              f"{bins_note}{last_note}")
+        print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "
+              f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
+        print(f"  Diag CSV: {self.diag.csv_path}")
+        print("=" * 90)
+
+        for ep in range(self.resume_from_ep, total_episodes):
+            row = self.run_episode(ep, training=True)
+
+            # ── Compact per-episode line ──
+            if ep % 5 == 0 or ep < 5:
+                line = (f"[{ep:3d}] {row['stage']:7s} N={row.get('N_fleet',12):2d} | "
+                        f"w={row['avg_wait_min']:4.1f} f={row['peak_fleet']:2d} "
+                        f"cv={row['headway_cv']:.2f} | "
+                        f"Lπ a={row['lower_action_mean']:+5.1f}±{row['lower_action_std']:4.1f} "
+                        f"Q={row['lower_q_mean']:+6.1f} λ={row['lower_lambda']:.2f} | ")
+                if row['stage'] == 'BiLevel':
+                    line += (f"Uδ={row['upper_delta_mean']:+5.1f}±{row['upper_delta_std']:4.1f} "
+                             f"Q={row['upper_q_mean']:+6.3f} | "
+                             f"h_μ={row['hold_fb_mean']:+5.1f} "
+                             f"pen={row['hold_penalty_mean']:.2f} | ")
+                line += f"{row['wall_env_s']:.0f}+{row['wall_train_s']:.0f}s"
+                print(line)
+
+            # ── Detailed diagnostic block ──
+            if ep % diag_freq == 0 or ep == total_episodes - 1:
+                self._print_diagnostic_block(row)
+
+            # ── Per-trip breakdown ──
+            if ep % trip_dump_freq == 0 and row['stage'] == 'BiLevel':
+                self._dump_trip_breakdown(ep)
+
+            # ── Checkpoint ──
+            if (ep + 1) % 50 == 0:
+                self._save_checkpoint(ep)
+
+        self._save_checkpoint(total_episodes - 1)
+        self.diag.save_json()
+        self._save_history()
+        print(f"\nDone. Results in {self.log_dir}/")
+
+    def _save_checkpoint(self, ep):
+        ckpt_dir = os.path.join(self.log_dir, 'checkpoints')
+        os.makedirs(ckpt_dir, exist_ok=True)
+        self.lower_trainer.save(os.path.join(ckpt_dir, f'lower_ep{ep}.pt'))
+        self.upper_trainer.save(os.path.join(ckpt_dir, f'upper_ep{ep}.pt'))
+        print(f"  [Checkpoint ep {ep}]")
+
+    def _save_history(self):
+        results = {}
+        for key, values in self.history.items():
+            try:
+                results[key] = [float(x) if not isinstance(x, list) else x
+                                for x in values]
+            except (TypeError, ValueError):
+                results[key] = [str(x) for x in values]
+        with open(os.path.join(self.log_dir, 'history.json'), 'w') as f:
+            json.dump(results, f)
+
+
+def eval_pareto_frontier(runner, n_eval=10, fleet_values=None):
+    """v2k: Sweep N_fleet values and record (fleet, wait, cv) Pareto points."""
+    if fleet_values is None:
+        fleet_values = list(range(8, 17))
+    results = []
+    for N in fleet_values:
+        waits, cvs, overshoots = [], [], []
+        for i in range(n_eval):
+            row = runner.run_episode(ep=9999, training=False, N_fleet_override=N)
+            waits.append(row['avg_wait_min'])
+            cvs.append(row['headway_cv'])
+            overshoots.append(row.get('fleet_overshoot', 0))
+        results.append({
+            'N_fleet': N,
+            'wait_mean': float(np.mean(waits)),
+            'wait_std': float(np.std(waits)),
+            'cv_mean': float(np.mean(cvs)),
+            'cv_std': float(np.std(cvs)),
+            'overshoot_mean': float(np.mean(overshoots)),
+        })
+        print(f"  N_fleet={N:2d}: wait={np.mean(waits):4.1f}±{np.std(waits):.1f}m  "
+              f"cv={np.mean(cvs):.2f}  overshoot={np.mean(overshoots):.1f}")
+    return results
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='TransitDuet v3 (HIRO/HAAR/channels coupling-mode runner)')
+    parser.add_argument('--config', type=str, default='config_v2.yaml')
+    parser.add_argument('--episodes', type=int, default=300)
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--gpu', action='store_true')
+    parser.add_argument('--eval_pareto', action='store_true',
+                        help='After training, evaluate Pareto frontier over N_fleet ∈ [8,16]')
+    parser.add_argument('--n_eval', type=int, default=5, help='eps per N_fleet for eval')
+    parser.add_argument('--resume', dest='resume', action='store_true', default=True,
+                        help='Resume from latest checkpoint if found (default: on)')
+    parser.add_argument('--no-resume', dest='resume', action='store_false',
+                        help='Start from scratch even if checkpoints exist')
+    parser.add_argument('--upper-warmup-eps', type=int, default=None,
+                        help='Override coupling.upper_warmup_eps for short experiments')
+    parser.add_argument('--logs-dir', type=str, default=None,
+                        help='Override base directory for run logs')
+    args = parser.parse_args()
+
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+
+    config_path = os.path.join(str(SCRIPT_DIR), args.config)
+    config = load_config(config_path)
+    config['seed'] = args.seed
+    if args.upper_warmup_eps is not None:
+        config.setdefault('coupling', {})['upper_warmup_eps'] = int(args.upper_warmup_eps)
+    if args.logs_dir is not None:
+        config.setdefault('logging', {})['logs_dir'] = args.logs_dir
+
+    device = 'cpu'
+    if args.gpu and torch.cuda.is_available():
+        device = 'cuda:0'
+
+    runner = TransitDuetV2Runner(config, device=device)
+    if args.resume:
+        runner.maybe_resume()
+    runner.train(total_episodes=args.episodes)
+
+    if args.eval_pareto:
+        print("\n" + "="*80)
+        print("  PARETO FRONTIER EVALUATION")
+        print("="*80)
+        results = eval_pareto_frontier(runner, n_eval=args.n_eval)
+        with open(os.path.join(runner.log_dir, 'pareto_frontier.json'), 'w') as f:
+            json.dump(results, f, indent=2)
+        print(f"\nSaved to {runner.log_dir}/pareto_frontier.json")
+
+
+if __name__ == '__main__':
+    main()
