@@ -9,7 +9,12 @@ import math
 import numpy as np
 
 from ...core import CausalPromotionGate, MultiEntityBinnedStream
-from ...encoders import CausalAdaptiveWaveletEncoder, CausalEMAEncoder, CausalFourierEncoder
+from ...encoders import (
+    CausalAdaptiveWaveletEncoder,
+    CausalEMAEncoder,
+    CausalFourierEncoder,
+    CausalPoissonHarmonicEncoder,
+)
 
 
 def _as_scalar(value: Any) -> float:
@@ -48,6 +53,10 @@ class TransitFrequencyTracker:
         harmonic_period_s: float = 14 * 3600.0,
         fourier_k: int = 4,
         harmonic_forgetting: float = 0.995,
+        harmonic_learning_rate: float = 0.4,
+        harmonic_ridge: float = 1.0,
+        harmonic_observation_model: str = "poisson",
+        harmonic_nb_dispersion: float = 20.0,
         adaptive_learn_rate: float = 0.02,
         adaptive_ridge: float = 1e-6,
         adaptive_max_predictor: float = 3.0,
@@ -82,7 +91,39 @@ class TransitFrequencyTracker:
         self._known_local_keys: set[Any] = set()
         self._stream = MultiEntityBinnedStream(bin_sec=self.bin_interval_s)
 
-        if self.method in {"fourier", "harmonic", "dynamic_harmonic", "harmonic_rls"}:
+        if self.method in {
+            "poisson_harmonic",
+            "dynamic_harmonic_poisson",
+            "dynamic_harmonic_nb",
+            "negative_binomial_harmonic",
+            "nb_harmonic",
+        }:
+            self.method = "poisson_harmonic"
+            obs_model = (
+                "negative_binomial"
+                if str(method or "").lower() in {
+                    "dynamic_harmonic_nb",
+                    "negative_binomial_harmonic",
+                    "nb_harmonic",
+                }
+                else harmonic_observation_model
+            )
+            self.encoder = CausalPoissonHarmonicEncoder(
+                update_interval_s=self.bin_interval_s,
+                period_s=harmonic_period_s,
+                fourier_k=fourier_k,
+                learning_rate=harmonic_learning_rate,
+                ridge=harmonic_ridge,
+                observation_model=obs_model,
+                nb_dispersion=harmonic_nb_dispersion,
+                residual_period_s=fast_period_s,
+                mid_period_s=mid_period_s,
+                energy_period_s=energy_period_s,
+                persistence_period_s=persistence_period_s,
+                persistence_threshold=persistence_threshold,
+                forecast_horizon_s=forecast_horizon_s,
+            )
+        elif self.method in {"fourier", "harmonic", "dynamic_harmonic", "harmonic_rls"}:
             self.method = "fourier"
             self.encoder = CausalFourierEncoder(
                 update_interval_s=self.bin_interval_s,
@@ -166,6 +207,10 @@ class TransitFrequencyTracker:
             harmonic_period_s=cfg.get("harmonic_period_s", 14 * 3600.0),
             fourier_k=cfg.get("fourier_k", cfg.get("fourier_K", 4)),
             harmonic_forgetting=cfg.get("harmonic_forgetting", 0.995),
+            harmonic_learning_rate=cfg.get("harmonic_learning_rate", 0.4),
+            harmonic_ridge=cfg.get("harmonic_ridge", 1.0),
+            harmonic_observation_model=cfg.get("harmonic_observation_model", "poisson"),
+            harmonic_nb_dispersion=cfg.get("harmonic_nb_dispersion", 20.0),
             adaptive_learn_rate=cfg.get("adaptive_learn_rate", 0.02),
             adaptive_ridge=cfg.get("adaptive_ridge", 1e-6),
             adaptive_max_predictor=cfg.get("adaptive_max_predictor", 3.0),

@@ -24,7 +24,10 @@ import math
 
 import numpy as np
 
-from .intensity_estimator import CausalHarmonicBandState
+from .intensity_estimator import (
+    CausalHarmonicBandState,
+    CausalPoissonHarmonicBandState,
+)
 from .promotion_gate import CausalPromotionGate
 
 
@@ -214,6 +217,10 @@ class DemandFrequencyTracker:
         harmonic_forgetting=0.995,
         harmonic_prior_var=100.0,
         harmonic_residual_period_s=None,
+        harmonic_learning_rate=0.4,
+        harmonic_ridge=1.0,
+        harmonic_observation_model="poisson",
+        harmonic_nb_dispersion=20.0,
         harmonic_prior=None,
         promotion_enable=False,
         promotion_window_s=900.0,
@@ -276,8 +283,37 @@ class DemandFrequencyTracker:
                 fast_period_s=fast_period_s,
                 energy_alpha=energy_alpha)
         elif self.method in {
-            "harmonic", "dynamic_harmonic", "harmonic_rls",
+            "poisson_harmonic",
+            "dynamic_harmonic_poisson",
             "dynamic_harmonic_nb",
+            "negative_binomial_harmonic",
+            "nb_harmonic",
+        }:
+            original_method = self.method
+            self.method = "poisson_harmonic"
+            obs_model = (
+                "negative_binomial"
+                if original_method in {
+                    "dynamic_harmonic_nb",
+                    "negative_binomial_harmonic",
+                    "nb_harmonic",
+                }
+                else harmonic_observation_model
+            )
+            self._state_factory = lambda prior_theta=None: CausalPoissonHarmonicBandState(
+                update_interval_s=self.bin_interval_s,
+                period_s=harmonic_period_s,
+                fourier_k=fourier_k,
+                learning_rate=harmonic_learning_rate,
+                ridge=harmonic_ridge,
+                observation_model=obs_model,
+                nb_dispersion=harmonic_nb_dispersion,
+                energy_alpha=energy_alpha,
+                residual_alpha=residual_alpha,
+                middle_alpha=middle_alpha,
+                prior_theta=prior_theta)
+        elif self.method in {
+            "harmonic", "dynamic_harmonic", "harmonic_rls",
         }:
             self.method = "harmonic"
             self._state_factory = lambda prior_theta=None: CausalHarmonicBandState(
@@ -358,6 +394,11 @@ class DemandFrequencyTracker:
             harmonic_residual_period_s=cfg.get(
                 "harmonic_residual_period_s",
                 cfg.get("fast_period_s", 300.0)),
+            harmonic_learning_rate=cfg.get("harmonic_learning_rate", 0.4),
+            harmonic_ridge=cfg.get("harmonic_ridge", 1.0),
+            harmonic_observation_model=cfg.get(
+                "harmonic_observation_model", "poisson"),
+            harmonic_nb_dispersion=cfg.get("harmonic_nb_dispersion", 20.0),
             harmonic_prior=cfg.get("harmonic_prior", None),
             promotion_enable=promotion_cfg.get(
                 "enable", cfg.get("promotion_enable", False)),
@@ -383,7 +424,7 @@ class DemandFrequencyTracker:
         )
 
     def _new_state(self, prior_theta=None):
-        if self.method == "harmonic":
+        if self.method in {"harmonic", "poisson_harmonic"}:
             return self._state_factory(prior_theta)
         return self._state_factory()
 
@@ -492,7 +533,7 @@ class DemandFrequencyTracker:
 
     def _maybe_promote_state(self, state, gate):
         if (not self.promotion_adapt_low
-                or self.method != "harmonic"
+                or self.method not in {"harmonic", "poisson_harmonic"}
                 or gate is None
                 or not getattr(gate, "flag", 0.0)
                 or float(getattr(gate, "strength", 0.0))

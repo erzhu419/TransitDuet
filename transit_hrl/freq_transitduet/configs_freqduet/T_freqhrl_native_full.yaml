@@ -1,0 +1,64 @@
+_extends: F_freqduet_terminal_lowerctx_lite_promotion_conservative_spline2dir_waitattr_hiro.yaml
+_name: T_freqhrl_native_full
+
+frequency:
+  # Native Transit path closest to the original FreqTransitDuet proposal:
+  # count-likelihood harmonic LF demand, HF lower state, terminal timetable
+  # dispatch, wait-credit shaping, leakage penalties, and promotion replanning.
+  method: dynamic_harmonic_nb
+  harmonic_observation_model: negative_binomial
+  harmonic_learning_rate: 0.4
+  harmonic_ridge: 1.0
+  harmonic_nb_dispersion: 24.0
+  upper_mode: low_mid
+  lower_mode: high_mid
+  promotion:
+    enable: true
+    state_features: true
+    window_min: 10.0
+    cooldown_min: 10.0
+    residual_threshold: 0.95
+    persistence_ratio: 0.40
+    adapt_low: true
+    adapt_gain: 0.08
+    adapt_strength_min: 0.20
+    adapt_local: true
+
+upper:
+  state_dim: 19
+  timetable_planner:
+    terminal_dispatch: true
+    promotion_replan: true
+    promotion_replan_strength_min: 0.20
+    horizon_s: 2700.0
+    replan_interval_s: 900.0
+    basis_per_direction: 2
+    shared_directions: false
+    plan_all_directions: false
+    action_ema_alpha: 0.30
+    smooth_penalty: 0.04
+    delta_min_s: -60.0
+    delta_max_s: 20.0
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0
+
+reward_attribution:
+  enable: true
+  upper_wait_weight: 0.18
+  lower_wait_weight: 0.10
+  lower_board_credit_weight: 0.04
+  lower_share_source: local_low
+  lower_positive_high_only: true
+  lower_high_share_cap: 0.75
+  wait_norm_s: 600.0
+  wait_clip: 2.0
+  low_share_floor: 0.05
+  normalize_upper_credit: true
+
+leakage:
+  enable: true
+  lower_drift_window: 24
+  lower_drift_budget_s: 90.0
+  lower_drift_penalty: 0.30
+  upper_hf_penalty: 0.05
+  upper_lpf_window: 6

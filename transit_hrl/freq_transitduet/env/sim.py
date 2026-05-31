@@ -501,8 +501,11 @@ class env_bus(object):
 
         if self.frequency_enabled:
             method = str(cfg.get('method', '')).lower()
-            if method in {'harmonic', 'dynamic_harmonic', 'harmonic_rls',
-                          'dynamic_harmonic_nb'}:
+            if method in {
+                    'harmonic', 'dynamic_harmonic', 'harmonic_rls',
+                    'poisson_harmonic', 'dynamic_harmonic_poisson',
+                    'dynamic_harmonic_nb', 'negative_binomial_harmonic',
+                    'nb_harmonic'}:
                 if cfg.get('use_historical_prior', True) and not isinstance(
                         cfg.get('harmonic_prior'), dict):
                     cfg['harmonic_prior'] = self._build_harmonic_prior(cfg)

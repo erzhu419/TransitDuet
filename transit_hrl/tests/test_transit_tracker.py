@@ -90,6 +90,25 @@ class TransitTrackerTest(unittest.TestCase):
         self.assertEqual(tracker.upper_features().shape[0], tracker.upper_feature_dim)
         self.assertEqual(tracker.lower_features(1, True).shape[0], tracker.lower_feature_dim)
 
+    def test_poisson_harmonic_tracker_runs_and_forecasts_nonnegative(self):
+        tracker = TransitFrequencyTracker(
+            update_interval_s=1,
+            bin_sec=1,
+            method="dynamic_harmonic_nb",
+            harmonic_period_s=24,
+            fourier_k=1,
+            global_demand_norm=10,
+            local_demand_norm=5,
+        )
+        for value in [2.0, 3.0, 4.0, 9.0]:
+            tracker.update({(1, True): value})
+        summary = tracker.summary()
+        self.assertEqual(summary["freq_method"], "poisson_harmonic")
+        self.assertGreaterEqual(summary["freq_low_demand"], 0.0)
+        self.assertGreaterEqual(summary["freq_low_forecast"], 0.0)
+        self.assertEqual(tracker.upper_features().shape[0], tracker.upper_feature_dim)
+        self.assertEqual(tracker.lower_features(1, True).shape[0], tracker.lower_feature_dim)
+
 
 if __name__ == "__main__":
     unittest.main()

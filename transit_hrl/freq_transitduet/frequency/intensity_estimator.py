@@ -234,3 +234,138 @@ class CausalHarmonicBandState:
     @property
     def middle_slope(self):
         return self.middle - self.prev_middle if self.n > 1 else 0.0
+
+
+class CausalPoissonHarmonicBandState(CausalHarmonicBandState):
+    """Scalar dynamic harmonic intensity state with count-likelihood updates.
+
+    This keeps the same public attributes as ``CausalHarmonicBandState`` but
+    replaces squared-error RLS with an online Newton-style update on a Poisson
+    or negative-binomial log-intensity observation model.
+    """
+
+    def __init__(
+        self,
+        update_interval_s,
+        period_s=50400.0,
+        fourier_k=4,
+        learning_rate=0.4,
+        ridge=1.0,
+        observation_model="poisson",
+        nb_dispersion=20.0,
+        energy_alpha=0.01,
+        residual_alpha=0.2,
+        middle_alpha=0.05,
+        prior_theta=None,
+    ):
+        self.learning_rate = float(np.clip(learning_rate, 1e-6, 1.0))
+        self.ridge = max(float(ridge), 1e-9)
+        self.observation_model = str(observation_model or "poisson").lower()
+        self.nb_dispersion = max(float(nb_dispersion), 1e-6)
+        super().__init__(
+            update_interval_s=update_interval_s,
+            period_s=period_s,
+            fourier_k=fourier_k,
+            forgetting_factor=0.999,
+            prior_var=1.0,
+            energy_alpha=energy_alpha,
+            residual_alpha=residual_alpha,
+            middle_alpha=middle_alpha,
+            prior_theta=prior_theta,
+        )
+
+    def reset(self):
+        self.theta = self.initial_theta.copy()
+        self.cov = np.eye(self.dim, dtype=np.float64) * (1.0 / self.ridge)
+        self.precision = np.ones(self.dim, dtype=np.float64) * self.ridge
+        self.low = self._rate_from_eta(float(self._features(0) @ self.theta))
+        self.fast = 0.0
+        self.prev_low = self.low
+        self.high = 0.0
+        self.prev_high = 0.0
+        self.high_energy = 0.0
+        self.middle = 0.0
+        self.prev_middle = 0.0
+        self.middle_energy = 0.0
+        self._raw_high = 0.0
+        self.uncertainty = 1.0
+        self.n = 0
+
+    def _rate_from_eta(self, eta):
+        return max(0.0, float(eta))
+
+    def _variance(self, mu):
+        mu = max(float(mu), 1e-6)
+        if self.observation_model in {"nb", "negative_binomial", "neg_binomial"}:
+            return mu + (mu * mu) / self.nb_dispersion
+        return mu
+
+    def update(self, value, step=None):
+        value = max(float(value), 0.0)
+        feature_step = self.n if step is None else int(step)
+        phi = self._features(feature_step)
+        if self.n == 0:
+            self.theta[0] = max(value, 0.0)
+            self.prev_low = value
+            self.low = value
+            self.fast = value
+            self.prev_high = 0.0
+            self.high = 0.0
+            self.prev_middle = 0.0
+            self.middle = 0.0
+            self.high_energy = 0.0
+            self.middle_energy = 0.0
+            self._raw_high = 0.0
+            self.uncertainty = float(
+                math.sqrt(1.0 / max(float(np.mean(self.precision)), 1e-9)))
+            self.n = 1
+            return
+        eta_before = float(phi @ self.theta)
+        pred_before = self._rate_from_eta(eta_before)
+        variance = self._variance(pred_before)
+        innovation = value - pred_before
+
+        weight = 1.0 / max(variance, 1e-6)
+        cov_phi = self.cov @ phi
+        denom = max(0.999 + weight * float(phi @ cov_phi), 1e-9)
+        gain = cov_phi * weight / denom
+        self.theta += np.clip(
+            self.learning_rate * gain * innovation, -3.0, 3.0)
+        self.cov = (self.cov - weight * np.outer(cov_phi, cov_phi) / denom) / 0.999
+        self.precision = np.maximum(np.diag(np.linalg.pinv(self.cov)), self.ridge)
+        pred_after = self._rate_from_eta(float(phi @ self.theta))
+
+        self.prev_low = self.low
+        self.prev_high = self.high
+        self.prev_middle = self.middle
+        self.low = pred_after
+        self.fast = value
+        self._raw_high = innovation
+        if self.n == 0:
+            self.middle = self._raw_high
+            self.high = self._raw_high
+            self.high_energy = 0.0
+            self.middle_energy = 0.0
+        else:
+            self.middle = (
+                (1.0 - self.middle_alpha) * self.middle
+                + self.middle_alpha * self._raw_high
+            )
+            self.high = (
+                (1.0 - self.residual_alpha) * self.high
+                + self.residual_alpha * self._raw_high
+            )
+            self.high_energy = (
+                (1.0 - self.energy_alpha) * self.high_energy
+                + self.energy_alpha * (self.high ** 2)
+            )
+            self.middle_energy = (
+                (1.0 - self.middle_alpha) * self.middle_energy
+                + self.middle_alpha * (self.middle ** 2)
+            )
+        self.uncertainty = float(
+            math.sqrt(1.0 / max(float(np.mean(self.precision)), 1e-9)))
+        self.n += 1
+
+    def _rate_from_log(self, log_rate):
+        return self._rate_from_eta(log_rate)

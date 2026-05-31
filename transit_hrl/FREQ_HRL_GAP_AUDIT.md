@@ -449,6 +449,21 @@ now mixed rather than uniformly positive:
 - HF speed and residual-order lower actions did not improve the default
   high-cost trading environment; the default now disables them, while keeping
   them as explicit sweep parameters for lower-cost execution settings.
+- Transit demand estimation now has a count-likelihood dynamic harmonic path:
+  `dynamic_harmonic_nb` / `poisson_harmonic` uses causal harmonic bases with
+  Poisson/NB variance weighting, nonnegative forecasts, and promotion residual
+  absorption. On the new synthetic count-intensity validation it improves over
+  EMA (`12.85` vs `14.63` MSE in the smoke run), while raw Fourier remains the
+  strongest short-horizon baseline (`9.26` MSE), so this closes the mechanism
+  gap but not the "best estimator" claim.
+- The shared Transit PPO surrogate now has an integrated gap-closure path:
+  learned Bernstein plan actions are reused at low frequency, promotion can
+  force a learned upper replan, lower state can include native load/queue/speed
+  context, and frequency-attributed wait penalties/credits enter the policy
+  reward used by `train_dual_ppo`. The short smoke matrix runs end-to-end, but
+  the integrated full row still trails the EMA-direct baseline, so it should be
+  treated as a diagnostic path rather than performance evidence until the
+  larger scheduler matrix resolves the tradeoff.
 
 Therefore the implementation should currently be described as:
 
@@ -470,9 +485,9 @@ fully validated, domain-general Frequency-Separated HRL
    composite score.
 3. Carry promotion-triggered replanning into learned PPO/off-policy runners and
    copied Transit native training, plus low-model process-noise adaptation.
-4. Extend the shared PPO path with plan-coefficient actions and/or add
-   off-policy SAC/TD3-style replay so the current control-level lower-drift
-   constraint can be learned end-to-end instead of hand-coded.
+4. Tune the integrated Transit PPO path so the new wait-credit, native lower
+   context, and low-frequency plan reuse improve objective metrics rather than
+   just exposing the right interfaces; then run the larger scheduler matrix.
 5. Broaden Level-2 minute/intraday validation beyond the current short Yahoo
    5-minute ETF slice, and add Level-3 order-book/market-making validation.
 6. Add automatic plot/report generation to the main validation commands.
