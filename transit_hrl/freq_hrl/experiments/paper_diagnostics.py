@@ -408,6 +408,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
     neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
+    native_loop = read_json(results_root / "transit_native_shared_ppo_loop" / "summary.json")
     transit = read_csv_rows(transit_root / "transit_performance_validation" / "summary.csv")
     checks = build_statistical_checks(results_root)
 
@@ -424,20 +425,28 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
     native_contract = native_audit.get("contract", {}) if isinstance(native_audit, dict) else {}
     native_status = str(native_audit.get("status", "missing")) if isinstance(native_audit, dict) else "missing"
+    native_loop_status = str(native_loop.get("status", "missing")) if isinstance(native_loop, dict) else "missing"
+    native_loop_summary = native_loop.get("summary", {}) if isinstance(native_loop, dict) else {}
+    native_loop_contract = native_loop.get("contract", {}) if isinstance(native_loop, dict) else {}
 
     return [
         {
             "claim": "C1: frequency-separated HRL can share one training core",
-            "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters; native Transit bridge maps that core onto real runner state/action contracts.",
+            "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters, and a native Transit episode loop now uses the same PPO core for upper/lower actions.",
             "metric": (
                 f"trading plan return={_fmt(plan_summary.get('total_return_mean'))}; "
                 f"transit composite={transit_freq.get('composite_mean', 'NA')}; "
                 f"native bridge={native_status} "
-                f"U={native_contract.get('upper_state_dim', 'NA')}x{native_contract.get('upper_action_dim', 'NA')} "
-                f"L={native_contract.get('lower_state_dim', 'NA')}x{native_contract.get('lower_action_dim', 'NA')}"
+                f"U={native_contract.get('upper_state_dim', native_loop_contract.get('upper_state_dim', 'NA'))}x{native_contract.get('upper_action_dim', native_loop_contract.get('upper_action_dim', 'NA'))} "
+                f"L={native_contract.get('lower_state_dim', native_loop_contract.get('lower_state_dim', 'NA'))}x{native_contract.get('lower_action_dim', native_loop_contract.get('lower_action_dim', 'NA'))}; "
+                f"native loop={native_loop_status}, wait={_fmt(native_loop_summary.get('avg_wait_min_mean'))}"
             ),
-            "status": "supported interface" if native_status == "supported_interface" else "partial",
-            "remaining_gap": "Native shared-PPO bridge exists; full native episode replacement training and performance validation remain.",
+            "status": (
+                "supported native loop"
+                if native_loop_status == "supported_native_episode_loop"
+                else ("supported interface" if native_status == "supported_interface" else "partial")
+            ),
+            "remaining_gap": "Native shared-PPO episode loop exists; multi-seed native performance validation remains.",
         },
         {
             "claim": "C2: high-level plan variables can be learned as curves",
@@ -503,14 +512,15 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
-            "evidence": "Gap-closure matrix combines count demand state, plan curves, promotion replanning, native lower context, wait credit, and drift constraint.",
+            "evidence": "Gap-closure matrix combines count demand state, plan curves, promotion replanning, native lower context, wait credit, and drift constraint; native loop runs the same shared PPO core inside the copied Transit simulator.",
             "metric": (
                 f"reward delta={_check_metric(checks, 'transit_full_reward_vs_base')}; "
                 f"wait delta={_check_metric(checks, 'transit_full_wait_vs_base')}; "
-                f"drift delta={_check_metric(checks, 'transit_full_lower_lf_vs_base')}"
+                f"drift delta={_check_metric(checks, 'transit_full_lower_lf_vs_base')}; "
+                f"native-loop samples={_fmt((native_loop.get('rows') or [{}])[0].get('shared_ppo_lower_samples') if isinstance(native_loop, dict) else None, digits=0)}"
             ),
             "status": _check_status(checks, "transit_full_reward_vs_base"),
-            "remaining_gap": "Supported on the small Transit surrogate gate and native shared-PPO interface; still needs full native performance and real-demand validation.",
+            "remaining_gap": "Supported on surrogate performance plus a native shared-PPO episode loop; still needs multi-seed native performance and real-demand validation.",
         },
         {
             "claim": "C8: passenger waiting-time frequency credit improves control quality",

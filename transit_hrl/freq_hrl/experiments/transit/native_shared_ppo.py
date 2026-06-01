@@ -19,7 +19,7 @@ from typing import Any
 
 import numpy as np
 
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig
+from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
 
 
 TRANSIT_HRL_ROOT = Path(__file__).resolve().parents[3]
@@ -27,11 +27,17 @@ TRANSIT_DUET_ROOT = TRANSIT_HRL_ROOT / "freq_transitduet"
 
 
 def _sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-np.asarray(x, dtype=np.float64)))
+    z = np.clip(np.asarray(x, dtype=np.float64), -60.0, 60.0)
+    return 1.0 / (1.0 + np.exp(-z))
 
 
 def _array(value: Any, dtype: Any = np.float32) -> np.ndarray:
     return np.asarray(value, dtype=dtype).reshape(-1)
+
+
+def _state_key(value: Any) -> tuple[float, ...]:
+    arr = _array(value, dtype=np.float64)
+    return tuple(np.round(arr, 6).tolist())
 
 
 @dataclass
@@ -191,12 +197,184 @@ class NativeTransitPPOBridge:
         return self.contract.as_dict()
 
 
+class _SharedPPOPolicyProxy:
+    def __init__(self, bridge: NativeTransitPPOBridge, level: str) -> None:
+        self.bridge = bridge
+        self.level = str(level)
+        self.pending: dict[tuple[float, ...], list[dict[str, Any]]] = {}
+        self.last_upper: dict[str, Any] | None = None
+        self.decisions = 0
+
+    def _remember(self, state: np.ndarray, info: dict[str, Any]) -> None:
+        key = _state_key(state)
+        self.pending.setdefault(key, []).append(info)
+        if self.level == "upper":
+            self.last_upper = info
+        self.decisions += 1
+
+    def pop(self, state: Any) -> dict[str, Any] | None:
+        key = _state_key(state)
+        values = self.pending.get(key)
+        if not values:
+            return None
+        info = values.pop(0)
+        if not values:
+            self.pending.pop(key, None)
+        return info
+
+    def get_action(self, state: Any, deterministic: bool = False) -> np.ndarray:
+        if hasattr(state, "detach"):
+            state = state.detach().cpu().numpy()
+        state_arr = _array(state)
+        sample = not bool(deterministic)
+        if self.level == "upper":
+            out = self.bridge.act_upper_native(state_arr, sample=sample)
+        else:
+            out = self.bridge.act_lower_native(state_arr, sample=sample)
+        info = {
+            "state": state_arr.astype(np.float32).copy(),
+            "latent_action": _array(out["latent_action"]).astype(np.float32),
+            "native_action": _array(out["native_action"]).astype(np.float32),
+            "logp": float(out["logp"]),
+            "value": float(out["value"]),
+        }
+        self._remember(state_arr, info)
+        return info["native_action"].copy()
+
+    def log_prob(self, state: Any, action: Any) -> float:
+        return 0.0
+
+
+class _NativeUpperReplayCollector:
+    def __init__(self, upper_proxy: _SharedPPOPolicyProxy) -> None:
+        self.upper_proxy = upper_proxy
+        self.rows: list[dict[str, Any]] = []
+
+    def push(self, state: Any, action: Any, reward: float, next_state: Any, done: bool) -> None:
+        info = self.upper_proxy.pop(state)
+        self.rows.append({
+            "state": _array(state).astype(np.float32),
+            "native_action": _array(action).astype(np.float32),
+            "latent_action": (
+                _array(info["latent_action"]).astype(np.float32)
+                if info is not None else np.zeros(1, dtype=np.float32)
+            ),
+            "reward": float(reward),
+            "next_state": _array(next_state).astype(np.float32),
+            "done": float(done),
+        })
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+
+class _NativeLowerReplayCollector:
+    def __init__(
+        self,
+        lower_proxy: _SharedPPOPolicyProxy,
+        upper_proxy: _SharedPPOPolicyProxy,
+        contract: NativeTransitContract,
+    ) -> None:
+        self.lower_proxy = lower_proxy
+        self.upper_proxy = upper_proxy
+        self.contract = contract
+        self.rows: list[dict[str, Any]] = []
+
+    def push(
+        self,
+        state: Any,
+        action: Any,
+        reward: float,
+        cost: float,
+        next_state: Any,
+        done: bool,
+        trip_id: int = 0,
+    ) -> None:
+        lower_info = self.lower_proxy.pop(state)
+        upper_info = self.upper_proxy.last_upper
+        if lower_info is None:
+            lower_info = {
+                "state": _array(state).astype(np.float32),
+                "latent_action": np.zeros(int(self.contract.lower_action_dim), dtype=np.float32),
+                "logp": 0.0,
+                "value": 0.0,
+            }
+        if upper_info is None:
+            upper_info = {
+                "state": np.zeros(int(self.contract.upper_state_dim), dtype=np.float32),
+                "latent_action": np.zeros(int(self.contract.upper_action_dim), dtype=np.float32),
+                "logp": 0.0,
+                "value": 0.0,
+            }
+        self.rows.append({
+            "upper_state": _array(upper_info["state"]).astype(np.float32),
+            "lower_state": _array(state).astype(np.float32),
+            "upper_action": _array(upper_info["latent_action"]).astype(np.float32),
+            "lower_action": _array(lower_info["latent_action"]).astype(np.float32),
+            "reward": float(reward),
+            "done": float(done),
+            "old_upper_logp": float(upper_info["logp"]),
+            "old_lower_logp": float(lower_info["logp"]),
+            "old_upper_value": float(upper_info["value"]),
+            "old_lower_value": float(lower_info["value"]),
+            "constraint": float(cost),
+            "trip_id": int(trip_id),
+        })
+
+    def __len__(self) -> int:
+        return len(self.rows)
+
+    def to_batch(self) -> TrajectoryBatch | None:
+        if not self.rows:
+            return None
+        return TrajectoryBatch(
+            upper_state=np.asarray([row["upper_state"] for row in self.rows], dtype=np.float32),
+            lower_state=np.asarray([row["lower_state"] for row in self.rows], dtype=np.float32),
+            upper_action=np.asarray([row["upper_action"] for row in self.rows], dtype=np.float32),
+            lower_action=np.asarray([row["lower_action"] for row in self.rows], dtype=np.float32),
+            reward=np.asarray([row["reward"] for row in self.rows], dtype=np.float32),
+            done=np.asarray([row["done"] for row in self.rows], dtype=np.float32),
+            old_upper_logp=np.asarray([row["old_upper_logp"] for row in self.rows], dtype=np.float32),
+            old_lower_logp=np.asarray([row["old_lower_logp"] for row in self.rows], dtype=np.float32),
+            old_upper_value=np.asarray([row["old_upper_value"] for row in self.rows], dtype=np.float32),
+            old_lower_value=np.asarray([row["old_lower_value"] for row in self.rows], dtype=np.float32),
+            constraint=np.asarray([row["constraint"] for row in self.rows], dtype=np.float32),
+        )
+
+
+def _native_row_score(row: dict[str, Any]) -> float:
+    return -float(row.get("avg_wait_min", 0.0)) - 2.0 * float(row.get("headway_cv", 0.0))
+
+
+def install_shared_ppo_episode_loop(runner: Any, bridge: NativeTransitPPOBridge) -> dict[str, Any]:
+    upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
+    lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
+    lower_collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
+    upper_collector = _NativeUpperReplayCollector(upper_proxy)
+    runner.upper_trainer.policy_net = upper_proxy
+    runner.upper_trainer.replay_buffer = upper_collector
+    runner.lower_trainer.policy_net = lower_proxy
+    runner.replay_buffer = lower_collector
+    runner.upper_warmup = 0
+    runner.updates_per_episode = 0
+    runner.upper_updates = 0
+    runner.tpc_enable = False
+    runner.target_upper_trainer = None
+    return {
+        "upper_proxy": upper_proxy,
+        "lower_proxy": lower_proxy,
+        "lower_collector": lower_collector,
+        "upper_collector": upper_collector,
+    }
+
+
 def load_native_runner(
     config_path: Path,
     *,
     seed: int,
     logs_dir: Path | None,
     device: str = "cpu",
+    config_overrides: dict[str, Any] | None = None,
 ) -> Any:
     if str(TRANSIT_HRL_ROOT) not in sys.path:
         sys.path.insert(0, str(TRANSIT_HRL_ROOT))
@@ -206,9 +384,176 @@ def load_native_runner(
 
     cfg = load_config(str(config_path))
     cfg["seed"] = int(seed)
+    if config_overrides:
+        _merge_dict(cfg, dict(config_overrides))
     if logs_dir is not None:
         cfg.setdefault("logging", {})["logs_dir"] = str(logs_dir)
     return TransitDuetV2Runner(cfg, device=device)
+
+
+def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            _merge_dict(base[key], value)
+        else:
+            base[key] = value
+    return base
+
+
+def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    if not rows:
+        return {"n": 0}
+    keys = [
+        "avg_wait_min",
+        "headway_cv",
+        "ep_reward",
+        "ep_cost",
+        "ep_steps",
+        "upper_plan_decisions",
+        "upper_plan_reuse_ratio",
+        "freq_wait_lower_net_mean",
+        "lower_lf_drift_ratio",
+        "upper_hf_power_ratio",
+        "freq_promotion_strength",
+    ]
+    summary = {"n": len(rows)}
+    for key in keys:
+        vals = [float(row.get(key, 0.0)) for row in rows]
+        summary[f"{key}_mean"] = float(np.mean(vals))
+    summary["score_mean"] = float(np.mean([_native_row_score(row) for row in rows]))
+    return summary
+
+
+def run_native_shared_ppo_episode_loop(
+    output_dir: Path,
+    config_path: Path,
+    *,
+    seed: int = 19,
+    episodes: int = 1,
+    device: str = "cpu",
+    hidden_dim: int = 0,
+    init_log_std: float = -2.0,
+    learning_rate: float = 3e-4,
+    keep_native_log_dir: bool = False,
+) -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    native_logs = output_dir / "native_logs"
+    runner = load_native_runner(
+        config_path,
+        seed=int(seed),
+        logs_dir=native_logs,
+        device=str(device),
+        config_overrides={
+            "coupling": {
+                "upper_warmup_eps": 0,
+                "tpc": {"enable": False},
+            },
+            "lower": {"updates_per_episode": 0},
+            "upper": {
+                "updates_per_episode": 0,
+                "timetable_planner": {"action_ema_alpha": 1.0},
+            },
+            "training": {
+                "diag_freq": max(1, int(episodes) + 1),
+                "trip_dump_freq": max(1, int(episodes) + 1),
+            },
+        },
+    )
+    if runner.diag is None:
+        if str(TRANSIT_DUET_ROOT) not in sys.path:
+            sys.path.insert(0, str(TRANSIT_DUET_ROOT))
+        from freq_transitduet.runner_v3 import DiagnosticLog
+
+        runner.diag = DiagnosticLog(runner.log_dir, resume=False)
+    bridge = NativeTransitPPOBridge.from_runner(
+        runner,
+        hidden_dim=hidden_dim,
+        init_log_std=init_log_std,
+        learning_rate=learning_rate,
+        device=device,
+    )
+    installed = install_shared_ppo_episode_loop(runner, bridge)
+    rows: list[dict[str, Any]] = []
+    updates: list[dict[str, Any]] = []
+    for ep in range(max(1, int(episodes))):
+        collector: _NativeLowerReplayCollector = installed["lower_collector"]
+        collector.rows.clear()
+        row = runner.run_episode(ep, training=True)
+        batch = collector.to_batch()
+        update_metrics = bridge.model.update(batch) if batch is not None else {}
+        row = dict(row)
+        row.update({
+            "native_shared_ppo": True,
+            "shared_ppo_lower_samples": 0 if batch is None else int(batch.reward.size),
+            "shared_ppo_upper_decisions": int(installed["upper_proxy"].decisions),
+            "shared_ppo_lower_decisions": int(installed["lower_proxy"].decisions),
+            "shared_ppo_loss": float(update_metrics.get("loss", 0.0)),
+            "shared_ppo_policy_loss": float(update_metrics.get("policy_loss", 0.0)),
+            "shared_ppo_value_loss": float(update_metrics.get("value_loss", 0.0)),
+        })
+        rows.append(row)
+        updates.append({"episode": int(ep), **update_metrics})
+    summary = _native_summary(rows)
+    payload = {
+        "policy": "shared_dual_actor_critic_ppo",
+        "trainer": "native_transit_episode_loop_shared_ppo",
+        "domain": "transit_native",
+        "seed": int(seed),
+        "episodes": int(max(1, int(episodes))),
+        "contract": bridge.contract_dict(),
+        "rows": rows,
+        "updates": updates,
+        "summary": summary,
+        "status": (
+            "supported_native_episode_loop"
+            if rows and rows[-1].get("shared_ppo_lower_samples", 0) > 0
+            else "failed_native_episode_loop"
+        ),
+    }
+    write_native_loop_outputs(output_dir, payload)
+    if native_logs.exists() and not keep_native_log_dir:
+        shutil.rmtree(native_logs)
+    return payload
+
+
+def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
+    with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    rows = list(payload.get("rows", []))
+    if rows:
+        with (output_dir / "per_episode.csv").open("w", newline="", encoding="utf-8") as f:
+            fieldnames = list(rows[0].keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore", lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+    summary = payload.get("summary", {})
+    lines = [
+        "# Native Transit Shared-PPO Episode Loop",
+        "",
+        f"- status: {payload.get('status', 'missing')}",
+        f"- episodes: {payload.get('episodes', 0)}",
+        f"- shared core: `{payload.get('contract', {}).get('shared_core', 'NA')}`",
+        f"- upper contract: {payload.get('contract', {}).get('upper_state_dim', 'NA')}x{payload.get('contract', {}).get('upper_action_dim', 'NA')}",
+        f"- lower contract: {payload.get('contract', {}).get('lower_state_dim', 'NA')}x{payload.get('contract', {}).get('lower_action_dim', 'NA')}",
+        f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
+        f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
+        f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
+        "",
+        "| ep | wait | cv | reward | lower samples | upper decisions | lower decisions | loss |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in rows:
+        lines.append(
+            f"| {int(row.get('ep', 0))} "
+            f"| {float(row.get('avg_wait_min', 0.0)):.4f} "
+            f"| {float(row.get('headway_cv', 0.0)):.4f} "
+            f"| {float(row.get('ep_reward', 0.0)):.4f} "
+            f"| {int(row.get('shared_ppo_lower_samples', 0))} "
+            f"| {int(row.get('shared_ppo_upper_decisions', 0))} "
+            f"| {int(row.get('shared_ppo_lower_decisions', 0))} "
+            f"| {float(row.get('shared_ppo_loss', 0.0)):.4f} |"
+        )
+    (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def run_native_shared_ppo_audit(
@@ -313,21 +658,40 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--keep-native-log-dir", action="store_true")
+    parser.add_argument("--episode-loop", action="store_true")
+    parser.add_argument("--episodes", type=int, default=1)
     args = parser.parse_args()
-    summary = run_native_shared_ppo_audit(
-        output_dir=args.output_dir,
-        config_path=args.config,
-        seed=int(args.seed),
-        device=str(args.device),
-        keep_native_log_dir=bool(args.keep_native_log_dir),
-    )
-    print(f"wrote {args.output_dir}")
-    print(
-        "native_shared_ppo "
-        f"status={summary['status']} "
-        f"upper_dim={summary['contract']['upper_state_dim']}x{summary['contract']['upper_action_dim']} "
-        f"lower_dim={summary['contract']['lower_state_dim']}x{summary['contract']['lower_action_dim']}"
-    )
+    if args.episode_loop:
+        summary = run_native_shared_ppo_episode_loop(
+            output_dir=args.output_dir,
+            config_path=args.config,
+            seed=int(args.seed),
+            episodes=int(args.episodes),
+            device=str(args.device),
+            keep_native_log_dir=bool(args.keep_native_log_dir),
+        )
+        print(f"wrote {args.output_dir}")
+        print(
+            "native_shared_ppo_loop "
+            f"status={summary['status']} "
+            f"episodes={summary['episodes']} "
+            f"wait={summary['summary'].get('avg_wait_min_mean', 0.0):.3f}"
+        )
+    else:
+        summary = run_native_shared_ppo_audit(
+            output_dir=args.output_dir,
+            config_path=args.config,
+            seed=int(args.seed),
+            device=str(args.device),
+            keep_native_log_dir=bool(args.keep_native_log_dir),
+        )
+        print(f"wrote {args.output_dir}")
+        print(
+            "native_shared_ppo "
+            f"status={summary['status']} "
+            f"upper_dim={summary['contract']['upper_state_dim']}x{summary['contract']['upper_action_dim']} "
+            f"lower_dim={summary['contract']['lower_state_dim']}x{summary['contract']['lower_action_dim']}"
+        )
 
 
 if __name__ == "__main__":

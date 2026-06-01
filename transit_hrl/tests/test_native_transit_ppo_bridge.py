@@ -2,7 +2,11 @@ import unittest
 
 import numpy as np
 
-from freq_hrl.experiments.transit.native_shared_ppo import NativeTransitPPOBridge
+from freq_hrl.experiments.transit.native_shared_ppo import (
+    NativeTransitPPOBridge,
+    _NativeLowerReplayCollector,
+    _SharedPPOPolicyProxy,
+)
 
 
 class _FakeNativeRunner:
@@ -45,6 +49,32 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(contract["shared_core"], "freq_hrl.rl.DualActorCriticPPO")
         self.assertTrue(contract["terminal_dispatch"])
         self.assertTrue(contract["promotion_replan"])
+
+    def test_native_episode_collector_builds_shared_ppo_batch(self):
+        bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
+        upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
+        lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
+        collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
+        upper_state = np.arange(5, dtype=np.float32)
+        lower_state = np.arange(3, dtype=np.float32)
+        upper_proxy.get_action(upper_state, deterministic=True)
+        lower_proxy.get_action(lower_state, deterministic=True)
+        collector.push(
+            lower_state,
+            np.asarray([10.0], dtype=np.float32),
+            reward=-1.0,
+            cost=0.25,
+            next_state=lower_state + 1.0,
+            done=False,
+            trip_id=3,
+        )
+        batch = collector.to_batch()
+        self.assertIsNotNone(batch)
+        self.assertEqual(batch.upper_state.shape, (1, 5))
+        self.assertEqual(batch.lower_state.shape, (1, 3))
+        self.assertEqual(batch.upper_action.shape, (1, 4))
+        self.assertEqual(batch.lower_action.shape, (1, 1))
+        self.assertAlmostEqual(float(batch.constraint[0]), 0.25)
 
 
 if __name__ == "__main__":
