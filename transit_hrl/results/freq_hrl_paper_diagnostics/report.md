@@ -19,13 +19,13 @@ Promotion false positives and false negatives are controlled by the persistence 
 
 | claim | status | metric | remaining gap |
 |---|---|---|---|
-| C1: frequency-separated HRL can share one training core | partial | trading plan return=0.2991; transit composite=1.6950337432937435 | Copied Transit native simulator still uses copied RESAC runner. |
+| C1: frequency-separated HRL can share one training core | supported interface | trading plan return=0.2991; transit composite=1.6950337432937435; native bridge=supported_interface U=20x4 L=43x1 | Native shared-PPO bridge exists; full native episode replacement training and performance validation remain. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
 | C3: promotion should trigger replanning after persistent shocks | supported learned | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=-0.0044 [-0.0055, -0.0023], wait=-0.0006 [-0.0008, -0.0004], replans=+13.3333 [+12.0000, +15.0000] | Learned gate is supported on Transit PPO surrogate; native off-policy and larger-seed validation remain. |
 | C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | mixed | adaptive Sharpe=13.0749; EMA Sharpe=16.0625 | Neural state-space and PINN-constrained encoders remain open. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200 | Short Level-1 intraday slice only; no order book or execution simulator. |
-| C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198] | Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation. |
+| C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198] | Supported on the small Transit surrogate gate and native shared-PPO interface; still needs full native performance and real-demand validation. |
 | C8: passenger waiting-time frequency credit improves control quality | supported | wait delta vs no-wait=-0.1251 [-0.1468, -0.1020] | Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation. |
 | C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
 | C10: dynamic harmonic count-state demand estimator is competitive | supported | MSE delta=-2.2628 [-2.9776, -1.6011] | The count-state path is present; it must beat or match Fourier on larger real Transit demand data before becoming a headline claim. |
@@ -57,4 +57,4 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 ## Paper Boundary
 
-The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because copied Transit native training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.
+The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because full native Transit shared-PPO training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.

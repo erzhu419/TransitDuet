@@ -1,0 +1,60 @@
+{
+  "config_path": "/home/erzhu419/mine_code/TransitDuet/transit_hrl/freq_transitduet/configs_freqduet/T_freqhrl_native_full.yaml",
+  "seed": 7,
+  "contract": {
+    "upper_state_dim": 20,
+    "lower_state_dim": 43,
+    "upper_action_dim": 4,
+    "lower_action_dim": 1,
+    "upper_action_low": [
+      -60.0,
+      -60.0,
+      -60.0,
+      -60.0
+    ],
+    "upper_action_high": [
+      20.0,
+      20.0,
+      20.0,
+      20.0
+    ],
+    "lower_action_range_s": 45.0,
+    "lower_action_bins": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      30.0,
+      45.0
+    ],
+    "frequency_method": "dynamic_harmonic_nb",
+    "timetable_planner": true,
+    "terminal_dispatch": true,
+    "promotion_replan": true,
+    "shared_core": "freq_hrl.rl.DualActorCriticPPO"
+  },
+  "smoke_actions": {
+    "upper_native_action": [
+      -24.071197509765625,
+      -16.26272201538086,
+      -26.170198440551758,
+      -21.654218673706055
+    ],
+    "lower_native_action": [
+      20.0
+    ],
+    "upper_logp": 4.324245929718018,
+    "lower_logp": 1.0810614824295044
+  },
+  "checks": {
+    "native_runner_instantiated": true,
+    "uses_shared_core": true,
+    "upper_action_dim_matches_native": true,
+    "upper_action_in_bounds": true,
+    "lower_action_in_bounds": true,
+    "native_timetable_terminal_dispatch": true,
+    "native_promotion_replan": true
+  },
+  "status": "supported_interface"
+}

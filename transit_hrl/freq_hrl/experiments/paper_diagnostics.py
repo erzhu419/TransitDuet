@@ -406,6 +406,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     replan = read_json(results_root / "trading_promotion_replan" / "summary.json")
     intraday = read_json(results_root / "trading_public_market_intraday_encoder_ablation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
+    native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
     transit = read_csv_rows(transit_root / "transit_performance_validation" / "summary.csv")
     checks = build_statistical_checks(results_root)
 
@@ -418,14 +419,22 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     best_intraday = max(intraday_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     adaptive = next((row for row in encoder_rows if row.get("freq_method") == "adaptive_wavelet"), {})
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
+    native_contract = native_audit.get("contract", {}) if isinstance(native_audit, dict) else {}
+    native_status = str(native_audit.get("status", "missing")) if isinstance(native_audit, dict) else "missing"
 
     return [
         {
             "claim": "C1: frequency-separated HRL can share one training core",
-            "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters.",
-            "metric": f"trading plan return={_fmt(plan_summary.get('total_return_mean'))}; transit composite={transit_freq.get('composite_mean', 'NA')}",
-            "status": "partial",
-            "remaining_gap": "Copied Transit native simulator still uses copied RESAC runner.",
+            "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters; native Transit bridge maps that core onto real runner state/action contracts.",
+            "metric": (
+                f"trading plan return={_fmt(plan_summary.get('total_return_mean'))}; "
+                f"transit composite={transit_freq.get('composite_mean', 'NA')}; "
+                f"native bridge={native_status} "
+                f"U={native_contract.get('upper_state_dim', 'NA')}x{native_contract.get('upper_action_dim', 'NA')} "
+                f"L={native_contract.get('lower_state_dim', 'NA')}x{native_contract.get('lower_action_dim', 'NA')}"
+            ),
+            "status": "supported interface" if native_status == "supported_interface" else "partial",
+            "remaining_gap": "Native shared-PPO bridge exists; full native episode replacement training and performance validation remain.",
         },
         {
             "claim": "C2: high-level plan variables can be learned as curves",
@@ -494,7 +503,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"drift delta={_check_metric(checks, 'transit_full_lower_lf_vs_base')}"
             ),
             "status": _check_status(checks, "transit_full_reward_vs_base"),
-            "remaining_gap": "Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation.",
+            "remaining_gap": "Supported on the small Transit surrogate gate and native shared-PPO interface; still needs full native performance and real-demand validation.",
         },
         {
             "claim": "C8: passenger waiting-time frequency credit improves control quality",
@@ -635,7 +644,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because copied Transit native training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because full native Transit shared-PPO training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

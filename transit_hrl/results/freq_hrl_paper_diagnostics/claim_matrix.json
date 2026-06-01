@@ -2,10 +2,10 @@
   "claims": [
     {
       "claim": "C1: frequency-separated HRL can share one training core",
-      "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters.",
-      "metric": "trading plan return=0.2991; transit composite=1.6950337432937435",
-      "status": "partial",
-      "remaining_gap": "Copied Transit native simulator still uses copied RESAC runner."
+      "evidence": "Shared dual PPO loop drives Trading and Transit surrogate adapters; native Transit bridge maps that core onto real runner state/action contracts.",
+      "metric": "trading plan return=0.2991; transit composite=1.6950337432937435; native bridge=supported_interface U=20x4 L=43x1",
+      "status": "supported interface",
+      "remaining_gap": "Native shared-PPO bridge exists; full native episode replacement training and performance validation remain."
     },
     {
       "claim": "C2: high-level plan variables can be learned as curves",
@@ -47,7 +47,7 @@
       "evidence": "Gap-closure matrix combines count demand state, plan curves, promotion replanning, native lower context, wait credit, and drift constraint.",
       "metric": "reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198]",
       "status": "supported",
-      "remaining_gap": "Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation."
+      "remaining_gap": "Supported on the small Transit surrogate gate and native shared-PPO interface; still needs full native performance and real-demand validation."
     },
     {
       "claim": "C8: passenger waiting-time frequency credit improves control quality",
