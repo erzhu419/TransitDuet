@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_holdpen05_current_hiro.yaml
+_name: F_freqduet_gen_rushshift_holdpen05_current_hiro
+
+env:
+  demand_noise: 0.0
+  peak_shift_choices: [-2, -1, 1, 2]
+  peak_shift_probs: [0.25, 0.25, 0.25, 0.25]

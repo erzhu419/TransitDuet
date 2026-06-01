@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_adaptive_rawcredit_hiro
+
+# Lower HF wait credit uses raw residual only when the causal middle-band
+# energy remains stable. Under high-noise demand it falls back to the denoised
+# HF feature, avoiding the global raw-credit failure mode.
+reward_attribution:
+  lower_high_source: adaptive_raw
+  lower_raw_gate_middle_energy_max: 0.038
+  lower_raw_gate_width: 0.010
+  lower_raw_gate_min_weight: 0.0

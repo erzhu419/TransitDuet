@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_holdpen06_current_hiro
+
+# Same current main path, but restore the stronger positive-HF hold-through
+# penalty that previously improved held-out highnoise/OD/rush screens. This
+# strengthens lower high-frequency action credit without exposing raw residual
+# wait credit directly to the lower reward.
+reward_attribution:
+  lower_hold_high_source: raw
+  lower_hold_positive_high_only: true
+  lower_hold_penalty_weight: 0.06
+  lower_hold_norm_s: 45.0
+  lower_hold_clip: 2.0

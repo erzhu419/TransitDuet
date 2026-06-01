@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_adaptive_rawcredit_hiro.yaml
+_name: F_freqduet_terminal_adaptive_hfgate_hiro
+
+# High-energy guard for adaptive raw residual lower credit. Raw HF credit is
+# only allowed when the decomposer sees true high-frequency energy; ordinary
+# base and rush-pattern shifts fall back to the denoised HF feature.
+reward_attribution:
+  lower_raw_gate_high_energy_min: 0.070
+  lower_raw_gate_high_energy_width: 0.006

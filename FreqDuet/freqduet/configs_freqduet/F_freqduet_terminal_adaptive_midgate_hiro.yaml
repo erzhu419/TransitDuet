@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_adaptive_rawcredit_hiro.yaml
+_name: F_freqduet_terminal_adaptive_midgate_hiro
+
+# Raw lower HF credit is only allowed when the causal middle-band level is not
+# showing a sustained positive rush-like drift. This keeps burst/noise credit
+# available while leaving slow demand shifts to the upper layer and promotion.
+reward_attribution:
+  lower_raw_gate_middle_value_max: 0.006
+  lower_raw_gate_middle_value_width: 0.006

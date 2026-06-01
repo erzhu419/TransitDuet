@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_hiro
+
+# Held-out rush-pattern shift: keep total hourly scale fixed but sample a
+# shifted OD-hour lookup so peaks arrive earlier/later than the base day.
+env:
+  demand_noise: 0.0
+  peak_shift_choices: [-2, -1, 1, 2]
+  peak_shift_probs: [0.25, 0.25, 0.25, 0.25]

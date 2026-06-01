@@ -161,9 +161,10 @@ class env_bus(object):
         self.timetables = self.set_timetables()
 
         # Episode-level demand stochasticity:
-        # - Per-hour multiplier: uniform(0.7, 1.3) → demand intensity varies
-        # - Peak hour shift: ±30min (0 or 1 hour granularity in OD)
-        # Stored on env so station_update can use it
+        # - Per-hour multiplier: demand intensity varies by hour.
+        # - Peak-hour lookup shift: held-out rush-pattern tests can set this
+        #   explicitly, otherwise demand-noise runs use the historical default.
+        # Stored on env so station_update can use it.
         demand_noise = getattr(self, 'demand_noise', 0.0)
         if demand_noise > 0:
             # Per-hour demand multipliers (14 hours: 6:00-19:00)
@@ -171,10 +172,37 @@ class env_bus(object):
                 h: np.clip(np.random.normal(1.0, demand_noise), 0.3, 2.0)
                 for h in range(6, 20)
             }
-            # Random peak shift: shift peak demand pattern by ±1 hour
-            self._peak_shift = np.random.choice([-1, 0, 0, 0, 1])
         else:
             self._demand_multipliers = None
+
+        peak_shift_choices = getattr(self, 'peak_shift_choices', None)
+        if peak_shift_choices is not None:
+            try:
+                choices = np.asarray([int(x) for x in peak_shift_choices],
+                                     dtype=int)
+            except Exception:
+                choices = np.asarray([], dtype=int)
+            if choices.size:
+                probs = None
+                peak_shift_probs = getattr(self, 'peak_shift_probs', None)
+                if peak_shift_probs is not None:
+                    try:
+                        probs_arr = np.asarray(
+                            [float(x) for x in peak_shift_probs], dtype=float)
+                        probs_arr = np.maximum(probs_arr, 0.0)
+                        total = float(probs_arr.sum())
+                        if probs_arr.size == choices.size and total > 0:
+                            probs = probs_arr / total
+                    except Exception:
+                        probs = None
+                self._peak_shift = int(np.random.choice(choices, p=probs))
+            else:
+                self._peak_shift = 0
+        elif demand_noise > 0:
+            # Historical generalization default: shift peak demand pattern by
+            # one hour sometimes, while usually keeping the original profile.
+            self._peak_shift = int(np.random.choice([-1, 0, 0, 0, 1]))
+        else:
             self._peak_shift = 0
         self._demand_scale = max(
             0.0, float(getattr(self, 'demand_scale', 1.0)))

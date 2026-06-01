@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_rawcredit_hiro
+
+# Keep the promoted LF/HF split, but credit lower-level wait response against
+# the raw HF residual. This tests whether OD-shift failures come from
+# over-denoising lower high-frequency credit rather than from the hierarchy.
+reward_attribution:
+  lower_high_source: raw

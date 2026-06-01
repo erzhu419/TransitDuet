@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_adaptive_rawcredit_hiro.yaml
+_name: F_freqduet_terminal_adaptive_noisegate_hiro
+
+# Raw HF wait credit is useful for demand-noise bursts, but it corrupts
+# rush-shift/baseline learning when the middle band is positive. Gate it toward
+# high HF energy with negative middle-band drift instead of low middle energy.
+reward_attribution:
+  lower_raw_gate_middle_energy_max: 0.120
+  lower_raw_gate_width: 0.020
+  lower_raw_gate_high_energy_min: 0.070
+  lower_raw_gate_high_energy_width: 0.020
+  lower_raw_gate_middle_value_max: -0.004
+  lower_raw_gate_middle_value_width: 0.006
+  lower_raw_gate_min_weight: 0.0

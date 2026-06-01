@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_adaptive_rawband_hiro
+
+# Band-pass raw residual credit: leave ordinary base/rush bursts denoised,
+# but allow raw HF credit when causal middle-band energy indicates a sustained
+# local regime buffer rather than one-step noise.
+reward_attribution:
+  lower_high_source: adaptive_raw
+  lower_raw_gate_middle_energy_min: 0.034
+  lower_raw_gate_middle_energy_max: 0.055
+  lower_raw_gate_width: 0.006
+  lower_raw_gate_min_weight: 0.0

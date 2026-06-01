@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_adaptive_rawcredit_hiro.yaml
+_name: F_freqduet_terminal_adaptive_midgate_strict_hiro
+
+# Stricter positive middle-band guard. The v1 middle gate still allowed too
+# much raw lower HF credit under held-out rush shifts; this setting only keeps
+# raw credit when the middle-band level is near-neutral or negative.
+reward_attribution:
+  lower_raw_gate_middle_value_max: 0.004
+  lower_raw_gate_middle_value_width: 0.003
