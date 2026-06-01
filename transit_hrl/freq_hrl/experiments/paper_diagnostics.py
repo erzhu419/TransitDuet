@@ -405,6 +405,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     constrained = read_json(results_root / "trading_ppo_primal_dual_leakage" / "summary.json")
     replan = read_json(results_root / "trading_promotion_replan" / "summary.json")
     intraday = read_json(results_root / "trading_public_market_intraday_encoder_ablation" / "summary.json")
+    order_book = read_json(results_root / "trading_order_book_encoder_ablation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
     neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
@@ -416,10 +417,12 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     constrained_summary = constrained.get("summary", {})
     replan_delta = replan.get("paired_delta", {})
     intraday_rows = intraday.get("summary", [])
+    order_book_rows = order_book.get("summary", [])
     encoder_rows = encoder.get("summary", [])
     neural_encoder_rows = neural_encoder.get("summary", [])
     transit_freq = next((row for row in transit if row.get("config") == "T_freqhrl_terminal"), {})
     best_intraday = max(intraday_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
+    best_order_book = max(order_book_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     adaptive = next((row for row in encoder_rows if row.get("freq_method") == "adaptive_wavelet"), {})
     neural = next((row for row in neural_encoder_rows if row.get("freq_method") == "neural_state_space"), {})
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
@@ -505,10 +508,15 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C6: public-data validation covers more than daily bars",
-            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation artifact.",
-            "metric": f"best intraday encoder={best_intraday.get('freq_method', 'NA')}, Sharpe={_fmt(best_intraday.get('sharpe'))}",
+            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation and order-book microstructure CSV adapter artifacts.",
+            "metric": (
+                f"best intraday encoder={best_intraday.get('freq_method', 'NA')}, "
+                f"Sharpe={_fmt(best_intraday.get('sharpe'))}; "
+                f"best order-book encoder={best_order_book.get('freq_method', 'NA')}, "
+                f"Sharpe={_fmt(best_order_book.get('sharpe'))}"
+            ),
             "status": "supported path",
-            "remaining_gap": "Short Level-1 intraday slice only; no order book or execution simulator.",
+            "remaining_gap": "Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim.",
         },
         {
             "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",

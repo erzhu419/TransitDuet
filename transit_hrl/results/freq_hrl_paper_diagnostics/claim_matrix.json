@@ -37,10 +37,10 @@
     },
     {
       "claim": "C6: public-data validation covers more than daily bars",
-      "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation artifact.",
-      "metric": "best intraday encoder=adaptive_wavelet, Sharpe=-9.2200",
+      "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation and order-book microstructure CSV adapter artifacts.",
+      "metric": "best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851",
       "status": "supported path",
-      "remaining_gap": "Short Level-1 intraday slice only; no order book or execution simulator."
+      "remaining_gap": "Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim."
     },
     {
       "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
