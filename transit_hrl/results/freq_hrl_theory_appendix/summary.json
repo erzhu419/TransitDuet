@@ -1,0 +1,96 @@
+{
+  "formal_objects": [
+    "causal exogenous stream x_t",
+    "endogenous environment state z_t",
+    "causal spectral encoder E_phi(x_<=t)",
+    "upper low-frequency plan policy pi_U",
+    "lower high-frequency controller pi_L",
+    "promotion gate g_promote",
+    "action-effect leakage cost L_t"
+  ],
+  "assumptions": [
+    "A1: the encoder reads only current and past exogenous bins.",
+    "A2: the upper action remains active across multiple lower decisions unless a scheduled or promoted replan occurs.",
+    "A3: leakage costs are nonnegative and computed causally from action effects.",
+    "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p."
+  ],
+  "examples": {
+    "leakage_bound_example": 0.087,
+    "promotion_false_positive_bound_example": 0.28650479686019015,
+    "promotion_detection_delay_bound_s": 600.0
+  },
+  "cited_checks": {
+    "transit_learned_promotion_wait": {
+      "check": "transit_learned_promotion_wait_vs_interval",
+      "claim": "learned promotion gate lowers Transit wait after persistent shocks",
+      "status": "supported",
+      "metric": "wait_proxy",
+      "treatment": "learned_gate",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": "10",
+      "delta_mean": "-0.00786163493657197",
+      "delta_ci95_low": "-0.009634420896740811",
+      "delta_ci95_high": "-0.006195855116323389",
+      "improvement_mean": "0.00786163493657197",
+      "improvement_ci95_low": "0.006355749720244377",
+      "improvement_ci95_high": "0.009645134594436456",
+      "win_rate": "1.0",
+      "sign_p_value": "0.001953125"
+    },
+    "native_learned_gate_reward": {
+      "check": "transit_native_learned_gate_reward_vs_interval",
+      "claim": "native learned promotion gate improves Transit episode reward",
+      "status": "positive_mixed",
+      "metric": "ep_reward",
+      "treatment": "native_learned_gate",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": "8",
+      "delta_mean": "33.40050000000025",
+      "delta_ci95_low": "-15.637375000000247",
+      "delta_ci95_high": "105.49962500000032",
+      "improvement_mean": "33.40050000000025",
+      "improvement_ci95_low": "-16.494115624999097",
+      "improvement_ci95_high": "106.35185625000008",
+      "win_rate": "0.625",
+      "sign_p_value": "0.7265625"
+    },
+    "trading_leakage_constraint": {
+      "check": "trading_constraint_lower_lf",
+      "claim": "primal-dual constraint lowers trading lower-LF drift",
+      "status": "supported",
+      "metric": "LowerLFDrift",
+      "treatment": "trading_constrained",
+      "control": "trading_plan",
+      "direction": "decrease",
+      "n_common": "5",
+      "delta_mean": "-1.0781856879544436",
+      "delta_ci95_low": "-1.2589940220658022",
+      "delta_ci95_high": "-0.8371210591584954",
+      "improvement_mean": "1.0781856879544436",
+      "improvement_ci95_low": "0.8371210591584954",
+      "improvement_ci95_high": "1.2589940220658022",
+      "win_rate": "1.0",
+      "sign_p_value": "0.0625"
+    },
+    "transit_leakage_constraint": {
+      "check": "transit_constraint_lower_lf",
+      "claim": "primal-dual constraint lowers Transit lower-LF drift",
+      "status": "supported",
+      "metric": "LowerLFDrift",
+      "treatment": "transit_constrained",
+      "control": "transit_plan",
+      "direction": "decrease",
+      "n_common": "5",
+      "delta_mean": "-0.3089563241370127",
+      "delta_ci95_low": "-0.33821777083336013",
+      "delta_ci95_high": "-0.2833995091642844",
+      "improvement_mean": "0.3089563241370127",
+      "improvement_ci95_low": "0.2833995091642844",
+      "improvement_ci95_high": "0.33812474026948364",
+      "win_rate": "1.0",
+      "sign_p_value": "0.0625"
+    }
+  }
+}

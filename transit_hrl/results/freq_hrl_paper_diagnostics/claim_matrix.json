@@ -51,10 +51,10 @@
     },
     {
       "claim": "C8: passenger waiting-time frequency credit improves control quality",
-      "evidence": "Full Freq-HRL path is paired against the same path without wait attribution.",
-      "metric": "wait delta vs no-wait=-0.1251 [-0.1468, -0.1020]",
+      "evidence": "Full Freq-HRL path is paired against the same path without wait attribution in both the surrogate gate and the native shared-PPO Transit loop.",
+      "metric": "surrogate wait delta=-0.1251 [-0.1468, -0.1020]; native final wait delta=NA; native score delta=NA; native reward delta=NA",
       "status": "supported",
-      "remaining_gap": "Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation."
+      "remaining_gap": "Native wait-credit validation harness exists, but native timetable performance is not yet supported."
     },
     {
       "claim": "C9: leakage constraints achieve no-tradeoff responsibility separation",

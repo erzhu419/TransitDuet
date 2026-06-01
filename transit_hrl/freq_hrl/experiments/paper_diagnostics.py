@@ -354,6 +354,76 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=5,
             )
 
+    native_wait_rows = collect_summary_rows(results_root, "transit_native_wait_credit")
+    if native_wait_rows:
+        add(
+            "transit_native_wait_credit_final_wait_vs_no_wait",
+            "native frequency-attributed wait credit lowers final Transit wait",
+            paired_delta_stats(
+                native_wait_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="final_avg_wait_min",
+                treatment="native_wait_credit",
+                control="no_wait_credit",
+                lower_is_better=True,
+            ),
+            min_pairs=5,
+        )
+        add(
+            "transit_native_wait_credit_mean_wait_vs_no_wait",
+            "native frequency-attributed wait credit lowers mean Transit wait",
+            paired_delta_stats(
+                native_wait_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="avg_wait_min_mean",
+                treatment="native_wait_credit",
+                control="no_wait_credit",
+                lower_is_better=True,
+            ),
+            min_pairs=5,
+        )
+        add(
+            "transit_native_wait_credit_reward_vs_no_wait",
+            "native frequency-attributed wait credit improves episode reward",
+            paired_delta_stats(
+                native_wait_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="final_ep_reward",
+                treatment="native_wait_credit",
+                control="no_wait_credit",
+            ),
+            min_pairs=5,
+        )
+        add(
+            "transit_native_wait_credit_score_vs_no_wait",
+            "native frequency-attributed wait credit improves wait/headway score",
+            paired_delta_stats(
+                native_wait_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="final_score",
+                treatment="native_wait_credit",
+                control="no_wait_credit",
+            ),
+            min_pairs=5,
+        )
+        add(
+            "transit_native_wait_credit_active_vs_no_wait",
+            "native frequency-attributed wait credit is active in PPO rewards",
+            paired_delta_stats(
+                native_wait_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="freq_wait_upper_credit_std",
+                treatment="native_wait_credit",
+                control="no_wait_credit",
+            ),
+            min_pairs=5,
+        )
+
     demand_rows = collect_demand_rows(results_root)
     demand_methods = {str(row.get("method")) for row in demand_rows}
     if {"dynamic_harmonic_nb", "fourier"} <= demand_methods:
@@ -547,6 +617,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_promotion_replan_status = _check_status(checks, "transit_native_promotion_replans_vs_interval")
     native_learned_reward_status = _check_status(checks, "transit_native_learned_gate_reward_vs_interval")
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
+    native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
     elif (
@@ -659,10 +730,34 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C8: passenger waiting-time frequency credit improves control quality",
-            "evidence": "Full Freq-HRL path is paired against the same path without wait attribution.",
-            "metric": f"wait delta vs no-wait={_check_metric(checks, 'transit_wait_credit_vs_no_wait')}",
-            "status": _check_status(checks, "transit_wait_credit_vs_no_wait"),
-            "remaining_gap": "Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation.",
+            "evidence": "Full Freq-HRL path is paired against the same path without wait attribution in both the surrogate gate and the native shared-PPO Transit loop.",
+            "metric": (
+                f"surrogate wait delta={_check_metric(checks, 'transit_wait_credit_vs_no_wait')}; "
+                f"native final wait delta={_check_metric(checks, 'transit_native_wait_credit_final_wait_vs_no_wait')}; "
+                f"native score delta={_check_metric(checks, 'transit_native_wait_credit_score_vs_no_wait')}; "
+                f"native reward delta={_check_metric(checks, 'transit_native_wait_credit_reward_vs_no_wait')}"
+            ),
+            "status": (
+                "supported native"
+                if native_wait_credit_status == "supported"
+                else (
+                    "supported surrogate; native positive-mixed"
+                    if (
+                        _check_status(checks, "transit_wait_credit_vs_no_wait") == "supported"
+                        and native_wait_credit_status == "positive_mixed"
+                    )
+                    else _check_status(checks, "transit_wait_credit_vs_no_wait")
+                )
+            ),
+            "remaining_gap": (
+                "Native wait-credit path is positive-mixed in the shared-PPO loop; still needs more seeds/episodes and real AFC/APC demand."
+                if native_wait_credit_status == "positive_mixed"
+                else (
+                    "Native wait-credit path is supported in the shared-PPO loop; still needs real AFC/APC demand."
+                    if native_wait_credit_status == "supported"
+                    else "Native wait-credit validation harness exists, but native timetable performance is not yet supported."
+                )
+            ),
         },
         {
             "claim": "C9: leakage constraints achieve no-tradeoff responsibility separation",
