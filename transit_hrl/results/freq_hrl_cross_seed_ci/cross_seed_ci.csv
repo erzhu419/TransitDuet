@@ -1,0 +1,18 @@
+check,claim,metric,status,direction,n_common,delta_ci95,improvement_ci95_low,win_rate,sign_p_value,enough_pairs,ci_supported,p_supported,paper_ready
+transit_full_reward_vs_base,integrated Transit Freq-HRL improves task reward,reward_mean,supported,increase,3,"+0.0565 [+0.0485, +0.0608]",0.04848341915777432,1.0,0.25,False,True,False,False
+transit_full_wait_vs_base,integrated Transit Freq-HRL lowers passenger wait proxy,wait_proxy,supported,decrease,3,"-0.0758 [-0.0815, -0.0651]",0.0651045149148004,1.0,0.25,False,True,False,False
+transit_full_lower_lf_vs_base,integrated Transit Freq-HRL reduces lower low-frequency drift,RawLowerLFDriftAbs,supported,decrease,3,"-0.0199 [-0.0199, -0.0198]",0.019750900455039796,1.0,0.25,False,True,False,False
+transit_wait_credit_vs_no_wait,frequency-attributed wait credit improves wait proxy,wait_proxy,supported,decrease,3,"-0.1251 [-0.1468, -0.1020]",0.10198934755207123,1.0,0.25,False,True,False,False
+transit_learned_promotion_reward_vs_interval,learned promotion gate improves Transit reward after persistent shocks,reward_mean,not_supported,increase,5,"-0.0034 [-0.0048, -0.0019]",-0.004813991945962925,0.0,0.0625,True,False,True,False
+transit_learned_promotion_wait_vs_interval,learned promotion gate lowers Transit wait after persistent shocks,wait_proxy,supported,decrease,5,"-0.0008 [-0.0012, -0.0005]",0.0004800335450262594,1.0,0.0625,True,True,True,True
+transit_learned_promotion_replans_vs_interval,learned promotion gate increases shock-triggered replans,promotion_replan_count,supported,increase,5,"+16.4000 [+12.6000, +22.8000]",12.6,1.0,0.0625,True,True,True,True
+transit_learned_promotion_raw_lf_vs_interval,learned promotion gate does not increase lower LF drift,RawLowerLFDriftAbs,supported,decrease,5,"-0.0003 [-0.0003, -0.0002]",0.0002358226698635467,1.0,0.0625,True,True,True,True
+demand_nb_vs_fourier_mse,dynamic harmonic count estimator is competitive with Fourier,mse,supported,decrease,17,"-0.7217 [-1.2633, -0.2617]",0.2389439711221359,0.8235294117647058,0.012725830078125,True,True,True,True
+demand_nb_vs_fourier_mae,dynamic harmonic count estimator is competitive with Fourier,mae,supported,decrease,17,"-0.0494 [-0.0759, -0.0296]",0.028152341116380375,1.0,1.52587890625e-05,True,True,True,True
+demand_nb_vs_fourier_poisson_nll_no_const,dynamic harmonic count estimator is competitive with Fourier,poisson_nll_no_const,supported,decrease,17,"-0.1322 [-0.1620, -0.1047]",0.10276718876416963,1.0,1.52587890625e-05,True,True,True,True
+trading_constraint_lower_lf,primal-dual constraint lowers trading lower-LF drift,LowerLFDrift,supported,decrease,5,"-1.0782 [-1.2590, -0.8371]",0.8371210591584954,1.0,0.0625,True,True,True,True
+trading_constraint_return_tradeoff,trading leakage constraint has no return tradeoff,total_return,supported,increase,5,"-0.0003 [-0.0011, +0.0006]",-0.0011072366285058254,0.4,1.0,True,False,False,False
+trading_constraint_raw_lower_lf,primal-dual constraint lowers raw trading lower-LF drift,RawLowerLFDriftAbs,supported,decrease,5,"-0.0000 [-0.0000, -0.0000]",2.2816045690793945e-05,1.0,0.0625,True,True,True,True
+transit_constraint_lower_lf,primal-dual constraint lowers Transit lower-LF drift,LowerLFDrift,supported,decrease,5,"-0.3090 [-0.3382, -0.2834]",0.2833995091642844,1.0,0.0625,True,True,True,True
+transit_constraint_reward_tradeoff,Transit leakage constraint has no reward tradeoff,reward_mean,supported,increase,5,"+0.0316 [+0.0308, +0.0322]",0.030815755572117888,1.0,0.0625,True,True,True,True
+transit_constraint_raw_lower_lf,primal-dual constraint lowers raw Transit lower-LF drift,RawLowerLFDriftAbs,supported,decrease,5,"-0.0192 [-0.0193, -0.0192]",0.019188828935758327,1.0,0.0625,True,True,True,True
