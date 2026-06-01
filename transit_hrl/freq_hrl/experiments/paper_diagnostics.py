@@ -85,6 +85,16 @@ def collect_payload_rows(results_root: Path, dirname: str) -> list[dict[str, Any
     return rows
 
 
+def collect_summary_rows(results_root: Path, dirname: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    data = read_json(results_root / dirname / "summary.json")
+    for row in data.get("rows", []):
+        item = dict(row)
+        item["source"] = dirname
+        rows.append(item)
+    return rows
+
+
 def collect_per_seed_rows(
     results_root: Path,
     variants: dict[str, str],
@@ -245,6 +255,49 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 lower_is_better=True,
             ),
             min_pairs=3,
+        )
+
+    native_promotion_rows = collect_summary_rows(results_root, "transit_native_promotion_replan")
+    if native_promotion_rows:
+        add(
+            "transit_native_promotion_reward_vs_interval",
+            "native promotion replanning improves Transit episode reward",
+            paired_delta_stats(
+                native_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="ep_reward",
+                treatment="native_promotion_replan",
+                control="interval_only",
+            ),
+            min_pairs=2,
+        )
+        add(
+            "transit_native_promotion_wait_vs_interval",
+            "native promotion replanning lowers Transit wait",
+            paired_delta_stats(
+                native_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="avg_wait_min",
+                treatment="native_promotion_replan",
+                control="interval_only",
+                lower_is_better=True,
+            ),
+            min_pairs=2,
+        )
+        add(
+            "transit_native_promotion_replans_vs_interval",
+            "native promotion replanning increases upper timetable replans",
+            paired_delta_stats(
+                native_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="upper_plan_decisions",
+                treatment="native_promotion_replan",
+                control="interval_only",
+            ),
+            min_pairs=2,
         )
 
     demand_rows = collect_demand_rows(results_root)
@@ -460,23 +513,31 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C3: promotion should trigger replanning after persistent shocks",
-            "evidence": "Deterministic replan improves trading recovery, and a learned PPO promotion gate triggers Transit replans.",
+            "evidence": "Deterministic replan improves trading recovery, a learned PPO promotion gate triggers Transit surrogate replans, and native Transit promotion-replan improves episode reward.",
             "metric": (
                 f"return delta={_fmt(replan_delta.get('total_return_delta_mean'))}, "
                 f"recovery regret delta={_fmt(replan_delta.get('recovery_regret_120_delta_mean'))}; "
                 f"learned transit reward={_check_metric(checks, 'transit_learned_promotion_reward_vs_interval')}, "
                 f"wait={_check_metric(checks, 'transit_learned_promotion_wait_vs_interval')}, "
-                f"replans={_check_metric(checks, 'transit_learned_promotion_replans_vs_interval')}"
+                f"replans={_check_metric(checks, 'transit_learned_promotion_replans_vs_interval')}; "
+                f"native reward={_check_metric(checks, 'transit_native_promotion_reward_vs_interval')}, "
+                f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}"
             ),
             "status": (
-                "supported learned"
-                if _check_status(checks, "transit_learned_promotion_reward_vs_interval")
-                in {"supported", "positive_mixed"}
-                or _check_status(checks, "transit_learned_promotion_wait_vs_interval")
-                in {"supported", "positive_mixed"}
+                "supported learned+native"
+                if (
+                    _check_status(checks, "transit_native_promotion_reward_vs_interval")
+                    in {"supported", "positive_mixed"}
+                    and (
+                        _check_status(checks, "transit_learned_promotion_reward_vs_interval")
+                        in {"supported", "positive_mixed"}
+                        or _check_status(checks, "transit_learned_promotion_wait_vs_interval")
+                        in {"supported", "positive_mixed"}
+                    )
+                )
                 else "supported deterministic"
             ),
-            "remaining_gap": "Learned gate is supported on Transit PPO surrogate; native off-policy and larger-seed validation remain.",
+            "remaining_gap": "Native evidence is two-seed promotion-replan, not yet a learned native gate or larger-seed off-policy theorem-grade result.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",
@@ -669,7 +730,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because full native Transit shared-PPO training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, and native Transit shared-PPO validation paths. It does not yet justify a fully validated domain-general algorithm claim because learned native promotion gates, larger real intraday/order-book and AFC/APC/GTFS feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

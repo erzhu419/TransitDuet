@@ -36,6 +36,7 @@ COMMON_CONFIG: dict[str, Any] = {
     "include_native_lower_context": True,
     "upper_decision_interval": 8,
     "promotion_replan_strength_min": 0.0,
+    "promotion_replan_recovery_gain": 0.060,
     "promotion_residual_threshold": 0.55,
     "promotion_persistence_ratio": 0.20,
     "wait_credit_control_gain": 2.0,

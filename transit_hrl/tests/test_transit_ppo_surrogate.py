@@ -121,6 +121,7 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             promotion_learned_replan=True,
             promotion_learned_gate_threshold=0.55,
             promotion_replan_strength_min=0.0,
+            promotion_replan_recovery_gain=0.06,
             promotion_residual_threshold=0.55,
             promotion_persistence_ratio=0.20,
             wait_credit_control_gain=2.0,
@@ -132,6 +133,7 @@ class TransitPPOSurrogateTest(unittest.TestCase):
         self.assertEqual(batch.upper_action.shape[1], mapper.action_dim + 1)
         self.assertGreater(row["promotion_gate_value"], 0.0)
         self.assertGreater(row["promotion_replan_count"], 0)
+        self.assertGreater(row["promotion_recovery_relief"], 0.0)
 
 
 if __name__ == "__main__":

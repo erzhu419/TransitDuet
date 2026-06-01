@@ -21,7 +21,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 |---|---|---|---|
 | C1: frequency-separated HRL can share one training core | supported native loop | trading plan return=0.2991; transit composite=1.6950337432937435; native bridge=supported_interface U=20x4 L=43x1; native loop=supported_native_episode_loop, wait=6.9890 | Native shared-PPO episode loop exists; multi-seed native performance validation remains. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
-| C3: promotion should trigger replanning after persistent shocks | supported learned | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=-0.0034 [-0.0048, -0.0019], wait=-0.0008 [-0.0012, -0.0005], replans=+16.4000 [+12.6000, +22.8000] | Learned gate is supported on Transit PPO surrogate; native off-policy and larger-seed validation remain. |
+| C3: promotion should trigger replanning after persistent shocks | supported learned+native | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0025 [-0.0001, +0.0051], wait=-0.0067 [-0.0085, -0.0053], replans=+16.4000 [+12.6000, +22.8000]; native reward=+769.3340 [+262.7800, +1275.8880], native replans=+191.0000 [+188.0000, +194.0000] | Native evidence is two-seed promotion-replan, not yet a learned native gate or larger-seed off-policy theorem-grade result. |
 | C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | supported path | adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625 | Neural/PINN encoder path exists; larger cross-domain performance validation is still needed. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851 | Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim. |
@@ -41,10 +41,13 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_full_wait_vs_base | supported | wait_proxy | 3 | -0.0758 [-0.0815, -0.0651] | 1.00 | 0.2500 |
 | transit_full_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 3 | -0.0199 [-0.0199, -0.0198] | 1.00 | 0.2500 |
 | transit_wait_credit_vs_no_wait | supported | wait_proxy | 3 | -0.1251 [-0.1468, -0.1020] | 1.00 | 0.2500 |
-| transit_learned_promotion_reward_vs_interval | not_supported | reward_mean | 5 | -0.0034 [-0.0048, -0.0019] | 0.00 | 0.0625 |
-| transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 5 | -0.0008 [-0.0012, -0.0005] | 1.00 | 0.0625 |
+| transit_learned_promotion_reward_vs_interval | positive_mixed | reward_mean | 5 | +0.0025 [-0.0001, +0.0051] | 0.60 | 1.0000 |
+| transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 5 | -0.0067 [-0.0085, -0.0053] | 1.00 | 0.0625 |
 | transit_learned_promotion_replans_vs_interval | supported | promotion_replan_count | 5 | +16.4000 [+12.6000, +22.8000] | 1.00 | 0.0625 |
 | transit_learned_promotion_raw_lf_vs_interval | supported | RawLowerLFDriftAbs | 5 | -0.0003 [-0.0003, -0.0002] | 1.00 | 0.0625 |
+| transit_native_promotion_reward_vs_interval | supported | ep_reward | 2 | +769.3340 [+262.7800, +1275.8880] | 1.00 | 0.5000 |
+| transit_native_promotion_wait_vs_interval | positive_mixed | avg_wait_min | 2 | -0.2285 [-0.8790, +0.4220] | 0.50 | 1.0000 |
+| transit_native_promotion_replans_vs_interval | supported | upper_plan_decisions | 2 | +191.0000 [+188.0000, +194.0000] | 1.00 | 0.5000 |
 | demand_nb_vs_fourier_mse | supported | mse | 17 | -0.7217 [-1.2633, -0.2617] | 0.82 | 0.0127 |
 | demand_nb_vs_fourier_mae | supported | mae | 17 | -0.0494 [-0.0759, -0.0296] | 1.00 | 0.0000 |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 17 | -0.1322 [-0.1620, -0.1047] | 1.00 | 0.0000 |
@@ -57,4 +60,4 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 ## Paper Boundary
 
-The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because full native Transit shared-PPO training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.
+The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, and native Transit shared-PPO validation paths. It does not yet justify a fully validated domain-general algorithm claim because learned native promotion gates, larger real intraday/order-book and AFC/APC/GTFS feeds, and broader seed-level statistical tests remain open.

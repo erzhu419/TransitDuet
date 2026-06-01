@@ -1,10 +1,10 @@
 # Freq-HRL Cross-Seed CI Report
 
-- checks: 17
+- checks: 20
 - enough paired seeds/sources: 13
-- supported checks: 16
+- supported checks: 18
 - paper-ready checks: 11
-- n_common range: 3 / 5.0 / 17
+- n_common range: 2 / 5.0 / 17
 
 `paper_ready` requires supported status, enough pairs, positive improvement CI, and either sign-test p <= threshold or at least 10 pairs.
 
@@ -14,10 +14,13 @@
 | transit_full_wait_vs_base | supported | 3 | -0.0758 [-0.0815, -0.0651] | 1.00 | 0.2500 | False |
 | transit_full_lower_lf_vs_base | supported | 3 | -0.0199 [-0.0199, -0.0198] | 1.00 | 0.2500 | False |
 | transit_wait_credit_vs_no_wait | supported | 3 | -0.1251 [-0.1468, -0.1020] | 1.00 | 0.2500 | False |
-| transit_learned_promotion_reward_vs_interval | not_supported | 5 | -0.0034 [-0.0048, -0.0019] | 0.00 | 0.0625 | False |
-| transit_learned_promotion_wait_vs_interval | supported | 5 | -0.0008 [-0.0012, -0.0005] | 1.00 | 0.0625 | True |
+| transit_learned_promotion_reward_vs_interval | positive_mixed | 5 | +0.0025 [-0.0001, +0.0051] | 0.60 | 1.0000 | False |
+| transit_learned_promotion_wait_vs_interval | supported | 5 | -0.0067 [-0.0085, -0.0053] | 1.00 | 0.0625 | True |
 | transit_learned_promotion_replans_vs_interval | supported | 5 | +16.4000 [+12.6000, +22.8000] | 1.00 | 0.0625 | True |
 | transit_learned_promotion_raw_lf_vs_interval | supported | 5 | -0.0003 [-0.0003, -0.0002] | 1.00 | 0.0625 | True |
+| transit_native_promotion_reward_vs_interval | supported | 2 | +769.3340 [+262.7800, +1275.8880] | 1.00 | 0.5000 | False |
+| transit_native_promotion_wait_vs_interval | positive_mixed | 2 | -0.2285 [-0.8790, +0.4220] | 0.50 | 1.0000 | False |
+| transit_native_promotion_replans_vs_interval | supported | 2 | +191.0000 [+188.0000, +194.0000] | 1.00 | 0.5000 | False |
 | demand_nb_vs_fourier_mse | supported | 17 | -0.7217 [-1.2633, -0.2617] | 0.82 | 0.0127 | True |
 | demand_nb_vs_fourier_mae | supported | 17 | -0.0494 [-0.0759, -0.0296] | 1.00 | 0.0000 | True |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | 17 | -0.1322 [-0.1620, -0.1047] | 1.00 | 0.0000 | True |

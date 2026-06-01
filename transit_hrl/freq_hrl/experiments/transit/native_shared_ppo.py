@@ -435,29 +435,33 @@ def run_native_shared_ppo_episode_loop(
     init_log_std: float = -2.0,
     learning_rate: float = 3e-4,
     keep_native_log_dir: bool = False,
+    config_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     native_logs = output_dir / "native_logs"
+    overrides = {
+        "coupling": {
+            "upper_warmup_eps": 0,
+            "tpc": {"enable": False},
+        },
+        "lower": {"updates_per_episode": 0},
+        "upper": {
+            "updates_per_episode": 0,
+            "timetable_planner": {"action_ema_alpha": 1.0},
+        },
+        "training": {
+            "diag_freq": max(1, int(episodes) + 1),
+            "trip_dump_freq": max(1, int(episodes) + 1),
+        },
+    }
+    if config_overrides:
+        _merge_dict(overrides, dict(config_overrides))
     runner = load_native_runner(
         config_path,
         seed=int(seed),
         logs_dir=native_logs,
         device=str(device),
-        config_overrides={
-            "coupling": {
-                "upper_warmup_eps": 0,
-                "tpc": {"enable": False},
-            },
-            "lower": {"updates_per_episode": 0},
-            "upper": {
-                "updates_per_episode": 0,
-                "timetable_planner": {"action_ema_alpha": 1.0},
-            },
-            "training": {
-                "diag_freq": max(1, int(episodes) + 1),
-                "trip_dump_freq": max(1, int(episodes) + 1),
-            },
-        },
+        config_overrides=overrides,
     )
     if runner.diag is None:
         if str(TRANSIT_DUET_ROOT) not in sys.path:

@@ -248,6 +248,7 @@ def rollout(
     promotion_learned_replan: bool = False,
     promotion_learned_gate_threshold: float = 0.55,
     promotion_replan_strength_min: float = 0.10,
+    promotion_replan_recovery_gain: float = 0.0,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
 ) -> tuple[TrajectoryBatch | None, dict[str, Any]]:
@@ -296,6 +297,7 @@ def rollout(
     wait_attr_penalties: list[float] = []
     wait_board_credits: list[float] = []
     wait_credit_reliefs: list[float] = []
+    promotion_recovery_reliefs: list[float] = []
     raw_recenter_reductions: list[np.ndarray] = []
     promotion_gate_values: list[float] = []
     upper_decisions = 0
@@ -308,6 +310,7 @@ def rollout(
     last_upper_decision_t = -10**9
     speed_shock = np.zeros(corridors, dtype=np.float64)
     hold_lf_baseline = np.zeros(corridors, dtype=np.float64)
+    promotion_recovery_relief = 0.0
     for t in range(int(steps)):
         arrivals = {(i, True): float(demand[t, i]) for i in range(corridors)}
         tracker.update(arrivals)
@@ -348,6 +351,11 @@ def rollout(
                 (bool(promotion_forced_replan) and promotion_active) or learned_replan
             ):
                 promotion_replans += 1
+                promotion_recovery_relief = max(
+                    promotion_recovery_relief,
+                    max(float(promotion_replan_recovery_gain), 0.0)
+                    * float(freq_summary.get("freq_promotion_strength", 0.0)),
+                )
             if gate_upper_out is not None and learned_replan and gate_upper_state is not None:
                 upper_state = gate_upper_state
                 upper_out = gate_upper_out
@@ -456,14 +464,18 @@ def rollout(
         high_share = float(np.clip(high_mass / (high_mass + low_mass + 1e-6), 0.0, 1.0))
         low_share = 1.0 - high_share
         wait_credit_relief = max(float(wait_credit_control_gain), 0.0) * hf_pressure
+        promotion_wait_relief = max(float(promotion_recovery_relief), 0.0)
         wait = max(
             0.0,
             4.0
             + 0.018 * float(np.mean(demand[t]))
             + 0.012 * float(np.mean(np.maximum(service_gap, 0.0)))
             + 0.006 * float(np.mean(hold_s))
-            - wait_credit_relief,
+            - wait_credit_relief
+            - promotion_wait_relief,
         )
+        promotion_recovery_reliefs.append(promotion_wait_relief)
+        promotion_recovery_relief *= 0.92
         cv = float(np.std(service_gap) / 120.0 + np.std(cv_gap) / 180.0)
         overshoot = float(np.mean(np.maximum(np.abs(target_delta) - 24.0, 0.0)) / 24.0)
         wait_attr_penalty = (
@@ -542,6 +554,7 @@ def rollout(
         "wait_attr_penalty": float(np.mean(wait_attr_penalties)) if wait_attr_penalties else 0.0,
         "wait_board_credit": float(np.mean(wait_board_credits)) if wait_board_credits else 0.0,
         "wait_credit_relief": float(np.mean(wait_credit_reliefs)) if wait_credit_reliefs else 0.0,
+        "promotion_recovery_relief": float(np.mean(promotion_recovery_reliefs)) if promotion_recovery_reliefs else 0.0,
         "promotion_gate_value": float(np.mean(promotion_gate_values)) if promotion_gate_values else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
@@ -593,6 +606,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "wait_attr_penalty",
         "wait_board_credit",
         "wait_credit_relief",
+        "promotion_recovery_relief",
         "promotion_gate_value",
         "lower_lf_effect_filter_window",
         "lower_lf_effect_filter_gain",
@@ -636,6 +650,7 @@ def train_transit_surrogate_ppo(
     promotion_learned_replan: bool = False,
     promotion_learned_gate_threshold: float = 0.55,
     promotion_replan_strength_min: float = 0.10,
+    promotion_replan_recovery_gain: float = 0.0,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
@@ -710,6 +725,7 @@ def train_transit_surrogate_ppo(
             promotion_learned_replan=promotion_learned_replan,
             promotion_learned_gate_threshold=promotion_learned_gate_threshold,
             promotion_replan_strength_min=promotion_replan_strength_min,
+            promotion_replan_recovery_gain=promotion_replan_recovery_gain,
             promotion_residual_threshold=promotion_residual_threshold,
             promotion_persistence_ratio=promotion_persistence_ratio,
         ),
@@ -739,6 +755,7 @@ def train_transit_surrogate_ppo(
             "promotion_learned_replan": bool(promotion_learned_replan),
             "promotion_learned_gate_threshold": float(promotion_learned_gate_threshold),
             "promotion_replan_strength_min": float(promotion_replan_strength_min),
+            "promotion_replan_recovery_gain": float(promotion_replan_recovery_gain),
             "promotion_residual_threshold": float(promotion_residual_threshold),
             "promotion_persistence_ratio": float(promotion_persistence_ratio),
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
@@ -777,6 +794,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- plan mode: `{payload['plan_mode']}`",
         f"- upper decision interval: {payload['upper_decision_interval']} steps, promotion forced replan={payload['promotion_forced_replan']}",
         f"- learned promotion replan: {payload['promotion_learned_replan']} gate_threshold={payload['promotion_learned_gate_threshold']}",
+        f"- promotion recovery gain: {payload['promotion_replan_recovery_gain']}",
         f"- promotion gate: residual_threshold={payload['promotion_residual_threshold']}, persistence_ratio={payload['promotion_persistence_ratio']}",
         f"- wait attribution weights: upper={payload['wait_upper_weight']}, lower={payload['wait_lower_weight']}, board_credit={payload['wait_lower_board_credit_weight']}",
         f"- wait credit control gain: {payload['wait_credit_control_gain']}",
@@ -801,6 +819,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- wait high-share mean: {summary['wait_high_share_mean']:.4f}",
         f"- wait attribution penalty mean: {summary['wait_attr_penalty_mean']:.4f}",
         f"- wait credit relief mean: {summary['wait_credit_relief_mean']:.4f}",
+        f"- promotion recovery relief mean: {summary['promotion_recovery_relief_mean']:.4f}",
         f"- promotion learned gate mean: {summary['promotion_gate_value_mean']:.4f}",
         f"- promotion replan count mean: {summary['promotion_replan_count_mean']:.2f}",
         "",
@@ -842,6 +861,7 @@ def main() -> None:
     parser.add_argument("--promotion-learned-replan", action="store_true")
     parser.add_argument("--promotion-learned-gate-threshold", type=float, default=0.55)
     parser.add_argument("--promotion-replan-strength-min", type=float, default=0.10)
+    parser.add_argument("--promotion-replan-recovery-gain", type=float, default=0.0)
     parser.add_argument("--promotion-residual-threshold", type=float, default=1.5)
     parser.add_argument("--promotion-persistence-ratio", type=float, default=0.35)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/transit_ppo_surrogate"))
@@ -878,6 +898,7 @@ def main() -> None:
         promotion_learned_replan=args.promotion_learned_replan,
         promotion_learned_gate_threshold=args.promotion_learned_gate_threshold,
         promotion_replan_strength_min=args.promotion_replan_strength_min,
+        promotion_replan_recovery_gain=args.promotion_replan_recovery_gain,
         promotion_residual_threshold=args.promotion_residual_threshold,
         promotion_persistence_ratio=args.promotion_persistence_ratio,
     )

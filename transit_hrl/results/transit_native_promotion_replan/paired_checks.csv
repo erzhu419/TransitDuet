@@ -1,0 +1,5 @@
+check,metric,treatment,control,direction,n_common,delta_mean,delta_ci95_low,delta_ci95_high,improvement_mean,improvement_ci95_low,improvement_ci95_high,win_rate,sign_p_value,status
+native_promotion_replan_vs_interval_ep_reward,ep_reward,native_promotion_replan,interval_only,increase,2,769.3340000000003,262.77999999999975,1275.8880000000008,769.3340000000003,262.77999999999975,1275.8880000000008,1.0,0.5,supported
+native_promotion_replan_vs_interval_avg_wait_min,avg_wait_min,native_promotion_replan,interval_only,decrease,2,-0.22850000000000037,-0.8790000000000004,0.4219999999999997,0.22850000000000037,-0.4219999999999997,0.8790000000000004,0.5,1.0,positive_mixed
+native_promotion_replan_vs_interval_score,score,native_promotion_replan,interval_only,increase,2,0.07460000000000022,-1.0881999999999996,1.2374,0.07460000000000022,-1.0881999999999996,1.2374,0.5,1.0,positive_mixed
+native_promotion_replan_vs_interval_upper_plan_decisions,upper_plan_decisions,native_promotion_replan,interval_only,increase,2,191.0,188.0,194.0,191.0,188.0,194.0,1.0,0.5,supported
