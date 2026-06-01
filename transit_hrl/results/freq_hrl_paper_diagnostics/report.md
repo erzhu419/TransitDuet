@@ -21,7 +21,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 |---|---|---|---|
 | C1: frequency-separated HRL can share one training core | supported native loop | trading plan return=0.2991; transit composite=1.6950337432937435; native bridge=supported_interface U=20x4 L=43x1; native loop=supported_native_episode_loop, wait=6.9890 | Native shared-PPO episode loop exists; multi-seed native performance validation remains. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
-| C3: promotion should trigger replanning after persistent shocks | supported learned; native learned-gate path | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=-823.6690 [-8513.0658, +6865.2066], native replans=+58.2500 [+48.7500, +68.3750]; native learned reward=+2049.4034 [-6341.6198, +9232.5186], native learned gate replans=+82.2500 [+58.8719, +107.6312] | Native learned gate runs end-to-end and is positive-mixed on reward, but native wait/reward are not CI-supported; larger off-policy/native training remains. |
+| C3: promotion should trigger replanning after persistent shocks | supported learned; native learned-gate path | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=+7.6590 [-25.3803, +56.1720], native replans=+55.8750 [+42.8719, +69.3781]; native learned reward=+33.4005 [-15.6374, +105.4996], native learned gate replans=+18.0000 [+12.7500, +23.3750] | Native learned gate runs end-to-end and is positive-mixed on reward, but native wait/reward are not CI-supported; larger off-policy/native training remains. |
 | C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | supported path | adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625 | Neural/PINN encoder path exists; larger cross-domain performance validation is still needed. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851 | Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim. |
@@ -45,13 +45,13 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 10 | -0.0079 [-0.0096, -0.0062] | 1.00 | 0.0020 |
 | transit_learned_promotion_replans_vs_interval | supported | promotion_replan_count | 10 | +20.1000 [+14.9000, +25.5000] | 1.00 | 0.0020 |
 | transit_learned_promotion_raw_lf_vs_interval | supported | RawLowerLFDriftAbs | 10 | -0.0003 [-0.0003, -0.0003] | 1.00 | 0.0020 |
-| transit_native_promotion_reward_vs_interval | not_supported | ep_reward | 8 | -823.6690 [-8513.0658, +6865.2066] | 0.50 | 1.0000 |
-| transit_native_promotion_wait_vs_interval | not_supported | avg_wait_min | 8 | +11.8440 [+1.5025, +23.8893] | 0.50 | 1.0000 |
-| transit_native_promotion_replans_vs_interval | supported | upper_plan_decisions | 8 | +58.2500 [+48.7500, +68.3750] | 1.00 | 0.0078 |
-| transit_native_learned_gate_reward_vs_interval | positive_mixed | ep_reward | 8 | +2049.4034 [-6341.6198, +9232.5186] | 0.62 | 0.7266 |
-| transit_native_learned_gate_wait_vs_interval | not_supported | avg_wait_min | 8 | +3.4595 [-0.0753, +8.3288] | 0.50 | 1.0000 |
-| transit_native_learned_gate_replans_vs_interval | supported | upper_plan_decisions | 8 | +55.1250 [+38.4969, +73.1250] | 1.00 | 0.0078 |
-| transit_native_learned_gate_gate_replans_vs_interval | supported | shared_ppo_gate_replans | 8 | +82.2500 [+58.8719, +107.6312] | 1.00 | 0.0078 |
+| transit_native_promotion_reward_vs_interval | inconclusive | ep_reward | 8 | +7.6590 [-25.3803, +56.1720] | 0.25 | 0.2891 |
+| transit_native_promotion_wait_vs_interval | not_supported | avg_wait_min | 8 | +0.0491 [+0.0004, +0.1365] | 0.12 | 0.2188 |
+| transit_native_promotion_replans_vs_interval | supported | upper_plan_decisions | 8 | +55.8750 [+42.8719, +69.3781] | 1.00 | 0.0078 |
+| transit_native_learned_gate_reward_vs_interval | positive_mixed | ep_reward | 8 | +33.4005 [-15.6374, +105.4996] | 0.62 | 0.7266 |
+| transit_native_learned_gate_wait_vs_interval | positive_mixed | avg_wait_min | 8 | -0.0231 [-0.0759, +0.0095] | 0.50 | 0.6875 |
+| transit_native_learned_gate_replans_vs_interval | supported | upper_plan_decisions | 8 | +4.8750 [+3.5000, +6.2500] | 1.00 | 0.0078 |
+| transit_native_learned_gate_gate_replans_vs_interval | supported | shared_ppo_gate_replans | 8 | +18.0000 [+12.7500, +23.3750] | 1.00 | 0.0078 |
 | demand_nb_vs_fourier_mse | supported | mse | 17 | -0.7217 [-1.2633, -0.2617] | 0.82 | 0.0127 |
 | demand_nb_vs_fourier_mae | supported | mae | 17 | -0.0494 [-0.0759, -0.0296] | 1.00 | 0.0000 |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 17 | -0.1322 [-0.1620, -0.1047] | 1.00 | 0.0000 |

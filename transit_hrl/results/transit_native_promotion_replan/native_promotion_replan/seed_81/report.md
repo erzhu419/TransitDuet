@@ -7,11 +7,12 @@
 - upper model action dim: 4
 - lower contract: 43x1
 - learned promotion gate: False threshold=0.62
-- mean wait: 25.8290
-- mean headway CV: 0.7592
-- mean shared-PPO score: -27.3474
+- gate guard: strength>=0.0 age>=0.0 min_elapsed_s=0.0 cooldown_s=0.0 preselect_action=False plan_blend=0.0
+- mean wait: 4.7430
+- mean headway CV: 0.5805
+- mean shared-PPO score: -5.9040
 - mean gate value: 0.0000
 
 | ep | wait | cv | reward | lower samples | upper decisions | gate replans | lower decisions | loss |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 0 | 25.8290 | 0.7592 | -19799.7480 | 4970 | 124 | 0 | 5232 | 53143.2629 |
+| 0 | 4.7430 | 0.5805 | -12349.8980 | 4970 | 131 | 0 | 5232 | 11948.2410 |

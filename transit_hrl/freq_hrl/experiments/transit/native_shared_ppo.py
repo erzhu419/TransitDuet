@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import random
 import shutil
 import sys
 from dataclasses import dataclass
@@ -38,6 +39,19 @@ def _array(value: Any, dtype: Any = np.float32) -> np.ndarray:
 def _state_key(value: Any) -> tuple[float, ...]:
     arr = _array(value, dtype=np.float64)
     return tuple(np.round(arr, 6).tolist())
+
+
+def _set_reproducible_seed(seed: int) -> None:
+    random.seed(int(seed))
+    np.random.seed(int(seed))
+    try:
+        import torch
+
+        torch.manual_seed(int(seed))
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(int(seed))
+    except Exception:
+        return
 
 
 @dataclass
@@ -91,6 +105,7 @@ class NativeTransitPPOBridge:
         learning_rate: float = 3e-4,
         device: str = "cpu",
         initialize_gate_prior: bool = True,
+        native_policy_init_seed: int | None = None,
     ) -> None:
         self.contract = contract
         self.upper_action_low = _array(contract.upper_action_low, dtype=np.float64)
@@ -100,6 +115,8 @@ class NativeTransitPPOBridge:
         if self.upper_action_high.size != int(contract.upper_action_dim):
             raise ValueError("upper_action_high must match upper_action_dim")
         self.lower_action_bins = _array(contract.lower_action_bins, dtype=np.float64)
+        if model is None and native_policy_init_seed is not None:
+            _set_reproducible_seed(int(native_policy_init_seed))
         self.model = model or DualActorCriticPPO(DualPPOConfig(
             upper_state_dim=int(contract.upper_state_dim),
             lower_state_dim=int(contract.lower_state_dim),
@@ -110,6 +127,14 @@ class NativeTransitPPOBridge:
             learning_rate=float(learning_rate),
             device=str(device),
         ))
+        if bool(contract.learned_promotion_gate) and native_policy_init_seed is not None:
+            self.align_native_policy_from_seed(
+                int(native_policy_init_seed),
+                hidden_dim=int(hidden_dim),
+                init_log_std=float(init_log_std),
+                learning_rate=float(learning_rate),
+                device=str(device),
+            )
         if bool(contract.learned_promotion_gate) and initialize_gate_prior:
             self.initialize_promotion_gate_prior()
 
@@ -124,6 +149,7 @@ class NativeTransitPPOBridge:
         device: str = "cpu",
         learned_promotion_gate: bool = False,
         initialize_gate_prior: bool = True,
+        native_policy_init_seed: int | None = None,
     ) -> "NativeTransitPPOBridge":
         cfg = getattr(runner, "cfg", {})
         lower_cfg = cfg.get("lower", {}) if isinstance(cfg, dict) else {}
@@ -160,7 +186,48 @@ class NativeTransitPPOBridge:
             learning_rate=learning_rate,
             device=device,
             initialize_gate_prior=initialize_gate_prior,
+            native_policy_init_seed=native_policy_init_seed,
         )
+
+    def align_native_policy_from_seed(
+        self,
+        seed: int,
+        *,
+        hidden_dim: int,
+        init_log_std: float,
+        learning_rate: float,
+        device: str,
+    ) -> None:
+        """Keep the native action policy identical when appending a gate head."""
+        if not bool(self.contract.learned_promotion_gate):
+            return
+        _set_reproducible_seed(int(seed))
+        baseline = DualActorCriticPPO(DualPPOConfig(
+            upper_state_dim=int(self.contract.upper_state_dim),
+            lower_state_dim=int(self.contract.lower_state_dim),
+            upper_action_dim=int(self.contract.upper_action_dim),
+            lower_action_dim=int(self.contract.lower_action_dim),
+            hidden_dim=int(hidden_dim),
+            init_log_std=float(init_log_std),
+            learning_rate=float(learning_rate),
+            device=str(device),
+        ))
+        try:
+            import torch
+
+            with torch.no_grad():
+                src = baseline.upper_actor.net[-1]
+                dst = self.model.upper_actor.net[-1]
+                dst.weight[:int(self.contract.upper_action_dim)].copy_(src.weight)
+                dst.bias[:int(self.contract.upper_action_dim)].copy_(src.bias)
+                self.model.upper_actor.log_std[:int(self.contract.upper_action_dim)].copy_(
+                    baseline.upper_actor.log_std
+                )
+            self.model.lower_actor.load_state_dict(baseline.lower_actor.state_dict())
+            self.model.upper_value.load_state_dict(baseline.upper_value.state_dict())
+            self.model.lower_value.load_state_dict(baseline.lower_value.state_dict())
+        except Exception:
+            return
 
     def initialize_promotion_gate_prior(self) -> None:
         """Seed the optional native gate head from causal promotion features.
@@ -199,6 +266,20 @@ class NativeTransitPPOBridge:
             self.upper_action_low
             + weight * (self.upper_action_high - self.upper_action_low)
         ).astype(np.float32)
+
+    def upper_native_to_latent(self, native_action: Any, gate_latent: float = 0.0) -> np.ndarray:
+        native = _array(native_action, dtype=np.float64)
+        if native.size != int(self.contract.upper_action_dim):
+            raise ValueError("upper native action has the wrong dimension")
+        denom = np.maximum(self.upper_action_high - self.upper_action_low, 1e-9)
+        weight = np.clip((native - self.upper_action_low) / denom, 1e-6, 1.0 - 1e-6)
+        latent = np.arctanh(np.clip(2.0 * weight - 1.0, -1.0 + 1e-6, 1.0 - 1e-6))
+        if int(self.contract.upper_model_action_dim) > int(self.contract.upper_action_dim):
+            latent = np.concatenate([
+                latent,
+                np.asarray([float(gate_latent)], dtype=np.float64),
+            ])
+        return latent.astype(np.float32)
 
     def promotion_gate_value(self, latent_action: Any) -> float:
         if not bool(self.contract.learned_promotion_gate):
@@ -295,6 +376,9 @@ class _SharedPPOPolicyProxy:
         *,
         threshold: float,
         sample: bool,
+        preselect_action: bool = False,
+        native_action_override: Any | None = None,
+        native_action_blend: float = 0.0,
     ) -> bool:
         if self.level != "upper" or not bool(self.bridge.contract.learned_promotion_gate):
             return False
@@ -307,8 +391,21 @@ class _SharedPPOPolicyProxy:
         self.gate_values.append(gate_value)
         promote = gate_value >= float(threshold)
         if promote:
-            key = _state_key(state_arr)
-            self.preselected.setdefault(key, []).append(info)
+            if bool(preselect_action):
+                if native_action_override is not None:
+                    native_override = _array(native_action_override, dtype=np.float64)
+                    blend = float(np.clip(native_action_blend, 0.0, 1.0))
+                    native = (
+                        (1.0 - blend) * native_override
+                        + blend * _array(info["native_action"], dtype=np.float64)
+                    )
+                    native = np.clip(native, self.bridge.upper_action_low, self.bridge.upper_action_high)
+                    gate_latent = float(_array(info["latent_action"], dtype=np.float64)[-1])
+                    info = dict(info)
+                    info["native_action"] = native.astype(np.float32)
+                    info["latent_action"] = self.bridge.upper_native_to_latent(native, gate_latent=gate_latent)
+                key = _state_key(state_arr)
+                self.preselected.setdefault(key, []).append(info)
             self.gate_replans += 1
         return bool(promote)
 
@@ -444,6 +541,11 @@ def install_shared_ppo_episode_loop(
     promotion_gate_threshold: float = 0.55,
     promotion_gate_sample: bool = False,
     promotion_gate_strength_min: float = 0.0,
+    promotion_gate_age_min: float = 0.0,
+    promotion_gate_min_elapsed_s: float = 0.0,
+    promotion_gate_cooldown_s: float = 0.0,
+    promotion_gate_preselect_action: bool = False,
+    promotion_gate_plan_blend: float = 0.0,
 ) -> dict[str, Any]:
     upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
     lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
@@ -459,17 +561,49 @@ def install_shared_ppo_episode_loop(
     runner.tpc_enable = False
     runner.target_upper_trainer = None
     if bool(learned_promotion_gate):
+        last_gate_replan_by_key: dict[Any, float] = {}
+
         def learned_gate_hook(**kwargs: Any) -> bool:
             freq_summary = kwargs.get("freq_summary", {}) or {}
             if not bool(freq_summary.get("freq_promotion_flag", 0.0)):
                 return False
             if float(freq_summary.get("freq_promotion_strength", 0.0)) < float(promotion_gate_strength_min):
                 return False
-            return upper_proxy.evaluate_promotion_gate(
+            if float(freq_summary.get("freq_promotion_age", 0.0)) < float(promotion_gate_age_min):
+                return False
+            elapsed = float(kwargs.get("elapsed", 0.0))
+            if elapsed < float(promotion_gate_min_elapsed_s):
+                return False
+            interval_s = float(getattr(runner, "timetable_replan_interval_s", 0.0))
+            horizon_s = float(getattr(getattr(runner, "timetable_planner", None), "horizon_s", interval_s))
+            if interval_s > 0.0 and elapsed >= interval_s:
+                return False
+            if horizon_s > 0.0 and elapsed > horizon_s:
+                return False
+            cooldown_s = float(promotion_gate_cooldown_s)
+            if cooldown_s > 0.0:
+                key = kwargs.get("planner_key", "__all__")
+                active_plan = kwargs.get("active_plan", {}) or {}
+                origin = float(active_plan.get("origin", 0.0))
+                now_s = origin + elapsed
+                last_s = last_gate_replan_by_key.get(key)
+                if last_s is not None and now_s - last_s < cooldown_s:
+                    return False
+            active_plan = kwargs.get("active_plan", {}) or {}
+            native_override = None
+            if bool(promotion_gate_preselect_action) and "action" in active_plan:
+                native_override = active_plan.get("action")
+            promote = upper_proxy.evaluate_promotion_gate(
                 kwargs["s_upper"],
                 threshold=float(promotion_gate_threshold),
                 sample=bool(promotion_gate_sample),
+                preselect_action=bool(promotion_gate_preselect_action),
+                native_action_override=native_override,
+                native_action_blend=float(promotion_gate_plan_blend),
             )
+            if promote and cooldown_s > 0.0:
+                last_gate_replan_by_key[kwargs.get("planner_key", "__all__")] = now_s
+            return bool(promote)
 
         runner.freq_hrl_learned_promotion_gate = learned_gate_hook
     return {
@@ -494,6 +628,7 @@ def load_native_runner(
         sys.path.insert(0, str(TRANSIT_DUET_ROOT))
     from freq_transitduet.runner_v3 import TransitDuetV2Runner, load_config
 
+    _set_reproducible_seed(int(seed))
     cfg = load_config(str(config_path))
     cfg["seed"] = int(seed)
     if config_overrides:
@@ -555,6 +690,11 @@ def run_native_shared_ppo_episode_loop(
     promotion_gate_threshold: float = 0.55,
     promotion_gate_sample: bool = False,
     promotion_gate_strength_min: float = 0.0,
+    promotion_gate_age_min: float = 0.0,
+    promotion_gate_min_elapsed_s: float = 0.0,
+    promotion_gate_cooldown_s: float = 0.0,
+    promotion_gate_preselect_action: bool = False,
+    promotion_gate_plan_blend: float = 0.0,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     native_logs = output_dir / "native_logs"
@@ -595,6 +735,7 @@ def run_native_shared_ppo_episode_loop(
         learning_rate=learning_rate,
         device=device,
         learned_promotion_gate=bool(learned_promotion_gate),
+        native_policy_init_seed=int(seed),
     )
     installed = install_shared_ppo_episode_loop(
         runner,
@@ -603,6 +744,11 @@ def run_native_shared_ppo_episode_loop(
         promotion_gate_threshold=float(promotion_gate_threshold),
         promotion_gate_sample=bool(promotion_gate_sample),
         promotion_gate_strength_min=float(promotion_gate_strength_min),
+        promotion_gate_age_min=float(promotion_gate_age_min),
+        promotion_gate_min_elapsed_s=float(promotion_gate_min_elapsed_s),
+        promotion_gate_cooldown_s=float(promotion_gate_cooldown_s),
+        promotion_gate_preselect_action=bool(promotion_gate_preselect_action),
+        promotion_gate_plan_blend=float(promotion_gate_plan_blend),
     )
     rows: list[dict[str, Any]] = []
     updates: list[dict[str, Any]] = []
@@ -642,6 +788,11 @@ def run_native_shared_ppo_episode_loop(
         "promotion_gate_threshold": float(promotion_gate_threshold),
         "promotion_gate_sample": bool(promotion_gate_sample),
         "promotion_gate_strength_min": float(promotion_gate_strength_min),
+        "promotion_gate_age_min": float(promotion_gate_age_min),
+        "promotion_gate_min_elapsed_s": float(promotion_gate_min_elapsed_s),
+        "promotion_gate_cooldown_s": float(promotion_gate_cooldown_s),
+        "promotion_gate_preselect_action": bool(promotion_gate_preselect_action),
+        "promotion_gate_plan_blend": float(promotion_gate_plan_blend),
         "rows": rows,
         "updates": updates,
         "summary": summary,
@@ -678,6 +829,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- upper model action dim: {payload.get('contract', {}).get('upper_model_action_dim', 'NA')}",
         f"- lower contract: {payload.get('contract', {}).get('lower_state_dim', 'NA')}x{payload.get('contract', {}).get('lower_action_dim', 'NA')}",
         f"- learned promotion gate: {payload.get('learned_promotion_gate', False)} threshold={payload.get('promotion_gate_threshold', 0.0)}",
+        f"- gate guard: strength>={payload.get('promotion_gate_strength_min', 0.0)} age>={payload.get('promotion_gate_age_min', 0.0)} min_elapsed_s={payload.get('promotion_gate_min_elapsed_s', 0.0)} cooldown_s={payload.get('promotion_gate_cooldown_s', 0.0)} preselect_action={payload.get('promotion_gate_preselect_action', False)} plan_blend={payload.get('promotion_gate_plan_blend', 0.0)}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
         f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
         f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
@@ -809,6 +961,11 @@ def main() -> None:
     parser.add_argument("--promotion-gate-threshold", type=float, default=0.55)
     parser.add_argument("--promotion-gate-sample", action="store_true")
     parser.add_argument("--promotion-gate-strength-min", type=float, default=0.0)
+    parser.add_argument("--promotion-gate-age-min", type=float, default=0.0)
+    parser.add_argument("--promotion-gate-min-elapsed-s", type=float, default=0.0)
+    parser.add_argument("--promotion-gate-cooldown-s", type=float, default=0.0)
+    parser.add_argument("--promotion-gate-preselect-action", action="store_true")
+    parser.add_argument("--promotion-gate-plan-blend", type=float, default=0.0)
     args = parser.parse_args()
     if args.episode_loop:
         summary = run_native_shared_ppo_episode_loop(
@@ -822,6 +979,11 @@ def main() -> None:
             promotion_gate_threshold=float(args.promotion_gate_threshold),
             promotion_gate_sample=bool(args.promotion_gate_sample),
             promotion_gate_strength_min=float(args.promotion_gate_strength_min),
+            promotion_gate_age_min=float(args.promotion_gate_age_min),
+            promotion_gate_min_elapsed_s=float(args.promotion_gate_min_elapsed_s),
+            promotion_gate_cooldown_s=float(args.promotion_gate_cooldown_s),
+            promotion_gate_preselect_action=bool(args.promotion_gate_preselect_action),
+            promotion_gate_plan_blend=float(args.promotion_gate_plan_blend),
         )
         print(f"wrote {args.output_dir}")
         print(

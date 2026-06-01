@@ -50,7 +50,12 @@ VARIANTS: dict[str, dict[str, Any]] = {
     "native_learned_gate": {
         "_learned_promotion_gate": True,
         "_promotion_gate_threshold": 0.92,
-        "_promotion_gate_strength_min": 0.80,
+        "_promotion_gate_strength_min": 0.95,
+        "_promotion_gate_age_min": 1.0,
+        "_promotion_gate_min_elapsed_s": 900.0,
+        "_promotion_gate_cooldown_s": 900.0,
+        "_promotion_gate_preselect_action": True,
+        "_promotion_gate_plan_blend": 0.0,
         "upper": {"timetable_planner": {"promotion_replan": False}},
     },
 }
@@ -153,6 +158,11 @@ def run_validation(
                 learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
                 promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.62)),
                 promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
+                promotion_gate_age_min=float(overrides.get("_promotion_gate_age_min", 0.0)),
+                promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
+                promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
+                promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
+                promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
             )
             payloads[variant][str(seed)] = {
                 "summary": payload.get("summary", {}),
