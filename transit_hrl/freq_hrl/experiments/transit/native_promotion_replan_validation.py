@@ -22,12 +22,12 @@ COMMON_OVERRIDES: dict[str, Any] = {
         "promotion": {
             "enable": True,
             "state_features": True,
-            "residual_threshold": 0.20,
-            "persistence_ratio": 0.20,
-            "cooldown_min": 0.0,
+            "residual_threshold": 0.60,
+            "persistence_ratio": 0.35,
+            "cooldown_min": 10.0,
             "adapt_low": True,
-            "adapt_gain": 0.12,
-            "adapt_strength_min": 0.0,
+            "adapt_gain": 0.08,
+            "adapt_strength_min": 0.20,
             "adapt_local": True,
         },
     },
@@ -35,7 +35,7 @@ COMMON_OVERRIDES: dict[str, Any] = {
         "timetable_planner": {
             "action_ema_alpha": 1.0,
             "replan_interval_s": 1200.0,
-            "promotion_replan_strength_min": 0.0,
+            "promotion_replan_strength_min": 0.80,
         },
     },
 }
@@ -84,7 +84,7 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
     }
 
 
-def paired_checks(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 5) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     for metric, lower_is_better in [
         ("ep_reward", False),
@@ -104,7 +104,7 @@ def paired_checks(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         checks.append({
             "check": f"native_promotion_replan_vs_interval_{metric}",
             **stats,
-            "status": claim_status(stats, min_pairs=2),
+            "status": claim_status(stats, min_pairs=int(min_pairs)),
         })
     return checks
 
@@ -115,6 +115,7 @@ def run_validation(
     seeds: list[int],
     episodes: int,
     device: str,
+    min_pairs: int = 5,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
@@ -137,12 +138,13 @@ def run_validation(
                 "rows": payload.get("rows", []),
             }
             rows.append(_row_from_payload(int(seed), variant, payload))
-    checks = paired_checks(rows)
+    checks = paired_checks(rows, min_pairs=int(min_pairs))
     summary = summarize(rows)
     payload = {
         "config_path": str(config_path),
         "seeds": [int(seed) for seed in seeds],
         "episodes": int(episodes),
+        "min_pairs": int(min_pairs),
         "variants": list(VARIANTS.keys()),
         "summary": summary,
         "rows": rows,
@@ -228,8 +230,9 @@ def main() -> None:
         type=Path,
         default=TRANSIT_DUET_ROOT / "configs_freqduet" / "T_freqhrl_native_full.yaml",
     )
-    parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41])
+    parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41, 51, 61, 71, 81, 91, 101])
     parser.add_argument("--episodes", type=int, default=1)
+    parser.add_argument("--min-pairs", type=int, default=5)
     parser.add_argument("--device", default="cpu")
     parser.add_argument(
         "--output-dir",
@@ -243,6 +246,7 @@ def main() -> None:
         seeds=list(args.seeds),
         episodes=int(args.episodes),
         device=str(args.device),
+        min_pairs=int(args.min_pairs),
     )
     reward_check = next(
         row for row in payload["paired_checks"]

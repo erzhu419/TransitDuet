@@ -270,7 +270,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 treatment="native_promotion_replan",
                 control="interval_only",
             ),
-            min_pairs=2,
+            min_pairs=5,
         )
         add(
             "transit_native_promotion_wait_vs_interval",
@@ -284,7 +284,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 control="interval_only",
                 lower_is_better=True,
             ),
-            min_pairs=2,
+            min_pairs=5,
         )
         add(
             "transit_native_promotion_replans_vs_interval",
@@ -297,7 +297,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 treatment="native_promotion_replan",
                 control="interval_only",
             ),
-            min_pairs=2,
+            min_pairs=5,
         )
 
     demand_rows = collect_demand_rows(results_root)
@@ -484,6 +484,21 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_loop_status = str(native_loop.get("status", "missing")) if isinstance(native_loop, dict) else "missing"
     native_loop_summary = native_loop.get("summary", {}) if isinstance(native_loop, dict) else {}
     native_loop_contract = native_loop.get("contract", {}) if isinstance(native_loop, dict) else {}
+    learned_promotion_supported = (
+        _check_status(checks, "transit_learned_promotion_reward_vs_interval") == "supported"
+        and _check_status(checks, "transit_learned_promotion_wait_vs_interval") == "supported"
+        and _check_status(checks, "transit_learned_promotion_replans_vs_interval") == "supported"
+    )
+    native_promotion_reward_status = _check_status(checks, "transit_native_promotion_reward_vs_interval")
+    native_promotion_replan_status = _check_status(checks, "transit_native_promotion_replans_vs_interval")
+    if learned_promotion_supported and native_promotion_reward_status == "supported":
+        promotion_status = "supported learned+native reward"
+    elif learned_promotion_supported and native_promotion_replan_status == "supported":
+        promotion_status = "supported learned; native replan"
+    elif learned_promotion_supported:
+        promotion_status = "supported learned"
+    else:
+        promotion_status = "supported deterministic"
 
     return [
         {
@@ -513,7 +528,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C3: promotion should trigger replanning after persistent shocks",
-            "evidence": "Deterministic replan improves trading recovery, a learned PPO promotion gate triggers Transit surrogate replans, and native Transit promotion-replan improves episode reward.",
+            "evidence": "Deterministic replan improves trading recovery, a learned PPO promotion gate improves Transit surrogate reward/wait, and native Transit promotion-replan increases timetable replans.",
             "metric": (
                 f"return delta={_fmt(replan_delta.get('total_return_delta_mean'))}, "
                 f"recovery regret delta={_fmt(replan_delta.get('recovery_regret_120_delta_mean'))}; "
@@ -523,21 +538,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native reward={_check_metric(checks, 'transit_native_promotion_reward_vs_interval')}, "
                 f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}"
             ),
-            "status": (
-                "supported learned+native"
-                if (
-                    _check_status(checks, "transit_native_promotion_reward_vs_interval")
-                    in {"supported", "positive_mixed"}
-                    and (
-                        _check_status(checks, "transit_learned_promotion_reward_vs_interval")
-                        in {"supported", "positive_mixed"}
-                        or _check_status(checks, "transit_learned_promotion_wait_vs_interval")
-                        in {"supported", "positive_mixed"}
-                    )
-                )
-                else "supported deterministic"
-            ),
-            "remaining_gap": "Native evidence is two-seed promotion-replan, not yet a learned native gate or larger-seed off-policy theorem-grade result.",
+            "status": promotion_status,
+            "remaining_gap": "Native promotion-replan is now 8-seed positive-mixed on reward/wait and supported on replan count; learned native gate and larger off-policy theorem-grade validation remain.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",

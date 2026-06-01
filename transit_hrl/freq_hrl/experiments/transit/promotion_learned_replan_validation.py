@@ -176,7 +176,12 @@ def write_report(path: Path, rows: list[dict[str, Any]], checks: list[dict[str, 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-seeds", type=int, nargs="+", default=[11, 23])
-    parser.add_argument("--eval-seeds", type=int, nargs="+", default=[101, 131, 151])
+    parser.add_argument(
+        "--eval-seeds",
+        type=int,
+        nargs="+",
+        default=[101, 131, 151, 181, 211, 241, 271, 301, 331, 361],
+    )
     parser.add_argument("--steps", type=int, default=96)
     parser.add_argument("--iterations", type=int, default=3)
     parser.add_argument("--corridors", type=int, default=2)

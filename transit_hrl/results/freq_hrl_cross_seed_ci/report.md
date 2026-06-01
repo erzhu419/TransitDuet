@@ -1,10 +1,10 @@
 # Freq-HRL Cross-Seed CI Report
 
 - checks: 20
-- enough paired seeds/sources: 13
+- enough paired seeds/sources: 16
 - supported checks: 18
-- paper-ready checks: 11
-- n_common range: 2 / 5.0 / 17
+- paper-ready checks: 13
+- n_common range: 3 / 6.5 / 17
 
 `paper_ready` requires supported status, enough pairs, positive improvement CI, and either sign-test p <= threshold or at least 10 pairs.
 
@@ -14,13 +14,13 @@
 | transit_full_wait_vs_base | supported | 3 | -0.0758 [-0.0815, -0.0651] | 1.00 | 0.2500 | False |
 | transit_full_lower_lf_vs_base | supported | 3 | -0.0199 [-0.0199, -0.0198] | 1.00 | 0.2500 | False |
 | transit_wait_credit_vs_no_wait | supported | 3 | -0.1251 [-0.1468, -0.1020] | 1.00 | 0.2500 | False |
-| transit_learned_promotion_reward_vs_interval | positive_mixed | 5 | +0.0025 [-0.0001, +0.0051] | 0.60 | 1.0000 | False |
-| transit_learned_promotion_wait_vs_interval | supported | 5 | -0.0067 [-0.0085, -0.0053] | 1.00 | 0.0625 | True |
-| transit_learned_promotion_replans_vs_interval | supported | 5 | +16.4000 [+12.6000, +22.8000] | 1.00 | 0.0625 | True |
-| transit_learned_promotion_raw_lf_vs_interval | supported | 5 | -0.0003 [-0.0003, -0.0002] | 1.00 | 0.0625 | True |
-| transit_native_promotion_reward_vs_interval | supported | 2 | +769.3340 [+262.7800, +1275.8880] | 1.00 | 0.5000 | False |
-| transit_native_promotion_wait_vs_interval | positive_mixed | 2 | -0.2285 [-0.8790, +0.4220] | 0.50 | 1.0000 | False |
-| transit_native_promotion_replans_vs_interval | supported | 2 | +191.0000 [+188.0000, +194.0000] | 1.00 | 0.5000 | False |
+| transit_learned_promotion_reward_vs_interval | supported | 10 | +0.0047 [+0.0016, +0.0076] | 0.70 | 0.3438 | True |
+| transit_learned_promotion_wait_vs_interval | supported | 10 | -0.0079 [-0.0096, -0.0062] | 1.00 | 0.0020 | True |
+| transit_learned_promotion_replans_vs_interval | supported | 10 | +20.1000 [+14.9000, +25.5000] | 1.00 | 0.0020 | True |
+| transit_learned_promotion_raw_lf_vs_interval | supported | 10 | -0.0003 [-0.0003, -0.0003] | 1.00 | 0.0020 | True |
+| transit_native_promotion_reward_vs_interval | positive_mixed | 8 | +331.9682 [-4100.6044, +4771.6282] | 0.62 | 0.7266 | False |
+| transit_native_promotion_wait_vs_interval | positive_mixed | 8 | -4.4798 [-13.1886, +0.8364] | 0.62 | 0.7266 | False |
+| transit_native_promotion_replans_vs_interval | supported | 8 | +54.8750 [+39.5000, +69.8844] | 1.00 | 0.0078 | True |
 | demand_nb_vs_fourier_mse | supported | 17 | -0.7217 [-1.2633, -0.2617] | 0.82 | 0.0127 | True |
 | demand_nb_vs_fourier_mae | supported | 17 | -0.0494 [-0.0759, -0.0296] | 1.00 | 0.0000 | True |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | 17 | -0.1322 [-0.1620, -0.1047] | 1.00 | 0.0000 | True |

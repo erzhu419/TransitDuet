@@ -39,7 +39,7 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
                 "upper_plan_decisions": 6.0,
             },
         ]
-        checks = {row["metric"]: row for row in paired_checks(rows)}
+        checks = {row["metric"]: row for row in paired_checks(rows, min_pairs=2)}
         self.assertGreater(checks["ep_reward"]["delta_mean"], 0.0)
         self.assertLess(checks["avg_wait_min"]["delta_mean"], 0.0)
         self.assertEqual(checks["ep_reward"]["n_common"], 2)

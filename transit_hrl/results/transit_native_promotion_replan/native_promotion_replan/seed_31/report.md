@@ -5,10 +5,10 @@
 - shared core: `freq_hrl.rl.DualActorCriticPPO`
 - upper contract: 20x4
 - lower contract: 43x1
-- mean wait: 4.9120
-- mean headway CV: 0.5596
-- mean shared-PPO score: -6.0312
+- mean wait: 5.9310
+- mean headway CV: 0.5411
+- mean shared-PPO score: -7.0132
 
 | ep | wait | cv | reward | lower samples | upper decisions | lower decisions | loss |
 |---:|---:|---:|---:|---:|---:|---:|---:|
-| 0 | 4.9120 | 0.5596 | -10594.3170 | 4970 | 260 | 5232 | 13904.9466 |
+| 0 | 5.9310 | 0.5411 | -11333.6110 | 4970 | 157 | 5232 | 6854.2824 |
