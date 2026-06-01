@@ -406,6 +406,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     replan = read_json(results_root / "trading_promotion_replan" / "summary.json")
     intraday = read_json(results_root / "trading_public_market_intraday_encoder_ablation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
+    neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
     transit = read_csv_rows(transit_root / "transit_performance_validation" / "summary.csv")
     checks = build_statistical_checks(results_root)
@@ -415,9 +416,11 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     replan_delta = replan.get("paired_delta", {})
     intraday_rows = intraday.get("summary", [])
     encoder_rows = encoder.get("summary", [])
+    neural_encoder_rows = neural_encoder.get("summary", [])
     transit_freq = next((row for row in transit if row.get("config") == "T_freqhrl_terminal"), {})
     best_intraday = max(intraday_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     adaptive = next((row for row in encoder_rows if row.get("freq_method") == "adaptive_wavelet"), {})
+    neural = next((row for row in neural_encoder_rows if row.get("freq_method") == "neural_state_space"), {})
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
     native_contract = native_audit.get("contract", {}) if isinstance(native_audit, dict) else {}
     native_status = str(native_audit.get("status", "missing")) if isinstance(native_audit, dict) else "missing"
@@ -482,10 +485,14 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C5: advanced causal encoders can be swapped by domain",
-            "evidence": "Adaptive lifting wavelet runs in Trading and Transit trackers and ablation.",
-            "metric": f"adaptive Sharpe={_fmt(adaptive.get('sharpe_mean'))}; EMA Sharpe={_fmt(ema.get('sharpe_mean'))}",
-            "status": "mixed",
-            "remaining_gap": "Neural state-space and PINN-constrained encoders remain open.",
+            "evidence": "Adaptive lifting wavelet and neural/PINN state-space encoders run in Trading and Transit trackers and ablations.",
+            "metric": (
+                f"adaptive Sharpe={_fmt(adaptive.get('sharpe_mean'))}; "
+                f"neural Sharpe={_fmt(neural.get('sharpe_mean'))}; "
+                f"EMA Sharpe={_fmt(ema.get('sharpe_mean'))}"
+            ),
+            "status": "supported path" if neural else "mixed",
+            "remaining_gap": "Neural/PINN encoder path exists; larger cross-domain performance validation is still needed.",
         },
         {
             "claim": "C6: public-data validation covers more than daily bars",

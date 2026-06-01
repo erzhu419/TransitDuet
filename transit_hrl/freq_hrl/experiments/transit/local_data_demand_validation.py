@@ -271,7 +271,7 @@ def main() -> None:
     parser.add_argument(
         "--methods",
         nargs="+",
-        default=["ema", "fourier", "dynamic_harmonic_nb", "adaptive_wavelet"],
+        default=["ema", "fourier", "dynamic_harmonic_nb", "adaptive_wavelet", "neural_state_space"],
     )
     parser.add_argument("--max-series", type=int, default=12)
     parser.add_argument("--bins-per-hour", type=int, default=12)

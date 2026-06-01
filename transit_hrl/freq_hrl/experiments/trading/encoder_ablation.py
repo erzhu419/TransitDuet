@@ -13,7 +13,14 @@ import numpy as np
 from .performance_validation import SCENARIOS, run_baseline
 
 
-ENCODER_METHODS = ("ema", "fourier", "state_space", "haar_wavelet", "adaptive_wavelet")
+ENCODER_METHODS = (
+    "ema",
+    "fourier",
+    "state_space",
+    "haar_wavelet",
+    "adaptive_wavelet",
+    "neural_state_space",
+)
 
 
 def aggregate_by_encoder(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -46,7 +53,7 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

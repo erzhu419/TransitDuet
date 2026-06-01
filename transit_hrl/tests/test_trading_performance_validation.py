@@ -109,7 +109,7 @@ class TradingPerformanceValidationTest(unittest.TestCase):
         self.assertGreaterEqual(row["plan_curve_forced_replans"], 1)
 
     def test_advanced_encoders_run_in_trading_validation(self):
-        for method in ("state_space", "haar_wavelet", "adaptive_wavelet"):
+        for method in ("state_space", "haar_wavelet", "adaptive_wavelet", "neural_state_space"):
             with self.subTest(method=method):
                 row = run_baseline(
                     seed=5,

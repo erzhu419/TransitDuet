@@ -30,10 +30,10 @@
     },
     {
       "claim": "C5: advanced causal encoders can be swapped by domain",
-      "evidence": "Adaptive lifting wavelet runs in Trading and Transit trackers and ablation.",
-      "metric": "adaptive Sharpe=13.0749; EMA Sharpe=16.0625",
-      "status": "mixed",
-      "remaining_gap": "Neural state-space and PINN-constrained encoders remain open."
+      "evidence": "Adaptive lifting wavelet and neural/PINN state-space encoders run in Trading and Transit trackers and ablations.",
+      "metric": "adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625",
+      "status": "supported path",
+      "remaining_gap": "Neural/PINN encoder path exists; larger cross-domain performance validation is still needed."
     },
     {
       "claim": "C6: public-data validation covers more than daily bars",

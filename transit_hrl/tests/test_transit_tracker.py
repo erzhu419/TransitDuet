@@ -77,6 +77,22 @@ class TransitTrackerTest(unittest.TestCase):
         self.assertEqual(tracker.upper_features().shape[0], tracker.upper_feature_dim)
         self.assertEqual(tracker.lower_features(1, True).shape[0], tracker.lower_feature_dim)
 
+    def test_neural_state_space_tracker_runs(self):
+        tracker = TransitFrequencyTracker(
+            update_interval_s=1,
+            bin_sec=1,
+            method="neural_state_space",
+            neural_hidden_dim=4,
+            global_demand_norm=10,
+            local_demand_norm=5,
+        )
+        tracker.update({(1, True): 3.0})
+        tracker.update({(1, True): 5.0})
+        summary = tracker.summary()
+        self.assertEqual(summary["freq_method"], "neural_state_space")
+        self.assertEqual(tracker.upper_features().shape[0], tracker.upper_feature_dim)
+        self.assertEqual(tracker.lower_features(1, True).shape[0], tracker.lower_feature_dim)
+
     def test_raw_history_method_is_supported_for_copied_configs(self):
         tracker = TransitFrequencyTracker(
             update_interval_s=1,

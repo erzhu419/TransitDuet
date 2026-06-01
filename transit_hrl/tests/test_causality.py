@@ -7,6 +7,7 @@ from freq_hrl.encoders import (
     CausalEMAEncoder,
     CausalFourierEncoder,
     CausalHaarWaveletEncoder,
+    CausalNeuralStateSpaceEncoder,
     CausalStateSpaceEncoder,
 )
 
@@ -86,6 +87,19 @@ class CausalityTest(unittest.TestCase):
             )
         )
 
+    def test_neural_state_space_encoder_is_causal(self):
+        self._assert_encoder_causal(
+            CausalNeuralStateSpaceEncoder(
+                update_interval_s=60,
+                hidden_dim=4,
+                low_period_s=600,
+                residual_period_s=180,
+                forecast_horizon_s=300,
+                learn_rate=0.03,
+                pinn_gain=0.05,
+            )
+        )
+
     def test_adaptive_wavelet_exposes_learned_metadata(self):
         encoder = CausalAdaptiveWaveletEncoder(update_interval_s=60, learn_rate=0.05)
         for t, value in enumerate([0.0, 1.0, 1.5, 2.0, 3.0]):
@@ -106,6 +120,20 @@ class CausalityTest(unittest.TestCase):
         feats = encoder.features()
         self.assertTrue(np.all(feats["x_low_uncertainty"] >= 0.0))
         self.assertEqual(feats["encoder"], "causal_state_space")
+
+    def test_neural_state_space_exposes_pinn_metadata(self):
+        encoder = CausalNeuralStateSpaceEncoder(
+            update_interval_s=60,
+            hidden_dim=4,
+            forecast_horizon_s=300,
+            pinn_gain=0.10,
+        )
+        for t, value in enumerate([0.0, 1.0, 1.0, 2.0, 3.0]):
+            encoder.update({"timestamp": t, "x_raw": [value]})
+        feats = encoder.features()
+        self.assertEqual(feats["encoder"], "causal_neural_state_space")
+        self.assertIn("pinn_residual", feats)
+        self.assertTrue(np.all(feats["x_low_uncertainty"] >= 0.0))
 
 
 if __name__ == "__main__":

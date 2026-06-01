@@ -13,6 +13,7 @@ from ...encoders import (
     CausalAdaptiveWaveletEncoder,
     CausalEMAEncoder,
     CausalFourierEncoder,
+    CausalNeuralStateSpaceEncoder,
     CausalPoissonHarmonicEncoder,
 )
 
@@ -60,6 +61,11 @@ class TransitFrequencyTracker:
         adaptive_learn_rate: float = 0.02,
         adaptive_ridge: float = 1e-6,
         adaptive_max_predictor: float = 3.0,
+        neural_hidden_dim: int = 8,
+        neural_learn_rate: float = 0.01,
+        neural_ridge: float = 1e-5,
+        neural_pinn_gain: float = 0.05,
+        neural_max_correction: float = 5.0,
         global_demand_norm: float = 50.0,
         local_demand_norm: float = 10.0,
         slope_norm: float = 5.0,
@@ -153,6 +159,30 @@ class TransitFrequencyTracker:
                 ridge=adaptive_ridge,
                 max_predictor=adaptive_max_predictor,
             )
+        elif self.method in {
+            "neural_state_space",
+            "neural_statespace",
+            "pinn_state_space",
+            "pinn_encoder",
+            "neural_pinn",
+        }:
+            self.method = "neural_state_space"
+            self.encoder = CausalNeuralStateSpaceEncoder(
+                update_interval_s=self.bin_interval_s,
+                hidden_dim=neural_hidden_dim,
+                low_period_s=low_period_s,
+                residual_period_s=fast_period_s,
+                mid_period_s=mid_period_s,
+                slope_period_s=mid_period_s,
+                energy_period_s=energy_period_s,
+                persistence_period_s=persistence_period_s,
+                persistence_threshold=persistence_threshold,
+                forecast_horizon_s=forecast_horizon_s,
+                learn_rate=neural_learn_rate,
+                ridge=neural_ridge,
+                pinn_gain=neural_pinn_gain,
+                max_correction=neural_max_correction,
+            )
         elif self.method in {"ema", "causal_ema", "raw_history", "history", "raw"}:
             raw_history_mode = self.method in {"raw_history", "history", "raw"}
             self.method = "raw_history" if raw_history_mode else "ema"
@@ -214,6 +244,11 @@ class TransitFrequencyTracker:
             adaptive_learn_rate=cfg.get("adaptive_learn_rate", 0.02),
             adaptive_ridge=cfg.get("adaptive_ridge", 1e-6),
             adaptive_max_predictor=cfg.get("adaptive_max_predictor", 3.0),
+            neural_hidden_dim=cfg.get("neural_hidden_dim", 8),
+            neural_learn_rate=cfg.get("neural_learn_rate", 0.01),
+            neural_ridge=cfg.get("neural_ridge", 1e-5),
+            neural_pinn_gain=cfg.get("neural_pinn_gain", 0.05),
+            neural_max_correction=cfg.get("neural_max_correction", 5.0),
             global_demand_norm=cfg.get("global_demand_norm", 50.0),
             local_demand_norm=cfg.get("local_demand_norm", 10.0),
             slope_norm=cfg.get("slope_norm", 5.0),

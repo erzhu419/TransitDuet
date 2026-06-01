@@ -266,7 +266,11 @@ def main() -> None:
     parser.add_argument("--yahoo-interval", default="1d")
     parser.add_argument("--bar-sec", type=float, default=24 * 3600.0)
     parser.add_argument("--steps", type=int, default=None)
-    parser.add_argument("--freq-method", choices=["ema", "state_space", "haar_wavelet", "adaptive_wavelet"], default="ema")
+    parser.add_argument(
+        "--freq-method",
+        choices=["ema", "state_space", "haar_wavelet", "adaptive_wavelet", "neural_state_space"],
+        default="ema",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_public_market"))
     args = parser.parse_args()
 

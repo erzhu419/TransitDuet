@@ -70,6 +70,19 @@ class TradingDomainTest(unittest.TestCase):
         self.assertEqual(tracker.summary()["freq_method"], "adaptive_wavelet")
         self.assertGreater(tracker.upper_features().shape[0], 0)
 
+    def test_trading_tracker_neural_state_space_runs(self):
+        tracker = TradingFrequencyTracker(
+            bar_sec=60,
+            method="neural_state_space",
+            feature_norm=[0.01, 0.01],
+            neural_hidden_dim=4,
+            promotion_enable=False,
+        )
+        tracker.update_bar([0.001, -0.001])
+        tracker.update_bar([0.002, -0.002])
+        self.assertEqual(tracker.summary()["freq_method"], "neural_state_space")
+        self.assertGreater(tracker.upper_features().shape[0], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

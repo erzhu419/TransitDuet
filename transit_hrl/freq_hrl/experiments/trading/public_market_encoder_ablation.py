@@ -20,7 +20,7 @@ from .public_market_data import (
 )
 
 
-PUBLIC_ENCODERS = ("ema", "state_space", "haar_wavelet", "adaptive_wavelet")
+PUBLIC_ENCODERS = ("ema", "state_space", "haar_wavelet", "adaptive_wavelet", "neural_state_space")
 
 
 def load_series(args: argparse.Namespace) -> tuple[list[str], list[str], np.ndarray]:
