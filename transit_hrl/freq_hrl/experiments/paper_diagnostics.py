@@ -8,6 +8,14 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.experiments.statistics import (
+    claim_status,
+    finite_float,
+    format_ci,
+    paired_delta_stats,
+)
+from freq_hrl.experiments.transit.demand_estimator_validation import COUNT_CALIBRATION_ID
+
 
 def read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -30,6 +38,232 @@ def _fmt(value: Any, digits: int = 4) -> str:
         return "NA"
 
 
+def collect_gap_rows(results_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in sorted(results_root.glob("*gap_closure*/summary.json")):
+        data = read_json(path)
+        payloads = data.get("payloads", {})
+        if not isinstance(payloads, dict):
+            continue
+        for variant, payload in payloads.items():
+            per_seed = payload.get("per_seed", []) if isinstance(payload, dict) else []
+            for row in per_seed:
+                item = dict(row)
+                item["source"] = path.parent.name
+                item["variant"] = str(variant)
+                rows.append(item)
+    return rows
+
+
+def collect_demand_rows(results_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in sorted(results_root.glob("*demand_estimator*/summary.json")):
+        data = read_json(path)
+        metadata = data.get("metadata", {})
+        if metadata.get("estimator_calibration") != COUNT_CALIBRATION_ID:
+            continue
+        for row in data.get("rows", []):
+            item = dict(row)
+            item["source"] = path.parent.name
+            rows.append(item)
+    return rows
+
+
+def collect_per_seed_rows(
+    results_root: Path,
+    variants: dict[str, str],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for variant, dirname in variants.items():
+        for row in read_csv_rows(results_root / dirname / "per_seed.csv"):
+            item = dict(row)
+            item["variant"] = variant
+            item["source"] = dirname
+            rows.append(item)
+    return rows
+
+
+def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+
+    def add(
+        check: str,
+        claim: str,
+        stats: dict[str, Any],
+        *,
+        min_pairs: int = 3,
+        require_ci: bool = False,
+    ) -> None:
+        checks.append({
+            "check": check,
+            "claim": claim,
+            **stats,
+            "status": claim_status(stats, min_pairs=min_pairs, require_ci=require_ci),
+        })
+
+    gap_rows = collect_gap_rows(results_root)
+    if gap_rows:
+        add(
+            "transit_full_reward_vs_base",
+            "integrated Transit Freq-HRL improves task reward",
+            paired_delta_stats(
+                gap_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="reward_mean",
+                treatment="full_freqhrl",
+                control="base_ema_direct",
+            ),
+            min_pairs=3,
+        )
+        add(
+            "transit_full_wait_vs_base",
+            "integrated Transit Freq-HRL lowers passenger wait proxy",
+            paired_delta_stats(
+                gap_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="wait_proxy",
+                treatment="full_freqhrl",
+                control="base_ema_direct",
+                lower_is_better=True,
+            ),
+            min_pairs=3,
+        )
+        add(
+            "transit_full_lower_lf_vs_base",
+            "integrated Transit Freq-HRL reduces lower low-frequency drift",
+            paired_delta_stats(
+                gap_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="LowerLFDrift",
+                treatment="full_freqhrl",
+                control="base_ema_direct",
+                lower_is_better=True,
+            ),
+            min_pairs=3,
+        )
+        add(
+            "transit_wait_credit_vs_no_wait",
+            "frequency-attributed wait credit improves wait proxy",
+            paired_delta_stats(
+                gap_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="wait_proxy",
+                treatment="full_freqhrl",
+                control="full_no_wait",
+                lower_is_better=True,
+            ),
+            min_pairs=3,
+        )
+
+    demand_rows = collect_demand_rows(results_root)
+    demand_methods = {str(row.get("method")) for row in demand_rows}
+    if {"dynamic_harmonic_nb", "fourier"} <= demand_methods:
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            add(
+                f"demand_nb_vs_fourier_{metric}",
+                "dynamic harmonic count estimator is competitive with Fourier",
+                paired_delta_stats(
+                    demand_rows,
+                    variant_key="method",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="dynamic_harmonic_nb",
+                    control="fourier",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+                require_ci=(metric == "mse"),
+            )
+
+    trading_rows = collect_per_seed_rows(
+        results_root,
+        {
+            "trading_plan": "trading_ppo_plan_actor_critic",
+            "trading_constrained": "trading_ppo_primal_dual_leakage",
+        },
+    )
+    if trading_rows:
+        add(
+            "trading_constraint_lower_lf",
+            "primal-dual constraint lowers trading lower-LF drift",
+            paired_delta_stats(
+                trading_rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric="LowerLFDrift",
+                treatment="trading_constrained",
+                control="trading_plan",
+                lower_is_better=True,
+            ),
+            min_pairs=5,
+        )
+        add(
+            "trading_constraint_return_tradeoff",
+            "trading leakage constraint has no return tradeoff",
+            paired_delta_stats(
+                trading_rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric="total_return",
+                treatment="trading_constrained",
+                control="trading_plan",
+            ),
+            min_pairs=5,
+        )
+
+    transit_rows = collect_per_seed_rows(
+        results_root,
+        {
+            "transit_plan": "transit_ppo_plan_surrogate",
+            "transit_constrained": "transit_ppo_primal_dual_leakage",
+        },
+    )
+    if transit_rows:
+        add(
+            "transit_constraint_lower_lf",
+            "primal-dual constraint lowers Transit lower-LF drift",
+            paired_delta_stats(
+                transit_rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric="LowerLFDrift",
+                treatment="transit_constrained",
+                control="transit_plan",
+                lower_is_better=True,
+            ),
+            min_pairs=5,
+        )
+        add(
+            "transit_constraint_reward_tradeoff",
+            "Transit leakage constraint has no reward tradeoff",
+            paired_delta_stats(
+                transit_rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric="reward_mean",
+                treatment="transit_constrained",
+                control="transit_plan",
+            ),
+            min_pairs=5,
+        )
+
+    return checks
+
+
+def _check_status(checks: list[dict[str, Any]], name: str) -> str:
+    row = next((item for item in checks if item.get("check") == name), None)
+    return str(row.get("status", "missing")) if row else "missing"
+
+
+def _check_metric(checks: list[dict[str, Any]], name: str, digits: int = 4) -> str:
+    row = next((item for item in checks if item.get("check") == name), None)
+    return format_ci(row, digits=digits) if row else "NA"
+
+
 def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str, str]]:
     plan = read_json(results_root / "trading_ppo_plan_actor_critic" / "summary.json")
     constrained = read_json(results_root / "trading_ppo_primal_dual_leakage" / "summary.json")
@@ -37,6 +271,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     intraday = read_json(results_root / "trading_public_market_intraday_encoder_ablation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
     transit = read_csv_rows(transit_root / "transit_performance_validation" / "summary.csv")
+    checks = build_statistical_checks(results_root)
 
     plan_summary = plan.get("summary", {})
     constrained_summary = constrained.get("summary", {})
@@ -73,7 +308,10 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         {
             "claim": "C4: leakage can be constrained at loss level",
             "evidence": "PPO trajectory constraints with primal-dual multiplier reduce lower-LF drift.",
-            "metric": f"constrained LowerLFDrift={_fmt(constrained_summary.get('LowerLFDrift_mean'))}, return={_fmt(constrained_summary.get('total_return_mean'))}",
+            "metric": (
+                f"trading drift delta={_check_metric(checks, 'trading_constraint_lower_lf')}; "
+                f"return delta={_check_metric(checks, 'trading_constraint_return_tradeoff')}"
+            ),
             "status": "supported with tradeoff",
             "remaining_gap": "Constraint trades off return/Sharpe and did not improve Transit surrogate drift.",
         },
@@ -91,6 +329,43 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
             "status": "supported path",
             "remaining_gap": "Short Level-1 intraday slice only; no order book or execution simulator.",
         },
+        {
+            "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
+            "evidence": "Gap-closure matrix combines count demand state, plan curves, promotion replanning, native lower context, wait credit, and drift constraint.",
+            "metric": (
+                f"reward delta={_check_metric(checks, 'transit_full_reward_vs_base')}; "
+                f"wait delta={_check_metric(checks, 'transit_full_wait_vs_base')}; "
+                f"drift delta={_check_metric(checks, 'transit_full_lower_lf_vs_base')}"
+            ),
+            "status": _check_status(checks, "transit_full_reward_vs_base"),
+            "remaining_gap": "Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation.",
+        },
+        {
+            "claim": "C8: passenger waiting-time frequency credit improves control quality",
+            "evidence": "Full Freq-HRL path is paired against the same path without wait attribution.",
+            "metric": f"wait delta vs no-wait={_check_metric(checks, 'transit_wait_credit_vs_no_wait')}",
+            "status": _check_status(checks, "transit_wait_credit_vs_no_wait"),
+            "remaining_gap": "Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation.",
+        },
+        {
+            "claim": "C9: leakage constraints achieve no-tradeoff responsibility separation",
+            "evidence": "Trading and Transit primal-dual constraints are checked on paired seeds for drift and task-return deltas.",
+            "metric": (
+                f"trading drift={_check_status(checks, 'trading_constraint_lower_lf')}, "
+                f"trading return={_check_status(checks, 'trading_constraint_return_tradeoff')}, "
+                f"transit drift={_check_status(checks, 'transit_constraint_lower_lf')}, "
+                f"transit reward={_check_status(checks, 'transit_constraint_reward_tradeoff')}"
+            ),
+            "status": "not_supported",
+            "remaining_gap": "The constraint path can reduce drift in trading, but no-tradeoff is not supported and Transit drift is not improved.",
+        },
+        {
+            "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed and source.",
+            "metric": f"MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}",
+            "status": _check_status(checks, "demand_nb_vs_fourier_mse"),
+            "remaining_gap": "The count-state path is present; it must beat or match Fourier on larger real Transit demand data before becoming a headline claim.",
+        },
     ]
 
 
@@ -99,12 +374,49 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     if not rows:
         return
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
 
-def write_report(path: Path, claims: list[dict[str, str]]) -> None:
+def write_statistical_checks(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        return
+    fieldnames = [
+        "check",
+        "claim",
+        "status",
+        "metric",
+        "treatment",
+        "control",
+        "direction",
+        "n_common",
+        "delta_mean",
+        "delta_ci95_low",
+        "delta_ci95_high",
+        "improvement_mean",
+        "improvement_ci95_low",
+        "improvement_ci95_high",
+        "win_rate",
+        "sign_p_value",
+    ]
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=fieldnames,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def write_report(
+    path: Path,
+    claims: list[dict[str, str]],
+    checks: list[dict[str, Any]],
+) -> None:
     lines = [
         "# Freq-HRL Paper Diagnostics",
         "",
@@ -134,6 +446,25 @@ def write_report(path: Path, claims: list[dict[str, str]]) -> None:
         )
     lines.extend([
         "",
+        "## Statistical Claim Gates",
+        "",
+        "Deltas are `treatment - control`; `direction=decrease` means negative raw delta is the desired effect. Bootstrap intervals are paired by seed where possible.",
+        "",
+        "| check | status | metric | n | delta CI95 | win rate | sign p |",
+        "|---|---|---|---:|---:|---:|---:|",
+    ])
+    for row in checks:
+        lines.append(
+            f"| {row['check']} "
+            f"| {row['status']} "
+            f"| {row['metric']} "
+            f"| {row['n_common']} "
+            f"| {format_ci(row)} "
+            f"| {_fmt(row.get('win_rate'), 2)} "
+            f"| {_fmt(row.get('sign_p_value'), 4)} |"
+        )
+    lines.extend([
+        "",
         "## Paper Boundary",
         "",
         "The current evidence supports a frequency-routed HRL protocol prototype with copied-Transit and trading validation. It does not yet justify a fully validated domain-general algorithm claim because copied Transit native training, larger intraday/order-book data, neural/PINN encoders, and broader statistical tests remain open.",
@@ -152,13 +483,15 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/freq_hrl_paper_diagnostics"))
     args = parser.parse_args()
     claims = build_claim_matrix(args.results_root, args.transit_root)
+    checks = build_statistical_checks(args.results_root)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_csv(args.output_dir / "claim_matrix.csv", claims)
+    write_statistical_checks(args.output_dir / "statistical_checks.csv", checks)
     with (args.output_dir / "claim_matrix.json").open("w", encoding="utf-8") as f:
-        json.dump({"claims": claims}, f, indent=2)
-    write_report(args.output_dir / "report.md", claims)
+        json.dump({"claims": claims, "statistical_checks": checks}, f, indent=2)
+    write_report(args.output_dir / "report.md", claims, checks)
     print(f"wrote {args.output_dir}")
-    print(f"paper_diagnostics claims={len(claims)}")
+    print(f"paper_diagnostics claims={len(claims)} checks={len(checks)}")
 
 
 if __name__ == "__main__":

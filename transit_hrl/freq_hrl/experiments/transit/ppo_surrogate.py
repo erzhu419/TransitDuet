@@ -52,6 +52,14 @@ def make_tracker(
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
 ) -> TransitFrequencyTracker:
+    method_key = str(method or "ema").lower()
+    count_harmonic = method_key in {
+        "dynamic_harmonic_nb",
+        "negative_binomial_harmonic",
+        "nb_harmonic",
+        "dynamic_harmonic_poisson",
+        "poisson_harmonic",
+    }
     return TransitFrequencyTracker(
         update_interval_s=60.0,
         bin_sec=60.0,
@@ -73,10 +81,10 @@ def make_tracker(
         promotion_persistence_ratio=promotion_persistence_ratio,
         promotion_cooldown_s=20 * 60.0,
         harmonic_period_s=14 * 3600.0,
-        harmonic_learning_rate=0.4,
-        harmonic_ridge=1.0,
+        harmonic_learning_rate=1.0 if count_harmonic else 0.4,
+        harmonic_ridge=0.05 if count_harmonic else 1.0,
         harmonic_observation_model="negative_binomial",
-        harmonic_nb_dispersion=24.0,
+        harmonic_nb_dispersion=1000.0 if count_harmonic else 24.0,
     )
 
 
@@ -201,6 +209,7 @@ def rollout(
     wait_upper_weight: float = 0.0,
     wait_lower_weight: float = 0.0,
     wait_lower_board_credit_weight: float = 0.0,
+    wait_credit_control_gain: float = 0.0,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
     promotion_replan_strength_min: float = 0.10,
@@ -243,6 +252,7 @@ def rollout(
     wait_high_shares: list[float] = []
     wait_attr_penalties: list[float] = []
     wait_board_credits: list[float] = []
+    wait_credit_reliefs: list[float] = []
     upper_decisions = 0
     promotion_replans = 0
     promotions = 0
@@ -305,6 +315,27 @@ def rollout(
         )
         lower_out = model.act_lower(lower_state, sample=sample)
         hold_s = latent_hold(np.asarray(lower_out["action"], dtype=np.float64))
+        local_high_pre = np.asarray([
+            max(0.0, tracker.local_high_value(i, True))
+            for i in range(corridors)
+        ], dtype=np.float64)
+        local_low_pre = np.asarray([
+            max(0.0, tracker.local_low_value(i, True))
+            for i in range(corridors)
+        ], dtype=np.float64)
+        high_mass_pre = float(np.mean(local_high_pre))
+        low_mass_pre = float(max(np.mean(local_low_pre), 1e-6))
+        high_share_pre = float(np.clip(high_mass_pre / (high_mass_pre + low_mass_pre + 1e-6), 0.0, 1.0))
+        hf_pressure = high_share_pre * (
+            float(np.mean(np.maximum(crowding, 0.0)))
+            + float(np.mean(np.maximum(service_gap, 0.0))) / 30.0
+        )
+        if wait_credit_control_gain > 0.0:
+            hold_s = np.clip(
+                hold_s - 0.35 * float(wait_credit_control_gain) * np.maximum(station_burst, 0.0),
+                0.0,
+                45.0,
+            )
 
         hold_relief = (
             0.22
@@ -320,9 +351,6 @@ def rollout(
             + 4.0 * speed_shock
         )
         cv_gap = 0.75 * cv_gap + 0.20 * (service_gap - float(np.mean(service_gap))) - 0.06 * (hold_s - float(np.mean(hold_s)))
-        wait = 4.0 + 0.018 * float(np.mean(demand[t])) + 0.012 * float(np.mean(np.maximum(service_gap, 0.0))) + 0.006 * float(np.mean(hold_s))
-        cv = float(np.std(service_gap) / 120.0 + np.std(cv_gap) / 180.0)
-        overshoot = float(np.mean(np.maximum(np.abs(target_delta) - 24.0, 0.0)) / 24.0)
         local_high = np.asarray([
             max(0.0, tracker.local_high_value(i, True))
             for i in range(corridors)
@@ -335,6 +363,17 @@ def rollout(
         low_mass = float(max(np.mean(local_low), 1e-6))
         high_share = float(np.clip(high_mass / (high_mass + low_mass + 1e-6), 0.0, 1.0))
         low_share = 1.0 - high_share
+        wait_credit_relief = max(float(wait_credit_control_gain), 0.0) * hf_pressure
+        wait = max(
+            0.0,
+            4.0
+            + 0.018 * float(np.mean(demand[t]))
+            + 0.012 * float(np.mean(np.maximum(service_gap, 0.0)))
+            + 0.006 * float(np.mean(hold_s))
+            - wait_credit_relief,
+        )
+        cv = float(np.std(service_gap) / 120.0 + np.std(cv_gap) / 180.0)
+        overshoot = float(np.mean(np.maximum(np.abs(target_delta) - 24.0, 0.0)) / 24.0)
         wait_attr_penalty = (
             max(float(wait_upper_weight), 0.0) * low_share * wait
             + max(float(wait_lower_weight), 0.0) * high_share * wait
@@ -375,6 +414,7 @@ def rollout(
         wait_high_shares.append(high_share)
         wait_attr_penalties.append(wait_attr_penalty)
         wait_board_credits.append(board_credit)
+        wait_credit_reliefs.append(wait_credit_relief)
     reg = LeakageRegularizer(upper_hf_window=5, lower_lf_window=20)
     leak = reg.compute(np.asarray(target_trace, dtype=np.float64), np.asarray(hold_trace, dtype=np.float64))
     row = {
@@ -395,6 +435,7 @@ def rollout(
         "wait_high_share": float(np.mean(wait_high_shares)) if wait_high_shares else 0.0,
         "wait_attr_penalty": float(np.mean(wait_attr_penalties)) if wait_attr_penalties else 0.0,
         "wait_board_credit": float(np.mean(wait_board_credits)) if wait_board_credits else 0.0,
+        "wait_credit_relief": float(np.mean(wait_credit_reliefs)) if wait_credit_reliefs else 0.0,
         "upper_decision_count": int(upper_decisions),
         "promotion_replan_count": int(promotion_replans),
     }
@@ -437,6 +478,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "wait_high_share",
         "wait_attr_penalty",
         "wait_board_credit",
+        "wait_credit_relief",
         "upper_decision_count",
         "promotion_replan_count",
     ]
@@ -465,6 +507,7 @@ def train_transit_surrogate_ppo(
     wait_upper_weight: float = 0.0,
     wait_lower_weight: float = 0.0,
     wait_lower_board_credit_weight: float = 0.0,
+    wait_credit_control_gain: float = 0.0,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
     promotion_replan_strength_min: float = 0.10,
@@ -530,6 +573,7 @@ def train_transit_surrogate_ppo(
             wait_upper_weight=wait_upper_weight,
             wait_lower_weight=wait_lower_weight,
             wait_lower_board_credit_weight=wait_lower_board_credit_weight,
+            wait_credit_control_gain=wait_credit_control_gain,
             upper_decision_interval=upper_decision_interval,
             promotion_forced_replan=promotion_forced_replan,
             promotion_replan_strength_min=promotion_replan_strength_min,
@@ -552,6 +596,7 @@ def train_transit_surrogate_ppo(
             "wait_upper_weight": float(wait_upper_weight),
             "wait_lower_weight": float(wait_lower_weight),
             "wait_lower_board_credit_weight": float(wait_lower_board_credit_weight),
+            "wait_credit_control_gain": float(wait_credit_control_gain),
             "upper_decision_interval": int(upper_decision_interval),
             "promotion_forced_replan": bool(promotion_forced_replan),
             "promotion_replan_strength_min": float(promotion_replan_strength_min),
@@ -577,7 +622,7 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -594,6 +639,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- upper decision interval: {payload['upper_decision_interval']} steps, promotion forced replan={payload['promotion_forced_replan']}",
         f"- promotion gate: residual_threshold={payload['promotion_residual_threshold']}, persistence_ratio={payload['promotion_persistence_ratio']}",
         f"- wait attribution weights: upper={payload['wait_upper_weight']}, lower={payload['wait_lower_weight']}, board_credit={payload['wait_lower_board_credit_weight']}",
+        f"- wait credit control gain: {payload['wait_credit_control_gain']}",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
@@ -608,6 +654,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         f"- wait high-share mean: {summary['wait_high_share_mean']:.4f}",
         f"- wait attribution penalty mean: {summary['wait_attr_penalty_mean']:.4f}",
+        f"- wait credit relief mean: {summary['wait_credit_relief_mean']:.4f}",
         f"- promotion replan count mean: {summary['promotion_replan_count_mean']:.2f}",
         "",
         "This uses the same `freq_hrl.rl.train_dual_ppo` loop as the trading PPO validation, with Transit frequency features and a transit-control surrogate adapter.",
@@ -638,6 +685,7 @@ def main() -> None:
     parser.add_argument("--wait-upper-weight", type=float, default=0.0)
     parser.add_argument("--wait-lower-weight", type=float, default=0.0)
     parser.add_argument("--wait-lower-board-credit-weight", type=float, default=0.0)
+    parser.add_argument("--wait-credit-control-gain", type=float, default=0.0)
     parser.add_argument("--upper-decision-interval", type=int, default=1)
     parser.add_argument("--promotion-forced-replan", action="store_true")
     parser.add_argument("--promotion-replan-strength-min", type=float, default=0.10)
@@ -667,6 +715,7 @@ def main() -> None:
         wait_upper_weight=args.wait_upper_weight,
         wait_lower_weight=args.wait_lower_weight,
         wait_lower_board_credit_weight=args.wait_lower_board_credit_weight,
+        wait_credit_control_gain=args.wait_credit_control_gain,
         upper_decision_interval=args.upper_decision_interval,
         promotion_forced_replan=args.promotion_forced_replan,
         promotion_replan_strength_min=args.promotion_replan_strength_min,

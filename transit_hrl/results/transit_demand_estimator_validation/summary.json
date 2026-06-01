@@ -1,4 +1,10 @@
 {
+  "metadata": {
+    "estimator_calibration": "count_calibrated_nb_v2",
+    "count_harmonic_learning_rate": 1.0,
+    "count_harmonic_ridge": 0.05,
+    "count_harmonic_nb_dispersion": 1000.0
+  },
   "rows": [
     {
       "method": "ema",
@@ -83,41 +89,41 @@
     {
       "method": "dynamic_harmonic_nb",
       "seed": 1,
-      "mse": 8.902509171215508,
-      "mae": 2.501106032687851,
-      "poisson_nll_no_const": -39.699363679935324,
+      "mse": 7.682375771146381,
+      "mae": 2.323408903023976,
+      "poisson_nll_no_const": -39.71385647325868,
       "n": 340
     },
     {
       "method": "dynamic_harmonic_nb",
       "seed": 2,
-      "mse": 8.879711067525054,
-      "mae": 2.472056813476008,
-      "poisson_nll_no_const": -39.69230933282009,
+      "mse": 7.810911957543233,
+      "mae": 2.337519254878161,
+      "poisson_nll_no_const": -39.728717648544134,
       "n": 340
     },
     {
       "method": "dynamic_harmonic_nb",
       "seed": 3,
-      "mse": 24.16566335380704,
-      "mae": 3.57942085476829,
-      "poisson_nll_no_const": -39.36205301649445,
+      "mse": 6.48894125039761,
+      "mae": 2.1448465166088786,
+      "poisson_nll_no_const": -39.76263336686223,
       "n": 340
     },
     {
       "method": "dynamic_harmonic_nb",
       "seed": 4,
-      "mse": 13.758106069284299,
-      "mae": 2.8973252597706813,
-      "poisson_nll_no_const": -39.58411806419431,
+      "mse": 7.112205052923537,
+      "mae": 2.184318789161728,
+      "poisson_nll_no_const": -39.751768066315705,
       "n": 340
     },
     {
       "method": "dynamic_harmonic_nb",
       "seed": 5,
-      "mse": 8.536535178076987,
-      "mae": 2.484809432708912,
-      "poisson_nll_no_const": -39.705677209252485,
+      "mse": 5.889066298705005,
+      "mae": 2.077606882070723,
+      "poisson_nll_no_const": -39.76551897386655,
       "n": 340
     }
   ],
@@ -125,10 +131,10 @@
     {
       "method": "dynamic_harmonic_nb",
       "seeds": 5,
-      "mse_mean": 12.848504967981778,
-      "mae_mean": 2.786943678682349,
-      "poisson_nll_no_const_mean": -39.608704260539334,
-      "delta_mse_vs_best": 3.5889649964861263
+      "mse_mean": 6.996700066143153,
+      "mae_mean": 2.2135400691486935,
+      "poisson_nll_no_const_mean": -39.744498905769454,
+      "delta_mse_vs_best": 0.0
     },
     {
       "method": "ema",
@@ -136,7 +142,7 @@
       "mse_mean": 14.631129455864798,
       "mae_mean": 3.3232124011986763,
       "poisson_nll_no_const_mean": -39.54649019563532,
-      "delta_mse_vs_best": 5.371589484369146
+      "delta_mse_vs_best": 7.634429389721645
     },
     {
       "method": "fourier",
@@ -144,7 +150,105 @@
       "mse_mean": 9.259539971495652,
       "mae_mean": 2.3178791538223473,
       "poisson_nll_no_const_mean": -39.6469619947124,
-      "delta_mse_vs_best": 0.0
+      "delta_mse_vs_best": 2.2628399053524992
+    }
+  ],
+  "paired_deltas": [
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mse",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": -2.2628399053524975,
+      "delta_ci95_low": -2.944277338007111,
+      "delta_ci95_high": -1.6010798014449423,
+      "improvement_mean": 2.2628399053524975,
+      "improvement_ci95_low": 1.6010798014449423,
+      "improvement_ci95_high": 2.944277338007111,
+      "win_rate": 1.0,
+      "sign_p_value": 0.0625
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mae",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": -0.10433908467365409,
+      "delta_ci95_low": -0.15592372423759038,
+      "delta_ci95_high": -0.05422949862547268,
+      "improvement_mean": 0.10433908467365409,
+      "improvement_ci95_low": 0.05422949862547268,
+      "improvement_ci95_high": 0.15448554705972917,
+      "win_rate": 1.0,
+      "sign_p_value": 0.0625
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": -0.09753691105705968,
+      "delta_ci95_low": -0.1293272266927758,
+      "delta_ci95_high": -0.06574752692293515,
+      "improvement_mean": 0.09753691105705968,
+      "improvement_ci95_low": 0.06574752692293515,
+      "improvement_ci95_high": 0.12932629519118422,
+      "win_rate": 1.0,
+      "sign_p_value": 0.0625
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mse",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": 5.371589484369147,
+      "delta_ci95_low": 3.3430021704975017,
+      "delta_ci95_high": 7.532954349700343,
+      "improvement_mean": -5.371589484369147,
+      "improvement_ci95_low": -7.400176798240791,
+      "improvement_ci95_high": -3.267707009569526,
+      "win_rate": 0.0,
+      "sign_p_value": 0.0625
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mae",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": 1.0053332473763288,
+      "delta_ci95_low": 0.679259759441119,
+      "delta_ci95_high": 1.3395529976615361,
+      "improvement_mean": -1.0053332473763288,
+      "improvement_ci95_low": -1.3395529976615361,
+      "improvement_ci95_high": -0.6711134970911214,
+      "win_rate": 0.0,
+      "sign_p_value": 0.0625
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 5,
+      "delta_mean": 0.1004717990770743,
+      "delta_ci95_low": 0.05747672692395582,
+      "delta_ci95_high": 0.13549318955278694,
+      "improvement_mean": -0.1004717990770743,
+      "improvement_ci95_low": -0.13549318955278694,
+      "improvement_ci95_high": -0.05497922664994519,
+      "win_rate": 0.0,
+      "sign_p_value": 0.0625
     }
   ]
 }

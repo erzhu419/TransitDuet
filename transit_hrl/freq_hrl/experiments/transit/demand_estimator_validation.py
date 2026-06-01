@@ -11,6 +11,10 @@ from typing import Any
 import numpy as np
 
 from freq_hrl.domains.transit import TransitFrequencyTracker
+from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
+
+
+COUNT_CALIBRATION_ID = "count_calibrated_nb_v2"
 
 
 def make_count_series(seed: int, steps: int, dispersion: float) -> tuple[np.ndarray, np.ndarray]:
@@ -31,6 +35,14 @@ def make_count_series(seed: int, steps: int, dispersion: float) -> tuple[np.ndar
 
 
 def make_tracker(method: str) -> TransitFrequencyTracker:
+    method_key = str(method or "ema").lower()
+    count_harmonic = method_key in {
+        "dynamic_harmonic_nb",
+        "negative_binomial_harmonic",
+        "nb_harmonic",
+        "dynamic_harmonic_poisson",
+        "poisson_harmonic",
+    }
     return TransitFrequencyTracker(
         update_interval_s=60.0,
         bin_sec=60.0,
@@ -41,9 +53,9 @@ def make_tracker(method: str) -> TransitFrequencyTracker:
         energy_period_s=10 * 60.0,
         harmonic_period_s=96 * 60.0,
         fourier_k=2,
-        harmonic_learning_rate=0.4,
-        harmonic_ridge=0.1,
-        harmonic_nb_dispersion=20.0,
+        harmonic_learning_rate=1.0 if count_harmonic else 0.4,
+        harmonic_ridge=0.05 if count_harmonic else 0.1,
+        harmonic_nb_dispersion=1000.0 if count_harmonic else 20.0,
         global_demand_norm=50.0,
         local_demand_norm=10.0,
         forecast_horizon_s=60.0,
@@ -97,12 +109,40 @@ def summarize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-def write_report(path: Path, summary: list[dict[str, Any]]) -> None:
+def paired_method_stats(rows: list[dict[str, Any]], reference: str = "fourier") -> list[dict[str, Any]]:
+    methods = sorted({str(row["method"]) for row in rows})
+    paired = []
+    for idx, method in enumerate(methods):
+        if method == reference:
+            continue
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            paired.append({
+                "comparison": f"{method}_vs_{reference}",
+                **paired_delta_stats(
+                    rows,
+                    variant_key="method",
+                    pair_keys=("seed",),
+                    metric=metric,
+                    treatment=method,
+                    control=reference,
+                    lower_is_better=True,
+                    seed=2026 + 31 * idx,
+                ),
+            })
+    return paired
+
+
+def write_report(
+    path: Path,
+    summary: list[dict[str, Any]],
+    paired: list[dict[str, Any]] | None = None,
+) -> None:
     best = min(summary, key=lambda row: row["mse_mean"])
     lines = [
         "# Transit Demand Estimator Validation",
         "",
         f"- best by MSE: `{best['method']}`",
+        "- `dynamic_harmonic_nb` uses the count-calibrated online Newton path: learning_rate=1.0, ridge=0.05, NB dispersion=1000.0.",
         "",
         "| method | seeds | MSE | MAE | Poisson NLL | delta MSE vs best |",
         "|---|---:|---:|---:|---:|---:|",
@@ -116,6 +156,29 @@ def write_report(path: Path, summary: list[dict[str, Any]]) -> None:
             f"| {row['poisson_nll_no_const_mean']:.4f} "
             f"| {row['delta_mse_vs_best']:+.4f} |"
         )
+    paired = paired or []
+    if paired:
+        lines.extend([
+            "",
+            "## Paired Method Deltas",
+            "",
+            "Deltas are `method - fourier`; lower is better for all listed metrics.",
+            "",
+            "| comparison | metric | n | delta | CI95 low | CI95 high | win rate | sign p | status |",
+            "|---|---|---:|---:|---:|---:|---:|---:|---|",
+        ])
+        for row in paired:
+            lines.append(
+                f"| {row['comparison']} "
+                f"| {row['metric']} "
+                f"| {row['n_common']} "
+                f"| {row['delta_mean']:+.4f} "
+                f"| {row['delta_ci95_low']:+.4f} "
+                f"| {row['delta_ci95_high']:+.4f} "
+                f"| {row['win_rate']:.2f} "
+                f"| {row['sign_p_value']:.4f} "
+                f"| {claim_status(row, min_pairs=5)} |"
+            )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -143,13 +206,29 @@ def main() -> None:
         for seed in args.seeds
     ]
     summary = summarize(rows)
+    paired = paired_method_stats(rows, reference="fourier") if "fourier" in args.methods else []
     with (args.output_dir / "per_seed.csv").open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
+    if paired:
+        with (args.output_dir / "paired_deltas.csv").open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(paired[0].keys()), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(paired)
     with (args.output_dir / "summary.json").open("w", encoding="utf-8") as f:
-        json.dump({"rows": rows, "summary": summary}, f, indent=2)
-    write_report(args.output_dir / "report.md", summary)
+        json.dump({
+            "metadata": {
+                "estimator_calibration": COUNT_CALIBRATION_ID,
+                "count_harmonic_learning_rate": 1.0,
+                "count_harmonic_ridge": 0.05,
+                "count_harmonic_nb_dispersion": 1000.0,
+            },
+            "rows": rows,
+            "summary": summary,
+            "paired_deltas": paired,
+        }, f, indent=2)
+    write_report(args.output_dir / "report.md", summary, paired)
     best = min(summary, key=lambda row: row["mse_mean"])
     print(f"wrote {args.output_dir}")
     print(f"demand_estimator best={best['method']} mse={best['mse_mean']:.4f}")

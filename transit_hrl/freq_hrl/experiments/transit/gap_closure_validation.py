@@ -55,6 +55,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "wait_upper_weight": 0.005,
         "wait_lower_weight": 0.010,
         "wait_lower_board_credit_weight": 0.10,
+        "wait_credit_control_gain": 2.0,
         "lower_lf_constraint_coef": 0.02,
         "lower_lf_constraint_target": 0.55,
         "lower_lf_dual_lr": 0.02,
@@ -114,7 +115,7 @@ def run_gap_closure_matrix(
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump({"rows": rows, "payloads": payloads}, f, indent=2)
     with (output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     write_report(output_dir / "report.md", rows)
