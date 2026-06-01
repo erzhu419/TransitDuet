@@ -35,6 +35,41 @@ def high_pass(values: Any, window: int) -> np.ndarray:
     return arr - causal_rolling_mean(arr, window)
 
 
+@dataclass
+class CausalLowFrequencyEffectProjector:
+    """Causally remove the lower controller's slow baseline effect.
+
+    Some domains have nonnegative lower actions, such as transit holding time
+    or execution speed.  Treating those raw actions as the lower effect makes
+    the lower policy look low-frequency by construction.  This projector keeps
+    a causal rolling baseline and returns the residual effect that should be
+    attributed to high-frequency lower control.
+    """
+
+    window: int = 24
+    gain: float = 1.0
+
+    def __post_init__(self) -> None:
+        self.window = max(1, int(self.window))
+        self.gain = float(np.clip(self.gain, 0.0, 1.0))
+        self.reset()
+
+    def reset(self) -> None:
+        self._history: list[np.ndarray] = []
+
+    def transform(self, value: Any) -> np.ndarray:
+        row = _effect_row(value).reshape(-1)
+        self._history.append(row.copy())
+        recent = np.asarray(self._history[-self.window:], dtype=np.float64)
+        baseline = recent.mean(axis=0)
+        return row - self.gain * baseline
+
+    def transform_sequence(self, values: Any) -> np.ndarray:
+        self.reset()
+        arr = as_2d(values)
+        return np.asarray([self.transform(row) for row in arr], dtype=np.float64)
+
+
 class ActionEffectOperator(ABC):
     """Map action histories to effects whose frequencies can be constrained."""
 

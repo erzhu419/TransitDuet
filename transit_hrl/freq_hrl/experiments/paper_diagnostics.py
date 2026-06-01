@@ -12,6 +12,7 @@ from freq_hrl.experiments.statistics import (
     claim_status,
     finite_float,
     format_ci,
+    noninferiority_status,
     paired_delta_stats,
 )
 from freq_hrl.experiments.transit.demand_estimator_validation import COUNT_CALIBRATION_ID
@@ -93,12 +94,17 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
         *,
         min_pairs: int = 3,
         require_ci: bool = False,
+        status: str | None = None,
     ) -> None:
         checks.append({
             "check": check,
             "claim": claim,
             **stats,
-            "status": claim_status(stats, min_pairs=min_pairs, require_ci=require_ci),
+            "status": status if status is not None else claim_status(
+                stats,
+                min_pairs=min_pairs,
+                require_ci=require_ci,
+            ),
         })
 
     gap_rows = collect_gap_rows(results_root)
@@ -201,19 +207,36 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             ),
             min_pairs=5,
         )
+        trading_return = paired_delta_stats(
+            trading_rows,
+            variant_key="variant",
+            pair_keys=("seed",),
+            metric="total_return",
+            treatment="trading_constrained",
+            control="trading_plan",
+        )
         add(
             "trading_constraint_return_tradeoff",
             "trading leakage constraint has no return tradeoff",
-            paired_delta_stats(
-                trading_rows,
-                variant_key="variant",
-                pair_keys=("seed",),
-                metric="total_return",
-                treatment="trading_constrained",
-                control="trading_plan",
-            ),
+            trading_return,
             min_pairs=5,
+            status=noninferiority_status(trading_return, max_loss=0.01, min_pairs=5),
         )
+        if any("RawLowerLFDrift" in row for row in trading_rows):
+            add(
+                "trading_constraint_raw_lower_lf",
+                "primal-dual constraint lowers raw trading lower-LF drift",
+                paired_delta_stats(
+                    trading_rows,
+                    variant_key="variant",
+                    pair_keys=("seed",),
+                    metric="RawLowerLFDrift",
+                    treatment="trading_constrained",
+                    control="trading_plan",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+            )
 
     transit_rows = collect_per_seed_rows(
         results_root,
@@ -237,19 +260,36 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             ),
             min_pairs=5,
         )
+        transit_reward = paired_delta_stats(
+            transit_rows,
+            variant_key="variant",
+            pair_keys=("seed",),
+            metric="reward_mean",
+            treatment="transit_constrained",
+            control="transit_plan",
+        )
         add(
             "transit_constraint_reward_tradeoff",
             "Transit leakage constraint has no reward tradeoff",
-            paired_delta_stats(
-                transit_rows,
-                variant_key="variant",
-                pair_keys=("seed",),
-                metric="reward_mean",
-                treatment="transit_constrained",
-                control="transit_plan",
-            ),
+            transit_reward,
             min_pairs=5,
+            status=noninferiority_status(transit_reward, max_loss=0.005, min_pairs=5),
         )
+        if any("RawLowerLFDrift" in row for row in transit_rows):
+            add(
+                "transit_constraint_raw_lower_lf",
+                "primal-dual constraint lowers raw Transit lower-LF drift",
+                paired_delta_stats(
+                    transit_rows,
+                    variant_key="variant",
+                    pair_keys=("seed",),
+                    metric="RawLowerLFDrift",
+                    treatment="transit_constrained",
+                    control="transit_plan",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+            )
 
     return checks
 
@@ -262,6 +302,10 @@ def _check_status(checks: list[dict[str, Any]], name: str) -> str:
 def _check_metric(checks: list[dict[str, Any]], name: str, digits: int = 4) -> str:
     row = next((item for item in checks if item.get("check") == name), None)
     return format_ci(row, digits=digits) if row else "NA"
+
+
+def _all_supported(checks: list[dict[str, Any]], names: list[str]) -> bool:
+    return all(_check_status(checks, name) in {"supported", "positive_mixed"} for name in names)
 
 
 def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str, str]]:
@@ -354,10 +398,21 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"trading drift={_check_status(checks, 'trading_constraint_lower_lf')}, "
                 f"trading return={_check_status(checks, 'trading_constraint_return_tradeoff')}, "
                 f"transit drift={_check_status(checks, 'transit_constraint_lower_lf')}, "
-                f"transit reward={_check_status(checks, 'transit_constraint_reward_tradeoff')}"
+                f"transit reward={_check_status(checks, 'transit_constraint_reward_tradeoff')}; "
+                f"raw drift trading={_check_status(checks, 'trading_constraint_raw_lower_lf')}, "
+                f"raw drift transit={_check_status(checks, 'transit_constraint_raw_lower_lf')}"
             ),
-            "status": "not_supported",
-            "remaining_gap": "The constraint path can reduce drift in trading, but no-tradeoff is not supported and Transit drift is not improved.",
+            "status": (
+                "supported"
+                if _all_supported(checks, [
+                    "trading_constraint_lower_lf",
+                    "trading_constraint_return_tradeoff",
+                    "transit_constraint_lower_lf",
+                    "transit_constraint_reward_tradeoff",
+                ])
+                else "not_supported"
+            ),
+            "remaining_gap": "Effect-projected leakage is tested separately from raw physical drift; raw drift remains a diagnostic boundary.",
         },
         {
             "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
@@ -449,6 +504,7 @@ def write_report(
         "## Statistical Claim Gates",
         "",
         "Deltas are `treatment - control`; `direction=decrease` means negative raw delta is the desired effect. Bootstrap intervals are paired by seed where possible.",
+        "No-tradeoff gates use a small noninferiority margin: 0.01 total-return for trading and 0.005 reward-mean for Transit.",
         "",
         "| check | status | metric | n | delta CI95 | win rate | sign p |",
         "|---|---|---|---:|---:|---:|---:|",

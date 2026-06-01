@@ -11,7 +11,11 @@ from typing import Any
 import numpy as np
 import torch
 
-from freq_hrl.core import CausalLeakageRewardShaper, LeakageRegularizer
+from freq_hrl.core import (
+    CausalLeakageRewardShaper,
+    CausalLowFrequencyEffectProjector,
+    LeakageRegularizer,
+)
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import (
@@ -161,6 +165,8 @@ def rollout(
     sample: bool,
     leakage_scale: float = 0.0,
     plan_mapper: LearnedPlanActionMapper | None = None,
+    lower_lf_effect_filter_window: int = 0,
+    lower_lf_effect_filter_gain: float = 1.0,
 ) -> tuple[TrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -180,6 +186,13 @@ def rollout(
         reward_penalty_scale=leakage_scale,
         enabled=leakage_scale > 0.0,
     )
+    lower_effect_projector = (
+        CausalLowFrequencyEffectProjector(
+            window=int(lower_lf_effect_filter_window),
+            gain=float(lower_lf_effect_filter_gain),
+        )
+        if int(lower_lf_effect_filter_window) > 0 else None
+    )
     upper_states: list[np.ndarray] = []
     lower_states: list[np.ndarray] = []
     upper_actions: list[np.ndarray] = []
@@ -196,6 +209,7 @@ def rollout(
     turnover: list[float] = []
     targets: list[np.ndarray] = []
     lower_effects: list[np.ndarray] = []
+    raw_lower_effects: list[np.ndarray] = []
     plan_smoothness: list[float] = []
     plan_coeff_abs: list[float] = []
     promotions = 0
@@ -221,7 +235,11 @@ def rollout(
             "execution_speed": speed,
             "residual_order": np.zeros(assets, dtype=np.float64),
         })
-        lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(info["target"], dtype=np.float64)
+        raw_lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(info["target"], dtype=np.float64)
+        lower_effect = (
+            lower_effect_projector.transform(raw_lower_effect)
+            if lower_effect_projector is not None else raw_lower_effect
+        )
         leak_info = leakage.update(upper_effect=target, lower_effect=lower_effect, reward=float(reward))
         step_reward = float(leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward)
         upper_states.append(upper_state)
@@ -240,6 +258,7 @@ def rollout(
         turnover.append(float(info["turnover"]))
         targets.append(np.asarray(info["target"], dtype=np.float64).copy())
         lower_effects.append(lower_effect.copy())
+        raw_lower_effects.append(raw_lower_effect.copy())
         if done:
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
@@ -248,6 +267,9 @@ def rollout(
     leak = reg.compute(np.asarray(targets, dtype=np.float64), np.asarray(lower_effects, dtype=np.float64)) if targets else {
         "leakage_penalty": 0.0,
         "UpperHFPower": 0.0,
+        "LowerLFDrift": 0.0,
+    }
+    raw_leak = reg.compute(np.asarray(targets, dtype=np.float64), np.asarray(raw_lower_effects, dtype=np.float64)) if targets else {
         "LowerLFDrift": 0.0,
     }
     row = {
@@ -261,8 +283,11 @@ def rollout(
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
+        "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
+        "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
+        "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
     }
     if not sample:
         return None, row
@@ -296,8 +321,11 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "leakage_penalty",
         "UpperHFPower",
         "LowerLFDrift",
+        "RawLowerLFDrift",
         "plan_smoothness",
         "plan_coeff_abs",
+        "lower_lf_effect_filter_window",
+        "lower_lf_effect_filter_gain",
     ]
     return summarize_numeric_rows(rows, keys=keys)
 
@@ -319,6 +347,8 @@ def train_ppo_actor_critic(
     lower_lf_constraint_target: float = 0.0,
     lower_lf_dual_lr: float = 0.0,
     lower_lf_objective_weight: float = 0.0,
+    lower_lf_effect_filter_window: int = 0,
+    lower_lf_effect_filter_gain: float = 1.0,
 ) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
@@ -361,6 +391,8 @@ def train_ppo_actor_critic(
             sample=sample,
             leakage_scale=leakage_scale if sample else 0.0,
             plan_mapper=plan_mapper,
+            lower_lf_effect_filter_window=lower_lf_effect_filter_window,
+            lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
         summary_fn=summarize,
@@ -377,6 +409,8 @@ def train_ppo_actor_critic(
             "lower_lf_constraint_target": float(lower_lf_constraint_target),
             "lower_lf_dual_lr": float(lower_lf_dual_lr),
             "lower_lf_objective_weight": float(lower_lf_objective_weight),
+            "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
+            "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
             **(plan_mapper.to_metadata() if plan_mapper is not None else {
                 "plan_basis_dim": 0,
                 "plan_horizon_s": 0.0,
@@ -394,7 +428,7 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -407,6 +441,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- trainer: `{payload['trainer']}`",
         f"- plan mode: `{payload['plan_mode']}`",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
+        f"- lower LF effect projector: window={payload['lower_lf_effect_filter_window']}, gain={payload['lower_lf_effect_filter_gain']}",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -416,6 +451,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- turnover mean: {summary['turnover_mean']:.2f}",
         f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
         f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        f"- RawLowerLFDrift mean: {summary['RawLowerLFDrift_mean']:.4f}",
         f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
         f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         "",
@@ -442,6 +478,8 @@ def main() -> None:
     parser.add_argument("--lower-lf-constraint-target", type=float, default=0.0)
     parser.add_argument("--lower-lf-dual-lr", type=float, default=0.0)
     parser.add_argument("--lower-lf-objective-weight", type=float, default=0.0)
+    parser.add_argument("--lower-lf-effect-filter-window", type=int, default=0)
+    parser.add_argument("--lower-lf-effect-filter-gain", type=float, default=1.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -461,6 +499,8 @@ def main() -> None:
         lower_lf_constraint_target=args.lower_lf_constraint_target,
         lower_lf_dual_lr=args.lower_lf_dual_lr,
         lower_lf_objective_weight=args.lower_lf_objective_weight,
+        lower_lf_effect_filter_window=args.lower_lf_effect_filter_window,
+        lower_lf_effect_filter_gain=args.lower_lf_effect_filter_gain,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

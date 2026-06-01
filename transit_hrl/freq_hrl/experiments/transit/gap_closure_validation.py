@@ -41,6 +41,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "promotion_residual_threshold": 0.55,
         "promotion_persistence_ratio": 0.20,
         "plan_coefficient_scale_s": 1.0,
+        "lower_lf_effect_filter_window": 12,
+        "lower_lf_effect_filter_gain": 1.0,
     },
     "full_freqhrl": {
         "tracker_method": "dynamic_harmonic_nb",
@@ -52,6 +54,8 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "promotion_residual_threshold": 0.55,
         "promotion_persistence_ratio": 0.20,
         "plan_coefficient_scale_s": 1.0,
+        "lower_lf_effect_filter_window": 12,
+        "lower_lf_effect_filter_gain": 1.0,
         "wait_upper_weight": 0.005,
         "wait_lower_weight": 0.010,
         "wait_lower_board_credit_weight": 0.10,

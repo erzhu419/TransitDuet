@@ -7,7 +7,12 @@ from freq_hrl.experiments.paper_diagnostics import (
     build_statistical_checks,
     write_report,
 )
-from freq_hrl.experiments.statistics import claim_status, paired_delta_stats, sign_test_p_value
+from freq_hrl.experiments.statistics import (
+    claim_status,
+    noninferiority_status,
+    paired_delta_stats,
+    sign_test_p_value,
+)
 
 
 class PaperDiagnosticsTest(unittest.TestCase):
@@ -42,6 +47,16 @@ class PaperDiagnosticsTest(unittest.TestCase):
         self.assertEqual(stats["win_rate"], 1.0)
         self.assertIn(claim_status(stats, min_pairs=4), {"supported", "positive_mixed"})
         self.assertLess(sign_test_p_value([1.0, 1.0, 1.0, 1.0]), 0.2)
+
+    def test_noninferiority_status_uses_loss_margin(self):
+        stats = {
+            "n_common": 5,
+            "improvement_mean": -0.002,
+            "improvement_ci95_low": -0.004,
+            "improvement_ci95_high": 0.001,
+        }
+        self.assertEqual(noninferiority_status(stats, max_loss=0.005, min_pairs=5), "supported")
+        self.assertEqual(noninferiority_status(stats, max_loss=0.001, min_pairs=5), "inconclusive")
 
 
 if __name__ == "__main__":

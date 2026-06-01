@@ -35,6 +35,11 @@
       "epochs": 4,
       "minibatch_size": 512,
       "init_log_std": -2.5,
+      "constraint_coef": 0.0,
+      "constraint_target": 0.0,
+      "constraint_dual_lr": 0.0,
+      "constraint_lambda_init": 0.0,
+      "constraint_max_lambda": 20.0,
       "device": "cpu"
     },
     "history": [
@@ -50,13 +55,19 @@
         "leakage_penalty_mean": 1.431719355115686,
         "UpperHFPower_mean": 0.0010029747108217858,
         "LowerLFDrift_mean": 1.4307163804048644,
+        "RawLowerLFDrift_mean": 1.4307163804048644,
         "plan_smoothness_mean": 3.6440747907208003e-06,
         "plan_coeff_abs_mean": 0.0690887345716303,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.0,
         "policy_loss": 0.0,
         "value_loss": 0.0,
-        "entropy": 0.0
+        "entropy": 0.0,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.0,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 0,
@@ -71,13 +82,19 @@
         "leakage_penalty_mean": 1.2815018771970001,
         "UpperHFPower_mean": 0.0011825296600456595,
         "LowerLFDrift_mean": 1.2803193475369545,
+        "RawLowerLFDrift_mean": 1.2803193475369545,
         "plan_smoothness_mean": 0.00015827660133873212,
         "plan_coeff_abs_mean": 0.06936818901784146,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.020012729364680126,
         "policy_loss": -0.04016414989018813,
         "value_loss": 0.007869407112593763,
-        "entropy": -16.21671599149704
+        "entropy": -16.21671599149704,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.29124751687049866,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 1,
@@ -92,13 +109,19 @@
         "leakage_penalty_mean": 0.9942488597880942,
         "UpperHFPower_mean": 0.0020606251751103173,
         "LowerLFDrift_mean": 0.992188234612984,
+        "RawLowerLFDrift_mean": 0.992188234612984,
         "plan_smoothness_mean": 0.00040240798571801445,
         "plan_coeff_abs_mean": 0.0705137221641827,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.0027846284792758524,
         "policy_loss": -0.02039348310790956,
         "value_loss": 0.002656599161127815,
-        "entropy": -16.280554711818695
+        "entropy": -16.280554711818695,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.31051546335220337,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 2,
@@ -113,13 +136,19 @@
         "leakage_penalty_mean": 0.8541763381096634,
         "UpperHFPower_mean": 0.003156540045838552,
         "LowerLFDrift_mean": 0.851019798063825,
+        "RawLowerLFDrift_mean": 0.851019798063825,
         "plan_smoothness_mean": 0.0004955599449445582,
         "plan_coeff_abs_mean": 0.07105010166552357,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.02756224139011465,
         "policy_loss": -0.04435884195845574,
         "value_loss": 0.00093523151736008,
-        "entropy": -16.32898473739624
+        "entropy": -16.32898473739624,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3232870399951935,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 3,
@@ -134,13 +163,19 @@
         "leakage_penalty_mean": 0.7905314838768689,
         "UpperHFPower_mean": 0.0038250963939964132,
         "LowerLFDrift_mean": 0.7867063874828724,
+        "RawLowerLFDrift_mean": 0.7867063874828724,
         "plan_smoothness_mean": 0.0008237578216313448,
         "plan_coeff_abs_mean": 0.07194869967857871,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.009253337164409459,
         "policy_loss": -0.007363083990640007,
         "value_loss": 0.000449045401182957,
-        "entropy": -16.391898095607758
+        "entropy": -16.391898095607758,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3323921859264374,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 4,
@@ -155,13 +190,19 @@
         "leakage_penalty_mean": 0.7640013220856084,
         "UpperHFPower_mean": 0.004116816543282104,
         "LowerLFDrift_mean": 0.7598845055423263,
+        "RawLowerLFDrift_mean": 0.7598845055423263,
         "plan_smoothness_mean": 0.00106783086175823,
         "plan_coeff_abs_mean": 0.07136246599221935,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.007805106113664806,
         "policy_loss": -0.024333662062417716,
         "value_loss": 0.00028030570274495403,
-        "entropy": -16.388402998447418
+        "entropy": -16.388402998447418,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.33692389726638794,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 5,
@@ -176,13 +217,19 @@
         "leakage_penalty_mean": 0.7412767657602573,
         "UpperHFPower_mean": 0.0043250365737085225,
         "LowerLFDrift_mean": 0.7369517291865486,
+        "RawLowerLFDrift_mean": 0.7369517291865486,
         "plan_smoothness_mean": 0.0011801027034441082,
         "plan_coeff_abs_mean": 0.0724686096367133,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.01811967563116923,
         "policy_loss": -0.03465035621775314,
         "value_loss": 0.00021406372297860798,
-        "entropy": -16.423648059368134
+        "entropy": -16.423648059368134,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3387830853462219,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 6,
@@ -197,13 +244,19 @@
         "leakage_penalty_mean": 0.7212226441702144,
         "UpperHFPower_mean": 0.004419076401209152,
         "LowerLFDrift_mean": 0.7168035677690051,
+        "RawLowerLFDrift_mean": 0.7168035677690051,
         "plan_smoothness_mean": 0.00141024534362707,
         "plan_coeff_abs_mean": 0.07290036342090649,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.03608145596808754,
         "policy_loss": 0.01954647155071143,
         "value_loss": 0.00016022311251617793,
-        "entropy": -16.454872131347656
+        "entropy": -16.454872131347656,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.32494038343429565,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 7,
@@ -218,13 +271,19 @@
         "leakage_penalty_mean": 0.710545765609271,
         "UpperHFPower_mean": 0.004638855422276376,
         "LowerLFDrift_mean": 0.7059069101869946,
+        "RawLowerLFDrift_mean": 0.7059069101869946,
         "plan_smoothness_mean": 0.0015009609223230948,
         "plan_coeff_abs_mean": 0.0740576003795178,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -6.244183168746531e-05,
         "policy_loss": -0.016549001884413883,
         "value_loss": 0.00012420391090017802,
-        "entropy": -16.424457132816315
+        "entropy": -16.424457132816315,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3248717486858368,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 8,
@@ -239,13 +298,19 @@
         "leakage_penalty_mean": 0.6923509455353732,
         "UpperHFPower_mean": 0.004538333353477528,
         "LowerLFDrift_mean": 0.6878126121818957,
+        "RawLowerLFDrift_mean": 0.6878126121818957,
         "plan_smoothness_mean": 0.0014494396724694693,
         "plan_coeff_abs_mean": 0.07449064012422386,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.040733473142609,
         "policy_loss": 0.024335216265171766,
         "value_loss": 9.053099893208127e-05,
-        "entropy": -16.352990806102753
+        "entropy": -16.352990806102753,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.32349342107772827,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 9,
@@ -260,13 +325,19 @@
         "leakage_penalty_mean": 0.6957171645396972,
         "UpperHFPower_mean": 0.004356856143511037,
         "LowerLFDrift_mean": 0.6913603083961861,
+        "RawLowerLFDrift_mean": 0.6913603083961861,
         "plan_smoothness_mean": 0.0011759414486462634,
         "plan_coeff_abs_mean": 0.07380355772319926,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.01624375703977421,
         "policy_loss": -0.00016786623746156693,
         "value_loss": 7.872143748954841e-05,
-        "entropy": -16.372261464595795
+        "entropy": -16.372261464595795,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3499116897583008,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 10,
@@ -281,13 +352,19 @@
         "leakage_penalty_mean": 0.6984560685122408,
         "UpperHFPower_mean": 0.004231297128633465,
         "LowerLFDrift_mean": 0.6942247713836074,
+        "RawLowerLFDrift_mean": 0.6942247713836074,
         "plan_smoothness_mean": 0.0014825416117650746,
         "plan_coeff_abs_mean": 0.07412311820318805,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": 0.03968169633299112,
         "policy_loss": 0.02323873453133274,
         "value_loss": 7.56011152134306e-05,
-        "entropy": -16.405160069465637
+        "entropy": -16.405160069465637,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.31245094537734985,
+        "constraint_lambda": 0.0
       },
       {
         "iteration": 11,
@@ -302,13 +379,19 @@
         "leakage_penalty_mean": 0.7145856610037548,
         "UpperHFPower_mean": 0.004029907221430417,
         "LowerLFDrift_mean": 0.7105557537823243,
+        "RawLowerLFDrift_mean": 0.7105557537823243,
         "plan_smoothness_mean": 0.0021732751704034055,
         "plan_coeff_abs_mean": 0.07457306280468141,
+        "lower_lf_effect_filter_window_mean": 0.0,
+        "lower_lf_effect_filter_gain_mean": 1.0,
         "n": 5,
         "loss": -0.007017864700173959,
         "policy_loss": -0.023460997559595853,
         "value_loss": 7.119215672446444e-05,
-        "entropy": -16.40753549337387
+        "entropy": -16.40753549337387,
+        "constraint_loss": 0.0,
+        "constraint_mean": 0.3334108889102936,
+        "constraint_lambda": 0.0
       }
     ],
     "summary": {
@@ -320,8 +403,11 @@
       "leakage_penalty_mean": 1.5489722048765198,
       "UpperHFPower_mean": 0.0008839490078838139,
       "LowerLFDrift_mean": 1.5480882558686362,
+      "RawLowerLFDrift_mean": 1.5480882558686362,
       "plan_smoothness_mean": 7.694894933697059e-06,
       "plan_coeff_abs_mean": 0.07923009604632994,
+      "lower_lf_effect_filter_window_mean": 0.0,
+      "lower_lf_effect_filter_gain_mean": 1.0,
       "n": 5
     },
     "scenario": "persistent_shift",
@@ -329,6 +415,12 @@
     "assets": 3,
     "leakage_scale": 0.0,
     "plan_mode": "learned_bernstein",
+    "lower_lf_constraint_coef": 0.0,
+    "lower_lf_constraint_target": 0.0,
+    "lower_lf_dual_lr": 0.0,
+    "lower_lf_objective_weight": 0.0,
+    "lower_lf_effect_filter_window": 0,
+    "lower_lf_effect_filter_gain": 1.0,
     "plan_basis_dim": 4,
     "plan_horizon_s": 1800.0,
     "plan_eval_offset_s": 300.0,
@@ -347,8 +439,11 @@
       "leakage_penalty": 1.1755164290156093,
       "UpperHFPower": 0.0011160327982669856,
       "LowerLFDrift": 1.1744003962173424,
+      "RawLowerLFDrift": 1.1744003962173424,
       "plan_smoothness": 3.814219415452554e-06,
-      "plan_coeff_abs": 0.06342453392485334
+      "plan_coeff_abs": 0.06342453392485334,
+      "lower_lf_effect_filter_window": 0,
+      "lower_lf_effect_filter_gain": 1.0
     },
     {
       "seed": 27182,
@@ -361,8 +456,11 @@
       "leakage_penalty": 1.487623656750701,
       "UpperHFPower": 0.0010601922314237514,
       "LowerLFDrift": 1.4865634645192773,
+      "RawLowerLFDrift": 1.4865634645192773,
       "plan_smoothness": 5.46173113401614e-06,
-      "plan_coeff_abs": 0.07471567784531864
+      "plan_coeff_abs": 0.07471567784531864,
+      "lower_lf_effect_filter_window": 0,
+      "lower_lf_effect_filter_gain": 1.0
     },
     {
       "seed": 16180,
@@ -375,8 +473,11 @@
       "leakage_penalty": 1.7459256996500325,
       "UpperHFPower": 0.0006881142911972119,
       "LowerLFDrift": 1.7452375853588353,
+      "RawLowerLFDrift": 1.7452375853588353,
       "plan_smoothness": 1.5070331100724688e-05,
-      "plan_coeff_abs": 0.09539155344042391
+      "plan_coeff_abs": 0.09539155344042391,
+      "lower_lf_effect_filter_window": 0,
+      "lower_lf_effect_filter_gain": 1.0
     },
     {
       "seed": 11235,
@@ -389,8 +490,11 @@
       "leakage_penalty": 1.6449950677129688,
       "UpperHFPower": 0.0007374968741118003,
       "LowerLFDrift": 1.644257570838857,
+      "RawLowerLFDrift": 1.644257570838857,
       "plan_smoothness": 5.768601507001451e-06,
-      "plan_coeff_abs": 0.07927878616843795
+      "plan_coeff_abs": 0.07927878616843795,
+      "lower_lf_effect_filter_window": 0,
+      "lower_lf_effect_filter_gain": 1.0
     },
     {
       "seed": 4242,
@@ -403,8 +507,11 @@
       "leakage_penalty": 1.6908001712532887,
       "UpperHFPower": 0.00081790884441932,
       "LowerLFDrift": 1.6899822624088694,
+      "RawLowerLFDrift": 1.6899822624088694,
       "plan_smoothness": 8.359591511290462e-06,
-      "plan_coeff_abs": 0.0833399288526158
+      "plan_coeff_abs": 0.0833399288526158,
+      "lower_lf_effect_filter_window": 0,
+      "lower_lf_effect_filter_gain": 1.0
     }
   ],
   "summary": {
@@ -416,8 +523,11 @@
     "leakage_penalty_mean": 1.5489722048765198,
     "UpperHFPower_mean": 0.0008839490078838139,
     "LowerLFDrift_mean": 1.5480882558686362,
+    "RawLowerLFDrift_mean": 1.5480882558686362,
     "plan_smoothness_mean": 7.694894933697059e-06,
     "plan_coeff_abs_mean": 0.07923009604632994,
+    "lower_lf_effect_filter_window_mean": 0.0,
+    "lower_lf_effect_filter_gain_mean": 1.0,
     "n": 5
   }
 }

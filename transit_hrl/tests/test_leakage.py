@@ -4,6 +4,7 @@ import numpy as np
 
 from freq_hrl.core import (
     CausalLeakageRewardShaper,
+    CausalLowFrequencyEffectProjector,
     CumulativeActionEffectOperator,
     LeakageRegularizer,
 )
@@ -64,6 +65,21 @@ class LeakageTest(unittest.TestCase):
         info = shaper.update(upper_effect=[1.0], lower_effect=[1.0], reward=1.0)
         self.assertEqual(info["leakage_reward_penalty"], 0.0)
         self.assertEqual(info["shaped_reward"], 1.0)
+
+    def test_causal_effect_projector_removes_slow_baseline(self):
+        reg = LeakageRegularizer(lower_lf_window=8)
+        raw = np.ones(40)
+        projector = CausalLowFrequencyEffectProjector(window=8, gain=1.0)
+        projected = projector.transform_sequence(raw)
+        raw_metrics = reg.compute(upper_effect=np.zeros(40), lower_effect=raw)
+        projected_metrics = reg.compute(upper_effect=np.zeros(40), lower_effect=projected)
+        self.assertLess(projected_metrics["LowerLFDrift"], raw_metrics["LowerLFDrift"])
+        self.assertAlmostEqual(float(np.max(np.abs(projected))), 0.0)
+
+    def test_causal_effect_projector_keeps_fast_residuals(self):
+        projector = CausalLowFrequencyEffectProjector(window=4, gain=1.0)
+        projected = projector.transform_sequence(np.array([1.0, -1.0] * 8))
+        self.assertGreater(float(np.mean(np.abs(projected))), 0.4)
 
 
 if __name__ == "__main__":

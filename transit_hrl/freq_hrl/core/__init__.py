@@ -4,6 +4,7 @@ from .diagnostics import FrequencyDiagnostics, binned_mutual_information
 from .leakage import (
     ActionEffectOperator,
     CausalLeakageRewardShaper,
+    CausalLowFrequencyEffectProjector,
     CumulativeActionEffectOperator,
     LeakageRegularizer,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "BinnedExogenousStreamAdapter",
     "CausalPromotionGate",
     "CausalLeakageRewardShaper",
+    "CausalLowFrequencyEffectProjector",
     "CumulativeActionEffectOperator",
     "ExogenousBin",
     "FrequencyDiagnostics",

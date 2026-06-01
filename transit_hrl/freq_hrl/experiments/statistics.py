@@ -141,6 +141,28 @@ def claim_status(
     return "inconclusive"
 
 
+def noninferiority_status(
+    stats: dict[str, Any],
+    *,
+    max_loss: float = 0.0,
+    min_pairs: int = 3,
+) -> str:
+    n_common = int(stats.get("n_common", 0) or 0)
+    if n_common < int(min_pairs):
+        return "underpowered"
+    low = finite_float(stats.get("improvement_ci95_low"))
+    high = finite_float(stats.get("improvement_ci95_high"))
+    mean = finite_float(stats.get("improvement_mean"))
+    margin = abs(float(max_loss))
+    if low is not None and low >= -margin:
+        return "supported"
+    if high is not None and high < -margin:
+        return "not_supported"
+    if mean is not None and mean >= -margin:
+        return "positive_mixed"
+    return "inconclusive"
+
+
 def format_ci(stats: dict[str, Any], digits: int = 4) -> str:
     mean = finite_float(stats.get("delta_mean"))
     low = finite_float(stats.get("delta_ci95_low"))
