@@ -109,6 +109,11 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
 
     gap_rows = collect_gap_rows(results_root)
     if gap_rows:
+        transit_full_drift_metric = (
+            "RawLowerLFDriftAbs"
+            if any("RawLowerLFDriftAbs" in row for row in gap_rows)
+            else "LowerLFDrift"
+        )
         add(
             "transit_full_reward_vs_base",
             "integrated Transit Freq-HRL improves task reward",
@@ -143,7 +148,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 gap_rows,
                 variant_key="variant",
                 pair_keys=("source", "seed"),
-                metric="LowerLFDrift",
+                metric=transit_full_drift_metric,
                 treatment="full_freqhrl",
                 control="base_ema_direct",
                 lower_is_better=True,
@@ -222,7 +227,12 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             min_pairs=5,
             status=noninferiority_status(trading_return, max_loss=0.01, min_pairs=5),
         )
-        if any("RawLowerLFDrift" in row for row in trading_rows):
+        trading_raw_metric = (
+            "RawLowerLFDriftAbs"
+            if any("RawLowerLFDriftAbs" in row for row in trading_rows)
+            else "RawLowerLFDrift"
+        )
+        if any(trading_raw_metric in row for row in trading_rows):
             add(
                 "trading_constraint_raw_lower_lf",
                 "primal-dual constraint lowers raw trading lower-LF drift",
@@ -230,7 +240,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                     trading_rows,
                     variant_key="variant",
                     pair_keys=("seed",),
-                    metric="RawLowerLFDrift",
+                    metric=trading_raw_metric,
                     treatment="trading_constrained",
                     control="trading_plan",
                     lower_is_better=True,
@@ -275,7 +285,12 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             min_pairs=5,
             status=noninferiority_status(transit_reward, max_loss=0.005, min_pairs=5),
         )
-        if any("RawLowerLFDrift" in row for row in transit_rows):
+        transit_raw_metric = (
+            "RawLowerLFDriftAbs"
+            if any("RawLowerLFDriftAbs" in row for row in transit_rows)
+            else "RawLowerLFDrift"
+        )
+        if any(transit_raw_metric in row for row in transit_rows):
             add(
                 "transit_constraint_raw_lower_lf",
                 "primal-dual constraint lowers raw Transit lower-LF drift",
@@ -283,7 +298,7 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                     transit_rows,
                     variant_key="variant",
                     pair_keys=("seed",),
-                    metric="RawLowerLFDrift",
+                    metric=transit_raw_metric,
                     treatment="transit_constrained",
                     control="transit_plan",
                     lower_is_better=True,
@@ -412,7 +427,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 ])
                 else "not_supported"
             ),
-            "remaining_gap": "Effect-projected leakage is tested separately from raw physical drift; raw drift remains a diagnostic boundary.",
+            "remaining_gap": "Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation.",
         },
         {
             "claim": "C10: dynamic harmonic count-state demand estimator is competitive",

@@ -19,7 +19,9 @@
 - hold mean: 7.44
 - leakage penalty mean: 1.0022
 - LowerLFDrift mean: 1.0007
+- LowerLFDriftAbs mean: 0.027354
 - RawLowerLFDrift mean: 1.0007
+- RawLowerLFDriftAbs mean: 0.027354
 - plan smoothness mean: 0.0014
 - plan coefficient abs mean: 7.8340
 - wait high-share mean: 0.0426

@@ -115,8 +115,10 @@ class LeakageRegularizer:
 
         upper_power = float(np.mean(upper * upper)) if upper.size else 0.0
         lower_power = float(np.mean(lower * lower)) if lower.size else 0.0
-        upper_hf_ratio = float(np.mean(upper_hf * upper_hf) / (upper_power + self.eps))
-        lower_lf_ratio = float(np.mean(lower_lf * lower_lf) / (lower_power + self.eps))
+        upper_hf_power = float(np.mean(upper_hf * upper_hf)) if upper_hf.size else 0.0
+        lower_lf_power = float(np.mean(lower_lf * lower_lf)) if lower_lf.size else 0.0
+        upper_hf_ratio = float(upper_hf_power / (upper_power + self.eps))
+        lower_lf_ratio = float(lower_lf_power / (lower_power + self.eps))
         upper_penalty = self.upper_hf_weight * upper_hf_ratio
         lower_penalty = self.lower_lf_weight * lower_lf_ratio
         return {
@@ -125,6 +127,8 @@ class LeakageRegularizer:
             "leakage_penalty": float(upper_penalty + lower_penalty),
             "UpperHFPower": float(upper_hf_ratio),
             "LowerLFDrift": float(lower_lf_ratio),
+            "UpperHFPowerAbs": float(upper_hf_power),
+            "LowerLFDriftAbs": float(lower_lf_power),
             "leakage_feedback": np.asarray([upper_hf_ratio, lower_lf_ratio], dtype=np.float32),
         }
 

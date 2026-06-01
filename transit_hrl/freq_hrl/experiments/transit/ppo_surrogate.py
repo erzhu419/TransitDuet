@@ -216,6 +216,8 @@ def rollout(
     wait_credit_control_gain: float = 0.0,
     lower_lf_effect_filter_window: int = 0,
     lower_lf_effect_filter_gain: float = 1.0,
+    lower_lf_raw_recenter_gain: float = 0.0,
+    lower_lf_raw_recenter_alpha: float = 0.10,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
     promotion_replan_strength_min: float = 0.10,
@@ -267,6 +269,7 @@ def rollout(
     wait_attr_penalties: list[float] = []
     wait_board_credits: list[float] = []
     wait_credit_reliefs: list[float] = []
+    raw_recenter_reductions: list[np.ndarray] = []
     upper_decisions = 0
     promotion_replans = 0
     promotions = 0
@@ -276,6 +279,7 @@ def rollout(
     cached_target_delta = np.zeros(corridors, dtype=np.float64)
     last_upper_decision_t = -10**9
     speed_shock = np.zeros(corridors, dtype=np.float64)
+    hold_lf_baseline = np.zeros(corridors, dtype=np.float64)
     for t in range(int(steps)):
         arrivals = {(i, True): float(demand[t, i]) for i in range(corridors)}
         tracker.update(arrivals)
@@ -344,12 +348,25 @@ def rollout(
             float(np.mean(np.maximum(crowding, 0.0)))
             + float(np.mean(np.maximum(service_gap, 0.0))) / 30.0
         )
+        raw_recenter_reduction = (
+            max(float(lower_lf_raw_recenter_gain), 0.0)
+            * np.clip(hold_lf_baseline, 0.0, 45.0)
+        )
+        if lower_lf_raw_recenter_gain > 0.0:
+            burst_gate = np.clip(np.maximum(station_burst, 0.0) / 8.0, 0.0, 1.0)
+            hold_s = np.clip(
+                hold_s - raw_recenter_reduction * (1.0 - 0.6 * burst_gate),
+                0.0,
+                45.0,
+            )
         if wait_credit_control_gain > 0.0:
             hold_s = np.clip(
                 hold_s - 0.35 * float(wait_credit_control_gain) * np.maximum(station_burst, 0.0),
                 0.0,
                 45.0,
             )
+        alpha = float(np.clip(lower_lf_raw_recenter_alpha, 1e-6, 1.0))
+        hold_lf_baseline = (1.0 - alpha) * hold_lf_baseline + alpha * hold_s
 
         hold_relief = (
             0.22
@@ -435,6 +452,7 @@ def rollout(
         wait_attr_penalties.append(wait_attr_penalty)
         wait_board_credits.append(board_credit)
         wait_credit_reliefs.append(wait_credit_relief)
+        raw_recenter_reductions.append(np.asarray(raw_recenter_reduction, dtype=np.float64).copy())
     reg = LeakageRegularizer(upper_hf_window=5, lower_lf_window=20)
     leak = reg.compute(np.asarray(target_trace, dtype=np.float64), np.asarray(hold_trace, dtype=np.float64))
     raw_leak = reg.compute(
@@ -453,7 +471,9 @@ def rollout(
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
+        "LowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
+        "RawLowerLFDriftAbs": float(raw_leak["LowerLFDriftAbs"]),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
         "wait_low_share": float(np.mean(wait_low_shares)) if wait_low_shares else 0.0,
@@ -463,6 +483,8 @@ def rollout(
         "wait_credit_relief": float(np.mean(wait_credit_reliefs)) if wait_credit_reliefs else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
+        "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
+        "raw_recenter_reduction_mean": float(np.mean(raw_recenter_reductions)) if raw_recenter_reductions else 0.0,
         "upper_decision_count": int(upper_decisions),
         "promotion_replan_count": int(promotion_replans),
     }
@@ -499,7 +521,9 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "leakage_penalty",
         "UpperHFPower",
         "LowerLFDrift",
+        "LowerLFDriftAbs",
         "RawLowerLFDrift",
+        "RawLowerLFDriftAbs",
         "plan_smoothness",
         "plan_coeff_abs",
         "wait_low_share",
@@ -509,6 +533,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "wait_credit_relief",
         "lower_lf_effect_filter_window",
         "lower_lf_effect_filter_gain",
+        "lower_lf_raw_recenter_gain",
+        "raw_recenter_reduction_mean",
         "upper_decision_count",
         "promotion_replan_count",
     ]
@@ -540,6 +566,8 @@ def train_transit_surrogate_ppo(
     wait_credit_control_gain: float = 0.0,
     lower_lf_effect_filter_window: int = 0,
     lower_lf_effect_filter_gain: float = 1.0,
+    lower_lf_raw_recenter_gain: float = 0.0,
+    lower_lf_raw_recenter_alpha: float = 0.10,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
     promotion_replan_strength_min: float = 0.10,
@@ -608,6 +636,8 @@ def train_transit_surrogate_ppo(
             wait_credit_control_gain=wait_credit_control_gain,
             lower_lf_effect_filter_window=lower_lf_effect_filter_window,
             lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
+            lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
+            lower_lf_raw_recenter_alpha=lower_lf_raw_recenter_alpha,
             upper_decision_interval=upper_decision_interval,
             promotion_forced_replan=promotion_forced_replan,
             promotion_replan_strength_min=promotion_replan_strength_min,
@@ -633,6 +663,8 @@ def train_transit_surrogate_ppo(
             "wait_credit_control_gain": float(wait_credit_control_gain),
             "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
             "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
+            "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
+            "lower_lf_raw_recenter_alpha": float(lower_lf_raw_recenter_alpha),
             "upper_decision_interval": int(upper_decision_interval),
             "promotion_forced_replan": bool(promotion_forced_replan),
             "promotion_replan_strength_min": float(promotion_replan_strength_min),
@@ -678,6 +710,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- wait credit control gain: {payload['wait_credit_control_gain']}",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- lower LF effect projector: window={payload['lower_lf_effect_filter_window']}, gain={payload['lower_lf_effect_filter_gain']}",
+        f"- raw lower hold recenter: gain={payload['lower_lf_raw_recenter_gain']}, alpha={payload['lower_lf_raw_recenter_alpha']}",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -687,7 +720,10 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- hold mean: {summary['hold_mean_mean']:.2f}",
         f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
         f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        f"- LowerLFDriftAbs mean: {summary['LowerLFDriftAbs_mean']:.6f}",
         f"- RawLowerLFDrift mean: {summary['RawLowerLFDrift_mean']:.4f}",
+        f"- RawLowerLFDriftAbs mean: {summary['RawLowerLFDriftAbs_mean']:.6f}",
+        f"- raw recenter reduction mean: {summary['raw_recenter_reduction_mean_mean']:.4f}",
         f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
         f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         f"- wait high-share mean: {summary['wait_high_share_mean']:.4f}",
@@ -726,6 +762,8 @@ def main() -> None:
     parser.add_argument("--wait-credit-control-gain", type=float, default=0.0)
     parser.add_argument("--lower-lf-effect-filter-window", type=int, default=0)
     parser.add_argument("--lower-lf-effect-filter-gain", type=float, default=1.0)
+    parser.add_argument("--lower-lf-raw-recenter-gain", type=float, default=0.0)
+    parser.add_argument("--lower-lf-raw-recenter-alpha", type=float, default=0.10)
     parser.add_argument("--upper-decision-interval", type=int, default=1)
     parser.add_argument("--promotion-forced-replan", action="store_true")
     parser.add_argument("--promotion-replan-strength-min", type=float, default=0.10)
@@ -758,6 +796,8 @@ def main() -> None:
         wait_credit_control_gain=args.wait_credit_control_gain,
         lower_lf_effect_filter_window=args.lower_lf_effect_filter_window,
         lower_lf_effect_filter_gain=args.lower_lf_effect_filter_gain,
+        lower_lf_raw_recenter_gain=args.lower_lf_raw_recenter_gain,
+        lower_lf_raw_recenter_alpha=args.lower_lf_raw_recenter_alpha,
         upper_decision_interval=args.upper_decision_interval,
         promotion_forced_replan=args.promotion_forced_replan,
         promotion_replan_strength_min=args.promotion_replan_strength_min,

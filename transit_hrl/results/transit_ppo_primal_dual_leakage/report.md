@@ -10,18 +10,22 @@
 - wait credit control gain: 0.0
 - lower LF constraint: coef=0.08, target=0.2, dual_lr=0.5
 - lower LF effect projector: window=12, gain=1.0
+- raw lower hold recenter: gain=1.0, alpha=0.1
 - scenario: `persistent_shift`
 - train seeds: [11, 23, 37, 41, 53]
 - eval seeds: [101, 131, 151, 181, 211]
-- reward mean: -4.4977
-- wait proxy mean: 4.1999
-- headway CV mean: 0.0745
-- hold mean: 7.56
-- leakage penalty mean: 0.0016
-- LowerLFDrift mean: 0.0000
-- RawLowerLFDrift mean: 1.0000
-- plan smoothness mean: 0.0008
-- plan coefficient abs mean: 7.8169
+- reward mean: -4.4651
+- wait proxy mean: 4.1781
+- headway CV mean: 0.0758
+- hold mean: 3.92
+- leakage penalty mean: 0.6933
+- LowerLFDrift mean: 0.6917
+- LowerLFDriftAbs mean: 0.000029
+- RawLowerLFDrift mean: 1.0547
+- RawLowerLFDriftAbs mean: 0.008118
+- raw recenter reduction mean: 3.7529
+- plan smoothness mean: 0.0004
+- plan coefficient abs mean: 7.8349
 - wait high-share mean: 0.0426
 - wait attribution penalty mean: 0.0000
 - wait credit relief mean: 0.0000

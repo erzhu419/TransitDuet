@@ -22,12 +22,12 @@ Promotion false positives and false negatives are controlled by the persistence 
 | C1: frequency-separated HRL can share one training core | partial | trading plan return=0.2991; transit composite=1.6950337432937435 | Copied Transit native simulator still uses copied RESAC runner. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
 | C3: promotion should trigger replanning after persistent shocks | supported deterministic | return delta=0.0014, recovery regret delta=-0.0007 | Not yet embedded in learned PPO/off-policy runner. |
-| C4: leakage can be constrained at loss level | supported with tradeoff | trading drift delta=-0.7782 [-0.8739, -0.6642]; return delta=+0.0000 [+0.0000, +0.0000] | Constraint trades off return/Sharpe and did not improve Transit surrogate drift. |
+| C4: leakage can be constrained at loss level | supported with tradeoff | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Constraint trades off return/Sharpe and did not improve Transit surrogate drift. |
 | C5: advanced causal encoders can be swapped by domain | mixed | adaptive Sharpe=13.0749; EMA Sharpe=16.0625 | Neural state-space and PINN-constrained encoders remain open. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200 | Short Level-1 intraday slice only; no order book or execution simulator. |
-| C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0358 [+0.0287, +0.0403]; wait delta=-0.0596 [-0.0659, -0.0501]; drift delta=-0.7979 [-0.8340, -0.7754] | Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation. |
-| C8: passenger waiting-time frequency credit improves control quality | supported | wait delta vs no-wait=-0.1250 [-0.1466, -0.1021] | Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation. |
-| C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=not_supported, raw drift transit=supported | Effect-projected leakage is tested separately from raw physical drift; raw drift remains a diagnostic boundary. |
+| C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198] | Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation. |
+| C8: passenger waiting-time frequency credit improves control quality | supported | wait delta vs no-wait=-0.1251 [-0.1468, -0.1020] | Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation. |
+| C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
 | C10: dynamic harmonic count-state demand estimator is competitive | supported | MSE delta=-2.2628 [-2.9776, -1.6011] | The count-state path is present; it must beat or match Fourier on larger real Transit demand data before becoming a headline claim. |
 
 ## Statistical Claim Gates
@@ -37,19 +37,19 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 | check | status | metric | n | delta CI95 | win rate | sign p |
 |---|---|---|---:|---:|---:|---:|
-| transit_full_reward_vs_base | supported | reward_mean | 3 | +0.0358 [+0.0287, +0.0403] | 1.00 | 0.2500 |
-| transit_full_wait_vs_base | supported | wait_proxy | 3 | -0.0596 [-0.0659, -0.0501] | 1.00 | 0.2500 |
-| transit_full_lower_lf_vs_base | supported | LowerLFDrift | 3 | -0.7979 [-0.8340, -0.7754] | 1.00 | 0.2500 |
-| transit_wait_credit_vs_no_wait | supported | wait_proxy | 3 | -0.1250 [-0.1466, -0.1021] | 1.00 | 0.2500 |
+| transit_full_reward_vs_base | supported | reward_mean | 3 | +0.0565 [+0.0485, +0.0608] | 1.00 | 0.2500 |
+| transit_full_wait_vs_base | supported | wait_proxy | 3 | -0.0758 [-0.0815, -0.0651] | 1.00 | 0.2500 |
+| transit_full_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 3 | -0.0199 [-0.0199, -0.0198] | 1.00 | 0.2500 |
+| transit_wait_credit_vs_no_wait | supported | wait_proxy | 3 | -0.1251 [-0.1468, -0.1020] | 1.00 | 0.2500 |
 | demand_nb_vs_fourier_mse | supported | mse | 5 | -2.2628 [-2.9776, -1.6011] | 1.00 | 0.0625 |
 | demand_nb_vs_fourier_mae | supported | mae | 5 | -0.1043 [-0.1604, -0.0542] | 1.00 | 0.0625 |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 5 | -0.0975 [-0.1315, -0.0671] | 1.00 | 0.0625 |
-| trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -0.7782 [-0.8739, -0.6642] | 1.00 | 0.0625 |
-| trading_constraint_return_tradeoff | supported | total_return | 5 | +0.0000 [+0.0000, +0.0000] | 0.00 | 1.0000 |
-| trading_constraint_raw_lower_lf | not_supported | RawLowerLFDrift | 5 | +0.0000 [+0.0000, +0.0000] | 0.00 | 1.0000 |
-| transit_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0007 [-1.0007, -1.0006] | 1.00 | 0.0625 |
-| transit_constraint_reward_tradeoff | supported | reward_mean | 5 | -0.0010 [-0.0012, -0.0008] | 0.00 | 0.0625 |
-| transit_constraint_raw_lower_lf | supported | RawLowerLFDrift | 5 | -0.0007 [-0.0007, -0.0006] | 1.00 | 0.0625 |
+| trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 |
+| trading_constraint_return_tradeoff | supported | total_return | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 |
+| trading_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 |
+| transit_constraint_lower_lf | supported | LowerLFDrift | 5 | -0.3090 [-0.3382, -0.2834] | 1.00 | 0.0625 |
+| transit_constraint_reward_tradeoff | supported | reward_mean | 5 | +0.0316 [+0.0308, +0.0322] | 1.00 | 0.0625 |
+| transit_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0192 [-0.0193, -0.0192] | 1.00 | 0.0625 |
 
 ## Paper Boundary
 

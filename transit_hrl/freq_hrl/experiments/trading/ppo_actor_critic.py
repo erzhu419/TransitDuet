@@ -167,6 +167,8 @@ def rollout(
     plan_mapper: LearnedPlanActionMapper | None = None,
     lower_lf_effect_filter_window: int = 0,
     lower_lf_effect_filter_gain: float = 1.0,
+    lower_lf_raw_recenter_gain: float = 0.0,
+    lower_lf_raw_recenter_scale: float = 0.10,
 ) -> tuple[TrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -210,6 +212,7 @@ def rollout(
     targets: list[np.ndarray] = []
     lower_effects: list[np.ndarray] = []
     raw_lower_effects: list[np.ndarray] = []
+    raw_recenter_boosts: list[np.ndarray] = []
     plan_smoothness: list[float] = []
     plan_coeff_abs: list[float] = []
     promotions = 0
@@ -230,6 +233,12 @@ def rollout(
         _, lower_state = feature_vectors(dict(freq), env.position.copy(), target=target)
         lower_out = model.act_lower(lower_state, sample=sample)
         speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        pre_gap = np.asarray(target, dtype=np.float64) - env.position.copy()
+        raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
+            np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
+        )
+        if lower_lf_raw_recenter_gain > 0.0:
+            speed = np.clip(speed + raw_recenter_boost, 0.05, 1.0)
         env.set_target(target)
         _, reward, done, info = env.lower_step({
             "execution_speed": speed,
@@ -259,6 +268,7 @@ def rollout(
         targets.append(np.asarray(info["target"], dtype=np.float64).copy())
         lower_effects.append(lower_effect.copy())
         raw_lower_effects.append(raw_lower_effect.copy())
+        raw_recenter_boosts.append(np.asarray(raw_recenter_boost, dtype=np.float64).copy())
         if done:
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
@@ -268,9 +278,11 @@ def rollout(
         "leakage_penalty": 0.0,
         "UpperHFPower": 0.0,
         "LowerLFDrift": 0.0,
+        "LowerLFDriftAbs": 0.0,
     }
     raw_leak = reg.compute(np.asarray(targets, dtype=np.float64), np.asarray(raw_lower_effects, dtype=np.float64)) if targets else {
         "LowerLFDrift": 0.0,
+        "LowerLFDriftAbs": 0.0,
     }
     row = {
         "seed": int(seed),
@@ -283,11 +295,15 @@ def rollout(
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
+        "LowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
+        "RawLowerLFDriftAbs": float(raw_leak["LowerLFDriftAbs"]),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
+        "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
+        "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
     }
     if not sample:
         return None, row
@@ -321,11 +337,15 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "leakage_penalty",
         "UpperHFPower",
         "LowerLFDrift",
+        "LowerLFDriftAbs",
         "RawLowerLFDrift",
+        "RawLowerLFDriftAbs",
         "plan_smoothness",
         "plan_coeff_abs",
         "lower_lf_effect_filter_window",
         "lower_lf_effect_filter_gain",
+        "lower_lf_raw_recenter_gain",
+        "raw_recenter_boost_mean",
     ]
     return summarize_numeric_rows(rows, keys=keys)
 
@@ -349,6 +369,8 @@ def train_ppo_actor_critic(
     lower_lf_objective_weight: float = 0.0,
     lower_lf_effect_filter_window: int = 0,
     lower_lf_effect_filter_gain: float = 1.0,
+    lower_lf_raw_recenter_gain: float = 0.0,
+    lower_lf_raw_recenter_scale: float = 0.10,
 ) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
@@ -393,6 +415,8 @@ def train_ppo_actor_critic(
             plan_mapper=plan_mapper,
             lower_lf_effect_filter_window=lower_lf_effect_filter_window,
             lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
+            lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
+            lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
         summary_fn=summarize,
@@ -411,6 +435,8 @@ def train_ppo_actor_critic(
             "lower_lf_objective_weight": float(lower_lf_objective_weight),
             "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
             "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
+            "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
+            "lower_lf_raw_recenter_scale": float(lower_lf_raw_recenter_scale),
             **(plan_mapper.to_metadata() if plan_mapper is not None else {
                 "plan_basis_dim": 0,
                 "plan_horizon_s": 0.0,
@@ -442,6 +468,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- plan mode: `{payload['plan_mode']}`",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- lower LF effect projector: window={payload['lower_lf_effect_filter_window']}, gain={payload['lower_lf_effect_filter_gain']}",
+        f"- raw lower drift recenter: gain={payload['lower_lf_raw_recenter_gain']}, scale={payload['lower_lf_raw_recenter_scale']}",
         f"- scenario: `{payload['scenario']}`",
         f"- train seeds: {payload['train_seeds']}",
         f"- eval seeds: {payload['eval_seeds']}",
@@ -451,7 +478,10 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- turnover mean: {summary['turnover_mean']:.2f}",
         f"- leakage penalty mean: {summary['leakage_penalty_mean']:.4f}",
         f"- LowerLFDrift mean: {summary['LowerLFDrift_mean']:.4f}",
+        f"- LowerLFDriftAbs mean: {summary['LowerLFDriftAbs_mean']:.6f}",
         f"- RawLowerLFDrift mean: {summary['RawLowerLFDrift_mean']:.4f}",
+        f"- RawLowerLFDriftAbs mean: {summary['RawLowerLFDriftAbs_mean']:.6f}",
+        f"- raw recenter boost mean: {summary['raw_recenter_boost_mean_mean']:.4f}",
         f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
         f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
         "",
@@ -480,6 +510,8 @@ def main() -> None:
     parser.add_argument("--lower-lf-objective-weight", type=float, default=0.0)
     parser.add_argument("--lower-lf-effect-filter-window", type=int, default=0)
     parser.add_argument("--lower-lf-effect-filter-gain", type=float, default=1.0)
+    parser.add_argument("--lower-lf-raw-recenter-gain", type=float, default=0.0)
+    parser.add_argument("--lower-lf-raw-recenter-scale", type=float, default=0.10)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -501,6 +533,8 @@ def main() -> None:
         lower_lf_objective_weight=args.lower_lf_objective_weight,
         lower_lf_effect_filter_window=args.lower_lf_effect_filter_window,
         lower_lf_effect_filter_gain=args.lower_lf_effect_filter_gain,
+        lower_lf_raw_recenter_gain=args.lower_lf_raw_recenter_gain,
+        lower_lf_raw_recenter_scale=args.lower_lf_raw_recenter_scale,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

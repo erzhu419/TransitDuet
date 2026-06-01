@@ -4,17 +4,21 @@
 - plan mode: `learned_bernstein`
 - lower LF constraint: coef=0.08, target=0.2, dual_lr=0.5
 - lower LF effect projector: window=24, gain=1.0
+- raw lower drift recenter: gain=1.0, scale=0.1
 - scenario: `persistent_shift`
 - train seeds: [42, 123, 456, 789, 2026]
 - eval seeds: [31415, 27182, 16180, 11235, 4242]
-- return mean: 0.2991
-- Sharpe mean: 14.750
-- max drawdown mean: 0.0254
-- turnover mean: 6.36
-- leakage penalty mean: 0.7707
-- LowerLFDrift mean: 0.7699
-- RawLowerLFDrift mean: 1.5481
+- return mean: 0.2988
+- Sharpe mean: 14.639
+- max drawdown mean: 0.0252
+- turnover mean: 6.65
+- leakage penalty mean: 0.4709
+- LowerLFDrift mean: 0.4699
+- LowerLFDriftAbs mean: 0.000001
+- RawLowerLFDrift mean: 0.7760
+- RawLowerLFDriftAbs mean: 0.000002
+- raw recenter boost mean: 0.0432
 - plan smoothness mean: 0.0000
-- plan coefficient abs mean: 0.0792
+- plan coefficient abs mean: 0.0791
 
 This validates the shared upper/lower PPO actor-critic training core. It uses trading as a domain adapter; the trainer itself only depends on upper/lower states, latent actions, rewards, and done flags.
