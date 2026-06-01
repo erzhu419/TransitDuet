@@ -28,7 +28,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 | C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198] | Supported on the small Transit surrogate gate and native shared-PPO interface; still needs full native performance and real-demand validation. |
 | C8: passenger waiting-time frequency credit improves control quality | supported | wait delta vs no-wait=-0.1251 [-0.1468, -0.1020] | Supported on the small surrogate gate; still needs larger seed coverage and native timetable validation. |
 | C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
-| C10: dynamic harmonic count-state demand estimator is competitive | supported | MSE delta=-2.2628 [-2.9776, -1.6011] | The count-state path is present; it must beat or match Fourier on larger real Transit demand data before becoming a headline claim. |
+| C10: dynamic harmonic count-state demand estimator is competitive | supported | MSE delta=-0.7217 [-1.2633, -0.2617] | The count-state path now covers local OD-derived traces; larger real AFC/APC/GTFS demand feeds remain for the strongest claim. |
 
 ## Statistical Claim Gates
 
@@ -45,9 +45,9 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 3 | -0.0006 [-0.0008, -0.0004] | 1.00 | 0.2500 |
 | transit_learned_promotion_replans_vs_interval | supported | promotion_replan_count | 3 | +13.3333 [+12.0000, +15.0000] | 1.00 | 0.2500 |
 | transit_learned_promotion_raw_lf_vs_interval | supported | RawLowerLFDriftAbs | 3 | -0.0003 [-0.0003, -0.0002] | 1.00 | 0.2500 |
-| demand_nb_vs_fourier_mse | supported | mse | 5 | -2.2628 [-2.9776, -1.6011] | 1.00 | 0.0625 |
-| demand_nb_vs_fourier_mae | supported | mae | 5 | -0.1043 [-0.1604, -0.0542] | 1.00 | 0.0625 |
-| demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 5 | -0.0975 [-0.1315, -0.0671] | 1.00 | 0.0625 |
+| demand_nb_vs_fourier_mse | supported | mse | 17 | -0.7217 [-1.2633, -0.2617] | 0.82 | 0.0127 |
+| demand_nb_vs_fourier_mae | supported | mae | 17 | -0.0494 [-0.0759, -0.0296] | 1.00 | 0.0000 |
+| demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 17 | -0.1322 [-0.1620, -0.1047] | 1.00 | 0.0000 |
 | trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 |
 | trading_constraint_return_tradeoff | supported | total_return | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 |
 | trading_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 |

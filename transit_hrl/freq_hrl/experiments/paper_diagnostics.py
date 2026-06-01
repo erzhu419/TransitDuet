@@ -537,10 +537,10 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
-            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed and source.",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts and copied TransitDuet local OD spreadsheet traces.",
             "metric": f"MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}",
             "status": _check_status(checks, "demand_nb_vs_fourier_mse"),
-            "remaining_gap": "The count-state path is present; it must beat or match Fourier on larger real Transit demand data before becoming a headline claim.",
+            "remaining_gap": "The count-state path now covers local OD-derived traces; larger real AFC/APC/GTFS demand feeds remain for the strongest claim.",
         },
     ]
 
