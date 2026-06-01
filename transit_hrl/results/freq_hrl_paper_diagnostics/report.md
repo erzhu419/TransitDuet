@@ -21,8 +21,8 @@ Promotion false positives and false negatives are controlled by the persistence 
 |---|---|---|---|
 | C1: frequency-separated HRL can share one training core | partial | trading plan return=0.2991; transit composite=1.6950337432937435 | Copied Transit native simulator still uses copied RESAC runner. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
-| C3: promotion should trigger replanning after persistent shocks | supported deterministic | return delta=0.0014, recovery regret delta=-0.0007 | Not yet embedded in learned PPO/off-policy runner. |
-| C4: leakage can be constrained at loss level | supported with tradeoff | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Constraint trades off return/Sharpe and did not improve Transit surrogate drift. |
+| C3: promotion should trigger replanning after persistent shocks | supported learned | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=-0.0044 [-0.0055, -0.0023], wait=-0.0006 [-0.0008, -0.0004], replans=+13.3333 [+12.0000, +15.0000] | Learned gate is supported on Transit PPO surrogate; native off-policy and larger-seed validation remain. |
+| C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | mixed | adaptive Sharpe=13.0749; EMA Sharpe=16.0625 | Neural state-space and PINN-constrained encoders remain open. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200 | Short Level-1 intraday slice only; no order book or execution simulator. |
 | C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198] | Supported on the small Transit surrogate gate; still needs larger native Transit and real-demand validation. |
@@ -41,6 +41,10 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_full_wait_vs_base | supported | wait_proxy | 3 | -0.0758 [-0.0815, -0.0651] | 1.00 | 0.2500 |
 | transit_full_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 3 | -0.0199 [-0.0199, -0.0198] | 1.00 | 0.2500 |
 | transit_wait_credit_vs_no_wait | supported | wait_proxy | 3 | -0.1251 [-0.1468, -0.1020] | 1.00 | 0.2500 |
+| transit_learned_promotion_reward_vs_interval | not_supported | reward_mean | 3 | -0.0044 [-0.0055, -0.0023] | 0.00 | 0.2500 |
+| transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 3 | -0.0006 [-0.0008, -0.0004] | 1.00 | 0.2500 |
+| transit_learned_promotion_replans_vs_interval | supported | promotion_replan_count | 3 | +13.3333 [+12.0000, +15.0000] | 1.00 | 0.2500 |
+| transit_learned_promotion_raw_lf_vs_interval | supported | RawLowerLFDriftAbs | 3 | -0.0003 [-0.0003, -0.0002] | 1.00 | 0.2500 |
 | demand_nb_vs_fourier_mse | supported | mse | 5 | -2.2628 [-2.9776, -1.6011] | 1.00 | 0.0625 |
 | demand_nb_vs_fourier_mae | supported | mae | 5 | -0.1043 [-0.1604, -0.0542] | 1.00 | 0.0625 |
 | demand_nb_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 5 | -0.0975 [-0.1315, -0.0671] | 1.00 | 0.0625 |

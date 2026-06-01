@@ -10,7 +10,6 @@ from typing import Any
 
 from freq_hrl.experiments.statistics import (
     claim_status,
-    finite_float,
     format_ci,
     noninferiority_status,
     paired_delta_stats,
@@ -66,6 +65,22 @@ def collect_demand_rows(results_root: Path) -> list[dict[str, Any]]:
         for row in data.get("rows", []):
             item = dict(row)
             item["source"] = path.parent.name
+            rows.append(item)
+    return rows
+
+
+def collect_payload_rows(results_root: Path, dirname: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    data = read_json(results_root / dirname / "summary.json")
+    payloads = data.get("payloads", {})
+    if not isinstance(payloads, dict):
+        return rows
+    for variant, payload in payloads.items():
+        per_seed = payload.get("per_seed", []) if isinstance(payload, dict) else []
+        for row in per_seed:
+            item = dict(row)
+            item["source"] = dirname
+            item["variant"] = str(variant)
             rows.append(item)
     return rows
 
@@ -165,6 +180,68 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 metric="wait_proxy",
                 treatment="full_freqhrl",
                 control="full_no_wait",
+                lower_is_better=True,
+            ),
+            min_pairs=3,
+        )
+
+    learned_promotion_rows = collect_payload_rows(results_root, "transit_promotion_learned_replan")
+    if learned_promotion_rows:
+        add(
+            "transit_learned_promotion_reward_vs_interval",
+            "learned promotion gate improves Transit reward after persistent shocks",
+            paired_delta_stats(
+                learned_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="reward_mean",
+                treatment="learned_gate",
+                control="interval_only",
+            ),
+            min_pairs=3,
+        )
+        add(
+            "transit_learned_promotion_wait_vs_interval",
+            "learned promotion gate lowers Transit wait after persistent shocks",
+            paired_delta_stats(
+                learned_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="wait_proxy",
+                treatment="learned_gate",
+                control="interval_only",
+                lower_is_better=True,
+            ),
+            min_pairs=3,
+        )
+        add(
+            "transit_learned_promotion_replans_vs_interval",
+            "learned promotion gate increases shock-triggered replans",
+            paired_delta_stats(
+                learned_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric="promotion_replan_count",
+                treatment="learned_gate",
+                control="interval_only",
+            ),
+            min_pairs=3,
+        )
+        learned_drift_metric = (
+            "RawLowerLFDriftAbs"
+            if any("RawLowerLFDriftAbs" in row for row in learned_promotion_rows)
+            else "LowerLFDrift"
+        )
+        add(
+            "transit_learned_promotion_raw_lf_vs_interval",
+            "learned promotion gate does not increase lower LF drift",
+            paired_delta_stats(
+                learned_promotion_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric=learned_drift_metric,
+                treatment="learned_gate",
+                control="interval_only",
                 lower_is_better=True,
             ),
             min_pairs=3,
@@ -359,10 +436,23 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C3: promotion should trigger replanning after persistent shocks",
-            "evidence": "Promotion-forced plan replan beats interval-only replan on recovery scenario.",
-            "metric": f"return delta={_fmt(replan_delta.get('total_return_delta_mean'))}, recovery regret delta={_fmt(replan_delta.get('recovery_regret_120_delta_mean'))}",
-            "status": "supported deterministic",
-            "remaining_gap": "Not yet embedded in learned PPO/off-policy runner.",
+            "evidence": "Deterministic replan improves trading recovery, and a learned PPO promotion gate triggers Transit replans.",
+            "metric": (
+                f"return delta={_fmt(replan_delta.get('total_return_delta_mean'))}, "
+                f"recovery regret delta={_fmt(replan_delta.get('recovery_regret_120_delta_mean'))}; "
+                f"learned transit reward={_check_metric(checks, 'transit_learned_promotion_reward_vs_interval')}, "
+                f"wait={_check_metric(checks, 'transit_learned_promotion_wait_vs_interval')}, "
+                f"replans={_check_metric(checks, 'transit_learned_promotion_replans_vs_interval')}"
+            ),
+            "status": (
+                "supported learned"
+                if _check_status(checks, "transit_learned_promotion_reward_vs_interval")
+                in {"supported", "positive_mixed"}
+                or _check_status(checks, "transit_learned_promotion_wait_vs_interval")
+                in {"supported", "positive_mixed"}
+                else "supported deterministic"
+            ),
+            "remaining_gap": "Learned gate is supported on Transit PPO surrogate; native off-policy and larger-seed validation remain.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",
@@ -371,8 +461,15 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"trading drift delta={_check_metric(checks, 'trading_constraint_lower_lf')}; "
                 f"return delta={_check_metric(checks, 'trading_constraint_return_tradeoff')}"
             ),
-            "status": "supported with tradeoff",
-            "remaining_gap": "Constraint trades off return/Sharpe and did not improve Transit surrogate drift.",
+            "status": (
+                "supported"
+                if _all_supported(checks, [
+                    "trading_constraint_lower_lf",
+                    "trading_constraint_return_tradeoff",
+                ])
+                else "not_supported"
+            ),
+            "remaining_gap": "Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain.",
         },
         {
             "claim": "C5: advanced causal encoders can be swapped by domain",

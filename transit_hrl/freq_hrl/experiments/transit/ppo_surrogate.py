@@ -168,11 +168,27 @@ def latent_hold(latent: np.ndarray, max_hold_s: float = 45.0) -> np.ndarray:
     return float(max_hold_s) / (1.0 + np.exp(-np.asarray(latent, dtype=np.float64)))
 
 
+def split_upper_action(
+    action: np.ndarray,
+    plan_action_dim: int,
+    promotion_learned_replan: bool = False,
+) -> tuple[np.ndarray, float]:
+    arr = np.asarray(action, dtype=np.float64).reshape(-1)
+    if bool(promotion_learned_replan):
+        if arr.size < int(plan_action_dim) + 1:
+            raise ValueError("learned promotion replan requires one extra upper action")
+        plan_action = arr[:int(plan_action_dim)]
+        gate = float(1.0 / (1.0 + np.exp(-arr[int(plan_action_dim)])))
+        return plan_action, gate
+    return arr[:int(plan_action_dim)], 0.0
+
+
 def initialize_transit_prior(
     model: DualActorCriticPPO,
     corridors: int,
     plan_basis_dim: int = 0,
     include_native_lower_context: bool = False,
+    promotion_learned_replan: bool = False,
 ) -> None:
     if model.config.hidden_dim != 0:
         return
@@ -197,6 +213,15 @@ def initialize_transit_prior(
                 burst_start = context_start + 2 * int(corridors)
                 if 0 <= burst_start + i < model.config.lower_state_dim:
                     lower_linear.weight[i, burst_start + i] = 0.55
+        if bool(promotion_learned_replan):
+            gate_row = model.config.upper_action_dim - 1
+            upper_linear.bias[gate_row] = -1.0
+            # low_mid upper features append promotion flag, strength, and age
+            # after the seven base frequency features.
+            if model.config.upper_state_dim >= 10:
+                upper_linear.weight[gate_row, 7] = 0.8
+                upper_linear.weight[gate_row, 8] = 3.0
+                upper_linear.weight[gate_row, 9] = 0.8
 
 
 def rollout(
@@ -220,6 +245,8 @@ def rollout(
     lower_lf_raw_recenter_alpha: float = 0.10,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
+    promotion_learned_replan: bool = False,
+    promotion_learned_gate_threshold: float = 0.55,
     promotion_replan_strength_min: float = 0.10,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
@@ -270,6 +297,7 @@ def rollout(
     wait_board_credits: list[float] = []
     wait_credit_reliefs: list[float] = []
     raw_recenter_reductions: list[np.ndarray] = []
+    promotion_gate_values: list[float] = []
     upper_decisions = 0
     promotion_replans = 0
     promotions = 0
@@ -290,20 +318,53 @@ def rollout(
         )
         if freq_summary["freq_promotion_flag"] > 0.0:
             promotions += 1
+        gate_upper_state: np.ndarray | None = None
+        gate_upper_out: dict[str, Any] | None = None
+        learned_gate_value = 0.0
+        learned_replan = False
+        if (
+            bool(promotion_learned_replan)
+            and cached_upper_out is not None
+            and promotion_active
+            and t - last_upper_decision_t < max(1, int(upper_decision_interval))
+        ):
+            gate_upper_state, _ = feature_vectors(tracker, service_gap)
+            gate_upper_out = model.act_upper(gate_upper_state, sample=sample)
+            _, learned_gate_value = split_upper_action(
+                np.asarray(gate_upper_out["action"], dtype=np.float64),
+                plan_mapper.action_dim if plan_mapper is not None else corridors,
+                promotion_learned_replan=True,
+            )
+            learned_replan = learned_gate_value >= float(promotion_learned_gate_threshold)
+            promotion_gate_values.append(learned_gate_value)
         upper_due = (
             cached_upper_out is None
             or t - last_upper_decision_t >= max(1, int(upper_decision_interval))
             or (bool(promotion_forced_replan) and promotion_active)
+            or learned_replan
         )
         if upper_due:
-            if cached_upper_out is not None and bool(promotion_forced_replan) and promotion_active:
+            if cached_upper_out is not None and (
+                (bool(promotion_forced_replan) and promotion_active) or learned_replan
+            ):
                 promotion_replans += 1
-            upper_state, _ = feature_vectors(tracker, service_gap)
-            upper_out = model.act_upper(upper_state, sample=sample)
-            if plan_mapper is None:
-                target_delta = latent_headway_delta(np.asarray(upper_out["action"], dtype=np.float64))
+            if gate_upper_out is not None and learned_replan and gate_upper_state is not None:
+                upper_state = gate_upper_state
+                upper_out = gate_upper_out
             else:
-                plan = plan_mapper.target(current_plan_delta, np.asarray(upper_out["action"], dtype=np.float64))
+                upper_state, _ = feature_vectors(tracker, service_gap)
+                upper_out = model.act_upper(upper_state, sample=sample)
+            plan_action, gate_value = split_upper_action(
+                np.asarray(upper_out["action"], dtype=np.float64),
+                plan_mapper.action_dim if plan_mapper is not None else corridors,
+                promotion_learned_replan=promotion_learned_replan,
+            )
+            if bool(promotion_learned_replan):
+                promotion_gate_values.append(gate_value)
+            if plan_mapper is None:
+                target_delta = latent_headway_delta(plan_action)
+            else:
+                plan = plan_mapper.target(current_plan_delta, plan_action)
                 target_delta = np.clip(plan.target, -30.0, 30.0)
                 current_plan_delta = target_delta.copy()
                 plan_smoothness.append(float(plan.smoothness_penalty))
@@ -481,6 +542,7 @@ def rollout(
         "wait_attr_penalty": float(np.mean(wait_attr_penalties)) if wait_attr_penalties else 0.0,
         "wait_board_credit": float(np.mean(wait_board_credits)) if wait_board_credits else 0.0,
         "wait_credit_relief": float(np.mean(wait_credit_reliefs)) if wait_credit_reliefs else 0.0,
+        "promotion_gate_value": float(np.mean(promotion_gate_values)) if promotion_gate_values else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
@@ -531,6 +593,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "wait_attr_penalty",
         "wait_board_credit",
         "wait_credit_relief",
+        "promotion_gate_value",
         "lower_lf_effect_filter_window",
         "lower_lf_effect_filter_gain",
         "lower_lf_raw_recenter_gain",
@@ -570,6 +633,8 @@ def train_transit_surrogate_ppo(
     lower_lf_raw_recenter_alpha: float = 0.10,
     upper_decision_interval: int = 1,
     promotion_forced_replan: bool = False,
+    promotion_learned_replan: bool = False,
+    promotion_learned_gate_threshold: float = 0.55,
     promotion_replan_strength_min: float = 0.10,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
@@ -586,6 +651,7 @@ def train_transit_surrogate_ppo(
     probe = make_tracker(method=tracker_method)
     upper_dim = int(probe.upper_features("low_mid").size + corridors + 1)
     lower_context_dim = 3 * int(corridors) if include_native_lower_context else 0
+    plan_action_dim = plan_mapper.action_dim if plan_mapper is not None else corridors
     lower_dim = int(
         corridors * probe.lower_features(0, True, "high_mid").size
         + 2 * corridors
@@ -595,7 +661,7 @@ def train_transit_surrogate_ppo(
     config = DualPPOConfig(
         upper_state_dim=upper_dim,
         lower_state_dim=lower_dim,
-        upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else corridors,
+        upper_action_dim=plan_action_dim + (1 if bool(promotion_learned_replan) else 0),
         lower_action_dim=corridors,
         hidden_dim=0,
         learning_rate=0.002,
@@ -613,6 +679,7 @@ def train_transit_surrogate_ppo(
         corridors,
         plan_basis_dim=plan_basis_dim,
         include_native_lower_context=include_native_lower_context,
+        promotion_learned_replan=promotion_learned_replan,
     )
     return train_dual_ppo(
         model=model,
@@ -640,6 +707,8 @@ def train_transit_surrogate_ppo(
             lower_lf_raw_recenter_alpha=lower_lf_raw_recenter_alpha,
             upper_decision_interval=upper_decision_interval,
             promotion_forced_replan=promotion_forced_replan,
+            promotion_learned_replan=promotion_learned_replan,
+            promotion_learned_gate_threshold=promotion_learned_gate_threshold,
             promotion_replan_strength_min=promotion_replan_strength_min,
             promotion_residual_threshold=promotion_residual_threshold,
             promotion_persistence_ratio=promotion_persistence_ratio,
@@ -667,6 +736,8 @@ def train_transit_surrogate_ppo(
             "lower_lf_raw_recenter_alpha": float(lower_lf_raw_recenter_alpha),
             "upper_decision_interval": int(upper_decision_interval),
             "promotion_forced_replan": bool(promotion_forced_replan),
+            "promotion_learned_replan": bool(promotion_learned_replan),
+            "promotion_learned_gate_threshold": float(promotion_learned_gate_threshold),
             "promotion_replan_strength_min": float(promotion_replan_strength_min),
             "promotion_residual_threshold": float(promotion_residual_threshold),
             "promotion_persistence_ratio": float(promotion_persistence_ratio),
@@ -705,6 +776,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- tracker method: `{payload['tracker_method']}`",
         f"- plan mode: `{payload['plan_mode']}`",
         f"- upper decision interval: {payload['upper_decision_interval']} steps, promotion forced replan={payload['promotion_forced_replan']}",
+        f"- learned promotion replan: {payload['promotion_learned_replan']} gate_threshold={payload['promotion_learned_gate_threshold']}",
         f"- promotion gate: residual_threshold={payload['promotion_residual_threshold']}, persistence_ratio={payload['promotion_persistence_ratio']}",
         f"- wait attribution weights: upper={payload['wait_upper_weight']}, lower={payload['wait_lower_weight']}, board_credit={payload['wait_lower_board_credit_weight']}",
         f"- wait credit control gain: {payload['wait_credit_control_gain']}",
@@ -729,6 +801,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- wait high-share mean: {summary['wait_high_share_mean']:.4f}",
         f"- wait attribution penalty mean: {summary['wait_attr_penalty_mean']:.4f}",
         f"- wait credit relief mean: {summary['wait_credit_relief_mean']:.4f}",
+        f"- promotion learned gate mean: {summary['promotion_gate_value_mean']:.4f}",
         f"- promotion replan count mean: {summary['promotion_replan_count_mean']:.2f}",
         "",
         "This uses the same `freq_hrl.rl.train_dual_ppo` loop as the trading PPO validation, with Transit frequency features and a transit-control surrogate adapter.",
@@ -766,6 +839,8 @@ def main() -> None:
     parser.add_argument("--lower-lf-raw-recenter-alpha", type=float, default=0.10)
     parser.add_argument("--upper-decision-interval", type=int, default=1)
     parser.add_argument("--promotion-forced-replan", action="store_true")
+    parser.add_argument("--promotion-learned-replan", action="store_true")
+    parser.add_argument("--promotion-learned-gate-threshold", type=float, default=0.55)
     parser.add_argument("--promotion-replan-strength-min", type=float, default=0.10)
     parser.add_argument("--promotion-residual-threshold", type=float, default=1.5)
     parser.add_argument("--promotion-persistence-ratio", type=float, default=0.35)
@@ -800,6 +875,8 @@ def main() -> None:
         lower_lf_raw_recenter_alpha=args.lower_lf_raw_recenter_alpha,
         upper_decision_interval=args.upper_decision_interval,
         promotion_forced_replan=args.promotion_forced_replan,
+        promotion_learned_replan=args.promotion_learned_replan,
+        promotion_learned_gate_threshold=args.promotion_learned_gate_threshold,
         promotion_replan_strength_min=args.promotion_replan_strength_min,
         promotion_residual_threshold=args.promotion_residual_threshold,
         promotion_persistence_ratio=args.promotion_persistence_ratio,

@@ -1,0 +1,5 @@
+check,metric,treatment,control,direction,n_common,delta_mean,delta_ci95_low,delta_ci95_high,improvement_mean,improvement_ci95_low,improvement_ci95_high,win_rate,sign_p_value,status
+learned_gate_vs_interval_reward_mean,reward_mean,learned_gate,interval_only,increase,3,-0.004391542306039812,-0.00546739391461859,-0.0023023742090044763,-0.004391542306039812,-0.00546739391461859,-0.0023023742090044763,0.0,0.25,not_supported
+learned_gate_vs_interval_wait_proxy,wait_proxy,learned_gate,interval_only,decrease,3,-0.0006077355243287267,-0.0007631438615902653,-0.00038823145518307456,0.0006077355243287267,0.00038823145518307456,0.0007631438615902653,1.0,0.25,supported
+learned_gate_vs_interval_RawLowerLFDriftAbs,RawLowerLFDriftAbs,learned_gate,interval_only,decrease,3,-0.0002573524613574459,-0.00028050448842280307,-0.0002127753431745514,0.0002573524613574459,0.0002127753431745514,0.00028050448842280307,1.0,0.25,supported
+learned_gate_vs_interval_promotion_replan_count,promotion_replan_count,learned_gate,interval_only,increase,3,13.333333333333334,12.0,15.0,13.333333333333334,12.0,15.0,1.0,0.25,supported
