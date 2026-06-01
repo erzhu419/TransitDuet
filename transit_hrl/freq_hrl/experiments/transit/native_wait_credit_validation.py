@@ -34,6 +34,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "reward_attribution": {"enable": False},
     },
     "native_wait_credit": {
+        "_lower_hf_wait_action_gain_s": 45.0,
         "reward_attribution": {
             "enable": True,
             "upper_wait_weight": 0.45,
@@ -168,6 +169,7 @@ def run_validation(
                 device=str(device),
                 learning_rate=float(learning_rate),
                 config_overrides=_variant_overrides(overrides),
+                lower_hf_wait_action_gain_s=float(overrides.get("_lower_hf_wait_action_gain_s", 0.0)),
             )
             payloads[variant][str(seed)] = {
                 "summary": payload.get("summary", {}),

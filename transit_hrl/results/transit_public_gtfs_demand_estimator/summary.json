@@ -1,0 +1,866 @@
+{
+  "metadata": {
+    "estimator_calibration": "count_calibrated_nb_v2",
+    "source": "public_gtfs_schedule_proxy",
+    "source_url": "https://www.bart.gov/dev/schedules/google_transit.zip",
+    "gtfs_zip": "transit_hrl/data/public_gtfs_bart/google_transit.zip",
+    "bin_sec": 1800.0,
+    "warmup": 2,
+    "max_series": 24,
+    "min_events": 20,
+    "real_transit_feed": true,
+    "passenger_demand_ground_truth": false
+  },
+  "rows": [
+    {
+      "method": "ema",
+      "seed": 0,
+      "series_id": "M10-1",
+      "mse": 1049.2022112708576,
+      "mae": 28.302994547994327,
+      "poisson_nll_no_const": -0.5195627550165279,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "fourier",
+      "seed": 0,
+      "series_id": "M10-1",
+      "mse": 1065.392223245682,
+      "mae": 28.44611819060395,
+      "poisson_nll_no_const": 26.27702229926695,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 0,
+      "series_id": "M10-1",
+      "mse": 1031.8134202110912,
+      "mae": 27.961360949115896,
+      "poisson_nll_no_const": 91.47982120429955,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "ema",
+      "seed": 1,
+      "series_id": "M16-1",
+      "mse": 1033.4908858484634,
+      "mae": 28.1786220058247,
+      "poisson_nll_no_const": -0.5958652755026212,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "fourier",
+      "seed": 1,
+      "series_id": "M16-1",
+      "mse": 1049.9258166332963,
+      "mae": 28.322562551885703,
+      "poisson_nll_no_const": 19.836240481833446,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 1,
+      "series_id": "M16-1",
+      "mse": 1003.9963177580802,
+      "mae": 27.522958978795725,
+      "poisson_nll_no_const": 151.55685273762853,
+      "n": 46,
+      "mean_count": 28.5
+    },
+    {
+      "method": "ema",
+      "seed": 2,
+      "series_id": "M30-1",
+      "mse": 1038.2558499517404,
+      "mae": 28.12208903297419,
+      "poisson_nll_no_const": -0.49458319041975374,
+      "n": 46,
+      "mean_count": 28.479166666666668
+    },
+    {
+      "method": "fourier",
+      "seed": 2,
+      "series_id": "M30-1",
+      "mse": 1055.3879629755957,
+      "mae": 28.292209359252173,
+      "poisson_nll_no_const": 19.201836570129686,
+      "n": 46,
+      "mean_count": 28.479166666666668
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 2,
+      "series_id": "M30-1",
+      "mse": 996.3430955483208,
+      "mae": 26.909223748356162,
+      "poisson_nll_no_const": 91.12916811452203,
+      "n": 46,
+      "mean_count": 28.479166666666668
+    },
+    {
+      "method": "ema",
+      "seed": 3,
+      "series_id": "M16-2",
+      "mse": 1034.7597704210077,
+      "mae": 28.11554488465115,
+      "poisson_nll_no_const": -0.34274348544280014,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 3,
+      "series_id": "M16-2",
+      "mse": 1053.1185547101738,
+      "mae": 28.256371676503637,
+      "poisson_nll_no_const": 24.88343429212785,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 3,
+      "series_id": "M16-2",
+      "mse": 1023.1737272675875,
+      "mae": 27.817472948885346,
+      "poisson_nll_no_const": 150.13313008578712,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 4,
+      "series_id": "M20-1",
+      "mse": 1038.2787760197193,
+      "mae": 28.11616526388899,
+      "poisson_nll_no_const": -0.5027981250434247,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 4,
+      "series_id": "M20-1",
+      "mse": 1055.459008867994,
+      "mae": 28.26780306229505,
+      "poisson_nll_no_const": 20.92699684559247,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 4,
+      "series_id": "M20-1",
+      "mse": 1019.4288824163336,
+      "mae": 27.65290578789385,
+      "poisson_nll_no_const": 161.5558712064389,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 5,
+      "series_id": "M20-2",
+      "mse": 1036.0629432715484,
+      "mae": 28.122079568618837,
+      "poisson_nll_no_const": -0.599159053163669,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 5,
+      "series_id": "M20-2",
+      "mse": 1055.1195568713963,
+      "mae": 28.27203373172603,
+      "poisson_nll_no_const": 25.67061646703373,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 5,
+      "series_id": "M20-2",
+      "mse": 723.7400580749216,
+      "mae": 22.943326159253754,
+      "poisson_nll_no_const": -2.552994324035811,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 6,
+      "series_id": "M30-2",
+      "mse": 1065.522293045736,
+      "mae": 28.246659894081898,
+      "poisson_nll_no_const": -0.36461430367275866,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 6,
+      "series_id": "M30-2",
+      "mse": 1086.4489215866656,
+      "mae": 28.42727866500011,
+      "poisson_nll_no_const": 30.586837651323837,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 6,
+      "series_id": "M30-2",
+      "mse": 1086.5959521501466,
+      "mae": 28.41034794368003,
+      "poisson_nll_no_const": 101.43806664800968,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 7,
+      "series_id": "M40-1",
+      "mse": 1041.6677753761483,
+      "mae": 28.096210722130373,
+      "poisson_nll_no_const": -0.5049075984954219,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 7,
+      "series_id": "M40-1",
+      "mse": 1059.3300813073206,
+      "mae": 28.25423533528115,
+      "poisson_nll_no_const": 19.27791383645549,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 7,
+      "series_id": "M40-1",
+      "mse": 669.1066674544425,
+      "mae": 21.037584802146238,
+      "poisson_nll_no_const": 36.48849178812833,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 8,
+      "series_id": "M40-2",
+      "mse": 1028.6526783125223,
+      "mae": 28.238589148357164,
+      "poisson_nll_no_const": -0.7709475985615555,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 8,
+      "series_id": "M40-2",
+      "mse": 1047.518472279655,
+      "mae": 28.410616790158,
+      "poisson_nll_no_const": 25.38551477433466,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 8,
+      "series_id": "M40-2",
+      "mse": 1049.5129767313504,
+      "mae": 28.422515979475758,
+      "poisson_nll_no_const": 42.83837628015286,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 9,
+      "series_id": "M50-1",
+      "mse": 1041.6677753761483,
+      "mae": 28.096210722130373,
+      "poisson_nll_no_const": -0.5049075984954219,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 9,
+      "series_id": "M50-1",
+      "mse": 1059.3300813073206,
+      "mae": 28.25423533528115,
+      "poisson_nll_no_const": 19.27791383645549,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 9,
+      "series_id": "M50-1",
+      "mse": 669.1066674544425,
+      "mae": 21.037584802146238,
+      "poisson_nll_no_const": 36.48849178812833,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 10,
+      "series_id": "M50-2",
+      "mse": 1035.2607935750598,
+      "mae": 28.25794771946469,
+      "poisson_nll_no_const": -0.6839611407446307,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 10,
+      "series_id": "M50-2",
+      "mse": 1053.53544985913,
+      "mae": 28.422737904415083,
+      "poisson_nll_no_const": 25.079020386842902,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 10,
+      "series_id": "M50-2",
+      "mse": 1055.6219762299938,
+      "mae": 28.43503372667438,
+      "poisson_nll_no_const": 40.990645686844445,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 11,
+      "series_id": "M60-1",
+      "mse": 1025.5458234015182,
+      "mae": 27.969616946523463,
+      "poisson_nll_no_const": -0.585608305134742,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 11,
+      "series_id": "M60-1",
+      "mse": 1042.2605533940348,
+      "mae": 28.117774181058017,
+      "poisson_nll_no_const": 25.538681967352517,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 11,
+      "series_id": "M60-1",
+      "mse": 663.6326975970339,
+      "mae": 20.821414936313424,
+      "poisson_nll_no_const": 37.45317529957151,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 12,
+      "series_id": "M60-2",
+      "mse": 1035.068188584103,
+      "mae": 28.256824157960104,
+      "poisson_nll_no_const": -0.6394164107268192,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 12,
+      "series_id": "M60-2",
+      "mse": 1053.009396707721,
+      "mae": 28.4090643737967,
+      "poisson_nll_no_const": 25.379743908822913,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 12,
+      "series_id": "M60-2",
+      "mse": 1055.5570995148582,
+      "mae": 28.432906839620056,
+      "poisson_nll_no_const": 46.08328028150841,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 13,
+      "series_id": "M70-1",
+      "mse": 1037.9956834405964,
+      "mae": 27.970118772323616,
+      "poisson_nll_no_const": -0.5165540077183971,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 13,
+      "series_id": "M70-1",
+      "mse": 1055.3199783744803,
+      "mae": 28.118845034237864,
+      "poisson_nll_no_const": 19.35091330688324,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 13,
+      "series_id": "M70-1",
+      "mse": 684.1070549932431,
+      "mae": 21.167224307154846,
+      "poisson_nll_no_const": 36.852455404405966,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 14,
+      "series_id": "M70-2",
+      "mse": 1067.5304539555973,
+      "mae": 28.399093826443366,
+      "poisson_nll_no_const": -0.08412790001318725,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 14,
+      "series_id": "M70-2",
+      "mse": 1086.2743406691607,
+      "mae": 28.548372508101235,
+      "poisson_nll_no_const": 28.04959912419575,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 14,
+      "series_id": "M70-2",
+      "mse": 1088.3482227268757,
+      "mae": 28.57655169905542,
+      "poisson_nll_no_const": 72.80483506192648,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 15,
+      "series_id": "M80-1",
+      "mse": 1025.3360851337989,
+      "mae": 27.970913425440127,
+      "poisson_nll_no_const": -0.6183633704029589,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 15,
+      "series_id": "M80-1",
+      "mse": 1042.5894171890418,
+      "mae": 28.126460134716705,
+      "poisson_nll_no_const": 25.056385199992793,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 15,
+      "series_id": "M80-1",
+      "mse": 668.010862217288,
+      "mae": 20.95229963937685,
+      "poisson_nll_no_const": 37.6666618524363,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 16,
+      "series_id": "M80-2",
+      "mse": 1032.0304811951607,
+      "mae": 28.39638330001203,
+      "poisson_nll_no_const": -0.48901122941280856,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "fourier",
+      "seed": 16,
+      "series_id": "M80-2",
+      "mse": 1049.3376933410452,
+      "mae": 28.553655874290193,
+      "poisson_nll_no_const": 24.041521386476564,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 16,
+      "series_id": "M80-2",
+      "mse": 1053.2158184958735,
+      "mae": 28.58468298337255,
+      "poisson_nll_no_const": 71.62905643673437,
+      "n": 46,
+      "mean_count": 28.4375
+    },
+    {
+      "method": "ema",
+      "seed": 17,
+      "series_id": "M10-2",
+      "mse": 1059.448686323869,
+      "mae": 28.09686433620198,
+      "poisson_nll_no_const": -0.2507681675273453,
+      "n": 46,
+      "mean_count": 28.416666666666668
+    },
+    {
+      "method": "fourier",
+      "seed": 17,
+      "series_id": "M10-2",
+      "mse": 1078.970675719501,
+      "mae": 28.24065205763984,
+      "poisson_nll_no_const": 34.62707479321134,
+      "n": 46,
+      "mean_count": 28.416666666666668
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 17,
+      "series_id": "M10-2",
+      "mse": 677.2704059928965,
+      "mae": 21.210565398350752,
+      "poisson_nll_no_const": 45.84668965910254,
+      "n": 46,
+      "mean_count": 28.416666666666668
+    },
+    {
+      "method": "ema",
+      "seed": 18,
+      "series_id": "Y10-2",
+      "mse": 942.3851598724412,
+      "mae": 25.48321470465922,
+      "poisson_nll_no_const": 3.786175459805968,
+      "n": 46,
+      "mean_count": 25.270833333333332
+    },
+    {
+      "method": "fourier",
+      "seed": 18,
+      "series_id": "Y10-2",
+      "mse": 965.1665543067155,
+      "mae": 25.732192793521698,
+      "poisson_nll_no_const": 44.328008264837926,
+      "n": 46,
+      "mean_count": 25.270833333333332
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 18,
+      "series_id": "Y10-2",
+      "mse": 956.6805898706439,
+      "mae": 25.59765928538731,
+      "poisson_nll_no_const": 105.98723550503196,
+      "n": 46,
+      "mean_count": 25.270833333333332
+    },
+    {
+      "method": "ema",
+      "seed": 19,
+      "series_id": "K10-2",
+      "mse": 683.9692194742837,
+      "mae": 23.01765509626807,
+      "poisson_nll_no_const": 4.571784909462499,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "fourier",
+      "seed": 19,
+      "series_id": "K10-2",
+      "mse": 692.993307439103,
+      "mae": 23.102544989154655,
+      "poisson_nll_no_const": 24.47932988067305,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 19,
+      "series_id": "K10-2",
+      "mse": 450.0852311387027,
+      "mae": 17.996207636455505,
+      "poisson_nll_no_const": 46.39164232524627,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "ema",
+      "seed": 20,
+      "series_id": "K20-2",
+      "mse": 672.2877753759715,
+      "mae": 23.017152593250536,
+      "poisson_nll_no_const": 4.500120401711013,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "fourier",
+      "seed": 20,
+      "series_id": "K20-2",
+      "mse": 681.3606595144727,
+      "mae": 23.109195573433897,
+      "poisson_nll_no_const": 23.559356830116872,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 20,
+      "series_id": "K20-2",
+      "mse": 422.480572446629,
+      "mae": 17.482495365395895,
+      "poisson_nll_no_const": 50.81677844099454,
+      "n": 46,
+      "mean_count": 23.520833333333332
+    },
+    {
+      "method": "ema",
+      "seed": 21,
+      "series_id": "Y10-1",
+      "mse": 557.4683507195274,
+      "mae": 21.273188805701253,
+      "poisson_nll_no_const": 6.916757973571674,
+      "n": 46,
+      "mean_count": 21.8125
+    },
+    {
+      "method": "fourier",
+      "seed": 21,
+      "series_id": "Y10-1",
+      "mse": 561.7392833689884,
+      "mae": 21.33004121087537,
+      "poisson_nll_no_const": 20.284746257680204,
+      "n": 46,
+      "mean_count": 21.8125
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 21,
+      "series_id": "Y10-1",
+      "mse": 553.3578915926855,
+      "mae": 21.149570768516043,
+      "poisson_nll_no_const": 61.51929298534255,
+      "n": 46,
+      "mean_count": 21.8125
+    },
+    {
+      "method": "ema",
+      "seed": 22,
+      "series_id": "H10",
+      "mse": 574.6910186100813,
+      "mae": 21.41991759011734,
+      "poisson_nll_no_const": 6.667629569422206,
+      "n": 46,
+      "mean_count": 21.5
+    },
+    {
+      "method": "fourier",
+      "seed": 22,
+      "series_id": "H10",
+      "mse": 584.0419992758253,
+      "mae": 21.556238483813466,
+      "poisson_nll_no_const": 19.185792964568297,
+      "n": 46,
+      "mean_count": 21.5
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 22,
+      "series_id": "H10",
+      "mse": 345.565766944158,
+      "mae": 15.398879197302204,
+      "poisson_nll_no_const": 38.99947130580453,
+      "n": 46,
+      "mean_count": 21.5
+    },
+    {
+      "method": "ema",
+      "seed": 23,
+      "series_id": "H40",
+      "mse": 574.7768412898189,
+      "mae": 21.418955986643727,
+      "poisson_nll_no_const": 6.8065619024820805,
+      "n": 46,
+      "mean_count": 21.5
+    },
+    {
+      "method": "fourier",
+      "seed": 23,
+      "series_id": "H40",
+      "mse": 583.8103181422161,
+      "mae": 21.55203594309317,
+      "poisson_nll_no_const": 18.457343440780356,
+      "n": 46,
+      "mean_count": 21.5
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 23,
+      "series_id": "H40",
+      "mse": 345.6149307333168,
+      "mae": 15.40830182889014,
+      "poisson_nll_no_const": 38.79868528517972,
+      "n": 46,
+      "mean_count": 21.5
+    }
+  ],
+  "summary": [
+    {
+      "method": "dynamic_harmonic_nb",
+      "series": 24,
+      "mse_mean": 803.8486202317048,
+      "mae_mean": 23.78871148798393,
+      "poisson_nll_no_const_mean": 66.34979921079955,
+      "delta_mse_vs_best": 0.0
+    },
+    {
+      "method": "ema",
+      "series": 24,
+      "mse_mean": 947.1398133269049,
+      "mae_mean": 26.774292210485896,
+      "poisson_nll_no_const_mean": 1.0075471125400248,
+      "delta_mse_vs_best": 143.29119309520013
+    },
+    {
+      "method": "fourier",
+      "series": 24,
+      "mse_mean": 963.226679461939,
+      "mae_mean": 26.921803156672286,
+      "poisson_nll_no_const_mean": 24.53091019862451,
+      "delta_mse_vs_best": 159.37805923023427
+    }
+  ],
+  "paired_deltas": [
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mse",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -159.3780592302342,
+      "delta_ci95_low": -226.88010595194197,
+      "delta_ci95_high": -96.9405324232988,
+      "improvement_mean": 159.3780592302342,
+      "improvement_ci95_low": 95.33232508551873,
+      "improvement_ci95_high": 227.33003945468747,
+      "win_rate": 0.75,
+      "sign_p_value": 0.022655844688415527,
+      "status": "supported"
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mae",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -3.133091668688353,
+      "delta_ci95_low": -4.442558212555947,
+      "delta_ci95_high": -1.8983442088599307,
+      "improvement_mean": 3.133091668688353,
+      "improvement_ci95_low": 1.8737030259628107,
+      "improvement_ci95_high": 4.3913238104702375,
+      "win_rate": 0.7916666666666666,
+      "sign_p_value": 0.006610751152038574,
+      "status": "supported"
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": 41.81888901217503,
+      "delta_ci95_low": 26.407116782696487,
+      "delta_ci95_high": 58.37705884654147,
+      "improvement_mean": -41.81888901217503,
+      "improvement_ci95_low": -58.43613544402004,
+      "improvement_ci95_high": -26.825860487528818,
+      "win_rate": 0.041666666666666664,
+      "sign_p_value": 2.9802322387695312e-06,
+      "status": "not_supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mse",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -16.086866135034047,
+      "delta_ci95_low": -17.739825058300582,
+      "delta_ci95_high": -14.18681984550835,
+      "improvement_mean": 16.086866135034047,
+      "improvement_ci95_low": 14.240260520267897,
+      "improvement_ci95_high": 17.73463589261262,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mae",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -0.1475109461863887,
+      "delta_ci95_low": -0.16259415494536175,
+      "delta_ci95_high": -0.1333499701080509,
+      "improvement_mean": 0.1475109461863887,
+      "improvement_ci95_low": 0.13365292035574533,
+      "improvement_ci95_high": 0.16119558621362692,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -23.523363086084487,
+      "delta_ci95_low": -26.120631183709076,
+      "delta_ci95_high": -20.85709104387384,
+      "improvement_mean": 23.523363086084487,
+      "improvement_ci95_low": 21.062412651917164,
+      "improvement_ci95_high": 26.125949371309208,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    }
+  ]
+}

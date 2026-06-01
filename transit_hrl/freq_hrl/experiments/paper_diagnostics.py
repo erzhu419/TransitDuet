@@ -328,6 +328,19 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=5,
             )
             add(
+                "transit_native_learned_gate_score_vs_interval",
+                "native learned promotion gate improves Transit wait/headway control score",
+                paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric="score",
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                ),
+                min_pairs=5,
+            )
+            add(
                 "transit_native_learned_gate_replans_vs_interval",
                 "native learned promotion gate increases upper timetable replans",
                 paired_delta_stats(
@@ -587,6 +600,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
     native_loop = read_json(results_root / "transit_native_shared_ppo_loop" / "summary.json")
+    native_offpolicy = read_json(results_root / "transit_native_offpolicy_smoke" / "summary.json")
     transit = read_csv_rows(transit_root / "transit_performance_validation" / "summary.csv")
     checks = build_statistical_checks(results_root)
 
@@ -608,6 +622,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_loop_status = str(native_loop.get("status", "missing")) if isinstance(native_loop, dict) else "missing"
     native_loop_summary = native_loop.get("summary", {}) if isinstance(native_loop, dict) else {}
     native_loop_contract = native_loop.get("contract", {}) if isinstance(native_loop, dict) else {}
+    native_offpolicy_status = str(native_offpolicy.get("status", "missing")) if isinstance(native_offpolicy, dict) else "missing"
+    native_offpolicy_updates = native_offpolicy.get("offpolicy_replay_updates", "NA") if isinstance(native_offpolicy, dict) else "NA"
     learned_promotion_supported = (
         _check_status(checks, "transit_learned_promotion_reward_vs_interval") == "supported"
         and _check_status(checks, "transit_learned_promotion_wait_vs_interval") == "supported"
@@ -616,10 +632,17 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_promotion_reward_status = _check_status(checks, "transit_native_promotion_reward_vs_interval")
     native_promotion_replan_status = _check_status(checks, "transit_native_promotion_replans_vs_interval")
     native_learned_reward_status = _check_status(checks, "transit_native_learned_gate_reward_vs_interval")
+    native_learned_score_status = _check_status(checks, "transit_native_learned_gate_score_vs_interval")
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
+    elif (
+        learned_promotion_supported
+        and native_learned_score_status == "supported"
+        and native_learned_replan_status == "supported"
+    ):
+        promotion_status = "supported learned; native learned-gate score"
     elif (
         learned_promotion_supported
         and native_learned_reward_status in {"supported", "positive_mixed"}
@@ -643,7 +666,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native bridge={native_status} "
                 f"U={native_contract.get('upper_state_dim', native_loop_contract.get('upper_state_dim', 'NA'))}x{native_contract.get('upper_action_dim', native_loop_contract.get('upper_action_dim', 'NA'))} "
                 f"L={native_contract.get('lower_state_dim', native_loop_contract.get('lower_state_dim', 'NA'))}x{native_contract.get('lower_action_dim', native_loop_contract.get('lower_action_dim', 'NA'))}; "
-                f"native loop={native_loop_status}, wait={_fmt(native_loop_summary.get('avg_wait_min_mean'))}"
+                f"native loop={native_loop_status}, wait={_fmt(native_loop_summary.get('avg_wait_min_mean'))}; "
+                f"offpolicy native={native_offpolicy_status}, replay_updates={native_offpolicy_updates}"
             ),
             "status": (
                 "supported native loop"
@@ -671,10 +695,11 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native reward={_check_metric(checks, 'transit_native_promotion_reward_vs_interval')}, "
                 f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}; "
                 f"native learned reward={_check_metric(checks, 'transit_native_learned_gate_reward_vs_interval')}, "
+                f"native learned score={_check_metric(checks, 'transit_native_learned_gate_score_vs_interval')}, "
                 f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native learned gate runs end-to-end and is positive-mixed on reward, but native wait/reward are not CI-supported; larger off-policy/native training remains.",
+            "remaining_gap": "Native learned gate runs end-to-end with CI-supported control score/gate replans, but episode reward remains positive-mixed; larger off-policy/native training remains.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",
@@ -784,10 +809,10 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
-            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts and copied TransitDuet local OD spreadsheet traces.",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts, copied TransitDuet local OD traces, and public GTFS schedule-event traces.",
             "metric": f"MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}",
             "status": _check_status(checks, "demand_nb_vs_fourier_mse"),
-            "remaining_gap": "The count-state path now covers local OD-derived traces; larger real AFC/APC/GTFS demand feeds remain for the strongest claim.",
+            "remaining_gap": "The count-state path now covers public GTFS schedule proxies; true AFC/APC passenger-demand feeds remain for the strongest claim.",
         },
     ]
 
@@ -891,7 +916,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, and native Transit shared-PPO validation paths. It does not yet justify a fully validated domain-general algorithm claim because learned native promotion gates, larger real intraday/order-book and AFC/APC/GTFS feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, and public GTFS schedule-proxy data paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, true AFC/APC passenger-demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

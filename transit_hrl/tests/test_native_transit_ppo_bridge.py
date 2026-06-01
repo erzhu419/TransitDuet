@@ -229,6 +229,22 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(batch.lower_action.shape, (1, 1))
         self.assertAlmostEqual(float(batch.constraint[0]), 0.25)
 
+    def test_lower_hf_wait_action_prior_reduces_holding(self):
+        bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
+        proxy = _SharedPPOPolicyProxy(
+            bridge,
+            "lower",
+            lower_hf_wait_action_gain_s=10.0,
+            lower_hf_wait_feature_offset=2,
+        )
+        state = np.asarray([0.0, 0.5, 1.0], dtype=np.float32)
+        no_prior = _SharedPPOPolicyProxy(bridge, "lower").get_action(
+            state,
+            deterministic=True,
+        )
+        with_prior = proxy.get_action(state, deterministic=True)
+        self.assertLessEqual(float(with_prior[0]), float(no_prior[0]))
+
 
 if __name__ == "__main__":
     unittest.main()

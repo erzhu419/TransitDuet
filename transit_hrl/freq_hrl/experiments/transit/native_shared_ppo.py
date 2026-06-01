@@ -328,9 +328,18 @@ class NativeTransitPPOBridge:
 
 
 class _SharedPPOPolicyProxy:
-    def __init__(self, bridge: NativeTransitPPOBridge, level: str) -> None:
+    def __init__(
+        self,
+        bridge: NativeTransitPPOBridge,
+        level: str,
+        *,
+        lower_hf_wait_action_gain_s: float = 0.0,
+        lower_hf_wait_feature_offset: int = 11,
+    ) -> None:
         self.bridge = bridge
         self.level = str(level)
+        self.lower_hf_wait_action_gain_s = max(float(lower_hf_wait_action_gain_s), 0.0)
+        self.lower_hf_wait_feature_offset = max(int(lower_hf_wait_feature_offset), 1)
         self.pending: dict[tuple[float, ...], list[dict[str, Any]]] = {}
         self.preselected: dict[tuple[float, ...], list[dict[str, Any]]] = {}
         self.last_upper: dict[str, Any] | None = None
@@ -422,6 +431,18 @@ class _SharedPPOPolicyProxy:
                 self.preselected.pop(key, None)
         else:
             info = self._act_info(state_arr, sample=sample)
+        if self.level == "lower" and self.lower_hf_wait_action_gain_s > 0.0:
+            offset = min(self.lower_hf_wait_feature_offset, int(state_arr.size))
+            local_high = max(float(state_arr[-offset]), 0.0) if offset > 0 else 0.0
+            if local_high > 0.0:
+                adjusted = _array(info["native_action"]).astype(np.float32)
+                adjusted[0] = float(np.clip(
+                    float(adjusted[0]) - self.lower_hf_wait_action_gain_s * local_high,
+                    0.0,
+                    float(self.bridge.contract.lower_action_range_s),
+                ))
+                info = dict(info)
+                info["native_action"] = adjusted
         self._remember(state_arr, info)
         return info["native_action"].copy()
 
@@ -546,9 +567,16 @@ def install_shared_ppo_episode_loop(
     promotion_gate_cooldown_s: float = 0.0,
     promotion_gate_preselect_action: bool = False,
     promotion_gate_plan_blend: float = 0.0,
+    lower_hf_wait_action_gain_s: float = 0.0,
+    lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
     upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
-    lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
+    lower_proxy = _SharedPPOPolicyProxy(
+        bridge,
+        "lower",
+        lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
+        lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
+    )
     lower_collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
     upper_collector = _NativeUpperReplayCollector(upper_proxy)
     runner.upper_trainer.policy_net = upper_proxy
@@ -700,6 +728,9 @@ def run_native_shared_ppo_episode_loop(
     promotion_gate_cooldown_s: float = 0.0,
     promotion_gate_preselect_action: bool = False,
     promotion_gate_plan_blend: float = 0.0,
+    lower_hf_wait_action_gain_s: float = 0.0,
+    lower_hf_wait_feature_offset: int = 11,
+    offpolicy_replay_updates: int = 1,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     native_logs = output_dir / "native_logs"
@@ -754,19 +785,31 @@ def run_native_shared_ppo_episode_loop(
         promotion_gate_cooldown_s=float(promotion_gate_cooldown_s),
         promotion_gate_preselect_action=bool(promotion_gate_preselect_action),
         promotion_gate_plan_blend=float(promotion_gate_plan_blend),
+        lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
+        lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
     rows: list[dict[str, Any]] = []
     updates: list[dict[str, Any]] = []
+    replay_updates = max(1, int(offpolicy_replay_updates))
     for ep in range(max(1, int(episodes))):
         collector: _NativeLowerReplayCollector = installed["lower_collector"]
         collector.rows.clear()
         row = runner.run_episode(ep, training=True)
         batch = collector.to_batch()
-        update_metrics = bridge.model.update(batch) if batch is not None else {}
+        update_metrics: dict[str, Any] = {}
+        if batch is not None:
+            for replay_idx in range(replay_updates):
+                update_metrics = bridge.model.update(batch)
+                updates.append({
+                    "episode": int(ep),
+                    "replay_update": int(replay_idx),
+                    **update_metrics,
+                })
         row = dict(row)
         row.update({
             "native_shared_ppo": True,
             "shared_ppo_lower_samples": 0 if batch is None else int(batch.reward.size),
+            "shared_ppo_replay_updates": int(replay_updates if batch is not None else 0),
             "shared_ppo_upper_decisions": int(installed["upper_proxy"].decisions),
             "shared_ppo_lower_decisions": int(installed["lower_proxy"].decisions),
             "shared_ppo_gate_evaluations": int(installed["upper_proxy"].gate_evaluations),
@@ -780,7 +823,6 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_value_loss": float(update_metrics.get("value_loss", 0.0)),
         })
         rows.append(row)
-        updates.append({"episode": int(ep), **update_metrics})
     summary = _native_summary(rows)
     payload = {
         "policy": "shared_dual_actor_critic_ppo",
@@ -798,6 +840,9 @@ def run_native_shared_ppo_episode_loop(
         "promotion_gate_cooldown_s": float(promotion_gate_cooldown_s),
         "promotion_gate_preselect_action": bool(promotion_gate_preselect_action),
         "promotion_gate_plan_blend": float(promotion_gate_plan_blend),
+        "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
+        "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
+        "offpolicy_replay_updates": int(replay_updates),
         "rows": rows,
         "updates": updates,
         "summary": summary,
@@ -835,6 +880,8 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- lower contract: {payload.get('contract', {}).get('lower_state_dim', 'NA')}x{payload.get('contract', {}).get('lower_action_dim', 'NA')}",
         f"- learned promotion gate: {payload.get('learned_promotion_gate', False)} threshold={payload.get('promotion_gate_threshold', 0.0)}",
         f"- gate guard: strength>={payload.get('promotion_gate_strength_min', 0.0)} age>={payload.get('promotion_gate_age_min', 0.0)} min_elapsed_s={payload.get('promotion_gate_min_elapsed_s', 0.0)} cooldown_s={payload.get('promotion_gate_cooldown_s', 0.0)} preselect_action={payload.get('promotion_gate_preselect_action', False)} plan_blend={payload.get('promotion_gate_plan_blend', 0.0)}",
+        f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)}",
+        f"- off-policy replay updates per native batch: {payload.get('offpolicy_replay_updates', 1)}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
         f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
         f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
@@ -971,6 +1018,9 @@ def main() -> None:
     parser.add_argument("--promotion-gate-cooldown-s", type=float, default=0.0)
     parser.add_argument("--promotion-gate-preselect-action", action="store_true")
     parser.add_argument("--promotion-gate-plan-blend", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
+    parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
     args = parser.parse_args()
     if args.episode_loop:
         summary = run_native_shared_ppo_episode_loop(
@@ -989,6 +1039,9 @@ def main() -> None:
             promotion_gate_cooldown_s=float(args.promotion_gate_cooldown_s),
             promotion_gate_preselect_action=bool(args.promotion_gate_preselect_action),
             promotion_gate_plan_blend=float(args.promotion_gate_plan_blend),
+            lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
+            lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
+            offpolicy_replay_updates=int(args.offpolicy_replay_updates),
         )
         print(f"wrote {args.output_dir}")
         print(

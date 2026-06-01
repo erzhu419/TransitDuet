@@ -39,6 +39,7 @@ COMMON_OVERRIDES: dict[str, Any] = {
         },
     },
 }
+DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S = 45.0
 
 VARIANTS: dict[str, dict[str, Any]] = {
     "interval_only": {
@@ -140,6 +141,7 @@ def run_validation(
     episodes: int,
     device: str,
     min_pairs: int = 5,
+    lower_hf_wait_action_gain_s: float = DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
@@ -148,6 +150,9 @@ def run_validation(
         payloads[variant] = {}
         for seed in seeds:
             run_dir = output_dir / variant / f"seed_{int(seed)}"
+            variant_lower_gain = float(
+                overrides.get("_lower_hf_wait_action_gain_s", lower_hf_wait_action_gain_s)
+            )
             payload = run_native_shared_ppo_episode_loop(
                 output_dir=run_dir,
                 config_path=config_path,
@@ -163,6 +168,7 @@ def run_validation(
                 promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
                 promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
                 promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
+                lower_hf_wait_action_gain_s=variant_lower_gain,
             )
             payloads[variant][str(seed)] = {
                 "summary": payload.get("summary", {}),
@@ -183,6 +189,7 @@ def run_validation(
         "seeds": [int(seed) for seed in seeds],
         "episodes": int(episodes),
         "min_pairs": int(min_pairs),
+        "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "variants": list(VARIANTS.keys()),
         "summary": summary,
         "rows": rows,
@@ -235,6 +242,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "# Native Transit Promotion Replan Validation",
         "",
         "This runs the native Transit episode loop through the shared PPO adapter and toggles native promotion-triggered timetable replanning.",
+        f"All variants use lower HF wait action prior gain `{payload.get('lower_hf_wait_action_gain_s', 0.0):.1f}s` so promotion is validated inside the full Freq-HRL lower-control loop.",
         "",
         "| variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -284,6 +292,11 @@ def main() -> None:
     parser.add_argument("--min-pairs", type=int, default=5)
     parser.add_argument("--device", default="cpu")
     parser.add_argument(
+        "--lower-hf-wait-action-gain-s",
+        type=float,
+        default=DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("transit_hrl/results/transit_native_promotion_replan"),
@@ -296,6 +309,7 @@ def main() -> None:
         episodes=int(args.episodes),
         device=str(args.device),
         min_pairs=int(args.min_pairs),
+        lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
     )
     reward_check = next(
         row for row in payload["paired_checks"]
