@@ -1,14 +1,23 @@
 _extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
-# Current promoted FreqDuet main path. The 2026-05-31 paired HPC screen selected
+# Current promoted FreqDuet main path. The 2026-06-01 paired HPC screen selected
 # the history-prior LF/HF split with HF-energy denoising, 45s terminal hold cap,
-# adaptive strict local promotion absorption, and the stronger positive-HF
-# hold-through penalty. The 0.06 penalty improved highnoise/OD/rush held-outs
-# while the terminal/base regression remained within seed variance.
+# adaptive strict local promotion absorption, the stronger positive-HF
+# hold-through penalty, and promotion-gated raw lower-HF wait credit. The raw
+# credit gate improved terminal/highnoise/OD/rush held-outs versus the previous
+# main while keeping rush/OD from receiving broad raw-residual lower credit.
 reward_attribution:
   lower_hold_high_source: raw
   lower_hold_positive_high_only: true
   lower_hold_penalty_weight: 0.06
   lower_hold_norm_s: 45.0
   lower_hold_clip: 2.0
+  lower_high_source: adaptive_raw
+  lower_raw_gate_middle_energy_max: 0.038
+  lower_raw_gate_width: 0.010
+  lower_raw_gate_min_weight: 0.0
+  lower_raw_gate_middle_value_max: 0.004
+  lower_raw_gate_middle_value_width: 0.003
+  lower_raw_gate_absorbed_min: 0.10
+  lower_raw_gate_absorbed_width: 0.10

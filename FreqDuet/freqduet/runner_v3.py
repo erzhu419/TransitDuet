@@ -241,6 +241,7 @@ class DiagnosticLog:
         'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
         'freq_wait_lower_board_credit_mean',
         'freq_wait_lower_board_credit_max',
+        'freq_wait_lower_board_credit_gate_mean',
         'freq_wait_lower_hold_penalty_mean',
         'freq_wait_lower_hold_penalty_max',
         'freq_wait_lower_net_mean',
@@ -555,6 +556,15 @@ class TransitDuetV2Runner:
             attr_cfg.get('lower_wait_weight', 0.0))
         self.freq_wait_lower_board_credit_weight = float(
             attr_cfg.get('lower_board_credit_weight', 0.0))
+        self.freq_wait_lower_board_credit_adaptive = bool(
+            attr_cfg.get('lower_board_credit_adaptive', False))
+        self.freq_wait_lower_board_credit_absorbed_min = float(
+            attr_cfg.get('lower_board_credit_absorbed_min', 0.0))
+        self.freq_wait_lower_board_credit_absorbed_width = max(
+            float(attr_cfg.get('lower_board_credit_absorbed_width', 0.05)),
+            1e-6)
+        self.freq_wait_lower_board_credit_min_gate = float(np.clip(
+            attr_cfg.get('lower_board_credit_min_gate', 0.0), 0.0, 1.0))
         self.freq_wait_lower_board_norm = max(
             float(attr_cfg.get('lower_board_norm', 10.0)), 1e-6)
         self.freq_wait_lower_board_clip = max(
@@ -600,6 +610,12 @@ class TransitDuetV2Runner:
             float(attr_cfg.get(
                 'lower_raw_gate_high_energy_width',
                 self.freq_wait_lower_raw_gate_width)), 1e-6)
+        self.freq_wait_lower_raw_gate_absorbed_min = float(
+            attr_cfg.get('lower_raw_gate_absorbed_min', 0.0))
+        self.freq_wait_lower_raw_gate_absorbed_width = max(
+            float(attr_cfg.get(
+                'lower_raw_gate_absorbed_width',
+                self.freq_wait_lower_raw_gate_width)), 1e-6)
         self.freq_wait_lower_raw_gate_min_weight = float(np.clip(
             attr_cfg.get('lower_raw_gate_min_weight', 0.0), 0.0, 1.0))
         self.freq_wait_norm_s = max(
@@ -611,6 +627,7 @@ class TransitDuetV2Runner:
             attr_cfg.get('normalize_upper_credit', True))
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_board_credit_gates = []
         self._ep_lower_high_hold_penalties = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
@@ -984,6 +1001,14 @@ class TransitDuetV2Runner:
                 (freq_high_energy - high_energy_min)
                 / self.freq_wait_lower_raw_gate_high_energy_width)
             weight = min(weight, high_energy_weight)
+        absorbed_min = self.freq_wait_lower_raw_gate_absorbed_min
+        if absorbed_min > 0.0:
+            absorbed = abs(float(
+                freq_summary.get('freq_promotion_absorbed', 0.0)))
+            absorbed_weight = (
+                (absorbed - absorbed_min)
+                / self.freq_wait_lower_raw_gate_absorbed_width)
+            weight = min(weight, absorbed_weight)
         middle_value_max = self.freq_wait_lower_raw_gate_middle_value_max
         if middle_value_max is not None:
             middle_value = float(freq_summary.get('freq_middle', 0.0))
@@ -1013,9 +1038,23 @@ class TransitDuetV2Runner:
             return w * raw_high + (1.0 - w) * feature_high, w
         return feature_high, 0.0
 
+    def _lower_board_credit_gate(self, freq_summary):
+        if (not self.freq_wait_lower_board_credit_adaptive
+                or self.freq_wait_lower_board_credit_weight <= 0.0):
+            return 1.0
+        summary = freq_summary or {}
+        absorbed = abs(float(summary.get('freq_promotion_absorbed', 0.0)))
+        gate = (
+            (absorbed - self.freq_wait_lower_board_credit_absorbed_min)
+            / self.freq_wait_lower_board_credit_absorbed_width)
+        return float(np.clip(
+            gate,
+            self.freq_wait_lower_board_credit_min_gate,
+            1.0))
+
     def _record_frequency_wait_credit(
             self, trip_id, wait_sum_s, boarded_count, low_demand, local_high,
-            lower_low_demand=None):
+            lower_low_demand=None, freq_summary=None):
         """Return lower net high-frequency wait shaping and store upper credit."""
         if not self.freq_wait_enable or boarded_count <= 0:
             return 0.0
@@ -1042,8 +1081,10 @@ class TransitDuetV2Runner:
         boarded_norm = int(boarded_count) / self.freq_wait_lower_board_norm
         if self.freq_wait_lower_board_clip > 0.0:
             boarded_norm = min(boarded_norm, self.freq_wait_lower_board_clip)
+        board_credit_gate = self._lower_board_credit_gate(freq_summary)
         lower_board_credit = (
             self.freq_wait_lower_board_credit_weight
+            * board_credit_gate
             * lower_high_share
             * boarded_norm)
 
@@ -1056,6 +1097,7 @@ class TransitDuetV2Runner:
 
         self._ep_lower_wait_penalties.append(float(lower_penalty))
         self._ep_lower_board_credits.append(float(lower_board_credit))
+        self._ep_lower_board_credit_gates.append(float(board_credit_gate))
         self._ep_lower_wait_net.append(
             float(lower_board_credit - lower_penalty))
         self._ep_freq_wait_low_shares.append(float(low_share))
@@ -1464,6 +1506,7 @@ class TransitDuetV2Runner:
         self._ep_freq_holdfb_features = []
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_board_credit_gates = []
         self._ep_lower_high_hold_penalties = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
@@ -1606,7 +1649,10 @@ class TransitDuetV2Runner:
                                 board_count,
                                 low_demand,
                                 credit_high,
-                                local_low)
+                                local_low,
+                                freq_summary if getattr(
+                                    self.env, 'frequency_tracker', None) is not None
+                                else None)
                         self._record_frequency_hold_feedback(
                             cur_dir, credit_high, act_val,
                             board_wait_sum_s, board_count)
@@ -1875,6 +1921,8 @@ class TransitDuetV2Runner:
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
+        lower_board_credit_gate_stat = _stat(
+            self._ep_lower_board_credit_gates)
         lower_hold_penalty_stat = _stat(self._ep_lower_high_hold_penalties)
         lower_wait_net_stat = _stat(self._ep_lower_wait_net)
         upper_wait_credit_stat = _stat(self._ep_upper_wait_credits)
@@ -2038,6 +2086,8 @@ class TransitDuetV2Runner:
             'freq_wait_lower_penalty_max': lower_wait_stat['max'],
             'freq_wait_lower_board_credit_mean': lower_board_credit_stat['mean'],
             'freq_wait_lower_board_credit_max': lower_board_credit_stat['max'],
+            'freq_wait_lower_board_credit_gate_mean':
+                lower_board_credit_gate_stat['mean'],
             'freq_wait_lower_hold_penalty_mean': lower_hold_penalty_stat['mean'],
             'freq_wait_lower_hold_penalty_max': lower_hold_penalty_stat['max'],
             'freq_wait_lower_net_mean': lower_wait_net_stat['mean'],
@@ -2075,6 +2125,7 @@ class TransitDuetV2Runner:
                    'upper_plan_penalty_mean',
                    'freq_wait_lower_penalty_mean',
                    'freq_wait_lower_board_credit_mean',
+                   'freq_wait_lower_board_credit_gate_mean',
                    'freq_wait_lower_hold_penalty_mean',
                    'freq_wait_lower_net_mean',
                    'freq_wait_upper_credit_mean',

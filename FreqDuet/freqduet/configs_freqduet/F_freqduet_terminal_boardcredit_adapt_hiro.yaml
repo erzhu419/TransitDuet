@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_boardcredit_adapt_hiro
+
+# Adaptive lower HF service credit. The credit stays off for ordinary terminal
+# and OD-shift regimes, and turns on only after the promotion mechanism has
+# absorbed a persistent residual into the harmonic LF prior.
+reward_attribution:
+  lower_board_credit_weight: 0.06
+  lower_board_credit_adaptive: true
+  lower_board_credit_absorbed_min: 0.15
+  lower_board_credit_absorbed_width: 0.10
+  lower_board_credit_min_gate: 0.0

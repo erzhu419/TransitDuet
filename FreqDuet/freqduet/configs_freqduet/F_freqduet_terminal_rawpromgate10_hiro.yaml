@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_adaptive_midgate_strict_hiro.yaml
+_name: F_freqduet_terminal_rawpromgate10_hiro
+
+# Lower threshold than rawpromgate: highnoise needs raw lower-HF credit earlier
+# in training, while base/OD/rush should still stay mostly below the absorbed
+# gate and fall back to denoised HF features.
+reward_attribution:
+  lower_raw_gate_absorbed_min: 0.10
+  lower_raw_gate_absorbed_width: 0.10

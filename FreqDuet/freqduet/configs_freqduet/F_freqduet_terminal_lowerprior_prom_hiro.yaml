@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_lowerprior_prom_hiro
+
+# Keep the division of labor: upper remains low-frequency and lower remains
+# high-frequency. The lower state additionally receives local LF prior scale
+# and positive-HF prior share so residual actions are calibrated against the
+# station's historical demand intensity.
+frequency:
+  lower_mode: high_prior

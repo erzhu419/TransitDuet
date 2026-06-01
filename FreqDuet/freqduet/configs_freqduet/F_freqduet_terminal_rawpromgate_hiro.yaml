@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_adaptive_midgate_strict_hiro.yaml
+_name: F_freqduet_terminal_rawpromgate_hiro
+
+# Keep the highnoise win from adaptive raw lower-HF credit, but only when the
+# promotion absorber confirms a persistent high-frequency regime. This should
+# leave base/OD/rush near the promoted main path instead of applying raw credit
+# to ordinary local fluctuation.
+reward_attribution:
+  lower_raw_gate_absorbed_min: 0.20
+  lower_raw_gate_absorbed_width: 0.10

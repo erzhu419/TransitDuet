@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_adaptive_rawcredit_hiro.yaml
+_name: F_freqduet_terminal_rawneggate_hiro
+
+# Use raw lower-HF credit only when the causal middle band is below neutral.
+# This keeps the highnoise benefit of raw residuals while avoiding positive
+# middle-band OD/rush shifts being delegated to lower-level holding.
+reward_attribution:
+  lower_raw_gate_middle_value_max: -0.002
+  lower_raw_gate_middle_value_width: 0.004
