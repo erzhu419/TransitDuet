@@ -4,11 +4,14 @@
 - episodes: 1
 - shared core: `freq_hrl.rl.DualActorCriticPPO`
 - upper contract: 20x4
+- upper model action dim: 4
 - lower contract: 43x1
-- mean wait: 4.6100
-- mean headway CV: 0.5484
-- mean shared-PPO score: -5.7068
+- learned promotion gate: False threshold=0.62
+- mean wait: 37.8430
+- mean headway CV: 0.6814
+- mean shared-PPO score: -39.2058
+- mean gate value: 0.0000
 
-| ep | wait | cv | reward | lower samples | upper decisions | lower decisions | loss |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 0 | 4.6100 | 0.5484 | -2701.0250 | 4970 | 93 | 5232 | 1403.2138 |
+| ep | wait | cv | reward | lower samples | upper decisions | gate replans | lower decisions | loss |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 37.8430 | 0.6814 | -17127.7530 | 4970 | 106 | 0 | 5232 | 15318.4285 |

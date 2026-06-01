@@ -47,6 +47,12 @@ VARIANTS: dict[str, dict[str, Any]] = {
     "native_promotion_replan": {
         "upper": {"timetable_planner": {"promotion_replan": True}},
     },
+    "native_learned_gate": {
+        "_learned_promotion_gate": True,
+        "_promotion_gate_threshold": 0.92,
+        "_promotion_gate_strength_min": 0.80,
+        "upper": {"timetable_planner": {"promotion_replan": False}},
+    },
 }
 
 
@@ -61,7 +67,10 @@ def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 def _variant_overrides(override: dict[str, Any]) -> dict[str, Any]:
     merged = json.loads(json.dumps(COMMON_OVERRIDES))
-    return _merge_dict(merged, dict(override))
+    return _merge_dict(merged, {
+        key: value for key, value in dict(override).items()
+        if not str(key).startswith("_")
+    })
 
 
 def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -80,29 +89,39 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "upper_plan_reuse_ratio": float(summary.get("upper_plan_reuse_ratio_mean", 0.0)),
         "freq_promotion_strength": float(summary.get("freq_promotion_strength_mean", 0.0)),
         "shared_ppo_lower_samples": float(last.get("shared_ppo_lower_samples", 0.0)),
+        "shared_ppo_gate_evaluations": float(last.get("shared_ppo_gate_evaluations", 0.0)),
+        "shared_ppo_gate_replans": float(last.get("shared_ppo_gate_replans", 0.0)),
+        "shared_ppo_gate_value_mean": float(last.get("shared_ppo_gate_value_mean", 0.0)),
         "shared_ppo_loss": float(last.get("shared_ppo_loss", 0.0)),
     }
 
 
-def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 5) -> list[dict[str, Any]]:
+def paired_checks(
+    rows: list[dict[str, Any]],
+    min_pairs: int = 5,
+    treatment: str = "native_promotion_replan",
+) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
-    for metric, lower_is_better in [
+    metrics = [
         ("ep_reward", False),
         ("avg_wait_min", True),
         ("score", False),
         ("upper_plan_decisions", False),
-    ]:
+    ]
+    if treatment == "native_learned_gate":
+        metrics.append(("shared_ppo_gate_replans", False))
+    for metric, lower_is_better in metrics:
         stats = paired_delta_stats(
             rows,
             variant_key="variant",
             pair_keys=("seed",),
             metric=metric,
-            treatment="native_promotion_replan",
+            treatment=treatment,
             control="interval_only",
             lower_is_better=lower_is_better,
         )
         checks.append({
-            "check": f"native_promotion_replan_vs_interval_{metric}",
+            "check": f"{treatment}_vs_interval_{metric}",
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
         })
@@ -131,6 +150,9 @@ def run_validation(
                 episodes=int(episodes),
                 device=str(device),
                 config_overrides=_variant_overrides(overrides),
+                learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
+                promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.62)),
+                promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
             )
             payloads[variant][str(seed)] = {
                 "summary": payload.get("summary", {}),
@@ -139,6 +161,12 @@ def run_validation(
             }
             rows.append(_row_from_payload(int(seed), variant, payload))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
+    if any(row.get("variant") == "native_learned_gate" for row in rows):
+        checks.extend(paired_checks(
+            rows,
+            min_pairs=int(min_pairs),
+            treatment="native_learned_gate",
+        ))
     summary = summarize(rows)
     payload = {
         "config_path": str(config_path),
@@ -159,7 +187,16 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     summary: dict[str, Any] = {"n": len(rows)}
     for variant in VARIANTS:
         vrows = [row for row in rows if row["variant"] == variant]
-        for metric in ["ep_reward", "avg_wait_min", "headway_cv", "score", "upper_plan_decisions"]:
+        for metric in [
+            "ep_reward",
+            "avg_wait_min",
+            "headway_cv",
+            "score",
+            "upper_plan_decisions",
+            "shared_ppo_gate_evaluations",
+            "shared_ppo_gate_replans",
+            "shared_ppo_gate_value_mean",
+        ]:
             values = np.asarray([float(row[metric]) for row in vrows], dtype=np.float64)
             summary[f"{variant}_{metric}_mean"] = float(np.mean(values)) if values.size else 0.0
     return summary
@@ -189,8 +226,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "",
         "This runs the native Transit episode loop through the shared PPO adapter and toggles native promotion-triggered timetable replanning.",
         "",
-        "| variant | seed | reward | wait | cv | score | upper decisions | promotion strength | samples |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["rows"]:
         lines.append(
@@ -201,6 +238,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
             f"| {row['headway_cv']:.4f} "
             f"| {row['score']:.4f} "
             f"| {row['upper_plan_decisions']:.1f} "
+            f"| {row['shared_ppo_gate_replans']:.1f} "
+            f"| {row['shared_ppo_gate_value_mean']:.3f} "
             f"| {row['freq_promotion_strength']:.4f} "
             f"| {row['shared_ppo_lower_samples']:.0f} |"
         )
@@ -252,12 +291,25 @@ def main() -> None:
         row for row in payload["paired_checks"]
         if row["check"] == "native_promotion_replan_vs_interval_ep_reward"
     )
+    learned_reward = next(
+        (
+            row for row in payload["paired_checks"]
+            if row["check"] == "native_learned_gate_vs_interval_ep_reward"
+        ),
+        None,
+    )
     print(f"wrote {args.output_dir}")
     print(
         "native_promotion_replan "
         f"reward_delta={reward_check['delta_mean']:+.4f} "
         f"status={reward_check['status']}"
     )
+    if learned_reward is not None:
+        print(
+            "native_learned_gate "
+            f"reward_delta={learned_reward['delta_mean']:+.4f} "
+            f"status={learned_reward['status']}"
+        )
 
 
 if __name__ == "__main__":

@@ -299,6 +299,60 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             ),
             min_pairs=5,
         )
+        if any(row.get("variant") == "native_learned_gate" for row in native_promotion_rows):
+            add(
+                "transit_native_learned_gate_reward_vs_interval",
+                "native learned promotion gate improves Transit episode reward",
+                paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric="ep_reward",
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                ),
+                min_pairs=5,
+            )
+            add(
+                "transit_native_learned_gate_wait_vs_interval",
+                "native learned promotion gate lowers Transit wait",
+                paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric="avg_wait_min",
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+            )
+            add(
+                "transit_native_learned_gate_replans_vs_interval",
+                "native learned promotion gate increases upper timetable replans",
+                paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric="upper_plan_decisions",
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                ),
+                min_pairs=5,
+            )
+            add(
+                "transit_native_learned_gate_gate_replans_vs_interval",
+                "native learned promotion gate fires gate-triggered replans",
+                paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric="shared_ppo_gate_replans",
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                ),
+                min_pairs=5,
+            )
 
     demand_rows = collect_demand_rows(results_root)
     demand_methods = {str(row.get("method")) for row in demand_rows}
@@ -491,8 +545,16 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     )
     native_promotion_reward_status = _check_status(checks, "transit_native_promotion_reward_vs_interval")
     native_promotion_replan_status = _check_status(checks, "transit_native_promotion_replans_vs_interval")
+    native_learned_reward_status = _check_status(checks, "transit_native_learned_gate_reward_vs_interval")
+    native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
+    elif (
+        learned_promotion_supported
+        and native_learned_reward_status in {"supported", "positive_mixed"}
+        and native_learned_replan_status == "supported"
+    ):
+        promotion_status = "supported learned; native learned-gate path"
     elif learned_promotion_supported and native_promotion_replan_status == "supported":
         promotion_status = "supported learned; native replan"
     elif learned_promotion_supported:
@@ -536,10 +598,12 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"wait={_check_metric(checks, 'transit_learned_promotion_wait_vs_interval')}, "
                 f"replans={_check_metric(checks, 'transit_learned_promotion_replans_vs_interval')}; "
                 f"native reward={_check_metric(checks, 'transit_native_promotion_reward_vs_interval')}, "
-                f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}"
+                f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}; "
+                f"native learned reward={_check_metric(checks, 'transit_native_learned_gate_reward_vs_interval')}, "
+                f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native promotion-replan is now 8-seed positive-mixed on reward/wait and supported on replan count; learned native gate and larger off-policy theorem-grade validation remain.",
+            "remaining_gap": "Native learned gate runs end-to-end and is positive-mixed on reward, but native wait/reward are not CI-supported; larger off-policy/native training remains.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",

@@ -45,6 +45,7 @@ class NativeTransitContract:
     upper_state_dim: int
     lower_state_dim: int
     upper_action_dim: int
+    upper_model_action_dim: int
     lower_action_dim: int
     upper_action_low: list[float]
     upper_action_high: list[float]
@@ -54,6 +55,7 @@ class NativeTransitContract:
     timetable_planner: bool
     terminal_dispatch: bool
     promotion_replan: bool
+    learned_promotion_gate: bool = False
     shared_core: str = "freq_hrl.rl.DualActorCriticPPO"
 
     def as_dict(self) -> dict[str, Any]:
@@ -61,6 +63,7 @@ class NativeTransitContract:
             "upper_state_dim": int(self.upper_state_dim),
             "lower_state_dim": int(self.lower_state_dim),
             "upper_action_dim": int(self.upper_action_dim),
+            "upper_model_action_dim": int(self.upper_model_action_dim),
             "lower_action_dim": int(self.lower_action_dim),
             "upper_action_low": list(self.upper_action_low),
             "upper_action_high": list(self.upper_action_high),
@@ -70,6 +73,7 @@ class NativeTransitContract:
             "timetable_planner": bool(self.timetable_planner),
             "terminal_dispatch": bool(self.terminal_dispatch),
             "promotion_replan": bool(self.promotion_replan),
+            "learned_promotion_gate": bool(self.learned_promotion_gate),
             "shared_core": self.shared_core,
         }
 
@@ -86,6 +90,7 @@ class NativeTransitPPOBridge:
         init_log_std: float = -2.0,
         learning_rate: float = 3e-4,
         device: str = "cpu",
+        initialize_gate_prior: bool = True,
     ) -> None:
         self.contract = contract
         self.upper_action_low = _array(contract.upper_action_low, dtype=np.float64)
@@ -98,13 +103,15 @@ class NativeTransitPPOBridge:
         self.model = model or DualActorCriticPPO(DualPPOConfig(
             upper_state_dim=int(contract.upper_state_dim),
             lower_state_dim=int(contract.lower_state_dim),
-            upper_action_dim=int(contract.upper_action_dim),
+            upper_action_dim=int(contract.upper_model_action_dim),
             lower_action_dim=int(contract.lower_action_dim),
             hidden_dim=int(hidden_dim),
             init_log_std=float(init_log_std),
             learning_rate=float(learning_rate),
             device=str(device),
         ))
+        if bool(contract.learned_promotion_gate) and initialize_gate_prior:
+            self.initialize_promotion_gate_prior()
 
     @classmethod
     def from_runner(
@@ -115,6 +122,8 @@ class NativeTransitPPOBridge:
         init_log_std: float = -2.0,
         learning_rate: float = 3e-4,
         device: str = "cpu",
+        learned_promotion_gate: bool = False,
+        initialize_gate_prior: bool = True,
     ) -> "NativeTransitPPOBridge":
         cfg = getattr(runner, "cfg", {})
         lower_cfg = cfg.get("lower", {}) if isinstance(cfg, dict) else {}
@@ -126,6 +135,7 @@ class NativeTransitPPOBridge:
             upper_state_dim=int(runner.upper_state_dim),
             lower_state_dim=int(runner.lower_state_dim),
             upper_action_dim=int(runner.upper_action_dim),
+            upper_model_action_dim=int(runner.upper_action_dim) + (1 if bool(learned_promotion_gate) else 0),
             lower_action_dim=1,
             upper_action_low=_array(runner.upper_action_low).astype(float).tolist(),
             upper_action_high=_array(runner.upper_action_high).astype(float).tolist(),
@@ -141,6 +151,7 @@ class NativeTransitPPOBridge:
                 "promotion_replan",
                 getattr(runner, "timetable_promotion_replan", False),
             )),
+            learned_promotion_gate=bool(learned_promotion_gate),
         )
         return cls(
             contract,
@@ -148,17 +159,54 @@ class NativeTransitPPOBridge:
             init_log_std=init_log_std,
             learning_rate=learning_rate,
             device=device,
+            initialize_gate_prior=initialize_gate_prior,
         )
+
+    def initialize_promotion_gate_prior(self) -> None:
+        """Seed the optional native gate head from causal promotion features.
+
+        Native Transit upper states append promotion features as
+        `[flag, strength, age]` when enabled.  The prior keeps the gate closed
+        without a promotion signal and opens it for persistent/high-strength
+        shocks; PPO can still update the row during native episode training.
+        """
+        if not bool(self.contract.learned_promotion_gate):
+            return
+        try:
+            linear = self.model.upper_actor.net[-1]
+            if not hasattr(linear, "weight") or not hasattr(linear, "bias"):
+                return
+            import torch
+
+            gate_row = int(self.contract.upper_model_action_dim) - 1
+            with torch.no_grad():
+                linear.weight[gate_row].zero_()
+                linear.bias[gate_row] = -2.0
+                if int(self.contract.upper_state_dim) >= 3:
+                    linear.weight[gate_row, -3] = 2.0
+                    linear.weight[gate_row, -2] = 3.0
+                    linear.weight[gate_row, -1] = 1.0
+        except Exception:
+            return
 
     def upper_latent_to_native(self, latent_action: Any) -> np.ndarray:
         latent = _array(latent_action, dtype=np.float64)
-        if latent.size != int(self.contract.upper_action_dim):
+        if latent.size != int(self.contract.upper_model_action_dim):
             raise ValueError("upper latent action has the wrong dimension")
+        latent = latent[:int(self.contract.upper_action_dim)]
         weight = 0.5 * (np.tanh(latent) + 1.0)
         return (
             self.upper_action_low
             + weight * (self.upper_action_high - self.upper_action_low)
         ).astype(np.float32)
+
+    def promotion_gate_value(self, latent_action: Any) -> float:
+        if not bool(self.contract.learned_promotion_gate):
+            return 0.0
+        latent = _array(latent_action, dtype=np.float64)
+        if latent.size != int(self.contract.upper_model_action_dim):
+            raise ValueError("upper latent action has the wrong dimension")
+        return float(_sigmoid(latent[-1:])[0])
 
     def lower_latent_to_native(self, latent_action: Any) -> np.ndarray:
         latent = _array(latent_action, dtype=np.float64)
@@ -178,6 +226,7 @@ class NativeTransitPPOBridge:
         return {
             "native_action": native,
             "latent_action": latent.astype(np.float32),
+            "promotion_gate_value": self.promotion_gate_value(latent),
             "logp": float(out["logp"]),
             "value": float(out["value"]),
         }
@@ -202,8 +251,12 @@ class _SharedPPOPolicyProxy:
         self.bridge = bridge
         self.level = str(level)
         self.pending: dict[tuple[float, ...], list[dict[str, Any]]] = {}
+        self.preselected: dict[tuple[float, ...], list[dict[str, Any]]] = {}
         self.last_upper: dict[str, Any] | None = None
         self.decisions = 0
+        self.gate_evaluations = 0
+        self.gate_replans = 0
+        self.gate_values: list[float] = []
 
     def _remember(self, state: np.ndarray, info: dict[str, Any]) -> None:
         key = _state_key(state)
@@ -222,22 +275,56 @@ class _SharedPPOPolicyProxy:
             self.pending.pop(key, None)
         return info
 
+    def _act_info(self, state_arr: np.ndarray, sample: bool) -> dict[str, Any]:
+        if self.level == "upper":
+            out = self.bridge.act_upper_native(state_arr, sample=sample)
+        else:
+            out = self.bridge.act_lower_native(state_arr, sample=sample)
+        return {
+            "state": state_arr.astype(np.float32).copy(),
+            "latent_action": _array(out["latent_action"]).astype(np.float32),
+            "native_action": _array(out["native_action"]).astype(np.float32),
+            "promotion_gate_value": float(out.get("promotion_gate_value", 0.0)),
+            "logp": float(out["logp"]),
+            "value": float(out["value"]),
+        }
+
+    def evaluate_promotion_gate(
+        self,
+        state: Any,
+        *,
+        threshold: float,
+        sample: bool,
+    ) -> bool:
+        if self.level != "upper" or not bool(self.bridge.contract.learned_promotion_gate):
+            return False
+        if hasattr(state, "detach"):
+            state = state.detach().cpu().numpy()
+        state_arr = _array(state)
+        info = self._act_info(state_arr, sample=sample)
+        gate_value = float(info.get("promotion_gate_value", 0.0))
+        self.gate_evaluations += 1
+        self.gate_values.append(gate_value)
+        promote = gate_value >= float(threshold)
+        if promote:
+            key = _state_key(state_arr)
+            self.preselected.setdefault(key, []).append(info)
+            self.gate_replans += 1
+        return bool(promote)
+
     def get_action(self, state: Any, deterministic: bool = False) -> np.ndarray:
         if hasattr(state, "detach"):
             state = state.detach().cpu().numpy()
         state_arr = _array(state)
         sample = not bool(deterministic)
-        if self.level == "upper":
-            out = self.bridge.act_upper_native(state_arr, sample=sample)
+        key = _state_key(state_arr)
+        preselected = self.preselected.get(key)
+        if preselected:
+            info = preselected.pop(0)
+            if not preselected:
+                self.preselected.pop(key, None)
         else:
-            out = self.bridge.act_lower_native(state_arr, sample=sample)
-        info = {
-            "state": state_arr.astype(np.float32).copy(),
-            "latent_action": _array(out["latent_action"]).astype(np.float32),
-            "native_action": _array(out["native_action"]).astype(np.float32),
-            "logp": float(out["logp"]),
-            "value": float(out["value"]),
-        }
+            info = self._act_info(state_arr, sample=sample)
         self._remember(state_arr, info)
         return info["native_action"].copy()
 
@@ -257,7 +344,10 @@ class _NativeUpperReplayCollector:
             "native_action": _array(action).astype(np.float32),
             "latent_action": (
                 _array(info["latent_action"]).astype(np.float32)
-                if info is not None else np.zeros(1, dtype=np.float32)
+                if info is not None else np.zeros(
+                    int(self.upper_proxy.bridge.contract.upper_model_action_dim),
+                    dtype=np.float32,
+                )
             ),
             "reward": float(reward),
             "next_state": _array(next_state).astype(np.float32),
@@ -302,7 +392,7 @@ class _NativeLowerReplayCollector:
         if upper_info is None:
             upper_info = {
                 "state": np.zeros(int(self.contract.upper_state_dim), dtype=np.float32),
-                "latent_action": np.zeros(int(self.contract.upper_action_dim), dtype=np.float32),
+                "latent_action": np.zeros(int(self.contract.upper_model_action_dim), dtype=np.float32),
                 "logp": 0.0,
                 "value": 0.0,
             }
@@ -346,7 +436,15 @@ def _native_row_score(row: dict[str, Any]) -> float:
     return -float(row.get("avg_wait_min", 0.0)) - 2.0 * float(row.get("headway_cv", 0.0))
 
 
-def install_shared_ppo_episode_loop(runner: Any, bridge: NativeTransitPPOBridge) -> dict[str, Any]:
+def install_shared_ppo_episode_loop(
+    runner: Any,
+    bridge: NativeTransitPPOBridge,
+    *,
+    learned_promotion_gate: bool = False,
+    promotion_gate_threshold: float = 0.55,
+    promotion_gate_sample: bool = False,
+    promotion_gate_strength_min: float = 0.0,
+) -> dict[str, Any]:
     upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
     lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
     lower_collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
@@ -360,6 +458,20 @@ def install_shared_ppo_episode_loop(runner: Any, bridge: NativeTransitPPOBridge)
     runner.upper_updates = 0
     runner.tpc_enable = False
     runner.target_upper_trainer = None
+    if bool(learned_promotion_gate):
+        def learned_gate_hook(**kwargs: Any) -> bool:
+            freq_summary = kwargs.get("freq_summary", {}) or {}
+            if not bool(freq_summary.get("freq_promotion_flag", 0.0)):
+                return False
+            if float(freq_summary.get("freq_promotion_strength", 0.0)) < float(promotion_gate_strength_min):
+                return False
+            return upper_proxy.evaluate_promotion_gate(
+                kwargs["s_upper"],
+                threshold=float(promotion_gate_threshold),
+                sample=bool(promotion_gate_sample),
+            )
+
+        runner.freq_hrl_learned_promotion_gate = learned_gate_hook
     return {
         "upper_proxy": upper_proxy,
         "lower_proxy": lower_proxy,
@@ -415,6 +527,9 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "lower_lf_drift_ratio",
         "upper_hf_power_ratio",
         "freq_promotion_strength",
+        "shared_ppo_gate_evaluations",
+        "shared_ppo_gate_replans",
+        "shared_ppo_gate_value_mean",
     ]
     summary = {"n": len(rows)}
     for key in keys:
@@ -436,6 +551,10 @@ def run_native_shared_ppo_episode_loop(
     learning_rate: float = 3e-4,
     keep_native_log_dir: bool = False,
     config_overrides: dict[str, Any] | None = None,
+    learned_promotion_gate: bool = False,
+    promotion_gate_threshold: float = 0.55,
+    promotion_gate_sample: bool = False,
+    promotion_gate_strength_min: float = 0.0,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     native_logs = output_dir / "native_logs"
@@ -475,8 +594,16 @@ def run_native_shared_ppo_episode_loop(
         init_log_std=init_log_std,
         learning_rate=learning_rate,
         device=device,
+        learned_promotion_gate=bool(learned_promotion_gate),
     )
-    installed = install_shared_ppo_episode_loop(runner, bridge)
+    installed = install_shared_ppo_episode_loop(
+        runner,
+        bridge,
+        learned_promotion_gate=bool(learned_promotion_gate),
+        promotion_gate_threshold=float(promotion_gate_threshold),
+        promotion_gate_sample=bool(promotion_gate_sample),
+        promotion_gate_strength_min=float(promotion_gate_strength_min),
+    )
     rows: list[dict[str, Any]] = []
     updates: list[dict[str, Any]] = []
     for ep in range(max(1, int(episodes))):
@@ -491,6 +618,12 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_lower_samples": 0 if batch is None else int(batch.reward.size),
             "shared_ppo_upper_decisions": int(installed["upper_proxy"].decisions),
             "shared_ppo_lower_decisions": int(installed["lower_proxy"].decisions),
+            "shared_ppo_gate_evaluations": int(installed["upper_proxy"].gate_evaluations),
+            "shared_ppo_gate_replans": int(installed["upper_proxy"].gate_replans),
+            "shared_ppo_gate_value_mean": (
+                float(np.mean(installed["upper_proxy"].gate_values))
+                if installed["upper_proxy"].gate_values else 0.0
+            ),
             "shared_ppo_loss": float(update_metrics.get("loss", 0.0)),
             "shared_ppo_policy_loss": float(update_metrics.get("policy_loss", 0.0)),
             "shared_ppo_value_loss": float(update_metrics.get("value_loss", 0.0)),
@@ -505,6 +638,10 @@ def run_native_shared_ppo_episode_loop(
         "seed": int(seed),
         "episodes": int(max(1, int(episodes))),
         "contract": bridge.contract_dict(),
+        "learned_promotion_gate": bool(learned_promotion_gate),
+        "promotion_gate_threshold": float(promotion_gate_threshold),
+        "promotion_gate_sample": bool(promotion_gate_sample),
+        "promotion_gate_strength_min": float(promotion_gate_strength_min),
         "rows": rows,
         "updates": updates,
         "summary": summary,
@@ -538,13 +675,16 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- episodes: {payload.get('episodes', 0)}",
         f"- shared core: `{payload.get('contract', {}).get('shared_core', 'NA')}`",
         f"- upper contract: {payload.get('contract', {}).get('upper_state_dim', 'NA')}x{payload.get('contract', {}).get('upper_action_dim', 'NA')}",
+        f"- upper model action dim: {payload.get('contract', {}).get('upper_model_action_dim', 'NA')}",
         f"- lower contract: {payload.get('contract', {}).get('lower_state_dim', 'NA')}x{payload.get('contract', {}).get('lower_action_dim', 'NA')}",
+        f"- learned promotion gate: {payload.get('learned_promotion_gate', False)} threshold={payload.get('promotion_gate_threshold', 0.0)}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
         f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
         f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
+        f"- mean gate value: {summary.get('shared_ppo_gate_value_mean_mean', 0.0):.4f}",
         "",
-        "| ep | wait | cv | reward | lower samples | upper decisions | lower decisions | loss |",
-        "|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| ep | wait | cv | reward | lower samples | upper decisions | gate replans | lower decisions | loss |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         lines.append(
@@ -554,6 +694,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
             f"| {float(row.get('ep_reward', 0.0)):.4f} "
             f"| {int(row.get('shared_ppo_lower_samples', 0))} "
             f"| {int(row.get('shared_ppo_upper_decisions', 0))} "
+            f"| {int(row.get('shared_ppo_gate_replans', 0))} "
             f"| {int(row.get('shared_ppo_lower_decisions', 0))} "
             f"| {float(row.get('shared_ppo_loss', 0.0)):.4f} |"
         )
@@ -664,6 +805,10 @@ def main() -> None:
     parser.add_argument("--keep-native-log-dir", action="store_true")
     parser.add_argument("--episode-loop", action="store_true")
     parser.add_argument("--episodes", type=int, default=1)
+    parser.add_argument("--learned-promotion-gate", action="store_true")
+    parser.add_argument("--promotion-gate-threshold", type=float, default=0.55)
+    parser.add_argument("--promotion-gate-sample", action="store_true")
+    parser.add_argument("--promotion-gate-strength-min", type=float, default=0.0)
     args = parser.parse_args()
     if args.episode_loop:
         summary = run_native_shared_ppo_episode_loop(
@@ -673,6 +818,10 @@ def main() -> None:
             episodes=int(args.episodes),
             device=str(args.device),
             keep_native_log_dir=bool(args.keep_native_log_dir),
+            learned_promotion_gate=bool(args.learned_promotion_gate),
+            promotion_gate_threshold=float(args.promotion_gate_threshold),
+            promotion_gate_sample=bool(args.promotion_gate_sample),
+            promotion_gate_strength_min=float(args.promotion_gate_strength_min),
         )
         print(f"wrote {args.output_dir}")
         print(

@@ -1071,6 +1071,7 @@ class TransitDuetV2Runner:
             if active_plan is not None:
                 elapsed = float(trip.launch_time) - float(active_plan['origin'])
                 promotion_replan = False
+                freq_summary = None
                 if (self.timetable_promotion_replan
                         and getattr(self.env, 'frequency_tracker', None) is not None):
                     freq_summary = self.env.frequency_summary()
@@ -1079,6 +1080,20 @@ class TransitDuetV2Runner:
                         and float(freq_summary.get('freq_promotion_strength', 0.0))
                         >= self.timetable_promotion_replan_strength_min
                     )
+                learned_gate = getattr(
+                    self, 'freq_hrl_learned_promotion_gate', None)
+                if (learned_gate is not None
+                        and getattr(self.env, 'frequency_tracker', None) is not None):
+                    if freq_summary is None:
+                        freq_summary = self.env.frequency_summary()
+                    promotion_replan = bool(learned_gate(
+                        s_upper=s_upper,
+                        trip=trip,
+                        active_plan=active_plan,
+                        elapsed=elapsed,
+                        planner_key=planner_key,
+                        freq_summary=freq_summary,
+                    ))
                 if (0.0 <= elapsed < self.timetable_replan_interval_s
                         and elapsed <= self.timetable_planner.horizon_s
                         and not promotion_replan):
