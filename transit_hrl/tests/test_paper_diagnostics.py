@@ -157,6 +157,30 @@ class PaperDiagnosticsTest(unittest.TestCase):
                 json.dumps({"paired_checks": [match_check]}),
                 encoding="utf-8",
             )
+            l3_out = root / "results" / "trading_order_book_l3_replay_validation"
+            l3_out.mkdir(parents=True)
+            l3_check = {
+                "check": "adaptive_wavelet_vs_ema_fill_rate",
+                "claim": "L3 order-event replay encoder paired check",
+                "status": "supported",
+                "metric": "fill_rate",
+                "treatment": "adaptive_wavelet",
+                "control": "ema",
+                "direction": "increase",
+                "n_common": 3,
+                "delta_mean": 0.1,
+                "delta_ci95_low": 0.05,
+                "delta_ci95_high": 0.2,
+                "improvement_mean": 0.1,
+                "improvement_ci95_low": 0.05,
+                "improvement_ci95_high": 0.2,
+                "win_rate": 1.0,
+                "sign_p_value": 0.125,
+            }
+            (l3_out / "summary.json").write_text(
+                json.dumps({"paired_checks": [l3_check]}),
+                encoding="utf-8",
+            )
 
             checks = {
                 row["check"]: row
@@ -174,6 +198,54 @@ class PaperDiagnosticsTest(unittest.TestCase):
                 checks["order_book_matching_state_space_vs_ema_sharpe"]["status"],
                 "supported",
             )
+            self.assertEqual(
+                checks["order_book_l3_adaptive_wavelet_vs_ema_fill_rate"]["status"],
+                "supported",
+            )
+
+    def test_expanded_native_promotion_preferred(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            old_out = root / "results" / "transit_native_promotion_replan"
+            expanded_out = root / "results" / "transit_native_promotion_replan_expanded"
+            old_out.mkdir(parents=True)
+            expanded_out.mkdir(parents=True)
+            old_rows = [
+                {"source": "old", "seed": 1, "variant": "interval_only", "ep_reward": 10.0, "avg_wait_min": 5.0, "score": 0.0, "upper_plan_decisions": 0.0, "shared_ppo_gate_replans": 0.0},
+                {"source": "old", "seed": 1, "variant": "native_learned_gate", "ep_reward": 1.0, "avg_wait_min": 5.0, "score": 0.0, "upper_plan_decisions": 0.0, "shared_ppo_gate_replans": 0.0},
+            ]
+            expanded_rows = []
+            for seed in range(1, 6):
+                expanded_rows.append({
+                    "source": "expanded",
+                    "seed": seed,
+                    "variant": "interval_only",
+                    "ep_reward": 10.0,
+                    "avg_wait_min": 5.0,
+                    "score": 0.0,
+                    "upper_plan_decisions": 0.0,
+                    "shared_ppo_gate_replans": 0.0,
+                })
+                expanded_rows.append({
+                    "source": "expanded",
+                    "seed": seed,
+                    "variant": "native_learned_gate",
+                    "ep_reward": 20.0,
+                    "avg_wait_min": 4.0,
+                    "score": 1.0,
+                    "upper_plan_decisions": 1.0,
+                    "shared_ppo_gate_replans": 1.0,
+                })
+            (old_out / "summary.json").write_text(json.dumps({"rows": old_rows}), encoding="utf-8")
+            (expanded_out / "summary.json").write_text(json.dumps({"rows": expanded_rows}), encoding="utf-8")
+
+            checks = {
+                row["check"]: row
+                for row in build_statistical_checks(root / "results")
+            }
+            learned_reward = checks["transit_native_learned_gate_reward_vs_interval"]
+            self.assertEqual(learned_reward["n_common"], 5)
+            self.assertEqual(learned_reward["status"], "supported")
 
 
 if __name__ == "__main__":

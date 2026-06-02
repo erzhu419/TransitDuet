@@ -50,8 +50,8 @@ Example `s=0.18`, `n=36`, `z=1.96`: `0.0588`.
 | check | status | delta CI95 |
 |---|---|---:|
 | transit_learned_promotion_wait | supported | -0.009634420896740811 to -0.006195855116323389 |
-| native_learned_gate_reward | inconclusive | -12.328347916665471 to 17.84738958333338 |
-| native_learned_gate_wait | inconclusive | -0.0530041666666669 to 0.006000000000000116 |
+| native_learned_gate_reward | positive_mixed | -5.438260526315868 to 16.26581776315782 |
+| native_learned_gate_wait | not_supported | -0.0028562500000000575 to 0.04719999999999998 |
 | real_demand_control_objective | supported | 1.28256587126095 to 2.4538887158636626 |
 | real_demand_control_wait | supported | -2.281750974403621 to -1.1727880039632244 |
 | trading_leakage_constraint | supported | -1.2589940220658022 to -0.8371210591584954 |

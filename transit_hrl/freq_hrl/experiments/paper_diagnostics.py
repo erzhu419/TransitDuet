@@ -280,7 +280,10 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
             min_pairs=3,
         )
 
-    native_promotion_rows = collect_summary_rows(results_root, "transit_native_promotion_replan")
+    native_promotion_rows = (
+        collect_summary_rows(results_root, "transit_native_promotion_replan_expanded")
+        or collect_summary_rows(results_root, "transit_native_promotion_replan")
+    )
     if native_promotion_rows:
         add(
             "transit_native_promotion_reward_vs_interval",
@@ -881,6 +884,13 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
         item["check"] = f"order_book_matching_{item.get('check', 'unknown')}"
         item.setdefault("claim", "L2 order-book matching encoder paired check")
         checks.append(item)
+    order_l3 = read_json(results_root / "trading_order_book_l3_replay_validation" / "summary.json")
+    order_l3_checks = order_l3.get("paired_checks", []) if isinstance(order_l3, dict) else []
+    for row in order_l3_checks:
+        item = dict(row)
+        item["check"] = f"order_book_l3_{item.get('check', 'unknown')}"
+        item.setdefault("claim", "L3 order-event replay encoder paired check")
+        checks.append(item)
 
     return checks
 
@@ -924,6 +934,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     order_book = read_json(results_root / "trading_order_book_encoder_ablation" / "summary.json")
     order_book_depth = read_json(results_root / "trading_order_book_depth_validation" / "summary.json")
     order_book_matching = read_json(results_root / "trading_order_book_matching_validation" / "summary.json")
+    order_book_l3 = read_json(results_root / "trading_order_book_l3_replay_validation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
     neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
@@ -939,6 +950,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     order_book_rows = order_book.get("summary", [])
     order_book_depth_rows = order_book_depth.get("summary", []) if isinstance(order_book_depth, dict) else []
     order_book_matching_rows = order_book_matching.get("summary", []) if isinstance(order_book_matching, dict) else []
+    order_book_l3_rows = order_book_l3.get("summary", []) if isinstance(order_book_l3, dict) else []
     encoder_rows = encoder.get("summary", [])
     neural_encoder_rows = neural_encoder.get("summary", [])
     transit_freq = next((row for row in transit if row.get("config") == "T_freqhrl_terminal"), {})
@@ -946,6 +958,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     best_order_book = max(order_book_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     best_order_book_depth = max(order_book_depth_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     best_order_book_matching = max(order_book_matching_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
+    best_order_book_l3 = max(order_book_l3_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     adaptive = next((row for row in encoder_rows if row.get("freq_method") == "adaptive_wavelet"), {})
     neural = next((row for row in neural_encoder_rows if row.get("freq_method") == "neural_state_space"), {})
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
@@ -1085,7 +1098,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C6: public-data validation covers more than daily bars",
-            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, multi-seed spread/depth/latency stress checks, and an L2 market/passive-queue matching simulator with CSV input support.",
+            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, multi-seed spread/depth/latency stress checks, L2 market/passive-queue matching, and synthetic/CSV L3 event replay.",
             "metric": (
                 f"best intraday encoder={best_intraday.get('freq_method', 'NA')}, "
                 f"Sharpe={_fmt(best_intraday.get('sharpe'))}; "
@@ -1099,10 +1112,13 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"mode={best_order_book_matching.get('execution_mode', 'NA')} "
                 f"latency={best_order_book_matching.get('latency_bins', 'NA')}, "
                 f"Sharpe={_fmt(best_order_book_matching.get('sharpe'))}; "
-                f"L2 adaptive Sharpe={_check_metric(checks, 'order_book_matching_adaptive_wavelet_vs_ema_sharpe')}"
+                f"L2 adaptive Sharpe={_check_metric(checks, 'order_book_matching_adaptive_wavelet_vs_ema_sharpe')}; "
+                f"best L3 encoder={best_order_book_l3.get('freq_method', 'NA')}, "
+                f"Sharpe={_fmt(best_order_book_l3.get('sharpe'))}; "
+                f"L3 adaptive Sharpe={_check_metric(checks, 'order_book_l3_adaptive_wavelet_vs_ema_sharpe')}"
             ),
             "status": "supported path",
-            "remaining_gap": "Order-book adapter, stress matrix, and L2 queue-priority matching proxy exist; larger real L2/L3 feeds and full exchange event replay remain for the strongest data claim.",
+            "remaining_gap": "Order-book adapter, stress matrix, L2 queue-priority matching proxy, and L3 event replay exist; larger real L2/L3 feeds and venue-grade event replay remain for the strongest data claim.",
         },
         {
             "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
@@ -1349,7 +1365,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, native AFC/APC-profile passenger generation, calibrated causal profiles, order-book spread/depth/latency stress checks, and L2 market/passive-queue matching simulation with CSV input support. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait CIs, larger real intraday/L2-L3 order-book feeds, full exchange L3 event replay, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, native AFC/APC-profile passenger generation, calibrated causal profiles, order-book spread/depth/latency stress checks, L2 market/passive-queue matching, and synthetic/CSV L3 event replay. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait improvement CIs, larger real intraday/L2-L3 order-book feeds, venue-grade exchange event replay, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
