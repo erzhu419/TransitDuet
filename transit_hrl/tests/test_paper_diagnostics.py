@@ -208,8 +208,10 @@ class PaperDiagnosticsTest(unittest.TestCase):
             root = Path(tmp)
             old_out = root / "results" / "transit_native_promotion_replan"
             expanded_out = root / "results" / "transit_native_promotion_replan_expanded"
+            waitaware_out = root / "results" / "transit_native_wait_aware_replan_fair"
             old_out.mkdir(parents=True)
             expanded_out.mkdir(parents=True)
+            waitaware_out.mkdir(parents=True)
             old_rows = [
                 {"source": "old", "seed": 1, "variant": "interval_only", "ep_reward": 10.0, "avg_wait_min": 5.0, "score": 0.0, "upper_plan_decisions": 0.0, "shared_ppo_gate_replans": 0.0},
                 {"source": "old", "seed": 1, "variant": "native_learned_gate", "ep_reward": 1.0, "avg_wait_min": 5.0, "score": 0.0, "upper_plan_decisions": 0.0, "shared_ppo_gate_replans": 0.0},
@@ -236,8 +238,37 @@ class PaperDiagnosticsTest(unittest.TestCase):
                     "upper_plan_decisions": 1.0,
                     "shared_ppo_gate_replans": 1.0,
                 })
+            waitaware_rows = []
+            for seed in range(1, 6):
+                waitaware_rows.append({
+                    "source": "waitaware",
+                    "seed": seed,
+                    "variant": "interval_only",
+                    "ep_reward": 10.0,
+                    "avg_wait_min": 5.0,
+                    "score": 0.0,
+                    "shared_ppo_gate_replans": 0.0,
+                    "shared_ppo_wait_replan_count": 0.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 0.0,
+                    "upper_plan_target_mean": 360.0,
+                    "terminal_launch_shift_mean": 0.0,
+                })
+                waitaware_rows.append({
+                    "source": "waitaware",
+                    "seed": seed,
+                    "variant": "native_wait_aware_replan",
+                    "ep_reward": 20.0,
+                    "avg_wait_min": 4.0,
+                    "score": 1.0,
+                    "shared_ppo_gate_replans": 1.0,
+                    "shared_ppo_wait_replan_count": 1.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 12.0,
+                    "upper_plan_target_mean": 348.0,
+                    "terminal_launch_shift_mean": -8.0,
+                })
             (old_out / "summary.json").write_text(json.dumps({"rows": old_rows}), encoding="utf-8")
             (expanded_out / "summary.json").write_text(json.dumps({"rows": expanded_rows}), encoding="utf-8")
+            (waitaware_out / "summary.json").write_text(json.dumps({"rows": waitaware_rows}), encoding="utf-8")
 
             checks = {
                 row["check"]: row
@@ -246,6 +277,11 @@ class PaperDiagnosticsTest(unittest.TestCase):
             learned_reward = checks["transit_native_learned_gate_reward_vs_interval"]
             self.assertEqual(learned_reward["n_common"], 5)
             self.assertEqual(learned_reward["status"], "supported")
+            waitaware_shift = checks["transit_native_wait_aware_replan_shift_vs_interval"]
+            self.assertEqual(waitaware_shift["n_common"], 5)
+            self.assertEqual(waitaware_shift["status"], "supported")
+            waitaware_target = checks["transit_native_wait_aware_replan_target_vs_interval"]
+            self.assertEqual(waitaware_target["status"], "supported")
 
 
 if __name__ == "__main__":

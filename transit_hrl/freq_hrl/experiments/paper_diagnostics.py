@@ -432,6 +432,119 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                     ),
                 )
 
+    native_wait_aware_rows = (
+        collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair")
+        or collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair_smoke")
+        or collect_summary_rows(results_root, "transit_native_wait_aware_replan_dispatch_smoke")
+    )
+    if native_wait_aware_rows and any(
+        row.get("variant") == "native_wait_aware_replan"
+        for row in native_wait_aware_rows
+    ):
+        for check_name, metric, claim, lower_is_better in [
+            (
+                "transit_native_wait_aware_replan_reward_vs_interval",
+                "ep_reward",
+                "native wait-aware promotion replan improves Transit episode reward",
+                False,
+            ),
+            (
+                "transit_native_wait_aware_replan_wait_vs_interval",
+                "avg_wait_min",
+                "native wait-aware promotion replan lowers Transit wait",
+                True,
+            ),
+            (
+                "transit_native_wait_aware_replan_score_vs_interval",
+                "score",
+                "native wait-aware promotion replan improves Transit wait/headway score",
+                False,
+            ),
+            (
+                "transit_native_wait_aware_replan_gate_vs_interval",
+                "shared_ppo_gate_replans",
+                "native wait-aware promotion gate fires replans",
+                False,
+            ),
+            (
+                "transit_native_wait_aware_replan_count_vs_interval",
+                "shared_ppo_wait_replan_count",
+                "native wait-aware promotion policy changes upper action",
+                False,
+            ),
+            (
+                "transit_native_wait_aware_replan_shift_vs_interval",
+                "shared_ppo_wait_replan_shift_abs_mean_s",
+                "native wait-aware promotion policy changes timetable coefficients",
+                False,
+            ),
+            (
+                "transit_native_wait_aware_replan_target_vs_interval",
+                "upper_plan_target_mean",
+                "native wait-aware promotion policy lowers target headway",
+                True,
+            ),
+            (
+                "transit_native_wait_aware_replan_launch_vs_interval",
+                "terminal_launch_shift_mean",
+                "native wait-aware promotion policy changes dispatch launch times",
+                True,
+            ),
+        ]:
+            add(
+                check_name,
+                claim,
+                paired_delta_stats(
+                    native_wait_aware_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="native_wait_aware_replan",
+                    control="interval_only",
+                    lower_is_better=lower_is_better,
+                ),
+                min_pairs=5,
+            )
+        for check_name, metric, claim, lower_is_better, margin in [
+            (
+                "transit_native_wait_aware_replan_reward_noninferiority",
+                "ep_reward",
+                "native wait-aware promotion replan keeps Transit reward noninferior",
+                False,
+                15.0,
+            ),
+            (
+                "transit_native_wait_aware_replan_wait_noninferiority",
+                "avg_wait_min",
+                "native wait-aware promotion replan keeps Transit wait noninferior",
+                True,
+                0.01,
+            ),
+        ]:
+            stats = paired_delta_stats(
+                native_wait_aware_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric=metric,
+                treatment="native_wait_aware_replan",
+                control="interval_only",
+                lower_is_better=lower_is_better,
+            )
+            add(
+                check_name,
+                claim,
+                {
+                    **stats,
+                    "noninferiority_margin": float(margin),
+                },
+                min_pairs=5,
+                status=noninferiority_status(
+                    stats,
+                    max_loss=float(margin),
+                    min_pairs=5,
+                ),
+            )
+
     native_wait_rows = collect_summary_rows(results_root, "transit_native_wait_credit")
     if native_wait_rows:
         add(
@@ -981,6 +1094,14 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
     native_learned_reward_ni_status = _check_status(checks, "transit_native_learned_gate_reward_noninferiority")
     native_learned_wait_ni_status = _check_status(checks, "transit_native_learned_gate_wait_noninferiority")
+    native_waitaware_reward_status = _check_status(checks, "transit_native_wait_aware_replan_reward_vs_interval")
+    native_waitaware_wait_status = _check_status(checks, "transit_native_wait_aware_replan_wait_vs_interval")
+    native_waitaware_gate_status = _check_status(checks, "transit_native_wait_aware_replan_gate_vs_interval")
+    native_waitaware_count_status = _check_status(checks, "transit_native_wait_aware_replan_count_vs_interval")
+    native_waitaware_shift_status = _check_status(checks, "transit_native_wait_aware_replan_shift_vs_interval")
+    native_waitaware_target_status = _check_status(checks, "transit_native_wait_aware_replan_target_vs_interval")
+    native_waitaware_reward_ni_status = _check_status(checks, "transit_native_wait_aware_replan_reward_noninferiority")
+    native_waitaware_wait_ni_status = _check_status(checks, "transit_native_wait_aware_replan_wait_noninferiority")
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     real_control_objective_status = _check_status(checks, "transit_real_demand_control_objective_vs_base")
     real_control_wait_status = _check_status(checks, "transit_real_demand_control_wait_vs_base")
@@ -995,6 +1116,16 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     apc_profile_status = _check_status(checks, "demand_apc_profile_vs_fourier_mse")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
+    elif (
+        learned_promotion_supported
+        and native_waitaware_reward_status in {"supported", "positive_mixed"}
+        and native_waitaware_wait_status in {"supported", "positive_mixed"}
+        and native_waitaware_gate_status == "supported"
+        and native_waitaware_count_status == "supported"
+        and native_waitaware_shift_status == "supported"
+        and native_waitaware_target_status == "supported"
+    ):
+        promotion_status = "supported learned; native wait-aware replan path"
     elif (
         learned_promotion_supported
         and native_learned_score_status == "supported"
@@ -1063,10 +1194,17 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native learned score={_check_metric(checks, 'transit_native_learned_gate_score_vs_interval')}, "
                 f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}; "
                 f"native learned reward NI={native_learned_reward_ni_status}, "
-                f"wait NI={native_learned_wait_ni_status}"
+                f"wait NI={native_learned_wait_ni_status}; "
+                f"native wait-aware reward={_check_metric(checks, 'transit_native_wait_aware_replan_reward_vs_interval')}, "
+                f"wait={_check_metric(checks, 'transit_native_wait_aware_replan_wait_vs_interval')}, "
+                f"gate={_check_metric(checks, 'transit_native_wait_aware_replan_gate_vs_interval')}, "
+                f"shift={_check_metric(checks, 'transit_native_wait_aware_replan_shift_vs_interval')}, "
+                f"target={_check_metric(checks, 'transit_native_wait_aware_replan_target_vs_interval')}; "
+                f"wait-aware reward NI={native_waitaware_reward_ni_status}, "
+                f"wait NI={native_waitaware_wait_ni_status}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native learned gate now preserves the closed native action policy and has CI-supported gate replans plus bounded reward/wait noninferiority; episode reward/wait improvement CIs remain inconclusive, so larger off-policy/native training remains.",
+            "remaining_gap": "Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and target headways; episode reward/wait improvement CIs still need larger seed validation.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",

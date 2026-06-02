@@ -41,6 +41,8 @@ COMMON_OVERRIDES: dict[str, Any] = {
             "action_ema_alpha": 1.0,
             "replan_interval_s": 1200.0,
             "promotion_replan_strength_min": 0.80,
+            "terminal_shift_min_s": -45.0,
+            "terminal_shift_max_s": 45.0,
         },
     },
 }
@@ -66,6 +68,40 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_gate_max_hf_to_lf_ratio": 8.0,
         "_promotion_gate_max_replans": 1,
         "upper": {"timetable_planner": {"promotion_replan": False}},
+    },
+    "native_wait_aware_replan": {
+        "_learned_promotion_gate": True,
+        "_promotion_gate_threshold": 0.92,
+        "_promotion_gate_strength_min": 0.95,
+        "_promotion_gate_age_min": 1.0,
+        "_promotion_gate_min_elapsed_s": 900.0,
+        "_promotion_gate_cooldown_s": 900.0,
+        "_promotion_gate_preselect_action": True,
+        "_promotion_gate_plan_blend": 0.0,
+        "_promotion_gate_low_signal_min": 0.10,
+        "_promotion_gate_max_hf_to_lf_ratio": 8.0,
+        "_promotion_gate_max_replans": 1,
+        "_promotion_replan_policy": "wait_aware",
+        "_promotion_replan_wait_gain_s": 28.0,
+        "_promotion_replan_max_shift_s": 18.0,
+        "_promotion_replan_state_wait_weight": 0.35,
+        "_promotion_replan_frequency_weight": 0.65,
+        "_promotion_replan_min_pressure": 0.10,
+        "frequency": {
+            "hold_feedback": {
+                "enable": True,
+                "window": 512,
+                "wait_norm_s": 600.0,
+                "wait_clip": 2.0,
+                "board_norm": 8.0,
+                "high_threshold": 0.0,
+            },
+        },
+        "upper": {
+            "timetable_planner": {
+                "promotion_replan": False,
+            },
+        },
     },
 }
 
@@ -101,11 +137,19 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "score": float(summary.get("score_mean", 0.0)),
         "upper_plan_decisions": float(summary.get("upper_plan_decisions_mean", 0.0)),
         "upper_plan_reuse_ratio": float(summary.get("upper_plan_reuse_ratio_mean", 0.0)),
+        "upper_plan_target_mean": float(summary.get("upper_plan_target_mean_mean", last.get("upper_plan_target_mean", 0.0))),
+        "upper_plan_target_std": float(summary.get("upper_plan_target_std_mean", last.get("upper_plan_target_std", 0.0))),
+        "terminal_launch_shift_mean": float(summary.get("terminal_launch_shift_mean_mean", last.get("terminal_launch_shift_mean", 0.0))),
+        "terminal_launch_shift_std": float(summary.get("terminal_launch_shift_std_mean", last.get("terminal_launch_shift_std", 0.0))),
         "freq_promotion_strength": float(summary.get("freq_promotion_strength_mean", 0.0)),
         "shared_ppo_lower_samples": float(last.get("shared_ppo_lower_samples", 0.0)),
         "shared_ppo_gate_evaluations": float(last.get("shared_ppo_gate_evaluations", 0.0)),
         "shared_ppo_gate_replans": float(last.get("shared_ppo_gate_replans", 0.0)),
         "shared_ppo_gate_value_mean": float(last.get("shared_ppo_gate_value_mean", 0.0)),
+        "shared_ppo_wait_replan_count": float(last.get("shared_ppo_wait_replan_count", 0.0)),
+        "shared_ppo_wait_replan_pressure_mean": float(last.get("shared_ppo_wait_replan_pressure_mean", 0.0)),
+        "shared_ppo_wait_replan_shift_mean_s": float(last.get("shared_ppo_wait_replan_shift_mean_s", 0.0)),
+        "shared_ppo_wait_replan_shift_abs_mean_s": float(last.get("shared_ppo_wait_replan_shift_abs_mean_s", 0.0)),
         "shared_ppo_loss": float(last.get("shared_ppo_loss", 0.0)),
     }
 
@@ -122,8 +166,16 @@ def paired_checks(
         ("score", False),
         ("upper_plan_decisions", False),
     ]
-    if treatment == "native_learned_gate":
+    if treatment in {"native_learned_gate", "native_wait_aware_replan"}:
         metrics.append(("shared_ppo_gate_replans", False))
+    if treatment == "native_wait_aware_replan":
+        metrics.extend([
+            ("shared_ppo_wait_replan_count", False),
+            ("shared_ppo_wait_replan_shift_abs_mean_s", False),
+            ("shared_ppo_wait_replan_shift_mean_s", True),
+            ("upper_plan_target_mean", True),
+            ("terminal_launch_shift_mean", True),
+        ])
     for metric, lower_is_better in metrics:
         stats = paired_delta_stats(
             rows,
@@ -139,7 +191,7 @@ def paired_checks(
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
         })
-    if treatment == "native_learned_gate":
+    if treatment in {"native_learned_gate", "native_wait_aware_replan"}:
         for metric, lower_is_better, margin in [
             ("ep_reward", False, 15.0),
             ("avg_wait_min", True, 0.01),
@@ -192,6 +244,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
         promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
         promotion_gate_max_total_replans=int(overrides.get("_promotion_gate_max_total_replans", 0)),
+        promotion_replan_policy=str(overrides.get("_promotion_replan_policy", "actor")),
+        promotion_replan_wait_gain_s=float(overrides.get("_promotion_replan_wait_gain_s", 0.0)),
+        promotion_replan_max_shift_s=float(overrides.get("_promotion_replan_max_shift_s", 30.0)),
+        promotion_replan_state_wait_weight=float(overrides.get("_promotion_replan_state_wait_weight", 1.0)),
+        promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
+        promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
         lower_hf_wait_action_gain_s=variant_lower_gain,
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )
@@ -248,12 +306,13 @@ def run_validation(
     variant_rank = {variant: idx for idx, variant in enumerate(VARIANTS)}
     rows.sort(key=lambda row: (variant_rank.get(str(row["variant"]), 999), int(row["seed"])))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
-    if any(row.get("variant") == "native_learned_gate" for row in rows):
-        checks.extend(paired_checks(
-            rows,
-            min_pairs=int(min_pairs),
-            treatment="native_learned_gate",
-        ))
+    for treatment in ("native_learned_gate", "native_wait_aware_replan"):
+        if any(row.get("variant") == treatment for row in rows):
+            checks.extend(paired_checks(
+                rows,
+                min_pairs=int(min_pairs),
+                treatment=treatment,
+            ))
     summary = summarize(rows)
     payload = {
         "config_path": str(config_path),
@@ -283,11 +342,19 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "headway_cv",
             "score",
             "upper_plan_decisions",
+            "upper_plan_target_mean",
+            "upper_plan_target_std",
+            "terminal_launch_shift_mean",
+            "terminal_launch_shift_std",
             "shared_ppo_gate_evaluations",
             "shared_ppo_gate_replans",
             "shared_ppo_gate_value_mean",
+            "shared_ppo_wait_replan_count",
+            "shared_ppo_wait_replan_pressure_mean",
+            "shared_ppo_wait_replan_shift_mean_s",
+            "shared_ppo_wait_replan_shift_abs_mean_s",
         ]:
-            values = np.asarray([float(row[metric]) for row in vrows], dtype=np.float64)
+            values = np.asarray([float(row.get(metric, 0.0)) for row in vrows], dtype=np.float64)
             summary[f"{variant}_{metric}_mean"] = float(np.mean(values)) if values.size else 0.0
     return summary
 
@@ -324,8 +391,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"Each native batch uses `{payload.get('offpolicy_replay_updates', 1)}` shared-PPO replay update(s).",
         f"Runner workers: `{payload.get('workers', 1)}`.",
         "",
-        "| variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| variant | seed | reward | wait | cv | score | upper decisions | launch shift | gate replans | wait replans | shift | gate | promotion strength | samples |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["rows"]:
         lines.append(
@@ -336,7 +403,10 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
             f"| {row['headway_cv']:.4f} "
             f"| {row['score']:.4f} "
             f"| {row['upper_plan_decisions']:.1f} "
+            f"| {row.get('terminal_launch_shift_mean', 0.0):+.2f} "
             f"| {row['shared_ppo_gate_replans']:.1f} "
+            f"| {row.get('shared_ppo_wait_replan_count', 0.0):.1f} "
+            f"| {row.get('shared_ppo_wait_replan_shift_mean_s', 0.0):.2f} "
             f"| {row['shared_ppo_gate_value_mean']:.3f} "
             f"| {row['freq_promotion_strength']:.4f} "
             f"| {row['shared_ppo_lower_samples']:.0f} |"

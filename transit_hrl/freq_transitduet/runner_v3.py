@@ -1065,6 +1065,8 @@ class TransitDuetV2Runner:
         log_mu = None
         upper_decision_taken = True
         plan_origin_launch = None
+        promotion_action_override = None
+        promotion_action_override_used = False
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
@@ -1095,6 +1097,14 @@ class TransitDuetV2Runner:
                         planner_key=planner_key,
                         freq_summary=freq_summary,
                     ))
+                    if promotion_replan:
+                        promotion_action_override = getattr(
+                            self, 'freq_hrl_promotion_action_override', None)
+                    else:
+                        if hasattr(self, 'freq_hrl_promotion_action_override'):
+                            delattr(self, 'freq_hrl_promotion_action_override')
+                        if hasattr(self, 'freq_hrl_promotion_action_metadata'):
+                            delattr(self, 'freq_hrl_promotion_action_metadata')
                 if (0.0 <= elapsed < self.timetable_replan_interval_s
                         and elapsed <= self.timetable_planner.horizon_s
                         and not promotion_replan):
@@ -1104,7 +1114,11 @@ class TransitDuetV2Runner:
                     upper_decision_taken = False
                     self._ep_upper_plan_reuses += 1
 
-        if (upper_decision_taken and self.tpc_enable
+        promotion_action_override_used = (
+            upper_decision_taken and promotion_action_override is not None)
+
+        if (upper_decision_taken and not promotion_action_override_used
+                and self.tpc_enable
                 and self.target_upper_trainer is not None):
             target_mean_arr = np.asarray(
                 self.target_upper_trainer.policy_net.get_action(
@@ -1138,19 +1152,27 @@ class TransitDuetV2Runner:
                 self.upper_trainer.policy_net.get_action(
                     s_upper, deterministic=False),
                 dtype=np.float32).reshape(-1)
+        if promotion_action_override is not None:
+            if hasattr(self, 'freq_hrl_promotion_action_override'):
+                delattr(self, 'freq_hrl_promotion_action_override')
+            if hasattr(self, 'freq_hrl_promotion_action_metadata'):
+                delattr(self, 'freq_hrl_promotion_action_metadata')
 
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
             plan_origin_launch = float(trip.launch_time)
             prev_plan = self._active_timetable_plans.get(planner_key)
-            if prev_plan is not None and self.timetable_action_ema_alpha < 1.0:
+            if (prev_plan is not None
+                    and self.timetable_action_ema_alpha < 1.0
+                    and not promotion_action_override_used):
                 prev_action = np.asarray(
                     prev_plan['action'], dtype=np.float32).reshape(-1)
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                     + (1.0 - self.timetable_action_ema_alpha) * prev_action
                 ).astype(np.float32)
-            elif self.timetable_action_ema_alpha < 1.0:
+            elif (self.timetable_action_ema_alpha < 1.0
+                  and not promotion_action_override_used):
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)

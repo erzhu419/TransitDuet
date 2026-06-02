@@ -24,8 +24,17 @@ validation.
 - Completed and merged an expanded native learned-promotion validation batch:
   the original native batch plus two corrected 32-seed scheduler shards now
   cover 76 paired seeds / 228 native rows.
+- Added native wait-aware learned replan policy: when promotion is accepted, the
+  shared-PPO gate can now preselect a pressure-weighted timetable action that
+  changes the active direction's Bernstein headway coefficients instead of only
+  refreshing the current plan.
+- Fixed the native learned-gate prior when frequency hold-feedback appends
+  state features after promotion features.
+- Added fair native promotion validation support where all variants share the
+  same early-dispatch feasibility bounds, so wait-aware replanning is not
+  compared against a clipped dispatch baseline.
 - Added formal theory diagnostics for wait-credit residual and paired-CI width.
-- Refreshed paper diagnostics to include 101 statistical checks.
+- Refreshed paper diagnostics to include 111 statistical checks.
 
 New supported checks:
 
@@ -46,6 +55,13 @@ New supported checks:
   minutes, delta `+0.0169`, CI `[-0.0029, +0.0472]`
 - Native learned-gate gate-triggered replans: supported, 76 pairs,
   delta `+1.7368`, CI `[+1.5921, +1.8684]`
+- Native wait-aware replan fair smoke, 4 pairs:
+  reward delta `+3606.9063`, CI `[-666.9357, +10279.1845]`,
+  wait delta `-3.0065` minutes, CI `[-7.9857, +0.7805]`.
+  This is positive-mixed smoke evidence, not a closed CI claim.
+- Native wait-aware gate/replan mechanics in the fair smoke are supported:
+  gate replans `+1.5000`, wait-replan count `+1.5000`,
+  action-shift magnitude `+11.8103s`, and target headway `-2.8813s`.
 - Native real-demand control score: supported, 6 pairs, delta `+99.6725`,
   CI `[+62.3044, +137.0299]`
 - Native real-demand reward: supported, 6 pairs, delta `+98.7658`,
@@ -104,6 +120,14 @@ gate sweep showed that `max_total_replans=1` hurts reward/wait, while stronger
 threshold/low-frequency guards mostly degenerate to no-op. The remaining path
 is a learned replan policy that changes the high-level timetable action under a
 wait-aware objective, not only a gate that refreshes the current plan.
+
+This path now exists mechanically. The wait-aware policy uses promotion
+pressure, low-frequency demand movement, high-frequency energy, and optional
+frequency hold-feedback wait features to shift the active-direction timetable
+curve. In a fair 4-seed native smoke, it produces CI-supported gate-triggered
+action changes and target-headway reductions, with positive-mixed reward/wait
+direction. The remaining proof is larger native CI, not another gate-only
+tuning sweep.
 
 ### 2. Native Transit multi-seed performance
 
@@ -176,9 +200,10 @@ paper-ready proofs for:
 
 ## Execution Plan
 
-1. Replace the current native learned gate with a wait-aware learned replan
-   policy that can change timetable actions after promotion, then re-run the
-   expanded native CI.
+1. Scale the native wait-aware learned replan validation from 4-seed smoke to
+   expanded CI. The next success criterion is supported reward and wait, or at
+   minimum supported reward/wait noninferiority plus supported action-change
+   diagnostics.
 2. Improve native real-demand loop so wait and alighting throughput improvement
    CIs are supported; for now score/reward plus wait/alighting noninferiority
    are supported.

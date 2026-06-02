@@ -48,6 +48,52 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
         self.assertLess(checks["avg_wait_min"]["delta_mean"], 0.0)
         self.assertEqual(checks["ep_reward"]["n_common"], 2)
 
+    def test_paired_checks_include_wait_aware_replan_dispatch_metrics(self):
+        rows = []
+        for seed in (1, 2):
+            rows.extend([
+                {
+                    "seed": seed,
+                    "variant": "interval_only",
+                    "ep_reward": -10.0,
+                    "avg_wait_min": 5.0,
+                    "score": -6.0,
+                    "upper_plan_decisions": 3.0,
+                    "shared_ppo_gate_replans": 0.0,
+                    "shared_ppo_wait_replan_count": 0.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 0.0,
+                    "shared_ppo_wait_replan_shift_mean_s": 0.0,
+                    "upper_plan_target_mean": 360.0,
+                    "terminal_launch_shift_mean": 0.0,
+                },
+                {
+                    "seed": seed,
+                    "variant": "native_wait_aware_replan",
+                    "ep_reward": -9.0,
+                    "avg_wait_min": 4.7,
+                    "score": -5.7,
+                    "upper_plan_decisions": 3.0,
+                    "shared_ppo_gate_replans": 1.0,
+                    "shared_ppo_wait_replan_count": 1.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 12.0,
+                    "shared_ppo_wait_replan_shift_mean_s": -12.0,
+                    "upper_plan_target_mean": 348.0,
+                    "terminal_launch_shift_mean": -8.0,
+                },
+            ])
+        checks = {
+            row["metric"]: row
+            for row in paired_checks(
+                rows,
+                min_pairs=2,
+                treatment="native_wait_aware_replan",
+            )
+        }
+        self.assertIn("terminal_launch_shift_mean", checks)
+        self.assertLess(checks["terminal_launch_shift_mean"]["delta_mean"], 0.0)
+        self.assertIn("upper_plan_target_mean", checks)
+        self.assertLess(checks["upper_plan_target_mean"]["delta_mean"], 0.0)
+
     def test_merge_native_promotion_shards_recomputes_checks(self):
         rows = []
         for seed in (1, 2):

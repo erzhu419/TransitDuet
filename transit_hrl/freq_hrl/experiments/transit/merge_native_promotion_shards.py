@@ -60,12 +60,13 @@ def merge_native_promotion_shards(
     if not rows:
         raise ValueError("no native promotion rows found in input shard summaries")
     checks = paired_checks(rows, min_pairs=int(min_pairs))
-    if any(row.get("variant") == "native_learned_gate" for row in rows):
-        checks.extend(paired_checks(
-            rows,
-            min_pairs=int(min_pairs),
-            treatment="native_learned_gate",
-        ))
+    for treatment in ("native_learned_gate", "native_wait_aware_replan"):
+        if any(row.get("variant") == treatment for row in rows):
+            checks.extend(paired_checks(
+                rows,
+                min_pairs=int(min_pairs),
+                treatment=treatment,
+            ))
     seeds = sorted({int(row["seed"]) for row in rows})
     merged = {
         "config_path": config_paths[0] if config_paths else "",
