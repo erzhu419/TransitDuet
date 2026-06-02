@@ -4,9 +4,9 @@ This artifact states the formal claims that are currently supported by code-leve
 
 ## Statistical Coverage
 
-- checks: 79
-- supported or positive-mixed: 50
-- paired seed/source counts: min=3, median=15.0, max=89
+- checks: 86
+- supported or positive-mixed: 55
+- paired seed/source counts: min=3, median=24.0, max=89
 
 ## Theorems
 

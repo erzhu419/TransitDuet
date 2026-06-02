@@ -817,6 +817,42 @@
       "win_rate": 0.8333333333333334,
       "sign_p_value": 0.001953125,
       "status": "supported"
+    },
+    {
+      "check": "native_learned_gate_vs_interval_ep_reward_noninferiority",
+      "metric": "ep_reward",
+      "treatment": "native_learned_gate",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 12,
+      "delta_mean": 3.6935000000004643,
+      "delta_ci95_low": -12.328347916665471,
+      "delta_ci95_high": 17.84738958333338,
+      "improvement_mean": 3.6935000000004643,
+      "improvement_ci95_low": -11.795533333332045,
+      "improvement_ci95_high": 18.761437499999893,
+      "win_rate": 0.4166666666666667,
+      "sign_p_value": 1.0,
+      "noninferiority_margin": 15.0,
+      "status": "supported"
+    },
+    {
+      "check": "native_learned_gate_vs_interval_avg_wait_min_noninferiority",
+      "metric": "avg_wait_min",
+      "treatment": "native_learned_gate",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": 12,
+      "delta_mean": -0.015250000000000022,
+      "delta_ci95_low": -0.0530041666666669,
+      "delta_ci95_high": 0.006000000000000116,
+      "improvement_mean": 0.015250000000000022,
+      "improvement_ci95_low": -0.005833333333333284,
+      "improvement_ci95_high": 0.054166666666666995,
+      "win_rate": 0.16666666666666666,
+      "sign_p_value": 0.453125,
+      "noninferiority_margin": 0.01,
+      "status": "supported"
     }
   ],
   "payloads": {

@@ -16,7 +16,11 @@ from typing import Any
 
 import numpy as np
 
-from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
+from freq_hrl.experiments.statistics import (
+    claim_status,
+    noninferiority_status,
+    paired_delta_stats,
+)
 from freq_hrl.experiments.transit.native_shared_ppo import (
     TRANSIT_DUET_ROOT,
     run_native_shared_ppo_episode_loop,
@@ -199,6 +203,45 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
         })
+    control_alighted = [
+        float(row.get("native_alighted_pax", 0.0))
+        for row in rows
+        if row.get("variant") == "native_real_interval"
+    ]
+    alighted_margin = max(1.0, 0.001 * float(np.mean(control_alighted))) if control_alighted else 1.0
+    for check_name, metric, lower_is_better, margin in [
+        (
+            "native_real_demand_wait_noninferiority",
+            "native_avg_board_wait_min",
+            True,
+            0.10,
+        ),
+        (
+            "native_real_demand_alighted_noninferiority",
+            "native_alighted_pax",
+            False,
+            alighted_margin,
+        ),
+    ]:
+        stats = paired_delta_stats(
+            rows,
+            variant_key="variant",
+            pair_keys=("source", "seed"),
+            metric=metric,
+            treatment="native_real_freqhrl",
+            control="native_real_interval",
+            lower_is_better=lower_is_better,
+        )
+        checks.append({
+            "check": check_name,
+            **stats,
+            "noninferiority_margin": float(margin),
+            "status": noninferiority_status(
+                stats,
+                max_loss=float(margin),
+                min_pairs=int(min_pairs),
+            ),
+        })
     return checks
 
 
@@ -310,7 +353,12 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     checks = payload["paired_checks"]
     if checks:
         with (output_dir / "paired_checks.csv").open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=list(checks[0].keys()), lineterminator="\n")
+            fieldnames = list(checks[0].keys())
+            for row in checks[1:]:
+                for key in row:
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
             writer.writeheader()
             writer.writerows(checks)
     lines = [

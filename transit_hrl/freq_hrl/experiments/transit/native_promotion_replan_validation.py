@@ -11,7 +11,11 @@ from typing import Any
 
 import numpy as np
 
-from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
+from freq_hrl.experiments.statistics import (
+    claim_status,
+    noninferiority_status,
+    paired_delta_stats,
+)
 from freq_hrl.experiments.transit.native_shared_ppo import (
     TRANSIT_DUET_ROOT,
     run_native_shared_ppo_episode_loop,
@@ -135,6 +139,30 @@ def paired_checks(
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
         })
+    if treatment == "native_learned_gate":
+        for metric, lower_is_better, margin in [
+            ("ep_reward", False, 15.0),
+            ("avg_wait_min", True, 0.01),
+        ]:
+            stats = paired_delta_stats(
+                rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric=metric,
+                treatment=treatment,
+                control="interval_only",
+                lower_is_better=lower_is_better,
+            )
+            checks.append({
+                "check": f"{treatment}_vs_interval_{metric}_noninferiority",
+                **stats,
+                "noninferiority_margin": float(margin),
+                "status": noninferiority_status(
+                    stats,
+                    max_loss=float(margin),
+                    min_pairs=int(min_pairs),
+                ),
+            })
     return checks
 
 
@@ -276,7 +304,12 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     checks = payload["paired_checks"]
     if checks:
         with (output_dir / "paired_checks.csv").open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=list(checks[0].keys()), lineterminator="\n")
+            fieldnames = list(checks[0].keys())
+            for row in checks[1:]:
+                for key in row:
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
             writer.writeheader()
             writer.writerows(checks)
     write_report(output_dir / "report.md", payload)

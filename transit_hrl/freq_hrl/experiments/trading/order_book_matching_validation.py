@@ -149,7 +149,14 @@ def _book_imbalance(row: dict[str, Any]) -> float:
 def fill_market_order(row: dict[str, Any], signed_qty: float) -> dict[str, float]:
     qty = abs(float(signed_qty))
     if qty <= 1e-12:
-        return {"filled": 0.0, "avg_price": _book_mid(row), "slippage_bps": 0.0, "levels_used": 0.0}
+        return {
+            "filled": 0.0,
+            "avg_price": _book_mid(row),
+            "slippage_bps": 0.0,
+            "levels_used": 0.0,
+            "queue_ahead": 0.0,
+            "queue_depletion": 0.0,
+        }
     side_buy = signed_qty > 0.0
     prices = row["ask_prices"] if side_buy else row["bid_prices"]
     sizes = row["ask_sizes"] if side_buy else row["bid_sizes"]
@@ -168,7 +175,14 @@ def fill_market_order(row: dict[str, Any], signed_qty: float) -> dict[str, float
         if remaining <= 1e-12:
             break
     if filled <= 1e-12:
-        return {"filled": 0.0, "avg_price": _book_mid(row), "slippage_bps": 0.0, "levels_used": 0.0}
+        return {
+            "filled": 0.0,
+            "avg_price": _book_mid(row),
+            "slippage_bps": 0.0,
+            "levels_used": 0.0,
+            "queue_ahead": 0.0,
+            "queue_depletion": float(qty),
+        }
     avg_price = notional / filled
     mid = _book_mid(row)
     signed_slip = (avg_price - mid) / max(mid, 1e-12)
@@ -179,6 +193,70 @@ def fill_market_order(row: dict[str, Any], signed_qty: float) -> dict[str, float
         "avg_price": float(avg_price),
         "slippage_bps": float(signed_slip * 1e4),
         "levels_used": float(levels_used),
+        "queue_ahead": 0.0,
+        "queue_depletion": float(qty),
+    }
+
+
+def fill_passive_limit_order(
+    row: dict[str, Any],
+    next_row: dict[str, Any],
+    signed_qty: float,
+    *,
+    queue_ahead_fraction: float = 0.50,
+) -> dict[str, float]:
+    """Approximate best-quote queue-priority fills from two L2 snapshots."""
+    qty = abs(float(signed_qty))
+    if qty <= 1e-12:
+        return {
+            "filled": 0.0,
+            "avg_price": _book_mid(row),
+            "slippage_bps": 0.0,
+            "levels_used": 0.0,
+            "queue_ahead": 0.0,
+            "queue_depletion": 0.0,
+        }
+    side_buy = signed_qty > 0.0
+    price = float(row["bid_prices"][0] if side_buy else row["ask_prices"][0])
+    queue_size = float(row["bid_sizes"][0] if side_buy else row["ask_sizes"][0])
+    next_price = float(next_row["bid_prices"][0] if side_buy else next_row["ask_prices"][0])
+    next_size = float(next_row["bid_sizes"][0] if side_buy else next_row["ask_sizes"][0])
+    if side_buy:
+        if next_price < price - 1e-12:
+            queue_depletion = queue_size
+        elif abs(next_price - price) <= 1e-12:
+            queue_depletion = max(queue_size - next_size, 0.0)
+        else:
+            queue_depletion = 0.0
+    else:
+        if next_price > price + 1e-12:
+            queue_depletion = queue_size
+        elif abs(next_price - price) <= 1e-12:
+            queue_depletion = max(queue_size - next_size, 0.0)
+        else:
+            queue_depletion = 0.0
+    queue_ahead = max(queue_size * float(np.clip(queue_ahead_fraction, 0.0, 1.0)), 0.0)
+    fill_qty = min(qty, max(queue_depletion - queue_ahead, 0.0))
+    if fill_qty <= 1e-12:
+        return {
+            "filled": 0.0,
+            "avg_price": price,
+            "slippage_bps": 0.0,
+            "levels_used": 0.0,
+            "queue_ahead": float(queue_ahead),
+            "queue_depletion": float(queue_depletion),
+        }
+    mid = _book_mid(row)
+    signed_slip = (price - mid) / max(mid, 1e-12)
+    if not side_buy:
+        signed_slip = (mid - price) / max(mid, 1e-12)
+    return {
+        "filled": float(fill_qty if side_buy else -fill_qty),
+        "avg_price": float(price),
+        "slippage_bps": float(signed_slip * 1e4),
+        "levels_used": 1.0,
+        "queue_ahead": float(queue_ahead),
+        "queue_depletion": float(queue_depletion),
     }
 
 
@@ -187,6 +265,8 @@ def run_matching_eval(
     *,
     freq_method: str,
     latency_bins: int = 1,
+    execution_mode: str = "market",
+    queue_ahead_fraction: float = 0.50,
     max_position: float = 6.0,
     max_order_qty: float = 1.5,
     participation: float = 0.0025,
@@ -223,6 +303,8 @@ def run_matching_eval(
     fill_abs = []
     partials = 0
     levels = []
+    queue_ahead = []
+    queue_depletion = []
     promotions = 0
     delay = max(0, int(latency_bins))
     prev_mid = mids[0]
@@ -239,8 +321,17 @@ def run_matching_eval(
         order = float(np.clip(target - position, -float(max_order_qty), float(max_order_qty)))
         visible_depth = float(signal_book["bid_sizes"][0] + signal_book["ask_sizes"][0])
         order = float(np.clip(order, -participation * visible_depth, participation * visible_depth))
-        fill_book = books[min(t + delay, len(books) - 1)]
-        fill = fill_market_order(fill_book, order)
+        fill_idx = min(t + delay, len(books) - 1)
+        fill_book = books[fill_idx]
+        if str(execution_mode) == "passive_queue":
+            fill = fill_passive_limit_order(
+                fill_book,
+                books[min(fill_idx + 1, len(books) - 1)],
+                order,
+                queue_ahead_fraction=float(queue_ahead_fraction),
+            )
+        else:
+            fill = fill_market_order(fill_book, order)
         filled = float(fill["filled"])
         if abs(filled) + 1e-12 < abs(order):
             partials += 1
@@ -255,11 +346,14 @@ def run_matching_eval(
         slippages.append(float(fill["slippage_bps"]))
         fill_abs.append(abs(filled))
         levels.append(float(fill["levels_used"]))
+        queue_ahead.append(float(fill.get("queue_ahead", 0.0)))
+        queue_depletion.append(float(fill.get("queue_depletion", 0.0)))
         prev_mid = mid
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity_curve, dtype=np.float64)
     return {
         "freq_method": str(freq_method),
+        "execution_mode": str(execution_mode),
         "bars": int(len(books)),
         "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
         "sharpe": float(np.sqrt(252.0 * 6.5 * 3600.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
@@ -267,7 +361,10 @@ def run_matching_eval(
         "avg_slippage_bps": float(np.mean(slippages)) if slippages else 0.0,
         "avg_abs_fill": float(np.mean(fill_abs)) if fill_abs else 0.0,
         "partial_fill_rate": float(partials / max(len(fill_abs), 1)),
+        "fill_rate": float(np.mean(np.asarray(fill_abs, dtype=np.float64) > 0.0)) if fill_abs else 0.0,
         "avg_levels_used": float(np.mean(levels)) if levels else 0.0,
+        "avg_queue_ahead": float(np.mean(queue_ahead)) if queue_ahead else 0.0,
+        "avg_queue_depletion": float(np.mean(queue_depletion)) if queue_depletion else 0.0,
         "promotion_count": int(promotions),
         "final_position": float(position),
     }
@@ -287,11 +384,12 @@ def paired_checks(rows: list[dict[str, Any]], *, baseline: str, min_pairs: int) 
             ("max_drawdown", True),
             ("avg_slippage_bps", True),
             ("partial_fill_rate", True),
+            ("fill_rate", False),
         ]:
             stats = paired_delta_stats(
                 rows,
                 variant_key="freq_method",
-                pair_keys=("source", "seed", "latency_bins"),
+                pair_keys=("source", "seed", "latency_bins", "execution_mode"),
                 metric=metric,
                 treatment=treatment,
                 control=baseline,
@@ -315,10 +413,13 @@ def run_validation(
     levels: int,
     min_pairs: int,
     csv_files: list[Path] | None = None,
+    execution_modes: list[str] | None = None,
+    queue_ahead_fraction: float = 0.50,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
     books: list[tuple[str, int, list[dict[str, Any]]]] = []
+    modes = list(execution_modes or ["market", "passive_queue"])
     if csv_files:
         for idx, path in enumerate(csv_files):
             books.append((str(path), idx, read_l2_order_book_csv(Path(path), levels=int(levels))))
@@ -335,20 +436,24 @@ def run_validation(
             ))
     for source, seed, book in books:
         for latency in latency_bins:
-            for method in methods:
-                row = run_matching_eval(
-                    book,
-                    freq_method=str(method),
-                    latency_bins=int(latency),
-                    steps=int(steps),
-                )
-                row.update({
-                    "source": str(source),
-                    "seed": int(seed),
-                    "latency_bins": int(latency),
-                    "levels": int(levels),
-                })
-                rows.append(row)
+            for mode in modes:
+                for method in methods:
+                    row = run_matching_eval(
+                        book,
+                        freq_method=str(method),
+                        latency_bins=int(latency),
+                        execution_mode=str(mode),
+                        queue_ahead_fraction=float(queue_ahead_fraction),
+                        steps=int(steps),
+                    )
+                    row.update({
+                        "source": str(source),
+                        "seed": int(seed),
+                        "latency_bins": int(latency),
+                        "levels": int(levels),
+                        "queue_ahead_fraction": float(queue_ahead_fraction),
+                    })
+                    rows.append(row)
     checks = paired_checks(rows, baseline="ema", min_pairs=int(min_pairs))
     write_outputs(output_dir, rows, checks, sources=[source for source, _, _ in books])
     return {"summary": rows, "paired_checks": checks}
@@ -374,16 +479,16 @@ def write_outputs(
         "paired_checks": checks,
         "best": best,
         "sources": sources,
-        "boundary": "L2 market-order matching with latency, partial fills, and slippage; real CSV input is supported, but exchange queue priority is not modeled.",
+        "boundary": "L2 market/passive-queue matching with latency, partial fills, slippage, and best-level queue-priority proxy; real CSV input is supported, but full L3 event replay is not modeled.",
     }
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     lines = [
         "# L2 Order-Book Matching Validation",
         "",
-        f"- best Sharpe: `{best['freq_method']}` latency={best['latency_bins']} ({best['sharpe']:.3f})",
+        f"- best Sharpe: `{best['freq_method']}` mode={best.get('execution_mode', 'NA')} latency={best['latency_bins']} ({best['sharpe']:.3f})",
         f"- sources: `{len(sources)}`",
-        "- boundary: L2 market-order matching with latency and partial fills; no exchange queue priority",
+        "- boundary: L2 market/passive-queue matching with latency and partial fills; best-level queue priority is approximated from L2 snapshots, not full L3 event replay",
         "",
         "| check | status | metric | n | delta | CI95 low | CI95 high | win rate |",
         "|---|---|---|---:|---:|---:|---:|---:|",
@@ -407,6 +512,8 @@ def main() -> None:
     parser.add_argument("--levels", type=int, default=5)
     parser.add_argument("--min-pairs", type=int, default=5)
     parser.add_argument("--csv-files", type=Path, nargs="*", default=None)
+    parser.add_argument("--execution-modes", nargs="+", default=["market", "passive_queue"])
+    parser.add_argument("--queue-ahead-fraction", type=float, default=0.50)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_order_book_matching_validation"))
     args = parser.parse_args()
     payload = run_validation(
@@ -418,11 +525,14 @@ def main() -> None:
         levels=int(args.levels),
         min_pairs=int(args.min_pairs),
         csv_files=list(args.csv_files or []),
+        execution_modes=list(args.execution_modes),
+        queue_ahead_fraction=float(args.queue_ahead_fraction),
     )
     best = max(payload["summary"], key=lambda row: float(row["sharpe"]))
     print(
         "order_book_matching "
-        f"best={best['freq_method']} latency={best['latency_bins']} sharpe={best['sharpe']:.3f}"
+        f"best={best['freq_method']} mode={best.get('execution_mode', 'NA')} "
+        f"latency={best['latency_bins']} sharpe={best['sharpe']:.3f}"
     )
 
 

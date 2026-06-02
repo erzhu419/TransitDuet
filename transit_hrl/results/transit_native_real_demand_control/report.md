@@ -19,3 +19,5 @@ native simulator passenger loop with public AFC/APC profile mapping, not exact A
 | native_real_demand_native_avg_board_wait_min | positive_mixed | native_avg_board_wait_min | 6 | -0.0833 | -0.2251 | +0.0564 | 0.67 |
 | native_real_demand_native_alighted_pax | not_supported | native_alighted_pax | 6 | -4.8333 | -9.8333 | -0.8333 | 0.17 |
 | native_real_demand_native_avg_onboard_load | inconclusive | native_avg_onboard_load | 6 | -0.0001 | -0.0005 | +0.0003 | 0.33 |
+| native_real_demand_wait_noninferiority | supported | native_avg_board_wait_min | 6 | -0.0833 | -0.2251 | +0.0564 | 0.67 |
+| native_real_demand_alighted_noninferiority | supported | native_alighted_pax | 6 | -4.8333 | -9.8333 | -0.8333 | 0.17 |

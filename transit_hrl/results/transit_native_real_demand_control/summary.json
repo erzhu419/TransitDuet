@@ -340,6 +340,42 @@
       "win_rate": 0.3333333333333333,
       "sign_p_value": 0.6875,
       "status": "inconclusive"
+    },
+    {
+      "check": "native_real_demand_wait_noninferiority",
+      "metric": "native_avg_board_wait_min",
+      "treatment": "native_real_freqhrl",
+      "control": "native_real_interval",
+      "direction": "decrease",
+      "n_common": 6,
+      "delta_mean": -0.08326712773411948,
+      "delta_ci95_low": -0.2250987895954791,
+      "delta_ci95_high": 0.05639255668876212,
+      "improvement_mean": 0.08326712773411948,
+      "improvement_ci95_low": -0.05816675255229837,
+      "improvement_ci95_high": 0.22514081451292828,
+      "win_rate": 0.6666666666666666,
+      "sign_p_value": 0.6875,
+      "noninferiority_margin": 0.1,
+      "status": "supported"
+    },
+    {
+      "check": "native_real_demand_alighted_noninferiority",
+      "metric": "native_alighted_pax",
+      "treatment": "native_real_freqhrl",
+      "control": "native_real_interval",
+      "direction": "increase",
+      "n_common": 6,
+      "delta_mean": -4.833333333333333,
+      "delta_ci95_low": -9.833333333333334,
+      "delta_ci95_high": -0.8333333333333334,
+      "improvement_mean": -4.833333333333333,
+      "improvement_ci95_low": -9.666666666666666,
+      "improvement_ci95_high": -0.8333333333333334,
+      "win_rate": 0.16666666666666666,
+      "sign_p_value": 0.375,
+      "noninferiority_margin": 19.706833333333332,
+      "status": "supported"
     }
   ],
   "payloads": {

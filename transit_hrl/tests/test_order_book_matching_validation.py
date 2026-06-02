@@ -4,6 +4,7 @@ from pathlib import Path
 
 from freq_hrl.experiments.trading.order_book_matching_validation import (
     fill_market_order,
+    fill_passive_limit_order,
     make_synthetic_l2_order_book,
     read_l2_order_book_csv,
     run_validation,
@@ -23,6 +24,25 @@ class OrderBookMatchingValidationTest(unittest.TestCase):
         self.assertGreater(fill["levels_used"], 1.0)
         self.assertGreater(fill["slippage_bps"], 0.0)
 
+    def test_passive_limit_order_respects_queue_ahead(self):
+        row = {
+            "bid_prices": [99.9],
+            "ask_prices": [100.1],
+            "bid_sizes": [10.0],
+            "ask_sizes": [10.0],
+        }
+        next_row = {
+            "bid_prices": [99.9],
+            "ask_prices": [100.1],
+            "bid_sizes": [2.0],
+            "ask_sizes": [10.0],
+        }
+        blocked = fill_passive_limit_order(row, next_row, 4.0, queue_ahead_fraction=0.9)
+        filled = fill_passive_limit_order(row, next_row, 4.0, queue_ahead_fraction=0.1)
+        self.assertEqual(blocked["filled"], 0.0)
+        self.assertGreater(filled["filled"], 0.0)
+        self.assertLess(filled["slippage_bps"], 0.0)
+
     def test_matching_validation_writes_outputs(self):
         self.assertGreater(len(make_synthetic_l2_order_book(seed=1, steps=8, levels=3)), 0)
         with tempfile.TemporaryDirectory() as tmp:
@@ -36,6 +56,7 @@ class OrderBookMatchingValidationTest(unittest.TestCase):
                 min_pairs=2,
             )
             self.assertTrue(payload["paired_checks"])
+            self.assertIn("passive_queue", {row["execution_mode"] for row in payload["summary"]})
             self.assertTrue((Path(tmp) / "out" / "summary.json").exists())
 
     def test_matching_validation_reads_l2_csv(self):

@@ -3,6 +3,7 @@
 This runs the native Transit episode loop through the shared PPO adapter and toggles native promotion-triggered timetable replanning.
 All variants use lower HF wait action prior gain `45.0s` so promotion is validated inside the full Freq-HRL lower-control loop.
 Each native batch uses `3` shared-PPO replay update(s).
+Runner workers: `1`.
 
 | variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -54,3 +55,5 @@ Each native batch uses `3` shared-PPO replay update(s).
 | native_learned_gate_vs_interval_score | not_supported | score | 12 | -0.0068 | -0.0904 | +0.0555 | 0.33 |
 | native_learned_gate_vs_interval_upper_plan_decisions | not_supported | upper_plan_decisions | 12 | +0.0000 | +0.0000 | +0.0000 | 0.00 |
 | native_learned_gate_vs_interval_shared_ppo_gate_replans | supported | shared_ppo_gate_replans | 12 | +1.5000 | +1.0813 | +1.9167 | 0.83 |
+| native_learned_gate_vs_interval_ep_reward_noninferiority | supported | ep_reward | 12 | +3.6935 | -12.3283 | +17.8474 | 0.42 |
+| native_learned_gate_vs_interval_avg_wait_min_noninferiority | supported | avg_wait_min | 12 | -0.0153 | -0.0530 | +0.0060 | 0.17 |

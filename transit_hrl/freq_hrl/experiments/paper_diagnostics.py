@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from freq_hrl.experiments.statistics import (
     claim_status,
     format_ci,
@@ -387,6 +389,45 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 ),
                 min_pairs=5,
             )
+            for check_name, metric, claim, lower_is_better, margin in [
+                (
+                    "transit_native_learned_gate_reward_noninferiority",
+                    "ep_reward",
+                    "native learned promotion gate keeps Transit reward noninferior",
+                    False,
+                    15.0,
+                ),
+                (
+                    "transit_native_learned_gate_wait_noninferiority",
+                    "avg_wait_min",
+                    "native learned promotion gate keeps Transit wait noninferior",
+                    True,
+                    0.01,
+                ),
+            ]:
+                stats = paired_delta_stats(
+                    native_promotion_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="native_learned_gate",
+                    control="interval_only",
+                    lower_is_better=lower_is_better,
+                )
+                add(
+                    check_name,
+                    claim,
+                    {
+                        **stats,
+                        "noninferiority_margin": float(margin),
+                    },
+                    min_pairs=5,
+                    status=noninferiority_status(
+                        stats,
+                        max_loss=float(margin),
+                        min_pairs=5,
+                    ),
+                )
 
     native_wait_rows = collect_summary_rows(results_root, "transit_native_wait_credit")
     if native_wait_rows:
@@ -563,6 +604,53 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                     lower_is_better=lower_is_better,
                 ),
                 min_pairs=3,
+            )
+        alighted_margin = max(
+            1.0,
+            0.001 * _variant_metric_mean(
+                native_real_demand_rows,
+                variant="native_real_interval",
+                metric="native_alighted_pax",
+            ),
+        )
+        for check_name, metric, claim, lower_is_better, margin in [
+            (
+                "transit_native_real_demand_wait_noninferiority",
+                "native_avg_board_wait_min",
+                "Native Freq-HRL keeps boarded passenger wait noninferior under real AFC/APC demand profiles",
+                True,
+                0.10,
+            ),
+            (
+                "transit_native_real_demand_alighted_noninferiority",
+                "native_alighted_pax",
+                "Native Freq-HRL keeps completed passenger alightings noninferior under real AFC/APC demand profiles",
+                False,
+                alighted_margin,
+            ),
+        ]:
+            stats = paired_delta_stats(
+                native_real_demand_rows,
+                variant_key="variant",
+                pair_keys=("source", "seed"),
+                metric=metric,
+                treatment="native_real_freqhrl",
+                control="native_real_interval",
+                lower_is_better=lower_is_better,
+            )
+            add(
+                check_name,
+                claim,
+                {
+                    **stats,
+                    "noninferiority_margin": float(margin),
+                },
+                min_pairs=3,
+                status=noninferiority_status(
+                    stats,
+                    max_loss=float(margin),
+                    min_pairs=3,
+                ),
             )
 
     demand_rows = collect_demand_rows(results_root)
@@ -811,6 +899,23 @@ def _all_supported(checks: list[dict[str, Any]], names: list[str]) -> bool:
     return all(_check_status(checks, name) in {"supported", "positive_mixed"} for name in names)
 
 
+def _variant_metric_mean(
+    rows: list[dict[str, Any]],
+    *,
+    variant: str,
+    metric: str,
+) -> float:
+    vals = []
+    for row in rows:
+        if str(row.get("variant")) != str(variant):
+            continue
+        try:
+            vals.append(float(row.get(metric, 0.0)))
+        except (TypeError, ValueError):
+            continue
+    return float(np.mean(vals)) if vals else 0.0
+
+
 def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str, str]]:
     plan = read_json(results_root / "trading_ppo_plan_actor_critic" / "summary.json")
     constrained = read_json(results_root / "trading_ppo_primal_dual_leakage" / "summary.json")
@@ -861,6 +966,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_learned_reward_status = _check_status(checks, "transit_native_learned_gate_reward_vs_interval")
     native_learned_score_status = _check_status(checks, "transit_native_learned_gate_score_vs_interval")
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
+    native_learned_reward_ni_status = _check_status(checks, "transit_native_learned_gate_reward_noninferiority")
+    native_learned_wait_ni_status = _check_status(checks, "transit_native_learned_gate_wait_noninferiority")
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     real_control_objective_status = _check_status(checks, "transit_real_demand_control_objective_vs_base")
     real_control_wait_status = _check_status(checks, "transit_real_demand_control_wait_vs_base")
@@ -868,6 +975,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_real_wait_status = _check_status(checks, "transit_native_real_demand_wait_vs_interval")
     native_real_board_wait_status = _check_status(checks, "transit_native_real_demand_board_wait_vs_interval")
     native_real_alighted_status = _check_status(checks, "transit_native_real_demand_alighted_vs_interval")
+    native_real_wait_ni_status = _check_status(checks, "transit_native_real_demand_wait_noninferiority")
+    native_real_alighted_ni_status = _check_status(checks, "transit_native_real_demand_alighted_noninferiority")
     afc_demand_status = _check_status(checks, "demand_afc_nb_vs_fourier_mse")
     afc_profile_status = _check_status(checks, "demand_afc_profile_vs_fourier_mse")
     apc_profile_status = _check_status(checks, "demand_apc_profile_vs_fourier_mse")
@@ -886,7 +995,12 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     ):
         promotion_status = "supported learned; native learned-gate path"
     elif learned_promotion_supported and native_learned_replan_status == "supported":
-        promotion_status = "supported learned; native guarded-gate path"
+        promotion_status = (
+            "supported learned; native guarded-gate no-harm"
+            if native_learned_reward_ni_status == "supported"
+            and native_learned_wait_ni_status == "supported"
+            else "supported learned; native guarded-gate path"
+        )
     elif learned_promotion_supported and native_promotion_replan_status == "supported":
         promotion_status = "supported learned; native replan"
     elif learned_promotion_supported:
@@ -934,10 +1048,12 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native replans={_check_metric(checks, 'transit_native_promotion_replans_vs_interval')}; "
                 f"native learned reward={_check_metric(checks, 'transit_native_learned_gate_reward_vs_interval')}, "
                 f"native learned score={_check_metric(checks, 'transit_native_learned_gate_score_vs_interval')}, "
-                f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}"
+                f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}; "
+                f"native learned reward NI={native_learned_reward_ni_status}, "
+                f"wait NI={native_learned_wait_ni_status}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native learned gate now preserves the closed native action policy and has CI-supported gate replans; episode reward/wait remain inconclusive, so larger off-policy/native training remains.",
+            "remaining_gap": "Native learned gate now preserves the closed native action policy and has CI-supported gate replans plus bounded reward/wait noninferiority; episode reward/wait improvement CIs remain inconclusive, so larger off-policy/native training remains.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",
@@ -969,7 +1085,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C6: public-data validation covers more than daily bars",
-            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, multi-seed spread/depth/latency stress checks, and an L2 market-order matching simulator with CSV input support.",
+            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, multi-seed spread/depth/latency stress checks, and an L2 market/passive-queue matching simulator with CSV input support.",
             "metric": (
                 f"best intraday encoder={best_intraday.get('freq_method', 'NA')}, "
                 f"Sharpe={_fmt(best_intraday.get('sharpe'))}; "
@@ -980,12 +1096,13 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"Sharpe={_fmt(best_order_book_depth.get('sharpe'))}; "
                 f"stress adaptive Sharpe={_check_metric(checks, 'order_book_depth_adaptive_wavelet_vs_ema_sharpe')}"
                 f"; best L2 matching encoder={best_order_book_matching.get('freq_method', 'NA')} "
+                f"mode={best_order_book_matching.get('execution_mode', 'NA')} "
                 f"latency={best_order_book_matching.get('latency_bins', 'NA')}, "
                 f"Sharpe={_fmt(best_order_book_matching.get('sharpe'))}; "
                 f"L2 adaptive Sharpe={_check_metric(checks, 'order_book_matching_adaptive_wavelet_vs_ema_sharpe')}"
             ),
             "status": "supported path",
-            "remaining_gap": "Order-book adapter, stress matrix, and L2 matching simulator exist; larger real L2/L3 feeds and exchange queue-priority modeling remain for the strongest data claim.",
+            "remaining_gap": "Order-book adapter, stress matrix, and L2 queue-priority matching proxy exist; larger real L2/L3 feeds and full exchange event replay remain for the strongest data claim.",
         },
         {
             "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
@@ -1015,12 +1132,16 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native reward delta={_check_metric(checks, 'transit_native_wait_credit_reward_vs_no_wait')}; "
                 f"real-demand objective delta={_check_metric(checks, 'transit_real_demand_control_objective_vs_base')}; "
                 f"real-demand wait delta={_check_metric(checks, 'transit_real_demand_control_wait_vs_base')}; "
-                f"native real-demand wait delta={_check_metric(checks, 'transit_native_real_demand_wait_vs_interval')}"
+                f"native real-demand wait delta={_check_metric(checks, 'transit_native_real_demand_wait_vs_interval')}; "
+                f"native wait noninferiority={native_real_wait_ni_status}"
             ),
             "status": (
                 "supported native+real-demand-loop"
                 if native_wait_credit_status == "supported"
                 and native_real_wait_status == "supported"
+                else "supported native; real-demand wait-noninferior"
+                if native_wait_credit_status == "supported"
+                and native_real_wait_ni_status == "supported"
                 else "supported native; real-demand positive-mixed"
                 if native_wait_credit_status == "supported"
                 and native_real_wait_status == "positive_mixed"
@@ -1043,7 +1164,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 "Native wait-credit path is positive-mixed in the shared-PPO loop; real-demand replay exists, but native AFC/APC/OD validation still needs more seeds/episodes."
                 if native_wait_credit_status == "positive_mixed"
                 else (
-                    "Native wait-credit path is supported in the shared-PPO loop; native real-demand passenger loop has score/reward support but wait is not fully CI-supported and exact AFC/APC OD validation remains open."
+                    "Native wait-credit path is supported in the shared-PPO loop; native real-demand passenger loop has score/reward support and bounded wait noninferiority, but wait-improvement CI and exact AFC/APC OD validation remain open."
                     if native_wait_credit_status == "supported"
                     else "Native wait-credit validation harness exists, but native timetable performance is not yet supported."
                 )
@@ -1083,7 +1204,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"real-control objective delta={_check_metric(checks, 'transit_real_demand_control_objective_vs_base')}; "
                 f"native real-control score delta={_check_metric(checks, 'transit_native_real_demand_control_score_vs_interval')}; "
                 f"native board-wait delta={_check_metric(checks, 'transit_native_real_demand_board_wait_vs_interval')}; "
-                f"native alighted delta={_check_metric(checks, 'transit_native_real_demand_alighted_vs_interval')}"
+                f"native alighted delta={_check_metric(checks, 'transit_native_real_demand_alighted_vs_interval')}; "
+                f"alighted noninferiority={native_real_alighted_ni_status}"
             ),
             "status": (
                 "supported afc+apc-calibrated+native-score"
@@ -1107,7 +1229,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
             ),
             "remaining_gap": (
                 "Real AFC/APC profiles now drive native passenger generation with boarding/alighting/onboard-load metrics; score is supported, board-wait is "
-                f"{native_real_board_wait_status}, alighted throughput is {native_real_alighted_status}, and exact public OD/onboard occupancy feeds remain open."
+                f"{native_real_board_wait_status}, wait noninferiority is {native_real_wait_ni_status}, alighted improvement is {native_real_alighted_status}, alighted noninferiority is {native_real_alighted_ni_status}, and exact public OD/onboard occupancy feeds remain open."
                 if afc_profile_status == "supported" and apc_profile_status == "supported" and native_real_score_status in {"supported", "positive_mixed"}
                 else
                 "Real AFC station-hour and APC route-boarding paths are present with supported calibrated profiles and control replay; true onboard-load/alighting/OD feeds remain open."
@@ -1155,6 +1277,7 @@ def write_statistical_checks(path: Path, rows: list[dict[str, Any]]) -> None:
         "improvement_mean",
         "improvement_ci95_low",
         "improvement_ci95_high",
+        "noninferiority_margin",
         "win_rate",
         "sign_p_value",
     ]
@@ -1206,10 +1329,10 @@ def write_report(
         "## Statistical Claim Gates",
         "",
         "Deltas are `treatment - control`; `direction=decrease` means negative raw delta is the desired effect. Bootstrap intervals are paired by seed where possible.",
-        "No-tradeoff gates use a small noninferiority margin: 0.01 total-return for trading and 0.005 reward-mean for Transit.",
+        "No-tradeoff gates use small noninferiority margins: 0.01 total-return for trading, 0.005 reward-mean for Transit, 0.10 minutes for native boarded wait, and 0.1% of interval alighted throughput for native real-demand alighting.",
         "",
-        "| check | status | metric | n | delta CI95 | win rate | sign p |",
-        "|---|---|---|---:|---:|---:|---:|",
+        "| check | status | metric | n | delta CI95 | margin | win rate | sign p |",
+        "|---|---|---|---:|---:|---:|---:|---:|",
     ])
     for row in checks:
         lines.append(
@@ -1218,6 +1341,7 @@ def write_report(
             f"| {row['metric']} "
             f"| {row['n_common']} "
             f"| {format_ci(row)} "
+            f"| {_fmt(row.get('noninferiority_margin'), 4)} "
             f"| {_fmt(row.get('win_rate'), 2)} "
             f"| {_fmt(row.get('sign_p_value'), 4)} |"
         )
@@ -1225,7 +1349,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, native AFC/APC-profile passenger generation, calibrated causal profiles, order-book spread/depth/latency stress checks, and L2 matching simulation with CSV input support. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait CIs, larger real intraday/L2-L3 order-book feeds, exchange queue-priority matching, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, native AFC/APC-profile passenger generation, calibrated causal profiles, order-book spread/depth/latency stress checks, and L2 market/passive-queue matching simulation with CSV input support. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait CIs, larger real intraday/L2-L3 order-book feeds, full exchange L3 event replay, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
