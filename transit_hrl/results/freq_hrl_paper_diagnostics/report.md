@@ -28,7 +28,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 | C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198]; native-loop samples=4970 | Supported on surrogate performance plus a native shared-PPO episode loop; still needs multi-seed native performance and real-demand validation. |
 | C8: passenger waiting-time frequency credit improves control quality | supported native | surrogate wait delta=-0.1251 [-0.1468, -0.1020]; native final wait delta=-8.5908 [-20.4276, -0.9074]; native score delta=+8.6724 [+1.0542, +20.4807]; native reward delta=+2037.3278 [-66.8598, +6165.1210] | Native wait-credit path is supported in the shared-PPO loop; still needs AFC/APC-driven control validation. |
 | C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
-| C10: causal count-state demand estimators support Transit demand validation | supported afc-calibrated | all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC NB MSE delta=+16121.7347 [+6009.5751, +31280.0939]; AFC profile MSE delta=-7186235.1828 [-10935870.1938, -4496470.4747] | Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open. |
+| C10: causal count-state demand estimators support Transit demand validation | supported afc+apc-calibrated | all-demand MSE delta=+4202.4659 [+1172.4726, +8434.5613]; AFC NB MSE delta=+16121.7347 [+6009.5751, +31280.0939]; AFC profile MSE delta=-7186235.1828 [-10935870.1938, -4496470.4747]; APC profile MSE delta=-5034.9993 [-8843.9598, -2369.0635] | Real AFC station-hour and APC route-boarding paths are present with supported calibrated profiles; true onboard-load/alighting/OD feeds remain open. |
 
 ## Statistical Claim Gates
 
@@ -58,15 +58,21 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | final_ep_reward | 5 | +2037.3278 [-66.8598, +6165.1210] | 0.60 | 1.0000 |
 | transit_native_wait_credit_score_vs_no_wait | supported | final_score | 5 | +8.6724 [+1.0542, +20.4807] | 0.80 | 0.3750 |
 | transit_native_wait_credit_active_vs_no_wait | supported | freq_wait_upper_credit_std | 5 | +0.4500 [+0.4500, +0.4500] | 1.00 | 0.0625 |
-| demand_nb_vs_fourier_mse | not_supported | mse | 65 | +5893.6045 [+1952.0454, +11648.3741] | 0.52 | 0.8043 |
-| demand_nb_vs_fourier_mae | not_supported | mae | 65 | +0.2650 [-0.6954, +1.2583] | 0.55 | 0.4570 |
-| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 65 | +77.7153 [+46.8625, +116.2732] | 0.32 | 0.0059 |
+| demand_nb_vs_fourier_mse | not_supported | mse | 89 | +4202.4659 [+1172.4726, +8434.5613] | 0.57 | 0.2031 |
+| demand_nb_vs_fourier_mae | positive_mixed | mae | 89 | -0.0693 [-0.9110, +0.7818] | 0.61 | 0.0558 |
+| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 89 | +70.6436 [+45.4303, +98.7533] | 0.27 | 0.0000 |
 | demand_afc_nb_vs_fourier_mse | not_supported | mse | 24 | +16121.7347 [+6009.5751, +31280.0939] | 0.08 | 0.0000 |
 | demand_afc_nb_vs_fourier_mae | not_supported | mae | 24 | +3.8859 [+2.7080, +5.3789] | 0.00 | 0.0000 |
 | demand_afc_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 24 | +168.7536 [+97.1531, +257.5680] | 0.12 | 0.0003 |
 | demand_afc_profile_vs_fourier_mse | supported | mse | 24 | -7186235.1828 [-10935870.1938, -4496470.4747] | 1.00 | 0.0000 |
 | demand_afc_profile_vs_fourier_mae | supported | mae | 24 | -1487.0751 [-1840.2423, -1211.6740] | 1.00 | 0.0000 |
 | demand_afc_profile_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 24 | -6612.4993 [-8039.1114, -5475.0716] | 1.00 | 0.0000 |
+| demand_apc_nb_vs_fourier_mse | supported | mse | 24 | -377.7009 [-767.6740, -71.2334] | 0.71 | 0.0639 |
+| demand_apc_nb_vs_fourier_mae | positive_mixed | mae | 24 | -0.9749 [-2.4697, +0.6107] | 0.75 | 0.0227 |
+| demand_apc_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 24 | +51.4912 [+18.7151, +94.3915] | 0.12 | 0.0003 |
+| demand_apc_profile_vs_fourier_mse | supported | mse | 24 | -5034.9993 [-8843.9598, -2369.0635] | 0.96 | 0.0000 |
+| demand_apc_profile_vs_fourier_mae | supported | mae | 24 | -30.3136 [-41.5414, -20.9693] | 1.00 | 0.0000 |
+| demand_apc_profile_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 24 | -136.5008 [-180.4619, -100.6444] | 1.00 | 0.0000 |
 | trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 |
 | trading_constraint_return_tradeoff | supported | total_return | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 |
 | trading_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 |
@@ -76,4 +82,4 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 ## Paper Boundary
 
-The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, and an AFC-calibrated causal profile. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, true OD demand feeds, and broader seed-level statistical tests remain open.
+The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, and calibrated causal profiles. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.

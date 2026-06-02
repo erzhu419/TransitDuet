@@ -2,8 +2,8 @@
 
 - checks: 36
 - enough paired seeds/sources: 32
-- supported checks: 25
-- paper-ready checks: 16
+- supported checks: 23
+- paper-ready checks: 15
 - n_common range: 3 / 10.0 / 65
 
 `paper_ready` requires supported status, enough pairs, positive improvement CI, and either sign-test p <= threshold or at least 10 pairs.
@@ -21,11 +21,11 @@
 | transit_native_promotion_reward_vs_interval | inconclusive | 12 | +0.0168 [-11.2749, +16.2435] | 0.25 | 0.1460 | False |
 | transit_native_promotion_wait_vs_interval | not_supported | 12 | +0.0092 [-0.0373, +0.0716] | 0.50 | 0.5078 | False |
 | transit_native_promotion_replans_vs_interval | supported | 12 | +49.4167 [+36.4146, +62.0000] | 1.00 | 0.0005 | True |
-| transit_native_learned_gate_reward_vs_interval | positive_mixed | 12 | +11.1923 [-9.1302, +33.6636] | 0.58 | 0.7744 | False |
-| transit_native_learned_gate_wait_vs_interval | inconclusive | 12 | -0.0066 [-0.0523, +0.0438] | 0.33 | 1.0000 | False |
-| transit_native_learned_gate_score_vs_interval | supported | 12 | +0.0385 [+0.0047, +0.0752] | 0.58 | 0.1797 | False |
-| transit_native_learned_gate_replans_vs_interval | supported | 12 | +4.3333 [+3.2500, +5.5000] | 1.00 | 0.0005 | True |
-| transit_native_learned_gate_gate_replans_vs_interval | supported | 12 | +15.6667 [+11.0000, +20.4167] | 1.00 | 0.0005 | True |
+| transit_native_learned_gate_reward_vs_interval | inconclusive | 12 | +3.6935 [-12.3283, +17.8474] | 0.42 | 1.0000 | False |
+| transit_native_learned_gate_wait_vs_interval | inconclusive | 12 | -0.0153 [-0.0530, +0.0060] | 0.17 | 0.4531 | False |
+| transit_native_learned_gate_score_vs_interval | not_supported | 12 | -0.0068 [-0.0904, +0.0555] | 0.33 | 1.0000 | False |
+| transit_native_learned_gate_replans_vs_interval | not_supported | 12 | +0.0000 [+0.0000, +0.0000] | 0.00 | 1.0000 | False |
+| transit_native_learned_gate_gate_replans_vs_interval | supported | 12 | +1.5000 [+1.0813, +1.9167] | 0.83 | 0.0020 | True |
 | transit_native_wait_credit_final_wait_vs_no_wait | supported | 5 | -8.5908 [-20.4276, -0.9074] | 0.80 | 0.3750 | False |
 | transit_native_wait_credit_mean_wait_vs_no_wait | supported | 5 | -6.1649 [-16.1955, -0.4631] | 0.80 | 0.3750 | False |
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | 5 | +2037.3278 [-66.8598, +6165.1210] | 0.60 | 1.0000 | False |

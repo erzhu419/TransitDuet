@@ -495,6 +495,45 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=5,
                 require_ci=(metric == "mse"),
             )
+    apc_rows = [
+        row for row in demand_rows
+        if str(row.get("source")) == "transit_public_apc_demand_estimator"
+    ]
+    apc_methods = {str(row.get("method")) for row in apc_rows}
+    if {"dynamic_harmonic_nb", "fourier"} <= apc_methods:
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            add(
+                f"demand_apc_nb_vs_fourier_{metric}",
+                "dynamic harmonic count estimator on real APC route-halfhour boardings",
+                paired_delta_stats(
+                    apc_rows,
+                    variant_key="method",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="dynamic_harmonic_nb",
+                    control="fourier",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+                require_ci=(metric == "mse"),
+            )
+    if {"apc_route_profile", "fourier"} <= apc_methods:
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            add(
+                f"demand_apc_profile_vs_fourier_{metric}",
+                "APC-calibrated causal route-halfhour profile on real APC boardings",
+                paired_delta_stats(
+                    apc_rows,
+                    variant_key="method",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="apc_route_profile",
+                    control="fourier",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+                require_ci=(metric == "mse"),
+            )
 
     trading_rows = collect_per_seed_rows(
         results_root,
@@ -676,6 +715,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     afc_demand_status = _check_status(checks, "demand_afc_nb_vs_fourier_mse")
     afc_profile_status = _check_status(checks, "demand_afc_profile_vs_fourier_mse")
+    apc_profile_status = _check_status(checks, "demand_apc_profile_vs_fourier_mse")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
     elif (
@@ -852,19 +892,24 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C10: causal count-state demand estimators support Transit demand validation",
-            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source across synthetic/copy/GTFS traces; real MTA AFC station-hour ridership also includes a causal AFC-calibrated daily station-hour profile.",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source across synthetic/copy/GTFS traces; real MTA AFC station-hour ridership and Halifax APC route boardings include causal calibrated profile baselines.",
             "metric": (
                 f"all-demand MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}; "
                 f"AFC NB MSE delta={_check_metric(checks, 'demand_afc_nb_vs_fourier_mse')}; "
-                f"AFC profile MSE delta={_check_metric(checks, 'demand_afc_profile_vs_fourier_mse')}"
+                f"AFC profile MSE delta={_check_metric(checks, 'demand_afc_profile_vs_fourier_mse')}; "
+                f"APC profile MSE delta={_check_metric(checks, 'demand_apc_profile_vs_fourier_mse')}"
             ),
             "status": (
-                "supported afc-calibrated"
+                "supported afc+apc-calibrated"
+                if afc_profile_status == "supported" and apc_profile_status == "supported"
+                else "supported afc-calibrated"
                 if afc_profile_status == "supported"
                 else _check_status(checks, "demand_nb_vs_fourier_mse")
             ),
             "remaining_gap": (
-                "Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open."
+                "Real AFC station-hour and APC route-boarding paths are present with supported calibrated profiles; true onboard-load/alighting/OD feeds remain open."
+                if afc_profile_status == "supported" and apc_profile_status == "supported"
+                else "Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open."
                 if afc_profile_status == "supported" and afc_demand_status == "not_supported"
                 else (
                     "Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and stronger AFC calibration remain open."
@@ -975,7 +1020,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, and an AFC-calibrated causal profile. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, and calibrated causal profiles. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
