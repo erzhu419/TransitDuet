@@ -106,6 +106,30 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertTrue(np.allclose(action4, action5, atol=1e-6))
         self.assertTrue(np.allclose(lower4, lower5, atol=1e-6))
 
+    def test_hold_feedback_seed_alignment_preserves_native_action_policy(self):
+        bridge_base = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=False,
+            native_policy_init_seed=31,
+        )
+        bridge_hold = NativeTransitPPOBridge.from_runner(
+            _FakeHoldFeedbackRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+            native_policy_init_seed=31,
+        )
+        state_base = np.asarray([0.0, 0.25, 0.50, 0.75, 1.0], dtype=np.float32)
+        state_hold = np.concatenate([
+            state_base,
+            np.asarray([0.2, 1.4, 0.1, 0.9], dtype=np.float32),
+        ])
+        action_base = bridge_base.act_upper_native(
+            state_base, sample=False)["native_action"]
+        action_hold = bridge_hold.act_upper_native(
+            state_hold, sample=False)["native_action"]
+        self.assertTrue(np.allclose(action_base, action_hold, atol=1e-6))
+
     def test_learned_gate_sampled_action_preserves_native_policy(self):
         import torch
 
@@ -213,6 +237,174 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertAlmostEqual(float(adjusted[3]), float(active_action[3]), places=5)
         self.assertGreater(meta["pressure"], 0.0)
         self.assertLess(meta["signed_shift_s"], 0.0)
+
+    def test_wait_aware_replan_uses_same_direction_wait_feedback(self):
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeHoldFeedbackRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_low_demand": 0.0,
+            "freq_low_forecast": 0.0,
+            "freq_low_slope": 0.0,
+            "freq_high_energy": 0.0,
+            "freq_promotion_strength": 0.0,
+        }
+        other_wait_state = np.zeros(9, dtype=np.float32)
+        other_wait_state[-1] = 1.0
+        unchanged, meta0 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=other_wait_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+        )
+        self.assertTrue(np.allclose(unchanged, active_action, atol=1e-5))
+        self.assertEqual(meta0["abs_shift_s"], 0.0)
+
+        same_wait_state = np.zeros(9, dtype=np.float32)
+        same_wait_state[-3] = 1.0
+        adjusted, meta1 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=same_wait_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+        )
+        self.assertLess(float(adjusted[0]), float(active_action[0]))
+        self.assertGreater(meta1["abs_shift_s"], 0.0)
+
+        held_state = np.zeros(9, dtype=np.float32)
+        held_state[-4] = 1.0
+        held_state[-3] = 1.0
+        guarded, meta2 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=held_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            hold_guard_weight=1.0,
+        )
+        self.assertTrue(np.allclose(guarded, active_action, atol=1e-5))
+        self.assertEqual(meta2["abs_shift_s"], 0.0)
+        self.assertEqual(meta2["state_same_hold"], 1.0)
+        self.assertEqual(meta2["state_same_wait"], 1.0)
+
+        low_wait_state = np.zeros(9, dtype=np.float32)
+        low_wait_state[-3] = 0.4
+        low_wait_guarded, meta3 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=low_wait_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            same_wait_min=0.55,
+        )
+        self.assertTrue(np.allclose(low_wait_guarded, active_action, atol=1e-5))
+        self.assertEqual(meta3["abs_shift_s"], 0.0)
+        self.assertEqual(meta3["wait_guard_active"], 1.0)
+
+    def test_wait_aware_replan_respects_dispatch_gap_guard(self):
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeHoldFeedbackRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_low_demand": 0.0,
+            "freq_low_forecast": 0.0,
+            "freq_low_slope": 0.0,
+            "freq_high_energy": 0.0,
+            "freq_promotion_strength": 0.0,
+        }
+        bunched_state = np.zeros(13, dtype=np.float32)
+        bunched_state[3] = 0.50
+        bunched_state[8] = 1.00
+        bunched_state[-3] = 1.0
+        guarded, meta0 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=bunched_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            gap_guard_min_ratio=0.95,
+        )
+        self.assertTrue(np.allclose(guarded, active_action, atol=1e-5))
+        self.assertEqual(meta0["abs_shift_s"], 0.0)
+        self.assertEqual(meta0["gap_guard_active"], 1.0)
+
+        delayed_state = bunched_state.copy()
+        delayed_state[3] = 1.20
+        adjusted, meta1 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=delayed_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            gap_guard_min_ratio=0.95,
+        )
+        self.assertLess(float(adjusted[0]), float(active_action[0]))
+        self.assertEqual(meta1["gap_guard_active"], 0.0)
+
+        extreme_gap_state = bunched_state.copy()
+        extreme_gap_state[3] = 1.60
+        guarded_high, meta2 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=extreme_gap_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            gap_guard_min_ratio=0.95,
+            gap_guard_max_ratio=1.30,
+        )
+        self.assertTrue(np.allclose(guarded_high, active_action, atol=1e-5))
+        self.assertEqual(meta2["abs_shift_s"], 0.0)
+        self.assertEqual(meta2["gap_guard_active"], 1.0)
 
     def test_learned_gate_hook_can_preselect_wait_aware_replan_action(self):
         runner = _FakeNativeRunner()

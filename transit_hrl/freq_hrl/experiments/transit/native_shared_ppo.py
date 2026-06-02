@@ -52,7 +52,7 @@ def _low_signal_from_freq_summary(freq_summary: dict[str, Any]) -> float:
     )
 
 
-def _state_wait_pressure(state: Any, *, holdfb_dim: int = 4) -> float:
+def _state_hold_wait_feedback(state: Any, *, holdfb_dim: int = 4) -> dict[str, float]:
     """Read appended frequency hold/wait feedback features when present.
 
     Runner v3 appends `[same_hold, same_wait, other_hold, other_wait]`.
@@ -61,9 +61,46 @@ def _state_wait_pressure(state: Any, *, holdfb_dim: int = 4) -> float:
     """
     arr = _array(state, dtype=np.float64)
     if arr.size < int(holdfb_dim) or int(holdfb_dim) < 4:
-        return 0.0
+        return {
+            "same_hold": 0.0,
+            "same_wait": 0.0,
+            "other_hold": 0.0,
+            "other_wait": 0.0,
+        }
     tail = arr[-int(holdfb_dim):]
-    return max(float(tail[1]), float(tail[3]), 0.0)
+    return {
+        "same_hold": max(float(tail[0]), 0.0),
+        "same_wait": max(float(tail[1]), 0.0),
+        "other_hold": max(float(tail[2]), 0.0),
+        "other_wait": max(float(tail[3]), 0.0),
+    }
+
+
+def _state_wait_pressure(
+    state: Any,
+    *,
+    holdfb_dim: int = 4,
+    hold_guard_weight: float = 0.0,
+) -> float:
+    feedback = _state_hold_wait_feedback(state, holdfb_dim=int(holdfb_dim))
+    same_hold = feedback["same_hold"]
+    same_wait = feedback["same_wait"]
+    other_wait = feedback["other_wait"]
+    return max(
+        same_wait
+        - 0.5 * other_wait
+        - max(float(hold_guard_weight), 0.0) * same_hold,
+        0.0,
+    )
+
+
+def _state_dispatch_gap_ratio(state: Any) -> float:
+    """Return current same-direction dispatch gap / scheduled headway if present."""
+    arr = _array(state, dtype=np.float64)
+    if arr.size <= 8:
+        return 1.0
+    scheduled = max(float(arr[8]), 1e-6)
+    return max(float(arr[3]), 0.0) / scheduled
 
 
 def _direction_action_slice(action_size: int, planner_key: Any) -> slice:
@@ -88,6 +125,10 @@ def wait_aware_replan_action(
     state_wait_weight: float = 1.0,
     frequency_weight: float = 1.0,
     min_pressure: float = 0.0,
+    hold_guard_weight: float = 0.0,
+    same_wait_min: float = 0.0,
+    gap_guard_min_ratio: float = 0.0,
+    gap_guard_max_ratio: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     """Build a promotion-triggered timetable action that reacts to wait pressure.
 
@@ -100,7 +141,13 @@ def wait_aware_replan_action(
     low_signal = _low_signal_from_freq_summary(freq_summary)
     hf_energy = max(float(freq_summary.get("freq_high_energy", 0.0)), 0.0)
     promotion_strength = max(float(freq_summary.get("freq_promotion_strength", 0.0)), 0.0)
-    state_wait = _state_wait_pressure(state, holdfb_dim=int(holdfb_dim))
+    hold_wait = _state_hold_wait_feedback(state, holdfb_dim=int(holdfb_dim))
+    gap_ratio = _state_dispatch_gap_ratio(state)
+    state_wait = _state_wait_pressure(
+        state,
+        holdfb_dim=int(holdfb_dim),
+        hold_guard_weight=float(hold_guard_weight),
+    )
     freq_pressure = min(
         1.0,
         max(low_signal, 0.0)
@@ -112,15 +159,43 @@ def wait_aware_replan_action(
         + float(state_wait_weight) * max(state_wait, 0.0)
     )
     pressure = max(0.0, min(1.0, pressure))
-    if pressure < float(min_pressure):
+    gap_guard_active = (
+        float(gap_guard_min_ratio) > 0.0
+        and gap_ratio < float(gap_guard_min_ratio)
+    )
+    gap_guard_active = gap_guard_active or (
+        float(gap_guard_max_ratio) > 0.0
+        and gap_ratio > float(gap_guard_max_ratio)
+    )
+    wait_guard_active = (
+        float(same_wait_min) > 0.0
+        and float(hold_wait["same_wait"]) < float(same_wait_min)
+    )
+    if pressure < float(min_pressure) or gap_guard_active or wait_guard_active:
         return active.astype(np.float32), {
             "pressure": float(pressure),
             "state_wait_pressure": float(state_wait),
             "frequency_pressure": float(freq_pressure),
+            "state_same_hold": float(hold_wait["same_hold"]),
+            "state_same_wait": float(hold_wait["same_wait"]),
+            "state_other_hold": float(hold_wait["other_hold"]),
+            "state_other_wait": float(hold_wait["other_wait"]),
+            "state_dispatch_gap_ratio": float(gap_ratio),
+            "gap_guard_active": float(gap_guard_active),
+            "wait_guard_active": float(wait_guard_active),
+            "shift_pressure": 0.0,
             "signed_shift_s": 0.0,
             "abs_shift_s": 0.0,
         }
-    shift = -min(abs(float(max_shift_s)), abs(float(wait_gain_s)) * pressure)
+    if float(min_pressure) > 0.0:
+        shift_pressure = (
+            (pressure - float(min_pressure))
+            / max(1.0 - float(min_pressure), 1e-6)
+        )
+    else:
+        shift_pressure = pressure
+    shift_pressure = max(0.0, min(1.0, float(shift_pressure)))
+    shift = -min(abs(float(max_shift_s)), abs(float(wait_gain_s)) * shift_pressure)
     action = active.copy()
     sl = _direction_action_slice(action.size, planner_key)
     n_coeff = int(action[sl].size)
@@ -136,6 +211,14 @@ def wait_aware_replan_action(
         "pressure": float(pressure),
         "state_wait_pressure": float(state_wait),
         "frequency_pressure": float(freq_pressure),
+        "state_same_hold": float(hold_wait["same_hold"]),
+        "state_same_wait": float(hold_wait["same_wait"]),
+        "state_other_hold": float(hold_wait["other_hold"]),
+        "state_other_wait": float(hold_wait["other_wait"]),
+        "state_dispatch_gap_ratio": float(gap_ratio),
+        "gap_guard_active": 0.0,
+        "wait_guard_active": 0.0,
+        "shift_pressure": float(shift_pressure),
         "signed_shift_s": float(np.mean(realized[sl])) if realized[sl].size else 0.0,
         "abs_shift_s": float(np.mean(np.abs(realized[sl]))) if realized[sl].size else 0.0,
     }
@@ -229,7 +312,9 @@ class NativeTransitPPOBridge:
             learning_rate=float(learning_rate),
             device=str(device),
         ))
-        if bool(contract.learned_promotion_gate) and native_policy_init_seed is not None:
+        if (native_policy_init_seed is not None
+                and (bool(contract.learned_promotion_gate)
+                     or int(contract.upper_hold_feedback_dim) > 0)):
             self.align_native_policy_from_seed(
                 int(native_policy_init_seed),
                 hidden_dim=int(hidden_dim),
@@ -301,12 +386,15 @@ class NativeTransitPPOBridge:
         learning_rate: float,
         device: str,
     ) -> None:
-        """Keep the native action policy identical when appending a gate head."""
-        if not bool(self.contract.learned_promotion_gate):
-            return
+        """Keep native actions identical when adding gate/hold-feedback inputs."""
         _set_reproducible_seed(int(seed))
+        reference_upper_state_dim = max(
+            1,
+            int(self.contract.upper_state_dim)
+            - max(int(self.contract.upper_hold_feedback_dim), 0),
+        )
         baseline = DualActorCriticPPO(DualPPOConfig(
-            upper_state_dim=int(self.contract.upper_state_dim),
+            upper_state_dim=int(reference_upper_state_dim),
             lower_state_dim=int(self.contract.lower_state_dim),
             upper_action_dim=int(self.contract.upper_action_dim),
             lower_action_dim=int(self.contract.lower_action_dim),
@@ -318,26 +406,49 @@ class NativeTransitPPOBridge:
         try:
             import torch
 
+            def copy_network_prefix(src_net, dst_net, *, output_rows: int | None = None) -> None:
+                src_linears = [
+                    module for module in src_net
+                    if isinstance(module, torch.nn.Linear)
+                ]
+                dst_linears = [
+                    module for module in dst_net
+                    if isinstance(module, torch.nn.Linear)
+                ]
+                if len(src_linears) != len(dst_linears):
+                    return
+                for idx, (src, dst) in enumerate(zip(src_linears, dst_linears)):
+                    is_first = idx == 0
+                    is_last = idx == len(src_linears) - 1
+                    rows = int(src.weight.shape[0])
+                    if is_last and output_rows is not None:
+                        rows = min(rows, int(output_rows))
+                    cols = int(src.weight.shape[1])
+                    if is_first:
+                        cols = min(cols, int(reference_upper_state_dim))
+                    rows = min(rows, int(dst.weight.shape[0]))
+                    cols = min(cols, int(dst.weight.shape[1]))
+                    dst.weight.zero_()
+                    if dst.bias is not None:
+                        dst.bias.zero_()
+                    dst.weight[:rows, :cols].copy_(src.weight[:rows, :cols])
+                    if src.bias is not None and dst.bias is not None:
+                        dst.bias[:rows].copy_(src.bias[:rows])
+
             with torch.no_grad():
-                src_modules = list(baseline.upper_actor.net)
-                dst_modules = list(self.model.upper_actor.net)
-                for src_mod, dst_mod in zip(src_modules[:-1], dst_modules[:-1]):
-                    if hasattr(src_mod, "state_dict") and hasattr(dst_mod, "load_state_dict"):
-                        if all(
-                            key in dst_mod.state_dict()
-                            and tuple(value.shape) == tuple(dst_mod.state_dict()[key].shape)
-                            for key, value in src_mod.state_dict().items()
-                        ):
-                            dst_mod.load_state_dict(src_mod.state_dict())
-                src = baseline.upper_actor.net[-1]
-                dst = self.model.upper_actor.net[-1]
-                dst.weight[:int(self.contract.upper_action_dim)].copy_(src.weight)
-                dst.bias[:int(self.contract.upper_action_dim)].copy_(src.bias)
+                copy_network_prefix(
+                    baseline.upper_actor.net,
+                    self.model.upper_actor.net,
+                    output_rows=int(self.contract.upper_action_dim),
+                )
+                copy_network_prefix(
+                    baseline.upper_value.net,
+                    self.model.upper_value.net,
+                )
                 self.model.upper_actor.log_std[:int(self.contract.upper_action_dim)].copy_(
                     baseline.upper_actor.log_std
                 )
             self.model.lower_actor.load_state_dict(baseline.lower_actor.state_dict())
-            self.model.upper_value.load_state_dict(baseline.upper_value.state_dict())
             self.model.lower_value.load_state_dict(baseline.lower_value.state_dict())
         except Exception:
             return
@@ -490,6 +601,10 @@ class _SharedPPOPolicyProxy:
         self.gate_replans = 0
         self.gate_values: list[float] = []
         self.wait_replan_pressures: list[float] = []
+        self.wait_replan_shift_pressures: list[float] = []
+        self.wait_replan_gap_ratios: list[float] = []
+        self.wait_replan_same_holds: list[float] = []
+        self.wait_replan_same_waits: list[float] = []
         self.wait_replan_signed_shifts: list[float] = []
         self.wait_replan_abs_shifts: list[float] = []
 
@@ -564,6 +679,18 @@ class _SharedPPOPolicyProxy:
                 if preselect_metadata is not None:
                     self.wait_replan_pressures.append(float(
                         preselect_metadata.get("pressure", 0.0)
+                    ))
+                    self.wait_replan_shift_pressures.append(float(
+                        preselect_metadata.get("shift_pressure", 0.0)
+                    ))
+                    self.wait_replan_gap_ratios.append(float(
+                        preselect_metadata.get("state_dispatch_gap_ratio", 0.0)
+                    ))
+                    self.wait_replan_same_holds.append(float(
+                        preselect_metadata.get("state_same_hold", 0.0)
+                    ))
+                    self.wait_replan_same_waits.append(float(
+                        preselect_metadata.get("state_same_wait", 0.0)
                     ))
                     self.wait_replan_signed_shifts.append(float(
                         preselect_metadata.get("signed_shift_s", 0.0)
@@ -733,6 +860,12 @@ def install_shared_ppo_episode_loop(
     promotion_replan_state_wait_weight: float = 1.0,
     promotion_replan_frequency_weight: float = 1.0,
     promotion_replan_min_pressure: float = 0.0,
+    promotion_replan_require_shift: bool = False,
+    promotion_replan_hold_guard_weight: float = 0.0,
+    promotion_replan_same_wait_min: float = 0.0,
+    promotion_replan_gap_guard_min_ratio: float = 0.0,
+    promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_base_action: str = "active",
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
@@ -820,8 +953,20 @@ def install_shared_ppo_episode_loop(
                     "wait_aware_replan",
                     "learned_wait_aware",
                 }:
+                    replan_base = np.asarray(
+                        active_plan.get("action"), dtype=np.float32).reshape(-1)
+                    base_mode = str(promotion_replan_base_action).lower()
+                    if base_mode in {"neutral", "zero", "zero_delta"}:
+                        replan_base = np.zeros_like(replan_base, dtype=np.float32)
+                    elif base_mode in {"midpoint", "mid"}:
+                        replan_base = (
+                            0.5 * (
+                                np.asarray(bridge.upper_action_low, dtype=np.float32)
+                                + np.asarray(bridge.upper_action_high, dtype=np.float32)
+                            )
+                        ).reshape(-1)
                     native_override, preselect_metadata = wait_aware_replan_action(
-                        active_plan.get("action"),
+                        replan_base,
                         bridge=bridge,
                         planner_key=key,
                         freq_summary=freq_summary,
@@ -832,7 +977,14 @@ def install_shared_ppo_episode_loop(
                         state_wait_weight=float(promotion_replan_state_wait_weight),
                         frequency_weight=float(promotion_replan_frequency_weight),
                         min_pressure=float(promotion_replan_min_pressure),
+                        hold_guard_weight=float(promotion_replan_hold_guard_weight),
+                        same_wait_min=float(promotion_replan_same_wait_min),
+                        gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
+                        gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
                     )
+                    if (bool(promotion_replan_require_shift)
+                            and float(preselect_metadata.get("abs_shift_s", 0.0)) <= 1e-6):
+                        return False
             promote = upper_proxy.evaluate_promotion_gate(
                 kwargs["s_upper"],
                 threshold=float(promotion_gate_threshold),
@@ -931,6 +1083,10 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_gate_value_mean",
         "shared_ppo_wait_replan_count",
         "shared_ppo_wait_replan_pressure_mean",
+        "shared_ppo_wait_replan_shift_pressure_mean",
+        "shared_ppo_wait_replan_gap_ratio_mean",
+        "shared_ppo_wait_replan_same_hold_mean",
+        "shared_ppo_wait_replan_same_wait_mean",
         "shared_ppo_wait_replan_shift_mean_s",
         "shared_ppo_wait_replan_shift_abs_mean_s",
         "native_real_profile",
@@ -979,6 +1135,12 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_state_wait_weight: float = 1.0,
     promotion_replan_frequency_weight: float = 1.0,
     promotion_replan_min_pressure: float = 0.0,
+    promotion_replan_require_shift: bool = False,
+    promotion_replan_hold_guard_weight: float = 0.0,
+    promotion_replan_same_wait_min: float = 0.0,
+    promotion_replan_gap_guard_min_ratio: float = 0.0,
+    promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_base_action: str = "active",
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
     offpolicy_replay_updates: int = 1,
@@ -1046,6 +1208,12 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_state_wait_weight=float(promotion_replan_state_wait_weight),
         promotion_replan_frequency_weight=float(promotion_replan_frequency_weight),
         promotion_replan_min_pressure=float(promotion_replan_min_pressure),
+        promotion_replan_require_shift=bool(promotion_replan_require_shift),
+        promotion_replan_hold_guard_weight=float(promotion_replan_hold_guard_weight),
+        promotion_replan_same_wait_min=float(promotion_replan_same_wait_min),
+        promotion_replan_gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
+        promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+        promotion_replan_base_action=str(promotion_replan_base_action),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
         lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
@@ -1083,6 +1251,22 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_wait_replan_pressure_mean": (
                 float(np.mean(installed["upper_proxy"].wait_replan_pressures))
                 if installed["upper_proxy"].wait_replan_pressures else 0.0
+            ),
+            "shared_ppo_wait_replan_shift_pressure_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_shift_pressures))
+                if installed["upper_proxy"].wait_replan_shift_pressures else 0.0
+            ),
+            "shared_ppo_wait_replan_gap_ratio_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_gap_ratios))
+                if installed["upper_proxy"].wait_replan_gap_ratios else 0.0
+            ),
+            "shared_ppo_wait_replan_same_hold_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_same_holds))
+                if installed["upper_proxy"].wait_replan_same_holds else 0.0
+            ),
+            "shared_ppo_wait_replan_same_wait_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_same_waits))
+                if installed["upper_proxy"].wait_replan_same_waits else 0.0
             ),
             "shared_ppo_wait_replan_shift_mean_s": (
                 float(np.mean(installed["upper_proxy"].wait_replan_signed_shifts))
@@ -1124,6 +1308,12 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_state_wait_weight": float(promotion_replan_state_wait_weight),
         "promotion_replan_frequency_weight": float(promotion_replan_frequency_weight),
         "promotion_replan_min_pressure": float(promotion_replan_min_pressure),
+        "promotion_replan_require_shift": bool(promotion_replan_require_shift),
+        "promotion_replan_hold_guard_weight": float(promotion_replan_hold_guard_weight),
+        "promotion_replan_same_wait_min": float(promotion_replan_same_wait_min),
+        "promotion_replan_gap_guard_min_ratio": float(promotion_replan_gap_guard_min_ratio),
+        "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
+        "promotion_replan_base_action": str(promotion_replan_base_action),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
         "offpolicy_replay_updates": int(replay_updates),
@@ -1322,6 +1512,12 @@ def main() -> None:
     parser.add_argument("--promotion-replan-state-wait-weight", type=float, default=1.0)
     parser.add_argument("--promotion-replan-frequency-weight", type=float, default=1.0)
     parser.add_argument("--promotion-replan-min-pressure", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-require-shift", action="store_true")
+    parser.add_argument("--promotion-replan-hold-guard-weight", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-same-wait-min", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-gap-guard-min-ratio", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-base-action", default="active")
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -1353,6 +1549,12 @@ def main() -> None:
             promotion_replan_state_wait_weight=float(args.promotion_replan_state_wait_weight),
             promotion_replan_frequency_weight=float(args.promotion_replan_frequency_weight),
             promotion_replan_min_pressure=float(args.promotion_replan_min_pressure),
+            promotion_replan_require_shift=bool(args.promotion_replan_require_shift),
+            promotion_replan_hold_guard_weight=float(args.promotion_replan_hold_guard_weight),
+            promotion_replan_same_wait_min=float(args.promotion_replan_same_wait_min),
+            promotion_replan_gap_guard_min_ratio=float(args.promotion_replan_gap_guard_min_ratio),
+            promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
+            promotion_replan_base_action=str(args.promotion_replan_base_action),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
             lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),
