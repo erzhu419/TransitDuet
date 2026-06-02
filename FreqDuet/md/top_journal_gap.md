@@ -66,16 +66,36 @@ The strongest current evidence is still 40 episodes. Older 100/200ep results do
 not fully represent the current soft-promotion main line.
 
 2026-06-02 start: added the current paper-longtrain runner and paired-delta
-summary tooling, then submitted the current 200ep matrix as six scheduler/Slurm
-shards:
+summary tooling. The first six 80-run shards were auto-routed by scheduler to
+Slurm because each requested 80 CPU workers; they were cancelled after staying
+`PENDING` under `QOSMaxCpuPerUserLimit`.
+
+The active launch is the direct-node retry below. It uses 30-core shards to stay
+below scheduler's large-CPU Slurm auto-route threshold and to make the tasks
+visible as normal scheduler direct-node jobs in `tui-top`.
 
 ```text
-tasks: t5870, t5872, t5874, t5875, t5876, t5877
-slurm: 18263, 18264, 18265, 18266, 18267, 18268
 matrix: 4 domains x 6 methods x 20 paired seeds = 480 runs
 episodes: 200
 last_k: 100
-state at submission: Slurm PENDING, reason QOSMaxCpuPerUserLimit
+effective active ranges:
+  t5907  node001   0-30
+  t5926  node005   30-60
+  t5909  node003   60-90
+  t5910  node004   90-120
+  t5911  node005   120-150
+  t5912  node006   150-180
+  t5913  node001   180-210
+  t5927  node006   210-240
+  t5915  node003   240-270
+  t5916  node004   270-300
+  t5917  node005   300-330
+  t5918  node006   330-360
+  t5919  node001   360-390
+  t5928  node001   390-420
+  t5921  node003   420-450
+  t5922  node004   450-480
+state at launch check: all 16 effective ranges running direct on node001/node003/node004/node005/node006
 ```
 
 Done means:

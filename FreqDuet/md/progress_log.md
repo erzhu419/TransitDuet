@@ -658,7 +658,8 @@ configs: terminal/highnoise/odshift/rushshift x
 jobs: 480 config-seed runs
 ```
 
-Submitted via scheduler to the zhengliang HPC Slurm CPU partition:
+Initial scheduler submission auto-routed to the zhengliang HPC Slurm CPU
+partition because the shards requested 80 CPU cores each:
 
 ```text
 task   slurm  jobs
@@ -670,6 +671,42 @@ t5876  18267  320-400
 t5877  18268  400-480
 ```
 
-At submission all six Slurm jobs were `PENDING` with
-`QOSMaxCpuPerUserLimit`, so they should be visible in `tui-top` / Slurm queued
-state and start as the CPU quota frees.
+All six Slurm jobs stayed `PENDING` with `QOSMaxCpuPerUserLimit`. They were
+cancelled and replaced with smaller direct-node shards so the work appears as
+normal scheduler direct-node jobs in `tui-top`.
+
+Direct-node correction:
+
+- resolved stale FreqDuet `ENV_MISSING` escalations from the first missing-script
+  launch attempt (`t5828`-`t5833`) after syncing the new scripts to the remote
+  FreqDuet workspace;
+- resubmitted direct shards with `cpu=30`, `WORKERS=30`, `THREADS=1`, and the
+  absolute HPC conda python
+  `/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python`;
+- avoided node002 after scheduler repeatedly skipped it despite real-time
+  `why` probes showing that it fit.
+
+Effective active 200ep ranges:
+
+```text
+task   node     jobs
+t5907  node001  0-30
+t5926  node005  30-60
+t5909  node003  60-90
+t5910  node004  90-120
+t5911  node005  120-150
+t5912  node006  150-180
+t5913  node001  180-210
+t5927  node006  210-240
+t5915  node003  240-270
+t5916  node004  270-300
+t5917  node005  300-330
+t5918  node006  330-360
+t5919  node001  360-390
+t5928  node001  390-420
+t5921  node003  420-450
+t5922  node004  450-480
+```
+
+Launch verification: all 16 effective ranges were running as direct scheduler
+tasks, with no FreqDuet jobs left in Slurm `PENDING`.
