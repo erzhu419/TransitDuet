@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -38,6 +40,42 @@ def parse_csv_list(value: str, cast=str) -> list:
 def config_path(name: str) -> Path:
     filename = name if name.endswith(".yaml") else f"{name}.yaml"
     return ROOT / "configs_freqduet" / filename
+
+
+def resolve_under_root(path_like: str | Path) -> Path:
+    path = Path(path_like)
+    return path if path.is_absolute() else ROOT / path
+
+
+def run_dir_for(config: str, variant: str, seed: int, logs_dir: Path) -> Path:
+    return logs_dir / f"{config}_{variant}_seed{seed}"
+
+
+def diagnostics_complete(run_dir: Path, episodes: int) -> bool:
+    csv_path = run_dir / "diagnostics.csv"
+    if not csv_path.exists():
+        return False
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception:
+        return False
+    if "ep" in df.columns:
+        df = df[df["ep"] < 9000]
+    return len(df) >= int(episodes)
+
+
+def apply_worker_threads(worker_threads: int | None) -> None:
+    if worker_threads is None:
+        return
+    n = str(max(1, int(worker_threads)))
+    for key in [
+        "OMP_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+    ]:
+        os.environ[key] = n
 
 
 def infer_domain(config: str) -> str:
@@ -146,8 +184,16 @@ def run_episode_external(env, variant: str, n_fleet: int, rng: np.random.RandomS
     }
 
 
-def run_one(config: str, variant: str, seed: int, episodes: int, logs_dir: Path) -> Path:
-    run_dir = logs_dir / f"{config}_{variant}_seed{seed}"
+def run_one(
+    config: str,
+    variant: str,
+    seed: int,
+    episodes: int,
+    logs_dir: Path,
+    worker_threads: int | None = None,
+) -> Path:
+    apply_worker_threads(worker_threads)
+    run_dir = run_dir_for(config, variant, seed, logs_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     env, cfg = make_env_from_config(config)
     upper_cfg = cfg.get("upper", {})
@@ -203,6 +249,79 @@ def run_one(config: str, variant: str, seed: int, episodes: int, logs_dir: Path)
     return run_dir
 
 
+def selected_jobs(
+    configs: list[str],
+    variants: list[str],
+    seeds: list[int],
+    job_start: int | None = None,
+    job_end: int | None = None,
+) -> list[tuple[str, str, int]]:
+    jobs = []
+    for config in configs:
+        for variant in variants:
+            for seed in seeds:
+                jobs.append((config, variant, seed))
+    total = len(jobs)
+    if job_start is None and job_end is None:
+        return jobs
+    start = 0 if job_start is None else max(0, int(job_start))
+    end = total if job_end is None else min(total, int(job_end))
+    if end < start:
+        end = start
+    print(f"Shard jobs [{start},{end}) of {total}")
+    return jobs[start:end]
+
+
+def run_jobs(
+    configs: list[str],
+    variants: list[str],
+    seeds: list[int],
+    episodes: int,
+    logs_dir: Path,
+    workers: int,
+    skip_existing: bool = False,
+    worker_threads: int | None = None,
+    job_start: int | None = None,
+    job_end: int | None = None,
+) -> None:
+    jobs = []
+    for config, variant, seed in selected_jobs(
+        configs, variants, seeds, job_start=job_start, job_end=job_end
+    ):
+        run_dir = run_dir_for(config, variant, seed, logs_dir)
+        if skip_existing and diagnostics_complete(run_dir, episodes):
+            print(
+                f"SKIP {config} {variant} seed={seed}: "
+                f"diagnostics already has >= {episodes} rows"
+            )
+            continue
+        jobs.append((config, variant, seed))
+    if not jobs:
+        return
+
+    workers = max(1, int(workers))
+    if workers == 1:
+        for config, variant, seed in jobs:
+            run_dir = run_one(
+                config, variant, seed, episodes, logs_dir,
+                worker_threads=worker_threads,
+            )
+            print(f"DONE {config} {variant} seed={seed}: {run_dir}")
+        return
+
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        futures = [
+            pool.submit(
+                run_one, config, variant, seed, episodes, logs_dir,
+                worker_threads,
+            )
+            for config, variant, seed in jobs
+        ]
+        for fut in as_completed(futures):
+            run_dir = fut.result()
+            print(f"DONE {run_dir.name}: {run_dir}")
+
+
 def summarize_run(run_dir: Path, last_k: int) -> dict:
     df = pd.read_csv(run_dir / "diagnostics.csv")
     tail = df.iloc[-min(int(last_k), len(df)):]
@@ -227,12 +346,16 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
     return row
 
 
-def aggregate(logs_dir: Path, out_dir: Path, last_k: int) -> None:
+def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
+    if isinstance(logs_dirs, (str, Path)):
+        logs_dirs = [Path(logs_dirs)]
     rows = []
-    for diag in sorted(logs_dir.glob("*/diagnostics.csv")):
-        rows.append(summarize_run(diag.parent, last_k=last_k))
+    for logs_dir in logs_dirs:
+        for diag in sorted(Path(logs_dir).glob("*/diagnostics.csv")):
+            rows.append(summarize_run(diag.parent, last_k=last_k))
     if not rows:
-        raise SystemExit(f"No diagnostics.csv found under {logs_dir}")
+        roots = ", ".join(str(p) for p in logs_dirs)
+        raise SystemExit(f"No diagnostics.csv found under {roots}")
     per_seed = pd.DataFrame(rows)
     out_dir.mkdir(parents=True, exist_ok=True)
     per_seed.to_csv(out_dir / "external_baselines_per_seed.csv", index=False)
@@ -249,7 +372,7 @@ def aggregate(logs_dir: Path, out_dir: Path, last_k: int) -> None:
     summary.to_csv(out_dir / "external_baselines_summary.csv", index=False)
     with (out_dir / "external_baselines_summary.json").open("w") as f:
         json.dump({
-            "logs_dir": str(logs_dir),
+            "logs_dirs": [str(p) for p in logs_dirs],
             "last_k": int(last_k),
             "n_rows": int(len(per_seed)),
         }, f, indent=2)
@@ -265,8 +388,21 @@ def main() -> None:
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--last-k", type=int, default=20)
     ap.add_argument("--logs-dir", default="logs_external_baselines")
+    ap.add_argument("--aggregate-logs-dirs", default=None)
     ap.add_argument("--out-dir", default="results_freqduet/external_baselines")
     ap.add_argument("--aggregate-only", action="store_true")
+    ap.add_argument("--no-aggregate", action="store_true",
+                    help="run selected jobs but skip summary writing; useful for scheduler shards")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="parallel baseline processes")
+    ap.add_argument("--worker-threads", type=int, default=None,
+                    help="numeric-library threads per baseline process")
+    ap.add_argument("--skip-existing", action="store_true",
+                    help="skip runs whose diagnostics already has enough rows")
+    ap.add_argument("--job-start", type=int, default=None,
+                    help="flattened config x variant x seed start index for scheduler shards")
+    ap.add_argument("--job-end", type=int, default=None,
+                    help="flattened config x variant x seed end index for scheduler shards")
     args = ap.parse_args()
 
     configs = parse_csv_list(args.configs)
@@ -276,14 +412,46 @@ def main() -> None:
     if unknown:
         raise SystemExit(f"Unknown variants: {unknown}")
 
-    logs_dir = Path(args.logs_dir)
-    out_dir = Path(args.out_dir)
+    logs_dir = resolve_under_root(args.logs_dir)
+    out_dir = resolve_under_root(args.out_dir)
+    env_job_start = (
+        os.environ.get("SCHEDULEURM_CPU_START")
+        or os.environ.get("SCHEDULEURM_CPU_SHARD_START")
+    )
+    env_job_end = (
+        os.environ.get("SCHEDULEURM_CPU_END")
+        or os.environ.get("SCHEDULEURM_CPU_SHARD_END")
+    )
+    job_start = args.job_start
+    job_end = args.job_end
+    if job_start is None and env_job_start is not None:
+        job_start = int(env_job_start)
+    if job_end is None and env_job_end is not None:
+        job_end = int(env_job_end)
     if not args.aggregate_only:
-        for config in configs:
-            for variant in variants:
-                for seed in seeds:
-                    run_one(config, variant, seed, args.episodes, logs_dir)
-    aggregate(logs_dir, out_dir, args.last_k)
+        run_jobs(
+            configs=configs,
+            variants=variants,
+            seeds=seeds,
+            episodes=args.episodes,
+            logs_dir=logs_dir,
+            workers=args.workers,
+            skip_existing=args.skip_existing,
+            worker_threads=args.worker_threads,
+            job_start=job_start,
+            job_end=job_end,
+        )
+    if args.no_aggregate:
+        print("Skipped aggregation (--no-aggregate).")
+        return
+
+    if args.aggregate_logs_dirs:
+        aggregate_logs_dirs = [
+            resolve_under_root(p) for p in parse_csv_list(args.aggregate_logs_dirs)
+        ]
+    else:
+        aggregate_logs_dirs = [logs_dir]
+    aggregate(aggregate_logs_dirs, out_dir, args.last_k)
 
 
 if __name__ == "__main__":
