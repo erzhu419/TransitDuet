@@ -26,9 +26,9 @@ Promotion false positives and false negatives are controlled by the persistence 
 | C5: advanced causal encoders can be swapped by domain | supported path | adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625 | Neural/PINN encoder path exists; larger cross-domain performance validation is still needed. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851 | Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim. |
 | C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198]; native-loop samples=4970 | Supported on surrogate performance plus a native shared-PPO episode loop; still needs multi-seed native performance and real-demand validation. |
-| C8: passenger waiting-time frequency credit improves control quality | supported native | surrogate wait delta=-0.1251 [-0.1468, -0.1020]; native final wait delta=-8.5908 [-20.4276, -0.9074]; native score delta=+8.6724 [+1.0542, +20.4807]; native reward delta=+2037.3278 [-66.8598, +6165.1210] | Native wait-credit path is supported in the shared-PPO loop; still needs real AFC/APC demand. |
+| C8: passenger waiting-time frequency credit improves control quality | supported native | surrogate wait delta=-0.1251 [-0.1468, -0.1020]; native final wait delta=-8.5908 [-20.4276, -0.9074]; native score delta=+8.6724 [+1.0542, +20.4807]; native reward delta=+2037.3278 [-66.8598, +6165.1210] | Native wait-credit path is supported in the shared-PPO loop; still needs AFC/APC-driven control validation. |
 | C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
-| C10: dynamic harmonic count-state demand estimator is competitive | supported | MSE delta=-93.5937 [-139.1670, -48.3963] | The count-state path now covers public GTFS schedule proxies; true AFC/APC passenger-demand feeds remain for the strongest claim. |
+| C10: dynamic harmonic count-state demand estimator is competitive | not_supported | all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC MSE delta=+16121.7347 [+6009.5751, +31280.0939] | Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and an AFC-calibrated count model remain open. |
 
 ## Statistical Claim Gates
 
@@ -58,9 +58,12 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | final_ep_reward | 5 | +2037.3278 [-66.8598, +6165.1210] | 0.60 | 1.0000 |
 | transit_native_wait_credit_score_vs_no_wait | supported | final_score | 5 | +8.6724 [+1.0542, +20.4807] | 0.80 | 0.3750 |
 | transit_native_wait_credit_active_vs_no_wait | supported | freq_wait_upper_credit_std | 5 | +0.4500 [+0.4500, +0.4500] | 1.00 | 0.0625 |
-| demand_nb_vs_fourier_mse | supported | mse | 41 | -93.5937 [-139.1670, -48.3963] | 0.78 | 0.0004 |
-| demand_nb_vs_fourier_mae | supported | mae | 41 | -1.8545 [-2.7563, -0.9781] | 0.88 | 0.0000 |
-| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 41 | +24.4245 [+13.9743, +36.8789] | 0.44 | 0.5327 |
+| demand_nb_vs_fourier_mse | not_supported | mse | 65 | +5893.6045 [+1952.0454, +11648.3741] | 0.52 | 0.8043 |
+| demand_nb_vs_fourier_mae | not_supported | mae | 65 | +0.2650 [-0.6954, +1.2583] | 0.55 | 0.4570 |
+| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 65 | +77.7153 [+46.8625, +116.2732] | 0.32 | 0.0059 |
+| demand_afc_nb_vs_fourier_mse | not_supported | mse | 24 | +16121.7347 [+6009.5751, +31280.0939] | 0.08 | 0.0000 |
+| demand_afc_nb_vs_fourier_mae | not_supported | mae | 24 | +3.8859 [+2.7080, +5.3789] | 0.00 | 0.0000 |
+| demand_afc_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 24 | +168.7536 [+97.1531, +257.5680] | 0.12 | 0.0003 |
 | trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 |
 | trading_constraint_return_tradeoff | supported | total_return | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 |
 | trading_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 |
@@ -70,4 +73,4 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 ## Paper Boundary
 
-The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, and public GTFS schedule-proxy data paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, true AFC/APC passenger-demand feeds, and broader seed-level statistical tests remain open.
+The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, and real AFC station-hour passenger-demand paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, AFC-calibrated count models, and broader seed-level statistical tests remain open.

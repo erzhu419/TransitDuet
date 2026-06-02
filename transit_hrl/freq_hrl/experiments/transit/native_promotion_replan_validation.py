@@ -142,6 +142,7 @@ def run_validation(
     device: str,
     min_pairs: int = 5,
     lower_hf_wait_action_gain_s: float = DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
+    offpolicy_replay_updates: int = 1,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
@@ -169,6 +170,7 @@ def run_validation(
                 promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
                 promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
                 lower_hf_wait_action_gain_s=variant_lower_gain,
+                offpolicy_replay_updates=int(offpolicy_replay_updates),
             )
             payloads[variant][str(seed)] = {
                 "summary": payload.get("summary", {}),
@@ -190,6 +192,7 @@ def run_validation(
         "episodes": int(episodes),
         "min_pairs": int(min_pairs),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
+        "offpolicy_replay_updates": int(max(1, int(offpolicy_replay_updates))),
         "variants": list(VARIANTS.keys()),
         "summary": summary,
         "rows": rows,
@@ -243,6 +246,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "",
         "This runs the native Transit episode loop through the shared PPO adapter and toggles native promotion-triggered timetable replanning.",
         f"All variants use lower HF wait action prior gain `{payload.get('lower_hf_wait_action_gain_s', 0.0):.1f}s` so promotion is validated inside the full Freq-HRL lower-control loop.",
+        f"Each native batch uses `{payload.get('offpolicy_replay_updates', 1)}` shared-PPO replay update(s).",
         "",
         "| variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -296,6 +300,7 @@ def main() -> None:
         type=float,
         default=DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
     )
+    parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -310,6 +315,7 @@ def main() -> None:
         device=str(args.device),
         min_pairs=int(args.min_pairs),
         lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
+        offpolicy_replay_updates=int(args.offpolicy_replay_updates),
     )
     reward_check = next(
         row for row in payload["paired_checks"]

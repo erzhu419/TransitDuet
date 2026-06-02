@@ -456,6 +456,28 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=5,
                 require_ci=(metric == "mse"),
             )
+    afc_rows = [
+        row for row in demand_rows
+        if str(row.get("source")) == "transit_public_afc_demand_estimator"
+    ]
+    afc_methods = {str(row.get("method")) for row in afc_rows}
+    if {"dynamic_harmonic_nb", "fourier"} <= afc_methods:
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            add(
+                f"demand_afc_nb_vs_fourier_{metric}",
+                "dynamic harmonic count estimator on real AFC station-hour ridership",
+                paired_delta_stats(
+                    afc_rows,
+                    variant_key="method",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="dynamic_harmonic_nb",
+                    control="fourier",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+                require_ci=(metric == "mse"),
+            )
 
     trading_rows = collect_per_seed_rows(
         results_root,
@@ -635,6 +657,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_learned_score_status = _check_status(checks, "transit_native_learned_gate_score_vs_interval")
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
+    afc_demand_status = _check_status(checks, "demand_afc_nb_vs_fourier_mse")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
     elif (
@@ -778,7 +801,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 "Native wait-credit path is positive-mixed in the shared-PPO loop; still needs more seeds/episodes and real AFC/APC demand."
                 if native_wait_credit_status == "positive_mixed"
                 else (
-                    "Native wait-credit path is supported in the shared-PPO loop; still needs real AFC/APC demand."
+                    "Native wait-credit path is supported in the shared-PPO loop; still needs AFC/APC-driven control validation."
                     if native_wait_credit_status == "supported"
                     else "Native wait-credit validation harness exists, but native timetable performance is not yet supported."
                 )
@@ -809,10 +832,17 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
-            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts, copied TransitDuet local OD traces, and public GTFS schedule-event traces.",
-            "metric": f"MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts, copied TransitDuet local OD traces, public GTFS schedule-event traces, and real MTA AFC station-hour ridership.",
+            "metric": (
+                f"all-demand MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}; "
+                f"AFC MSE delta={_check_metric(checks, 'demand_afc_nb_vs_fourier_mse')}"
+            ),
             "status": _check_status(checks, "demand_nb_vs_fourier_mse"),
-            "remaining_gap": "The count-state path now covers public GTFS schedule proxies; true AFC/APC passenger-demand feeds remain for the strongest claim.",
+            "remaining_gap": (
+                "Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and an AFC-calibrated count model remain open."
+                if afc_demand_status == "not_supported"
+                else "Real AFC station-hour path is present; true APC onboard-load/OD feeds remain open."
+            ),
         },
     ]
 
@@ -916,7 +946,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, and public GTFS schedule-proxy data paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, true AFC/APC passenger-demand feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, and real AFC station-hour passenger-demand paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, AFC-calibrated count models, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

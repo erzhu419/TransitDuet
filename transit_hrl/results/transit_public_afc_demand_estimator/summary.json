@@ -1,0 +1,868 @@
+{
+  "metadata": {
+    "estimator_calibration": "count_calibrated_nb_v2",
+    "source": "public_mta_hourly_ridership_afc",
+    "source_endpoint": "https://data.ny.gov/resource/wujg-7c2s.json",
+    "start": "2024-10-01T00:00:00",
+    "end": "2024-10-15T00:00:00",
+    "rows_fetched": 140078,
+    "max_series": 24,
+    "min_hours": 240,
+    "warmup": 24,
+    "real_passenger_demand": true,
+    "afc_style_entries": true,
+    "apc_onboard_loads": false
+  },
+  "rows": [
+    {
+      "method": "ema",
+      "seed": 0,
+      "series_id": "611:Times Sq-42 St (N,Q,R,W,S,1,2,3,7)/42 St (A,C,E)",
+      "mse": 38875804.38007812,
+      "mae": 5222.724822455495,
+      "poisson_nll_no_const": -24378.843778444694,
+      "n": 313,
+      "mean_count": 5373.875370919881
+    },
+    {
+      "method": "fourier",
+      "seed": 0,
+      "series_id": "611:Times Sq-42 St (N,Q,R,W,S,1,2,3,7)/42 St (A,C,E)",
+      "mse": 39084210.003595665,
+      "mae": 5219.883613488745,
+      "poisson_nll_no_const": -23681.71479371549,
+      "n": 313,
+      "mean_count": 5373.875370919881
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 0,
+      "series_id": "611:Times Sq-42 St (N,Q,R,W,S,1,2,3,7)/42 St (A,C,E)",
+      "mse": 39230742.13994119,
+      "mae": 5235.44887027072,
+      "poisson_nll_no_const": -22816.793082397253,
+      "n": 313,
+      "mean_count": 5373.875370919881
+    },
+    {
+      "method": "ema",
+      "seed": 1,
+      "series_id": "610:Grand Central-42 St (S,4,5,6,7)",
+      "mse": 28723945.291876398,
+      "mae": 3892.8923986754126,
+      "poisson_nll_no_const": -17450.76856560083,
+      "n": 313,
+      "mean_count": 4041.46884272997
+    },
+    {
+      "method": "fourier",
+      "seed": 1,
+      "series_id": "610:Grand Central-42 St (S,4,5,6,7)",
+      "mse": 28978298.42999275,
+      "mae": 3889.8679755898265,
+      "poisson_nll_no_const": -16405.38626525841,
+      "n": 313,
+      "mean_count": 4041.46884272997
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 1,
+      "series_id": "610:Grand Central-42 St (S,4,5,6,7)",
+      "mse": 29060110.88908852,
+      "mae": 3902.6334706154153,
+      "poisson_nll_no_const": -15788.023402612995,
+      "n": 313,
+      "mean_count": 4041.46884272997
+    },
+    {
+      "method": "ema",
+      "seed": 2,
+      "series_id": "607:34 St-Herald Sq (B,D,F,M,N,Q,R,W)",
+      "mse": 14128755.502225718,
+      "mae": 2901.505785632395,
+      "poisson_nll_no_const": -12042.380077861784,
+      "n": 313,
+      "mean_count": 2984.845697329377
+    },
+    {
+      "method": "fourier",
+      "seed": 2,
+      "series_id": "607:34 St-Herald Sq (B,D,F,M,N,Q,R,W)",
+      "mse": 14254008.227708025,
+      "mae": 2900.3402707408704,
+      "poisson_nll_no_const": -11308.952149732493,
+      "n": 313,
+      "mean_count": 2984.845697329377
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 2,
+      "series_id": "607:34 St-Herald Sq (B,D,F,M,N,Q,R,W)",
+      "mse": 14277449.844497528,
+      "mae": 2906.1801705395915,
+      "poisson_nll_no_const": -11076.671874891526,
+      "n": 313,
+      "mean_count": 2984.845697329377
+    },
+    {
+      "method": "ema",
+      "seed": 3,
+      "series_id": "602:14 St-Union Sq (L,N,Q,R,W,4,5,6)",
+      "mse": 12982618.25302797,
+      "mae": 2742.387746149482,
+      "poisson_nll_no_const": -11340.65642547076,
+      "n": 313,
+      "mean_count": 2821.5489614243324
+    },
+    {
+      "method": "fourier",
+      "seed": 3,
+      "series_id": "602:14 St-Union Sq (L,N,Q,R,W,4,5,6)",
+      "mse": 13116912.03744079,
+      "mae": 2741.4054162466946,
+      "poisson_nll_no_const": -10516.320974225755,
+      "n": 313,
+      "mean_count": 2821.5489614243324
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 3,
+      "series_id": "602:14 St-Union Sq (L,N,Q,R,W,4,5,6)",
+      "mse": 13140779.24260831,
+      "mae": 2747.7326473641037,
+      "poisson_nll_no_const": -10243.670007917426,
+      "n": 313,
+      "mean_count": 2821.5489614243324
+    },
+    {
+      "method": "ema",
+      "seed": 4,
+      "series_id": "628:Fulton St (A,C,J,Z,2,3,4,5)",
+      "mse": 10009127.46667479,
+      "mae": 2255.3619610001215,
+      "poisson_nll_no_const": -8903.338889154507,
+      "n": 313,
+      "mean_count": 2342.53115727003
+    },
+    {
+      "method": "fourier",
+      "seed": 4,
+      "series_id": "628:Fulton St (A,C,J,Z,2,3,4,5)",
+      "mse": 10105481.194429018,
+      "mae": 2252.5940628839644,
+      "poisson_nll_no_const": -8253.99414619056,
+      "n": 313,
+      "mean_count": 2342.53115727003
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 4,
+      "series_id": "628:Fulton St (A,C,J,Z,2,3,4,5)",
+      "mse": 10116694.267348612,
+      "mae": 2256.9463503190977,
+      "poisson_nll_no_const": -8138.594141496305,
+      "n": 313,
+      "mean_count": 2342.53115727003
+    },
+    {
+      "method": "ema",
+      "seed": 5,
+      "series_id": "164:34 St-Penn Station (A,C,E)",
+      "mse": 7176580.080094984,
+      "mae": 2156.535490440257,
+      "poisson_nll_no_const": -8192.358611632706,
+      "n": 313,
+      "mean_count": 2227.0296735905044
+    },
+    {
+      "method": "fourier",
+      "seed": 5,
+      "series_id": "164:34 St-Penn Station (A,C,E)",
+      "mse": 7222099.929976052,
+      "mae": 2155.034157439269,
+      "poisson_nll_no_const": -7828.961360852085,
+      "n": 313,
+      "mean_count": 2227.0296735905044
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 5,
+      "series_id": "164:34 St-Penn Station (A,C,E)",
+      "mse": 7240002.78246354,
+      "mae": 2160.1493088468387,
+      "poisson_nll_no_const": -7569.579640741891,
+      "n": 313,
+      "mean_count": 2227.0296735905044
+    },
+    {
+      "method": "ema",
+      "seed": 6,
+      "series_id": "614:59 St-Columbus Circle (A,B,C,D,1)",
+      "mse": 7261089.408518933,
+      "mae": 2032.795567796046,
+      "poisson_nll_no_const": -7791.955215376844,
+      "n": 313,
+      "mean_count": 2101.789317507418
+    },
+    {
+      "method": "fourier",
+      "seed": 6,
+      "series_id": "614:59 St-Columbus Circle (A,B,C,D,1)",
+      "mse": 7334163.439910782,
+      "mae": 2031.4080682049873,
+      "poisson_nll_no_const": -7217.064492559102,
+      "n": 313,
+      "mean_count": 2101.789317507418
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 6,
+      "series_id": "614:59 St-Columbus Circle (A,B,C,D,1)",
+      "mse": 7341204.741077298,
+      "mae": 2034.5712479192405,
+      "poisson_nll_no_const": -7115.60712721986,
+      "n": 313,
+      "mean_count": 2101.789317507418
+    },
+    {
+      "method": "ema",
+      "seed": 7,
+      "series_id": "318:34 St-Penn Station (1,2,3)",
+      "mse": 6336407.903705844,
+      "mae": 1998.4475023973537,
+      "poisson_nll_no_const": -7417.781201411801,
+      "n": 313,
+      "mean_count": 2063.1691394658756
+    },
+    {
+      "method": "fourier",
+      "seed": 7,
+      "series_id": "318:34 St-Penn Station (1,2,3)",
+      "mse": 6375372.834565776,
+      "mae": 1997.0226705823761,
+      "poisson_nll_no_const": -7087.616502357474,
+      "n": 313,
+      "mean_count": 2063.1691394658756
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 7,
+      "series_id": "318:34 St-Penn Station (1,2,3)",
+      "mse": 6392560.02472658,
+      "mae": 2002.2733074149642,
+      "poisson_nll_no_const": -6804.004211944754,
+      "n": 313,
+      "mean_count": 2063.1691394658756
+    },
+    {
+      "method": "ema",
+      "seed": 8,
+      "series_id": "616:74-Broadway (7)/Jackson Hts-Roosevelt Av (E,F,M,R)",
+      "mse": 4277364.988344111,
+      "mae": 1689.648876612211,
+      "poisson_nll_no_const": -5996.895310454614,
+      "n": 313,
+      "mean_count": 1734.0830860534124
+    },
+    {
+      "method": "fourier",
+      "seed": 8,
+      "series_id": "616:74-Broadway (7)/Jackson Hts-Roosevelt Av (E,F,M,R)",
+      "mse": 4305078.052827456,
+      "mae": 1688.468045774566,
+      "poisson_nll_no_const": -5730.622437882746,
+      "n": 313,
+      "mean_count": 1734.0830860534124
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 8,
+      "series_id": "616:74-Broadway (7)/Jackson Hts-Roosevelt Av (E,F,M,R)",
+      "mse": 4311360.403847073,
+      "mae": 1690.899107737001,
+      "poisson_nll_no_const": -5609.731530148405,
+      "n": 313,
+      "mean_count": 1734.0830860534124
+    },
+    {
+      "method": "ema",
+      "seed": 9,
+      "series_id": "624:Chambers St (A,C)/WTC (E)/Park Pl (2,3)/Cortlandt (R,W)",
+      "mse": 5616030.312599214,
+      "mae": 1598.2101953709748,
+      "poisson_nll_no_const": -5838.692792106181,
+      "n": 313,
+      "mean_count": 1662.1632047477744
+    },
+    {
+      "method": "fourier",
+      "seed": 9,
+      "series_id": "624:Chambers St (A,C)/WTC (E)/Park Pl (2,3)/Cortlandt (R,W)",
+      "mse": 5677822.170356234,
+      "mae": 1596.0512470382334,
+      "poisson_nll_no_const": -5270.894816252128,
+      "n": 313,
+      "mean_count": 1662.1632047477744
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 9,
+      "series_id": "624:Chambers St (A,C)/WTC (E)/Park Pl (2,3)/Cortlandt (R,W)",
+      "mse": 5683292.274478281,
+      "mae": 1599.391262474478,
+      "poisson_nll_no_const": -5186.668681567252,
+      "n": 313,
+      "mean_count": 1662.1632047477744
+    },
+    {
+      "method": "ema",
+      "seed": 10,
+      "series_id": "447:Flushing-Main St (7)",
+      "mse": 4289621.012070408,
+      "mae": 1525.5900790684789,
+      "poisson_nll_no_const": -5502.392402072069,
+      "n": 313,
+      "mean_count": 1584.3323442136498
+    },
+    {
+      "method": "fourier",
+      "seed": 10,
+      "series_id": "447:Flushing-Main St (7)",
+      "mse": 4323554.723457961,
+      "mae": 1531.4569802728286,
+      "poisson_nll_no_const": -5163.055976372368,
+      "n": 313,
+      "mean_count": 1584.3323442136498
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 10,
+      "series_id": "447:Flushing-Main St (7)",
+      "mse": 4338267.037409559,
+      "mae": 1535.1086732130982,
+      "poisson_nll_no_const": -4815.787953022486,
+      "n": 313,
+      "mean_count": 1584.3323442136498
+    },
+    {
+      "method": "ema",
+      "seed": 11,
+      "series_id": "612:Lexington Av-53 St (E,M)/51 St (6)",
+      "mse": 4819924.800728949,
+      "mae": 1416.6213271132483,
+      "poisson_nll_no_const": -5074.634497283768,
+      "n": 313,
+      "mean_count": 1481.2818991097922
+    },
+    {
+      "method": "fourier",
+      "seed": 11,
+      "series_id": "612:Lexington Av-53 St (E,M)/51 St (6)",
+      "mse": 4878240.64079086,
+      "mae": 1414.3930805139864,
+      "poisson_nll_no_const": -4508.0420197863705,
+      "n": 313,
+      "mean_count": 1481.2818991097922
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 11,
+      "series_id": "612:Lexington Av-53 St (E,M)/51 St (6)",
+      "mse": 4878697.850956845,
+      "mae": 1416.0716524688314,
+      "poisson_nll_no_const": -4520.0031593123895,
+      "n": 313,
+      "mean_count": 1481.2818991097922
+    },
+    {
+      "method": "ema",
+      "seed": 12,
+      "series_id": "225:47-50 Sts-Rockefeller Ctr (B,D,F,M)",
+      "mse": 5590416.485007407,
+      "mae": 1388.0029966888783,
+      "poisson_nll_no_const": -5039.310498982607,
+      "n": 313,
+      "mean_count": 1450.6706231454007
+    },
+    {
+      "method": "fourier",
+      "seed": 12,
+      "series_id": "225:47-50 Sts-Rockefeller Ctr (B,D,F,M)",
+      "mse": 5664140.687802759,
+      "mae": 1386.1025655798499,
+      "poisson_nll_no_const": -4294.743479681796,
+      "n": 313,
+      "mean_count": 1450.6706231454007
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 12,
+      "series_id": "225:47-50 Sts-Rockefeller Ctr (B,D,F,M)",
+      "mse": 5662559.620595518,
+      "mae": 1387.4720894280772,
+      "poisson_nll_no_const": -4360.485380727285,
+      "n": 313,
+      "mean_count": 1450.6706231454007
+    },
+    {
+      "method": "ema",
+      "seed": 13,
+      "series_id": "618:14 St (A,C,E)/8 Av (L)",
+      "mse": 3518659.3493427285,
+      "mae": 1403.9627569507675,
+      "poisson_nll_no_const": -4870.468629585771,
+      "n": 313,
+      "mean_count": 1440.480712166172
+    },
+    {
+      "method": "fourier",
+      "seed": 13,
+      "series_id": "618:14 St (A,C,E)/8 Av (L)",
+      "mse": 3556191.196554488,
+      "mae": 1403.3688152510058,
+      "poisson_nll_no_const": -4425.348240538605,
+      "n": 313,
+      "mean_count": 1440.480712166172
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 13,
+      "series_id": "618:14 St (A,C,E)/8 Av (L)",
+      "mse": 3559489.5928319483,
+      "mae": 1405.5234935029735,
+      "poisson_nll_no_const": -4355.36003829662,
+      "n": 313,
+      "mean_count": 1440.480712166172
+    },
+    {
+      "method": "ema",
+      "seed": 14,
+      "series_id": "609:Bryant Pk (B,D,F,M)/5 Av (7)",
+      "mse": 4481992.0476298155,
+      "mae": 1371.077736091149,
+      "poisson_nll_no_const": -4849.889937038086,
+      "n": 313,
+      "mean_count": 1423.9910979228487
+    },
+    {
+      "method": "fourier",
+      "seed": 14,
+      "series_id": "609:Bryant Pk (B,D,F,M)/5 Av (7)",
+      "mse": 4536435.446016829,
+      "mae": 1369.4835799150558,
+      "poisson_nll_no_const": -4267.168393621629,
+      "n": 313,
+      "mean_count": 1423.9910979228487
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 14,
+      "series_id": "609:Bryant Pk (B,D,F,M)/5 Av (7)",
+      "mse": 4536422.895610173,
+      "mae": 1370.988047648806,
+      "poisson_nll_no_const": -4289.360724257213,
+      "n": 313,
+      "mean_count": 1423.9910979228487
+    },
+    {
+      "method": "ema",
+      "seed": 15,
+      "series_id": "613:Lexington Av (N,R,W)/59 St (4,5,6)",
+      "mse": 3717278.980964078,
+      "mae": 1341.90826785444,
+      "poisson_nll_no_const": -4650.328726830464,
+      "n": 313,
+      "mean_count": 1390.551928783383
+    },
+    {
+      "method": "fourier",
+      "seed": 15,
+      "series_id": "613:Lexington Av (N,R,W)/59 St (4,5,6)",
+      "mse": 3759554.3390622884,
+      "mae": 1340.6999108995838,
+      "poisson_nll_no_const": -4173.111944584394,
+      "n": 313,
+      "mean_count": 1390.551928783383
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 15,
+      "series_id": "613:Lexington Av (N,R,W)/59 St (4,5,6)",
+      "mse": 3760730.4271195633,
+      "mae": 1342.2653925406928,
+      "poisson_nll_no_const": -4157.937989834875,
+      "n": 313,
+      "mean_count": 1390.551928783383
+    },
+    {
+      "method": "ema",
+      "seed": 16,
+      "series_id": "167:W 4 St-Wash Sq (A,C,E,B,D,F,M)",
+      "mse": 2772694.053849401,
+      "mae": 1330.888176635281,
+      "poisson_nll_no_const": -4453.372483445746,
+      "n": 313,
+      "mean_count": 1359.8813056379822
+    },
+    {
+      "method": "fourier",
+      "seed": 16,
+      "series_id": "167:W 4 St-Wash Sq (A,C,E,B,D,F,M)",
+      "mse": 2797754.6669630725,
+      "mae": 1330.944097464968,
+      "poisson_nll_no_const": -4115.916151839133,
+      "n": 313,
+      "mean_count": 1359.8813056379822
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 16,
+      "series_id": "167:W 4 St-Wash Sq (A,C,E,B,D,F,M)",
+      "mse": 2800076.8028194183,
+      "mae": 1332.3961179047642,
+      "poisson_nll_no_const": -4067.5047513416807,
+      "n": 313,
+      "mean_count": 1359.8813056379822
+    },
+    {
+      "method": "ema",
+      "seed": 17,
+      "series_id": "617:Atlantic Av-Barclays Ctr (B,D,N,Q,R,2,3,4,5)",
+      "mse": 2635201.168322272,
+      "mae": 1267.762637021285,
+      "poisson_nll_no_const": -4116.581988315157,
+      "n": 313,
+      "mean_count": 1310.0682492581602
+    },
+    {
+      "method": "fourier",
+      "seed": 17,
+      "series_id": "617:Atlantic Av-Barclays Ctr (B,D,N,Q,R,2,3,4,5)",
+      "mse": 2651861.9407294705,
+      "mae": 1267.1144343266462,
+      "poisson_nll_no_const": -3891.1936648455926,
+      "n": 313,
+      "mean_count": 1310.0682492581602
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 17,
+      "series_id": "617:Atlantic Av-Barclays Ctr (B,D,N,Q,R,2,3,4,5)",
+      "mse": 2654603.3530338546,
+      "mae": 1268.7582809930009,
+      "poisson_nll_no_const": -3825.7440160329234,
+      "n": 313,
+      "mean_count": 1310.0682492581602
+    },
+    {
+      "method": "ema",
+      "seed": 18,
+      "series_id": "601:14 St (F,M,1,2,3)/6 Av (L)",
+      "mse": 2680190.9528493974,
+      "mae": 1279.252175645931,
+      "poisson_nll_no_const": -4260.281781690472,
+      "n": 313,
+      "mean_count": 1309.0949554896142
+    },
+    {
+      "method": "fourier",
+      "seed": 18,
+      "series_id": "601:14 St (F,M,1,2,3)/6 Av (L)",
+      "mse": 2705057.153196712,
+      "mae": 1278.8324253578014,
+      "poisson_nll_no_const": -3921.928438428953,
+      "n": 313,
+      "mean_count": 1309.0949554896142
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 18,
+      "series_id": "601:14 St (F,M,1,2,3)/6 Av (L)",
+      "mse": 2709307.026772192,
+      "mae": 1281.2454033944553,
+      "poisson_nll_no_const": -3814.5922128357774,
+      "n": 313,
+      "mean_count": 1309.0949554896142
+    },
+    {
+      "method": "ema",
+      "seed": 19,
+      "series_id": "397:86 St (4,5,6)",
+      "mse": 2868271.385761948,
+      "mae": 1266.5781567931688,
+      "poisson_nll_no_const": -4223.718907746816,
+      "n": 313,
+      "mean_count": 1305.632047477745
+    },
+    {
+      "method": "fourier",
+      "seed": 19,
+      "series_id": "397:86 St (4,5,6)",
+      "mse": 2895139.6925587663,
+      "mae": 1266.177626768384,
+      "poisson_nll_no_const": -3869.877012795858,
+      "n": 313,
+      "mean_count": 1305.632047477745
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 19,
+      "series_id": "397:86 St (4,5,6)",
+      "mse": 2899530.293328881,
+      "mae": 1268.7350693038143,
+      "poisson_nll_no_const": -3747.369964943657,
+      "n": 313,
+      "mean_count": 1305.632047477745
+    },
+    {
+      "method": "ema",
+      "seed": 20,
+      "series_id": "623:Canal St (J,N,Q,R,W,Z,6)",
+      "mse": 3054726.05333511,
+      "mae": 1245.6594451941505,
+      "poisson_nll_no_const": -4247.0166305955645,
+      "n": 313,
+      "mean_count": 1274.658753709199
+    },
+    {
+      "method": "fourier",
+      "seed": 20,
+      "series_id": "623:Canal St (J,N,Q,R,W,Z,6)",
+      "mse": 3092507.526826657,
+      "mae": 1245.837649080596,
+      "poisson_nll_no_const": -3721.991156008849,
+      "n": 313,
+      "mean_count": 1274.658753709199
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 20,
+      "series_id": "623:Canal St (J,N,Q,R,W,Z,6)",
+      "mse": 3096781.6725681336,
+      "mae": 1248.6530011356037,
+      "poisson_nll_no_const": -3600.959349259341,
+      "n": 313,
+      "mean_count": 1274.658753709199
+    },
+    {
+      "method": "ema",
+      "seed": 21,
+      "series_id": "619:Broadway-Lafayette St (B,D,F,M)/Bleecker St (6)",
+      "mse": 2659796.444212055,
+      "mae": 1213.866614464673,
+      "poisson_nll_no_const": -4038.163538897836,
+      "n": 313,
+      "mean_count": 1239.9762611275964
+    },
+    {
+      "method": "fourier",
+      "seed": 21,
+      "series_id": "619:Broadway-Lafayette St (B,D,F,M)/Bleecker St (6)",
+      "mse": 2689403.9661522387,
+      "mae": 1213.8811866835904,
+      "poisson_nll_no_const": -3613.737520226281,
+      "n": 313,
+      "mean_count": 1239.9762611275964
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 21,
+      "series_id": "619:Broadway-Lafayette St (B,D,F,M)/Bleecker St (6)",
+      "mse": 2692766.0038789795,
+      "mae": 1216.1555428158747,
+      "poisson_nll_no_const": -3525.5009998682135,
+      "n": 313,
+      "mean_count": 1239.9762611275964
+    },
+    {
+      "method": "ema",
+      "seed": 22,
+      "series_id": "313:72 St (1,2,3)",
+      "mse": 2131380.4595267475,
+      "mae": 1152.4128680588103,
+      "poisson_nll_no_const": -3681.772278300436,
+      "n": 313,
+      "mean_count": 1181.5074183976262
+    },
+    {
+      "method": "fourier",
+      "seed": 22,
+      "series_id": "313:72 St (1,2,3)",
+      "mse": 2148969.9714881233,
+      "mae": 1152.8230600080735,
+      "poisson_nll_no_const": -3398.0128041813196,
+      "n": 313,
+      "mean_count": 1181.5074183976262
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 22,
+      "series_id": "313:72 St (1,2,3)",
+      "mse": 2152060.0508937086,
+      "mae": 1154.7124305287443,
+      "poisson_nll_no_const": -3300.6740738326507,
+      "n": 313,
+      "mean_count": 1181.5074183976262
+    },
+    {
+      "method": "ema",
+      "seed": 23,
+      "series_id": "120:Bedford Av (L)",
+      "mse": 1939961.9391093925,
+      "mae": 1105.6021104984773,
+      "poisson_nll_no_const": -3462.2357918771136,
+      "n": 313,
+      "mean_count": 1125.7893175074184
+    },
+    {
+      "method": "fourier",
+      "seed": 23,
+      "series_id": "120:Bedford Av (L)",
+      "mse": 1955082.2821706245,
+      "mae": 1105.6653335622168,
+      "poisson_nll_no_const": -3205.7489399571255,
+      "n": 313,
+      "mean_count": 1125.7893175074184
+    },
+    {
+      "method": "dynamic_harmonic_nb",
+      "seed": 23,
+      "series_id": "120:Bedford Av (L)",
+      "mse": 1958772.949860865,
+      "mae": 1107.8069420514405,
+      "poisson_nll_no_const": -3090.692423387859,
+      "n": 313,
+      "mean_count": 1125.7893175074184
+    }
+  ],
+  "summary": [
+    {
+      "method": "dynamic_harmonic_nb",
+      "series": 24,
+      "mse_mean": 7687260.924489857,
+      "mae_mean": 1869.671578351318,
+      "poisson_nll_no_const_mean": -6492.554864078777,
+      "delta_mse_vs_best": 81100.97782919928
+    },
+    {
+      "method": "ema",
+      "series": 24,
+      "mse_mean": 7606159.946660657,
+      "mae_mean": 1866.6539872753535,
+      "poisson_nll_no_const_mean": -7159.326623340693,
+      "delta_mse_vs_best": 0.0
+    },
+    {
+      "method": "fourier",
+      "series": 24,
+      "mse_mean": 7671139.189773892,
+      "mae_mean": 1865.7856780697548,
+      "poisson_nll_no_const_mean": -6661.3084867456055,
+      "delta_mse_vs_best": 64979.24311323464
+    }
+  ],
+  "paired_deltas": [
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mse",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": 16121.734715965664,
+      "delta_ci95_low": 6046.060394075155,
+      "delta_ci95_high": 31800.852688927745,
+      "improvement_mean": -16121.734715965664,
+      "improvement_ci95_low": -30129.018136974206,
+      "improvement_ci95_high": -5952.129425589385,
+      "win_rate": 0.08333333333333333,
+      "sign_p_value": 3.5881996154785156e-05,
+      "status": "not_supported"
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "mae",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": 3.88590028156284,
+      "delta_ci95_low": 2.705917788433685,
+      "delta_ci95_high": 5.521653658052223,
+      "improvement_mean": -3.88590028156284,
+      "improvement_ci95_low": -5.367155164585571,
+      "improvement_ci95_high": -2.676201886082015,
+      "win_rate": 0.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "not_supported"
+    },
+    {
+      "comparison": "dynamic_harmonic_nb_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "dynamic_harmonic_nb",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": 168.75362266682833,
+      "delta_ci95_low": 98.82769022435419,
+      "delta_ci95_high": 265.48546709895476,
+      "improvement_mean": -168.75362266682833,
+      "improvement_ci95_low": -256.93819975545694,
+      "improvement_ci95_high": -96.72031832688464,
+      "win_rate": 0.125,
+      "sign_p_value": 0.0002771615982055664,
+      "status": "not_supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mse",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -64979.24311323361,
+      "delta_ci95_low": -89698.34511354088,
+      "delta_ci95_high": -44124.11668512242,
+      "improvement_mean": 64979.24311323361,
+      "improvement_ci95_low": 43572.6262225803,
+      "improvement_ci95_high": 90922.04496538483,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "mae",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": 0.8683092055986682,
+      "delta_ci95_low": 0.0644569554596887,
+      "delta_ci95_high": 1.4577785168486344,
+      "improvement_mean": -0.8683092055986682,
+      "improvement_ci95_low": -1.4598355959715217,
+      "improvement_ci95_high": -0.07643024640666496,
+      "win_rate": 0.25,
+      "sign_p_value": 0.022655844688415527,
+      "status": "not_supported"
+    },
+    {
+      "comparison": "ema_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "ema",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -498.01813659508775,
+      "delta_ci95_low": -578.1576623667454,
+      "delta_ci95_high": -419.3570612541371,
+      "improvement_mean": 498.01813659508775,
+      "improvement_ci95_low": 420.71443749905376,
+      "improvement_ci95_high": 579.0603656639609,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    }
+  ]
+}

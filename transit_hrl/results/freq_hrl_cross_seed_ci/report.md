@@ -1,10 +1,10 @@
 # Freq-HRL Cross-Seed CI Report
 
-- checks: 30
-- enough paired seeds/sources: 26
-- supported checks: 24
-- paper-ready checks: 15
-- n_common range: 3 / 7.5 / 41
+- checks: 33
+- enough paired seeds/sources: 29
+- supported checks: 22
+- paper-ready checks: 13
+- n_common range: 3 / 10.0 / 65
 
 `paper_ready` requires supported status, enough pairs, positive improvement CI, and either sign-test p <= threshold or at least 10 pairs.
 
@@ -31,9 +31,12 @@
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | 5 | +2037.3278 [-66.8598, +6165.1210] | 0.60 | 1.0000 | False |
 | transit_native_wait_credit_score_vs_no_wait | supported | 5 | +8.6724 [+1.0542, +20.4807] | 0.80 | 0.3750 | False |
 | transit_native_wait_credit_active_vs_no_wait | supported | 5 | +0.4500 [+0.4500, +0.4500] | 1.00 | 0.0625 | True |
-| demand_nb_vs_fourier_mse | supported | 41 | -93.5937 [-139.1670, -48.3963] | 0.78 | 0.0004 | True |
-| demand_nb_vs_fourier_mae | supported | 41 | -1.8545 [-2.7563, -0.9781] | 0.88 | 0.0000 | True |
-| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | 41 | +24.4245 [+13.9743, +36.8789] | 0.44 | 0.5327 | False |
+| demand_nb_vs_fourier_mse | not_supported | 65 | +5893.6045 [+1952.0454, +11648.3741] | 0.52 | 0.8043 | False |
+| demand_nb_vs_fourier_mae | not_supported | 65 | +0.2650 [-0.6954, +1.2583] | 0.55 | 0.4570 | False |
+| demand_nb_vs_fourier_poisson_nll_no_const | not_supported | 65 | +77.7153 [+46.8625, +116.2732] | 0.32 | 0.0059 | False |
+| demand_afc_nb_vs_fourier_mse | not_supported | 24 | +16121.7347 [+6009.5751, +31280.0939] | 0.08 | 0.0000 | False |
+| demand_afc_nb_vs_fourier_mae | not_supported | 24 | +3.8859 [+2.7080, +5.3789] | 0.00 | 0.0000 | False |
+| demand_afc_nb_vs_fourier_poisson_nll_no_const | not_supported | 24 | +168.7536 [+97.1531, +257.5680] | 0.12 | 0.0003 | False |
 | trading_constraint_lower_lf | supported | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 | True |
 | trading_constraint_return_tradeoff | supported | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 | False |
 | trading_constraint_raw_lower_lf | supported | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 | True |
