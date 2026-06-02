@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_driftcost_hiro
+
+# Long-train repair candidate: keep the promoted frequency split, but close the
+# lower-drift loop through the lower Lagrangian cost as well as reward shaping.
+# This prevents the lower multiplier from decaying when headway cost is low but
+# rolling holding has become a low-frequency timetable drift.
+leakage:
+  lower_drift_cost_weight: 0.25
+  lower_drift_cost_mode: excess
+  lower_drift_cost_cap: 1.0

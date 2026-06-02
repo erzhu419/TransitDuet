@@ -233,6 +233,7 @@ class DiagnosticLog:
         'freq_promotion_absorptions', 'freq_promotion_absorbed',
         # FreqDuet frequency-leakage regularization
         'lower_drift_penalty_mean', 'lower_drift_penalty_max',
+        'lower_drift_cost_mean', 'lower_drift_cost_max',
         'upper_hf_penalty_mean', 'upper_hf_penalty_max',
         # FreqDuet layer-frequency allocation diagnostics
         'upper_hf_power_ratio', 'lower_lf_drift_ratio',
@@ -526,6 +527,12 @@ class TransitDuetV2Runner:
         self.lower_drift_window = int(leak_cfg.get('lower_drift_window', 24))
         self.lower_drift_budget_s = float(leak_cfg.get('lower_drift_budget_s', 180.0))
         self.lower_drift_penalty = float(leak_cfg.get('lower_drift_penalty', 0.0))
+        self.lower_drift_cost_weight = float(
+            leak_cfg.get('lower_drift_cost_weight', 0.0))
+        self.lower_drift_cost_cap = float(
+            leak_cfg.get('lower_drift_cost_cap', 1.0))
+        self.lower_drift_cost_mode = str(
+            leak_cfg.get('lower_drift_cost_mode', 'excess')).lower()
         self.upper_hf_penalty = float(leak_cfg.get('upper_hf_penalty', 0.0))
         self.upper_lpf_window = int(leak_cfg.get('upper_lpf_window', 6))
         self._lower_drift_by_dir = {
@@ -533,6 +540,7 @@ class TransitDuetV2Runner:
             False: deque(maxlen=max(1, self.lower_drift_window)),
         }
         self._ep_lower_drift_penalties = []
+        self._ep_lower_drift_costs = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
@@ -871,6 +879,23 @@ class TransitDuetV2Runner:
         penalty = self.lower_drift_penalty * (
             excess / max(self.lower_drift_budget_s, 1e-6))
         return float(penalty)
+
+    def _lower_drift_cost(self, direction):
+        """Optional Lagrangian cost for lower holding that becomes LF drift."""
+        if (not self.leakage_enable
+                or self.lower_drift_cost_weight <= 0.0):
+            return 0.0
+        hist = self._lower_drift_by_dir[bool(direction)]
+        rolling_hold = float(sum(hist))
+        budget = max(self.lower_drift_budget_s, 1e-6)
+        if self.lower_drift_cost_mode in {'total', 'rolling', 'hold'}:
+            signal = rolling_hold / budget
+        else:
+            signal = max(0.0, rolling_hold - self.lower_drift_budget_s) / budget
+        cost = self.lower_drift_cost_weight * max(signal, 0.0)
+        if self.lower_drift_cost_cap >= 0.0:
+            cost = min(cost, self.lower_drift_cost_cap)
+        return float(cost)
 
     def _drift_feedback_pair(self, direction):
         hist = self._lower_drift_by_dir[bool(direction)]
@@ -1593,6 +1618,7 @@ class TransitDuetV2Runner:
             False: deque(maxlen=max(1, self.lower_drift_window)),
         }
         self._ep_lower_drift_penalties = []
+        self._ep_lower_drift_costs = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
@@ -1658,6 +1684,8 @@ class TransitDuetV2Runner:
                                 cur_dir = bool(getattr(bus, 'direction', True))
                                 break
                         drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
+                        drift_cost = self._lower_drift_cost(cur_dir)
+                        cost = float(cost) + drift_cost
                         low_demand = 0.0
                         local_high = 0.0
                         credit_high = 0.0
@@ -1730,6 +1758,7 @@ class TransitDuetV2Runner:
                         self._ep_lower_actions_by_dir[cur_dir].append(act_val)
                         self._ep_lower_rewards.append(shaped_reward)
                         self._ep_lower_drift_penalties.append(drift_penalty)
+                        self._ep_lower_drift_costs.append(drift_cost)
                         if getattr(self.env, 'frequency_tracker', None) is not None:
                             self._ep_lower_demand_action.append((
                                 low_demand,
@@ -1988,6 +2017,7 @@ class TransitDuetV2Runner:
         ur_stat = _stat(self._ep_upper_rewards)
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
+        lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
@@ -2141,6 +2171,8 @@ class TransitDuetV2Runner:
                 'freq_promotion_absorbed', 0.0),
             'lower_drift_penalty_mean': lower_drift_stat['mean'],
             'lower_drift_penalty_max': lower_drift_stat['max'],
+            'lower_drift_cost_mean': lower_drift_cost_stat['mean'],
+            'lower_drift_cost_max': lower_drift_cost_stat['max'],
             'upper_hf_penalty_mean': upper_hf_stat['mean'],
             'upper_hf_penalty_max': upper_hf_stat['max'],
             'upper_hf_power_ratio': upper_hf_power_ratio,

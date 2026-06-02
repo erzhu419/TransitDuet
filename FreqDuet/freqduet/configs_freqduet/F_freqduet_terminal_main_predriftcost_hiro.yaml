@@ -1,13 +1,9 @@
 _extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml
-_name: F_freqduet_terminal_main_hiro
+_name: F_freqduet_terminal_main_predriftcost_hiro
 
-# Current promoted FreqDuet main path. The 2026-06-02 DriftFB HPC screen selected
-# the history-prior LF/HF split with HF-energy denoising, 45s terminal hold cap,
-# active+persistent soft promotion absorption, positive-HF hold-through penalty,
-# promotion-gated raw lower-HF wait credit, high-energy raw-credit cap, and
-# DriftFB upper feedback. The 2026-06-03 200ep repair adds lower-drift excess as
-# a lower Lagrangian cost, closing the long-horizon drift loop that reward
-# shaping alone did not constrain.
+# Historical 2026-06-02 promoted main before the 200ep drift-cost repair.
+# Kept to reproduce results_freqduet/paper_longtrain_current_ep200_wu10 after
+# F_freqduet_terminal_main_hiro was promoted to include lower_drift_cost.
 frequency:
   promotion:
     adapt_local: false
@@ -36,8 +32,3 @@ reward_attribution:
   lower_raw_gate_high_energy_width: 0.015
   lower_raw_gate_absorbed_min: 0.10
   lower_raw_gate_absorbed_width: 0.10
-
-leakage:
-  lower_drift_cost_weight: 0.25
-  lower_drift_cost_mode: excess
-  lower_drift_cost_cap: 1.0

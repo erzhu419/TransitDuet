@@ -1,0 +1,295 @@
+# FreqDuet paper reproducibility manifest
+#
+# This file binds table/figure artifacts to exact configs, seeds, scripts, and
+# result directories. Candidate repairs stay here after promotion so historical
+# comparisons remain reproducible.
+
+version: 2026-06-03
+project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
+python_path: .
+
+paired_seeds_20:
+  - 7
+  - 11
+  - 17
+  - 23
+  - 31
+  - 37
+  - 42
+  - 43
+  - 53
+  - 61
+  - 71
+  - 83
+  - 97
+  - 109
+  - 123
+  - 127
+  - 149
+  - 456
+  - 789
+  - 2026
+
+metrics:
+  primary: composite
+  lower_is_better:
+    - wait
+    - cv
+    - overshoot
+    - composite
+    - lower_action_mean
+    - lower_drift_penalty_mean
+  diagnostics:
+    - upper_hf_power_ratio
+    - lower_lf_drift_ratio
+    - freq_high_energy
+    - freq_promotion_active
+    - freq_promotion_ratio
+    - lower_drift_cost_mean
+
+config_sets:
+  current_longtrain_4x6:
+    terminal:
+      main: F_freqduet_terminal_main_hiro
+      nofreq: F_freqduet_terminal_final_nofreq_hiro
+      rawhistory: F_freqduet_terminal_final_rawhistory_hiro
+      allfreq: F_freqduet_terminal_final_allfreq_hiro
+      nopromotion: F_freqduet_terminal_final_nopromotion_hiro
+      noleakage: F_freqduet_terminal_final_noleakage_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_main_hiro
+      nofreq: F_freqduet_gen_highnoise_nofreq_hiro
+      rawhistory: F_freqduet_gen_highnoise_rawhistory_hiro
+      allfreq: F_freqduet_gen_highnoise_allfreq_hiro
+      nopromotion: F_freqduet_gen_highnoise_nopromotion_hiro
+      noleakage: F_freqduet_gen_highnoise_noleakage_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_main_hiro
+      nofreq: F_freqduet_gen_odshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_odshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_odshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_odshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_odshift_noleakage_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_main_hiro
+      nofreq: F_freqduet_gen_rushshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_rushshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_rushshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_rushshift_noleakage_hiro
+
+  predriftcost_longtrain_4x6:
+    terminal:
+      main: F_freqduet_terminal_main_predriftcost_hiro
+      nofreq: F_freqduet_terminal_final_nofreq_hiro
+      rawhistory: F_freqduet_terminal_final_rawhistory_hiro
+      allfreq: F_freqduet_terminal_final_allfreq_hiro
+      nopromotion: F_freqduet_terminal_final_nopromotion_hiro
+      noleakage: F_freqduet_terminal_final_noleakage_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_main_predriftcost_hiro
+      nofreq: F_freqduet_gen_highnoise_nofreq_hiro
+      rawhistory: F_freqduet_gen_highnoise_rawhistory_hiro
+      allfreq: F_freqduet_gen_highnoise_allfreq_hiro
+      nopromotion: F_freqduet_gen_highnoise_nopromotion_hiro
+      noleakage: F_freqduet_gen_highnoise_noleakage_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_main_predriftcost_hiro
+      nofreq: F_freqduet_gen_odshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_odshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_odshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_odshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_odshift_noleakage_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_main_predriftcost_hiro
+      nofreq: F_freqduet_gen_rushshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_rushshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_rushshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_rushshift_noleakage_hiro
+
+  driftcost_candidate_4x1:
+    terminal:
+      main_driftcost: F_freqduet_terminal_main_driftcost_hiro
+    highnoise:
+      main_driftcost: F_freqduet_gen_highnoise_main_driftcost_hiro
+    odshift:
+      main_driftcost: F_freqduet_gen_odshift_main_driftcost_hiro
+    rushshift:
+      main_driftcost: F_freqduet_gen_rushshift_main_driftcost_hiro
+
+experiments:
+  current_longtrain_ep200_wu10:
+    status: complete_predriftcost
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: predriftcost_longtrain_4x6
+    runner: scripts/run_freqduet_paper_longtrain_matrix.sh
+    logs_dir: logs_paper_longtrain_current_ep200_wu10
+    result_dir: results_freqduet/paper_longtrain_current_ep200_wu10
+    per_seed_csv: results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_command: >
+      python3 scripts/summarize_freqduet_paper_matrix.py
+      --per-seed results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/paper_longtrain_current_ep200_wu10/paper_summary
+
+  driftcost_longtrain_candidate_ep200_wu10:
+    status: complete_promoted_to_main
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: driftcost_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    logs_dir: logs_driftcost_longtrain_ep200_wu10
+    result_dir: results_freqduet/driftcost_longtrain_ep200_wu10
+    per_seed_csv: results_freqduet/driftcost_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    candidate_comparison_dir: results_freqduet/driftcost_longtrain_ep200_wu10/candidate_comparison
+    promoted_aliases:
+      - F_freqduet_terminal_main_hiro
+      - F_freqduet_gen_highnoise_main_hiro
+      - F_freqduet_gen_odshift_main_hiro
+      - F_freqduet_gen_rushshift_main_hiro
+    comparison_command: >
+      python3 scripts/compare_freqduet_candidate.py
+      --baseline-per-seed results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-per-seed results_freqduet/driftcost_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-method main_driftcost
+      --out-dir results_freqduet/driftcost_longtrain_ep200_wu10/candidate_comparison
+
+  promoted_longtrain_ep200_wu10:
+    status: complete_from_validated_candidate_relabel
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: current_longtrain_4x6
+    builder: scripts/build_freqduet_promoted_matrix.py
+    result_dir: results_freqduet/paper_longtrain_promoted_ep200_wu10
+    per_seed_csv: results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/paper_longtrain_promoted_ep200_wu10/paper_summary
+    build_command: >
+      python3 scripts/build_freqduet_promoted_matrix.py
+      --baseline-per-seed results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-per-seed results_freqduet/driftcost_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary
+
+  heldout_generalization_ep100_wu10:
+    status: ready_to_run
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    domains:
+      - highnoise
+      - odshift
+      - rushshift
+    methods:
+      - main
+      - nofreq
+      - rawhistory
+      - allfreq
+      - nopromotion
+      - noleakage
+    runner: scripts/run_freqduet_generalization_matrix.sh
+    logs_dir: logs_generalization_ep100_wu10
+    result_dir: results_freqduet/generalization_ep100_wu10
+
+figures:
+  decomposer_validation_current_trace:
+    status: generated
+    script: scripts/make_freqduet_decomposer_figures.py
+    trace_logs:
+      - logs_trace_smoke
+    out_dir: results_freqduet/decomposer_validation/current_trace
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_decomposer_figures.py
+      --out-dir results_freqduet/decomposer_validation/current_trace
+      --trace-logs logs_trace_smoke
+      --formats png,pdf
+      --n-seeds 5
+    outputs:
+      - decomposer_synthetic_components
+      - decomposer_cutoff_window_sensitivity
+      - decomposer_trace_alignment
+      - decomposer_synthetic_per_seed.csv
+      - decomposer_synthetic_summary.csv
+      - decomposer_cutoff_window_sensitivity.csv
+      - decomposer_trace_alignment.csv
+
+  mechanism_current_ep200:
+    status: generated
+    script: scripts/make_freqduet_mechanism_figures.py
+    logs:
+      - logs_paper_longtrain_current_ep200_wu10
+      - logs_trace_smoke
+    out_dir: results_freqduet/mechanism_figures/current_ep200
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_mechanism_figures.py
+      --logs logs_paper_longtrain_current_ep200_wu10 logs_trace_smoke
+      --out-dir results_freqduet/mechanism_figures/current_ep200
+      --last-k 100
+    outputs:
+      - mechanism_hf_energy_to_holding
+      - mechanism_lower_drift_by_method
+      - mechanism_promotion_active_vs_inactive
+      - mechanism_domain_method_bars
+      - mechanism_action_state_spectrum
+      - mechanism_longtrain_drift_curves
+      - trace_hf_lag_audit.csv
+
+  mechanism_promoted_ep200:
+    status: generated
+    script: scripts/make_freqduet_mechanism_figures.py
+    logs:
+      - logs_paper_longtrain_current_ep200_wu10
+      - logs_driftcost_longtrain_ep200_wu10
+      - logs_trace_smoke
+    out_dir: results_freqduet/mechanism_figures/promoted_ep200
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_mechanism_figures.py
+      --logs logs_paper_longtrain_current_ep200_wu10 logs_driftcost_longtrain_ep200_wu10 logs_trace_smoke
+      --out-dir results_freqduet/mechanism_figures/promoted_ep200
+      --last-k 100
+    outputs:
+      - mechanism_hf_energy_to_holding
+      - mechanism_lower_drift_by_method
+      - mechanism_promotion_active_vs_inactive
+      - mechanism_domain_method_bars
+      - mechanism_action_state_spectrum
+      - mechanism_longtrain_drift_curves
+      - trace_hf_lag_audit.csv
+
+scope_decisions:
+  phase4_terminal_dispatch:
+    status: undecided
+    current_scope: target-headway executable timetable MVP
+    remaining_decision: implement actual terminal launch / first-stop holding, or document as limitation
+
+external_baselines:
+  status: harness_ready_full_matrix_pending
+  runner: scripts/run_freqduet_external_baselines.py
+  smoke_result_dir: results_freqduet/external_baselines_smoke
+  default_variants:
+    - fixed_headway
+    - rule_holding
+    - rule_mpc
+  required:
+    - fixed_headway
+    - rule_based_holding
+    - preserved_transitduet
+    - sumo_rl_style_online_rl
+    - mpc_or_forecast_control
+  full_matrix_command: >
+    PYTHONPATH=. python3 scripts/run_freqduet_external_baselines.py
+    --configs F_freqduet_terminal_main_hiro,F_freqduet_gen_highnoise_main_hiro,F_freqduet_gen_odshift_main_hiro,F_freqduet_gen_rushshift_main_hiro
+    --variants fixed_headway,rule_holding,rule_mpc
+    --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+    --episodes 100
+    --last-k 50
+    --logs-dir logs_external_baselines_ep100
+    --out-dir results_freqduet/external_baselines_ep100

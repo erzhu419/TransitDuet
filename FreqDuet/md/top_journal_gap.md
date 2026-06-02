@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -50,6 +50,13 @@ but it is not yet best in every domain. `rawhistory` is still slightly better in
 highnoise, and `rawhistory` / `nopromotion` are slightly better in odshift. This
 means the method direction is effective, but the paper evidence is not closed.
 
+2026-06-03 update: the current-name 200ep matrix has been synced and
+aggregated. It confirms that `noleakage` is clearly bad, but it also exposed a
+long-training weakness in the previous main line: lower action/drift rose after
+roughly 80 episodes while `lower_lambda` decayed. The drift-cost repair
+candidate closed this gap and has been promoted into `F_freqduet_*_main_hiro`.
+Historical pre-repair aliases are kept as `*_main_predriftcost_hiro`.
+
 ## Top-Journal Gap Summary
 
 Status legend:
@@ -60,10 +67,11 @@ Status legend:
 
 ### 1. Current-Version Long Training
 
-Status: `[~]` running
+Status: `[x]` promoted 200ep matrix complete
 
-The strongest current evidence is still 40 episodes. Older 100/200ep results do
-not fully represent the current soft-promotion main line.
+The 200ep current-name matrix is now available, but it does not close the paper
+claim by itself because the current main loses its 40ep advantage in some
+domains during longer training.
 
 2026-06-02 start: added the current paper-longtrain runner and paired-delta
 summary tooling. The first six 80-run shards were auto-routed by scheduler to
@@ -98,6 +106,26 @@ effective active ranges:
 state at launch check: all 16 effective ranges running direct on node001/node003/node004/node005/node006
 ```
 
+2026-06-03 result: the pre-repair current 200ep summary is under
+`FreqDuet/freqduet/results_freqduet/paper_longtrain_current_ep200_wu10`.
+Overall paired deltas show that main is decisively better than `noleakage`, but
+not decisively better than `nofreq`, `rawhistory`, `allfreq`, or `nopromotion`.
+The diagnosis is that long-horizon lower drift was only a reward shaping term,
+not a Lagrangian cost. The active repair adds `lower_drift_cost_*` leakage keys
+and injects rolling drift excess into lower constrained cost.
+
+The promoted 200ep matrix is under
+`FreqDuet/freqduet/results_freqduet/paper_longtrain_promoted_ep200_wu10`.
+Overall paired composite deltas for promoted main are:
+
+```text
+vs nofreq      -0.0719  CI [-0.1322, -0.0266]
+vs rawhistory  -0.0528  CI [-0.0724, -0.0333]
+vs allfreq     -0.0629  CI [-0.0913, -0.0346]
+vs nopromotion -0.0542  CI [-0.0720, -0.0354]
+vs noleakage   -0.3052  CI [-0.3908, -0.2286]
+```
+
 Done means:
 
 - run current `main` against `nofreq`, `rawhistory`, `allfreq`,
@@ -110,10 +138,15 @@ Done means:
 
 ### 2. Systematic Generalization Matrix
 
-Status: `[~]`
+Status: `[~]` script upgraded; full matrix still needs execution
 
 Highnoise, odshift, and rushshift are present, but this is not yet a complete
 held-out generalization package.
+
+2026-06-03 update: `scripts/run_freqduet_generalization_matrix.sh` now defaults
+to highnoise / odshift / rushshift x six methods x 20 paired seeds at 100
+episodes. It still needs execution and additional scenario families beyond the
+three current held-out shifts.
 
 Done means:
 
@@ -126,11 +159,17 @@ Done means:
 
 ### 3. Per-Domain Weakness Repair
 
-Status: `[~]`
+Status: `[x]` repaired by lower drift-cost constraint
 
 The current main wins on average but loses narrowly in highnoise and odshift.
 This must either be repaired or explained with statistically defensible
 tradeoffs.
+
+2026-06-03 update: 200ep diagnosis pointed to lower-drift/Lagrangian mismatch
+rather than only decomposer smoothing. `main_driftcost` beat previous main in
+all four domains at 20 seeds / 200 episodes and has been promoted into the main
+aliases. Mechanism summary shows lower action dropping from roughly 8-9s to
+4.3-4.7s and lower drift penalty dropping from roughly 0.33-0.39 to 0.13-0.15.
 
 Done means:
 
@@ -143,10 +182,16 @@ Done means:
 
 ### 4. Paper-Grade Decomposer Evidence
 
-Status: `[~]`
+Status: `[~]` fixed validation package generated; needs final paper selection
 
 The harmonic causal decomposer and synthetic evaluator exist, but the paper still
 needs direct evidence on real/sim demand traces.
+
+2026-06-03 update: `scripts/make_freqduet_decomposer_figures.py` now writes a
+fixed decomposer validation package to
+`results_freqduet/decomposer_validation/current_trace`, including synthetic
+LF/HF/burst truth, harmonic prior sensitivity, and trace LF/HF alignment CSVs
+and figures.
 
 Done means:
 
@@ -160,9 +205,16 @@ Done means:
 
 ### 5. FreqDuet-Specific Mechanism Figures
 
-Status: `[ ]`
+Status: `[~]` fixed FreqDuet figure package generated
 
 The existing figure scripts are not yet a complete FreqDuet mechanism package.
+
+2026-06-03 update: `scripts/make_freqduet_mechanism_figures.py` writes
+FreqDuet-specific mechanism CSVs and figures to
+`results_freqduet/mechanism_figures/current_ep200` and
+`results_freqduet/mechanism_figures/promoted_ep200`, including HF-to-holding,
+lower drift, promotion active/inactive, method/domain bars, action/state
+spectrum, and longtrain drift curves.
 
 Done means:
 
@@ -194,10 +246,17 @@ preferred unless it destabilizes the method.
 
 ### 7. External Baselines
 
-Status: `[ ]`
+Status: `[~]` FreqDuet baseline harness ready; full results pending
 
 Current evidence is mostly FreqDuet internal ablations and TransitDuet-family
 comparisons. Top-journal claims need stronger outside baselines.
+
+2026-06-03 update: `scripts/run_freqduet_external_baselines.py` now runs
+FreqDuet-format classical baselines using the same config/env perturbations and
+paper composite output. It currently covers fixed-headway without holding,
+rule-based holding, and a simple MPC/forecast triple controller. A 1-episode
+smoke passed, but the full 20-seed external baseline matrix has not been run.
+Preserved TransitDuet and SUMO-RL-style online RL baselines remain open.
 
 Done means:
 
@@ -209,10 +268,16 @@ Done means:
 
 ### 8. Statistical Rigor
 
-Status: `[ ]`
+Status: `[~]` promoted longtrain statistics complete; gen/baseline tables pending
 
 Mean scores are not enough for top-journal claims, especially when domain-level
 gaps are close.
+
+2026-06-03 update: current longtrain summarization, candidate comparison, and
+promoted-main table generation now write seed-level paired deltas, bootstrap
+CIs, and win rates via `scripts/summarize_freqduet_paper_matrix.py`,
+`scripts/compare_freqduet_candidate.py`, and
+`scripts/build_freqduet_promoted_matrix.py`.
 
 Done means:
 
@@ -224,10 +289,17 @@ Done means:
 
 ### 9. Reproducibility And Config Hygiene
 
-Status: `[ ]`
+Status: `[~]` paper manifest started; aliases locked, historical cleanup pending
 
 There are many historical configs, failed ablations, and renamed aliases. This
 is acceptable during research but risky for paper reproduction.
+
+2026-06-03 update: `FreqDuet/freqduet/paper_manifest.yaml` now maps current
+longtrain, driftcost candidate, held-out generalization, decomposer validation,
+and mechanism figures to configs, seeds, scripts, logs, and result paths. The
+promoted main aliases now include drift-cost. The remaining work is to move
+historical failed configs into a clearly marked layer and keep final table/figure
+manifests current as new generalization and baseline results land.
 
 Done means:
 

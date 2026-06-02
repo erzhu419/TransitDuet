@@ -20,7 +20,7 @@ import pandas as pd
 
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
-METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
+METHODS = ("main", "main_driftcost", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
 
 
@@ -37,6 +37,8 @@ def infer_domain(config):
 
 
 def infer_method(config):
+    if "driftcost" in config:
+        return "main_driftcost"
     if config.endswith("_main_hiro"):
         return "main"
     for method in METHODS:

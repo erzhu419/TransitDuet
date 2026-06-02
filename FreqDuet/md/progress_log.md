@@ -710,3 +710,122 @@ t5922  node004  450-480
 
 Launch verification: all 16 effective ranges were running as direct scheduler
 tasks, with no FreqDuet jobs left in Slurm `PENDING`.
+
+## 2026-06-03 top-journal gap: 200ep diagnosis, drift-cost repair, and paper package tooling
+
+Synced and aggregated the current-name 200ep matrix:
+
+```text
+results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary
+matrix: 4 domains x 6 methods x 20 paired seeds = 480 runs
+episodes: 200
+last_k: 100
+```
+
+Main conclusion: the current main remains clearly better than `noleakage`, but
+does not decisively beat `nofreq`, `rawhistory`, `allfreq`, or `nopromotion` at
+200 episodes. Diagnostics showed a long-training drift failure: after roughly
+80 episodes, lower action and lower drift penalty rise while `lower_lambda`
+decays because rolling drift was only reward shaping, not a constrained cost.
+
+Implemented a targeted repair candidate:
+
+- `runner_v3.py`
+  - added `lower_drift_cost_weight`, `lower_drift_cost_mode`, and
+    `lower_drift_cost_cap`;
+  - added rolling drift excess as an optional lower Lagrangian cost;
+  - logged `lower_drift_cost_mean` and `lower_drift_cost_max`.
+- `scripts/run_freqduet_ablation.py`
+  - carries `lower_drift_cost_mean` into summaries.
+- new candidate configs:
+  - `F_freqduet_terminal_main_driftcost_hiro`
+  - `F_freqduet_gen_highnoise_main_driftcost_hiro`
+  - `F_freqduet_gen_odshift_main_driftcost_hiro`
+  - `F_freqduet_gen_rushshift_main_driftcost_hiro`
+
+Smoke validation passed locally and remotely. The local 2ep smoke showed
+positive drift cost and no immediate lambda decay, confirming that the new cost
+path reaches the replay/cost channel.
+
+Launched the 200ep drift-cost candidate on zhengliang HPC direct CPU nodes, not
+Slurm, so the tasks stay visible in `tui-top`:
+
+```text
+t6067 node001 jobs 0-11
+t6068 node002 jobs 11-26
+t6069 node003 jobs 26-39
+t6070 node004 jobs 39-52
+t6071 node005 jobs 52-65
+t6072 node006 jobs 65-80
+```
+
+All 80 candidate runs completed and were synced locally. Aggregated result:
+
+```text
+terminal   main_driftcost composite = 1.509
+highnoise  main_driftcost composite = 1.885
+odshift    main_driftcost composite = 1.501
+rushshift  main_driftcost composite = 1.325
+overall    main_driftcost composite = 1.555
+```
+
+Candidate paired deltas against previous current main:
+
+```text
+terminal  -0.0454  CI [-0.0842, -0.0051]
+highnoise -0.0668  CI [-0.0958, -0.0369]
+odshift   -0.0653  CI [-0.0918, -0.0381]
+rushshift -0.0756  CI [-0.1081, -0.0445]
+overall   -0.0633  CI [-0.0821, -0.0457], win rate 0.95
+```
+
+The repair is effective and was promoted into the canonical main aliases:
+
+- `F_freqduet_terminal_main_hiro`
+- `F_freqduet_gen_highnoise_main_hiro`
+- `F_freqduet_gen_odshift_main_hiro`
+- `F_freqduet_gen_rushshift_main_hiro`
+
+Historical pre-repair aliases were added as `*_main_predriftcost_hiro`.
+`scripts/build_freqduet_promoted_matrix.py` replaces old main rows with the
+validated candidate rows and writes the promoted 200ep paper matrix.
+
+Added paper package tooling:
+
+- `scripts/compare_freqduet_candidate.py`
+  compares a repair candidate against the current paper matrix with paired
+  seed deltas, bootstrap CIs, and win rates.
+- `scripts/build_freqduet_promoted_matrix.py`
+  creates the promoted-main matrix from the validated candidate rows and the
+  unchanged ablation rows.
+- `scripts/make_freqduet_mechanism_figures.py`
+  generates FreqDuet-specific mechanism CSVs and figures from current 200ep
+  diagnostics and trace logs.
+- `scripts/make_freqduet_decomposer_figures.py`
+  generates decomposer validation figures: synthetic LF/HF truth, harmonic
+  prior sensitivity, and trace LF/HF alignment.
+- `scripts/run_freqduet_generalization_matrix.sh`
+  now defaults to highnoise / odshift / rushshift x six methods x 20 paired
+  seeds at 100 episodes.
+- `paper_manifest.yaml`
+  maps experiments, figures, configs, seeds, scripts, logs, and result paths.
+- `scripts/run_freqduet_external_baselines.py`
+  runs FreqDuet-format fixed-headway, rule-holding, and simple MPC external
+  baselines with the same env perturbation configs and paper composite output;
+  a 1-episode smoke passed, but the full external baseline matrix is still
+  pending.
+
+Generated outputs:
+
+```text
+results_freqduet/mechanism_figures/current_ep200
+results_freqduet/mechanism_figures/promoted_ep200
+results_freqduet/decomposer_validation/current_trace
+results_freqduet/driftcost_longtrain_ep200_wu10/combined_summary
+results_freqduet/driftcost_longtrain_ep200_wu10/candidate_comparison
+results_freqduet/paper_longtrain_promoted_ep200_wu10
+```
+
+Documentation updated in `md/top_journal_gap.md`. Next paper gaps are full
+held-out generalization execution, external baseline full matrix, Phase 4 scope
+decision, and final paper table/figure assembly.
