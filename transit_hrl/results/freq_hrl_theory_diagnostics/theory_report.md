@@ -4,9 +4,9 @@ This artifact states the formal claims that are currently supported by code-leve
 
 ## Statistical Coverage
 
-- checks: 17
-- supported or positive-mixed: 16
-- paired seed/source counts: min=3, median=5.0, max=17
+- checks: 59
+- supported or positive-mixed: 38
+- paired seed/source counts: min=3, median=12.0, max=89
 
 ## Theorems
 
@@ -61,3 +61,29 @@ Assumptions:
 Proof sketch: The promotion event is a monotone threshold event in residual exceedance counts. Raising tau or rho can only remove crossing windows under the same residual path. That reduces stationary crossings, but it can also delay or remove crossings on a shifted path whose exceedance count is near the old threshold.
 
 Diagnostics: promotion sweep, recovery validation, and learned Transit promotion-replan checks should be reported together.
+
+### T5: Hierarchical Wait-Credit Residual Bound
+
+Statement: If the passenger-wait credit c_t is decomposed into upper and lower frequency credits c_t^U and c_t^L on the same causal rollout, then the episode-level attribution error is bounded by sum_t |c_t - c_t^U - c_t^L|.
+
+Assumptions:
+- Upper, lower, and total wait credits are computed from the same observed rollout.
+- The policy loss consumes only causal credit terms available at time t.
+- The residual is logged by the validation harness or can be reconstructed from logs.
+
+Proof sketch: For each time step, the absolute attribution mismatch is |c_t - c_t^U - c_t^L|. Summing over the episode and applying the triangle inequality gives the stated L1 residual bound. Thus a small logged residual certifies that frequency-attributed policy losses are close to the intended passenger-wait objective.
+
+Diagnostics: native wait-credit and real-demand control checks report wait/reward deltas; future native OD logs should add explicit credit-residual columns.
+
+### T6: Paired Validation CI Width
+
+Statement: For paired seed/source deltas with empirical standard deviation s and n independent pairs, the normal-approximation confidence half-width decreases as z s / sqrt(n).
+
+Assumptions:
+- Treatment and control are paired by seed/source window.
+- Paired deltas have finite variance.
+- The reported z value matches the desired two-sided confidence level.
+
+Proof sketch: The paired estimator is the sample mean of deltas. Its standard error is s / sqrt(n). Multiplying by the normal critical value z gives the usual large-sample half-width. This quantifies why native promotion and real-demand controls need more paired seeds when reward/wait intervals cross zero.
+
+Diagnostics: paper statistical checks expose n_common and CI bounds for every paired claim.

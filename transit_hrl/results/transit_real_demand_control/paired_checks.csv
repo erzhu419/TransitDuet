@@ -1,0 +1,6 @@
+check,metric,treatment,control,direction,n_common,delta_mean,delta_ci95_low,delta_ci95_high,improvement_mean,improvement_ci95_low,improvement_ci95_high,win_rate,sign_p_value,status
+real_demand_control_control_objective,control_objective,full_real_freqhrl,base_real_ema,increase,6,1.8114274241451875,1.28256587126095,2.4538887158636626,1.8114274241451875,1.28256587126095,2.455658168688026,1.0,0.03125,supported
+real_demand_control_reward_mean,reward_mean,full_real_freqhrl,base_real_ema,increase,6,1.6834868920214543,1.1721058685448769,2.3034313883274398,1.6834868920214543,1.1721058685448769,2.305312231872156,1.0,0.03125,supported
+real_demand_control_wait_proxy,wait_proxy,full_real_freqhrl,base_real_ema,decrease,6,-1.674093575629235,-2.281750974403621,-1.1727880039632244,1.674093575629235,1.1727880039632244,2.2830341124267717,1.0,0.03125,supported
+real_demand_control_LowerLFDrift,LowerLFDrift,full_real_freqhrl,base_real_ema,decrease,6,-0.30257772016495865,-0.3978236653688718,-0.19692228663199698,0.30257772016495865,0.19692228663199704,0.3995897428706634,1.0,0.03125,supported
+real_demand_control_RawLowerLFDriftAbs,RawLowerLFDriftAbs,full_real_freqhrl,base_real_ema,decrease,6,-0.018490157797068665,-0.01908985879641734,-0.01788757381986503,0.018490157797068665,0.01786805835206781,0.019090903227680728,1.0,0.03125,supported

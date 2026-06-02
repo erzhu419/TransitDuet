@@ -15,6 +15,28 @@ def shaped_return_deviation_bound(leakage_weight: float, leakage_costs: list[flo
     return float(max(leakage_weight, 0.0) * sum(max(float(cost), 0.0) for cost in leakage_costs))
 
 
+def finite_sample_mean_ci_radius(*, sample_std: float, n: int, z_value: float = 1.96) -> float:
+    """Normal-approximation half-width for a paired mean delta CI."""
+    n_safe = max(int(n), 1)
+    return float(max(float(sample_std), 0.0) * max(float(z_value), 0.0) / math.sqrt(n_safe))
+
+
+def hierarchical_credit_residual_bound(
+    *,
+    total_credit: list[float],
+    upper_credit: list[float],
+    lower_credit: list[float],
+) -> float:
+    """Bound the additive credit mismatch by the L1 residual."""
+    n = min(len(total_credit), len(upper_credit), len(lower_credit))
+    if n <= 0:
+        return 0.0
+    return float(sum(
+        abs(float(total_credit[i]) - float(upper_credit[i]) - float(lower_credit[i]))
+        for i in range(n)
+    ))
+
+
 def promotion_false_positive_bound(
     *,
     window_bins: int,
@@ -83,10 +105,22 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             window_bins=10,
             persistence_ratio=0.35,
         ),
+        "paired_ci_radius_example": finite_sample_mean_ci_radius(
+            sample_std=0.18,
+            n=36,
+        ),
+        "credit_residual_bound_example": hierarchical_credit_residual_bound(
+            total_credit=[1.0, 0.6, 0.2],
+            upper_credit=[0.7, 0.4, 0.1],
+            lower_credit=[0.2, 0.2, 0.1],
+        ),
     }
     cited_checks = {
         "transit_learned_promotion_wait": _check(checks, "transit_learned_promotion_wait_vs_interval"),
         "native_learned_gate_reward": _check(checks, "transit_native_learned_gate_reward_vs_interval"),
+        "native_learned_gate_wait": _check(checks, "transit_native_learned_gate_wait_vs_interval"),
+        "real_demand_control_objective": _check(checks, "transit_real_demand_control_objective_vs_base"),
+        "real_demand_control_wait": _check(checks, "transit_real_demand_control_wait_vs_base"),
         "trading_leakage_constraint": _check(checks, "trading_constraint_lower_lf"),
         "transit_leakage_constraint": _check(checks, "transit_constraint_lower_lf"),
     }
@@ -99,12 +133,16 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "lower high-frequency controller pi_L",
             "promotion gate g_promote",
             "action-effect leakage cost L_t",
+            "frequency-attributed passenger wait credit c_t^wait",
+            "paired seed/source estimator delta d_i",
         ],
         "assumptions": [
             "A1: the encoder reads only current and past exogenous bins.",
             "A2: the upper action remains active across multiple lower decisions unless a scheduled or promoted replan occurs.",
             "A3: leakage costs are nonnegative and computed causally from action effects.",
             "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p.",
+            "A5: paired validation compares treatment/control on the same seed and source window.",
+            "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
         ],
         "examples": examples,
         "cited_checks": cited_checks,
@@ -150,6 +188,18 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "",
         f"Example delay bound: `{_fmt(examples['promotion_detection_delay_bound_s'], digits=1)}s`.",
         "",
+        "## Theorem 4: Hierarchical Credit Residual Bound",
+        "",
+        "Let `c_t` be the total causal wait credit and let `c_t^U + c_t^L` be the upper/lower frequency attribution used by the policy losses. The episode-level attribution error is bounded by `sum_t |c_t - c_t^U - c_t^L|`. When diagnostics keep this residual small, the learned objectives are close to the intended passenger-wait objective.",
+        "",
+        f"Example residual bound: `{_fmt(examples['credit_residual_bound_example'])}`.",
+        "",
+        "## Theorem 5: Paired Mean Evidence Width",
+        "",
+        "For paired seed/source deltas with empirical standard deviation `s` and `n` pairs, the normal-approximation half-width is `z s / sqrt(n)`. This gives an explicit target for the larger-seed native promotion and real-demand control validations: increasing independent paired seeds shrinks inconclusive CIs at the standard square-root rate.",
+        "",
+        f"Example `s=0.18`, `n=36`, `z=1.96`: `{_fmt(examples['paired_ci_radius_example'])}`.",
+        "",
         "## Empirical Anchors",
         "",
         "| check | status | delta CI95 |",
@@ -167,7 +217,7 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "",
         "## Boundary",
         "",
-        "These results formalize the Freq-HRL protocol claims. They do not replace large-scale performance validation: native Transit, real AFC/APC/GTFS demand, and deeper order-book feeds still need broader seed and data coverage.",
+        "These results formalize the Freq-HRL protocol claims. They do not replace large-scale performance validation: native Transit under true onboard-load/alighting/OD dynamics, learned native promotion reward/wait CIs, and deeper order-book feeds still need broader seed and data coverage.",
     ])
     (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 

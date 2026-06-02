@@ -4,6 +4,8 @@ from pathlib import Path
 
 from freq_hrl.experiments.theory_appendix import (
     build_theory_payload,
+    finite_sample_mean_ci_radius,
+    hierarchical_credit_residual_bound,
     promotion_detection_delay_bound,
     promotion_false_positive_bound,
     shaped_return_deviation_bound,
@@ -36,6 +38,18 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             600.0,
         )
+        self.assertLess(
+            finite_sample_mean_ci_radius(sample_std=1.0, n=16),
+            finite_sample_mean_ci_radius(sample_std=1.0, n=4),
+        )
+        self.assertAlmostEqual(
+            hierarchical_credit_residual_bound(
+                total_credit=[1.0, 2.0],
+                upper_credit=[0.25, 1.0],
+                lower_credit=[0.75, 0.5],
+            ),
+            0.5,
+        )
 
     def test_theory_appendix_writes_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -44,6 +58,7 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             self.assertIn("Theorem 1", (root / "out" / "report.md").read_text())
+            self.assertIn("Theorem 5", (root / "out" / "report.md").read_text())
 
 
 if __name__ == "__main__":

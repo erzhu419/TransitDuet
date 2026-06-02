@@ -6,18 +6,24 @@
     "upper low-frequency plan policy pi_U",
     "lower high-frequency controller pi_L",
     "promotion gate g_promote",
-    "action-effect leakage cost L_t"
+    "action-effect leakage cost L_t",
+    "frequency-attributed passenger wait credit c_t^wait",
+    "paired seed/source estimator delta d_i"
   ],
   "assumptions": [
     "A1: the encoder reads only current and past exogenous bins.",
     "A2: the upper action remains active across multiple lower decisions unless a scheduled or promoted replan occurs.",
     "A3: leakage costs are nonnegative and computed causally from action effects.",
-    "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p."
+    "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p.",
+    "A5: paired validation compares treatment/control on the same seed and source window.",
+    "A6: frequency credit residuals are explicitly measurable from the same causal rollout."
   ],
   "examples": {
     "leakage_bound_example": 0.087,
     "promotion_false_positive_bound_example": 0.28650479686019015,
-    "promotion_detection_delay_bound_s": 600.0
+    "promotion_detection_delay_bound_s": 600.0,
+    "paired_ci_radius_example": 0.0588,
+    "credit_residual_bound_example": 0.10000000000000009
   },
   "cited_checks": {
     "transit_learned_promotion_wait": {
@@ -41,20 +47,74 @@
     "native_learned_gate_reward": {
       "check": "transit_native_learned_gate_reward_vs_interval",
       "claim": "native learned promotion gate improves Transit episode reward",
-      "status": "positive_mixed",
+      "status": "inconclusive",
       "metric": "ep_reward",
       "treatment": "native_learned_gate",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": "8",
-      "delta_mean": "33.40050000000025",
-      "delta_ci95_low": "-15.637375000000247",
-      "delta_ci95_high": "105.49962500000032",
-      "improvement_mean": "33.40050000000025",
-      "improvement_ci95_low": "-16.494115624999097",
-      "improvement_ci95_high": "106.35185625000008",
-      "win_rate": "0.625",
-      "sign_p_value": "0.7265625"
+      "n_common": "12",
+      "delta_mean": "3.6935000000004643",
+      "delta_ci95_low": "-12.328347916665471",
+      "delta_ci95_high": "17.84738958333338",
+      "improvement_mean": "3.6935000000004643",
+      "improvement_ci95_low": "-11.795533333332045",
+      "improvement_ci95_high": "18.761437499999893",
+      "win_rate": "0.4166666666666667",
+      "sign_p_value": "1.0"
+    },
+    "native_learned_gate_wait": {
+      "check": "transit_native_learned_gate_wait_vs_interval",
+      "claim": "native learned promotion gate lowers Transit wait",
+      "status": "inconclusive",
+      "metric": "avg_wait_min",
+      "treatment": "native_learned_gate",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": "12",
+      "delta_mean": "-0.015250000000000022",
+      "delta_ci95_low": "-0.0530041666666669",
+      "delta_ci95_high": "0.006000000000000116",
+      "improvement_mean": "0.015250000000000022",
+      "improvement_ci95_low": "-0.005833333333333284",
+      "improvement_ci95_high": "0.054166666666666995",
+      "win_rate": "0.16666666666666666",
+      "sign_p_value": "0.453125"
+    },
+    "real_demand_control_objective": {
+      "check": "transit_real_demand_control_objective_vs_base",
+      "claim": "Freq-HRL improves the composite control objective under real AFC/APC demand traces",
+      "status": "supported",
+      "metric": "control_objective",
+      "treatment": "full_real_freqhrl",
+      "control": "base_real_ema",
+      "direction": "increase",
+      "n_common": "6",
+      "delta_mean": "1.8114274241451875",
+      "delta_ci95_low": "1.28256587126095",
+      "delta_ci95_high": "2.4538887158636626",
+      "improvement_mean": "1.8114274241451875",
+      "improvement_ci95_low": "1.28256587126095",
+      "improvement_ci95_high": "2.455658168688026",
+      "win_rate": "1.0",
+      "sign_p_value": "0.03125"
+    },
+    "real_demand_control_wait": {
+      "check": "transit_real_demand_control_wait_vs_base",
+      "claim": "Freq-HRL lowers wait proxy under real AFC/APC demand traces",
+      "status": "supported",
+      "metric": "wait_proxy",
+      "treatment": "full_real_freqhrl",
+      "control": "base_real_ema",
+      "direction": "decrease",
+      "n_common": "6",
+      "delta_mean": "-1.674093575629235",
+      "delta_ci95_low": "-2.281750974403621",
+      "delta_ci95_high": "-1.1727880039632244",
+      "improvement_mean": "1.674093575629235",
+      "improvement_ci95_low": "1.1727880039632244",
+      "improvement_ci95_high": "2.2830341124267717",
+      "win_rate": "1.0",
+      "sign_p_value": "0.03125"
     },
     "trading_leakage_constraint": {
       "check": "trading_constraint_lower_lf",

@@ -231,6 +231,7 @@ def rollout(
     corridors: int,
     scenario: str,
     sample: bool,
+    demand_trace: np.ndarray | None = None,
     leakage_scale: float = 0.0,
     plan_mapper: LearnedPlanActionMapper | None = None,
     tracker_method: str = "ema",
@@ -252,7 +253,22 @@ def rollout(
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
 ) -> tuple[TrajectoryBatch | None, dict[str, Any]]:
-    demand = make_synthetic_transit_demand(seed, steps, corridors, scenario)
+    if demand_trace is None:
+        demand = make_synthetic_transit_demand(seed, steps, corridors, scenario)
+        demand_source = "synthetic"
+    else:
+        demand = np.asarray(demand_trace, dtype=np.float64)
+        if demand.ndim == 1:
+            demand = demand.reshape(-1, 1)
+        if demand.shape[1] < int(corridors):
+            repeats = int(np.ceil(float(corridors) / max(float(demand.shape[1]), 1.0)))
+            demand = np.tile(demand, (1, repeats))
+        demand = demand[:, :int(corridors)]
+        if demand.shape[0] < int(steps):
+            repeats = int(np.ceil(float(steps) / max(float(demand.shape[0]), 1.0)))
+            demand = np.tile(demand, (repeats, 1))
+        demand = np.maximum(demand[:int(steps), :], 0.0)
+        demand_source = "real_trace"
     rng = np.random.default_rng(int(seed) + 7919)
     tracker = make_tracker(
         method=tracker_method,
@@ -562,6 +578,8 @@ def rollout(
         "raw_recenter_reduction_mean": float(np.mean(raw_recenter_reductions)) if raw_recenter_reductions else 0.0,
         "upper_decision_count": int(upper_decisions),
         "promotion_replan_count": int(promotion_replans),
+        "real_demand_trace": bool(demand_trace is not None),
+        "demand_source": demand_source,
     }
     if not sample:
         return None, row
@@ -653,6 +671,7 @@ def train_transit_surrogate_ppo(
     promotion_replan_recovery_gain: float = 0.0,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
+    demand_traces: dict[int, np.ndarray] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
@@ -708,6 +727,7 @@ def train_transit_surrogate_ppo(
             corridors=corridors,
             scenario=scenario,
             sample=sample,
+            demand_trace=(demand_traces or {}).get(int(rollout_seed)),
             leakage_scale=leakage_scale if sample else 0.0,
             plan_mapper=plan_mapper,
             tracker_method=tracker_method,
@@ -758,6 +778,7 @@ def train_transit_surrogate_ppo(
             "promotion_replan_recovery_gain": float(promotion_replan_recovery_gain),
             "promotion_residual_threshold": float(promotion_residual_threshold),
             "promotion_persistence_ratio": float(promotion_persistence_ratio),
+            "real_demand_traces": bool(demand_traces),
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
             "lower_lf_constraint_target": float(lower_lf_constraint_target),
             "lower_lf_dual_lr": float(lower_lf_dual_lr),

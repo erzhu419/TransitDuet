@@ -135,6 +135,41 @@ class TransitPPOSurrogateTest(unittest.TestCase):
         self.assertGreater(row["promotion_replan_count"], 0)
         self.assertGreater(row["promotion_recovery_relief"], 0.0)
 
+    def test_rollout_accepts_real_demand_trace(self):
+        corridors = 2
+        tracker = make_tracker(method="ema")
+        upper_dim = int(tracker.upper_features("low_mid").size + corridors + 1)
+        lower_dim = int(
+            corridors * tracker.lower_features(0, True, "high_mid").size
+            + 2 * corridors
+            + 1
+        )
+        model = DualActorCriticPPO(DualPPOConfig(
+            upper_state_dim=upper_dim,
+            lower_state_dim=lower_dim,
+            upper_action_dim=corridors,
+            lower_action_dim=corridors,
+            hidden_dim=0,
+            init_log_std=-3.0,
+        ))
+        trace = np.stack([
+            np.linspace(3.0, 12.0, 24),
+            np.linspace(8.0, 5.0, 24),
+        ], axis=1)
+        _, row = rollout(
+            model,
+            seed=3,
+            steps=32,
+            corridors=corridors,
+            scenario="stationary",
+            sample=False,
+            demand_trace=trace,
+            tracker_method="ema",
+        )
+        self.assertTrue(row["real_demand_trace"])
+        self.assertEqual(row["demand_source"], "real_trace")
+        self.assertGreater(row["wait_proxy"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

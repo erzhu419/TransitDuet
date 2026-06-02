@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 from freq_hrl.experiments.paper_diagnostics import (
@@ -57,6 +58,48 @@ class PaperDiagnosticsTest(unittest.TestCase):
         }
         self.assertEqual(noninferiority_status(stats, max_loss=0.005, min_pairs=5), "supported")
         self.assertEqual(noninferiority_status(stats, max_loss=0.001, min_pairs=5), "inconclusive")
+
+    def test_real_demand_control_rows_enter_statistical_checks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "results" / "transit_real_demand_control"
+            out.mkdir(parents=True)
+            rows = []
+            for source in ("afc", "apc"):
+                for seed in (1, 2, 3):
+                    rows.append({
+                        "source": source,
+                        "seed": seed,
+                        "variant": "base_real_ema",
+                        "control_objective": -10.0,
+                        "reward_mean": -8.0,
+                        "wait_proxy": 7.0,
+                        "LowerLFDrift": 2.0,
+                        "RawLowerLFDriftAbs": 2.5,
+                    })
+                    rows.append({
+                        "source": source,
+                        "seed": seed,
+                        "variant": "full_real_freqhrl",
+                        "control_objective": -8.0,
+                        "reward_mean": -6.0,
+                        "wait_proxy": 5.0,
+                        "LowerLFDrift": 1.5,
+                        "RawLowerLFDriftAbs": 1.8,
+                    })
+            (out / "summary.json").write_text(json.dumps({"rows": rows}), encoding="utf-8")
+            checks = {
+                row["check"]: row
+                for row in build_statistical_checks(root / "results")
+            }
+            self.assertEqual(
+                checks["transit_real_demand_control_objective_vs_base"]["status"],
+                "supported",
+            )
+            self.assertLess(
+                checks["transit_real_demand_control_wait_vs_base"]["delta_mean"],
+                0.0,
+            )
 
 
 if __name__ == "__main__":
