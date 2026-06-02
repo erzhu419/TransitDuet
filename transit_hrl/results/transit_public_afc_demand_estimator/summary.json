@@ -11,7 +11,8 @@
     "warmup": 24,
     "real_passenger_demand": true,
     "afc_style_entries": true,
-    "apc_onboard_loads": false
+    "apc_onboard_loads": false,
+    "afc_calibrated_profile": true
   },
   "rows": [
     {
@@ -41,6 +42,16 @@
       "mse": 39230742.13994119,
       "mae": 5235.44887027072,
       "poisson_nll_no_const": -22816.793082397253,
+      "n": 313,
+      "mean_count": 5373.875370919881
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 0,
+      "series_id": "611:Times Sq-42 St (N,Q,R,W,S,1,2,3,7)/42 St (A,C,E)",
+      "mse": 1846711.9579993794,
+      "mae": 911.9459560553794,
+      "poisson_nll_no_const": -41336.48095110965,
       "n": 313,
       "mean_count": 5373.875370919881
     },
@@ -75,6 +86,16 @@
       "mean_count": 4041.46884272997
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 1,
+      "series_id": "610:Grand Central-42 St (S,4,5,6,7)",
+      "mse": 2412864.458061995,
+      "mae": 923.561595756963,
+      "poisson_nll_no_const": -30274.688038698423,
+      "n": 313,
+      "mean_count": 4041.46884272997
+    },
+    {
       "method": "ema",
       "seed": 2,
       "series_id": "607:34 St-Herald Sq (B,D,F,M,N,Q,R,W)",
@@ -101,6 +122,16 @@
       "mse": 14277449.844497528,
       "mae": 2906.1801705395915,
       "poisson_nll_no_const": -11076.671874891526,
+      "n": 313,
+      "mean_count": 2984.845697329377
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 2,
+      "series_id": "607:34 St-Herald Sq (B,D,F,M,N,Q,R,W)",
+      "mse": 710672.8759054592,
+      "mae": 537.4393122145458,
+      "poisson_nll_no_const": -21526.02175923156,
       "n": 313,
       "mean_count": 2984.845697329377
     },
@@ -135,6 +166,16 @@
       "mean_count": 2821.5489614243324
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 3,
+      "series_id": "602:14 St-Union Sq (L,N,Q,R,W,4,5,6)",
+      "mse": 459850.4912862492,
+      "mae": 471.9003653869671,
+      "poisson_nll_no_const": -20314.88762095802,
+      "n": 313,
+      "mean_count": 2821.5489614243324
+    },
+    {
       "method": "ema",
       "seed": 4,
       "series_id": "628:Fulton St (A,C,J,Z,2,3,4,5)",
@@ -161,6 +202,16 @@
       "mse": 10116694.267348612,
       "mae": 2256.9463503190977,
       "poisson_nll_no_const": -8138.594141496305,
+      "n": 313,
+      "mean_count": 2342.53115727003
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 4,
+      "series_id": "628:Fulton St (A,C,J,Z,2,3,4,5)",
+      "mse": 742807.8086082472,
+      "mae": 513.76950593899,
+      "poisson_nll_no_const": -16326.510040146393,
       "n": 313,
       "mean_count": 2342.53115727003
     },
@@ -195,6 +246,16 @@
       "mean_count": 2227.0296735905044
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 5,
+      "series_id": "164:34 St-Penn Station (A,C,E)",
+      "mse": 470436.46438341617,
+      "mae": 435.52701537973826,
+      "poisson_nll_no_const": -15228.70400873189,
+      "n": 313,
+      "mean_count": 2227.0296735905044
+    },
+    {
       "method": "ema",
       "seed": 6,
       "series_id": "614:59 St-Columbus Circle (A,B,C,D,1)",
@@ -221,6 +282,16 @@
       "mse": 7341204.741077298,
       "mae": 2034.5712479192405,
       "poisson_nll_no_const": -7115.60712721986,
+      "n": 313,
+      "mean_count": 2101.789317507418
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 6,
+      "series_id": "614:59 St-Columbus Circle (A,B,C,D,1)",
+      "mse": 253004.08345011086,
+      "mae": 334.8739561756449,
+      "poisson_nll_no_const": -14454.102871347222,
       "n": 313,
       "mean_count": 2101.789317507418
     },
@@ -255,6 +326,16 @@
       "mean_count": 2063.1691394658756
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 7,
+      "series_id": "318:34 St-Penn Station (1,2,3)",
+      "mse": 524081.8830548396,
+      "mae": 444.0206690300785,
+      "poisson_nll_no_const": -13944.725694910881,
+      "n": 313,
+      "mean_count": 2063.1691394658756
+    },
+    {
       "method": "ema",
       "seed": 8,
       "series_id": "616:74-Broadway (7)/Jackson Hts-Roosevelt Av (E,F,M,R)",
@@ -281,6 +362,16 @@
       "mse": 4311360.403847073,
       "mae": 1690.899107737001,
       "poisson_nll_no_const": -5609.731530148405,
+      "n": 313,
+      "mean_count": 1734.0830860534124
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 8,
+      "series_id": "616:74-Broadway (7)/Jackson Hts-Roosevelt Av (E,F,M,R)",
+      "mse": 207713.02541548412,
+      "mae": 264.8140512199345,
+      "poisson_nll_no_const": -11482.305167400154,
       "n": 313,
       "mean_count": 1734.0830860534124
     },
@@ -315,6 +406,16 @@
       "mean_count": 1662.1632047477744
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 9,
+      "series_id": "624:Chambers St (A,C)/WTC (E)/Park Pl (2,3)/Cortlandt (R,W)",
+      "mse": 421419.88260338054,
+      "mae": 373.1508475753845,
+      "poisson_nll_no_const": -11130.649995304198,
+      "n": 313,
+      "mean_count": 1662.1632047477744
+    },
+    {
       "method": "ema",
       "seed": 10,
       "series_id": "447:Flushing-Main St (7)",
@@ -341,6 +442,16 @@
       "mse": 4338267.037409559,
       "mae": 1535.1086732130982,
       "poisson_nll_no_const": -4815.787953022486,
+      "n": 313,
+      "mean_count": 1584.3323442136498
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 10,
+      "series_id": "447:Flushing-Main St (7)",
+      "mse": 493604.736991043,
+      "mae": 412.9378038050611,
+      "poisson_nll_no_const": -10381.381072449565,
       "n": 313,
       "mean_count": 1584.3323442136498
     },
@@ -375,6 +486,16 @@
       "mean_count": 1481.2818991097922
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 11,
+      "series_id": "612:Lexington Av-53 St (E,M)/51 St (6)",
+      "mse": 536463.5803164177,
+      "mae": 389.25419546088284,
+      "poisson_nll_no_const": -9735.851208658261,
+      "n": 313,
+      "mean_count": 1481.2818991097922
+    },
+    {
       "method": "ema",
       "seed": 12,
       "series_id": "225:47-50 Sts-Rockefeller Ctr (B,D,F,M)",
@@ -401,6 +522,16 @@
       "mse": 5662559.620595518,
       "mae": 1387.4720894280772,
       "poisson_nll_no_const": -4360.485380727285,
+      "n": 313,
+      "mean_count": 1450.6706231454007
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 12,
+      "series_id": "225:47-50 Sts-Rockefeller Ctr (B,D,F,M)",
+      "mse": 691610.5549984681,
+      "mae": 406.24355005240994,
+      "poisson_nll_no_const": -9658.69345878373,
       "n": 313,
       "mean_count": 1450.6706231454007
     },
@@ -435,6 +566,16 @@
       "mean_count": 1440.480712166172
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 13,
+      "series_id": "618:14 St (A,C,E)/8 Av (L)",
+      "mse": 108308.09312977997,
+      "mae": 224.30924139037631,
+      "poisson_nll_no_const": -9472.033984599026,
+      "n": 313,
+      "mean_count": 1440.480712166172
+    },
+    {
       "method": "ema",
       "seed": 14,
       "series_id": "609:Bryant Pk (B,D,F,M)/5 Av (7)",
@@ -461,6 +602,16 @@
       "mse": 4536422.895610173,
       "mae": 1370.988047648806,
       "poisson_nll_no_const": -4289.360724257213,
+      "n": 313,
+      "mean_count": 1423.9910979228487
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 14,
+      "series_id": "609:Bryant Pk (B,D,F,M)/5 Av (7)",
+      "mse": 383517.79936801206,
+      "mae": 319.8581826809089,
+      "poisson_nll_no_const": -9384.948828444001,
       "n": 313,
       "mean_count": 1423.9910979228487
     },
@@ -495,6 +646,16 @@
       "mean_count": 1390.551928783383
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 15,
+      "series_id": "613:Lexington Av (N,R,W)/59 St (4,5,6)",
+      "mse": 259946.28267378663,
+      "mae": 289.3681295610806,
+      "poisson_nll_no_const": -9065.038953391384,
+      "n": 313,
+      "mean_count": 1390.551928783383
+    },
+    {
       "method": "ema",
       "seed": 16,
       "series_id": "167:W 4 St-Wash Sq (A,C,E,B,D,F,M)",
@@ -521,6 +682,16 @@
       "mse": 2800076.8028194183,
       "mae": 1332.3961179047642,
       "poisson_nll_no_const": -4067.5047513416807,
+      "n": 313,
+      "mean_count": 1359.8813056379822
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 16,
+      "series_id": "167:W 4 St-Wash Sq (A,C,E,B,D,F,M)",
+      "mse": 81501.10526813933,
+      "mae": 203.51593301030766,
+      "poisson_nll_no_const": -8792.653998178766,
       "n": 313,
       "mean_count": 1359.8813056379822
     },
@@ -555,6 +726,16 @@
       "mean_count": 1310.0682492581602
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 17,
+      "series_id": "617:Atlantic Av-Barclays Ctr (B,D,N,Q,R,2,3,4,5)",
+      "mse": 379352.3918257989,
+      "mae": 336.8775836053462,
+      "poisson_nll_no_const": -8246.596495989861,
+      "n": 313,
+      "mean_count": 1310.0682492581602
+    },
+    {
       "method": "ema",
       "seed": 18,
       "series_id": "601:14 St (F,M,1,2,3)/6 Av (L)",
@@ -581,6 +762,16 @@
       "mse": 2709307.026772192,
       "mae": 1281.2454033944553,
       "poisson_nll_no_const": -3814.5922128357774,
+      "n": 313,
+      "mean_count": 1309.0949554896142
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 18,
+      "series_id": "601:14 St (F,M,1,2,3)/6 Av (L)",
+      "mse": 81446.82701037098,
+      "mae": 200.994743758482,
+      "poisson_nll_no_const": -8448.038066302497,
       "n": 313,
       "mean_count": 1309.0949554896142
     },
@@ -615,6 +806,16 @@
       "mean_count": 1305.632047477745
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 19,
+      "series_id": "397:86 St (4,5,6)",
+      "mse": 163489.14521890337,
+      "mae": 255.95822872673398,
+      "poisson_nll_no_const": -8408.903680470408,
+      "n": 313,
+      "mean_count": 1305.632047477745
+    },
+    {
       "method": "ema",
       "seed": 20,
       "series_id": "623:Canal St (J,N,Q,R,W,Z,6)",
@@ -641,6 +842,16 @@
       "mse": 3096781.6725681336,
       "mae": 1248.6530011356037,
       "poisson_nll_no_const": -3600.959349259341,
+      "n": 313,
+      "mean_count": 1274.658753709199
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 20,
+      "series_id": "623:Canal St (J,N,Q,R,W,Z,6)",
+      "mse": 88937.19604914622,
+      "mae": 196.1616636434702,
+      "poisson_nll_no_const": -8371.559251504792,
       "n": 313,
       "mean_count": 1274.658753709199
     },
@@ -675,6 +886,16 @@
       "mean_count": 1239.9762611275964
     },
     {
+      "method": "afc_daily_profile",
+      "seed": 21,
+      "series_id": "619:Broadway-Lafayette St (B,D,F,M)/Bleecker St (6)",
+      "mse": 74765.69666631326,
+      "mae": 194.7566763452308,
+      "poisson_nll_no_const": -8029.257276146222,
+      "n": 313,
+      "mean_count": 1239.9762611275964
+    },
+    {
       "method": "ema",
       "seed": 22,
       "series_id": "313:72 St (1,2,3)",
@@ -701,6 +922,16 @@
       "mse": 2152060.0508937086,
       "mae": 1154.7124305287443,
       "poisson_nll_no_const": -3300.6740738326507,
+      "n": 313,
+      "mean_count": 1181.5074183976262
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 22,
+      "series_id": "313:72 St (1,2,3)",
+      "mse": 101686.67193386614,
+      "mae": 207.16674691072242,
+      "poisson_nll_no_const": -7482.828294499346,
       "n": 313,
       "mean_count": 1181.5074183976262
     },
@@ -733,16 +964,34 @@
       "poisson_nll_no_const": -3090.692423387859,
       "n": 313,
       "mean_count": 1125.7893175074184
+    },
+    {
+      "method": "afc_daily_profile",
+      "seed": 23,
+      "series_id": "120:Bedford Av (L)",
+      "mse": 143503.15539802492,
+      "mae": 240.64802961005725,
+      "poisson_nll_no_const": -7074.525235995906,
+      "n": 313,
+      "mean_count": 1125.7893175074184
     }
   ],
   "summary": [
+    {
+      "method": "afc_daily_profile",
+      "series": 24,
+      "mse_mean": 484904.00698402635,
+      "mae_mean": 378.710582637279,
+      "poisson_nll_no_const_mean": -13273.807748052173,
+      "delta_mse_vs_best": 0.0
+    },
     {
       "method": "dynamic_harmonic_nb",
       "series": 24,
       "mse_mean": 7687260.924489857,
       "mae_mean": 1869.671578351318,
       "poisson_nll_no_const_mean": -6492.554864078777,
-      "delta_mse_vs_best": 81100.97782919928
+      "delta_mse_vs_best": 7202356.9175058305
     },
     {
       "method": "ema",
@@ -750,7 +999,7 @@
       "mse_mean": 7606159.946660657,
       "mae_mean": 1866.6539872753535,
       "poisson_nll_no_const_mean": -7159.326623340693,
-      "delta_mse_vs_best": 0.0
+      "delta_mse_vs_best": 7121255.939676631
     },
     {
       "method": "fourier",
@@ -758,10 +1007,61 @@
       "mse_mean": 7671139.189773892,
       "mae_mean": 1865.7856780697548,
       "poisson_nll_no_const_mean": -6661.3084867456055,
-      "delta_mse_vs_best": 64979.24311323464
+      "delta_mse_vs_best": 7186235.182789866
     }
   ],
   "paired_deltas": [
+    {
+      "comparison": "afc_daily_profile_vs_fourier",
+      "metric": "mse",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -7186235.182789865,
+      "delta_ci95_low": -11227317.017685505,
+      "delta_ci95_high": -4426375.239262286,
+      "improvement_mean": 7186235.182789865,
+      "improvement_ci95_low": 4302324.061080188,
+      "improvement_ci95_high": 10841796.878497355,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "comparison": "afc_daily_profile_vs_fourier",
+      "metric": "mae",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -1487.0750954324758,
+      "delta_ci95_low": -1861.9975292413699,
+      "delta_ci95_high": -1211.7628861938194,
+      "improvement_mean": 1487.0750954324758,
+      "improvement_ci95_low": 1202.7411859291133,
+      "improvement_ci95_high": 1831.995933466178,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "comparison": "afc_daily_profile_vs_fourier",
+      "metric": "poisson_nll_no_const",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -6612.499261306569,
+      "delta_ci95_low": -8186.386690173029,
+      "delta_ci95_high": -5459.888993164063,
+      "improvement_mean": 6612.499261306569,
+      "improvement_ci95_low": 5409.274600267328,
+      "improvement_ci95_high": 8028.920684335092,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
     {
       "comparison": "dynamic_harmonic_nb_vs_fourier",
       "metric": "mse",
@@ -770,11 +1070,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": 16121.734715965664,
-      "delta_ci95_low": 6046.060394075155,
-      "delta_ci95_high": 31800.852688927745,
+      "delta_ci95_low": 6049.562880413584,
+      "delta_ci95_high": 30336.582843573877,
       "improvement_mean": -16121.734715965664,
-      "improvement_ci95_low": -30129.018136974206,
-      "improvement_ci95_high": -5952.129425589385,
+      "improvement_ci95_low": -30586.218060424988,
+      "improvement_ci95_high": -5768.623828906704,
       "win_rate": 0.08333333333333333,
       "sign_p_value": 3.5881996154785156e-05,
       "status": "not_supported"
@@ -787,11 +1087,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": 3.88590028156284,
-      "delta_ci95_low": 2.705917788433685,
-      "delta_ci95_high": 5.521653658052223,
+      "delta_ci95_low": 2.7103747004281002,
+      "delta_ci95_high": 5.366576703768015,
       "improvement_mean": -3.88590028156284,
-      "improvement_ci95_low": -5.367155164585571,
-      "improvement_ci95_high": -2.676201886082015,
+      "improvement_ci95_low": -5.392245648300982,
+      "improvement_ci95_high": -2.6566716536458097,
       "win_rate": 0.0,
       "sign_p_value": 1.1920928955078125e-07,
       "status": "not_supported"
@@ -804,11 +1104,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": 168.75362266682833,
-      "delta_ci95_low": 98.82769022435419,
-      "delta_ci95_high": 265.48546709895476,
+      "delta_ci95_low": 98.33790110455288,
+      "delta_ci95_high": 252.45354136196772,
       "improvement_mean": -168.75362266682833,
-      "improvement_ci95_low": -256.93819975545694,
-      "improvement_ci95_high": -96.72031832688464,
+      "improvement_ci95_low": -257.90659374828226,
+      "improvement_ci95_high": -93.42315510766481,
       "win_rate": 0.125,
       "sign_p_value": 0.0002771615982055664,
       "status": "not_supported"
@@ -821,11 +1121,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": -64979.24311323361,
-      "delta_ci95_low": -89698.34511354088,
-      "delta_ci95_high": -44124.11668512242,
+      "delta_ci95_low": -91793.58605351226,
+      "delta_ci95_high": -44541.02524021776,
       "improvement_mean": 64979.24311323361,
-      "improvement_ci95_low": 43572.6262225803,
-      "improvement_ci95_high": 90922.04496538483,
+      "improvement_ci95_low": 43774.421102011744,
+      "improvement_ci95_high": 92002.67796849631,
       "win_rate": 1.0,
       "sign_p_value": 1.1920928955078125e-07,
       "status": "supported"
@@ -838,11 +1138,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": 0.8683092055986682,
-      "delta_ci95_low": 0.0644569554596887,
-      "delta_ci95_high": 1.4577785168486344,
+      "delta_ci95_low": 0.18664181833668986,
+      "delta_ci95_high": 1.4558091032939875,
       "improvement_mean": -0.8683092055986682,
-      "improvement_ci95_low": -1.4598355959715217,
-      "improvement_ci95_high": -0.07643024640666496,
+      "improvement_ci95_low": -1.4768779721688983,
+      "improvement_ci95_high": -0.09135428845889094,
       "win_rate": 0.25,
       "sign_p_value": 0.022655844688415527,
       "status": "not_supported"
@@ -855,11 +1155,11 @@
       "direction": "decrease",
       "n_common": 24,
       "delta_mean": -498.01813659508775,
-      "delta_ci95_low": -578.1576623667454,
-      "delta_ci95_high": -419.3570612541371,
+      "delta_ci95_low": -584.3149798227176,
+      "delta_ci95_high": -422.2208126906787,
       "improvement_mean": 498.01813659508775,
-      "improvement_ci95_low": 420.71443749905376,
-      "improvement_ci95_high": 579.0603656639609,
+      "improvement_ci95_low": 421.08237513729534,
+      "improvement_ci95_high": 582.5838630606897,
       "win_rate": 1.0,
       "sign_p_value": 1.1920928955078125e-07,
       "status": "supported"

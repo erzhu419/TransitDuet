@@ -28,7 +28,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 | C7: integrated native Transit Freq-HRL closes the copied-runner gap | supported | reward delta=+0.0565 [+0.0485, +0.0608]; wait delta=-0.0758 [-0.0815, -0.0651]; drift delta=-0.0199 [-0.0199, -0.0198]; native-loop samples=4970 | Supported on surrogate performance plus a native shared-PPO episode loop; still needs multi-seed native performance and real-demand validation. |
 | C8: passenger waiting-time frequency credit improves control quality | supported native | surrogate wait delta=-0.1251 [-0.1468, -0.1020]; native final wait delta=-8.5908 [-20.4276, -0.9074]; native score delta=+8.6724 [+1.0542, +20.4807]; native reward delta=+2037.3278 [-66.8598, +6165.1210] | Native wait-credit path is supported in the shared-PPO loop; still needs AFC/APC-driven control validation. |
 | C9: leakage constraints achieve no-tradeoff responsibility separation | supported | trading drift=supported, trading return=supported, transit drift=supported, transit reward=supported; raw drift trading=supported, raw drift transit=supported | Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation. |
-| C10: dynamic harmonic count-state demand estimator is competitive | not_supported | all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC MSE delta=+16121.7347 [+6009.5751, +31280.0939] | Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and an AFC-calibrated count model remain open. |
+| C10: causal count-state demand estimators support Transit demand validation | supported afc-calibrated | all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC NB MSE delta=+16121.7347 [+6009.5751, +31280.0939]; AFC profile MSE delta=-7186235.1828 [-10935870.1938, -4496470.4747] | Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open. |
 
 ## Statistical Claim Gates
 
@@ -64,6 +64,9 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | demand_afc_nb_vs_fourier_mse | not_supported | mse | 24 | +16121.7347 [+6009.5751, +31280.0939] | 0.08 | 0.0000 |
 | demand_afc_nb_vs_fourier_mae | not_supported | mae | 24 | +3.8859 [+2.7080, +5.3789] | 0.00 | 0.0000 |
 | demand_afc_nb_vs_fourier_poisson_nll_no_const | not_supported | poisson_nll_no_const | 24 | +168.7536 [+97.1531, +257.5680] | 0.12 | 0.0003 |
+| demand_afc_profile_vs_fourier_mse | supported | mse | 24 | -7186235.1828 [-10935870.1938, -4496470.4747] | 1.00 | 0.0000 |
+| demand_afc_profile_vs_fourier_mae | supported | mae | 24 | -1487.0751 [-1840.2423, -1211.6740] | 1.00 | 0.0000 |
+| demand_afc_profile_vs_fourier_poisson_nll_no_const | supported | poisson_nll_no_const | 24 | -6612.4993 [-8039.1114, -5475.0716] | 1.00 | 0.0000 |
 | trading_constraint_lower_lf | supported | LowerLFDrift | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 |
 | trading_constraint_return_tradeoff | supported | total_return | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 |
 | trading_constraint_raw_lower_lf | supported | RawLowerLFDriftAbs | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 |

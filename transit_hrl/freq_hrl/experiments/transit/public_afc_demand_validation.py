@@ -28,6 +28,11 @@ from freq_hrl.experiments.transit.local_data_demand_validation import evaluate_s
 DEFAULT_AFC_ENDPOINT = "https://data.ny.gov/resource/wujg-7c2s.json"
 DEFAULT_START = "2024-10-01T00:00:00"
 DEFAULT_END = "2024-10-15T00:00:00"
+AFC_PROFILE_METHODS = {
+    "afc_daily_profile",
+    "afc_daily_profile_nb",
+    "afc_calibrated_profile",
+}
 
 
 def _timestamp_key(value: Any) -> pd.Timestamp:
@@ -137,6 +142,68 @@ def summarize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def evaluate_afc_profile_series(
+    method: str,
+    series_id: str,
+    series_index: int,
+    counts: np.ndarray,
+    *,
+    warmup: int,
+    period_hours: int = 24,
+    alpha: float = 0.80,
+    global_shrink: float = 0.35,
+) -> dict[str, Any]:
+    """Causal station-hour AFC profile estimator.
+
+    The model keeps an online seasonal profile for each hour-of-day slot and
+    shrinks it toward a global EMA.  It is intentionally simple but important:
+    real AFC station entries have strong daily periodicity, and the default
+    harmonic NB path underfits this structure on the current MTA feed.
+    """
+    counts = np.asarray(counts, dtype=np.float64).reshape(-1)
+    period = max(1, int(period_hours))
+    alpha = float(np.clip(alpha, 1e-6, 1.0))
+    shrink = float(np.clip(global_shrink, 0.0, 1.0))
+    profile = np.zeros(period, dtype=np.float64)
+    seen = np.zeros(period, dtype=np.float64)
+    global_mean = 0.0
+    preds: list[float] = []
+    targets: list[float] = []
+    for idx, count in enumerate(counts):
+        count = float(max(count, 0.0))
+        slot = int(idx % period)
+        if idx >= int(warmup):
+            slot_mean = profile[slot] if seen[slot] > 0.0 else global_mean
+            pred = (1.0 - shrink) * slot_mean + shrink * global_mean
+            preds.append(max(float(pred), 1e-6))
+            targets.append(count)
+        if idx == 0:
+            global_mean = count
+            profile[slot] = count
+            seen[slot] = 1.0
+            continue
+        global_mean = (1.0 - alpha) * global_mean + alpha * count
+        if seen[slot] <= 0.0:
+            profile[slot] = count
+        else:
+            profile[slot] = (1.0 - alpha) * profile[slot] + alpha * count
+        seen[slot] += 1.0
+    pred_arr = np.asarray(preds, dtype=np.float64)
+    target_arr = np.asarray(targets, dtype=np.float64)
+    err = pred_arr - target_arr
+    nll = pred_arr - target_arr * np.log(np.maximum(pred_arr, 1e-6))
+    return {
+        "method": str(method),
+        "seed": int(series_index),
+        "series_id": str(series_id),
+        "mse": float(np.mean(err * err)),
+        "mae": float(np.mean(np.abs(err))),
+        "poisson_nll_no_const": float(np.mean(nll)),
+        "n": int(pred_arr.size),
+        "mean_count": float(np.mean(counts)),
+    }
+
+
 def paired_method_stats(rows: list[dict[str, Any]], reference: str = "fourier") -> list[dict[str, Any]]:
     out = []
     for idx, method in enumerate(sorted({str(row["method"]) for row in rows})):
@@ -229,7 +296,7 @@ def run_validation(
     # Validate timestamps early so malformed Socrata predicates are easier to diagnose.
     datetime.fromisoformat(start)
     datetime.fromisoformat(end)
-    methods = methods or ["ema", "fourier", "dynamic_harmonic_nb"]
+    methods = methods or ["ema", "fourier", "dynamic_harmonic_nb", "afc_daily_profile"]
     raw_rows = fetch_mta_hourly_ridership(
         endpoint=str(endpoint),
         start=str(start),
@@ -245,14 +312,23 @@ def run_validation(
     rows: list[dict[str, Any]] = []
     for series_index, (series_id, counts) in enumerate(series.items()):
         for method in methods:
-            rows.append(evaluate_series(
-                method=method,
-                series_id=series_id,
-                series_index=series_index,
-                counts=counts,
-                warmup=int(warmup),
-                bin_sec=3600.0,
-            ))
+            if str(method) in AFC_PROFILE_METHODS:
+                rows.append(evaluate_afc_profile_series(
+                    method=method,
+                    series_id=series_id,
+                    series_index=series_index,
+                    counts=counts,
+                    warmup=int(warmup),
+                ))
+            else:
+                rows.append(evaluate_series(
+                    method=method,
+                    series_id=series_id,
+                    series_index=series_index,
+                    counts=counts,
+                    warmup=int(warmup),
+                    bin_sec=3600.0,
+                ))
     if not rows:
         raise ValueError("no usable AFC station-hour series")
     summary = summarize(rows)
@@ -280,6 +356,7 @@ def run_validation(
             "real_passenger_demand": True,
             "afc_style_entries": True,
             "apc_onboard_loads": False,
+            "afc_calibrated_profile": bool({str(method) for method in methods} & AFC_PROFILE_METHODS),
         },
         "rows": rows,
         "summary": summary,
@@ -298,7 +375,11 @@ def main() -> None:
     parser.add_argument("--end", default=DEFAULT_END)
     parser.add_argument("--cache-csv", type=Path, default=Path("transit_hrl/data/public_afc_mta/hourly_ridership.csv"))
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/transit_public_afc_demand_estimator"))
-    parser.add_argument("--methods", nargs="+", default=["ema", "fourier", "dynamic_harmonic_nb"])
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        default=["ema", "fourier", "dynamic_harmonic_nb", "afc_daily_profile"],
+    )
     parser.add_argument("--max-series", type=int, default=24)
     parser.add_argument("--min-hours", type=int, default=72)
     parser.add_argument("--warmup", type=int, default=24)

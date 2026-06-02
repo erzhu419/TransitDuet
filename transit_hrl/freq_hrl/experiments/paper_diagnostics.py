@@ -478,6 +478,23 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=5,
                 require_ci=(metric == "mse"),
             )
+    if {"afc_daily_profile", "fourier"} <= afc_methods:
+        for metric in ("mse", "mae", "poisson_nll_no_const"):
+            add(
+                f"demand_afc_profile_vs_fourier_{metric}",
+                "AFC-calibrated causal station-hour profile on real AFC ridership",
+                paired_delta_stats(
+                    afc_rows,
+                    variant_key="method",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="afc_daily_profile",
+                    control="fourier",
+                    lower_is_better=True,
+                ),
+                min_pairs=5,
+                require_ci=(metric == "mse"),
+            )
 
     trading_rows = collect_per_seed_rows(
         results_root,
@@ -658,6 +675,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_learned_replan_status = _check_status(checks, "transit_native_learned_gate_gate_replans_vs_interval")
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     afc_demand_status = _check_status(checks, "demand_afc_nb_vs_fourier_mse")
+    afc_profile_status = _check_status(checks, "demand_afc_profile_vs_fourier_mse")
     if learned_promotion_supported and native_promotion_reward_status == "supported":
         promotion_status = "supported learned+native reward"
     elif (
@@ -831,17 +849,26 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
             "remaining_gap": "Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation.",
         },
         {
-            "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
-            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts, copied TransitDuet local OD traces, public GTFS schedule-event traces, and real MTA AFC station-hour ridership.",
+            "claim": "C10: causal count-state demand estimators support Transit demand validation",
+            "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source across synthetic/copy/GTFS traces; real MTA AFC station-hour ridership also includes a causal AFC-calibrated daily station-hour profile.",
             "metric": (
                 f"all-demand MSE delta={_check_metric(checks, 'demand_nb_vs_fourier_mse')}; "
-                f"AFC MSE delta={_check_metric(checks, 'demand_afc_nb_vs_fourier_mse')}"
+                f"AFC NB MSE delta={_check_metric(checks, 'demand_afc_nb_vs_fourier_mse')}; "
+                f"AFC profile MSE delta={_check_metric(checks, 'demand_afc_profile_vs_fourier_mse')}"
             ),
-            "status": _check_status(checks, "demand_nb_vs_fourier_mse"),
+            "status": (
+                "supported afc-calibrated"
+                if afc_profile_status == "supported"
+                else _check_status(checks, "demand_nb_vs_fourier_mse")
+            ),
             "remaining_gap": (
-                "Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and an AFC-calibrated count model remain open."
-                if afc_demand_status == "not_supported"
-                else "Real AFC station-hour path is present; true APC onboard-load/OD feeds remain open."
+                "Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open."
+                if afc_profile_status == "supported" and afc_demand_status == "not_supported"
+                else (
+                    "Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and stronger AFC calibration remain open."
+                    if afc_demand_status == "not_supported"
+                    else "Real AFC station-hour path is present; true APC onboard-load/OD feeds remain open."
+                )
             ),
         },
     ]

@@ -64,11 +64,11 @@
       "remaining_gap": "Supported on surrogate Trading/Transit with raw-drift diagnostics; still needs native Transit and real-data confirmation."
     },
     {
-      "claim": "C10: dynamic harmonic count-state demand estimator is competitive",
-      "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source, including synthetic counts, copied TransitDuet local OD traces, public GTFS schedule-event traces, and real MTA AFC station-hour ridership.",
-      "metric": "all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC MSE delta=+16121.7347 [+6009.5751, +31280.0939]",
-      "status": "not_supported",
-      "remaining_gap": "Real AFC station-hour path is present, but NB is not competitive there; true APC onboard-load/OD feeds and an AFC-calibrated count model remain open."
+      "claim": "C10: causal count-state demand estimators support Transit demand validation",
+      "evidence": "Poisson/NB harmonic estimator is paired against Fourier by seed/source across synthetic/copy/GTFS traces; real MTA AFC station-hour ridership also includes a causal AFC-calibrated daily station-hour profile.",
+      "metric": "all-demand MSE delta=+5893.6045 [+1952.0454, +11648.3741]; AFC NB MSE delta=+16121.7347 [+6009.5751, +31280.0939]; AFC profile MSE delta=-7186235.1828 [-10935870.1938, -4496470.4747]",
+      "status": "supported afc-calibrated",
+      "remaining_gap": "Real AFC station-hour path is present and the AFC-calibrated profile is supported; default NB is not competitive there, and true APC onboard-load/OD feeds remain open."
     }
   ],
   "statistical_checks": [
@@ -557,6 +557,60 @@
       "win_rate": 0.125,
       "sign_p_value": 0.0002771615982055664,
       "status": "not_supported"
+    },
+    {
+      "check": "demand_afc_profile_vs_fourier_mse",
+      "claim": "AFC-calibrated causal station-hour profile on real AFC ridership",
+      "metric": "mse",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -7186235.182789865,
+      "delta_ci95_low": -10935870.193830037,
+      "delta_ci95_high": -4496470.474680746,
+      "improvement_mean": 7186235.182789865,
+      "improvement_ci95_low": 4408500.6104646,
+      "improvement_ci95_high": 10879621.410372201,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "check": "demand_afc_profile_vs_fourier_mae",
+      "claim": "AFC-calibrated causal station-hour profile on real AFC ridership",
+      "metric": "mae",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -1487.0750954324758,
+      "delta_ci95_low": -1840.2423363898527,
+      "delta_ci95_high": -1211.6739699228253,
+      "improvement_mean": 1487.0750954324758,
+      "improvement_ci95_low": 1219.0216634888027,
+      "improvement_ci95_high": 1840.6963086052262,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
+    },
+    {
+      "check": "demand_afc_profile_vs_fourier_poisson_nll_no_const",
+      "claim": "AFC-calibrated causal station-hour profile on real AFC ridership",
+      "metric": "poisson_nll_no_const",
+      "treatment": "afc_daily_profile",
+      "control": "fourier",
+      "direction": "decrease",
+      "n_common": 24,
+      "delta_mean": -6612.499261306569,
+      "delta_ci95_low": -8039.111365479392,
+      "delta_ci95_high": -5475.071577343052,
+      "improvement_mean": 6612.499261306569,
+      "improvement_ci95_low": 5463.980465147414,
+      "improvement_ci95_high": 8055.390939626745,
+      "win_rate": 1.0,
+      "sign_p_value": 1.1920928955078125e-07,
+      "status": "supported"
     },
     {
       "check": "trading_constraint_lower_lf",
