@@ -402,6 +402,8 @@ def main():
                     help="comma-separated log roots to merge during aggregation")
     ap.add_argument("--out-dir", default="results_freqduet/ablation")
     ap.add_argument("--aggregate-only", action="store_true")
+    ap.add_argument("--no-aggregate", action="store_true",
+                    help="run selected jobs but skip summary writing; useful for scheduler shards")
     ap.add_argument("--gpu", action="store_true")
     ap.add_argument("--workers", type=int, default=1,
                     help="parallel runner processes; keep small on CPU")
@@ -452,6 +454,10 @@ def main():
         ]
     else:
         aggregate_logs_dirs = [logs_dir]
+    if args.no_aggregate:
+        print("Skipped aggregation (--no-aggregate).")
+        return
+
     summary = aggregate(
         configs=configs,
         seeds=seeds,
