@@ -13,6 +13,7 @@ UPPER_WARMUP_EPS="${UPPER_WARMUP_EPS:-10}"
 SEEDS="${SEEDS:-7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026}"
 LOGS_DIR="${LOGS_DIR:-logs_paper_longtrain_current_ep${EPISODES}_wu10}"
 OUT_DIR="${OUT_DIR:-results_freqduet/paper_longtrain_current_ep${EPISODES}_wu10}"
+PYTHON="${PYTHON:-python3}"
 
 CONFIGS="$(
   IFS=,
@@ -43,7 +44,7 @@ F_freqduet_gen_rushshift_nopromotion_hiro,\
 F_freqduet_gen_rushshift_noleakage_hiro
 )"
 
-python3 scripts/run_freqduet_ablation.py \
+"${PYTHON}" scripts/run_freqduet_ablation.py \
   --configs "${CONFIGS}" \
   --seeds "${SEEDS}" \
   --episodes "${EPISODES}" \
