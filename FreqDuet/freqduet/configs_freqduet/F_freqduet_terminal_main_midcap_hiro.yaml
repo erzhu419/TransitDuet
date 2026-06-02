@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_midcap_hiro
+
+# Stricter middle-band stability gate. This tests whether OD/highnoise failures
+# are caused by raw credit firing while the residual is drifting into the
+# shared middle band instead of a true local HF burst.
+reward_attribution:
+  lower_raw_gate_middle_energy_max: 0.030
+  lower_raw_gate_width: 0.010

@@ -227,6 +227,8 @@ class DemandFrequencyTracker:
         promotion_adapt_gain=0.10,
         promotion_adapt_strength_min=0.15,
         promotion_adapt_local=False,
+        promotion_adapt_active_only=False,
+        promotion_adapt_requires_persistent=False,
         promotion_residual_mode="abs",
     ):
         self.update_interval_s = float(update_interval_s)
@@ -261,6 +263,9 @@ class DemandFrequencyTracker:
         self.promotion_adapt_strength_min = max(
             float(promotion_adapt_strength_min), 0.0)
         self.promotion_adapt_local = bool(promotion_adapt_local)
+        self.promotion_adapt_active_only = bool(promotion_adapt_active_only)
+        self.promotion_adapt_requires_persistent = bool(
+            promotion_adapt_requires_persistent)
         self.promotion_residual_mode = str(
             promotion_residual_mode or "abs").lower()
         self.promotion_absorptions = 0
@@ -386,6 +391,12 @@ class DemandFrequencyTracker:
                 cfg.get("promotion_adapt_strength_min", 0.15)),
             promotion_adapt_local=promotion_cfg.get(
                 "adapt_local", cfg.get("promotion_adapt_local", False)),
+            promotion_adapt_active_only=promotion_cfg.get(
+                "adapt_active_only",
+                cfg.get("promotion_adapt_active_only", False)),
+            promotion_adapt_requires_persistent=promotion_cfg.get(
+                "adapt_requires_persistent",
+                cfg.get("promotion_adapt_requires_persistent", False)),
             promotion_residual_mode=promotion_cfg.get(
                 "residual_mode", cfg.get("promotion_residual_mode", "abs")),
         )
@@ -503,6 +514,10 @@ class DemandFrequencyTracker:
                 or self.method != "harmonic"
                 or gate is None
                 or not getattr(gate, "flag", 0.0)
+                or (self.promotion_adapt_active_only
+                    and not getattr(gate, "active", 0.0))
+                or (self.promotion_adapt_requires_persistent
+                    and not getattr(gate, "persistent", 0.0))
                 or float(getattr(gate, "strength", 0.0))
                 < self.promotion_adapt_strength_min
                 or not hasattr(state, "promote_residual")):
@@ -833,6 +848,10 @@ class DemandFrequencyTracker:
             "freq_promotion_score": float(promotion["score"]),
             "freq_promotion_direction": float(
                 promotion.get("direction", 0.0)),
+            "freq_promotion_active": float(promotion.get("active", 0.0)),
+            "freq_promotion_persistent": float(
+                promotion.get("persistent", 0.0)),
+            "freq_promotion_ratio": float(promotion.get("ratio", 0.0)),
             "freq_promotion_absorptions": int(self.promotion_absorptions),
             "freq_promotion_absorbed": float(
                 self.promotion_absorbed_rate / self.global_demand_norm),

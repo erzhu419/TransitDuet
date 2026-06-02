@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hicap_hiro.yaml
+_name: F_freqduet_terminal_main_hicap_abs15_hiro
+
+# Joint reliability gate: require a moderate LF absorption signal and reject
+# days whose high-frequency energy looks noise-dominated.
+reward_attribution:
+  lower_raw_gate_absorbed_min: 0.15
+  lower_raw_gate_absorbed_width: 0.10

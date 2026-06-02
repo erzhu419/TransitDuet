@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_noraw_hiro
+
+# Same current main path, but lower wait credit uses the denoised HF feature
+# only. This isolates whether raw residual credit is helping or just adding
+# variance under held-out demand.
+reward_attribution:
+  lower_high_source: feature

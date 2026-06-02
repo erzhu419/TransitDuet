@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_main_persistprom_hiro.yaml
+_name: F_freqduet_terminal_main_softprom_hiro
+
+# Same active+persistent guard as persistprom, with smaller LF absorption gain.
+frequency:
+  promotion:
+    adapt_gain: 0.05

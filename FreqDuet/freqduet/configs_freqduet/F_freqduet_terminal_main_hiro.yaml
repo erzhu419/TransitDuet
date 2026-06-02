@@ -1,12 +1,24 @@
 _extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml
 _name: F_freqduet_terminal_main_hiro
 
-# Current promoted FreqDuet main path. The 2026-06-01 paired HPC screen selected
+# Current promoted FreqDuet main path. The 2026-06-02 DriftFB HPC screen selected
 # the history-prior LF/HF split with HF-energy denoising, 45s terminal hold cap,
-# adaptive strict local promotion absorption, the stronger positive-HF
-# hold-through penalty, and promotion-gated raw lower-HF wait credit. The raw
-# credit gate improved terminal/highnoise/OD/rush held-outs versus the previous
-# main while keeping rush/OD from receiving broad raw-residual lower credit.
+# active+persistent soft promotion absorption, positive-HF hold-through penalty,
+# promotion-gated raw lower-HF wait credit, high-energy raw-credit cap, and
+# DriftFB upper feedback. This keeps lower station holding as a high-frequency
+# correction while exposing persistent holding drift to the upper planner.
+frequency:
+  promotion:
+    adapt_local: false
+    adapt_gain: 0.05
+    adapt_strength_min: 0.20
+    adapt_active_only: true
+    adapt_requires_persistent: true
+  drift_feedback:
+    enable: true
+    norm_s: 180.0
+    clip: 2.0
+
 reward_attribution:
   lower_hold_high_source: raw
   lower_hold_positive_high_only: true
@@ -14,10 +26,12 @@ reward_attribution:
   lower_hold_norm_s: 45.0
   lower_hold_clip: 2.0
   lower_high_source: adaptive_raw
-  lower_raw_gate_middle_energy_max: 0.038
+  lower_raw_gate_middle_energy_max: 0.030
   lower_raw_gate_width: 0.010
   lower_raw_gate_min_weight: 0.0
   lower_raw_gate_middle_value_max: 0.004
   lower_raw_gate_middle_value_width: 0.003
+  lower_raw_gate_high_energy_max: 0.065
+  lower_raw_gate_high_energy_width: 0.015
   lower_raw_gate_absorbed_min: 0.10
   lower_raw_gate_absorbed_width: 0.10

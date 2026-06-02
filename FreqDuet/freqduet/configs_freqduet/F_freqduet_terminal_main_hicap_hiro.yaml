@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_hicap_hiro
+
+# Raw lower-HF credit is useful for structured local bursts, but not when
+# global high-frequency energy is dominated by random demand noise. This cap
+# suppresses raw credit above the historical-prior high-energy band.
+reward_attribution:
+  lower_raw_gate_high_energy_max: 0.065
+  lower_raw_gate_high_energy_width: 0.015

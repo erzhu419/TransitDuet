@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_persistprom_hiro
+
+# LF absorption is allowed only for the exact dev-manual condition:
+# the current residual is active and the trailing window is still persistent.
+# Station-local absorption remains off because DriftFB already exposes lower
+# drift to the upper planner.
+frequency:
+  promotion:
+    adapt_local: false
+    adapt_strength_min: 0.20
+    adapt_active_only: true
+    adapt_requires_persistent: true

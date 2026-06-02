@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_abs20_hiro
+
+# More conservative promotion absorption threshold for raw lower-HF wait
+# credit. It should keep terminal gains only when the historical LF prior has
+# clearly absorbed a persistent residual.
+reward_attribution:
+  lower_raw_gate_absorbed_min: 0.20
+  lower_raw_gate_absorbed_width: 0.10

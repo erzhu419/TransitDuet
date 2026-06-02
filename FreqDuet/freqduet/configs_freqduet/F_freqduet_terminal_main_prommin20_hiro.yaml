@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_prommin20_hiro
+
+# Require a stronger persistent residual before harmonic LF absorption. This
+# tests whether promotion should remain active but not fire on ordinary noise.
+frequency:
+  promotion:
+    adapt_strength_min: 0.20

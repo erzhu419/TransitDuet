@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_replanonly_hiro
+
+# Keep the dev-manual cross-frequency promotion signal and early upper replan,
+# but disable LF absorption. This isolates whether the current harm comes from
+# promotion-triggered replanning or from absorbing residuals into the harmonic LF
+# estimator.
+frequency:
+  promotion:
+    adapt_low: false
+    adapt_local: false

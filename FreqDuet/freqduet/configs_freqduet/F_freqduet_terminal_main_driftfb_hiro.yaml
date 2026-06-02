@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_driftfb_hiro
+
+# Dev-manual DriftFB: expose lower rolling holding drift to the upper planner
+# so persistent station holding can be absorbed by timetable/headway decisions.
+frequency:
+  drift_feedback:
+    enable: true
+    norm_s: 180.0
+    clip: 2.0

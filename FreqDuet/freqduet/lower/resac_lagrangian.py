@@ -74,6 +74,53 @@ class GaussianPolicy(nn.Module):
         return action.detach().squeeze().cpu().numpy()
 
 
+class CategoricalPolicy(nn.Module):
+    """Categorical policy over a configured holding-time alphabet."""
+
+    def __init__(self, num_inputs, action_bins, hidden_dim=64, init_w=3e-3):
+        super().__init__()
+        bins = torch.as_tensor(action_bins, dtype=torch.float32).view(-1, 1)
+        if bins.numel() < 2:
+            raise ValueError("action_bins must contain at least two values")
+        self.register_buffer("action_bins", bins)
+        self.fc1 = nn.Linear(num_inputs, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.logits = nn.Linear(hidden_dim, bins.shape[0])
+        self.logits.weight.data.uniform_(-init_w, init_w)
+        self.logits.bias.data.uniform_(-init_w, init_w)
+
+    def forward(self, state):
+        x = F.relu(self.fc1(state))
+        x = F.relu(self.fc2(x))
+        return self.logits(x)
+
+    def dist_info(self, state, epsilon=1e-8):
+        logits = self.forward(state)
+        probs = F.softmax(logits, dim=-1)
+        log_probs = torch.log(probs + epsilon)
+        return probs, log_probs, logits
+
+    def evaluate(self, state, epsilon=1e-8):
+        probs, log_probs, logits = self.dist_info(state, epsilon=epsilon)
+        dist = torch.distributions.Categorical(probs=probs)
+        idx = dist.sample()
+        action = self.action_bins[idx]
+        log_prob = log_probs.gather(1, idx.view(-1, 1))
+        return action, log_prob, idx.view(-1, 1).float(), logits, probs
+
+    def get_action(self, state, deterministic=False):
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        probs, _, _ = self.dist_info(state)
+        if deterministic:
+            idx = probs.argmax(dim=-1)
+        else:
+            dist = torch.distributions.Categorical(probs=probs)
+            idx = dist.sample()
+        action = self.action_bins[idx]
+        return action.detach().squeeze().cpu().numpy()
+
+
 class EnsembleQNetwork(nn.Module):
     """
     Ensemble of K Q-networks for RE-SAC.
@@ -159,7 +206,7 @@ class RESACLagrangianTrainer:
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
                  lr=3e-4, lambda_lr=1e-3, gamma=0.99, soft_tau=5e-3,
-                 auto_entropy=True, maximum_alpha=0.3,
+                 auto_entropy=True, maximum_alpha=0.3, action_bins=None,
                  device='cpu'):
         self.device = device
         self.gamma = gamma
@@ -171,9 +218,19 @@ class RESACLagrangianTrainer:
         self.beta_ood = beta_ood      # OOD regularization weight
         self.weight_reg = weight_reg  # L1 regularization weight
 
-        # Policy
-        self.policy_net = GaussianPolicy(
-            state_dim, hidden_dim, action_range).to(device)
+        self.discrete_actions = None
+        if action_bins is not None:
+            bins = np.asarray(action_bins, dtype=np.float32).reshape(-1)
+            bins = np.unique(np.clip(bins, 0.0, float(action_range)))
+            if bins.size < 2:
+                raise ValueError("action_bins must contain at least two values")
+            self.discrete_actions = torch.as_tensor(
+                bins, dtype=torch.float32, device=device).view(-1, 1)
+            self.policy_net = CategoricalPolicy(
+                state_dim, bins, hidden_dim).to(device)
+        else:
+            self.policy_net = GaussianPolicy(
+                state_dim, hidden_dim, action_range).to(device)
 
         # Ensemble Q-networks
         self.q_net = EnsembleQNetwork(
@@ -196,7 +253,11 @@ class RESACLagrangianTrainer:
         if auto_entropy:
             self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
             self.alpha_optimizer = optim.Adam([self.log_alpha], lr=lr)
-            self.target_entropy = -1.0 * action_dim
+            if self.discrete_actions is not None:
+                self.target_entropy = 0.98 * float(
+                    np.log(max(int(self.discrete_actions.shape[0]), 2)))
+            else:
+                self.target_entropy = -1.0 * action_dim
         self.alpha = 0.1
         self.maximum_alpha = maximum_alpha
 
@@ -207,6 +268,45 @@ class RESACLagrangianTrainer:
     @property
     def lambda_param(self):
         return self.log_lambda.exp().item()
+
+    def _discrete_q_values(self, q_net, state):
+        """Evaluate a scalar-action critic on every configured action bin."""
+        bins = self.discrete_actions
+        if bins is None:
+            raise RuntimeError("discrete action values requested without bins")
+        batch = state.shape[0]
+        n_actions = bins.shape[0]
+        state_rep = (
+            state.unsqueeze(1)
+            .expand(batch, n_actions, state.shape[-1])
+            .reshape(batch * n_actions, state.shape[-1])
+        )
+        action_rep = (
+            bins.view(1, n_actions, 1)
+            .expand(batch, n_actions, 1)
+            .reshape(batch * n_actions, 1)
+        )
+        q_flat = q_net(state_rep, action_rep)
+        return q_flat.view(q_flat.shape[0], batch, n_actions)
+
+    def _discrete_cost_values(self, cost_q_net, state):
+        bins = self.discrete_actions
+        if bins is None:
+            raise RuntimeError("discrete cost values requested without bins")
+        batch = state.shape[0]
+        n_actions = bins.shape[0]
+        state_rep = (
+            state.unsqueeze(1)
+            .expand(batch, n_actions, state.shape[-1])
+            .reshape(batch * n_actions, state.shape[-1])
+        )
+        action_rep = (
+            bins.view(1, n_actions, 1)
+            .expand(batch, n_actions, 1)
+            .reshape(batch * n_actions, 1)
+        )
+        c_flat = cost_q_net(state_rep, action_rep)
+        return c_flat.view(batch, n_actions)
 
     def update(self, replay_buffer, batch_size, reward_scale=10.0,
                update_policy=True, tap_signal=None, weight_fn=None):
@@ -244,13 +344,24 @@ class RESACLagrangianTrainer:
                     tap_bonus[i] = tap_signal[tid] * reward_scale
             reward = reward + tap_bonus
 
+        discrete_policy = self.discrete_actions is not None
+
         # ──── Ensemble Critic update ────
         with torch.no_grad():
-            next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
-            target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
-            # Use ensemble MEAN for shared target → prevents member divergence
-            target_q_mean = target_q_all.mean(dim=0)  # [B]
-            target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)  # [B]
+            if discrete_policy:
+                next_probs, next_log_probs, _ = self.policy_net.dist_info(next_state)
+                target_q_all = self._discrete_q_values(
+                    self.target_q_net, next_state)  # [K, B, A]
+                # Use ensemble MEAN for shared target -> prevents member divergence.
+                target_q_mean = target_q_all.mean(dim=0)  # [B, A]
+                target_q_mean = (next_probs * (
+                    target_q_mean - self.alpha * next_log_probs)).sum(dim=-1)
+            else:
+                next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
+                target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
+                # Use ensemble MEAN for shared target -> prevents member divergence.
+                target_q_mean = target_q_all.mean(dim=0)  # [B]
+                target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)  # [B]
             r = reward.squeeze(-1)   # [B]
             d = done.squeeze(-1)     # [B]
             # Shared target broadcast to all K members
@@ -280,8 +391,15 @@ class RESACLagrangianTrainer:
 
         # ──── Cost critic update ────
         with torch.no_grad():
-            next_action_c, _, _, _, _ = self.policy_net.evaluate(next_state)
-            target_cost_q = self.target_cost_q_net(next_state, next_action_c)
+            if discrete_policy:
+                next_probs_c, _, _ = self.policy_net.dist_info(next_state)
+                target_cost_all = self._discrete_cost_values(
+                    self.target_cost_q_net, next_state)
+                target_cost_q = (
+                    next_probs_c * target_cost_all).sum(dim=-1, keepdim=True)
+            else:
+                next_action_c, _, _, _, _ = self.policy_net.evaluate(next_state)
+                target_cost_q = self.target_cost_q_net(next_state, next_action_c)
             target_cost_value = cost + (1.0 - done) * self.gamma * target_cost_q
             target_cost_value = target_cost_value.clamp(0.0, 50.0)  # cost is non-negative
 
@@ -313,20 +431,38 @@ class RESACLagrangianTrainer:
             new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
 
             # RE-SAC: ensemble Q statistics
-            q_all = self.q_net(state, new_action)  # [K, B]
-            q_mean = q_all.mean(dim=0)              # [B]
-            q_std = q_all.std(dim=0)                # [B]
+            if discrete_policy:
+                probs, log_probs, _ = self.policy_net.dist_info(state)
+                q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
+                q_mean = q_all.mean(dim=0)              # [B, A]
+                q_std = q_all.std(dim=0)                # [B, A]
+                cost_q_new = self._discrete_cost_values(
+                    self.cost_q_net, state)             # [B, A]
+                entropy_log_prob = (probs * log_probs).sum(
+                    dim=-1, keepdim=True)
+            else:
+                q_all = self.q_net(state, new_action)  # [K, B]
+                q_mean = q_all.mean(dim=0)              # [B]
+                q_std = q_all.std(dim=0)                # [B]
+                cost_q_new = self.cost_q_net(state, new_action)
+                entropy_log_prob = log_prob
 
             # LCB: pessimistic Q estimate (beta < 0 → subtract uncertainty)
             q_lcb = q_mean + self.beta * q_std      # [B]
 
-            cost_q_new = self.cost_q_net(state, new_action)
             lam = self.log_lambda.exp().detach()
 
             # Weighted policy loss (TPC: emphasize transitions consistent with EMA upper)
-            policy_terms = (self.alpha * log_prob.squeeze(-1)
-                            - q_lcb
-                            + lam * cost_q_new.squeeze(-1))
+            if discrete_policy:
+                per_action_terms = (
+                    self.alpha * log_probs
+                    - q_lcb
+                    + lam * cost_q_new)
+                policy_terms = (probs * per_action_terms).sum(dim=-1)
+            else:
+                policy_terms = (self.alpha * log_prob.squeeze(-1)
+                                - q_lcb
+                                + lam * cost_q_new.squeeze(-1))
             policy_loss = (policy_terms * w).mean()
 
             self.policy_optimizer.zero_grad()
@@ -337,7 +473,7 @@ class RESACLagrangianTrainer:
             # ──── Alpha update ────
             if self.auto_entropy:
                 alpha_loss = -(self.log_alpha *
-                               (log_prob + self.target_entropy).detach()).mean()
+                               (entropy_log_prob + self.target_entropy).detach()).mean()
                 self.alpha_optimizer.zero_grad()
                 alpha_loss.backward()
                 self.alpha_optimizer.step()

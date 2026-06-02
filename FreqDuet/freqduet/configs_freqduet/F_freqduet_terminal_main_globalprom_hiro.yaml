@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_globalprom_hiro
+
+# Keep cross-frequency promotion at the global harmonic state only. The final
+# DriftFB matrix showed station-local absorption can overreact in terminal and
+# high-noise settings after the upper planner already sees lower drift.
+frequency:
+  promotion:
+    adapt_local: false

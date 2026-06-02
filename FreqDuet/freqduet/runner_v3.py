@@ -211,6 +211,9 @@ class DiagnosticLog:
         'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
         'freq_holdfb_other_hold', 'freq_holdfb_other_wait',
         'freq_holdfb_decisions',
+        'freq_driftfb_same_drift', 'freq_driftfb_same_excess',
+        'freq_driftfb_other_drift', 'freq_driftfb_other_excess',
+        'freq_driftfb_decisions',
         'theta_wait', 'theta_fleet', 'theta_cv',
         # CS-BAPR belief
         'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
@@ -225,6 +228,8 @@ class DiagnosticLog:
         'freq_od_active', 'freq_updates',
         'freq_promotion_flag', 'freq_promotion_strength',
         'freq_promotion_age', 'freq_promotion_score',
+        'freq_promotion_active', 'freq_promotion_persistent',
+        'freq_promotion_ratio',
         'freq_promotion_absorptions', 'freq_promotion_absorbed',
         # FreqDuet frequency-leakage regularization
         'lower_drift_penalty_mean', 'lower_drift_penalty_max',
@@ -419,7 +424,19 @@ class TransitDuetV2Runner:
         # Features appended to upper state:
         # [same-dir HF-hold, same-dir HF-wait, other-dir HF-hold, other-dir HF-wait].
         self.freq_holdfb_dim = 4 if self.freq_holdfb_enable else 0
-        self.upper_state_dim += self.freq_holdfb_dim
+        freq_driftfb_cfg = freq_cfg.get('drift_feedback', {}) or {}
+        self.freq_driftfb_enable = bool(freq_driftfb_cfg.get('enable', False))
+        self.freq_driftfb_norm_s = max(
+            float(freq_driftfb_cfg.get(
+                'norm_s',
+                config.get('leakage', {}).get('lower_drift_budget_s', 180.0))),
+            1e-6)
+        self.freq_driftfb_clip = max(
+            float(freq_driftfb_cfg.get('clip', 2.0)), 0.0)
+        # Features appended to upper state:
+        # [same-dir drift load, same-dir excess, other-dir drift load, other-dir excess].
+        self.freq_driftfb_dim = 4 if self.freq_driftfb_enable else 0
+        self.upper_state_dim += self.freq_holdfb_dim + self.freq_driftfb_dim
         self.upper_action_dim = int(upper_cfg.get('action_dim', 1))
         if self.timetable_planner is not None:
             self.upper_action_dim = self.timetable_planner.action_dim
@@ -480,6 +497,7 @@ class TransitDuetV2Runner:
             gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
             auto_entropy=lower_cfg['auto_entropy'],
             maximum_alpha=lower_cfg['maximum_alpha'],
+            action_bins=self.lower_action_bins,
             device=device)
         self.lower_state_dim = lower_state_dim
 
@@ -533,6 +551,7 @@ class TransitDuetV2Runner:
             False: deque(maxlen=self.freq_holdfb_window),
         }
         self._ep_freq_holdfb_features = []
+        self._ep_freq_driftfb_features = []
         diag_cfg = config.get('diagnostics', {})
         self.freq_diag_mi_bins = int(diag_cfg.get('mi_bins', 8))
         self.freq_diag_shock_threshold = float(
@@ -610,6 +629,11 @@ class TransitDuetV2Runner:
             float(attr_cfg.get(
                 'lower_raw_gate_high_energy_width',
                 self.freq_wait_lower_raw_gate_width)), 1e-6)
+        self.freq_wait_lower_raw_gate_high_energy_max = attr_cfg.get(
+            'lower_raw_gate_high_energy_max', None)
+        if self.freq_wait_lower_raw_gate_high_energy_max is not None:
+            self.freq_wait_lower_raw_gate_high_energy_max = float(
+                self.freq_wait_lower_raw_gate_high_energy_max)
         self.freq_wait_lower_raw_gate_absorbed_min = float(
             attr_cfg.get('lower_raw_gate_absorbed_min', 0.0))
         self.freq_wait_lower_raw_gate_absorbed_width = max(
@@ -836,17 +860,28 @@ class TransitDuetV2Runner:
 
     def _lower_drift_penalty(self, direction, action_s):
         """Rolling penalty for lower holding that accumulates as timetable drift."""
-        if not self.leakage_enable or self.lower_drift_penalty <= 0:
-            return 0.0
         direction = bool(direction)
         action_s = max(float(action_s), 0.0)
         hist = self._lower_drift_by_dir[direction]
         hist.append(action_s)
+        if not self.leakage_enable or self.lower_drift_penalty <= 0:
+            return 0.0
         rolling_hold = float(sum(hist))
         excess = max(0.0, rolling_hold - self.lower_drift_budget_s)
         penalty = self.lower_drift_penalty * (
             excess / max(self.lower_drift_budget_s, 1e-6))
         return float(penalty)
+
+    def _drift_feedback_pair(self, direction):
+        hist = self._lower_drift_by_dir[bool(direction)]
+        rolling_hold = float(sum(hist))
+        drift = rolling_hold / self.freq_driftfb_norm_s
+        excess = max(0.0, rolling_hold - self.lower_drift_budget_s)
+        excess = excess / self.freq_driftfb_norm_s
+        if self.freq_driftfb_clip > 0.0:
+            drift = min(drift, self.freq_driftfb_clip)
+            excess = min(excess, self.freq_driftfb_clip)
+        return float(drift), float(excess)
 
     def _quantize_lower_action(self, action):
         """Project continuous holding to configured bins for smaller action space."""
@@ -906,6 +941,16 @@ class TransitDuetV2Runner:
         feats = np.asarray([same[0], same[1], other[0], other[1]],
                            dtype=np.float32)
         self._ep_freq_holdfb_features.append(feats.copy())
+        return feats
+
+    def _frequency_drift_feedback_features(self, direction):
+        if not self.freq_driftfb_enable:
+            return np.zeros(0, dtype=np.float32)
+        same = self._drift_feedback_pair(direction)
+        other = self._drift_feedback_pair(not bool(direction))
+        feats = np.asarray([same[0], same[1], other[0], other[1]],
+                           dtype=np.float32)
+        self._ep_freq_driftfb_features.append(feats.copy())
         return feats
 
     def _augment_lower_state(self, obs, last_action=0.0):
@@ -1001,6 +1046,16 @@ class TransitDuetV2Runner:
                 (freq_high_energy - high_energy_min)
                 / self.freq_wait_lower_raw_gate_high_energy_width)
             weight = min(weight, high_energy_weight)
+        high_energy_max = self.freq_wait_lower_raw_gate_high_energy_max
+        if high_energy_max is not None:
+            freq_high_energy = float(
+                freq_summary.get('freq_high_energy', 0.0))
+            high_energy_cap_weight = (
+                (high_energy_max
+                 + self.freq_wait_lower_raw_gate_high_energy_width
+                 - freq_high_energy)
+                / self.freq_wait_lower_raw_gate_high_energy_width)
+            weight = min(weight, high_energy_cap_weight)
         absorbed_min = self.freq_wait_lower_raw_gate_absorbed_min
         if absorbed_min > 0.0:
             absorbed = abs(float(
@@ -1240,11 +1295,20 @@ class TransitDuetV2Runner:
                 np.asarray(s_upper, dtype=np.float32),
                 self._frequency_hold_feedback_features(bool(trip.direction)),
             ]).astype(np.float32)
+        if self.freq_driftfb_enable:
+            s_upper = np.concatenate([
+                np.asarray(s_upper, dtype=np.float32),
+                self._frequency_drift_feedback_features(bool(trip.direction)),
+            ]).astype(np.float32)
         if self.ablate_holding_feedback:
             # Zero out holding feedback state dims [5,6,7]
             s_upper[5:8] = 0.0
+            end = len(s_upper)
+            if self.freq_driftfb_enable:
+                s_upper[end - self.freq_driftfb_dim:end] = 0.0
+                end -= self.freq_driftfb_dim
             if self.freq_holdfb_enable:
-                s_upper[-self.freq_holdfb_dim:] = 0.0
+                s_upper[end - self.freq_holdfb_dim:end] = 0.0
 
         # ─── TPC-Lower behaviour-policy sampling ───
         # During Phase 1 (after warmup, target_upper_trainer initialised), sample
@@ -1504,6 +1568,7 @@ class TransitDuetV2Runner:
             False: deque(maxlen=self.freq_holdfb_window),
         }
         self._ep_freq_holdfb_features = []
+        self._ep_freq_driftfb_features = []
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
         self._ep_lower_board_credit_gates = []
@@ -1912,6 +1977,11 @@ class TransitDuetV2Runner:
             freq_holdfb_mean = freq_holdfb_arr.mean(axis=0)
         else:
             freq_holdfb_mean = np.zeros(4, dtype=np.float64)
+        if self._ep_freq_driftfb_features:
+            freq_driftfb_arr = np.vstack(self._ep_freq_driftfb_features)
+            freq_driftfb_mean = freq_driftfb_arr.mean(axis=0)
+        else:
+            freq_driftfb_mean = np.zeros(4, dtype=np.float64)
         la_stat = _stat(self._ep_lower_actions)
         lr_stat = _stat(self._ep_lower_rewards)
         ud_stat = _stat(self._ep_upper_deltas)
@@ -2024,6 +2094,11 @@ class TransitDuetV2Runner:
             'freq_holdfb_other_hold': float(freq_holdfb_mean[2]),
             'freq_holdfb_other_wait': float(freq_holdfb_mean[3]),
             'freq_holdfb_decisions': len(self._ep_freq_holdfb_features),
+            'freq_driftfb_same_drift': float(freq_driftfb_mean[0]),
+            'freq_driftfb_same_excess': float(freq_driftfb_mean[1]),
+            'freq_driftfb_other_drift': float(freq_driftfb_mean[2]),
+            'freq_driftfb_other_excess': float(freq_driftfb_mean[3]),
+            'freq_driftfb_decisions': len(self._ep_freq_driftfb_features),
             'theta_wait': float(theta_w[0]),
             'theta_fleet': float(theta_w[1]),
             'theta_cv': float(theta_w[2]),
@@ -2054,6 +2129,12 @@ class TransitDuetV2Runner:
             'freq_promotion_strength': freq_summary.get('freq_promotion_strength', 0.0),
             'freq_promotion_age': freq_summary.get('freq_promotion_age', 0.0),
             'freq_promotion_score': freq_summary.get('freq_promotion_score', 0.0),
+            'freq_promotion_active': freq_summary.get(
+                'freq_promotion_active', 0.0),
+            'freq_promotion_persistent': freq_summary.get(
+                'freq_promotion_persistent', 0.0),
+            'freq_promotion_ratio': freq_summary.get(
+                'freq_promotion_ratio', 0.0),
             'freq_promotion_absorptions': freq_summary.get(
                 'freq_promotion_absorptions', 0),
             'freq_promotion_absorbed': freq_summary.get(
@@ -2116,6 +2197,7 @@ class TransitDuetV2Runner:
                    'upper_delta_mean', 'upper_q_mean',
                    'hold_fb_mean', 'hold_penalty_mean',
                    'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
+                   'freq_driftfb_same_drift', 'freq_driftfb_same_excess',
                    'theta_wait', 'theta_fleet',
                    'surprise', 'belief_window',
                    'upper_hf_power_ratio', 'lower_lf_drift_ratio',
@@ -2136,6 +2218,8 @@ class TransitDuetV2Runner:
                    'upper_plan_target_mean', 'upper_plan_decisions',
                    'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
                    'freq_promotion_flag', 'freq_promotion_strength',
+                   'freq_promotion_active', 'freq_promotion_persistent',
+                   'freq_promotion_ratio',
                    'freq_promotion_absorbed']:
             self.history[k].append(row[k])
 
@@ -2202,6 +2286,12 @@ class TransitDuetV2Runner:
                   f"other={row.get('freq_holdfb_other_hold',0):.3f}/"
                   f"{row.get('freq_holdfb_other_wait',0):.3f}  "
                   f"n={int(row.get('freq_holdfb_decisions',0))}")
+        if self.freq_driftfb_enable:
+            print(f"  D-FB     same={row.get('freq_driftfb_same_drift',0):.3f}/"
+                  f"{row.get('freq_driftfb_same_excess',0):.3f}  "
+                  f"other={row.get('freq_driftfb_other_drift',0):.3f}/"
+                  f"{row.get('freq_driftfb_other_excess',0):.3f}  "
+                  f"n={int(row.get('freq_driftfb_decisions',0))}")
 
         print(f"  θ-OGD    w=[{row['theta_wait']:.3f}, "
               f"{row['theta_fleet']:.3f}, {row['theta_cv']:.3f}]")

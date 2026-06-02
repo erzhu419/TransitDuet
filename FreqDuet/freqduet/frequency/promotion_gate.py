@@ -49,6 +49,9 @@ class CausalPromotionGate:
         self.neg_events = deque(maxlen=self.window_bins)
         self.shock_age = 0
         self.cooldown = 0
+        self.active = 0.0
+        self.persistent = 0.0
+        self.ratio = 0.0
         self.flag = 0.0
         self.strength = 0.0
         self.score = 0.0
@@ -61,6 +64,7 @@ class CausalPromotionGate:
         promo_residual = self._promotion_residual(residual)
         self.score = promo_residual / max(np.sqrt(low_level + 1.0), 1e-6)
         active = 1.0 if self.score >= self.residual_threshold else 0.0
+        self.active = active
         self.events.append(active)
         pos_active = 1.0 if active and residual > 0.0 else 0.0
         neg_active = 1.0 if active and residual < 0.0 else 0.0
@@ -82,6 +86,8 @@ class CausalPromotionGate:
             else:
                 direction = float(np.sign(residual)) if active else self.direction
         persistent = ratio >= self.persistence_ratio and len(self.events) >= self.window_bins
+        self.ratio = ratio
+        self.persistent = 1.0 if persistent else 0.0
         if persistent:
             self.flag = 1.0
             self.cooldown = self.cooldown_bins
@@ -117,4 +123,7 @@ class CausalPromotionGate:
             "age": min(float(self.shock_age) / max(self.window_bins, 1), 1.0),
             "score": float(self.score),
             "direction": float(self.direction),
+            "active": float(self.active),
+            "persistent": float(self.persistent),
+            "ratio": float(self.ratio),
         }
