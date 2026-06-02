@@ -607,6 +607,9 @@ class _SharedPPOPolicyProxy:
         self.wait_replan_same_waits: list[float] = []
         self.wait_replan_signed_shifts: list[float] = []
         self.wait_replan_abs_shifts: list[float] = []
+        self.wait_replan_base_delta_abs: list[float] = []
+        self.wait_replan_final_delta_abs: list[float] = []
+        self.wait_replan_actor_base_used: list[float] = []
 
     def _remember(self, state: np.ndarray, info: dict[str, Any]) -> None:
         key = _state_key(state)
@@ -649,13 +652,18 @@ class _SharedPPOPolicyProxy:
         native_action_override: Any | None = None,
         native_action_blend: float = 0.0,
         preselect_metadata: dict[str, float] | None = None,
+        act_info_override: dict[str, Any] | None = None,
     ) -> bool:
         if self.level != "upper" or not bool(self.bridge.contract.learned_promotion_gate):
             return False
         if hasattr(state, "detach"):
             state = state.detach().cpu().numpy()
         state_arr = _array(state)
-        info = self._act_info(state_arr, sample=sample)
+        info = (
+            dict(act_info_override)
+            if act_info_override is not None
+            else self._act_info(state_arr, sample=sample)
+        )
         gate_value = float(info.get("promotion_gate_value", 0.0))
         self.gate_evaluations += 1
         self.gate_values.append(gate_value)
@@ -697,6 +705,15 @@ class _SharedPPOPolicyProxy:
                     ))
                     self.wait_replan_abs_shifts.append(float(
                         preselect_metadata.get("abs_shift_s", 0.0)
+                    ))
+                    self.wait_replan_base_delta_abs.append(float(
+                        preselect_metadata.get("base_action_delta_abs_s", 0.0)
+                    ))
+                    self.wait_replan_final_delta_abs.append(float(
+                        preselect_metadata.get("final_action_delta_abs_s", 0.0)
+                    ))
+                    self.wait_replan_actor_base_used.append(float(
+                        preselect_metadata.get("actor_base_used", 0.0)
                     ))
             self.gate_replans += 1
         return bool(promote)
@@ -866,6 +883,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
+    promotion_replan_actor_base_trust_s: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
@@ -946,16 +964,40 @@ def install_shared_ppo_episode_loop(
             active_plan = kwargs.get("active_plan", {}) or {}
             native_override = None
             preselect_metadata = None
+            actor_replan_info = None
             if bool(promotion_gate_preselect_action) and "action" in active_plan:
-                native_override = active_plan.get("action")
-                if str(promotion_replan_policy).lower() in {
-                    "wait_aware",
-                    "wait_aware_replan",
-                    "learned_wait_aware",
-                }:
+                active_action = np.asarray(
+                    active_plan.get("action"), dtype=np.float32).reshape(-1)
+                native_override = active_action.copy()
+                policy_name = str(promotion_replan_policy).lower()
+                base_mode = str(promotion_replan_base_action).lower()
+                use_actor_base = (
+                    base_mode in {"actor", "policy", "learned", "current_actor"}
+                    or policy_name in {
+                        "actor_wait_aware",
+                        "learned_actor_wait_aware",
+                        "learned_wait_aware",
+                    }
+                )
+                if use_actor_base:
+                    actor_replan_info = upper_proxy._act_info(
+                        _array(kwargs["s_upper"]), sample=bool(promotion_gate_sample))
                     replan_base = np.asarray(
-                        active_plan.get("action"), dtype=np.float32).reshape(-1)
-                    base_mode = str(promotion_replan_base_action).lower()
+                        actor_replan_info["native_action"], dtype=np.float32).reshape(-1)
+                    actor_delta = (
+                        np.asarray(replan_base, dtype=np.float64)
+                        - np.asarray(active_action, dtype=np.float64)
+                    )
+                    actor_delta_abs = float(np.mean(np.abs(actor_delta)))
+                    trust_s = max(float(promotion_replan_actor_base_trust_s), 0.0)
+                    if trust_s > 0.0 and actor_delta_abs > trust_s:
+                        scale = trust_s / max(actor_delta_abs, 1e-9)
+                        replan_base = (
+                            np.asarray(active_action, dtype=np.float64)
+                            + actor_delta * scale
+                        ).astype(np.float32)
+                else:
+                    replan_base = active_action.copy()
                     if base_mode in {"neutral", "zero", "zero_delta"}:
                         replan_base = np.zeros_like(replan_base, dtype=np.float32)
                     elif base_mode in {"midpoint", "mid"}:
@@ -965,6 +1007,13 @@ def install_shared_ppo_episode_loop(
                                 + np.asarray(bridge.upper_action_high, dtype=np.float32)
                             )
                         ).reshape(-1)
+                if policy_name in {
+                    "wait_aware",
+                    "wait_aware_replan",
+                    "learned_wait_aware",
+                    "actor_wait_aware",
+                    "learned_actor_wait_aware",
+                }:
                     native_override, preselect_metadata = wait_aware_replan_action(
                         replan_base,
                         bridge=bridge,
@@ -982,9 +1031,49 @@ def install_shared_ppo_episode_loop(
                         gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
                         gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
                     )
+                    preselect_metadata = dict(preselect_metadata)
+                    preselect_metadata["actor_base_used"] = float(use_actor_base)
+                    preselect_metadata["actor_base_trust_s"] = float(
+                        max(float(promotion_replan_actor_base_trust_s), 0.0))
+                    preselect_metadata["base_action_delta_abs_s"] = float(np.mean(
+                        np.abs(np.asarray(replan_base, dtype=np.float64)
+                               - np.asarray(active_action, dtype=np.float64))
+                    ))
+                    preselect_metadata["final_action_delta_abs_s"] = float(np.mean(
+                        np.abs(np.asarray(native_override, dtype=np.float64)
+                               - np.asarray(active_action, dtype=np.float64))
+                    ))
                     if (bool(promotion_replan_require_shift)
                             and float(preselect_metadata.get("abs_shift_s", 0.0)) <= 1e-6):
                         return False
+                elif use_actor_base:
+                    native_override = replan_base.astype(np.float32)
+                    preselect_metadata = {
+                        "pressure": 0.0,
+                        "state_wait_pressure": 0.0,
+                        "frequency_pressure": 0.0,
+                        "state_same_hold": 0.0,
+                        "state_same_wait": 0.0,
+                        "state_other_hold": 0.0,
+                        "state_other_wait": 0.0,
+                        "state_dispatch_gap_ratio": _state_dispatch_gap_ratio(kwargs["s_upper"]),
+                        "gap_guard_active": 0.0,
+                        "wait_guard_active": 0.0,
+                        "shift_pressure": 0.0,
+                        "signed_shift_s": 0.0,
+                        "abs_shift_s": 0.0,
+                        "actor_base_used": 1.0,
+                        "actor_base_trust_s": float(
+                            max(float(promotion_replan_actor_base_trust_s), 0.0)),
+                        "base_action_delta_abs_s": float(np.mean(
+                            np.abs(np.asarray(replan_base, dtype=np.float64)
+                                   - np.asarray(active_action, dtype=np.float64))
+                        )),
+                        "final_action_delta_abs_s": float(np.mean(
+                            np.abs(np.asarray(native_override, dtype=np.float64)
+                                   - np.asarray(active_action, dtype=np.float64))
+                        )),
+                    }
             promote = upper_proxy.evaluate_promotion_gate(
                 kwargs["s_upper"],
                 threshold=float(promotion_gate_threshold),
@@ -993,6 +1082,7 @@ def install_shared_ppo_episode_loop(
                 native_action_override=native_override,
                 native_action_blend=float(promotion_gate_plan_blend),
                 preselect_metadata=preselect_metadata,
+                act_info_override=actor_replan_info,
             )
             if promote and native_override is not None:
                 runner.freq_hrl_promotion_action_override = np.asarray(
@@ -1089,6 +1179,9 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_wait_replan_same_wait_mean",
         "shared_ppo_wait_replan_shift_mean_s",
         "shared_ppo_wait_replan_shift_abs_mean_s",
+        "shared_ppo_wait_replan_actor_base_used_mean",
+        "shared_ppo_wait_replan_base_delta_abs_mean_s",
+        "shared_ppo_wait_replan_final_delta_abs_mean_s",
         "native_real_profile",
         "native_boarded_pax",
         "native_alighted_pax",
@@ -1141,6 +1234,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
+    promotion_replan_actor_base_trust_s: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
     offpolicy_replay_updates: int = 1,
@@ -1214,6 +1308,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
         promotion_replan_base_action=str(promotion_replan_base_action),
+        promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
         lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
@@ -1276,6 +1371,18 @@ def run_native_shared_ppo_episode_loop(
                 float(np.mean(installed["upper_proxy"].wait_replan_abs_shifts))
                 if installed["upper_proxy"].wait_replan_abs_shifts else 0.0
             ),
+            "shared_ppo_wait_replan_actor_base_used_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_actor_base_used))
+                if installed["upper_proxy"].wait_replan_actor_base_used else 0.0
+            ),
+            "shared_ppo_wait_replan_base_delta_abs_mean_s": (
+                float(np.mean(installed["upper_proxy"].wait_replan_base_delta_abs))
+                if installed["upper_proxy"].wait_replan_base_delta_abs else 0.0
+            ),
+            "shared_ppo_wait_replan_final_delta_abs_mean_s": (
+                float(np.mean(installed["upper_proxy"].wait_replan_final_delta_abs))
+                if installed["upper_proxy"].wait_replan_final_delta_abs else 0.0
+            ),
             "shared_ppo_loss": float(update_metrics.get("loss", 0.0)),
             "shared_ppo_policy_loss": float(update_metrics.get("policy_loss", 0.0)),
             "shared_ppo_value_loss": float(update_metrics.get("value_loss", 0.0)),
@@ -1314,6 +1421,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_gap_guard_min_ratio": float(promotion_replan_gap_guard_min_ratio),
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
         "promotion_replan_base_action": str(promotion_replan_base_action),
+        "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
         "offpolicy_replay_updates": int(replay_updates),
@@ -1364,6 +1472,8 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- mean gate value: {summary.get('shared_ppo_gate_value_mean_mean', 0.0):.4f}",
         f"- mean wait-aware replan pressure: {summary.get('shared_ppo_wait_replan_pressure_mean_mean', 0.0):.4f}",
         f"- mean wait-aware replan shift: {summary.get('shared_ppo_wait_replan_shift_mean_s_mean', 0.0):.4f}s",
+        f"- mean learned replan base delta: {summary.get('shared_ppo_wait_replan_base_delta_abs_mean_s_mean', 0.0):.4f}s",
+        f"- mean learned replan final delta: {summary.get('shared_ppo_wait_replan_final_delta_abs_mean_s_mean', 0.0):.4f}s",
         f"- native boarded pax: {summary.get('native_boarded_pax_mean', 0.0):.1f}",
         f"- native alighted pax: {summary.get('native_alighted_pax_mean', 0.0):.1f}",
         f"- native onboard load: avg={summary.get('native_avg_onboard_load_mean', 0.0):.4f}, peak={summary.get('native_peak_onboard_load_mean', 0.0):.4f}",
@@ -1518,6 +1628,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-gap-guard-min-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
+    parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -1555,6 +1666,7 @@ def main() -> None:
             promotion_replan_gap_guard_min_ratio=float(args.promotion_replan_gap_guard_min_ratio),
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
+            promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
             lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),

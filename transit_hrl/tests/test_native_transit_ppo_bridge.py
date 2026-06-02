@@ -460,6 +460,107 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(installed["upper_proxy"].gate_replans, 1)
         self.assertEqual(installed["upper_proxy"].wait_replan_abs_shifts[-1], 12.0)
 
+    def test_learned_wait_aware_replan_uses_current_actor_plan_base(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+            native_policy_init_seed=37,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        actor_action = bridge.act_upper_native(state, sample=False)["native_action"]
+        active_action = np.asarray([20.0, 20.0, 30.0, 30.0], dtype=np.float32)
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_gate_plan_blend=0.0,
+            promotion_replan_policy="learned_wait_aware",
+            promotion_replan_wait_gain_s=10.0,
+            promotion_replan_max_shift_s=5.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=1.0,
+            promotion_replan_base_action="actor",
+        )
+        hook = runner.freq_hrl_learned_promotion_gate
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+        }
+        self.assertTrue(hook(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": active_action},
+            planner_key=True,
+            freq_summary=freq_summary,
+        ))
+        native = installed["upper_proxy"].get_action(state, deterministic=True)
+        self.assertLess(float(native[0]), float(actor_action[0]))
+        self.assertLess(float(native[1]), float(actor_action[1]))
+        self.assertAlmostEqual(float(native[2]), float(actor_action[2]), places=5)
+        self.assertAlmostEqual(float(native[3]), float(actor_action[3]), places=5)
+        self.assertGreater(installed["upper_proxy"].wait_replan_base_delta_abs[-1], 0.0)
+        self.assertGreater(installed["upper_proxy"].wait_replan_final_delta_abs[-1], 0.0)
+        self.assertEqual(installed["upper_proxy"].wait_replan_actor_base_used[-1], 1.0)
+
+    def test_learned_actor_replan_trust_region_caps_base_delta(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+            native_policy_init_seed=37,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_replan_policy="learned_wait_aware",
+            promotion_replan_wait_gain_s=0.0,
+            promotion_replan_max_shift_s=0.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=0.0,
+            promotion_replan_base_action="actor",
+            promotion_replan_actor_base_trust_s=2.0,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        active_action = np.asarray([20.0, 20.0, 30.0, 30.0], dtype=np.float32)
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+        }
+        self.assertTrue(runner.freq_hrl_learned_promotion_gate(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": active_action},
+            planner_key=True,
+            freq_summary=freq_summary,
+        ))
+        native = installed["upper_proxy"].get_action(state, deterministic=True)
+        self.assertLessEqual(
+            float(np.mean(np.abs(native - active_action))),
+            2.0 + 1e-4,
+        )
+        self.assertLessEqual(
+            installed["upper_proxy"].wait_replan_base_delta_abs[-1],
+            2.0 + 1e-4,
+        )
+
     def test_learned_gate_can_trigger_without_preselecting_plan_action(self):
         bridge = NativeTransitPPOBridge.from_runner(
             _FakeNativeRunner(),
