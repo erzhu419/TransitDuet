@@ -101,6 +101,80 @@ class PaperDiagnosticsTest(unittest.TestCase):
                 0.0,
             )
 
+    def test_native_real_demand_and_l2_matching_enter_statistical_checks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            native_out = root / "results" / "transit_native_real_demand_control"
+            native_out.mkdir(parents=True)
+            rows = []
+            for source in ("afc", "apc"):
+                for seed in (1, 2, 3):
+                    rows.append({
+                        "source": source,
+                        "seed": seed,
+                        "variant": "native_real_interval",
+                        "control_score": -20.0,
+                        "ep_reward": -100.0,
+                        "avg_wait_min": 5.0,
+                        "native_avg_board_wait_min": 4.0,
+                        "native_alighted_pax": 50.0,
+                        "native_avg_onboard_load": 0.8,
+                    })
+                    rows.append({
+                        "source": source,
+                        "seed": seed,
+                        "variant": "native_real_freqhrl",
+                        "control_score": -12.0,
+                        "ep_reward": -90.0,
+                        "avg_wait_min": 4.0,
+                        "native_avg_board_wait_min": 3.0,
+                        "native_alighted_pax": 55.0,
+                        "native_avg_onboard_load": 0.6,
+                    })
+            (native_out / "summary.json").write_text(json.dumps({"rows": rows}), encoding="utf-8")
+
+            match_out = root / "results" / "trading_order_book_matching_validation"
+            match_out.mkdir(parents=True)
+            match_check = {
+                "check": "state_space_vs_ema_sharpe",
+                "claim": "L2 order-book matching encoder paired check",
+                "status": "supported",
+                "metric": "sharpe",
+                "treatment": "state_space",
+                "control": "ema",
+                "direction": "increase",
+                "n_common": 3,
+                "delta_mean": 1.0,
+                "delta_ci95_low": 0.4,
+                "delta_ci95_high": 1.4,
+                "improvement_mean": 1.0,
+                "improvement_ci95_low": 0.4,
+                "improvement_ci95_high": 1.4,
+                "win_rate": 1.0,
+                "sign_p_value": 0.125,
+            }
+            (match_out / "summary.json").write_text(
+                json.dumps({"paired_checks": [match_check]}),
+                encoding="utf-8",
+            )
+
+            checks = {
+                row["check"]: row
+                for row in build_statistical_checks(root / "results")
+            }
+            self.assertEqual(
+                checks["transit_native_real_demand_control_score_vs_interval"]["status"],
+                "supported",
+            )
+            self.assertLess(
+                checks["transit_native_real_demand_board_wait_vs_interval"]["delta_mean"],
+                0.0,
+            )
+            self.assertEqual(
+                checks["order_book_matching_state_space_vs_ema_sharpe"]["status"],
+                "supported",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -106,6 +106,16 @@ def collect_real_demand_control_rows(results_root: Path) -> list[dict[str, Any]]
     return rows
 
 
+def collect_native_real_demand_rows(results_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    data = read_json(results_root / "transit_native_real_demand_control" / "summary.json")
+    for row in data.get("rows", []):
+        item = dict(row)
+        item.setdefault("dataset", "transit_native_real_demand_control")
+        rows.append(item)
+    return rows
+
+
 def collect_per_seed_rows(
     results_root: Path,
     variants: dict[str, str],
@@ -506,6 +516,55 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 min_pairs=3,
             )
 
+    native_real_demand_rows = collect_native_real_demand_rows(results_root)
+    if native_real_demand_rows:
+        for check_name, metric, claim, lower_is_better in [
+            (
+                "transit_native_real_demand_control_score_vs_interval",
+                "control_score",
+                "Native Freq-HRL improves control score under real AFC/APC demand profiles",
+                False,
+            ),
+            (
+                "transit_native_real_demand_reward_vs_interval",
+                "ep_reward",
+                "Native Freq-HRL improves reward under real AFC/APC demand profiles",
+                False,
+            ),
+            (
+                "transit_native_real_demand_wait_vs_interval",
+                "avg_wait_min",
+                "Native Freq-HRL lowers wait under real AFC/APC demand profiles",
+                True,
+            ),
+            (
+                "transit_native_real_demand_board_wait_vs_interval",
+                "native_avg_board_wait_min",
+                "Native Freq-HRL lowers actual boarded passenger wait under real AFC/APC demand profiles",
+                True,
+            ),
+            (
+                "transit_native_real_demand_alighted_vs_interval",
+                "native_alighted_pax",
+                "Native Freq-HRL preserves or improves completed passenger alightings under real AFC/APC demand profiles",
+                False,
+            ),
+        ]:
+            add(
+                check_name,
+                claim,
+                paired_delta_stats(
+                    native_real_demand_rows,
+                    variant_key="variant",
+                    pair_keys=("source", "seed"),
+                    metric=metric,
+                    treatment="native_real_freqhrl",
+                    control="native_real_interval",
+                    lower_is_better=lower_is_better,
+                ),
+                min_pairs=3,
+            )
+
     demand_rows = collect_demand_rows(results_root)
     demand_methods = {str(row.get("method")) for row in demand_rows}
     if {"dynamic_harmonic_nb", "fourier"} <= demand_methods:
@@ -727,6 +786,13 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
         item["check"] = f"order_book_depth_{item.get('check', 'unknown')}"
         item.setdefault("claim", "order-book stress encoder paired check")
         checks.append(item)
+    order_matching = read_json(results_root / "trading_order_book_matching_validation" / "summary.json")
+    order_matching_checks = order_matching.get("paired_checks", []) if isinstance(order_matching, dict) else []
+    for row in order_matching_checks:
+        item = dict(row)
+        item["check"] = f"order_book_matching_{item.get('check', 'unknown')}"
+        item.setdefault("claim", "L2 order-book matching encoder paired check")
+        checks.append(item)
 
     return checks
 
@@ -752,6 +818,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     intraday = read_json(results_root / "trading_public_market_intraday_encoder_ablation" / "summary.json")
     order_book = read_json(results_root / "trading_order_book_encoder_ablation" / "summary.json")
     order_book_depth = read_json(results_root / "trading_order_book_depth_validation" / "summary.json")
+    order_book_matching = read_json(results_root / "trading_order_book_matching_validation" / "summary.json")
     encoder = read_json(results_root / "trading_encoder_ablation_adaptive" / "summary.json")
     neural_encoder = read_json(results_root / "trading_encoder_ablation_neural" / "summary.json")
     native_audit = read_json(results_root / "transit_native_shared_ppo_audit" / "summary.json")
@@ -766,12 +833,14 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     intraday_rows = intraday.get("summary", [])
     order_book_rows = order_book.get("summary", [])
     order_book_depth_rows = order_book_depth.get("summary", []) if isinstance(order_book_depth, dict) else []
+    order_book_matching_rows = order_book_matching.get("summary", []) if isinstance(order_book_matching, dict) else []
     encoder_rows = encoder.get("summary", [])
     neural_encoder_rows = neural_encoder.get("summary", [])
     transit_freq = next((row for row in transit if row.get("config") == "T_freqhrl_terminal"), {})
     best_intraday = max(intraday_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     best_order_book = max(order_book_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     best_order_book_depth = max(order_book_depth_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
+    best_order_book_matching = max(order_book_matching_rows, key=lambda row: float(row.get("sharpe", -1e9)), default={})
     adaptive = next((row for row in encoder_rows if row.get("freq_method") == "adaptive_wavelet"), {})
     neural = next((row for row in neural_encoder_rows if row.get("freq_method") == "neural_state_space"), {})
     ema = next((row for row in encoder_rows if row.get("freq_method") == "ema"), {})
@@ -795,6 +864,10 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     real_control_objective_status = _check_status(checks, "transit_real_demand_control_objective_vs_base")
     real_control_wait_status = _check_status(checks, "transit_real_demand_control_wait_vs_base")
+    native_real_score_status = _check_status(checks, "transit_native_real_demand_control_score_vs_interval")
+    native_real_wait_status = _check_status(checks, "transit_native_real_demand_wait_vs_interval")
+    native_real_board_wait_status = _check_status(checks, "transit_native_real_demand_board_wait_vs_interval")
+    native_real_alighted_status = _check_status(checks, "transit_native_real_demand_alighted_vs_interval")
     afc_demand_status = _check_status(checks, "demand_afc_nb_vs_fourier_mse")
     afc_profile_status = _check_status(checks, "demand_afc_profile_vs_fourier_mse")
     apc_profile_status = _check_status(checks, "demand_apc_profile_vs_fourier_mse")
@@ -896,7 +969,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         },
         {
             "claim": "C6: public-data validation covers more than daily bars",
-            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, and multi-seed spread/depth/latency order-book stress checks.",
+            "evidence": "Yahoo 5-minute SPY/QQQ/IWM encoder ablation, order-book microstructure CSV adapter artifacts, multi-seed spread/depth/latency stress checks, and an L2 market-order matching simulator with CSV input support.",
             "metric": (
                 f"best intraday encoder={best_intraday.get('freq_method', 'NA')}, "
                 f"Sharpe={_fmt(best_intraday.get('sharpe'))}; "
@@ -906,9 +979,13 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"under {best_order_book_depth.get('stress', 'NA')}, "
                 f"Sharpe={_fmt(best_order_book_depth.get('sharpe'))}; "
                 f"stress adaptive Sharpe={_check_metric(checks, 'order_book_depth_adaptive_wavelet_vs_ema_sharpe')}"
+                f"; best L2 matching encoder={best_order_book_matching.get('freq_method', 'NA')} "
+                f"latency={best_order_book_matching.get('latency_bins', 'NA')}, "
+                f"Sharpe={_fmt(best_order_book_matching.get('sharpe'))}; "
+                f"L2 adaptive Sharpe={_check_metric(checks, 'order_book_matching_adaptive_wavelet_vs_ema_sharpe')}"
             ),
             "status": "supported path",
-            "remaining_gap": "Order-book adapter and stress matrix exist with deterministic CI fixtures; larger real L2/L3 feeds and a full exchange matching simulator remain for the strongest data claim.",
+            "remaining_gap": "Order-book adapter, stress matrix, and L2 matching simulator exist; larger real L2/L3 feeds and exchange queue-priority modeling remain for the strongest data claim.",
         },
         {
             "claim": "C7: integrated native Transit Freq-HRL closes the copied-runner gap",
@@ -921,7 +998,9 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
             ),
             "status": _check_status(checks, "transit_full_reward_vs_base"),
             "remaining_gap": (
-                "Supported on surrogate performance plus a native shared-PPO episode loop and real AFC/APC demand replay; still needs multi-seed native performance under true onboard-load/alighting/OD dynamics."
+                "Supported on surrogate performance plus a native shared-PPO episode loop and native AFC/APC-profile passenger generation; exact AFC/APC OD geometry and alighting-throughput support remain open."
+                if native_real_score_status in {"supported", "positive_mixed"}
+                else "Supported on surrogate performance plus a native shared-PPO episode loop and real AFC/APC demand replay; still needs supported native onboard-load/alighting validation."
                 if real_control_objective_status in {"supported", "positive_mixed"}
                 else "Supported on surrogate performance plus a native shared-PPO episode loop; real-demand control replay is present but not yet statistically supported."
             ),
@@ -935,10 +1014,17 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native score delta={_check_metric(checks, 'transit_native_wait_credit_score_vs_no_wait')}; "
                 f"native reward delta={_check_metric(checks, 'transit_native_wait_credit_reward_vs_no_wait')}; "
                 f"real-demand objective delta={_check_metric(checks, 'transit_real_demand_control_objective_vs_base')}; "
-                f"real-demand wait delta={_check_metric(checks, 'transit_real_demand_control_wait_vs_base')}"
+                f"real-demand wait delta={_check_metric(checks, 'transit_real_demand_control_wait_vs_base')}; "
+                f"native real-demand wait delta={_check_metric(checks, 'transit_native_real_demand_wait_vs_interval')}"
             ),
             "status": (
-                "supported native+real-demand"
+                "supported native+real-demand-loop"
+                if native_wait_credit_status == "supported"
+                and native_real_wait_status == "supported"
+                else "supported native; real-demand positive-mixed"
+                if native_wait_credit_status == "supported"
+                and native_real_wait_status == "positive_mixed"
+                else "supported native+real-demand"
                 if native_wait_credit_status == "supported"
                 and real_control_objective_status in {"supported", "positive_mixed"}
                 and real_control_wait_status in {"supported", "positive_mixed"}
@@ -957,7 +1043,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 "Native wait-credit path is positive-mixed in the shared-PPO loop; real-demand replay exists, but native AFC/APC/OD validation still needs more seeds/episodes."
                 if native_wait_credit_status == "positive_mixed"
                 else (
-                    "Native wait-credit path is supported in the shared-PPO loop and real-demand replay is present; still needs native onboard-load/alighting/OD validation."
+                    "Native wait-credit path is supported in the shared-PPO loop; native real-demand passenger loop has score/reward support but wait is not fully CI-supported and exact AFC/APC OD validation remains open."
                     if native_wait_credit_status == "supported"
                     else "Native wait-credit validation harness exists, but native timetable performance is not yet supported."
                 )
@@ -994,9 +1080,19 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"AFC NB MSE delta={_check_metric(checks, 'demand_afc_nb_vs_fourier_mse')}; "
                 f"AFC profile MSE delta={_check_metric(checks, 'demand_afc_profile_vs_fourier_mse')}; "
                 f"APC profile MSE delta={_check_metric(checks, 'demand_apc_profile_vs_fourier_mse')}; "
-                f"real-control objective delta={_check_metric(checks, 'transit_real_demand_control_objective_vs_base')}"
+                f"real-control objective delta={_check_metric(checks, 'transit_real_demand_control_objective_vs_base')}; "
+                f"native real-control score delta={_check_metric(checks, 'transit_native_real_demand_control_score_vs_interval')}; "
+                f"native board-wait delta={_check_metric(checks, 'transit_native_real_demand_board_wait_vs_interval')}; "
+                f"native alighted delta={_check_metric(checks, 'transit_native_real_demand_alighted_vs_interval')}"
             ),
             "status": (
+                "supported afc+apc-calibrated+native-score"
+                if (
+                    afc_profile_status == "supported"
+                    and apc_profile_status == "supported"
+                    and native_real_score_status in {"supported", "positive_mixed"}
+                )
+                else
                 "supported afc+apc-calibrated+control"
                 if (
                     afc_profile_status == "supported"
@@ -1010,6 +1106,10 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 else _check_status(checks, "demand_nb_vs_fourier_mse")
             ),
             "remaining_gap": (
+                "Real AFC/APC profiles now drive native passenger generation with boarding/alighting/onboard-load metrics; score is supported, board-wait is "
+                f"{native_real_board_wait_status}, alighted throughput is {native_real_alighted_status}, and exact public OD/onboard occupancy feeds remain open."
+                if afc_profile_status == "supported" and apc_profile_status == "supported" and native_real_score_status in {"supported", "positive_mixed"}
+                else
                 "Real AFC station-hour and APC route-boarding paths are present with supported calibrated profiles and control replay; true onboard-load/alighting/OD feeds remain open."
                 if afc_profile_status == "supported" and apc_profile_status == "supported" and real_control_objective_status in {"supported", "positive_mixed"}
                 else "Real AFC station-hour and APC route-boarding paths are present with supported calibrated profiles; control replay exists but true onboard-load/alighting/OD feeds remain open."
@@ -1125,7 +1225,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, calibrated causal profiles, and order-book spread/depth/latency stress checks. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait CIs, larger real intraday/L2-L3 order-book feeds, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, real APC route-boarding passenger-demand paths, real-demand shared-PPO control replay, native AFC/APC-profile passenger generation, calibrated causal profiles, order-book spread/depth/latency stress checks, and L2 matching simulation with CSV input support. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward/wait CIs, larger real intraday/L2-L3 order-book feeds, exchange queue-priority matching, APC onboard-load/alighting feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

@@ -11,10 +11,15 @@ validation.
 
 - Added real AFC/APC demand control replay through the shared Transit PPO
   surrogate loop.
+- Added native AFC/APC-profile passenger generation inside the copied Transit
+  simulator. Public AFC/APC temporal and station-intensity profiles now drive
+  native passenger objects, boarding, alighting, and onboard-load metrics.
 - Added order-book spread/depth/latency stress validation.
+- Added an L2 market-order matching simulator with latency, partial fills,
+  multi-level fills, slippage, and real L2 CSV input support.
 - Added shard merge support for expanded native promotion validation.
 - Added formal theory diagnostics for wait-credit residual and paired-CI width.
-- Refreshed paper diagnostics to include 59 statistical checks.
+- Refreshed paper diagnostics to include 79 statistical checks.
 
 New supported checks:
 
@@ -22,13 +27,33 @@ New supported checks:
   delta `+1.8114`, CI `[+1.2826, +2.4539]`
 - `transit_real_demand_control_wait_vs_base`: supported, 6 pairs,
   delta `-1.6741`, CI `[-2.2818, -1.1728]`
-- C8 status: `supported native+real-demand`
-- C10 status: `supported afc+apc-calibrated+control`
+- C8 status: `supported native; real-demand positive-mixed`
+- C10 status: `supported afc+apc-calibrated+native-score`
+- Native real-demand control score: supported, 6 pairs, delta `+99.6725`,
+  CI `[+62.3044, +137.0299]`
+- Native real-demand reward: supported, 6 pairs, delta `+98.7658`,
+  CI `[+59.9997, +137.1515]`
+- Native real-demand wait: positive-mixed, 6 pairs, delta `-0.0830`,
+  CI `[-0.2248, +0.0567]`
+- Native real-demand alighted passengers: not supported, 6 pairs,
+  delta `-4.8333`, CI `[-9.8333, -0.8333]`
 
 Order-book stress is improved but not a final top-journal data claim:
 
 - `order_book_depth_adaptive_wavelet_vs_ema_sharpe`: positive-mixed, 25 pairs,
   delta `+0.2807`, CI `[-0.3942, +0.9004]`
+- `order_book_matching_state_space_vs_ema_sharpe`: supported, 15 pairs,
+  delta `+483.0914`, CI `[+407.1948, +559.5459]`
+- `order_book_matching_adaptive_wavelet_vs_ema_sharpe`: inconclusive, 15 pairs,
+  delta `+1.0908`, CI `[-0.2300, +2.4692]`
+
+Boundary of this pass:
+
+- Native real demand uses public AFC/APC profiles mapped onto the copied native
+  corridor. It is a native passenger loop, but not exact public OD geometry.
+- L2 matching can consume real multi-level CSVs, but the committed validation
+  uses synthetic L2 books. Exchange queue priority and L3 event replay are still
+  open.
 
 ## Hardest Remaining Gaps
 
@@ -60,23 +85,27 @@ matrix before the native evidence can be considered strong.
 ### 3. Real Transit demand control validation
 
 Real AFC station-hour demand and APC route-boarding now drive a shared-PPO
-Transit control replay. The stronger native Transit claim still needs:
+Transit control replay, and AFC/APC profiles now drive the native passenger
+loop. The stronger native Transit claim still needs:
 
 - onboard load when available
 - alighting when available
 - OD flow when available
-- real AFC/APC demand inside the native control loop, not only surrogate replay
+- exact AFC/APC OD geometry instead of profile-to-corridor mapping
+- supported alighting-throughput and wait CIs in the native real-demand loop
 
 ### 4. Real market and order-book depth
 
 The current public-data path includes daily bars, 5-minute intraday data, an
-order-book adapter fixture, and a multi-seed spread/depth/latency stress matrix.
+order-book adapter fixture, a multi-seed spread/depth/latency stress matrix,
+and an L2 matching simulator that can read real multi-level CSVs.
 A stronger paper still needs:
 
 - more assets
 - more markets and regimes
 - larger intraday windows
 - real or realistic L2/L3 order-book samples
+- exchange queue-priority or L3 event replay
 - execution simulator sensitivity for transaction cost, slippage, and latency
 
 ### 5. Advanced encoder evidence
@@ -108,8 +137,9 @@ paper-ready proofs for:
 
 1. Finish and merge native learned-promotion multi-seed validation.
 2. Merge scheduler outputs into `transit_native_promotion_replan_expanded`.
-3. Move real AFC/APC demand from surrogate replay into native Transit control.
-4. Expand order-book validation from deterministic stress fixtures to larger
-   real L2/L3 feeds.
+3. Improve native real-demand loop so wait and alighting throughput are both
+   CI-supported, or split the claim into score/reward and throughput tradeoffs.
+4. Expand order-book validation from synthetic matching fixtures to larger real
+   L2/L3 feeds.
 5. Add paper-ready convergence/identifiability proof conditions.
 6. Re-run diagnostics and push each evidence-improving step.

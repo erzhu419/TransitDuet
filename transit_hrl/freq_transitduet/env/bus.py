@@ -56,6 +56,7 @@ class Bus(object):
         self.board_num = 0. # 上车人数
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
+        self.last_alight_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
         self.last_action_s = 0.0
@@ -131,6 +132,7 @@ class Bus(object):
         index_of_passenger_in_station = []
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
+        self.last_alight_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = current_time
         # passengers alight from bus(self)
@@ -139,6 +141,7 @@ class Bus(object):
                 passenger.arrived = True
                 passenger.arrive_time = current_time
                 self.alight_num += 1
+                self.last_alight_count += 1
                 index_of_passenger_on_bus.append(i)
         # remove passengers from bus
         self.passengers = self.passengers[
@@ -472,6 +475,7 @@ class Bus(object):
         self.alight_num = 0.
         self.last_board_wait_sum_s = 0.0
         self.last_board_count = 0
+        self.last_alight_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
         self.last_action_s = 0.0

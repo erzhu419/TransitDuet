@@ -339,6 +339,7 @@ class TransitDuetV2Runner:
         self.env.demand_scale = env_cfg.get('demand_scale', 1.0)
         self.env.od_noise = env_cfg.get('od_noise', 0.0)
         self.env.od_noise_clip = env_cfg.get('od_noise_clip', [0.3, 2.0])
+        self.env.configure_real_demand_profile(env_cfg.get('real_demand_profile', None))
 
         state_dim = self.env.state_dim
 
@@ -1864,6 +1865,7 @@ class TransitDuetV2Runner:
             'terminal_launch_shift_mean': terminal_launch_shift_stat['mean'],
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
         }
+        row.update(self.env.passenger_demand_summary())
         self.diag.append(row)
 
         # Also keep lightweight history for quick plotting

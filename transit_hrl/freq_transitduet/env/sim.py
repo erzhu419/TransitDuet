@@ -102,6 +102,16 @@ class env_bus(object):
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
         self._peak_concurrent = 0
+        self.real_demand_profile = None
+
+    def configure_real_demand_profile(self, profile=None):
+        """Install a causal real-demand profile for native passenger generation.
+
+        The profile maps public AFC/APC temporal and station-intensity patterns
+        onto this copied corridor's OD table. It preserves the native passenger,
+        boarding, alighting, and onboard-load mechanics.
+        """
+        self.real_demand_profile = copy.deepcopy(profile) if profile else None
 
     @property
     def bus_in_terminal(self):
@@ -176,6 +186,8 @@ class env_bus(object):
         else:
             self._demand_multipliers = None
             self._peak_shift = 0
+        self._demand_multipliers = self._compose_hour_multipliers(
+            self._demand_multipliers)
         self._demand_scale = max(
             0.0, float(getattr(self, 'demand_scale', 1.0)))
         self._od_multipliers = self._sample_od_multipliers()
@@ -198,6 +210,12 @@ class env_bus(object):
         self.cost = {key: 0.0 for key in range(self.max_agent_num)}
         self.done = False
         self._peak_concurrent = 0
+        self._episode_boarded_pax = 0
+        self._episode_alighted_pax = 0
+        self._episode_board_wait_sum_s = 0.0
+        self._episode_load_sum = 0.0
+        self._episode_load_samples = 0
+        self._episode_peak_load = 0.0
         self._cached_measurement = None
         self._dispatch_rewards = {}
         self._last_dispatch_trip = {}
@@ -206,11 +224,78 @@ class env_bus(object):
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
 
+    def _compose_hour_multipliers(self, base):
+        profile = self.real_demand_profile if isinstance(self.real_demand_profile, dict) else None
+        hour_profile = (profile or {}).get('hour_multipliers', {})
+        if not hour_profile:
+            return base
+        out = dict(base or {})
+        for hour in range(6, 20):
+            key = str(hour)
+            mult = hour_profile.get(key, hour_profile.get(hour, 1.0))
+            out[hour] = float(out.get(hour, 1.0)) * max(float(mult), 0.0)
+        return out
+
+    def _profile_station_multiplier(self, station):
+        profile = self.real_demand_profile if isinstance(self.real_demand_profile, dict) else None
+        station_profile = (profile or {}).get('station_multipliers', {})
+        if not station_profile:
+            return 1.0
+        candidates = [
+            f"{int(station.station_id)}:{int(bool(station.direction))}",
+            f"{int(station.station_id)}:{bool(station.direction)}",
+            str(int(station.station_id)),
+            str(station.station_name),
+        ]
+        for key in candidates:
+            if key in station_profile:
+                return max(float(station_profile[key]), 0.0)
+        return 1.0
+
+    def _profile_od_multiplier(self, station, destination_name):
+        profile = self.real_demand_profile if isinstance(self.real_demand_profile, dict) else None
+        od_profile = (profile or {}).get('od_multipliers', {})
+        if not od_profile:
+            return 1.0
+        candidates = [
+            f"{int(station.station_id)}:{str(destination_name)}:{int(bool(station.direction))}",
+            f"{int(station.station_id)}:{str(destination_name)}:{bool(station.direction)}",
+            f"{str(station.station_name)}:{str(destination_name)}:{int(bool(station.direction))}",
+        ]
+        for key in candidates:
+            if key in od_profile:
+                return max(float(od_profile[key]), 0.0)
+        return 1.0
+
     def _sample_od_multipliers(self):
         """Episode-level OD pair demand multipliers for generalization tests."""
         od_noise = float(getattr(self, 'od_noise', 0.0))
+        multipliers = {}
+        has_any = False
+        profile = self.real_demand_profile if isinstance(self.real_demand_profile, dict) else None
+        if profile:
+            for station in self.stations:
+                if station.od is None:
+                    continue
+                station_mult = self._profile_station_multiplier(station)
+                for period_od in station.od.values():
+                    if not isinstance(period_od, dict):
+                        continue
+                    for destination_name, demand in period_od.items():
+                        if float(demand) <= 0:
+                            continue
+                        key = (
+                            int(station.station_id),
+                            bool(station.direction),
+                            str(destination_name),
+                        )
+                        od_mult = self._profile_od_multiplier(station, destination_name)
+                        mult = float(station_mult) * float(od_mult)
+                        if abs(mult - 1.0) > 1e-12:
+                            multipliers[key] = mult
+                            has_any = True
         if od_noise <= 0:
-            return None
+            return multipliers if has_any else None
         clip = getattr(self, 'od_noise_clip', [0.3, 2.0])
         try:
             lo, hi = float(clip[0]), float(clip[1])
@@ -235,9 +320,50 @@ class env_bus(object):
                         str(destination_name),
                     )
                     if key not in multipliers:
+                        multipliers[key] = 1.0
+                    if od_noise > 0:
                         sample = np.random.lognormal(mean=mean, sigma=od_noise)
-                        multipliers[key] = float(np.clip(sample, lo, hi))
-        return multipliers
+                        multipliers[key] *= float(np.clip(sample, lo, hi))
+                        has_any = True
+        return multipliers if has_any else None
+
+    def _record_passenger_demand_metrics(self):
+        active = [bus for bus in self.bus_all if bus.on_route]
+        if active:
+            loads = [
+                len(bus.passengers) / max(float(bus.capacity), 1.0)
+                for bus in active
+            ]
+            mean_load = float(np.mean(loads))
+            self._episode_load_sum += mean_load
+            self._episode_load_samples += 1
+            self._episode_peak_load = max(self._episode_peak_load, max(loads))
+        for bus in active:
+            if getattr(bus, 'last_board_time', None) != self.current_time:
+                continue
+            if getattr(bus, '_freqhrl_last_accounted_board_time', None) == self.current_time:
+                continue
+            self._episode_boarded_pax += int(getattr(bus, 'last_board_count', 0))
+            self._episode_alighted_pax += int(getattr(bus, 'last_alight_count', 0))
+            self._episode_board_wait_sum_s += float(getattr(bus, 'last_board_wait_sum_s', 0.0))
+            bus._freqhrl_last_accounted_board_time = self.current_time
+
+    def passenger_demand_summary(self):
+        boarded = int(getattr(self, '_episode_boarded_pax', 0))
+        return {
+            'native_real_profile': bool(self.real_demand_profile),
+            'native_boarded_pax': boarded,
+            'native_alighted_pax': int(getattr(self, '_episode_alighted_pax', 0)),
+            'native_avg_board_wait_min': (
+                float(getattr(self, '_episode_board_wait_sum_s', 0.0)) / max(boarded, 1) / 60.0
+            ),
+            'native_avg_onboard_load': (
+                float(getattr(self, '_episode_load_sum', 0.0))
+                / max(int(getattr(self, '_episode_load_samples', 0)), 1)
+            ),
+            'native_peak_onboard_load': float(getattr(self, '_episode_peak_load', 0.0)),
+        }
+
 
     def initialize_state(self, render=False):
         def count_non_empty_sublist(lst):
@@ -386,6 +512,7 @@ class env_bus(object):
                           lower_context_enabled=self.lower_context_enabled,
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features)
+        self._record_passenger_demand_metrics()
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))

@@ -770,6 +770,12 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_gate_evaluations",
         "shared_ppo_gate_replans",
         "shared_ppo_gate_value_mean",
+        "native_real_profile",
+        "native_boarded_pax",
+        "native_alighted_pax",
+        "native_avg_board_wait_min",
+        "native_avg_onboard_load",
+        "native_peak_onboard_load",
     ]
     summary = {"n": len(rows)}
     for key in keys:
@@ -971,9 +977,12 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
         f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
         f"- mean gate value: {summary.get('shared_ppo_gate_value_mean_mean', 0.0):.4f}",
+        f"- native boarded pax: {summary.get('native_boarded_pax_mean', 0.0):.1f}",
+        f"- native alighted pax: {summary.get('native_alighted_pax_mean', 0.0):.1f}",
+        f"- native onboard load: avg={summary.get('native_avg_onboard_load_mean', 0.0):.4f}, peak={summary.get('native_peak_onboard_load_mean', 0.0):.4f}",
         "",
-        "| ep | wait | cv | reward | lower samples | upper decisions | gate replans | lower decisions | loss |",
-        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| ep | wait | cv | reward | boarded | alighted | load | lower samples | upper decisions | gate replans | lower decisions | loss |",
+        "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         lines.append(
@@ -981,6 +990,9 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
             f"| {float(row.get('avg_wait_min', 0.0)):.4f} "
             f"| {float(row.get('headway_cv', 0.0)):.4f} "
             f"| {float(row.get('ep_reward', 0.0)):.4f} "
+            f"| {int(row.get('native_boarded_pax', 0))} "
+            f"| {int(row.get('native_alighted_pax', 0))} "
+            f"| {float(row.get('native_avg_onboard_load', 0.0)):.4f} "
             f"| {int(row.get('shared_ppo_lower_samples', 0))} "
             f"| {int(row.get('shared_ppo_upper_decisions', 0))} "
             f"| {int(row.get('shared_ppo_gate_replans', 0))} "
