@@ -243,6 +243,7 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             promotion_gate_low_signal_min=0.10,
             promotion_gate_max_hf_to_lf_ratio=2.0,
             promotion_gate_max_replans=1,
+            promotion_gate_max_total_replans=1,
         )
         hook = runner.freq_hrl_learned_promotion_gate
         state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
@@ -269,6 +270,8 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         valid = dict(base_summary, freq_low_slope=0.20, freq_high_energy=0.20)
         self.assertTrue(hook(freq_summary=valid, **kwargs))
         self.assertFalse(hook(freq_summary=valid, **kwargs))
+        other_key = dict(kwargs, planner_key=False)
+        self.assertFalse(hook(freq_summary=valid, **other_key))
         self.assertEqual(installed["upper_proxy"].gate_replans, 1)
 
     def test_native_episode_collector_builds_shared_ppo_batch(self):

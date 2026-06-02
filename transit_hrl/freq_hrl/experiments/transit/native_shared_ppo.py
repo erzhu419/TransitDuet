@@ -607,6 +607,7 @@ def install_shared_ppo_episode_loop(
     promotion_gate_low_signal_min: float = 0.0,
     promotion_gate_max_hf_to_lf_ratio: float = 0.0,
     promotion_gate_max_replans: int = 0,
+    promotion_gate_max_total_replans: int = 0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
@@ -631,8 +632,10 @@ def install_shared_ppo_episode_loop(
     if bool(learned_promotion_gate):
         last_gate_replan_by_key: dict[Any, float] = {}
         gate_replans_by_key: dict[Any, int] = {}
+        gate_replans_total = 0
 
         def learned_gate_hook(**kwargs: Any) -> bool:
+            nonlocal gate_replans_total
             freq_summary = kwargs.get("freq_summary", {}) or {}
             if not bool(freq_summary.get("freq_promotion_flag", 0.0)):
                 return False
@@ -672,6 +675,9 @@ def install_shared_ppo_episode_loop(
             max_replans = max(0, int(promotion_gate_max_replans))
             if max_replans > 0 and gate_replans_by_key.get(key, 0) >= max_replans:
                 return False
+            max_total_replans = max(0, int(promotion_gate_max_total_replans))
+            if max_total_replans > 0 and gate_replans_total >= max_total_replans:
+                return False
             if cooldown_s > 0.0:
                 active_plan = kwargs.get("active_plan", {}) or {}
                 origin = float(active_plan.get("origin", 0.0))
@@ -695,6 +701,8 @@ def install_shared_ppo_episode_loop(
                 last_gate_replan_by_key[key] = now_s
             if promote and max_replans > 0:
                 gate_replans_by_key[key] = gate_replans_by_key.get(key, 0) + 1
+            if promote and max_total_replans > 0:
+                gate_replans_total += 1
             return bool(promote)
 
         runner.freq_hrl_learned_promotion_gate = learned_gate_hook
@@ -795,6 +803,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_gate_low_signal_min: float = 0.0,
     promotion_gate_max_hf_to_lf_ratio: float = 0.0,
     promotion_gate_max_replans: int = 0,
+    promotion_gate_max_total_replans: int = 0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
     offpolicy_replay_updates: int = 1,
@@ -855,6 +864,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_gate_low_signal_min=float(promotion_gate_low_signal_min),
         promotion_gate_max_hf_to_lf_ratio=float(promotion_gate_max_hf_to_lf_ratio),
         promotion_gate_max_replans=int(promotion_gate_max_replans),
+        promotion_gate_max_total_replans=int(promotion_gate_max_total_replans),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
         lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
@@ -913,6 +923,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_gate_low_signal_min": float(promotion_gate_low_signal_min),
         "promotion_gate_max_hf_to_lf_ratio": float(promotion_gate_max_hf_to_lf_ratio),
         "promotion_gate_max_replans": int(max(0, int(promotion_gate_max_replans))),
+        "promotion_gate_max_total_replans": int(max(0, int(promotion_gate_max_total_replans))),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
         "offpolicy_replay_updates": int(replay_updates),
@@ -953,7 +964,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- lower contract: {payload.get('contract', {}).get('lower_state_dim', 'NA')}x{payload.get('contract', {}).get('lower_action_dim', 'NA')}",
         f"- learned promotion gate: {payload.get('learned_promotion_gate', False)} threshold={payload.get('promotion_gate_threshold', 0.0)}",
         f"- gate guard: strength>={payload.get('promotion_gate_strength_min', 0.0)} age>={payload.get('promotion_gate_age_min', 0.0)} min_elapsed_s={payload.get('promotion_gate_min_elapsed_s', 0.0)} cooldown_s={payload.get('promotion_gate_cooldown_s', 0.0)} preselect_action={payload.get('promotion_gate_preselect_action', False)} plan_blend={payload.get('promotion_gate_plan_blend', 0.0)}",
-        f"- gate LF/HF guard: low_signal_min={payload.get('promotion_gate_low_signal_min', 0.0)} max_hf_to_lf={payload.get('promotion_gate_max_hf_to_lf_ratio', 0.0)} max_replans={payload.get('promotion_gate_max_replans', 0)}",
+        f"- gate LF/HF guard: low_signal_min={payload.get('promotion_gate_low_signal_min', 0.0)} max_hf_to_lf={payload.get('promotion_gate_max_hf_to_lf_ratio', 0.0)} max_replans={payload.get('promotion_gate_max_replans', 0)} max_total_replans={payload.get('promotion_gate_max_total_replans', 0)}",
         f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)}",
         f"- off-policy replay updates per native batch: {payload.get('offpolicy_replay_updates', 1)}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
@@ -1095,6 +1106,7 @@ def main() -> None:
     parser.add_argument("--promotion-gate-low-signal-min", type=float, default=0.0)
     parser.add_argument("--promotion-gate-max-hf-to-lf-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-gate-max-replans", type=int, default=0)
+    parser.add_argument("--promotion-gate-max-total-replans", type=int, default=0)
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -1119,6 +1131,7 @@ def main() -> None:
             promotion_gate_low_signal_min=float(args.promotion_gate_low_signal_min),
             promotion_gate_max_hf_to_lf_ratio=float(args.promotion_gate_max_hf_to_lf_ratio),
             promotion_gate_max_replans=int(args.promotion_gate_max_replans),
+            promotion_gate_max_total_replans=int(args.promotion_gate_max_total_replans),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
             lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),

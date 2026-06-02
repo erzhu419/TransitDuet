@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import csv
 import json
 from pathlib import Path
@@ -137,6 +138,44 @@ def paired_checks(
     return checks
 
 
+def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any], dict[str, Any]]:
+    variant = str(job["variant"])
+    seed = int(job["seed"])
+    overrides = dict(job["overrides"])
+    variant_lower_gain = float(
+        overrides.get("_lower_hf_wait_action_gain_s", job["lower_hf_wait_action_gain_s"])
+    )
+    payload = run_native_shared_ppo_episode_loop(
+        output_dir=Path(job["output_dir"]) / variant / f"seed_{seed}",
+        config_path=Path(job["config_path"]),
+        seed=seed,
+        episodes=int(job["episodes"]),
+        device=str(job["device"]),
+        config_overrides=_variant_overrides(overrides),
+        learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
+        promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.62)),
+        promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
+        promotion_gate_age_min=float(overrides.get("_promotion_gate_age_min", 0.0)),
+        promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
+        promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
+        promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
+        promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
+        promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
+        promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
+        promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
+        promotion_gate_max_total_replans=int(overrides.get("_promotion_gate_max_total_replans", 0)),
+        lower_hf_wait_action_gain_s=variant_lower_gain,
+        offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
+    )
+    row = _row_from_payload(seed, variant, payload)
+    compact = {
+        "summary": payload.get("summary", {}),
+        "status": payload.get("status", "missing"),
+        "rows": payload.get("rows", []),
+    }
+    return variant, str(seed), compact, row
+
+
 def run_validation(
     output_dir: Path,
     config_path: Path,
@@ -146,44 +185,40 @@ def run_validation(
     min_pairs: int = 5,
     lower_hf_wait_action_gain_s: float = DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
     offpolicy_replay_updates: int = 1,
+    workers: int = 1,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
     payloads: dict[str, Any] = {}
+    jobs: list[dict[str, Any]] = []
     for variant, overrides in VARIANTS.items():
         payloads[variant] = {}
         for seed in seeds:
-            run_dir = output_dir / variant / f"seed_{int(seed)}"
-            variant_lower_gain = float(
-                overrides.get("_lower_hf_wait_action_gain_s", lower_hf_wait_action_gain_s)
-            )
-            payload = run_native_shared_ppo_episode_loop(
-                output_dir=run_dir,
-                config_path=config_path,
-                seed=int(seed),
-                episodes=int(episodes),
-                device=str(device),
-                config_overrides=_variant_overrides(overrides),
-                learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
-                promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.62)),
-                promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
-                promotion_gate_age_min=float(overrides.get("_promotion_gate_age_min", 0.0)),
-                promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
-                promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
-                promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
-                promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
-                promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
-                promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
-                promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
-                lower_hf_wait_action_gain_s=variant_lower_gain,
-                offpolicy_replay_updates=int(offpolicy_replay_updates),
-            )
-            payloads[variant][str(seed)] = {
-                "summary": payload.get("summary", {}),
-                "status": payload.get("status", "missing"),
-                "rows": payload.get("rows", []),
-            }
-            rows.append(_row_from_payload(int(seed), variant, payload))
+            jobs.append({
+                "variant": str(variant),
+                "overrides": dict(overrides),
+                "seed": int(seed),
+                "output_dir": str(output_dir),
+                "config_path": str(config_path),
+                "episodes": int(episodes),
+                "device": str(device),
+                "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
+                "offpolicy_replay_updates": int(offpolicy_replay_updates),
+            })
+    if int(workers) > 1 and len(jobs) > 1:
+        with ProcessPoolExecutor(max_workers=max(1, int(workers))) as executor:
+            futures = [executor.submit(_run_variant_seed_job, job) for job in jobs]
+            for future in as_completed(futures):
+                variant, seed_key, compact, row = future.result()
+                payloads.setdefault(variant, {})[seed_key] = compact
+                rows.append(row)
+    else:
+        for job in jobs:
+            variant, seed_key, compact, row = _run_variant_seed_job(job)
+            payloads.setdefault(variant, {})[seed_key] = compact
+            rows.append(row)
+    variant_rank = {variant: idx for idx, variant in enumerate(VARIANTS)}
+    rows.sort(key=lambda row: (variant_rank.get(str(row["variant"]), 999), int(row["seed"])))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
     if any(row.get("variant") == "native_learned_gate" for row in rows):
         checks.extend(paired_checks(
@@ -199,6 +234,7 @@ def run_validation(
         "min_pairs": int(min_pairs),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "offpolicy_replay_updates": int(max(1, int(offpolicy_replay_updates))),
+        "workers": int(max(1, int(workers))),
         "variants": list(VARIANTS.keys()),
         "summary": summary,
         "rows": rows,
@@ -253,6 +289,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "This runs the native Transit episode loop through the shared PPO adapter and toggles native promotion-triggered timetable replanning.",
         f"All variants use lower HF wait action prior gain `{payload.get('lower_hf_wait_action_gain_s', 0.0):.1f}s` so promotion is validated inside the full Freq-HRL lower-control loop.",
         f"Each native batch uses `{payload.get('offpolicy_replay_updates', 1)}` shared-PPO replay update(s).",
+        f"Runner workers: `{payload.get('workers', 1)}`.",
         "",
         "| variant | seed | reward | wait | cv | score | upper decisions | gate replans | gate | promotion strength | samples |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
@@ -307,6 +344,7 @@ def main() -> None:
         default=DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
     )
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
+    parser.add_argument("--workers", type=int, default=1)
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -322,6 +360,7 @@ def main() -> None:
         min_pairs=int(args.min_pairs),
         lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
         offpolicy_replay_updates=int(args.offpolicy_replay_updates),
+        workers=int(args.workers),
     )
     reward_check = next(
         row for row in payload["paired_checks"]
