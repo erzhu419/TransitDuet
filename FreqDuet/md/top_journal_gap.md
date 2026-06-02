@@ -60,10 +60,23 @@ Status legend:
 
 ### 1. Current-Version Long Training
 
-Status: `[ ]`
+Status: `[~]` running
 
 The strongest current evidence is still 40 episodes. Older 100/200ep results do
 not fully represent the current soft-promotion main line.
+
+2026-06-02 start: added the current paper-longtrain runner and paired-delta
+summary tooling, then submitted the current 200ep matrix as six scheduler/Slurm
+shards:
+
+```text
+tasks: t5870, t5872, t5874, t5875, t5876, t5877
+slurm: 18263, 18264, 18265, 18266, 18267, 18268
+matrix: 4 domains x 6 methods x 20 paired seeds = 480 runs
+episodes: 200
+last_k: 100
+state at submission: Slurm PENDING, reason QOSMaxCpuPerUserLimit
+```
 
 Done means:
 

@@ -619,3 +619,57 @@ Set `F_freqduet_terminal_main_hiro` back to
 `F_freqduet_terminal_promotion_localcap10_w06_hiro`. Keep
 `F_freqduet_terminal_final_nopromotion_hiro` as the explicit no-promotion
 ablation because the 40ep matrix remains a documented short-training conflict.
+
+## 2026-06-02 top-journal gap item 1: current long-training launch
+
+Added paper-longtrain tooling for the current FreqDuet main line:
+
+- `scripts/run_freqduet_paper_longtrain_matrix.sh`
+  runs the current 4-domain x 6-method x 20-seed matrix.
+- `scripts/summarize_freqduet_paper_matrix.py`
+  writes method summaries plus paired `main - baseline` deltas and bootstrap
+  confidence intervals.
+- `scripts/run_freqduet_ablation.py --no-aggregate`
+  lets scheduler shards run without racing on shared summary files.
+
+Smoke checks:
+
+```text
+bash -n scripts/run_freqduet_paper_longtrain_matrix.sh
+python3 -m py_compile scripts/run_freqduet_ablation.py scripts/summarize_freqduet_paper_matrix.py
+python3 scripts/summarize_freqduet_paper_matrix.py \
+  --per-seed results_freqduet/final_matrix_current_after_softprom_scheduler_20260602/combined_summary/freqduet_ablation_per_seed.csv \
+  --out-dir /tmp/freqduet_paper_stats_smoke
+```
+
+The 40ep smoke paired-delta table reproduced the known issue: main is best on
+average, but highnoise and odshift still have close/negative paired deltas
+against rawhistory/nopromotion. That confirms why the 200ep long-training check
+is required before closing the gap.
+
+Current 200ep launch:
+
+```text
+episodes: 200
+last_k: 100
+seeds: 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+configs: terminal/highnoise/odshift/rushshift x
+         main,nofreq,rawhistory,allfreq,nopromotion,noleakage
+jobs: 480 config-seed runs
+```
+
+Submitted via scheduler to the zhengliang HPC Slurm CPU partition:
+
+```text
+task   slurm  jobs
+t5870  18263  0-80
+t5872  18264  80-160
+t5874  18265  160-240
+t5875  18266  240-320
+t5876  18267  320-400
+t5877  18268  400-480
+```
+
+At submission all six Slurm jobs were `PENDING` with
+`QOSMaxCpuPerUserLimit`, so they should be visible in `tui-top` / Slurm queued
+state and start as the CPU quota frees.
