@@ -57,6 +57,9 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_gate_cooldown_s": 900.0,
         "_promotion_gate_preselect_action": True,
         "_promotion_gate_plan_blend": 0.0,
+        "_promotion_gate_low_signal_min": 0.10,
+        "_promotion_gate_max_hf_to_lf_ratio": 8.0,
+        "_promotion_gate_max_replans": 1,
         "upper": {"timetable_planner": {"promotion_replan": False}},
     },
 }
@@ -169,6 +172,9 @@ def run_validation(
                 promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
                 promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
                 promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
+                promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
+                promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
+                promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
                 lower_hf_wait_action_gain_s=variant_lower_gain,
                 offpolicy_replay_updates=int(offpolicy_replay_updates),
             )

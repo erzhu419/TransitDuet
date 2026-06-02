@@ -1,9 +1,9 @@
 # Freq-HRL Cross-Seed CI Report
 
-- checks: 33
-- enough paired seeds/sources: 29
-- supported checks: 22
-- paper-ready checks: 13
+- checks: 36
+- enough paired seeds/sources: 32
+- supported checks: 25
+- paper-ready checks: 16
 - n_common range: 3 / 10.0 / 65
 
 `paper_ready` requires supported status, enough pairs, positive improvement CI, and either sign-test p <= threshold or at least 10 pairs.
@@ -37,6 +37,9 @@
 | demand_afc_nb_vs_fourier_mse | not_supported | 24 | +16121.7347 [+6009.5751, +31280.0939] | 0.08 | 0.0000 | False |
 | demand_afc_nb_vs_fourier_mae | not_supported | 24 | +3.8859 [+2.7080, +5.3789] | 0.00 | 0.0000 | False |
 | demand_afc_nb_vs_fourier_poisson_nll_no_const | not_supported | 24 | +168.7536 [+97.1531, +257.5680] | 0.12 | 0.0003 | False |
+| demand_afc_profile_vs_fourier_mse | supported | 24 | -7186235.1828 [-10935870.1938, -4496470.4747] | 1.00 | 0.0000 | True |
+| demand_afc_profile_vs_fourier_mae | supported | 24 | -1487.0751 [-1840.2423, -1211.6740] | 1.00 | 0.0000 | True |
+| demand_afc_profile_vs_fourier_poisson_nll_no_const | supported | 24 | -6612.4993 [-8039.1114, -5475.0716] | 1.00 | 0.0000 | True |
 | trading_constraint_lower_lf | supported | 5 | -1.0782 [-1.2590, -0.8371] | 1.00 | 0.0625 | True |
 | trading_constraint_return_tradeoff | supported | 5 | -0.0003 [-0.0011, +0.0006] | 0.40 | 1.0000 | False |
 | trading_constraint_raw_lower_lf | supported | 5 | -0.0000 [-0.0000, -0.0000] | 1.00 | 0.0625 | True |

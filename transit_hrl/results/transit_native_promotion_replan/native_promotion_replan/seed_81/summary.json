@@ -48,13 +48,17 @@
   "promotion_gate_cooldown_s": 0.0,
   "promotion_gate_preselect_action": false,
   "promotion_gate_plan_blend": 0.0,
+  "promotion_gate_low_signal_min": 0.0,
+  "promotion_gate_max_hf_to_lf_ratio": 0.0,
+  "promotion_gate_max_replans": 0,
   "lower_hf_wait_action_gain_s": 45.0,
   "lower_hf_wait_feature_offset": 11,
+  "offpolicy_replay_updates": 3,
   "rows": [
     {
       "ep": 0,
       "stage": "BiLevel",
-      "wall_env_s": 16.2,
+      "wall_env_s": 14.1,
       "wall_train_s": 0.0,
       "avg_wait_min": 4.738,
       "peak_fleet": 14,
@@ -174,23 +178,47 @@
       "terminal_launch_shift_std": 0.0,
       "native_shared_ppo": true,
       "shared_ppo_lower_samples": 4970,
+      "shared_ppo_replay_updates": 3,
       "shared_ppo_upper_decisions": 131,
       "shared_ppo_lower_decisions": 5232,
       "shared_ppo_gate_evaluations": 0,
       "shared_ppo_gate_replans": 0,
       "shared_ppo_gate_value_mean": 0.0,
-      "shared_ppo_loss": 11884.351293945312,
-      "shared_ppo_policy_loss": 0.1698244309052825,
-      "shared_ppo_value_loss": 23768.35725097656
+      "shared_ppo_loss": 8013.710852050781,
+      "shared_ppo_policy_loss": 0.15398561097681523,
+      "shared_ppo_value_loss": 16027.107958984376
     }
   ],
   "updates": [
     {
       "episode": 0,
+      "replay_update": 0,
       "loss": 11884.351293945312,
-      "policy_loss": 0.1698244309052825,
+      "policy_loss": 0.16982443360611796,
       "value_loss": 23768.35725097656,
       "entropy": -2.907295709848404,
+      "constraint_loss": 0.0,
+      "constraint_mean": 0.7702611088752747,
+      "constraint_lambda": 0.0
+    },
+    {
+      "episode": 0,
+      "replay_update": 1,
+      "loss": 9754.749645996093,
+      "policy_loss": 0.16769279446452856,
+      "value_loss": 19509.15810546875,
+      "entropy": -2.90711510181427,
+      "constraint_loss": 0.0,
+      "constraint_mean": 0.7702611088752747,
+      "constraint_lambda": 0.0
+    },
+    {
+      "episode": 0,
+      "replay_update": 2,
+      "loss": 8013.710852050781,
+      "policy_loss": 0.15398561097681523,
+      "value_loss": 16027.107958984376,
+      "entropy": -2.9026031494140625,
       "constraint_loss": 0.0,
       "constraint_mean": 0.7702611088752747,
       "constraint_lambda": 0.0

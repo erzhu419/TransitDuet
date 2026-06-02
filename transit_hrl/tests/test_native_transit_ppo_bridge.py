@@ -96,6 +96,28 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertTrue(np.allclose(action4, action5, atol=1e-6))
         self.assertTrue(np.allclose(lower4, lower5, atol=1e-6))
 
+    def test_learned_gate_sampled_action_preserves_native_policy(self):
+        import torch
+
+        bridge4 = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=False,
+            native_policy_init_seed=23,
+        )
+        bridge5 = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+            native_policy_init_seed=23,
+        )
+        state = np.asarray([0.0, 0.25, 0.50, 0.75, 1.0], dtype=np.float32)
+        torch.manual_seed(99)
+        action4 = bridge4.act_upper_native(state, sample=True)["native_action"]
+        torch.manual_seed(99)
+        action5 = bridge5.act_upper_native(state, sample=True)["native_action"]
+        self.assertTrue(np.allclose(action4, action5, atol=1e-6))
+
     def test_policy_proxy_preselects_learned_gate_action(self):
         bridge = NativeTransitPPOBridge.from_runner(
             _FakeNativeRunner(),
@@ -201,6 +223,52 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             planner_key=True,
             freq_summary=freq_summary,
         ))
+        self.assertEqual(installed["upper_proxy"].gate_replans, 1)
+
+    def test_learned_gate_hook_respects_lf_hf_guards(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_min_elapsed_s=0.0,
+            promotion_gate_low_signal_min=0.10,
+            promotion_gate_max_hf_to_lf_ratio=2.0,
+            promotion_gate_max_replans=1,
+        )
+        hook = runner.freq_hrl_learned_promotion_gate
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        base_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.5,
+            "freq_low_forecast": 0.5,
+            "freq_low_slope": 0.01,
+            "freq_middle": 0.0,
+            "freq_middle_energy": 0.0,
+            "freq_high_energy": 0.0,
+        }
+        kwargs = {
+            "s_upper": state,
+            "elapsed": 100.0,
+            "active_plan": {"origin": 0.0},
+            "planner_key": True,
+        }
+        self.assertFalse(hook(freq_summary=base_summary, **kwargs))
+        high_hf = dict(base_summary, freq_low_slope=0.20, freq_high_energy=1.0)
+        self.assertFalse(hook(freq_summary=high_hf, **kwargs))
+        valid = dict(base_summary, freq_low_slope=0.20, freq_high_energy=0.20)
+        self.assertTrue(hook(freq_summary=valid, **kwargs))
+        self.assertFalse(hook(freq_summary=valid, **kwargs))
         self.assertEqual(installed["upper_proxy"].gate_replans, 1)
 
     def test_native_episode_collector_builds_shared_ppo_batch(self):

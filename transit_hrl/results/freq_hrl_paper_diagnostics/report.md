@@ -21,7 +21,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 |---|---|---|---|
 | C1: frequency-separated HRL can share one training core | supported native loop | trading plan return=0.2991; transit composite=1.6950337432937435; native bridge=supported_interface U=20x4 L=43x1; native loop=supported_native_episode_loop, wait=6.9890; offpolicy native=supported_native_episode_loop, replay_updates=3 | Native shared-PPO episode loop exists; multi-seed native performance validation remains. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
-| C3: promotion should trigger replanning after persistent shocks | supported learned; native learned-gate score | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=+0.0168 [-11.2749, +16.2435], native replans=+49.4167 [+36.4146, +62.0000]; native learned reward=+11.1923 [-9.1302, +33.6636], native learned score=+0.0385 [+0.0047, +0.0752], native learned gate replans=+15.6667 [+11.0000, +20.4167] | Native learned gate runs end-to-end with CI-supported control score/gate replans, but episode reward remains positive-mixed; larger off-policy/native training remains. |
+| C3: promotion should trigger replanning after persistent shocks | supported learned; native guarded-gate path | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=+0.0168 [-11.2749, +16.2435], native replans=+49.4167 [+36.4146, +62.0000]; native learned reward=+3.6935 [-12.3283, +17.8474], native learned score=-0.0068 [-0.0904, +0.0555], native learned gate replans=+1.5000 [+1.0813, +1.9167] | Native learned gate now preserves the closed native action policy and has CI-supported gate replans; episode reward/wait remain inconclusive, so larger off-policy/native training remains. |
 | C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | supported path | adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625 | Neural/PINN encoder path exists; larger cross-domain performance validation is still needed. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851 | Order-book adapter exists with deterministic CI fixture; larger real L2/L3 feeds remain for the strongest data claim. |
@@ -48,11 +48,11 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 | transit_native_promotion_reward_vs_interval | inconclusive | ep_reward | 12 | +0.0168 [-11.2749, +16.2435] | 0.25 | 0.1460 |
 | transit_native_promotion_wait_vs_interval | not_supported | avg_wait_min | 12 | +0.0092 [-0.0373, +0.0716] | 0.50 | 0.5078 |
 | transit_native_promotion_replans_vs_interval | supported | upper_plan_decisions | 12 | +49.4167 [+36.4146, +62.0000] | 1.00 | 0.0005 |
-| transit_native_learned_gate_reward_vs_interval | positive_mixed | ep_reward | 12 | +11.1923 [-9.1302, +33.6636] | 0.58 | 0.7744 |
-| transit_native_learned_gate_wait_vs_interval | inconclusive | avg_wait_min | 12 | -0.0066 [-0.0523, +0.0438] | 0.33 | 1.0000 |
-| transit_native_learned_gate_score_vs_interval | supported | score | 12 | +0.0385 [+0.0047, +0.0752] | 0.58 | 0.1797 |
-| transit_native_learned_gate_replans_vs_interval | supported | upper_plan_decisions | 12 | +4.3333 [+3.2500, +5.5000] | 1.00 | 0.0005 |
-| transit_native_learned_gate_gate_replans_vs_interval | supported | shared_ppo_gate_replans | 12 | +15.6667 [+11.0000, +20.4167] | 1.00 | 0.0005 |
+| transit_native_learned_gate_reward_vs_interval | inconclusive | ep_reward | 12 | +3.6935 [-12.3283, +17.8474] | 0.42 | 1.0000 |
+| transit_native_learned_gate_wait_vs_interval | inconclusive | avg_wait_min | 12 | -0.0153 [-0.0530, +0.0060] | 0.17 | 0.4531 |
+| transit_native_learned_gate_score_vs_interval | not_supported | score | 12 | -0.0068 [-0.0904, +0.0555] | 0.33 | 1.0000 |
+| transit_native_learned_gate_replans_vs_interval | not_supported | upper_plan_decisions | 12 | +0.0000 [+0.0000, +0.0000] | 0.00 | 1.0000 |
+| transit_native_learned_gate_gate_replans_vs_interval | supported | shared_ppo_gate_replans | 12 | +1.5000 [+1.0813, +1.9167] | 0.83 | 0.0020 |
 | transit_native_wait_credit_final_wait_vs_no_wait | supported | final_avg_wait_min | 5 | -8.5908 [-20.4276, -0.9074] | 0.80 | 0.3750 |
 | transit_native_wait_credit_mean_wait_vs_no_wait | supported | avg_wait_min_mean | 5 | -6.1649 [-16.1955, -0.4631] | 0.80 | 0.3750 |
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | final_ep_reward | 5 | +2037.3278 [-66.8598, +6165.1210] | 0.60 | 1.0000 |
@@ -76,4 +76,4 @@ No-tradeoff gates use a small noninferiority margin: 0.01 total-return for tradi
 
 ## Paper Boundary
 
-The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, and real AFC station-hour passenger-demand paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, AFC-calibrated count models, and broader seed-level statistical tests remain open.
+The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, and an AFC-calibrated causal profile. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, true OD demand feeds, and broader seed-level statistical tests remain open.

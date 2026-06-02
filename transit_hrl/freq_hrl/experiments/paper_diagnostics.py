@@ -690,6 +690,8 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
         and native_learned_replan_status == "supported"
     ):
         promotion_status = "supported learned; native learned-gate path"
+    elif learned_promotion_supported and native_learned_replan_status == "supported":
+        promotion_status = "supported learned; native guarded-gate path"
     elif learned_promotion_supported and native_promotion_replan_status == "supported":
         promotion_status = "supported learned; native replan"
     elif learned_promotion_supported:
@@ -740,7 +742,7 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"native learned gate replans={_check_metric(checks, 'transit_native_learned_gate_gate_replans_vs_interval')}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native learned gate runs end-to-end with CI-supported control score/gate replans, but episode reward remains positive-mixed; larger off-policy/native training remains.",
+            "remaining_gap": "Native learned gate now preserves the closed native action policy and has CI-supported gate replans; episode reward/wait remain inconclusive, so larger off-policy/native training remains.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",
@@ -973,7 +975,7 @@ def write_report(
         "",
         "## Paper Boundary",
         "",
-        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, and real AFC station-hour passenger-demand paths. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, AFC-calibrated count models, and broader seed-level statistical tests remain open.",
+        "The current evidence supports a frequency-routed HRL protocol prototype with trading, surrogate Transit, native Transit shared-PPO validation, public GTFS schedule-proxy data, real AFC station-hour passenger-demand paths, and an AFC-calibrated causal profile. It does not yet justify a fully validated domain-general algorithm claim because native learned-promotion reward, larger real intraday/order-book feeds, APC onboard-load/OD feeds, true OD demand feeds, and broader seed-level statistical tests remain open.",
     ])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
