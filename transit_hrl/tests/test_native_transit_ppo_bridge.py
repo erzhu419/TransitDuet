@@ -238,6 +238,40 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertGreater(meta["pressure"], 0.0)
         self.assertLess(meta["signed_shift_s"], 0.0)
 
+    def test_wait_aware_replan_action_supports_reversed_shift_direction(self):
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        adjusted, meta = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary={
+                "freq_low_demand": 0.4,
+                "freq_low_forecast": 0.7,
+                "freq_low_slope": 0.2,
+                "freq_high_energy": 0.3,
+                "freq_promotion_strength": 1.0,
+            },
+            state=np.zeros(5, dtype=np.float32),
+            wait_gain_s=20.0,
+            max_shift_s=12.0,
+            holdfb_dim=0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            min_pressure=0.0,
+            shift_sign=1.0,
+        )
+        self.assertGreater(float(adjusted[0]), float(active_action[0]))
+        self.assertGreater(float(adjusted[1]), float(active_action[1]))
+        self.assertAlmostEqual(float(adjusted[2]), float(active_action[2]), places=5)
+        self.assertAlmostEqual(float(adjusted[3]), float(active_action[3]), places=5)
+        self.assertEqual(meta["shift_sign"], 1.0)
+        self.assertGreater(meta["signed_shift_s"], 0.0)
+
     def test_wait_aware_replan_uses_same_direction_wait_feedback(self):
         bridge = NativeTransitPPOBridge.from_runner(
             _FakeHoldFeedbackRunner(),
@@ -309,6 +343,27 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(meta2["abs_shift_s"], 0.0)
         self.assertEqual(meta2["state_same_hold"], 1.0)
         self.assertEqual(meta2["state_same_wait"], 1.0)
+
+        high_hold_state = np.zeros(9, dtype=np.float32)
+        high_hold_state[-4] = 0.4
+        high_hold_state[-3] = 0.8
+        hold_guarded, meta_hold = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=high_hold_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            same_hold_max=0.25,
+        )
+        self.assertTrue(np.allclose(hold_guarded, active_action, atol=1e-5))
+        self.assertEqual(meta_hold["abs_shift_s"], 0.0)
+        self.assertEqual(meta_hold["wait_guard_active"], 1.0)
 
         low_wait_state = np.zeros(9, dtype=np.float32)
         low_wait_state[-3] = 0.4
@@ -446,10 +501,12 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             promotion_replan_wait_gain_s=20.0,
             promotion_replan_max_shift_s=12.0,
             promotion_replan_terminal_early_cap_s=15.0,
+            promotion_replan_terminal_early_relax=True,
             promotion_replan_state_wait_weight=0.0,
             promotion_replan_frequency_weight=1.0,
         )
         self.assertEqual(runner.freq_hrl_promotion_terminal_early_cap_s, 15.0)
+        self.assertTrue(runner.freq_hrl_promotion_terminal_early_relax)
         hook = runner.freq_hrl_learned_promotion_gate
         state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
         active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)

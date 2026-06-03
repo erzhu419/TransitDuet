@@ -138,7 +138,7 @@ class TimetableCurvePlanner:
         return float(tt._freqduet_base_target_headway)
 
     def apply(self, timetables, current_trip, action, origin_launch_s=None,
-              write_scheduled_launch=False):
+              write_scheduled_launch=False, no_later_than_existing=False):
         """Write target headways for current and future trips.
 
         Returns:
@@ -188,6 +188,8 @@ class TimetableCurvePlanner:
                         float(tt.launch_time) + self.terminal_shift_min_s,
                         float(tt.launch_time) + self.terminal_shift_max_s,
                     ))
+                    if bool(no_later_than_existing) and existing is not None:
+                        scheduled = min(scheduled, float(existing))
                     tt._freqduet_scheduled_launch = int(round(scheduled))
                     tt._freqduet_terminal_dispatch = True
                     scheduled_launches.append(
@@ -211,6 +213,9 @@ class TimetableCurvePlanner:
                     current_launch + self.terminal_shift_min_s,
                     current_launch + self.terminal_shift_max_s,
                 ))
+                existing = getattr(current_trip, "_freqduet_scheduled_launch", None)
+                if bool(no_later_than_existing) and existing is not None:
+                    scheduled = min(scheduled, float(existing))
                 current_trip._freqduet_scheduled_launch = int(round(scheduled))
                 current_trip._freqduet_terminal_dispatch = True
                 scheduled_launches.append(float(current_trip._freqduet_scheduled_launch))

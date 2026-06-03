@@ -352,6 +352,7 @@ class TransitDuetV2Runner:
         self.timetable_replan_interval_s = 0.0
         self.timetable_action_ema_alpha = 1.0
         self.timetable_terminal_dispatch = False
+        self.timetable_terminal_no_later_on_promotion = False
         self.timetable_promotion_replan = False
         self.timetable_promotion_replan_strength_min = 0.0
         self.timetable_plan_all_directions = False
@@ -367,6 +368,8 @@ class TransitDuetV2Runner:
                 np.clip(planner_cfg.get('action_ema_alpha', 1.0), 0.0, 1.0))
             self.timetable_terminal_dispatch = bool(
                 planner_cfg.get('terminal_dispatch', False))
+            self.timetable_terminal_no_later_on_promotion = bool(
+                planner_cfg.get('terminal_no_later_on_promotion', False))
             self.timetable_promotion_replan = bool(
                 planner_cfg.get('promotion_replan', False))
             self.timetable_promotion_replan_strength_min = float(
@@ -1208,15 +1211,27 @@ class TransitDuetV2Runner:
             if self.timetable_terminal_dispatch and early_cap_s > 0.0:
                 old_terminal_min_s = float(
                     self.timetable_planner.terminal_shift_min_s)
-                self.timetable_planner.terminal_shift_min_s = max(
-                    old_terminal_min_s,
-                    -float(early_cap_s),
-                )
+                if bool(getattr(
+                        self,
+                        'freq_hrl_promotion_terminal_early_relax',
+                        False)):
+                    self.timetable_planner.terminal_shift_min_s = min(
+                        old_terminal_min_s,
+                        -float(early_cap_s),
+                    )
+                else:
+                    self.timetable_planner.terminal_shift_min_s = max(
+                        old_terminal_min_s,
+                        -float(early_cap_s),
+                    )
             try:
                 plan_summary = self.timetable_planner.apply(
                     self.env.timetables, trip, action_vec,
                     origin_launch_s=plan_origin_launch,
-                    write_scheduled_launch=self.timetable_terminal_dispatch)
+                    write_scheduled_launch=self.timetable_terminal_dispatch,
+                    no_later_than_existing=(
+                        promotion_action_override_used
+                        and self.timetable_terminal_no_later_on_promotion))
             finally:
                 if old_terminal_min_s is not None:
                     self.timetable_planner.terminal_shift_min_s = old_terminal_min_s

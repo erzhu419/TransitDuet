@@ -93,6 +93,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_same_wait_max": 0.82,
         "_promotion_replan_gap_guard_min_ratio": 0.998,
         "_promotion_replan_gap_guard_max_ratio": 1.30,
+        "_promotion_replan_shift_sign": -1.0,
         "_promotion_replan_base_action": "actor",
         "_promotion_replan_actor_base_trust_s": 2.0,
         "frequency": {
@@ -108,10 +109,57 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "upper": {
             "timetable_planner": {
                 "promotion_replan": False,
+                "terminal_no_later_on_promotion": True,
             },
         },
     },
 }
+
+
+PERSISTENT_STRESS_CONFIG = (
+    TRANSIT_DUET_ROOT
+    / "configs_freqduet"
+    / "T_freqhrl_native_full_persistent_stress.yaml"
+)
+
+
+def apply_persistent_stress_preset() -> None:
+    """Use the pre-registered native promotion stress protocol.
+
+    The control keeps terminal dispatch at the nominal launch-time boundary.
+    The Freq-HRL treatment can open a bounded early-dispatch window only when
+    the learned wait-aware promotion gate fires, and the gate is protected by
+    same-direction wait/hold guards.
+    """
+    COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"] = 0.0
+    COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_max_s"] = 45.0
+    wait_aware = json.loads(json.dumps(VARIANTS["native_wait_aware_replan"]))
+    wait_aware.update({
+        "_promotion_gate_threshold": 0.20,
+        "_promotion_gate_strength_min": 0.20,
+        "_promotion_gate_age_min": 0.0,
+        "_promotion_gate_min_elapsed_s": 0.0,
+        "_promotion_gate_low_signal_min": 0.0,
+        "_promotion_gate_max_hf_to_lf_ratio": 0.0,
+        "_promotion_gate_max_replans": 2,
+        "_promotion_replan_same_hold_max": 0.25,
+        "_promotion_replan_same_wait_min": 0.70,
+        "_promotion_replan_same_wait_max": 0.85,
+        "_promotion_replan_max_shift_s": 2.0,
+        "_promotion_replan_terminal_early_cap_s": 45.0,
+        "_promotion_replan_terminal_early_relax": True,
+        "_promotion_replan_shift_sign": -1.0,
+    })
+    wait_aware.setdefault("upper", {}).setdefault(
+        "timetable_planner", {}
+    )["terminal_no_later_on_promotion"] = True
+    VARIANTS.clear()
+    VARIANTS.update({
+        "interval_only": {
+            "upper": {"timetable_planner": {"promotion_replan": False}},
+        },
+        "native_wait_aware_replan": wait_aware,
+    })
 
 
 def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -378,13 +426,16 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
         promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
         promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
+        promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
         promotion_replan_same_wait_min=float(overrides.get("_promotion_replan_same_wait_min", 0.0)),
         promotion_replan_same_wait_max=float(overrides.get("_promotion_replan_same_wait_max", 0.0)),
         promotion_replan_gap_guard_min_ratio=float(overrides.get("_promotion_replan_gap_guard_min_ratio", 0.0)),
         promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
+        promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
         promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
         promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
         promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
+        promotion_replan_terminal_early_relax=bool(overrides.get("_promotion_replan_terminal_early_relax", False)),
         lower_hf_wait_action_gain_s=variant_lower_gain,
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )
@@ -589,11 +640,13 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    default_config = TRANSIT_DUET_ROOT / "configs_freqduet" / "T_freqhrl_native_full.yaml"
     parser.add_argument(
         "--config",
         type=Path,
-        default=TRANSIT_DUET_ROOT / "configs_freqduet" / "T_freqhrl_native_full.yaml",
+        default=default_config,
     )
+    parser.add_argument("--preset", choices=["default", "persistent_stress"], default="default")
     parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41, 51, 61, 71, 81, 91, 101])
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--min-pairs", type=int, default=5)
@@ -611,6 +664,10 @@ def main() -> None:
         default=Path("transit_hrl/results/transit_native_promotion_replan"),
     )
     args = parser.parse_args()
+    if args.preset == "persistent_stress":
+        apply_persistent_stress_preset()
+        if Path(args.config) == default_config:
+            args.config = PERSISTENT_STRESS_CONFIG
     payload = run_validation(
         output_dir=args.output_dir,
         config_path=args.config,

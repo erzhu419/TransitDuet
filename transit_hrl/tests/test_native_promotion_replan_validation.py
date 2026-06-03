@@ -5,6 +5,9 @@ from pathlib import Path
 
 from freq_hrl.experiments.transit.merge_native_promotion_shards import merge_native_promotion_shards
 from freq_hrl.experiments.transit.native_promotion_replan_validation import (
+    COMMON_OVERRIDES,
+    VARIANTS,
+    apply_persistent_stress_preset,
     paired_checks,
     stress_subset_checks,
     write_outputs,
@@ -12,6 +15,26 @@ from freq_hrl.experiments.transit.native_promotion_replan_validation import (
 
 
 class NativePromotionReplanValidationTest(unittest.TestCase):
+    def test_persistent_stress_preset_installs_wait_safe_gate(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset()
+            self.assertEqual(set(VARIANTS), {"interval_only", "native_wait_aware_replan"})
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertEqual(wait_aware["_promotion_replan_same_hold_max"], 0.25)
+            self.assertEqual(wait_aware["_promotion_replan_same_wait_max"], 0.85)
+            self.assertTrue(wait_aware["_promotion_replan_terminal_early_relax"])
+            self.assertEqual(
+                COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"],
+                0.0,
+            )
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
     def test_paired_checks_gate_native_reward_and_wait(self):
         rows = [
             {

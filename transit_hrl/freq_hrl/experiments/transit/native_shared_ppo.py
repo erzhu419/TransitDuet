@@ -126,10 +126,12 @@ def wait_aware_replan_action(
     frequency_weight: float = 1.0,
     min_pressure: float = 0.0,
     hold_guard_weight: float = 0.0,
+    same_hold_max: float = 0.0,
     same_wait_min: float = 0.0,
     same_wait_max: float = 0.0,
     gap_guard_min_ratio: float = 0.0,
     gap_guard_max_ratio: float = 0.0,
+    shift_sign: float = -1.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     """Build a promotion-triggered timetable action that reacts to wait pressure.
 
@@ -169,6 +171,10 @@ def wait_aware_replan_action(
         and gap_ratio > float(gap_guard_max_ratio)
     )
     wait_guard_active = (
+        float(same_hold_max) > 0.0
+        and float(hold_wait["same_hold"]) > float(same_hold_max)
+    )
+    wait_guard_active = wait_guard_active or (
         float(same_wait_min) > 0.0
         and float(hold_wait["same_wait"]) < float(same_wait_min)
     )
@@ -200,7 +206,8 @@ def wait_aware_replan_action(
     else:
         shift_pressure = pressure
     shift_pressure = max(0.0, min(1.0, float(shift_pressure)))
-    shift = -min(abs(float(max_shift_s)), abs(float(wait_gain_s)) * shift_pressure)
+    sign = -1.0 if float(shift_sign) < 0.0 else 1.0
+    shift = sign * min(abs(float(max_shift_s)), abs(float(wait_gain_s)) * shift_pressure)
     action = active.copy()
     sl = _direction_action_slice(action.size, planner_key)
     n_coeff = int(action[sl].size)
@@ -224,6 +231,7 @@ def wait_aware_replan_action(
         "gap_guard_active": 0.0,
         "wait_guard_active": 0.0,
         "shift_pressure": float(shift_pressure),
+        "shift_sign": float(sign),
         "signed_shift_s": float(np.mean(realized[sl])) if realized[sl].size else 0.0,
         "abs_shift_s": float(np.mean(np.abs(realized[sl]))) if realized[sl].size else 0.0,
     }
@@ -884,13 +892,16 @@ def install_shared_ppo_episode_loop(
     promotion_replan_min_pressure: float = 0.0,
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
+    promotion_replan_same_hold_max: float = 0.0,
     promotion_replan_same_wait_min: float = 0.0,
     promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
     promotion_replan_terminal_early_cap_s: float = 0.0,
+    promotion_replan_terminal_early_relax: bool = False,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
@@ -914,6 +925,8 @@ def install_shared_ppo_episode_loop(
     runner.target_upper_trainer = None
     runner.freq_hrl_promotion_terminal_early_cap_s = max(
         float(promotion_replan_terminal_early_cap_s), 0.0)
+    runner.freq_hrl_promotion_terminal_early_relax = bool(
+        promotion_replan_terminal_early_relax)
     if bool(learned_promotion_gate):
         last_gate_replan_by_key: dict[Any, float] = {}
         gate_replans_by_key: dict[Any, int] = {}
@@ -1036,10 +1049,12 @@ def install_shared_ppo_episode_loop(
                         frequency_weight=float(promotion_replan_frequency_weight),
                         min_pressure=float(promotion_replan_min_pressure),
                         hold_guard_weight=float(promotion_replan_hold_guard_weight),
+                        same_hold_max=float(promotion_replan_same_hold_max),
                         same_wait_min=float(promotion_replan_same_wait_min),
                         same_wait_max=float(promotion_replan_same_wait_max),
                         gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
                         gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+                        shift_sign=float(promotion_replan_shift_sign),
                     )
                     preselect_metadata = dict(preselect_metadata)
                     preselect_metadata["actor_base_used"] = float(use_actor_base)
@@ -1240,13 +1255,16 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_min_pressure: float = 0.0,
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
+    promotion_replan_same_hold_max: float = 0.0,
     promotion_replan_same_wait_min: float = 0.0,
     promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
     promotion_replan_terminal_early_cap_s: float = 0.0,
+    promotion_replan_terminal_early_relax: bool = False,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
     offpolicy_replay_updates: int = 1,
@@ -1317,13 +1335,16 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_min_pressure=float(promotion_replan_min_pressure),
         promotion_replan_require_shift=bool(promotion_replan_require_shift),
         promotion_replan_hold_guard_weight=float(promotion_replan_hold_guard_weight),
+        promotion_replan_same_hold_max=float(promotion_replan_same_hold_max),
         promotion_replan_same_wait_min=float(promotion_replan_same_wait_min),
         promotion_replan_same_wait_max=float(promotion_replan_same_wait_max),
         promotion_replan_gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+        promotion_replan_shift_sign=float(promotion_replan_shift_sign),
         promotion_replan_base_action=str(promotion_replan_base_action),
         promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
         promotion_replan_terminal_early_cap_s=float(promotion_replan_terminal_early_cap_s),
+        promotion_replan_terminal_early_relax=bool(promotion_replan_terminal_early_relax),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
         lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
@@ -1432,13 +1453,16 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_min_pressure": float(promotion_replan_min_pressure),
         "promotion_replan_require_shift": bool(promotion_replan_require_shift),
         "promotion_replan_hold_guard_weight": float(promotion_replan_hold_guard_weight),
+        "promotion_replan_same_hold_max": float(promotion_replan_same_hold_max),
         "promotion_replan_same_wait_min": float(promotion_replan_same_wait_min),
         "promotion_replan_same_wait_max": float(promotion_replan_same_wait_max),
         "promotion_replan_gap_guard_min_ratio": float(promotion_replan_gap_guard_min_ratio),
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
+        "promotion_replan_shift_sign": float(promotion_replan_shift_sign),
         "promotion_replan_base_action": str(promotion_replan_base_action),
         "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
         "promotion_replan_terminal_early_cap_s": float(promotion_replan_terminal_early_cap_s),
+        "promotion_replan_terminal_early_relax": bool(promotion_replan_terminal_early_relax),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
         "offpolicy_replay_updates": int(replay_updates),
@@ -1641,13 +1665,16 @@ def main() -> None:
     parser.add_argument("--promotion-replan-min-pressure", type=float, default=0.0)
     parser.add_argument("--promotion-replan-require-shift", action="store_true")
     parser.add_argument("--promotion-replan-hold-guard-weight", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-same-hold-max", type=float, default=0.0)
     parser.add_argument("--promotion-replan-same-wait-min", type=float, default=0.0)
     parser.add_argument("--promotion-replan-same-wait-max", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-min-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-shift-sign", type=float, default=-1.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
     parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-terminal-early-cap-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-terminal-early-relax", action="store_true")
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -1681,13 +1708,16 @@ def main() -> None:
             promotion_replan_min_pressure=float(args.promotion_replan_min_pressure),
             promotion_replan_require_shift=bool(args.promotion_replan_require_shift),
             promotion_replan_hold_guard_weight=float(args.promotion_replan_hold_guard_weight),
+            promotion_replan_same_hold_max=float(args.promotion_replan_same_hold_max),
             promotion_replan_same_wait_min=float(args.promotion_replan_same_wait_min),
             promotion_replan_same_wait_max=float(args.promotion_replan_same_wait_max),
             promotion_replan_gap_guard_min_ratio=float(args.promotion_replan_gap_guard_min_ratio),
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
+            promotion_replan_shift_sign=float(args.promotion_replan_shift_sign),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
             promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),
             promotion_replan_terminal_early_cap_s=float(args.promotion_replan_terminal_early_cap_s),
+            promotion_replan_terminal_early_relax=bool(args.promotion_replan_terminal_early_relax),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
             lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),

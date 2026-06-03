@@ -74,6 +74,38 @@ class PlanCurveTest(unittest.TestCase):
         self.assertAlmostEqual(trips[1].target_headway, 390.0)
         self.assertAlmostEqual(trips[2].target_headway, 360.0)
 
+    def test_transit_terminal_no_later_guard_preserves_earlier_schedule(self):
+        class Trip:
+            def __init__(self, launch_time, launch_turn, direction):
+                self.launch_time = launch_time
+                self.launch_turn = launch_turn
+                self.direction = direction
+                self.target_headway = 360.0
+                self.launched = False
+
+        planner = TimetableCurvePlanner(
+            horizon_s=900.0,
+            basis_per_direction=2,
+            min_headway_s=180.0,
+            max_headway_s=720.0,
+            delta_min_s=-120.0,
+            delta_max_s=120.0,
+            terminal_shift_min_s=-120.0,
+            terminal_shift_max_s=120.0,
+        )
+        trips = [Trip(0.0, 0, True), Trip(360.0, 1, True), Trip(720.0, 2, True)]
+        trips[1]._freqduet_scheduled_launch = 330
+        trips[2]._freqduet_scheduled_launch = 660
+        planner.apply(
+            trips,
+            trips[0],
+            [0.0, 90.0, 0.0, 0.0],
+            write_scheduled_launch=True,
+            no_later_than_existing=True,
+        )
+        self.assertLessEqual(trips[1]._freqduet_scheduled_launch, 330)
+        self.assertLessEqual(trips[2]._freqduet_scheduled_launch, 660)
+
 
 if __name__ == "__main__":
     unittest.main()

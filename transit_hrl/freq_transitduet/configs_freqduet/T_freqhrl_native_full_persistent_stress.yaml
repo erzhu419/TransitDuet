@@ -1,0 +1,28 @@
+_extends: T_freqhrl_native_full.yaml
+_name: T_freqhrl_native_full_persistent_stress
+
+env:
+  # Pre-registered persistent demand-shift regime for the native promotion
+  # claim.  The stress is deterministic and causal: all policies see the same
+  # corridor profile before acting, with a sustained 09:00-12:00 demand lift
+  # and a mid-corridor station cluster that creates persistent headway pressure.
+  demand_noise: 0.0
+  od_noise: 0.0
+  demand_scale: 1.05
+  real_demand_profile:
+    hour_multipliers:
+      "8": 1.15
+      "9": 1.65
+      "10": 1.80
+      "11": 1.70
+      "12": 1.35
+      "13": 1.10
+    station_multipliers:
+      "6": 1.20
+      "7": 1.35
+      "8": 1.55
+      "9": 1.70
+      "10": 1.70
+      "11": 1.55
+      "12": 1.35
+      "13": 1.20
