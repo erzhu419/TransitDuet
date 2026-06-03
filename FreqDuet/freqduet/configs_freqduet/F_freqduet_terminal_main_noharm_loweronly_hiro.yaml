@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_loweronly_hiro
+
+# Split diagnostic for the fleet no-harm repair: keep upper timetable planning
+# unchanged and only shrink lower holding toward zero under fleet pressure.
+fleet_noharm:
+  upper:
+    enable: false
+  lower:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+
