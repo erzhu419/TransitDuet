@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_main_noharm_loweronly_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_proactive2_hiro
+
+# Stronger proactive lower no-harm: fully suppress on-route holding once the
+# system is one bus below the sampled fleet budget.
+fleet_noharm:
+  lower:
+    enable: true
+    pressure_start: -2.0
+    pressure_full: -1.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+

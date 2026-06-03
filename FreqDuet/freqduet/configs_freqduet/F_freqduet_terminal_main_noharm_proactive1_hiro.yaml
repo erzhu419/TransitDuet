@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_main_noharm_loweronly_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_proactive1_hiro
+
+# Proactive lower no-harm: start shrinking on-route holding before fleet
+# overshoot is already visible. This targets the fixed-headway gap, which is
+# mostly an overshoot penalty rather than a wait/CV gap.
+fleet_noharm:
+  lower:
+    enable: true
+    pressure_start: -1.0
+    pressure_full: 0.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+
