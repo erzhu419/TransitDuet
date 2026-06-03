@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_noharm_loweronly_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_loweronly_driftcost50_hiro
+
+# Long-training repair for lower-only no-harm: keep the validated lower fleet
+# guard, but strengthen the lower Lagrangian drift cost so station holding
+# cannot rebuild low-frequency timetable drift after 100+ episodes.
+leakage:
+  lower_drift_cost_weight: 0.50
+  lower_drift_cost_mode: excess
+  lower_drift_cost_cap: 1.5
+
