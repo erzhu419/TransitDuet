@@ -433,7 +433,9 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 )
 
     native_wait_aware_rows = (
-        collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair")
+        collect_summary_rows(results_root, "transit_native_learned_wait_replan_same070_cap2_128seed")
+        or collect_summary_rows(results_root, "transit_native_learned_wait_replan_gapguard998_128seed")
+        or collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair")
         or collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair_smoke")
         or collect_summary_rows(results_root, "transit_native_wait_aware_replan_dispatch_smoke")
     )
