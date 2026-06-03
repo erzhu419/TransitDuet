@@ -330,6 +330,26 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(meta3["abs_shift_s"], 0.0)
         self.assertEqual(meta3["wait_guard_active"], 1.0)
 
+        high_wait_state = np.zeros(9, dtype=np.float32)
+        high_wait_state[-3] = 1.2
+        high_wait_guarded, meta4 = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=high_wait_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            same_wait_max=0.82,
+        )
+        self.assertTrue(np.allclose(high_wait_guarded, active_action, atol=1e-5))
+        self.assertEqual(meta4["abs_shift_s"], 0.0)
+        self.assertEqual(meta4["wait_guard_active"], 1.0)
+
     def test_wait_aware_replan_respects_dispatch_gap_guard(self):
         bridge = NativeTransitPPOBridge.from_runner(
             _FakeHoldFeedbackRunner(),

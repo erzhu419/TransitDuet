@@ -208,7 +208,7 @@ class PaperDiagnosticsTest(unittest.TestCase):
             root = Path(tmp)
             old_out = root / "results" / "transit_native_promotion_replan"
             expanded_out = root / "results" / "transit_native_promotion_replan_expanded"
-            learned_waitaware_out = root / "results" / "transit_native_learned_wait_replan_same070_cap2_128seed"
+            learned_waitaware_out = root / "results" / "transit_native_learned_wait_replan_same070_082_cap2_512seed"
             waitaware_out = root / "results" / "transit_native_wait_aware_replan_fair"
             old_out.mkdir(parents=True)
             expanded_out.mkdir(parents=True)

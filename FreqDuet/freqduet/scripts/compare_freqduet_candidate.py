@@ -130,7 +130,7 @@ def paired_deltas(
 ) -> pd.DataFrame:
     rows = []
     for metric in metrics:
-        for domain in [*DOMAINS, "overall"]:
+        for domain in DOMAINS:
             metric_df = domain_seed_metric(df, metric, domain)
             pivot = metric_df.pivot_table(index="seed", columns="method", values=metric, aggfunc="mean")
             if candidate_method not in pivot.columns:
@@ -161,6 +161,53 @@ def paired_deltas(
                     "candidate_win_rate": float((delta < 0.0).mean()),
                     "candidate_tie_rate": float((delta == 0.0).mean()),
                 })
+        for baseline in baselines:
+            if baseline == candidate_method:
+                continue
+            cand = df[
+                (df["method"] == candidate_method)
+                & (df["domain"].isin(DOMAINS))
+            ][["seed", "domain", metric]].copy()
+            base = df[
+                (df["method"] == baseline)
+                & (df["domain"].isin(DOMAINS))
+            ][["seed", "domain", metric]].copy()
+            pair = cand.merge(
+                base,
+                on=["seed", "domain"],
+                suffixes=("_candidate", "_baseline"),
+            ).dropna()
+            if pair.empty:
+                continue
+            pair["delta"] = (
+                pair[f"{metric}_candidate"].astype(float)
+                - pair[f"{metric}_baseline"].astype(float)
+            )
+            seed_pair = pair.groupby("seed", as_index=False).agg(
+                candidate_mean=(f"{metric}_candidate", "mean"),
+                baseline_mean=(f"{metric}_baseline", "mean"),
+                delta=("delta", "mean"),
+            )
+            delta = seed_pair["delta"].astype(float)
+            lo, hi = bootstrap_ci(
+                delta.to_numpy(),
+                n_boot=n_boot,
+                seed=stable_seed("delta", "overall", candidate_method, baseline, metric),
+            )
+            rows.append({
+                "domain": "overall",
+                "metric": metric,
+                "candidate": candidate_method,
+                "baseline": baseline,
+                "n_pairs": int(len(seed_pair)),
+                "candidate_mean": float(seed_pair["candidate_mean"].mean()),
+                "baseline_mean": float(seed_pair["baseline_mean"].mean()),
+                "delta_candidate_minus_baseline": float(delta.mean()),
+                "delta_ci95_lo": lo,
+                "delta_ci95_hi": hi,
+                "candidate_win_rate": float((delta < 0.0).mean()),
+                "candidate_tie_rate": float((delta == 0.0).mean()),
+            })
     return pd.DataFrame(rows)
 
 
@@ -200,7 +247,7 @@ def main() -> None:
 
     baseline = prepare(pd.read_csv(args.baseline_per_seed), "baseline")
     candidate = prepare(pd.read_csv(args.candidate_per_seed), "candidate")
-    candidate.loc[candidate["method"] != "unknown", "method"] = args.candidate_method
+    candidate.loc[candidate["domain"] != "unknown", "method"] = args.candidate_method
 
     metrics = [m.strip() for m in args.metrics.split(",") if m.strip()]
     baselines = [m.strip() for m in args.baselines.split(",") if m.strip()]
