@@ -1,0 +1,33 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_adaptive2_hiro
+
+# Tighter adaptive split guard after adaptive1: raw HF energy was too broad and
+# activated upper projection in terminal/rushshift. Middle-band energy isolates
+# highnoise better, while low LF forecast isolates OD shift.
+fleet_noharm:
+  upper:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    mode: all
+    neutral_s: 0.0
+    gate:
+      mode: any
+      default_active: false
+      min_updates_required: 20
+      min_middle_energy: 0.045
+      max_low_forecast: 0.410
+  lower:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+    gate:
+      mode: inverse_any
+      default_active: true
+      min_updates_required: 20
+      min_middle_energy: 0.045
+      max_low_forecast: 0.410
+
