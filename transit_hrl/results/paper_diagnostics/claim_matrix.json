@@ -17,9 +17,9 @@
     {
       "claim": "C3: promotion should trigger replanning after persistent shocks",
       "evidence": "Deterministic replan improves trading recovery, a learned PPO promotion gate improves Transit surrogate reward/wait, and native Transit promotion-replan increases timetable replans.",
-      "metric": "return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=-2.3508 [-38.7708, +28.5689], native replans=+57.0263 [+50.2230, +64.2112]; native learned reward=+5.2023 [-5.4383, +16.2658], native learned score=-0.0143 [-0.0485, +0.0146], native learned gate replans=+1.7368 [+1.5921, +1.8684]; native learned reward NI=supported, wait NI=inconclusive; native wait-aware reward=+0.3131 [-0.2616, +1.1065], wait=-0.0010 [-0.0027, +0.0001], gate=+0.0664 [+0.0468, +0.0898], shift=+0.1130 [+0.0749, +0.1538], target=-0.0018 [-0.0103, +0.0074]; wait-aware reward NI=supported, wait NI=supported",
+      "metric": "return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=-2.3508 [-38.7708, +28.5689], native replans=+57.0263 [+50.2230, +64.2112]; native learned reward=+5.2023 [-5.4383, +16.2658], native learned score=-0.0143 [-0.0485, +0.0146], native learned gate replans=+1.7368 [+1.5921, +1.8684]; native learned reward NI=supported, wait NI=inconclusive; native wait-aware reward=-0.1283 [-0.6791, +0.4116], wait=-0.0001 [-0.0011, +0.0010], gate=+0.0752 [+0.0596, +0.0918], shift=+0.1324 [+0.1024, +0.1621], target=-0.0011 [-0.0081, +0.0055]; wait-aware reward NI=supported, wait NI=supported; headway-stress score=+0.0023 [-0.0000, +0.0051], headway-stress replans=+0.0624 [+0.0435, +0.0832], promotion-stress reward=+0.6875 [-0.1631, +2.0317]",
       "status": "supported learned; native learned-gate path",
-      "remaining_gap": "Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and target headways; episode reward/wait improvement CIs still need larger seed validation."
+      "remaining_gap": "Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and supports a control-side headway-stress score subset; full-population reward/wait improvement CIs still need larger seed validation."
     },
     {
       "claim": "C4: leakage can be constrained at loss level",
@@ -87,7 +87,7 @@
       "improvement_ci95_low": 0.04848341915777432,
       "improvement_ci95_high": 0.06080840183590652,
       "win_rate": 1.0,
-      "sign_p_value": 0.25,
+      "sign_p_value": 0.25000000000000006,
       "status": "supported"
     },
     {
@@ -105,7 +105,7 @@
       "improvement_ci95_low": 0.0651045149148004,
       "improvement_ci95_high": 0.08145783113171134,
       "win_rate": 1.0,
-      "sign_p_value": 0.25,
+      "sign_p_value": 0.25000000000000006,
       "status": "supported"
     },
     {
@@ -123,7 +123,7 @@
       "improvement_ci95_low": 0.019750900455039796,
       "improvement_ci95_high": 0.019929650820731407,
       "win_rate": 1.0,
-      "sign_p_value": 0.25,
+      "sign_p_value": 0.25000000000000006,
       "status": "supported"
     },
     {
@@ -141,7 +141,7 @@
       "improvement_ci95_low": 0.10198934755207123,
       "improvement_ci95_high": 0.14678289126867217,
       "win_rate": 1.0,
-      "sign_p_value": 0.25,
+      "sign_p_value": 0.25000000000000006,
       "status": "supported"
     },
     {
@@ -159,7 +159,7 @@
       "improvement_ci95_low": 0.0018948725265907362,
       "improvement_ci95_high": 0.007480071818040604,
       "win_rate": 0.7,
-      "sign_p_value": 0.34375,
+      "sign_p_value": 0.3437499999999998,
       "status": "supported"
     },
     {
@@ -231,7 +231,7 @@
       "improvement_ci95_low": -36.22011940789486,
       "improvement_ci95_high": 28.661710197368155,
       "win_rate": 0.4605263157894737,
-      "sign_p_value": 0.5665734423986847,
+      "sign_p_value": 0.5665734423986907,
       "status": "not_supported"
     },
     {
@@ -267,7 +267,7 @@
       "improvement_ci95_low": 49.93355263157895,
       "improvement_ci95_high": 64.38157894736842,
       "win_rate": 1.0,
-      "sign_p_value": 2.6469779601696886e-23,
+      "sign_p_value": 2.64697796016969e-23,
       "status": "supported"
     },
     {
@@ -285,7 +285,7 @@
       "improvement_ci95_low": -5.950370394736978,
       "improvement_ci95_high": 16.61221282894726,
       "win_rate": 0.5,
-      "sign_p_value": 0.39612484029702977,
+      "sign_p_value": 0.3961248402970416,
       "status": "positive_mixed"
     },
     {
@@ -303,7 +303,7 @@
       "improvement_ci95_low": -0.0475950657894738,
       "improvement_ci95_high": 0.00299046052631576,
       "win_rate": 0.3026315789473684,
-      "sign_p_value": 0.8854334972865132,
+      "sign_p_value": 0.8854334972865122,
       "status": "not_supported"
     },
     {
@@ -357,7 +357,7 @@
       "improvement_ci95_low": 1.5921052631578947,
       "improvement_ci95_high": 1.868421052631579,
       "win_rate": 0.8947368421052632,
-      "sign_p_value": 6.776263578034403e-21,
+      "sign_p_value": 6.77626357803441e-21,
       "status": "supported"
     },
     {
@@ -375,7 +375,7 @@
       "improvement_ci95_low": -5.950370394736978,
       "improvement_ci95_high": 16.61221282894726,
       "win_rate": 0.5,
-      "sign_p_value": 0.39612484029702977,
+      "sign_p_value": 0.3961248402970416,
       "noninferiority_margin": 15.0,
       "status": "supported"
     },
@@ -394,7 +394,7 @@
       "improvement_ci95_low": -0.0475950657894738,
       "improvement_ci95_high": 0.00299046052631576,
       "win_rate": 0.3026315789473684,
-      "sign_p_value": 0.8854334972865132,
+      "sign_p_value": 0.8854334972865122,
       "noninferiority_margin": 0.01,
       "status": "inconclusive"
     },
@@ -405,16 +405,16 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.31314648437498693,
-      "delta_ci95_low": -0.26159672851564,
-      "delta_ci95_high": 1.106530712890606,
-      "improvement_mean": 0.31314648437498693,
-      "improvement_ci95_low": -0.2679229003906317,
-      "improvement_ci95_high": 1.1125033203124843,
+      "n_common": 1024,
+      "delta_mean": -0.12832812500000879,
+      "delta_ci95_low": -0.6791333984375116,
+      "delta_ci95_high": 0.41155332031249525,
+      "improvement_mean": -0.12832812500000879,
+      "improvement_ci95_low": -0.6991430908203209,
+      "improvement_ci95_high": 0.42049089355467717,
       "win_rate": 0.03515625,
-      "sign_p_value": 0.8641662404406816,
-      "status": "inconclusive"
+      "sign_p_value": 0.6487911623106533,
+      "status": "not_supported"
     },
     {
       "check": "transit_native_wait_aware_replan_wait_vs_interval",
@@ -423,15 +423,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "decrease",
-      "n_common": 512,
-      "delta_mean": -0.0009863281249999998,
-      "delta_ci95_low": -0.002664208984374998,
-      "delta_ci95_high": 0.00012895507812500285,
-      "improvement_mean": 0.0009863281249999998,
-      "improvement_ci95_low": -0.00012695312500000255,
-      "improvement_ci95_high": 0.0027134277343749975,
-      "win_rate": 0.021484375,
-      "sign_p_value": 0.6476058959960938,
+      "n_common": 1024,
+      "delta_mean": -7.031250000000093e-05,
+      "delta_ci95_low": -0.0011103759765624995,
+      "delta_ci95_high": 0.000992211914062493,
+      "improvement_mean": 7.031250000000093e-05,
+      "improvement_ci95_low": -0.001047851562499996,
+      "improvement_ci95_high": 0.0011338378906250019,
+      "win_rate": 0.017578125,
+      "sign_p_value": 0.6358280026288299,
       "status": "inconclusive"
     },
     {
@@ -441,15 +441,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.001580078125000002,
-      "delta_ci95_low": -9.166992187500201e-05,
-      "delta_ci95_high": 0.0036045214843750065,
-      "improvement_mean": 0.001580078125000002,
-      "improvement_ci95_low": -8.157226562500459e-05,
-      "improvement_ci95_high": 0.0036914062500000046,
-      "win_rate": 0.02734375,
-      "sign_p_value": 0.28627872467041016,
+      "n_common": 1024,
+      "delta_mean": 0.0005886718750000037,
+      "delta_ci95_low": -0.0009210498046874963,
+      "delta_ci95_high": 0.002359882812500021,
+      "improvement_mean": 0.0005886718750000037,
+      "improvement_ci95_low": -0.0009869287109374992,
+      "improvement_ci95_high": 0.0022707666015624943,
+      "win_rate": 0.025390625,
+      "sign_p_value": 0.7754496546815774,
       "status": "inconclusive"
     },
     {
@@ -459,15 +459,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.06640625,
-      "delta_ci95_low": 0.046826171875,
-      "delta_ci95_high": 0.08984375,
-      "improvement_mean": 0.06640625,
-      "improvement_ci95_low": 0.044921875,
-      "improvement_ci95_high": 0.08984375,
-      "win_rate": 0.06640625,
-      "sign_p_value": 1.1641532182693481e-10,
+      "n_common": 1024,
+      "delta_mean": 0.0751953125,
+      "delta_ci95_low": 0.0595703125,
+      "delta_ci95_high": 0.091796875,
+      "improvement_mean": 0.0751953125,
+      "improvement_ci95_low": 0.0595703125,
+      "improvement_ci95_high": 0.091796875,
+      "win_rate": 0.0751953125,
+      "sign_p_value": 1.3234889800848424e-23,
       "status": "supported"
     },
     {
@@ -477,15 +477,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.06640625,
-      "delta_ci95_low": 0.046826171875,
-      "delta_ci95_high": 0.08984375,
-      "improvement_mean": 0.06640625,
-      "improvement_ci95_low": 0.044921875,
-      "improvement_ci95_high": 0.08984375,
-      "win_rate": 0.06640625,
-      "sign_p_value": 1.1641532182693481e-10,
+      "n_common": 1024,
+      "delta_mean": 0.0751953125,
+      "delta_ci95_low": 0.0595703125,
+      "delta_ci95_high": 0.091796875,
+      "improvement_mean": 0.0751953125,
+      "improvement_ci95_low": 0.0595703125,
+      "improvement_ci95_high": 0.091796875,
+      "win_rate": 0.0751953125,
+      "sign_p_value": 1.3234889800848424e-23,
       "status": "supported"
     },
     {
@@ -495,15 +495,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.11295083511181556,
-      "delta_ci95_low": 0.07487902525563744,
-      "delta_ci95_high": 0.1537732433487393,
-      "improvement_mean": 0.11295083511181556,
-      "improvement_ci95_low": 0.07382194965208166,
-      "improvement_ci95_high": 0.15310349979447946,
-      "win_rate": 0.06640625,
-      "sign_p_value": 1.1641532182693481e-10,
+      "n_common": 1024,
+      "delta_mean": 0.13240119937165296,
+      "delta_ci95_low": 0.10239404673205801,
+      "delta_ci95_high": 0.16209830739615208,
+      "improvement_mean": 0.13240119937165296,
+      "improvement_ci95_low": 0.10469307562312867,
+      "improvement_ci95_high": 0.16198844440524487,
+      "win_rate": 0.0751953125,
+      "sign_p_value": 1.3234889800848424e-23,
       "status": "supported"
     },
     {
@@ -513,15 +513,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "decrease",
-      "n_common": 512,
-      "delta_mean": -0.0017997890401361127,
-      "delta_ci95_low": -0.010346040613975978,
-      "delta_ci95_high": 0.0073826329104123,
-      "improvement_mean": 0.0017997890401361127,
-      "improvement_ci95_low": -0.006856457535562882,
-      "improvement_ci95_high": 0.01045337297392047,
-      "win_rate": 0.03515625,
-      "sign_p_value": 0.8641662404406816,
+      "n_common": 1024,
+      "delta_mean": -0.0011235270924460639,
+      "delta_ci95_low": -0.008052416264911282,
+      "delta_ci95_high": 0.005530634112648634,
+      "improvement_mean": 0.0011235270924460639,
+      "improvement_ci95_low": -0.005545437943764625,
+      "improvement_ci95_high": 0.007630512172909845,
+      "win_rate": 0.041015625,
+      "sign_p_value": 0.4943822736955048,
       "status": "inconclusive"
     },
     {
@@ -531,15 +531,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "decrease",
-      "n_common": 512,
-      "delta_mean": 0.017906130725190837,
-      "delta_ci95_low": -0.006266586653148854,
-      "delta_ci95_high": 0.059750156548186974,
-      "improvement_mean": -0.017906130725190837,
-      "improvement_ci95_low": -0.05671535812261449,
-      "improvement_ci95_high": 0.006403752683683208,
-      "win_rate": 0.0078125,
-      "sign_p_value": 1.0,
+      "n_common": 1024,
+      "delta_mean": 0.008632514312977086,
+      "delta_ci95_low": -0.0034333440183683334,
+      "delta_ci95_high": 0.02871615577290074,
+      "improvement_mean": -0.008632514312977086,
+      "improvement_ci95_low": -0.02923919444775762,
+      "improvement_ci95_high": 0.003421975638120262,
+      "win_rate": 0.0126953125,
+      "sign_p_value": 0.6776394844055216,
       "status": "not_supported"
     },
     {
@@ -549,15 +549,15 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": 512,
-      "delta_mean": 0.31314648437498693,
-      "delta_ci95_low": -0.26159672851564,
-      "delta_ci95_high": 1.106530712890606,
-      "improvement_mean": 0.31314648437498693,
-      "improvement_ci95_low": -0.2679229003906317,
-      "improvement_ci95_high": 1.1125033203124843,
+      "n_common": 1024,
+      "delta_mean": -0.12832812500000879,
+      "delta_ci95_low": -0.6791333984375116,
+      "delta_ci95_high": 0.41155332031249525,
+      "improvement_mean": -0.12832812500000879,
+      "improvement_ci95_low": -0.6991430908203209,
+      "improvement_ci95_high": 0.42049089355467717,
       "win_rate": 0.03515625,
-      "sign_p_value": 0.8641662404406816,
+      "sign_p_value": 0.6487911623106533,
       "noninferiority_margin": 15.0,
       "status": "supported"
     },
@@ -568,17 +568,281 @@
       "treatment": "native_wait_aware_replan",
       "control": "interval_only",
       "direction": "decrease",
-      "n_common": 512,
-      "delta_mean": -0.0009863281249999998,
-      "delta_ci95_low": -0.002664208984374998,
-      "delta_ci95_high": 0.00012895507812500285,
-      "improvement_mean": 0.0009863281249999998,
-      "improvement_ci95_low": -0.00012695312500000255,
-      "improvement_ci95_high": 0.0027134277343749975,
-      "win_rate": 0.021484375,
-      "sign_p_value": 0.6476058959960938,
+      "n_common": 1024,
+      "delta_mean": -7.031250000000093e-05,
+      "delta_ci95_low": -0.0011103759765624995,
+      "delta_ci95_high": 0.000992211914062493,
+      "improvement_mean": 7.031250000000093e-05,
+      "improvement_ci95_low": -0.001047851562499996,
+      "improvement_ci95_high": 0.0011338378906250019,
+      "win_rate": 0.017578125,
+      "sign_p_value": 0.6358280026288299,
       "noninferiority_margin": 0.01,
       "status": "supported"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_ep_reward",
+      "metric": "ep_reward",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 257,
+      "delta_mean": 0.6874980544746954,
+      "delta_ci95_low": -0.16309815175097797,
+      "delta_ci95_high": 2.0317322957198156,
+      "improvement_mean": 0.6874980544746954,
+      "improvement_ci95_low": -0.17798618677043784,
+      "improvement_ci95_high": 2.135382587548618,
+      "win_rate": 0.058365758754863814,
+      "sign_p_value": 0.4243562221527101,
+      "selector": "control_promotion_strength_ge1",
+      "selector_metric": "freq_promotion_strength",
+      "selector_threshold": 1.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves ep_reward under control_promotion_strength_ge1 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_avg_wait_min",
+      "metric": "avg_wait_min",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": 257,
+      "delta_mean": -0.0012957198443579773,
+      "delta_ci95_low": -0.004046887159533087,
+      "delta_ci95_high": 0.00018287937743189885,
+      "improvement_mean": 0.0012957198443579773,
+      "improvement_ci95_low": -0.0001867704280155609,
+      "improvement_ci95_high": 0.004081712062256822,
+      "win_rate": 0.0311284046692607,
+      "sign_p_value": 0.7905273437500017,
+      "selector": "control_promotion_strength_ge1",
+      "selector_metric": "freq_promotion_strength",
+      "selector_threshold": 1.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves avg_wait_min under control_promotion_strength_ge1 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_score",
+      "metric": "score",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 257,
+      "delta_mean": -0.0002599221789883155,
+      "delta_ci95_low": -0.0040476848249027045,
+      "delta_ci95_high": 0.003411712062256814,
+      "improvement_mean": -0.0002599221789883155,
+      "improvement_ci95_low": -0.003779883268482463,
+      "improvement_ci95_high": 0.003662568093385248,
+      "win_rate": 0.038910505836575876,
+      "sign_p_value": 0.8145294189453125,
+      "selector": "control_promotion_strength_ge1",
+      "selector_metric": "freq_promotion_strength",
+      "selector_threshold": 1.0,
+      "stress_subset": true,
+      "status": "not_supported",
+      "claim": "native wait-aware promotion replan improves score under control_promotion_strength_ge1 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_shared_ppo_wait_replan_count",
+      "metric": "shared_ppo_wait_replan_count",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 257,
+      "delta_mean": 0.09727626459143969,
+      "delta_ci95_low": 0.0622568093385214,
+      "delta_ci95_high": 0.13618677042801555,
+      "improvement_mean": 0.09727626459143969,
+      "improvement_ci95_low": 0.0622568093385214,
+      "improvement_ci95_high": 0.13618677042801555,
+      "win_rate": 0.09727626459143969,
+      "sign_p_value": 5.96046447753906e-08,
+      "selector": "control_promotion_strength_ge1",
+      "selector_metric": "freq_promotion_strength",
+      "selector_threshold": 1.0,
+      "stress_subset": true,
+      "status": "supported",
+      "claim": "native wait-aware promotion replan improves shared_ppo_wait_replan_count under control_promotion_strength_ge1 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_ep_reward",
+      "metric": "ep_reward",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 529,
+      "delta_mean": 0.09878071833647038,
+      "delta_ci95_low": -0.64511271266542,
+      "delta_ci95_high": 0.9557767013232373,
+      "improvement_mean": 0.09878071833647038,
+      "improvement_ci95_low": -0.6409226370510495,
+      "improvement_ci95_high": 0.9341394612476204,
+      "win_rate": 0.030245746691871456,
+      "sign_p_value": 1.0,
+      "selector": "control_headway_cv_ge050",
+      "selector_metric": "headway_cv",
+      "selector_threshold": 0.5,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves ep_reward under control_headway_cv_ge050 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_avg_wait_min",
+      "metric": "avg_wait_min",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": 529,
+      "delta_mean": -0.000911153119092628,
+      "delta_ci95_low": -0.002620226843100188,
+      "delta_ci95_high": 0.00018147448015123061,
+      "improvement_mean": 0.000911153119092628,
+      "improvement_ci95_low": -0.000172069943289227,
+      "improvement_ci95_high": 0.0025729678638941418,
+      "win_rate": 0.020793950850661626,
+      "sign_p_value": 1.0,
+      "selector": "control_headway_cv_ge050",
+      "selector_metric": "headway_cv",
+      "selector_threshold": 0.5,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves avg_wait_min under control_headway_cv_ge050 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_score",
+      "metric": "score",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 529,
+      "delta_mean": 0.0023051039697542536,
+      "delta_ci95_low": -1.0604914933833803e-05,
+      "delta_ci95_high": 0.005144413988657866,
+      "improvement_mean": 0.0023051039697542536,
+      "improvement_ci95_low": 3.2892249527368455e-06,
+      "improvement_ci95_high": 0.005166465028355391,
+      "win_rate": 0.02835538752362949,
+      "sign_p_value": 0.4243562221527101,
+      "selector": "control_headway_cv_ge050",
+      "selector_metric": "headway_cv",
+      "selector_threshold": 0.5,
+      "stress_subset": true,
+      "status": "supported",
+      "claim": "native wait-aware promotion replan improves score under control_headway_cv_ge050 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_shared_ppo_wait_replan_count",
+      "metric": "shared_ppo_wait_replan_count",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 529,
+      "delta_mean": 0.062381852551984876,
+      "delta_ci95_low": 0.043478260869565216,
+      "delta_ci95_high": 0.0832230623818523,
+      "improvement_mean": 0.062381852551984876,
+      "improvement_ci95_low": 0.043478260869565216,
+      "improvement_ci95_high": 0.0831758034026465,
+      "win_rate": 0.062381852551984876,
+      "sign_p_value": 2.328306436538702e-10,
+      "selector": "control_headway_cv_ge050",
+      "selector_metric": "headway_cv",
+      "selector_threshold": 0.5,
+      "stress_subset": true,
+      "status": "supported",
+      "claim": "native wait-aware promotion replan improves shared_ppo_wait_replan_count under control_headway_cv_ge050 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_ep_reward",
+      "metric": "ep_reward",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 41,
+      "delta_mean": 3.7970243902438665,
+      "delta_ci95_low": -0.18570731707316043,
+      "delta_ci95_high": 11.486184146341339,
+      "improvement_mean": 3.7970243902438665,
+      "improvement_ci95_low": -0.18570731707316043,
+      "improvement_ci95_high": 11.478804878048667,
+      "win_rate": 0.04878048780487805,
+      "sign_p_value": 1.0,
+      "selector": "control_upper_plan_target_ge350",
+      "selector_metric": "upper_plan_target_mean",
+      "selector_threshold": 350.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves ep_reward under control_upper_plan_target_ge350 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_avg_wait_min",
+      "metric": "avg_wait_min",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "decrease",
+      "n_common": 41,
+      "delta_mean": -0.00841463414634148,
+      "delta_ci95_low": -0.025268902439024445,
+      "delta_ci95_high": 4.878048780489434e-05,
+      "improvement_mean": 0.00841463414634148,
+      "improvement_ci95_low": -4.878048780489434e-05,
+      "improvement_ci95_high": 0.025268292682926883,
+      "win_rate": 0.04878048780487805,
+      "sign_p_value": 1.0,
+      "selector": "control_upper_plan_target_ge350",
+      "selector_metric": "upper_plan_target_mean",
+      "selector_threshold": 350.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves avg_wait_min under control_upper_plan_target_ge350 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_score",
+      "metric": "score",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 41,
+      "delta_mean": 0.008565853658536661,
+      "delta_ci95_low": -4.878048780489434e-05,
+      "delta_ci95_high": 0.025722560975609987,
+      "improvement_mean": 0.008565853658536661,
+      "improvement_ci95_low": -4.878048780489434e-05,
+      "improvement_ci95_high": 0.025721951219512384,
+      "win_rate": 0.04878048780487805,
+      "sign_p_value": 1.0,
+      "selector": "control_upper_plan_target_ge350",
+      "selector_metric": "upper_plan_target_mean",
+      "selector_threshold": 350.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves score under control_upper_plan_target_ge350 stress"
+    },
+    {
+      "check": "transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_shared_ppo_wait_replan_count",
+      "metric": "shared_ppo_wait_replan_count",
+      "treatment": "native_wait_aware_replan",
+      "control": "interval_only",
+      "direction": "increase",
+      "n_common": 41,
+      "delta_mean": 0.07317073170731707,
+      "delta_ci95_low": 0.0,
+      "delta_ci95_high": 0.17073170731707318,
+      "improvement_mean": 0.07317073170731707,
+      "improvement_ci95_low": 0.0,
+      "improvement_ci95_high": 0.17073170731707318,
+      "win_rate": 0.07317073170731707,
+      "sign_p_value": 0.25000000000000006,
+      "selector": "control_upper_plan_target_ge350",
+      "selector_metric": "upper_plan_target_mean",
+      "selector_threshold": 350.0,
+      "stress_subset": true,
+      "status": "inconclusive",
+      "claim": "native wait-aware promotion replan improves shared_ppo_wait_replan_count under control_upper_plan_target_ge350 stress"
     },
     {
       "check": "transit_native_wait_credit_final_wait_vs_no_wait",
@@ -595,7 +859,7 @@
       "improvement_ci95_low": 0.9234000000000002,
       "improvement_ci95_high": 20.4276,
       "win_rate": 0.8,
-      "sign_p_value": 0.375,
+      "sign_p_value": 0.37500000000000044,
       "status": "supported"
     },
     {
@@ -613,7 +877,7 @@
       "improvement_ci95_low": 0.46313333333333323,
       "improvement_ci95_high": 16.19546666666667,
       "win_rate": 0.8,
-      "sign_p_value": 0.375,
+      "sign_p_value": 0.37500000000000044,
       "status": "supported"
     },
     {
@@ -649,7 +913,7 @@
       "improvement_ci95_low": 1.0547600000000001,
       "improvement_ci95_high": 20.480719999999998,
       "win_rate": 0.8,
-      "sign_p_value": 0.375,
+      "sign_p_value": 0.37500000000000044,
       "status": "supported"
     },
     {
@@ -685,7 +949,7 @@
       "improvement_ci95_low": 1.28256587126095,
       "improvement_ci95_high": 2.455658168688026,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -703,7 +967,7 @@
       "improvement_ci95_low": 1.1721058685448769,
       "improvement_ci95_high": 2.305312231872156,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -721,7 +985,7 @@
       "improvement_ci95_low": 1.1727880039632244,
       "improvement_ci95_high": 2.2830341124267717,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -739,7 +1003,7 @@
       "improvement_ci95_low": 0.19692228663199704,
       "improvement_ci95_high": 0.3995897428706634,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -757,7 +1021,7 @@
       "improvement_ci95_low": 0.01786805835206781,
       "improvement_ci95_high": 0.019090903227680728,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -775,7 +1039,7 @@
       "improvement_ci95_low": 61.692953753100056,
       "improvement_ci95_high": 139.5113618436438,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -793,7 +1057,7 @@
       "improvement_ci95_low": 59.40466666666665,
       "improvement_ci95_high": 140.21650000000076,
       "win_rate": 1.0,
-      "sign_p_value": 0.03125,
+      "sign_p_value": 0.031250000000000014,
       "status": "supported"
     },
     {
@@ -811,7 +1075,7 @@
       "improvement_ci95_low": -0.05842916666666717,
       "improvement_ci95_high": 0.22487499999999688,
       "win_rate": 0.6666666666666666,
-      "sign_p_value": 0.6875,
+      "sign_p_value": 0.6875000000000016,
       "status": "positive_mixed"
     },
     {
@@ -829,7 +1093,7 @@
       "improvement_ci95_low": -0.05816675255229837,
       "improvement_ci95_high": 0.22514081451292828,
       "win_rate": 0.6666666666666666,
-      "sign_p_value": 0.6875,
+      "sign_p_value": 0.6875000000000016,
       "status": "positive_mixed"
     },
     {
@@ -847,7 +1111,7 @@
       "improvement_ci95_low": -9.666666666666666,
       "improvement_ci95_high": -0.8333333333333334,
       "win_rate": 0.16666666666666666,
-      "sign_p_value": 0.375,
+      "sign_p_value": 0.37500000000000044,
       "status": "not_supported"
     },
     {
@@ -865,7 +1129,7 @@
       "improvement_ci95_low": -0.05816675255229837,
       "improvement_ci95_high": 0.22514081451292828,
       "win_rate": 0.6666666666666666,
-      "sign_p_value": 0.6875,
+      "sign_p_value": 0.6875000000000016,
       "noninferiority_margin": 0.1,
       "status": "supported"
     },
@@ -884,7 +1148,7 @@
       "improvement_ci95_low": -9.666666666666666,
       "improvement_ci95_high": -0.8333333333333334,
       "win_rate": 0.16666666666666666,
-      "sign_p_value": 0.375,
+      "sign_p_value": 0.37500000000000044,
       "noninferiority_margin": 19.706833333333332,
       "status": "supported"
     },
@@ -903,7 +1167,7 @@
       "improvement_ci95_low": -8330.249779927652,
       "improvement_ci95_high": -1351.4142154727226,
       "win_rate": 0.5730337078651685,
-      "sign_p_value": 0.20311681873649556,
+      "sign_p_value": 0.20311681873649592,
       "status": "not_supported"
     },
     {
@@ -921,7 +1185,7 @@
       "improvement_ci95_low": -0.7756743220889424,
       "improvement_ci95_high": 0.8974005541544734,
       "win_rate": 0.6067415730337079,
-      "sign_p_value": 0.05577832765373429,
+      "sign_p_value": 0.05577832765373444,
       "status": "positive_mixed"
     },
     {
@@ -939,7 +1203,7 @@
       "improvement_ci95_low": -101.25306873334641,
       "improvement_ci95_high": -45.75687168580995,
       "win_rate": 0.2696629213483146,
-      "sign_p_value": 1.611384920056498e-05,
+      "sign_p_value": 1.611384920056435e-05,
       "status": "not_supported"
     },
     {
@@ -957,7 +1221,7 @@
       "improvement_ci95_low": -30826.26519082925,
       "improvement_ci95_high": -5997.633837898743,
       "win_rate": 0.08333333333333333,
-      "sign_p_value": 3.5881996154785156e-05,
+      "sign_p_value": 3.5881996154785244e-05,
       "status": "not_supported"
     },
     {
@@ -975,7 +1239,7 @@
       "improvement_ci95_low": -5.410756583999486,
       "improvement_ci95_high": -2.6817539341653043,
       "win_rate": 0.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "not_supported"
     },
     {
@@ -993,7 +1257,7 @@
       "improvement_ci95_low": -259.6783231756346,
       "improvement_ci95_high": -95.9214907333252,
       "win_rate": 0.125,
-      "sign_p_value": 0.0002771615982055664,
+      "sign_p_value": 0.00027716159820556695,
       "status": "not_supported"
     },
     {
@@ -1011,7 +1275,7 @@
       "improvement_ci95_low": 4408500.6104646,
       "improvement_ci95_high": 10879621.410372201,
       "win_rate": 1.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "supported"
     },
     {
@@ -1029,7 +1293,7 @@
       "improvement_ci95_low": 1219.0216634888027,
       "improvement_ci95_high": 1840.6963086052262,
       "win_rate": 1.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "supported"
     },
     {
@@ -1047,7 +1311,7 @@
       "improvement_ci95_low": 5463.980465147414,
       "improvement_ci95_high": 8055.390939626745,
       "win_rate": 1.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "supported"
     },
     {
@@ -1065,7 +1329,7 @@
       "improvement_ci95_low": 58.759900735033,
       "improvement_ci95_high": 765.287046180404,
       "win_rate": 0.7083333333333334,
-      "sign_p_value": 0.06391465663909912,
+      "sign_p_value": 0.06391465663909913,
       "status": "supported"
     },
     {
@@ -1083,7 +1347,7 @@
       "improvement_ci95_low": -0.6081685663391212,
       "improvement_ci95_high": 2.532063268790609,
       "win_rate": 0.75,
-      "sign_p_value": 0.022655844688415527,
+      "sign_p_value": 0.022655844688415597,
       "status": "positive_mixed"
     },
     {
@@ -1101,7 +1365,7 @@
       "improvement_ci95_low": -92.36892314028395,
       "improvement_ci95_high": -19.684331055520623,
       "win_rate": 0.125,
-      "sign_p_value": 0.0002771615982055664,
+      "sign_p_value": 0.00027716159820556695,
       "status": "not_supported"
     },
     {
@@ -1119,7 +1383,7 @@
       "improvement_ci95_low": 2276.2438938598248,
       "improvement_ci95_high": 8649.450303141979,
       "win_rate": 0.9583333333333334,
-      "sign_p_value": 2.9802322387695312e-06,
+      "sign_p_value": 2.9802322387695245e-06,
       "status": "supported"
     },
     {
@@ -1137,7 +1401,7 @@
       "improvement_ci95_low": 20.79173518121257,
       "improvement_ci95_high": 41.44968921402525,
       "win_rate": 1.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "supported"
     },
     {
@@ -1155,7 +1419,7 @@
       "improvement_ci95_low": 99.79178418216038,
       "improvement_ci95_high": 179.6741090151191,
       "win_rate": 1.0,
-      "sign_p_value": 1.1920928955078125e-07,
+      "sign_p_value": 1.1920928955078144e-07,
       "status": "supported"
     },
     {

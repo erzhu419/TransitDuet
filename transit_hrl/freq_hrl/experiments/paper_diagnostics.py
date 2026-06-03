@@ -17,6 +17,7 @@ from freq_hrl.experiments.statistics import (
     paired_delta_stats,
 )
 from freq_hrl.experiments.transit.demand_estimator_validation import COUNT_CALIBRATION_ID
+from freq_hrl.experiments.transit.native_promotion_replan_validation import stress_subset_checks
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -433,7 +434,9 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                 )
 
     native_wait_aware_rows = (
-        collect_summary_rows(results_root, "transit_native_learned_wait_replan_same070_082_cap2_512seed")
+        collect_summary_rows(results_root, "transit_native_learned_wait_replan_same070_082_cap2_nocap_1024seed")
+        or collect_summary_rows(results_root, "transit_native_learned_wait_replan_gap106_512seed")
+        or collect_summary_rows(results_root, "transit_native_learned_wait_replan_same070_082_cap2_512seed")
         or collect_summary_rows(results_root, "transit_native_learned_wait_replan_same070_cap2_128seed")
         or collect_summary_rows(results_root, "transit_native_learned_wait_replan_gapguard998_128seed")
         or collect_summary_rows(results_root, "transit_native_wait_aware_replan_fair")
@@ -547,6 +550,20 @@ def build_statistical_checks(results_root: Path) -> list[dict[str, Any]]:
                     min_pairs=5,
                 ),
             )
+        for stress_check in stress_subset_checks(
+            native_wait_aware_rows,
+            min_pairs=30,
+            treatment="native_wait_aware_replan",
+        ):
+            item = dict(stress_check)
+            selector = str(item.get("selector", "control_stress"))
+            metric = str(item.get("metric", "metric"))
+            item["check"] = f"transit_{item['check']}"
+            item["claim"] = (
+                f"native wait-aware promotion replan improves {metric} "
+                f"under {selector} stress"
+            )
+            checks.append(item)
 
     native_wait_rows = collect_summary_rows(results_root, "transit_native_wait_credit")
     if native_wait_rows:
@@ -1105,6 +1122,18 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
     native_waitaware_target_status = _check_status(checks, "transit_native_wait_aware_replan_target_vs_interval")
     native_waitaware_reward_ni_status = _check_status(checks, "transit_native_wait_aware_replan_reward_noninferiority")
     native_waitaware_wait_ni_status = _check_status(checks, "transit_native_wait_aware_replan_wait_noninferiority")
+    native_waitaware_headway_stress_score_status = _check_status(
+        checks,
+        "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_score",
+    )
+    native_waitaware_headway_stress_count_status = _check_status(
+        checks,
+        "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_shared_ppo_wait_replan_count",
+    )
+    native_waitaware_promotion_stress_reward_status = _check_status(
+        checks,
+        "transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_ep_reward",
+    )
     native_wait_credit_status = _check_status(checks, "transit_native_wait_credit_final_wait_vs_no_wait")
     real_control_objective_status = _check_status(checks, "transit_real_demand_control_objective_vs_base")
     real_control_wait_status = _check_status(checks, "transit_real_demand_control_wait_vs_base")
@@ -1148,6 +1177,12 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
             and native_learned_wait_ni_status == "supported"
             else "supported learned; native guarded-gate path"
         )
+    elif (
+        learned_promotion_supported
+        and native_waitaware_headway_stress_score_status == "supported"
+        and native_waitaware_headway_stress_count_status == "supported"
+    ):
+        promotion_status = "supported learned; native stress-subset wait-aware score"
     elif learned_promotion_supported and native_promotion_replan_status == "supported":
         promotion_status = "supported learned; native replan"
     elif learned_promotion_supported:
@@ -1204,10 +1239,13 @@ def build_claim_matrix(results_root: Path, transit_root: Path) -> list[dict[str,
                 f"shift={_check_metric(checks, 'transit_native_wait_aware_replan_shift_vs_interval')}, "
                 f"target={_check_metric(checks, 'transit_native_wait_aware_replan_target_vs_interval')}; "
                 f"wait-aware reward NI={native_waitaware_reward_ni_status}, "
-                f"wait NI={native_waitaware_wait_ni_status}"
+                f"wait NI={native_waitaware_wait_ni_status}; "
+                f"headway-stress score={_check_metric(checks, 'transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_score')}, "
+                f"headway-stress replans={_check_metric(checks, 'transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_shared_ppo_wait_replan_count')}, "
+                f"promotion-stress reward={_check_metric(checks, 'transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_ep_reward')}"
             ),
             "status": promotion_status,
-            "remaining_gap": "Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and target headways; episode reward/wait improvement CIs still need larger seed validation.",
+            "remaining_gap": "Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and supports a control-side headway-stress score subset; full-population reward/wait improvement CIs still need larger seed validation.",
         },
         {
             "claim": "C4: leakage can be constrained at loss level",

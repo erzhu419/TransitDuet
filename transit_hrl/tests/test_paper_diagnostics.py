@@ -210,10 +210,12 @@ class PaperDiagnosticsTest(unittest.TestCase):
             root = Path(tmp)
             old_out = root / "results" / "transit_native_promotion_replan"
             expanded_out = root / "results" / "transit_native_promotion_replan_expanded"
+            learned_waitaware_1024_out = root / "results" / "transit_native_learned_wait_replan_same070_082_cap2_nocap_1024seed"
             learned_waitaware_out = root / "results" / "transit_native_learned_wait_replan_same070_082_cap2_512seed"
             waitaware_out = root / "results" / "transit_native_wait_aware_replan_fair"
             old_out.mkdir(parents=True)
             expanded_out.mkdir(parents=True)
+            learned_waitaware_1024_out.mkdir(parents=True)
             learned_waitaware_out.mkdir(parents=True)
             waitaware_out.mkdir(parents=True)
             old_rows = [
@@ -298,8 +300,42 @@ class PaperDiagnosticsTest(unittest.TestCase):
                     "upper_plan_target_mean": 346.0,
                     "terminal_launch_shift_mean": -9.0,
                 })
+            learned_waitaware_1024_rows = []
+            for seed in range(1, 31):
+                learned_waitaware_1024_rows.append({
+                    "source": "learned_waitaware_1024",
+                    "seed": seed,
+                    "variant": "interval_only",
+                    "ep_reward": 10.0,
+                    "avg_wait_min": 5.0,
+                    "score": 0.0,
+                    "shared_ppo_gate_replans": 0.0,
+                    "shared_ppo_wait_replan_count": 0.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 0.0,
+                    "upper_plan_target_mean": 360.0,
+                    "terminal_launch_shift_mean": 0.0,
+                    "freq_promotion_strength": 1.0,
+                    "headway_cv": 0.6,
+                })
+                learned_waitaware_1024_rows.append({
+                    "source": "learned_waitaware_1024",
+                    "seed": seed,
+                    "variant": "native_wait_aware_replan",
+                    "ep_reward": 21.0,
+                    "avg_wait_min": 3.9,
+                    "score": 1.2,
+                    "shared_ppo_gate_replans": 1.0,
+                    "shared_ppo_wait_replan_count": 1.0,
+                    "shared_ppo_wait_replan_shift_abs_mean_s": 10.0,
+                    "upper_plan_target_mean": 346.0,
+                    "terminal_launch_shift_mean": -9.0,
+                    "freq_promotion_strength": 1.0,
+                    "headway_cv": 0.6,
+                })
             (old_out / "summary.json").write_text(json.dumps({"rows": old_rows}), encoding="utf-8")
             (expanded_out / "summary.json").write_text(json.dumps({"rows": expanded_rows}), encoding="utf-8")
+            (learned_waitaware_1024_out / "summary.json").write_text(
+                json.dumps({"rows": learned_waitaware_1024_rows}), encoding="utf-8")
             (learned_waitaware_out / "summary.json").write_text(
                 json.dumps({"rows": learned_waitaware_rows}), encoding="utf-8")
             (waitaware_out / "summary.json").write_text(json.dumps({"rows": waitaware_rows}), encoding="utf-8")
@@ -312,10 +348,15 @@ class PaperDiagnosticsTest(unittest.TestCase):
             self.assertEqual(learned_reward["n_common"], 5)
             self.assertEqual(learned_reward["status"], "supported")
             waitaware_shift = checks["transit_native_wait_aware_replan_shift_vs_interval"]
-            self.assertEqual(waitaware_shift["n_common"], 6)
+            self.assertEqual(waitaware_shift["n_common"], 30)
             self.assertEqual(waitaware_shift["status"], "supported")
             waitaware_target = checks["transit_native_wait_aware_replan_target_vs_interval"]
             self.assertEqual(waitaware_target["status"], "supported")
+            waitaware_stress = checks[
+                "transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_score"
+            ]
+            self.assertEqual(waitaware_stress["n_common"], 30)
+            self.assertEqual(waitaware_stress["status"], "supported")
 
 
 if __name__ == "__main__":

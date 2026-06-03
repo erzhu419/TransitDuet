@@ -21,7 +21,7 @@ Promotion false positives and false negatives are controlled by the persistence 
 |---|---|---|---|
 | C1: frequency-separated HRL can share one training core | supported native loop | trading plan return=0.2991; transit composite=NA; native bridge=supported_interface U=20x4 L=43x1; native loop=supported_native_episode_loop, wait=6.9890; offpolicy native=supported_native_episode_loop, replay_updates=3 | Native shared-PPO episode loop exists; multi-seed native performance validation remains. |
 | C2: high-level plan variables can be learned as curves | supported synthetic | plan-PPO return=0.2991, LowerLFDrift=1.5481 | Public-data and copied-Transit learned plan-coefficient training remain open. |
-| C3: promotion should trigger replanning after persistent shocks | supported learned; native learned-gate path | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=-2.3508 [-38.7708, +28.5689], native replans=+57.0263 [+50.2230, +64.2112]; native learned reward=+5.2023 [-5.4383, +16.2658], native learned score=-0.0143 [-0.0485, +0.0146], native learned gate replans=+1.7368 [+1.5921, +1.8684]; native learned reward NI=supported, wait NI=inconclusive; native wait-aware reward=+0.3131 [-0.2616, +1.1065], wait=-0.0010 [-0.0027, +0.0001], gate=+0.0664 [+0.0468, +0.0898], shift=+0.1130 [+0.0749, +0.1538], target=-0.0018 [-0.0103, +0.0074]; wait-aware reward NI=supported, wait NI=supported | Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and target headways; episode reward/wait improvement CIs still need larger seed validation. |
+| C3: promotion should trigger replanning after persistent shocks | supported learned; native learned-gate path | return delta=0.0014, recovery regret delta=-0.0007; learned transit reward=+0.0047 [+0.0016, +0.0076], wait=-0.0079 [-0.0096, -0.0062], replans=+20.1000 [+14.9000, +25.5000]; native reward=-2.3508 [-38.7708, +28.5689], native replans=+57.0263 [+50.2230, +64.2112]; native learned reward=+5.2023 [-5.4383, +16.2658], native learned score=-0.0143 [-0.0485, +0.0146], native learned gate replans=+1.7368 [+1.5921, +1.8684]; native learned reward NI=supported, wait NI=inconclusive; native wait-aware reward=-0.1283 [-0.6791, +0.4116], wait=-0.0001 [-0.0011, +0.0010], gate=+0.0752 [+0.0596, +0.0918], shift=+0.1324 [+0.1024, +0.1621], target=-0.0011 [-0.0081, +0.0055]; wait-aware reward NI=supported, wait NI=supported; headway-stress score=+0.0023 [-0.0000, +0.0051], headway-stress replans=+0.0624 [+0.0435, +0.0832], promotion-stress reward=+0.6875 [-0.1631, +2.0317] | Native learned gate now preserves the closed native action policy. Wait-aware native replanning changes upper timetable actions and supports a control-side headway-stress score subset; full-population reward/wait improvement CIs still need larger seed validation. |
 | C4: leakage can be constrained at loss level | supported | trading drift delta=-1.0782 [-1.2590, -0.8371]; return delta=-0.0003 [-0.0011, +0.0006] | Projected and raw lower-drift constraints are supported in surrogate diagnostics; native and real-data confirmation remain. |
 | C5: advanced causal encoders can be swapped by domain | supported path | adaptive Sharpe=13.0749; neural Sharpe=6.8422; EMA Sharpe=16.0625 | Neural/PINN encoder path exists; larger cross-domain performance validation is still needed. |
 | C6: public-data validation covers more than daily bars | supported path | best intraday encoder=adaptive_wavelet, Sharpe=-9.2200; best order-book encoder=state_space, Sharpe=299.9851; best stress encoder=adaptive_wavelet under stale_book, Sharpe=243.4833; stress adaptive Sharpe=+0.2807 [-0.3942, +0.9004]; best L2 matching encoder=state_space mode=market latency=0, Sharpe=599.2800; L2 adaptive Sharpe=+1.4779 [-1.3087, +3.8865]; best L3 encoder=neural_state_space, Sharpe=-185.0290; L3 adaptive Sharpe=+21.5438 [-7.2826, +53.6276] | Order-book adapter, stress matrix, L2 queue-priority matching proxy, and L3 event replay exist; larger real L2/L3 feeds and venue-grade event replay remain for the strongest data claim. |
@@ -41,7 +41,7 @@ No-tradeoff gates use small noninferiority margins: 0.01 total-return for tradin
 | transit_full_wait_vs_base | supported | wait_proxy | 3 | -0.0758 [-0.0815, -0.0651] | NA | 1.00 | 0.2500 |
 | transit_full_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 3 | -0.0199 [-0.0199, -0.0198] | NA | 1.00 | 0.2500 |
 | transit_wait_credit_vs_no_wait | supported | wait_proxy | 3 | -0.1251 [-0.1468, -0.1020] | NA | 1.00 | 0.2500 |
-| transit_learned_promotion_reward_vs_interval | supported | reward_mean | 10 | +0.0047 [+0.0016, +0.0076] | NA | 0.70 | 0.3438 |
+| transit_learned_promotion_reward_vs_interval | supported | reward_mean | 10 | +0.0047 [+0.0016, +0.0076] | NA | 0.70 | 0.3437 |
 | transit_learned_promotion_wait_vs_interval | supported | wait_proxy | 10 | -0.0079 [-0.0096, -0.0062] | NA | 1.00 | 0.0020 |
 | transit_learned_promotion_replans_vs_interval | supported | promotion_replan_count | 10 | +20.1000 [+14.9000, +25.5000] | NA | 1.00 | 0.0020 |
 | transit_learned_promotion_raw_lf_vs_interval | supported | RawLowerLFDriftAbs | 10 | -0.0003 [-0.0003, -0.0003] | NA | 1.00 | 0.0020 |
@@ -55,28 +55,40 @@ No-tradeoff gates use small noninferiority margins: 0.01 total-return for tradin
 | transit_native_learned_gate_gate_replans_vs_interval | supported | shared_ppo_gate_replans | 76 | +1.7368 [+1.5921, +1.8684] | NA | 0.89 | 0.0000 |
 | transit_native_learned_gate_reward_noninferiority | supported | ep_reward | 76 | +5.2023 [-5.4383, +16.2658] | 15.0000 | 0.50 | 0.3961 |
 | transit_native_learned_gate_wait_noninferiority | inconclusive | avg_wait_min | 76 | +0.0169 [-0.0029, +0.0472] | 0.0100 | 0.30 | 0.8854 |
-| transit_native_wait_aware_replan_reward_vs_interval | inconclusive | ep_reward | 512 | +0.3131 [-0.2616, +1.1065] | NA | 0.04 | 0.8642 |
-| transit_native_wait_aware_replan_wait_vs_interval | inconclusive | avg_wait_min | 512 | -0.0010 [-0.0027, +0.0001] | NA | 0.02 | 0.6476 |
-| transit_native_wait_aware_replan_score_vs_interval | inconclusive | score | 512 | +0.0016 [-0.0001, +0.0036] | NA | 0.03 | 0.2863 |
-| transit_native_wait_aware_replan_gate_vs_interval | supported | shared_ppo_gate_replans | 512 | +0.0664 [+0.0468, +0.0898] | NA | 0.07 | 0.0000 |
-| transit_native_wait_aware_replan_count_vs_interval | supported | shared_ppo_wait_replan_count | 512 | +0.0664 [+0.0468, +0.0898] | NA | 0.07 | 0.0000 |
-| transit_native_wait_aware_replan_shift_vs_interval | supported | shared_ppo_wait_replan_shift_abs_mean_s | 512 | +0.1130 [+0.0749, +0.1538] | NA | 0.07 | 0.0000 |
-| transit_native_wait_aware_replan_target_vs_interval | inconclusive | upper_plan_target_mean | 512 | -0.0018 [-0.0103, +0.0074] | NA | 0.04 | 0.8642 |
-| transit_native_wait_aware_replan_launch_vs_interval | not_supported | terminal_launch_shift_mean | 512 | +0.0179 [-0.0063, +0.0598] | NA | 0.01 | 1.0000 |
-| transit_native_wait_aware_replan_reward_noninferiority | supported | ep_reward | 512 | +0.3131 [-0.2616, +1.1065] | 15.0000 | 0.04 | 0.8642 |
-| transit_native_wait_aware_replan_wait_noninferiority | supported | avg_wait_min | 512 | -0.0010 [-0.0027, +0.0001] | 0.0100 | 0.02 | 0.6476 |
+| transit_native_wait_aware_replan_reward_vs_interval | not_supported | ep_reward | 1024 | -0.1283 [-0.6791, +0.4116] | NA | 0.04 | 0.6488 |
+| transit_native_wait_aware_replan_wait_vs_interval | inconclusive | avg_wait_min | 1024 | -0.0001 [-0.0011, +0.0010] | NA | 0.02 | 0.6358 |
+| transit_native_wait_aware_replan_score_vs_interval | inconclusive | score | 1024 | +0.0006 [-0.0009, +0.0024] | NA | 0.03 | 0.7754 |
+| transit_native_wait_aware_replan_gate_vs_interval | supported | shared_ppo_gate_replans | 1024 | +0.0752 [+0.0596, +0.0918] | NA | 0.08 | 0.0000 |
+| transit_native_wait_aware_replan_count_vs_interval | supported | shared_ppo_wait_replan_count | 1024 | +0.0752 [+0.0596, +0.0918] | NA | 0.08 | 0.0000 |
+| transit_native_wait_aware_replan_shift_vs_interval | supported | shared_ppo_wait_replan_shift_abs_mean_s | 1024 | +0.1324 [+0.1024, +0.1621] | NA | 0.08 | 0.0000 |
+| transit_native_wait_aware_replan_target_vs_interval | inconclusive | upper_plan_target_mean | 1024 | -0.0011 [-0.0081, +0.0055] | NA | 0.04 | 0.4944 |
+| transit_native_wait_aware_replan_launch_vs_interval | not_supported | terminal_launch_shift_mean | 1024 | +0.0086 [-0.0034, +0.0287] | NA | 0.01 | 0.6776 |
+| transit_native_wait_aware_replan_reward_noninferiority | supported | ep_reward | 1024 | -0.1283 [-0.6791, +0.4116] | 15.0000 | 0.04 | 0.6488 |
+| transit_native_wait_aware_replan_wait_noninferiority | supported | avg_wait_min | 1024 | -0.0001 [-0.0011, +0.0010] | 0.0100 | 0.02 | 0.6358 |
+| transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_ep_reward | inconclusive | ep_reward | 257 | +0.6875 [-0.1631, +2.0317] | NA | 0.06 | 0.4244 |
+| transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_avg_wait_min | inconclusive | avg_wait_min | 257 | -0.0013 [-0.0040, +0.0002] | NA | 0.03 | 0.7905 |
+| transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_score | not_supported | score | 257 | -0.0003 [-0.0040, +0.0034] | NA | 0.04 | 0.8145 |
+| transit_native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_shared_ppo_wait_replan_count | supported | shared_ppo_wait_replan_count | 257 | +0.0973 [+0.0623, +0.1362] | NA | 0.10 | 0.0000 |
+| transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_ep_reward | inconclusive | ep_reward | 529 | +0.0988 [-0.6451, +0.9558] | NA | 0.03 | 1.0000 |
+| transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_avg_wait_min | inconclusive | avg_wait_min | 529 | -0.0009 [-0.0026, +0.0002] | NA | 0.02 | 1.0000 |
+| transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_score | supported | score | 529 | +0.0023 [-0.0000, +0.0051] | NA | 0.03 | 0.4244 |
+| transit_native_wait_aware_replan_control_headway_cv_ge050_vs_interval_shared_ppo_wait_replan_count | supported | shared_ppo_wait_replan_count | 529 | +0.0624 [+0.0435, +0.0832] | NA | 0.06 | 0.0000 |
+| transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_ep_reward | inconclusive | ep_reward | 41 | +3.7970 [-0.1857, +11.4862] | NA | 0.05 | 1.0000 |
+| transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_avg_wait_min | inconclusive | avg_wait_min | 41 | -0.0084 [-0.0253, +0.0000] | NA | 0.05 | 1.0000 |
+| transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_score | inconclusive | score | 41 | +0.0086 [-0.0000, +0.0257] | NA | 0.05 | 1.0000 |
+| transit_native_wait_aware_replan_control_upper_plan_target_ge350_vs_interval_shared_ppo_wait_replan_count | inconclusive | shared_ppo_wait_replan_count | 41 | +0.0732 [+0.0000, +0.1707] | NA | 0.07 | 0.2500 |
 | transit_native_wait_credit_final_wait_vs_no_wait | supported | final_avg_wait_min | 5 | -8.5908 [-20.4276, -0.9074] | NA | 0.80 | 0.3750 |
 | transit_native_wait_credit_mean_wait_vs_no_wait | supported | avg_wait_min_mean | 5 | -6.1649 [-16.1955, -0.4631] | NA | 0.80 | 0.3750 |
 | transit_native_wait_credit_reward_vs_no_wait | positive_mixed | final_ep_reward | 5 | +2037.3278 [-66.8598, +6165.1210] | NA | 0.60 | 1.0000 |
 | transit_native_wait_credit_score_vs_no_wait | supported | final_score | 5 | +8.6724 [+1.0542, +20.4807] | NA | 0.80 | 0.3750 |
 | transit_native_wait_credit_active_vs_no_wait | supported | freq_wait_upper_credit_std | 5 | +0.4500 [+0.4500, +0.4500] | NA | 1.00 | 0.0625 |
-| transit_real_demand_control_objective_vs_base | supported | control_objective | 6 | +1.8114 [+1.2826, +2.4539] | NA | 1.00 | 0.0312 |
-| transit_real_demand_control_reward_vs_base | supported | reward_mean | 6 | +1.6835 [+1.1721, +2.3034] | NA | 1.00 | 0.0312 |
-| transit_real_demand_control_wait_vs_base | supported | wait_proxy | 6 | -1.6741 [-2.2818, -1.1728] | NA | 1.00 | 0.0312 |
-| transit_real_demand_control_lower_lf_vs_base | supported | LowerLFDrift | 6 | -0.3026 [-0.3978, -0.1969] | NA | 1.00 | 0.0312 |
-| transit_real_demand_control_raw_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 6 | -0.0185 [-0.0191, -0.0179] | NA | 1.00 | 0.0312 |
-| transit_native_real_demand_control_score_vs_interval | supported | control_score | 6 | +99.6725 [+62.3044, +137.0299] | NA | 1.00 | 0.0312 |
-| transit_native_real_demand_reward_vs_interval | supported | ep_reward | 6 | +98.7658 [+59.9997, +137.1515] | NA | 1.00 | 0.0312 |
+| transit_real_demand_control_objective_vs_base | supported | control_objective | 6 | +1.8114 [+1.2826, +2.4539] | NA | 1.00 | 0.0313 |
+| transit_real_demand_control_reward_vs_base | supported | reward_mean | 6 | +1.6835 [+1.1721, +2.3034] | NA | 1.00 | 0.0313 |
+| transit_real_demand_control_wait_vs_base | supported | wait_proxy | 6 | -1.6741 [-2.2818, -1.1728] | NA | 1.00 | 0.0313 |
+| transit_real_demand_control_lower_lf_vs_base | supported | LowerLFDrift | 6 | -0.3026 [-0.3978, -0.1969] | NA | 1.00 | 0.0313 |
+| transit_real_demand_control_raw_lower_lf_vs_base | supported | RawLowerLFDriftAbs | 6 | -0.0185 [-0.0191, -0.0179] | NA | 1.00 | 0.0313 |
+| transit_native_real_demand_control_score_vs_interval | supported | control_score | 6 | +99.6725 [+62.3044, +137.0299] | NA | 1.00 | 0.0313 |
+| transit_native_real_demand_reward_vs_interval | supported | ep_reward | 6 | +98.7658 [+59.9997, +137.1515] | NA | 1.00 | 0.0313 |
 | transit_native_real_demand_wait_vs_interval | positive_mixed | avg_wait_min | 6 | -0.0830 [-0.2248, +0.0567] | NA | 0.67 | 0.6875 |
 | transit_native_real_demand_board_wait_vs_interval | positive_mixed | native_avg_board_wait_min | 6 | -0.0833 [-0.2251, +0.0564] | NA | 0.67 | 0.6875 |
 | transit_native_real_demand_alighted_vs_interval | not_supported | native_alighted_pax | 6 | -4.8333 [-9.8333, -0.8333] | NA | 0.17 | 0.3750 |
