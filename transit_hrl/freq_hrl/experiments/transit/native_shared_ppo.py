@@ -1277,6 +1277,7 @@ def run_native_shared_ppo_episode_loop(
         device=str(device),
         config_overrides=overrides,
     )
+    Path(getattr(runner, "log_dir", native_logs)).mkdir(parents=True, exist_ok=True)
     if runner.diag is None:
         if str(TRANSIT_DUET_ROOT) not in sys.path:
             sys.path.insert(0, str(TRANSIT_DUET_ROOT))
