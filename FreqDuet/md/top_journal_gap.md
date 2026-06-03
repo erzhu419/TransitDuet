@@ -138,15 +138,16 @@ Done means:
 
 ### 2. Systematic Generalization Matrix
 
-Status: `[~]` script upgraded; full matrix still needs execution
+Status: `[~]` three-shift 100ep matrix complete; broader scenario families open
 
 Highnoise, odshift, and rushshift are present, but this is not yet a complete
 held-out generalization package.
 
 2026-06-03 update: `scripts/run_freqduet_generalization_matrix.sh` now defaults
 to highnoise / odshift / rushshift x six methods x 20 paired seeds at 100
-episodes. It still needs execution and additional scenario families beyond the
-three current held-out shifts.
+episodes. The current promoted 100ep three-shift matrix has been executed under
+`results_freqduet/generalization_promoted_ep100_wu10`; broader scenario
+families beyond the three current held-out shifts are still open.
 
 Done means:
 
@@ -170,6 +171,28 @@ rather than only decomposer smoothing. `main_driftcost` beat previous main in
 all four domains at 20 seeds / 200 episodes and has been promoted into the main
 aliases. Mechanism summary shows lower action dropping from roughly 8-9s to
 4.3-4.7s and lower drift penalty dropping from roughly 0.33-0.39 to 0.13-0.15.
+
+2026-06-03 late update: the 100ep promoted generalization matrix plus external
+fixed-headway baseline exposed a different weakness: promoted main is robust
+against internal ablations, but fixed-headway remains very competitive because
+FreqDuet can pay extra composite cost through fleet overshoot/CV. A fleet
+no-harm guard was tested without changing the promoted main alias:
+
+```text
+candidate           overall vs promoted main      overall vs fixed-headway
+noharm full         -0.0450 CI [-0.0792,-0.0106]  -0.0142 CI [-0.0524,+0.0233]
+upper-only          -0.0460 CI [-0.0775,-0.0123]  -0.0138 CI [-0.0528,+0.0228]
+lower-only          -0.0456 CI [-0.0793,-0.0120]  -0.0156 CI [-0.0481,+0.0147]
+adaptive gate       -0.0457 CI [-0.0790,-0.0131]  -0.0133 CI [-0.0404,+0.0156]
+adaptive2 gate      -0.0311 CI [-0.0680,+0.0042]  -0.0002 CI [-0.0330,+0.0351]
+```
+
+Interpretation: lower-only no-harm is the safest current candidate because it
+keeps the rushshift gap to fixed statistically ambiguous and avoids the
+upper-only rush degradation. Adaptive gates are documented negative results:
+they still activate upper projection in terminal/rush and do not beat
+lower-only. The fixed-headway gap is not closed enough for a top-journal claim;
+do not promote an adaptive gate without new evidence.
 
 Done means:
 
@@ -246,7 +269,7 @@ preferred unless it destabilizes the method.
 
 ### 7. External Baselines
 
-Status: `[~]` FreqDuet baseline harness ready; full results pending
+Status: `[~]` FreqDuet classical baseline matrix complete; external RL/TransitDuet baselines open
 
 Current evidence is mostly FreqDuet internal ablations and TransitDuet-family
 comparisons. Top-journal claims need stronger outside baselines.
@@ -258,6 +281,15 @@ rule-based holding, and a simple MPC/forecast triple controller. A 1-episode
 smoke passed, but the full 20-seed external baseline matrix has not been run.
 Preserved TransitDuet and SUMO-RL-style online RL baselines remain open.
 
+2026-06-03 late update: the full 100ep / 20-seed external classical matrix was
+run under `results_freqduet/external_baselines_promoted_ep100`. Fixed-headway is
+the strongest classical baseline; rule-holding and the simple MPC/forecast
+controller are much weaker. Promoted main and no-harm candidates beat fixed on
+OD shift and are competitive overall, but they do not yet decisively dominate
+fixed-headway across terminal/highnoise/rushshift. Added
+`scripts/compare_freqduet_external_baseline.py` for paired candidate-vs-external
+comparisons with bootstrap CIs.
+
 Done means:
 
 - include fixed-headway and rule-based holding baselines;
@@ -268,7 +300,7 @@ Done means:
 
 ### 8. Statistical Rigor
 
-Status: `[~]` promoted longtrain statistics complete; gen/baseline tables pending
+Status: `[~]` paired statistics tooling complete; final paper tables pending
 
 Mean scores are not enough for top-journal claims, especially when domain-level
 gaps are close.
@@ -278,6 +310,11 @@ promoted-main table generation now write seed-level paired deltas, bootstrap
 CIs, and win rates via `scripts/summarize_freqduet_paper_matrix.py`,
 `scripts/compare_freqduet_candidate.py`, and
 `scripts/build_freqduet_promoted_matrix.py`.
+
+2026-06-03 late update: `scripts/compare_freqduet_external_baseline.py` adds the
+same paired-delta/bootstrap-CI workflow for external baselines. Split no-harm,
+adaptive, and adaptive2 screens all have seed-level CSVs and paired CI outputs
+under `results_freqduet/noharm_*_screen_ep100_wu10`.
 
 Done means:
 

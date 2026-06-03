@@ -46,6 +46,10 @@ metrics:
     - freq_promotion_active
     - freq_promotion_ratio
     - lower_drift_cost_mean
+    - fleet_noharm_upper_adjust_mean
+    - fleet_noharm_lower_adjust_mean
+    - fleet_noharm_upper_gate_active_mean
+    - fleet_noharm_lower_gate_active_mean
 
 config_sets:
   current_longtrain_4x6:
@@ -118,6 +122,32 @@ config_sets:
     rushshift:
       main_driftcost: F_freqduet_gen_rushshift_main_driftcost_hiro
 
+  noharm_candidate_4x4:
+    terminal:
+      noharm_full: F_freqduet_terminal_main_noharm_hiro
+      noharm_upperonly: F_freqduet_terminal_main_noharm_upperonly_hiro
+      noharm_loweronly: F_freqduet_terminal_main_noharm_loweronly_hiro
+      noharm_adaptive: F_freqduet_terminal_main_noharm_adaptive_hiro
+      noharm_adaptive2: F_freqduet_terminal_main_noharm_adaptive2_hiro
+    highnoise:
+      noharm_full: F_freqduet_gen_highnoise_main_noharm_hiro
+      noharm_upperonly: F_freqduet_gen_highnoise_main_noharm_upperonly_hiro
+      noharm_loweronly: F_freqduet_gen_highnoise_main_noharm_loweronly_hiro
+      noharm_adaptive: F_freqduet_gen_highnoise_main_noharm_adaptive_hiro
+      noharm_adaptive2: F_freqduet_gen_highnoise_main_noharm_adaptive2_hiro
+    odshift:
+      noharm_full: F_freqduet_gen_odshift_main_noharm_hiro
+      noharm_upperonly: F_freqduet_gen_odshift_main_noharm_upperonly_hiro
+      noharm_loweronly: F_freqduet_gen_odshift_main_noharm_loweronly_hiro
+      noharm_adaptive: F_freqduet_gen_odshift_main_noharm_adaptive_hiro
+      noharm_adaptive2: F_freqduet_gen_odshift_main_noharm_adaptive2_hiro
+    rushshift:
+      noharm_full: F_freqduet_gen_rushshift_main_noharm_hiro
+      noharm_upperonly: F_freqduet_gen_rushshift_main_noharm_upperonly_hiro
+      noharm_loweronly: F_freqduet_gen_rushshift_main_noharm_loweronly_hiro
+      noharm_adaptive: F_freqduet_gen_rushshift_main_noharm_adaptive_hiro
+      noharm_adaptive2: F_freqduet_gen_rushshift_main_noharm_adaptive2_hiro
+
 experiments:
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
@@ -179,7 +209,7 @@ experiments:
       --out-dir results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary
 
   heldout_generalization_ep100_wu10:
-    status: ready_to_run
+    status: complete_promoted_current
     episodes: 100
     last_k: 50
     upper_warmup_eps: 10
@@ -196,8 +226,58 @@ experiments:
       - nopromotion
       - noleakage
     runner: scripts/run_freqduet_generalization_matrix.sh
-    logs_dir: logs_generalization_ep100_wu10
-    result_dir: results_freqduet/generalization_ep100_wu10
+    logs_dir: logs_generalization_promoted_ep100_wu10
+    result_dir: results_freqduet/generalization_promoted_ep100_wu10
+    per_seed_csv: results_freqduet/generalization_promoted_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/generalization_promoted_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+
+  external_baselines_promoted_ep100:
+    status: complete_classical
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    configs:
+      - F_freqduet_terminal_main_hiro
+      - F_freqduet_gen_highnoise_main_hiro
+      - F_freqduet_gen_odshift_main_hiro
+      - F_freqduet_gen_rushshift_main_hiro
+    variants:
+      - fixed_headway
+      - rule_holding
+      - rule_mpc
+    runner: scripts/run_freqduet_external_baselines.py
+    logs_dir: logs_external_baselines_promoted_ep100
+    result_dir: results_freqduet/external_baselines_promoted_ep100
+    per_seed_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_per_seed.csv
+    summary_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_summary.csv
+
+  noharm_split_screen_ep100_wu10:
+    status: complete_candidate_screen
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: noharm_candidate_4x4
+    runner: scripts/run_freqduet_ablation.py
+    logs_dir: logs_noharm_split_screen_ep100_wu10
+    result_dir: results_freqduet/noharm_split_screen_ep100_wu10
+    per_seed_csv: results_freqduet/noharm_split_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    loweronly_vs_fixed: results_freqduet/noharm_split_screen_ep100_wu10/compare_loweronly_vs_external_fixed/external_baseline_paired_deltas.csv
+    upperonly_vs_fixed: results_freqduet/noharm_split_screen_ep100_wu10/compare_upperonly_vs_external_fixed/external_baseline_paired_deltas.csv
+
+  noharm_adaptive_screens_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: noharm_candidate_4x4
+    runner: scripts/run_freqduet_ablation.py
+    result_dirs:
+      - results_freqduet/noharm_adaptive_screen_ep100_wu10
+      - results_freqduet/noharm_adaptive2_screen_ep100_wu10
+    note: adaptive gates did not beat lower-only and should not be promoted without new evidence
 
 figures:
   decomposer_validation_current_trace:
