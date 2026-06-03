@@ -1,0 +1,10 @@
+_extends: T_freqhrl_native_full.yaml
+_name: T_freqhrl_native_full_odshift
+
+env:
+  # Stress validation regime for promotion/replanning: persistent OD and
+  # demand-intensity shifts increase the cases where upper-level timetable
+  # replanning should matter, instead of averaging mostly no-trigger episodes.
+  demand_noise: 0.15
+  od_noise: 0.35
+  od_noise_clip: [0.4, 1.8]
