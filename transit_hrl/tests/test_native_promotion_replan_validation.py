@@ -6,6 +6,7 @@ from pathlib import Path
 from freq_hrl.experiments.transit.merge_native_promotion_shards import merge_native_promotion_shards
 from freq_hrl.experiments.transit.native_promotion_replan_validation import (
     paired_checks,
+    stress_subset_checks,
     write_outputs,
 )
 
@@ -204,6 +205,41 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             write_outputs(out, payload)
             csv_text = (out / "summary.csv").read_text(encoding="utf-8")
             self.assertIn("cfg_promotion_replan_same_wait_max", csv_text.splitlines()[0])
+
+    def test_stress_subset_checks_use_control_side_selector(self):
+        rows = []
+        for seed, control_strength in [(1, 1.0), (2, 0.0)]:
+            rows.extend([
+                {
+                    "seed": seed,
+                    "variant": "interval_only",
+                    "ep_reward": -10.0,
+                    "avg_wait_min": 5.0,
+                    "score": -5.0,
+                    "shared_ppo_wait_replan_count": 0.0,
+                    "freq_promotion_strength": control_strength,
+                    "headway_cv": 0.1,
+                    "upper_plan_target_mean": 340.0,
+                },
+                {
+                    "seed": seed,
+                    "variant": "native_wait_aware_replan",
+                    "ep_reward": -8.0,
+                    "avg_wait_min": 4.8,
+                    "score": -4.8,
+                    "shared_ppo_wait_replan_count": 1.0,
+                    "freq_promotion_strength": 1.0,
+                    "headway_cv": 0.1,
+                    "upper_plan_target_mean": 340.0,
+                },
+            ])
+        checks = stress_subset_checks(rows, min_pairs=1)
+        reward = next(
+            row for row in checks
+            if row["check"] == "native_wait_aware_replan_control_promotion_strength_ge1_vs_interval_ep_reward"
+        )
+        self.assertEqual(reward["n_common"], 1)
+        self.assertEqual(reward["delta_mean"], 2.0)
 
 
 if __name__ == "__main__":

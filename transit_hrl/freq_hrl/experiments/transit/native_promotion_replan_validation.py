@@ -225,7 +225,7 @@ def paired_checks(
             "check": f"{treatment}_vs_interval_{metric}",
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
-        })
+            })
     if treatment in {"native_learned_gate", "native_wait_aware_replan"}:
         for metric, lower_is_better, margin in [
             ("ep_reward", False, 15.0),
@@ -249,6 +249,95 @@ def paired_checks(
                     max_loss=float(margin),
                     min_pairs=int(min_pairs),
                 ),
+            })
+    if treatment == "native_wait_aware_replan":
+        checks.extend(stress_subset_checks(
+            rows,
+            min_pairs=max(5, min(int(min_pairs), max(30, int(min_pairs) // 4))),
+            treatment=treatment,
+        ))
+    return checks
+
+
+def _stress_subset_rows(
+    rows: list[dict[str, Any]],
+    *,
+    treatment: str,
+    control: str,
+    selector_metric: str,
+    threshold: float,
+    greater_equal: bool,
+) -> list[dict[str, Any]]:
+    by_variant_seed = {
+        (str(row.get("variant")), int(row.get("seed", 0))): row
+        for row in rows
+    }
+    selected: list[dict[str, Any]] = []
+    seeds = sorted({
+        int(row.get("seed", 0))
+        for row in rows
+        if str(row.get("variant")) == control
+    })
+    for seed in seeds:
+        control_row = by_variant_seed.get((control, seed))
+        treatment_row = by_variant_seed.get((treatment, seed))
+        if control_row is None or treatment_row is None:
+            continue
+        value = float(control_row.get(selector_metric, 0.0))
+        include = value >= float(threshold) if greater_equal else value <= float(threshold)
+        if not include:
+            continue
+        selected.append(control_row)
+        selected.append(treatment_row)
+    return selected
+
+
+def stress_subset_checks(
+    rows: list[dict[str, Any]],
+    min_pairs: int = 30,
+    treatment: str = "native_wait_aware_replan",
+) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+    selectors = [
+        ("control_promotion_strength_ge1", "freq_promotion_strength", 1.0, True),
+        ("control_headway_cv_ge050", "headway_cv", 0.50, True),
+        ("control_upper_plan_target_ge350", "upper_plan_target_mean", 350.0, True),
+    ]
+    metrics = [
+        ("ep_reward", False),
+        ("avg_wait_min", True),
+        ("score", False),
+        ("shared_ppo_wait_replan_count", False),
+    ]
+    for selector_name, selector_metric, threshold, greater_equal in selectors:
+        subset = _stress_subset_rows(
+            rows,
+            treatment=treatment,
+            control="interval_only",
+            selector_metric=selector_metric,
+            threshold=float(threshold),
+            greater_equal=bool(greater_equal),
+        )
+        if not subset:
+            continue
+        for metric, lower_is_better in metrics:
+            stats = paired_delta_stats(
+                subset,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric=metric,
+                treatment=treatment,
+                control="interval_only",
+                lower_is_better=lower_is_better,
+            )
+            checks.append({
+                "check": f"{treatment}_{selector_name}_vs_interval_{metric}",
+                **stats,
+                "selector": selector_name,
+                "selector_metric": selector_metric,
+                "selector_threshold": float(threshold),
+                "stress_subset": True,
+                "status": claim_status(stats, min_pairs=int(min_pairs)),
             })
     return checks
 
