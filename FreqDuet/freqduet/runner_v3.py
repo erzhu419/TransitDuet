@@ -261,6 +261,12 @@ class DiagnosticLog:
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
         'terminal_shift_cap_mean', 'terminal_shift_cap_max',
+        'fleet_noharm_upper_pressure_mean',
+        'fleet_noharm_upper_adjust_mean',
+        'fleet_noharm_upper_events',
+        'fleet_noharm_lower_pressure_mean',
+        'fleet_noharm_lower_adjust_mean',
+        'fleet_noharm_lower_events',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -453,6 +459,32 @@ class TransitDuetV2Runner:
         self.upper_action_low = np.asarray(action_low, dtype=np.float32)
         self.upper_action_high = np.asarray(action_high, dtype=np.float32)
 
+        noharm_cfg = config.get('fleet_noharm', {}) or {}
+        upper_noharm_cfg = noharm_cfg.get('upper', {}) or {}
+        lower_noharm_cfg = noharm_cfg.get('lower', {}) or {}
+        self.fleet_noharm_upper_enable = bool(
+            upper_noharm_cfg.get('enable', False))
+        self.fleet_noharm_upper_pressure_start = float(
+            upper_noharm_cfg.get('pressure_start', 0.0))
+        self.fleet_noharm_upper_pressure_full = float(
+            upper_noharm_cfg.get('pressure_full', 2.0))
+        self.fleet_noharm_upper_shrink_max = float(np.clip(
+            upper_noharm_cfg.get('shrink_max', 1.0), 0.0, 1.0))
+        self.fleet_noharm_upper_mode = str(
+            upper_noharm_cfg.get('mode', 'all')).lower()
+        self.fleet_noharm_upper_neutral_s = float(
+            upper_noharm_cfg.get('neutral_s', 0.0))
+        self.fleet_noharm_lower_enable = bool(
+            lower_noharm_cfg.get('enable', False))
+        self.fleet_noharm_lower_pressure_start = float(
+            lower_noharm_cfg.get('pressure_start', 0.0))
+        self.fleet_noharm_lower_pressure_full = float(
+            lower_noharm_cfg.get('pressure_full', 2.0))
+        self.fleet_noharm_lower_shrink_max = float(np.clip(
+            lower_noharm_cfg.get('shrink_max', 1.0), 0.0, 1.0))
+        self.fleet_noharm_lower_min_action_s = float(
+            lower_noharm_cfg.get('min_action_s', 0.0))
+
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 1001)
         self.upper_trainer = RESACUpperTrainer(
@@ -548,6 +580,10 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_fleet_noharm_upper_pressures = []
+        self._ep_fleet_noharm_upper_adjusts = []
+        self._ep_fleet_noharm_lower_pressures = []
+        self._ep_fleet_noharm_lower_adjusts = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -919,6 +955,82 @@ class TransitDuetV2Runner:
     @staticmethod
     def _lower_action_scalar(action):
         return float(np.asarray(action, dtype=np.float32).reshape(-1)[0])
+
+    def _fleet_pressure(self):
+        n_fleet = max(1, int(getattr(
+            self, '_current_N_fleet', getattr(self, 'N_fleet_default', 12))))
+        concurrent = sum(1 for bus in getattr(self.env, 'bus_all', [])
+                         if getattr(bus, 'on_route', False))
+        return float(concurrent), float(n_fleet), float(concurrent - n_fleet)
+
+    @staticmethod
+    def _pressure_strength(pressure, start, full):
+        start = float(start)
+        full = float(full)
+        pressure = float(pressure)
+        if pressure <= start:
+            return 0.0
+        if full <= start:
+            return 1.0
+        return float(np.clip((pressure - start) / (full - start), 0.0, 1.0))
+
+    def _apply_upper_fleet_noharm(self, action_vec):
+        if not self.fleet_noharm_upper_enable:
+            return np.asarray(action_vec, dtype=np.float32)
+        original = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        _, _, pressure = self._fleet_pressure()
+        strength = self._pressure_strength(
+            pressure,
+            self.fleet_noharm_upper_pressure_start,
+            self.fleet_noharm_upper_pressure_full,
+        )
+        self._ep_fleet_noharm_upper_pressures.append(max(0.0, pressure))
+        if strength <= 0.0:
+            self._ep_fleet_noharm_upper_adjusts.append(0.0)
+            return original
+
+        neutral = self.fleet_noharm_upper_neutral_s
+        shrink = strength * self.fleet_noharm_upper_shrink_max
+        adjusted = original.copy()
+        if self.fleet_noharm_upper_mode in {'positive', 'positive_only'}:
+            mask = adjusted > neutral
+            adjusted[mask] = neutral + (adjusted[mask] - neutral) * (1.0 - shrink)
+        elif self.fleet_noharm_upper_mode in {'negative', 'negative_only'}:
+            mask = adjusted < neutral
+            adjusted[mask] = neutral + (adjusted[mask] - neutral) * (1.0 - shrink)
+        else:
+            adjusted = neutral + (adjusted - neutral) * (1.0 - shrink)
+        adjusted = np.clip(
+            adjusted, self.upper_action_low, self.upper_action_high
+        ).astype(np.float32)
+        self._ep_fleet_noharm_upper_adjusts.append(
+            float(np.mean(np.abs(original - adjusted))))
+        return adjusted
+
+    def _apply_lower_fleet_noharm(self, action):
+        if not self.fleet_noharm_lower_enable:
+            return action
+        original = self._lower_action_scalar(action)
+        _, _, pressure = self._fleet_pressure()
+        strength = self._pressure_strength(
+            pressure,
+            self.fleet_noharm_lower_pressure_start,
+            self.fleet_noharm_lower_pressure_full,
+        )
+        self._ep_fleet_noharm_lower_pressures.append(max(0.0, pressure))
+        if strength <= 0.0:
+            self._ep_fleet_noharm_lower_adjusts.append(0.0)
+            return action
+        shrink = strength * self.fleet_noharm_lower_shrink_max
+        adjusted = max(
+            self.fleet_noharm_lower_min_action_s,
+            original * (1.0 - shrink),
+        )
+        adjusted = np.asarray([adjusted], dtype=np.float32)
+        adjusted = self._quantize_lower_action(adjusted)
+        self._ep_fleet_noharm_lower_adjusts.append(
+            max(0.0, original - self._lower_action_scalar(adjusted)))
+        return adjusted
 
     def _record_frequency_hold_feedback(
             self, direction, local_high, action_s, wait_sum_s, boarded_count):
@@ -1424,6 +1536,7 @@ class TransitDuetV2Runner:
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
+            action_vec = self._apply_upper_fleet_noharm(action_vec)
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
@@ -1432,6 +1545,9 @@ class TransitDuetV2Runner:
                 self._last_promotion_replan_launch[planner_key] = float(
                     trip.launch_time)
             self._ep_upper_plan_decisions += 1
+        elif (not upper_decision_taken and self.timetable_planner is not None
+                and self.coupling_mode == 'hiro'):
+            action_vec = self._apply_upper_fleet_noharm(action_vec)
 
         delta_t = float(action_vec[0])
         base_hw = trip.target_headway if hasattr(trip, 'target_headway') else 360.0
@@ -1626,6 +1742,10 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_fleet_noharm_upper_pressures = []
+        self._ep_fleet_noharm_upper_adjusts = []
+        self._ep_fleet_noharm_lower_pressures = []
+        self._ep_fleet_noharm_lower_adjusts = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
 
@@ -1658,6 +1778,8 @@ class TransitDuetV2Runner:
                             state_dict[key][0],
                             last_action=lower_last_action.get(key, 0.0),
                             deterministic=not training)
+                        action_dict[key] = self._apply_lower_fleet_noharm(
+                            action_dict[key])
 
                 elif len(state_dict[key]) == 2:
                     if state_dict[key][0][1] != state_dict[key][1][1]:
@@ -1796,6 +1918,8 @@ class TransitDuetV2Runner:
                         state_dict[key][0],
                         last_action=lower_last_action.get(key, 0.0),
                         deterministic=not training)
+                    action_dict[key] = self._apply_lower_fleet_noharm(
+                        action_dict[key])
 
             state_dict, reward_dict, cost_dict, done = self.env.step(
                 action_dict, render=False)
@@ -2034,6 +2158,14 @@ class TransitDuetV2Runner:
         upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
         terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
         terminal_shift_cap_stat = _stat(self._ep_terminal_shift_caps)
+        fleet_noharm_upper_pressure_stat = _stat(
+            self._ep_fleet_noharm_upper_pressures)
+        fleet_noharm_upper_adjust_stat = _stat(
+            self._ep_fleet_noharm_upper_adjusts)
+        fleet_noharm_lower_pressure_stat = _stat(
+            self._ep_fleet_noharm_lower_pressures)
+        fleet_noharm_lower_adjust_stat = _stat(
+            self._ep_fleet_noharm_lower_adjusts)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -2220,6 +2352,20 @@ class TransitDuetV2Runner:
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
             'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],
             'terminal_shift_cap_max': terminal_shift_cap_stat['max'],
+            'fleet_noharm_upper_pressure_mean':
+                fleet_noharm_upper_pressure_stat['mean'],
+            'fleet_noharm_upper_adjust_mean':
+                fleet_noharm_upper_adjust_stat['mean'],
+            'fleet_noharm_upper_events': int(sum(
+                1 for v in self._ep_fleet_noharm_upper_adjusts
+                if float(v) > 1e-6)),
+            'fleet_noharm_lower_pressure_mean':
+                fleet_noharm_lower_pressure_stat['mean'],
+            'fleet_noharm_lower_adjust_mean':
+                fleet_noharm_lower_adjust_stat['mean'],
+            'fleet_noharm_lower_events': int(sum(
+                1 for v in self._ep_fleet_noharm_lower_adjusts
+                if float(v) > 1e-6)),
         }
         self.diag.append(row)
 

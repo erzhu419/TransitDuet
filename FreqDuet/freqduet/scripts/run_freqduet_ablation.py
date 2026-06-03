@@ -261,6 +261,12 @@ def summarize_seed(csv_path, last_k):
         "freq_wait_boarded_pax",
         "terminal_shift_cap_mean",
         "terminal_shift_cap_max",
+        "fleet_noharm_upper_pressure_mean",
+        "fleet_noharm_upper_adjust_mean",
+        "fleet_noharm_upper_events",
+        "fleet_noharm_lower_pressure_mean",
+        "fleet_noharm_lower_adjust_mean",
+        "fleet_noharm_lower_events",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
     row["episodes"] = int(len(df))
@@ -346,6 +352,12 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "freq_wait_boarded_pax",
         "terminal_shift_cap_mean",
         "terminal_shift_cap_max",
+        "fleet_noharm_upper_pressure_mean",
+        "fleet_noharm_upper_adjust_mean",
+        "fleet_noharm_upper_events",
+        "fleet_noharm_lower_pressure_mean",
+        "fleet_noharm_lower_adjust_mean",
+        "fleet_noharm_lower_events",
     ]
     summary = []
     for cfg in configs:

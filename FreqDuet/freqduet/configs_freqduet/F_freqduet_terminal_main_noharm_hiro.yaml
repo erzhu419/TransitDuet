@@ -1,0 +1,23 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_hiro
+
+# Candidate safety repair after the promoted 100ep generalization matrix:
+# main matches fixed-headway on wait/CV but loses composite through slightly
+# higher fleet overshoot. This guard keeps the frequency-separated policy active
+# under normal pressure, but projects upper target-headway deltas and lower
+# holding toward the executable fixed-headway baseline when fleet pressure
+# exceeds the episode budget.
+fleet_noharm:
+  upper:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    mode: all
+    neutral_s: 0.0
+  lower:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    min_action_s: 0.0
