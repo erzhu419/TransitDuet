@@ -131,6 +131,18 @@ def _variant_overrides(override: dict[str, Any]) -> dict[str, Any]:
     })
 
 
+def _private_override_snapshot(override: dict[str, Any]) -> dict[str, Any]:
+    snapshot: dict[str, Any] = {}
+    for key, value in sorted(dict(override).items()):
+        name = str(key)
+        if not name.startswith("_"):
+            continue
+        public_name = name[1:]
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            snapshot[public_name] = value
+    return snapshot
+
+
 def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[str, Any]:
     summary = payload.get("summary", {})
     rows = payload.get("rows", [])
@@ -248,6 +260,8 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
     variant_lower_gain = float(
         overrides.get("_lower_hf_wait_action_gain_s", job["lower_hf_wait_action_gain_s"])
     )
+    private_overrides = _private_override_snapshot(overrides)
+    private_overrides["lower_hf_wait_action_gain_s"] = variant_lower_gain
     payload = run_native_shared_ppo_episode_loop(
         output_dir=Path(job["output_dir"]) / variant / f"seed_{seed}",
         config_path=Path(job["config_path"]),
@@ -286,10 +300,16 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )
     row = _row_from_payload(seed, variant, payload)
+    row.update({
+        f"cfg_{key}": value
+        for key, value in private_overrides.items()
+        if isinstance(value, (str, int, float, bool)) or value is None
+    })
     compact = {
         "summary": payload.get("summary", {}),
         "status": payload.get("status", "missing"),
         "rows": payload.get("rows", []),
+        "private_overrides": private_overrides,
     }
     return variant, str(seed), compact, row
 
@@ -355,6 +375,14 @@ def run_validation(
         "offpolicy_replay_updates": int(max(1, int(offpolicy_replay_updates))),
         "workers": int(max(1, int(workers))),
         "variants": list(VARIANTS.keys()),
+        "variant_overrides": {
+            variant: _variant_overrides(overrides)
+            for variant, overrides in VARIANTS.items()
+        },
+        "variant_private_overrides": {
+            variant: _private_override_snapshot(overrides)
+            for variant, overrides in VARIANTS.items()
+        },
         "summary": summary,
         "rows": rows,
         "paired_checks": checks,
@@ -400,7 +428,12 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     rows = payload["rows"]
     if rows:
         with (output_dir / "summary.csv").open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
+            fieldnames = list(rows[0].keys())
+            for row in rows[1:]:
+                for key in row:
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
     checks = payload["paired_checks"]

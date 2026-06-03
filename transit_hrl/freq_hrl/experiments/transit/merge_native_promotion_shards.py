@@ -27,6 +27,8 @@ def merge_native_promotion_shards(
 ) -> dict[str, Any]:
     rows_by_key: dict[tuple[str, int], dict[str, Any]] = {}
     payloads: dict[str, dict[str, Any]] = {variant: {} for variant in VARIANTS}
+    variant_overrides: dict[str, Any] = {}
+    variant_private_overrides: dict[str, Any] = {}
     config_paths: list[str] = []
     episodes = 0
     lower_gain = 0.0
@@ -41,6 +43,15 @@ def merge_native_promotion_shards(
         episodes = max(episodes, int(payload.get("episodes", 0)))
         lower_gain = max(lower_gain, float(payload.get("lower_hf_wait_action_gain_s", 0.0)))
         replay_updates = max(replay_updates, int(payload.get("offpolicy_replay_updates", 0)))
+        for key, target in [
+            ("variant_overrides", variant_overrides),
+            ("variant_private_overrides", variant_private_overrides),
+        ]:
+            values = payload.get(key, {}) or {}
+            if not isinstance(values, dict):
+                continue
+            for variant, override in values.items():
+                target[str(variant)] = override
         for row in payload.get("rows", []):
             key = (str(row.get("variant")), int(row.get("seed", 0)))
             rows_by_key[key] = dict(row)
@@ -78,6 +89,8 @@ def merge_native_promotion_shards(
         "offpolicy_replay_updates": int(replay_updates),
         "workers": 0,
         "variants": list(VARIANTS.keys()),
+        "variant_overrides": variant_overrides,
+        "variant_private_overrides": variant_private_overrides,
         "summary": summarize(rows),
         "rows": rows,
         "paired_checks": checks,

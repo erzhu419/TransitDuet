@@ -4,7 +4,10 @@ import unittest
 from pathlib import Path
 
 from freq_hrl.experiments.transit.merge_native_promotion_shards import merge_native_promotion_shards
-from freq_hrl.experiments.transit.native_promotion_replan_validation import paired_checks
+from freq_hrl.experiments.transit.native_promotion_replan_validation import (
+    paired_checks,
+    write_outputs,
+)
 
 
 class NativePromotionReplanValidationTest(unittest.TestCase):
@@ -143,6 +146,11 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
                     "episodes": 1,
                     "lower_hf_wait_action_gain_s": 45.0,
                     "offpolicy_replay_updates": 3,
+                    "variant_private_overrides": {
+                        "native_promotion_replan": {
+                            "promotion_replan_max_shift_s": 2.0,
+                        },
+                    },
                 }, f)
             merged = merge_native_promotion_shards(
                 input_dirs=[shard],
@@ -151,7 +159,51 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             )
             self.assertEqual(len(merged["rows"]), 4)
             self.assertTrue(merged["paired_checks"])
+            self.assertEqual(
+                merged["variant_private_overrides"]["native_promotion_replan"]["promotion_replan_max_shift_s"],
+                2.0,
+            )
             self.assertTrue((Path(tmp) / "merged" / "summary.json").exists())
+
+    def test_write_outputs_accepts_variant_specific_config_columns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "out"
+            out.mkdir()
+            payload = {
+                "rows": [
+                    {
+                        "seed": 1,
+                        "variant": "interval_only",
+                        "ep_reward": -10.0,
+                        "avg_wait_min": 5.0,
+                        "headway_cv": 0.2,
+                        "score": -5.0,
+                        "upper_plan_decisions": 3.0,
+                        "shared_ppo_gate_replans": 0.0,
+                        "shared_ppo_gate_value_mean": 0.0,
+                        "freq_promotion_strength": 0.0,
+                        "shared_ppo_lower_samples": 0.0,
+                    },
+                    {
+                        "seed": 1,
+                        "variant": "native_wait_aware_replan",
+                        "ep_reward": -9.0,
+                        "avg_wait_min": 4.8,
+                        "headway_cv": 0.2,
+                        "score": -4.8,
+                        "upper_plan_decisions": 3.0,
+                        "shared_ppo_gate_replans": 1.0,
+                        "shared_ppo_gate_value_mean": 0.9,
+                        "freq_promotion_strength": 1.0,
+                        "shared_ppo_lower_samples": 0.0,
+                        "cfg_promotion_replan_same_wait_max": 0.82,
+                    },
+                ],
+                "paired_checks": [],
+            }
+            write_outputs(out, payload)
+            csv_text = (out / "summary.csv").read_text(encoding="utf-8")
+            self.assertIn("cfg_promotion_replan_same_wait_max", csv_text.splitlines()[0])
 
 
 if __name__ == "__main__":
