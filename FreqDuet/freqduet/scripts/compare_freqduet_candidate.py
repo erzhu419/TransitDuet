@@ -21,7 +21,20 @@ import pandas as pd
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
-DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite", "lower_action_mean", "lower_drift_penalty_mean")
+DEFAULT_METRICS = (
+    "wait",
+    "cv",
+    "overshoot",
+    "composite",
+    "lower_action_mean",
+    "lower_drift_penalty_mean",
+    "lower_drift_cost_mean",
+    "upper_delta_mean",
+    "upper_plan_target_mean",
+    "upper_plan_reuse_ratio",
+    "fleet_noharm_upper_adjust_mean",
+    "fleet_noharm_lower_adjust_mean",
+)
 
 
 def stable_seed(*parts: object) -> int:
@@ -252,10 +265,15 @@ def main() -> None:
     metrics = [m.strip() for m in args.metrics.split(",") if m.strip()]
     baselines = [m.strip() for m in args.baselines.split(",") if m.strip()]
     missing_metrics = [m for m in metrics if m not in baseline.columns or m not in candidate.columns]
-    if missing_metrics:
-        raise SystemExit(f"metrics missing from at least one input: {missing_metrics}")
     if args.paired_metric not in metrics:
         raise SystemExit(f"paired metric {args.paired_metric!r} not included in metrics {metrics}")
+    if args.paired_metric not in baseline.columns or args.paired_metric not in candidate.columns:
+        raise SystemExit(f"paired metric {args.paired_metric!r} missing from at least one input")
+    if missing_metrics:
+        print("Warning: skipping metrics missing from at least one input:")
+        for metric in missing_metrics:
+            print(f"  {metric}")
+        metrics = [m for m in metrics if m not in missing_metrics]
 
     combined = pd.concat([baseline, candidate], ignore_index=True, sort=False)
     unknown = combined[(combined["domain"] == "unknown") | (combined["method"] == "unknown")]["config"].unique()
