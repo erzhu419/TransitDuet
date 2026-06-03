@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_main_noharm_loweronly_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_loweronly_adaptdrift_hiro
+
+# Adaptive lower drift-cost: keep base drift cost for all domains, and add
+# extra pressure only in low-frequency dominated regimes. This targets the
+# terminal/rush long-training fleet gap without penalizing high-noise or OD
+# cases where holding still buys substantial wait reduction.
+leakage:
+  lower_drift_cost_weight: 0.25
+  lower_drift_cost_mode: excess
+  lower_drift_cost_cap: 1.5
+  lower_drift_cost_adaptive:
+    enable: true
+    extra_weight: 0.25
+    gate:
+      mode: all
+      default_active: false
+      min_updates_required: 20
+      min_low_forecast: 0.435
+      max_high_energy: 0.070
+

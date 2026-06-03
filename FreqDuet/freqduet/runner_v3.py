@@ -234,6 +234,7 @@ class DiagnosticLog:
         # FreqDuet frequency-leakage regularization
         'lower_drift_penalty_mean', 'lower_drift_penalty_max',
         'lower_drift_cost_mean', 'lower_drift_cost_max',
+        'lower_drift_cost_adaptive_gate_mean',
         'upper_hf_penalty_mean', 'upper_hf_penalty_max',
         # FreqDuet layer-frequency allocation diagnostics
         'upper_hf_power_ratio', 'lower_lf_drift_ratio',
@@ -601,6 +602,14 @@ class TransitDuetV2Runner:
             leak_cfg.get('lower_drift_cost_cap', 1.0))
         self.lower_drift_cost_mode = str(
             leak_cfg.get('lower_drift_cost_mode', 'excess')).lower()
+        drift_cost_adapt_cfg = (
+            leak_cfg.get('lower_drift_cost_adaptive', {}) or {})
+        self.lower_drift_cost_adaptive_enable = bool(
+            drift_cost_adapt_cfg.get('enable', False))
+        self.lower_drift_cost_adaptive_extra_weight = max(float(
+            drift_cost_adapt_cfg.get('extra_weight', 0.0)), 0.0)
+        self.lower_drift_cost_adaptive_gate = self._parse_fleet_noharm_gate(
+            drift_cost_adapt_cfg.get('gate', {}))
         self.upper_hf_penalty = float(leak_cfg.get('upper_hf_penalty', 0.0))
         self.upper_lpf_window = int(leak_cfg.get('upper_lpf_window', 6))
         self._lower_drift_by_dir = {
@@ -609,6 +618,7 @@ class TransitDuetV2Runner:
         }
         self._ep_lower_drift_penalties = []
         self._ep_lower_drift_costs = []
+        self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
@@ -982,6 +992,16 @@ class TransitDuetV2Runner:
         if (not self.leakage_enable
                 or self.lower_drift_cost_weight <= 0.0):
             return 0.0
+        adaptive_active = False
+        weight = self.lower_drift_cost_weight
+        if (self.lower_drift_cost_adaptive_enable
+                and self.lower_drift_cost_adaptive_extra_weight > 0.0):
+            adaptive_active = self._fleet_noharm_gate_active(
+                self.lower_drift_cost_adaptive_gate)
+            if adaptive_active:
+                weight += self.lower_drift_cost_adaptive_extra_weight
+        self._ep_lower_drift_cost_adaptive_gate.append(
+            1.0 if adaptive_active else 0.0)
         hist = self._lower_drift_by_dir[bool(direction)]
         rolling_hold = float(sum(hist))
         budget = max(self.lower_drift_budget_s, 1e-6)
@@ -989,7 +1009,7 @@ class TransitDuetV2Runner:
             signal = rolling_hold / budget
         else:
             signal = max(0.0, rolling_hold - self.lower_drift_budget_s) / budget
-        cost = self.lower_drift_cost_weight * max(signal, 0.0)
+        cost = weight * max(signal, 0.0)
         if self.lower_drift_cost_cap >= 0.0:
             cost = min(cost, self.lower_drift_cost_cap)
         return float(cost)
@@ -1900,6 +1920,7 @@ class TransitDuetV2Runner:
         }
         self._ep_lower_drift_penalties = []
         self._ep_lower_drift_costs = []
+        self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
@@ -2311,6 +2332,8 @@ class TransitDuetV2Runner:
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
+        lower_drift_cost_adaptive_gate_stat = _stat(
+            self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
@@ -2482,6 +2505,8 @@ class TransitDuetV2Runner:
             'lower_drift_penalty_max': lower_drift_stat['max'],
             'lower_drift_cost_mean': lower_drift_cost_stat['mean'],
             'lower_drift_cost_max': lower_drift_cost_stat['max'],
+            'lower_drift_cost_adaptive_gate_mean':
+                lower_drift_cost_adaptive_gate_stat['mean'],
             'upper_hf_penalty_mean': upper_hf_stat['mean'],
             'upper_hf_penalty_max': upper_hf_stat['max'],
             'upper_hf_power_ratio': upper_hf_power_ratio,

@@ -29,6 +29,7 @@ DEFAULT_METRICS = (
     "lower_action_mean",
     "lower_drift_penalty_mean",
     "lower_drift_cost_mean",
+    "lower_drift_cost_adaptive_gate_mean",
     "w_fleet",
     "theta_fleet",
     "upper_delta_mean",
