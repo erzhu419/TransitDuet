@@ -890,6 +890,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
+    promotion_replan_terminal_early_cap_s: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
 ) -> dict[str, Any]:
@@ -911,6 +912,8 @@ def install_shared_ppo_episode_loop(
     runner.upper_updates = 0
     runner.tpc_enable = False
     runner.target_upper_trainer = None
+    runner.freq_hrl_promotion_terminal_early_cap_s = max(
+        float(promotion_replan_terminal_early_cap_s), 0.0)
     if bool(learned_promotion_gate):
         last_gate_replan_by_key: dict[Any, float] = {}
         gate_replans_by_key: dict[Any, int] = {}
@@ -1243,6 +1246,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
+    promotion_replan_terminal_early_cap_s: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
     lower_hf_wait_feature_offset: int = 11,
     offpolicy_replay_updates: int = 1,
@@ -1318,6 +1322,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
         promotion_replan_base_action=str(promotion_replan_base_action),
         promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
+        promotion_replan_terminal_early_cap_s=float(promotion_replan_terminal_early_cap_s),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
         lower_hf_wait_feature_offset=int(lower_hf_wait_feature_offset),
     )
@@ -1432,6 +1437,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
         "promotion_replan_base_action": str(promotion_replan_base_action),
         "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
+        "promotion_replan_terminal_early_cap_s": float(promotion_replan_terminal_early_cap_s),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
         "lower_hf_wait_feature_offset": int(lower_hf_wait_feature_offset),
         "offpolicy_replay_updates": int(replay_updates),
@@ -1640,6 +1646,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
     parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-terminal-early-cap-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-feature-offset", type=int, default=11)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -1679,6 +1686,7 @@ def main() -> None:
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
             promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),
+            promotion_replan_terminal_early_cap_s=float(args.promotion_replan_terminal_early_cap_s),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
             lower_hf_wait_feature_offset=int(args.lower_hf_wait_feature_offset),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),

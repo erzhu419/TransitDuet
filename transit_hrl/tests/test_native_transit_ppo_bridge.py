@@ -445,9 +445,11 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             promotion_replan_policy="wait_aware",
             promotion_replan_wait_gain_s=20.0,
             promotion_replan_max_shift_s=12.0,
+            promotion_replan_terminal_early_cap_s=15.0,
             promotion_replan_state_wait_weight=0.0,
             promotion_replan_frequency_weight=1.0,
         )
+        self.assertEqual(runner.freq_hrl_promotion_terminal_early_cap_s, 15.0)
         hook = runner.freq_hrl_learned_promotion_gate
         state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
         active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)

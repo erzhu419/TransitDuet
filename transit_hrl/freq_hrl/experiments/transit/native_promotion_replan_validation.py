@@ -95,6 +95,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_gap_guard_max_ratio": 1.30,
         "_promotion_replan_base_action": "actor",
         "_promotion_replan_actor_base_trust_s": 2.0,
+        "_promotion_replan_terminal_early_cap_s": 15.0,
         "frequency": {
             "hold_feedback": {
                 "enable": True,
@@ -281,6 +282,7 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
         promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
         promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
+        promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
         lower_hf_wait_action_gain_s=variant_lower_gain,
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )

@@ -1176,10 +1176,22 @@ class TransitDuetV2Runner:
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
-            self._active_timetable_plans[planner_key] = {
+            active_plan_record = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
             }
+            if promotion_action_override_used:
+                early_cap_s = max(
+                    float(getattr(
+                        self,
+                        'freq_hrl_promotion_terminal_early_cap_s',
+                        0.0,
+                    )),
+                    0.0,
+                )
+                if early_cap_s > 0.0:
+                    active_plan_record['terminal_early_cap_s'] = early_cap_s
+            self._active_timetable_plans[planner_key] = active_plan_record
             self._ep_upper_plan_decisions += 1
 
         delta_t = float(action_vec[0])
@@ -1187,10 +1199,27 @@ class TransitDuetV2Runner:
         plan_summary = None
         plan_penalty = 0.0
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
-            plan_summary = self.timetable_planner.apply(
-                self.env.timetables, trip, action_vec,
-                origin_launch_s=plan_origin_launch,
-                write_scheduled_launch=self.timetable_terminal_dispatch)
+            plan_record = self._active_timetable_plans.get(planner_key, {})
+            early_cap_s = max(
+                float(plan_record.get('terminal_early_cap_s', 0.0)),
+                0.0,
+            )
+            old_terminal_min_s = None
+            if self.timetable_terminal_dispatch and early_cap_s > 0.0:
+                old_terminal_min_s = float(
+                    self.timetable_planner.terminal_shift_min_s)
+                self.timetable_planner.terminal_shift_min_s = max(
+                    old_terminal_min_s,
+                    -float(early_cap_s),
+                )
+            try:
+                plan_summary = self.timetable_planner.apply(
+                    self.env.timetables, trip, action_vec,
+                    origin_launch_s=plan_origin_launch,
+                    write_scheduled_launch=self.timetable_terminal_dispatch)
+            finally:
+                if old_terminal_min_s is not None:
+                    self.timetable_planner.terminal_shift_min_s = old_terminal_min_s
             delta_t = float(plan_summary['effective_delta'])
             base_hw = float(plan_summary['base_headway'])
             if upper_decision_taken:
