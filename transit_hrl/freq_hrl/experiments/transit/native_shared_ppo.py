@@ -127,7 +127,6 @@ def wait_aware_replan_action(
     min_pressure: float = 0.0,
     hold_guard_weight: float = 0.0,
     same_wait_min: float = 0.0,
-    same_wait_max: float = 0.0,
     gap_guard_min_ratio: float = 0.0,
     gap_guard_max_ratio: float = 0.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
@@ -171,10 +170,6 @@ def wait_aware_replan_action(
     wait_guard_active = (
         float(same_wait_min) > 0.0
         and float(hold_wait["same_wait"]) < float(same_wait_min)
-    )
-    wait_guard_active = wait_guard_active or (
-        float(same_wait_max) > 0.0
-        and float(hold_wait["same_wait"]) > float(same_wait_max)
     )
     if pressure < float(min_pressure) or gap_guard_active or wait_guard_active:
         return active.astype(np.float32), {
@@ -885,7 +880,6 @@ def install_shared_ppo_episode_loop(
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
     promotion_replan_same_wait_min: float = 0.0,
-    promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
@@ -1034,7 +1028,6 @@ def install_shared_ppo_episode_loop(
                         min_pressure=float(promotion_replan_min_pressure),
                         hold_guard_weight=float(promotion_replan_hold_guard_weight),
                         same_wait_min=float(promotion_replan_same_wait_min),
-                        same_wait_max=float(promotion_replan_same_wait_max),
                         gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
                         gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
                     )
@@ -1238,7 +1231,6 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
     promotion_replan_same_wait_min: float = 0.0,
-    promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_base_action: str = "active",
@@ -1313,7 +1305,6 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_require_shift=bool(promotion_replan_require_shift),
         promotion_replan_hold_guard_weight=float(promotion_replan_hold_guard_weight),
         promotion_replan_same_wait_min=float(promotion_replan_same_wait_min),
-        promotion_replan_same_wait_max=float(promotion_replan_same_wait_max),
         promotion_replan_gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
         promotion_replan_base_action=str(promotion_replan_base_action),
@@ -1427,7 +1418,6 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_require_shift": bool(promotion_replan_require_shift),
         "promotion_replan_hold_guard_weight": float(promotion_replan_hold_guard_weight),
         "promotion_replan_same_wait_min": float(promotion_replan_same_wait_min),
-        "promotion_replan_same_wait_max": float(promotion_replan_same_wait_max),
         "promotion_replan_gap_guard_min_ratio": float(promotion_replan_gap_guard_min_ratio),
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
         "promotion_replan_base_action": str(promotion_replan_base_action),
@@ -1635,7 +1625,6 @@ def main() -> None:
     parser.add_argument("--promotion-replan-require-shift", action="store_true")
     parser.add_argument("--promotion-replan-hold-guard-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-same-wait-min", type=float, default=0.0)
-    parser.add_argument("--promotion-replan-same-wait-max", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-min-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
@@ -1674,7 +1663,6 @@ def main() -> None:
             promotion_replan_require_shift=bool(args.promotion_replan_require_shift),
             promotion_replan_hold_guard_weight=float(args.promotion_replan_hold_guard_weight),
             promotion_replan_same_wait_min=float(args.promotion_replan_same_wait_min),
-            promotion_replan_same_wait_max=float(args.promotion_replan_same_wait_max),
             promotion_replan_gap_guard_min_ratio=float(args.promotion_replan_gap_guard_min_ratio),
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
