@@ -1,0 +1,24 @@
+_extends: F_freqduet_terminal_main_noharm_loweronly_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_proactive_hfgate_hiro
+
+# Keep the validated lower-only fleet no-harm as the base behavior. Add an
+# earlier proactive shrink only when causal high-frequency energy indicates the
+# high-noise regime; this avoids damaging OD/rush/terminal cases.
+fleet_noharm:
+  lower:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+    proactive:
+      enable: true
+      pressure_start: -2.0
+      pressure_full: -1.0
+      shrink_max: 1.0
+      gate:
+        mode: all
+        default_active: false
+        min_updates_required: 20
+        min_high_energy: 0.070
+

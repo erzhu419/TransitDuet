@@ -38,6 +38,8 @@ DEFAULT_METRICS = (
     "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",
     "fleet_noharm_lower_gate_active_mean",
+    "fleet_noharm_lower_proactive_adjust_mean",
+    "fleet_noharm_lower_proactive_gate_active_mean",
 )
 
 

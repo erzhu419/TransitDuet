@@ -269,6 +269,9 @@ class DiagnosticLog:
         'fleet_noharm_lower_adjust_mean',
         'fleet_noharm_lower_events',
         'fleet_noharm_lower_gate_active_mean',
+        'fleet_noharm_lower_proactive_adjust_mean',
+        'fleet_noharm_lower_proactive_events',
+        'fleet_noharm_lower_proactive_gate_active_mean',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -490,6 +493,17 @@ class TransitDuetV2Runner:
             lower_noharm_cfg.get('min_action_s', 0.0))
         self.fleet_noharm_lower_gate = self._parse_fleet_noharm_gate(
             lower_noharm_cfg.get('gate', {}))
+        lower_proactive_cfg = lower_noharm_cfg.get('proactive', {}) or {}
+        self.fleet_noharm_lower_proactive_enable = bool(
+            lower_proactive_cfg.get('enable', False))
+        self.fleet_noharm_lower_proactive_pressure_start = float(
+            lower_proactive_cfg.get('pressure_start', -2.0))
+        self.fleet_noharm_lower_proactive_pressure_full = float(
+            lower_proactive_cfg.get('pressure_full', -1.0))
+        self.fleet_noharm_lower_proactive_shrink_max = float(np.clip(
+            lower_proactive_cfg.get('shrink_max', 1.0), 0.0, 1.0))
+        self.fleet_noharm_lower_proactive_gate = self._parse_fleet_noharm_gate(
+            lower_proactive_cfg.get('gate', {}))
 
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 1001)
@@ -608,6 +622,8 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_pressures = []
         self._ep_fleet_noharm_lower_adjusts = []
         self._ep_fleet_noharm_lower_gate_active = []
+        self._ep_fleet_noharm_lower_proactive_adjusts = []
+        self._ep_fleet_noharm_lower_proactive_gate_active = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -1144,18 +1160,41 @@ class TransitDuetV2Runner:
             self.fleet_noharm_lower_pressure_full,
         )
         self._ep_fleet_noharm_lower_pressures.append(max(0.0, pressure))
-        if (not gate_active) or strength <= 0.0:
+        base_shrink = (
+            strength * self.fleet_noharm_lower_shrink_max
+            if gate_active else 0.0)
+        proactive_shrink = 0.0
+        proactive_gate_active = False
+        if self.fleet_noharm_lower_proactive_enable:
+            proactive_gate_active = self._fleet_noharm_gate_active(
+                self.fleet_noharm_lower_proactive_gate)
+            if proactive_gate_active:
+                proactive_strength = self._pressure_strength(
+                    pressure,
+                    self.fleet_noharm_lower_proactive_pressure_start,
+                    self.fleet_noharm_lower_proactive_pressure_full,
+                )
+                proactive_shrink = (
+                    proactive_strength
+                    * self.fleet_noharm_lower_proactive_shrink_max)
+        self._ep_fleet_noharm_lower_proactive_gate_active.append(
+            1.0 if proactive_gate_active else 0.0)
+        shrink = float(np.clip(max(base_shrink, proactive_shrink), 0.0, 1.0))
+        if shrink <= 0.0:
             self._ep_fleet_noharm_lower_adjusts.append(0.0)
+            self._ep_fleet_noharm_lower_proactive_adjusts.append(0.0)
             return action
-        shrink = strength * self.fleet_noharm_lower_shrink_max
         adjusted = max(
             self.fleet_noharm_lower_min_action_s,
             original * (1.0 - shrink),
         )
         adjusted = np.asarray([adjusted], dtype=np.float32)
         adjusted = self._quantize_lower_action(adjusted)
-        self._ep_fleet_noharm_lower_adjusts.append(
-            max(0.0, original - self._lower_action_scalar(adjusted)))
+        adjust = max(0.0, original - self._lower_action_scalar(adjusted))
+        self._ep_fleet_noharm_lower_adjusts.append(adjust)
+        self._ep_fleet_noharm_lower_proactive_adjusts.append(
+            adjust if proactive_shrink >= base_shrink and proactive_shrink > 0.0
+            else 0.0)
         return adjusted
 
     def _record_frequency_hold_feedback(
@@ -1874,6 +1913,8 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_pressures = []
         self._ep_fleet_noharm_lower_adjusts = []
         self._ep_fleet_noharm_lower_gate_active = []
+        self._ep_fleet_noharm_lower_proactive_adjusts = []
+        self._ep_fleet_noharm_lower_proactive_gate_active = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
 
@@ -2298,6 +2339,10 @@ class TransitDuetV2Runner:
             self._ep_fleet_noharm_lower_adjusts)
         fleet_noharm_lower_gate_stat = _stat(
             self._ep_fleet_noharm_lower_gate_active)
+        fleet_noharm_lower_proactive_adjust_stat = _stat(
+            self._ep_fleet_noharm_lower_proactive_adjusts)
+        fleet_noharm_lower_proactive_gate_stat = _stat(
+            self._ep_fleet_noharm_lower_proactive_gate_active)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -2502,6 +2547,13 @@ class TransitDuetV2Runner:
                 if float(v) > 1e-6)),
             'fleet_noharm_lower_gate_active_mean':
                 fleet_noharm_lower_gate_stat['mean'],
+            'fleet_noharm_lower_proactive_adjust_mean':
+                fleet_noharm_lower_proactive_adjust_stat['mean'],
+            'fleet_noharm_lower_proactive_events': int(sum(
+                1 for v in self._ep_fleet_noharm_lower_proactive_adjusts
+                if float(v) > 1e-6)),
+            'fleet_noharm_lower_proactive_gate_active_mean':
+                fleet_noharm_lower_proactive_gate_stat['mean'],
         }
         self.diag.append(row)
 
