@@ -29,6 +29,8 @@ DEFAULT_METRICS = (
     "lower_action_mean",
     "lower_drift_penalty_mean",
     "lower_drift_cost_mean",
+    "w_fleet",
+    "theta_fleet",
     "upper_delta_mean",
     "upper_plan_target_mean",
     "upper_plan_reuse_ratio",

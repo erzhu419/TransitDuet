@@ -1,0 +1,9 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_fleetstable_hiro
+
+# Safety scalarization screen: keep changepoint fleet boost, but do not shift
+# fleet weight away during stable windows. Tests whether fixed-headway gap is
+# caused by over-prioritising wait/CV once belief becomes stable.
+coupling:
+  belief_stable_quality_shift_max: 0.0
+

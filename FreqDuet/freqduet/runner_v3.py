@@ -547,6 +547,22 @@ class TransitDuetV2Runner:
         self.ablate_csbapr = coupling_cfg.get('ablate_csbapr', False)
         self.ablate_hindsight_credit = coupling_cfg.get('ablate_hindsight_credit', False)
         self.ablate_morl = coupling_cfg.get('ablate_morl', False)
+        self.belief_crisis_cp_threshold = float(
+            coupling_cfg.get('belief_crisis_cp_threshold', 0.1))
+        self.belief_crisis_cp_width = max(float(
+            coupling_cfg.get('belief_crisis_cp_width', 0.2)), 1e-6)
+        self.belief_crisis_fleet_boost_max = max(float(
+            coupling_cfg.get('belief_crisis_fleet_boost_max', 0.3)), 0.0)
+        self.belief_stable_window_threshold = float(
+            coupling_cfg.get('belief_stable_window_threshold', 15.0))
+        self.belief_stable_window_width = max(float(
+            coupling_cfg.get('belief_stable_window_width', 5.0)), 1e-6)
+        self.belief_stable_quality_shift_max = max(float(
+            coupling_cfg.get('belief_stable_quality_shift_max', 0.15)), 0.0)
+        self.belief_fleet_weight_floor = float(np.clip(
+            coupling_cfg.get('belief_fleet_weight_floor', 0.0), 0.0, 0.95))
+        self.belief_fleet_reward_scale = max(float(
+            coupling_cfg.get('belief_fleet_reward_scale', 1.0)), 0.0)
 
         self.holding_feedback = HoldingFeedback(
             window_size=coupling_cfg.get('feedback_window', 10))
@@ -820,7 +836,9 @@ class TransitDuetV2Runner:
         Returns: scalar reward + weight dict for logging
         """
         wait_p = -z[0] / 10.0
-        fleet_p = -max(0, z[1] - N_fleet) ** 2 / N_fleet
+        fleet_p = (
+            -max(0, z[1] - N_fleet) ** 2 / N_fleet
+            * self.belief_fleet_reward_scale)
         cv_p = -z[2]
 
         # Ablation: fixed equal weights instead of belief-driven
@@ -837,19 +855,26 @@ class TransitDuetV2Runner:
         window = self.belief_tracker.effective_window
 
         # Crisis modulation: if changepoint detected, boost fleet safety
-        if cp_prob > 0.1:
-            # Shift up to 30% mass toward fleet term
-            crisis_strength = min(1.0, (cp_prob - 0.1) / 0.2)
-            boost = 0.3 * crisis_strength
+        if cp_prob > self.belief_crisis_cp_threshold:
+            # Shift mass toward fleet safety during detected non-stationarity.
+            crisis_strength = min(
+                1.0,
+                ((cp_prob - self.belief_crisis_cp_threshold)
+                 / self.belief_crisis_cp_width))
+            boost = self.belief_crisis_fleet_boost_max * crisis_strength
             adj_w = base_w.copy()
             # Take mass from wait+cv, add to fleet
             adj_w[0] *= (1 - boost)
             adj_w[2] *= (1 - boost)
             adj_w[1] += boost * (base_w[0] + base_w[2])
         # Stable modulation: if very stable, shift toward quality
-        elif window > 15:
-            stability = min(1.0, (window - 15) / 5)
-            shift = 0.15 * stability
+        elif (self.belief_stable_quality_shift_max > 0.0
+              and window > self.belief_stable_window_threshold):
+            stability = min(
+                1.0,
+                ((window - self.belief_stable_window_threshold)
+                 / self.belief_stable_window_width))
+            shift = self.belief_stable_quality_shift_max * stability
             adj_w = base_w.copy()
             # Take from fleet (already safe), add to quality
             adj_w[1] *= (1 - shift)
@@ -860,6 +885,18 @@ class TransitDuetV2Runner:
 
         # Normalize
         adj_w = adj_w / max(adj_w.sum(), 1e-6)
+        if (self.belief_fleet_weight_floor > 0.0
+                and adj_w[1] < self.belief_fleet_weight_floor):
+            floor = self.belief_fleet_weight_floor
+            other_sum = adj_w[0] + adj_w[2]
+            if other_sum > 1e-8:
+                scale = (1.0 - floor) / other_sum
+                adj_w[0] *= scale
+                adj_w[2] *= scale
+            else:
+                adj_w[0] = (1.0 - floor) * 0.6
+                adj_w[2] = (1.0 - floor) * 0.4
+            adj_w[1] = floor
 
         # Scalarize with M=3 dimensions
         r = adj_w[0] * wait_p + adj_w[1] * fleet_p + adj_w[2] * cv_p

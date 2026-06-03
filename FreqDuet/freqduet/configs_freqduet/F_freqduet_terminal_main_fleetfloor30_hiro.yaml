@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_fleetfloor30_hiro
+
+# Safety scalarization screen: enforce a minimum fleet objective weight while
+# preserving the existing belief modulation and frequency-separated policy.
+coupling:
+  belief_fleet_weight_floor: 0.30
+
