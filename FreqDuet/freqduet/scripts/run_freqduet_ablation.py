@@ -276,9 +276,11 @@ def summarize_seed(csv_path, last_k):
         "fleet_noharm_upper_pressure_mean",
         "fleet_noharm_upper_adjust_mean",
         "fleet_noharm_upper_events",
+        "fleet_noharm_upper_gate_active_mean",
         "fleet_noharm_lower_pressure_mean",
         "fleet_noharm_lower_adjust_mean",
         "fleet_noharm_lower_events",
+        "fleet_noharm_lower_gate_active_mean",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
     row["episodes"] = int(len(df))
@@ -379,9 +381,11 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "fleet_noharm_upper_pressure_mean",
         "fleet_noharm_upper_adjust_mean",
         "fleet_noharm_upper_events",
+        "fleet_noharm_upper_gate_active_mean",
         "fleet_noharm_lower_pressure_mean",
         "fleet_noharm_lower_adjust_mean",
         "fleet_noharm_lower_events",
+        "fleet_noharm_lower_gate_active_mean",
     ]
     summary = []
     for cfg in configs:

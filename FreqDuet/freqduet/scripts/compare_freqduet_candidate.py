@@ -33,7 +33,9 @@ DEFAULT_METRICS = (
     "upper_plan_target_mean",
     "upper_plan_reuse_ratio",
     "fleet_noharm_upper_adjust_mean",
+    "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",
+    "fleet_noharm_lower_gate_active_mean",
 )
 
 

@@ -1,0 +1,34 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_noharm_adaptive_hiro
+
+# Adaptive split guard: use causal frequency summaries to decide which no-harm
+# projection is active. High HF energy or unusually low LF forecast indicates
+# demand uncertainty where upper timetable projection helped; otherwise use
+# lower holding projection, which was safer for terminal/rushshift.
+fleet_noharm:
+  upper:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    mode: all
+    neutral_s: 0.0
+    gate:
+      mode: any
+      default_active: false
+      min_updates_required: 20
+      min_high_energy: 0.080
+      max_low_forecast: 0.420
+  lower:
+    enable: true
+    pressure_start: 0.0
+    pressure_full: 2.0
+    shrink_max: 1.0
+    min_action_s: 0.0
+    gate:
+      mode: inverse_any
+      default_active: true
+      min_updates_required: 20
+      min_high_energy: 0.080
+      max_low_forecast: 0.420
+

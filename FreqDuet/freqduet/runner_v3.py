@@ -264,9 +264,11 @@ class DiagnosticLog:
         'fleet_noharm_upper_pressure_mean',
         'fleet_noharm_upper_adjust_mean',
         'fleet_noharm_upper_events',
+        'fleet_noharm_upper_gate_active_mean',
         'fleet_noharm_lower_pressure_mean',
         'fleet_noharm_lower_adjust_mean',
         'fleet_noharm_lower_events',
+        'fleet_noharm_lower_gate_active_mean',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -474,6 +476,8 @@ class TransitDuetV2Runner:
             upper_noharm_cfg.get('mode', 'all')).lower()
         self.fleet_noharm_upper_neutral_s = float(
             upper_noharm_cfg.get('neutral_s', 0.0))
+        self.fleet_noharm_upper_gate = self._parse_fleet_noharm_gate(
+            upper_noharm_cfg.get('gate', {}))
         self.fleet_noharm_lower_enable = bool(
             lower_noharm_cfg.get('enable', False))
         self.fleet_noharm_lower_pressure_start = float(
@@ -484,6 +488,8 @@ class TransitDuetV2Runner:
             lower_noharm_cfg.get('shrink_max', 1.0), 0.0, 1.0))
         self.fleet_noharm_lower_min_action_s = float(
             lower_noharm_cfg.get('min_action_s', 0.0))
+        self.fleet_noharm_lower_gate = self._parse_fleet_noharm_gate(
+            lower_noharm_cfg.get('gate', {}))
 
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 1001)
@@ -582,8 +588,10 @@ class TransitDuetV2Runner:
         self._ep_terminal_shift_caps = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
+        self._ep_fleet_noharm_upper_gate_active = []
         self._ep_fleet_noharm_lower_pressures = []
         self._ep_fleet_noharm_lower_adjusts = []
+        self._ep_fleet_noharm_lower_gate_active = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -974,18 +982,95 @@ class TransitDuetV2Runner:
             return 1.0
         return float(np.clip((pressure - start) / (full - start), 0.0, 1.0))
 
+    @staticmethod
+    def _parse_fleet_noharm_gate(cfg):
+        cfg = cfg or {}
+
+        def _optional_float(key):
+            value = cfg.get(key, None)
+            return None if value is None else float(value)
+
+        return {
+            'mode': str(cfg.get('mode', 'always')).lower(),
+            'default_active': bool(cfg.get('default_active', True)),
+            'min_high_energy': _optional_float('min_high_energy'),
+            'max_high_energy': _optional_float('max_high_energy'),
+            'min_middle_energy': _optional_float('min_middle_energy'),
+            'max_middle_energy': _optional_float('max_middle_energy'),
+            'min_od_high_energy': _optional_float('min_od_high_energy'),
+            'max_od_high_energy': _optional_float('max_od_high_energy'),
+            'min_low_forecast': _optional_float('min_low_forecast'),
+            'max_low_forecast': _optional_float('max_low_forecast'),
+            'min_low_demand': _optional_float('min_low_demand'),
+            'max_low_demand': _optional_float('max_low_demand'),
+            'min_updates_required': _optional_float('min_updates_required'),
+        }
+
+    def _fleet_noharm_gate_active(self, gate_cfg):
+        mode = str(gate_cfg.get('mode', 'always')).lower()
+        if mode in {'always', 'on', 'true'}:
+            return True
+        if mode in {'never', 'off', 'false'}:
+            return False
+        tracker = getattr(self.env, 'frequency_tracker', None)
+        if tracker is None:
+            return bool(gate_cfg.get('default_active', True))
+        summary = tracker.summary()
+        min_updates = gate_cfg.get('min_updates_required')
+        if min_updates is not None:
+            updates = float(summary.get('freq_updates', 0.0))
+            if updates < float(min_updates):
+                return bool(gate_cfg.get('default_active', True))
+        checks = []
+
+        def _add_min(key, summary_key):
+            threshold = gate_cfg.get(key)
+            if threshold is not None:
+                checks.append(float(summary.get(summary_key, 0.0)) >= float(threshold))
+
+        def _add_max(key, summary_key):
+            threshold = gate_cfg.get(key)
+            if threshold is not None:
+                checks.append(float(summary.get(summary_key, 0.0)) <= float(threshold))
+
+        _add_min('min_high_energy', 'freq_high_energy')
+        _add_max('max_high_energy', 'freq_high_energy')
+        _add_min('min_middle_energy', 'freq_middle_energy')
+        _add_max('max_middle_energy', 'freq_middle_energy')
+        _add_min('min_od_high_energy', 'freq_od_high_energy')
+        _add_max('max_od_high_energy', 'freq_od_high_energy')
+        _add_min('min_low_forecast', 'freq_low_forecast')
+        _add_max('max_low_forecast', 'freq_low_forecast')
+        _add_min('min_low_demand', 'freq_low_demand')
+        _add_max('max_low_demand', 'freq_low_demand')
+        if not checks:
+            return bool(gate_cfg.get('default_active', True))
+        if mode in {'any', 'or'}:
+            return any(checks)
+        if mode in {'all', 'and'}:
+            return all(checks)
+        if mode in {'inverse_any', 'not_any'}:
+            return not any(checks)
+        if mode in {'inverse_all', 'not_all'}:
+            return not all(checks)
+        return bool(gate_cfg.get('default_active', True))
+
     def _apply_upper_fleet_noharm(self, action_vec):
         if not self.fleet_noharm_upper_enable:
             return np.asarray(action_vec, dtype=np.float32)
         original = np.asarray(action_vec, dtype=np.float32).reshape(-1)
         _, _, pressure = self._fleet_pressure()
+        gate_active = self._fleet_noharm_gate_active(
+            self.fleet_noharm_upper_gate)
+        self._ep_fleet_noharm_upper_gate_active.append(
+            1.0 if gate_active else 0.0)
         strength = self._pressure_strength(
             pressure,
             self.fleet_noharm_upper_pressure_start,
             self.fleet_noharm_upper_pressure_full,
         )
         self._ep_fleet_noharm_upper_pressures.append(max(0.0, pressure))
-        if strength <= 0.0:
+        if (not gate_active) or strength <= 0.0:
             self._ep_fleet_noharm_upper_adjusts.append(0.0)
             return original
 
@@ -1012,13 +1097,17 @@ class TransitDuetV2Runner:
             return action
         original = self._lower_action_scalar(action)
         _, _, pressure = self._fleet_pressure()
+        gate_active = self._fleet_noharm_gate_active(
+            self.fleet_noharm_lower_gate)
+        self._ep_fleet_noharm_lower_gate_active.append(
+            1.0 if gate_active else 0.0)
         strength = self._pressure_strength(
             pressure,
             self.fleet_noharm_lower_pressure_start,
             self.fleet_noharm_lower_pressure_full,
         )
         self._ep_fleet_noharm_lower_pressures.append(max(0.0, pressure))
-        if strength <= 0.0:
+        if (not gate_active) or strength <= 0.0:
             self._ep_fleet_noharm_lower_adjusts.append(0.0)
             return action
         shrink = strength * self.fleet_noharm_lower_shrink_max
@@ -1744,8 +1833,10 @@ class TransitDuetV2Runner:
         self._ep_terminal_shift_caps = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
+        self._ep_fleet_noharm_upper_gate_active = []
         self._ep_fleet_noharm_lower_pressures = []
         self._ep_fleet_noharm_lower_adjusts = []
+        self._ep_fleet_noharm_lower_gate_active = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
 
@@ -2162,10 +2253,14 @@ class TransitDuetV2Runner:
             self._ep_fleet_noharm_upper_pressures)
         fleet_noharm_upper_adjust_stat = _stat(
             self._ep_fleet_noharm_upper_adjusts)
+        fleet_noharm_upper_gate_stat = _stat(
+            self._ep_fleet_noharm_upper_gate_active)
         fleet_noharm_lower_pressure_stat = _stat(
             self._ep_fleet_noharm_lower_pressures)
         fleet_noharm_lower_adjust_stat = _stat(
             self._ep_fleet_noharm_lower_adjusts)
+        fleet_noharm_lower_gate_stat = _stat(
+            self._ep_fleet_noharm_lower_gate_active)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -2359,6 +2454,8 @@ class TransitDuetV2Runner:
             'fleet_noharm_upper_events': int(sum(
                 1 for v in self._ep_fleet_noharm_upper_adjusts
                 if float(v) > 1e-6)),
+            'fleet_noharm_upper_gate_active_mean':
+                fleet_noharm_upper_gate_stat['mean'],
             'fleet_noharm_lower_pressure_mean':
                 fleet_noharm_lower_pressure_stat['mean'],
             'fleet_noharm_lower_adjust_mean':
@@ -2366,6 +2463,8 @@ class TransitDuetV2Runner:
             'fleet_noharm_lower_events': int(sum(
                 1 for v in self._ep_fleet_noharm_lower_adjusts
                 if float(v) > 1e-6)),
+            'fleet_noharm_lower_gate_active_mean':
+                fleet_noharm_lower_gate_stat['mean'],
         }
         self.diag.append(row)
 
