@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from math import comb
+from math import exp, lgamma, log
 from typing import Any, Iterable
 
 import numpy as np
@@ -50,7 +50,13 @@ def sign_test_p_value(improvements: Iterable[Any]) -> float:
         return 1.0
     wins = int(np.sum(vals > 0.0))
     tail = min(wins, n - wins)
-    prob = sum(comb(n, k) for k in range(0, tail + 1)) / (2.0 ** n)
+    log_half_n = -float(n) * log(2.0)
+    log_terms = [
+        lgamma(n + 1.0) - lgamma(k + 1.0) - lgamma(n - k + 1.0) + log_half_n
+        for k in range(0, tail + 1)
+    ]
+    max_log = max(log_terms)
+    prob = exp(max_log) * sum(exp(term - max_log) for term in log_terms)
     return float(min(1.0, 2.0 * prob))
 
 

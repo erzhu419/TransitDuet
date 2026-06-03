@@ -48,6 +48,8 @@ class PaperDiagnosticsTest(unittest.TestCase):
         self.assertEqual(stats["win_rate"], 1.0)
         self.assertIn(claim_status(stats, min_pairs=4), {"supported", "positive_mixed"})
         self.assertLess(sign_test_p_value([1.0, 1.0, 1.0, 1.0]), 0.2)
+        self.assertLess(sign_test_p_value([1.0] * 1024), 1e-250)
+        self.assertEqual(sign_test_p_value([1.0] * 512 + [-1.0] * 512), 1.0)
 
     def test_noninferiority_status_uses_loss_margin(self):
         stats = {
