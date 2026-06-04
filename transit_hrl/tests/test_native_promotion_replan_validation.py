@@ -27,6 +27,7 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             self.assertEqual(wait_aware["_promotion_replan_same_wait_max"], 0.85)
             self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_start"], 0.05)
             self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_full"], 0.20)
+            self.assertEqual(wait_aware["_promotion_replan_target_headway_max_s"], 347.0)
             self.assertTrue(wait_aware["_promotion_replan_terminal_early_relax"])
             self.assertEqual(
                 COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"],

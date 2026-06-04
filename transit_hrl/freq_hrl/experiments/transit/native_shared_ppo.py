@@ -112,6 +112,33 @@ def _direction_action_slice(action_size: int, planner_key: Any) -> slice:
     return slice(0, half) if bool(planner_key) else slice(half, int(action_size))
 
 
+def _candidate_target_headway_mean_s(runner: Any, action: Any, trip: Any) -> float:
+    planner = getattr(runner, "timetable_planner", None)
+    if planner is None or trip is None:
+        return 0.0
+    try:
+        base = float(getattr(
+            trip,
+            "_freqduet_base_target_headway",
+            getattr(trip, "target_headway", 360.0),
+        ))
+        horizon_s = max(float(getattr(planner, "horizon_s", 0.0)), 0.0)
+        if horizon_s > 0.0:
+            offsets = np.linspace(0.0, horizon_s, num=5, dtype=np.float64)
+        else:
+            offsets = np.asarray([0.0], dtype=np.float64)
+        if not hasattr(planner, "target_headway"):
+            action_arr = _array(action, dtype=np.float64)
+            return float(base + np.mean(action_arr)) if action_arr.size else float(base)
+        targets = [
+            float(planner.target_headway(base, action, bool(getattr(trip, "direction", True)), offset))
+            for offset in offsets
+        ]
+        return float(np.mean(targets)) if targets else 0.0
+    except Exception:
+        return 0.0
+
+
 def wait_aware_replan_action(
     active_action: Any,
     *,
@@ -918,6 +945,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_gap_risk_cap_start: float = 0.0,
     promotion_replan_gap_risk_cap_full: float = 0.0,
+    promotion_replan_target_headway_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
@@ -948,6 +976,7 @@ def install_shared_ppo_episode_loop(
         float(promotion_replan_terminal_early_cap_s), 0.0)
     runner.freq_hrl_promotion_terminal_early_relax = bool(
         promotion_replan_terminal_early_relax)
+    runner.freq_hrl_promotion_target_headway_guard_rejects = 0
     if bool(learned_promotion_gate):
         last_gate_replan_by_key: dict[Any, float] = {}
         gate_replans_by_key: dict[Any, int] = {}
@@ -1091,6 +1120,22 @@ def install_shared_ppo_episode_loop(
                         np.abs(np.asarray(native_override, dtype=np.float64)
                                - np.asarray(active_action, dtype=np.float64))
                     ))
+                    target_headway_max_s = max(
+                        float(promotion_replan_target_headway_max_s), 0.0)
+                    if target_headway_max_s > 0.0:
+                        candidate_target = _candidate_target_headway_mean_s(
+                            runner, native_override, kwargs.get("trip", None))
+                        preselect_metadata["candidate_target_headway_mean_s"] = float(
+                            candidate_target)
+                        if candidate_target > target_headway_max_s:
+                            runner.freq_hrl_promotion_target_headway_guard_rejects = int(
+                                getattr(
+                                    runner,
+                                    "freq_hrl_promotion_target_headway_guard_rejects",
+                                    0,
+                                )
+                            ) + 1
+                            return False
                     if (bool(promotion_replan_require_shift)
                             and float(preselect_metadata.get("abs_shift_s", 0.0)) <= 1e-6):
                         return False
@@ -1218,6 +1263,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "freq_promotion_strength",
         "shared_ppo_gate_evaluations",
         "shared_ppo_gate_replans",
+        "shared_ppo_target_headway_guard_rejects",
         "shared_ppo_gate_value_mean",
         "shared_ppo_wait_replan_count",
         "shared_ppo_wait_replan_pressure_mean",
@@ -1285,6 +1331,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_gap_guard_max_ratio: float = 0.0,
     promotion_replan_gap_risk_cap_start: float = 0.0,
     promotion_replan_gap_risk_cap_full: float = 0.0,
+    promotion_replan_target_headway_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
@@ -1367,6 +1414,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
         promotion_replan_gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
         promotion_replan_gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
+        promotion_replan_target_headway_max_s=float(promotion_replan_target_headway_max_s),
         promotion_replan_shift_sign=float(promotion_replan_shift_sign),
         promotion_replan_base_action=str(promotion_replan_base_action),
         promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
@@ -1401,6 +1449,11 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_lower_decisions": int(installed["lower_proxy"].decisions),
             "shared_ppo_gate_evaluations": int(installed["upper_proxy"].gate_evaluations),
             "shared_ppo_gate_replans": int(installed["upper_proxy"].gate_replans),
+            "shared_ppo_target_headway_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_target_headway_guard_rejects",
+                0,
+            )),
             "shared_ppo_gate_value_mean": (
                 float(np.mean(installed["upper_proxy"].gate_values))
                 if installed["upper_proxy"].gate_values else 0.0
@@ -1491,6 +1544,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
         "promotion_replan_gap_risk_cap_start": float(promotion_replan_gap_risk_cap_start),
         "promotion_replan_gap_risk_cap_full": float(promotion_replan_gap_risk_cap_full),
+        "promotion_replan_target_headway_max_s": float(promotion_replan_target_headway_max_s),
         "promotion_replan_shift_sign": float(promotion_replan_shift_sign),
         "promotion_replan_base_action": str(promotion_replan_base_action),
         "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
@@ -1537,6 +1591,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- learned promotion gate: {payload.get('learned_promotion_gate', False)} threshold={payload.get('promotion_gate_threshold', 0.0)}",
         f"- gate guard: strength>={payload.get('promotion_gate_strength_min', 0.0)} age>={payload.get('promotion_gate_age_min', 0.0)} min_elapsed_s={payload.get('promotion_gate_min_elapsed_s', 0.0)} cooldown_s={payload.get('promotion_gate_cooldown_s', 0.0)} preselect_action={payload.get('promotion_gate_preselect_action', False)} plan_blend={payload.get('promotion_gate_plan_blend', 0.0)}",
         f"- gate LF/HF guard: low_signal_min={payload.get('promotion_gate_low_signal_min', 0.0)} max_hf_to_lf={payload.get('promotion_gate_max_hf_to_lf_ratio', 0.0)} max_replans={payload.get('promotion_gate_max_replans', 0)} max_total_replans={payload.get('promotion_gate_max_total_replans', 0)}",
+        f"- replan target-headway guard: max_s={payload.get('promotion_replan_target_headway_max_s', 0.0)}",
         f"- promotion replan policy: {payload.get('promotion_replan_policy', 'actor')} wait_gain_s={payload.get('promotion_replan_wait_gain_s', 0.0)} max_shift_s={payload.get('promotion_replan_max_shift_s', 0.0)}",
         f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)}",
         f"- off-policy replay updates per native batch: {payload.get('offpolicy_replay_updates', 1)}",
@@ -1705,6 +1760,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-risk-cap-start", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-risk-cap-full", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-target-headway-max-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-shift-sign", type=float, default=-1.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
     parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
@@ -1750,6 +1806,7 @@ def main() -> None:
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
             promotion_replan_gap_risk_cap_start=float(args.promotion_replan_gap_risk_cap_start),
             promotion_replan_gap_risk_cap_full=float(args.promotion_replan_gap_risk_cap_full),
+            promotion_replan_target_headway_max_s=float(args.promotion_replan_target_headway_max_s),
             promotion_replan_shift_sign=float(args.promotion_replan_shift_sign),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
             promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),

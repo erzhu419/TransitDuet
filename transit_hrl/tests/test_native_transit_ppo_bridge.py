@@ -594,6 +594,52 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(installed["upper_proxy"].gate_replans, 1)
         self.assertEqual(installed["upper_proxy"].wait_replan_abs_shifts[-1], 12.0)
 
+    def test_learned_gate_target_headway_guard_vetoes_high_target_replan(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_replan_policy="wait_aware",
+            promotion_replan_wait_gain_s=20.0,
+            promotion_replan_max_shift_s=12.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=1.0,
+            promotion_replan_target_headway_max_s=347.0,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        active_action = np.asarray([20.0, 20.0, 20.0, 20.0], dtype=np.float32)
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+        }
+        trip = SimpleNamespace(target_headway=350.0, direction=True)
+        self.assertFalse(runner.freq_hrl_learned_promotion_gate(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": active_action},
+            planner_key=True,
+            freq_summary=freq_summary,
+            trip=trip,
+        ))
+        self.assertFalse(hasattr(runner, "freq_hrl_promotion_action_override"))
+        self.assertEqual(installed["upper_proxy"].gate_replans, 0)
+        self.assertEqual(runner.freq_hrl_promotion_target_headway_guard_rejects, 1)
+
     def test_learned_wait_aware_replan_uses_current_actor_plan_base(self):
         runner = _FakeNativeRunner()
         bridge = NativeTransitPPOBridge.from_runner(
