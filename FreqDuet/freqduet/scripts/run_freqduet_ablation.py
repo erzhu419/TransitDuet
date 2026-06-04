@@ -291,6 +291,12 @@ def summarize_seed(csv_path, last_k):
         "fleet_noharm_lower_proactive_adjust_mean",
         "fleet_noharm_lower_proactive_events",
         "fleet_noharm_lower_proactive_gate_active_mean",
+        "fleet_noharm_lower_value_guard_adjust_mean",
+        "fleet_noharm_lower_value_guard_events",
+        "fleet_noharm_lower_value_guard_active_mean",
+        "fleet_noharm_lower_value_guard_value_mean",
+        "fleet_noharm_lower_value_guard_headway_mean",
+        "fleet_noharm_lower_value_guard_cost_mean",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
     row["episodes"] = int(len(df))
@@ -406,6 +412,12 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "fleet_noharm_lower_proactive_adjust_mean",
         "fleet_noharm_lower_proactive_events",
         "fleet_noharm_lower_proactive_gate_active_mean",
+        "fleet_noharm_lower_value_guard_adjust_mean",
+        "fleet_noharm_lower_value_guard_events",
+        "fleet_noharm_lower_value_guard_active_mean",
+        "fleet_noharm_lower_value_guard_value_mean",
+        "fleet_noharm_lower_value_guard_headway_mean",
+        "fleet_noharm_lower_value_guard_cost_mean",
     ]
     summary = []
     for cfg in configs:

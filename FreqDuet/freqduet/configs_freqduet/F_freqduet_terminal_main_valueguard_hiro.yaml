@@ -1,0 +1,26 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_valueguard_hiro
+
+# Candidate fixed-headway-gap repair. Instead of shrinking lower holding from
+# fleet pressure alone, clip a holding action only when its causal high-frequency
+# passenger value is too small for the fleet-second risk it creates.
+fleet_noharm:
+  lower:
+    value_guard:
+      enable: true
+      pressure_start: 0.0
+      pressure_full: 2.0
+      min_ratio: 1.0
+      cost_weight: 0.55
+      action_norm_s: 45.0
+      wait_norm_s: 90.0
+      wait_clip: 2.0
+      board_norm: 10.0
+      board_clip: 2.0
+      board_weight: 0.25
+      headway_weight: 2.0
+      headway_clip: 1.0
+      high_share_cap: 1.0
+      positive_high_only: true
+      max_shrink: 1.0
+      min_action_s: 0.0

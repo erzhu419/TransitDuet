@@ -236,6 +236,26 @@ needs a mechanism change rather than another hand threshold: likely a
 holding-value-per-fleet-second guard, or Phase-4 terminal/first-stop execution
 that moves useful delay off the on-route fleet.
 
+2026-06-03 value-guard candidate: implemented a causal lower holding guard that
+clips an on-route holding action only when its estimated passenger/headway value
+is below its fleet-pressure cost. The first local 2-seed / 10ep screen is
+promising but not sufficient for promotion:
+
+```text
+soft valueguard vs main, composite delta:
+terminal   -0.1723 CI [-0.4381,+0.0935]
+highnoise  -0.2125 CI [-0.3920,-0.0330]
+odshift    +0.2342 CI [+0.2329,+0.2355]
+rushshift  +0.0519 CI [-0.3089,+0.4127]
+overall    -0.0247 CI [-0.0455,-0.0039]
+```
+
+Interpretation: adding headway-correction value fixes the earlier OD/rush damage
+from a pure passenger-HF guard, but OD overshoot remains unstable. A valueguard
++ fleet-floor combination was also screened locally and rejected because it
+removed the highnoise benefit. Next step is a scheduler-visible 100ep/20seed
+valueguard screen against main and fixed-headway before any alias promotion.
+
 Done means:
 
 - inspect highnoise and odshift seed traces;

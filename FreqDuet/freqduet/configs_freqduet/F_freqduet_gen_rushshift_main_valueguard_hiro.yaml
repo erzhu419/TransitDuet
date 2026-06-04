@@ -1,0 +1,6 @@
+_extends: F_freqduet_terminal_main_valueguard_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_valueguard_hiro
+
+env:
+  peak_shift_choices: [-900, 0, 900]
+  peak_shift_probs: [0.35, 0.30, 0.35]

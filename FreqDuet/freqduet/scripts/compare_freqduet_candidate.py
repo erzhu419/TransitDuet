@@ -41,6 +41,11 @@ DEFAULT_METRICS = (
     "fleet_noharm_lower_gate_active_mean",
     "fleet_noharm_lower_proactive_adjust_mean",
     "fleet_noharm_lower_proactive_gate_active_mean",
+    "fleet_noharm_lower_value_guard_adjust_mean",
+    "fleet_noharm_lower_value_guard_active_mean",
+    "fleet_noharm_lower_value_guard_value_mean",
+    "fleet_noharm_lower_value_guard_headway_mean",
+    "fleet_noharm_lower_value_guard_cost_mean",
 )
 
 
@@ -62,6 +67,8 @@ def infer_domain(config: str) -> str:
 
 
 def infer_method(config: str) -> str:
+    if "valueguard" in config:
+        return "valueguard"
     if "driftcost" in config:
         return "main_driftcost"
     if config.endswith("_main_hiro"):

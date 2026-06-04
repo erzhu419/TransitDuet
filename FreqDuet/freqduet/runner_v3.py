@@ -273,6 +273,12 @@ class DiagnosticLog:
         'fleet_noharm_lower_proactive_adjust_mean',
         'fleet_noharm_lower_proactive_events',
         'fleet_noharm_lower_proactive_gate_active_mean',
+        'fleet_noharm_lower_value_guard_adjust_mean',
+        'fleet_noharm_lower_value_guard_events',
+        'fleet_noharm_lower_value_guard_active_mean',
+        'fleet_noharm_lower_value_guard_value_mean',
+        'fleet_noharm_lower_value_guard_headway_mean',
+        'fleet_noharm_lower_value_guard_cost_mean',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -505,6 +511,46 @@ class TransitDuetV2Runner:
             lower_proactive_cfg.get('shrink_max', 1.0), 0.0, 1.0))
         self.fleet_noharm_lower_proactive_gate = self._parse_fleet_noharm_gate(
             lower_proactive_cfg.get('gate', {}))
+        lower_value_guard_cfg = lower_noharm_cfg.get('value_guard', {}) or {}
+        self.fleet_noharm_lower_value_guard_enable = bool(
+            lower_value_guard_cfg.get('enable', False))
+        self.fleet_noharm_lower_value_guard_pressure_start = float(
+            lower_value_guard_cfg.get('pressure_start', 0.0))
+        self.fleet_noharm_lower_value_guard_pressure_full = float(
+            lower_value_guard_cfg.get('pressure_full', 2.0))
+        self.fleet_noharm_lower_value_guard_min_ratio = max(float(
+            lower_value_guard_cfg.get('min_ratio', 1.0)), 0.0)
+        self.fleet_noharm_lower_value_guard_cost_weight = max(float(
+            lower_value_guard_cfg.get('cost_weight', 1.0)), 1e-6)
+        self.fleet_noharm_lower_value_guard_action_norm_s = max(float(
+            lower_value_guard_cfg.get('action_norm_s', 45.0)), 1e-6)
+        self.fleet_noharm_lower_value_guard_wait_norm_s = max(float(
+            lower_value_guard_cfg.get('wait_norm_s', 90.0)), 1e-6)
+        self.fleet_noharm_lower_value_guard_wait_clip = max(float(
+            lower_value_guard_cfg.get('wait_clip', 2.0)), 0.0)
+        self.fleet_noharm_lower_value_guard_board_norm = max(float(
+            lower_value_guard_cfg.get('board_norm', 10.0)), 1e-6)
+        self.fleet_noharm_lower_value_guard_board_clip = max(float(
+            lower_value_guard_cfg.get('board_clip', 2.0)), 0.0)
+        self.fleet_noharm_lower_value_guard_board_weight = max(float(
+            lower_value_guard_cfg.get('board_weight', 0.25)), 0.0)
+        self.fleet_noharm_lower_value_guard_headway_weight = max(float(
+            lower_value_guard_cfg.get('headway_weight', 1.0)), 0.0)
+        self.fleet_noharm_lower_value_guard_headway_clip = max(float(
+            lower_value_guard_cfg.get('headway_clip', 1.0)), 0.0)
+        self.fleet_noharm_lower_value_guard_low_floor = max(float(
+            lower_value_guard_cfg.get('low_floor', 1e-3)), 1e-9)
+        self.fleet_noharm_lower_value_guard_high_share_cap = float(
+            lower_value_guard_cfg.get('high_share_cap', 1.0))
+        self.fleet_noharm_lower_value_guard_positive_high_only = bool(
+            lower_value_guard_cfg.get('positive_high_only', True))
+        self.fleet_noharm_lower_value_guard_max_shrink = float(np.clip(
+            lower_value_guard_cfg.get('max_shrink', 1.0), 0.0, 1.0))
+        self.fleet_noharm_lower_value_guard_min_action_s = max(float(
+            lower_value_guard_cfg.get(
+                'min_action_s', self.fleet_noharm_lower_min_action_s)), 0.0)
+        self.fleet_noharm_lower_value_guard_gate = self._parse_fleet_noharm_gate(
+            lower_value_guard_cfg.get('gate', {}))
 
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 1001)
@@ -634,6 +680,11 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_gate_active = []
         self._ep_fleet_noharm_lower_proactive_adjusts = []
         self._ep_fleet_noharm_lower_proactive_gate_active = []
+        self._ep_fleet_noharm_lower_value_guard_adjusts = []
+        self._ep_fleet_noharm_lower_value_guard_active = []
+        self._ep_fleet_noharm_lower_value_guard_values = []
+        self._ep_fleet_noharm_lower_value_guard_headway_values = []
+        self._ep_fleet_noharm_lower_value_guard_costs = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -1165,9 +1216,139 @@ class TransitDuetV2Runner:
             float(np.mean(np.abs(original - adjusted))))
         return adjusted
 
-    def _apply_lower_fleet_noharm(self, action):
-        if not self.fleet_noharm_lower_enable:
+    def _lower_value_guard_signal(self, bus, action_s):
+        if bus is None:
+            return 0.0, 0.0, 0.0
+        board_count = int(getattr(bus, 'last_board_count', 0))
+        wait_sum_s = float(getattr(bus, 'last_board_wait_sum_s', 0.0))
+        if board_count > 0:
+            wait_norm = (wait_sum_s / max(board_count, 1)
+                         / self.fleet_noharm_lower_value_guard_wait_norm_s)
+            if self.fleet_noharm_lower_value_guard_wait_clip > 0.0:
+                wait_norm = min(
+                    wait_norm, self.fleet_noharm_lower_value_guard_wait_clip)
+            board_norm = (
+                board_count / self.fleet_noharm_lower_value_guard_board_norm)
+            if self.fleet_noharm_lower_value_guard_board_clip > 0.0:
+                board_norm = min(
+                    board_norm, self.fleet_noharm_lower_value_guard_board_clip)
+        else:
+            wait_norm = 0.0
+            board_norm = 0.0
+
+        high_share = 0.0
+        tracker = getattr(self.env, 'frequency_tracker', None)
+        if tracker is not None:
+            station_id = int(getattr(
+                bus, 'last_board_station_id',
+                getattr(getattr(bus, 'last_station', None), 'station_id', 0)))
+            direction = bool(getattr(bus, 'direction', True))
+            local_high = float(tracker.local_high_value(station_id, direction))
+            local_low = 0.0
+            if hasattr(tracker, 'local_low_value'):
+                local_low = float(tracker.local_low_value(station_id, direction))
+            high = (
+                max(local_high, 0.0)
+                if self.fleet_noharm_lower_value_guard_positive_high_only
+                else abs(local_high))
+            low = max(
+                abs(local_low),
+                self.fleet_noharm_lower_value_guard_low_floor)
+            high_share = high / (high + low + 1e-9)
+            cap = self.fleet_noharm_lower_value_guard_high_share_cap
+            if cap >= 0.0:
+                high_share = min(high_share, cap)
+            high_share = float(np.clip(high_share, 0.0, 1.0))
+
+        value = high_share * (
+            wait_norm
+            + self.fleet_noharm_lower_value_guard_board_weight * board_norm)
+        headway_value = 0.0
+        if self.fleet_noharm_lower_value_guard_headway_weight > 0.0:
+            target_hw = max(float(getattr(bus, '_target_headway', 360.0)), 1.0)
+            fwd = float(getattr(bus, 'forward_headway', target_hw))
+            bwd = float(getattr(bus, 'backward_headway', target_hw))
+            action_s = max(float(action_s), 0.0)
+            before = abs(fwd - target_hw) + abs(bwd - target_hw)
+            after = (
+                abs((fwd + action_s) - target_hw)
+                + abs((bwd - action_s) - target_hw))
+            headway_value = max(0.0, (before - after) / target_hw)
+            if self.fleet_noharm_lower_value_guard_headway_clip > 0.0:
+                headway_value = min(
+                    headway_value,
+                    self.fleet_noharm_lower_value_guard_headway_clip)
+            value += (
+                self.fleet_noharm_lower_value_guard_headway_weight
+                * headway_value)
+        return float(value), float(high_share), float(headway_value)
+
+    def _apply_lower_value_guard(self, action, bus=None):
+        if not self.fleet_noharm_lower_value_guard_enable:
             return action
+        original = self._lower_action_scalar(action)
+        if original <= 0.0:
+            self._ep_fleet_noharm_lower_value_guard_adjusts.append(0.0)
+            self._ep_fleet_noharm_lower_value_guard_active.append(0.0)
+            self._ep_fleet_noharm_lower_value_guard_values.append(0.0)
+            self._ep_fleet_noharm_lower_value_guard_headway_values.append(0.0)
+            self._ep_fleet_noharm_lower_value_guard_costs.append(0.0)
+            return action
+        gate_active = self._fleet_noharm_gate_active(
+            self.fleet_noharm_lower_value_guard_gate)
+        _, _, pressure = self._fleet_pressure()
+        strength = self._pressure_strength(
+            pressure,
+            self.fleet_noharm_lower_value_guard_pressure_start,
+            self.fleet_noharm_lower_value_guard_pressure_full,
+        )
+        value, _, headway_value = self._lower_value_guard_signal(bus, original)
+        cost = (
+            self.fleet_noharm_lower_value_guard_cost_weight
+            * strength
+            * original
+            / self.fleet_noharm_lower_value_guard_action_norm_s)
+        active = bool(gate_active and strength > 0.0 and cost > 0.0)
+        self._ep_fleet_noharm_lower_value_guard_active.append(
+            1.0 if active else 0.0)
+        self._ep_fleet_noharm_lower_value_guard_values.append(float(value))
+        self._ep_fleet_noharm_lower_value_guard_headway_values.append(
+            float(headway_value))
+        self._ep_fleet_noharm_lower_value_guard_costs.append(float(cost))
+        if not active:
+            self._ep_fleet_noharm_lower_value_guard_adjusts.append(0.0)
+            return action
+
+        required = self.fleet_noharm_lower_value_guard_min_ratio * cost
+        if value >= required or required <= 1e-9:
+            self._ep_fleet_noharm_lower_value_guard_adjusts.append(0.0)
+            return action
+
+        denom = (
+            self.fleet_noharm_lower_value_guard_min_ratio
+            * self.fleet_noharm_lower_value_guard_cost_weight
+            * strength)
+        allowed = (
+            value
+            * self.fleet_noharm_lower_value_guard_action_norm_s
+            / max(denom, 1e-9))
+        allowed = max(0.0, min(float(allowed), original))
+        shrink = 1.0 - allowed / max(original, 1e-9)
+        shrink = min(
+            max(shrink, 0.0),
+            self.fleet_noharm_lower_value_guard_max_shrink)
+        adjusted = max(
+            self.fleet_noharm_lower_value_guard_min_action_s,
+            original * (1.0 - shrink))
+        adjusted = self._quantize_lower_action(
+            np.asarray([adjusted], dtype=np.float32))
+        adjust = max(0.0, original - self._lower_action_scalar(adjusted))
+        self._ep_fleet_noharm_lower_value_guard_adjusts.append(adjust)
+        return adjusted
+
+    def _apply_lower_fleet_noharm(self, action, bus=None):
+        if not self.fleet_noharm_lower_enable:
+            return self._apply_lower_value_guard(action, bus)
         original = self._lower_action_scalar(action)
         _, _, pressure = self._fleet_pressure()
         gate_active = self._fleet_noharm_gate_active(
@@ -1203,7 +1384,7 @@ class TransitDuetV2Runner:
         if shrink <= 0.0:
             self._ep_fleet_noharm_lower_adjusts.append(0.0)
             self._ep_fleet_noharm_lower_proactive_adjusts.append(0.0)
-            return action
+            return self._apply_lower_value_guard(action, bus)
         adjusted = max(
             self.fleet_noharm_lower_min_action_s,
             original * (1.0 - shrink),
@@ -1215,7 +1396,7 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_proactive_adjusts.append(
             adjust if proactive_shrink >= base_shrink and proactive_shrink > 0.0
             else 0.0)
-        return adjusted
+        return self._apply_lower_value_guard(adjusted, bus)
 
     def _record_frequency_hold_feedback(
             self, direction, local_high, action_s, wait_sum_s, boarded_count):
@@ -1936,6 +2117,11 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_gate_active = []
         self._ep_fleet_noharm_lower_proactive_adjusts = []
         self._ep_fleet_noharm_lower_proactive_gate_active = []
+        self._ep_fleet_noharm_lower_value_guard_adjusts = []
+        self._ep_fleet_noharm_lower_value_guard_active = []
+        self._ep_fleet_noharm_lower_value_guard_values = []
+        self._ep_fleet_noharm_lower_value_guard_headway_values = []
+        self._ep_fleet_noharm_lower_value_guard_costs = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
 
@@ -1968,8 +2154,12 @@ class TransitDuetV2Runner:
                             state_dict[key][0],
                             last_action=lower_last_action.get(key, 0.0),
                             deterministic=not training)
+                        action_bus = next(
+                            (bus for bus in self.env.bus_all
+                             if int(getattr(bus, 'bus_id', -1)) == int(key)),
+                            None)
                         action_dict[key] = self._apply_lower_fleet_noharm(
-                            action_dict[key])
+                            action_dict[key], action_bus)
 
                 elif len(state_dict[key]) == 2:
                     if state_dict[key][0][1] != state_dict[key][1][1]:
@@ -2108,8 +2298,12 @@ class TransitDuetV2Runner:
                         state_dict[key][0],
                         last_action=lower_last_action.get(key, 0.0),
                         deterministic=not training)
+                    action_bus = next(
+                        (bus for bus in self.env.bus_all
+                         if int(getattr(bus, 'bus_id', -1)) == int(key)),
+                        None)
                     action_dict[key] = self._apply_lower_fleet_noharm(
-                        action_dict[key])
+                        action_dict[key], action_bus)
 
             state_dict, reward_dict, cost_dict, done = self.env.step(
                 action_dict, render=False)
@@ -2366,6 +2560,16 @@ class TransitDuetV2Runner:
             self._ep_fleet_noharm_lower_proactive_adjusts)
         fleet_noharm_lower_proactive_gate_stat = _stat(
             self._ep_fleet_noharm_lower_proactive_gate_active)
+        fleet_noharm_lower_value_guard_adjust_stat = _stat(
+            self._ep_fleet_noharm_lower_value_guard_adjusts)
+        fleet_noharm_lower_value_guard_active_stat = _stat(
+            self._ep_fleet_noharm_lower_value_guard_active)
+        fleet_noharm_lower_value_guard_value_stat = _stat(
+            self._ep_fleet_noharm_lower_value_guard_values)
+        fleet_noharm_lower_value_guard_headway_stat = _stat(
+            self._ep_fleet_noharm_lower_value_guard_headway_values)
+        fleet_noharm_lower_value_guard_cost_stat = _stat(
+            self._ep_fleet_noharm_lower_value_guard_costs)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -2579,6 +2783,19 @@ class TransitDuetV2Runner:
                 if float(v) > 1e-6)),
             'fleet_noharm_lower_proactive_gate_active_mean':
                 fleet_noharm_lower_proactive_gate_stat['mean'],
+            'fleet_noharm_lower_value_guard_adjust_mean':
+                fleet_noharm_lower_value_guard_adjust_stat['mean'],
+            'fleet_noharm_lower_value_guard_events': int(sum(
+                1 for v in self._ep_fleet_noharm_lower_value_guard_adjusts
+                if float(v) > 1e-6)),
+            'fleet_noharm_lower_value_guard_active_mean':
+                fleet_noharm_lower_value_guard_active_stat['mean'],
+            'fleet_noharm_lower_value_guard_value_mean':
+                fleet_noharm_lower_value_guard_value_stat['mean'],
+            'fleet_noharm_lower_value_guard_headway_mean':
+                fleet_noharm_lower_value_guard_headway_stat['mean'],
+            'fleet_noharm_lower_value_guard_cost_mean':
+                fleet_noharm_lower_value_guard_cost_stat['mean'],
         }
         self.diag.append(row)
 

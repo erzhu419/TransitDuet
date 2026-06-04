@@ -53,6 +53,11 @@ metrics:
     - fleet_noharm_lower_proactive_adjust_mean
     - fleet_noharm_lower_proactive_gate_active_mean
     - lower_drift_cost_adaptive_gate_mean
+    - fleet_noharm_lower_value_guard_adjust_mean
+    - fleet_noharm_lower_value_guard_active_mean
+    - fleet_noharm_lower_value_guard_value_mean
+    - fleet_noharm_lower_value_guard_headway_mean
+    - fleet_noharm_lower_value_guard_cost_mean
 
 config_sets:
   current_longtrain_4x6:
@@ -204,6 +209,16 @@ config_sets:
       loweronly: F_freqduet_gen_rushshift_main_noharm_loweronly_hiro
       driftcost50: F_freqduet_gen_rushshift_main_noharm_loweronly_driftcost50_hiro
       adaptdrift: F_freqduet_gen_rushshift_main_noharm_loweronly_adaptdrift_hiro
+
+  valueguard_candidate_4x1:
+    terminal:
+      valueguard: F_freqduet_terminal_main_valueguard_hiro
+    highnoise:
+      valueguard: F_freqduet_gen_highnoise_main_valueguard_hiro
+    odshift:
+      valueguard: F_freqduet_gen_odshift_main_valueguard_hiro
+    rushshift:
+      valueguard: F_freqduet_gen_rushshift_main_valueguard_hiro
 
 experiments:
   current_longtrain_ep200_wu10:
@@ -378,6 +393,21 @@ experiments:
       driftcost50: results_freqduet/noharm_loweronly_driftcost50_ep200_wu10/compare_driftcost50_ep200_vs_external_fixed/external_baseline_paired_deltas.csv
       adaptdrift: results_freqduet/noharm_loweronly_adaptdrift_ep200_wu10/compare_adaptdrift_ep200_vs_external_fixed/external_baseline_paired_deltas.csv
     note: lower-only no-harm did not survive 200ep; stronger/adaptive drift cost traded terminal/rush gains for OD/highnoise damage
+
+  valueguard_local_screen_ep10_wu2:
+    status: complete_candidate_screen_not_promoted
+    episodes: 10
+    last_k: 5
+    upper_warmup_eps: 2
+    seeds:
+      - 7
+      - 11
+    config_set: valueguard_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    baseline_result_dir: results_freqduet/main_screen_ep10
+    result_dir: results_freqduet/valueguard_soft_screen_ep10
+    comparison_dir: results_freqduet/valueguard_soft_screen_ep10/compare_vs_main
+    note: soft valueguard improved local overall/highnoise but OD overshoot remained unstable; requires 100ep/20seed screen before promotion
 
 figures:
   decomposer_validation_current_trace:

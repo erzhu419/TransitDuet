@@ -829,3 +829,54 @@ results_freqduet/paper_longtrain_promoted_ep200_wu10
 Documentation updated in `md/top_journal_gap.md`. Next paper gaps are full
 held-out generalization execution, external baseline full matrix, Phase 4 scope
 decision, and final paper table/figure assembly.
+
+## 2026-06-03 fixed-headway gap: lower holding value guard
+
+Added an experimental lower action guard for the fixed-headway gap. Unlike the
+previous no-harm screens, this guard does not shrink holding from fleet pressure
+alone. It estimates causal value for each lower holding action from:
+
+- boarded passengers' observed wait at the current stop;
+- local positive high-frequency demand share;
+- headway-correction value, computed by whether the proposed hold moves forward
+  and backward headways closer to the current target headway.
+
+The guard clips only when this value is below a fleet-pressure cost proxy. It is
+off by default and only enabled in:
+
+```text
+F_freqduet_terminal_main_valueguard_hiro
+F_freqduet_gen_highnoise_main_valueguard_hiro
+F_freqduet_gen_odshift_main_valueguard_hiro
+F_freqduet_gen_rushshift_main_valueguard_hiro
+```
+
+Local screen protocol:
+
+```text
+episodes: 10
+last_k: 5
+upper_warmup_eps: 2
+seeds: 7,11
+baseline: current main under the same protocol
+```
+
+The first passenger-HF-only guard was rejected: it improved highnoise but
+damaged OD/rush. Adding headway-correction value fixed most of that, but a
+strong cost weight still hurt terminal. The kept soft setting uses
+`cost_weight: 0.55`, `headway_weight: 2.0`, and no fleet-weight floor.
+
+Soft valueguard paired composite deltas vs same-protocol main:
+
+```text
+terminal   -0.1723  CI [-0.4381,+0.0935]
+highnoise  -0.2125  CI [-0.3920,-0.0330]
+odshift    +0.2342  CI [+0.2329,+0.2355]
+rushshift  +0.0519  CI [-0.3089,+0.4127]
+overall    -0.0247  CI [-0.0455,-0.0039]
+```
+
+A valueguard + `belief_fleet_weight_floor: 0.30` combination was rejected in
+the same local screen because it removed the highnoise benefit and worsened
+overall composite. The current valueguard is a candidate for a scheduler-visible
+100ep/20seed screen, not a promoted main alias.
