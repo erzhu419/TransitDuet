@@ -241,6 +241,8 @@ class DiagnosticLog:
         'freq_wait_lower_penalty_mean', 'freq_wait_lower_penalty_max',
         'freq_wait_lower_board_credit_mean',
         'freq_wait_lower_board_credit_max',
+        'freq_wait_lower_improvement_credit_mean',
+        'freq_wait_lower_improvement_credit_max',
         'freq_wait_lower_net_mean',
         'freq_wait_upper_credit_mean', 'freq_wait_upper_credit_std',
         'freq_wait_low_share_mean', 'freq_wait_lower_high_share_mean',
@@ -536,6 +538,12 @@ class TransitDuetV2Runner:
             attr_cfg.get('lower_wait_weight', 0.0))
         self.freq_wait_lower_board_credit_weight = float(
             attr_cfg.get('lower_board_credit_weight', 0.0))
+        self.freq_wait_lower_improvement_credit_weight = float(
+            attr_cfg.get('lower_improvement_credit_weight', 0.0))
+        self.freq_wait_lower_improvement_ema_alpha = float(np.clip(
+            attr_cfg.get('lower_improvement_ema_alpha', 0.08), 0.0, 1.0))
+        self.freq_wait_lower_improvement_clip = max(
+            float(attr_cfg.get('lower_improvement_clip', 1.0)), 0.0)
         self.freq_wait_lower_board_norm = max(
             float(attr_cfg.get('lower_board_norm', 10.0)), 1e-6)
         self.freq_wait_lower_board_clip = max(
@@ -555,11 +563,13 @@ class TransitDuetV2Runner:
             attr_cfg.get('normalize_upper_credit', True))
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_wait_improvement_credits = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
         self._ep_freq_wait_lower_high_shares = []
         self._ep_freq_wait_boarded_pax = 0
+        self._freq_wait_improvement_baseline = {}
         self._ep_trip_wait_stats = defaultdict(lambda: {
             'pax': 0,
             'wait_s': 0.0,
@@ -871,7 +881,7 @@ class TransitDuetV2Runner:
 
     def _record_frequency_wait_credit(
             self, trip_id, wait_sum_s, boarded_count, low_demand, local_high,
-            lower_low_demand=None):
+            lower_low_demand=None, station_id=None, direction=None):
         """Return lower net high-frequency wait shaping and store upper credit."""
         if not self.freq_wait_enable or boarded_count <= 0:
             return 0.0
@@ -902,6 +912,31 @@ class TransitDuetV2Runner:
             self.freq_wait_lower_board_credit_weight
             * lower_high_share
             * boarded_norm)
+        lower_improvement_credit = 0.0
+        if self.freq_wait_lower_improvement_credit_weight > 0.0:
+            try:
+                key = (bool(direction), int(station_id))
+            except (TypeError, ValueError):
+                key = ('trip', int(trip_id))
+            prev_wait_norm = self._freq_wait_improvement_baseline.get(key)
+            if prev_wait_norm is not None:
+                improvement = max(0.0, float(prev_wait_norm) - float(wait_norm))
+                if self.freq_wait_lower_improvement_clip > 0.0:
+                    improvement = min(
+                        improvement, self.freq_wait_lower_improvement_clip)
+                lower_improvement_credit = (
+                    self.freq_wait_lower_improvement_credit_weight
+                    * lower_high_share
+                    * boarded_norm
+                    * improvement)
+            alpha = self.freq_wait_lower_improvement_ema_alpha
+            if prev_wait_norm is None or alpha >= 1.0:
+                next_wait_norm = float(wait_norm)
+            else:
+                next_wait_norm = (
+                    (1.0 - alpha) * float(prev_wait_norm)
+                    + alpha * float(wait_norm))
+            self._freq_wait_improvement_baseline[key] = float(next_wait_norm)
 
         stats = self._ep_trip_wait_stats[int(trip_id)]
         stats['pax'] += int(boarded_count)
@@ -912,12 +947,15 @@ class TransitDuetV2Runner:
 
         self._ep_lower_wait_penalties.append(float(lower_penalty))
         self._ep_lower_board_credits.append(float(lower_board_credit))
+        self._ep_lower_wait_improvement_credits.append(
+            float(lower_improvement_credit))
         self._ep_lower_wait_net.append(
-            float(lower_board_credit - lower_penalty))
+            float(lower_board_credit + lower_improvement_credit - lower_penalty))
         self._ep_freq_wait_low_shares.append(float(low_share))
         self._ep_freq_wait_lower_high_shares.append(float(lower_high_share))
         self._ep_freq_wait_boarded_pax += int(boarded_count)
-        return float(lower_penalty - lower_board_credit)
+        return float(
+            lower_penalty - lower_board_credit - lower_improvement_credit)
 
     def _upper_frequency_wait_credits(self, transitions):
         """Per-trip zero-mean upper credit from low-frequency passenger wait."""
@@ -1380,11 +1418,13 @@ class TransitDuetV2Runner:
         self._ep_freq_holdfb_features = []
         self._ep_lower_wait_penalties = []
         self._ep_lower_board_credits = []
+        self._ep_lower_wait_improvement_credits = []
         self._ep_lower_wait_net = []
         self._ep_upper_wait_credits = []
         self._ep_freq_wait_low_shares = []
         self._ep_freq_wait_lower_high_shares = []
         self._ep_freq_wait_boarded_pax = 0
+        self._freq_wait_improvement_baseline = {}
         self._ep_trip_wait_stats = defaultdict(lambda: {
             'pax': 0,
             'wait_s': 0.0,
@@ -1492,7 +1532,9 @@ class TransitDuetV2Runner:
                                 board_count,
                                 low_demand,
                                 local_high,
-                                local_low)
+                                local_low,
+                                station_id,
+                                cur_dir)
                         self._record_frequency_hold_feedback(
                             cur_dir, local_high, act_val,
                             board_wait_sum_s, board_count)
@@ -1757,6 +1799,8 @@ class TransitDuetV2Runner:
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
+        lower_improvement_credit_stat = _stat(
+            self._ep_lower_wait_improvement_credits)
         lower_wait_net_stat = _stat(self._ep_lower_wait_net)
         upper_wait_credit_stat = _stat(self._ep_upper_wait_credits)
         wait_low_share_stat = _stat(self._ep_freq_wait_low_shares)
@@ -1916,6 +1960,10 @@ class TransitDuetV2Runner:
             'freq_wait_lower_penalty_max': lower_wait_stat['max'],
             'freq_wait_lower_board_credit_mean': lower_board_credit_stat['mean'],
             'freq_wait_lower_board_credit_max': lower_board_credit_stat['max'],
+            'freq_wait_lower_improvement_credit_mean':
+                lower_improvement_credit_stat['mean'],
+            'freq_wait_lower_improvement_credit_max':
+                lower_improvement_credit_stat['max'],
             'freq_wait_lower_net_mean': lower_wait_net_stat['mean'],
             'freq_wait_upper_credit_mean': upper_wait_credit_stat['mean'],
             'freq_wait_upper_credit_std': upper_wait_credit_stat['std'],
@@ -1949,6 +1997,7 @@ class TransitDuetV2Runner:
                    'upper_plan_penalty_mean',
                    'freq_wait_lower_penalty_mean',
                    'freq_wait_lower_board_credit_mean',
+                   'freq_wait_lower_improvement_credit_mean',
                    'freq_wait_lower_net_mean',
                    'freq_wait_upper_credit_mean',
                    'freq_wait_low_share_mean',
@@ -2049,6 +2098,7 @@ class TransitDuetV2Runner:
         if self.freq_wait_enable:
             print(f"  WAIT-F   lower_pen={row.get('freq_wait_lower_penalty_mean',0):.4f}  "
                   f"board_credit={row.get('freq_wait_lower_board_credit_mean',0):+.4f}  "
+                  f"improve_credit={row.get('freq_wait_lower_improvement_credit_mean',0):+.4f}  "
                   f"net={row.get('freq_wait_lower_net_mean',0):+.4f}  "
                   f"upper_credit={row.get('freq_wait_upper_credit_mean',0):+.4f}"
                   f"±{row.get('freq_wait_upper_credit_std',0):.4f}  "

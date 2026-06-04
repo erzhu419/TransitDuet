@@ -96,6 +96,7 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_gap_risk_cap_start": 0.05,
         "_promotion_replan_gap_risk_cap_full": 0.20,
         "_promotion_replan_target_headway_max_s": 0.0,
+        "_promotion_replan_final_delta_abs_max_s": 0.0,
         "_promotion_replan_shift_sign": -1.0,
         "_promotion_replan_base_action": "actor",
         "_promotion_replan_actor_base_trust_s": 2.0,
@@ -136,6 +137,11 @@ def apply_persistent_stress_preset() -> None:
     """
     COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"] = 0.0
     COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_max_s"] = 45.0
+    COMMON_OVERRIDES.setdefault("reward_attribution", {}).update({
+        "lower_improvement_credit_weight": 100.0,
+        "lower_improvement_ema_alpha": 0.08,
+        "lower_improvement_clip": 1.0,
+    })
     wait_aware = json.loads(json.dumps(VARIANTS["native_wait_aware_replan"]))
     wait_aware.update({
         "_promotion_gate_threshold": 0.20,
@@ -152,6 +158,7 @@ def apply_persistent_stress_preset() -> None:
         "_promotion_replan_gap_risk_cap_start": 0.05,
         "_promotion_replan_gap_risk_cap_full": 0.20,
         "_promotion_replan_target_headway_max_s": 347.0,
+        "_promotion_replan_final_delta_abs_max_s": 1.27,
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
         "_promotion_replan_shift_sign": -1.0,
@@ -232,6 +239,9 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_target_headway_guard_rejects": float(
             last.get("shared_ppo_target_headway_guard_rejects", 0.0)
         ),
+        "shared_ppo_final_delta_guard_rejects": float(
+            last.get("shared_ppo_final_delta_guard_rejects", 0.0)
+        ),
         "shared_ppo_gate_value_mean": float(last.get("shared_ppo_gate_value_mean", 0.0)),
         "shared_ppo_wait_replan_count": float(last.get("shared_ppo_wait_replan_count", 0.0)),
         "shared_ppo_wait_replan_pressure_mean": float(last.get("shared_ppo_wait_replan_pressure_mean", 0.0)),
@@ -245,6 +255,15 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_wait_replan_actor_base_used_mean": float(last.get("shared_ppo_wait_replan_actor_base_used_mean", 0.0)),
         "shared_ppo_wait_replan_base_delta_abs_mean_s": float(last.get("shared_ppo_wait_replan_base_delta_abs_mean_s", 0.0)),
         "shared_ppo_wait_replan_final_delta_abs_mean_s": float(last.get("shared_ppo_wait_replan_final_delta_abs_mean_s", 0.0)),
+        "freq_wait_lower_improvement_credit_mean": float(
+            summary.get(
+                "freq_wait_lower_improvement_credit_mean_mean",
+                last.get("freq_wait_lower_improvement_credit_mean", 0.0),
+            )
+        ),
+        "freq_wait_lower_net_mean": float(
+            summary.get("freq_wait_lower_net_mean_mean", last.get("freq_wait_lower_net_mean", 0.0))
+        ),
         "shared_ppo_loss": float(last.get("shared_ppo_loss", 0.0)),
     }
 
@@ -266,6 +285,7 @@ def paired_checks(
     if treatment == "native_wait_aware_replan":
         metrics.extend([
             ("shared_ppo_target_headway_guard_rejects", False),
+            ("shared_ppo_final_delta_guard_rejects", False),
             ("shared_ppo_wait_replan_count", False),
             ("shared_ppo_wait_replan_pressure_mean", False),
             ("shared_ppo_wait_replan_shift_pressure_mean", False),
@@ -278,6 +298,8 @@ def paired_checks(
             ("shared_ppo_wait_replan_actor_base_used_mean", False),
             ("shared_ppo_wait_replan_base_delta_abs_mean_s", False),
             ("shared_ppo_wait_replan_final_delta_abs_mean_s", False),
+            ("freq_wait_lower_improvement_credit_mean", False),
+            ("freq_wait_lower_net_mean", False),
             ("upper_plan_target_mean", True),
             ("terminal_launch_shift_mean", True),
         ])
@@ -456,6 +478,7 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
         promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
         promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
+        promotion_replan_final_delta_abs_max_s=float(overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)),
         promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
         promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
         promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
@@ -574,6 +597,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_gate_evaluations",
             "shared_ppo_gate_replans",
             "shared_ppo_target_headway_guard_rejects",
+            "shared_ppo_final_delta_guard_rejects",
             "shared_ppo_gate_value_mean",
             "shared_ppo_wait_replan_count",
             "shared_ppo_wait_replan_pressure_mean",
@@ -582,6 +606,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_wait_replan_actor_base_used_mean",
             "shared_ppo_wait_replan_base_delta_abs_mean_s",
             "shared_ppo_wait_replan_final_delta_abs_mean_s",
+            "freq_wait_lower_improvement_credit_mean",
+            "freq_wait_lower_net_mean",
         ]:
             values = np.asarray([float(row.get(metric, 0.0)) for row in vrows], dtype=np.float64)
             summary[f"{variant}_{metric}_mean"] = float(np.mean(values)) if values.size else 0.0
