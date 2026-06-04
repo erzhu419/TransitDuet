@@ -160,7 +160,7 @@ Done means:
 
 ### 3. Per-Domain Weakness Repair
 
-Status: `[x]` repaired by lower drift-cost constraint
+Status: `[~]` lower drift repaired; fixed-headway gap still open
 
 The current main wins on average but loses narrowly in highnoise and odshift.
 This must either be repaired or explained with statistically defensible
@@ -193,6 +193,48 @@ upper-only rush degradation. Adaptive gates are documented negative results:
 they still activate upper projection in terminal/rush and do not beat
 lower-only. The fixed-headway gap is not closed enough for a top-journal claim;
 do not promote an adaptive gate without new evidence.
+
+2026-06-03 fixed-gap follow-up: several 100/200ep attempts were run and should
+be treated as negative evidence rather than promotion candidates.
+
+100ep fleet-safe scalarization:
+
+```text
+fleetstable / fleetfloor30 changed w_fleet as intended but did not close the
+fixed-headway gap. Overall vs fixed-headway stayed statistically ambiguous, and
+terminal/rush still carried the gap.
+```
+
+100ep proactive lower no-harm:
+
+```text
+proactive1 overall vs fixed-headway  +0.0295 CI [-0.0043,+0.0633]
+proactive2 overall vs fixed-headway  +0.0306 CI [+0.0016,+0.0606]
+hfgate     overall vs fixed-headway  +0.0349 CI [+0.0058,+0.0614]
+hfgate2    overall vs fixed-headway  +0.0550 CI [+0.0239,+0.0891]
+```
+
+Interpretation: proactive shrink can help highnoise overshoot, but hand gates
+trigger in OD/terminal/rush trajectories and damage wait/composite.
+
+200ep lower-only / stronger drift follow-up:
+
+```text
+loweronly    overall vs fixed-headway +0.0252 CI [-0.0109,+0.0641]
+             terminal +0.0691 and rush +0.0782 were significant regressions
+driftcost50  overall vs fixed-headway +0.0524 CI [+0.0164,+0.0918]
+adaptdrift   overall vs fixed-headway +0.0528 CI [+0.0202,+0.0860]
+```
+
+Interpretation: lower-only no-harm does not survive 200ep as a main promotion.
+Stronger/adaptive drift cost improves terminal/rush in isolation but destroys
+OD/highnoise tradeoff, so it is not a universal repair.
+
+Current decision: do not promote fleetstable, fleetfloor30, proactive1,
+proactive2, hfgate, hfgate2, driftcost50, or adaptdrift. The fixed-headway gap
+needs a mechanism change rather than another hand threshold: likely a
+holding-value-per-fleet-second guard, or Phase-4 terminal/first-stop execution
+that moves useful delay off the on-route fleet.
 
 Done means:
 
