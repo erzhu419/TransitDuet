@@ -24,8 +24,8 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             wait_aware = VARIANTS["native_wait_aware_replan"]
             self.assertEqual(wait_aware["_promotion_replan_same_hold_max"], 0.25)
             self.assertEqual(wait_aware["_promotion_replan_same_wait_max"], 0.85)
-            self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_start"], 0.0)
-            self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_full"], 0.10)
+            self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_start"], 0.05)
+            self.assertEqual(wait_aware["_promotion_replan_gap_risk_cap_full"], 0.20)
             self.assertTrue(wait_aware["_promotion_replan_terminal_early_relax"])
             self.assertEqual(
                 COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"],
