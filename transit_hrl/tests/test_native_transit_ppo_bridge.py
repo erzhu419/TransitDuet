@@ -481,6 +481,61 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(meta2["abs_shift_s"], 0.0)
         self.assertEqual(meta2["gap_guard_active"], 1.0)
 
+    def test_wait_aware_replan_gap_risk_cap_scales_shift(self):
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeHoldFeedbackRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_low_demand": 0.0,
+            "freq_low_forecast": 0.0,
+            "freq_low_slope": 0.0,
+            "freq_high_energy": 0.0,
+            "freq_promotion_strength": 0.0,
+        }
+        balanced_state = np.zeros(13, dtype=np.float32)
+        balanced_state[3] = 1.00
+        balanced_state[8] = 1.00
+        balanced_state[-3] = 1.0
+        balanced, meta_balanced = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=balanced_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            gap_risk_cap_start=0.05,
+            gap_risk_cap_full=0.20,
+        )
+        delayed_state = balanced_state.copy()
+        delayed_state[3] = 1.14
+        capped, meta_capped = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=delayed_state,
+            wait_gain_s=16.0,
+            max_shift_s=10.0,
+            holdfb_dim=4,
+            state_wait_weight=1.0,
+            frequency_weight=0.0,
+            min_pressure=0.25,
+            gap_risk_cap_start=0.05,
+            gap_risk_cap_full=0.20,
+        )
+        self.assertLess(meta_capped["abs_shift_s"], meta_balanced["abs_shift_s"])
+        self.assertLess(meta_capped["gap_risk_scale"], 1.0)
+        self.assertGreater(meta_capped["gap_risk_scale"], 0.0)
+        self.assertLess(float(abs(capped[0] - active_action[0])), float(abs(balanced[0] - active_action[0])))
+
     def test_learned_gate_hook_can_preselect_wait_aware_replan_action(self):
         runner = _FakeNativeRunner()
         bridge = NativeTransitPPOBridge.from_runner(

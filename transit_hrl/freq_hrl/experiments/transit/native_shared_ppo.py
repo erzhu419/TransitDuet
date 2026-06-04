@@ -131,6 +131,8 @@ def wait_aware_replan_action(
     same_wait_max: float = 0.0,
     gap_guard_min_ratio: float = 0.0,
     gap_guard_max_ratio: float = 0.0,
+    gap_risk_cap_start: float = 0.0,
+    gap_risk_cap_full: float = 0.0,
     shift_sign: float = -1.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     """Build a promotion-triggered timetable action that reacts to wait pressure.
@@ -195,6 +197,7 @@ def wait_aware_replan_action(
             "gap_guard_active": float(gap_guard_active),
             "wait_guard_active": float(wait_guard_active),
             "shift_pressure": 0.0,
+            "gap_risk_scale": 1.0,
             "signed_shift_s": 0.0,
             "abs_shift_s": 0.0,
         }
@@ -206,6 +209,17 @@ def wait_aware_replan_action(
     else:
         shift_pressure = pressure
     shift_pressure = max(0.0, min(1.0, float(shift_pressure)))
+    gap_risk_scale = 1.0
+    start = max(float(gap_risk_cap_start), 0.0)
+    full = max(float(gap_risk_cap_full), start)
+    if full > start:
+        gap_deviation = abs(float(gap_ratio) - 1.0)
+        if gap_deviation > start:
+            gap_risk_scale = 1.0 - min(
+                1.0,
+                (gap_deviation - start) / max(full - start, 1e-6),
+            )
+            shift_pressure *= gap_risk_scale
     sign = -1.0 if float(shift_sign) < 0.0 else 1.0
     shift = sign * min(abs(float(max_shift_s)), abs(float(wait_gain_s)) * shift_pressure)
     action = active.copy()
@@ -231,6 +245,7 @@ def wait_aware_replan_action(
         "gap_guard_active": 0.0,
         "wait_guard_active": 0.0,
         "shift_pressure": float(shift_pressure),
+        "gap_risk_scale": float(gap_risk_scale),
         "shift_sign": float(sign),
         "signed_shift_s": float(np.mean(realized[sl])) if realized[sl].size else 0.0,
         "abs_shift_s": float(np.mean(np.abs(realized[sl]))) if realized[sl].size else 0.0,
@@ -615,6 +630,7 @@ class _SharedPPOPolicyProxy:
         self.gate_values: list[float] = []
         self.wait_replan_pressures: list[float] = []
         self.wait_replan_shift_pressures: list[float] = []
+        self.wait_replan_gap_risk_scales: list[float] = []
         self.wait_replan_gap_ratios: list[float] = []
         self.wait_replan_same_holds: list[float] = []
         self.wait_replan_same_waits: list[float] = []
@@ -703,6 +719,9 @@ class _SharedPPOPolicyProxy:
                     ))
                     self.wait_replan_shift_pressures.append(float(
                         preselect_metadata.get("shift_pressure", 0.0)
+                    ))
+                    self.wait_replan_gap_risk_scales.append(float(
+                        preselect_metadata.get("gap_risk_scale", 1.0)
                     ))
                     self.wait_replan_gap_ratios.append(float(
                         preselect_metadata.get("state_dispatch_gap_ratio", 0.0)
@@ -897,6 +916,8 @@ def install_shared_ppo_episode_loop(
     promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_gap_risk_cap_start: float = 0.0,
+    promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
@@ -1054,6 +1075,8 @@ def install_shared_ppo_episode_loop(
                         same_wait_max=float(promotion_replan_same_wait_max),
                         gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
                         gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+                        gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
+                        gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
                         shift_sign=float(promotion_replan_shift_sign),
                     )
                     preselect_metadata = dict(preselect_metadata)
@@ -1260,6 +1283,8 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_same_wait_max: float = 0.0,
     promotion_replan_gap_guard_min_ratio: float = 0.0,
     promotion_replan_gap_guard_max_ratio: float = 0.0,
+    promotion_replan_gap_risk_cap_start: float = 0.0,
+    promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
     promotion_replan_actor_base_trust_s: float = 0.0,
@@ -1340,6 +1365,8 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_same_wait_max=float(promotion_replan_same_wait_max),
         promotion_replan_gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
         promotion_replan_gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+        promotion_replan_gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
+        promotion_replan_gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
         promotion_replan_shift_sign=float(promotion_replan_shift_sign),
         promotion_replan_base_action=str(promotion_replan_base_action),
         promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
@@ -1390,6 +1417,10 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_wait_replan_gap_ratio_mean": (
                 float(np.mean(installed["upper_proxy"].wait_replan_gap_ratios))
                 if installed["upper_proxy"].wait_replan_gap_ratios else 0.0
+            ),
+            "shared_ppo_wait_replan_gap_risk_scale_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_gap_risk_scales))
+                if installed["upper_proxy"].wait_replan_gap_risk_scales else 0.0
             ),
             "shared_ppo_wait_replan_same_hold_mean": (
                 float(np.mean(installed["upper_proxy"].wait_replan_same_holds))
@@ -1458,6 +1489,8 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_same_wait_max": float(promotion_replan_same_wait_max),
         "promotion_replan_gap_guard_min_ratio": float(promotion_replan_gap_guard_min_ratio),
         "promotion_replan_gap_guard_max_ratio": float(promotion_replan_gap_guard_max_ratio),
+        "promotion_replan_gap_risk_cap_start": float(promotion_replan_gap_risk_cap_start),
+        "promotion_replan_gap_risk_cap_full": float(promotion_replan_gap_risk_cap_full),
         "promotion_replan_shift_sign": float(promotion_replan_shift_sign),
         "promotion_replan_base_action": str(promotion_replan_base_action),
         "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
@@ -1670,6 +1703,8 @@ def main() -> None:
     parser.add_argument("--promotion-replan-same-wait-max", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-min-ratio", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-guard-max-ratio", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-gap-risk-cap-start", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-gap-risk-cap-full", type=float, default=0.0)
     parser.add_argument("--promotion-replan-shift-sign", type=float, default=-1.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
     parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
@@ -1713,6 +1748,8 @@ def main() -> None:
             promotion_replan_same_wait_max=float(args.promotion_replan_same_wait_max),
             promotion_replan_gap_guard_min_ratio=float(args.promotion_replan_gap_guard_min_ratio),
             promotion_replan_gap_guard_max_ratio=float(args.promotion_replan_gap_guard_max_ratio),
+            promotion_replan_gap_risk_cap_start=float(args.promotion_replan_gap_risk_cap_start),
+            promotion_replan_gap_risk_cap_full=float(args.promotion_replan_gap_risk_cap_full),
             promotion_replan_shift_sign=float(args.promotion_replan_shift_sign),
             promotion_replan_base_action=str(args.promotion_replan_base_action),
             promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),
