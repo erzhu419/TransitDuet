@@ -702,6 +702,7 @@ def main() -> None:
             f"reward_delta={learned_reward['delta_mean']:+.4f} "
             f"status={learned_reward['status']}"
         )
+    print("DONE")
 
 
 if __name__ == "__main__":
