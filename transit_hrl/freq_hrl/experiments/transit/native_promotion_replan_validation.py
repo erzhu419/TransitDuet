@@ -168,6 +168,16 @@ def apply_persistent_stress_preset() -> None:
     })
 
 
+def select_variants(names: list[str]) -> None:
+    requested = [str(name) for name in names]
+    missing = [name for name in requested if name not in VARIANTS]
+    if missing:
+        raise ValueError(f"unknown variant(s): {', '.join(missing)}")
+    selected = {name: VARIANTS[name] for name in requested}
+    VARIANTS.clear()
+    VARIANTS.update(selected)
+
+
 def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     for key, value in override.items():
         if isinstance(value, dict) and isinstance(base.get(key), dict):
@@ -663,6 +673,12 @@ def main() -> None:
         default=default_config,
     )
     parser.add_argument("--preset", choices=["default", "persistent_stress"], default="default")
+    parser.add_argument(
+        "--variants",
+        nargs="+",
+        default=None,
+        help="Optional subset of validation variants to run, e.g. interval_only.",
+    )
     parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41, 51, 61, 71, 81, 91, 101])
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--min-pairs", type=int, default=5)
@@ -684,6 +700,8 @@ def main() -> None:
         apply_persistent_stress_preset()
         if Path(args.config) == default_config:
             args.config = PERSISTENT_STRESS_CONFIG
+    if args.variants:
+        select_variants(list(args.variants))
     payload = run_validation(
         output_dir=args.output_dir,
         config_path=args.config,

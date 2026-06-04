@@ -9,6 +9,7 @@ from freq_hrl.experiments.transit.native_promotion_replan_validation import (
     VARIANTS,
     apply_persistent_stress_preset,
     paired_checks,
+    select_variants,
     stress_subset_checks,
     write_outputs,
 )
@@ -33,6 +34,21 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
                 COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"],
                 0.0,
             )
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_select_variants_filters_current_protocol(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset()
+            select_variants(["interval_only"])
+            self.assertEqual(set(VARIANTS), {"interval_only"})
+            with self.assertRaises(ValueError):
+                select_variants(["missing_variant"])
         finally:
             COMMON_OVERRIDES.clear()
             COMMON_OVERRIDES.update(old_common)
