@@ -9,6 +9,7 @@ from typing import Any
 
 from freq_hrl.experiments.transit.native_promotion_replan_validation import (
     VARIANTS,
+    _row_from_payload,
     paired_checks,
     summarize,
     write_outputs,
@@ -18,6 +19,30 @@ from freq_hrl.experiments.transit.native_promotion_replan_validation import (
 def _read_payload(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def _recover_seed_payloads(input_dir: Path) -> dict[str, dict[str, Any]]:
+    recovered: dict[str, dict[str, Any]] = {}
+    for variant_dir in sorted(Path(input_dir).iterdir() if Path(input_dir).exists() else []):
+        if not variant_dir.is_dir():
+            continue
+        variant = variant_dir.name
+        by_seed: dict[str, Any] = {}
+        for summary_path in sorted(variant_dir.glob("seed_*/summary.json")):
+            try:
+                seed = int(summary_path.parent.name.split("_", 1)[1])
+            except (IndexError, ValueError):
+                continue
+            payload = _read_payload(summary_path)
+            by_seed[str(seed)] = {
+                "summary": payload.get("summary", {}),
+                "status": payload.get("status", "missing"),
+                "rows": payload.get("rows", []),
+                "private_overrides": payload.get("private_overrides", {}),
+            }
+        if by_seed:
+            recovered[variant] = by_seed
+    return recovered
 
 
 def merge_native_promotion_shards(
@@ -35,9 +60,10 @@ def merge_native_promotion_shards(
     replay_updates = 0
     for input_dir in input_dirs:
         summary_path = Path(input_dir) / "summary.json"
-        if not summary_path.exists():
-            continue
-        payload = _read_payload(summary_path)
+        payload = _read_payload(summary_path) if summary_path.exists() else {
+            "payloads": _recover_seed_payloads(Path(input_dir)),
+            "rows": [],
+        }
         if payload.get("config_path"):
             config_paths.append(str(payload["config_path"]))
         episodes = max(episodes, int(payload.get("episodes", 0)))
@@ -61,6 +87,9 @@ def merge_native_promotion_shards(
             target = payloads.setdefault(str(variant), {})
             for seed_key, compact in by_seed.items():
                 target[str(seed_key)] = compact
+                key = (str(variant), int(seed_key))
+                if key not in rows_by_key:
+                    rows_by_key[key] = _row_from_payload(int(seed_key), str(variant), compact)
     rows = [
         rows_by_key[key]
         for key in sorted(rows_by_key, key=lambda item: (

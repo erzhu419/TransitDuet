@@ -192,6 +192,48 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             )
             self.assertTrue((Path(tmp) / "merged" / "summary.json").exists())
 
+    def test_merge_native_promotion_shards_recovers_cancelled_seed_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shard = Path(tmp) / "cancelled_shard"
+            for variant, reward, wait in [
+                ("interval_only", -10.0, 5.0),
+                ("native_wait_aware_replan", -9.0, 4.8),
+            ]:
+                seed_dir = shard / variant / "seed_7"
+                seed_dir.mkdir(parents=True)
+                with (seed_dir / "summary.json").open("w", encoding="utf-8") as f:
+                    json.dump({
+                        "status": "ok",
+                        "summary": {
+                            "ep_reward_mean": reward,
+                            "avg_wait_min_mean": wait,
+                            "headway_cv_mean": 0.2,
+                            "score_mean": -wait,
+                            "upper_plan_decisions_mean": 3.0,
+                            "freq_promotion_strength_mean": 0.0,
+                        },
+                        "rows": [
+                            {
+                                "ep_reward": reward,
+                                "avg_wait_min": wait,
+                                "headway_cv": 0.2,
+                                "score": -wait,
+                                "shared_ppo_wait_replan_count": 1.0 if variant != "interval_only" else 0.0,
+                            },
+                        ],
+                    }, f)
+            merged = merge_native_promotion_shards(
+                input_dirs=[shard],
+                output_dir=Path(tmp) / "merged",
+                min_pairs=1,
+            )
+            self.assertEqual(len(merged["rows"]), 2)
+            self.assertEqual(set(merged["seeds"]), {7})
+            self.assertTrue(any(
+                row["check"] == "native_wait_aware_replan_vs_interval_avg_wait_min"
+                for row in merged["paired_checks"]
+            ))
+
     def test_write_outputs_accepts_variant_specific_config_columns(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "out"
