@@ -706,6 +706,15 @@ def main() -> None:
         help="Optional subset of validation variants to run, e.g. interval_only.",
     )
     parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41, 51, 61, 71, 81, 91, 101])
+    parser.add_argument(
+        "--seed-index-start",
+        type=int,
+        default=None,
+        help="Generate seeds as seed_base + seed_step * i for i in [start, end).",
+    )
+    parser.add_argument("--seed-index-end", type=int, default=None)
+    parser.add_argument("--seed-base", type=int, default=31)
+    parser.add_argument("--seed-step", type=int, default=10)
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--min-pairs", type=int, default=5)
     parser.add_argument("--device", default="cpu")
@@ -728,10 +737,20 @@ def main() -> None:
             args.config = PERSISTENT_STRESS_CONFIG
     if args.variants:
         select_variants(list(args.variants))
+    seeds = list(args.seeds)
+    if args.seed_index_start is not None or args.seed_index_end is not None:
+        if args.seed_index_start is None or args.seed_index_end is None:
+            raise ValueError("--seed-index-start and --seed-index-end must be provided together")
+        if int(args.seed_index_end) <= int(args.seed_index_start):
+            raise ValueError("--seed-index-end must be greater than --seed-index-start")
+        seeds = [
+            int(args.seed_base) + int(args.seed_step) * idx
+            for idx in range(int(args.seed_index_start), int(args.seed_index_end))
+        ]
     payload = run_validation(
         output_dir=args.output_dir,
         config_path=args.config,
-        seeds=list(args.seeds),
+        seeds=seeds,
         episodes=int(args.episodes),
         device=str(args.device),
         min_pairs=int(args.min_pairs),
@@ -739,28 +758,25 @@ def main() -> None:
         offpolicy_replay_updates=int(args.offpolicy_replay_updates),
         workers=int(args.workers),
     )
-    reward_check = next(
-        row for row in payload["paired_checks"]
-        if row["check"] == "native_promotion_replan_vs_interval_ep_reward"
-    )
-    learned_reward = next(
-        (
-            row for row in payload["paired_checks"]
-            if row["check"] == "native_learned_gate_vs_interval_ep_reward"
-        ),
-        None,
-    )
     print(f"wrote {args.output_dir}")
-    print(
-        "native_promotion_replan "
-        f"reward_delta={reward_check['delta_mean']:+.4f} "
-        f"status={reward_check['status']}"
-    )
-    if learned_reward is not None:
+    for check_name, label in [
+        ("native_promotion_replan_vs_interval_ep_reward", "native_promotion_replan"),
+        ("native_learned_gate_vs_interval_ep_reward", "native_learned_gate"),
+        ("native_wait_aware_replan_vs_interval_ep_reward", "native_wait_aware_replan"),
+    ]:
+        reward_check = next(
+            (
+                row for row in payload["paired_checks"]
+                if row["check"] == check_name
+            ),
+            None,
+        )
+        if reward_check is None or int(reward_check.get("n_common", 0) or 0) <= 0:
+            continue
         print(
-            "native_learned_gate "
-            f"reward_delta={learned_reward['delta_mean']:+.4f} "
-            f"status={learned_reward['status']}"
+            f"{label} "
+            f"reward_delta={reward_check['delta_mean']:+.4f} "
+            f"status={reward_check['status']}"
         )
     print("DONE")
 
