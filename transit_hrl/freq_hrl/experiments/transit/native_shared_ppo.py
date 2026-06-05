@@ -152,6 +152,7 @@ def wait_aware_replan_action(
     state_wait_weight: float = 1.0,
     frequency_weight: float = 1.0,
     min_pressure: float = 0.0,
+    max_pressure: float = 0.0,
     hold_guard_weight: float = 0.0,
     same_hold_max: float = 0.0,
     same_wait_min: float = 0.0,
@@ -211,7 +212,16 @@ def wait_aware_replan_action(
         float(same_wait_max) > 0.0
         and float(hold_wait["same_wait"]) > float(same_wait_max)
     )
-    if pressure < float(min_pressure) or gap_guard_active or wait_guard_active:
+    pressure_guard_active = (
+        float(max_pressure) > 0.0
+        and pressure > float(max_pressure)
+    )
+    if (
+        pressure < float(min_pressure)
+        or pressure_guard_active
+        or gap_guard_active
+        or wait_guard_active
+    ):
         return active.astype(np.float32), {
             "pressure": float(pressure),
             "state_wait_pressure": float(state_wait),
@@ -221,6 +231,7 @@ def wait_aware_replan_action(
             "state_other_hold": float(hold_wait["other_hold"]),
             "state_other_wait": float(hold_wait["other_wait"]),
             "state_dispatch_gap_ratio": float(gap_ratio),
+            "pressure_guard_active": float(pressure_guard_active),
             "gap_guard_active": float(gap_guard_active),
             "wait_guard_active": float(wait_guard_active),
             "shift_pressure": 0.0,
@@ -269,6 +280,7 @@ def wait_aware_replan_action(
         "state_other_hold": float(hold_wait["other_hold"]),
         "state_other_wait": float(hold_wait["other_wait"]),
         "state_dispatch_gap_ratio": float(gap_ratio),
+        "pressure_guard_active": 0.0,
         "gap_guard_active": 0.0,
         "wait_guard_active": 0.0,
         "shift_pressure": float(shift_pressure),
@@ -936,6 +948,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_state_wait_weight: float = 1.0,
     promotion_replan_frequency_weight: float = 1.0,
     promotion_replan_min_pressure: float = 0.0,
+    promotion_replan_max_pressure: float = 0.0,
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
     promotion_replan_same_hold_max: float = 0.0,
@@ -946,6 +959,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_gap_risk_cap_start: float = 0.0,
     promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_target_headway_max_s: float = 0.0,
+    promotion_replan_base_delta_abs_max_s: float = 0.0,
     promotion_replan_final_delta_abs_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
@@ -978,6 +992,8 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_terminal_early_relax = bool(
         promotion_replan_terminal_early_relax)
     runner.freq_hrl_promotion_target_headway_guard_rejects = 0
+    runner.freq_hrl_promotion_pressure_guard_rejects = 0
+    runner.freq_hrl_promotion_base_delta_guard_rejects = 0
     runner.freq_hrl_promotion_final_delta_guard_rejects = 0
     if bool(learned_promotion_gate):
         last_gate_replan_by_key: dict[Any, float] = {}
@@ -1100,6 +1116,7 @@ def install_shared_ppo_episode_loop(
                         state_wait_weight=float(promotion_replan_state_wait_weight),
                         frequency_weight=float(promotion_replan_frequency_weight),
                         min_pressure=float(promotion_replan_min_pressure),
+                        max_pressure=float(promotion_replan_max_pressure),
                         hold_guard_weight=float(promotion_replan_hold_guard_weight),
                         same_hold_max=float(promotion_replan_same_hold_max),
                         same_wait_min=float(promotion_replan_same_wait_min),
@@ -1122,6 +1139,30 @@ def install_shared_ppo_episode_loop(
                         np.abs(np.asarray(native_override, dtype=np.float64)
                                - np.asarray(active_action, dtype=np.float64))
                     ))
+                    if float(preselect_metadata.get("pressure_guard_active", 0.0)) > 0.0:
+                        runner.freq_hrl_promotion_pressure_guard_rejects = int(
+                            getattr(
+                                runner,
+                                "freq_hrl_promotion_pressure_guard_rejects",
+                                0,
+                            )
+                        ) + 1
+                        return False
+                    base_delta_abs_max_s = max(
+                        float(promotion_replan_base_delta_abs_max_s), 0.0)
+                    if (
+                        base_delta_abs_max_s > 0.0
+                        and float(preselect_metadata.get("base_action_delta_abs_s", 0.0))
+                        > base_delta_abs_max_s
+                    ):
+                        runner.freq_hrl_promotion_base_delta_guard_rejects = int(
+                            getattr(
+                                runner,
+                                "freq_hrl_promotion_base_delta_guard_rejects",
+                                0,
+                            )
+                        ) + 1
+                        return False
                     final_delta_abs_max_s = max(
                         float(promotion_replan_final_delta_abs_max_s), 0.0)
                     if (
@@ -1342,6 +1383,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_state_wait_weight: float = 1.0,
     promotion_replan_frequency_weight: float = 1.0,
     promotion_replan_min_pressure: float = 0.0,
+    promotion_replan_max_pressure: float = 0.0,
     promotion_replan_require_shift: bool = False,
     promotion_replan_hold_guard_weight: float = 0.0,
     promotion_replan_same_hold_max: float = 0.0,
@@ -1352,6 +1394,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_gap_risk_cap_start: float = 0.0,
     promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_target_headway_max_s: float = 0.0,
+    promotion_replan_base_delta_abs_max_s: float = 0.0,
     promotion_replan_final_delta_abs_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
@@ -1426,6 +1469,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_state_wait_weight=float(promotion_replan_state_wait_weight),
         promotion_replan_frequency_weight=float(promotion_replan_frequency_weight),
         promotion_replan_min_pressure=float(promotion_replan_min_pressure),
+        promotion_replan_max_pressure=float(promotion_replan_max_pressure),
         promotion_replan_require_shift=bool(promotion_replan_require_shift),
         promotion_replan_hold_guard_weight=float(promotion_replan_hold_guard_weight),
         promotion_replan_same_hold_max=float(promotion_replan_same_hold_max),
@@ -1436,6 +1480,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
         promotion_replan_gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
         promotion_replan_target_headway_max_s=float(promotion_replan_target_headway_max_s),
+        promotion_replan_base_delta_abs_max_s=float(promotion_replan_base_delta_abs_max_s),
         promotion_replan_final_delta_abs_max_s=float(promotion_replan_final_delta_abs_max_s),
         promotion_replan_shift_sign=float(promotion_replan_shift_sign),
         promotion_replan_base_action=str(promotion_replan_base_action),
@@ -1474,6 +1519,16 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_target_headway_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_target_headway_guard_rejects",
+                0,
+            )),
+            "shared_ppo_pressure_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_pressure_guard_rejects",
+                0,
+            )),
+            "shared_ppo_base_delta_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_base_delta_guard_rejects",
                 0,
             )),
             "shared_ppo_final_delta_guard_rejects": int(getattr(
@@ -1562,6 +1617,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_state_wait_weight": float(promotion_replan_state_wait_weight),
         "promotion_replan_frequency_weight": float(promotion_replan_frequency_weight),
         "promotion_replan_min_pressure": float(promotion_replan_min_pressure),
+        "promotion_replan_max_pressure": float(promotion_replan_max_pressure),
         "promotion_replan_require_shift": bool(promotion_replan_require_shift),
         "promotion_replan_hold_guard_weight": float(promotion_replan_hold_guard_weight),
         "promotion_replan_same_hold_max": float(promotion_replan_same_hold_max),
@@ -1572,6 +1628,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_gap_risk_cap_start": float(promotion_replan_gap_risk_cap_start),
         "promotion_replan_gap_risk_cap_full": float(promotion_replan_gap_risk_cap_full),
         "promotion_replan_target_headway_max_s": float(promotion_replan_target_headway_max_s),
+        "promotion_replan_base_delta_abs_max_s": float(promotion_replan_base_delta_abs_max_s),
         "promotion_replan_final_delta_abs_max_s": float(promotion_replan_final_delta_abs_max_s),
         "promotion_replan_shift_sign": float(promotion_replan_shift_sign),
         "promotion_replan_base_action": str(promotion_replan_base_action),
@@ -1780,6 +1837,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-state-wait-weight", type=float, default=1.0)
     parser.add_argument("--promotion-replan-frequency-weight", type=float, default=1.0)
     parser.add_argument("--promotion-replan-min-pressure", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-max-pressure", type=float, default=0.0)
     parser.add_argument("--promotion-replan-require-shift", action="store_true")
     parser.add_argument("--promotion-replan-hold-guard-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-same-hold-max", type=float, default=0.0)
@@ -1790,6 +1848,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-gap-risk-cap-start", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-risk-cap-full", type=float, default=0.0)
     parser.add_argument("--promotion-replan-target-headway-max-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-base-delta-abs-max-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-final-delta-abs-max-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-shift-sign", type=float, default=-1.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
@@ -1827,6 +1886,7 @@ def main() -> None:
             promotion_replan_state_wait_weight=float(args.promotion_replan_state_wait_weight),
             promotion_replan_frequency_weight=float(args.promotion_replan_frequency_weight),
             promotion_replan_min_pressure=float(args.promotion_replan_min_pressure),
+            promotion_replan_max_pressure=float(args.promotion_replan_max_pressure),
             promotion_replan_require_shift=bool(args.promotion_replan_require_shift),
             promotion_replan_hold_guard_weight=float(args.promotion_replan_hold_guard_weight),
             promotion_replan_same_hold_max=float(args.promotion_replan_same_hold_max),
@@ -1837,6 +1897,7 @@ def main() -> None:
             promotion_replan_gap_risk_cap_start=float(args.promotion_replan_gap_risk_cap_start),
             promotion_replan_gap_risk_cap_full=float(args.promotion_replan_gap_risk_cap_full),
             promotion_replan_target_headway_max_s=float(args.promotion_replan_target_headway_max_s),
+            promotion_replan_base_delta_abs_max_s=float(args.promotion_replan_base_delta_abs_max_s),
             promotion_replan_final_delta_abs_max_s=float(args.promotion_replan_final_delta_abs_max_s),
             promotion_replan_shift_sign=float(args.promotion_replan_shift_sign),
             promotion_replan_base_action=str(args.promotion_replan_base_action),

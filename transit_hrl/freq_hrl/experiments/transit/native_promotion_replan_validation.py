@@ -125,9 +125,35 @@ PERSISTENT_STRESS_CONFIG = (
     / "configs_freqduet"
     / "T_freqhrl_native_full_persistent_stress.yaml"
 )
+PERSISTENT_STRESS_PROFILES = {
+    "reward_open_v7": {
+        "description": "Higher-replan reward-seeking profile from the v7 same-wait 512-seed run.",
+        "lower_improvement_credit_weight": 0.0,
+        "target_headway_max_s": 0.0,
+        "final_delta_abs_max_s": 0.0,
+    },
+    "balanced_target_v8": {
+        "description": "Target-headway guarded profile from the v8 512-seed run.",
+        "lower_improvement_credit_weight": 0.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+    },
+    "conservative_wait_v12": {
+        "description": "Conservative wait-credit profile with supported wait/score evidence.",
+        "lower_improvement_credit_weight": 100.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.27,
+    },
+    "reward_delta_v13": {
+        "description": "Looser final-delta profile that increased reward mean in v13.",
+        "lower_improvement_credit_weight": 100.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.85,
+    },
+}
 
 
-def apply_persistent_stress_preset() -> None:
+def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> None:
     """Use the pre-registered native promotion stress protocol.
 
     The control keeps terminal dispatch at the nominal launch-time boundary.
@@ -135,10 +161,15 @@ def apply_persistent_stress_preset() -> None:
     the learned wait-aware promotion gate fires, and the gate is protected by
     same-direction wait/hold guards.
     """
+    if profile not in PERSISTENT_STRESS_PROFILES:
+        raise ValueError(f"unknown persistent stress profile: {profile}")
+    profile_cfg = PERSISTENT_STRESS_PROFILES[str(profile)]
     COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_min_s"] = 0.0
     COMMON_OVERRIDES["upper"]["timetable_planner"]["terminal_shift_max_s"] = 45.0
     COMMON_OVERRIDES.setdefault("reward_attribution", {}).update({
-        "lower_improvement_credit_weight": 100.0,
+        "lower_improvement_credit_weight": float(
+            profile_cfg["lower_improvement_credit_weight"]
+        ),
         "lower_improvement_ema_alpha": 0.08,
         "lower_improvement_clip": 1.0,
     })
@@ -157,11 +188,16 @@ def apply_persistent_stress_preset() -> None:
         "_promotion_replan_max_shift_s": 2.0,
         "_promotion_replan_gap_risk_cap_start": 0.05,
         "_promotion_replan_gap_risk_cap_full": 0.20,
-        "_promotion_replan_target_headway_max_s": 347.0,
-        "_promotion_replan_final_delta_abs_max_s": 1.27,
+        "_promotion_replan_target_headway_max_s": float(
+            profile_cfg["target_headway_max_s"]
+        ),
+        "_promotion_replan_final_delta_abs_max_s": float(
+            profile_cfg["final_delta_abs_max_s"]
+        ),
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
         "_promotion_replan_shift_sign": -1.0,
+        "_stress_profile": str(profile),
     })
     wait_aware.setdefault("upper", {}).setdefault(
         "timetable_planner", {}
@@ -239,6 +275,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_target_headway_guard_rejects": float(
             last.get("shared_ppo_target_headway_guard_rejects", 0.0)
         ),
+        "shared_ppo_pressure_guard_rejects": float(
+            last.get("shared_ppo_pressure_guard_rejects", 0.0)
+        ),
+        "shared_ppo_base_delta_guard_rejects": float(
+            last.get("shared_ppo_base_delta_guard_rejects", 0.0)
+        ),
         "shared_ppo_final_delta_guard_rejects": float(
             last.get("shared_ppo_final_delta_guard_rejects", 0.0)
         ),
@@ -285,6 +327,8 @@ def paired_checks(
     if treatment == "native_wait_aware_replan":
         metrics.extend([
             ("shared_ppo_target_headway_guard_rejects", False),
+            ("shared_ppo_pressure_guard_rejects", False),
+            ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
             ("shared_ppo_wait_replan_count", False),
             ("shared_ppo_wait_replan_pressure_mean", False),
@@ -468,6 +512,7 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_state_wait_weight=float(overrides.get("_promotion_replan_state_wait_weight", 1.0)),
         promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
         promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
+        promotion_replan_max_pressure=float(overrides.get("_promotion_replan_max_pressure", 0.0)),
         promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
         promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
         promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
@@ -478,6 +523,7 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
         promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
         promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
+        promotion_replan_base_delta_abs_max_s=float(overrides.get("_promotion_replan_base_delta_abs_max_s", 0.0)),
         promotion_replan_final_delta_abs_max_s=float(overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)),
         promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
         promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
@@ -597,6 +643,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_gate_evaluations",
             "shared_ppo_gate_replans",
             "shared_ppo_target_headway_guard_rejects",
+            "shared_ppo_pressure_guard_rejects",
+            "shared_ppo_base_delta_guard_rejects",
             "shared_ppo_final_delta_guard_rejects",
             "shared_ppo_gate_value_mean",
             "shared_ppo_wait_replan_count",
@@ -700,6 +748,12 @@ def main() -> None:
     )
     parser.add_argument("--preset", choices=["default", "persistent_stress"], default="default")
     parser.add_argument(
+        "--stress-profile",
+        choices=sorted(PERSISTENT_STRESS_PROFILES),
+        default="conservative_wait_v12",
+        help="Named persistent-stress promotion profile.",
+    )
+    parser.add_argument(
         "--variants",
         nargs="+",
         default=None,
@@ -732,7 +786,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     if args.preset == "persistent_stress":
-        apply_persistent_stress_preset()
+        apply_persistent_stress_preset(profile=str(args.stress_profile))
         if Path(args.config) == default_config:
             args.config = PERSISTENT_STRESS_CONFIG
     if args.variants:
