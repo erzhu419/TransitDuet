@@ -162,6 +162,40 @@ PERSISTENT_STRESS_PROFILES = {
         "target_headway_max_s": 347.0,
         "final_delta_abs_max_s": 1.27,
     },
+    "bounded_wait_nofinal_v14": {
+        "description": (
+            "Small-shift wait-aligned promotion profile: keep target-headway guard, "
+            "remove the over-tight final-delta guard, and cap promotion shifts at 1s."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 1.0,
+        "wait_gain_s": 4.0,
+        "max_replans": 2,
+        "same_wait_min": 0.812,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+    },
+    "bounded_wait_nofinal_v15": {
+        "description": (
+            "Slightly stronger small-shift wait-aligned profile: keep target-headway guard, "
+            "remove the final-delta guard, and cap promotion shifts at 2s."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.812,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+    },
 }
 
 
@@ -193,13 +227,18 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_gate_min_elapsed_s": 0.0,
         "_promotion_gate_low_signal_min": 0.0,
         "_promotion_gate_max_hf_to_lf_ratio": 0.0,
-        "_promotion_gate_max_replans": 2,
-        "_promotion_replan_same_hold_max": 0.25,
-        "_promotion_replan_same_wait_min": 0.812,
-        "_promotion_replan_same_wait_max": 0.85,
-        "_promotion_replan_max_shift_s": 2.0,
-        "_promotion_replan_gap_risk_cap_start": 0.05,
-        "_promotion_replan_gap_risk_cap_full": 0.20,
+        "_promotion_gate_max_replans": int(profile_cfg.get("max_replans", 2)),
+        "_promotion_replan_same_hold_max": float(profile_cfg.get("same_hold_max", 0.25)),
+        "_promotion_replan_same_wait_min": float(profile_cfg.get("same_wait_min", 0.812)),
+        "_promotion_replan_same_wait_max": float(profile_cfg.get("same_wait_max", 0.85)),
+        "_promotion_replan_wait_gain_s": float(profile_cfg.get("wait_gain_s", 8.0)),
+        "_promotion_replan_max_shift_s": float(profile_cfg.get("max_shift_s", 2.0)),
+        "_promotion_replan_gap_risk_cap_start": float(
+            profile_cfg.get("gap_risk_cap_start", 0.05)
+        ),
+        "_promotion_replan_gap_risk_cap_full": float(
+            profile_cfg.get("gap_risk_cap_full", 0.20)
+        ),
         "_promotion_replan_target_headway_max_s": float(
             profile_cfg["target_headway_max_s"]
         ),
