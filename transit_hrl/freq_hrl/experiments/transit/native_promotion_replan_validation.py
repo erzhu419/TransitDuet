@@ -150,6 +150,18 @@ PERSISTENT_STRESS_PROFILES = {
         "target_headway_max_s": 347.0,
         "final_delta_abs_max_s": 1.85,
     },
+    "aligned_wait_credit500": {
+        "description": "Wait-objective aligned profile with 500x lower wait-improvement credit.",
+        "lower_improvement_credit_weight": 500.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.27,
+    },
+    "aligned_wait_credit1000": {
+        "description": "Wait-objective aligned profile with 1000x lower wait-improvement credit.",
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.27,
+    },
 }
 
 
