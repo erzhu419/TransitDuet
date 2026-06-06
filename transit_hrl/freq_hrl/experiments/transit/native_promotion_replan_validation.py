@@ -258,6 +258,28 @@ PERSISTENT_STRESS_PROFILES = {
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
     },
+    "amplified_projected_wait_v20": {
+        "description": (
+            "Amplified selective projection profile: retain the v18 selective gap/wait "
+            "guards but allow a 2s wait-aware timetable shift for stronger reward and "
+            "score response."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.824,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_guard_min_ratio": 0.998,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
 }
 
 
