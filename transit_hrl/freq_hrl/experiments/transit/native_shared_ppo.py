@@ -1217,6 +1217,11 @@ def install_shared_ppo_episode_loop(
                             )
                         ) + 1
                         return False
+                    if (
+                        float(preselect_metadata.get("gap_guard_active", 0.0)) > 0.0
+                        or float(preselect_metadata.get("wait_guard_active", 0.0)) > 0.0
+                    ):
+                        return False
                     base_delta_abs_max_s = max(
                         float(promotion_replan_base_delta_abs_max_s), 0.0)
                     if (

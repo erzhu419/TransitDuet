@@ -215,6 +215,49 @@ PERSISTENT_STRESS_PROFILES = {
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
     },
+    "selective_projected_wait_v17": {
+        "description": (
+            "Selective projected wait profile: keep target projection, but only accept "
+            "promotion replans in the high same-direction wait and low gap-risk region "
+            "identified by the 2048-seed v16 diagnostic."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 1.0,
+        "wait_gain_s": 4.0,
+        "max_replans": 2,
+        "same_wait_min": 0.824,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_guard_min_ratio": 0.998,
+        "gap_guard_max_ratio": 1.05,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
+    "targeted_projected_wait_v18": {
+        "description": (
+            "Tighter selective projection profile for reward/wait alignment: narrower "
+            "gap guard and lower projected target-headway cap."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 345.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 1.0,
+        "wait_gain_s": 4.0,
+        "max_replans": 2,
+        "same_wait_min": 0.824,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_guard_min_ratio": 0.998,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
 }
 
 
@@ -252,6 +295,18 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_replan_same_wait_max": float(profile_cfg.get("same_wait_max", 0.85)),
         "_promotion_replan_wait_gain_s": float(profile_cfg.get("wait_gain_s", 8.0)),
         "_promotion_replan_max_shift_s": float(profile_cfg.get("max_shift_s", 2.0)),
+        "_promotion_replan_gap_guard_min_ratio": float(
+            profile_cfg.get(
+                "gap_guard_min_ratio",
+                wait_aware.get("_promotion_replan_gap_guard_min_ratio", 0.0),
+            )
+        ),
+        "_promotion_replan_gap_guard_max_ratio": float(
+            profile_cfg.get(
+                "gap_guard_max_ratio",
+                wait_aware.get("_promotion_replan_gap_guard_max_ratio", 0.0),
+            )
+        ),
         "_promotion_replan_gap_risk_cap_start": float(
             profile_cfg.get("gap_risk_cap_start", 0.05)
         ),
