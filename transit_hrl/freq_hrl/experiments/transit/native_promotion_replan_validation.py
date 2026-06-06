@@ -196,6 +196,25 @@ PERSISTENT_STRESS_PROFILES = {
         "gap_risk_cap_start": 0.05,
         "gap_risk_cap_full": 0.20,
     },
+    "projected_target_v16": {
+        "description": (
+            "Project wait-aware promotion replans onto the target-headway cap instead "
+            "of rejecting high-headway actor bases."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 1.0,
+        "wait_gain_s": 4.0,
+        "max_replans": 2,
+        "same_wait_min": 0.812,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
 }
 
 
@@ -241,6 +260,12 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_target_headway_max_s": float(
             profile_cfg["target_headway_max_s"]
+        ),
+        "_promotion_replan_project_target_headway": bool(
+            profile_cfg.get("project_target_headway", False)
+        ),
+        "_promotion_replan_target_headway_project_margin_s": float(
+            profile_cfg.get("target_headway_project_margin_s", 0.25)
         ),
         "_promotion_replan_final_delta_abs_max_s": float(
             profile_cfg["final_delta_abs_max_s"]
@@ -326,6 +351,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_target_headway_guard_rejects": float(
             last.get("shared_ppo_target_headway_guard_rejects", 0.0)
         ),
+        "shared_ppo_target_headway_project_count": float(
+            last.get("shared_ppo_target_headway_project_count", 0.0)
+        ),
+        "shared_ppo_target_headway_project_correction_mean_s": float(
+            last.get("shared_ppo_target_headway_project_correction_mean_s", 0.0)
+        ),
         "shared_ppo_pressure_guard_rejects": float(
             last.get("shared_ppo_pressure_guard_rejects", 0.0)
         ),
@@ -378,6 +409,8 @@ def paired_checks(
     if treatment == "native_wait_aware_replan":
         metrics.extend([
             ("shared_ppo_target_headway_guard_rejects", False),
+            ("shared_ppo_target_headway_project_count", False),
+            ("shared_ppo_target_headway_project_correction_mean_s", False),
             ("shared_ppo_pressure_guard_rejects", False),
             ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
@@ -574,6 +607,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
         promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
         promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
+        promotion_replan_project_target_headway=bool(
+            overrides.get("_promotion_replan_project_target_headway", False)
+        ),
+        promotion_replan_target_headway_project_margin_s=float(
+            overrides.get("_promotion_replan_target_headway_project_margin_s", 0.25)
+        ),
         promotion_replan_base_delta_abs_max_s=float(overrides.get("_promotion_replan_base_delta_abs_max_s", 0.0)),
         promotion_replan_final_delta_abs_max_s=float(overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)),
         promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
