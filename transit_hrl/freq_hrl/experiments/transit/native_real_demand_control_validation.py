@@ -59,15 +59,57 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_learned_promotion_gate": False,
     },
     "native_real_freqhrl": {
-        "upper": {"timetable_planner": {"promotion_replan": True}},
+        "frequency": {
+            "hold_feedback": {
+                "enable": True,
+                "window": 512,
+                "wait_norm_s": 600.0,
+                "wait_clip": 2.0,
+                "board_norm": 8.0,
+                "high_threshold": 0.0,
+            },
+        },
+        "upper": {
+            "timetable_planner": {
+                "promotion_replan": False,
+                "terminal_no_later_on_promotion": True,
+            },
+        },
         "_learned_promotion_gate": True,
-        "_promotion_gate_threshold": 0.88,
-        "_promotion_gate_strength_min": 0.55,
-        "_promotion_gate_age_min": 1.0,
-        "_promotion_gate_min_elapsed_s": 600.0,
+        "_promotion_gate_threshold": 0.20,
+        "_promotion_gate_strength_min": 0.20,
+        "_promotion_gate_age_min": 0.0,
+        "_promotion_gate_min_elapsed_s": 0.0,
         "_promotion_gate_cooldown_s": 900.0,
         "_promotion_gate_preselect_action": True,
+        "_promotion_gate_low_signal_min": 0.0,
+        "_promotion_gate_max_hf_to_lf_ratio": 0.0,
         "_promotion_gate_max_replans": 2,
+        "_promotion_replan_policy": "learned_wait_aware",
+        "_promotion_replan_wait_gain_s": 8.0,
+        "_promotion_replan_max_shift_s": 2.0,
+        "_promotion_replan_state_wait_weight": 0.85,
+        "_promotion_replan_frequency_weight": 0.15,
+        "_promotion_replan_min_pressure": 0.25,
+        "_promotion_replan_max_pressure": 0.5263,
+        "_promotion_replan_require_shift": True,
+        "_promotion_replan_hold_guard_weight": 0.85,
+        "_promotion_replan_same_hold_max": 0.25,
+        "_promotion_replan_same_wait_min": 0.812,
+        "_promotion_replan_same_wait_max": 0.85,
+        "_promotion_replan_gap_guard_min_ratio": 0.998,
+        "_promotion_replan_gap_guard_max_ratio": 1.30,
+        "_promotion_replan_gap_risk_cap_start": 0.05,
+        "_promotion_replan_gap_risk_cap_full": 0.20,
+        "_promotion_replan_target_headway_max_s": 347.0,
+        "_promotion_replan_project_target_headway": True,
+        "_promotion_replan_target_headway_project_margin_s": 0.25,
+        "_promotion_replan_final_delta_abs_max_s": 1.27,
+        "_promotion_replan_shift_sign": -1.0,
+        "_promotion_replan_base_action": "actor",
+        "_promotion_replan_actor_base_trust_s": 2.0,
+        "_promotion_replan_terminal_early_cap_s": 45.0,
+        "_promotion_replan_terminal_early_relax": True,
         "_lower_hf_wait_action_gain_s": 45.0,
         "_offpolicy_replay_updates": 3,
     },
@@ -173,6 +215,11 @@ def _row_from_payload(
         "native_avg_onboard_load": float(summary.get("native_avg_onboard_load_mean", 0.0)),
         "native_peak_onboard_load": float(summary.get("native_peak_onboard_load_mean", 0.0)),
         "shared_ppo_gate_replans": float(summary.get("shared_ppo_gate_replans_mean", 0.0)),
+        "shared_ppo_wait_replan_count": float(summary.get("shared_ppo_wait_replan_count_mean", 0.0)),
+        "shared_ppo_pressure_guard_rejects": float(summary.get("shared_ppo_pressure_guard_rejects_mean", 0.0)),
+        "shared_ppo_target_headway_project_count": float(
+            summary.get("shared_ppo_target_headway_project_count_mean", 0.0)
+        ),
         "upper_plan_decisions": float(summary.get("upper_plan_decisions_mean", 0.0)),
     }
     row["control_score"] = control_score(row)
@@ -188,6 +235,9 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("native_avg_board_wait_min", True),
         ("native_alighted_pax", False),
         ("native_avg_onboard_load", True),
+        ("shared_ppo_wait_replan_count", False),
+        ("shared_ppo_pressure_guard_rejects", False),
+        ("shared_ppo_target_headway_project_count", False),
     ]:
         stats = paired_delta_stats(
             rows,
@@ -311,7 +361,46 @@ def run_validation(
                     promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
                     promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
                     promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
+                    promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
+                    promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
                     promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
+                    promotion_replan_policy=str(overrides.get("_promotion_replan_policy", "actor")),
+                    promotion_replan_wait_gain_s=float(overrides.get("_promotion_replan_wait_gain_s", 0.0)),
+                    promotion_replan_max_shift_s=float(overrides.get("_promotion_replan_max_shift_s", 30.0)),
+                    promotion_replan_state_wait_weight=float(overrides.get("_promotion_replan_state_wait_weight", 1.0)),
+                    promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
+                    promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
+                    promotion_replan_max_pressure=float(overrides.get("_promotion_replan_max_pressure", 0.0)),
+                    promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
+                    promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
+                    promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
+                    promotion_replan_same_wait_min=float(overrides.get("_promotion_replan_same_wait_min", 0.0)),
+                    promotion_replan_same_wait_max=float(overrides.get("_promotion_replan_same_wait_max", 0.0)),
+                    promotion_replan_gap_guard_min_ratio=float(overrides.get("_promotion_replan_gap_guard_min_ratio", 0.0)),
+                    promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
+                    promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
+                    promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
+                    promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
+                    promotion_replan_project_target_headway=bool(
+                        overrides.get("_promotion_replan_project_target_headway", False)
+                    ),
+                    promotion_replan_target_headway_project_margin_s=float(
+                        overrides.get("_promotion_replan_target_headway_project_margin_s", 0.25)
+                    ),
+                    promotion_replan_final_delta_abs_max_s=float(
+                        overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)
+                    ),
+                    promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
+                    promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
+                    promotion_replan_actor_base_trust_s=float(
+                        overrides.get("_promotion_replan_actor_base_trust_s", 0.0)
+                    ),
+                    promotion_replan_terminal_early_cap_s=float(
+                        overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)
+                    ),
+                    promotion_replan_terminal_early_relax=bool(
+                        overrides.get("_promotion_replan_terminal_early_relax", False)
+                    ),
                     lower_hf_wait_action_gain_s=float(overrides.get("_lower_hf_wait_action_gain_s", 0.0)),
                     offpolicy_replay_updates=int(overrides.get("_offpolicy_replay_updates", 1)),
                 )

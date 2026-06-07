@@ -35,8 +35,13 @@ promotion run closed the native reward CI but not the wait CI.
      not only score/reward or noninferiority.
    - Current status: real AFC/APC profiles drive native passengers; wait is
      positive-mixed and alighting improvement is not supported.
-   - Next action: improve native real-demand control objective and rerun paired
-     real-demand validation.
+   - Implementation update: `native_real_freqhrl` now uses the same guarded
+     wait-aware learned replan policy as the best native-promotion candidate:
+     promotion no longer only flips the generic timetable replanner; it passes
+     pressure, wait, hold, gap, target-headway projection, terminal early-cap,
+     and actor-base trust controls into the shared PPO native loop.
+   - Next action: submit paired AFC/APC real-demand validation through scheduler,
+     not local execution, and check wait/alighting CI plus the replan diagnostics.
 
 3. Real L2/L3 order-book validation
    - Goal: move beyond synthetic/fixture replay toward large real or realistic
