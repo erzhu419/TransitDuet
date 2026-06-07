@@ -62,8 +62,13 @@ promotion run closed the native reward CI but not the wait CI.
      evidence, not just exposes an interface.
    - Current status: adaptive wavelet, state-space, neural, and PINN-style paths
      exist; cross-domain CI is not closed.
-   - Next action: add a unified encoder matrix with paired deltas across
-     synthetic trading, public market/order-book, and Transit demand.
+   - Implementation update: added a cross-domain encoder matrix builder that
+     reads existing synthetic trading, public market, L2/L3 order-book, and
+     Transit demand artifacts, then emits one paired-check/domain-summary report
+     with `supported`, `positive_mixed`, `not_supported`, and `summary_only`
+     statuses.
+   - Next action: schedule the matrix refresh after the new order-book and
+     real-demand runs finish, then use it to target encoder reruns.
 
 5. Leakage no-tradeoff native/real-data
    - Goal: show leakage reduction without performance loss in native Transit
