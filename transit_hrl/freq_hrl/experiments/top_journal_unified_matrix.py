@@ -12,7 +12,7 @@ from typing import Any
 DEFAULT_ARTIFACTS = {
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
-    "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged/summary.json"),
+    "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/scheduler_encoder_cross_domain_matrix/summary.json"),
     "leakage_matrix": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix/summary.json"),

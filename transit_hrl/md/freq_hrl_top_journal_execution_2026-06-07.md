@@ -85,7 +85,8 @@ promotion run closed the native reward CI but not the wait CI.
      future native AFC/APC reruns can test leakage/no-tradeoff directly.
    - Merge update: the real-demand shard merger now rebuilds rows from compact
      payload summaries, so existing shards can expose newly added native drift
-     metrics without rerunning seeds.
+     metrics without rerunning seeds. The drift-aware merged artifact uses the
+     `transit_native_real_demand_waitaware_v2_24seed_merged_drift` result dir.
    - Next action: schedule the matrix after the wait-aware real-demand merge,
      then add native LowerLFDrift metrics if the verdict remains
      `performance_noharm_only`.

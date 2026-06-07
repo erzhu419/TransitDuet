@@ -15,7 +15,7 @@ DEFAULT_RESULT_PATHS = {
     "trading_constraint": Path("transit_hrl/results/trading_lower_lf_constraint_validation/summary.json"),
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
     "native_real_demand": Path("transit_hrl/results/transit_native_real_demand_control/summary.json"),
-    "native_real_demand_waitaware_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged/summary.json"),
+    "native_real_demand_waitaware_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
 }
 
 
