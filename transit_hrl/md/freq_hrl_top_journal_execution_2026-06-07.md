@@ -75,8 +75,14 @@ promotion run closed the native reward CI but not the wait CI.
      and real-data settings.
    - Current status: surrogate evidence is strong; native/real-data confirmation
      is incomplete.
-   - Next action: add native/real-data leakage paired checks with noninferiority
-     and drift-reduction criteria.
+   - Implementation update: added a leakage no-tradeoff matrix that requires
+     both drift/leakage reduction and performance noninferiority in the same
+     domain before calling a no-tradeoff verdict. Native real-demand artifacts
+     are explicitly marked as performance/no-harm evidence when drift metrics
+     are absent.
+   - Next action: schedule the matrix after the wait-aware real-demand merge,
+     then add native LowerLFDrift metrics if the verdict remains
+     `performance_noharm_only`.
 
 6. Formal theory
    - Goal: write paper-ready assumptions and theorem/proof sketches for
