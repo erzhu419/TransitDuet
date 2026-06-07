@@ -15,6 +15,20 @@ promotion run closed the native reward CI but not the wait CI.
 - Main blocker: the reward claim is now credible, but top-journal wait,
   real-demand, real-market, leakage, encoder, theory, and unified-matrix claims
   still need stronger evidence.
+- Scheduler update after items 1-7:
+  - Native promotion v24, 2048 paired seeds: wait delta `-0.0002676` minutes,
+    95% CI `[-0.0004385, -0.0001225]`, supported; reward delta `+0.2494`,
+    CI crosses zero, reward noninferiority supported.
+  - Native real-demand v2, 24 paired AFC/APC seeds: score and reward supported;
+    wait is positive-mixed; alighting throughput is not supported.
+  - Order-book manifest smoke: manifest consumed both L2 and L3 files and wrote
+    paired checks; this validates the large-replay path, not a large real feed.
+  - Encoder matrix: supported evidence appears in order-book L2, synthetic
+    trading, Transit real-demand estimator, and Transit synthetic demand.
+  - Leakage matrix: Transit surrogate no-tradeoff is supported; trading and
+    native real-demand remain partial.
+  - Unified top-journal matrix v2: 6 claims total, 3 supported, 3 partial,
+    0 missing.
 
 ## 1-7 Execution Items
 
@@ -29,6 +43,8 @@ promotion run closed the native reward CI but not the wait CI.
      no-op in the 64-seed smoke.
    - Next action: run `pressure_guarded_wait_v24` as a scheduler multi-seed
      validation without binding shards to fixed nodes.
+   - Scheduler result: 2048 paired seeds support wait improvement and reward
+     noninferiority, but reward improvement itself remains inconclusive.
 
 2. Real Transit demand wait/alighting
    - Goal: support native real-demand wait improvement and alighting throughput,
@@ -44,6 +60,9 @@ promotion run closed the native reward CI but not the wait CI.
      combined into one paired AFC/APC CI report without local post-processing.
    - Next action: submit paired AFC/APC real-demand validation through scheduler,
      not local execution, and check wait/alighting CI plus the replan diagnostics.
+   - Scheduler result: score/reward supported; wait positive-mixed; alighting
+     not supported. Native drift metrics are now present in the drift-aware
+     merged artifact.
 
 3. Real L2/L3 order-book validation
    - Goal: move beyond synthetic/fixture replay toward large real or realistic
@@ -56,6 +75,8 @@ promotion run closed the native reward CI but not the wait CI.
      replay engines, and writes one coverage/paired-check report.
    - Next action: point the manifest runner at a larger real or venue-realistic
      L2/L3 dataset and schedule the replay matrix.
+   - Scheduler result: fixture L2/L3 manifest smoke passed and wrote coverage /
+     paired-check artifacts.
 
 4. Advanced encoder cross-domain evidence
    - Goal: show an advanced encoder consistently improves Quant and Transit
@@ -69,6 +90,8 @@ promotion run closed the native reward CI but not the wait CI.
      statuses.
    - Next action: schedule the matrix refresh after the new order-book and
      real-demand runs finish, then use it to target encoder reruns.
+   - Scheduler result: matrix built 96 checks; at least one supported check
+     appears in four domains.
 
 5. Leakage no-tradeoff native/real-data
    - Goal: show leakage reduction without performance loss in native Transit
@@ -90,6 +113,8 @@ promotion run closed the native reward CI but not the wait CI.
    - Next action: schedule the matrix after the wait-aware real-demand merge,
      then add native LowerLFDrift metrics if the verdict remains
      `performance_noharm_only`.
+   - Scheduler result: Transit real surrogate reached `no_tradeoff_supported`;
+     native real-demand and trading remain `partial`.
 
 6. Formal theory
    - Goal: write paper-ready assumptions and theorem/proof sketches for
@@ -103,6 +128,8 @@ promotion run closed the native reward CI but not the wait CI.
      hierarchical credit residual, and paired-CI arguments.
    - Next action: regenerate the appendix artifact through scheduler after the
      latest diagnostics are refreshed.
+   - Scheduler result: appendix artifact regenerated with the weak
+     primal-dual bound included.
 
 7. Unified large matrix
    - Goal: run one claim matrix that ties together wait-aware promotion,
@@ -114,6 +141,8 @@ promotion run closed the native reward CI but not the wait CI.
      claim-level `supported` / `partial` / `missing` statuses and remaining gaps.
    - Next action: schedule the unified matrix after the v24 promotion shards and
      theory appendix refresh finish.
+   - Scheduler result: final matrix v2 produced 3 supported claims and 3 partial
+     claims; no claim is missing.
 
 ## Scheduler Rule
 
