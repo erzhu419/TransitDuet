@@ -40,6 +40,8 @@ promotion run closed the native reward CI but not the wait CI.
      promotion no longer only flips the generic timetable replanner; it passes
      pressure, wait, hold, gap, target-headway projection, terminal early-cap,
      and actor-base trust controls into the shared PPO native loop.
+   - Merge update: added a real-demand shard merger so scheduler shards can be
+     combined into one paired AFC/APC CI report without local post-processing.
    - Next action: submit paired AFC/APC real-demand validation through scheduler,
      not local execution, and check wait/alighting CI plus the replan diagnostics.
 
