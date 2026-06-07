@@ -9,6 +9,11 @@ validation.
 
 ## Progress Added In This Pass
 
+- 2026-06-07 update: completed the v21 native wait-aware promotion-replan
+  validation at 8192 paired seeds. The merged evidence is under
+  `transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged`.
+  This closes the native reward-improvement CI for the wait-aware promotion
+  path, but not the wait-improvement CI.
 - Added real AFC/APC demand control replay through the shared Transit PPO
   surrogate loop.
 - Added native AFC/APC-profile passenger generation inside the copied Transit
@@ -62,6 +67,18 @@ New supported checks:
 - Native wait-aware gate/replan mechanics in the fair smoke are supported:
   gate replans `+1.5000`, wait-replan count `+1.5000`,
   action-shift magnitude `+11.8103s`, and target headway `-2.8813s`.
+- Native wait-aware v21 8192-seed reward improvement: supported, 8192 pairs,
+  delta `+1.6594`, CI `[+0.3398, +3.0747]`.
+- Native wait-aware v21 8192-seed wait improvement: inconclusive, 8192 pairs,
+  delta `-0.000069` minutes, CI `[-0.000814, +0.000640]`.
+- Native wait-aware v21 8192-seed reward noninferiority: supported, margin
+  `15.0`, delta `+1.6594`, CI `[+0.3398, +3.0747]`.
+- Native wait-aware v21 8192-seed wait noninferiority: supported, margin
+  `0.01` minutes, delta `-0.000069`, CI `[-0.000814, +0.000640]`.
+- Native wait-aware v21 mechanics are CI-supported at 8192 pairs: gate replans
+  `+0.03723`, wait-replan count `+0.03723`, target-headway projection count
+  `+0.02051`, terminal launch shift reduction `-0.01124s`, and lower wait
+  credit/net deltas about `+0.000331`.
 - Native real-demand control score: supported, 6 pairs, delta `+99.6725`,
   CI `[+62.3044, +137.0299]`
 - Native real-demand reward: supported, 6 pairs, delta `+98.7658`,
@@ -103,8 +120,25 @@ Boundary of this pass:
 ### 1. Native learned promotion reward and wait proof
 
 The learned gate fires in native Transit and gate-triggered replans are
-CI-supported. Expanded 76-seed validation improved the reward estimate, but
-did not close the strong reward/wait improvement claim:
+CI-supported. Gate-only validation remains weak, but the wait-aware replan path
+now has a closed native reward-improvement CI at 8192 paired seeds.
+
+The strongest current wait-aware v21 result is:
+
+- reward delta: `+1.6594`
+- reward CI: `[+0.3398, +3.0747]`
+- reward status: supported
+- reward noninferiority: supported with margin `15.0`
+- wait delta: `-0.000069` minutes
+- wait CI: `[-0.000814, +0.000640]`
+- wait status: inconclusive
+- wait noninferiority: supported with margin `0.01` minutes
+- gate replans: supported, delta `+0.03723`
+- wait-replan count: supported, delta `+0.03723`
+- lower wait-credit/net improvement: supported, delta about `+0.000331`
+
+The older expanded 76-seed gate-only validation improved the reward estimate,
+but did not close the strong reward/wait improvement claim:
 
 - native learned reward delta: `+5.2023`
 - reward CI: `[-5.4383, +16.2658]`
@@ -121,13 +155,11 @@ threshold/low-frequency guards mostly degenerate to no-op. The remaining path
 is a learned replan policy that changes the high-level timetable action under a
 wait-aware objective, not only a gate that refreshes the current plan.
 
-This path now exists mechanically. The wait-aware policy uses promotion
-pressure, low-frequency demand movement, high-frequency energy, and optional
-frequency hold-feedback wait features to shift the active-direction timetable
-curve. In a fair 4-seed native smoke, it produces CI-supported gate-triggered
-action changes and target-headway reductions, with positive-mixed reward/wait
-direction. The remaining proof is larger native CI, not another gate-only
-tuning sweep.
+This path now exists mechanically and now has large-seed reward support. The
+wait-aware policy uses promotion pressure, low-frequency demand movement,
+high-frequency energy, and optional frequency hold-feedback wait features to
+shift the active-direction timetable curve. The remaining proof target is
+supported wait improvement, not another gate-only tuning sweep.
 
 ### 2. Native Transit multi-seed performance
 
@@ -200,10 +232,9 @@ paper-ready proofs for:
 
 ## Execution Plan
 
-1. Scale the native wait-aware learned replan validation from 4-seed smoke to
-   expanded CI. The next success criterion is supported reward and wait, or at
-   minimum supported reward/wait noninferiority plus supported action-change
-   diagnostics.
+1. Continue native wait-aware learned replan validation from the v21 8192-seed
+   reward-supported profile toward supported wait improvement. The next success
+   criterion is a wait CI below zero while preserving supported reward.
 2. Improve native real-demand loop so wait and alighting throughput improvement
    CIs are supported; for now score/reward plus wait/alighting noninferiority
    are supported.
@@ -211,3 +242,10 @@ paper-ready proofs for:
    venue-grade L2/L3 feeds.
 4. Add paper-ready convergence/identifiability proof conditions.
 5. Re-run diagnostics and push each evidence-improving step.
+
+Scheduler note: the v21 8192-seed batch was initially overspecified with
+`require_node=node00x` to force an even node001-node006 split. That was the wrong
+strategy for retries because it blocks opportunistic backfilling. Future retry
+submissions should omit `require_node` and only specify resource hints such as
+`cpu_cores=32`, `ram_mb=8192`, `vram_mb=0`, and `reroute_on_node_down=true`, so
+the scheduler can place each shard wherever capacity opens first.
