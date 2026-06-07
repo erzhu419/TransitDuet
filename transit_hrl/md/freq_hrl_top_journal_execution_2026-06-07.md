@@ -80,6 +80,9 @@ promotion run closed the native reward CI but not the wait CI.
      domain before calling a no-tradeoff verdict. Native real-demand artifacts
      are explicitly marked as performance/no-harm evidence when drift metrics
      are absent.
+   - Native metric update: real-demand validation now extracts
+     `LowerLFDrift` and `UpperHFPower` from the native shared-PPO summaries so
+     future native AFC/APC reruns can test leakage/no-tradeoff directly.
    - Next action: schedule the matrix after the wait-aware real-demand merge,
      then add native LowerLFDrift metrics if the verdict remains
      `performance_noharm_only`.
