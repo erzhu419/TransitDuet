@@ -50,8 +50,12 @@ promotion run closed the native reward CI but not the wait CI.
      L2/L3 event replay with queue-priority sensitivity.
    - Current status: L2 matching, L3 replay, and CSV paths exist; large
      venue-grade data evidence is open.
-   - Next action: add a large replay harness/manifest path and validation matrix
-     that can consume multi-file L2/L3 data without changing core trading code.
+   - Implementation update: added a manifest-driven large replay runner that
+     consumes multi-file L2/L3 CSV collections with venue/symbol/session
+     metadata, dispatches them through the existing L2 matching and L3 FIFO
+     replay engines, and writes one coverage/paired-check report.
+   - Next action: point the manifest runner at a larger real or venue-realistic
+     L2/L3 dataset and schedule the replay matrix.
 
 4. Advanced encoder cross-domain evidence
    - Goal: show an advanced encoder consistently improves Quant and Transit
