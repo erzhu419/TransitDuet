@@ -16,6 +16,7 @@ DEFAULT_RESULT_PATHS = {
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
     "native_real_demand": Path("transit_hrl/results/transit_native_real_demand_control/summary.json"),
     "native_real_demand_waitaware_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
+    "native_real_demand_reward_floor_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
 }
 
 

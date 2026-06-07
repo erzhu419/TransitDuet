@@ -10,11 +10,14 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v25": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v25_512seed_merged/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/scheduler_encoder_cross_domain_matrix/summary.json"),
+    "leakage_matrix_v25_v3": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v25_v3/summary.json"),
     "leakage_matrix": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_drift/summary.json"),
     "theory_appendix": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
 }
@@ -76,7 +79,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         for key, path in DEFAULT_ARTIFACTS.items()
     }
 
-    promotion = artifacts["native_promotion_v24"] or artifacts["native_promotion_v21"]
+    promotion = artifacts["native_promotion_v25"] or artifacts["native_promotion_v24"] or artifacts["native_promotion_v21"]
     promotion_reward = _check_by_metric(
         promotion,
         "ep_reward",
@@ -99,14 +102,14 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "native_avg_board_wait_min",
             treatment="native_wait_aware_replan",
         )
-    real = artifacts["native_real_demand_v2"]
+    real = artifacts["native_real_demand_v3"] or artifacts["native_real_demand_v2"]
     real_score = _check_by_metric(real, "control_score")
     real_reward = _check_by_metric(real, "ep_reward")
     real_wait = _check_by_metric(real, "native_avg_board_wait_min")
     real_alighted = _check_by_metric(real, "native_alighted_pax")
     order_book = artifacts["order_book_manifest"] or {}
     encoder = artifacts["encoder_matrix"] or {}
-    leakage = artifacts["leakage_matrix"] or {}
+    leakage = artifacts["leakage_matrix_v25_v3"] or artifacts["leakage_matrix"] or {}
     theory = artifacts["theory_appendix"] or {}
 
     encoder_domains = encoder.get("domain_summary", []) if isinstance(encoder, dict) else []
@@ -136,7 +139,13 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"wait={promotion_wait.get('status', 'missing')}"
             ),
             "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
-            "artifact": paths["native_promotion_v24"] if artifacts["native_promotion_v24"] else paths["native_promotion_v21"],
+            "artifact": (
+                paths["native_promotion_v25"]
+                if artifacts["native_promotion_v25"]
+                else paths["native_promotion_v24"]
+                if artifacts["native_promotion_v24"]
+                else paths["native_promotion_v21"]
+            ),
         },
         {
             "id": "C2",
@@ -153,7 +162,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"alighted={real_alighted.get('status', 'missing')}"
             ),
             "remaining_gap": "Alighting throughput and wait CI still need supported native real-demand evidence.",
-            "artifact": paths["native_real_demand_v2"],
+            "artifact": paths["native_real_demand_v3"] if artifacts["native_real_demand_v3"] else paths["native_real_demand_v2"],
         },
         {
             "id": "C3",
@@ -189,7 +198,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             ),
             "evidence": f"no_tradeoff_domains={leakage_supported_domains}",
             "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
-            "artifact": paths["leakage_matrix"],
+            "artifact": paths["leakage_matrix_v25_v3"] if artifacts["leakage_matrix_v25_v3"] else paths["leakage_matrix"],
         },
         {
             "id": "C6",

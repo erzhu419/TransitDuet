@@ -30,6 +30,34 @@ promotion run closed the native reward CI but not the wait CI.
   - Unified top-journal matrix v2: 6 claims total, 3 supported, 3 partial,
     0 missing.
 
+## 2026-06-08 Reward/Throughput/Leakage Attack
+
+- Native promotion now has a `reward_floor_throughput_v25` persistent-stress
+  profile.  It starts from the wait-supported v24 policy and adds:
+  - a causal reward-floor score before accepting promotion replans;
+  - a throughput proxy guard built from upper-state fleet/gap/holding and
+    high-frequency wait feedback;
+  - an adaptive drift penalty that scales promotion shifts down when HF energy
+    dominates the LF promotion signal;
+  - a target-headway floor to avoid over-aggressive timetable compression.
+- Native real-demand treatment reuses the same reward-floor, throughput, and
+  adaptive-drift guards, so AFC/APC validation can test wait/alighting and
+  leakage tradeoffs in the same path.
+- New diagnostics are emitted into native rows and paired checks:
+  `shared_ppo_reward_floor_guard_rejects`,
+  `shared_ppo_throughput_guard_rejects`,
+  `shared_ppo_target_headway_floor_rejects`,
+  `shared_ppo_wait_replan_adaptive_drift_scale_mean`,
+  `shared_ppo_wait_replan_throughput_score_mean`, and
+  `shared_ppo_wait_replan_reward_floor_score_mean`.
+- Scheduler submissions:
+  - v25 native promotion 512-seed shards: `t7715`, `t7716`, `t7717`,
+    `t7719`, `t7720`, `t7721`, `t7722`, `t7723`.
+  - v25 promotion merge: `t7734`, waiting for the 8 shard summaries.
+  - real-demand guarded v3 AFC/APC 24-pair validation: `t7726`.
+- Unified top-journal and leakage matrices now prefer v25/v3 artifacts and
+  fall back to v24/v2 when those results are not present.
+
 ## 1-7 Execution Items
 
 1. Native wait improvement CI

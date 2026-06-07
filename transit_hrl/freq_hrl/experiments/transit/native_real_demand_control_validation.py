@@ -101,6 +101,16 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_gap_guard_max_ratio": 1.30,
         "_promotion_replan_gap_risk_cap_start": 0.05,
         "_promotion_replan_gap_risk_cap_full": 0.20,
+        "_promotion_replan_adaptive_drift_penalty_gain": 0.15,
+        "_promotion_replan_adaptive_drift_penalty_min_scale": 0.65,
+        "_promotion_replan_reward_floor_min_score": 0.12,
+        "_promotion_replan_reward_floor_wait_weight": 1.0,
+        "_promotion_replan_reward_floor_target_weight": 1.0,
+        "_promotion_replan_reward_floor_action_cost": 0.03,
+        "_promotion_replan_reward_floor_gap_cost": 0.25,
+        "_promotion_replan_reward_floor_hold_cost": 0.35,
+        "_promotion_replan_throughput_guard_min_score": 0.25,
+        "_promotion_replan_target_headway_min_s": 338.0,
         "_promotion_replan_target_headway_max_s": 347.0,
         "_promotion_replan_project_target_headway": True,
         "_promotion_replan_target_headway_project_margin_s": 0.25,
@@ -219,8 +229,29 @@ def _row_from_payload(
         "shared_ppo_gate_replans": float(summary.get("shared_ppo_gate_replans_mean", 0.0)),
         "shared_ppo_wait_replan_count": float(summary.get("shared_ppo_wait_replan_count_mean", 0.0)),
         "shared_ppo_pressure_guard_rejects": float(summary.get("shared_ppo_pressure_guard_rejects_mean", 0.0)),
+        "shared_ppo_reward_floor_guard_rejects": float(
+            summary.get("shared_ppo_reward_floor_guard_rejects_mean", 0.0)
+        ),
+        "shared_ppo_throughput_guard_rejects": float(
+            summary.get("shared_ppo_throughput_guard_rejects_mean", 0.0)
+        ),
+        "shared_ppo_target_headway_floor_rejects": float(
+            summary.get("shared_ppo_target_headway_floor_rejects_mean", 0.0)
+        ),
         "shared_ppo_target_headway_project_count": float(
             summary.get("shared_ppo_target_headway_project_count_mean", 0.0)
+        ),
+        "shared_ppo_wait_replan_adaptive_drift_scale_mean": float(
+            summary.get("shared_ppo_wait_replan_adaptive_drift_scale_mean_mean", 1.0)
+        ),
+        "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean": float(
+            summary.get("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean_mean", 0.0)
+        ),
+        "shared_ppo_wait_replan_throughput_score_mean": float(
+            summary.get("shared_ppo_wait_replan_throughput_score_mean_mean", 0.0)
+        ),
+        "shared_ppo_wait_replan_reward_floor_score_mean": float(
+            summary.get("shared_ppo_wait_replan_reward_floor_score_mean_mean", 0.0)
         ),
         "upper_plan_decisions": float(summary.get("upper_plan_decisions_mean", 0.0)),
     }
@@ -241,7 +272,14 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("UpperHFPower", True),
         ("shared_ppo_wait_replan_count", False),
         ("shared_ppo_pressure_guard_rejects", False),
+        ("shared_ppo_reward_floor_guard_rejects", False),
+        ("shared_ppo_throughput_guard_rejects", False),
+        ("shared_ppo_target_headway_floor_rejects", False),
         ("shared_ppo_target_headway_project_count", False),
+        ("shared_ppo_wait_replan_adaptive_drift_scale_mean", True),
+        ("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", True),
+        ("shared_ppo_wait_replan_throughput_score_mean", False),
+        ("shared_ppo_wait_replan_reward_floor_score_mean", False),
     ]:
         stats = paired_delta_stats(
             rows,
@@ -384,6 +422,36 @@ def run_validation(
                     promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
                     promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
                     promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
+                    promotion_replan_adaptive_drift_penalty_gain=float(
+                        overrides.get("_promotion_replan_adaptive_drift_penalty_gain", 0.0)
+                    ),
+                    promotion_replan_adaptive_drift_penalty_min_scale=float(
+                        overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
+                    ),
+                    promotion_replan_reward_floor_min_score=float(
+                        overrides.get("_promotion_replan_reward_floor_min_score", 0.0)
+                    ),
+                    promotion_replan_reward_floor_wait_weight=float(
+                        overrides.get("_promotion_replan_reward_floor_wait_weight", 1.0)
+                    ),
+                    promotion_replan_reward_floor_target_weight=float(
+                        overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
+                    ),
+                    promotion_replan_reward_floor_action_cost=float(
+                        overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
+                    ),
+                    promotion_replan_reward_floor_gap_cost=float(
+                        overrides.get("_promotion_replan_reward_floor_gap_cost", 0.25)
+                    ),
+                    promotion_replan_reward_floor_hold_cost=float(
+                        overrides.get("_promotion_replan_reward_floor_hold_cost", 0.35)
+                    ),
+                    promotion_replan_throughput_guard_min_score=float(
+                        overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
+                    ),
+                    promotion_replan_target_headway_min_s=float(
+                        overrides.get("_promotion_replan_target_headway_min_s", 0.0)
+                    ),
                     promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
                     promotion_replan_project_target_headway=bool(
                         overrides.get("_promotion_replan_project_target_headway", False)

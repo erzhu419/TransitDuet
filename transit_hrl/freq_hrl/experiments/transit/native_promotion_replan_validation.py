@@ -369,6 +369,39 @@ PERSISTENT_STRESS_PROFILES = {
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
     },
+    "reward_floor_throughput_v25": {
+        "description": (
+            "Reward-floor profile: start from the v24 wait-supported guard, then "
+            "accept a promotion replan only when a causal reward surrogate, "
+            "dispatch-throughput proxy, and adaptive drift scale all pass."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 338.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.27,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.812,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_guard_min_ratio": 0.998,
+        "gap_guard_max_ratio": 1.30,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "max_pressure": 0.5263,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.15,
+        "adaptive_drift_penalty_min_scale": 0.65,
+        "throughput_guard_min_score": 0.25,
+        "reward_floor_min_score": 0.12,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.25,
+        "reward_floor_hold_cost": 0.35,
+    },
 }
 
 
@@ -424,6 +457,36 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_gap_risk_cap_full": float(
             profile_cfg.get("gap_risk_cap_full", 0.20)
+        ),
+        "_promotion_replan_adaptive_drift_penalty_gain": float(
+            profile_cfg.get("adaptive_drift_penalty_gain", 0.0)
+        ),
+        "_promotion_replan_adaptive_drift_penalty_min_scale": float(
+            profile_cfg.get("adaptive_drift_penalty_min_scale", 0.25)
+        ),
+        "_promotion_replan_reward_floor_min_score": float(
+            profile_cfg.get("reward_floor_min_score", 0.0)
+        ),
+        "_promotion_replan_reward_floor_wait_weight": float(
+            profile_cfg.get("reward_floor_wait_weight", 1.0)
+        ),
+        "_promotion_replan_reward_floor_target_weight": float(
+            profile_cfg.get("reward_floor_target_weight", 1.0)
+        ),
+        "_promotion_replan_reward_floor_action_cost": float(
+            profile_cfg.get("reward_floor_action_cost", 0.05)
+        ),
+        "_promotion_replan_reward_floor_gap_cost": float(
+            profile_cfg.get("reward_floor_gap_cost", 0.25)
+        ),
+        "_promotion_replan_reward_floor_hold_cost": float(
+            profile_cfg.get("reward_floor_hold_cost", 0.35)
+        ),
+        "_promotion_replan_throughput_guard_min_score": float(
+            profile_cfg.get("throughput_guard_min_score", 0.0)
+        ),
+        "_promotion_replan_target_headway_min_s": float(
+            profile_cfg.get("target_headway_min_s", 0.0)
         ),
         "_promotion_replan_target_headway_max_s": float(
             profile_cfg["target_headway_max_s"]
@@ -530,6 +593,15 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_pressure_guard_rejects": float(
             last.get("shared_ppo_pressure_guard_rejects", 0.0)
         ),
+        "shared_ppo_reward_floor_guard_rejects": float(
+            last.get("shared_ppo_reward_floor_guard_rejects", 0.0)
+        ),
+        "shared_ppo_throughput_guard_rejects": float(
+            last.get("shared_ppo_throughput_guard_rejects", 0.0)
+        ),
+        "shared_ppo_target_headway_floor_rejects": float(
+            last.get("shared_ppo_target_headway_floor_rejects", 0.0)
+        ),
         "shared_ppo_base_delta_guard_rejects": float(
             last.get("shared_ppo_base_delta_guard_rejects", 0.0)
         ),
@@ -542,6 +614,18 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_wait_replan_shift_pressure_mean": float(last.get("shared_ppo_wait_replan_shift_pressure_mean", 0.0)),
         "shared_ppo_wait_replan_gap_ratio_mean": float(last.get("shared_ppo_wait_replan_gap_ratio_mean", 0.0)),
         "shared_ppo_wait_replan_gap_risk_scale_mean": float(last.get("shared_ppo_wait_replan_gap_risk_scale_mean", 0.0)),
+        "shared_ppo_wait_replan_adaptive_drift_scale_mean": float(
+            last.get("shared_ppo_wait_replan_adaptive_drift_scale_mean", 1.0)
+        ),
+        "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean": float(
+            last.get("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", 0.0)
+        ),
+        "shared_ppo_wait_replan_throughput_score_mean": float(
+            last.get("shared_ppo_wait_replan_throughput_score_mean", 0.0)
+        ),
+        "shared_ppo_wait_replan_reward_floor_score_mean": float(
+            last.get("shared_ppo_wait_replan_reward_floor_score_mean", 0.0)
+        ),
         "shared_ppo_wait_replan_same_hold_mean": float(last.get("shared_ppo_wait_replan_same_hold_mean", 0.0)),
         "shared_ppo_wait_replan_same_wait_mean": float(last.get("shared_ppo_wait_replan_same_wait_mean", 0.0)),
         "shared_ppo_wait_replan_shift_mean_s": float(last.get("shared_ppo_wait_replan_shift_mean_s", 0.0)),
@@ -582,6 +666,9 @@ def paired_checks(
             ("shared_ppo_target_headway_project_count", False),
             ("shared_ppo_target_headway_project_correction_mean_s", False),
             ("shared_ppo_pressure_guard_rejects", False),
+            ("shared_ppo_reward_floor_guard_rejects", False),
+            ("shared_ppo_throughput_guard_rejects", False),
+            ("shared_ppo_target_headway_floor_rejects", False),
             ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
             ("shared_ppo_wait_replan_count", False),
@@ -589,6 +676,10 @@ def paired_checks(
             ("shared_ppo_wait_replan_shift_pressure_mean", False),
             ("shared_ppo_wait_replan_gap_ratio_mean", False),
             ("shared_ppo_wait_replan_gap_risk_scale_mean", False),
+            ("shared_ppo_wait_replan_adaptive_drift_scale_mean", True),
+            ("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", True),
+            ("shared_ppo_wait_replan_throughput_score_mean", False),
+            ("shared_ppo_wait_replan_reward_floor_score_mean", False),
             ("shared_ppo_wait_replan_same_hold_mean", False),
             ("shared_ppo_wait_replan_same_wait_mean", False),
             ("shared_ppo_wait_replan_shift_abs_mean_s", False),
@@ -776,6 +867,36 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
         promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
         promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
+        promotion_replan_adaptive_drift_penalty_gain=float(
+            overrides.get("_promotion_replan_adaptive_drift_penalty_gain", 0.0)
+        ),
+        promotion_replan_adaptive_drift_penalty_min_scale=float(
+            overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
+        ),
+        promotion_replan_reward_floor_min_score=float(
+            overrides.get("_promotion_replan_reward_floor_min_score", 0.0)
+        ),
+        promotion_replan_reward_floor_wait_weight=float(
+            overrides.get("_promotion_replan_reward_floor_wait_weight", 1.0)
+        ),
+        promotion_replan_reward_floor_target_weight=float(
+            overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
+        ),
+        promotion_replan_reward_floor_action_cost=float(
+            overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
+        ),
+        promotion_replan_reward_floor_gap_cost=float(
+            overrides.get("_promotion_replan_reward_floor_gap_cost", 0.25)
+        ),
+        promotion_replan_reward_floor_hold_cost=float(
+            overrides.get("_promotion_replan_reward_floor_hold_cost", 0.35)
+        ),
+        promotion_replan_throughput_guard_min_score=float(
+            overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
+        ),
+        promotion_replan_target_headway_min_s=float(
+            overrides.get("_promotion_replan_target_headway_min_s", 0.0)
+        ),
         promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
         promotion_replan_project_target_headway=bool(
             overrides.get("_promotion_replan_project_target_headway", False)
@@ -904,11 +1025,18 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_gate_replans",
             "shared_ppo_target_headway_guard_rejects",
             "shared_ppo_pressure_guard_rejects",
+            "shared_ppo_reward_floor_guard_rejects",
+            "shared_ppo_throughput_guard_rejects",
+            "shared_ppo_target_headway_floor_rejects",
             "shared_ppo_base_delta_guard_rejects",
             "shared_ppo_final_delta_guard_rejects",
             "shared_ppo_gate_value_mean",
             "shared_ppo_wait_replan_count",
             "shared_ppo_wait_replan_pressure_mean",
+            "shared_ppo_wait_replan_adaptive_drift_scale_mean",
+            "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean",
+            "shared_ppo_wait_replan_throughput_score_mean",
+            "shared_ppo_wait_replan_reward_floor_score_mean",
             "shared_ppo_wait_replan_shift_mean_s",
             "shared_ppo_wait_replan_shift_abs_mean_s",
             "shared_ppo_wait_replan_actor_base_used_mean",
