@@ -9,6 +9,7 @@ from typing import Any
 
 from freq_hrl.experiments.transit.native_real_demand_control_validation import (
     VARIANTS,
+    _row_from_payload,
     paired_checks,
     write_outputs,
 )
@@ -51,6 +52,17 @@ def merge_native_real_demand_shards(
             rows_by_key[key] = dict(row)
         for key, compact in (payload.get("payloads", {}) or {}).items():
             payloads[str(key)] = compact
+            try:
+                source, seed_text, variant = str(key).split(":", 2)
+                row_key = (source, int(seed_text), variant)
+            except ValueError:
+                continue
+            rows_by_key[row_key] = _row_from_payload(
+                source=source,
+                seed=int(seed_text),
+                variant=variant,
+                payload=compact,
+            )
     rows = [
         rows_by_key[key]
         for key in sorted(

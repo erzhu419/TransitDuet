@@ -83,6 +83,9 @@ promotion run closed the native reward CI but not the wait CI.
    - Native metric update: real-demand validation now extracts
      `LowerLFDrift` and `UpperHFPower` from the native shared-PPO summaries so
      future native AFC/APC reruns can test leakage/no-tradeoff directly.
+   - Merge update: the real-demand shard merger now rebuilds rows from compact
+     payload summaries, so existing shards can expose newly added native drift
+     metrics without rerunning seeds.
    - Next action: schedule the matrix after the wait-aware real-demand merge,
      then add native LowerLFDrift metrics if the verdict remains
      `performance_noharm_only`.
