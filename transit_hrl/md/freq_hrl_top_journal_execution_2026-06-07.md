@@ -53,8 +53,17 @@ promotion run closed the native reward CI but not the wait CI.
 - Scheduler submissions:
   - v25 native promotion 512-seed shards: `t7715`, `t7716`, `t7717`,
     `t7719`, `t7720`, `t7721`, `t7722`, `t7723`.
+  - Initial `preferred_node` submissions for shard 0/5/7 and real-demand v3
+    were rerouted to non-zhengliang nodes and failed because the zhengliang
+    working tree path was unavailable there.  Missing artifacts were retried
+    with explicit zhengliang CPU nodes: shard 0 `t7748` on `node001`, shard 5
+    `t7749` on `node006`, shard 7 `t7750` on `node005`, and real-demand v3
+    `t7751` on `node004`.
   - v25 promotion merge: `t7734`, waiting for the 8 shard summaries.
   - real-demand guarded v3 AFC/APC 24-pair validation: `t7726`.
+  - leakage/no-tradeoff v25/v3 matrix: `t7736`, waiting for real-demand v3.
+  - unified top-journal v25/v3 matrix: `t7737`, waiting for v25 merge,
+    real-demand v3, and leakage v25/v3.
 - Unified top-journal and leakage matrices now prefer v25/v3 artifacts and
   fall back to v24/v2 when those results are not present.
 
