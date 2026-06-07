@@ -28,10 +28,24 @@ def _read_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _check_by_metric(data: dict[str, Any] | None, metric: str) -> dict[str, Any]:
+def _check_by_metric(
+    data: dict[str, Any] | None,
+    metric: str,
+    *,
+    treatment: str = "",
+    check_contains: str = "",
+) -> dict[str, Any]:
     if not data:
         return {}
-    return next((row for row in data.get("paired_checks", []) or [] if row.get("metric") == metric), {})
+    for row in data.get("paired_checks", []) or []:
+        if row.get("metric") != metric:
+            continue
+        if treatment and row.get("treatment") != treatment:
+            continue
+        if check_contains and check_contains not in str(row.get("check", "")):
+            continue
+        return row
+    return {}
 
 
 def _supported(row: dict[str, Any]) -> bool:
@@ -63,10 +77,28 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     }
 
     promotion = artifacts["native_promotion_v24"] or artifacts["native_promotion_v21"]
-    promotion_reward = _check_by_metric(promotion, "ep_reward")
-    promotion_wait = _check_by_metric(promotion, "avg_wait_min")
+    promotion_reward = _check_by_metric(
+        promotion,
+        "ep_reward",
+        treatment="native_wait_aware_replan",
+    )
+    promotion_reward_noninferiority = _check_by_metric(
+        promotion,
+        "ep_reward",
+        treatment="native_wait_aware_replan",
+        check_contains="noninferiority",
+    )
+    promotion_wait = _check_by_metric(
+        promotion,
+        "avg_wait_min",
+        treatment="native_wait_aware_replan",
+    )
     if not promotion_wait:
-        promotion_wait = _check_by_metric(promotion, "native_avg_board_wait_min")
+        promotion_wait = _check_by_metric(
+            promotion,
+            "native_avg_board_wait_min",
+            treatment="native_wait_aware_replan",
+        )
     real = artifacts["native_real_demand_v2"]
     real_score = _check_by_metric(real, "control_score")
     real_reward = _check_by_metric(real, "ep_reward")
@@ -96,10 +128,11 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "status": _status_from_flags(
                 present=bool(promotion),
                 supported=_supported(promotion_reward) and _supported(promotion_wait),
-                partial=_supported(promotion_reward) or _positive(promotion_wait),
+                partial=_positive(promotion_reward_noninferiority) and _supported(promotion_wait),
             ),
             "evidence": (
                 f"reward={promotion_reward.get('status', 'missing')} "
+                f"reward_noharm={promotion_reward_noninferiority.get('status', 'missing')} "
                 f"wait={promotion_wait.get('status', 'missing')}"
             ),
             "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
