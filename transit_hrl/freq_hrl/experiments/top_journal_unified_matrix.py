@@ -15,7 +15,7 @@ DEFAULT_ARTIFACTS = {
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/scheduler_encoder_cross_domain_matrix/summary.json"),
-    "leakage_matrix": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix/summary.json"),
+    "leakage_matrix": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_drift/summary.json"),
     "theory_appendix": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
 }
 
