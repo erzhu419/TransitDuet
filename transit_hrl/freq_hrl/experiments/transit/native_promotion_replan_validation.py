@@ -302,6 +302,73 @@ PERSISTENT_STRESS_PROFILES = {
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
     },
+    "tight_gap_wait_v22": {
+        "description": (
+            "Tighter wait profile: keep the v21 reward-positive same-wait guard, "
+            "but restrict accepted dispatch gaps to the <=1.02 region where the "
+            "v21 8192-seed diagnostic showed supported wait reduction."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.02,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
+    "tight_gap_target345_wait_v23": {
+        "description": (
+            "Tighter wait profile with a lower target-headway cap. It keeps the "
+            "v22 accept region and projects candidate replans to 345s for a more "
+            "direct wait objective."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 345.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.02,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
+    "pressure_guarded_wait_v24": {
+        "description": (
+            "Wait-score guard profile: restore the v12 pressure cap while keeping "
+            "projected target headway so high-pressure replans can reduce wait "
+            "without accepting the reward-negative tail."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 1.27,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.812,
+        "same_wait_max": 0.85,
+        "same_hold_max": 0.25,
+        "gap_guard_min_ratio": 0.998,
+        "gap_guard_max_ratio": 1.30,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "max_pressure": 0.5263,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
 }
 
 
@@ -339,6 +406,7 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_replan_same_wait_max": float(profile_cfg.get("same_wait_max", 0.85)),
         "_promotion_replan_wait_gain_s": float(profile_cfg.get("wait_gain_s", 8.0)),
         "_promotion_replan_max_shift_s": float(profile_cfg.get("max_shift_s", 2.0)),
+        "_promotion_replan_max_pressure": float(profile_cfg.get("max_pressure", 0.0)),
         "_promotion_replan_gap_guard_min_ratio": float(
             profile_cfg.get(
                 "gap_guard_min_ratio",
@@ -368,6 +436,9 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_final_delta_abs_max_s": float(
             profile_cfg["final_delta_abs_max_s"]
+        ),
+        "_promotion_replan_base_delta_abs_max_s": float(
+            profile_cfg.get("base_delta_abs_max_s", 0.0)
         ),
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
