@@ -101,8 +101,12 @@ promotion run closed the native reward CI but not the wait CI.
    - Goal: run one claim matrix that ties together wait-aware promotion,
      real-demand Transit, encoder, leakage, and order-book evidence.
    - Current status: strong pieces exist separately; unified matrix is missing.
-   - Next action: add a top-journal matrix runner/manifest and scheduler launch
-     plan, then run shards opportunistically without `require_node`.
+   - Implementation update: added a unified top-journal evidence matrix runner
+     that reads native promotion, native real-demand, order-book manifest,
+     encoder matrix, leakage matrix, and theory appendix artifacts, then emits
+     claim-level `supported` / `partial` / `missing` statuses and remaining gaps.
+   - Next action: schedule the unified matrix after the v24 promotion shards and
+     theory appendix refresh finish.
 
 ## Scheduler Rule
 
