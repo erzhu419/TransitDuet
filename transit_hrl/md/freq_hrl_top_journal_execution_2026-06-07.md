@@ -90,8 +90,12 @@ promotion run closed the native reward CI but not the wait CI.
      hierarchical wait credit, and weak constrained convergence.
    - Current status: diagnostics scaffolds exist, but formal proof text is not
      ready.
-   - Next action: add a theory appendix md with definitions, propositions,
-     assumptions, and proof sketches tied to measurable diagnostics.
+   - Implementation update: extended the theory appendix generator with an
+     explicit weak projected primal-dual constraint bound, in addition to the
+     existing causal encoder, leakage-shaped return, promotion FP/delay,
+     hierarchical credit residual, and paired-CI arguments.
+   - Next action: regenerate the appendix artifact through scheduler after the
+     latest diagnostics are refreshed.
 
 7. Unified large matrix
    - Goal: run one claim matrix that ties together wait-aware promotion,

@@ -70,6 +70,26 @@ def promotion_detection_delay_bound(
     return float(max(update_interval_s, 0.0) * max(required, n))
 
 
+def primal_dual_average_violation_bound(
+    *,
+    dual_radius: float,
+    step_size: float,
+    horizon: int,
+    gradient_bound: float,
+) -> float:
+    """O(1/sqrt(T)) average-violation style bound for bounded dual updates.
+
+    This is the standard projected subgradient bookkeeping term used in the
+    appendix as a weak constrained-convergence argument, not a claim that the
+    nonconvex actor-critic objective is globally optimized.
+    """
+    t_safe = max(int(horizon), 1)
+    eta = max(float(step_size), 1e-12)
+    radius = max(float(dual_radius), 0.0)
+    grad = max(float(gradient_bound), 0.0)
+    return float((radius ** 2) / (2.0 * eta * t_safe) + 0.5 * eta * (grad ** 2))
+
+
 def read_csv_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -109,6 +129,12 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             sample_std=0.18,
             n=36,
         ),
+        "primal_dual_avg_violation_bound_example": primal_dual_average_violation_bound(
+            dual_radius=2.0,
+            step_size=0.05,
+            horizon=400,
+            gradient_bound=1.0,
+        ),
         "credit_residual_bound_example": hierarchical_credit_residual_bound(
             total_credit=[1.0, 0.6, 0.2],
             upper_credit=[0.7, 0.4, 0.1],
@@ -143,6 +169,7 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p.",
             "A5: paired validation compares treatment/control on the same seed and source window.",
             "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
+            "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples.",
         ],
         "examples": examples,
         "cited_checks": cited_checks,
@@ -199,6 +226,12 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "For paired seed/source deltas with empirical standard deviation `s` and `n` pairs, the normal-approximation half-width is `z s / sqrt(n)`. This gives an explicit target for the larger-seed native promotion and real-demand control validations: increasing independent paired seeds shrinks inconclusive CIs at the standard square-root rate.",
         "",
         f"Example `s=0.18`, `n=36`, `z=1.96`: `{_fmt(examples['paired_ci_radius_example'])}`.",
+        "",
+        "## Theorem 6: Weak Primal-Dual Constraint Bound",
+        "",
+        "For a bounded projected dual variable and bounded constraint samples, the usual online projected-subgradient regret calculation yields an average constraint-excess bookkeeping term of order `O(1 / sqrt(T))` when the dual step is chosen on the `1 / sqrt(T)` scale. This is a weak constraint-control statement for the leakage multiplier path, not a global optimality theorem for the nonconvex actor-critic.",
+        "",
+        f"Example average-violation bound term: `{_fmt(examples['primal_dual_avg_violation_bound_example'])}`.",
         "",
         "## Empirical Anchors",
         "",
