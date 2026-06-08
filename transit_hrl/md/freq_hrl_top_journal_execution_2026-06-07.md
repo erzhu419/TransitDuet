@@ -94,6 +94,23 @@ promotion run closed the native reward CI but not the wait CI.
     constraints so the next AFC/APC run can test whether real wait improvement
     also preserves or improves alighting.
   - unified and leakage matrices now prefer v26/v4 artifacts when present.
+- v26 scheduler result:
+  - all six node001-node006 shards completed: `t7810`-`t7815`.
+  - merged artifact: `transit_native_promotion_reward_floor_throughput_v26_512seed_merged`.
+  - wait-pressure override solved the no-op problem: replan count mean increased
+    to `0.5195` per seed and override-count CI is supported.
+  - performance did not improve: reward delta `-6.2067`, wait delta
+    `+0.00499` minutes, both not supported.  This shows the remaining problem
+    is accepted-action selectivity, not gate sparsity.
+- v27 implementation update:
+  - Added acceptance guards for `adaptive_drift_scale` and `gap_risk_scale`.
+  - `selective_reward_wait_v27` accepts only the v26 diagnostic region where
+    reward, wait, and score moved together: `adaptive_drift_scale >= 0.747`,
+    `gap_risk_scale <= 0.984`, plus a tighter same-hold guard.
+  - New reject diagnostics:
+    `shared_ppo_adaptive_drift_guard_rejects` and
+    `shared_ppo_gap_risk_guard_rejects`.
+  - unified/leakage matrices now prefer v27/v5 artifacts when present.
 
 ## 1-7 Execution Items
 

@@ -18,6 +18,7 @@ DEFAULT_RESULT_PATHS = {
     "native_real_demand_waitaware_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "native_real_demand_reward_floor_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
     "native_real_demand_wait_pressure_v4": Path("transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json"),
+    "native_real_demand_selective_v5": Path("transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json"),
 }
 
 

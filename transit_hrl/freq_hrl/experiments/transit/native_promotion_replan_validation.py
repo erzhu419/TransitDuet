@@ -440,6 +440,45 @@ PERSISTENT_STRESS_PROFILES = {
         "reward_floor_gap_cost": 0.20,
         "reward_floor_hold_cost": 0.30,
     },
+    "selective_reward_wait_v27": {
+        "description": (
+            "Selective v27 profile from v26 diagnostics: keep wait-pressure "
+            "override active, but accept only the replan region where paired "
+            "v26 diagnostics showed reward, wait, and score moving together: "
+            "adaptive drift scale is high and gap-risk scale is low."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "gap_risk_accept_max_scale": 0.984,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "adaptive_drift_accept_min_scale": 0.747,
+        "throughput_guard_min_score": 0.05,
+        "reward_floor_min_score": 0.02,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+    },
 }
 
 
@@ -509,6 +548,12 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_adaptive_drift_penalty_min_scale": float(
             profile_cfg.get("adaptive_drift_penalty_min_scale", 0.25)
+        ),
+        "_promotion_replan_adaptive_drift_accept_min_scale": float(
+            profile_cfg.get("adaptive_drift_accept_min_scale", 0.0)
+        ),
+        "_promotion_replan_gap_risk_accept_max_scale": float(
+            profile_cfg.get("gap_risk_accept_max_scale", 0.0)
         ),
         "_promotion_replan_reward_floor_min_score": float(
             profile_cfg.get("reward_floor_min_score", 0.0)
@@ -645,6 +690,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_throughput_guard_rejects": float(
             last.get("shared_ppo_throughput_guard_rejects", 0.0)
         ),
+        "shared_ppo_adaptive_drift_guard_rejects": float(
+            last.get("shared_ppo_adaptive_drift_guard_rejects", 0.0)
+        ),
+        "shared_ppo_gap_risk_guard_rejects": float(
+            last.get("shared_ppo_gap_risk_guard_rejects", 0.0)
+        ),
         "shared_ppo_target_headway_floor_rejects": float(
             last.get("shared_ppo_target_headway_floor_rejects", 0.0)
         ),
@@ -720,6 +771,8 @@ def paired_checks(
             ("shared_ppo_pressure_guard_rejects", False),
             ("shared_ppo_reward_floor_guard_rejects", False),
             ("shared_ppo_throughput_guard_rejects", False),
+            ("shared_ppo_adaptive_drift_guard_rejects", False),
+            ("shared_ppo_gap_risk_guard_rejects", False),
             ("shared_ppo_target_headway_floor_rejects", False),
             ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
@@ -934,6 +987,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_adaptive_drift_penalty_min_scale=float(
             overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
         ),
+        promotion_replan_adaptive_drift_accept_min_scale=float(
+            overrides.get("_promotion_replan_adaptive_drift_accept_min_scale", 0.0)
+        ),
+        promotion_replan_gap_risk_accept_max_scale=float(
+            overrides.get("_promotion_replan_gap_risk_accept_max_scale", 0.0)
+        ),
         promotion_replan_reward_floor_min_score=float(
             overrides.get("_promotion_replan_reward_floor_min_score", 0.0)
         ),
@@ -1088,6 +1147,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_pressure_guard_rejects",
             "shared_ppo_reward_floor_guard_rejects",
             "shared_ppo_throughput_guard_rejects",
+            "shared_ppo_adaptive_drift_guard_rejects",
+            "shared_ppo_gap_risk_guard_rejects",
             "shared_ppo_target_headway_floor_rejects",
             "shared_ppo_base_delta_guard_rejects",
             "shared_ppo_final_delta_guard_rejects",

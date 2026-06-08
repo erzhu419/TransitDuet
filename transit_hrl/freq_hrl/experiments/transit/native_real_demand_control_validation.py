@@ -103,8 +103,10 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_gap_guard_max_ratio": 1.35,
         "_promotion_replan_gap_risk_cap_start": 0.05,
         "_promotion_replan_gap_risk_cap_full": 0.25,
+        "_promotion_replan_gap_risk_accept_max_scale": 0.984,
         "_promotion_replan_adaptive_drift_penalty_gain": 0.10,
         "_promotion_replan_adaptive_drift_penalty_min_scale": 0.72,
+        "_promotion_replan_adaptive_drift_accept_min_scale": 0.747,
         "_promotion_replan_reward_floor_min_score": 0.02,
         "_promotion_replan_reward_floor_wait_weight": 1.0,
         "_promotion_replan_reward_floor_target_weight": 1.0,
@@ -237,6 +239,12 @@ def _row_from_payload(
         "shared_ppo_throughput_guard_rejects": float(
             summary.get("shared_ppo_throughput_guard_rejects_mean", 0.0)
         ),
+        "shared_ppo_adaptive_drift_guard_rejects": float(
+            summary.get("shared_ppo_adaptive_drift_guard_rejects_mean", 0.0)
+        ),
+        "shared_ppo_gap_risk_guard_rejects": float(
+            summary.get("shared_ppo_gap_risk_guard_rejects_mean", 0.0)
+        ),
         "shared_ppo_target_headway_floor_rejects": float(
             summary.get("shared_ppo_target_headway_floor_rejects_mean", 0.0)
         ),
@@ -282,6 +290,8 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("shared_ppo_pressure_guard_rejects", False),
         ("shared_ppo_reward_floor_guard_rejects", False),
         ("shared_ppo_throughput_guard_rejects", False),
+        ("shared_ppo_adaptive_drift_guard_rejects", False),
+        ("shared_ppo_gap_risk_guard_rejects", False),
         ("shared_ppo_target_headway_floor_rejects", False),
         ("shared_ppo_target_headway_project_count", False),
         ("shared_ppo_wait_replan_adaptive_drift_scale_mean", True),
@@ -443,6 +453,12 @@ def run_validation(
                     ),
                     promotion_replan_adaptive_drift_penalty_min_scale=float(
                         overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
+                    ),
+                    promotion_replan_adaptive_drift_accept_min_scale=float(
+                        overrides.get("_promotion_replan_adaptive_drift_accept_min_scale", 0.0)
+                    ),
+                    promotion_replan_gap_risk_accept_max_scale=float(
+                        overrides.get("_promotion_replan_gap_risk_accept_max_scale", 0.0)
                     ),
                     promotion_replan_reward_floor_min_score=float(
                         overrides.get("_promotion_replan_reward_floor_min_score", 0.0)

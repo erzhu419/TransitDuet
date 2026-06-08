@@ -1130,6 +1130,8 @@ def install_shared_ppo_episode_loop(
     promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_adaptive_drift_penalty_gain: float = 0.0,
     promotion_replan_adaptive_drift_penalty_min_scale: float = 0.25,
+    promotion_replan_adaptive_drift_accept_min_scale: float = 0.0,
+    promotion_replan_gap_risk_accept_max_scale: float = 0.0,
     promotion_replan_reward_floor_min_score: float = 0.0,
     promotion_replan_reward_floor_wait_weight: float = 1.0,
     promotion_replan_reward_floor_target_weight: float = 1.0,
@@ -1179,6 +1181,8 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_final_delta_guard_rejects = 0
     runner.freq_hrl_promotion_reward_floor_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_guard_rejects = 0
+    runner.freq_hrl_promotion_adaptive_drift_guard_rejects = 0
+    runner.freq_hrl_promotion_gap_risk_guard_rejects = 0
     runner.freq_hrl_promotion_target_headway_floor_rejects = 0
     runner.freq_hrl_promotion_target_headway_project_count = 0
     runner.freq_hrl_promotion_target_headway_project_correction_abs_sum_s = 0.0
@@ -1358,6 +1362,36 @@ def install_shared_ppo_episode_loop(
                         float(preselect_metadata.get("gap_guard_active", 0.0)) > 0.0
                         or float(preselect_metadata.get("wait_guard_active", 0.0)) > 0.0
                     ):
+                        return False
+                    drift_accept_min_scale = max(
+                        float(promotion_replan_adaptive_drift_accept_min_scale), 0.0)
+                    if (
+                        drift_accept_min_scale > 0.0
+                        and float(preselect_metadata.get("adaptive_drift_scale", 1.0))
+                        < drift_accept_min_scale
+                    ):
+                        runner.freq_hrl_promotion_adaptive_drift_guard_rejects = int(
+                            getattr(
+                                runner,
+                                "freq_hrl_promotion_adaptive_drift_guard_rejects",
+                                0,
+                            )
+                        ) + 1
+                        return False
+                    gap_risk_accept_max_scale = max(
+                        float(promotion_replan_gap_risk_accept_max_scale), 0.0)
+                    if (
+                        gap_risk_accept_max_scale > 0.0
+                        and float(preselect_metadata.get("gap_risk_scale", 1.0))
+                        > gap_risk_accept_max_scale
+                    ):
+                        runner.freq_hrl_promotion_gap_risk_guard_rejects = int(
+                            getattr(
+                                runner,
+                                "freq_hrl_promotion_gap_risk_guard_rejects",
+                                0,
+                            )
+                        ) + 1
                         return False
                     throughput_guard_min = float(
                         promotion_replan_throughput_guard_min_score)
@@ -1654,6 +1688,8 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_final_delta_guard_rejects",
         "shared_ppo_reward_floor_guard_rejects",
         "shared_ppo_throughput_guard_rejects",
+        "shared_ppo_adaptive_drift_guard_rejects",
+        "shared_ppo_gap_risk_guard_rejects",
         "shared_ppo_target_headway_floor_rejects",
         "shared_ppo_gate_value_mean",
         "shared_ppo_wait_replan_count",
@@ -1733,6 +1769,8 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_gap_risk_cap_full: float = 0.0,
     promotion_replan_adaptive_drift_penalty_gain: float = 0.0,
     promotion_replan_adaptive_drift_penalty_min_scale: float = 0.25,
+    promotion_replan_adaptive_drift_accept_min_scale: float = 0.0,
+    promotion_replan_gap_risk_accept_max_scale: float = 0.0,
     promotion_replan_reward_floor_min_score: float = 0.0,
     promotion_replan_reward_floor_wait_weight: float = 1.0,
     promotion_replan_reward_floor_target_weight: float = 1.0,
@@ -1835,6 +1873,10 @@ def run_native_shared_ppo_episode_loop(
             promotion_replan_adaptive_drift_penalty_gain),
         promotion_replan_adaptive_drift_penalty_min_scale=float(
             promotion_replan_adaptive_drift_penalty_min_scale),
+        promotion_replan_adaptive_drift_accept_min_scale=float(
+            promotion_replan_adaptive_drift_accept_min_scale),
+        promotion_replan_gap_risk_accept_max_scale=float(
+            promotion_replan_gap_risk_accept_max_scale),
         promotion_replan_reward_floor_min_score=float(
             promotion_replan_reward_floor_min_score),
         promotion_replan_reward_floor_wait_weight=float(
@@ -1935,6 +1977,16 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_throughput_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_throughput_guard_rejects",
+                0,
+            )),
+            "shared_ppo_adaptive_drift_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_adaptive_drift_guard_rejects",
+                0,
+            )),
+            "shared_ppo_gap_risk_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_gap_risk_guard_rejects",
                 0,
             )),
             "shared_ppo_target_headway_floor_rejects": int(getattr(

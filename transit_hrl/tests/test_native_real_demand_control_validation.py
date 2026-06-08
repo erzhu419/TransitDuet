@@ -41,6 +41,8 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                     "shared_ppo_wait_replan_throughput_score_mean": 0.0,
                     "shared_ppo_wait_replan_reward_floor_score_mean": 0.0,
                     "shared_ppo_wait_replan_pressure_override_count": 0.0,
+                    "shared_ppo_adaptive_drift_guard_rejects": 0.0,
+                    "shared_ppo_gap_risk_guard_rejects": 0.0,
                 })
                 rows.append({
                     "source": source,
@@ -56,6 +58,8 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                     "shared_ppo_wait_replan_throughput_score_mean": 0.4,
                     "shared_ppo_wait_replan_reward_floor_score_mean": 0.2,
                     "shared_ppo_wait_replan_pressure_override_count": 1.0,
+                    "shared_ppo_adaptive_drift_guard_rejects": 1.0,
+                    "shared_ppo_gap_risk_guard_rejects": 1.0,
                 })
         checks = {row["metric"]: row for row in paired_checks(rows, min_pairs=3)}
         self.assertEqual(checks["control_score"]["status"], "supported")
@@ -70,6 +74,10 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         )
         self.assertGreater(
             checks["shared_ppo_wait_replan_pressure_override_count"]["delta_mean"],
+            0.0,
+        )
+        self.assertGreater(
+            checks["shared_ppo_adaptive_drift_guard_rejects"]["delta_mean"],
             0.0,
         )
 
