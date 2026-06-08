@@ -7,6 +7,7 @@ from freq_hrl.experiments.transit.native_shared_ppo import (
     NativeTransitPPOBridge,
     _NativeLowerReplayCollector,
     _SharedPPOPolicyProxy,
+    _promotion_reward_floor_score,
     install_shared_ppo_episode_loop,
     wait_aware_replan_action,
 )
@@ -43,6 +44,10 @@ class _FakeHoldFeedbackRunner(_FakeNativeRunner):
         super().__init__()
         self.upper_state_dim = 9
         self.freq_holdfb_dim = 4
+
+
+class _FakeLowerContextRunner(_FakeNativeRunner):
+    lower_state_dim = 6
 
 
 class NativeTransitPPOBridgeTest(unittest.TestCase):
@@ -899,6 +904,134 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         )
         with_prior = proxy.get_action(state, deterministic=True)
         self.assertLessEqual(float(with_prior[0]), float(no_prior[0]))
+
+    def test_lower_hf_wait_action_prior_context_damps_holding_reduction(self):
+        bridge = NativeTransitPPOBridge.from_runner(_FakeLowerContextRunner(), hidden_dim=0)
+        raw_proxy = _SharedPPOPolicyProxy(
+            bridge,
+            "lower",
+            lower_hf_wait_action_gain_s=10.0,
+            lower_hf_wait_feature_offset=2,
+        )
+        damped_proxy = _SharedPPOPolicyProxy(
+            bridge,
+            "lower",
+            lower_hf_wait_action_gain_s=10.0,
+            lower_hf_wait_feature_offset=2,
+            lower_hf_wait_context_dim=3,
+            lower_hf_wait_min_scale=0.25,
+            lower_hf_wait_load_damping_weight=0.75,
+            lower_hf_wait_schedule_slack_damping_weight=1.25,
+        )
+        state = np.asarray([0.0, 0.8, 0.1, 1.0, 1.0, 0.5], dtype=np.float32)
+        raw_action = raw_proxy.get_action(state, deterministic=True)
+        damped_action = damped_proxy.get_action(state, deterministic=True)
+        self.assertGreater(float(damped_action[0]), float(raw_action[0]))
+        self.assertLess(damped_proxy.lower_hf_wait_prior_scales[-1], 1.0)
+
+        boosted_proxy = _SharedPPOPolicyProxy(
+            bridge,
+            "lower",
+            lower_hf_wait_action_gain_s=10.0,
+            lower_hf_wait_feature_offset=2,
+            lower_hf_wait_context_dim=3,
+            lower_hf_wait_min_scale=0.0,
+            lower_hf_wait_max_scale=1.5,
+            lower_hf_wait_queue_boost_weight=0.5,
+        )
+        boosted_state = np.asarray([0.0, 0.1, 1.0, 0.0, 1.0, 0.5], dtype=np.float32)
+        boosted_proxy.get_action(boosted_state, deterministic=True)
+        self.assertGreater(boosted_proxy.lower_hf_wait_prior_scales[-1], 1.0)
+        self.assertLessEqual(boosted_proxy.lower_hf_wait_prior_scales[-1], 1.5)
+
+    def test_learned_gate_throughput_floor_shrinks_replan_delta(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_gate_plan_blend=0.0,
+            promotion_replan_policy="wait_aware",
+            promotion_replan_wait_gain_s=20.0,
+            promotion_replan_max_shift_s=12.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=1.0,
+            promotion_replan_throughput_floor_min_score=0.20,
+            promotion_replan_throughput_floor_min_delta_fraction=0.25,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+        }
+        self.assertTrue(runner.freq_hrl_learned_promotion_gate(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": active_action},
+            planner_key=True,
+            freq_summary=freq_summary,
+        ))
+        native = installed["upper_proxy"].get_action(state, deterministic=True)
+        self.assertLess(float(native[0]), float(active_action[0]))
+        self.assertGreater(float(native[0]), -12.0)
+        self.assertEqual(runner.freq_hrl_promotion_throughput_floor_project_count, 1)
+        self.assertAlmostEqual(
+            installed["upper_proxy"].wait_replan_throughput_floor_delta_fractions[-1],
+            0.25,
+            places=5,
+        )
+
+    def test_reward_floor_score_uses_throughput_proxy(self):
+        base = {
+            "state_wait_pressure": 0.1,
+            "state_same_wait": 0.2,
+            "shift_pressure": 0.5,
+            "abs_shift_s": 1.0,
+            "state_dispatch_gap_ratio": 1.0,
+            "state_same_hold": 0.0,
+            "throughput_proxy_score": 0.0,
+            "throughput_proxy_fleet_util": 0.0,
+        }
+        without = _promotion_reward_floor_score(
+            base,
+            active_target_headway_s=350.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.5,
+            reward_fleet_weight=0.0,
+            reward_action_cost=0.03,
+            reward_gap_cost=0.20,
+            reward_hold_cost=0.30,
+        )
+        with_throughput = _promotion_reward_floor_score(
+            {**base, "throughput_proxy_score": 0.4},
+            active_target_headway_s=350.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.5,
+            reward_fleet_weight=0.0,
+            reward_action_cost=0.03,
+            reward_gap_cost=0.20,
+            reward_hold_cost=0.30,
+        )
+        self.assertGreater(with_throughput, without)
 
 
 if __name__ == "__main__":

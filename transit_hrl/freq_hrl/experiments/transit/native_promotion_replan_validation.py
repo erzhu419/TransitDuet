@@ -479,6 +479,148 @@ PERSISTENT_STRESS_PROFILES = {
         "reward_floor_gap_cost": 0.20,
         "reward_floor_hold_cost": 0.30,
     },
+    "throughput_damped_reward_wait_v28": {
+        "description": (
+            "Throughput-damped v28 profile: start from v27, add a throughput "
+            "term to the reward-floor accept score, and damp the lower HF wait "
+            "prior when causal load/slack context says holding is still needed."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "gap_risk_accept_max_scale": 0.984,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "adaptive_drift_accept_min_scale": 0.747,
+        "throughput_guard_min_score": 0.10,
+        "reward_floor_min_score": 0.04,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_throughput_weight": 0.50,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+        "lower_hf_wait_context_dim": 3,
+        "lower_hf_wait_min_scale": 0.25,
+        "lower_hf_wait_load_damping_weight": 0.75,
+        "lower_hf_wait_schedule_slack_damping_weight": 1.25,
+        "lower_hf_wait_queue_boost_weight": 0.15,
+    },
+    "reward_floor_no_lower_damp_v29": {
+        "description": (
+            "No-lower-damp v29 profile: keep the v27 reward/wait-positive "
+            "promotion region and only add throughput/fleet terms to the "
+            "promotion reward-floor diagnostic. Lower HF wait prior remains "
+            "undamped because v28 showed global damping hurts reward even "
+            "when no replan fires."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "gap_risk_accept_max_scale": 0.984,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "adaptive_drift_accept_min_scale": 0.747,
+        "throughput_guard_min_score": 0.05,
+        "reward_floor_min_score": 0.02,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+        "lower_hf_wait_context_dim": 0,
+        "lower_hf_wait_min_scale": 0.0,
+        "lower_hf_wait_load_damping_weight": 0.0,
+        "lower_hf_wait_schedule_slack_damping_weight": 0.0,
+        "lower_hf_wait_queue_boost_weight": 0.0,
+    },
+    "throughput_floor_reward_wait_v30": {
+        "description": (
+            "Throughput-floor v30 profile: keep the v29 no-lower-damp policy, "
+            "but project accepted promotion deltas back toward the active "
+            "timetable when causal throughput, fleet utilization, or same-hold "
+            "context says the replan would hurt episode reward."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "gap_risk_accept_max_scale": 0.984,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "adaptive_drift_accept_min_scale": 0.747,
+        "throughput_guard_min_score": 0.05,
+        "throughput_floor_min_score": 0.12,
+        "throughput_floor_min_delta_fraction": 0.25,
+        "throughput_floor_fleet_util_max": 0.92,
+        "throughput_floor_same_hold_max": 0.03,
+        "reward_floor_min_score": 0.02,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+        "lower_hf_wait_context_dim": 0,
+        "lower_hf_wait_min_scale": 0.0,
+        "lower_hf_wait_load_damping_weight": 0.0,
+        "lower_hf_wait_schedule_slack_damping_weight": 0.0,
+        "lower_hf_wait_queue_boost_weight": 0.0,
+    },
 }
 
 
@@ -564,6 +706,12 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_replan_reward_floor_target_weight": float(
             profile_cfg.get("reward_floor_target_weight", 1.0)
         ),
+        "_promotion_replan_reward_floor_throughput_weight": float(
+            profile_cfg.get("reward_floor_throughput_weight", 0.0)
+        ),
+        "_promotion_replan_reward_floor_fleet_weight": float(
+            profile_cfg.get("reward_floor_fleet_weight", 0.0)
+        ),
         "_promotion_replan_reward_floor_action_cost": float(
             profile_cfg.get("reward_floor_action_cost", 0.05)
         ),
@@ -575,6 +723,18 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_throughput_guard_min_score": float(
             profile_cfg.get("throughput_guard_min_score", 0.0)
+        ),
+        "_promotion_replan_throughput_floor_min_score": float(
+            profile_cfg.get("throughput_floor_min_score", 0.0)
+        ),
+        "_promotion_replan_throughput_floor_min_delta_fraction": float(
+            profile_cfg.get("throughput_floor_min_delta_fraction", 0.0)
+        ),
+        "_promotion_replan_throughput_floor_fleet_util_max": float(
+            profile_cfg.get("throughput_floor_fleet_util_max", 0.0)
+        ),
+        "_promotion_replan_throughput_floor_same_hold_max": float(
+            profile_cfg.get("throughput_floor_same_hold_max", 0.0)
         ),
         "_promotion_replan_target_headway_min_s": float(
             profile_cfg.get("target_headway_min_s", 0.0)
@@ -597,6 +757,30 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
         "_promotion_replan_shift_sign": -1.0,
+        "_lower_hf_wait_context_dim": int(
+            profile_cfg.get("lower_hf_wait_context_dim", 0)
+        ),
+        "_lower_hf_wait_min_scale": float(
+            profile_cfg.get("lower_hf_wait_min_scale", 0.0)
+        ),
+        "_lower_hf_wait_max_scale": float(
+            profile_cfg.get("lower_hf_wait_max_scale", 1.0)
+        ),
+        "_lower_hf_wait_load_damping_weight": float(
+            profile_cfg.get("lower_hf_wait_load_damping_weight", 0.0)
+        ),
+        "_lower_hf_wait_schedule_slack_damping_weight": float(
+            profile_cfg.get("lower_hf_wait_schedule_slack_damping_weight", 0.0)
+        ),
+        "_lower_hf_wait_queue_boost_weight": float(
+            profile_cfg.get("lower_hf_wait_queue_boost_weight", 0.0)
+        ),
+        "_adaptive_lower_drift_penalty_gain": float(
+            profile_cfg.get("adaptive_lower_drift_penalty_gain", 0.0)
+        ),
+        "_adaptive_lower_drift_penalty_min_scale": float(
+            profile_cfg.get("adaptive_lower_drift_penalty_min_scale", 0.25)
+        ),
         "_stress_profile": str(profile),
     })
     wait_aware.setdefault("upper", {}).setdefault(
@@ -690,6 +874,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_throughput_guard_rejects": float(
             last.get("shared_ppo_throughput_guard_rejects", 0.0)
         ),
+        "shared_ppo_throughput_floor_project_count": float(
+            last.get("shared_ppo_throughput_floor_project_count", 0.0)
+        ),
+        "shared_ppo_throughput_floor_delta_fraction_mean": float(
+            last.get("shared_ppo_throughput_floor_delta_fraction_mean", 1.0)
+        ),
         "shared_ppo_adaptive_drift_guard_rejects": float(
             last.get("shared_ppo_adaptive_drift_guard_rejects", 0.0)
         ),
@@ -720,8 +910,29 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_wait_replan_throughput_score_mean": float(
             last.get("shared_ppo_wait_replan_throughput_score_mean", 0.0)
         ),
+        "shared_ppo_wait_replan_throughput_floor_delta_fraction_mean": float(
+            last.get("shared_ppo_wait_replan_throughput_floor_delta_fraction_mean", 1.0)
+        ),
         "shared_ppo_wait_replan_reward_floor_score_mean": float(
             last.get("shared_ppo_wait_replan_reward_floor_score_mean", 0.0)
+        ),
+        "shared_ppo_adaptive_lower_drift_penalty_scale_mean": float(
+            last.get("shared_ppo_adaptive_lower_drift_penalty_scale_mean", 1.0)
+        ),
+        "shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean": float(
+            last.get("shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_scale_mean": float(
+            last.get("shared_ppo_lower_hf_wait_prior_scale_mean", 1.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_load_mean": float(
+            last.get("shared_ppo_lower_hf_wait_prior_load_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_queue_mean": float(
+            last.get("shared_ppo_lower_hf_wait_prior_queue_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_schedule_slack_mean": float(
+            last.get("shared_ppo_lower_hf_wait_prior_schedule_slack_mean", 0.0)
         ),
         "shared_ppo_wait_replan_pressure_override_count": float(
             last.get("shared_ppo_wait_replan_pressure_override_count", 0.0)
@@ -771,6 +982,8 @@ def paired_checks(
             ("shared_ppo_pressure_guard_rejects", False),
             ("shared_ppo_reward_floor_guard_rejects", False),
             ("shared_ppo_throughput_guard_rejects", False),
+            ("shared_ppo_throughput_floor_project_count", False),
+            ("shared_ppo_throughput_floor_delta_fraction_mean", True),
             ("shared_ppo_adaptive_drift_guard_rejects", False),
             ("shared_ppo_gap_risk_guard_rejects", False),
             ("shared_ppo_target_headway_floor_rejects", False),
@@ -784,7 +997,14 @@ def paired_checks(
             ("shared_ppo_wait_replan_adaptive_drift_scale_mean", True),
             ("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", True),
             ("shared_ppo_wait_replan_throughput_score_mean", False),
+            ("shared_ppo_wait_replan_throughput_floor_delta_fraction_mean", True),
             ("shared_ppo_wait_replan_reward_floor_score_mean", False),
+            ("shared_ppo_adaptive_lower_drift_penalty_scale_mean", True),
+            ("shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean", True),
+            ("shared_ppo_lower_hf_wait_prior_scale_mean", True),
+            ("shared_ppo_lower_hf_wait_prior_load_mean", False),
+            ("shared_ppo_lower_hf_wait_prior_queue_mean", False),
+            ("shared_ppo_lower_hf_wait_prior_schedule_slack_mean", False),
             ("shared_ppo_wait_replan_pressure_override_count", False),
             ("shared_ppo_wait_replan_pressure_override_mean", False),
             ("shared_ppo_wait_replan_same_hold_mean", False),
@@ -1002,6 +1222,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_reward_floor_target_weight=float(
             overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
         ),
+        promotion_replan_reward_floor_throughput_weight=float(
+            overrides.get("_promotion_replan_reward_floor_throughput_weight", 0.0)
+        ),
+        promotion_replan_reward_floor_fleet_weight=float(
+            overrides.get("_promotion_replan_reward_floor_fleet_weight", 0.0)
+        ),
         promotion_replan_reward_floor_action_cost=float(
             overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
         ),
@@ -1013,6 +1239,18 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         ),
         promotion_replan_throughput_guard_min_score=float(
             overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
+        ),
+        promotion_replan_throughput_floor_min_score=float(
+            overrides.get("_promotion_replan_throughput_floor_min_score", 0.0)
+        ),
+        promotion_replan_throughput_floor_min_delta_fraction=float(
+            overrides.get("_promotion_replan_throughput_floor_min_delta_fraction", 0.0)
+        ),
+        promotion_replan_throughput_floor_fleet_util_max=float(
+            overrides.get("_promotion_replan_throughput_floor_fleet_util_max", 0.0)
+        ),
+        promotion_replan_throughput_floor_same_hold_max=float(
+            overrides.get("_promotion_replan_throughput_floor_same_hold_max", 0.0)
         ),
         promotion_replan_target_headway_min_s=float(
             overrides.get("_promotion_replan_target_headway_min_s", 0.0)
@@ -1032,6 +1270,24 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
         promotion_replan_terminal_early_relax=bool(overrides.get("_promotion_replan_terminal_early_relax", False)),
         lower_hf_wait_action_gain_s=variant_lower_gain,
+        lower_hf_wait_context_dim=int(overrides.get("_lower_hf_wait_context_dim", 0)),
+        lower_hf_wait_min_scale=float(overrides.get("_lower_hf_wait_min_scale", 0.0)),
+        lower_hf_wait_max_scale=float(overrides.get("_lower_hf_wait_max_scale", 1.0)),
+        lower_hf_wait_load_damping_weight=float(
+            overrides.get("_lower_hf_wait_load_damping_weight", 0.0)
+        ),
+        lower_hf_wait_schedule_slack_damping_weight=float(
+            overrides.get("_lower_hf_wait_schedule_slack_damping_weight", 0.0)
+        ),
+        lower_hf_wait_queue_boost_weight=float(
+            overrides.get("_lower_hf_wait_queue_boost_weight", 0.0)
+        ),
+        adaptive_lower_drift_penalty_gain=float(
+            overrides.get("_adaptive_lower_drift_penalty_gain", 0.0)
+        ),
+        adaptive_lower_drift_penalty_min_scale=float(
+            overrides.get("_adaptive_lower_drift_penalty_min_scale", 0.25)
+        ),
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )
     row = _row_from_payload(seed, variant, payload)
@@ -1049,6 +1305,81 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
     return variant, str(seed), compact, row
 
 
+def _partial_checks(rows: list[dict[str, Any]], min_pairs: int) -> list[dict[str, Any]]:
+    checks = paired_checks(rows, min_pairs=int(min_pairs))
+    for treatment in ("native_learned_gate", "native_wait_aware_replan"):
+        if any(row.get("variant") == treatment for row in rows):
+            checks.extend(paired_checks(
+                rows,
+                min_pairs=int(min_pairs),
+                treatment=treatment,
+            ))
+    return checks
+
+
+def _write_partial_outputs(
+    output_dir: Path,
+    rows: list[dict[str, Any]],
+    payloads: dict[str, Any],
+    *,
+    completed_jobs: int,
+    total_jobs: int,
+    config_path: Path,
+    seeds: list[int],
+    episodes: int,
+    min_pairs: int,
+    lower_hf_wait_action_gain_s: float,
+    offpolicy_replay_updates: int,
+    workers: int,
+) -> None:
+    if not rows:
+        return
+    variant_rank = {variant: idx for idx, variant in enumerate(VARIANTS)}
+    partial_rows = sorted(
+        rows,
+        key=lambda row: (variant_rank.get(str(row["variant"]), 999), int(row["seed"])),
+    )
+    partial = {
+        "complete": False,
+        "completed_jobs": int(completed_jobs),
+        "total_jobs": int(total_jobs),
+        "config_path": str(config_path),
+        "seeds": [int(seed) for seed in seeds],
+        "episodes": int(episodes),
+        "min_pairs": int(min_pairs),
+        "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
+        "offpolicy_replay_updates": int(max(1, int(offpolicy_replay_updates))),
+        "workers": int(max(1, int(workers))),
+        "variants": list(VARIANTS.keys()),
+        "summary": summarize(partial_rows),
+        "rows": partial_rows,
+        "paired_checks": _partial_checks(partial_rows, min_pairs=int(min_pairs)),
+        "payloads": payloads,
+    }
+    with (output_dir / "partial_summary.json").open("w", encoding="utf-8") as f:
+        json.dump(partial, f, indent=2)
+    with (output_dir / "partial_rows.csv").open("w", newline="", encoding="utf-8") as f:
+        fieldnames = list(partial_rows[0].keys())
+        for row in partial_rows[1:]:
+            for key in row:
+                if key not in fieldnames:
+                    fieldnames.append(key)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(partial_rows)
+    checks = partial["paired_checks"]
+    if checks:
+        with (output_dir / "partial_paired_checks.csv").open("w", newline="", encoding="utf-8") as f:
+            fieldnames = list(checks[0].keys())
+            for row in checks[1:]:
+                for key in row:
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(checks)
+
+
 def run_validation(
     output_dir: Path,
     config_path: Path,
@@ -1059,6 +1390,7 @@ def run_validation(
     lower_hf_wait_action_gain_s: float = DEFAULT_LOWER_HF_WAIT_ACTION_GAIN_S,
     offpolicy_replay_updates: int = 1,
     workers: int = 1,
+    partial_every: int = 0,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
@@ -1078,6 +1410,7 @@ def run_validation(
                 "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
                 "offpolicy_replay_updates": int(offpolicy_replay_updates),
             })
+    completed_jobs = 0
     if int(workers) > 1 and len(jobs) > 1:
         with ProcessPoolExecutor(max_workers=max(1, int(workers))) as executor:
             futures = [executor.submit(_run_variant_seed_job, job) for job in jobs]
@@ -1085,11 +1418,43 @@ def run_validation(
                 variant, seed_key, compact, row = future.result()
                 payloads.setdefault(variant, {})[seed_key] = compact
                 rows.append(row)
+                completed_jobs += 1
+                if int(partial_every) > 0 and completed_jobs % int(partial_every) == 0:
+                    _write_partial_outputs(
+                        output_dir,
+                        rows,
+                        payloads,
+                        completed_jobs=completed_jobs,
+                        total_jobs=len(jobs),
+                        config_path=config_path,
+                        seeds=seeds,
+                        episodes=int(episodes),
+                        min_pairs=int(min_pairs),
+                        lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
+                        offpolicy_replay_updates=int(offpolicy_replay_updates),
+                        workers=int(workers),
+                    )
     else:
         for job in jobs:
             variant, seed_key, compact, row = _run_variant_seed_job(job)
             payloads.setdefault(variant, {})[seed_key] = compact
             rows.append(row)
+            completed_jobs += 1
+            if int(partial_every) > 0 and completed_jobs % int(partial_every) == 0:
+                _write_partial_outputs(
+                    output_dir,
+                    rows,
+                    payloads,
+                    completed_jobs=completed_jobs,
+                    total_jobs=len(jobs),
+                    config_path=config_path,
+                    seeds=seeds,
+                    episodes=int(episodes),
+                    min_pairs=int(min_pairs),
+                    lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
+                    offpolicy_replay_updates=int(offpolicy_replay_updates),
+                    workers=int(workers),
+                )
     variant_rank = {variant: idx for idx, variant in enumerate(VARIANTS)}
     rows.sort(key=lambda row: (variant_rank.get(str(row["variant"]), 999), int(row["seed"])))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
@@ -1102,6 +1467,9 @@ def run_validation(
             ))
     summary = summarize(rows)
     payload = {
+        "complete": True,
+        "completed_jobs": int(completed_jobs),
+        "total_jobs": len(jobs),
         "config_path": str(config_path),
         "seeds": [int(seed) for seed in seeds],
         "episodes": int(episodes),
@@ -1147,6 +1515,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_pressure_guard_rejects",
             "shared_ppo_reward_floor_guard_rejects",
             "shared_ppo_throughput_guard_rejects",
+            "shared_ppo_throughput_floor_project_count",
+            "shared_ppo_throughput_floor_delta_fraction_mean",
             "shared_ppo_adaptive_drift_guard_rejects",
             "shared_ppo_gap_risk_guard_rejects",
             "shared_ppo_target_headway_floor_rejects",
@@ -1158,7 +1528,10 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_wait_replan_adaptive_drift_scale_mean",
             "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean",
             "shared_ppo_wait_replan_throughput_score_mean",
+            "shared_ppo_wait_replan_throughput_floor_delta_fraction_mean",
             "shared_ppo_wait_replan_reward_floor_score_mean",
+            "shared_ppo_adaptive_lower_drift_penalty_scale_mean",
+            "shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean",
             "shared_ppo_wait_replan_pressure_override_count",
             "shared_ppo_wait_replan_pressure_override_mean",
             "shared_ppo_wait_replan_shift_mean_s",
@@ -1292,6 +1665,12 @@ def main() -> None:
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument(
+        "--partial-every",
+        type=int,
+        default=0,
+        help="Write partial_summary.json every N completed seed/variant jobs.",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("transit_hrl/results/transit_native_promotion_replan"),
@@ -1323,6 +1702,7 @@ def main() -> None:
         lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
         offpolicy_replay_updates=int(args.offpolicy_replay_updates),
         workers=int(args.workers),
+        partial_every=int(args.partial_every),
     )
     print(f"wrote {args.output_dir}")
     for check_name, label in [

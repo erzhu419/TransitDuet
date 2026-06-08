@@ -110,10 +110,16 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_reward_floor_min_score": 0.02,
         "_promotion_replan_reward_floor_wait_weight": 1.0,
         "_promotion_replan_reward_floor_target_weight": 1.0,
+        "_promotion_replan_reward_floor_throughput_weight": 0.50,
+        "_promotion_replan_reward_floor_fleet_weight": 0.05,
         "_promotion_replan_reward_floor_action_cost": 0.03,
         "_promotion_replan_reward_floor_gap_cost": 0.20,
         "_promotion_replan_reward_floor_hold_cost": 0.30,
-        "_promotion_replan_throughput_guard_min_score": 0.05,
+        "_promotion_replan_throughput_guard_min_score": 0.10,
+        "_promotion_replan_throughput_floor_min_score": 0.12,
+        "_promotion_replan_throughput_floor_min_delta_fraction": 0.25,
+        "_promotion_replan_throughput_floor_fleet_util_max": 0.92,
+        "_promotion_replan_throughput_floor_same_hold_max": 0.30,
         "_promotion_replan_target_headway_min_s": 336.0,
         "_promotion_replan_target_headway_max_s": 346.0,
         "_promotion_replan_project_target_headway": True,
@@ -125,6 +131,14 @@ VARIANTS: dict[str, dict[str, Any]] = {
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
         "_lower_hf_wait_action_gain_s": 45.0,
+        "_lower_hf_wait_context_dim": 3,
+        "_lower_hf_wait_min_scale": 0.90,
+        "_lower_hf_wait_max_scale": 1.20,
+        "_lower_hf_wait_load_damping_weight": 0.0,
+        "_lower_hf_wait_schedule_slack_damping_weight": 0.0,
+        "_lower_hf_wait_queue_boost_weight": 0.15,
+        "_adaptive_lower_drift_penalty_gain": 0.20,
+        "_adaptive_lower_drift_penalty_min_scale": 0.70,
         "_offpolicy_replay_updates": 3,
     },
 }
@@ -239,6 +253,12 @@ def _row_from_payload(
         "shared_ppo_throughput_guard_rejects": float(
             summary.get("shared_ppo_throughput_guard_rejects_mean", 0.0)
         ),
+        "shared_ppo_throughput_floor_project_count": float(
+            summary.get("shared_ppo_throughput_floor_project_count_mean", 0.0)
+        ),
+        "shared_ppo_throughput_floor_delta_fraction_mean": float(
+            summary.get("shared_ppo_throughput_floor_delta_fraction_mean_mean", 1.0)
+        ),
         "shared_ppo_adaptive_drift_guard_rejects": float(
             summary.get("shared_ppo_adaptive_drift_guard_rejects_mean", 0.0)
         ),
@@ -260,8 +280,29 @@ def _row_from_payload(
         "shared_ppo_wait_replan_throughput_score_mean": float(
             summary.get("shared_ppo_wait_replan_throughput_score_mean_mean", 0.0)
         ),
+        "shared_ppo_wait_replan_throughput_floor_delta_fraction_mean": float(
+            summary.get("shared_ppo_wait_replan_throughput_floor_delta_fraction_mean_mean", 1.0)
+        ),
         "shared_ppo_wait_replan_reward_floor_score_mean": float(
             summary.get("shared_ppo_wait_replan_reward_floor_score_mean_mean", 0.0)
+        ),
+        "shared_ppo_adaptive_lower_drift_penalty_scale_mean": float(
+            summary.get("shared_ppo_adaptive_lower_drift_penalty_scale_mean_mean", 1.0)
+        ),
+        "shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean": float(
+            summary.get("shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_scale_mean": float(
+            summary.get("shared_ppo_lower_hf_wait_prior_scale_mean_mean", 1.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_load_mean": float(
+            summary.get("shared_ppo_lower_hf_wait_prior_load_mean_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_queue_mean": float(
+            summary.get("shared_ppo_lower_hf_wait_prior_queue_mean_mean", 0.0)
+        ),
+        "shared_ppo_lower_hf_wait_prior_schedule_slack_mean": float(
+            summary.get("shared_ppo_lower_hf_wait_prior_schedule_slack_mean_mean", 0.0)
         ),
         "shared_ppo_wait_replan_pressure_override_count": float(
             summary.get("shared_ppo_wait_replan_pressure_override_count_mean", 0.0)
@@ -282,6 +323,7 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("ep_reward", False),
         ("avg_wait_min", True),
         ("native_avg_board_wait_min", True),
+        ("native_boarded_pax", False),
         ("native_alighted_pax", False),
         ("native_avg_onboard_load", True),
         ("LowerLFDrift", True),
@@ -290,6 +332,8 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("shared_ppo_pressure_guard_rejects", False),
         ("shared_ppo_reward_floor_guard_rejects", False),
         ("shared_ppo_throughput_guard_rejects", False),
+        ("shared_ppo_throughput_floor_project_count", False),
+        ("shared_ppo_throughput_floor_delta_fraction_mean", True),
         ("shared_ppo_adaptive_drift_guard_rejects", False),
         ("shared_ppo_gap_risk_guard_rejects", False),
         ("shared_ppo_target_headway_floor_rejects", False),
@@ -297,7 +341,14 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("shared_ppo_wait_replan_adaptive_drift_scale_mean", True),
         ("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", True),
         ("shared_ppo_wait_replan_throughput_score_mean", False),
+        ("shared_ppo_wait_replan_throughput_floor_delta_fraction_mean", True),
         ("shared_ppo_wait_replan_reward_floor_score_mean", False),
+        ("shared_ppo_adaptive_lower_drift_penalty_scale_mean", True),
+        ("shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean", True),
+        ("shared_ppo_lower_hf_wait_prior_scale_mean", True),
+        ("shared_ppo_lower_hf_wait_prior_load_mean", False),
+        ("shared_ppo_lower_hf_wait_prior_queue_mean", False),
+        ("shared_ppo_lower_hf_wait_prior_schedule_slack_mean", False),
         ("shared_ppo_wait_replan_pressure_override_count", False),
         ("shared_ppo_wait_replan_pressure_override_mean", False),
     ]:
@@ -469,6 +520,12 @@ def run_validation(
                     promotion_replan_reward_floor_target_weight=float(
                         overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
                     ),
+                    promotion_replan_reward_floor_throughput_weight=float(
+                        overrides.get("_promotion_replan_reward_floor_throughput_weight", 0.0)
+                    ),
+                    promotion_replan_reward_floor_fleet_weight=float(
+                        overrides.get("_promotion_replan_reward_floor_fleet_weight", 0.0)
+                    ),
                     promotion_replan_reward_floor_action_cost=float(
                         overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
                     ),
@@ -480,6 +537,18 @@ def run_validation(
                     ),
                     promotion_replan_throughput_guard_min_score=float(
                         overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
+                    ),
+                    promotion_replan_throughput_floor_min_score=float(
+                        overrides.get("_promotion_replan_throughput_floor_min_score", 0.0)
+                    ),
+                    promotion_replan_throughput_floor_min_delta_fraction=float(
+                        overrides.get("_promotion_replan_throughput_floor_min_delta_fraction", 0.0)
+                    ),
+                    promotion_replan_throughput_floor_fleet_util_max=float(
+                        overrides.get("_promotion_replan_throughput_floor_fleet_util_max", 0.0)
+                    ),
+                    promotion_replan_throughput_floor_same_hold_max=float(
+                        overrides.get("_promotion_replan_throughput_floor_same_hold_max", 0.0)
                     ),
                     promotion_replan_target_headway_min_s=float(
                         overrides.get("_promotion_replan_target_headway_min_s", 0.0)
@@ -506,6 +575,24 @@ def run_validation(
                         overrides.get("_promotion_replan_terminal_early_relax", False)
                     ),
                     lower_hf_wait_action_gain_s=float(overrides.get("_lower_hf_wait_action_gain_s", 0.0)),
+                    lower_hf_wait_context_dim=int(overrides.get("_lower_hf_wait_context_dim", 0)),
+                    lower_hf_wait_min_scale=float(overrides.get("_lower_hf_wait_min_scale", 0.0)),
+                    lower_hf_wait_max_scale=float(overrides.get("_lower_hf_wait_max_scale", 1.0)),
+                    lower_hf_wait_load_damping_weight=float(
+                        overrides.get("_lower_hf_wait_load_damping_weight", 0.0)
+                    ),
+                    lower_hf_wait_schedule_slack_damping_weight=float(
+                        overrides.get("_lower_hf_wait_schedule_slack_damping_weight", 0.0)
+                    ),
+                    lower_hf_wait_queue_boost_weight=float(
+                        overrides.get("_lower_hf_wait_queue_boost_weight", 0.0)
+                    ),
+                    adaptive_lower_drift_penalty_gain=float(
+                        overrides.get("_adaptive_lower_drift_penalty_gain", 0.0)
+                    ),
+                    adaptive_lower_drift_penalty_min_scale=float(
+                        overrides.get("_adaptive_lower_drift_penalty_min_scale", 0.25)
+                    ),
                     offpolicy_replay_updates=int(overrides.get("_offpolicy_replay_updates", 1)),
                 )
                 payloads[f"{source}:{seed}:{variant}"] = {
