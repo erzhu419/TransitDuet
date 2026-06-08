@@ -1303,6 +1303,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_project_target_headway: bool = False,
     promotion_replan_target_headway_project_margin_s: float = 0.25,
     promotion_replan_base_delta_abs_max_s: float = 0.0,
+    promotion_replan_final_delta_abs_min_s: float = 0.0,
     promotion_replan_final_delta_abs_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
@@ -1352,6 +1353,7 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_target_headway_guard_rejects = 0
     runner.freq_hrl_promotion_pressure_guard_rejects = 0
     runner.freq_hrl_promotion_base_delta_guard_rejects = 0
+    runner.freq_hrl_promotion_final_delta_floor_rejects = 0
     runner.freq_hrl_promotion_final_delta_guard_rejects = 0
     runner.freq_hrl_promotion_reward_floor_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_guard_rejects = 0
@@ -1833,6 +1835,22 @@ def install_shared_ppo_episode_loop(
                                    - np.asarray(active_action, dtype=np.float64))
                         )),
                     }
+                final_delta_abs_min_s = max(
+                    float(promotion_replan_final_delta_abs_min_s), 0.0)
+                if (
+                    final_delta_abs_min_s > 0.0
+                    and preselect_metadata is not None
+                    and float(preselect_metadata.get("final_action_delta_abs_s", 0.0))
+                    < final_delta_abs_min_s
+                ):
+                    runner.freq_hrl_promotion_final_delta_floor_rejects = int(
+                        getattr(
+                            runner,
+                            "freq_hrl_promotion_final_delta_floor_rejects",
+                            0,
+                        )
+                    ) + 1
+                    return False
             promote = upper_proxy.evaluate_promotion_gate(
                 kwargs["s_upper"],
                 threshold=float(promotion_gate_threshold),
@@ -1935,6 +1953,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_target_headway_guard_rejects",
         "shared_ppo_target_headway_project_count",
         "shared_ppo_target_headway_project_correction_mean_s",
+        "shared_ppo_final_delta_floor_rejects",
         "shared_ppo_final_delta_guard_rejects",
         "shared_ppo_reward_floor_guard_rejects",
         "shared_ppo_throughput_guard_rejects",
@@ -2048,6 +2067,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_project_target_headway: bool = False,
     promotion_replan_target_headway_project_margin_s: float = 0.25,
     promotion_replan_base_delta_abs_max_s: float = 0.0,
+    promotion_replan_final_delta_abs_min_s: float = 0.0,
     promotion_replan_final_delta_abs_max_s: float = 0.0,
     promotion_replan_shift_sign: float = -1.0,
     promotion_replan_base_action: str = "active",
@@ -2182,6 +2202,7 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_target_headway_project_margin_s=float(
             promotion_replan_target_headway_project_margin_s),
         promotion_replan_base_delta_abs_max_s=float(promotion_replan_base_delta_abs_max_s),
+        promotion_replan_final_delta_abs_min_s=float(promotion_replan_final_delta_abs_min_s),
         promotion_replan_final_delta_abs_max_s=float(promotion_replan_final_delta_abs_max_s),
         promotion_replan_shift_sign=float(promotion_replan_shift_sign),
         promotion_replan_base_action=str(promotion_replan_base_action),
@@ -2256,6 +2277,11 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_base_delta_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_base_delta_guard_rejects",
+                0,
+            )),
+            "shared_ppo_final_delta_floor_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_final_delta_floor_rejects",
                 0,
             )),
             "shared_ppo_final_delta_guard_rejects": int(getattr(
@@ -2498,6 +2524,7 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_target_headway_min_s": float(promotion_replan_target_headway_min_s),
         "promotion_replan_target_headway_max_s": float(promotion_replan_target_headway_max_s),
         "promotion_replan_base_delta_abs_max_s": float(promotion_replan_base_delta_abs_max_s),
+        "promotion_replan_final_delta_abs_min_s": float(promotion_replan_final_delta_abs_min_s),
         "promotion_replan_final_delta_abs_max_s": float(promotion_replan_final_delta_abs_max_s),
         "promotion_replan_shift_sign": float(promotion_replan_shift_sign),
         "promotion_replan_base_action": str(promotion_replan_base_action),
@@ -2558,7 +2585,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- replan target-headway projection: enabled={payload.get('promotion_replan_project_target_headway', False)} margin_s={payload.get('promotion_replan_target_headway_project_margin_s', 0.0)}",
         f"- replan throughput/reward floor: throughput_min={payload.get('promotion_replan_throughput_guard_min_score', 0.0)} floor_min={payload.get('promotion_replan_throughput_floor_min_score', 0.0)} reward_floor={payload.get('promotion_replan_reward_floor_min_score', 0.0)} target_min_s={payload.get('promotion_replan_target_headway_min_s', 0.0)}",
         f"- adaptive drift penalty: gain={payload.get('promotion_replan_adaptive_drift_penalty_gain', 0.0)} min_scale={payload.get('promotion_replan_adaptive_drift_penalty_min_scale', 0.0)}",
-        f"- replan final-delta guard: max_s={payload.get('promotion_replan_final_delta_abs_max_s', 0.0)}",
+        f"- replan final-delta guard: min_s={payload.get('promotion_replan_final_delta_abs_min_s', 0.0)} max_s={payload.get('promotion_replan_final_delta_abs_max_s', 0.0)}",
         f"- promotion replan policy: {payload.get('promotion_replan_policy', 'actor')} wait_gain_s={payload.get('promotion_replan_wait_gain_s', 0.0)} max_shift_s={payload.get('promotion_replan_max_shift_s', 0.0)}",
         f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)} context_dim={payload.get('lower_hf_wait_context_dim', 0)} min_scale={payload.get('lower_hf_wait_min_scale', 0.0)} max_scale={payload.get('lower_hf_wait_max_scale', 1.0)}",
         f"- adaptive lower drift penalty: gain={payload.get('adaptive_lower_drift_penalty_gain', 0.0)} min_scale={payload.get('adaptive_lower_drift_penalty_min_scale', 0.0)}",
@@ -2746,6 +2773,7 @@ def main() -> None:
     parser.add_argument("--promotion-replan-project-target-headway", action="store_true")
     parser.add_argument("--promotion-replan-target-headway-project-margin-s", type=float, default=0.25)
     parser.add_argument("--promotion-replan-base-delta-abs-max-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-final-delta-abs-min-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-final-delta-abs-max-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-shift-sign", type=float, default=-1.0)
     parser.add_argument("--promotion-replan-base-action", default="active")
@@ -2818,6 +2846,7 @@ def main() -> None:
             promotion_replan_target_headway_project_margin_s=float(
                 args.promotion_replan_target_headway_project_margin_s),
             promotion_replan_base_delta_abs_max_s=float(args.promotion_replan_base_delta_abs_max_s),
+            promotion_replan_final_delta_abs_min_s=float(args.promotion_replan_final_delta_abs_min_s),
             promotion_replan_final_delta_abs_max_s=float(args.promotion_replan_final_delta_abs_max_s),
             promotion_replan_shift_sign=float(args.promotion_replan_shift_sign),
             promotion_replan_base_action=str(args.promotion_replan_base_action),

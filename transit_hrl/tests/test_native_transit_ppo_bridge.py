@@ -996,6 +996,50 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             places=5,
         )
 
+    def test_learned_gate_final_delta_floor_rejects_small_replan(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_gate_plan_blend=0.0,
+            promotion_replan_policy="wait_aware",
+            promotion_replan_wait_gain_s=1.0,
+            promotion_replan_max_shift_s=1.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=1.0,
+            promotion_replan_final_delta_abs_min_s=1.5,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+        }
+        self.assertFalse(runner.freq_hrl_learned_promotion_gate(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": active_action},
+            planner_key=True,
+            freq_summary=freq_summary,
+        ))
+        self.assertEqual(runner.freq_hrl_promotion_final_delta_floor_rejects, 1)
+        self.assertEqual(installed["upper_proxy"].gate_replans, 0)
+
     def test_reward_floor_score_uses_throughput_proxy(self):
         base = {
             "state_wait_pressure": 0.1,

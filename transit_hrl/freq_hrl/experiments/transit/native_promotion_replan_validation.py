@@ -621,6 +621,56 @@ PERSISTENT_STRESS_PROFILES = {
         "lower_hf_wait_schedule_slack_damping_weight": 0.0,
         "lower_hf_wait_queue_boost_weight": 0.0,
     },
+    "final_delta_floor_reward_wait_v31": {
+        "description": (
+            "Final-delta floor v31 profile: keep the v30 throughput floor, "
+            "but reject promotion replans whose final projected timetable "
+            "delta is too small to overcome episode-reward noise."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_min_s": 0.64,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "gap_risk_accept_max_scale": 0.984,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "adaptive_drift_accept_min_scale": 0.831,
+        "throughput_guard_min_score": 0.05,
+        "throughput_floor_min_score": 0.12,
+        "throughput_floor_min_delta_fraction": 0.25,
+        "throughput_floor_fleet_util_max": 0.92,
+        "throughput_floor_same_hold_max": 0.03,
+        "reward_floor_min_score": 0.02,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+        "lower_hf_wait_context_dim": 0,
+        "lower_hf_wait_min_scale": 0.0,
+        "lower_hf_wait_load_damping_weight": 0.0,
+        "lower_hf_wait_schedule_slack_damping_weight": 0.0,
+        "lower_hf_wait_queue_boost_weight": 0.0,
+    },
 }
 
 
@@ -750,6 +800,9 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_final_delta_abs_max_s": float(
             profile_cfg["final_delta_abs_max_s"]
+        ),
+        "_promotion_replan_final_delta_abs_min_s": float(
+            profile_cfg.get("final_delta_abs_min_s", 0.0)
         ),
         "_promotion_replan_base_delta_abs_max_s": float(
             profile_cfg.get("base_delta_abs_max_s", 0.0)
@@ -895,6 +948,9 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_final_delta_guard_rejects": float(
             last.get("shared_ppo_final_delta_guard_rejects", 0.0)
         ),
+        "shared_ppo_final_delta_floor_rejects": float(
+            last.get("shared_ppo_final_delta_floor_rejects", 0.0)
+        ),
         "shared_ppo_gate_value_mean": float(last.get("shared_ppo_gate_value_mean", 0.0)),
         "shared_ppo_wait_replan_count": float(last.get("shared_ppo_wait_replan_count", 0.0)),
         "shared_ppo_wait_replan_pressure_mean": float(last.get("shared_ppo_wait_replan_pressure_mean", 0.0)),
@@ -989,6 +1045,7 @@ def paired_checks(
             ("shared_ppo_target_headway_floor_rejects", False),
             ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
+            ("shared_ppo_final_delta_floor_rejects", False),
             ("shared_ppo_wait_replan_count", False),
             ("shared_ppo_wait_replan_pressure_mean", False),
             ("shared_ppo_wait_replan_shift_pressure_mean", False),
@@ -1263,6 +1320,7 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
             overrides.get("_promotion_replan_target_headway_project_margin_s", 0.25)
         ),
         promotion_replan_base_delta_abs_max_s=float(overrides.get("_promotion_replan_base_delta_abs_max_s", 0.0)),
+        promotion_replan_final_delta_abs_min_s=float(overrides.get("_promotion_replan_final_delta_abs_min_s", 0.0)),
         promotion_replan_final_delta_abs_max_s=float(overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)),
         promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
         promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
@@ -1522,6 +1580,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_target_headway_floor_rejects",
             "shared_ppo_base_delta_guard_rejects",
             "shared_ppo_final_delta_guard_rejects",
+            "shared_ppo_final_delta_floor_rejects",
             "shared_ppo_gate_value_mean",
             "shared_ppo_wait_replan_count",
             "shared_ppo_wait_replan_pressure_mean",
