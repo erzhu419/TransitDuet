@@ -67,6 +67,34 @@ promotion run closed the native reward CI but not the wait CI.
 - Unified top-journal and leakage matrices now prefer v25/v3 artifacts and
   fall back to v24/v2 when those results are not present.
 
+## 2026-06-08 Wait-Pressure Override Attack
+
+- v25/v3 post-processing finished after scheduler retries:
+  - native promotion v25 merged 512 pairs: reward improvement is still
+    inconclusive, reward no-harm is supported, wait is inconclusive, and the
+    wait-aware replan count is effectively zero (`~0.002` per paired seed).
+  - native real-demand v3 supports score/reward/wait, but alighting throughput
+    is not supported and upper replanning is still a no-op.
+  - unified matrix v25/v3 remains `3 supported / 2 partial / 1 not_supported`.
+- Root cause: the learned gate path exists, but the frequency promotion flag is
+  too sparse for these native stress regimes, so promotion rarely changes the
+  upper timetable action.
+- Implementation update for v26/v4:
+  - `native_shared_ppo` now supports `promotion_gate_wait_pressure_override`,
+    allowing high native wait pressure to force the promotion gate after the
+    wait-aware replan candidate passes reward-floor, throughput, target-headway,
+    shift, and drift-scaling guards.
+  - New diagnostics record whether each accepted replan came from this override:
+    `shared_ppo_wait_replan_pressure_override_count` and
+    `shared_ppo_wait_replan_pressure_override_mean`.
+  - `reward_floor_throughput_v26` lowers the no-op risk by widening the
+    wait/dispatch acceptance region while keeping a small positive reward floor,
+    throughput guard, target-headway projection, and adaptive drift scaling.
+  - native real-demand v4 reuses the same wait-pressure override and throughput
+    constraints so the next AFC/APC run can test whether real wait improvement
+    also preserves or improves alighting.
+  - unified and leakage matrices now prefer v26/v4 artifacts when present.
+
 ## 1-7 Execution Items
 
 1. Native wait improvement CI

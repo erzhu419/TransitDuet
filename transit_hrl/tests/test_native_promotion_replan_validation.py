@@ -64,14 +64,16 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
         old_common = json.loads(json.dumps(COMMON_OVERRIDES))
         old_variants = json.loads(json.dumps(VARIANTS))
         try:
-            apply_persistent_stress_preset(profile="reward_floor_throughput_v25")
+            apply_persistent_stress_preset(profile="reward_floor_throughput_v26")
             wait_aware = VARIANTS["native_wait_aware_replan"]
-            self.assertEqual(wait_aware["_promotion_replan_target_headway_min_s"], 338.0)
-            self.assertEqual(wait_aware["_promotion_replan_target_headway_max_s"], 347.0)
-            self.assertEqual(wait_aware["_promotion_replan_reward_floor_min_score"], 0.12)
-            self.assertEqual(wait_aware["_promotion_replan_throughput_guard_min_score"], 0.25)
-            self.assertEqual(wait_aware["_promotion_replan_adaptive_drift_penalty_gain"], 0.15)
-            self.assertEqual(wait_aware["_promotion_replan_adaptive_drift_penalty_min_scale"], 0.65)
+            self.assertTrue(wait_aware["_promotion_gate_wait_pressure_override"])
+            self.assertEqual(wait_aware["_promotion_gate_wait_pressure_override_min"], 0.18)
+            self.assertEqual(wait_aware["_promotion_replan_target_headway_min_s"], 336.0)
+            self.assertEqual(wait_aware["_promotion_replan_target_headway_max_s"], 346.0)
+            self.assertEqual(wait_aware["_promotion_replan_reward_floor_min_score"], 0.02)
+            self.assertEqual(wait_aware["_promotion_replan_throughput_guard_min_score"], 0.05)
+            self.assertEqual(wait_aware["_promotion_replan_adaptive_drift_penalty_gain"], 0.10)
+            self.assertEqual(wait_aware["_promotion_replan_adaptive_drift_penalty_min_scale"], 0.72)
         finally:
             COMMON_OVERRIDES.clear()
             COMMON_OVERRIDES.update(old_common)
@@ -136,6 +138,7 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
                     "shared_ppo_wait_replan_adaptive_drift_scale_mean": 1.0,
                     "shared_ppo_wait_replan_throughput_score_mean": 0.0,
                     "shared_ppo_wait_replan_reward_floor_score_mean": 0.0,
+                    "shared_ppo_wait_replan_pressure_override_count": 0.0,
                     "upper_plan_target_mean": 360.0,
                     "terminal_launch_shift_mean": 0.0,
                 },
@@ -153,6 +156,7 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
                     "shared_ppo_wait_replan_adaptive_drift_scale_mean": 0.8,
                     "shared_ppo_wait_replan_throughput_score_mean": 0.4,
                     "shared_ppo_wait_replan_reward_floor_score_mean": 0.2,
+                    "shared_ppo_wait_replan_pressure_override_count": 1.0,
                     "upper_plan_target_mean": 348.0,
                     "terminal_launch_shift_mean": -8.0,
                 },
@@ -172,6 +176,11 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
         self.assertIn("shared_ppo_wait_replan_reward_floor_score_mean", checks)
         self.assertGreater(
             checks["shared_ppo_wait_replan_reward_floor_score_mean"]["delta_mean"],
+            0.0,
+        )
+        self.assertIn("shared_ppo_wait_replan_pressure_override_count", checks)
+        self.assertGreater(
+            checks["shared_ppo_wait_replan_pressure_override_count"]["delta_mean"],
             0.0,
         )
 

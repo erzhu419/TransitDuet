@@ -824,6 +824,7 @@ class _SharedPPOPolicyProxy:
         self.wait_replan_adaptive_drift_hf_to_lf: list[float] = []
         self.wait_replan_throughput_scores: list[float] = []
         self.wait_replan_reward_floor_scores: list[float] = []
+        self.wait_replan_pressure_overrides: list[float] = []
         self.wait_replan_signed_shifts: list[float] = []
         self.wait_replan_abs_shifts: list[float] = []
         self.wait_replan_base_delta_abs: list[float] = []
@@ -872,6 +873,7 @@ class _SharedPPOPolicyProxy:
         native_action_blend: float = 0.0,
         preselect_metadata: dict[str, float] | None = None,
         act_info_override: dict[str, Any] | None = None,
+        force_promote: bool = False,
     ) -> bool:
         if self.level != "upper" or not bool(self.bridge.contract.learned_promotion_gate):
             return False
@@ -886,7 +888,7 @@ class _SharedPPOPolicyProxy:
         gate_value = float(info.get("promotion_gate_value", 0.0))
         self.gate_evaluations += 1
         self.gate_values.append(gate_value)
-        promote = gate_value >= float(threshold)
+        promote = bool(force_promote) or gate_value >= float(threshold)
         if promote:
             if bool(preselect_action):
                 if native_action_override is not None:
@@ -933,6 +935,9 @@ class _SharedPPOPolicyProxy:
                     ))
                     self.wait_replan_reward_floor_scores.append(float(
                         preselect_metadata.get("reward_floor_score", 0.0)
+                    ))
+                    self.wait_replan_pressure_overrides.append(float(
+                        preselect_metadata.get("gate_wait_pressure_override_active", 0.0)
                     ))
                     self.wait_replan_signed_shifts.append(float(
                         preselect_metadata.get("signed_shift_s", 0.0)
@@ -1095,6 +1100,8 @@ def install_shared_ppo_episode_loop(
     learned_promotion_gate: bool = False,
     promotion_gate_threshold: float = 0.55,
     promotion_gate_sample: bool = False,
+    promotion_gate_wait_pressure_override: bool = False,
+    promotion_gate_wait_pressure_override_min: float = 0.0,
     promotion_gate_strength_min: float = 0.0,
     promotion_gate_age_min: float = 0.0,
     promotion_gate_min_elapsed_s: float = 0.0,
@@ -1183,11 +1190,21 @@ def install_shared_ppo_episode_loop(
         def learned_gate_hook(**kwargs: Any) -> bool:
             nonlocal gate_replans_total
             freq_summary = kwargs.get("freq_summary", {}) or {}
-            if not bool(freq_summary.get("freq_promotion_flag", 0.0)):
+            freq_promotion_active = bool(freq_summary.get("freq_promotion_flag", 0.0))
+            wait_pressure_override = bool(promotion_gate_wait_pressure_override)
+            if not freq_promotion_active and not wait_pressure_override:
                 return False
-            if float(freq_summary.get("freq_promotion_strength", 0.0)) < float(promotion_gate_strength_min):
+            if (
+                freq_promotion_active
+                and float(freq_summary.get("freq_promotion_strength", 0.0))
+                < float(promotion_gate_strength_min)
+            ):
                 return False
-            if float(freq_summary.get("freq_promotion_age", 0.0)) < float(promotion_gate_age_min):
+            if (
+                freq_promotion_active
+                and float(freq_summary.get("freq_promotion_age", 0.0))
+                < float(promotion_gate_age_min)
+            ):
                 return False
             low_level = float(freq_summary.get("freq_low_demand", 0.0))
             low_forecast = float(freq_summary.get("freq_low_forecast", low_level))
@@ -1235,6 +1252,7 @@ def install_shared_ppo_episode_loop(
             native_override = None
             preselect_metadata = None
             actor_replan_info = None
+            force_promote = False
             if bool(promotion_gate_preselect_action) and "action" in active_plan:
                 active_action = np.asarray(
                     active_plan.get("action"), dtype=np.float32).reshape(-1)
@@ -1495,6 +1513,14 @@ def install_shared_ppo_episode_loop(
                     if (bool(promotion_replan_require_shift)
                             and float(preselect_metadata.get("abs_shift_s", 0.0)) <= 1e-6):
                         return False
+                    override_min = max(float(promotion_gate_wait_pressure_override_min), 0.0)
+                    force_promote = (
+                        wait_pressure_override
+                        and float(preselect_metadata.get("pressure", 0.0)) >= override_min
+                        and float(preselect_metadata.get("shift_pressure", 0.0)) > 0.0
+                    )
+                    if force_promote:
+                        preselect_metadata["gate_wait_pressure_override_active"] = 1.0
                 elif use_actor_base:
                     native_override = replan_base.astype(np.float32)
                     preselect_metadata = {
@@ -1532,6 +1558,7 @@ def install_shared_ppo_episode_loop(
                 native_action_blend=float(promotion_gate_plan_blend),
                 preselect_metadata=preselect_metadata,
                 act_info_override=actor_replan_info,
+                force_promote=bool(force_promote),
             )
             if promote and native_override is not None:
                 runner.freq_hrl_promotion_action_override = np.asarray(
@@ -1637,6 +1664,8 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean",
         "shared_ppo_wait_replan_throughput_score_mean",
         "shared_ppo_wait_replan_reward_floor_score_mean",
+        "shared_ppo_wait_replan_pressure_override_count",
+        "shared_ppo_wait_replan_pressure_override_mean",
         "shared_ppo_wait_replan_same_hold_mean",
         "shared_ppo_wait_replan_same_wait_mean",
         "shared_ppo_wait_replan_shift_mean_s",
@@ -1674,6 +1703,8 @@ def run_native_shared_ppo_episode_loop(
     learned_promotion_gate: bool = False,
     promotion_gate_threshold: float = 0.55,
     promotion_gate_sample: bool = False,
+    promotion_gate_wait_pressure_override: bool = False,
+    promotion_gate_wait_pressure_override_min: float = 0.0,
     promotion_gate_strength_min: float = 0.0,
     promotion_gate_age_min: float = 0.0,
     promotion_gate_min_elapsed_s: float = 0.0,
@@ -1772,6 +1803,8 @@ def run_native_shared_ppo_episode_loop(
         learned_promotion_gate=bool(learned_promotion_gate),
         promotion_gate_threshold=float(promotion_gate_threshold),
         promotion_gate_sample=bool(promotion_gate_sample),
+        promotion_gate_wait_pressure_override=bool(promotion_gate_wait_pressure_override),
+        promotion_gate_wait_pressure_override_min=float(promotion_gate_wait_pressure_override_min),
         promotion_gate_strength_min=float(promotion_gate_strength_min),
         promotion_gate_age_min=float(promotion_gate_age_min),
         promotion_gate_min_elapsed_s=float(promotion_gate_min_elapsed_s),
@@ -1946,6 +1979,13 @@ def run_native_shared_ppo_episode_loop(
                 float(np.mean(installed["upper_proxy"].wait_replan_reward_floor_scores))
                 if installed["upper_proxy"].wait_replan_reward_floor_scores else 0.0
             ),
+            "shared_ppo_wait_replan_pressure_override_count": int(np.sum(
+                installed["upper_proxy"].wait_replan_pressure_overrides
+            )),
+            "shared_ppo_wait_replan_pressure_override_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_pressure_overrides))
+                if installed["upper_proxy"].wait_replan_pressure_overrides else 0.0
+            ),
             "shared_ppo_wait_replan_same_hold_mean": (
                 float(np.mean(installed["upper_proxy"].wait_replan_same_holds))
                 if installed["upper_proxy"].wait_replan_same_holds else 0.0
@@ -2103,6 +2143,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- mean adaptive drift scale: {summary.get('shared_ppo_wait_replan_adaptive_drift_scale_mean_mean', 1.0):.4f}",
         f"- mean throughput proxy score: {summary.get('shared_ppo_wait_replan_throughput_score_mean_mean', 0.0):.4f}",
         f"- mean reward-floor score: {summary.get('shared_ppo_wait_replan_reward_floor_score_mean_mean', 0.0):.4f}",
+        f"- mean wait-pressure override count: {summary.get('shared_ppo_wait_replan_pressure_override_count_mean', 0.0):.4f}",
         f"- mean wait-aware replan shift: {summary.get('shared_ppo_wait_replan_shift_mean_s_mean', 0.0):.4f}s",
         f"- mean learned replan base delta: {summary.get('shared_ppo_wait_replan_base_delta_abs_mean_s_mean', 0.0):.4f}s",
         f"- mean learned replan final delta: {summary.get('shared_ppo_wait_replan_final_delta_abs_mean_s_mean', 0.0):.4f}s",

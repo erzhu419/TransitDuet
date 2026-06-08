@@ -402,6 +402,44 @@ PERSISTENT_STRESS_PROFILES = {
         "reward_floor_gap_cost": 0.25,
         "reward_floor_hold_cost": 0.35,
     },
+    "reward_floor_throughput_v26": {
+        "description": (
+            "Wait-pressure override profile: keep v25 reward-floor and throughput "
+            "guards, but allow high native wait pressure to force the learned gate "
+            "when the frequency flag is too sparse. This tests whether promotion "
+            "can become an effective upper-timetable intervention instead of a "
+            "near-zero-trigger diagnostic."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "target_headway_min_s": 336.0,
+        "target_headway_max_s": 346.0,
+        "final_delta_abs_max_s": 1.60,
+        "max_shift_s": 2.5,
+        "wait_gain_s": 10.0,
+        "max_replans": 3,
+        "gate_cooldown_s": 450.0,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.18,
+        "min_pressure": 0.15,
+        "same_wait_min": 0.70,
+        "same_wait_max": 0.95,
+        "same_hold_max": 0.35,
+        "gap_guard_min_ratio": 0.95,
+        "gap_guard_max_ratio": 1.35,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.25,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.10,
+        "adaptive_drift_penalty_min_scale": 0.72,
+        "throughput_guard_min_score": 0.05,
+        "reward_floor_min_score": 0.02,
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.0,
+        "reward_floor_action_cost": 0.03,
+        "reward_floor_gap_cost": 0.20,
+        "reward_floor_hold_cost": 0.30,
+    },
 }
 
 
@@ -431,14 +469,22 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_gate_strength_min": 0.20,
         "_promotion_gate_age_min": 0.0,
         "_promotion_gate_min_elapsed_s": 0.0,
+        "_promotion_gate_cooldown_s": float(profile_cfg.get("gate_cooldown_s", 900.0)),
         "_promotion_gate_low_signal_min": 0.0,
         "_promotion_gate_max_hf_to_lf_ratio": 0.0,
         "_promotion_gate_max_replans": int(profile_cfg.get("max_replans", 2)),
+        "_promotion_gate_wait_pressure_override": bool(
+            profile_cfg.get("gate_wait_pressure_override", False)
+        ),
+        "_promotion_gate_wait_pressure_override_min": float(
+            profile_cfg.get("gate_wait_pressure_override_min", 0.0)
+        ),
         "_promotion_replan_same_hold_max": float(profile_cfg.get("same_hold_max", 0.25)),
         "_promotion_replan_same_wait_min": float(profile_cfg.get("same_wait_min", 0.812)),
         "_promotion_replan_same_wait_max": float(profile_cfg.get("same_wait_max", 0.85)),
         "_promotion_replan_wait_gain_s": float(profile_cfg.get("wait_gain_s", 8.0)),
         "_promotion_replan_max_shift_s": float(profile_cfg.get("max_shift_s", 2.0)),
+        "_promotion_replan_min_pressure": float(profile_cfg.get("min_pressure", 0.25)),
         "_promotion_replan_max_pressure": float(profile_cfg.get("max_pressure", 0.0)),
         "_promotion_replan_gap_guard_min_ratio": float(
             profile_cfg.get(
@@ -626,6 +672,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_wait_replan_reward_floor_score_mean": float(
             last.get("shared_ppo_wait_replan_reward_floor_score_mean", 0.0)
         ),
+        "shared_ppo_wait_replan_pressure_override_count": float(
+            last.get("shared_ppo_wait_replan_pressure_override_count", 0.0)
+        ),
+        "shared_ppo_wait_replan_pressure_override_mean": float(
+            last.get("shared_ppo_wait_replan_pressure_override_mean", 0.0)
+        ),
         "shared_ppo_wait_replan_same_hold_mean": float(last.get("shared_ppo_wait_replan_same_hold_mean", 0.0)),
         "shared_ppo_wait_replan_same_wait_mean": float(last.get("shared_ppo_wait_replan_same_wait_mean", 0.0)),
         "shared_ppo_wait_replan_shift_mean_s": float(last.get("shared_ppo_wait_replan_shift_mean_s", 0.0)),
@@ -680,6 +732,8 @@ def paired_checks(
             ("shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean", True),
             ("shared_ppo_wait_replan_throughput_score_mean", False),
             ("shared_ppo_wait_replan_reward_floor_score_mean", False),
+            ("shared_ppo_wait_replan_pressure_override_count", False),
+            ("shared_ppo_wait_replan_pressure_override_mean", False),
             ("shared_ppo_wait_replan_same_hold_mean", False),
             ("shared_ppo_wait_replan_same_wait_mean", False),
             ("shared_ppo_wait_replan_shift_abs_mean_s", False),
@@ -789,6 +843,7 @@ def stress_subset_checks(
         ("avg_wait_min", True),
         ("score", False),
         ("shared_ppo_wait_replan_count", False),
+        ("shared_ppo_wait_replan_pressure_override_count", False),
     ]
     for selector_name, selector_metric, threshold, greater_equal in selectors:
         subset = _stress_subset_rows(
@@ -847,6 +902,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
         promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
         promotion_gate_plan_blend=float(overrides.get("_promotion_gate_plan_blend", 0.0)),
+        promotion_gate_wait_pressure_override=bool(
+            overrides.get("_promotion_gate_wait_pressure_override", False)
+        ),
+        promotion_gate_wait_pressure_override_min=float(
+            overrides.get("_promotion_gate_wait_pressure_override_min", 0.0)
+        ),
         promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
         promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
         promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
@@ -1037,6 +1098,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_wait_replan_adaptive_drift_hf_to_lf_mean",
             "shared_ppo_wait_replan_throughput_score_mean",
             "shared_ppo_wait_replan_reward_floor_score_mean",
+            "shared_ppo_wait_replan_pressure_override_count",
+            "shared_ppo_wait_replan_pressure_override_mean",
             "shared_ppo_wait_replan_shift_mean_s",
             "shared_ppo_wait_replan_shift_abs_mean_s",
             "shared_ppo_wait_replan_actor_base_used_mean",
