@@ -16,13 +16,115 @@
     "A3: leakage costs are nonnegative and computed causally from action effects.",
     "A4: under stationary noise, residual-threshold events are conditionally bounded by a Bernoulli rate p.",
     "A5: paired validation compares treatment/control on the same seed and source window.",
-    "A6: frequency credit residuals are explicitly measurable from the same causal rollout."
+    "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
+    "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples."
+  ],
+  "theorems": [
+    {
+      "id": "Theorem 1",
+      "title": "Causal Frequency Features Are Nonanticipative",
+      "statement": "For every decision time t, the feature vector emitted by a causal Freq-HRL encoder is measurable with respect to the observations available up to t.",
+      "assumptions": [
+        "The domain adapter appends an exogenous bin only after that bin has occurred.",
+        "The encoder update is a deterministic or seeded-random function of the previous encoder state and the current bin.",
+        "The feature extractor does not use backward smoothing, centered windows, or future timestamps."
+      ],
+      "proof": "Use induction on the number of processed bins. The initial encoder state is fixed or seeded independently of future observations. If the state before bin k is a function only of bins 1 through k-1, then the next state is a function only of that state and bin k. Therefore the features after bin k are functions only of bins 1 through k. Mapping k to decision time t gives the nonanticipativity claim.",
+      "limitation": "This is an information-flow guarantee. It does not claim that a chosen encoder is statistically optimal for every domain.",
+      "diagnostic": "Causal encoder tests cover EMA, Fourier, state-space, Haar/adaptive wavelet, and neural/PINN state-space paths.",
+      "example": ""
+    },
+    {
+      "id": "Theorem 2",
+      "title": "Leakage-Shaped Return Gap Is Budgeted",
+      "statement": "For shaped rewards r'_t = r_t - lambda L_t with lambda >= 0 and causal leakage cost L_t >= 0, the absolute episode-return gap is bounded by lambda sum_t L_t.",
+      "assumptions": [
+        "Leakage is computed from same-trajectory upper and lower action effects.",
+        "The leakage multiplier is nonnegative.",
+        "Task return and shaped return are evaluated on the same rollout."
+      ],
+      "proof": "Summing the shaped reward gives sum_t r'_t = sum_t r_t - lambda sum_t L_t. Since lambda and L_t are nonnegative, the shaped return is no larger than task return and the exact difference is lambda sum_t L_t. Any enforced leakage budget B therefore bounds the distortion by lambda B.",
+      "limitation": "The bound controls reward-shaping distortion and responsibility violations; it is not a guarantee that stronger leakage penalties are performance-neutral.",
+      "diagnostic": "Leakage matrices report drift reduction and no-tradeoff gates for Transit and Trading variants.",
+      "example": "Example bound with lambda=0.30: 0.0870."
+    },
+    {
+      "id": "Theorem 3",
+      "title": "Stationary Promotion False Positives Are Exponentially Controlled",
+      "statement": "If stationary residual-threshold events have conditional probability p < rho and promotion requires a trailing-window event share of at least rho over n bins, then the false-promotion probability is at most exp(-2 n (rho - p)^2).",
+      "assumptions": [
+        "The gate uses only a finite causal residual-event window.",
+        "Stationary residual events are bounded Bernoulli indicators with rate at most p.",
+        "The detector promotes when the window mean exceeds rho."
+      ],
+      "proof": "The promotion statistic is the empirical mean of bounded event indicators in the trailing window. Under the stationary null, its expectation is at most p. Hoeffding's inequality bounds the probability that this mean exceeds rho by exp(-2 n (rho - p)^2).",
+      "limitation": "The bound is conservative and assumes a stationary null. It should be reported together with empirical promotion false-positive sweeps.",
+      "diagnostic": "Promotion sweep and persistent-stress recovery validations test the empirical tradeoff.",
+      "example": "Example n=10, rho=0.35, p=0.10: 0.286505."
+    },
+    {
+      "id": "Theorem 4",
+      "title": "Persistent-Shock Promotion Delay Is Window-Bounded",
+      "statement": "If every residual event after a regime shift exceeds the promotion threshold, the causal trailing-window gate promotes within one full persistence window.",
+      "assumptions": [
+        "The gate updates every fixed interval.",
+        "Promotion requires a finite number of positive residual events in the trailing window.",
+        "After the shift, each new event in the window is positive."
+      ],
+      "proof": "After one full window, all entries in the trailing window are post-shift positive events, so the event share equals one and exceeds any rho <= 1. The implementation's conservative bound reports the full window duration, which avoids any future-looking detection.",
+      "limitation": "Real shocks can be intermittent. In that case the false-negative and delay behavior depends on the post-shift event rate and threshold.",
+      "diagnostic": "Persistent-stress native promotion runs report replan counts, wait deltas, and recovery metrics.",
+      "example": "Example delay bound: 600.0s."
+    },
+    {
+      "id": "Theorem 5",
+      "title": "Hierarchical Wait-Credit Residual Bounds Attribution Error",
+      "statement": "Let c_t be total causal passenger-wait credit, and let c_t^U and c_t^L be the upper and lower frequency-attributed credits on the same rollout. The episode attribution error is bounded by sum_t |c_t - c_t^U - c_t^L|.",
+      "assumptions": [
+        "Total, upper, and lower credits are computed from the same causal rollout.",
+        "The policy losses consume only credits available at their decision times.",
+        "The validation harness logs or reconstructs the residual term."
+      ],
+      "proof": "At each step, the attribution mismatch is exactly the absolute residual |c_t - c_t^U - c_t^L|. Summing the nonnegative per-step mismatches over the episode gives the stated L1 upper bound on total credit-assignment error.",
+      "limitation": "Small residuals certify attribution consistency, not necessarily that the resulting learned policy globally improves wait time.",
+      "diagnostic": "Native wait-credit and real-demand control validations report reward/wait/alighting deltas and should keep residual columns in OD/onboard-load runs.",
+      "example": "Example residual bound: 0.1000."
+    },
+    {
+      "id": "Theorem 6",
+      "title": "Paired CI Width Shrinks at the Seed-Count Rate",
+      "statement": "For paired seed/source deltas with empirical standard deviation s and n independent pairs, the normal-approximation confidence half-width is z s / sqrt(n).",
+      "assumptions": [
+        "Treatment and control are paired by seed or source window.",
+        "The paired deltas have finite variance.",
+        "The z value matches the reported two-sided confidence level."
+      ],
+      "proof": "The paired estimator is the sample mean of the deltas. Its standard error is s / sqrt(n). Multiplication by the normal critical value z gives the reported half-width.",
+      "limitation": "The statement is an evidence-width calculation. It does not remove bias from nonrepresentative stress regimes or public-data samples.",
+      "diagnostic": "The unified matrix records n_common and CI status for every paired claim.",
+      "example": "Example s=0.18, n=36, z=1.96: 0.0588."
+    },
+    {
+      "id": "Theorem 7",
+      "title": "Projected Primal-Dual Leakage Updates Control Average Excess",
+      "statement": "For bounded projected dual variables and bounded constraint samples, the standard projected-subgradient bookkeeping term for average constraint excess is O(1 / sqrt(T)) when the dual step is chosen on the 1 / sqrt(T) scale.",
+      "assumptions": [
+        "The dual variable is projected onto a bounded nonnegative interval.",
+        "Constraint samples are uniformly bounded.",
+        "The actor update uses the current multiplier times the causal constraint excess."
+      ],
+      "proof": "Apply the standard projected subgradient inequality to the one-dimensional dual update. Summing over T steps and dividing by T yields the radius term divided by eta T plus eta times the squared gradient bound. Choosing eta proportional to 1 / sqrt(T) gives the stated average excess rate.",
+      "limitation": "This is a constraint-control argument for the multiplier path. It is not a global convergence theorem for nonconvex actor-critic training.",
+      "diagnostic": "Dual PPO validation reports leakage budget, multiplier direction, and no-tradeoff status.",
+      "example": "Example average-violation bookkeeping term: 0.1250."
+    }
   ],
   "examples": {
     "leakage_bound_example": 0.087,
     "promotion_false_positive_bound_example": 0.28650479686019015,
     "promotion_detection_delay_bound_s": 600.0,
     "paired_ci_radius_example": 0.0588,
+    "primal_dual_avg_violation_bound_example": 0.125,
     "credit_residual_bound_example": 0.10000000000000009
   },
   "cited_checks": {
@@ -41,44 +143,47 @@
       "improvement_mean": "0.00786163493657197",
       "improvement_ci95_low": "0.006355749720244377",
       "improvement_ci95_high": "0.009645134594436456",
+      "noninferiority_margin": "",
       "win_rate": "1.0",
       "sign_p_value": "0.001953125"
     },
     "native_learned_gate_reward": {
       "check": "transit_native_learned_gate_reward_vs_interval",
       "claim": "native learned promotion gate improves Transit episode reward",
-      "status": "inconclusive",
+      "status": "positive_mixed",
       "metric": "ep_reward",
       "treatment": "native_learned_gate",
       "control": "interval_only",
       "direction": "increase",
-      "n_common": "12",
-      "delta_mean": "3.6935000000004643",
-      "delta_ci95_low": "-12.328347916665471",
-      "delta_ci95_high": "17.84738958333338",
-      "improvement_mean": "3.6935000000004643",
-      "improvement_ci95_low": "-11.795533333332045",
-      "improvement_ci95_high": "18.761437499999893",
-      "win_rate": "0.4166666666666667",
-      "sign_p_value": "1.0"
+      "n_common": "76",
+      "delta_mean": "5.202276315789408",
+      "delta_ci95_low": "-5.438260526315868",
+      "delta_ci95_high": "16.26581776315782",
+      "improvement_mean": "5.202276315789408",
+      "improvement_ci95_low": "-5.950370394736978",
+      "improvement_ci95_high": "16.61221282894726",
+      "noninferiority_margin": "",
+      "win_rate": "0.5",
+      "sign_p_value": "0.39612484029702977"
     },
     "native_learned_gate_wait": {
       "check": "transit_native_learned_gate_wait_vs_interval",
       "claim": "native learned promotion gate lowers Transit wait",
-      "status": "inconclusive",
+      "status": "not_supported",
       "metric": "avg_wait_min",
       "treatment": "native_learned_gate",
       "control": "interval_only",
       "direction": "decrease",
-      "n_common": "12",
-      "delta_mean": "-0.015250000000000022",
-      "delta_ci95_low": "-0.0530041666666669",
-      "delta_ci95_high": "0.006000000000000116",
-      "improvement_mean": "0.015250000000000022",
-      "improvement_ci95_low": "-0.005833333333333284",
-      "improvement_ci95_high": "0.054166666666666995",
-      "win_rate": "0.16666666666666666",
-      "sign_p_value": "0.453125"
+      "n_common": "76",
+      "delta_mean": "0.01692105263157888",
+      "delta_ci95_low": "-0.0028562500000000575",
+      "delta_ci95_high": "0.04719999999999998",
+      "improvement_mean": "-0.01692105263157888",
+      "improvement_ci95_low": "-0.0475950657894738",
+      "improvement_ci95_high": "0.00299046052631576",
+      "noninferiority_margin": "",
+      "win_rate": "0.3026315789473684",
+      "sign_p_value": "0.8854334972865132"
     },
     "real_demand_control_objective": {
       "check": "transit_real_demand_control_objective_vs_base",
@@ -95,6 +200,7 @@
       "improvement_mean": "1.8114274241451875",
       "improvement_ci95_low": "1.28256587126095",
       "improvement_ci95_high": "2.455658168688026",
+      "noninferiority_margin": "",
       "win_rate": "1.0",
       "sign_p_value": "0.03125"
     },
@@ -113,6 +219,7 @@
       "improvement_mean": "1.674093575629235",
       "improvement_ci95_low": "1.1727880039632244",
       "improvement_ci95_high": "2.2830341124267717",
+      "noninferiority_margin": "",
       "win_rate": "1.0",
       "sign_p_value": "0.03125"
     },
@@ -131,6 +238,7 @@
       "improvement_mean": "1.0781856879544436",
       "improvement_ci95_low": "0.8371210591584954",
       "improvement_ci95_high": "1.2589940220658022",
+      "noninferiority_margin": "",
       "win_rate": "1.0",
       "sign_p_value": "0.0625"
     },
@@ -149,6 +257,7 @@
       "improvement_mean": "0.3089563241370127",
       "improvement_ci95_low": "0.2833995091642844",
       "improvement_ci95_high": "0.33812474026948364",
+      "noninferiority_margin": "",
       "win_rate": "1.0",
       "sign_p_value": "0.0625"
     }

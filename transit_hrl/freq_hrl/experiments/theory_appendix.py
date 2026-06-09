@@ -108,6 +108,210 @@ def _fmt(value: Any, digits: int = 4) -> str:
         return "NA"
 
 
+def build_theorem_rows(examples: dict[str, Any]) -> list[dict[str, Any]]:
+    """Paper-facing theorem/proof rows for the Freq-HRL appendix."""
+    return [
+        {
+            "id": "Theorem 1",
+            "title": "Causal Frequency Features Are Nonanticipative",
+            "statement": (
+                "For every decision time t, the feature vector emitted by a causal "
+                "Freq-HRL encoder is measurable with respect to the observations "
+                "available up to t."
+            ),
+            "assumptions": [
+                "The domain adapter appends an exogenous bin only after that bin has occurred.",
+                "The encoder update is a deterministic or seeded-random function of the previous encoder state and the current bin.",
+                "The feature extractor does not use backward smoothing, centered windows, or future timestamps.",
+            ],
+            "proof": (
+                "Use induction on the number of processed bins. The initial encoder "
+                "state is fixed or seeded independently of future observations. If the "
+                "state before bin k is a function only of bins 1 through k-1, then the "
+                "next state is a function only of that state and bin k. Therefore the "
+                "features after bin k are functions only of bins 1 through k. Mapping "
+                "k to decision time t gives the nonanticipativity claim."
+            ),
+            "limitation": (
+                "This is an information-flow guarantee. It does not claim that a chosen "
+                "encoder is statistically optimal for every domain."
+            ),
+            "diagnostic": "Causal encoder tests cover EMA, Fourier, state-space, Haar/adaptive wavelet, and neural/PINN state-space paths.",
+            "example": "",
+        },
+        {
+            "id": "Theorem 2",
+            "title": "Leakage-Shaped Return Gap Is Budgeted",
+            "statement": (
+                "For shaped rewards r'_t = r_t - lambda L_t with lambda >= 0 and "
+                "causal leakage cost L_t >= 0, the absolute episode-return gap is "
+                "bounded by lambda sum_t L_t."
+            ),
+            "assumptions": [
+                "Leakage is computed from same-trajectory upper and lower action effects.",
+                "The leakage multiplier is nonnegative.",
+                "Task return and shaped return are evaluated on the same rollout.",
+            ],
+            "proof": (
+                "Summing the shaped reward gives sum_t r'_t = sum_t r_t - lambda "
+                "sum_t L_t. Since lambda and L_t are nonnegative, the shaped return "
+                "is no larger than task return and the exact difference is lambda "
+                "sum_t L_t. Any enforced leakage budget B therefore bounds the "
+                "distortion by lambda B."
+            ),
+            "limitation": (
+                "The bound controls reward-shaping distortion and responsibility "
+                "violations; it is not a guarantee that stronger leakage penalties are "
+                "performance-neutral."
+            ),
+            "diagnostic": "Leakage matrices report drift reduction and no-tradeoff gates for Transit and Trading variants.",
+            "example": f"Example bound with lambda=0.30: {_fmt(examples['leakage_bound_example'])}.",
+        },
+        {
+            "id": "Theorem 3",
+            "title": "Stationary Promotion False Positives Are Exponentially Controlled",
+            "statement": (
+                "If stationary residual-threshold events have conditional probability "
+                "p < rho and promotion requires a trailing-window event share of at "
+                "least rho over n bins, then the false-promotion probability is at "
+                "most exp(-2 n (rho - p)^2)."
+            ),
+            "assumptions": [
+                "The gate uses only a finite causal residual-event window.",
+                "Stationary residual events are bounded Bernoulli indicators with rate at most p.",
+                "The detector promotes when the window mean exceeds rho.",
+            ],
+            "proof": (
+                "The promotion statistic is the empirical mean of bounded event "
+                "indicators in the trailing window. Under the stationary null, its "
+                "expectation is at most p. Hoeffding's inequality bounds the "
+                "probability that this mean exceeds rho by exp(-2 n (rho - p)^2)."
+            ),
+            "limitation": (
+                "The bound is conservative and assumes a stationary null. It should be "
+                "reported together with empirical promotion false-positive sweeps."
+            ),
+            "diagnostic": "Promotion sweep and persistent-stress recovery validations test the empirical tradeoff.",
+            "example": (
+                "Example n=10, rho=0.35, p=0.10: "
+                f"{_fmt(examples['promotion_false_positive_bound_example'], digits=6)}."
+            ),
+        },
+        {
+            "id": "Theorem 4",
+            "title": "Persistent-Shock Promotion Delay Is Window-Bounded",
+            "statement": (
+                "If every residual event after a regime shift exceeds the promotion "
+                "threshold, the causal trailing-window gate promotes within one full "
+                "persistence window."
+            ),
+            "assumptions": [
+                "The gate updates every fixed interval.",
+                "Promotion requires a finite number of positive residual events in the trailing window.",
+                "After the shift, each new event in the window is positive.",
+            ],
+            "proof": (
+                "After one full window, all entries in the trailing window are "
+                "post-shift positive events, so the event share equals one and exceeds "
+                "any rho <= 1. The implementation's conservative bound reports the "
+                "full window duration, which avoids any future-looking detection."
+            ),
+            "limitation": (
+                "Real shocks can be intermittent. In that case the false-negative and "
+                "delay behavior depends on the post-shift event rate and threshold."
+            ),
+            "diagnostic": "Persistent-stress native promotion runs report replan counts, wait deltas, and recovery metrics.",
+            "example": f"Example delay bound: {_fmt(examples['promotion_detection_delay_bound_s'], digits=1)}s.",
+        },
+        {
+            "id": "Theorem 5",
+            "title": "Hierarchical Wait-Credit Residual Bounds Attribution Error",
+            "statement": (
+                "Let c_t be total causal passenger-wait credit, and let c_t^U and "
+                "c_t^L be the upper and lower frequency-attributed credits on the "
+                "same rollout. The episode attribution error is bounded by "
+                "sum_t |c_t - c_t^U - c_t^L|."
+            ),
+            "assumptions": [
+                "Total, upper, and lower credits are computed from the same causal rollout.",
+                "The policy losses consume only credits available at their decision times.",
+                "The validation harness logs or reconstructs the residual term.",
+            ],
+            "proof": (
+                "At each step, the attribution mismatch is exactly the absolute "
+                "residual |c_t - c_t^U - c_t^L|. Summing the nonnegative per-step "
+                "mismatches over the episode gives the stated L1 upper bound on total "
+                "credit-assignment error."
+            ),
+            "limitation": (
+                "Small residuals certify attribution consistency, not necessarily "
+                "that the resulting learned policy globally improves wait time."
+            ),
+            "diagnostic": "Native wait-credit and real-demand control validations report reward/wait/alighting deltas and should keep residual columns in OD/onboard-load runs.",
+            "example": f"Example residual bound: {_fmt(examples['credit_residual_bound_example'])}.",
+        },
+        {
+            "id": "Theorem 6",
+            "title": "Paired CI Width Shrinks at the Seed-Count Rate",
+            "statement": (
+                "For paired seed/source deltas with empirical standard deviation s "
+                "and n independent pairs, the normal-approximation confidence "
+                "half-width is z s / sqrt(n)."
+            ),
+            "assumptions": [
+                "Treatment and control are paired by seed or source window.",
+                "The paired deltas have finite variance.",
+                "The z value matches the reported two-sided confidence level.",
+            ],
+            "proof": (
+                "The paired estimator is the sample mean of the deltas. Its standard "
+                "error is s / sqrt(n). Multiplication by the normal critical value z "
+                "gives the reported half-width."
+            ),
+            "limitation": (
+                "The statement is an evidence-width calculation. It does not remove "
+                "bias from nonrepresentative stress regimes or public-data samples."
+            ),
+            "diagnostic": "The unified matrix records n_common and CI status for every paired claim.",
+            "example": (
+                "Example s=0.18, n=36, z=1.96: "
+                f"{_fmt(examples['paired_ci_radius_example'])}."
+            ),
+        },
+        {
+            "id": "Theorem 7",
+            "title": "Projected Primal-Dual Leakage Updates Control Average Excess",
+            "statement": (
+                "For bounded projected dual variables and bounded constraint samples, "
+                "the standard projected-subgradient bookkeeping term for average "
+                "constraint excess is O(1 / sqrt(T)) when the dual step is chosen on "
+                "the 1 / sqrt(T) scale."
+            ),
+            "assumptions": [
+                "The dual variable is projected onto a bounded nonnegative interval.",
+                "Constraint samples are uniformly bounded.",
+                "The actor update uses the current multiplier times the causal constraint excess.",
+            ],
+            "proof": (
+                "Apply the standard projected subgradient inequality to the one-dimensional "
+                "dual update. Summing over T steps and dividing by T yields the radius "
+                "term divided by eta T plus eta times the squared gradient bound. "
+                "Choosing eta proportional to 1 / sqrt(T) gives the stated average "
+                "excess rate."
+            ),
+            "limitation": (
+                "This is a constraint-control argument for the multiplier path. It is "
+                "not a global convergence theorem for nonconvex actor-critic training."
+            ),
+            "diagnostic": "Dual PPO validation reports leakage budget, multiplier direction, and no-tradeoff status.",
+            "example": (
+                "Example average-violation bookkeeping term: "
+                f"{_fmt(examples['primal_dual_avg_violation_bound_example'])}."
+            ),
+        },
+    ]
+
+
 def build_theory_payload(results_root: Path) -> dict[str, Any]:
     checks = read_csv_rows(results_root / "freq_hrl_paper_diagnostics" / "statistical_checks.csv")
     examples = {
@@ -171,6 +375,7 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
             "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples.",
         ],
+        "theorems": build_theorem_rows(examples),
         "examples": examples,
         "cited_checks": cited_checks,
     }
@@ -194,45 +399,29 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     ]
     for item in payload["assumptions"]:
         lines.append(f"- {item}")
-    examples = payload["examples"]
+    lines.extend(["", "## Theorems", ""])
+    for theorem in payload["theorems"]:
+        lines.extend([
+            f"### {theorem['id']}: {theorem['title']}",
+            "",
+            f"Statement: {theorem['statement']}",
+            "",
+            "Assumptions:",
+        ])
+        for assumption in theorem["assumptions"]:
+            lines.append(f"- {assumption}")
+        lines.extend([
+            "",
+            f"Proof: {theorem['proof']}",
+            "",
+            f"Limitation: {theorem['limitation']}",
+            "",
+            f"Diagnostics: {theorem['diagnostic']}",
+        ])
+        if theorem.get("example"):
+            lines.extend(["", f"Numeric example: {theorem['example']}"])
+        lines.append("")
     lines.extend([
-        "",
-        "## Theorem 1: Leakage-Shaped Return Bound",
-        "",
-        "For shaped rewards `r'_t = r_t - lambda L_t`, where `L_t >= 0`, the absolute deviation between task return and shaped return over an episode is bounded by `lambda * sum_t L_t`. Therefore, enforcing a leakage budget controls the maximum reward-shaping distortion while penalizing responsibility violations.",
-        "",
-        f"Example bound with `lambda=0.30`: `{_fmt(examples['leakage_bound_example'])}`.",
-        "",
-        "## Theorem 2: Stationary Promotion False-Positive Bound",
-        "",
-        "If residual threshold events occur with stationary probability `p < rho`, and promotion requires a trailing-window event share of at least `rho`, Hoeffding's inequality gives `P(false promote) <= exp(-2 n (rho-p)^2)` for window length `n`.",
-        "",
-        f"Example `n=10`, `rho=0.35`, `p=0.10`: `{_fmt(examples['promotion_false_positive_bound_example'], digits=6)}`.",
-        "",
-        "## Theorem 3: Persistent-Shock Detection Delay",
-        "",
-        "If every residual event after a regime shift exceeds threshold, the causal trailing-window gate detects the shift after at most one full persistence window. This is conservative and avoids future leakage.",
-        "",
-        f"Example delay bound: `{_fmt(examples['promotion_detection_delay_bound_s'], digits=1)}s`.",
-        "",
-        "## Theorem 4: Hierarchical Credit Residual Bound",
-        "",
-        "Let `c_t` be the total causal wait credit and let `c_t^U + c_t^L` be the upper/lower frequency attribution used by the policy losses. The episode-level attribution error is bounded by `sum_t |c_t - c_t^U - c_t^L|`. When diagnostics keep this residual small, the learned objectives are close to the intended passenger-wait objective.",
-        "",
-        f"Example residual bound: `{_fmt(examples['credit_residual_bound_example'])}`.",
-        "",
-        "## Theorem 5: Paired Mean Evidence Width",
-        "",
-        "For paired seed/source deltas with empirical standard deviation `s` and `n` pairs, the normal-approximation half-width is `z s / sqrt(n)`. This gives an explicit target for the larger-seed native promotion and real-demand control validations: increasing independent paired seeds shrinks inconclusive CIs at the standard square-root rate.",
-        "",
-        f"Example `s=0.18`, `n=36`, `z=1.96`: `{_fmt(examples['paired_ci_radius_example'])}`.",
-        "",
-        "## Theorem 6: Weak Primal-Dual Constraint Bound",
-        "",
-        "For a bounded projected dual variable and bounded constraint samples, the usual online projected-subgradient regret calculation yields an average constraint-excess bookkeeping term of order `O(1 / sqrt(T))` when the dual step is chosen on the `1 / sqrt(T)` scale. This is a weak constraint-control statement for the leakage multiplier path, not a global optimality theorem for the nonconvex actor-critic.",
-        "",
-        f"Example average-violation bound term: `{_fmt(examples['primal_dual_avg_violation_bound_example'])}`.",
-        "",
         "## Empirical Anchors",
         "",
         "| check | status | delta CI95 |",

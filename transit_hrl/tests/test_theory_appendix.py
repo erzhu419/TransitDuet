@@ -57,8 +57,12 @@ class TheoryAppendixTest(unittest.TestCase):
             payload = build_theory_payload(root / "results")
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
-            self.assertIn("Theorem 1", (root / "out" / "report.md").read_text())
-            self.assertIn("Theorem 5", (root / "out" / "report.md").read_text())
+            report = (root / "out" / "report.md").read_text()
+            self.assertGreaterEqual(len(payload["theorems"]), 7)
+            self.assertIn("Theorem 1", report)
+            self.assertIn("Theorem 5", report)
+            self.assertIn("Proof:", report)
+            self.assertIn("Limitation:", report)
 
 
 if __name__ == "__main__":

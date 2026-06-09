@@ -43,16 +43,16 @@
     {
       "id": "C6",
       "claim": "Formal theory appendix covers main protocol claims",
-      "status": "partial",
-      "evidence": "examples=['credit_residual_bound_example', 'leakage_bound_example', 'paired_ci_radius_example', 'promotion_detection_delay_bound_s', 'promotion_false_positive_bound_example']",
-      "remaining_gap": "Turn proof sketches into polished manuscript appendix text with assumptions near theorem statements.",
+      "status": "supported",
+      "evidence": "examples=['credit_residual_bound_example', 'leakage_bound_example', 'paired_ci_radius_example', 'primal_dual_avg_violation_bound_example', 'promotion_detection_delay_bound_s', 'promotion_false_positive_bound_example']",
+      "remaining_gap": "Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration.",
       "artifact": "transit_hrl/results/freq_hrl_theory_appendix/summary.json"
     }
   ],
   "summary": {
     "claims": 6,
-    "supported": 2,
-    "partial": 4,
+    "supported": 3,
+    "partial": 3,
     "not_supported_or_missing": 0
   },
   "artifacts": {

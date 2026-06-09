@@ -380,7 +380,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 partial=bool(theory_examples),
             ),
             "evidence": f"examples={sorted(theory_examples.keys())}",
-            "remaining_gap": "Turn proof sketches into polished manuscript appendix text with assumptions near theorem statements.",
+            "remaining_gap": "Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration.",
             "artifact": paths["theory_appendix"] if artifacts["theory_appendix"] else paths["theory_appendix_scheduler"],
         },
     ]
