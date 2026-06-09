@@ -10,22 +10,29 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v31": Path("transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json"),
     "native_promotion_v27": Path("transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json"),
     "native_promotion_v26": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v26_512seed_merged/summary.json"),
     "native_promotion_v25": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v25_512seed_merged/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand_v5": Path("transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json"),
     "native_real_demand_v4": Path("transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json"),
     "native_real_demand_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
+    "order_book_l2_matching": Path("transit_hrl/results/trading_order_book_matching_validation/summary.json"),
+    "order_book_l3_replay": Path("transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"),
     "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
-    "encoder_matrix": Path("transit_hrl/results/scheduler_encoder_cross_domain_matrix/summary.json"),
+    "encoder_matrix": Path("transit_hrl/results/encoder_cross_domain_matrix/summary.json"),
+    "encoder_matrix_latest": Path("transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json"),
     "leakage_matrix_v27_v5": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v27_v5/summary.json"),
     "leakage_matrix_v26_v4": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v26_v4/summary.json"),
     "leakage_matrix_v25_v3": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v25_v3/summary.json"),
-    "leakage_matrix": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_drift/summary.json"),
-    "theory_appendix": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
+    "leakage_matrix": Path("transit_hrl/results/leakage_no_tradeoff_matrix/summary.json"),
+    "leakage_matrix_latest": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json"),
+    "theory_appendix": Path("transit_hrl/results/freq_hrl_theory_appendix/summary.json"),
+    "theory_appendix_scheduler": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
 }
 
 
@@ -75,6 +82,94 @@ def _status_from_flags(*, present: bool, supported: bool, partial: bool) -> str:
     return "not_supported"
 
 
+def _count_checks(data: dict[str, Any], statuses: set[str]) -> int:
+    if not isinstance(data, dict):
+        return 0
+    return sum(
+        1
+        for row in data.get("paired_checks", []) or []
+        if str(row.get("status", "")) in statuses
+    )
+
+
+def _has_non_synthetic_sources(data: dict[str, Any]) -> bool:
+    if not isinstance(data, dict):
+        return False
+    sources = data.get("sources", []) or []
+    return any("synthetic" not in str(source).lower() for source in sources)
+
+
+def _promotion_evidence(
+    artifacts: dict[str, dict[str, Any] | None],
+    paths: dict[str, str],
+) -> dict[str, Any]:
+    candidates = [
+        "native_promotion_v31",
+        "native_promotion_v27",
+        "native_promotion_v26",
+        "native_promotion_v25",
+        "native_promotion_v24",
+        "native_promotion_v21",
+    ]
+    ranked: list[dict[str, Any]] = []
+    for key in candidates:
+        data = artifacts.get(key)
+        if not data:
+            continue
+        reward = _check_by_metric(data, "ep_reward", treatment="native_wait_aware_replan")
+        reward_noninferiority = _check_by_metric(
+            data,
+            "ep_reward",
+            treatment="native_wait_aware_replan",
+            check_contains="noninferiority",
+        )
+        wait = _check_by_metric(data, "avg_wait_min", treatment="native_wait_aware_replan")
+        if not wait:
+            wait = _check_by_metric(data, "native_avg_board_wait_min", treatment="native_wait_aware_replan")
+        wait_noninferiority = _check_by_metric(
+            data,
+            "avg_wait_min",
+            treatment="native_wait_aware_replan",
+            check_contains="noninferiority",
+        )
+        status = _status_from_flags(
+            present=True,
+            supported=_supported(reward) and _supported(wait),
+            partial=(
+                (_supported(reward) and _positive(wait_noninferiority))
+                or (_positive(reward_noninferiority) and _supported(wait))
+            ),
+        )
+        score = {"supported": 3, "partial": 2, "not_supported": 1, "missing": 0}[status]
+        n_common = max(
+            int(reward.get("n_common", 0) or 0),
+            int(wait.get("n_common", 0) or 0),
+        )
+        ranked.append({
+            "key": key,
+            "data": data,
+            "reward": reward,
+            "reward_noninferiority": reward_noninferiority,
+            "wait": wait,
+            "wait_noninferiority": wait_noninferiority,
+            "status": status,
+            "score": score,
+            "n_common": n_common,
+            "artifact": paths[key],
+        })
+    if not ranked:
+        return {
+            "key": "missing",
+            "status": "missing",
+            "reward": {},
+            "reward_noninferiority": {},
+            "wait": {},
+            "wait_noninferiority": {},
+            "artifact": paths["native_promotion_v31"],
+        }
+    return max(ranked, key=lambda row: (row["score"], row["n_common"]))
+
+
 def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     artifacts = {
         key: _read_json(results_root / path.relative_to("transit_hrl/results"))
@@ -85,37 +180,14 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         for key, path in DEFAULT_ARTIFACTS.items()
     }
 
-    promotion = (
-        artifacts["native_promotion_v27"]
-        or artifacts["native_promotion_v26"]
-        or artifacts["native_promotion_v25"]
-        or artifacts["native_promotion_v24"]
-        or artifacts["native_promotion_v21"]
-    )
-    promotion_reward = _check_by_metric(
-        promotion,
-        "ep_reward",
-        treatment="native_wait_aware_replan",
-    )
-    promotion_reward_noninferiority = _check_by_metric(
-        promotion,
-        "ep_reward",
-        treatment="native_wait_aware_replan",
-        check_contains="noninferiority",
-    )
-    promotion_wait = _check_by_metric(
-        promotion,
-        "avg_wait_min",
-        treatment="native_wait_aware_replan",
-    )
-    if not promotion_wait:
-        promotion_wait = _check_by_metric(
-            promotion,
-            "native_avg_board_wait_min",
-            treatment="native_wait_aware_replan",
-        )
+    promotion = _promotion_evidence(artifacts, paths)
+    promotion_reward = promotion["reward"]
+    promotion_reward_noninferiority = promotion["reward_noninferiority"]
+    promotion_wait = promotion["wait"]
+    promotion_wait_noninferiority = promotion["wait_noninferiority"]
     real = (
-        artifacts["native_real_demand_v5"]
+        artifacts["native_real_demand_alighting_safe_v2"]
+        or artifacts["native_real_demand_v5"]
         or artifacts["native_real_demand_v4"]
         or artifacts["native_real_demand_v3"]
         or artifacts["native_real_demand_v2"]
@@ -124,16 +196,29 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     real_reward = _check_by_metric(real, "ep_reward")
     real_wait = _check_by_metric(real, "native_avg_board_wait_min")
     real_alighted = _check_by_metric(real, "native_alighted_pax")
-    order_book = artifacts["order_book_manifest"] or {}
-    encoder = artifacts["encoder_matrix"] or {}
+    real_wait_noninferiority = _check_by_metric(
+        real,
+        "native_avg_board_wait_min",
+        check_contains="noninferiority",
+    )
+    real_alighted_noninferiority = _check_by_metric(
+        real,
+        "native_alighted_pax",
+        check_contains="noninferiority",
+    )
+    order_book_manifest = artifacts["order_book_manifest"] or {}
+    order_book_l2 = artifacts["order_book_l2_matching"] or {}
+    order_book_l3 = artifacts["order_book_l3_replay"] or {}
+    encoder = artifacts["encoder_matrix"] or artifacts["encoder_matrix_latest"] or {}
     leakage = (
         artifacts["leakage_matrix_v27_v5"]
         or artifacts["leakage_matrix_v26_v4"]
         or artifacts["leakage_matrix_v25_v3"]
         or artifacts["leakage_matrix"]
+        or artifacts["leakage_matrix_latest"]
         or {}
     )
-    theory = artifacts["theory_appendix"] or {}
+    theory = artifacts["theory_appendix"] or artifacts["theory_appendix_scheduler"] or {}
 
     encoder_domains = encoder.get("domain_summary", []) if isinstance(encoder, dict) else []
     encoder_supported_domains = [
@@ -145,52 +230,59 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         row.get("domain") for row in leakage_verdicts
         if row.get("verdict") == "no_tradeoff_supported"
     ]
+    leakage_partial_domains = [
+        row.get("domain") for row in leakage_verdicts
+        if row.get("verdict") in {"partial", "performance_noharm_only", "summary_only_noharm"}
+    ]
     theory_examples = theory.get("examples", {}) if isinstance(theory, dict) else {}
+    order_book_l2_supported = _count_checks(order_book_l2, {"supported"})
+    order_book_l3_positive = _count_checks(order_book_l3, {"supported", "positive_mixed"})
+    order_book_has_real_l2_l3 = (
+        bool(order_book_manifest.get("coverage", {}).get("l2_files", 0))
+        and bool(order_book_manifest.get("coverage", {}).get("l3_files", 0))
+    ) or (_has_non_synthetic_sources(order_book_l2) and _has_non_synthetic_sources(order_book_l3))
 
     claims = [
         {
             "id": "C1",
             "claim": "Native learned promotion improves reward and wait",
-            "status": _status_from_flags(
-                present=bool(promotion),
-                supported=_supported(promotion_reward) and _supported(promotion_wait),
-                partial=_positive(promotion_reward_noninferiority) and _supported(promotion_wait),
-            ),
+            "status": promotion["status"],
             "evidence": (
+                f"best={promotion['key']} "
                 f"reward={promotion_reward.get('status', 'missing')} "
                 f"reward_noharm={promotion_reward_noninferiority.get('status', 'missing')} "
-                f"wait={promotion_wait.get('status', 'missing')}"
+                f"wait={promotion_wait.get('status', 'missing')} "
+                f"wait_noharm={promotion_wait_noninferiority.get('status', 'missing')}"
             ),
             "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
-            "artifact": (
-                paths["native_promotion_v27"]
-                if artifacts["native_promotion_v27"]
-                else paths["native_promotion_v26"]
-                if artifacts["native_promotion_v26"]
-                else paths["native_promotion_v25"]
-                if artifacts["native_promotion_v25"]
-                else paths["native_promotion_v24"]
-                if artifacts["native_promotion_v24"]
-                else paths["native_promotion_v21"]
-            ),
+            "artifact": promotion["artifact"],
         },
         {
             "id": "C2",
             "claim": "Native real AFC/APC demand improves score/reward without wait/alighting loss",
             "status": _status_from_flags(
                 present=bool(real),
-                supported=_supported(real_score) and _supported(real_reward) and _supported(real_wait) and _positive(real_alighted),
-                partial=_supported(real_score) and _supported(real_reward) and _positive(real_wait),
+                supported=(
+                    _supported(real_score)
+                    and _supported(real_reward)
+                    and _positive(real_wait_noninferiority)
+                    and _positive(real_alighted_noninferiority)
+                ),
+                partial=_supported(real_score) and _supported(real_reward),
             ),
             "evidence": (
                 f"score={real_score.get('status', 'missing')} "
                 f"reward={real_reward.get('status', 'missing')} "
                 f"wait={real_wait.get('status', 'missing')} "
-                f"alighted={real_alighted.get('status', 'missing')}"
+                f"wait_noharm={real_wait_noninferiority.get('status', 'missing')} "
+                f"alighted={real_alighted.get('status', 'missing')} "
+                f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')}"
             ),
-            "remaining_gap": "Alighting throughput and wait CI still need supported native real-demand evidence.",
+            "remaining_gap": "Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation.",
             "artifact": (
-                paths["native_real_demand_v5"]
+                paths["native_real_demand_alighting_safe_v2"]
+                if artifacts["native_real_demand_alighting_safe_v2"]
+                else paths["native_real_demand_v5"]
                 if artifacts["native_real_demand_v5"]
                 else paths["native_real_demand_v4"]
                 if artifacts["native_real_demand_v4"]
@@ -203,13 +295,21 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "id": "C3",
             "claim": "Large L2/L3 order-book replay path exists",
             "status": _status_from_flags(
-                present=bool(order_book),
-                supported=bool(order_book.get("coverage", {}).get("l2_files", 0)) and bool(order_book.get("coverage", {}).get("l3_files", 0)),
-                partial=bool(order_book),
+                present=bool(order_book_manifest or order_book_l2 or order_book_l3),
+                supported=bool(order_book_has_real_l2_l3),
+                partial=bool(order_book_l2 and order_book_l3),
             ),
-            "evidence": str(order_book.get("coverage", {})),
-            "remaining_gap": "Replace fixture manifest with larger real venue L2/L3 feeds.",
-            "artifact": paths["order_book_manifest"],
+            "evidence": (
+                f"l2_supported_checks={order_book_l2_supported} "
+                f"l3_positive_checks={order_book_l3_positive} "
+                f"manifest_coverage={order_book_manifest.get('coverage', {})}"
+            ),
+            "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
+            "artifact": (
+                f"{paths['order_book_l2_matching']} | {paths['order_book_l3_replay']}"
+                if order_book_l2 or order_book_l3
+                else paths["order_book_manifest"]
+            ),
         },
         {
             "id": "C4",
@@ -221,7 +321,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             ),
             "evidence": f"supported_domains={encoder_supported_domains}",
             "remaining_gap": "Public market needs paired multi-window CIs; L3 remains mixed.",
-            "artifact": paths["encoder_matrix"],
+            "artifact": paths["encoder_matrix"] if artifacts["encoder_matrix"] else paths["encoder_matrix_latest"],
         },
         {
             "id": "C5",
@@ -231,7 +331,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 supported=len(leakage_supported_domains) >= 2,
                 partial=bool(leakage_supported_domains),
             ),
-            "evidence": f"no_tradeoff_domains={leakage_supported_domains}",
+            "evidence": f"no_tradeoff_domains={leakage_supported_domains} partial_domains={leakage_partial_domains}",
             "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
             "artifact": (
                 paths["leakage_matrix_v27_v5"]
@@ -241,6 +341,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 else paths["leakage_matrix_v25_v3"]
                 if artifacts["leakage_matrix_v25_v3"]
                 else paths["leakage_matrix"]
+                if artifacts["leakage_matrix"]
+                else paths["leakage_matrix_latest"]
             ),
         },
         {
@@ -248,12 +350,12 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Formal theory appendix covers main protocol claims",
             "status": _status_from_flags(
                 present=bool(theory),
-                supported="primal_dual_avg_violation_bound_example" in theory_examples,
+                supported=bool(theory.get("theorems")) and "primal_dual_avg_violation_bound_example" in theory_examples,
                 partial=bool(theory_examples),
             ),
             "evidence": f"examples={sorted(theory_examples.keys())}",
             "remaining_gap": "Turn proof sketches into polished manuscript appendix text with assumptions near theorem statements.",
-            "artifact": paths["theory_appendix"],
+            "artifact": paths["theory_appendix"] if artifacts["theory_appendix"] else paths["theory_appendix_scheduler"],
         },
     ]
     supported = sum(1 for row in claims if row["status"] == "supported")

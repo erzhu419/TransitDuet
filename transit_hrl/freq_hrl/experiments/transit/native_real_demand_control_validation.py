@@ -143,6 +143,113 @@ VARIANTS: dict[str, dict[str, Any]] = {
     },
 }
 
+CONTROL_PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
+    "default": {},
+    "alighting_safe_v1": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.35,
+            "_promotion_gate_wait_pressure_override_min": 0.25,
+            "_promotion_gate_max_replans": 1,
+            "_promotion_replan_wait_gain_s": 4.0,
+            "_promotion_replan_max_shift_s": 1.0,
+            "_promotion_replan_min_pressure": 0.25,
+            "_promotion_replan_same_hold_max": 0.20,
+            "_promotion_replan_same_wait_min": 0.80,
+            "_promotion_replan_gap_guard_min_ratio": 0.998,
+            "_promotion_replan_gap_guard_max_ratio": 1.20,
+            "_promotion_replan_gap_risk_cap_full": 0.20,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.95,
+            "_promotion_replan_reward_floor_min_score": 0.08,
+            "_promotion_replan_reward_floor_throughput_weight": 2.0,
+            "_promotion_replan_reward_floor_fleet_weight": 0.20,
+            "_promotion_replan_throughput_guard_min_score": 0.20,
+            "_promotion_replan_throughput_floor_min_score": 0.30,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.0,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.85,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.10,
+            "_promotion_replan_target_headway_min_s": 338.0,
+            "_promotion_replan_target_headway_max_s": 345.0,
+            "_promotion_replan_final_delta_abs_max_s": 1.0,
+            "_lower_hf_wait_min_scale": 0.95,
+            "_lower_hf_wait_max_scale": 1.10,
+            "_lower_hf_wait_queue_boost_weight": 0.30,
+            "_adaptive_lower_drift_penalty_gain": 0.30,
+        },
+    },
+    "alighting_safe_v2": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.40,
+            "_promotion_gate_wait_pressure_override_min": 0.30,
+            "_promotion_gate_max_replans": 1,
+            "_promotion_replan_wait_gain_s": 3.0,
+            "_promotion_replan_max_shift_s": 0.75,
+            "_promotion_replan_min_pressure": 0.30,
+            "_promotion_replan_same_hold_max": 0.15,
+            "_promotion_replan_same_wait_min": 0.85,
+            "_promotion_replan_gap_guard_min_ratio": 1.00,
+            "_promotion_replan_gap_guard_max_ratio": 1.15,
+            "_promotion_replan_gap_risk_cap_full": 0.15,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.90,
+            "_promotion_replan_reward_floor_min_score": 0.10,
+            "_promotion_replan_reward_floor_throughput_weight": 3.0,
+            "_promotion_replan_reward_floor_fleet_weight": 0.35,
+            "_promotion_replan_throughput_guard_min_score": 0.30,
+            "_promotion_replan_throughput_floor_min_score": 0.40,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.0,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.80,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.08,
+            "_promotion_replan_target_headway_min_s": 339.0,
+            "_promotion_replan_target_headway_max_s": 344.0,
+            "_promotion_replan_final_delta_abs_max_s": 0.75,
+            "_lower_hf_wait_action_gain_s": 20.0,
+            "_lower_hf_wait_min_scale": 0.0,
+            "_lower_hf_wait_max_scale": 0.70,
+            "_lower_hf_wait_load_damping_weight": 2.0,
+            "_lower_hf_wait_schedule_slack_damping_weight": 1.0,
+            "_lower_hf_wait_queue_boost_weight": 0.05,
+            "_adaptive_lower_drift_penalty_gain": 0.40,
+        },
+    },
+    "alighting_rescue_v3": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.40,
+            "_promotion_gate_wait_pressure_override_min": 0.30,
+            "_promotion_gate_max_replans": 1,
+            "_promotion_replan_wait_gain_s": 3.0,
+            "_promotion_replan_max_shift_s": 0.75,
+            "_promotion_replan_min_pressure": 0.30,
+            "_promotion_replan_same_hold_max": 0.15,
+            "_promotion_replan_same_wait_min": 0.85,
+            "_promotion_replan_gap_guard_min_ratio": 1.00,
+            "_promotion_replan_gap_guard_max_ratio": 1.15,
+            "_promotion_replan_gap_risk_cap_full": 0.15,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.90,
+            "_promotion_replan_reward_floor_min_score": 0.10,
+            "_promotion_replan_reward_floor_throughput_weight": 3.0,
+            "_promotion_replan_reward_floor_fleet_weight": 0.35,
+            "_promotion_replan_throughput_guard_min_score": 0.30,
+            "_promotion_replan_throughput_floor_min_score": 0.40,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.0,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.80,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.08,
+            "_promotion_replan_target_headway_min_s": 339.0,
+            "_promotion_replan_target_headway_max_s": 344.0,
+            "_promotion_replan_final_delta_abs_max_s": 0.75,
+            "_lower_hf_wait_action_gain_s": 12.0,
+            "_lower_hf_wait_min_scale": 0.0,
+            "_lower_hf_wait_max_scale": 0.55,
+            "_lower_hf_wait_load_damping_weight": 2.0,
+            "_lower_hf_wait_schedule_slack_damping_weight": 1.0,
+            "_lower_hf_wait_queue_boost_weight": 0.0,
+            "_lower_hf_wait_boarding_rescue_gain_s": 18.0,
+            "_lower_hf_wait_boarding_rescue_max_s": 6.0,
+            "_lower_hf_wait_boarding_rescue_queue_min": 0.05,
+            "_lower_hf_wait_boarding_rescue_load_max": 1.20,
+            "_adaptive_lower_drift_penalty_gain": 0.40,
+        },
+    },
+}
+
 
 def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     for key, value in override.items():
@@ -151,6 +258,19 @@ def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
         else:
             base[key] = value
     return base
+
+
+def variants_for_control_profile(profile: str = "default") -> dict[str, dict[str, Any]]:
+    profile_key = str(profile or "default")
+    if profile_key not in CONTROL_PROFILE_OVERRIDES:
+        known = ", ".join(sorted(CONTROL_PROFILE_OVERRIDES))
+        raise ValueError(f"unknown native real-demand control profile {profile_key!r}; known: {known}")
+    variants = json.loads(json.dumps(VARIANTS))
+    for variant, overrides in CONTROL_PROFILE_OVERRIDES[profile_key].items():
+        if variant not in variants:
+            raise ValueError(f"control profile {profile_key!r} references unknown variant {variant!r}")
+        _merge_dict(variants[variant], overrides)
+    return variants
 
 
 def _service_hour_profile(values: np.ndarray, *, bins_per_hour: int, seed: int) -> np.ndarray:
@@ -213,11 +333,16 @@ def build_native_real_demand_profile(
 
 
 def control_score(row: dict[str, Any]) -> float:
+    completed_throughput = min(
+        float(row.get("native_boarded_pax", 0.0)),
+        float(row.get("native_alighted_pax", 0.0)),
+    )
     return (
         float(row.get("ep_reward", 0.0))
         - 10.0 * float(row.get("avg_wait_min", 0.0))
         - 2.0 * float(row.get("headway_cv", 0.0))
         - 0.5 * float(row.get("native_avg_board_wait_min", 0.0))
+        + 25.0 * completed_throughput
     )
 
 
@@ -229,6 +354,8 @@ def _row_from_payload(
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     summary = payload.get("summary", {})
+    boarded_pax = float(summary.get("native_boarded_pax_mean", 0.0))
+    alighted_pax = float(summary.get("native_alighted_pax_mean", 0.0))
     row = {
         "source": str(source),
         "seed": int(seed),
@@ -237,8 +364,10 @@ def _row_from_payload(
         "ep_reward": float(summary.get("ep_reward_mean", 0.0)),
         "avg_wait_min": float(summary.get("avg_wait_min_mean", 0.0)),
         "headway_cv": float(summary.get("headway_cv_mean", 0.0)),
-        "native_boarded_pax": float(summary.get("native_boarded_pax_mean", 0.0)),
-        "native_alighted_pax": float(summary.get("native_alighted_pax_mean", 0.0)),
+        "native_boarded_pax": boarded_pax,
+        "native_alighted_pax": alighted_pax,
+        "native_completed_throughput_pax": min(boarded_pax, alighted_pax),
+        "native_unalighted_pax": max(boarded_pax - alighted_pax, 0.0),
         "native_avg_board_wait_min": float(summary.get("native_avg_board_wait_min_mean", 0.0)),
         "native_avg_onboard_load": float(summary.get("native_avg_onboard_load_mean", 0.0)),
         "native_peak_onboard_load": float(summary.get("native_peak_onboard_load_mean", 0.0)),
@@ -304,6 +433,9 @@ def _row_from_payload(
         "shared_ppo_lower_hf_wait_prior_schedule_slack_mean": float(
             summary.get("shared_ppo_lower_hf_wait_prior_schedule_slack_mean_mean", 0.0)
         ),
+        "shared_ppo_lower_hf_wait_boarding_rescue_mean": float(
+            summary.get("shared_ppo_lower_hf_wait_boarding_rescue_mean_mean", 0.0)
+        ),
         "shared_ppo_wait_replan_pressure_override_count": float(
             summary.get("shared_ppo_wait_replan_pressure_override_count_mean", 0.0)
         ),
@@ -325,6 +457,8 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("native_avg_board_wait_min", True),
         ("native_boarded_pax", False),
         ("native_alighted_pax", False),
+        ("native_completed_throughput_pax", False),
+        ("native_unalighted_pax", True),
         ("native_avg_onboard_load", True),
         ("LowerLFDrift", True),
         ("UpperHFPower", True),
@@ -349,6 +483,7 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("shared_ppo_lower_hf_wait_prior_load_mean", False),
         ("shared_ppo_lower_hf_wait_prior_queue_mean", False),
         ("shared_ppo_lower_hf_wait_prior_schedule_slack_mean", False),
+        ("shared_ppo_lower_hf_wait_boarding_rescue_mean", False),
         ("shared_ppo_wait_replan_pressure_override_count", False),
         ("shared_ppo_wait_replan_pressure_override_mean", False),
     ]:
@@ -426,8 +561,10 @@ def run_validation(
     apc_end: str,
     limit: int,
     min_pairs: int,
+    control_profile: str = "default",
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
+    variants = variants_for_control_profile(control_profile)
     rows: list[dict[str, Any]] = []
     payloads: dict[str, Any] = {}
     metadata: list[dict[str, Any]] = []
@@ -453,7 +590,7 @@ def run_validation(
                 seed=int(seed),
                 bins_per_hour=bins_per_hour,
             )
-            for variant, overrides in VARIANTS.items():
+            for variant, overrides in variants.items():
                 merged = json.loads(json.dumps(COMMON_OVERRIDES))
                 _merge_dict(merged, {
                     key: value for key, value in overrides.items()
@@ -587,6 +724,18 @@ def run_validation(
                     lower_hf_wait_queue_boost_weight=float(
                         overrides.get("_lower_hf_wait_queue_boost_weight", 0.0)
                     ),
+                    lower_hf_wait_boarding_rescue_gain_s=float(
+                        overrides.get("_lower_hf_wait_boarding_rescue_gain_s", 0.0)
+                    ),
+                    lower_hf_wait_boarding_rescue_max_s=float(
+                        overrides.get("_lower_hf_wait_boarding_rescue_max_s", 0.0)
+                    ),
+                    lower_hf_wait_boarding_rescue_queue_min=float(
+                        overrides.get("_lower_hf_wait_boarding_rescue_queue_min", 0.0)
+                    ),
+                    lower_hf_wait_boarding_rescue_load_max=float(
+                        overrides.get("_lower_hf_wait_boarding_rescue_load_max", 0.0)
+                    ),
                     adaptive_lower_drift_penalty_gain=float(
                         overrides.get("_adaptive_lower_drift_penalty_gain", 0.0)
                     ),
@@ -615,6 +764,8 @@ def run_validation(
         "rows": rows,
         "paired_checks": checks,
         "payloads": payloads,
+        "control_profile": str(control_profile),
+        "variant_overrides": variants,
         "boundary": "native simulator passenger loop with public AFC/APC profile mapping, not exact AFC/APC OD geometry",
     }
     write_outputs(output_dir, payload)
@@ -645,6 +796,8 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "# Native Real-Demand Transit Control Validation",
         "",
         str(payload.get("boundary", "")),
+        "",
+        f"Control profile: `{payload.get('control_profile', 'default')}`.",
         "",
         "## Sources",
         "",
@@ -690,6 +843,11 @@ def main() -> None:
     parser.add_argument("--apc-end", default="2026-01-08")
     parser.add_argument("--limit", type=int, default=1000)
     parser.add_argument("--min-pairs", type=int, default=3)
+    parser.add_argument(
+        "--control-profile",
+        choices=sorted(CONTROL_PROFILE_OVERRIDES),
+        default="default",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/transit_native_real_demand_control"))
     args = parser.parse_args()
     payload = run_validation(
@@ -709,10 +867,11 @@ def main() -> None:
         apc_end=str(args.apc_end),
         limit=int(args.limit),
         min_pairs=int(args.min_pairs),
+        control_profile=str(args.control_profile),
     )
     score = next(row for row in payload["paired_checks"] if row["metric"] == "control_score")
     print(
-        "native_real_demand "
+        "DONE native_real_demand "
         f"score_delta={score['delta_mean']:+.4f} "
         f"status={score['status']}"
     )

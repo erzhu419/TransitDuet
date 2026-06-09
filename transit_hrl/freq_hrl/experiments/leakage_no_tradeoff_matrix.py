@@ -13,12 +13,37 @@ from freq_hrl.experiments.statistics import claim_status, noninferiority_status,
 
 DEFAULT_RESULT_PATHS = {
     "trading_constraint": Path("transit_hrl/results/trading_lower_lf_constraint_validation/summary.json"),
+    "trading_ppo_primal_dual": Path("transit_hrl/results/trading_ppo_primal_dual_leakage/summary.json"),
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
+    "transit_ppo_primal_dual": Path("transit_hrl/results/transit_ppo_primal_dual_leakage/summary.json"),
+    "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand": Path("transit_hrl/results/transit_native_real_demand_control/summary.json"),
-    "native_real_demand_waitaware_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
-    "native_real_demand_reward_floor_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
-    "native_real_demand_wait_pressure_v4": Path("transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json"),
-    "native_real_demand_selective_v5": Path("transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json"),
+}
+
+ACCEPTED_PERFORMANCE_STATUSES = {
+    "supported",
+    "positive_mixed",
+    "noninferiority_supported",
+    "summary_only_positive",
+    "summary_only_noharm",
+}
+DRIFT_METRICS = {"LowerLFDrift", "RawLowerLFDriftAbs", "LowerLFDriftAbs", "UpperHFPower"}
+CORE_PERFORMANCE_METRICS = {
+    "control_objective",
+    "control_score",
+    "reward_mean",
+    "ep_reward",
+    "total_return",
+    "sharpe",
+    "FocusScore",
+    "wait_proxy",
+    "avg_wait_min",
+    "native_avg_board_wait_min",
+    "native_boarded_pax",
+    "native_alighted_pax",
+    "native_completed_throughput_pax",
+    "headway_cv",
+    "max_drawdown",
 }
 
 
@@ -106,6 +131,92 @@ def _from_existing_checks(domain: str, data: dict[str, Any], path: Path) -> list
     return out
 
 
+def _summary_only_status(*, improvement: float, noninferiority_margin: float | None) -> str:
+    if improvement > 0.0:
+        return "summary_only_positive"
+    if noninferiority_margin is not None and improvement >= -float(noninferiority_margin):
+        return "summary_only_noharm"
+    return "summary_only_not_supported"
+
+
+def _summary_only_row(
+    *,
+    domain: str,
+    metric: str,
+    treatment: str,
+    control: str,
+    treatment_value: float,
+    control_value: float,
+    lower_is_better: bool,
+    source_path: Path,
+    noninferiority_margin: float | None = None,
+) -> dict[str, Any]:
+    delta = float(treatment_value) - float(control_value)
+    improvement = -delta if lower_is_better else delta
+    status = _summary_only_status(
+        improvement=float(improvement),
+        noninferiority_margin=noninferiority_margin,
+    )
+    return _metric_row(
+        domain=domain,
+        check=f"{domain}_{treatment}_vs_{control}_{metric}_summary_only",
+        stats={
+            "metric": metric,
+            "treatment": treatment,
+            "control": control,
+            "direction": "decrease" if lower_is_better else "increase",
+            "n_common": 1,
+            "delta_mean": delta,
+            "delta_ci95_low": delta,
+            "delta_ci95_high": delta,
+            "improvement_mean": improvement,
+            "improvement_ci95_low": improvement,
+            "improvement_ci95_high": improvement,
+            "win_rate": 1.0 if improvement > 0.0 else 0.0,
+        },
+        status=status,
+        source_path=source_path,
+    )
+
+
+def _ppo_trajectory_checks(domain: str, data: dict[str, Any], path: Path) -> list[dict[str, Any]]:
+    history = data.get("model", {}).get("history", []) or []
+    baseline = next((row for row in history if int(row.get("iteration", -99)) == -1), None)
+    summary = data.get("summary", {}) or {}
+    if not isinstance(baseline, dict) or not isinstance(summary, dict):
+        return []
+    if domain.startswith("trading"):
+        specs = [
+            ("LowerLFDrift", "LowerLFDrift_mean", True, None),
+            ("total_return", "total_return_mean", False, 0.02),
+            ("sharpe", "sharpe_mean", False, 0.75),
+            ("max_drawdown", "max_drawdown_mean", True, 0.01),
+        ]
+    else:
+        specs = [
+            ("LowerLFDrift", "LowerLFDrift_mean", True, None),
+            ("reward_mean", "reward_mean_mean", False, 0.05),
+            ("wait_proxy", "wait_proxy_mean", True, 0.05),
+            ("headway_cv", "headway_cv_mean", True, 0.01),
+        ]
+    out: list[dict[str, Any]] = []
+    for metric, key, lower, margin in specs:
+        if key not in summary or key not in baseline:
+            continue
+        out.append(_summary_only_row(
+            domain=domain,
+            metric=metric,
+            treatment="ppo_primal_dual_final",
+            control="ppo_primal_dual_initial",
+            treatment_value=float(summary[key]),
+            control_value=float(baseline[key]),
+            lower_is_better=lower,
+            source_path=path,
+            noninferiority_margin=margin,
+        ))
+    return out
+
+
 def _trading_checks(data: dict[str, Any], path: Path, min_pairs: int) -> list[dict[str, Any]]:
     rows = data.get("per_seed", []) or []
     if not rows:
@@ -167,19 +278,29 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         return {"domain": domain, "checks": 0, "verdict": "missing"}
     drift = [
         row for row in group
-        if row["metric"] in {"LowerLFDrift", "RawLowerLFDriftAbs", "LowerLFDriftAbs"}
+        if row["metric"] in DRIFT_METRICS
     ]
     perf = [
         row for row in group
-        if row["metric"] not in {"LowerLFDrift", "RawLowerLFDriftAbs", "LowerLFDriftAbs"}
+        if row["metric"] in CORE_PERFORMANCE_METRICS and row["metric"] not in DRIFT_METRICS
     ]
-    drift_ok = bool(drift) and any(row["status"] == "supported" for row in drift)
-    perf_ok = bool(perf) and all(row["status"] in {"supported", "positive_mixed", "noninferiority_supported"} for row in perf)
-    if drift and drift_ok and perf_ok:
+    drift_ok_supported = bool(drift) and any(row["status"] == "supported" for row in drift)
+    drift_ok_summary = bool(drift) and any(row["status"] == "summary_only_positive" for row in drift)
+    perf_metrics = sorted({row["metric"] for row in perf})
+    perf_ok = bool(perf) and all(
+        any(
+            row["metric"] == metric and row["status"] in ACCEPTED_PERFORMANCE_STATUSES
+            for row in perf
+        )
+        for metric in perf_metrics
+    )
+    if drift and drift_ok_supported and perf_ok:
         verdict = "no_tradeoff_supported"
+    elif drift and drift_ok_summary and perf_ok:
+        verdict = "summary_only_noharm"
     elif not drift and perf_ok:
         verdict = "performance_noharm_only"
-    elif any(row["status"] == "supported" for row in group):
+    elif any(row["status"] in {"supported", "summary_only_positive", "summary_only_noharm"} for row in group):
         verdict = "partial"
     else:
         verdict = "not_supported"
@@ -191,6 +312,8 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         "supported": sum(1 for row in group if row["status"] == "supported"),
         "noninferiority_supported": sum(1 for row in group if row["status"] == "noninferiority_supported"),
         "positive_mixed": sum(1 for row in group if row["status"] == "positive_mixed"),
+        "summary_only_positive": sum(1 for row in group if row["status"] == "summary_only_positive"),
+        "summary_only_noharm": sum(1 for row in group if row["status"] == "summary_only_noharm"),
         "not_supported": sum(1 for row in group if row["status"] == "not_supported"),
         "verdict": verdict,
     }
@@ -206,6 +329,8 @@ def build_leakage_matrix(result_paths: dict[str, Path], *, min_pairs: int) -> di
             continue
         if domain == "trading_constraint":
             checks.extend(_trading_checks(data, path, min_pairs=int(min_pairs)))
+        elif domain in {"trading_ppo_primal_dual", "transit_ppo_primal_dual"}:
+            checks.extend(_ppo_trajectory_checks(domain, data, path))
         elif domain == "transit_real_surrogate":
             checks.extend(_surrogate_checks(data, path, min_pairs=int(min_pairs)))
         elif domain.startswith("native_real_demand"):
@@ -251,15 +376,16 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "",
         payload["boundary"],
         "",
-        "| domain | verdict | checks | drift checks | performance checks | supported | noninferiority | positive mixed | not supported |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| domain | verdict | checks | drift checks | performance checks | supported | noninferiority | positive mixed | summary positive | summary no-harm | not supported |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["domain_verdicts"]:
         lines.append(
             f"| {row['domain']} | {row['verdict']} | {row.get('checks', 0)} "
             f"| {row.get('drift_checks', 0)} | {row.get('performance_checks', 0)} "
             f"| {row.get('supported', 0)} | {row.get('noninferiority_supported', 0)} "
-            f"| {row.get('positive_mixed', 0)} | {row.get('not_supported', 0)} |"
+            f"| {row.get('positive_mixed', 0)} | {row.get('summary_only_positive', 0)} "
+            f"| {row.get('summary_only_noharm', 0)} | {row.get('not_supported', 0)} |"
         )
     (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 

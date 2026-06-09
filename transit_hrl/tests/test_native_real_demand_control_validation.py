@@ -4,7 +4,9 @@ import numpy as np
 
 from freq_hrl.experiments.transit.native_real_demand_control_validation import (
     build_native_real_demand_profile,
+    control_score,
     paired_checks,
+    variants_for_control_profile,
 )
 
 
@@ -79,6 +81,42 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         self.assertGreater(
             checks["shared_ppo_adaptive_drift_guard_rejects"]["delta_mean"],
             0.0,
+        )
+
+    def test_alighting_safe_profile_tightens_replan_acceptance(self):
+        variants = variants_for_control_profile("alighting_safe_v1")
+        freq = variants["native_real_freqhrl"]
+        self.assertEqual(freq["_promotion_gate_max_replans"], 1)
+        self.assertLess(freq["_promotion_replan_max_shift_s"], 2.5)
+        self.assertGreater(freq["_promotion_replan_throughput_guard_min_score"], 0.10)
+        self.assertEqual(freq["_promotion_replan_throughput_floor_min_delta_fraction"], 0.0)
+        damped = variants_for_control_profile("alighting_safe_v2")["native_real_freqhrl"]
+        self.assertLess(damped["_lower_hf_wait_action_gain_s"], freq["_lower_hf_wait_action_gain_s"])
+        self.assertGreater(damped["_lower_hf_wait_load_damping_weight"], 0.0)
+        self.assertLess(damped["_lower_hf_wait_max_scale"], freq["_lower_hf_wait_max_scale"])
+        rescue = variants_for_control_profile("alighting_rescue_v3")["native_real_freqhrl"]
+        self.assertGreater(rescue["_lower_hf_wait_boarding_rescue_gain_s"], 0.0)
+        self.assertGreater(rescue["_lower_hf_wait_boarding_rescue_max_s"], 0.0)
+        self.assertLess(rescue["_lower_hf_wait_action_gain_s"], damped["_lower_hf_wait_action_gain_s"])
+
+    def test_control_score_penalizes_completed_throughput_loss(self):
+        base = {
+            "ep_reward": -100.0,
+            "avg_wait_min": 5.0,
+            "headway_cv": 0.2,
+            "native_avg_board_wait_min": 4.0,
+            "native_boarded_pax": 100.0,
+            "native_alighted_pax": 100.0,
+        }
+        better_reward_less_throughput = {
+            **base,
+            "ep_reward": -20.0,
+            "native_boarded_pax": 95.0,
+            "native_alighted_pax": 95.0,
+        }
+        self.assertLess(
+            control_score(better_reward_less_throughput),
+            control_score(base),
         )
 
 

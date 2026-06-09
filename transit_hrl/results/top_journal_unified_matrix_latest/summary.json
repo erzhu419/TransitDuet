@@ -1,0 +1,84 @@
+{
+  "claims": [
+    {
+      "id": "C1",
+      "claim": "Native learned promotion improves reward and wait",
+      "status": "partial",
+      "evidence": "best=native_promotion_v21 reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported",
+      "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
+      "artifact": "transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"
+    },
+    {
+      "id": "C2",
+      "claim": "Native real AFC/APC demand improves score/reward without wait/alighting loss",
+      "status": "supported",
+      "evidence": "score=supported reward=supported wait=inconclusive wait_noharm=supported alighted=inconclusive alighted_noharm=supported",
+      "remaining_gap": "Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation.",
+      "artifact": "transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"
+    },
+    {
+      "id": "C3",
+      "claim": "Large L2/L3 order-book replay path exists",
+      "status": "partial",
+      "evidence": "l2_supported_checks=8 l3_positive_checks=8 manifest_coverage={}",
+      "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
+      "artifact": "transit_hrl/results/trading_order_book_matching_validation/summary.json | transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"
+    },
+    {
+      "id": "C4",
+      "claim": "Advanced encoder evidence spans Quant and Transit",
+      "status": "supported",
+      "evidence": "supported_domains=['order_book_l2', 'trading_synthetic', 'transit_real_demand', 'transit_synthetic_demand']",
+      "remaining_gap": "Public market needs paired multi-window CIs; L3 remains mixed.",
+      "artifact": "transit_hrl/results/encoder_cross_domain_matrix/summary.json"
+    },
+    {
+      "id": "C5",
+      "claim": "Leakage no-tradeoff holds beyond surrogate",
+      "status": "partial",
+      "evidence": "no_tradeoff_domains=['transit_real_surrogate'] partial_domains=['native_real_demand', 'native_real_demand_alighting_safe_v2', 'trading_constraint', 'trading_ppo_primal_dual', 'transit_ppo_primal_dual']",
+      "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
+      "artifact": "transit_hrl/results/leakage_no_tradeoff_matrix/summary.json"
+    },
+    {
+      "id": "C6",
+      "claim": "Formal theory appendix covers main protocol claims",
+      "status": "partial",
+      "evidence": "examples=['credit_residual_bound_example', 'leakage_bound_example', 'paired_ci_radius_example', 'promotion_detection_delay_bound_s', 'promotion_false_positive_bound_example']",
+      "remaining_gap": "Turn proof sketches into polished manuscript appendix text with assumptions near theorem statements.",
+      "artifact": "transit_hrl/results/freq_hrl_theory_appendix/summary.json"
+    }
+  ],
+  "summary": {
+    "claims": 6,
+    "supported": 2,
+    "partial": 4,
+    "not_supported_or_missing": 0
+  },
+  "artifacts": {
+    "native_promotion_v31": "transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json",
+    "native_promotion_v27": "transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json",
+    "native_promotion_v26": "transit_hrl/results/transit_native_promotion_reward_floor_throughput_v26_512seed_merged/summary.json",
+    "native_promotion_v25": "transit_hrl/results/transit_native_promotion_reward_floor_throughput_v25_512seed_merged/summary.json",
+    "native_promotion_v24": "transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json",
+    "native_promotion_v21": "transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json",
+    "native_real_demand_alighting_safe_v2": "transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json",
+    "native_real_demand_v5": "transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json",
+    "native_real_demand_v4": "transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json",
+    "native_real_demand_v3": "transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json",
+    "native_real_demand_v2": "transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json",
+    "order_book_l2_matching": "transit_hrl/results/trading_order_book_matching_validation/summary.json",
+    "order_book_l3_replay": "transit_hrl/results/trading_order_book_l3_replay_validation/summary.json",
+    "order_book_manifest": "transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json",
+    "encoder_matrix": "transit_hrl/results/encoder_cross_domain_matrix/summary.json",
+    "encoder_matrix_latest": "transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json",
+    "leakage_matrix_v27_v5": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v27_v5/summary.json",
+    "leakage_matrix_v26_v4": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v26_v4/summary.json",
+    "leakage_matrix_v25_v3": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v25_v3/summary.json",
+    "leakage_matrix": "transit_hrl/results/leakage_no_tradeoff_matrix/summary.json",
+    "leakage_matrix_latest": "transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json",
+    "theory_appendix": "transit_hrl/results/freq_hrl_theory_appendix/summary.json",
+    "theory_appendix_scheduler": "transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"
+  },
+  "boundary": "Unified matrix records current evidence quality; it is not itself a performance validation run."
+}

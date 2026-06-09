@@ -200,6 +200,32 @@ def _lower_wait_prior_scale(
     return context
 
 
+def _lower_wait_boarding_rescue_s(
+    context: dict[str, float],
+    *,
+    local_high: float,
+    gain_s: float = 0.0,
+    max_s: float = 0.0,
+    queue_min: float = 0.0,
+    load_max: float = 0.0,
+) -> float:
+    gain = max(float(gain_s), 0.0)
+    if gain <= 0.0:
+        return 0.0
+    queue_pressure = max(float(context.get("queue", 0.0)) - max(float(queue_min), 0.0), 0.0)
+    if queue_pressure <= 0.0:
+        return 0.0
+    load_cap = max(float(load_max), 0.0)
+    load_room = 1.0
+    if load_cap > 0.0:
+        load_room = max(load_cap - max(float(context.get("load", 0.0)), 0.0), 0.0) / load_cap
+    rescue = gain * max(float(local_high), 0.0) * queue_pressure * load_room
+    cap = max(float(max_s), 0.0)
+    if cap > 0.0:
+        rescue = min(rescue, cap)
+    return float(max(rescue, 0.0))
+
+
 def _direction_action_slice(action_size: int, planner_key: Any) -> slice:
     if planner_key == "__all__" or not isinstance(planner_key, (bool, np.bool_)):
         return slice(0, int(action_size))
@@ -923,6 +949,10 @@ class _SharedPPOPolicyProxy:
         lower_hf_wait_load_damping_weight: float = 0.0,
         lower_hf_wait_schedule_slack_damping_weight: float = 0.0,
         lower_hf_wait_queue_boost_weight: float = 0.0,
+        lower_hf_wait_boarding_rescue_gain_s: float = 0.0,
+        lower_hf_wait_boarding_rescue_max_s: float = 0.0,
+        lower_hf_wait_boarding_rescue_queue_min: float = 0.0,
+        lower_hf_wait_boarding_rescue_load_max: float = 0.0,
     ) -> None:
         self.bridge = bridge
         self.level = str(level)
@@ -935,10 +965,19 @@ class _SharedPPOPolicyProxy:
         self.lower_hf_wait_schedule_slack_damping_weight = max(
             float(lower_hf_wait_schedule_slack_damping_weight), 0.0)
         self.lower_hf_wait_queue_boost_weight = max(float(lower_hf_wait_queue_boost_weight), 0.0)
+        self.lower_hf_wait_boarding_rescue_gain_s = max(
+            float(lower_hf_wait_boarding_rescue_gain_s), 0.0)
+        self.lower_hf_wait_boarding_rescue_max_s = max(
+            float(lower_hf_wait_boarding_rescue_max_s), 0.0)
+        self.lower_hf_wait_boarding_rescue_queue_min = max(
+            float(lower_hf_wait_boarding_rescue_queue_min), 0.0)
+        self.lower_hf_wait_boarding_rescue_load_max = max(
+            float(lower_hf_wait_boarding_rescue_load_max), 0.0)
         self.lower_hf_wait_prior_scales: list[float] = []
         self.lower_hf_wait_prior_loads: list[float] = []
         self.lower_hf_wait_prior_queues: list[float] = []
         self.lower_hf_wait_prior_schedule_slacks: list[float] = []
+        self.lower_hf_wait_boarding_rescues: list[float] = []
         self.pending: dict[tuple[float, ...], list[dict[str, Any]]] = {}
         self.preselected: dict[tuple[float, ...], list[dict[str, Any]]] = {}
         self.last_upper: dict[str, Any] | None = None
@@ -1126,10 +1165,23 @@ class _SharedPPOPolicyProxy:
                 self.lower_hf_wait_prior_loads.append(float(context["load"]))
                 self.lower_hf_wait_prior_queues.append(float(context["queue"]))
                 self.lower_hf_wait_prior_schedule_slacks.append(float(context["schedule_slack"]))
+                rescue_s = _lower_wait_boarding_rescue_s(
+                    context,
+                    local_high=local_high,
+                    gain_s=self.lower_hf_wait_boarding_rescue_gain_s,
+                    max_s=self.lower_hf_wait_boarding_rescue_max_s,
+                    queue_min=self.lower_hf_wait_boarding_rescue_queue_min,
+                    load_max=self.lower_hf_wait_boarding_rescue_load_max,
+                )
+                self.lower_hf_wait_boarding_rescues.append(float(rescue_s))
                 adjusted = _array(info["native_action"]).astype(np.float32)
-                adjusted[0] = float(np.clip(
+                adjusted_value = (
                     float(adjusted[0])
-                    - self.lower_hf_wait_action_gain_s * local_high * scale,
+                    - self.lower_hf_wait_action_gain_s * local_high * scale
+                    + float(rescue_s)
+                )
+                adjusted[0] = float(np.clip(
+                    adjusted_value,
                     0.0,
                     float(self.bridge.contract.lower_action_range_s),
                 ))
@@ -1318,6 +1370,10 @@ def install_shared_ppo_episode_loop(
     lower_hf_wait_load_damping_weight: float = 0.0,
     lower_hf_wait_schedule_slack_damping_weight: float = 0.0,
     lower_hf_wait_queue_boost_weight: float = 0.0,
+    lower_hf_wait_boarding_rescue_gain_s: float = 0.0,
+    lower_hf_wait_boarding_rescue_max_s: float = 0.0,
+    lower_hf_wait_boarding_rescue_queue_min: float = 0.0,
+    lower_hf_wait_boarding_rescue_load_max: float = 0.0,
     adaptive_lower_drift_penalty_gain: float = 0.0,
     adaptive_lower_drift_penalty_min_scale: float = 0.25,
 ) -> dict[str, Any]:
@@ -1334,6 +1390,14 @@ def install_shared_ppo_episode_loop(
         lower_hf_wait_schedule_slack_damping_weight=float(
             lower_hf_wait_schedule_slack_damping_weight),
         lower_hf_wait_queue_boost_weight=float(lower_hf_wait_queue_boost_weight),
+        lower_hf_wait_boarding_rescue_gain_s=float(
+            lower_hf_wait_boarding_rescue_gain_s),
+        lower_hf_wait_boarding_rescue_max_s=float(
+            lower_hf_wait_boarding_rescue_max_s),
+        lower_hf_wait_boarding_rescue_queue_min=float(
+            lower_hf_wait_boarding_rescue_queue_min),
+        lower_hf_wait_boarding_rescue_load_max=float(
+            lower_hf_wait_boarding_rescue_load_max),
     )
     lower_collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
     upper_collector = _NativeUpperReplayCollector(upper_proxy)
@@ -1978,6 +2042,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_lower_hf_wait_prior_load_mean",
         "shared_ppo_lower_hf_wait_prior_queue_mean",
         "shared_ppo_lower_hf_wait_prior_schedule_slack_mean",
+        "shared_ppo_lower_hf_wait_boarding_rescue_mean",
         "shared_ppo_wait_replan_pressure_override_count",
         "shared_ppo_wait_replan_pressure_override_mean",
         "shared_ppo_wait_replan_same_hold_mean",
@@ -2082,6 +2147,10 @@ def run_native_shared_ppo_episode_loop(
     lower_hf_wait_load_damping_weight: float = 0.0,
     lower_hf_wait_schedule_slack_damping_weight: float = 0.0,
     lower_hf_wait_queue_boost_weight: float = 0.0,
+    lower_hf_wait_boarding_rescue_gain_s: float = 0.0,
+    lower_hf_wait_boarding_rescue_max_s: float = 0.0,
+    lower_hf_wait_boarding_rescue_queue_min: float = 0.0,
+    lower_hf_wait_boarding_rescue_load_max: float = 0.0,
     adaptive_lower_drift_penalty_gain: float = 0.0,
     adaptive_lower_drift_penalty_min_scale: float = 0.25,
     offpolicy_replay_updates: int = 1,
@@ -2218,6 +2287,14 @@ def run_native_shared_ppo_episode_loop(
         lower_hf_wait_schedule_slack_damping_weight=float(
             lower_hf_wait_schedule_slack_damping_weight),
         lower_hf_wait_queue_boost_weight=float(lower_hf_wait_queue_boost_weight),
+        lower_hf_wait_boarding_rescue_gain_s=float(
+            lower_hf_wait_boarding_rescue_gain_s),
+        lower_hf_wait_boarding_rescue_max_s=float(
+            lower_hf_wait_boarding_rescue_max_s),
+        lower_hf_wait_boarding_rescue_queue_min=float(
+            lower_hf_wait_boarding_rescue_queue_min),
+        lower_hf_wait_boarding_rescue_load_max=float(
+            lower_hf_wait_boarding_rescue_load_max),
         adaptive_lower_drift_penalty_gain=float(adaptive_lower_drift_penalty_gain),
         adaptive_lower_drift_penalty_min_scale=float(adaptive_lower_drift_penalty_min_scale),
     )
@@ -2411,6 +2488,10 @@ def run_native_shared_ppo_episode_loop(
                 float(np.mean(installed["lower_proxy"].lower_hf_wait_prior_schedule_slacks))
                 if installed["lower_proxy"].lower_hf_wait_prior_schedule_slacks else 0.0
             ),
+            "shared_ppo_lower_hf_wait_boarding_rescue_mean": (
+                float(np.mean(installed["lower_proxy"].lower_hf_wait_boarding_rescues))
+                if installed["lower_proxy"].lower_hf_wait_boarding_rescues else 0.0
+            ),
             "shared_ppo_wait_replan_pressure_override_count": int(np.sum(
                 installed["upper_proxy"].wait_replan_pressure_overrides
             )),
@@ -2540,6 +2621,14 @@ def run_native_shared_ppo_episode_loop(
         "lower_hf_wait_schedule_slack_damping_weight": float(
             lower_hf_wait_schedule_slack_damping_weight),
         "lower_hf_wait_queue_boost_weight": float(lower_hf_wait_queue_boost_weight),
+        "lower_hf_wait_boarding_rescue_gain_s": float(
+            lower_hf_wait_boarding_rescue_gain_s),
+        "lower_hf_wait_boarding_rescue_max_s": float(
+            lower_hf_wait_boarding_rescue_max_s),
+        "lower_hf_wait_boarding_rescue_queue_min": float(
+            lower_hf_wait_boarding_rescue_queue_min),
+        "lower_hf_wait_boarding_rescue_load_max": float(
+            lower_hf_wait_boarding_rescue_load_max),
         "adaptive_lower_drift_penalty_gain": float(adaptive_lower_drift_penalty_gain),
         "adaptive_lower_drift_penalty_min_scale": float(adaptive_lower_drift_penalty_min_scale),
         "offpolicy_replay_updates": int(replay_updates),
@@ -2588,6 +2677,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- replan final-delta guard: min_s={payload.get('promotion_replan_final_delta_abs_min_s', 0.0)} max_s={payload.get('promotion_replan_final_delta_abs_max_s', 0.0)}",
         f"- promotion replan policy: {payload.get('promotion_replan_policy', 'actor')} wait_gain_s={payload.get('promotion_replan_wait_gain_s', 0.0)} max_shift_s={payload.get('promotion_replan_max_shift_s', 0.0)}",
         f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)} context_dim={payload.get('lower_hf_wait_context_dim', 0)} min_scale={payload.get('lower_hf_wait_min_scale', 0.0)} max_scale={payload.get('lower_hf_wait_max_scale', 1.0)}",
+        f"- lower HF boarding rescue: gain_s={payload.get('lower_hf_wait_boarding_rescue_gain_s', 0.0)} max_s={payload.get('lower_hf_wait_boarding_rescue_max_s', 0.0)} queue_min={payload.get('lower_hf_wait_boarding_rescue_queue_min', 0.0)} load_max={payload.get('lower_hf_wait_boarding_rescue_load_max', 0.0)}",
         f"- adaptive lower drift penalty: gain={payload.get('adaptive_lower_drift_penalty_gain', 0.0)} min_scale={payload.get('adaptive_lower_drift_penalty_min_scale', 0.0)}",
         f"- off-policy replay updates per native batch: {payload.get('offpolicy_replay_updates', 1)}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
@@ -2601,6 +2691,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- mean reward-floor score: {summary.get('shared_ppo_wait_replan_reward_floor_score_mean_mean', 0.0):.4f}",
         f"- mean adaptive lower drift scale: {summary.get('shared_ppo_adaptive_lower_drift_penalty_scale_mean_mean', 1.0):.4f}",
         f"- mean lower prior scale: {summary.get('shared_ppo_lower_hf_wait_prior_scale_mean_mean', 1.0):.4f}",
+        f"- mean lower boarding rescue: {summary.get('shared_ppo_lower_hf_wait_boarding_rescue_mean_mean', 0.0):.4f}s",
         f"- mean wait-pressure override count: {summary.get('shared_ppo_wait_replan_pressure_override_count_mean', 0.0):.4f}",
         f"- mean wait-aware replan shift: {summary.get('shared_ppo_wait_replan_shift_mean_s_mean', 0.0):.4f}s",
         f"- mean learned replan base delta: {summary.get('shared_ppo_wait_replan_base_delta_abs_mean_s_mean', 0.0):.4f}s",
@@ -2788,6 +2879,10 @@ def main() -> None:
     parser.add_argument("--lower-hf-wait-load-damping-weight", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-schedule-slack-damping-weight", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-queue-boost-weight", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-boarding-rescue-gain-s", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-boarding-rescue-max-s", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-boarding-rescue-queue-min", type=float, default=0.0)
+    parser.add_argument("--lower-hf-wait-boarding-rescue-load-max", type=float, default=0.0)
     parser.add_argument("--adaptive-lower-drift-penalty-gain", type=float, default=0.0)
     parser.add_argument("--adaptive-lower-drift-penalty-min-scale", type=float, default=0.25)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
@@ -2862,6 +2957,14 @@ def main() -> None:
             lower_hf_wait_schedule_slack_damping_weight=float(
                 args.lower_hf_wait_schedule_slack_damping_weight),
             lower_hf_wait_queue_boost_weight=float(args.lower_hf_wait_queue_boost_weight),
+            lower_hf_wait_boarding_rescue_gain_s=float(
+                args.lower_hf_wait_boarding_rescue_gain_s),
+            lower_hf_wait_boarding_rescue_max_s=float(
+                args.lower_hf_wait_boarding_rescue_max_s),
+            lower_hf_wait_boarding_rescue_queue_min=float(
+                args.lower_hf_wait_boarding_rescue_queue_min),
+            lower_hf_wait_boarding_rescue_load_max=float(
+                args.lower_hf_wait_boarding_rescue_load_max),
             adaptive_lower_drift_penalty_gain=float(args.adaptive_lower_drift_penalty_gain),
             adaptive_lower_drift_penalty_min_scale=float(args.adaptive_lower_drift_penalty_min_scale),
             offpolicy_replay_updates=int(args.offpolicy_replay_updates),

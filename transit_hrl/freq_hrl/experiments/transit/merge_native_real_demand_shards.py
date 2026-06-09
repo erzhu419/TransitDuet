@@ -29,6 +29,7 @@ def merge_native_real_demand_shards(
     metadata_by_key: dict[tuple[str, str], dict[str, Any]] = {}
     payloads: dict[str, Any] = {}
     config_paths: list[str] = []
+    control_profiles: set[str] = set()
     sources: set[str] = set()
     episodes = 0
     for input_dir in input_dirs:
@@ -38,6 +39,8 @@ def merge_native_real_demand_shards(
         payload = _read_payload(summary_path)
         if payload.get("config_path"):
             config_paths.append(str(payload["config_path"]))
+        if payload.get("control_profile"):
+            control_profiles.add(str(payload["control_profile"]))
         episodes = max(episodes, int(payload.get("episodes", 0)))
         sources.update(str(source) for source in payload.get("sources", []))
         for meta in payload.get("metadata", []):
@@ -86,6 +89,7 @@ def merge_native_real_demand_shards(
         "seeds": seeds,
         "episodes": int(episodes),
         "min_pairs": int(min_pairs),
+        "control_profiles": sorted(control_profiles),
         "variants": list(VARIANTS.keys()),
         "rows": rows,
         "paired_checks": checks,
@@ -122,7 +126,7 @@ def main() -> None:
         if row["metric"] == "native_avg_board_wait_min"
     )
     print(
-        "merged native_real_demand "
+        "DONE merged native_real_demand "
         f"rows={len(payload['rows'])} seeds={len(payload['seeds'])} "
         f"score_delta={score['delta_mean']:+.4f} score_status={score['status']} "
         f"wait_delta={wait['delta_mean']:+.4f} wait_status={wait['status']}"
