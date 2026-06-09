@@ -19,7 +19,7 @@ Claim-level state:
 
 | id | status | current evidence | remaining gap |
 |---|---|---|---|
-| C1 | partial | Best native promotion artifact is v21: reward supported, reward no-harm supported, wait inconclusive, wait no-harm supported. | Need native learned promotion wait CI strictly supported in the same run as reward. |
+| C1 | partial | Best reward artifact is v21: reward supported, wait no-harm supported. Best wait artifact is v24 fixed 2048 seeds: wait supported, reward no-harm supported. | Need reward and wait both CI-supported in the same native run. |
 | C2 | supported | Native real AFC/APC demand alighting-safe v2 supports score/reward and wait/alighting no-harm. | Strict wait and alighting improvement CIs are still inconclusive. |
 | C3 | partial | L2 matching has 8 supported checks; synthetic/CSV-capable L3 FIFO replay has 8 positive checks. | Need larger real venue L2/L3 feeds and exchange-quality queue-priority replay. |
 | C4 | supported | Encoder evidence spans order-book L2, synthetic trading, transit real demand, and transit synthetic demand. | Public-market paired multi-window CIs and L3 stability remain weak. |
@@ -29,7 +29,8 @@ Claim-level state:
 ## Practical Next Priorities
 
 1. Close C1 by designing a native promotion profile whose wait improvement is
-   strict while preserving the v21 reward support.
+   strict while preserving the v21 reward support. Current v24 fixed 2048 seeds
+   gives strict wait support and reward no-harm, but reward CI still crosses 0.
 2. Upgrade C5 by adding native paired leakage/no-tradeoff evidence with core
    metrics only: drift reduction plus reward/wait/alighting noninferiority.
 3. Upgrade C3 with real L2/L3 order-book replay inputs instead of synthetic

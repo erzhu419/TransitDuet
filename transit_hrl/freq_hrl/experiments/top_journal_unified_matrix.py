@@ -14,6 +14,7 @@ DEFAULT_ARTIFACTS = {
     "native_promotion_v27": Path("transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json"),
     "native_promotion_v26": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v26_512seed_merged/summary.json"),
     "native_promotion_v25": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v25_512seed_merged/summary.json"),
+    "native_promotion_v24_fixed": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
@@ -108,6 +109,7 @@ def _promotion_evidence(
         "native_promotion_v27",
         "native_promotion_v26",
         "native_promotion_v25",
+        "native_promotion_v24_fixed",
         "native_promotion_v24",
         "native_promotion_v21",
     ]
@@ -167,7 +169,29 @@ def _promotion_evidence(
             "wait_noninferiority": {},
             "artifact": paths["native_promotion_v31"],
         }
-    return max(ranked, key=lambda row: (row["score"], row["n_common"]))
+    best = max(ranked, key=lambda row: (row["score"], row["n_common"]))
+    best_reward = max(
+        ranked,
+        key=lambda row: (
+            1 if _supported(row["reward"]) else 0,
+            1 if _positive(row["reward_noninferiority"]) else 0,
+            row["n_common"],
+        ),
+    )
+    best_wait = max(
+        ranked,
+        key=lambda row: (
+            1 if _supported(row["wait"]) else 0,
+            1 if _positive(row["wait_noninferiority"]) else 0,
+            row["n_common"],
+        ),
+    )
+    best["best_reward_key"] = best_reward["key"]
+    best["best_wait_key"] = best_wait["key"]
+    best["complementary_supported"] = _supported(best_reward["reward"]) and _supported(best_wait["wait"])
+    if best["status"] == "not_supported" and best["complementary_supported"]:
+        best["status"] = "partial"
+    return best
 
 
 def build_unified_matrix(results_root: Path) -> dict[str, Any]:
@@ -249,6 +273,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "status": promotion["status"],
             "evidence": (
                 f"best={promotion['key']} "
+                f"best_reward={promotion.get('best_reward_key', 'missing')} "
+                f"best_wait={promotion.get('best_wait_key', 'missing')} "
                 f"reward={promotion_reward.get('status', 'missing')} "
                 f"reward_noharm={promotion_reward_noninferiority.get('status', 'missing')} "
                 f"wait={promotion_wait.get('status', 'missing')} "
