@@ -4,8 +4,8 @@
       "id": "C1",
       "claim": "Native learned promotion improves reward and wait",
       "status": "partial",
-      "evidence": "best=native_promotion_v21 best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported",
-      "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
+      "evidence": "best=native_promotion_v21 best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed best_score=native_promotion_v32 reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported score=supported",
+      "remaining_gap": "Reward and wait CIs must be supported together in the same native run; v32 now supports wait/score with reward no-harm.",
       "artifact": "transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"
     },
     {
@@ -56,6 +56,7 @@
     "not_supported_or_missing": 0
   },
   "artifacts": {
+    "native_promotion_v32": "transit_hrl/results/transit_native_promotion_reward_guarded_highpressure_wait_v32_512seed_w16_evidence/summary.json",
     "native_promotion_v31": "transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json",
     "native_promotion_v27": "transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json",
     "native_promotion_v26": "transit_hrl/results/transit_native_promotion_reward_floor_throughput_v26_512seed_merged/summary.json",

@@ -369,6 +369,32 @@ PERSISTENT_STRESS_PROFILES = {
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
     },
+    "reward_guarded_highpressure_wait_v32": {
+        "description": (
+            "C1 repair profile after the v24 8192 diagnostic: keep the v21 "
+            "reward-positive same-wait/gap accept region, but only accept "
+            "wait-aware promotion replans when the causal promotion signal is "
+            "strong and the active timetable target is in the high-headway "
+            "context where v24 showed supported wait/score improvements."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "active_target_headway_min_s": 350.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
     "reward_floor_throughput_v25": {
         "description": (
             "Reward-floor profile: start from the v24 wait-supported guard, then "
@@ -697,7 +723,7 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
     wait_aware = json.loads(json.dumps(VARIANTS["native_wait_aware_replan"]))
     wait_aware.update({
         "_promotion_gate_threshold": 0.20,
-        "_promotion_gate_strength_min": 0.20,
+        "_promotion_gate_strength_min": float(profile_cfg.get("gate_strength_min", 0.20)),
         "_promotion_gate_age_min": 0.0,
         "_promotion_gate_min_elapsed_s": 0.0,
         "_promotion_gate_cooldown_s": float(profile_cfg.get("gate_cooldown_s", 900.0)),
@@ -785,6 +811,9 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_throughput_floor_same_hold_max": float(
             profile_cfg.get("throughput_floor_same_hold_max", 0.0)
+        ),
+        "_promotion_replan_active_target_headway_min_s": float(
+            profile_cfg.get("active_target_headway_min_s", 0.0)
         ),
         "_promotion_replan_target_headway_min_s": float(
             profile_cfg.get("target_headway_min_s", 0.0)
@@ -939,6 +968,9 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_gap_risk_guard_rejects": float(
             last.get("shared_ppo_gap_risk_guard_rejects", 0.0)
         ),
+        "shared_ppo_active_target_headway_floor_rejects": float(
+            last.get("shared_ppo_active_target_headway_floor_rejects", 0.0)
+        ),
         "shared_ppo_target_headway_floor_rejects": float(
             last.get("shared_ppo_target_headway_floor_rejects", 0.0)
         ),
@@ -1042,6 +1074,7 @@ def paired_checks(
             ("shared_ppo_throughput_floor_delta_fraction_mean", True),
             ("shared_ppo_adaptive_drift_guard_rejects", False),
             ("shared_ppo_gap_risk_guard_rejects", False),
+            ("shared_ppo_active_target_headway_floor_rejects", False),
             ("shared_ppo_target_headway_floor_rejects", False),
             ("shared_ppo_base_delta_guard_rejects", False),
             ("shared_ppo_final_delta_guard_rejects", False),
@@ -1308,6 +1341,9 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         ),
         promotion_replan_throughput_floor_same_hold_max=float(
             overrides.get("_promotion_replan_throughput_floor_same_hold_max", 0.0)
+        ),
+        promotion_replan_active_target_headway_min_s=float(
+            overrides.get("_promotion_replan_active_target_headway_min_s", 0.0)
         ),
         promotion_replan_target_headway_min_s=float(
             overrides.get("_promotion_replan_target_headway_min_s", 0.0)

@@ -8,7 +8,7 @@ Unified matrix records current evidence quality; it is not itself a performance 
 
 | id | claim | status | evidence | remaining gap |
 |---|---|---|---|---|
-| C1 | Native learned promotion improves reward and wait | partial | best=native_promotion_v21 best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported | Wait CI must be supported together with reward in the same native run. |
+| C1 | Native learned promotion improves reward and wait | partial | best=native_promotion_v21 best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed best_score=native_promotion_v32 reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported score=supported | Reward and wait CIs must be supported together in the same native run; v32 now supports wait/score with reward no-harm. |
 | C2 | Native real AFC/APC demand improves score/reward without wait/alighting loss | supported | score=supported reward=supported wait=inconclusive wait_noharm=supported alighted=inconclusive alighted_noharm=supported | Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation. |
 | C3 | Large L2/L3 order-book replay path exists | partial | l2_supported_checks=8 l3_positive_checks=8 manifest_coverage={} | Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds. |
 | C4 | Advanced encoder evidence spans Quant and Transit | supported | supported_domains=['order_book_l2', 'trading_synthetic', 'transit_real_demand', 'transit_synthetic_demand'] | Public market needs paired multi-window CIs; L3 remains mixed. |

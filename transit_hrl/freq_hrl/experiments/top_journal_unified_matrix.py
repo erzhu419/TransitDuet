@@ -10,6 +10,7 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v32": Path("transit_hrl/results/transit_native_promotion_reward_guarded_highpressure_wait_v32_512seed_w16_evidence/summary.json"),
     "native_promotion_v31": Path("transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json"),
     "native_promotion_v27": Path("transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json"),
     "native_promotion_v26": Path("transit_hrl/results/transit_native_promotion_reward_floor_throughput_v26_512seed_merged/summary.json"),
@@ -105,6 +106,7 @@ def _promotion_evidence(
     paths: dict[str, str],
 ) -> dict[str, Any]:
     candidates = [
+        "native_promotion_v32",
         "native_promotion_v31",
         "native_promotion_v27",
         "native_promotion_v26",
@@ -128,6 +130,7 @@ def _promotion_evidence(
         wait = _check_by_metric(data, "avg_wait_min", treatment="native_wait_aware_replan")
         if not wait:
             wait = _check_by_metric(data, "native_avg_board_wait_min", treatment="native_wait_aware_replan")
+        control_score = _check_by_metric(data, "score", treatment="native_wait_aware_replan")
         wait_noninferiority = _check_by_metric(
             data,
             "avg_wait_min",
@@ -154,6 +157,7 @@ def _promotion_evidence(
             "reward_noninferiority": reward_noninferiority,
             "wait": wait,
             "wait_noninferiority": wait_noninferiority,
+            "control_score": control_score,
             "status": status,
             "score": score,
             "n_common": n_common,
@@ -167,6 +171,7 @@ def _promotion_evidence(
             "reward_noninferiority": {},
             "wait": {},
             "wait_noninferiority": {},
+            "control_score": {},
             "artifact": paths["native_promotion_v31"],
         }
     best = max(ranked, key=lambda row: (row["score"], row["n_common"]))
@@ -186,8 +191,17 @@ def _promotion_evidence(
             row["n_common"],
         ),
     )
+    best_score = max(
+        ranked,
+        key=lambda row: (
+            1 if _supported(row["control_score"]) else 0,
+            row["n_common"],
+        ),
+    )
     best["best_reward_key"] = best_reward["key"]
     best["best_wait_key"] = best_wait["key"]
+    best["best_score_key"] = best_score["key"]
+    best["best_score"] = best_score["control_score"]
     best["complementary_supported"] = _supported(best_reward["reward"]) and _supported(best_wait["wait"])
     if best["status"] == "not_supported" and best["complementary_supported"]:
         best["status"] = "partial"
@@ -209,6 +223,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     promotion_reward_noninferiority = promotion["reward_noninferiority"]
     promotion_wait = promotion["wait"]
     promotion_wait_noninferiority = promotion["wait_noninferiority"]
+    promotion_score = promotion.get("best_score", {})
     real = (
         artifacts["native_real_demand_alighting_safe_v2"]
         or artifacts["native_real_demand_v5"]
@@ -275,12 +290,14 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"best={promotion['key']} "
                 f"best_reward={promotion.get('best_reward_key', 'missing')} "
                 f"best_wait={promotion.get('best_wait_key', 'missing')} "
+                f"best_score={promotion.get('best_score_key', 'missing')} "
                 f"reward={promotion_reward.get('status', 'missing')} "
                 f"reward_noharm={promotion_reward_noninferiority.get('status', 'missing')} "
                 f"wait={promotion_wait.get('status', 'missing')} "
-                f"wait_noharm={promotion_wait_noninferiority.get('status', 'missing')}"
+                f"wait_noharm={promotion_wait_noninferiority.get('status', 'missing')} "
+                f"score={promotion_score.get('status', 'missing')}"
             ),
-            "remaining_gap": "Wait CI must be supported together with reward in the same native run.",
+            "remaining_gap": "Reward and wait CIs must be supported together in the same native run; v32 now supports wait/score with reward no-harm.",
             "artifact": promotion["artifact"],
         },
         {

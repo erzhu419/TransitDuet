@@ -1350,6 +1350,7 @@ def install_shared_ppo_episode_loop(
     promotion_replan_throughput_floor_min_delta_fraction: float = 0.0,
     promotion_replan_throughput_floor_fleet_util_max: float = 0.0,
     promotion_replan_throughput_floor_same_hold_max: float = 0.0,
+    promotion_replan_active_target_headway_min_s: float = 0.0,
     promotion_replan_target_headway_min_s: float = 0.0,
     promotion_replan_target_headway_max_s: float = 0.0,
     promotion_replan_project_target_headway: bool = False,
@@ -1425,6 +1426,7 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_throughput_floor_delta_fraction_sum = 0.0
     runner.freq_hrl_promotion_adaptive_drift_guard_rejects = 0
     runner.freq_hrl_promotion_gap_risk_guard_rejects = 0
+    runner.freq_hrl_promotion_active_target_headway_floor_rejects = 0
     runner.freq_hrl_promotion_target_headway_floor_rejects = 0
     runner.freq_hrl_promotion_target_headway_project_count = 0
     runner.freq_hrl_promotion_target_headway_project_correction_abs_sum_s = 0.0
@@ -1802,11 +1804,17 @@ def install_shared_ppo_episode_loop(
                                 )
                             ) + 1
                             return False
+                    active_target_headway_min_s = max(
+                        float(promotion_replan_active_target_headway_min_s), 0.0)
                     target_headway_min_s = max(
                         float(promotion_replan_target_headway_min_s), 0.0)
                     reward_floor_min_score = float(
                         promotion_replan_reward_floor_min_score)
-                    if target_headway_min_s > 0.0 or reward_floor_min_score > 0.0:
+                    if (
+                        active_target_headway_min_s > 0.0
+                        or target_headway_min_s > 0.0
+                        or reward_floor_min_score > 0.0
+                    ):
                         candidate_target = float(preselect_metadata.get(
                             "candidate_target_headway_mean_s",
                             _candidate_target_headway_mean_s(
@@ -1816,6 +1824,18 @@ def install_shared_ppo_episode_loop(
                             runner, active_action, kwargs.get("trip", None)))
                         preselect_metadata["active_target_headway_mean_s"] = active_target
                         preselect_metadata["candidate_target_headway_mean_s"] = candidate_target
+                        if (
+                            active_target_headway_min_s > 0.0
+                            and active_target < active_target_headway_min_s
+                        ):
+                            runner.freq_hrl_promotion_active_target_headway_floor_rejects = int(
+                                getattr(
+                                    runner,
+                                    "freq_hrl_promotion_active_target_headway_floor_rejects",
+                                    0,
+                                )
+                            ) + 1
+                            return False
                         if (
                             target_headway_min_s > 0.0
                             and candidate_target < target_headway_min_s
@@ -2025,6 +2045,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_throughput_floor_delta_fraction_mean",
         "shared_ppo_adaptive_drift_guard_rejects",
         "shared_ppo_gap_risk_guard_rejects",
+        "shared_ppo_active_target_headway_floor_rejects",
         "shared_ppo_target_headway_floor_rejects",
         "shared_ppo_gate_value_mean",
         "shared_ppo_wait_replan_count",
@@ -2127,6 +2148,7 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_throughput_floor_min_delta_fraction: float = 0.0,
     promotion_replan_throughput_floor_fleet_util_max: float = 0.0,
     promotion_replan_throughput_floor_same_hold_max: float = 0.0,
+    promotion_replan_active_target_headway_min_s: float = 0.0,
     promotion_replan_target_headway_min_s: float = 0.0,
     promotion_replan_target_headway_max_s: float = 0.0,
     promotion_replan_project_target_headway: bool = False,
@@ -2265,6 +2287,8 @@ def run_native_shared_ppo_episode_loop(
             promotion_replan_throughput_floor_fleet_util_max),
         promotion_replan_throughput_floor_same_hold_max=float(
             promotion_replan_throughput_floor_same_hold_max),
+        promotion_replan_active_target_headway_min_s=float(
+            promotion_replan_active_target_headway_min_s),
         promotion_replan_target_headway_min_s=float(promotion_replan_target_headway_min_s),
         promotion_replan_target_headway_max_s=float(promotion_replan_target_headway_max_s),
         promotion_replan_project_target_headway=bool(promotion_replan_project_target_headway),
@@ -2406,6 +2430,11 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_gap_risk_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_gap_risk_guard_rejects",
+                0,
+            )),
+            "shared_ppo_active_target_headway_floor_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_active_target_headway_floor_rejects",
                 0,
             )),
             "shared_ppo_target_headway_floor_rejects": int(getattr(
@@ -2602,6 +2631,8 @@ def run_native_shared_ppo_episode_loop(
             promotion_replan_throughput_floor_fleet_util_max),
         "promotion_replan_throughput_floor_same_hold_max": float(
             promotion_replan_throughput_floor_same_hold_max),
+        "promotion_replan_active_target_headway_min_s": float(
+            promotion_replan_active_target_headway_min_s),
         "promotion_replan_target_headway_min_s": float(promotion_replan_target_headway_min_s),
         "promotion_replan_target_headway_max_s": float(promotion_replan_target_headway_max_s),
         "promotion_replan_base_delta_abs_max_s": float(promotion_replan_base_delta_abs_max_s),
@@ -2861,6 +2892,8 @@ def main() -> None:
     parser.add_argument("--promotion-replan-throughput-floor-min-delta-fraction", type=float, default=0.0)
     parser.add_argument("--promotion-replan-throughput-floor-fleet-util-max", type=float, default=0.0)
     parser.add_argument("--promotion-replan-throughput-floor-same-hold-max", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-active-target-headway-min-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-target-headway-min-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-project-target-headway", action="store_true")
     parser.add_argument("--promotion-replan-target-headway-project-margin-s", type=float, default=0.25)
     parser.add_argument("--promotion-replan-base-delta-abs-max-s", type=float, default=0.0)
@@ -2937,6 +2970,10 @@ def main() -> None:
                 args.promotion_replan_throughput_floor_fleet_util_max),
             promotion_replan_throughput_floor_same_hold_max=float(
                 args.promotion_replan_throughput_floor_same_hold_max),
+            promotion_replan_active_target_headway_min_s=float(
+                args.promotion_replan_active_target_headway_min_s),
+            promotion_replan_target_headway_min_s=float(
+                args.promotion_replan_target_headway_min_s),
             promotion_replan_project_target_headway=bool(args.promotion_replan_project_target_headway),
             promotion_replan_target_headway_project_margin_s=float(
                 args.promotion_replan_target_headway_project_margin_s),
