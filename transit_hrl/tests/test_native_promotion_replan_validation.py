@@ -515,8 +515,16 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             )
             self.assertEqual(len(merged["rows"]), 2)
             self.assertEqual(set(merged["seeds"]), {7})
+            self.assertEqual(
+                set(merged["variants"]),
+                {"interval_only", "native_wait_aware_replan"},
+            )
             self.assertTrue(any(
                 row["check"] == "native_wait_aware_replan_vs_interval_avg_wait_min"
+                for row in merged["paired_checks"]
+            ))
+            self.assertFalse(any(
+                row["check"].startswith("native_promotion_replan_vs_interval")
                 for row in merged["paired_checks"]
             ))
 

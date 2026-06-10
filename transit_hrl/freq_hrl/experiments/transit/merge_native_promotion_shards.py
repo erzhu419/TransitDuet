@@ -99,9 +99,17 @@ def merge_native_promotion_shards(
     ]
     if not rows:
         raise ValueError("no native promotion rows found in input shard summaries")
-    checks = paired_checks(rows, min_pairs=int(min_pairs))
-    for treatment in ("native_learned_gate", "native_wait_aware_replan"):
-        if any(row.get("variant") == treatment for row in rows):
+    actual_variants = [
+        variant for variant in VARIANTS
+        if any(row.get("variant") == variant for row in rows)
+    ]
+    checks = []
+    for treatment in (
+        "native_promotion_replan",
+        "native_learned_gate",
+        "native_wait_aware_replan",
+    ):
+        if treatment in actual_variants:
             checks.extend(paired_checks(
                 rows,
                 min_pairs=int(min_pairs),
@@ -117,7 +125,7 @@ def merge_native_promotion_shards(
         "lower_hf_wait_action_gain_s": float(lower_gain),
         "offpolicy_replay_updates": int(replay_updates),
         "workers": 0,
-        "variants": list(VARIANTS.keys()),
+        "variants": actual_variants,
         "variant_overrides": variant_overrides,
         "variant_private_overrides": variant_private_overrides,
         "summary": summarize(rows),

@@ -9,6 +9,7 @@ This note records the current state after the latest native promotion, real-dema
 | Native learned promotion reward/wait | Partially supported | `scheduler_native_promotion_risk_banded_delta_floor_v42_512seed_merged` supports reward, wait, and score under persistent stress. | Cross-stress replication is not closed. |
 | v42 cross-stress replication | Not supported on OD shift | `transit_native_promotion_v42_odshift_512seed_merged` has nearly no active replanning: reward delta is -0.0060 with CI upper at 0, wait/score are only inconclusive. | The odshift regime needs a stress-specific promotion policy, not just the persistent-stress v42 gate. |
 | v43 pressure override for OD shift | Smoke only, do not scale as-is | First shard in `scheduler_native_promotion_v43_odshift_pressure_smoke64_shard_0_0_11` raises wait-aware replan count but reward becomes negative and wait is worse on mean. | Retune the pressure override with reward-floor and value-guard selection before any 512-seed expansion. |
+| v44 OD-shift reward-floor wait-aware replan | Noninferiority supported, strong improvement not closed | `scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4` has 64 seeds: reward delta +2.4216 with CI [0.0000, 6.8108], wait delta -0.00022 min with CI [-0.00059, 0.0000]. Reward/wait noninferiority is supported, but improvement status remains inconclusive. | Scale or stress-register only if the next profile increases active replans without relying mostly on value-guard rejection. |
 | Real-demand wait/alighting | Not strictly supported | `transit_native_real_demand_alighting_wait_v4_24pair_merged` supports control score and episode reward, but wait, alighted pax, and completed throughput deltas remain zero or worse. | Use high-pressure real-shape demand scaling and throughput-aware action constraints. |
 | Native leakage no-tradeoff | Partial | `leakage_no_tradeoff_matrix_v4_indexed` now indexes native real-demand metrics including `LowerLFDrift`; v4 drift reduction is still inconclusive. | Need native runs where drift reduction and reward/wait noninferiority hold together. |
 | Real L2/L3 order-book replay | Mechanism ready, data claim not closed | The manifest validator now separates explicit real or venue-grade L2/L3 feeds from fixture/synthetic/sample files. | Add actual venue-grade L2/L3 event data and run large replay with queue-priority matching. |
@@ -21,6 +22,7 @@ This note records the current state after the latest native promotion, real-dema
 4. `leakage_no_tradeoff_matrix.py` indexes the new native real-demand v4 artifact and reports native drift/performance tradeoffs more strictly.
 5. `native_promotion_replan_validation.py` adds the `odshift_pressure_replay_v43` profile, which is useful as a negative smoke result but should not be scaled without retuning.
 6. `order_book_large_replay_manifest_validation.py` now treats real-data coverage as a source-quality claim, not merely as CSV availability.
+7. `merge_native_promotion_shards.py` now reports only actually observed variants and no longer emits underpowered checks for promotion variants that were not run in a shard set.
 
 ## Next Experiments
 
@@ -32,3 +34,5 @@ This note records the current state after the latest native promotion, real-dema
 ## Bottom Line
 
 The implementation is stronger than the previous state because the matrix now separates supported claims from stress-specific failures and source-quality placeholders. The top-journal gap is still not closed: native promotion needs cross-stress reward/wait support, real-demand needs strict wait/alighting improvement, native leakage needs a no-tradeoff run, and order-book replay still needs real venue-grade L2/L3 data.
+
+After the v44 scheduler rerun, OD-shift promotion has moved from broken smoke to valid no-harm evidence. It still does not establish the stronger global reward/wait improvement claim.
