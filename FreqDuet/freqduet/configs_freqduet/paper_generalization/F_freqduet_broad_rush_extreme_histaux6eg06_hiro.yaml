@@ -1,0 +1,14 @@
+_extends: ../F_freqduet_terminal_main_histaux6eg06_hiro.yaml
+_name: F_freqduet_broad_rush_extreme_histaux6eg06_hiro
+_paper_generalization:
+  scenario: rush_extreme
+  label: extreme early/late peak lookup shift
+  method: histaux6eg06
+env:
+  demand_noise: 0.0
+  peak_shift_choices:
+  - -3
+  - 3
+  peak_shift_probs:
+  - 0.5
+  - 0.5

@@ -1,0 +1,15 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_termvalue20_hiro
+
+upper:
+  timetable_planner:
+    terminal_value_relief:
+      enable: true
+      pressure_start: -2.0
+      pressure_full: 0.5
+      max_s: 15.0
+      min_gap_deficit_s: 0.0
+      gap_norm_s: 60.0
+      gap_tolerance_s: 30.0
+      gap_gain: 1.0
+      demand_weight: 0.25

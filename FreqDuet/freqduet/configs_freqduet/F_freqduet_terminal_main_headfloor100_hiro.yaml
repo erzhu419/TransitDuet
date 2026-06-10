@@ -1,0 +1,13 @@
+_extends: configs_freqduet/F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_headfloor100_hiro
+
+# Fixed-headway competitor guard: terminal-dispatch trips may still be delayed
+# by FreqDuet, but they cannot be launched more densely than the causal base
+# headway. This targets the fixed-headway gap without adding lower holding
+# thresholds or future information.
+upper:
+  timetable_planner:
+    terminal_headway_floor:
+      enable: true
+      ratio: 1.0
+

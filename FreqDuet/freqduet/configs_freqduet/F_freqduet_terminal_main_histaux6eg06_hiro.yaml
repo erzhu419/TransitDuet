@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_histaux6eg06_hiro
+
+# Candidate only: slightly looser high-energy gate for the 6-bin residual
+# memory, to test whether mild/noise10 memory can remain active safely.
+frequency:
+  history_aux:
+    enable: true
+    mode: residual
+    upper_bins: 6
+    lower_bins: 6
+    clip: 2.0
+    high_energy_max: 0.06
+    high_energy_width: 0.02
+    min_weight: 0.0

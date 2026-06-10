@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_termfb30_hiro
+
+# Phase-4 candidate: convert persistent completed-trip lower holding into a
+# no-early-launch terminal dispatch bias. This tests whether useful delay can be
+# moved off the on-route lower controller without adding another hard lower gate.
+upper:
+  timetable_planner:
+    terminal_feedback:
+      enable: true
+      gain: 0.70
+      max_s: 30.0
+      min_s: 0.0
+      deadband_s: 3.0
+      min_trips: 3
+      ema_weight: 0.35

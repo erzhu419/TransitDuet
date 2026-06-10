@@ -1,0 +1,15 @@
+_extends: configs_freqduet/F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_fixedselector_hiro
+
+# Fixed-headway expert selector. FreqDuet remains the learned expert; a causal
+# episode-level selector can switch to a no-holding fixed-headway expert when
+# its historical composite cost is lower. This is a no-regret safety wrapper,
+# not a step-level hand threshold.
+fixed_expert_selector:
+  enable: true
+  start_ep: 40
+  min_observations: 2
+  probe_period: 8
+  epsilon: 0.02
+  ema_alpha: 0.25
+  margin: 0.0

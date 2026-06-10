@@ -20,7 +20,26 @@ import pandas as pd
 
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
-METHODS = ("main", "main_driftcost", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
+METHODS = (
+    "main",
+    "main_driftcost",
+    "sumorl_rawhist_holdrl",
+    "sumorl_holdrl",
+    "fixedselector_balanced",
+    "fixedselector",
+    "headfloor100",
+    "headfloor095",
+    "histaux6eg06upper",
+    "histaux6eg06",
+    "histaux6eg05",
+    "histaux6",
+    "histaux3",
+    "nofreq",
+    "rawhistory",
+    "allfreq",
+    "nopromotion",
+    "noleakage",
+)
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
 
 
@@ -37,6 +56,21 @@ def infer_domain(config):
 
 
 def infer_method(config):
+    for method in (
+        "sumorl_rawhist_holdrl",
+        "sumorl_holdrl",
+        "fixedselector_balanced",
+        "fixedselector",
+        "headfloor100",
+        "headfloor095",
+        "histaux6eg06upper",
+        "histaux6eg06",
+        "histaux6eg05",
+        "histaux6",
+        "histaux3",
+    ):
+        if method in config:
+            return method
     if "driftcost" in config:
         return "main_driftcost"
     if config.endswith("_main_hiro"):

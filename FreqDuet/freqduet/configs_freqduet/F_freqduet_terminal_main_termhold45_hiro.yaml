@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_termhold45_hiro
+
+# Phase-4 candidate: execute the promoted target-headway timetable as
+# no-early-launch terminal holding. This moves useful delay from on-route lower
+# holding to terminal dispatch while keeping the promoted decomposer/reward path.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0

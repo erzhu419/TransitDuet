@@ -1,0 +1,13 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_termfb30_hiro
+
+upper:
+  timetable_planner:
+    terminal_feedback:
+      enable: true
+      gain: 0.70
+      max_s: 30.0
+      min_s: 0.0
+      deadband_s: 3.0
+      min_trips: 3
+      ema_weight: 0.35

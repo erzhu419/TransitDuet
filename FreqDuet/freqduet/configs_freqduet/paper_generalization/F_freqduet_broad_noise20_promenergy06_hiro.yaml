@@ -1,0 +1,11 @@
+_extends: ../F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_broad_noise20_promenergy06_hiro
+_paper_generalization:
+  scenario: noise20
+  label: moderate demand noise
+  method: promenergy06
+env:
+  demand_noise: 0.2
+frequency:
+  promotion:
+    adapt_high_energy_min: 0.06

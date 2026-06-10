@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_final_nofreq_hiro.yaml
+_name: F_freqduet_terminal_sumorl_holdrl_hiro
+
+# SUMO-RL-style online holding baseline:
+# single-level station holding RL, no frequency features, no upper learning.
+# The lower action space stays discretized as in the current paper runner.
+coupling:
+  upper_warmup_eps: 1000000
+
+frequency:
+  enable: false
+  drift_feedback:
+    enable: false
+
+reward_attribution:
+  enable: false

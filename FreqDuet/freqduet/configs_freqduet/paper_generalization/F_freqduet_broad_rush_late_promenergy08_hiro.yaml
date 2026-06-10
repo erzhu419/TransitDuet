@@ -1,0 +1,17 @@
+_extends: ../F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_broad_rush_late_promenergy08_hiro
+_paper_generalization:
+  scenario: rush_late
+  label: late peak lookup shift
+  method: promenergy08
+env:
+  demand_noise: 0.0
+  peak_shift_choices:
+  - 1
+  - 2
+  peak_shift_probs:
+  - 0.5
+  - 0.5
+frequency:
+  promotion:
+    adapt_high_energy_min: 0.08

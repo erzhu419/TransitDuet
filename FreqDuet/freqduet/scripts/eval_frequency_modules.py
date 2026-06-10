@@ -190,6 +190,29 @@ def check_feature_modes():
             "expected_lower_dim": expected_l,
             "pass": bool(len(u) == expected_u and len(l) == expected_l),
         })
+    tr = DemandFrequencyTracker(
+        method="harmonic",
+        update_interval_s=60.0,
+        bin_sec=60,
+        od_features=True,
+        upper_mode="low",
+        lower_mode="high",
+        history_aux_enable=True,
+        history_aux_upper_bins=3,
+        history_aux_lower_bins=4,
+    )
+    tr.update({(1, True): 10}, {(1, 5, True): 10})
+    u = tr.upper_features()
+    l = tr.lower_features(1, True)
+    rows.append({
+        "upper_mode": "low+histaux3",
+        "lower_mode": "high+histaux4",
+        "upper_dim": int(len(u)),
+        "lower_dim": int(len(l)),
+        "expected_upper_dim": 9,
+        "expected_lower_dim": 8,
+        "pass": bool(len(u) == 9 and len(l) == 8),
+    })
     return rows
 
 

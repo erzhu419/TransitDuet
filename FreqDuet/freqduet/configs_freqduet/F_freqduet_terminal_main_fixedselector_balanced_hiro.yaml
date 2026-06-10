@@ -1,0 +1,18 @@
+_extends: configs_freqduet/F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_fixedselector_balanced_hiro
+
+# Balanced no-regret selector between learned FreqDuet and a no-holding
+# fixed-headway expert. Unlike the first diagnostic selector, this version
+# starts its EMA counts only when the selector opens and alternates periodic
+# probes, so a good result cannot be explained by stale learned estimates or
+# a one-way collapse to fixed-headway.
+fixed_expert_selector:
+  enable: true
+  start_ep: 40
+  count_start: selector_start
+  min_observations: 2
+  probe_period: 8
+  probe_mode: alternate
+  epsilon: 0.02
+  ema_alpha: 0.25
+  margin: 0.0

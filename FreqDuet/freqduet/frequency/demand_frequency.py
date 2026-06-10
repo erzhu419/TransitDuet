@@ -14,6 +14,11 @@ Four causal decomposers are available:
 * ``raw_history``: no frequency split; exposes trailing realized-demand bins as
   the RawHistory ablation required by `GPT.md`.
 
+For the harmonic path, an optional history-auxiliary feature block can append
+short causal residual bins relative to the harmonic low-frequency estimate.
+This keeps the historical-prior LF/HF split as the main signal while giving
+the policy local memory in scenarios where raw history is competitive.
+
 This is the first code path aligned with the wavelet direction in `GPT.md`;
 MODWT/learnable wavelets can replace these classes behind the same API.
 """
@@ -229,7 +234,16 @@ class DemandFrequencyTracker:
         promotion_adapt_local=False,
         promotion_adapt_active_only=False,
         promotion_adapt_requires_persistent=False,
+        promotion_adapt_high_energy_min=0.0,
         promotion_residual_mode="abs",
+        history_aux_enable=False,
+        history_aux_upper_bins=0,
+        history_aux_lower_bins=0,
+        history_aux_mode="residual",
+        history_aux_clip=3.0,
+        history_aux_high_energy_max=0.0,
+        history_aux_high_energy_width=0.0,
+        history_aux_min_weight=0.0,
     ):
         self.update_interval_s = float(update_interval_s)
         self.method = str(method).lower()
@@ -240,6 +254,20 @@ class DemandFrequencyTracker:
             float(forecast_horizon_s) / max(self.update_interval_s, 1e-6), 1.0)
         self.upper_history_bins = max(1, int(upper_history_bins))
         self.lower_history_bins = max(1, int(lower_history_bins))
+        self.history_aux_enabled = bool(history_aux_enable)
+        self.history_aux_upper_bins = max(0, int(history_aux_upper_bins))
+        self.history_aux_lower_bins = max(0, int(history_aux_lower_bins))
+        self.history_aux_mode = str(history_aux_mode or "residual").lower()
+        if self.history_aux_mode not in {"residual", "innovation", "raw", "rate"}:
+            raise ValueError(
+                f"Unknown history auxiliary mode: {history_aux_mode}")
+        self.history_aux_clip = max(float(history_aux_clip), 0.0)
+        self.history_aux_high_energy_max = max(
+            float(history_aux_high_energy_max), 0.0)
+        self.history_aux_high_energy_width = max(
+            float(history_aux_high_energy_width), 0.0)
+        self.history_aux_min_weight = float(np.clip(
+            history_aux_min_weight, 0.0, 1.0))
         self.bin_sec = float(bin_sec) if bin_sec else self.update_interval_s
         self.bin_steps = max(1, int(round(self.bin_sec / self.update_interval_s)))
         self.bin_interval_s = self.bin_steps * self.update_interval_s
@@ -266,6 +294,8 @@ class DemandFrequencyTracker:
         self.promotion_adapt_active_only = bool(promotion_adapt_active_only)
         self.promotion_adapt_requires_persistent = bool(
             promotion_adapt_requires_persistent)
+        self.promotion_adapt_high_energy_min = max(
+            float(promotion_adapt_high_energy_min), 0.0)
         self.promotion_residual_mode = str(
             promotion_residual_mode or "abs").lower()
         self.promotion_absorptions = 0
@@ -303,11 +333,17 @@ class DemandFrequencyTracker:
         elif self.method in {"raw_history", "history"}:
             self.method = "raw_history"
             self.od_features_enabled = False
+            self.history_aux_enabled = False
             max_bins = max(self.upper_history_bins, self.lower_history_bins)
             self._state_factory = lambda: _RawHistoryBandState(max_bins)
         else:
             raise ValueError(f"Unknown demand frequency method: {method}")
 
+        self._history_aux_max_bins = max(
+            1, self.history_aux_upper_bins, self.history_aux_lower_bins)
+        self._global_history_aux = deque(maxlen=self._history_aux_max_bins)
+        self._local_history_aux = defaultdict(
+            lambda: deque(maxlen=self._history_aux_max_bins))
         self.upper_feature_dim = self._upper_dim_for_mode(self.upper_mode)
         self.lower_feature_dim = self._lower_dim_for_mode(self.lower_mode)
 
@@ -397,8 +433,29 @@ class DemandFrequencyTracker:
             promotion_adapt_requires_persistent=promotion_cfg.get(
                 "adapt_requires_persistent",
                 cfg.get("promotion_adapt_requires_persistent", False)),
+            promotion_adapt_high_energy_min=promotion_cfg.get(
+                "adapt_high_energy_min",
+                cfg.get("promotion_adapt_high_energy_min", 0.0)),
             promotion_residual_mode=promotion_cfg.get(
                 "residual_mode", cfg.get("promotion_residual_mode", "abs")),
+            history_aux_enable=(cfg.get("history_aux", {}) or {}).get(
+                "enable", cfg.get("history_aux_enable", False)),
+            history_aux_upper_bins=(cfg.get("history_aux", {}) or {}).get(
+                "upper_bins", cfg.get("history_aux_upper_bins", 0)),
+            history_aux_lower_bins=(cfg.get("history_aux", {}) or {}).get(
+                "lower_bins", cfg.get("history_aux_lower_bins", 0)),
+            history_aux_mode=(cfg.get("history_aux", {}) or {}).get(
+                "mode", cfg.get("history_aux_mode", "residual")),
+            history_aux_clip=(cfg.get("history_aux", {}) or {}).get(
+                "clip", cfg.get("history_aux_clip", 3.0)),
+            history_aux_high_energy_max=(cfg.get("history_aux", {}) or {}).get(
+                "high_energy_max",
+                cfg.get("history_aux_high_energy_max", 0.0)),
+            history_aux_high_energy_width=(cfg.get("history_aux", {}) or {}).get(
+                "high_energy_width",
+                cfg.get("history_aux_high_energy_width", 0.0)),
+            history_aux_min_weight=(cfg.get("history_aux", {}) or {}).get(
+                "min_weight", cfg.get("history_aux_min_weight", 0.0)),
         )
 
     def _new_state(self, prior_theta=None):
@@ -453,6 +510,8 @@ class DemandFrequencyTracker:
         self.promotion_absorbed_rate = 0.0
         self._pending_station.clear()
         self._pending_od.clear()
+        self._global_history_aux.clear()
+        self._local_history_aux.clear()
         self._pending_steps = 0
         self.total_updates = 0
         self._od_summary_cache = (0.0, 0.0, 0)
@@ -482,22 +541,30 @@ class DemandFrequencyTracker:
         total_count = float(sum(arrivals_by_station.values()))
         scale = 60.0 / max(self.bin_interval_s, 1e-6)
         bin_step = int(self.total_updates)
-        self._update_state(self.global_state, total_count * scale, bin_step)
+        global_rate = total_count * scale
+        if self.history_aux_enabled:
+            self._global_history_aux.append(global_rate)
+        self._update_state(self.global_state, global_rate, bin_step)
         if self.global_promotion_gate is not None:
             gate = self.global_promotion_gate
             gate.update(self.global_state.high, self.global_state.low)
-            self._maybe_promote_state(self.global_state, gate)
+            self._maybe_promote_state(
+                self.global_state, gate, self.global_demand_norm)
 
         local_keys = set(self.local_states.keys()) | set(arrivals_by_station.keys())
         for key in local_keys:
             state = self._get_local_state(key)
+            local_rate = float(arrivals_by_station.get(key, 0.0)) * scale
+            if self.history_aux_enabled:
+                self._local_history_aux[key].append(local_rate)
             self._update_state(
-                state, float(arrivals_by_station.get(key, 0.0)) * scale, bin_step)
+                state, local_rate, bin_step)
             if self.promotion_enabled:
                 gate = self._get_local_promotion_gate(key)
                 gate.update(state.high, state.low)
                 if self.promotion_adapt_local:
-                    self._maybe_promote_state(state, gate)
+                    self._maybe_promote_state(
+                        state, gate, self.local_demand_norm)
 
         if self.od_features_enabled:
             od_keys = set(self.od_states.keys()) | set(arrivals_by_od.keys())
@@ -509,7 +576,7 @@ class DemandFrequencyTracker:
         self.total_updates += 1
         self._od_summary_cache_updates = -1
 
-    def _maybe_promote_state(self, state, gate):
+    def _maybe_promote_state(self, state, gate, demand_norm):
         if (not self.promotion_adapt_low
                 or self.method != "harmonic"
                 or gate is None
@@ -522,6 +589,11 @@ class DemandFrequencyTracker:
                 < self.promotion_adapt_strength_min
                 or not hasattr(state, "promote_residual")):
             return 0.0
+        if self.promotion_adapt_high_energy_min > 0.0:
+            high_energy = math.sqrt(max(getattr(state, "high_energy", 0.0), 0.0))
+            high_norm = high_energy / max(float(demand_norm), 1e-6)
+            if high_norm < self.promotion_adapt_high_energy_min:
+                return 0.0
         absorbed = float(state.promote_residual(
             strength=gate.strength,
             gain=self.promotion_adapt_gain))
@@ -560,36 +632,95 @@ class DemandFrequencyTracker:
         floor = self._high_noise_floor_for_low(low)
         return math.copysign(max(abs(high) - floor, 0.0), high)
 
+    def _history_aux_dim(self, level):
+        if not self.history_aux_enabled or self.method == "raw_history":
+            return 0
+        if str(level).lower() == "upper":
+            return self.history_aux_upper_bins
+        return self.history_aux_lower_bins
+
+    def _history_aux_weight(self):
+        if self.history_aux_high_energy_max <= 0.0:
+            return 1.0
+        high_energy = math.sqrt(max(self.global_state.high_energy, 0.0))
+        high_norm = high_energy / max(self.global_demand_norm, 1e-6)
+        if high_norm <= self.history_aux_high_energy_max:
+            return 1.0
+        if self.history_aux_high_energy_width <= 0.0:
+            return self.history_aux_min_weight
+        over = (
+            high_norm - self.history_aux_high_energy_max
+        ) / self.history_aux_high_energy_width
+        over = float(np.clip(over, 0.0, 1.0))
+        return (1.0 - over) + over * self.history_aux_min_weight
+
+    def _history_aux_features(self, samples, state, bins, norm):
+        bins = int(bins)
+        if bins <= 0:
+            return []
+        values = list(samples)[-bins:]
+        if len(values) < bins:
+            values = [0.0] * (bins - len(values)) + values
+        arr = np.asarray(values, dtype=np.float64)
+        if self.history_aux_mode in {"residual", "innovation"}:
+            arr = arr - float(getattr(state, "low", 0.0))
+        elif self.history_aux_mode not in {"raw", "rate"}:
+            raise ValueError(
+                f"Unknown history auxiliary mode: {self.history_aux_mode}")
+        arr = arr / max(float(norm), 1e-6)
+        if self.history_aux_clip > 0.0:
+            arr = np.clip(arr, -self.history_aux_clip, self.history_aux_clip)
+        arr = arr * self._history_aux_weight()
+        return arr.astype(np.float32).tolist()
+
+    def _upper_history_aux_features(self, state):
+        if not self.history_aux_enabled:
+            return []
+        return self._history_aux_features(
+            self._global_history_aux, state,
+            self.history_aux_upper_bins, self.global_demand_norm)
+
+    def _lower_history_aux_features(self, key, state):
+        if not self.history_aux_enabled:
+            return []
+        return self._history_aux_features(
+            self._local_history_aux.get(key, []), state,
+            self.history_aux_lower_bins, self.local_demand_norm)
+
     def _upper_dim_for_mode(self, mode):
         if self.method == "raw_history":
             return self.upper_history_bins + self.promotion_feature_dim
         mode = str(mode or "low").lower()
         od_dim = 2 if self.od_features_enabled else 0
         if mode in {"low", "lf", "split"}:
-            return 4 + od_dim + self.promotion_feature_dim
-        if mode in {"low_mid", "low_middle", "regime"}:
-            return 7 + od_dim + self.promotion_feature_dim
-        if mode in {"high", "hf"}:
-            return 3 + od_dim + self.promotion_feature_dim
-        if mode in {"all", "allfreq", "all_freq"}:
-            return 6 + od_dim + self.promotion_feature_dim
-        raise ValueError(f"Unknown upper frequency mode: {mode}")
+            base_dim = 4 + od_dim + self.promotion_feature_dim
+        elif mode in {"low_mid", "low_middle", "regime"}:
+            base_dim = 7 + od_dim + self.promotion_feature_dim
+        elif mode in {"high", "hf"}:
+            base_dim = 3 + od_dim + self.promotion_feature_dim
+        elif mode in {"all", "allfreq", "all_freq"}:
+            base_dim = 6 + od_dim + self.promotion_feature_dim
+        else:
+            raise ValueError(f"Unknown upper frequency mode: {mode}")
+        return base_dim + self._history_aux_dim("upper")
 
     def _lower_dim_for_mode(self, mode):
         if self.method == "raw_history":
             return self.lower_history_bins + self.promotion_feature_dim
         mode = str(mode or "high").lower()
         if mode in {"high", "hf", "split"}:
-            return 4 + self.promotion_feature_dim
-        if mode in {"high_prior", "hf_prior", "high_context", "hf_context"}:
-            return 6 + self.promotion_feature_dim
-        if mode in {"high_mid", "high_middle", "regime"}:
-            return 7 + self.promotion_feature_dim
-        if mode in {"low", "lf"}:
-            return 4 + self.promotion_feature_dim
-        if mode in {"all", "allfreq", "all_freq"}:
-            return 7 + self.promotion_feature_dim
-        raise ValueError(f"Unknown lower frequency mode: {mode}")
+            base_dim = 4 + self.promotion_feature_dim
+        elif mode in {"high_prior", "hf_prior", "high_context", "hf_context"}:
+            base_dim = 6 + self.promotion_feature_dim
+        elif mode in {"high_mid", "high_middle", "regime"}:
+            base_dim = 7 + self.promotion_feature_dim
+        elif mode in {"low", "lf"}:
+            base_dim = 4 + self.promotion_feature_dim
+        elif mode in {"all", "allfreq", "all_freq"}:
+            base_dim = 7 + self.promotion_feature_dim
+        else:
+            raise ValueError(f"Unknown lower frequency mode: {mode}")
+        return base_dim + self._history_aux_dim("lower")
 
     def _od_summary_features(self):
         if self._od_summary_cache_updates == self.total_updates:
@@ -672,6 +803,7 @@ class DemandFrequencyTracker:
         else:
             raise ValueError(f"Unknown upper frequency mode: {mode}")
         feats = feats + self._upper_od_features()
+        feats = feats + self._upper_history_aux_features(s)
         if self.promotion_state_features and self.global_promotion_gate is not None:
             feats.extend(self.global_promotion_gate.features().tolist())
         return np.array(feats, dtype=np.float32)
@@ -742,6 +874,7 @@ class DemandFrequencyTracker:
             feats = low_feats[:3] + high_feats
         else:
             raise ValueError(f"Unknown lower frequency mode: {mode}")
+        feats = feats + self._lower_history_aux_features(key, s)
         if self.promotion_state_features:
             gate = self.local_promotion_gates.get(key)
             gate_feats = (

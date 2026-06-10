@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_main_valuesoft35_hiro.yaml
+_name: F_freqduet_terminal_main_valuesoft35_lfsafe_hiro
+
+# Keep the soft value cost out of clear low-frequency/rush-pattern shifts.
+# This preserves the causal LF/HF split: do not penalize lower holding as
+# "low value" while the decomposer still sees a strong LF forecast shift.
+fleet_noharm:
+  lower:
+    value_soft_cost:
+      gate:
+        mode: all
+        default_active: false
+        min_updates_required: 20
+        max_low_forecast: 0.48

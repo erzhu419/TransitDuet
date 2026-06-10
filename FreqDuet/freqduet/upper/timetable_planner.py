@@ -100,7 +100,9 @@ class TimetableCurvePlanner:
 
     def apply(self, timetables, current_trip, action, origin_launch_s=None,
               write_scheduled_launch=False, terminal_shift_min_s=None,
-              terminal_shift_max_s=None):
+              terminal_shift_max_s=None, terminal_shift_bias_s=0.0,
+              terminal_headway_floor_ratio=0.0,
+              terminal_headway_floor_min_s=0.0):
         """Write target headways for current and future trips.
 
         Returns:
@@ -115,9 +117,25 @@ class TimetableCurvePlanner:
         terminal_shift_max = (
             self.terminal_shift_max_s if terminal_shift_max_s is None
             else float(terminal_shift_max_s))
+        terminal_shift_bias = float(terminal_shift_bias_s or 0.0)
         planned_targets = []
         scheduled_launches = []
+        headway_floors = []
         current_seen = False
+
+        def _apply_terminal_headway_floor(tt, base, target):
+            floor = 0.0
+            ratio = float(terminal_headway_floor_ratio or 0.0)
+            if ratio > 0.0:
+                floor = max(floor, float(base) * ratio)
+            floor_min = float(terminal_headway_floor_min_s or 0.0)
+            if floor_min > 0.0:
+                floor = max(floor, floor_min)
+            if write_scheduled_launch and floor > 0.0:
+                target = max(float(target), floor)
+                tt._freqduet_min_dispatch_headway = float(floor)
+                headway_floors.append(float(floor))
+            return float(target), float(floor)
 
         plan_directions = (
             [True, False] if self.plan_all_directions else [current_direction]
@@ -138,6 +156,8 @@ class TimetableCurvePlanner:
                 base = self._base_headway(tt)
                 target = self.target_headway(
                     base, action, bool(plan_direction), offset)
+                target, min_dispatch_headway = _apply_terminal_headway_floor(
+                    tt, base, target)
                 tt.target_headway = target
                 tt._freqduet_planned_by = int(current_trip.launch_turn)
                 tt._freqduet_plan_offset_s = offset
@@ -151,6 +171,13 @@ class TimetableCurvePlanner:
                         )
                     else:
                         scheduled = prev_scheduled + target
+                    if min_dispatch_headway > 0.0 and prev_scheduled is not None:
+                        scheduled = max(
+                            scheduled, prev_scheduled + min_dispatch_headway)
+                    if terminal_shift_bias > 0.0:
+                        scheduled = max(
+                            scheduled,
+                            float(tt.launch_time) + terminal_shift_bias)
                     scheduled = float(np.clip(
                         scheduled,
                         float(tt.launch_time) + terminal_shift_min,
@@ -168,12 +195,23 @@ class TimetableCurvePlanner:
         current_offset = current_launch - origin_launch
         current_target = self.target_headway(
             base_current, action, current_direction, current_offset)
+        current_target, current_floor = _apply_terminal_headway_floor(
+            current_trip, base_current, current_target)
         current_trip.target_headway = current_target
         if not current_seen:
             planned_targets.append(current_target)
             if write_scheduled_launch:
                 scheduled = float(getattr(
                     current_trip, "_freqduet_scheduled_launch", current_launch))
+                if terminal_shift_bias > 0.0:
+                    scheduled = max(
+                        scheduled,
+                        current_launch + terminal_shift_bias)
+                if current_floor > 0.0:
+                    existing = getattr(
+                        current_trip, "_freqduet_scheduled_launch", None)
+                    if existing is not None:
+                        scheduled = max(scheduled, float(existing))
                 scheduled = float(np.clip(
                     scheduled,
                     current_launch + terminal_shift_min,
@@ -185,6 +223,7 @@ class TimetableCurvePlanner:
 
         targets = np.asarray(planned_targets, dtype=np.float64)
         scheduled = np.asarray(scheduled_launches, dtype=np.float64)
+        floors = np.asarray(headway_floors, dtype=np.float64)
         return {
             "target_headway": current_target,
             "effective_delta": current_target - base_current,
@@ -199,6 +238,10 @@ class TimetableCurvePlanner:
                 float(scheduled.std()) if scheduled.size else 0.0),
             "terminal_shift_min_s": float(terminal_shift_min),
             "terminal_shift_max_s": float(terminal_shift_max),
+            "terminal_shift_bias_s": float(terminal_shift_bias),
+            "terminal_headway_floor_n": int(floors.size),
+            "terminal_headway_floor_mean": (
+                float(floors.mean()) if floors.size else 0.0),
         }
 
     def smoothness_penalty(self, action) -> float:

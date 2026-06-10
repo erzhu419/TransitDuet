@@ -44,7 +44,13 @@ def parse_csv_list(value, cast=str):
 
 def config_path(name):
     filename = name if name.endswith(".yaml") else f"{name}.yaml"
-    return Path("configs_freqduet") / filename
+    path = Path("configs_freqduet") / filename
+    if path.exists():
+        return path
+    paper_generalization = Path("configs_freqduet") / "paper_generalization" / filename
+    if paper_generalization.exists():
+        return paper_generalization
+    return path
 
 
 def run_dir_for(config, seed, logs_dir):
@@ -61,6 +67,7 @@ def diagnostics_complete(run_dir, episodes):
         return False
     if "ep" in df.columns:
         df = df[df["ep"] < 9000]
+        return int(df["ep"].nunique()) >= int(episodes)
     return len(df) >= int(episodes)
 
 
@@ -200,6 +207,7 @@ def summarize_seed(csv_path, last_k):
     df = pd.read_csv(csv_path)
     if "ep" in df.columns:
         df = df[df["ep"] < 9000]
+        df = df.drop_duplicates(subset=["ep"], keep="last").sort_values("ep")
     if df.empty:
         return None
     tail = df.iloc[-min(int(last_k), len(df)):]
@@ -272,6 +280,9 @@ def summarize_seed(csv_path, last_k):
         "freq_wait_boarded_pax",
         "terminal_shift_cap_mean",
         "terminal_shift_cap_max",
+        "terminal_feedback_bias_mean",
+        "terminal_feedback_bias_max",
+        "terminal_feedback_events",
         "upper_plan_penalty_mean",
         "upper_plan_penalty_max",
         "upper_plan_target_mean",
@@ -297,6 +308,14 @@ def summarize_seed(csv_path, last_k):
         "fleet_noharm_lower_value_guard_value_mean",
         "fleet_noharm_lower_value_guard_headway_mean",
         "fleet_noharm_lower_value_guard_cost_mean",
+        "fleet_noharm_lower_value_soft_cost_mean",
+        "fleet_noharm_lower_value_soft_cost_max",
+        "fleet_noharm_lower_value_soft_events",
+        "fleet_noharm_lower_value_soft_active_mean",
+        "fleet_noharm_lower_value_soft_value_mean",
+        "fleet_noharm_lower_value_soft_headway_mean",
+        "fleet_noharm_lower_value_soft_risk_mean",
+        "fleet_noharm_lower_value_soft_violation_mean",
     ]:
         row[col] = float(tail[col].astype(float).mean()) if col in tail.columns else 0.0
     row["episodes"] = int(len(df))
@@ -393,6 +412,9 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "freq_wait_boarded_pax",
         "terminal_shift_cap_mean",
         "terminal_shift_cap_max",
+        "terminal_feedback_bias_mean",
+        "terminal_feedback_bias_max",
+        "terminal_feedback_events",
         "upper_plan_penalty_mean",
         "upper_plan_penalty_max",
         "upper_plan_target_mean",
@@ -418,6 +440,14 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
         "fleet_noharm_lower_value_guard_value_mean",
         "fleet_noharm_lower_value_guard_headway_mean",
         "fleet_noharm_lower_value_guard_cost_mean",
+        "fleet_noharm_lower_value_soft_cost_mean",
+        "fleet_noharm_lower_value_soft_cost_max",
+        "fleet_noharm_lower_value_soft_events",
+        "fleet_noharm_lower_value_soft_active_mean",
+        "fleet_noharm_lower_value_soft_value_mean",
+        "fleet_noharm_lower_value_soft_headway_mean",
+        "fleet_noharm_lower_value_soft_risk_mean",
+        "fleet_noharm_lower_value_soft_violation_mean",
     ]
     summary = []
     for cfg in configs:

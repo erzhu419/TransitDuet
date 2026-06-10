@@ -321,6 +321,14 @@ class env_bus(object):
                             trip, '_freqduet_scheduled_launch', trip.launch_time)
                         if self.current_time < effective_launch:
                             continue
+                        min_dispatch_headway = getattr(
+                            trip, '_freqduet_min_dispatch_headway', None)
+                        if min_dispatch_headway is not None:
+                            actual_gap = (
+                                self.current_time
+                                - self._last_dispatch_time[trip.direction])
+                            if actual_gap < float(min_dispatch_headway):
+                                continue
                     elif hasattr(trip, '_delta_t'):
                         effective_launch = trip._original_launch + trip._delta_t
                         if self.current_time < effective_launch:

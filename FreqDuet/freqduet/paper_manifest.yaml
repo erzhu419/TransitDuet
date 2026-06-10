@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-03
+version: 2026-06-11
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -58,6 +58,26 @@ metrics:
     - fleet_noharm_lower_value_guard_value_mean
     - fleet_noharm_lower_value_guard_headway_mean
     - fleet_noharm_lower_value_guard_cost_mean
+    - fleet_noharm_lower_value_soft_cost_mean
+    - fleet_noharm_lower_value_soft_cost_max
+    - fleet_noharm_lower_value_soft_events
+    - fleet_noharm_lower_value_soft_active_mean
+    - fleet_noharm_lower_value_soft_value_mean
+    - fleet_noharm_lower_value_soft_headway_mean
+    - fleet_noharm_lower_value_soft_risk_mean
+    - fleet_noharm_lower_value_soft_violation_mean
+    - terminal_launch_shift_mean
+    - terminal_launch_shift_std
+    - terminal_shift_cap_mean
+    - terminal_shift_cap_max
+    - terminal_feedback_bias_mean
+    - terminal_feedback_bias_max
+    - terminal_feedback_events
+    - fixed_selector_fixed_active
+    - fixed_selector_learned_cost_ema
+    - fixed_selector_fixed_cost_ema
+    - fixed_selector_learned_count
+    - fixed_selector_fixed_count
 
 config_sets:
   current_longtrain_4x6:
@@ -89,6 +109,26 @@ config_sets:
       allfreq: F_freqduet_gen_rushshift_allfreq_hiro
       nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
       noleakage: F_freqduet_gen_rushshift_noleakage_hiro
+
+  sumorl_holdrl_4x1:
+    terminal:
+      sumorl_holdrl: F_freqduet_terminal_sumorl_holdrl_hiro
+    highnoise:
+      sumorl_holdrl: F_freqduet_gen_highnoise_sumorl_holdrl_hiro
+    odshift:
+      sumorl_holdrl: F_freqduet_gen_odshift_sumorl_holdrl_hiro
+    rushshift:
+      sumorl_holdrl: F_freqduet_gen_rushshift_sumorl_holdrl_hiro
+
+  sumorl_rawhist_holdrl_4x1:
+    terminal:
+      sumorl_rawhist_holdrl: F_freqduet_terminal_sumorl_rawhist_holdrl_hiro
+    highnoise:
+      sumorl_rawhist_holdrl: F_freqduet_gen_highnoise_sumorl_rawhist_holdrl_hiro
+    odshift:
+      sumorl_rawhist_holdrl: F_freqduet_gen_odshift_sumorl_rawhist_holdrl_hiro
+    rushshift:
+      sumorl_rawhist_holdrl: F_freqduet_gen_rushshift_sumorl_rawhist_holdrl_hiro
 
   predriftcost_longtrain_4x6:
     terminal:
@@ -220,6 +260,110 @@ config_sets:
     rushshift:
       valueguard: F_freqduet_gen_rushshift_main_valueguard_hiro
 
+  fixedselector_candidate_4x1:
+    terminal:
+      fixedselector: F_freqduet_terminal_main_fixedselector_hiro
+    highnoise:
+      fixedselector: F_freqduet_gen_highnoise_main_fixedselector_hiro
+    odshift:
+      fixedselector: F_freqduet_gen_odshift_main_fixedselector_hiro
+    rushshift:
+      fixedselector: F_freqduet_gen_rushshift_main_fixedselector_hiro
+
+  fixedselector_balanced_candidate_4x1:
+    terminal:
+      fixedselector_balanced: F_freqduet_terminal_main_fixedselector_balanced_hiro
+    highnoise:
+      fixedselector_balanced: F_freqduet_gen_highnoise_main_fixedselector_balanced_hiro
+    odshift:
+      fixedselector_balanced: F_freqduet_gen_odshift_main_fixedselector_balanced_hiro
+    rushshift:
+      fixedselector_balanced: F_freqduet_gen_rushshift_main_fixedselector_balanced_hiro
+
+  termhold45_candidate_4x1:
+    terminal:
+      termhold45: F_freqduet_terminal_main_termhold45_hiro
+    highnoise:
+      termhold45: F_freqduet_gen_highnoise_main_termhold45_hiro
+    odshift:
+      termhold45: F_freqduet_gen_odshift_main_termhold45_hiro
+    rushshift:
+      termhold45: F_freqduet_gen_rushshift_main_termhold45_hiro
+
+  termfb30_candidate_4x1:
+    terminal:
+      termfb30: F_freqduet_terminal_main_termfb30_hiro
+    highnoise:
+      termfb30: F_freqduet_gen_highnoise_main_termfb30_hiro
+    odshift:
+      termfb30: F_freqduet_gen_odshift_main_termfb30_hiro
+    rushshift:
+      termfb30: F_freqduet_gen_rushshift_main_termfb30_hiro
+
+  termrelief20_candidate_4x1:
+    terminal:
+      termrelief20: F_freqduet_terminal_main_termrelief20_hiro
+    highnoise:
+      termrelief20: F_freqduet_gen_highnoise_main_termrelief20_hiro
+    odshift:
+      termrelief20: F_freqduet_gen_odshift_main_termrelief20_hiro
+    rushshift:
+      termrelief20: F_freqduet_gen_rushshift_main_termrelief20_hiro
+
+  termvalue20_candidate_4x1:
+    terminal:
+      termvalue20: F_freqduet_terminal_main_termvalue20_hiro
+    highnoise:
+      termvalue20: F_freqduet_gen_highnoise_main_termvalue20_hiro
+    odshift:
+      termvalue20: F_freqduet_gen_odshift_main_termvalue20_hiro
+    rushshift:
+      termvalue20: F_freqduet_gen_rushshift_main_termvalue20_hiro
+
+  valuesoft35_candidate_4x1:
+    terminal:
+      valuesoft: F_freqduet_terminal_main_valuesoft35_hiro
+    highnoise:
+      valuesoft: F_freqduet_gen_highnoise_main_valuesoft35_hiro
+    odshift:
+      valuesoft: F_freqduet_gen_odshift_main_valuesoft35_hiro
+    rushshift:
+      valuesoft: F_freqduet_gen_rushshift_main_valuesoft35_hiro
+
+  valuesoft35_lfsafe_candidate_4x1:
+    terminal:
+      valuesoft: F_freqduet_terminal_main_valuesoft35_lfsafe_hiro
+    highnoise:
+      valuesoft: F_freqduet_gen_highnoise_main_valuesoft35_lfsafe_hiro
+    odshift:
+      valuesoft: F_freqduet_gen_odshift_main_valuesoft35_lfsafe_hiro
+    rushshift:
+      valuesoft: F_freqduet_gen_rushshift_main_valuesoft35_lfsafe_hiro
+
+  histaux6eg06_longtrain_4x2:
+    terminal:
+      main: F_freqduet_terminal_main_hiro
+      histaux6eg06: F_freqduet_terminal_main_histaux6eg06_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_main_hiro
+      histaux6eg06: F_freqduet_gen_highnoise_main_histaux6eg06_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_main_hiro
+      histaux6eg06: F_freqduet_gen_odshift_main_histaux6eg06_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_main_hiro
+      histaux6eg06: F_freqduet_gen_rushshift_main_histaux6eg06_hiro
+
+  histaux6eg06upper_candidate_4x1:
+    terminal:
+      histaux6eg06upper: F_freqduet_terminal_main_histaux6eg06upper_hiro
+    highnoise:
+      histaux6eg06upper: F_freqduet_gen_highnoise_main_histaux6eg06upper_hiro
+    odshift:
+      histaux6eg06upper: F_freqduet_gen_odshift_main_histaux6eg06upper_hiro
+    rushshift:
+      histaux6eg06upper: F_freqduet_gen_rushshift_main_histaux6eg06upper_hiro
+
 experiments:
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
@@ -303,6 +447,546 @@ experiments:
     per_seed_csv: results_freqduet/generalization_promoted_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
     summary_csv: results_freqduet/generalization_promoted_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
 
+  broad_generalization_ep100_wu10:
+    status: complete_broad_matrix
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    matrix_size: 960
+    shard_size: 30
+    config_dir: configs_freqduet/paper_generalization
+    scenarios:
+      - noise10
+      - noise20
+      - noise40
+      - od20
+      - od50
+      - rush_early
+      - rush_late
+      - rush_extreme
+    methods:
+      - main
+      - nofreq
+      - rawhistory
+      - allfreq
+      - nopromotion
+      - noleakage
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_submitter: scripts/submit_freqduet_broad_generalization_scheduleurm.py
+    sync_and_aggregate_script: scripts/sync_freqduet_broad_generalization.py
+    paper_summary_script: scripts/summarize_freqduet_broad_generalization.py
+    scheduler_nodes:
+      - node001
+      - node002
+      - node003
+      - node004
+      - node005
+      - node006
+    scheduler_tasks:
+      - t7829
+      - t7830
+      - t7831
+      - t7832
+      - t7833
+      - t7834
+      - t7835
+      - t7836
+      - t7837
+      - t7838
+      - t7839
+      - t7840
+      - t7841
+      - t7842
+      - t7843
+      - t7844
+      - t7845
+      - t7846
+      - t7847
+      - t7848
+      - t7849
+      - t7850
+      - t7851
+      - t7852
+      - t7853
+      - t7854
+      - t7855
+      - t7856
+      - t7857
+      - t7858
+      - t7859
+      - t7860
+    scheduler_submission:
+      submitted_at: 2026-06-08 CST
+      backend: scheduleurm_direct_node
+      slurm_jobs: []
+      initial_status_check: 18 running, 14 queued
+      queue_note: node001 shards were briefly preempted by higher-priority work; remaining queued shards wait for 30 free CPUs on their pinned nodes.
+      remote_cwd: /home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet
+      remote_python: /home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python
+    planned_result_dir: results_freqduet/broad_generalization_ep100_wu10
+    result_dir: results_freqduet/broad_generalization_ep100_wu10
+    per_seed_csv: results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/broad_generalization_ep100_wu10/paper_summary
+    completion_audit_csv: results_freqduet/broad_generalization_ep100_wu10/paper_summary/broad_completion_audit.csv
+    paired_deltas_csv: results_freqduet/broad_generalization_ep100_wu10/paper_summary/broad_paired_deltas.csv
+    result_summary:
+      rows: 960
+      expected_rows: 960
+      missing_rows: 0
+      overall_composite_delta_main_minus_nofreq: -0.0012
+      overall_composite_delta_main_minus_rawhistory: 0.0047
+      overall_composite_delta_main_minus_allfreq: 0.0028
+      overall_composite_delta_main_minus_nopromotion: 0.0035
+      overall_composite_delta_main_minus_noleakage: -0.3411
+      conclusion: main is robustly better than noleakage, but statistically tied with nofreq/rawhistory/allfreq/nopromotion over the broad held-out matrix.
+    submit_command: >
+      python3 scripts/submit_freqduet_broad_generalization_scheduleurm.py
+      --dispatch
+    sync_aggregate_summary_command: >
+      python3 scripts/sync_freqduet_broad_generalization.py
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs <generated_config_csv>
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs <comma_sorted_logs_shards>
+      --last-k 50
+      --out-dir results_freqduet/broad_generalization_ep100_wu10/combined_summary
+
+  promenergy08_broad_candidate_ep100_wu10:
+    status: complete_candidate_screen_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    candidate_method: promenergy08
+    candidate_mechanism: require promotion low-frequency absorption to see normalized high-frequency energy >= 0.08
+    config_dir: configs_freqduet/paper_generalization
+    scenarios:
+      - noise10
+      - noise20
+      - noise40
+      - od20
+      - od50
+      - rush_early
+      - rush_late
+      - rush_extreme
+    scheduler_tasks:
+      - t7925
+      - t7926
+      - t7927
+      - t7928
+      - t7929
+      - t7930
+    scheduler_nodes:
+      - node001
+      - node002
+      - node003
+      - node004
+      - node005
+      - node006
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_submitter: scripts/submit_freqduet_broad_generalization_scheduleurm.py
+    sync_and_aggregate_script: scripts/sync_freqduet_broad_generalization.py
+    comparison_script: scripts/compare_freqduet_broad_candidate.py
+    result_dir: results_freqduet/broad_promenergy08_screen_ep100_wu10
+    per_seed_csv: results_freqduet/broad_promenergy08_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/broad_promenergy08_screen_ep100_wu10/compare_vs_broad_baselines
+    comparison_csv: results_freqduet/broad_promenergy08_screen_ep100_wu10/compare_vs_broad_baselines/broad_candidate_paired_deltas.csv
+    result_summary:
+      rows: 160
+      expected_rows: 160
+      missing_rows: 0
+      overall_composite_delta_candidate_minus_main: -0.0083
+      overall_composite_delta_ci95: [-0.0224, 0.0054]
+      noise40_composite_delta_candidate_minus_main: 0.0505
+      conclusion: promenergy08 improves broad overall weakly but loses part of the noise40 promotion gain; do not promote before lower-threshold sweep.
+    submit_command: >
+      python3 scripts/submit_freqduet_broad_generalization_scheduleurm.py
+      --methods promenergy08
+      --run-name broad_promenergy08_screen_ep100_wu10
+      --dispatch
+    sync_aggregate_command: >
+      python3 scripts/sync_freqduet_broad_generalization.py
+      --run-name broad_promenergy08_screen_ep100_wu10
+      --methods promenergy08
+    comparison_command: >
+      python3 scripts/compare_freqduet_broad_candidate.py
+      --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-per-seed results_freqduet/broad_promenergy08_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-method promenergy08
+      --out-dir results_freqduet/broad_promenergy08_screen_ep100_wu10/compare_vs_broad_baselines
+
+  promenergy06_07_broad_candidate_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    candidate_methods:
+      - promenergy06
+      - promenergy07
+    candidate_mechanism: threshold sweep for promotion.adapt_high_energy_min after promenergy08 improved overall but hurt noise40
+    config_dir: configs_freqduet/paper_generalization
+    scenarios:
+      - noise10
+      - noise20
+      - noise40
+      - od20
+      - od50
+      - rush_early
+      - rush_late
+      - rush_extreme
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_submitter: scripts/submit_freqduet_broad_generalization_scheduleurm.py
+    sync_and_aggregate_script: scripts/sync_freqduet_broad_generalization.py
+    comparison_script: scripts/compare_freqduet_broad_candidate.py
+    scheduler_tasks:
+      - t7939
+      - t7940
+      - t7941
+      - t7942
+      - t7943
+      - t7944
+      - t7946
+      - t7947
+      - t7948
+      - t7950
+      - t7951
+    result_dir: results_freqduet/broad_promenergy06_07_screen_ep100_wu10
+    per_seed_csv: results_freqduet/broad_promenergy06_07_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/broad_promenergy06_07_screen_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/broad_promenergy06_07_screen_ep100_wu10/paper_summary
+    comparison_dirs:
+      promenergy06: results_freqduet/broad_promenergy06_07_screen_ep100_wu10/compare_promenergy06_vs_broad_baselines
+      promenergy07: results_freqduet/broad_promenergy06_07_screen_ep100_wu10/compare_promenergy07_vs_broad_baselines
+    result_summary:
+      rows: 320
+      expected_rows: 320
+      missing_rows: 0
+      promenergy06_overall_delta_candidate_minus_main: 0.0019
+      promenergy06_overall_delta_ci95: [-0.0118, 0.0173]
+      promenergy07_overall_delta_candidate_minus_main: 0.0043
+      promenergy07_overall_delta_ci95: [-0.0112, 0.0202]
+      conclusion: lower promotion-energy thresholds did not improve broad overall and still did not preserve the noise40 main gain; do not promote.
+    submit_command: >
+      python3 scripts/submit_freqduet_broad_generalization_scheduleurm.py
+      --methods promenergy06,promenergy07
+      --run-name broad_promenergy06_07_screen_ep100_wu10
+      --dispatch
+    sync_aggregate_command: >
+      python3 scripts/sync_freqduet_broad_generalization.py
+      --run-name broad_promenergy06_07_screen_ep100_wu10
+      --methods promenergy06,promenergy07
+    comparison_commands:
+      promenergy06: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_promenergy06_07_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method promenergy06
+        --out-dir results_freqduet/broad_promenergy06_07_screen_ep100_wu10/compare_promenergy06_vs_broad_baselines
+      promenergy07: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_promenergy06_07_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method promenergy07
+        --out-dir results_freqduet/broad_promenergy06_07_screen_ep100_wu10/compare_promenergy07_vs_broad_baselines
+
+  histaux3_6_broad_candidate_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    candidate_methods:
+      - histaux3
+      - histaux6
+    candidate_mechanism: causal harmonic history-aux residual bins appended to LF/HF features without HF-energy gating
+    config_dir: configs_freqduet/paper_generalization
+    scenarios:
+      - noise10
+      - noise20
+      - noise40
+      - od20
+      - od50
+      - rush_early
+      - rush_late
+      - rush_extreme
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_submitter: scripts/submit_freqduet_broad_generalization_scheduleurm.py
+    sync_and_aggregate_script: scripts/sync_freqduet_broad_generalization.py
+    comparison_script: scripts/compare_freqduet_broad_candidate.py
+    scheduler_tasks:
+      - t8181
+      - t8182
+      - t8183
+      - t8184
+      - t8185
+      - t8186
+      - t8145
+      - t8146
+      - t8147
+      - t8149
+      - t8151
+    result_dir: results_freqduet/broad_histaux3_6_screen_ep100_wu10
+    per_seed_csv: results_freqduet/broad_histaux3_6_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/broad_histaux3_6_screen_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/broad_histaux3_6_screen_ep100_wu10/paper_summary
+    comparison_dirs:
+      histaux3: results_freqduet/broad_histaux3_6_screen_ep100_wu10/compare_histaux3_vs_broad_baselines
+      histaux6: results_freqduet/broad_histaux3_6_screen_ep100_wu10/compare_histaux6_vs_broad_baselines
+    result_summary:
+      rows: 320
+      expected_rows: 320
+      missing_rows: 0
+      histaux3_overall_delta_candidate_minus_main: 0.0181
+      histaux3_overall_delta_ci95: [-0.0142, 0.0641]
+      histaux6_overall_delta_candidate_minus_main: 0.0088
+      histaux6_overall_delta_ci95: [-0.0069, 0.0280]
+      histaux6_demand_noise_delta_candidate_minus_main: 0.0386
+      histaux6_demand_noise_delta_ci95: [0.0074, 0.0744]
+      histaux6_noise40_delta_candidate_minus_main: 0.1107
+      histaux6_noise40_delta_ci95: [0.0354, 0.1826]
+      conclusion: ungated residual history injected too much single-day variance under demand noise; do not promote.
+    sync_aggregate_command: >
+      python3 scripts/sync_freqduet_broad_generalization.py
+      --run-name broad_histaux3_6_screen_ep100_wu10
+      --methods histaux3,histaux6
+    comparison_commands:
+      histaux3: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_histaux3_6_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method histaux3
+        --out-dir results_freqduet/broad_histaux3_6_screen_ep100_wu10/compare_histaux3_vs_broad_baselines
+      histaux6: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_histaux3_6_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method histaux6
+        --out-dir results_freqduet/broad_histaux3_6_screen_ep100_wu10/compare_histaux6_vs_broad_baselines
+
+  histaux6eg05_06_broad_candidate_ep100_wu10:
+    status: complete_candidate_screen_not_promoted_pending_longtrain
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    candidate_methods:
+      - histaux6eg05
+      - histaux6eg06
+    candidate_mechanism: causal harmonic history-aux residual bins with HF-energy down-weighting gate
+    config_dir: configs_freqduet/paper_generalization
+    scenarios:
+      - noise10
+      - noise20
+      - noise40
+      - od20
+      - od50
+      - rush_early
+      - rush_late
+      - rush_extreme
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_submitter: scripts/submit_freqduet_broad_generalization_scheduleurm.py
+    sync_and_aggregate_script: scripts/sync_freqduet_broad_generalization.py
+    comparison_script: scripts/compare_freqduet_broad_candidate.py
+    scheduler_tasks:
+      - t8434
+      - t8435
+      - t8436
+      - t8437
+      - t8438
+      - t8439
+      - t8440
+      - t8441
+      - t8442
+      - t8443
+      - t8444
+    result_dir: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10
+    per_seed_csv: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/paper_summary
+    comparison_dirs:
+      histaux6eg05: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/compare_histaux6eg05_vs_broad_baselines
+      histaux6eg06: results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/compare_histaux6eg06_vs_broad_baselines
+    result_summary:
+      rows: 320
+      expected_rows: 320
+      missing_rows: 0
+      histaux6eg05_overall_delta_candidate_minus_main: 0.0027
+      histaux6eg05_overall_delta_ci95: [-0.0166, 0.0219]
+      histaux6eg06_overall_delta_candidate_minus_main: -0.0046
+      histaux6eg06_overall_delta_ci95: [-0.0250, 0.0181]
+      histaux6eg06_noise40_delta_candidate_minus_main: 0.0049
+      histaux6eg06_noise40_delta_ci95: [-0.0729, 0.0803]
+      histaux6eg06_demand_noise_delta_candidate_minus_main: -0.0116
+      histaux6eg06_demand_noise_delta_ci95: [-0.0560, 0.0349]
+      conclusion: histaux6eg06 is the only useful history-aux candidate, but the broad gain is weak and CI crosses zero; require 200ep longtrain before promotion.
+    sync_aggregate_command: >
+      python3 scripts/sync_freqduet_broad_generalization.py
+      --run-name broad_histaux6eg05_06_screen_ep100_wu10
+      --methods histaux6eg05,histaux6eg06
+    comparison_commands:
+      histaux6eg05: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method histaux6eg05
+        --out-dir results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/compare_histaux6eg05_vs_broad_baselines
+      histaux6eg06: >
+        python3 scripts/compare_freqduet_broad_candidate.py
+        --baseline-per-seed results_freqduet/broad_generalization_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-per-seed results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+        --candidate-method histaux6eg06
+        --out-dir results_freqduet/broad_histaux6eg05_06_screen_ep100_wu10/compare_histaux6eg06_vs_broad_baselines
+
+  histaux6eg06_longtrain_ep200_wu10:
+    status: complete_neutral_result_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: histaux6eg06_longtrain_4x2
+    matrix_size: 160
+    shard_size: 30
+    candidate_method: histaux6eg06
+    candidate_mechanism: gated causal harmonic history-aux residual bins with high_energy_max 0.06
+    runner: scripts/run_freqduet_ablation.py
+    summary_script: scripts/summarize_freqduet_paper_matrix.py
+    scheduler_nodes:
+      - node001
+      - node002
+      - node003
+      - node004
+      - node005
+      - node006
+    scheduler_tasks:
+      - t8769
+      - t8770
+      - t8771
+      - t8772
+      - t8773
+      - t8774
+    scheduler_submission:
+      submitted_at: 2026-06-09 CST
+      backend: scheduleurm_direct_node
+      slurm_jobs: []
+      final_status: batch complete; all six direct-node tasks succeeded and synced locally
+      remote_cwd: /home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet
+      remote_python: /home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python
+    result_dir: results_freqduet/histaux6eg06_longtrain_ep200_wu10
+    logs_dir: results_freqduet/histaux6eg06_longtrain_ep200_wu10/logs_shards
+    per_seed_csv: results_freqduet/histaux6eg06_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/histaux6eg06_longtrain_ep200_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/histaux6eg06_longtrain_ep200_wu10/paper_summary
+    paired_deltas_csv: results_freqduet/histaux6eg06_longtrain_ep200_wu10/paper_summary/paper_matrix_paired_deltas.csv
+    result_summary:
+      rows: 160
+      expected_rows: 160
+      missing_rows: 0
+      terminal_delta_main_minus_histaux6eg06: 0.0216
+      terminal_delta_ci95: [-0.0062, 0.0496]
+      highnoise_delta_main_minus_histaux6eg06: -0.0044
+      highnoise_delta_ci95: [-0.0555, 0.0468]
+      odshift_delta_main_minus_histaux6eg06: -0.0111
+      odshift_delta_ci95: [-0.0579, 0.0372]
+      rushshift_delta_main_minus_histaux6eg06: -0.0004
+      rushshift_delta_ci95: [-0.0316, 0.0308]
+      overall_delta_main_minus_histaux6eg06: 0.0014
+      overall_delta_ci95: [-0.0215, 0.0248]
+      conclusion: 200ep longtrain is a statistical tie; do not promote histaux6eg06.
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_main_hiro,F_freqduet_terminal_main_histaux6eg06_hiro,F_freqduet_gen_highnoise_main_hiro,F_freqduet_gen_highnoise_main_histaux6eg06_hiro,F_freqduet_gen_odshift_main_hiro,F_freqduet_gen_odshift_main_histaux6eg06_hiro,F_freqduet_gen_rushshift_main_hiro,F_freqduet_gen_rushshift_main_histaux6eg06_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs <comma_sorted_logs_shards>
+      --last-k 100
+      --out-dir results_freqduet/histaux6eg06_longtrain_ep200_wu10/combined_summary
+    summary_command: >
+      python3 scripts/summarize_freqduet_paper_matrix.py
+      --per-seed results_freqduet/histaux6eg06_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/histaux6eg06_longtrain_ep200_wu10/paper_summary
+    comparison_note: paper_matrix_paired_deltas.csv reports delta_main_minus_baseline for baseline histaux6eg06; histaux6eg06 is better when this delta is positive.
+    promotion_gate: failed; require overall 200ep improvement over current main with no significant domain regression before changing aliases
+
+  histaux6eg06upper_longtrain_ep200_wu10:
+    status: complete_negative_result
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: histaux6eg06upper_candidate_4x1
+    matrix_size: 80
+    shard_size: 14
+    candidate_method: histaux6eg06upper
+    candidate_mechanism: gated causal harmonic history-aux residual bins for upper timetable only; lower_bins is zero
+    runner: scripts/run_freqduet_ablation.py
+    comparison_script: scripts/compare_freqduet_candidate.py
+    baseline_result_dir: results_freqduet/histaux6eg06_longtrain_ep200_wu10
+    scheduler_nodes:
+      - node001
+      - node002
+      - node003
+      - node004
+      - node005
+      - node006
+    scheduler_tasks:
+      - t8877
+      - t8878
+      - t8879
+      - t8880
+      - t8881
+      - t8882
+    scheduler_submission:
+      submitted_at: 2026-06-10 CST
+      backend: scheduleurm_direct_node
+      slurm_jobs: []
+      final_status: all six shards completed and synced manually after diagnostics reached 80/80 complete
+      remote_cwd: /home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet
+      remote_python: /home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python
+    result_dir: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10
+    logs_dir: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/logs_shards
+    per_seed_csv: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/combined_summary/freqduet_ablation_summary.csv
+    comparison_dir: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/compare_vs_current_main
+    comparison_csv: results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/compare_vs_current_main/candidate_paired_deltas.csv
+    result_summary:
+      rows: 80
+      expected_rows: 80
+      missing_rows: 0
+      terminal_delta_candidate_minus_main: 0.0253
+      terminal_delta_ci95: [-0.0263, 0.0893]
+      highnoise_delta_candidate_minus_main: 0.0393
+      highnoise_delta_ci95: [-0.0242, 0.1129]
+      odshift_delta_candidate_minus_main: 0.0288
+      odshift_delta_ci95: [-0.0475, 0.1350]
+      rushshift_delta_candidate_minus_main: 0.0368
+      rushshift_delta_ci95: [-0.0328, 0.1203]
+      overall_delta_candidate_minus_main: 0.0325
+      overall_delta_ci95: [-0.0217, 0.1087]
+      wait_delta_candidate_minus_main_overall: 0.2872
+      lower_action_delta_candidate_minus_main_overall: 0.9709
+      conclusion: upper-only gated history auxiliary worsened all four domains; do not promote.
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_main_histaux6eg06upper_hiro,F_freqduet_gen_highnoise_main_histaux6eg06upper_hiro,F_freqduet_gen_odshift_main_histaux6eg06upper_hiro,F_freqduet_gen_rushshift_main_histaux6eg06upper_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs <comma_sorted_logs_shards>
+      --last-k 100
+      --out-dir results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/combined_summary
+    comparison_command: >
+      python3 scripts/compare_freqduet_candidate.py
+      --baseline-per-seed results_freqduet/histaux6eg06_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-per-seed results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --candidate-method histaux6eg06upper
+      --baselines main
+      --out-dir results_freqduet/histaux6eg06upper_longtrain_ep200_wu10/compare_vs_current_main
+    promotion_gate: failed; require overall 200ep improvement over current main with no significant domain regression before changing aliases
+
   external_baselines_promoted_ep100:
     status: complete_classical
     episodes: 100
@@ -323,6 +1007,178 @@ experiments:
     result_dir: results_freqduet/external_baselines_promoted_ep100
     per_seed_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_per_seed.csv
     summary_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_summary.csv
+
+  transitduet_like_baseline_ep200:
+    status: complete_closest_preserved_transitduet_family
+    episodes: 200
+    last_k: 100
+    seeds: paired_seeds_20
+    source_experiment: promoted_longtrain_ep200_wu10
+    source_per_seed_csv: results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    baseline_method: transitduet_like_nofreq_hiro
+    boundary: closest preserved TransitDuet-family control inside the FreqDuet runner with frequency decomposition disabled; not the unmodified original TransitDuet repository
+    builder: scripts/build_freqduet_transitduet_baseline.py
+    result_dir: results_freqduet/transitduet_like_baseline_ep200
+    per_seed_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_per_seed.csv
+    summary_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_summary.csv
+    paired_deltas_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_paired_deltas.csv
+    result_summary:
+      rows: 160
+      expected_rows: 160
+      missing_rows: 0
+      overall_delta_main_minus_transitduet_like: -0.0719
+      overall_delta_ci95: [-0.1322, -0.0266]
+      overall_main_win_rate: 0.700
+      conclusion: promoted FreqDuet main beats the closest preserved no-frequency TransitDuet-family baseline in the 200ep paired matrix; original unmodified TransitDuet remains out of scope unless restored separately.
+    command: >
+      python3 scripts/build_freqduet_transitduet_baseline.py
+      --source-per-seed results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/transitduet_like_baseline_ep200
+
+  sumorl_style_holdrl_baseline_ep100_wu10:
+    status: complete_external_rl_screen_weak_vs_fixed
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 1000000
+    seeds: paired_seeds_20
+    config_set: sumorl_holdrl_4x1
+    method: sumorl_holdrl
+    baseline_family: SUMO-RL-style single-level online holding RL
+    boundary: no upper learning, no frequency features, same FreqDuet simulator, lower RE-SAC Lagrangian trainer with discrete holding bins
+    runner: scripts/run_freqduet_ablation.py
+    submitter: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_backend: scheduleurm_direct_node
+    scheduler_tasks:
+      - t8992
+      - t8993
+      - t8994
+      - t8995
+    scheduler_nodes:
+      - node005
+      - node006
+    result_dir: results_freqduet/sumorl_holdrl_ep100_wu10_r1
+    logs_dir: results_freqduet/sumorl_holdrl_ep100_wu10_r1/logs_shards
+    per_seed_csv: results_freqduet/sumorl_holdrl_ep100_wu10_r1/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/sumorl_holdrl_ep100_wu10_r1/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/sumorl_holdrl_ep100_wu10_r1/paper_summary
+    comparison_dir_vs_current_main_ep100_reference: results_freqduet/sumorl_holdrl_ep100_wu10_r1/compare_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/sumorl_holdrl_ep100_wu10_r1/compare_vs_external_classical
+    result_summary:
+      rows: 80
+      expected_rows: 80
+      missing_rows: 0
+      overall_composite_mean: 1.5447
+      overall_vs_current_main_ep100_delta_candidate_minus_main: 0.0447
+      overall_vs_current_main_ep100_delta_ci95: [-0.0074, 0.1066]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0553
+      overall_vs_fixed_headway_delta_ci95: [0.0065, 0.1143]
+      conclusion: single-level online holding RL with discrete actions is competitive with current main only as a weak statistical tie, but is significantly worse than fixed-headway overall; keep as external RL baseline/negative evidence, not a strong baseline.
+    note: >
+      First submission t8988-t8991 failed because the newly added configs had
+      not yet been synced to the remote worktree. Configs were synced directly
+      to zhengliang-hpc and retry t8992-t8995 completed on direct CPU nodes.
+      The result is a credible but weak online-holding RL baseline: it beats
+      rule-holding and simple MPC, but not fixed-headway.
+    submit_command: >
+      python3 scripts/submit_freqduet_config_matrix_scheduleurm.py
+      --configs F_freqduet_terminal_sumorl_holdrl_hiro,F_freqduet_gen_highnoise_sumorl_holdrl_hiro,F_freqduet_gen_odshift_sumorl_holdrl_hiro,F_freqduet_gen_rushshift_sumorl_holdrl_hiro
+      --run-name sumorl_holdrl_ep100_wu10_r1
+      --episodes 100
+      --last-k 50
+      --upper-warmup-eps 1000000
+      --shard-size 20
+      --workers 20
+      --cpu 20
+      --nodes node001,node002,node003,node004,node005,node006
+      --dispatch
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_sumorl_holdrl_hiro,F_freqduet_gen_highnoise_sumorl_holdrl_hiro,F_freqduet_gen_odshift_sumorl_holdrl_hiro,F_freqduet_gen_rushshift_sumorl_holdrl_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs <comma_sorted_logs_shards>
+      --last-k 50
+      --out-dir results_freqduet/sumorl_holdrl_ep100_wu10_r1/combined_summary
+
+  sumorl_rawhist_holdrl_baseline_ep100_wu10:
+    status: complete_external_rl_screen_richer_state_still_weak_vs_fixed
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 1000000
+    seeds: paired_seeds_20
+    config_set: sumorl_rawhist_holdrl_4x1
+    method: sumorl_rawhist_holdrl
+    baseline_family: SUMO-RL-style richer-state single-level online holding RL
+    boundary: no upper learning and no LF/HF decomposition; lower RE-SAC Lagrangian trainer with discrete holding bins plus six-bin recent realized-demand history in the lower state
+    runner: scripts/run_freqduet_ablation.py
+    submitter: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_backend: scheduleurm_direct_node
+    scheduler_tasks:
+      - t9027
+      - t9036
+      - t9037
+      - t9038
+    failed_or_cancelled_setup_tasks:
+      failed_due_implicit_extends_path:
+        - t9028
+        - t9029
+        - t9030
+      cancelled_blocked_retries:
+        - t9032
+        - t9033
+        - t9034
+    scheduler_nodes:
+      - node005
+      - node006
+    result_dir: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10
+    logs_dir: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/logs_shards
+    per_seed_csv: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/paper_summary
+    comparison_dir_vs_current_main_ep100_reference: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/compare_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/compare_vs_external_classical
+    comparison_dir_vs_plain_sumorl: results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/compare_vs_sumorl_holdrl
+    result_summary:
+      rows: 80
+      expected_rows: 80
+      missing_rows: 0
+      overall_composite_mean: 1.5202
+      overall_delta_candidate_minus_plain_sumorl: -0.0244
+      overall_delta_candidate_minus_plain_sumorl_ci95: [-0.0793, 0.0147]
+      overall_vs_current_main_ep100_delta_candidate_minus_main: 0.0202
+      overall_vs_current_main_ep100_delta_ci95: [-0.0089, 0.0498]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0309
+      overall_vs_fixed_headway_delta_ci95: [0.0043, 0.0592]
+      conclusion: richer state improves the online RL baseline versus plain sumorl, but the tuned online holding baseline remains significantly worse than fixed-headway overall; use as external RL negative evidence rather than a main competitor.
+    note: >
+      This is the stronger online RL baseline motivated by the SUMO-RL exp39
+      path: keep the action space discrete and enlarge the lower state with
+      recent realized-demand history, while keeping frequency separation and
+      upper learning disabled. The first retry failed because a one-off rsync
+      placed a duplicate config in the remote worktree root; configs now use
+      explicit configs_freqduet/ _extends paths, and scheduler env-missing
+      escalations for the fixed setup were marked resolved. The final result
+      improves over plain sumorl but remains worse than fixed-headway overall.
+    submit_command: >
+      python3 scripts/submit_freqduet_config_matrix_scheduleurm.py
+      --configs F_freqduet_terminal_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_highnoise_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_odshift_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_rushshift_sumorl_rawhist_holdrl_hiro
+      --run-name sumorl_rawhist_holdrl_ep100_wu10
+      --episodes 100
+      --last-k 50
+      --upper-warmup-eps 1000000
+      --shard-size 20
+      --workers 20
+      --cpu 20
+      --nodes node001,node002,node003,node004,node005,node006
+      --dispatch
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_highnoise_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_odshift_sumorl_rawhist_holdrl_hiro,F_freqduet_gen_rushshift_sumorl_rawhist_holdrl_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs <comma_sorted_logs_shards>
+      --last-k 50
+      --out-dir results_freqduet/sumorl_rawhist_holdrl_ep100_wu10/combined_summary
 
   noharm_split_screen_ep100_wu10:
     status: complete_candidate_screen
@@ -409,6 +1265,204 @@ experiments:
     comparison_dir: results_freqduet/valueguard_soft_screen_ep10/compare_vs_main
     note: soft valueguard improved local overall/highnoise but OD overshoot remained unstable; requires 100ep/20seed screen before promotion
 
+  valueguard_screen_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: valueguard_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7458
+      - t7459
+      - t7460
+      - t7461
+      - t7462
+      - t7463
+    logs_dir: logs_valueguard_screen_ep100_wu10
+    result_dir: results_freqduet/valueguard_screen_ep100_wu10_merged
+    per_seed_csv: results_freqduet/valueguard_screen_ep100_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/valueguard_screen_ep100_wu10_compare
+    note: valueguard worsened promoted main overall composite by +0.0428 CI [+0.0266,+0.0589], mainly through higher wait; do not promote
+
+  fixedselector_screen_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: fixedselector_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t9383
+      - t9384
+      - t9385
+      - t9386
+    result_dir: results_freqduet/fixedselector_screen_ep100_wu10
+    per_seed_csv: results_freqduet/fixedselector_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/fixedselector_screen_ep100_wu10/compare_fixedselector_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/fixedselector_screen_ep100_wu10/compare_fixedselector_vs_external_classical
+    note: original one-way EMA fixed expert selector worsened main overall by +0.0472 CI [+0.0221,+0.0717] and stayed worse than fixed-headway; do not promote
+
+  fixedselector_balanced_screen_ep100_wu10:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: fixedselector_balanced_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t9463
+      - t9464
+      - t9465
+      - t9466
+      - t9467
+      - t9468
+    result_dir: results_freqduet/fixedselector_balanced_screen_ep100_wu10
+    per_seed_csv: results_freqduet/fixedselector_balanced_screen_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/fixedselector_balanced_screen_ep100_wu10/compare_fixedselector_balanced_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/fixedselector_balanced_screen_ep100_wu10/compare_fixedselector_balanced_vs_external_classical_filtered
+    note: balanced selector starts EMA at selector_start and alternates probes, but still worsened main overall by +0.0485 CI [+0.0251,+0.0721], driven by rushshift wait; do not promote
+
+  current_main_vs_external_fixed_ep100_filtered:
+    status: complete_evaluation_correction
+    episodes: 100
+    last_k: 50
+    seeds: paired_seeds_20
+    candidate_per_seed_csv: results_freqduet/valueguard_screen_ep100_wu10_merged/freqduet_ablation_per_seed.csv
+    filtered_candidate_method: main
+    baseline_per_seed_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_per_seed.csv
+    comparison_dir: results_freqduet/current_main_vs_external_fixed_ep100_filtered_script_check
+    script: scripts/compare_freqduet_external_baseline.py
+    note: external compare now filters candidate CSVs by inferred method; clean current main vs fixed-headway is an overall statistical tie, +0.0107 CI [-0.0244,+0.0472]
+
+  termhold45_screen_ep40_wu10:
+    status: complete_neutral_control_not_promoted
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: termhold45_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7503
+      - t7504
+      - t7505
+      - t7506
+      - t7507
+    logs_dir: logs_termhold45_screen_ep40_wu10
+    result_dir: results_freqduet/termhold45_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/termhold45_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/termhold45_screen_ep40_wu10_compare
+    note: termhold45 mostly repeated the promoted 45s terminal cap; overall delta vs main +0.0064 CI [-0.0157,+0.0288], do not promote
+
+  termfb30_screen_ep40_wu10:
+    status: complete_negative_result
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: termfb30_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7610
+      - t7611
+      - t7612
+      - t7613
+      - t7614
+      - t7615
+    logs_dir: logs_termfb30_screen_ep40_wu10
+    result_dir: results_freqduet/termfb30_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/termfb30_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/termfb30_screen_ep40_wu10_compare
+    note: holding-history terminal feedback collapsed to near-zero last-k bias and worsened terminal/highnoise; overall delta vs main +0.0202 CI [-0.0035,+0.0461], do not promote
+
+  termrelief20_screen_ep40_wu10:
+    status: complete_negative_result
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: termrelief20_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7626
+      - t7627
+      - t7628
+      - t7629
+      - t7630
+      - t7631
+    logs_dir: logs_termrelief20_screen_ep40_wu10
+    result_dir: results_freqduet/termrelief20_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/termrelief20_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/termrelief20_screen_ep40_wu10_compare
+    note: fleet-pressure terminal relief produced real launch shifts but raised wait/CV outside rushshift; overall delta vs main +0.0219 CI [-0.0147,+0.0577], do not promote
+
+  termvalue20_screen_ep40_wu10:
+    status: complete_negative_result
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: termvalue20_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7684
+      - t7685
+      - t7686
+      - t7687
+      - t7688
+      - t7689
+    logs_dir: logs_termvalue20_screen_ep40_wu10
+    result_dir: results_freqduet/termvalue20_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/termvalue20_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/termvalue20_screen_ep40_wu10_compare
+    note: value-aware terminal relief gave moderate terminal action and a small terminal gain, but overall delta vs main +0.0160 CI [-0.0178,+0.0486]; do not promote
+
+  valuesoft35_screen_ep40_wu10:
+    status: complete_negative_result
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: valuesoft35_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7753
+      - t7754
+      - t7755
+      - t7756
+      - t7757
+      - t7758
+    logs_dir: logs_valuesoft35_screen_ep40_wu10
+    result_dir: results_freqduet/valuesoft35_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/valuesoft35_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/valuesoft35_screen_ep40_wu10_compare
+    note: soft lower value cost helped terminal/highnoise weakly but significantly harmed rushshift; overall delta vs main +0.0235 CI [-0.0111,+0.0552], do not promote
+
+  valuesoft35_lfsafe_screen_ep40_wu10:
+    status: complete_negative_result
+    episodes: 40
+    last_k: 20
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: valuesoft35_lfsafe_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t7781
+      - t7782
+      - t7783
+      - t7784
+      - t7785
+      - t7786
+    logs_dir: logs_valuesoft35_lfsafe_screen_ep40_wu10
+    result_dir: results_freqduet/valuesoft35_lfsafe_screen_ep40_wu10_merged
+    per_seed_csv: results_freqduet/valuesoft35_lfsafe_screen_ep40_wu10_merged/freqduet_ablation_per_seed.csv
+    comparison_dir: results_freqduet/valuesoft35_lfsafe_screen_ep40_wu10_compare
+    note: LF-safe low-forecast gate did not repair rushshift and worsened overall composite by +0.0826 CI [+0.0605,+0.1044], do not promote
+
 figures:
   decomposer_validation_current_trace:
     status: generated
@@ -474,16 +1528,89 @@ figures:
       - mechanism_longtrain_drift_curves
       - trace_hf_lag_audit.csv
 
+manuscript_notes:
+  method_framing:
+    status: drafted
+    path: ../md/method_framing.md
+    purpose: method and discussion framing for frequency-separated HRL
+  realism_data_evidence:
+    status: audit_complete_real_calibration_open
+    path: ../md/realism_data_evidence.md
+    purpose: realism, data, and calibration evidence boundary
+  phase4_scope_decision:
+    status: documented_future_work_scope
+    path: ../md/phase4_scope_decision.md
+    purpose: Phase 4 terminal dispatch scope boundary and negative heuristic evidence
+
+paper_scripts:
+  - runner_v3.py
+  - scripts/run_freqduet_ablation.py
+  - scripts/run_freqduet_external_baselines.py
+  - scripts/build_freqduet_transitduet_baseline.py
+  - scripts/summarize_freqduet_paper_matrix.py
+  - scripts/summarize_freqduet_broad_generalization.py
+  - scripts/compare_freqduet_broad_candidate.py
+  - scripts/compare_freqduet_candidate.py
+  - scripts/compare_freqduet_external_baseline.py
+  - scripts/make_freqduet_decomposer_figures.py
+  - scripts/make_freqduet_mechanism_figures.py
+  - scripts/build_freqduet_paper_package.py
+  - scripts/submit_freqduet_config_matrix_scheduleurm.py
+  - scripts/submit_freqduet_broad_generalization_scheduleurm.py
+  - scripts/sync_freqduet_broad_generalization.py
+
+paper_packages:
+  current:
+    status: generated
+    script: scripts/build_freqduet_paper_package.py
+    out_dir: results_freqduet/paper_package/current
+    command: >
+      python3 scripts/build_freqduet_paper_package.py
+      --out-dir results_freqduet/paper_package/current
+    outputs:
+      - README.md
+      - package_manifest.json
+      - paper_manifest.yaml
+      - tables/longtrain_promoted_method_summary.csv
+      - tables/longtrain_promoted_paired_deltas.csv
+      - tables/generalization_summary.csv
+      - tables/broad_generalization_per_seed.csv
+      - tables/broad_generalization_summary.csv
+      - tables/broad_generalization_completion_audit.csv
+      - tables/broad_generalization_method_summary.csv
+      - tables/broad_generalization_paired_deltas.csv
+      - tables/external_baselines_summary.csv
+      - tables/transitduet_like_per_seed.csv
+      - tables/transitduet_like_summary.csv
+      - tables/transitduet_like_paired_deltas.csv
+      - configs/paper_generalization
+      - configs/current_longtrain_4x6
+      - configs/histaux6eg06_longtrain_4x2
+      - configs/histaux6eg06upper_candidate_4x1
+      - scripts
+      - manuscript_notes/method_framing.md
+      - manuscript_notes/realism_data_evidence.md
+      - manuscript_notes/phase4_scope_decision.md
+      - appendix/negative_results_appendix.md
+
 scope_decisions:
   phase4_terminal_dispatch:
-    status: undecided
+    status: scoped_as_future_work_for_current_paper
     current_scope: target-headway executable timetable MVP
-    remaining_decision: implement actual terminal launch / first-stop holding, or document as limitation
+    current_evidence: terminal-delay and lower-value-cost repair screens did not produce a universal improvement over promoted main
+    note: ../md/phase4_scope_decision.md
+    future_work_requires: learned actual terminal launch / first-stop holding value model with paired 100/200ep validation
 
 external_baselines:
-  status: harness_ready_full_matrix_pending
+  status: classical_full_matrix_complete_closest_preserved_transitduet_family_complete_external_rl_pending
   runner: scripts/run_freqduet_external_baselines.py
   smoke_result_dir: results_freqduet/external_baselines_smoke
+  full_result_dir: results_freqduet/external_baselines_promoted_ep100
+  full_per_seed_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_per_seed.csv
+  full_summary_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_summary.csv
+  transitduet_like_result_dir: results_freqduet/transitduet_like_baseline_ep200
+  transitduet_like_summary_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_summary.csv
+  transitduet_like_paired_deltas_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_paired_deltas.csv
   default_variants:
     - fixed_headway
     - rule_holding
@@ -491,7 +1618,7 @@ external_baselines:
   required:
     - fixed_headway
     - rule_based_holding
-    - preserved_transitduet
+    - closest_preserved_transitduet_family
     - sumo_rl_style_online_rl
     - mpc_or_forecast_control
   full_matrix_command: >

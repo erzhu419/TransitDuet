@@ -14,6 +14,27 @@ import pandas as pd
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
+CANDIDATE_METHOD_TOKENS = (
+    "fixedselector_balanced",
+    "sumorl_rawhist_holdrl",
+    "sumorl_holdrl",
+    "histaux6eg06upper",
+    "histaux6eg06",
+    "histaux6eg05",
+    "histaux6",
+    "histaux3",
+    "termvalue20",
+    "fixedselector",
+    "headfloor100",
+    "headfloor095",
+    "valuesoft35_lfsafe",
+    "valuesoft35",
+    "valuesoft",
+    "termrelief20",
+    "termfb30",
+    "termhold45",
+    "valueguard",
+)
 
 
 def stable_seed(*parts: object) -> int:
@@ -30,6 +51,22 @@ def infer_domain(config: str) -> str:
         return "rushshift"
     if "_terminal_" in config:
         return "terminal"
+    return "unknown"
+
+
+def infer_method(config: str) -> str:
+    text = str(config)
+    for token in CANDIDATE_METHOD_TOKENS:
+        if token in text:
+            return token
+    if "driftcost" in text:
+        return "main_driftcost"
+    if text.endswith("_main_hiro"):
+        return "main"
+    for method in ("nofreq", "rawhistory", "allfreq", "nopromotion",
+                   "noleakage"):
+        if f"_{method}_" in text:
+            return method
     return "unknown"
 
 
@@ -55,6 +92,27 @@ def prepare_candidate(path: Path, method: str) -> pd.DataFrame:
         raise SystemExit(f"candidate missing required columns: {missing}")
     if "domain" not in df.columns:
         df["domain"] = df["config"].astype(str).map(infer_domain)
+    inferred = df["config"].astype(str).map(infer_method)
+    matched = inferred == method
+    if matched.any():
+        df = df[matched].copy()
+    elif inferred.nunique(dropna=True) > 1:
+        counts = inferred.value_counts().to_dict()
+        raise SystemExit(
+            "candidate file contains multiple inferred methods but none "
+            f"match {method!r}: {counts}"
+        )
+    duplicates = df.duplicated(["domain", "seed"], keep=False)
+    if duplicates.any():
+        bad = (
+            df.loc[duplicates, ["domain", "seed", "config"]]
+            .sort_values(["domain", "seed", "config"])
+            .head(20)
+        )
+        raise SystemExit(
+            "candidate has duplicate domain/seed rows after method filtering; "
+            f"first duplicates:\n{bad.to_string(index=False)}"
+        )
     df["method"] = method
     return df[df["domain"].isin(DOMAINS)].copy()
 
@@ -233,4 +291,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

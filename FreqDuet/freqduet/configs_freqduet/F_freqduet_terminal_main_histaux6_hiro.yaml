@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_histaux6_hiro
+
+# Candidate only: same harmonic LF/HF path as main, with a 6-bin causal
+# residual memory matching the RawHistory ablation horizon.
+frequency:
+  history_aux:
+    enable: true
+    mode: residual
+    upper_bins: 6
+    lower_bins: 6
+    clip: 2.0

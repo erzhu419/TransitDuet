@@ -21,6 +21,25 @@ import pandas as pd
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
+CANDIDATE_METHOD_TOKENS = (
+    "sumorl_rawhist_holdrl",
+    "sumorl_holdrl",
+    "histaux6eg06upper",
+    "histaux6eg06",
+    "histaux6eg05",
+    "histaux6",
+    "histaux3",
+    "termvalue20",
+    "fixedselector_balanced",
+    "fixedselector",
+    "headfloor100",
+    "headfloor095",
+    "valuesoft",
+    "termrelief20",
+    "termfb30",
+    "termhold45",
+    "valueguard",
+)
 DEFAULT_METRICS = (
     "wait",
     "cv",
@@ -35,6 +54,19 @@ DEFAULT_METRICS = (
     "upper_delta_mean",
     "upper_plan_target_mean",
     "upper_plan_reuse_ratio",
+    "terminal_launch_shift_mean",
+    "terminal_launch_shift_std",
+    "terminal_shift_cap_mean",
+    "terminal_feedback_bias_mean",
+    "terminal_feedback_bias_max",
+    "terminal_feedback_events",
+    "terminal_headway_floor_mean",
+    "terminal_headway_floor_events",
+    "fixed_selector_fixed_active",
+    "fixed_selector_learned_cost_ema",
+    "fixed_selector_fixed_cost_ema",
+    "fixed_selector_learned_count",
+    "fixed_selector_fixed_count",
     "fleet_noharm_upper_adjust_mean",
     "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",
@@ -46,6 +78,14 @@ DEFAULT_METRICS = (
     "fleet_noharm_lower_value_guard_value_mean",
     "fleet_noharm_lower_value_guard_headway_mean",
     "fleet_noharm_lower_value_guard_cost_mean",
+    "fleet_noharm_lower_value_soft_cost_mean",
+    "fleet_noharm_lower_value_soft_cost_max",
+    "fleet_noharm_lower_value_soft_events",
+    "fleet_noharm_lower_value_soft_active_mean",
+    "fleet_noharm_lower_value_soft_value_mean",
+    "fleet_noharm_lower_value_soft_headway_mean",
+    "fleet_noharm_lower_value_soft_risk_mean",
+    "fleet_noharm_lower_value_soft_violation_mean",
 )
 
 
@@ -67,8 +107,9 @@ def infer_domain(config: str) -> str:
 
 
 def infer_method(config: str) -> str:
-    if "valueguard" in config:
-        return "valueguard"
+    for token in CANDIDATE_METHOD_TOKENS:
+        if token in config:
+            return token
     if "driftcost" in config:
         return "main_driftcost"
     if config.endswith("_main_hiro"):

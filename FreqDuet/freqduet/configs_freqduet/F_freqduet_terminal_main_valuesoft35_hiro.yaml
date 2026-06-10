@@ -1,0 +1,27 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_valuesoft35_hiro
+
+# Candidate fixed-headway-gap repair. Unlike value_guard, this does not clip
+# lower holding actions before execution. It adds a lower Lagrangian cost when a
+# holding action has weak causal HF/passenger/headway value under fleet pressure.
+fleet_noharm:
+  lower:
+    value_guard:
+      wait_norm_s: 90.0
+      wait_clip: 2.0
+      board_norm: 10.0
+      board_clip: 2.0
+      board_weight: 0.25
+      headway_weight: 2.0
+      headway_clip: 1.0
+      high_share_cap: 1.0
+      positive_high_only: true
+    value_soft_cost:
+      enable: true
+      pressure_start: 0.0
+      pressure_full: 2.0
+      min_ratio: 1.0
+      cost_weight: 0.35
+      action_norm_s: 45.0
+      violation_weight: 0.5
+      cap: 0.4

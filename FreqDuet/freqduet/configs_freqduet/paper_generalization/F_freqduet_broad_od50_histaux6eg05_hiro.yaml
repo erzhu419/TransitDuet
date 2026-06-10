@@ -1,0 +1,12 @@
+_extends: ../F_freqduet_terminal_main_histaux6eg05_hiro.yaml
+_name: F_freqduet_broad_od50_histaux6eg05_hiro
+_paper_generalization:
+  scenario: od50
+  label: strong OD multiplier shift
+  method: histaux6eg05
+env:
+  demand_noise: 0.15
+  od_noise: 0.5
+  od_noise_clip:
+  - 0.3
+  - 2.0

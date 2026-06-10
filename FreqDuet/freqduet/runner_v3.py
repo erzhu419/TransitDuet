@@ -262,6 +262,9 @@ class DiagnosticLog:
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
         'terminal_shift_cap_mean', 'terminal_shift_cap_max',
+        'terminal_feedback_bias_mean', 'terminal_feedback_bias_max',
+        'terminal_feedback_events',
+        'terminal_headway_floor_mean', 'terminal_headway_floor_events',
         'fleet_noharm_upper_pressure_mean',
         'fleet_noharm_upper_adjust_mean',
         'fleet_noharm_upper_events',
@@ -279,6 +282,19 @@ class DiagnosticLog:
         'fleet_noharm_lower_value_guard_value_mean',
         'fleet_noharm_lower_value_guard_headway_mean',
         'fleet_noharm_lower_value_guard_cost_mean',
+        'fleet_noharm_lower_value_soft_cost_mean',
+        'fleet_noharm_lower_value_soft_cost_max',
+        'fleet_noharm_lower_value_soft_events',
+        'fleet_noharm_lower_value_soft_active_mean',
+        'fleet_noharm_lower_value_soft_value_mean',
+        'fleet_noharm_lower_value_soft_headway_mean',
+        'fleet_noharm_lower_value_soft_risk_mean',
+        'fleet_noharm_lower_value_soft_violation_mean',
+        'fixed_selector_fixed_active',
+        'fixed_selector_learned_cost_ema',
+        'fixed_selector_fixed_cost_ema',
+        'fixed_selector_learned_count',
+        'fixed_selector_fixed_count',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -388,6 +404,30 @@ class TransitDuetV2Runner:
         self.timetable_plan_all_directions = False
         self.timetable_terminal_hf_shift_max_s = None
         self.timetable_terminal_hf_energy_min = 0.0
+        self.timetable_terminal_feedback_enable = False
+        self.timetable_terminal_feedback_gain = 0.0
+        self.timetable_terminal_feedback_max_s = 0.0
+        self.timetable_terminal_feedback_min_s = 0.0
+        self.timetable_terminal_feedback_deadband_s = 0.0
+        self.timetable_terminal_feedback_min_trips = 1
+        self.timetable_terminal_feedback_ema_weight = 0.0
+        self.timetable_terminal_fleet_relief_enable = False
+        self.timetable_terminal_fleet_relief_max_s = 0.0
+        self.timetable_terminal_fleet_relief_min_s = 0.0
+        self.timetable_terminal_fleet_relief_pressure_start = 0.0
+        self.timetable_terminal_fleet_relief_pressure_full = 1.0
+        self.timetable_terminal_value_relief_enable = False
+        self.timetable_terminal_value_relief_max_s = 0.0
+        self.timetable_terminal_value_relief_pressure_start = 0.0
+        self.timetable_terminal_value_relief_pressure_full = 1.0
+        self.timetable_terminal_value_relief_gap_norm_s = 60.0
+        self.timetable_terminal_value_relief_min_gap_s = 0.0
+        self.timetable_terminal_value_relief_gap_tolerance_s = 0.0
+        self.timetable_terminal_value_relief_gap_gain = 1.0
+        self.timetable_terminal_value_relief_demand_weight = 0.0
+        self.timetable_terminal_headway_floor_enable = False
+        self.timetable_terminal_headway_floor_ratio = 0.0
+        self.timetable_terminal_headway_floor_min_s = 0.0
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         if bool(planner_cfg.get('enable', False)):
@@ -418,6 +458,63 @@ class TransitDuetV2Runner:
                 planner_cfg.get('terminal_shift_high_energy_min',
                                 planner_cfg.get('terminal_high_energy_min',
                                                 0.0))), 0.0)
+            terminal_fb_cfg = planner_cfg.get('terminal_feedback', {}) or {}
+            self.timetable_terminal_feedback_enable = bool(
+                terminal_fb_cfg.get('enable', False))
+            self.timetable_terminal_feedback_gain = max(float(
+                terminal_fb_cfg.get('gain', 0.0)), 0.0)
+            self.timetable_terminal_feedback_max_s = max(float(
+                terminal_fb_cfg.get('max_s', 0.0)), 0.0)
+            self.timetable_terminal_feedback_min_s = max(float(
+                terminal_fb_cfg.get('min_s', 0.0)), 0.0)
+            self.timetable_terminal_feedback_deadband_s = max(float(
+                terminal_fb_cfg.get('deadband_s', 0.0)), 0.0)
+            self.timetable_terminal_feedback_min_trips = max(
+                1, int(terminal_fb_cfg.get('min_trips', 1)))
+            self.timetable_terminal_feedback_ema_weight = float(np.clip(
+                terminal_fb_cfg.get('ema_weight', 0.0), 0.0, 1.0))
+            terminal_relief_cfg = (
+                planner_cfg.get('terminal_fleet_relief', {}) or {})
+            self.timetable_terminal_fleet_relief_enable = bool(
+                terminal_relief_cfg.get('enable', False))
+            self.timetable_terminal_fleet_relief_max_s = max(float(
+                terminal_relief_cfg.get('max_s', 0.0)), 0.0)
+            self.timetable_terminal_fleet_relief_min_s = max(float(
+                terminal_relief_cfg.get('min_s', 0.0)), 0.0)
+            self.timetable_terminal_fleet_relief_pressure_start = float(
+                terminal_relief_cfg.get('pressure_start', 0.0))
+            self.timetable_terminal_fleet_relief_pressure_full = float(
+                terminal_relief_cfg.get('pressure_full', 1.0))
+            terminal_value_cfg = (
+                planner_cfg.get('terminal_value_relief', {}) or {})
+            self.timetable_terminal_value_relief_enable = bool(
+                terminal_value_cfg.get('enable', False))
+            self.timetable_terminal_value_relief_max_s = max(float(
+                terminal_value_cfg.get('max_s', 0.0)), 0.0)
+            self.timetable_terminal_value_relief_pressure_start = float(
+                terminal_value_cfg.get('pressure_start', 0.0))
+            self.timetable_terminal_value_relief_pressure_full = float(
+                terminal_value_cfg.get('pressure_full', 1.0))
+            self.timetable_terminal_value_relief_gap_norm_s = max(float(
+                terminal_value_cfg.get('gap_norm_s', 60.0)), 1e-6)
+            self.timetable_terminal_value_relief_min_gap_s = max(float(
+                terminal_value_cfg.get('min_gap_deficit_s', 0.0)), 0.0)
+            self.timetable_terminal_value_relief_gap_tolerance_s = max(float(
+                terminal_value_cfg.get('gap_tolerance_s', 0.0)), 0.0)
+            self.timetable_terminal_value_relief_gap_gain = max(float(
+                terminal_value_cfg.get('gap_gain', 1.0)), 0.0)
+            self.timetable_terminal_value_relief_demand_weight = max(float(
+                terminal_value_cfg.get('demand_weight', 0.0)), 0.0)
+            terminal_floor_cfg = (
+                planner_cfg.get('terminal_headway_floor', {}) or {})
+            self.timetable_terminal_headway_floor_enable = bool(
+                terminal_floor_cfg.get('enable', False))
+            default_ratio = (
+                1.0 if self.timetable_terminal_headway_floor_enable else 0.0)
+            self.timetable_terminal_headway_floor_ratio = max(float(
+                terminal_floor_cfg.get('ratio', default_ratio)), 0.0)
+            self.timetable_terminal_headway_floor_min_s = max(float(
+                terminal_floor_cfg.get('min_s', 0.0)), 0.0)
         # v2k: elastic fleet — sample N_fleet per episode
         self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
         self.fleet_min = upper_cfg.get('fleet_min', 8)
@@ -551,6 +648,36 @@ class TransitDuetV2Runner:
                 'min_action_s', self.fleet_noharm_lower_min_action_s)), 0.0)
         self.fleet_noharm_lower_value_guard_gate = self._parse_fleet_noharm_gate(
             lower_value_guard_cfg.get('gate', {}))
+        lower_value_soft_cfg = (
+            lower_noharm_cfg.get('value_soft_cost', {}) or {})
+        self.fleet_noharm_lower_value_soft_cost_enable = bool(
+            lower_value_soft_cfg.get('enable', False))
+        self.fleet_noharm_lower_value_soft_cost_pressure_start = float(
+            lower_value_soft_cfg.get(
+                'pressure_start',
+                self.fleet_noharm_lower_value_guard_pressure_start))
+        self.fleet_noharm_lower_value_soft_cost_pressure_full = float(
+            lower_value_soft_cfg.get(
+                'pressure_full',
+                self.fleet_noharm_lower_value_guard_pressure_full))
+        self.fleet_noharm_lower_value_soft_cost_min_ratio = max(float(
+            lower_value_soft_cfg.get(
+                'min_ratio',
+                self.fleet_noharm_lower_value_guard_min_ratio)), 0.0)
+        self.fleet_noharm_lower_value_soft_cost_weight = max(float(
+            lower_value_soft_cfg.get(
+                'cost_weight',
+                self.fleet_noharm_lower_value_guard_cost_weight)), 0.0)
+        self.fleet_noharm_lower_value_soft_cost_action_norm_s = max(float(
+            lower_value_soft_cfg.get(
+                'action_norm_s',
+                self.fleet_noharm_lower_value_guard_action_norm_s)), 1e-6)
+        self.fleet_noharm_lower_value_soft_cost_violation_weight = max(float(
+            lower_value_soft_cfg.get('violation_weight', 1.0)), 0.0)
+        self.fleet_noharm_lower_value_soft_cost_cap = max(float(
+            lower_value_soft_cfg.get('cap', 1.0)), 0.0)
+        self.fleet_noharm_lower_value_soft_cost_gate = self._parse_fleet_noharm_gate(
+            lower_value_soft_cfg.get('gate', {}))
 
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 1001)
@@ -632,6 +759,26 @@ class TransitDuetV2Runner:
             lr=coupling_cfg.get('measurement_lr', 0.01))
         self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
         self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+        selector_cfg = config.get('fixed_expert_selector', {}) or {}
+        self.fixed_selector_enable = bool(selector_cfg.get('enable', False))
+        self.fixed_selector_start_ep = int(
+            selector_cfg.get('start_ep', self.upper_warmup))
+        self.fixed_selector_min_observations = max(
+            1, int(selector_cfg.get('min_observations', 2)))
+        self.fixed_selector_probe_period = int(
+            selector_cfg.get('probe_period', 10))
+        self.fixed_selector_epsilon = float(np.clip(
+            selector_cfg.get('epsilon', 0.0), 0.0, 1.0))
+        self.fixed_selector_ema_alpha = float(np.clip(
+            selector_cfg.get('ema_alpha', 0.25), 0.0, 1.0))
+        self.fixed_selector_margin = float(selector_cfg.get('margin', 0.0))
+        self.fixed_selector_probe_mode = str(
+            selector_cfg.get('probe_mode', 'fixed')).lower()
+        self.fixed_selector_count_start = str(
+            selector_cfg.get('count_start', 'upper_warmup')).lower()
+        self.fixed_selector_cost_ema = {'learned': None, 'fixed': None}
+        self.fixed_selector_counts = {'learned': 0, 'fixed': 0}
+        self._fixed_expert_active = False
 
         # FreqDuet leakage regularization:
         # upper should not emit high-frequency timetable shifts, and lower
@@ -672,6 +819,8 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_terminal_feedback_biases = []
+        self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
         self._ep_fleet_noharm_upper_gate_active = []
@@ -685,6 +834,12 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_value_guard_values = []
         self._ep_fleet_noharm_lower_value_guard_headway_values = []
         self._ep_fleet_noharm_lower_value_guard_costs = []
+        self._ep_fleet_noharm_lower_value_soft_costs = []
+        self._ep_fleet_noharm_lower_value_soft_active = []
+        self._ep_fleet_noharm_lower_value_soft_values = []
+        self._ep_fleet_noharm_lower_value_soft_headway_values = []
+        self._ep_fleet_noharm_lower_value_soft_risks = []
+        self._ep_fleet_noharm_lower_value_soft_violations = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -1346,6 +1501,56 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_value_guard_adjusts.append(adjust)
         return adjusted
 
+    def _lower_value_soft_cost(self, bus=None, action_s=0.0):
+        if not self.fleet_noharm_lower_value_soft_cost_enable:
+            return 0.0
+        action_s = max(float(action_s), 0.0)
+        if action_s <= 0.0:
+            self._ep_fleet_noharm_lower_value_soft_costs.append(0.0)
+            self._ep_fleet_noharm_lower_value_soft_active.append(0.0)
+            self._ep_fleet_noharm_lower_value_soft_values.append(0.0)
+            self._ep_fleet_noharm_lower_value_soft_headway_values.append(0.0)
+            self._ep_fleet_noharm_lower_value_soft_risks.append(0.0)
+            self._ep_fleet_noharm_lower_value_soft_violations.append(0.0)
+            return 0.0
+
+        gate_active = self._fleet_noharm_gate_active(
+            self.fleet_noharm_lower_value_soft_cost_gate)
+        _, _, pressure = self._fleet_pressure()
+        strength = self._pressure_strength(
+            pressure,
+            self.fleet_noharm_lower_value_soft_cost_pressure_start,
+            self.fleet_noharm_lower_value_soft_cost_pressure_full,
+        )
+        value, _, headway_value = self._lower_value_guard_signal(bus, action_s)
+        risk = (
+            self.fleet_noharm_lower_value_soft_cost_weight
+            * strength
+            * action_s
+            / self.fleet_noharm_lower_value_soft_cost_action_norm_s)
+        active = bool(gate_active and strength > 0.0 and risk > 0.0)
+        required = self.fleet_noharm_lower_value_soft_cost_min_ratio * risk
+        violation = max(0.0, required - value) if active else 0.0
+        soft_cost = (
+            self.fleet_noharm_lower_value_soft_cost_violation_weight
+            * violation)
+        if self.fleet_noharm_lower_value_soft_cost_cap > 0.0:
+            soft_cost = min(
+                soft_cost,
+                self.fleet_noharm_lower_value_soft_cost_cap)
+
+        self._ep_fleet_noharm_lower_value_soft_costs.append(
+            float(soft_cost))
+        self._ep_fleet_noharm_lower_value_soft_active.append(
+            1.0 if active else 0.0)
+        self._ep_fleet_noharm_lower_value_soft_values.append(float(value))
+        self._ep_fleet_noharm_lower_value_soft_headway_values.append(
+            float(headway_value))
+        self._ep_fleet_noharm_lower_value_soft_risks.append(float(risk))
+        self._ep_fleet_noharm_lower_value_soft_violations.append(
+            float(violation))
+        return float(soft_cost)
+
     def _apply_lower_fleet_noharm(self, action, bus=None):
         if not self.fleet_noharm_lower_enable:
             return self._apply_lower_value_guard(action, bus)
@@ -1464,11 +1669,71 @@ class TransitDuetV2Runner:
             [obs, np.asarray([float(last_action)], dtype=np.float32)])
 
     def _lower_policy_action(self, obs, last_action=0.0, deterministic=False):
+        if getattr(self, '_fixed_expert_active', False):
+            return np.asarray([0.0], dtype=np.float32)
         state = self._augment_lower_state(obs, last_action)
         action = self.lower_trainer.policy_net.get_action(
             torch.from_numpy(state).float().to(self.device),
             deterministic=deterministic)
         return self._quantize_lower_action(action)
+
+    def _fixed_headway_callback(self, s_upper_v1, trip):
+        base_hw = float(getattr(trip, 'target_headway', 360.0))
+        if not hasattr(trip, '_freqduet_base_target_headway'):
+            trip._freqduet_base_target_headway = base_hw
+        return float(getattr(trip, '_freqduet_base_target_headway', base_hw))
+
+    def _select_fixed_expert_for_episode(self, ep, training=True):
+        if not (self.fixed_selector_enable and training):
+            return False
+        if int(ep) < int(self.fixed_selector_start_ep):
+            return False
+        fixed_count = self.fixed_selector_counts['fixed']
+        learned_count = self.fixed_selector_counts['learned']
+        if fixed_count < self.fixed_selector_min_observations:
+            return True
+        if learned_count < self.fixed_selector_min_observations:
+            return False
+        if (self.fixed_selector_probe_period > 0
+                and (int(ep) - int(self.fixed_selector_start_ep))
+                % self.fixed_selector_probe_period == 0):
+            probe_index = (
+                (int(ep) - int(self.fixed_selector_start_ep))
+                // self.fixed_selector_probe_period)
+            if self.fixed_selector_probe_mode in {'alternate', 'balanced'}:
+                return bool(probe_index % 2 == 0)
+            if self.fixed_selector_probe_mode in {'learned', 'learned_only'}:
+                return False
+            return True
+        if self.fixed_selector_epsilon > 0.0:
+            if np.random.random() < self.fixed_selector_epsilon:
+                return bool(np.random.random() < 0.5)
+        learned_cost = self.fixed_selector_cost_ema.get('learned')
+        fixed_cost = self.fixed_selector_cost_ema.get('fixed')
+        if learned_cost is None or fixed_cost is None:
+            return False
+        return bool(fixed_cost <= learned_cost + self.fixed_selector_margin)
+
+    def _update_fixed_expert_selector(self, fixed_active, composite_cost):
+        if not self.fixed_selector_enable:
+            return
+        key = 'fixed' if fixed_active else 'learned'
+        cost = float(composite_cost)
+        prev = self.fixed_selector_cost_ema.get(key)
+        if prev is None:
+            self.fixed_selector_cost_ema[key] = cost
+        else:
+            alpha = self.fixed_selector_ema_alpha
+            self.fixed_selector_cost_ema[key] = (
+                alpha * cost + (1.0 - alpha) * float(prev))
+        self.fixed_selector_counts[key] += 1
+
+    def _fixed_selector_update_start_ep(self):
+        if self.fixed_selector_count_start in {'selector', 'selector_start',
+                                               'start'}:
+            return max(int(self.upper_warmup),
+                       int(self.fixed_selector_start_ep))
+        return int(self.upper_warmup)
 
     def _upper_delta_hf_penalty(self, direction, delta_t, prev_delta_by_dir):
         """Penalty for high-frequency upper target-headway oscillation."""
@@ -1493,6 +1758,108 @@ class TransitDuetV2Runner:
                 < self.timetable_terminal_hf_energy_min):
             return None
         return float(self.timetable_terminal_hf_shift_max_s)
+
+    def _terminal_feedback_bias(
+            self, direction, trip=None, action_vec=None,
+            plan_origin_launch=None):
+        """Causal lower-to-terminal shift from completed-trip holding history."""
+        if not self.timetable_terminal_dispatch:
+            return 0.0
+        bias = 0.0
+        if (self.timetable_terminal_feedback_enable
+                and self.timetable_terminal_feedback_gain > 0.0
+                and self.timetable_terminal_feedback_max_s > 0.0):
+            stats = self.holding_feedback.get_direction_stats(bool(direction))
+            if (int(stats.get('n_trips', 0))
+                    >= self.timetable_terminal_feedback_min_trips):
+                rolling = max(float(stats.get('rolling_mean', 0.0)), 0.0)
+                ema = max(float(stats.get('ema', 0.0)), 0.0)
+                ema_w = self.timetable_terminal_feedback_ema_weight
+                signal = (1.0 - ema_w) * rolling + ema_w * ema
+                signal = max(
+                    0.0,
+                    signal - self.timetable_terminal_feedback_deadband_s)
+                if signal > 0.0:
+                    hold_bias = self.timetable_terminal_feedback_gain * signal
+                    if self.timetable_terminal_feedback_min_s > 0.0:
+                        hold_bias = max(
+                            hold_bias,
+                            self.timetable_terminal_feedback_min_s)
+                    bias = max(bias, float(np.clip(
+                        hold_bias,
+                        0.0,
+                        self.timetable_terminal_feedback_max_s)))
+
+        if (self.timetable_terminal_fleet_relief_enable
+                and self.timetable_terminal_fleet_relief_max_s > 0.0):
+            _, _, pressure = self._fleet_pressure()
+            strength = self._pressure_strength(
+                pressure,
+                self.timetable_terminal_fleet_relief_pressure_start,
+                self.timetable_terminal_fleet_relief_pressure_full)
+            if strength > 0.0:
+                relief_bias = (
+                    self.timetable_terminal_fleet_relief_max_s * strength)
+                if self.timetable_terminal_fleet_relief_min_s > 0.0:
+                    relief_bias = max(
+                        relief_bias,
+                        self.timetable_terminal_fleet_relief_min_s)
+                bias = max(bias, relief_bias)
+
+        if (self.timetable_terminal_value_relief_enable
+                and self.timetable_terminal_value_relief_max_s > 0.0
+                and self.timetable_planner is not None
+                and trip is not None
+                and action_vec is not None):
+            _, _, pressure = self._fleet_pressure()
+            pressure_strength = self._pressure_strength(
+                pressure,
+                self.timetable_terminal_value_relief_pressure_start,
+                self.timetable_terminal_value_relief_pressure_full)
+            if pressure_strength > 0.0:
+                direction = bool(direction)
+                origin = (
+                    float(trip.launch_time) if plan_origin_launch is None
+                    else float(plan_origin_launch))
+                offset = float(trip.launch_time) - origin
+                base = self.timetable_planner._base_headway(trip)
+                target = self.timetable_planner.target_headway(
+                    base, action_vec, direction, offset)
+                last_dispatch = float(getattr(
+                    self.env, '_last_dispatch_time', {}).get(
+                        direction, -9999.0))
+                now = float(getattr(self.env, 'current_time', trip.launch_time))
+                gap_now = now - last_dispatch
+                gap_room = max(
+                    0.0,
+                    float(target)
+                    + self.timetable_terminal_value_relief_gap_tolerance_s
+                    - gap_now
+                    - self.timetable_terminal_value_relief_min_gap_s)
+                if gap_room > 0.0:
+                    gap_strength = min(
+                        1.0,
+                        gap_room
+                        / self.timetable_terminal_value_relief_gap_norm_s)
+                    raw_bias = (
+                        self.timetable_terminal_value_relief_max_s
+                        * pressure_strength
+                        * gap_strength
+                        * self.timetable_terminal_value_relief_gap_gain)
+                    if self.timetable_terminal_value_relief_demand_weight > 0.0:
+                        freq_summary = self.env.frequency_summary()
+                        demand = max(float(
+                            freq_summary.get('freq_low_demand', 0.0)), 0.0)
+                        raw_bias /= (
+                            1.0
+                            + self.timetable_terminal_value_relief_demand_weight
+                            * demand)
+                    raw_bias = min(
+                        raw_bias,
+                        self.timetable_terminal_value_relief_max_s,
+                        gap_room)
+                    bias = max(bias, raw_bias)
+        return float(max(bias, 0.0))
 
     def _freq_wait_high_share(self, low_demand, local_high, positive_only=False):
         """Share of local passenger wait attributed to high-frequency demand."""
@@ -1923,17 +2290,43 @@ class TransitDuetV2Runner:
             terminal_shift_max_s = (
                 self._terminal_shift_max_for_frequency()
                 if self.timetable_terminal_dispatch else None)
+            terminal_shift_bias_s = (
+                self._terminal_feedback_bias(
+                    bool(trip.direction), trip=trip,
+                    action_vec=action_vec,
+                    plan_origin_launch=plan_origin_launch)
+                if self.timetable_terminal_dispatch else 0.0)
+            terminal_floor_ratio = (
+                self.timetable_terminal_headway_floor_ratio
+                if (self.timetable_terminal_dispatch
+                    and self.timetable_terminal_headway_floor_enable)
+                else 0.0)
+            terminal_floor_min_s = (
+                self.timetable_terminal_headway_floor_min_s
+                if (self.timetable_terminal_dispatch
+                    and self.timetable_terminal_headway_floor_enable)
+                else 0.0)
             plan_summary = self.timetable_planner.apply(
                 self.env.timetables, trip, action_vec,
                 origin_launch_s=plan_origin_launch,
                 write_scheduled_launch=self.timetable_terminal_dispatch,
-                terminal_shift_max_s=terminal_shift_max_s)
+                terminal_shift_max_s=terminal_shift_max_s,
+                terminal_shift_bias_s=terminal_shift_bias_s,
+                terminal_headway_floor_ratio=terminal_floor_ratio,
+                terminal_headway_floor_min_s=terminal_floor_min_s)
             delta_t = float(plan_summary['effective_delta'])
             base_hw = float(plan_summary['base_headway'])
             self._ep_terminal_shift_caps.append(
                 float(plan_summary.get(
                     'terminal_shift_max_s',
                     self.timetable_planner.terminal_shift_max_s)))
+            self._ep_terminal_feedback_biases.append(
+                float(plan_summary.get('terminal_shift_bias_s', 0.0)))
+            floor_n = int(plan_summary.get('terminal_headway_floor_n', 0))
+            if floor_n > 0:
+                self._ep_terminal_headway_floors.extend(
+                    [float(plan_summary.get(
+                        'terminal_headway_floor_mean', 0.0))] * floor_n)
             if upper_decision_taken:
                 plan_penalty = (
                     self.upper_plan_penalty_weight
@@ -2109,6 +2502,8 @@ class TransitDuetV2Runner:
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_terminal_feedback_biases = []
+        self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
         self._ep_fleet_noharm_upper_gate_active = []
@@ -2122,8 +2517,16 @@ class TransitDuetV2Runner:
         self._ep_fleet_noharm_lower_value_guard_values = []
         self._ep_fleet_noharm_lower_value_guard_headway_values = []
         self._ep_fleet_noharm_lower_value_guard_costs = []
+        self._ep_fleet_noharm_lower_value_soft_costs = []
+        self._ep_fleet_noharm_lower_value_soft_active = []
+        self._ep_fleet_noharm_lower_value_soft_values = []
+        self._ep_fleet_noharm_lower_value_soft_headway_values = []
+        self._ep_fleet_noharm_lower_value_soft_risks = []
+        self._ep_fleet_noharm_lower_value_soft_violations = []
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
+        self._fixed_expert_active = self._select_fixed_expert_for_episode(
+            ep, training=training)
 
         # v2k: elastic fleet sampling per-episode
         if N_fleet_override is not None:
@@ -2135,9 +2538,13 @@ class TransitDuetV2Runner:
             self._current_N_fleet = self.N_fleet_default
         self.env._n_fleet_target = self._current_N_fleet
 
-        upper_active = ep >= self.upper_warmup and training
-        self.env._upper_policy_callback = (
-            self._upper_callback_v2 if upper_active else None)
+        learned_training = training and not self._fixed_expert_active
+        upper_active = ep >= self.upper_warmup and learned_training
+        if self._fixed_expert_active:
+            self.env._upper_policy_callback = self._fixed_headway_callback
+        else:
+            self.env._upper_policy_callback = (
+                self._upper_callback_v2 if upper_active else None)
 
         state_dict, reward_dict, _ = self.env.initialize_state()
         action_dict = {k: None for k in range(self.env.max_agent_num)}
@@ -2187,7 +2594,9 @@ class TransitDuetV2Runner:
                                 break
                         drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
                         drift_cost = self._lower_drift_cost(cur_dir)
-                        cost = float(cost) + drift_cost
+                        lower_value_soft_cost = self._lower_value_soft_cost(
+                            cur_bus, act_val)
+                        cost = float(cost) + drift_cost + lower_value_soft_cost
                         low_demand = 0.0
                         local_high = 0.0
                         credit_high = 0.0
@@ -2275,7 +2684,7 @@ class TransitDuetV2Runner:
                                 'action_s': act_val,
                             })
 
-                        if training:
+                        if learned_training:
                             # Look up the bus's current trip_id (launch_turn) so
                             # downstream TPC IS-weight lookup can match dispatch_meta.
                             global_tid = (self._current_ep * 1000 + cur_tid
@@ -2430,9 +2839,12 @@ class TransitDuetV2Runner:
         ep_delta_mean = (np.mean(self._ep_upper_deltas)
                          if self._ep_upper_deltas else 0.0)
 
-        surprise = self.surprise_computer.compute(
-            ep_reward_mean, ep_q_std, ep_delta_mean)
-        self.belief_tracker.update(surprise)
+        if self._fixed_expert_active:
+            surprise = 0.0
+        else:
+            surprise = self.surprise_computer.compute(
+                ep_reward_mean, ep_q_std, ep_delta_mean)
+            self.belief_tracker.update(surprise)
 
         # Adaptive alpha: boost exploration after detected changepoint
         base_alpha = self.lower_trainer.alpha
@@ -2469,7 +2881,7 @@ class TransitDuetV2Runner:
             haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
 
         # Lower
-        if training and len(self.replay_buffer) > self.batch_size:
+        if learned_training and len(self.replay_buffer) > self.batch_size:
             for _ in range(self.updates_per_episode):
                 lower_m = self.lower_trainer.update(
                     self.replay_buffer, self.batch_size, reward_scale=1.0,
@@ -2499,7 +2911,8 @@ class TransitDuetV2Runner:
                             p.data, alpha=self.tpc_ema_tau)
 
         # Measurement projection (z already computed above for upper reward)
-        self.measurement_proj.update(z)
+        if learned_training:
+            self.measurement_proj.update(z)
         theta_w = self.measurement_proj.get_reward_weights()
 
         train_time = time.time() - t1
@@ -2544,6 +2957,10 @@ class TransitDuetV2Runner:
         upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
         terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
         terminal_shift_cap_stat = _stat(self._ep_terminal_shift_caps)
+        terminal_feedback_bias_stat = _stat(
+            self._ep_terminal_feedback_biases)
+        terminal_headway_floor_stat = _stat(
+            self._ep_terminal_headway_floors)
         fleet_noharm_upper_pressure_stat = _stat(
             self._ep_fleet_noharm_upper_pressures)
         fleet_noharm_upper_adjust_stat = _stat(
@@ -2570,6 +2987,18 @@ class TransitDuetV2Runner:
             self._ep_fleet_noharm_lower_value_guard_headway_values)
         fleet_noharm_lower_value_guard_cost_stat = _stat(
             self._ep_fleet_noharm_lower_value_guard_costs)
+        fleet_noharm_lower_value_soft_cost_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_costs)
+        fleet_noharm_lower_value_soft_active_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_active)
+        fleet_noharm_lower_value_soft_value_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_values)
+        fleet_noharm_lower_value_soft_headway_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_headway_values)
+        fleet_noharm_lower_value_soft_risk_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_risks)
+        fleet_noharm_lower_value_soft_violation_stat = _stat(
+            self._ep_fleet_noharm_lower_value_soft_violations)
         upper_hf_power_ratio = _upper_hf_power_ratio(
             self._ep_upper_deltas_by_dir, self.upper_lpf_window)
         lower_lf_drift_ratio = _lower_lf_drift_ratio(
@@ -2758,6 +3187,13 @@ class TransitDuetV2Runner:
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
             'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],
             'terminal_shift_cap_max': terminal_shift_cap_stat['max'],
+            'terminal_feedback_bias_mean': terminal_feedback_bias_stat['mean'],
+            'terminal_feedback_bias_max': terminal_feedback_bias_stat['max'],
+            'terminal_feedback_events': int(terminal_feedback_bias_stat['n']),
+            'terminal_headway_floor_mean':
+                terminal_headway_floor_stat['mean'],
+            'terminal_headway_floor_events':
+                int(terminal_headway_floor_stat['n']),
             'fleet_noharm_upper_pressure_mean':
                 fleet_noharm_upper_pressure_stat['mean'],
             'fleet_noharm_upper_adjust_mean':
@@ -2796,7 +3232,44 @@ class TransitDuetV2Runner:
                 fleet_noharm_lower_value_guard_headway_stat['mean'],
             'fleet_noharm_lower_value_guard_cost_mean':
                 fleet_noharm_lower_value_guard_cost_stat['mean'],
+            'fleet_noharm_lower_value_soft_cost_mean':
+                fleet_noharm_lower_value_soft_cost_stat['mean'],
+            'fleet_noharm_lower_value_soft_cost_max':
+                fleet_noharm_lower_value_soft_cost_stat['max'],
+            'fleet_noharm_lower_value_soft_events': int(sum(
+                1 for v in self._ep_fleet_noharm_lower_value_soft_costs
+                if float(v) > 1e-6)),
+            'fleet_noharm_lower_value_soft_active_mean':
+                fleet_noharm_lower_value_soft_active_stat['mean'],
+            'fleet_noharm_lower_value_soft_value_mean':
+                fleet_noharm_lower_value_soft_value_stat['mean'],
+            'fleet_noharm_lower_value_soft_headway_mean':
+                fleet_noharm_lower_value_soft_headway_stat['mean'],
+            'fleet_noharm_lower_value_soft_risk_mean':
+                fleet_noharm_lower_value_soft_risk_stat['mean'],
+            'fleet_noharm_lower_value_soft_violation_mean':
+                fleet_noharm_lower_value_soft_violation_stat['mean'],
         }
+        composite_cost = (
+            float(row['avg_wait_min']) / 10.0
+            + (float(row['fleet_overshoot']) ** 2)
+            / max(float(row['N_fleet']), 1.0)
+            + float(row['headway_cv']))
+        if int(ep) >= int(self._fixed_selector_update_start_ep()):
+            self._update_fixed_expert_selector(
+                self._fixed_expert_active, composite_cost)
+        row['fixed_selector_fixed_active'] = (
+            1.0 if self._fixed_expert_active else 0.0)
+        row['fixed_selector_learned_cost_ema'] = (
+            self.fixed_selector_cost_ema['learned']
+            if self.fixed_selector_cost_ema['learned'] is not None else 0.0)
+        row['fixed_selector_fixed_cost_ema'] = (
+            self.fixed_selector_cost_ema['fixed']
+            if self.fixed_selector_cost_ema['fixed'] is not None else 0.0)
+        row['fixed_selector_learned_count'] = int(
+            self.fixed_selector_counts['learned'])
+        row['fixed_selector_fixed_count'] = int(
+            self.fixed_selector_counts['fixed'])
         self.diag.append(row)
 
         # Also keep lightweight history for quick plotting
@@ -2825,6 +3298,7 @@ class TransitDuetV2Runner:
                    'freq_middle', 'freq_middle_energy',
                    'upper_plan_target_mean', 'upper_plan_decisions',
                    'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
+                   'terminal_feedback_bias_mean',
                    'freq_promotion_flag', 'freq_promotion_strength',
                    'freq_promotion_active', 'freq_promotion_persistent',
                    'freq_promotion_ratio',
@@ -2936,7 +3410,8 @@ class TransitDuetV2Runner:
         if self.timetable_terminal_dispatch:
             print(f"  TERM     launch_shift={row.get('terminal_launch_shift_mean',0):+.1f}"
                   f"±{row.get('terminal_launch_shift_std',0):.1f}s  "
-                  f"cap={row.get('terminal_shift_cap_mean',0):.1f}s")
+                  f"cap={row.get('terminal_shift_cap_mean',0):.1f}s  "
+                  f"fb_bias={row.get('terminal_feedback_bias_mean',0):.1f}s")
         print(f"{'─'*90}\n")
 
     # ────────────────── Per-trip dump ──────────────────

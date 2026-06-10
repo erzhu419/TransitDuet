@@ -1,0 +1,13 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_histaux6eg06upper_hiro
+
+frequency:
+  history_aux:
+    enable: true
+    mode: residual
+    upper_bins: 6
+    lower_bins: 0
+    clip: 2.0
+    high_energy_max: 0.06
+    high_energy_width: 0.02
+    min_weight: 0.0

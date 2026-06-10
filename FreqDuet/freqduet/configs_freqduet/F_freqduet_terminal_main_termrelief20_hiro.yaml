@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_termrelief20_hiro
+
+# Phase-4 fixed-headway-gap candidate: when the causal on-route fleet already
+# exceeds the episode budget, delay new launches at the terminal instead of
+# forcing lower in-route holding or upper target-headway projection.
+upper:
+  timetable_planner:
+    terminal_fleet_relief:
+      enable: true
+      pressure_start: -1.0
+      pressure_full: 1.0
+      max_s: 20.0
+      min_s: 0.0

@@ -1,0 +1,7 @@
+_extends: configs_freqduet/F_freqduet_terminal_main_headfloor100_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_headfloor100_hiro
+
+env:
+  peak_shift_choices: [-900, -600, -300, 300, 600, 900]
+  peak_shift_probs: [0.15, 0.20, 0.15, 0.15, 0.20, 0.15]
+

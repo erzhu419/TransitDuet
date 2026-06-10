@@ -1,0 +1,15 @@
+_extends: ../F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_broad_od50_promenergy08_hiro
+_paper_generalization:
+  scenario: od50
+  label: strong OD multiplier shift
+  method: promenergy08
+env:
+  demand_noise: 0.15
+  od_noise: 0.5
+  od_noise_clip:
+  - 0.3
+  - 2.0
+frequency:
+  promotion:
+    adapt_high_energy_min: 0.08

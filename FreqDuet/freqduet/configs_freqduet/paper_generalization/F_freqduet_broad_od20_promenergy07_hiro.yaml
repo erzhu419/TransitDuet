@@ -1,0 +1,15 @@
+_extends: ../F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_broad_od20_promenergy07_hiro
+_paper_generalization:
+  scenario: od20
+  label: mild OD multiplier shift
+  method: promenergy07
+env:
+  demand_noise: 0.15
+  od_noise: 0.2
+  od_noise_clip:
+  - 0.5
+  - 1.6
+frequency:
+  promotion:
+    adapt_high_energy_min: 0.07

@@ -1,0 +1,8 @@
+_extends: ../F_freqduet_terminal_final_rawhistory_hiro.yaml
+_name: F_freqduet_broad_noise40_rawhistory_hiro
+_paper_generalization:
+  scenario: noise40
+  label: strong demand noise
+  method: rawhistory
+env:
+  demand_noise: 0.4
