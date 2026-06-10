@@ -579,6 +579,181 @@ def _promotion_reward_floor_score(
     )
 
 
+def _parse_float_list(value: Any, *, default: tuple[float, ...] = (1.0,)) -> list[float]:
+    if value is None:
+        return [float(v) for v in default]
+    if isinstance(value, str):
+        parts = [part.strip() for part in value.split(",") if part.strip()]
+        if not parts:
+            return [float(v) for v in default]
+        return [float(part) for part in parts]
+    if isinstance(value, (list, tuple, np.ndarray)):
+        values = [float(v) for v in value]
+        return values or [float(v) for v in default]
+    return [float(value)]
+
+
+def value_guarded_replan_action(
+    active_action: Any,
+    replan_base: Any,
+    *,
+    runner: Any,
+    bridge: "NativeTransitPPOBridge",
+    planner_key: Any,
+    freq_summary: dict[str, Any],
+    state: Any,
+    trip: Any,
+    candidate_scales: Any,
+    wait_gain_s: float,
+    max_shift_s: float,
+    holdfb_dim: int = 0,
+    state_wait_weight: float = 1.0,
+    frequency_weight: float = 1.0,
+    min_pressure: float = 0.0,
+    max_pressure: float = 0.0,
+    hold_guard_weight: float = 0.0,
+    same_hold_max: float = 0.0,
+    same_wait_min: float = 0.0,
+    same_wait_max: float = 0.0,
+    gap_guard_min_ratio: float = 0.0,
+    gap_guard_max_ratio: float = 0.0,
+    gap_risk_cap_start: float = 0.0,
+    gap_risk_cap_full: float = 0.0,
+    adaptive_drift_penalty_gain: float = 0.0,
+    adaptive_drift_penalty_min_scale: float = 0.25,
+    shift_sign: float = -1.0,
+    project_target_headway: bool = False,
+    target_headway_max_s: float = 0.0,
+    target_headway_project_margin_s: float = 0.25,
+    reward_wait_weight: float = 1.0,
+    reward_target_weight: float = 1.0,
+    reward_throughput_weight: float = 0.0,
+    reward_fleet_weight: float = 0.0,
+    reward_action_cost: float = 0.05,
+    reward_gap_cost: float = 0.25,
+    reward_hold_cost: float = 0.35,
+) -> tuple[np.ndarray, dict[str, float]]:
+    """Select a promotion timetable action from causal reward-aware candidates."""
+    active = _array(active_action, dtype=np.float64)
+    base = _array(replan_base, dtype=np.float64)
+    if active.size != int(bridge.contract.upper_action_dim):
+        active = np.resize(active, int(bridge.contract.upper_action_dim)).astype(np.float64)
+    if base.size != active.size:
+        base = np.resize(base, active.size).astype(np.float64)
+    scales = _parse_float_list(candidate_scales, default=(1.0,))
+    throughput = _state_throughput_proxy(state, holdfb_dim=int(holdfb_dim))
+    active_target = _candidate_target_headway_mean_s(runner, active, trip)
+    best_action: np.ndarray | None = None
+    best_metadata: dict[str, float] | None = None
+    best_score = -float("inf")
+    evaluated = 0
+    for raw_scale in scales:
+        scale = max(float(raw_scale), 0.0)
+        if scale <= 0.0:
+            candidate_base = active
+            scaled_wait_gain_s = 0.0
+            scaled_max_shift_s = 0.0
+        else:
+            candidate_base = base
+            scaled_wait_gain_s = float(wait_gain_s) * scale
+            scaled_max_shift_s = float(max_shift_s) * scale
+        candidate, metadata = wait_aware_replan_action(
+            candidate_base,
+            bridge=bridge,
+            planner_key=planner_key,
+            freq_summary=freq_summary,
+            state=state,
+            wait_gain_s=scaled_wait_gain_s,
+            max_shift_s=scaled_max_shift_s,
+            holdfb_dim=int(holdfb_dim),
+            state_wait_weight=float(state_wait_weight),
+            frequency_weight=float(frequency_weight),
+            min_pressure=float(min_pressure),
+            max_pressure=float(max_pressure),
+            hold_guard_weight=float(hold_guard_weight),
+            same_hold_max=float(same_hold_max),
+            same_wait_min=float(same_wait_min),
+            same_wait_max=float(same_wait_max),
+            gap_guard_min_ratio=float(gap_guard_min_ratio),
+            gap_guard_max_ratio=float(gap_guard_max_ratio),
+            gap_risk_cap_start=float(gap_risk_cap_start),
+            gap_risk_cap_full=float(gap_risk_cap_full),
+            adaptive_drift_penalty_gain=float(adaptive_drift_penalty_gain),
+            adaptive_drift_penalty_min_scale=float(adaptive_drift_penalty_min_scale),
+            shift_sign=float(shift_sign),
+        )
+        metadata = dict(metadata)
+        metadata.update(throughput)
+        if bool(project_target_headway) and float(target_headway_max_s) > 0.0:
+            candidate, projection = _project_action_to_target_headway_cap(
+                runner,
+                candidate,
+                trip=trip,
+                planner_key=planner_key,
+                target_headway_max_s=float(target_headway_max_s),
+                margin_s=float(target_headway_project_margin_s),
+            )
+            metadata.update(projection)
+        candidate_target = _candidate_target_headway_mean_s(runner, candidate, trip)
+        metadata["active_target_headway_mean_s"] = float(active_target)
+        metadata["candidate_target_headway_mean_s"] = float(candidate_target)
+        metadata["value_guard_candidate_scale"] = float(scale)
+        metadata["value_guard_candidate_count"] = float(len(scales))
+        metadata["final_action_delta_abs_s"] = float(np.mean(
+            np.abs(np.asarray(candidate, dtype=np.float64) - active)
+        ))
+        metadata["base_action_delta_abs_s"] = float(np.mean(
+            np.abs(base - active)
+        ))
+        score = _promotion_reward_floor_score(
+            metadata,
+            active_target_headway_s=float(active_target),
+            candidate_target_headway_s=float(candidate_target),
+            reward_wait_weight=float(reward_wait_weight),
+            reward_target_weight=float(reward_target_weight),
+            reward_throughput_weight=float(reward_throughput_weight),
+            reward_fleet_weight=float(reward_fleet_weight),
+            reward_action_cost=float(reward_action_cost),
+            reward_gap_cost=float(reward_gap_cost),
+            reward_hold_cost=float(reward_hold_cost),
+        )
+        metadata["value_guard_score"] = float(score)
+        metadata["reward_floor_score"] = float(score)
+        evaluated += 1
+        if score > best_score:
+            best_score = float(score)
+            best_action = np.asarray(candidate, dtype=np.float32).reshape(-1)
+            best_metadata = metadata
+    if best_action is None or best_metadata is None:
+        best_action = active.astype(np.float32)
+        best_metadata = {
+            "pressure": 0.0,
+            "state_wait_pressure": 0.0,
+            "frequency_pressure": 0.0,
+            "state_same_hold": 0.0,
+            "state_same_wait": 0.0,
+            "state_other_hold": 0.0,
+            "state_other_wait": 0.0,
+            "state_dispatch_gap_ratio": 1.0,
+            "pressure_guard_active": 0.0,
+            "gap_guard_active": 0.0,
+            "wait_guard_active": 0.0,
+            "shift_pressure": 0.0,
+            "gap_risk_scale": 1.0,
+            "adaptive_drift_scale": 1.0,
+            "adaptive_drift_hf_to_lf": 0.0,
+            "signed_shift_s": 0.0,
+            "abs_shift_s": 0.0,
+            "value_guard_score": -float("inf"),
+            "reward_floor_score": -float("inf"),
+            "value_guard_candidate_scale": 0.0,
+            "value_guard_candidate_count": float(len(scales)),
+        }
+    best_metadata["value_guard_active"] = 1.0
+    best_metadata["value_guard_candidate_evaluations"] = float(evaluated)
+    return best_action.astype(np.float32), best_metadata
+
+
 def _set_reproducible_seed(seed: int) -> None:
     random.seed(int(seed))
     np.random.seed(int(seed))
@@ -996,6 +1171,9 @@ class _SharedPPOPolicyProxy:
         self.wait_replan_throughput_scores: list[float] = []
         self.wait_replan_throughput_floor_delta_fractions: list[float] = []
         self.wait_replan_reward_floor_scores: list[float] = []
+        self.wait_replan_value_guard_scores: list[float] = []
+        self.wait_replan_value_guard_scales: list[float] = []
+        self.wait_replan_value_guard_candidate_counts: list[float] = []
         self.wait_replan_pressure_overrides: list[float] = []
         self.wait_replan_signed_shifts: list[float] = []
         self.wait_replan_abs_shifts: list[float] = []
@@ -1110,6 +1288,15 @@ class _SharedPPOPolicyProxy:
                     ))
                     self.wait_replan_reward_floor_scores.append(float(
                         preselect_metadata.get("reward_floor_score", 0.0)
+                    ))
+                    self.wait_replan_value_guard_scores.append(float(
+                        preselect_metadata.get("value_guard_score", 0.0)
+                    ))
+                    self.wait_replan_value_guard_scales.append(float(
+                        preselect_metadata.get("value_guard_candidate_scale", 0.0)
+                    ))
+                    self.wait_replan_value_guard_candidate_counts.append(float(
+                        preselect_metadata.get("value_guard_candidate_count", 0.0)
                     ))
                     self.wait_replan_pressure_overrides.append(float(
                         preselect_metadata.get("gate_wait_pressure_override_active", 0.0)
@@ -1345,6 +1532,8 @@ def install_shared_ppo_episode_loop(
     promotion_replan_reward_floor_action_cost: float = 0.05,
     promotion_replan_reward_floor_gap_cost: float = 0.25,
     promotion_replan_reward_floor_hold_cost: float = 0.35,
+    promotion_replan_value_guard_min_score: float = 0.0,
+    promotion_replan_value_guard_candidate_scales: Any = "",
     promotion_replan_throughput_guard_min_score: float = 0.0,
     promotion_replan_throughput_floor_min_score: float = 0.0,
     promotion_replan_throughput_floor_min_delta_fraction: float = 0.0,
@@ -1421,6 +1610,7 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_final_delta_floor_rejects = 0
     runner.freq_hrl_promotion_final_delta_guard_rejects = 0
     runner.freq_hrl_promotion_reward_floor_guard_rejects = 0
+    runner.freq_hrl_promotion_value_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_floor_project_count = 0
     runner.freq_hrl_promotion_throughput_floor_delta_fraction_sum = 0.0
@@ -1577,33 +1767,89 @@ def install_shared_ppo_episode_loop(
                     "actor_wait_aware",
                     "learned_actor_wait_aware",
                 }:
-                    native_override, preselect_metadata = wait_aware_replan_action(
-                        replan_base,
-                        bridge=bridge,
-                        planner_key=key,
-                        freq_summary=freq_summary,
-                        state=kwargs["s_upper"],
-                        wait_gain_s=float(promotion_replan_wait_gain_s),
-                        max_shift_s=float(promotion_replan_max_shift_s),
-                        holdfb_dim=int(getattr(runner, "freq_holdfb_dim", 0)),
-                        state_wait_weight=float(promotion_replan_state_wait_weight),
-                        frequency_weight=float(promotion_replan_frequency_weight),
-                        min_pressure=float(promotion_replan_min_pressure),
-                        max_pressure=float(promotion_replan_max_pressure),
-                        hold_guard_weight=float(promotion_replan_hold_guard_weight),
-                        same_hold_max=float(promotion_replan_same_hold_max),
-                        same_wait_min=float(promotion_replan_same_wait_min),
-                        same_wait_max=float(promotion_replan_same_wait_max),
-                        gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
-                        gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
-                        gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
-                        gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
-                        adaptive_drift_penalty_gain=float(
-                            promotion_replan_adaptive_drift_penalty_gain),
-                        adaptive_drift_penalty_min_scale=float(
-                            promotion_replan_adaptive_drift_penalty_min_scale),
-                        shift_sign=float(promotion_replan_shift_sign),
-                    )
+                    if _parse_float_list(
+                        promotion_replan_value_guard_candidate_scales,
+                        default=(),
+                    ):
+                        native_override, preselect_metadata = value_guarded_replan_action(
+                            active_action,
+                            replan_base,
+                            runner=runner,
+                            bridge=bridge,
+                            planner_key=key,
+                            freq_summary=freq_summary,
+                            state=kwargs["s_upper"],
+                            trip=kwargs.get("trip", None),
+                            candidate_scales=promotion_replan_value_guard_candidate_scales,
+                            wait_gain_s=float(promotion_replan_wait_gain_s),
+                            max_shift_s=float(promotion_replan_max_shift_s),
+                            holdfb_dim=int(getattr(runner, "freq_holdfb_dim", 0)),
+                            state_wait_weight=float(promotion_replan_state_wait_weight),
+                            frequency_weight=float(promotion_replan_frequency_weight),
+                            min_pressure=float(promotion_replan_min_pressure),
+                            max_pressure=float(promotion_replan_max_pressure),
+                            hold_guard_weight=float(promotion_replan_hold_guard_weight),
+                            same_hold_max=float(promotion_replan_same_hold_max),
+                            same_wait_min=float(promotion_replan_same_wait_min),
+                            same_wait_max=float(promotion_replan_same_wait_max),
+                            gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
+                            gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+                            gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
+                            gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
+                            adaptive_drift_penalty_gain=float(
+                                promotion_replan_adaptive_drift_penalty_gain),
+                            adaptive_drift_penalty_min_scale=float(
+                                promotion_replan_adaptive_drift_penalty_min_scale),
+                            shift_sign=float(promotion_replan_shift_sign),
+                            project_target_headway=bool(
+                                promotion_replan_project_target_headway),
+                            target_headway_max_s=float(
+                                promotion_replan_target_headway_max_s),
+                            target_headway_project_margin_s=float(
+                                promotion_replan_target_headway_project_margin_s),
+                            reward_wait_weight=float(
+                                promotion_replan_reward_floor_wait_weight),
+                            reward_target_weight=float(
+                                promotion_replan_reward_floor_target_weight),
+                            reward_throughput_weight=float(
+                                promotion_replan_reward_floor_throughput_weight),
+                            reward_fleet_weight=float(
+                                promotion_replan_reward_floor_fleet_weight),
+                            reward_action_cost=float(
+                                promotion_replan_reward_floor_action_cost),
+                            reward_gap_cost=float(
+                                promotion_replan_reward_floor_gap_cost),
+                            reward_hold_cost=float(
+                                promotion_replan_reward_floor_hold_cost),
+                        )
+                    else:
+                        native_override, preselect_metadata = wait_aware_replan_action(
+                            replan_base,
+                            bridge=bridge,
+                            planner_key=key,
+                            freq_summary=freq_summary,
+                            state=kwargs["s_upper"],
+                            wait_gain_s=float(promotion_replan_wait_gain_s),
+                            max_shift_s=float(promotion_replan_max_shift_s),
+                            holdfb_dim=int(getattr(runner, "freq_holdfb_dim", 0)),
+                            state_wait_weight=float(promotion_replan_state_wait_weight),
+                            frequency_weight=float(promotion_replan_frequency_weight),
+                            min_pressure=float(promotion_replan_min_pressure),
+                            max_pressure=float(promotion_replan_max_pressure),
+                            hold_guard_weight=float(promotion_replan_hold_guard_weight),
+                            same_hold_max=float(promotion_replan_same_hold_max),
+                            same_wait_min=float(promotion_replan_same_wait_min),
+                            same_wait_max=float(promotion_replan_same_wait_max),
+                            gap_guard_min_ratio=float(promotion_replan_gap_guard_min_ratio),
+                            gap_guard_max_ratio=float(promotion_replan_gap_guard_max_ratio),
+                            gap_risk_cap_start=float(promotion_replan_gap_risk_cap_start),
+                            gap_risk_cap_full=float(promotion_replan_gap_risk_cap_full),
+                            adaptive_drift_penalty_gain=float(
+                                promotion_replan_adaptive_drift_penalty_gain),
+                            adaptive_drift_penalty_min_scale=float(
+                                promotion_replan_adaptive_drift_penalty_min_scale),
+                            shift_sign=float(promotion_replan_shift_sign),
+                        )
                     preselect_metadata = dict(preselect_metadata)
                     preselect_metadata.update(_state_throughput_proxy(
                         kwargs["s_upper"],
@@ -1620,6 +1866,21 @@ def install_shared_ppo_episode_loop(
                         np.abs(np.asarray(native_override, dtype=np.float64)
                                - np.asarray(active_action, dtype=np.float64))
                     ))
+                    value_guard_min_score = float(
+                        promotion_replan_value_guard_min_score)
+                    if (
+                        value_guard_min_score > 0.0
+                        and float(preselect_metadata.get("value_guard_score", 0.0))
+                        < value_guard_min_score
+                    ):
+                        runner.freq_hrl_promotion_value_guard_rejects = int(
+                            getattr(
+                                runner,
+                                "freq_hrl_promotion_value_guard_rejects",
+                                0,
+                            )
+                        ) + 1
+                        return False
                     if float(preselect_metadata.get("pressure_guard_active", 0.0)) > 0.0:
                         runner.freq_hrl_promotion_pressure_guard_rejects = int(
                             getattr(
@@ -2040,6 +2301,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_final_delta_floor_rejects",
         "shared_ppo_final_delta_guard_rejects",
         "shared_ppo_reward_floor_guard_rejects",
+        "shared_ppo_value_guard_rejects",
         "shared_ppo_throughput_guard_rejects",
         "shared_ppo_throughput_floor_project_count",
         "shared_ppo_throughput_floor_delta_fraction_mean",
@@ -2057,6 +2319,9 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_wait_replan_throughput_score_mean",
         "shared_ppo_wait_replan_throughput_floor_delta_fraction_mean",
         "shared_ppo_wait_replan_reward_floor_score_mean",
+        "shared_ppo_wait_replan_value_guard_score_mean",
+        "shared_ppo_wait_replan_value_guard_scale_mean",
+        "shared_ppo_wait_replan_value_guard_candidate_count_mean",
         "shared_ppo_adaptive_lower_drift_penalty_scale_mean",
         "shared_ppo_adaptive_lower_drift_penalty_hf_to_lf_mean",
         "shared_ppo_lower_hf_wait_prior_scale_mean",
@@ -2143,6 +2408,8 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_reward_floor_action_cost: float = 0.05,
     promotion_replan_reward_floor_gap_cost: float = 0.25,
     promotion_replan_reward_floor_hold_cost: float = 0.35,
+    promotion_replan_value_guard_min_score: float = 0.0,
+    promotion_replan_value_guard_candidate_scales: Any = "",
     promotion_replan_throughput_guard_min_score: float = 0.0,
     promotion_replan_throughput_floor_min_score: float = 0.0,
     promotion_replan_throughput_floor_min_delta_fraction: float = 0.0,
@@ -2277,6 +2544,10 @@ def run_native_shared_ppo_episode_loop(
             promotion_replan_reward_floor_gap_cost),
         promotion_replan_reward_floor_hold_cost=float(
             promotion_replan_reward_floor_hold_cost),
+        promotion_replan_value_guard_min_score=float(
+            promotion_replan_value_guard_min_score),
+        promotion_replan_value_guard_candidate_scales=(
+            promotion_replan_value_guard_candidate_scales),
         promotion_replan_throughput_guard_min_score=float(
             promotion_replan_throughput_guard_min_score),
         promotion_replan_throughput_floor_min_score=float(
@@ -2395,6 +2666,11 @@ def run_native_shared_ppo_episode_loop(
                 "freq_hrl_promotion_reward_floor_guard_rejects",
                 0,
             )),
+            "shared_ppo_value_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_value_guard_rejects",
+                0,
+            )),
             "shared_ppo_throughput_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_throughput_guard_rejects",
@@ -2482,6 +2758,18 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_wait_replan_reward_floor_score_mean": (
                 float(np.mean(installed["upper_proxy"].wait_replan_reward_floor_scores))
                 if installed["upper_proxy"].wait_replan_reward_floor_scores else 0.0
+            ),
+            "shared_ppo_wait_replan_value_guard_score_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_value_guard_scores))
+                if installed["upper_proxy"].wait_replan_value_guard_scores else 0.0
+            ),
+            "shared_ppo_wait_replan_value_guard_scale_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_value_guard_scales))
+                if installed["upper_proxy"].wait_replan_value_guard_scales else 0.0
+            ),
+            "shared_ppo_wait_replan_value_guard_candidate_count_mean": (
+                float(np.mean(installed["upper_proxy"].wait_replan_value_guard_candidate_counts))
+                if installed["upper_proxy"].wait_replan_value_guard_candidate_counts else 0.0
             ),
             "shared_ppo_adaptive_lower_drift_penalty_scale_mean": (
                 float(np.mean(getattr(
@@ -2621,6 +2909,10 @@ def run_native_shared_ppo_episode_loop(
             promotion_replan_reward_floor_gap_cost),
         "promotion_replan_reward_floor_hold_cost": float(
             promotion_replan_reward_floor_hold_cost),
+        "promotion_replan_value_guard_min_score": float(
+            promotion_replan_value_guard_min_score),
+        "promotion_replan_value_guard_candidate_scales": (
+            str(promotion_replan_value_guard_candidate_scales)),
         "promotion_replan_throughput_guard_min_score": float(
             promotion_replan_throughput_guard_min_score),
         "promotion_replan_throughput_floor_min_score": float(
@@ -2720,6 +3012,8 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- mean throughput proxy score: {summary.get('shared_ppo_wait_replan_throughput_score_mean_mean', 0.0):.4f}",
         f"- mean throughput floor delta fraction: {summary.get('shared_ppo_wait_replan_throughput_floor_delta_fraction_mean_mean', 1.0):.4f}",
         f"- mean reward-floor score: {summary.get('shared_ppo_wait_replan_reward_floor_score_mean_mean', 0.0):.4f}",
+        f"- mean value-guard score: {summary.get('shared_ppo_wait_replan_value_guard_score_mean_mean', 0.0):.4f}",
+        f"- mean value-guard selected scale: {summary.get('shared_ppo_wait_replan_value_guard_scale_mean_mean', 0.0):.4f}",
         f"- mean adaptive lower drift scale: {summary.get('shared_ppo_adaptive_lower_drift_penalty_scale_mean_mean', 1.0):.4f}",
         f"- mean lower prior scale: {summary.get('shared_ppo_lower_hf_wait_prior_scale_mean_mean', 1.0):.4f}",
         f"- mean lower boarding rescue: {summary.get('shared_ppo_lower_hf_wait_boarding_rescue_mean_mean', 0.0):.4f}s",
@@ -2886,6 +3180,8 @@ def main() -> None:
     parser.add_argument("--promotion-replan-gap-risk-cap-start", type=float, default=0.0)
     parser.add_argument("--promotion-replan-gap-risk-cap-full", type=float, default=0.0)
     parser.add_argument("--promotion-replan-target-headway-max-s", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-value-guard-min-score", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-value-guard-candidate-scales", default="")
     parser.add_argument("--promotion-replan-reward-floor-throughput-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-reward-floor-fleet-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-throughput-floor-min-score", type=float, default=0.0)
@@ -2958,6 +3254,10 @@ def main() -> None:
             promotion_replan_gap_risk_cap_start=float(args.promotion_replan_gap_risk_cap_start),
             promotion_replan_gap_risk_cap_full=float(args.promotion_replan_gap_risk_cap_full),
             promotion_replan_target_headway_max_s=float(args.promotion_replan_target_headway_max_s),
+            promotion_replan_value_guard_min_score=float(
+                args.promotion_replan_value_guard_min_score),
+            promotion_replan_value_guard_candidate_scales=str(
+                args.promotion_replan_value_guard_candidate_scales),
             promotion_replan_reward_floor_throughput_weight=float(
                 args.promotion_replan_reward_floor_throughput_weight),
             promotion_replan_reward_floor_fleet_weight=float(

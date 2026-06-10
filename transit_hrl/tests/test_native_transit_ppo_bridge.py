@@ -9,6 +9,7 @@ from freq_hrl.experiments.transit.native_shared_ppo import (
     _SharedPPOPolicyProxy,
     _promotion_reward_floor_score,
     install_shared_ppo_episode_loop,
+    value_guarded_replan_action,
     wait_aware_replan_action,
 )
 
@@ -745,6 +746,85 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             installed["upper_proxy"].wait_replan_base_delta_abs[-1],
             2.0 + 1e-4,
         )
+
+    def test_value_guarded_replan_selects_candidate_scale(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        candidate, meta = value_guarded_replan_action(
+            active_action,
+            active_action,
+            runner=runner,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary={
+                "freq_low_demand": 0.4,
+                "freq_low_forecast": 0.7,
+                "freq_low_slope": 0.2,
+                "freq_high_energy": 0.3,
+                "freq_promotion_strength": 1.0,
+            },
+            state=np.zeros(5, dtype=np.float32),
+            trip=SimpleNamespace(target_headway=350.0, direction=True),
+            candidate_scales="0.25,0.50,1.00",
+            wait_gain_s=8.0,
+            max_shift_s=2.0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            reward_action_cost=0.04,
+        )
+        self.assertLess(float(candidate[0]), float(active_action[0]))
+        self.assertIn(meta["value_guard_candidate_scale"], {0.25, 0.5, 1.0})
+        self.assertEqual(meta["value_guard_candidate_count"], 3.0)
+        self.assertIn("value_guard_score", meta)
+
+    def test_learned_gate_value_guard_can_veto_low_score_replan(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        installed = install_shared_ppo_episode_loop(
+            runner,
+            bridge,
+            learned_promotion_gate=True,
+            promotion_gate_threshold=0.30,
+            promotion_gate_strength_min=0.80,
+            promotion_gate_age_min=0.50,
+            promotion_gate_preselect_action=True,
+            promotion_replan_policy="wait_aware",
+            promotion_replan_wait_gain_s=8.0,
+            promotion_replan_max_shift_s=2.0,
+            promotion_replan_state_wait_weight=0.0,
+            promotion_replan_frequency_weight=1.0,
+            promotion_replan_value_guard_candidate_scales="0.25,0.50,1.00",
+            promotion_replan_value_guard_min_score=99.0,
+        )
+        state = np.asarray([0.1, 0.2, 0.3, 1.0, 1.0], dtype=np.float32)
+        freq_summary = {
+            "freq_promotion_flag": 1.0,
+            "freq_promotion_strength": 1.0,
+            "freq_promotion_age": 1.0,
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+        }
+        self.assertFalse(runner.freq_hrl_learned_promotion_gate(
+            s_upper=state,
+            elapsed=100.0,
+            active_plan={"origin": 0.0, "action": np.asarray([0.0, 0.0, 5.0, 5.0])},
+            planner_key=True,
+            freq_summary=freq_summary,
+            trip=SimpleNamespace(target_headway=350.0, direction=True),
+        ))
+        self.assertEqual(installed["upper_proxy"].gate_replans, 0)
+        self.assertEqual(runner.freq_hrl_promotion_value_guard_rejects, 1)
 
     def test_learned_gate_can_trigger_without_preselecting_plan_action(self):
         bridge = NativeTransitPPOBridge.from_runner(
