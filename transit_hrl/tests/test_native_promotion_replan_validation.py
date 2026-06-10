@@ -88,15 +88,104 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
         try:
             apply_persistent_stress_preset(profile="value_guarded_wait_v35")
             wait_aware = VARIANTS["native_wait_aware_replan"]
-            self.assertEqual(wait_aware["_promotion_replan_active_target_headway_min_s"], 350.0)
+            self.assertEqual(wait_aware["_promotion_replan_active_target_headway_min_s"], 0.0)
             self.assertEqual(wait_aware["_promotion_replan_target_headway_min_s"], 338.0)
             self.assertEqual(wait_aware["_promotion_replan_target_headway_max_s"], 347.0)
-            self.assertEqual(wait_aware["_promotion_replan_value_guard_min_score"], 0.02)
+            self.assertEqual(wait_aware["_promotion_replan_final_delta_abs_max_s"], 0.0)
+            self.assertEqual(wait_aware["_promotion_replan_value_guard_min_score"], 0.0)
             self.assertEqual(
                 wait_aware["_promotion_replan_value_guard_candidate_scales"],
-                "0.25,0.50,0.75,1.00",
+                "0.00,0.05,0.10,0.15,0.20,0.25,0.50,0.75,1.00",
             )
+            self.assertEqual(wait_aware["_promotion_replan_reward_floor_min_score"], 0.02)
+            self.assertEqual(wait_aware["_promotion_replan_reward_floor_action_cost"], 0.08)
             self.assertEqual(wait_aware["_promotion_replan_reward_floor_target_weight"], 1.25)
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_calibrated_reward_wait_profile_uses_v21_diagnostic_region(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="calibrated_reward_wait_v36")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertEqual(wait_aware["_promotion_replan_final_delta_abs_max_s"], 3.0)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_same_wait_min"], 0.8292)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_same_wait_max"], 0.8389)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_gap_guard_min_ratio"], 1.0264)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_gap_guard_max_ratio"], 1.0333)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_min_pressure"], 0.2508)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_max_pressure"], 0.7206)
+            self.assertEqual(
+                wait_aware["_promotion_replan_value_guard_candidate_scales"],
+                "",
+            )
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_soft_capped_reward_wait_profile_enables_soft_pressure_value_guard(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="soft_capped_reward_wait_v37")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertEqual(wait_aware["_promotion_replan_final_delta_abs_max_s"], 0.0)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_same_wait_min"], 0.828)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_same_wait_max"], 0.84)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_gap_guard_min_ratio"], 1.01)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_gap_guard_max_ratio"], 1.04)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_min_pressure"], 0.25)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_max_pressure"], 0.7206)
+            self.assertTrue(wait_aware["_promotion_replan_soft_pressure_cap"])
+            self.assertEqual(wait_aware["_promotion_replan_value_guard_min_score"], 0.0)
+            self.assertEqual(
+                wait_aware["_promotion_replan_value_guard_candidate_scales"],
+                "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+            )
+            self.assertEqual(wait_aware["_promotion_replan_reward_floor_action_cost"], 0.08)
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_active_base_scorefix_profile_removes_actor_base_replan(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="active_base_scorefix_v38")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertEqual(wait_aware["_promotion_replan_policy"], "wait_aware")
+            self.assertEqual(wait_aware["_promotion_replan_base_action"], "active")
+            self.assertEqual(wait_aware["_promotion_replan_actor_base_trust_s"], 0.0)
+            self.assertTrue(wait_aware["_promotion_replan_soft_pressure_cap"])
+            self.assertEqual(
+                wait_aware["_promotion_replan_value_guard_candidate_scales"],
+                "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+            )
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_wait_credit_aligned_profile_enables_bounded_promotion_credit(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="wait_credit_aligned_v39")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertEqual(wait_aware["_promotion_replan_policy"], "wait_aware")
+            self.assertEqual(wait_aware["_promotion_replan_base_action"], "active")
+            self.assertEqual(wait_aware["_promotion_replan_wait_credit_weight"], 4.0)
+            self.assertEqual(wait_aware["_promotion_replan_wait_credit_clip"], 4.0)
+            self.assertTrue(wait_aware["_promotion_replan_soft_pressure_cap"])
         finally:
             COMMON_OVERRIDES.clear()
             COMMON_OVERRIDES.update(old_common)

@@ -404,33 +404,175 @@ PERSISTENT_STRESS_PROFILES = {
         ),
         "lower_improvement_credit_weight": 1000.0,
         "gate_strength_min": 1.0,
-        "active_target_headway_min_s": 350.0,
+        "active_target_headway_min_s": 0.0,
         "target_headway_min_s": 338.0,
         "target_headway_max_s": 347.0,
-        "final_delta_abs_max_s": 1.60,
+        "final_delta_abs_max_s": 0.0,
         "max_shift_s": 2.0,
         "wait_gain_s": 8.0,
         "max_replans": 2,
-        "same_wait_min": 0.812,
-        "same_wait_max": 0.85,
-        "same_hold_max": 0.18,
-        "gap_guard_min_ratio": 0.998,
-        "gap_guard_max_ratio": 1.30,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
         "gap_risk_cap_start": 0.05,
         "gap_risk_cap_full": 0.20,
         "max_pressure": 0.5263,
         "project_target_headway": True,
         "target_headway_project_margin_s": 0.25,
-        "value_guard_min_score": 0.02,
-        "value_guard_candidate_scales": "0.25,0.50,0.75,1.00",
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.05,0.10,0.15,0.20,0.25,0.50,0.75,1.00",
         "reward_floor_min_score": 0.02,
         "reward_floor_wait_weight": 1.0,
         "reward_floor_target_weight": 1.25,
         "reward_floor_throughput_weight": 0.25,
         "reward_floor_fleet_weight": 0.05,
-        "reward_floor_action_cost": 0.04,
+        "reward_floor_action_cost": 0.08,
         "reward_floor_gap_cost": 0.22,
         "reward_floor_hold_cost": 0.40,
+    },
+    "calibrated_reward_wait_v36": {
+        "description": (
+            "Calibrated reward-wait guard from the v21 8192-seed diagnostic: "
+            "keep only the same-wait, dispatch-gap, pressure, and final-delta "
+            "region where accepted native replans had positive reward and "
+            "negative wait CIs in paired replay analysis."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 3.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.8292,
+        "same_wait_max": 0.8389,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.0264,
+        "gap_guard_max_ratio": 1.0333,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.2508,
+        "max_pressure": 0.7206,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+    },
+    "soft_capped_reward_wait_v37": {
+        "description": (
+            "Soft pressure-capped reward/wait profile: return to the v21 "
+            "reward-supported accept region, but replace high-pressure hard "
+            "rejection with causal shift compression and value-candidate "
+            "selection so promotion can act often enough for CI validation."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.25,
+        "max_pressure": 0.7206,
+        "soft_pressure_cap": True,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+    },
+    "active_base_scorefix_v38": {
+        "description": (
+            "Active-base score-fixed reward/wait profile: keep the learned "
+            "promotion gate and v37 candidate value guard, but apply the "
+            "promotion replan against the active timetable rather than an "
+            "actor-base plan to reduce native action cost."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.25,
+        "max_pressure": 0.7206,
+        "soft_pressure_cap": True,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+    },
+    "wait_credit_aligned_v39": {
+        "description": (
+            "Wait-credit aligned reward profile: start from v38 active-base "
+            "value-guarded promotion, then align native episode reward with "
+            "accepted wait-aware replans by granting a bounded credit budget "
+            "that is consumed only by subsequent real boarding events."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.25,
+        "max_pressure": 0.7206,
+        "soft_pressure_cap": True,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+        "wait_credit_weight": 4.0,
+        "wait_credit_clip": 4.0,
     },
     "reward_floor_throughput_v25": {
         "description": (
@@ -773,6 +915,24 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_gate_wait_pressure_override_min": float(
             profile_cfg.get("gate_wait_pressure_override_min", 0.0)
         ),
+        "_promotion_replan_policy": str(
+            profile_cfg.get(
+                "replan_policy",
+                wait_aware.get("_promotion_replan_policy", "learned_wait_aware"),
+            )
+        ),
+        "_promotion_replan_base_action": str(
+            profile_cfg.get(
+                "base_action",
+                wait_aware.get("_promotion_replan_base_action", "actor"),
+            )
+        ),
+        "_promotion_replan_actor_base_trust_s": float(
+            profile_cfg.get(
+                "actor_base_trust_s",
+                wait_aware.get("_promotion_replan_actor_base_trust_s", 2.0),
+            )
+        ),
         "_promotion_replan_same_hold_max": float(profile_cfg.get("same_hold_max", 0.25)),
         "_promotion_replan_same_wait_min": float(profile_cfg.get("same_wait_min", 0.812)),
         "_promotion_replan_same_wait_max": float(profile_cfg.get("same_wait_max", 0.85)),
@@ -780,6 +940,9 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         "_promotion_replan_max_shift_s": float(profile_cfg.get("max_shift_s", 2.0)),
         "_promotion_replan_min_pressure": float(profile_cfg.get("min_pressure", 0.25)),
         "_promotion_replan_max_pressure": float(profile_cfg.get("max_pressure", 0.0)),
+        "_promotion_replan_soft_pressure_cap": bool(
+            profile_cfg.get("soft_pressure_cap", False)
+        ),
         "_promotion_replan_gap_guard_min_ratio": float(
             profile_cfg.get(
                 "gap_guard_min_ratio",
@@ -881,6 +1044,12 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
+        "_promotion_replan_wait_credit_weight": float(
+            profile_cfg.get("wait_credit_weight", 0.0)
+        ),
+        "_promotion_replan_wait_credit_clip": float(
+            profile_cfg.get("wait_credit_clip", 0.0)
+        ),
         "_promotion_replan_shift_sign": -1.0,
         "_lower_hf_wait_context_dim": int(
             profile_cfg.get("lower_hf_wait_context_dim", 0)
@@ -993,6 +1162,12 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_pressure_guard_rejects": float(
             last.get("shared_ppo_pressure_guard_rejects", 0.0)
         ),
+        "shared_ppo_soft_pressure_cap_count": float(
+            last.get("shared_ppo_soft_pressure_cap_count", 0.0)
+        ),
+        "shared_ppo_soft_pressure_cap_scale_mean": float(
+            last.get("shared_ppo_soft_pressure_cap_scale_mean", 1.0)
+        ),
         "shared_ppo_reward_floor_guard_rejects": float(
             last.get("shared_ppo_reward_floor_guard_rejects", 0.0)
         ),
@@ -1059,6 +1234,18 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         "shared_ppo_wait_replan_value_guard_candidate_count_mean": float(
             last.get("shared_ppo_wait_replan_value_guard_candidate_count_mean", 0.0)
         ),
+        "shared_ppo_promotion_wait_credit_granted": float(
+            last.get("shared_ppo_promotion_wait_credit_granted", 0.0)
+        ),
+        "shared_ppo_promotion_wait_credit_consumed": float(
+            last.get("shared_ppo_promotion_wait_credit_consumed", 0.0)
+        ),
+        "shared_ppo_promotion_wait_credit_budget": float(
+            last.get("shared_ppo_promotion_wait_credit_budget", 0.0)
+        ),
+        "shared_ppo_promotion_wait_credit_events": float(
+            last.get("shared_ppo_promotion_wait_credit_events", 0.0)
+        ),
         "shared_ppo_adaptive_lower_drift_penalty_scale_mean": float(
             last.get("shared_ppo_adaptive_lower_drift_penalty_scale_mean", 1.0)
         ),
@@ -1123,6 +1310,8 @@ def paired_checks(
             ("shared_ppo_target_headway_project_count", False),
             ("shared_ppo_target_headway_project_correction_mean_s", False),
             ("shared_ppo_pressure_guard_rejects", False),
+            ("shared_ppo_soft_pressure_cap_count", False),
+            ("shared_ppo_soft_pressure_cap_scale_mean", True),
             ("shared_ppo_reward_floor_guard_rejects", False),
             ("shared_ppo_value_guard_rejects", False),
             ("shared_ppo_throughput_guard_rejects", False),
@@ -1341,6 +1530,9 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
         promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
         promotion_replan_max_pressure=float(overrides.get("_promotion_replan_max_pressure", 0.0)),
+        promotion_replan_soft_pressure_cap=bool(
+            overrides.get("_promotion_replan_soft_pressure_cap", False)
+        ),
         promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
         promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
         promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
@@ -1428,6 +1620,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
         promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
         promotion_replan_terminal_early_relax=bool(overrides.get("_promotion_replan_terminal_early_relax", False)),
+        promotion_replan_wait_credit_weight=float(
+            overrides.get("_promotion_replan_wait_credit_weight", 0.0)
+        ),
+        promotion_replan_wait_credit_clip=float(
+            overrides.get("_promotion_replan_wait_credit_clip", 0.0)
+        ),
         lower_hf_wait_action_gain_s=variant_lower_gain,
         lower_hf_wait_context_dim=int(overrides.get("_lower_hf_wait_context_dim", 0)),
         lower_hf_wait_min_scale=float(overrides.get("_lower_hf_wait_min_scale", 0.0)),
@@ -1703,6 +1901,10 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_wait_replan_actor_base_used_mean",
             "shared_ppo_wait_replan_base_delta_abs_mean_s",
             "shared_ppo_wait_replan_final_delta_abs_mean_s",
+            "shared_ppo_promotion_wait_credit_granted",
+            "shared_ppo_promotion_wait_credit_consumed",
+            "shared_ppo_promotion_wait_credit_budget",
+            "shared_ppo_promotion_wait_credit_events",
             "freq_wait_lower_improvement_credit_mean",
             "freq_wait_lower_net_mean",
         ]:

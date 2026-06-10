@@ -8,6 +8,7 @@ from freq_hrl.experiments.transit.native_shared_ppo import (
     _NativeLowerReplayCollector,
     _SharedPPOPolicyProxy,
     _promotion_reward_floor_score,
+    _promotion_wait_credit_from_metadata,
     install_shared_ppo_episode_loop,
     value_guarded_replan_action,
     wait_aware_replan_action,
@@ -277,6 +278,58 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertAlmostEqual(float(adjusted[3]), float(active_action[3]), places=5)
         self.assertEqual(meta["shift_sign"], 1.0)
         self.assertGreater(meta["signed_shift_s"], 0.0)
+
+    def test_wait_aware_replan_soft_pressure_cap_scales_instead_of_rejecting(self):
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        freq_summary = {
+            "freq_low_demand": 0.4,
+            "freq_low_forecast": 0.7,
+            "freq_low_slope": 0.2,
+            "freq_high_energy": 0.3,
+            "freq_promotion_strength": 1.0,
+        }
+        hard_capped, hard_meta = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=np.zeros(5, dtype=np.float32),
+            wait_gain_s=20.0,
+            max_shift_s=12.0,
+            holdfb_dim=0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            min_pressure=0.0,
+            max_pressure=0.2,
+        )
+        soft_capped, soft_meta = wait_aware_replan_action(
+            active_action,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary=freq_summary,
+            state=np.zeros(5, dtype=np.float32),
+            wait_gain_s=20.0,
+            max_shift_s=12.0,
+            holdfb_dim=0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            min_pressure=0.0,
+            max_pressure=0.2,
+            soft_pressure_cap=True,
+        )
+        np.testing.assert_allclose(hard_capped, active_action)
+        self.assertEqual(hard_meta["pressure_guard_active"], 1.0)
+        self.assertEqual(hard_meta["pressure_soft_cap_active"], 0.0)
+        self.assertLess(float(soft_capped[0]), float(active_action[0]))
+        self.assertEqual(soft_meta["pressure_guard_active"], 0.0)
+        self.assertEqual(soft_meta["pressure_soft_cap_active"], 1.0)
+        self.assertLess(soft_meta["pressure_cap_scale"], 1.0)
+        self.assertGreater(soft_meta["abs_shift_s"], 0.0)
 
     def test_wait_aware_replan_uses_same_direction_wait_feedback(self):
         bridge = NativeTransitPPOBridge.from_runner(
@@ -782,6 +835,75 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(meta["value_guard_candidate_count"], 3.0)
         self.assertIn("value_guard_score", meta)
 
+    def test_value_guarded_replan_can_select_noop_baseline(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        candidate, meta = value_guarded_replan_action(
+            active_action,
+            active_action,
+            runner=runner,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary={
+                "freq_low_demand": 0.4,
+                "freq_low_forecast": 0.7,
+                "freq_low_slope": 0.2,
+                "freq_high_energy": 0.3,
+                "freq_promotion_strength": 1.0,
+            },
+            state=np.zeros(5, dtype=np.float32),
+            trip=SimpleNamespace(target_headway=350.0, direction=True),
+            candidate_scales="0.00,1.00",
+            wait_gain_s=8.0,
+            max_shift_s=2.0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            reward_action_cost=10.0,
+        )
+        np.testing.assert_allclose(candidate, active_action)
+        self.assertEqual(meta["value_guard_candidate_scale"], 0.0)
+        self.assertEqual(meta["value_guard_score"], 0.0)
+        self.assertEqual(meta["value_guard_candidate_count"], 2.0)
+
+    def test_value_guarded_replan_respects_final_delta_cap(self):
+        runner = _FakeNativeRunner()
+        bridge = NativeTransitPPOBridge.from_runner(
+            runner,
+            hidden_dim=0,
+            learned_promotion_gate=True,
+        )
+        active_action = np.asarray([0.0, 0.0, 5.0, 5.0], dtype=np.float32)
+        candidate, meta = value_guarded_replan_action(
+            active_action,
+            active_action,
+            runner=runner,
+            bridge=bridge,
+            planner_key=True,
+            freq_summary={
+                "freq_low_demand": 0.4,
+                "freq_low_forecast": 0.7,
+                "freq_low_slope": 0.2,
+                "freq_high_energy": 0.3,
+                "freq_promotion_strength": 1.0,
+            },
+            state=np.zeros(5, dtype=np.float32),
+            trip=SimpleNamespace(target_headway=350.0, direction=True),
+            candidate_scales="0.00,1.00",
+            wait_gain_s=8.0,
+            max_shift_s=2.0,
+            state_wait_weight=0.0,
+            frequency_weight=1.0,
+            final_delta_abs_max_s=0.01,
+        )
+        np.testing.assert_allclose(candidate, active_action)
+        self.assertEqual(meta["value_guard_candidate_scale"], 0.0)
+        self.assertEqual(meta["final_delta_guard_active"], 0.0)
+
     def test_learned_gate_value_guard_can_veto_low_score_replan(self):
         runner = _FakeNativeRunner()
         bridge = NativeTransitPPOBridge.from_runner(
@@ -1156,6 +1278,104 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
             reward_hold_cost=0.30,
         )
         self.assertGreater(with_throughput, without)
+
+    def test_reward_floor_score_discounts_throughput_for_no_effect_action(self):
+        no_effect = {
+            "state_wait_pressure": 0.0,
+            "state_same_wait": 0.8,
+            "shift_pressure": 0.0,
+            "abs_shift_s": 0.0,
+            "state_dispatch_gap_ratio": 1.0,
+            "state_same_hold": 0.0,
+            "throughput_proxy_score": 0.7,
+            "throughput_proxy_fleet_util": 0.9,
+        }
+        score = _promotion_reward_floor_score(
+            no_effect,
+            active_target_headway_s=345.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.5,
+            reward_fleet_weight=0.2,
+            reward_action_cost=0.03,
+            reward_gap_cost=0.20,
+            reward_hold_cost=0.30,
+        )
+        self.assertAlmostEqual(score, 0.0, places=6)
+
+        acted = _promotion_reward_floor_score(
+            {**no_effect, "shift_pressure": 0.5, "abs_shift_s": 1.0},
+            active_target_headway_s=345.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.5,
+            reward_fleet_weight=0.2,
+            reward_action_cost=0.03,
+            reward_gap_cost=0.20,
+            reward_hold_cost=0.30,
+        )
+        self.assertGreater(acted, score)
+
+    def test_reward_floor_score_charges_final_action_delta(self):
+        base = {
+            "state_wait_pressure": 0.1,
+            "state_same_wait": 0.2,
+            "shift_pressure": 0.5,
+            "abs_shift_s": 0.1,
+            "state_dispatch_gap_ratio": 1.0,
+            "state_same_hold": 0.0,
+        }
+        small_final = _promotion_reward_floor_score(
+            {**base, "final_action_delta_abs_s": 0.1},
+            active_target_headway_s=350.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.0,
+            reward_fleet_weight=0.0,
+            reward_action_cost=0.10,
+            reward_gap_cost=0.0,
+            reward_hold_cost=0.0,
+        )
+        large_final = _promotion_reward_floor_score(
+            {**base, "final_action_delta_abs_s": 5.0},
+            active_target_headway_s=350.0,
+            candidate_target_headway_s=345.0,
+            reward_wait_weight=1.0,
+            reward_target_weight=1.0,
+            reward_throughput_weight=0.0,
+            reward_fleet_weight=0.0,
+            reward_action_cost=0.10,
+            reward_gap_cost=0.0,
+            reward_hold_cost=0.0,
+        )
+        self.assertLess(large_final, small_final)
+
+    def test_promotion_wait_credit_requires_effective_positive_replan(self):
+        no_effect = _promotion_wait_credit_from_metadata(
+            {
+                "reward_floor_score": 1.0,
+                "shift_pressure": 0.0,
+                "abs_shift_s": 0.0,
+            },
+            weight=4.0,
+            clip=4.0,
+        )
+        self.assertEqual(no_effect, 0.0)
+
+        credit = _promotion_wait_credit_from_metadata(
+            {
+                "reward_floor_score": 0.9,
+                "value_guard_score": 0.8,
+                "shift_pressure": 0.5,
+                "abs_shift_s": 0.4,
+            },
+            weight=4.0,
+            clip=3.0,
+        )
+        self.assertAlmostEqual(credit, 3.0)
 
 
 if __name__ == "__main__":
