@@ -98,6 +98,14 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         self.assertGreater(rescue["_lower_hf_wait_boarding_rescue_gain_s"], 0.0)
         self.assertGreater(rescue["_lower_hf_wait_boarding_rescue_max_s"], 0.0)
         self.assertLess(rescue["_lower_hf_wait_action_gain_s"], damped["_lower_hf_wait_action_gain_s"])
+        wait = variants_for_control_profile("alighting_wait_v4")["native_real_freqhrl"]
+        self.assertEqual(wait["_promotion_gate_max_replans"], 2)
+        self.assertLess(wait["_promotion_gate_wait_pressure_override_min"], damped["_promotion_gate_wait_pressure_override_min"])
+        self.assertGreater(wait["_promotion_replan_throughput_floor_min_delta_fraction"], 0.0)
+        self.assertEqual(wait["_promotion_replan_final_delta_abs_min_s"], 0.03)
+        self.assertLess(wait["_lower_hf_wait_action_gain_s"], rescue["_lower_hf_wait_action_gain_s"])
+        self.assertGreater(wait["_lower_hf_wait_boarding_rescue_gain_s"], 0.0)
+        self.assertGreater(wait["_adaptive_lower_drift_penalty_gain"], rescue["_adaptive_lower_drift_penalty_gain"])
 
     def test_control_score_penalizes_completed_throughput_loss(self):
         base = {

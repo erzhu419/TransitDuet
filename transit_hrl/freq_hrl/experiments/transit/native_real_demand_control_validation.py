@@ -248,6 +248,58 @@ CONTROL_PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
             "_adaptive_lower_drift_penalty_gain": 0.40,
         },
     },
+    "alighting_wait_v4": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.24,
+            "_promotion_gate_strength_min": 0.18,
+            "_promotion_gate_wait_pressure_override_min": 0.18,
+            "_promotion_gate_max_replans": 2,
+            "_promotion_replan_wait_gain_s": 4.0,
+            "_promotion_replan_max_shift_s": 1.25,
+            "_promotion_replan_min_pressure": 0.18,
+            "_promotion_replan_max_pressure": 0.68,
+            "_promotion_replan_same_hold_max": 0.12,
+            "_promotion_replan_same_wait_min": 0.78,
+            "_promotion_replan_same_wait_max": 0.88,
+            "_promotion_replan_gap_guard_min_ratio": 1.00,
+            "_promotion_replan_gap_guard_max_ratio": 1.12,
+            "_promotion_replan_gap_risk_cap_full": 0.15,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.90,
+            "_promotion_replan_reward_floor_min_score": 0.06,
+            "_promotion_replan_reward_floor_wait_weight": 1.0,
+            "_promotion_replan_reward_floor_target_weight": 1.25,
+            "_promotion_replan_reward_floor_throughput_weight": 2.75,
+            "_promotion_replan_reward_floor_fleet_weight": 0.30,
+            "_promotion_replan_reward_floor_action_cost": 0.05,
+            "_promotion_replan_reward_floor_gap_cost": 0.22,
+            "_promotion_replan_reward_floor_hold_cost": 0.35,
+            "_promotion_replan_throughput_guard_min_score": 0.25,
+            "_promotion_replan_throughput_floor_min_score": 0.32,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.05,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.84,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.08,
+            "_promotion_replan_target_headway_min_s": 341.0,
+            "_promotion_replan_target_headway_max_s": 351.0,
+            "_promotion_replan_project_target_headway": True,
+            "_promotion_replan_final_delta_abs_min_s": 0.03,
+            "_promotion_replan_final_delta_abs_max_s": 0.0,
+            "_promotion_replan_base_action": "active",
+            "_promotion_replan_actor_base_trust_s": 0.0,
+            "_lower_hf_wait_action_gain_s": 8.0,
+            "_lower_hf_wait_min_scale": 0.0,
+            "_lower_hf_wait_max_scale": 0.45,
+            "_lower_hf_wait_load_damping_weight": 1.8,
+            "_lower_hf_wait_schedule_slack_damping_weight": 0.8,
+            "_lower_hf_wait_queue_boost_weight": 0.08,
+            "_lower_hf_wait_boarding_rescue_gain_s": 14.0,
+            "_lower_hf_wait_boarding_rescue_max_s": 5.0,
+            "_lower_hf_wait_boarding_rescue_queue_min": 0.03,
+            "_lower_hf_wait_boarding_rescue_load_max": 1.25,
+            "_adaptive_lower_drift_penalty_gain": 0.80,
+            "_adaptive_lower_drift_penalty_min_scale": 0.55,
+            "_offpolicy_replay_updates": 3,
+        },
+    },
 }
 
 
@@ -562,6 +614,7 @@ def run_validation(
     limit: int,
     min_pairs: int,
     control_profile: str = "default",
+    demand_scale_multiplier: float = 1.0,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     variants = variants_for_control_profile(control_profile)
@@ -596,7 +649,11 @@ def run_validation(
                     key: value for key, value in overrides.items()
                     if not str(key).startswith("_")
                 })
-                merged.setdefault("env", {})["real_demand_profile"] = profile
+                env_overrides = merged.setdefault("env", {})
+                env_overrides["real_demand_profile"] = profile
+                demand_scale = max(float(demand_scale_multiplier), 0.0)
+                if abs(demand_scale - 1.0) > 1e-12:
+                    env_overrides["demand_scale"] = demand_scale
                 payload = run_native_shared_ppo_episode_loop(
                     output_dir=output_dir / variant / str(source) / f"seed_{int(seed)}",
                     config_path=config_path,
@@ -700,6 +757,9 @@ def run_validation(
                     promotion_replan_final_delta_abs_max_s=float(
                         overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)
                     ),
+                    promotion_replan_final_delta_abs_min_s=float(
+                        overrides.get("_promotion_replan_final_delta_abs_min_s", 0.0)
+                    ),
                     promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
                     promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
                     promotion_replan_actor_base_trust_s=float(
@@ -765,6 +825,7 @@ def run_validation(
         "paired_checks": checks,
         "payloads": payloads,
         "control_profile": str(control_profile),
+        "demand_scale_multiplier": float(demand_scale_multiplier),
         "variant_overrides": variants,
         "boundary": "native simulator passenger loop with public AFC/APC profile mapping, not exact AFC/APC OD geometry",
     }
@@ -798,6 +859,7 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         str(payload.get("boundary", "")),
         "",
         f"Control profile: `{payload.get('control_profile', 'default')}`.",
+        f"Demand scale multiplier: `{payload.get('demand_scale_multiplier', 1.0)}`.",
         "",
         "## Sources",
         "",
@@ -831,6 +893,10 @@ def main() -> None:
     parser.add_argument("--config", type=Path, default=TRANSIT_DUET_ROOT / "configs_freqduet" / "T_freqhrl_native_full.yaml")
     parser.add_argument("--sources", nargs="+", default=["afc", "apc"])
     parser.add_argument("--seeds", type=int, nargs="+", default=[31, 41, 51])
+    parser.add_argument("--seed-index-start", type=int, default=None)
+    parser.add_argument("--seed-index-end", type=int, default=None)
+    parser.add_argument("--seed-base", type=int, default=31)
+    parser.add_argument("--seed-step", type=int, default=10)
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--max-series", type=int, default=4)
@@ -848,13 +914,24 @@ def main() -> None:
         choices=sorted(CONTROL_PROFILE_OVERRIDES),
         default="default",
     )
+    parser.add_argument("--demand-scale-multiplier", type=float, default=1.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/transit_native_real_demand_control"))
     args = parser.parse_args()
+    seeds = list(args.seeds)
+    if args.seed_index_start is not None or args.seed_index_end is not None:
+        if args.seed_index_start is None or args.seed_index_end is None:
+            raise ValueError("--seed-index-start and --seed-index-end must be provided together")
+        if int(args.seed_index_end) <= int(args.seed_index_start):
+            raise ValueError("--seed-index-end must be greater than --seed-index-start")
+        seeds = [
+            int(args.seed_base) + int(args.seed_step) * idx
+            for idx in range(int(args.seed_index_start), int(args.seed_index_end))
+        ]
     payload = run_validation(
         args.output_dir,
         config_path=args.config,
         sources=list(args.sources),
-        seeds=list(args.seeds),
+        seeds=seeds,
         episodes=int(args.episodes),
         device=str(args.device),
         max_series=int(args.max_series),
@@ -868,6 +945,7 @@ def main() -> None:
         limit=int(args.limit),
         min_pairs=int(args.min_pairs),
         control_profile=str(args.control_profile),
+        demand_scale_multiplier=float(args.demand_scale_multiplier),
     )
     score = next(row for row in payload["paired_checks"] if row["metric"] == "control_score")
     print(

@@ -27,6 +27,7 @@ class ManifestEntry:
     symbol: str = ""
     session: str = ""
     source_id: str = ""
+    source_type: str = ""
 
 
 def _as_entries(raw: Any) -> list[dict[str, Any]]:
@@ -69,6 +70,12 @@ def load_manifest(path: Path) -> list[ManifestEntry]:
             symbol=str(record.get("symbol", "")),
             session=str(record.get("session") or record.get("date") or ""),
             source_id=str(record.get("source_id") or f"{kind}_{idx}"),
+            source_type=str(
+                record.get("source_type")
+                or record.get("data_type")
+                or record.get("quality")
+                or ""
+            ).strip().lower(),
         ))
     return entries
 
@@ -90,6 +97,7 @@ def _filter_existing(
                 "symbol": entry.symbol,
                 "session": entry.session,
                 "source_id": entry.source_id,
+                "source_type": entry.source_type,
             }
             if not allow_missing:
                 raise FileNotFoundError(f"manifest input missing: {entry.path}")
@@ -108,9 +116,21 @@ def _metadata_by_path(entries: list[ManifestEntry]) -> dict[str, dict[str, str]]
             "symbol": entry.symbol,
             "session": entry.session,
             "source_id": entry.source_id,
+            "source_type": entry.source_type,
         }
         for entry in entries
     }
+
+
+def _is_real_or_venue_grade(entry: ManifestEntry) -> bool:
+    source_type = str(entry.source_type).lower().replace("-", "_")
+    if source_type in {"real", "venue", "venue_grade", "exchange", "production"}:
+        return True
+    source_id = str(entry.source_id).lower()
+    path_text = str(entry.path).lower()
+    if any(token in source_id or token in path_text for token in ("synthetic", "fixture", "toy", "sample")):
+        return False
+    return False
 
 
 def _enrich_rows(rows: list[dict[str, Any]], *, kind: str, entries: list[ManifestEntry]) -> list[dict[str, Any]]:
@@ -224,6 +244,10 @@ def run_manifest_validation(
         "missing_entries": len(missing),
         "l2_files": len(l2_entries),
         "l3_files": len(l3_entries),
+        "real_l2_files": sum(1 for entry in l2_entries if _is_real_or_venue_grade(entry)),
+        "real_l3_files": sum(1 for entry in l3_entries if _is_real_or_venue_grade(entry)),
+        "fixture_l2_files": sum(1 for entry in l2_entries if not _is_real_or_venue_grade(entry)),
+        "fixture_l3_files": sum(1 for entry in l3_entries if not _is_real_or_venue_grade(entry)),
         "methods": list(methods),
         "steps": int(steps),
         "levels": int(levels),
@@ -255,6 +279,8 @@ def run_manifest_validation(
         f"- used entries: `{coverage['used_entries']}`",
         f"- L2 files: `{coverage['l2_files']}`",
         f"- L3 files: `{coverage['l3_files']}`",
+        f"- real/venue-grade L2 files: `{coverage['real_l2_files']}`",
+        f"- real/venue-grade L3 files: `{coverage['real_l3_files']}`",
         f"- missing entries: `{coverage['missing_entries']}`",
         f"- boundary: {payload['boundary']}",
         "",

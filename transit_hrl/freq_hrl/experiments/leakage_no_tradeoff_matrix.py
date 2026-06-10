@@ -16,6 +16,7 @@ DEFAULT_RESULT_PATHS = {
     "trading_ppo_primal_dual": Path("transit_hrl/results/trading_ppo_primal_dual_leakage/summary.json"),
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
     "transit_ppo_primal_dual": Path("transit_hrl/results/transit_ppo_primal_dual_leakage/summary.json"),
+    "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand": Path("transit_hrl/results/transit_native_real_demand_control/summary.json"),
 }
@@ -344,9 +345,9 @@ def build_leakage_matrix(result_paths: dict[str, Path], *, min_pairs: int) -> di
         "boundary": (
             "No-tradeoff is supported only when leakage/drift reduction and "
             "performance noninferiority are both supported in the same domain. "
-            "Native real-demand artifacts currently expose wait/alighting/reward "
-            "checks but not LowerLFDrift, so they are performance/no-harm evidence "
-            "unless native drift metrics are added."
+            "Native real-demand artifacts expose wait/alighting/reward and "
+            "LowerLFDrift checks; they are no-tradeoff evidence only when both "
+            "drift reduction and performance noninferiority are supported."
         ),
     }
 

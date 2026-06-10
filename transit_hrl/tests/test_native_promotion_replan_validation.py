@@ -249,6 +249,26 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             VARIANTS.clear()
             VARIANTS.update(old_variants)
 
+    def test_odshift_pressure_profile_enables_pressure_override(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="odshift_pressure_replay_v43")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertTrue(wait_aware["_promotion_gate_wait_pressure_override"])
+            self.assertEqual(wait_aware["_promotion_gate_wait_pressure_override_min"], 0.01)
+            self.assertEqual(wait_aware["_promotion_gate_strength_min"], 0.20)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_min_pressure"], 0.01)
+            self.assertAlmostEqual(wait_aware["_promotion_replan_max_pressure"], 0.678)
+            self.assertEqual(wait_aware["_promotion_replan_final_delta_abs_min_s"], 0.03)
+            self.assertEqual(wait_aware["_promotion_replan_target_headway_min_s"], 341.0)
+            self.assertEqual(wait_aware["_promotion_replan_wait_credit_weight"], 4.0)
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
     def test_paired_checks_gate_native_reward_and_wait(self):
         rows = [
             {

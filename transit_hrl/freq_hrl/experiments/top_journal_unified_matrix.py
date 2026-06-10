@@ -10,6 +10,7 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v42": Path("transit_hrl/results/scheduler_native_promotion_risk_banded_delta_floor_v42_512seed_merged/summary.json"),
     "native_promotion_v32": Path("transit_hrl/results/transit_native_promotion_reward_guarded_highpressure_wait_v32_512seed_w16_evidence/summary.json"),
     "native_promotion_v31": Path("transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json"),
     "native_promotion_v27": Path("transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json"),
@@ -18,6 +19,7 @@ DEFAULT_ARTIFACTS = {
     "native_promotion_v24_fixed": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand_v5": Path("transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json"),
     "native_real_demand_v4": Path("transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json"),
@@ -106,6 +108,7 @@ def _promotion_evidence(
     paths: dict[str, str],
 ) -> dict[str, Any]:
     candidates = [
+        "native_promotion_v42",
         "native_promotion_v32",
         "native_promotion_v31",
         "native_promotion_v27",
@@ -225,7 +228,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     promotion_wait_noninferiority = promotion["wait_noninferiority"]
     promotion_score = promotion.get("best_score", {})
     real = (
-        artifacts["native_real_demand_alighting_safe_v2"]
+        artifacts["native_real_demand_alighting_wait_v4"]
+        or artifacts["native_real_demand_alighting_safe_v2"]
         or artifacts["native_real_demand_v5"]
         or artifacts["native_real_demand_v4"]
         or artifacts["native_real_demand_v3"]
@@ -277,8 +281,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     order_book_l2_supported = _count_checks(order_book_l2, {"supported"})
     order_book_l3_positive = _count_checks(order_book_l3, {"supported", "positive_mixed"})
     order_book_has_real_l2_l3 = (
-        bool(order_book_manifest.get("coverage", {}).get("l2_files", 0))
-        and bool(order_book_manifest.get("coverage", {}).get("l3_files", 0))
+        bool(order_book_manifest.get("coverage", {}).get("real_l2_files", 0))
+        and bool(order_book_manifest.get("coverage", {}).get("real_l3_files", 0))
     ) or (_has_non_synthetic_sources(order_book_l2) and _has_non_synthetic_sources(order_book_l3))
 
     claims = [
@@ -297,7 +301,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"wait_noharm={promotion_wait_noninferiority.get('status', 'missing')} "
                 f"score={promotion_score.get('status', 'missing')}"
             ),
-            "remaining_gap": "Reward and wait CIs must be supported together in the same native run; v32 now supports wait/score with reward no-harm.",
+            "remaining_gap": "v42 supports reward and wait in the same native run; remaining work is cross-stress replication and final paper-table integration.",
             "artifact": promotion["artifact"],
         },
         {
@@ -323,7 +327,9 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             ),
             "remaining_gap": "Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation.",
             "artifact": (
-                paths["native_real_demand_alighting_safe_v2"]
+                paths["native_real_demand_alighting_wait_v4"]
+                if artifacts["native_real_demand_alighting_wait_v4"]
+                else paths["native_real_demand_alighting_safe_v2"]
                 if artifacts["native_real_demand_alighting_safe_v2"]
                 else paths["native_real_demand_v5"]
                 if artifacts["native_real_demand_v5"]

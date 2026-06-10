@@ -30,6 +30,7 @@ def merge_native_real_demand_shards(
     payloads: dict[str, Any] = {}
     config_paths: list[str] = []
     control_profiles: set[str] = set()
+    demand_scale_multipliers: set[float] = set()
     sources: set[str] = set()
     episodes = 0
     for input_dir in input_dirs:
@@ -41,6 +42,8 @@ def merge_native_real_demand_shards(
             config_paths.append(str(payload["config_path"]))
         if payload.get("control_profile"):
             control_profiles.add(str(payload["control_profile"]))
+        if "demand_scale_multiplier" in payload:
+            demand_scale_multipliers.add(float(payload["demand_scale_multiplier"]))
         episodes = max(episodes, int(payload.get("episodes", 0)))
         sources.update(str(source) for source in payload.get("sources", []))
         for meta in payload.get("metadata", []):
@@ -90,6 +93,7 @@ def merge_native_real_demand_shards(
         "episodes": int(episodes),
         "min_pairs": int(min_pairs),
         "control_profiles": sorted(control_profiles),
+        "demand_scale_multipliers": sorted(demand_scale_multipliers),
         "variants": list(VARIANTS.keys()),
         "rows": rows,
         "paired_checks": checks,
