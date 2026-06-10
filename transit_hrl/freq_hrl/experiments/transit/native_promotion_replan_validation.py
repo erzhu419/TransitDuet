@@ -574,6 +574,133 @@ PERSISTENT_STRESS_PROFILES = {
         "wait_credit_weight": 4.0,
         "wait_credit_clip": 4.0,
     },
+    "promotion_confirmed_wait_credit_v40": {
+        "description": (
+            "Promotion-confirmed wait-credit profile: keep v39 active-base "
+            "wait replan and bounded boarding credit, but require a real "
+            "frequency-promotion strength confirmation before the preselected "
+            "action is allowed to modify the native upper timetable."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_max_s": 347.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.25,
+        "max_pressure": 0.7206,
+        "soft_pressure_cap": True,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+        "confirm_min_strength": 0.10,
+        "wait_credit_weight": 4.0,
+        "wait_credit_clip": 4.0,
+    },
+    "risk_banded_wait_credit_v41": {
+        "description": (
+            "Risk-banded wait-credit profile: keep v39 active-base wait "
+            "replanning and bounded boarding credit, but replace the soft "
+            "pressure cap with a hard causal accept band for pressure and "
+            "target headway to avoid the native lower-reward tail observed in "
+            "the v39/v40 512-seed diagnostics."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_min_s": 341.0,
+        "target_headway_max_s": 351.0,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.29,
+        "max_pressure": 0.678,
+        "soft_pressure_cap": False,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+        "wait_credit_weight": 4.0,
+        "wait_credit_clip": 4.0,
+    },
+    "risk_banded_delta_floor_v42": {
+        "description": (
+            "Risk-banded delta-floor profile: keep the v41 pressure/target "
+            "reward-risk band, and reject tiny final timetable deltas that are "
+            "too small to overcome native lower-reward variance."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 1.0,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_min_s": 341.0,
+        "target_headway_max_s": 351.0,
+        "final_delta_abs_min_s": 0.03,
+        "final_delta_abs_max_s": 0.0,
+        "max_shift_s": 2.0,
+        "wait_gain_s": 8.0,
+        "max_replans": 2,
+        "same_wait_min": 0.828,
+        "same_wait_max": 0.84,
+        "same_hold_max": 0.02,
+        "gap_guard_min_ratio": 1.01,
+        "gap_guard_max_ratio": 1.04,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.20,
+        "min_pressure": 0.29,
+        "max_pressure": 0.678,
+        "soft_pressure_cap": False,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.25,0.50,0.75,1.00",
+        "reward_floor_wait_weight": 1.0,
+        "reward_floor_target_weight": 1.25,
+        "reward_floor_throughput_weight": 0.25,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.08,
+        "reward_floor_gap_cost": 0.22,
+        "reward_floor_hold_cost": 0.40,
+        "wait_credit_weight": 4.0,
+        "wait_credit_clip": 4.0,
+    },
     "reward_floor_throughput_v25": {
         "description": (
             "Reward-floor profile: start from the v24 wait-supported guard, then "
@@ -1044,6 +1171,12 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
         ),
         "_promotion_replan_terminal_early_cap_s": 45.0,
         "_promotion_replan_terminal_early_relax": True,
+        "_promotion_replan_confirm_min_strength": float(
+            profile_cfg.get("confirm_min_strength", 0.0)
+        ),
+        "_promotion_replan_confirm_min_low_signal": float(
+            profile_cfg.get("confirm_min_low_signal", 0.0)
+        ),
         "_promotion_replan_wait_credit_weight": float(
             profile_cfg.get("wait_credit_weight", 0.0)
         ),
@@ -1170,6 +1303,9 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         ),
         "shared_ppo_reward_floor_guard_rejects": float(
             last.get("shared_ppo_reward_floor_guard_rejects", 0.0)
+        ),
+        "shared_ppo_confirm_guard_rejects": float(
+            last.get("shared_ppo_confirm_guard_rejects", 0.0)
         ),
         "shared_ppo_value_guard_rejects": float(
             last.get("shared_ppo_value_guard_rejects", 0.0)
@@ -1313,6 +1449,7 @@ def paired_checks(
             ("shared_ppo_soft_pressure_cap_count", False),
             ("shared_ppo_soft_pressure_cap_scale_mean", True),
             ("shared_ppo_reward_floor_guard_rejects", False),
+            ("shared_ppo_confirm_guard_rejects", False),
             ("shared_ppo_value_guard_rejects", False),
             ("shared_ppo_throughput_guard_rejects", False),
             ("shared_ppo_throughput_floor_project_count", False),
@@ -1620,6 +1757,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
         promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
         promotion_replan_terminal_early_relax=bool(overrides.get("_promotion_replan_terminal_early_relax", False)),
+        promotion_replan_confirm_min_strength=float(
+            overrides.get("_promotion_replan_confirm_min_strength", 0.0)
+        ),
+        promotion_replan_confirm_min_low_signal=float(
+            overrides.get("_promotion_replan_confirm_min_low_signal", 0.0)
+        ),
         promotion_replan_wait_credit_weight=float(
             overrides.get("_promotion_replan_wait_credit_weight", 0.0)
         ),
@@ -1871,6 +2014,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "shared_ppo_target_headway_guard_rejects",
             "shared_ppo_pressure_guard_rejects",
             "shared_ppo_reward_floor_guard_rejects",
+            "shared_ppo_confirm_guard_rejects",
             "shared_ppo_value_guard_rejects",
             "shared_ppo_throughput_guard_rejects",
             "shared_ppo_throughput_floor_project_count",

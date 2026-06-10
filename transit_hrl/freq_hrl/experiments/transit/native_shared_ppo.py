@@ -1637,6 +1637,8 @@ def install_shared_ppo_episode_loop(
     promotion_replan_actor_base_trust_s: float = 0.0,
     promotion_replan_terminal_early_cap_s: float = 0.0,
     promotion_replan_terminal_early_relax: bool = False,
+    promotion_replan_confirm_min_strength: float = 0.0,
+    promotion_replan_confirm_min_low_signal: float = 0.0,
     promotion_replan_wait_credit_weight: float = 0.0,
     promotion_replan_wait_credit_clip: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
@@ -1699,6 +1701,7 @@ def install_shared_ppo_episode_loop(
     runner.freq_hrl_promotion_final_delta_floor_rejects = 0
     runner.freq_hrl_promotion_final_delta_guard_rejects = 0
     runner.freq_hrl_promotion_reward_floor_guard_rejects = 0
+    runner.freq_hrl_promotion_confirm_guard_rejects = 0
     runner.freq_hrl_promotion_value_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_guard_rejects = 0
     runner.freq_hrl_promotion_throughput_floor_project_count = 0
@@ -2286,6 +2289,34 @@ def install_shared_ppo_episode_loop(
                     if (bool(promotion_replan_require_shift)
                             and float(preselect_metadata.get("abs_shift_s", 0.0)) <= 1e-6):
                         return False
+                    confirm_strength_min = max(
+                        float(promotion_replan_confirm_min_strength), 0.0)
+                    confirm_low_signal_min = max(
+                        float(promotion_replan_confirm_min_low_signal), 0.0)
+                    if confirm_strength_min > 0.0 or confirm_low_signal_min > 0.0:
+                        confirm_strength = max(
+                            float(freq_summary.get("freq_promotion_strength", 0.0)),
+                            0.0,
+                        )
+                        confirmed_by_strength = (
+                            confirm_strength_min <= 0.0
+                            or confirm_strength >= confirm_strength_min
+                        )
+                        confirmed_by_low_signal = (
+                            confirm_low_signal_min <= 0.0
+                            or low_signal >= confirm_low_signal_min
+                        )
+                        if not (confirmed_by_strength and confirmed_by_low_signal):
+                            runner.freq_hrl_promotion_confirm_guard_rejects = int(
+                                getattr(
+                                    runner,
+                                    "freq_hrl_promotion_confirm_guard_rejects",
+                                    0,
+                                )
+                            ) + 1
+                            return False
+                        preselect_metadata["confirm_strength"] = float(confirm_strength)
+                        preselect_metadata["confirm_low_signal"] = float(low_signal)
                     override_min = max(float(promotion_gate_wait_pressure_override_min), 0.0)
                     force_promote = (
                         wait_pressure_override
@@ -2464,6 +2495,7 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_ppo_final_delta_floor_rejects",
         "shared_ppo_final_delta_guard_rejects",
         "shared_ppo_reward_floor_guard_rejects",
+        "shared_ppo_confirm_guard_rejects",
         "shared_ppo_value_guard_rejects",
         "shared_ppo_throughput_guard_rejects",
         "shared_ppo_throughput_floor_project_count",
@@ -2596,6 +2628,8 @@ def run_native_shared_ppo_episode_loop(
     promotion_replan_actor_base_trust_s: float = 0.0,
     promotion_replan_terminal_early_cap_s: float = 0.0,
     promotion_replan_terminal_early_relax: bool = False,
+    promotion_replan_confirm_min_strength: float = 0.0,
+    promotion_replan_confirm_min_low_signal: float = 0.0,
     promotion_replan_wait_credit_weight: float = 0.0,
     promotion_replan_wait_credit_clip: float = 0.0,
     lower_hf_wait_action_gain_s: float = 0.0,
@@ -2744,6 +2778,10 @@ def run_native_shared_ppo_episode_loop(
         promotion_replan_actor_base_trust_s=float(promotion_replan_actor_base_trust_s),
         promotion_replan_terminal_early_cap_s=float(promotion_replan_terminal_early_cap_s),
         promotion_replan_terminal_early_relax=bool(promotion_replan_terminal_early_relax),
+        promotion_replan_confirm_min_strength=float(
+            promotion_replan_confirm_min_strength),
+        promotion_replan_confirm_min_low_signal=float(
+            promotion_replan_confirm_min_low_signal),
         promotion_replan_wait_credit_weight=float(promotion_replan_wait_credit_weight),
         promotion_replan_wait_credit_clip=float(promotion_replan_wait_credit_clip),
         lower_hf_wait_action_gain_s=float(lower_hf_wait_action_gain_s),
@@ -2859,6 +2897,11 @@ def run_native_shared_ppo_episode_loop(
             "shared_ppo_reward_floor_guard_rejects": int(getattr(
                 runner,
                 "freq_hrl_promotion_reward_floor_guard_rejects",
+                0,
+            )),
+            "shared_ppo_confirm_guard_rejects": int(getattr(
+                runner,
+                "freq_hrl_promotion_confirm_guard_rejects",
                 0,
             )),
             "shared_ppo_value_guard_rejects": int(getattr(
@@ -3151,6 +3194,10 @@ def run_native_shared_ppo_episode_loop(
         "promotion_replan_actor_base_trust_s": float(promotion_replan_actor_base_trust_s),
         "promotion_replan_terminal_early_cap_s": float(promotion_replan_terminal_early_cap_s),
         "promotion_replan_terminal_early_relax": bool(promotion_replan_terminal_early_relax),
+        "promotion_replan_confirm_min_strength": float(
+            promotion_replan_confirm_min_strength),
+        "promotion_replan_confirm_min_low_signal": float(
+            promotion_replan_confirm_min_low_signal),
         "promotion_replan_wait_credit_weight": float(promotion_replan_wait_credit_weight),
         "promotion_replan_wait_credit_clip": float(promotion_replan_wait_credit_clip),
         "lower_hf_wait_action_gain_s": float(lower_hf_wait_action_gain_s),
@@ -3419,6 +3466,8 @@ def main() -> None:
     parser.add_argument("--promotion-replan-actor-base-trust-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-terminal-early-cap-s", type=float, default=0.0)
     parser.add_argument("--promotion-replan-terminal-early-relax", action="store_true")
+    parser.add_argument("--promotion-replan-confirm-min-strength", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-confirm-min-low-signal", type=float, default=0.0)
     parser.add_argument("--promotion-replan-wait-credit-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-wait-credit-clip", type=float, default=0.0)
     parser.add_argument("--lower-hf-wait-action-gain-s", type=float, default=0.0)
@@ -3507,6 +3556,10 @@ def main() -> None:
             promotion_replan_actor_base_trust_s=float(args.promotion_replan_actor_base_trust_s),
             promotion_replan_terminal_early_cap_s=float(args.promotion_replan_terminal_early_cap_s),
             promotion_replan_terminal_early_relax=bool(args.promotion_replan_terminal_early_relax),
+            promotion_replan_confirm_min_strength=float(
+                args.promotion_replan_confirm_min_strength),
+            promotion_replan_confirm_min_low_signal=float(
+                args.promotion_replan_confirm_min_low_signal),
             promotion_replan_wait_credit_weight=float(args.promotion_replan_wait_credit_weight),
             promotion_replan_wait_credit_clip=float(args.promotion_replan_wait_credit_clip),
             lower_hf_wait_action_gain_s=float(args.lower_hf_wait_action_gain_s),
