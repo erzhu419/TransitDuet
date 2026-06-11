@@ -89,3 +89,16 @@ Next scheduler validations should target:
 2. `throughput_safe_wait_v6` across at least the same 48 AFC/APC seed indices as v5.
 3. A refreshed leakage matrix after v6, using the strict native real-demand core metrics.
 4. A venue-grade L2/L3 manifest once real exchange data is available.
+
+## 2026-06-11 Scheduler Dispatch Note
+
+Commit `64c9d6cf57` pushed the stricter top-journal gates and the new v46/v6 validation profiles. Local verification passed with 34 focused tests plus compileall over `transit_hrl/freq_hrl/experiments` and `transit_hrl/tests`.
+
+Scheduler submission status:
+
+1. Native real-demand `throughput_safe_wait_v6` was re-submitted with the correct CLI, after the first t9891-t9895 attempt failed because the script does not accept `--workers`. Fixed shard tasks are t9937-t9942. At dispatch time, t9937-t9941 were running on node005/node002 and t9942 was queued behind node006 placement.
+2. Native promotion `odshift_reward_wait_guard_v46` is queued as 16 small w16 shards, t9943-t9958, covering seed-index ranges 0-512 in 32-seed blocks. The earlier 6 large shards t9877-t9882 and 8 req64 parent shards t9906/t9908/t9910/t9912/t9914/t9916/t9918/t9920 were cancelled while still queued.
+3. The current blocker for promotion is scheduler CPU-token availability on node002-node005, not RAM. Existing v45 OD-shift tasks t9782-t9787 are still running on node002-node005 and consume most direct CPU slots. No running task was killed in this patch.
+4. node001/node006 still show scheduler placement/env escalation behavior for this signature path. The queued w16 shards are therefore constrained to node002-node005 until the direct-node scheduler gate is cleared or those nodes free enough CPU tokens.
+
+Once t9937-t9942 finish, merge the fixed v6 real-demand shards and regenerate the strict leakage/top-journal matrices. Once t9943-t9958 finish, merge v46 promotion and check whether OD-shift reward/wait moves from no-harm to CI-supported improvement.
