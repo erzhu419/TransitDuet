@@ -19,6 +19,23 @@ from freq_hrl.experiments.trading import order_book_l3_replay_validation as l3_r
 from freq_hrl.experiments.trading import order_book_matching_validation as l2_matching
 
 
+L2_REQUIRED_COLUMN_GROUPS = {
+    "timestamp": {"timestamp", "time", "ts"},
+    "bid_price": {"bid_price_1", "bid_px_1", "bid1", "bid_price1", "bid", "best_bid", "bid_price"},
+    "ask_price": {"ask_price_1", "ask_px_1", "ask1", "ask_price1", "ask", "best_ask", "ask_price"},
+    "bid_size": {"bid_size_1", "bid_qty_1", "bid_volume_1", "bid_size1", "bid_size", "best_bid_size"},
+    "ask_size": {"ask_size_1", "ask_qty_1", "ask_volume_1", "ask_size1", "ask_size", "best_ask_size"},
+}
+L3_REQUIRED_COLUMN_GROUPS = {
+    "timestamp": {"timestamp", "time", "ts"},
+    "event_type": {"event_type", "type"},
+    "side": {"side"},
+    "price": {"price", "px"},
+    "size": {"size", "qty", "quantity"},
+    "order_id": {"order_id", "id"},
+}
+
+
 @dataclass(frozen=True)
 class ManifestEntry:
     kind: str
@@ -150,6 +167,49 @@ def _has_session_metadata(entry: ManifestEntry) -> bool:
     return bool(str(entry.venue).strip() and str(entry.symbol).strip() and str(entry.session).strip())
 
 
+def _csv_columns(path: Path) -> set[str]:
+    with Path(path).open("r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        header = next(reader, [])
+    return {str(col).strip().lower() for col in header if str(col).strip()}
+
+
+def _schema_missing_groups(entry: ManifestEntry) -> list[str]:
+    groups = L2_REQUIRED_COLUMN_GROUPS if entry.kind == "l2" else L3_REQUIRED_COLUMN_GROUPS
+    columns = _csv_columns(entry.path)
+    return [
+        group for group, aliases in groups.items()
+        if not columns.intersection({alias.lower() for alias in aliases})
+    ]
+
+
+def _schema_audit(entries: list[ManifestEntry]) -> list[dict[str, Any]]:
+    audit: list[dict[str, Any]] = []
+    for entry in entries:
+        try:
+            missing = _schema_missing_groups(entry)
+        except Exception as exc:  # pragma: no cover - defensive for unreadable feeds.
+            missing = ["unreadable_csv"]
+            error = str(exc)
+        else:
+            error = ""
+        audit.append({
+            "kind": entry.kind,
+            "path": str(entry.path),
+            "venue": entry.venue,
+            "symbol": entry.symbol,
+            "session": entry.session,
+            "source_id": entry.source_id,
+            "source_type": entry.source_type,
+            "feed_level": entry.feed_level,
+            "matching_semantics": entry.matching_semantics,
+            "schema_ready": not missing,
+            "missing_column_groups": missing,
+            "error": error,
+        })
+    return audit
+
+
 def _is_venue_grade_session(entry: ManifestEntry) -> bool:
     if not _is_real_or_venue_grade(entry) or not _has_session_metadata(entry):
         return False
@@ -223,6 +283,11 @@ def run_manifest_validation(
     )
     l2_entries = [entry for entry in entries if entry.kind == "l2"]
     l3_entries = [entry for entry in entries if entry.kind == "l3"]
+    schema_audit = _schema_audit(entries)
+    schema_ready_by_key = {
+        (row["kind"], row["path"]): bool(row["schema_ready"])
+        for row in schema_audit
+    }
 
     rows: list[dict[str, Any]] = []
     checks: list[dict[str, Any]] = []
@@ -308,9 +373,26 @@ def run_manifest_validation(
         if _is_venue_grade_session(entry)
     }
     venue_l2_l3_pairs = sorted(venue_l2_sessions & venue_l3_sessions)
+    venue_schema_l2_sessions = {
+        (entry.venue, entry.symbol, entry.session)
+        for entry in l2_entries
+        if _is_venue_grade_session(entry)
+        and schema_ready_by_key.get((entry.kind, str(entry.path)), False)
+    }
+    venue_schema_l3_sessions = {
+        (entry.venue, entry.symbol, entry.session)
+        for entry in l3_entries
+        if _is_venue_grade_session(entry)
+        and schema_ready_by_key.get((entry.kind, str(entry.path)), False)
+    }
+    venue_schema_l2_l3_pairs = sorted(venue_schema_l2_sessions & venue_schema_l3_sessions)
     if venue_l2_l3_pairs:
-        source_quality_status = "venue_grade_ready"
-        venue_grade_claim_status = "supported"
+        if venue_schema_l2_l3_pairs:
+            source_quality_status = "venue_grade_ready"
+            venue_grade_claim_status = "supported"
+        else:
+            source_quality_status = "venue_grade_schema_incomplete"
+            venue_grade_claim_status = "blocked_schema_incomplete"
     elif coverage["real_l2_files"] > 0 and coverage["real_l3_files"] > 0:
         source_quality_status = "real_unpaired_or_metadata_incomplete"
         venue_grade_claim_status = "blocked_unpaired_or_metadata_incomplete"
@@ -325,10 +407,23 @@ def run_manifest_validation(
     coverage.update({
         "real_or_venue_grade_sessions": len(real_sessions),
         "venue_grade_l2_l3_session_pairs": len(venue_l2_l3_pairs),
+        "venue_grade_schema_l2_l3_session_pairs": len(venue_schema_l2_l3_pairs),
         "venue_grade_sessions": [
             {"venue": venue, "symbol": symbol, "session": session}
             for venue, symbol, session in venue_l2_l3_pairs
         ],
+        "venue_grade_schema_ready_sessions": [
+            {"venue": venue, "symbol": symbol, "session": session}
+            for venue, symbol, session in venue_schema_l2_l3_pairs
+        ],
+        "schema_ready_l2_files": sum(
+            1 for entry in l2_entries
+            if schema_ready_by_key.get((entry.kind, str(entry.path)), False)
+        ),
+        "schema_ready_l3_files": sum(
+            1 for entry in l3_entries
+            if schema_ready_by_key.get((entry.kind, str(entry.path)), False)
+        ),
         "source_quality_status": source_quality_status,
         "venue_grade_required": bool(require_venue_grade),
         "venue_grade_claim_status": venue_grade_claim_status,
@@ -336,6 +431,7 @@ def run_manifest_validation(
     payload = {
         "manifest": str(manifest),
         "coverage": coverage,
+        "schema_audit": schema_audit,
         "missing": missing,
         "sections": sections,
         "summary": rows,
@@ -361,6 +457,9 @@ def run_manifest_validation(
         f"- real/venue-grade L2 files: `{coverage['real_l2_files']}`",
         f"- real/venue-grade L3 files: `{coverage['real_l3_files']}`",
         f"- venue-grade paired L2/L3 sessions: `{coverage['venue_grade_l2_l3_session_pairs']}`",
+        f"- venue-grade schema-ready L2/L3 sessions: `{coverage['venue_grade_schema_l2_l3_session_pairs']}`",
+        f"- schema-ready L2 files: `{coverage['schema_ready_l2_files']}`",
+        f"- schema-ready L3 files: `{coverage['schema_ready_l3_files']}`",
         f"- source quality: `{coverage['source_quality_status']}`",
         f"- venue-grade claim status: `{coverage['venue_grade_claim_status']}`",
         f"- venue-grade required: `{coverage['venue_grade_required']}`",

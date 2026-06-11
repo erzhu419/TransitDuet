@@ -232,6 +232,84 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             self.assertEqual(payload["coverage"]["venue_grade_claim_status"], "supported")
             self.assertGreater(payload["coverage"]["real_or_venue_grade_sessions"], 0)
 
+    def test_venue_grade_claim_requires_l3_order_id_schema(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            l2_path = root / "book_l2.csv"
+            l2_path.write_text(
+                "\n".join([
+                    "timestamp,bid_price_1,ask_price_1,bid_size_1,ask_size_1,bid_price_2,ask_price_2,bid_size_2,ask_size_2",
+                    "0,99.9,100.1,5,4,99.8,100.2,8,7",
+                    "1,100.0,100.2,6,4,99.9,100.3,8,7",
+                    "2,100.1,100.3,6,5,100.0,100.4,8,7",
+                    "3,100.2,100.4,7,5,100.1,100.5,8,7",
+                    "4,100.1,100.3,6,5,100.0,100.4,8,7",
+                    "5,100.3,100.5,7,4,100.2,100.6,8,7",
+                    "6,100.4,100.6,7,5,100.3,100.7,8,7",
+                    "7,100.5,100.7,8,5,100.4,100.8,8,7",
+                ]) + "\n",
+                encoding="utf-8",
+            )
+            l3_path = root / "events_l3_missing_order_id.csv"
+            l3_path.write_text(
+                "\n".join([
+                    "timestamp,event_type,side,price,size",
+                    "0,add,bid,99.9,20",
+                    "0,add,ask,100.1,20",
+                    "1,trade,bid,99.9,12",
+                    "1,add,bid,99.8,10",
+                    "1,add,ask,100.2,10",
+                    "2,trade,ask,100.1,12",
+                    "2,add,bid,99.9,20",
+                    "2,add,ask,100.1,20",
+                    "3,cancel,bid,99.9,5",
+                    "3,trade,bid,99.9,10",
+                ]) + "\n",
+                encoding="utf-8",
+            )
+            manifest = root / "manifest.json"
+            manifest.write_text(
+                json.dumps({
+                    "datasets": [
+                        {
+                            "kind": "l2",
+                            "path": "book_l2.csv",
+                            "venue": "XNAS",
+                            "symbol": "AAA",
+                            "session": "2026-01-02",
+                            "source_type": "real",
+                        },
+                        {
+                            "kind": "l3",
+                            "path": "events_l3_missing_order_id.csv",
+                            "venue": "XNAS",
+                            "symbol": "AAA",
+                            "session": "2026-01-02",
+                            "source_type": "venue_grade",
+                            "matching_semantics": "price_time",
+                        },
+                    ]
+                }),
+                encoding="utf-8",
+            )
+            payload = run_manifest_validation(
+                root / "out",
+                manifest=manifest,
+                methods=["ema", "state_space"],
+                steps=4,
+                levels=2,
+                latency_bins=[0],
+                execution_modes=["market"],
+                queue_ahead_fraction=0.5,
+                min_pairs=1,
+            )
+            self.assertEqual(payload["coverage"]["venue_grade_l2_l3_session_pairs"], 1)
+            self.assertEqual(payload["coverage"]["venue_grade_schema_l2_l3_session_pairs"], 0)
+            self.assertEqual(payload["coverage"]["source_quality_status"], "venue_grade_schema_incomplete")
+            self.assertEqual(payload["coverage"]["venue_grade_claim_status"], "blocked_schema_incomplete")
+            l3_audit = [row for row in payload["schema_audit"] if row["kind"] == "l3"][0]
+            self.assertIn("order_id", l3_audit["missing_column_groups"])
+
     def test_require_venue_grade_marks_fixture_manifest_blocked(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
