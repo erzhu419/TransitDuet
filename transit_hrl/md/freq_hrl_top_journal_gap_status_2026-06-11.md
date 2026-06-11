@@ -207,3 +207,30 @@ After refreshing `baseline_ablation_matrix_latest` and
 The only remaining partial top-journal row is C3: real venue-grade paired L2/L3
 order-book replay. Current code supports L2 matching and L3 FIFO replay paths,
 but the manifest still lacks real paired venue/session metadata.
+
+## 2026-06-11 C3 Venue-Grade Order-Book Closure
+
+C3 was closed with a small public LOBSTER/NASDAQ TotalView-ITCH sample path.
+The new `order_book_lobster_sample_validation.py` downloads the AMZN
+2012-06-21 1-level LOBSTER sample, converts the paired message/orderbook files
+into the existing L3 event and L2 snapshot CSV schemas, writes a venue-grade
+manifest, and runs the existing manifest-driven L2 matching / L3 FIFO replay
+validator.
+
+The committed artifact is the converted small sample plus validation output,
+not the raw downloaded files. Raw downloads are ignored under
+`transit_hrl/data/lobster_sample_raw/`.
+
+Current C3 evidence:
+
+- source quality: `venue_grade_ready`
+- venue-grade paired L2/L3 sessions: `1`
+- venue/session: `XNAS AMZN 2012-06-21`
+- L2 supported checks: `8`
+- L3 positive checks: `8`
+
+After refreshing `top_journal_unified_matrix_latest`, all 9 rows are supported
+and 0 rows remain partial. The remaining paper work is no longer a missing
+code-path gap; it is scale/replication: larger multi-symbol, multi-session
+venue replay, deeper real agency OD/onboard-load replication, and manuscript
+presentation of claim boundaries.

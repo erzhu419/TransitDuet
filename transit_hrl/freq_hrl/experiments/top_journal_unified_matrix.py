@@ -35,7 +35,7 @@ DEFAULT_ARTIFACTS = {
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "order_book_l2_matching": Path("transit_hrl/results/trading_order_book_matching_validation/summary.json"),
     "order_book_l3_replay": Path("transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"),
-    "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
+    "order_book_manifest": Path("transit_hrl/results/order_book_lobster_venue_grade_smoke/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/encoder_cross_domain_matrix/summary.json"),
     "encoder_matrix_latest": Path("transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json"),
     "leakage_matrix_latest_patch": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest_patch/summary.json"),
@@ -571,6 +571,21 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "or strict CI support."
         )
     )
+    c3_supported = bool(
+        order_book_venue_session_pairs > 0
+        or order_book_source_quality == "venue_grade_ready"
+        or (
+            order_book_has_real_l2_l3
+            and order_book_source_quality == "venue_grade_ready"
+        )
+    )
+    c3_remaining_gap = (
+        "Closed for the current LOBSTER/NASDAQ TotalView-ITCH venue-grade "
+        "L2/L3 smoke path; remaining work is larger multi-symbol, multi-session "
+        "venue replay for final paper scale."
+        if c3_supported
+        else "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds."
+    )
 
     claims = [
         {
@@ -633,14 +648,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Large L2/L3 order-book replay path exists",
             "status": _status_from_flags(
                 present=bool(order_book_manifest or order_book_l2 or order_book_l3),
-                supported=bool(
-                    order_book_venue_session_pairs > 0
-                    or order_book_source_quality == "venue_grade_ready"
-                    or (
-                        order_book_has_real_l2_l3
-                        and order_book_source_quality == "venue_grade_ready"
-                    )
-                ),
+                supported=c3_supported,
                 partial=bool(order_book_l2 and order_book_l3),
             ),
             "evidence": (
@@ -650,9 +658,11 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"venue_l2_l3_pairs={order_book_venue_session_pairs} "
                 f"manifest_coverage={order_book_manifest.get('coverage', {})}"
             ),
-            "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
+            "remaining_gap": c3_remaining_gap,
             "artifact": (
-                f"{paths['order_book_l2_matching']} | {paths['order_book_l3_replay']}"
+                paths["order_book_manifest"]
+                if order_book_manifest
+                else f"{paths['order_book_l2_matching']} | {paths['order_book_l3_replay']}"
                 if order_book_l2 or order_book_l3
                 else paths["order_book_manifest"]
             ),
