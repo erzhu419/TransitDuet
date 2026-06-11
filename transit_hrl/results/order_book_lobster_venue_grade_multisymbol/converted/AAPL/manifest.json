@@ -1,0 +1,27 @@
+{
+  "datasets": [
+    {
+      "kind": "l2",
+      "path": "AAPL_2012-06-21_lobster_l2.csv",
+      "venue": "XNAS",
+      "symbol": "AAPL",
+      "session": "2012-06-21",
+      "source_id": "lobster_AAPL_2012-06-21_l2",
+      "source_type": "venue_grade",
+      "feed_level": "l2_snapshot",
+      "matching_semantics": "price_time"
+    },
+    {
+      "kind": "l3",
+      "path": "AAPL_2012-06-21_lobster_l3.csv",
+      "venue": "XNAS",
+      "symbol": "AAPL",
+      "session": "2012-06-21",
+      "source_id": "lobster_AAPL_2012-06-21_l3",
+      "source_type": "venue_grade",
+      "feed_level": "l3_event",
+      "matching_semantics": "price_time"
+    }
+  ],
+  "source": "LOBSTER public sample reconstructed from NASDAQ TotalView-ITCH; downloaded from totalorganfailure/lobster-data on Hugging Face."
+}

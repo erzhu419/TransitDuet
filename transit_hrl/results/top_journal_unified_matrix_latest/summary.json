@@ -20,9 +20,9 @@
       "id": "C3",
       "claim": "Large L2/L3 order-book replay path exists",
       "status": "supported",
-      "evidence": "l2_supported_checks=8 l3_positive_checks=8 source_quality=venue_grade_ready venue_l2_l3_pairs=1 manifest_coverage={'manifest_entries': 2, 'used_entries': 2, 'missing_entries': 0, 'l2_files': 1, 'l3_files': 1, 'real_l2_files': 1, 'real_l3_files': 1, 'venue_grade_l2_files': 1, 'venue_grade_l3_files': 1, 'fixture_l2_files': 0, 'fixture_l3_files': 0, 'methods': ['ema', 'state_space', 'adaptive_wavelet', 'neural_state_space'], 'steps': 720, 'levels': 1, 'latency_bins': [0, 2], 'execution_modes': ['market', 'passive_queue'], 'real_or_venue_grade_sessions': 2, 'venue_grade_l2_l3_session_pairs': 1, 'venue_grade_schema_l2_l3_session_pairs': 1, 'venue_grade_sessions': [{'venue': 'XNAS', 'symbol': 'AMZN', 'session': '2012-06-21'}], 'venue_grade_schema_ready_sessions': [{'venue': 'XNAS', 'symbol': 'AMZN', 'session': '2012-06-21'}], 'schema_ready_l2_files': 1, 'schema_ready_l3_files': 1, 'source_quality_status': 'venue_grade_ready', 'venue_grade_required': True, 'venue_grade_claim_status': 'supported'}",
+      "evidence": "l2_supported_checks=8 l3_positive_checks=8 source_quality=venue_grade_ready venue_l2_l3_pairs=3 manifest_coverage={'manifest_entries': 6, 'used_entries': 6, 'missing_entries': 0, 'l2_files': 3, 'l3_files': 3, 'real_l2_files': 3, 'real_l3_files': 3, 'venue_grade_l2_files': 3, 'venue_grade_l3_files': 3, 'fixture_l2_files': 0, 'fixture_l3_files': 0, 'methods': ['ema', 'state_space', 'adaptive_wavelet', 'neural_state_space'], 'steps': 720, 'levels': 1, 'latency_bins': [0, 2], 'execution_modes': ['market', 'passive_queue'], 'real_or_venue_grade_sessions': 6, 'venue_grade_l2_l3_session_pairs': 3, 'venue_grade_schema_l2_l3_session_pairs': 3, 'venue_grade_sessions': [{'venue': 'XNAS', 'symbol': 'AAPL', 'session': '2012-06-21'}, {'venue': 'XNAS', 'symbol': 'AMZN', 'session': '2012-06-21'}, {'venue': 'XNAS', 'symbol': 'GOOG', 'session': '2012-06-21'}], 'venue_grade_schema_ready_sessions': [{'venue': 'XNAS', 'symbol': 'AAPL', 'session': '2012-06-21'}, {'venue': 'XNAS', 'symbol': 'AMZN', 'session': '2012-06-21'}, {'venue': 'XNAS', 'symbol': 'GOOG', 'session': '2012-06-21'}], 'schema_ready_l2_files': 3, 'schema_ready_l3_files': 3, 'source_quality_status': 'venue_grade_ready', 'venue_grade_required': True, 'venue_grade_claim_status': 'supported'}",
       "remaining_gap": "Closed for the current LOBSTER/NASDAQ TotalView-ITCH venue-grade L2/L3 smoke path; remaining work is larger multi-symbol, multi-session venue replay for final paper scale.",
-      "artifact": "transit_hrl/results/order_book_lobster_venue_grade_smoke/summary.json"
+      "artifact": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json"
     },
     {
       "id": "C4",
@@ -105,7 +105,7 @@
     "native_real_demand_v2": "transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json",
     "order_book_l2_matching": "transit_hrl/results/trading_order_book_matching_validation/summary.json",
     "order_book_l3_replay": "transit_hrl/results/trading_order_book_l3_replay_validation/summary.json",
-    "order_book_manifest": "transit_hrl/results/order_book_lobster_venue_grade_smoke/summary.json",
+    "order_book_manifest": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json",
     "encoder_matrix": "transit_hrl/results/encoder_cross_domain_matrix/summary.json",
     "encoder_matrix_latest": "transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json",
     "leakage_matrix_latest_patch": "transit_hrl/results/leakage_no_tradeoff_matrix_latest_patch/summary.json",

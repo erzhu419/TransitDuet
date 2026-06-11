@@ -35,7 +35,7 @@ DEFAULT_ARTIFACTS = {
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
     "order_book_l2_matching": Path("transit_hrl/results/trading_order_book_matching_validation/summary.json"),
     "order_book_l3_replay": Path("transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"),
-    "order_book_manifest": Path("transit_hrl/results/order_book_lobster_venue_grade_smoke/summary.json"),
+    "order_book_manifest": Path("transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/encoder_cross_domain_matrix/summary.json"),
     "encoder_matrix_latest": Path("transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json"),
     "leakage_matrix_latest_patch": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest_patch/summary.json"),

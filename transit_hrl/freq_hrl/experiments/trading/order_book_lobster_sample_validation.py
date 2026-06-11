@@ -23,10 +23,15 @@ HF_BASE = "https://huggingface.co/datasets/totalorganfailure/lobster-data/resolv
 SAMPLE_TICKER = "AMZN"
 SAMPLE_SESSION = "2012-06-21"
 SAMPLE_LEVELS = 1
-SAMPLE_DIR = f"LOBSTER_SampleFile_{SAMPLE_TICKER}_{SAMPLE_SESSION}_{SAMPLE_LEVELS}"
-SAMPLE_PREFIX = f"{SAMPLE_TICKER}_{SAMPLE_SESSION}_34200000_57600000"
-SAMPLE_MESSAGE = f"{SAMPLE_DIR}/{SAMPLE_PREFIX}_message_{SAMPLE_LEVELS}.csv"
-SAMPLE_ORDERBOOK = f"{SAMPLE_DIR}/{SAMPLE_PREFIX}_orderbook_{SAMPLE_LEVELS}.csv"
+DEFAULT_SYMBOLS = ("AMZN", "GOOG", "AAPL")
+
+
+def _sample_paths(symbol: str, session: str = SAMPLE_SESSION, levels: int = SAMPLE_LEVELS) -> tuple[str, str]:
+    sample_dir = f"LOBSTER_SampleFile_{symbol}_{session}_{levels}"
+    sample_prefix = f"{symbol}_{session}_34200000_57600000"
+    message = f"{sample_dir}/{sample_prefix}_message_{levels}.csv"
+    orderbook = f"{sample_dir}/{sample_prefix}_orderbook_{levels}.csv"
+    return message, orderbook
 
 
 def _download(url_path: str, dest: Path) -> Path:
@@ -36,9 +41,16 @@ def _download(url_path: str, dest: Path) -> Path:
     return dest
 
 
-def download_lobster_sample(raw_dir: Path) -> tuple[Path, Path]:
-    message = _download(SAMPLE_MESSAGE, raw_dir / Path(SAMPLE_MESSAGE).name)
-    orderbook = _download(SAMPLE_ORDERBOOK, raw_dir / Path(SAMPLE_ORDERBOOK).name)
+def download_lobster_sample(
+    raw_dir: Path,
+    *,
+    symbol: str = SAMPLE_TICKER,
+    session: str = SAMPLE_SESSION,
+    levels: int = SAMPLE_LEVELS,
+) -> tuple[Path, Path]:
+    message_path, orderbook_path = _sample_paths(symbol, session=session, levels=int(levels))
+    message = _download(message_path, raw_dir / Path(message_path).name)
+    orderbook = _download(orderbook_path, raw_dir / Path(orderbook_path).name)
     return message, orderbook
 
 
@@ -183,21 +195,52 @@ def run_lobster_sample_validation(
     output_dir: Path,
     *,
     raw_dir: Path,
+    symbols: list[str],
     max_rows: int,
     methods: list[str],
     steps: int,
     min_pairs: int,
 ) -> dict[str, Any]:
-    raw_message, raw_orderbook = download_lobster_sample(raw_dir)
-    converted = convert_lobster_pair(
-        message_csv=raw_message,
-        orderbook_csv=raw_orderbook,
-        output_dir=output_dir / "converted",
-        max_rows=int(max_rows),
-    )
+    converted_root = output_dir / "converted"
+    converted_root.mkdir(parents=True, exist_ok=True)
+    conversion_rows: list[dict[str, Any]] = []
+    manifest_datasets: list[dict[str, Any]] = []
+    for symbol in symbols:
+        symbol = str(symbol).upper()
+        raw_message, raw_orderbook = download_lobster_sample(raw_dir, symbol=symbol)
+        converted = convert_lobster_pair(
+            message_csv=raw_message,
+            orderbook_csv=raw_orderbook,
+            output_dir=converted_root / symbol,
+            max_rows=int(max_rows),
+            symbol=symbol,
+        )
+        symbol_manifest = json.loads(Path(converted["manifest"]).read_text(encoding="utf-8"))
+        for entry in symbol_manifest["datasets"]:
+            item = dict(entry)
+            item["path"] = f"{symbol}/{item['path']}"
+            manifest_datasets.append(item)
+        conversion_rows.append({
+            "symbol": symbol,
+            "rows": int(converted["rows"]),
+            "l3_events": int(converted["l3_events"]),
+            "l2_csv": str(converted["l2_csv"]),
+            "l3_csv": str(converted["l3_csv"]),
+            "raw_message_csv": str(raw_message),
+            "raw_orderbook_csv": str(raw_orderbook),
+        })
+    combined_manifest = {
+        "datasets": manifest_datasets,
+        "source": (
+            "LOBSTER public samples reconstructed from NASDAQ TotalView-ITCH; "
+            "downloaded from totalorganfailure/lobster-data on Hugging Face."
+        ),
+    }
+    manifest_path = converted_root / "manifest.json"
+    manifest_path.write_text(json.dumps(combined_manifest, indent=2) + "\n", encoding="utf-8")
     payload = run_manifest_validation(
         output_dir,
-        manifest=Path(converted["manifest"]),
+        manifest=manifest_path,
         methods=list(methods),
         steps=int(steps),
         levels=1,
@@ -207,14 +250,7 @@ def run_lobster_sample_validation(
         min_pairs=int(min_pairs),
         require_venue_grade=True,
     )
-    payload["lobster_conversion"] = {
-        "rows": int(converted["rows"]),
-        "l3_events": int(converted["l3_events"]),
-        "l2_csv": str(converted["l2_csv"]),
-        "l3_csv": str(converted["l3_csv"]),
-        "raw_message_csv": str(raw_message),
-        "raw_orderbook_csv": str(raw_orderbook),
-    }
+    payload["lobster_conversion"] = conversion_rows
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     return payload
@@ -223,19 +259,21 @@ def run_lobster_sample_validation(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw-dir", type=Path, default=Path("transit_hrl/data/lobster_sample_raw"))
+    parser.add_argument("--symbols", nargs="+", default=list(DEFAULT_SYMBOLS))
     parser.add_argument("--max-rows", type=int, default=2400)
     parser.add_argument("--methods", nargs="+", default=["ema", "state_space", "adaptive_wavelet", "neural_state_space"])
     parser.add_argument("--steps", type=int, default=720)
-    parser.add_argument("--min-pairs", type=int, default=1)
+    parser.add_argument("--min-pairs", type=int, default=3)
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("transit_hrl/results/order_book_lobster_venue_grade_smoke"),
+        default=Path("transit_hrl/results/order_book_lobster_venue_grade_multisymbol"),
     )
     args = parser.parse_args()
     payload = run_lobster_sample_validation(
         args.output_dir,
         raw_dir=args.raw_dir,
+        symbols=list(args.symbols),
         max_rows=int(args.max_rows),
         methods=list(args.methods),
         steps=int(args.steps),

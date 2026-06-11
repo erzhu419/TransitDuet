@@ -234,3 +234,24 @@ and 0 rows remain partial. The remaining paper work is no longer a missing
 code-path gap; it is scale/replication: larger multi-symbol, multi-session
 venue replay, deeper real agency OD/onboard-load replication, and manuscript
 presentation of claim boundaries.
+
+## 2026-06-12 Multi-Symbol LOBSTER Extension
+
+The venue-grade order-book path now uses three paired L2/L3 LOBSTER samples
+instead of one:
+
+- XNAS AAPL 2012-06-21
+- XNAS AMZN 2012-06-21
+- XNAS GOOG 2012-06-21
+
+The multisymbol artifact is
+`order_book_lobster_venue_grade_multisymbol`. It has:
+
+- manifest entries: `6`
+- venue-grade paired L2/L3 sessions: `3`
+- schema-ready paired sessions: `3`
+- source quality: `venue_grade_ready`
+- venue-grade claim status: `supported`
+
+`top_journal_unified_matrix_latest` remains 9 supported and 0 partial after
+switching C3 to the multisymbol artifact.
