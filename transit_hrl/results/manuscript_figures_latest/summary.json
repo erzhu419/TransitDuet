@@ -1,0 +1,39 @@
+{
+  "summary": {
+    "figures": 5,
+    "formats": [
+      "svg",
+      "pdf",
+      "png",
+      "tiff"
+    ],
+    "backend": "python-matplotlib",
+    "output_dir": "transit_hrl/results/manuscript_figures_latest",
+    "figures_dir": "transit_hrl/results/manuscript_figures_latest/figures",
+    "source_data_dir": "transit_hrl/results/manuscript_figures_latest/source_data"
+  },
+  "figures": [
+    {
+      "figure": "fig1_frequency_separated_protocol",
+      "source_rows": 5
+    },
+    {
+      "figure": "fig2_claim_ablation_matrix",
+      "claim_rows": 9
+    },
+    {
+      "figure": "fig3_transit_promotion_real_demand",
+      "promotion_checks": 4,
+      "real_checks": 7
+    },
+    {
+      "figure": "fig4_external_transit_data_coverage",
+      "boundary_rows": 10
+    },
+    {
+      "figure": "fig5_orderbook_encoder_replay",
+      "encoder_domains": 8
+    }
+  ],
+  "boundary": "Figures are generated from committed summary artifacts. They are publication-ready drafts, not a substitute for final journal caption and source-data submission checks."
+}

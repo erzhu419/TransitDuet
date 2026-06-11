@@ -2,7 +2,7 @@
 
 Date: 2026-06-12
 
-Backend gate: actual journal-ready plotting requires an explicit backend choice, Python or R. This file fixes the scientific figure contracts and data hooks before rendering.
+Backend: Python/matplotlib. Rendered SVG/PDF/PNG/TIFF drafts, panel source CSVs, and a preview montage are written to `transit_hrl/results/manuscript_figures_latest/` by `python3 -m freq_hrl.experiments.manuscript_figures`. TIFF files are regenerated locally and ignored by git because they are large.
 
 ## Fig. 1: Frequency-separated HRL protocol
 

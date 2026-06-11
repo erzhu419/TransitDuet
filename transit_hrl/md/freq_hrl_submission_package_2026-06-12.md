@@ -66,6 +66,6 @@ Disallowed claim: Freq-HRL is fully validated for all real-world deployments, al
 
 - Main text: title, abstract, introduction, method overview, experiments, discussion, limitations.
 - Main tables: C1-C9 evidence, baseline/ablation, real-data coverage.
-- Figures: five-figure plan in `freq_hrl_figure_plan_2026-06-12.md`; actual rendering awaits Python/R backend selection.
+- Figures: Python-rendered SVG/PDF/PNG/TIFF drafts and panel source data are under `transit_hrl/results/manuscript_figures_latest/`; regenerate with `python3 -m freq_hrl.experiments.manuscript_figures`.
 - Supplementary Information: Methods/SI draft in `freq_hrl_methods_si_2026-06-12.md`.
 - Availability: Data and Code Availability draft in `freq_hrl_data_code_availability_2026-06-12.md`.

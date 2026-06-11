@@ -284,7 +284,7 @@ def write_submission_package(
         "",
         "- Main text: title, abstract, introduction, method overview, experiments, discussion, limitations.",
         "- Main tables: C1-C9 evidence, baseline/ablation, real-data coverage.",
-        "- Figures: five-figure plan in `freq_hrl_figure_plan_2026-06-12.md`; actual rendering awaits Python/R backend selection.",
+        "- Figures: Python-rendered SVG/PDF/PNG/TIFF drafts and panel source data are under `transit_hrl/results/manuscript_figures_latest/`; regenerate with `python3 -m freq_hrl.experiments.manuscript_figures`.",
         "- Supplementary Information: Methods/SI draft in `freq_hrl_methods_si_2026-06-12.md`.",
         "- Availability: Data and Code Availability draft in `freq_hrl_data_code_availability_2026-06-12.md`.",
     ]
@@ -344,6 +344,7 @@ def write_methods_si(md_path: Path, paths: dict[str, Path]) -> None:
         "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage --output-dir transit_hrl/results/agency_demand_onboard_coverage_latest",
         "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.top_journal_unified_matrix --output-dir transit_hrl/results/top_journal_unified_matrix_latest",
         "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.manuscript_submission_pack --output-dir transit_hrl/results/manuscript_submission_pack_latest",
+        "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.manuscript_figures --output-dir transit_hrl/results/manuscript_figures_latest",
         "```",
         "",
         "## Supplementary Boundaries",
@@ -362,7 +363,7 @@ def write_figure_plan(md_path: Path, figure_rows: list[dict[str, Any]]) -> None:
         "",
         "Date: 2026-06-12",
         "",
-        "Backend gate: actual journal-ready plotting requires an explicit backend choice, Python or R. This file fixes the scientific figure contracts and data hooks before rendering.",
+        "Backend: Python/matplotlib. Rendered SVG/PDF/PNG/TIFF drafts, panel source CSVs, and a preview montage are written to `transit_hrl/results/manuscript_figures_latest/` by `python3 -m freq_hrl.experiments.manuscript_figures`. TIFF files are regenerated locally and ignored by git because they are large.",
         "",
     ]
     for row in figure_rows:
@@ -389,11 +390,11 @@ def write_data_availability(md_path: Path) -> None:
         "",
         "## Data Availability",
         "",
-        "The processed evidence tables, validation summaries, claim matrices, and source-coverage ledgers generated in this study are available in the repository under `transit_hrl/results/`. The public AFC/APC demand traces used by the native Transit validation are stored under `transit_hrl/data/public_afc_mta/` and `transit_hrl/data/public_apc_halifax/`. Public external Transit truth-source coverage was derived from the MBTA Bus Ridership by Trip, Season, Route, Line, and Stop dataset and the MTA Subway Origin-Destination Ridership Estimate 2024 dataset; the derived summaries are committed under `transit_hrl/results/external_transit_truth_validation_latest/`, while raw downloaded caches are ignored under `transit_hrl/data/public_mbta_bus_ridership_raw/` and `transit_hrl/data/public_mta_od_raw/` to avoid committing large third-party files. The LOBSTER/NASDAQ TotalView-ITCH sample-derived replay summaries are available under `transit_hrl/results/order_book_lobster_venue_grade_multisymbol/`; access to any full raw proprietary exchange feed remains governed by the original data provider.",
+        "The processed evidence tables, validation summaries, claim matrices, source-coverage ledgers, rendered manuscript figures, and figure source-data CSVs generated in this study are available in the repository under `transit_hrl/results/`. The public AFC/APC demand traces used by the native Transit validation are stored under `transit_hrl/data/public_afc_mta/` and `transit_hrl/data/public_apc_halifax/`. Public external Transit truth-source coverage was derived from the MBTA Bus Ridership by Trip, Season, Route, Line, and Stop dataset and the MTA Subway Origin-Destination Ridership Estimate 2024 dataset; the derived summaries are committed under `transit_hrl/results/external_transit_truth_validation_latest/`, while raw downloaded caches are ignored under `transit_hrl/data/public_mbta_bus_ridership_raw/` and `transit_hrl/data/public_mta_od_raw/` to avoid committing large third-party files. The LOBSTER/NASDAQ TotalView-ITCH sample-derived replay summaries are available under `transit_hrl/results/order_book_lobster_venue_grade_multisymbol/`; access to any full raw proprietary exchange feed remains governed by the original data provider.",
         "",
         "## Code Availability",
         "",
-        "The code used to generate the Freq-HRL experiments, evidence matrices, external data-source ledgers, and manuscript submission package is available in the same repository under `transit_hrl/`. The external Transit source ledger can be regenerated with `python3 -m freq_hrl.experiments.transit.external_transit_truth_validation`, the agency coverage ledger with `python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage`, and the unified claim matrix with `python3 -m freq_hrl.experiments.top_journal_unified_matrix`.",
+        "The code used to generate the Freq-HRL experiments, evidence matrices, external data-source ledgers, manuscript submission package, and manuscript figures is available in the same repository under `transit_hrl/`. The external Transit source ledger can be regenerated with `python3 -m freq_hrl.experiments.transit.external_transit_truth_validation`, the agency coverage ledger with `python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage`, the unified claim matrix with `python3 -m freq_hrl.experiments.top_journal_unified_matrix`, and the figure set with `python3 -m freq_hrl.experiments.manuscript_figures`.",
         "",
         "## Dataset Citations And Source URLs",
         "",
@@ -472,8 +473,8 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
         },
         "boundary": (
             "This package is submission-preparation scaffolding. It keeps claim "
-            "wording conservative and defers actual figure rendering until a "
-            "Python or R backend is selected."
+            "wording conservative and links to Python-rendered draft figures, "
+            "while preserving deployment-scale boundaries."
         ),
     }
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
