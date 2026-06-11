@@ -212,6 +212,7 @@ def run_manifest_validation(
     min_pairs: int,
     max_files: int = 0,
     allow_missing: bool = False,
+    require_venue_grade: bool = False,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     entries_raw = load_manifest(manifest)
@@ -309,12 +310,18 @@ def run_manifest_validation(
     venue_l2_l3_pairs = sorted(venue_l2_sessions & venue_l3_sessions)
     if venue_l2_l3_pairs:
         source_quality_status = "venue_grade_ready"
+        venue_grade_claim_status = "supported"
     elif coverage["real_l2_files"] > 0 and coverage["real_l3_files"] > 0:
         source_quality_status = "real_unpaired_or_metadata_incomplete"
+        venue_grade_claim_status = "blocked_unpaired_or_metadata_incomplete"
     elif coverage["l2_files"] > 0 and coverage["l3_files"] > 0:
         source_quality_status = "mechanism_only"
+        venue_grade_claim_status = "blocked_fixture_or_synthetic_only"
     else:
         source_quality_status = "incomplete"
+        venue_grade_claim_status = "blocked_incomplete_manifest"
+    if bool(require_venue_grade) and not venue_l2_l3_pairs:
+        source_quality_status = "venue_grade_required_but_missing"
     coverage.update({
         "real_or_venue_grade_sessions": len(real_sessions),
         "venue_grade_l2_l3_session_pairs": len(venue_l2_l3_pairs),
@@ -323,6 +330,8 @@ def run_manifest_validation(
             for venue, symbol, session in venue_l2_l3_pairs
         ],
         "source_quality_status": source_quality_status,
+        "venue_grade_required": bool(require_venue_grade),
+        "venue_grade_claim_status": venue_grade_claim_status,
     })
     payload = {
         "manifest": str(manifest),
@@ -353,6 +362,8 @@ def run_manifest_validation(
         f"- real/venue-grade L3 files: `{coverage['real_l3_files']}`",
         f"- venue-grade paired L2/L3 sessions: `{coverage['venue_grade_l2_l3_session_pairs']}`",
         f"- source quality: `{coverage['source_quality_status']}`",
+        f"- venue-grade claim status: `{coverage['venue_grade_claim_status']}`",
+        f"- venue-grade required: `{coverage['venue_grade_required']}`",
         f"- missing entries: `{coverage['missing_entries']}`",
         f"- boundary: {payload['boundary']}",
         "",
@@ -382,6 +393,7 @@ def main() -> None:
     parser.add_argument("--min-pairs", type=int, default=5)
     parser.add_argument("--max-files", type=int, default=0)
     parser.add_argument("--allow-missing", action="store_true")
+    parser.add_argument("--require-venue-grade", action="store_true")
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -400,6 +412,7 @@ def main() -> None:
         min_pairs=int(args.min_pairs),
         max_files=int(args.max_files),
         allow_missing=bool(args.allow_missing),
+        require_venue_grade=bool(args.require_venue_grade),
     )
     coverage = payload["coverage"]
     print(

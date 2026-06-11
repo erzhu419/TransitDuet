@@ -76,6 +76,10 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             self.assertEqual(payload["coverage"]["fixture_l3_files"], 1)
             self.assertEqual(payload["coverage"]["venue_grade_l2_l3_session_pairs"], 0)
             self.assertEqual(payload["coverage"]["source_quality_status"], "mechanism_only")
+            self.assertEqual(
+                payload["coverage"]["venue_grade_claim_status"],
+                "blocked_fixture_or_synthetic_only",
+            )
             self.assertTrue((root / "out" / "summary.json").exists())
             self.assertTrue(any(row["book_kind"] == "l2" for row in payload["summary"]))
             self.assertTrue(any(row["book_kind"] == "l3" for row in payload["summary"]))
@@ -146,6 +150,10 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             self.assertEqual(
                 payload["coverage"]["source_quality_status"],
                 "real_unpaired_or_metadata_incomplete",
+            )
+            self.assertEqual(
+                payload["coverage"]["venue_grade_claim_status"],
+                "blocked_unpaired_or_metadata_incomplete",
             )
 
     def test_manifest_requires_paired_venue_sessions_for_ready_status(self):
@@ -221,7 +229,70 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             )
             self.assertEqual(payload["coverage"]["venue_grade_l2_l3_session_pairs"], 1)
             self.assertEqual(payload["coverage"]["source_quality_status"], "venue_grade_ready")
+            self.assertEqual(payload["coverage"]["venue_grade_claim_status"], "supported")
             self.assertGreater(payload["coverage"]["real_or_venue_grade_sessions"], 0)
+
+    def test_require_venue_grade_marks_fixture_manifest_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            l2_path = root / "book_l2.csv"
+            l2_path.write_text(
+                "\n".join([
+                    "timestamp,bid_price_1,ask_price_1,bid_size_1,ask_size_1,bid_price_2,ask_price_2,bid_size_2,ask_size_2",
+                    "0,99.9,100.1,5,4,99.8,100.2,8,7",
+                    "1,100.0,100.2,6,4,99.9,100.3,8,7",
+                    "2,100.1,100.3,6,5,100.0,100.4,8,7",
+                    "3,100.2,100.4,7,5,100.1,100.5,8,7",
+                ]) + "\n",
+                encoding="utf-8",
+            )
+            l3_path = root / "events_l3.csv"
+            l3_path.write_text(
+                "\n".join([
+                    "timestamp,event_type,side,price,size,order_id",
+                    "0,add,bid,99.9,20,b1",
+                    "0,add,ask,100.1,20,a1",
+                    "1,trade,bid,99.9,12,t1",
+                    "2,trade,ask,100.1,12,t2",
+                    "3,add,bid,99.8,10,b2",
+                    "3,add,ask,100.2,10,a2",
+                    "4,cancel,bid,99.8,3,b2",
+                    "5,trade,bid,99.8,4,t3",
+                    "6,trade,ask,100.2,4,t4",
+                ]) + "\n",
+                encoding="utf-8",
+            )
+            manifest = root / "manifest.json"
+            manifest.write_text(
+                json.dumps({
+                    "datasets": [
+                        {"kind": "l2", "path": "book_l2.csv", "source_type": "fixture"},
+                        {"kind": "l3", "path": "events_l3.csv", "source_type": "fixture"},
+                    ]
+                }),
+                encoding="utf-8",
+            )
+            payload = run_manifest_validation(
+                root / "out",
+                manifest=manifest,
+                methods=["ema", "state_space"],
+                steps=4,
+                levels=2,
+                latency_bins=[0],
+                execution_modes=["market"],
+                queue_ahead_fraction=0.5,
+                min_pairs=1,
+                require_venue_grade=True,
+            )
+            self.assertTrue(payload["coverage"]["venue_grade_required"])
+            self.assertEqual(
+                payload["coverage"]["source_quality_status"],
+                "venue_grade_required_but_missing",
+            )
+            self.assertEqual(
+                payload["coverage"]["venue_grade_claim_status"],
+                "blocked_fixture_or_synthetic_only",
+            )
 
 
 if __name__ == "__main__":

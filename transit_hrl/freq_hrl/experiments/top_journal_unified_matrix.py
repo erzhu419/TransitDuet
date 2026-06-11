@@ -10,6 +10,7 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v47_odshift": Path("transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_merged/summary.json"),
     "native_promotion_v46_odshift": Path("transit_hrl/results/scheduler_native_promotion_v46_odshift_reward_wait_guard_512seed_merged/summary.json"),
     "native_promotion_v45_odshift": Path("transit_hrl/results/scheduler_native_promotion_v45_odshift_reward_floor_active_512seed_merged/summary.json"),
     "native_promotion_v44_odshift": Path("transit_hrl/results/scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4/summary.json"),
@@ -23,6 +24,7 @@ DEFAULT_ARTIFACTS = {
     "native_promotion_v24_fixed": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_service_response_v7": Path("transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json"),
     "native_real_demand_throughput_safe_wait_v6": Path("transit_hrl/results/transit_native_real_demand_throughput_safe_wait_v6_48pair_merged/summary.json"),
     "native_real_demand_alighting_throughput_v5": Path("transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json"),
     "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
@@ -126,6 +128,7 @@ def _promotion_evidence(
     paths: dict[str, str],
 ) -> dict[str, Any]:
     candidates = [
+        "native_promotion_v47_odshift",
         "native_promotion_v46_odshift",
         "native_promotion_v45_odshift",
         "native_promotion_v44_odshift",
@@ -238,6 +241,7 @@ def _promotion_cross_stress_evidence(
 ) -> dict[str, Any]:
     persistent = _promotion_evidence(artifacts, paths)
     odshift_candidates = [
+        "native_promotion_v47_odshift",
         "native_promotion_v46_odshift",
         "native_promotion_v45_odshift",
         "native_promotion_v44_odshift",
@@ -379,7 +383,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     promotion_wait_noninferiority = promotion["wait_noninferiority"]
     promotion_score = promotion.get("best_score", {})
     real = (
-        artifacts["native_real_demand_throughput_safe_wait_v6"]
+        artifacts["native_real_demand_service_response_v7"]
+        or artifacts["native_real_demand_throughput_safe_wait_v6"]
         or artifacts["native_real_demand_alighting_throughput_v5"]
         or artifacts["native_real_demand_alighting_wait_v4"]
         or artifacts["native_real_demand_alighting_safe_v2"]
@@ -532,7 +537,9 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             ),
             "remaining_gap": "Strict wait/alighting/throughput improvement still needs throughput-safe v6 validation if this row remains partial.",
             "artifact": (
-                paths["native_real_demand_throughput_safe_wait_v6"]
+                paths["native_real_demand_service_response_v7"]
+                if artifacts["native_real_demand_service_response_v7"]
+                else paths["native_real_demand_throughput_safe_wait_v6"]
                 if artifacts["native_real_demand_throughput_safe_wait_v6"]
                 else paths["native_real_demand_alighting_throughput_v5"]
                 if artifacts["native_real_demand_alighting_throughput_v5"]

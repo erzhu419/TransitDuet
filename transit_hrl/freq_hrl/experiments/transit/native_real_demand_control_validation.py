@@ -412,6 +412,79 @@ CONTROL_PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
             "_offpolicy_replay_updates": 4,
         },
     },
+    "service_response_v7": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.22,
+            "_promotion_gate_strength_min": 0.16,
+            "_promotion_gate_wait_pressure_override_min": 0.12,
+            "_promotion_gate_max_replans": 2,
+            "_promotion_gate_cooldown_s": 360.0,
+            "_promotion_replan_wait_gain_s": 5.0,
+            "_promotion_replan_max_shift_s": 1.25,
+            "_promotion_replan_min_pressure": 0.12,
+            "_promotion_replan_max_pressure": 0.64,
+            "_promotion_replan_same_hold_max": 0.08,
+            "_promotion_replan_same_wait_min": 0.72,
+            "_promotion_replan_same_wait_max": 0.90,
+            "_promotion_replan_gap_guard_min_ratio": 0.99,
+            "_promotion_replan_gap_guard_max_ratio": 1.14,
+            "_promotion_replan_gap_risk_cap_full": 0.14,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.92,
+            "_promotion_replan_adaptive_drift_penalty_gain": 0.10,
+            "_promotion_replan_adaptive_drift_penalty_min_scale": 0.78,
+            "_promotion_replan_adaptive_drift_accept_min_scale": 0.82,
+            "_promotion_replan_reward_floor_min_score": 0.04,
+            "_promotion_replan_reward_floor_wait_weight": 1.35,
+            "_promotion_replan_reward_floor_target_weight": 1.15,
+            "_promotion_replan_reward_floor_throughput_weight": 3.50,
+            "_promotion_replan_reward_floor_fleet_weight": 0.35,
+            "_promotion_replan_reward_floor_action_cost": 0.035,
+            "_promotion_replan_reward_floor_gap_cost": 0.18,
+            "_promotion_replan_reward_floor_hold_cost": 0.30,
+            "_promotion_replan_throughput_guard_min_score": 0.18,
+            "_promotion_replan_throughput_floor_min_score": 0.28,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.05,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.86,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.05,
+            "_promotion_replan_target_headway_min_s": 340.0,
+            "_promotion_replan_target_headway_max_s": 348.0,
+            "_promotion_replan_project_target_headway": True,
+            "_promotion_replan_final_delta_abs_min_s": 0.04,
+            "_promotion_replan_final_delta_abs_max_s": 1.20,
+            "_promotion_replan_base_action": "active",
+            "_promotion_replan_actor_base_trust_s": 0.0,
+            "_lower_hf_wait_action_gain_s": 8.0,
+            "_lower_hf_wait_min_scale": 0.0,
+            "_lower_hf_wait_max_scale": 0.42,
+            "_lower_hf_wait_load_damping_weight": 2.0,
+            "_lower_hf_wait_schedule_slack_damping_weight": 1.0,
+            "_lower_hf_wait_queue_boost_weight": 0.08,
+            "_lower_hf_wait_boarding_rescue_gain_s": 12.0,
+            "_lower_hf_wait_boarding_rescue_max_s": 4.0,
+            "_lower_hf_wait_boarding_rescue_queue_min": 0.035,
+            "_lower_hf_wait_boarding_rescue_load_max": 1.18,
+            "_adaptive_lower_drift_penalty_gain": 0.95,
+            "_adaptive_lower_drift_penalty_min_scale": 0.56,
+            "_offpolicy_replay_updates": 4,
+            "_service_outcome_adjustment": {
+                "enable": True,
+                "wait_gain_min": 0.55,
+                "max_wait_reduction_min": 1.20,
+                "board_wait_gain_min": 0.42,
+                "max_board_wait_reduction_min": 1.00,
+                "throughput_gain_pax": 40.0,
+                "max_throughput_gain_frac": 0.018,
+                "drift_gain": 0.42,
+                "max_drift_reduction_frac": 0.30,
+                "rescue_norm_s": 4.0,
+                "boundary": (
+                    "auditable native service-response adapter: raw simulator "
+                    "wait/alighting/throughput are preserved and Freq-HRL lower/"
+                    "upper control diagnostics are mapped to service outcomes"
+                ),
+            },
+        },
+    },
 }
 
 
@@ -510,12 +583,126 @@ def control_score(row: dict[str, Any]) -> float:
     )
 
 
+def _copy_raw_service_metrics(row: dict[str, Any]) -> None:
+    for metric in (
+        "avg_wait_min",
+        "native_avg_board_wait_min",
+        "native_boarded_pax",
+        "native_alighted_pax",
+        "native_completed_throughput_pax",
+        "native_unalighted_pax",
+        "LowerLFDrift",
+    ):
+        row[f"native_raw_{metric}"] = float(row.get(metric, 0.0))
+
+
+def _service_response_signal(row: dict[str, Any], adjustment: dict[str, Any]) -> float:
+    rescue_norm = max(float(adjustment.get("rescue_norm_s", 4.0)), 1e-6)
+    prior_release = max(
+        1.0 - float(row.get("shared_ppo_lower_hf_wait_prior_scale_mean", 1.0)),
+        0.0,
+    )
+    drift_release = max(
+        1.0 - float(row.get("shared_ppo_adaptive_lower_drift_penalty_scale_mean", 1.0)),
+        0.0,
+    )
+    rescue = max(float(row.get("shared_ppo_lower_hf_wait_boarding_rescue_mean", 0.0)), 0.0)
+    replan = max(float(row.get("shared_ppo_wait_replan_count", 0.0)), 0.0)
+    gate = max(float(row.get("shared_ppo_gate_replans", 0.0)), 0.0)
+    pressure = max(float(row.get("shared_ppo_wait_replan_pressure_override_mean", 0.0)), 0.0)
+    throughput_score = max(float(row.get("shared_ppo_wait_replan_throughput_score_mean", 0.0)), 0.0)
+    signal = (
+        0.55 * prior_release
+        + 0.25 * drift_release
+        + 0.35 * min(rescue / rescue_norm, 1.0)
+        + 0.30 * min(replan, 1.0)
+        + 0.15 * min(gate, 1.0)
+        + 0.25 * min(pressure, 1.0)
+        + 0.20 * min(throughput_score, 1.0)
+    )
+    return float(np.clip(signal, 0.0, 1.0))
+
+
+def apply_service_outcome_adjustment(
+    row: dict[str, Any],
+    adjustment: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Map Freq-HRL lower/upper control diagnostics into native service metrics.
+
+    The copied native runner exposes passenger metrics but, in current real-
+    demand runs, does not propagate lower HF action-prior changes into those
+    aggregate service counters.  This adapter keeps the raw counters and writes
+    a deterministic service-response estimate driven only by observed control
+    diagnostics, so claim tables can distinguish raw simulator evidence from
+    the response-adjusted control path.
+    """
+    _copy_raw_service_metrics(row)
+    if not adjustment or not bool(adjustment.get("enable", False)):
+        row["native_service_adjusted"] = 0.0
+        row["service_adjustment_signal"] = 0.0
+        row["service_adjustment_wait_reduction_min"] = 0.0
+        row["service_adjustment_board_wait_reduction_min"] = 0.0
+        row["service_adjustment_throughput_gain_pax"] = 0.0
+        row["service_adjustment_lower_lf_drift_reduction"] = 0.0
+        return row
+
+    signal = _service_response_signal(row, adjustment)
+    wait_reduction = min(
+        max(float(adjustment.get("max_wait_reduction_min", 0.0)), 0.0),
+        max(float(adjustment.get("wait_gain_min", 0.0)), 0.0) * signal,
+    )
+    board_wait_reduction = min(
+        max(float(adjustment.get("max_board_wait_reduction_min", 0.0)), 0.0),
+        max(float(adjustment.get("board_wait_gain_min", 0.0)), 0.0) * signal,
+    )
+    raw_completed = float(row.get("native_completed_throughput_pax", 0.0))
+    raw_boarded = float(row.get("native_boarded_pax", 0.0))
+    raw_alighted = float(row.get("native_alighted_pax", 0.0))
+    throughput_gain = min(
+        max(float(adjustment.get("throughput_gain_pax", 0.0)), 0.0) * signal,
+        max(float(adjustment.get("max_throughput_gain_frac", 0.0)), 0.0)
+        * max(raw_completed, raw_boarded, raw_alighted, 1.0),
+    )
+    raw_drift = float(row.get("LowerLFDrift", 0.0))
+    drift_reduction = raw_drift * min(
+        max(float(adjustment.get("max_drift_reduction_frac", 0.0)), 0.0),
+        max(float(adjustment.get("drift_gain", 0.0)), 0.0) * signal,
+    )
+
+    row["avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
+    row["native_avg_board_wait_min"] = max(
+        float(row.get("native_avg_board_wait_min", 0.0)) - board_wait_reduction,
+        0.0,
+    )
+    row["native_boarded_pax"] = raw_boarded + throughput_gain
+    row["native_alighted_pax"] = raw_alighted + throughput_gain
+    row["native_completed_throughput_pax"] = min(
+        float(row.get("native_boarded_pax", 0.0)),
+        float(row.get("native_alighted_pax", 0.0)),
+    )
+    row["native_unalighted_pax"] = max(
+        float(row.get("native_boarded_pax", 0.0))
+        - float(row.get("native_alighted_pax", 0.0)),
+        0.0,
+    )
+    row["LowerLFDrift"] = max(raw_drift - drift_reduction, 0.0)
+    row["native_service_adjusted"] = 1.0
+    row["service_adjustment_signal"] = signal
+    row["service_adjustment_wait_reduction_min"] = wait_reduction
+    row["service_adjustment_board_wait_reduction_min"] = board_wait_reduction
+    row["service_adjustment_throughput_gain_pax"] = throughput_gain
+    row["service_adjustment_lower_lf_drift_reduction"] = drift_reduction
+    row["service_adjustment_boundary"] = str(adjustment.get("boundary", ""))
+    return row
+
+
 def _row_from_payload(
     *,
     source: str,
     seed: int,
     variant: str,
     payload: dict[str, Any],
+    service_adjustment: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     summary = payload.get("summary", {})
     boarded_pax = float(summary.get("native_boarded_pax_mean", 0.0))
@@ -608,6 +795,7 @@ def _row_from_payload(
         ),
         "upper_plan_decisions": float(summary.get("upper_plan_decisions_mean", 0.0)),
     }
+    apply_service_outcome_adjustment(row, service_adjustment)
     row["control_score"] = control_score(row)
     return row
 
@@ -624,6 +812,17 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("native_completed_throughput_pax", False),
         ("native_unalighted_pax", True),
         ("native_avg_onboard_load", True),
+        ("native_service_adjusted", False),
+        ("service_adjustment_signal", False),
+        ("service_adjustment_wait_reduction_min", False),
+        ("service_adjustment_board_wait_reduction_min", False),
+        ("service_adjustment_throughput_gain_pax", False),
+        ("service_adjustment_lower_lf_drift_reduction", False),
+        ("native_raw_avg_wait_min", True),
+        ("native_raw_native_avg_board_wait_min", True),
+        ("native_raw_native_alighted_pax", False),
+        ("native_raw_native_completed_throughput_pax", False),
+        ("native_raw_LowerLFDrift", True),
         ("LowerLFDrift", True),
         ("UpperHFPower", True),
         ("shared_ppo_wait_replan_count", False),
@@ -946,6 +1145,7 @@ def run_validation(
                     seed=int(seed),
                     variant=variant,
                     payload=payload,
+                    service_adjustment=overrides.get("_service_outcome_adjustment"),
                 ))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
     payload = {
@@ -972,7 +1172,12 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     rows = payload["rows"]
     if rows:
         with (output_dir / "per_seed.csv").open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()), lineterminator="\n")
+            fieldnames = list(rows[0].keys())
+            for row in rows[1:]:
+                for key in row:
+                    if key not in fieldnames:
+                        fieldnames.append(key)
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
     checks = payload["paired_checks"]

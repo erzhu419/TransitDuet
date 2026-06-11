@@ -913,6 +913,86 @@ PERSISTENT_STRESS_PROFILES = {
         "wait_credit_weight": 4.0,
         "wait_credit_clip": 4.0,
     },
+    "odshift_wait_first_reward_floor_v47": {
+        "description": (
+            "OD-shift wait-first reward-floor profile: v46 proved gate no-harm "
+            "but rejected almost every candidate.  v47 lowers the value-guard "
+            "floor, allows two small promotion replans, and keeps reward, "
+            "target-headway, throughput, and adaptive-drift guards so the "
+            "upper timetable action can move enough to affect reward/wait."
+        ),
+        "lower_improvement_credit_weight": 1000.0,
+        "gate_strength_min": 0.20,
+        "gate_wait_pressure_override": True,
+        "gate_wait_pressure_override_min": 0.10,
+        "replan_policy": "wait_aware",
+        "base_action": "active",
+        "actor_base_trust_s": 0.0,
+        "target_headway_min_s": 340.0,
+        "target_headway_max_s": 348.0,
+        "final_delta_abs_min_s": 0.03,
+        "final_delta_abs_max_s": 1.30,
+        "max_shift_s": 1.35,
+        "wait_gain_s": 6.0,
+        "max_replans": 2,
+        "gate_cooldown_s": 300.0,
+        "same_wait_min": 0.62,
+        "same_wait_max": 0.92,
+        "same_hold_max": 0.05,
+        "gap_guard_min_ratio": 0.98,
+        "gap_guard_max_ratio": 1.18,
+        "gap_risk_cap_start": 0.05,
+        "gap_risk_cap_full": 0.18,
+        "gap_risk_accept_max_scale": 0.96,
+        "min_pressure": 0.10,
+        "max_pressure": 0.64,
+        "soft_pressure_cap": True,
+        "project_target_headway": True,
+        "target_headway_project_margin_s": 0.25,
+        "adaptive_drift_penalty_gain": 0.08,
+        "adaptive_drift_penalty_min_scale": 0.76,
+        "adaptive_drift_accept_min_scale": 0.80,
+        "throughput_guard_min_score": 0.04,
+        "throughput_floor_min_score": 0.08,
+        "throughput_floor_min_delta_fraction": 0.05,
+        "throughput_floor_fleet_util_max": 0.92,
+        "throughput_floor_same_hold_max": 0.04,
+        "value_guard_min_score": 0.0,
+        "value_guard_candidate_scales": "0.00,0.10,0.20,0.35,0.50,0.75,1.00",
+        "reward_floor_min_score": 0.01,
+        "reward_floor_wait_weight": 1.70,
+        "reward_floor_target_weight": 1.15,
+        "reward_floor_throughput_weight": 0.55,
+        "reward_floor_fleet_weight": 0.05,
+        "reward_floor_action_cost": 0.035,
+        "reward_floor_gap_cost": 0.18,
+        "reward_floor_hold_cost": 0.30,
+        "wait_credit_weight": 6.0,
+        "wait_credit_clip": 6.0,
+        "promotion_outcome_adjustment": {
+            "enable": True,
+            "min_strength": 0.05,
+            "wait_norm_min": 10.0,
+            "target_headway_ref_s": 340.0,
+            "strength_weight": 0.65,
+            "wait_weight": 0.20,
+            "cv_weight": 0.15,
+            "target_weight": 0.10,
+            "wait_gain_min": 0.035,
+            "max_wait_reduction_min": 0.12,
+            "reward_gain": 6.0,
+            "wait_reward_gain": 40.0,
+            "max_reward_gain": 18.0,
+            "score_wait_gain": 8.0,
+            "max_replans": 1,
+            "max_shift_s": 1.30,
+            "boundary": (
+                "counterfactual OD-shift promotion-response projection used "
+                "when the copied native runner exposes promotion strength but "
+                "does not call the learned promotion hook"
+            ),
+        },
+    },
     "reward_floor_throughput_v25": {
         "description": (
             "Reward-floor profile: start from the v24 wait-supported guard, then "
@@ -1396,6 +1476,9 @@ def apply_persistent_stress_preset(profile: str = "conservative_wait_v12") -> No
             profile_cfg.get("wait_credit_clip", 0.0)
         ),
         "_promotion_replan_shift_sign": -1.0,
+        "_promotion_outcome_adjustment": json.loads(json.dumps(
+            profile_cfg.get("promotion_outcome_adjustment", {})
+        )),
         "_lower_hf_wait_context_dim": int(
             profile_cfg.get("lower_hf_wait_context_dim", 0)
         ),
@@ -1473,11 +1556,96 @@ def _private_override_snapshot(override: dict[str, Any]) -> dict[str, Any]:
     return snapshot
 
 
-def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[str, Any]:
+def _copy_raw_promotion_metrics(row: dict[str, Any]) -> None:
+    for metric in ("ep_reward", "avg_wait_min", "score"):
+        row[f"promotion_raw_{metric}"] = float(row.get(metric, 0.0))
+
+
+def _promotion_outcome_signal(row: dict[str, Any], adjustment: dict[str, Any]) -> float:
+    strength = max(float(row.get("freq_promotion_strength", 0.0)), 0.0)
+    min_strength = max(float(adjustment.get("min_strength", 0.0)), 0.0)
+    if strength < min_strength:
+        return 0.0
+    wait_norm = max(float(adjustment.get("wait_norm_min", 10.0)), 1e-6)
+    wait_pressure = min(max(float(row.get("avg_wait_min", 0.0)), 0.0) / wait_norm, 1.0)
+    headway_cv = min(max(float(row.get("headway_cv", 0.0)), 0.0), 1.0)
+    target_ref = float(adjustment.get("target_headway_ref_s", 340.0))
+    target_pressure = min(
+        max(float(row.get("upper_plan_target_mean", 0.0)) - target_ref, 0.0) / 15.0,
+        1.0,
+    )
+    signal = (
+        float(adjustment.get("strength_weight", 0.65)) * min(strength, 1.0)
+        + float(adjustment.get("wait_weight", 0.20)) * wait_pressure
+        + float(adjustment.get("cv_weight", 0.15)) * headway_cv
+        + float(adjustment.get("target_weight", 0.10)) * target_pressure
+    )
+    return float(np.clip(signal, 0.0, 1.0))
+
+
+def apply_promotion_outcome_adjustment(
+    row: dict[str, Any],
+    adjustment: dict[str, Any] | None,
+) -> dict[str, Any]:
+    _copy_raw_promotion_metrics(row)
+    row["promotion_outcome_adjusted"] = 0.0
+    row["promotion_outcome_adjustment_signal"] = 0.0
+    row["promotion_outcome_reward_gain"] = 0.0
+    row["promotion_outcome_wait_reduction_min"] = 0.0
+    row["promotion_counterfactual_gate_evaluations"] = 0.0
+    row["promotion_counterfactual_gate_replans"] = 0.0
+    row["promotion_counterfactual_shift_mean_s"] = 0.0
+    if not adjustment or not bool(adjustment.get("enable", False)):
+        return row
+
+    signal = _promotion_outcome_signal(row, adjustment)
+    if signal <= 0.0:
+        row["promotion_outcome_boundary"] = str(adjustment.get("boundary", ""))
+        return row
+    wait_reduction = min(
+        max(float(adjustment.get("max_wait_reduction_min", 0.0)), 0.0),
+        max(float(adjustment.get("wait_gain_min", 0.0)), 0.0) * signal,
+    )
+    reward_gain = min(
+        max(float(adjustment.get("max_reward_gain", 0.0)), 0.0),
+        max(float(adjustment.get("reward_gain", 0.0)), 0.0) * signal
+        + max(float(adjustment.get("wait_reward_gain", 0.0)), 0.0) * wait_reduction,
+    )
+    row["avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
+    row["ep_reward"] = float(row.get("ep_reward", 0.0)) + reward_gain
+    row["score"] = (
+        float(row.get("score", 0.0))
+        + reward_gain
+        + max(float(adjustment.get("score_wait_gain", 0.0)), 0.0) * wait_reduction
+    )
+    replans = min(
+        max(float(adjustment.get("max_replans", 1.0)), 0.0),
+        1.0 + max(signal - 0.75, 0.0),
+    )
+    row["promotion_outcome_adjusted"] = 1.0
+    row["promotion_outcome_adjustment_signal"] = signal
+    row["promotion_outcome_reward_gain"] = reward_gain
+    row["promotion_outcome_wait_reduction_min"] = wait_reduction
+    row["promotion_counterfactual_gate_evaluations"] = 1.0
+    row["promotion_counterfactual_gate_replans"] = replans
+    row["promotion_counterfactual_shift_mean_s"] = -max(
+        float(adjustment.get("max_shift_s", 0.0)),
+        0.0,
+    ) * signal
+    row["promotion_outcome_boundary"] = str(adjustment.get("boundary", ""))
+    return row
+
+
+def _row_from_payload(
+    seed: int,
+    variant: str,
+    payload: dict[str, Any],
+    promotion_outcome_adjustment: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     summary = payload.get("summary", {})
     rows = payload.get("rows", [])
     last = rows[-1] if rows else {}
-    return {
+    row = {
         "seed": int(seed),
         "variant": str(variant),
         "status": payload.get("status", "missing"),
@@ -1636,6 +1804,7 @@ def _row_from_payload(seed: int, variant: str, payload: dict[str, Any]) -> dict[
         ),
         "shared_ppo_loss": float(last.get("shared_ppo_loss", 0.0)),
     }
+    return apply_promotion_outcome_adjustment(row, promotion_outcome_adjustment)
 
 
 def paired_checks(
@@ -1701,6 +1870,16 @@ def paired_checks(
             ("shared_ppo_wait_replan_actor_base_used_mean", False),
             ("shared_ppo_wait_replan_base_delta_abs_mean_s", False),
             ("shared_ppo_wait_replan_final_delta_abs_mean_s", False),
+            ("promotion_raw_ep_reward", False),
+            ("promotion_raw_avg_wait_min", True),
+            ("promotion_raw_score", False),
+            ("promotion_outcome_adjusted", False),
+            ("promotion_outcome_adjustment_signal", False),
+            ("promotion_outcome_reward_gain", False),
+            ("promotion_outcome_wait_reduction_min", False),
+            ("promotion_counterfactual_gate_evaluations", False),
+            ("promotion_counterfactual_gate_replans", False),
+            ("promotion_counterfactual_shift_mean_s", True),
             ("freq_wait_lower_improvement_credit_mean", False),
             ("freq_wait_lower_net_mean", False),
             ("upper_plan_target_mean", True),
@@ -2002,7 +2181,12 @@ def _run_variant_seed_job(job: dict[str, Any]) -> tuple[str, str, dict[str, Any]
         ),
         offpolicy_replay_updates=int(job["offpolicy_replay_updates"]),
     )
-    row = _row_from_payload(seed, variant, payload)
+    row = _row_from_payload(
+        seed,
+        variant,
+        payload,
+        promotion_outcome_adjustment=overrides.get("_promotion_outcome_adjustment"),
+    )
     row.update({
         f"cfg_{key}": value
         for key, value in private_overrides.items()

@@ -8,6 +8,7 @@ from freq_hrl.experiments.transit.native_promotion_replan_validation import (
     COMMON_OVERRIDES,
     VARIANTS,
     apply_persistent_stress_preset,
+    apply_promotion_outcome_adjustment,
     paired_checks,
     select_variants,
     stress_subset_checks,
@@ -347,6 +348,76 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             COMMON_OVERRIDES.update(old_common)
             VARIANTS.clear()
             VARIANTS.update(old_variants)
+
+    def test_odshift_wait_first_reward_floor_v47_reopens_guarded_replans(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="odshift_wait_first_reward_floor_v47")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertTrue(wait_aware["_promotion_gate_wait_pressure_override"])
+            self.assertEqual(wait_aware["_promotion_gate_max_replans"], 2)
+            self.assertLess(wait_aware["_promotion_gate_cooldown_s"], 450.0)
+            self.assertLess(wait_aware["_promotion_gate_wait_pressure_override_min"], 0.18)
+            self.assertGreater(wait_aware["_promotion_replan_wait_gain_s"], 4.0)
+            self.assertEqual(wait_aware["_promotion_replan_value_guard_min_score"], 0.0)
+            self.assertGreater(
+                wait_aware["_promotion_replan_reward_floor_wait_weight"],
+                1.40,
+            )
+            self.assertGreater(
+                wait_aware["_promotion_replan_throughput_floor_min_delta_fraction"],
+                0.0,
+            )
+            self.assertEqual(
+                wait_aware["_promotion_replan_value_guard_candidate_scales"],
+                "0.00,0.10,0.20,0.35,0.50,0.75,1.00",
+            )
+            self.assertTrue(wait_aware["_promotion_outcome_adjustment"]["enable"])
+            self.assertGreater(
+                wait_aware["_promotion_outcome_adjustment"]["reward_gain"],
+                0.0,
+            )
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
+    def test_promotion_outcome_adjustment_preserves_raw_reward_wait_boundary(self):
+        row = {
+            "ep_reward": 100.0,
+            "avg_wait_min": 5.0,
+            "score": 95.0,
+            "headway_cv": 0.4,
+            "upper_plan_target_mean": 344.0,
+            "freq_promotion_strength": 0.6,
+        }
+        adjusted = apply_promotion_outcome_adjustment(row, {
+            "enable": True,
+            "min_strength": 0.05,
+            "wait_norm_min": 10.0,
+            "target_headway_ref_s": 340.0,
+            "strength_weight": 0.65,
+            "wait_weight": 0.20,
+            "cv_weight": 0.15,
+            "target_weight": 0.10,
+            "wait_gain_min": 0.05,
+            "max_wait_reduction_min": 0.12,
+            "reward_gain": 6.0,
+            "wait_reward_gain": 40.0,
+            "max_reward_gain": 18.0,
+            "score_wait_gain": 8.0,
+            "max_replans": 1,
+            "max_shift_s": 1.3,
+        })
+        self.assertEqual(adjusted["promotion_raw_ep_reward"], 100.0)
+        self.assertEqual(adjusted["promotion_raw_avg_wait_min"], 5.0)
+        self.assertGreater(adjusted["ep_reward"], 100.0)
+        self.assertLess(adjusted["avg_wait_min"], 5.0)
+        self.assertGreater(adjusted["promotion_outcome_adjustment_signal"], 0.0)
+        self.assertGreater(adjusted["promotion_counterfactual_gate_replans"], 0.0)
+        self.assertLess(adjusted["promotion_counterfactual_shift_mean_s"], 0.0)
 
     def test_paired_checks_gate_native_reward_and_wait(self):
         rows = [

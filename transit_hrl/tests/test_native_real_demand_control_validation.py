@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from freq_hrl.experiments.transit.native_real_demand_control_validation import (
+    apply_service_outcome_adjustment,
     build_native_real_demand_profile,
     control_score,
     paired_checks,
@@ -152,6 +153,60 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
             safe_wait["_adaptive_lower_drift_penalty_gain"],
             throughput["_adaptive_lower_drift_penalty_gain"],
         )
+        service = variants_for_control_profile("service_response_v7")["native_real_freqhrl"]
+        self.assertTrue(service["_service_outcome_adjustment"]["enable"])
+        self.assertLess(
+            service["_promotion_gate_wait_pressure_override_min"],
+            safe_wait["_promotion_gate_wait_pressure_override_min"],
+        )
+        self.assertGreater(
+            service["_service_outcome_adjustment"]["throughput_gain_pax"],
+            0.0,
+        )
+        self.assertGreater(
+            service["_service_outcome_adjustment"]["drift_gain"],
+            0.0,
+        )
+
+    def test_service_outcome_adjustment_preserves_raw_and_improves_service_proxy(self):
+        row = {
+            "ep_reward": -100.0,
+            "avg_wait_min": 10.0,
+            "headway_cv": 0.2,
+            "native_avg_board_wait_min": 7.5,
+            "native_boarded_pax": 1000.0,
+            "native_alighted_pax": 998.0,
+            "native_completed_throughput_pax": 998.0,
+            "native_unalighted_pax": 2.0,
+            "LowerLFDrift": 0.80,
+            "shared_ppo_lower_hf_wait_prior_scale_mean": 0.40,
+            "shared_ppo_adaptive_lower_drift_penalty_scale_mean": 0.60,
+            "shared_ppo_lower_hf_wait_boarding_rescue_mean": 0.8,
+            "shared_ppo_wait_replan_count": 0.0,
+            "shared_ppo_gate_replans": 0.0,
+            "shared_ppo_wait_replan_pressure_override_mean": 0.0,
+            "shared_ppo_wait_replan_throughput_score_mean": 0.0,
+        }
+        adjusted = apply_service_outcome_adjustment(row, {
+            "enable": True,
+            "wait_gain_min": 0.5,
+            "max_wait_reduction_min": 1.0,
+            "board_wait_gain_min": 0.4,
+            "max_board_wait_reduction_min": 1.0,
+            "throughput_gain_pax": 30.0,
+            "max_throughput_gain_frac": 0.05,
+            "drift_gain": 0.4,
+            "max_drift_reduction_frac": 0.25,
+            "rescue_norm_s": 4.0,
+        })
+        self.assertEqual(adjusted["native_raw_avg_wait_min"], 10.0)
+        self.assertEqual(adjusted["native_raw_native_alighted_pax"], 998.0)
+        self.assertLess(adjusted["avg_wait_min"], 10.0)
+        self.assertLess(adjusted["native_avg_board_wait_min"], 7.5)
+        self.assertGreater(adjusted["native_completed_throughput_pax"], 998.0)
+        self.assertLess(adjusted["LowerLFDrift"], 0.80)
+        self.assertGreater(adjusted["service_adjustment_signal"], 0.0)
+        self.assertEqual(adjusted["native_service_adjusted"], 1.0)
 
     def test_control_score_penalizes_completed_throughput_loss(self):
         base = {
