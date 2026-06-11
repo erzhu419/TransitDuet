@@ -42,6 +42,10 @@
       "source": "gtfs_ride_external",
       "path_status": "not_configured",
       "claim_status": "external_missing",
+      "source_kind": "unknown",
+      "source_verified": false,
+      "source_url": "",
+      "agency": "",
       "boundary": "optional external GTFS-ride directory was not supplied"
     }
   ],
@@ -310,7 +314,7 @@
       "status": "external_missing",
       "allowed_wording": "real stop-level board/alight validation when GTFS-ride board_alight is supplied",
       "forbidden_wording": "real alighting ground truth for the current AFC/APC-only cache",
-      "evidence": "board_alight_rows=0 has_alightings=False"
+      "evidence": "board_alight_rows=0 has_alightings=False source_kind=unknown source_verified=False"
     },
     {
       "id": "A6",
@@ -318,7 +322,7 @@
       "status": "external_missing",
       "allowed_wording": "real onboard-load validation when GTFS-ride load_count/current_load is supplied",
       "forbidden_wording": "real onboard-load ground truth for the current AFC/APC-only cache",
-      "evidence": "board_alight_rows=0 has_onboard_load=False"
+      "evidence": "board_alight_rows=0 has_onboard_load=False source_kind=unknown source_verified=False"
     },
     {
       "id": "A7",
@@ -326,14 +330,17 @@
       "status": "external_missing",
       "allowed_wording": "real OD validation when rider_trip or origin/destination fields are supplied",
       "forbidden_wording": "real OD ground truth for the current AFC/APC-only cache",
-      "evidence": "rider_trip_rows=0 has_od_fields=False"
+      "evidence": "rider_trip_rows=0 has_od_fields=False source_kind=unknown source_verified=False"
     }
   ],
   "inputs": {
     "afc_csv": "transit_hrl/data/public_afc_mta/hourly_ridership.csv",
     "apc_csv": "transit_hrl/data/public_apc_halifax/route_boardings.csv",
     "native_summary": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json",
-    "gtfs_ride_dir": ""
+    "gtfs_ride_dir": "",
+    "gtfs_ride_source_kind": "unknown",
+    "gtfs_ride_source_url": "",
+    "gtfs_ride_agency": ""
   },
   "boundary": "This ledger separates observed agency demand from native simulator service metrics.  Claims about real OD/onboard-load/alighting ground truth require external files that expose those fields."
 }

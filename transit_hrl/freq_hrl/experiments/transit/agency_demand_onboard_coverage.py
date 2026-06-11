@@ -232,12 +232,31 @@ def summarize_apc_rows(
     }
 
 
-def summarize_gtfs_ride(gtfs_ride_dir: Path | None) -> dict[str, Any]:
+def _real_agency_source(source_kind: str) -> bool:
+    return str(source_kind).lower() in {
+        "real_agency",
+        "public_agency",
+        "agency_export",
+        "gtfs_ride_public",
+    }
+
+
+def summarize_gtfs_ride(
+    gtfs_ride_dir: Path | None,
+    *,
+    source_kind: str = "unknown",
+    source_url: str = "",
+    agency: str = "",
+) -> dict[str, Any]:
     if gtfs_ride_dir is None:
         return {
             "source": "gtfs_ride_external",
             "path_status": "not_configured",
             "claim_status": "external_missing",
+            "source_kind": str(source_kind),
+            "source_verified": False,
+            "source_url": str(source_url),
+            "agency": str(agency),
             "boundary": "optional external GTFS-ride directory was not supplied",
         }
     board_rows, board_fields = _read_csv_rows(gtfs_ride_dir / "board_alight.txt")
@@ -252,9 +271,20 @@ def summarize_gtfs_ride(gtfs_ride_dir: Path | None) -> dict[str, Any]:
     dest_col = _first_column(rider_fields or board_fields, DESTINATION_COLUMNS)
     od_rows = rider_rows if rider_rows else board_rows
     has_od = bool(origin_col and dest_col and od_rows)
+    source_verified = _real_agency_source(source_kind)
+    rows_present = bool(board_rows or rider_rows)
+    claim_status = "external_missing"
+    if rows_present and source_verified:
+        claim_status = "supported"
+    elif rows_present:
+        claim_status = "schema_supported_unverified_source"
     return {
         "source": "gtfs_ride_external",
         "path_status": "present" if gtfs_ride_dir.exists() else "missing",
+        "source_kind": str(source_kind),
+        "source_verified": bool(source_verified),
+        "source_url": str(source_url),
+        "agency": str(agency),
         "board_alight_rows": len(board_rows),
         "rider_trip_rows": len(rider_rows),
         "trip_capacity_rows": len(capacity_rows),
@@ -272,8 +302,11 @@ def summarize_gtfs_ride(gtfs_ride_dir: Path | None) -> dict[str, Any]:
         "has_onboard_load": bool(load_col),
         "has_od_fields": has_od,
         "has_capacity": bool(capacity_rows and capacity_fields),
-        "claim_status": _status_from(bool(board_rows or rider_rows), missing=not gtfs_ride_dir.exists()),
-        "boundary": "external stop-level board/alight, load, and OD support if supplied by the directory",
+        "claim_status": claim_status,
+        "boundary": (
+            "external stop-level board/alight, load, and OD support only closes "
+            "paper claims when source_kind is a verified real agency feed"
+        ),
     }
 
 
@@ -353,6 +386,19 @@ def build_claim_boundaries(
     gtfs_has_alight = bool(gtfs_ride.get("has_alightings"))
     gtfs_has_load = bool(gtfs_ride.get("has_onboard_load"))
     gtfs_has_od = bool(gtfs_ride.get("has_od_fields"))
+    gtfs_source_verified = bool(gtfs_ride.get("source_verified", False))
+
+    def _external_truth_status(has_fields: bool) -> str:
+        if has_fields and gtfs_source_verified:
+            return "supported"
+        if has_fields:
+            return "schema_supported_unverified_source"
+        return "external_missing"
+
+    gtfs_evidence_suffix = (
+        f" source_kind={gtfs_ride.get('source_kind', 'unknown')} "
+        f"source_verified={gtfs_source_verified}"
+    )
     return [
         {
             "id": "A1",
@@ -394,26 +440,35 @@ def build_claim_boundaries(
         {
             "id": "A5",
             "evidence_item": "real_gtfs_ride_board_alight",
-            "status": "supported" if gtfs_has_alight else "external_missing",
+            "status": _external_truth_status(gtfs_has_alight),
             "allowed_wording": "real stop-level board/alight validation when GTFS-ride board_alight is supplied",
             "forbidden_wording": "real alighting ground truth for the current AFC/APC-only cache",
-            "evidence": f"board_alight_rows={gtfs_ride.get('board_alight_rows', 0)} has_alightings={gtfs_has_alight}",
+            "evidence": (
+                f"board_alight_rows={gtfs_ride.get('board_alight_rows', 0)} "
+                f"has_alightings={gtfs_has_alight}{gtfs_evidence_suffix}"
+            ),
         },
         {
             "id": "A6",
             "evidence_item": "real_gtfs_ride_onboard_load",
-            "status": "supported" if gtfs_has_load else "external_missing",
+            "status": _external_truth_status(gtfs_has_load),
             "allowed_wording": "real onboard-load validation when GTFS-ride load_count/current_load is supplied",
             "forbidden_wording": "real onboard-load ground truth for the current AFC/APC-only cache",
-            "evidence": f"board_alight_rows={gtfs_ride.get('board_alight_rows', 0)} has_onboard_load={gtfs_has_load}",
+            "evidence": (
+                f"board_alight_rows={gtfs_ride.get('board_alight_rows', 0)} "
+                f"has_onboard_load={gtfs_has_load}{gtfs_evidence_suffix}"
+            ),
         },
         {
             "id": "A7",
             "evidence_item": "real_gtfs_ride_od",
-            "status": "supported" if gtfs_has_od else "external_missing",
+            "status": _external_truth_status(gtfs_has_od),
             "allowed_wording": "real OD validation when rider_trip or origin/destination fields are supplied",
             "forbidden_wording": "real OD ground truth for the current AFC/APC-only cache",
-            "evidence": f"rider_trip_rows={gtfs_ride.get('rider_trip_rows', 0)} has_od_fields={gtfs_has_od}",
+            "evidence": (
+                f"rider_trip_rows={gtfs_ride.get('rider_trip_rows', 0)} "
+                f"has_od_fields={gtfs_has_od}{gtfs_evidence_suffix}"
+            ),
         },
     ]
 
@@ -493,6 +548,9 @@ def run_coverage(
     apc_csv: Path = DEFAULT_APC_CSV,
     native_summary: Path = DEFAULT_NATIVE_SUMMARY,
     gtfs_ride_dir: Path | None = None,
+    gtfs_ride_source_kind: str = "unknown",
+    gtfs_ride_source_url: str = "",
+    gtfs_ride_agency: str = "",
     native_variant: str = "native_real_freqhrl",
     min_afc_rows: int = 100,
     min_afc_stations: int = 4,
@@ -518,7 +576,12 @@ def run_coverage(
         min_route_count=int(min_apc_routes),
         min_time_bins=int(min_apc_time_bins),
     )
-    gtfs_ride = summarize_gtfs_ride(gtfs_ride_dir)
+    gtfs_ride = summarize_gtfs_ride(
+        gtfs_ride_dir,
+        source_kind=str(gtfs_ride_source_kind),
+        source_url=str(gtfs_ride_source_url),
+        agency=str(gtfs_ride_agency),
+    )
     native = summarize_native_summary(native_data, variant=str(native_variant))
     boundaries = build_claim_boundaries(afc, apc, gtfs_ride, native)
     supported_boundaries = sum(1 for row in boundaries if row["status"] == "supported")
@@ -530,7 +593,11 @@ def run_coverage(
         and native["native_service_response_status"] == "supported"
         else "partial"
     )
-    if gtfs_ride.get("has_od_fields") and gtfs_ride.get("has_onboard_load"):
+    if (
+        gtfs_ride.get("has_od_fields")
+        and gtfs_ride.get("has_onboard_load")
+        and gtfs_ride.get("source_verified")
+    ):
         evidence_scope = "real_gtfs_ride_od_onboard_plus_native_service_response"
     payload = {
         "summary": {
@@ -547,6 +614,9 @@ def run_coverage(
             "apc_csv": str(apc_csv),
             "native_summary": str(native_summary),
             "gtfs_ride_dir": str(gtfs_ride_dir) if gtfs_ride_dir else "",
+            "gtfs_ride_source_kind": str(gtfs_ride_source_kind),
+            "gtfs_ride_source_url": str(gtfs_ride_source_url),
+            "gtfs_ride_agency": str(gtfs_ride_agency),
         },
         "boundary": (
             "This ledger separates observed agency demand from native simulator "
@@ -570,6 +640,9 @@ def main() -> None:
     parser.add_argument("--apc-csv", type=Path, default=DEFAULT_APC_CSV)
     parser.add_argument("--native-summary", type=Path, default=DEFAULT_NATIVE_SUMMARY)
     parser.add_argument("--gtfs-ride-dir", type=Path, default=None)
+    parser.add_argument("--gtfs-ride-source-kind", default="unknown")
+    parser.add_argument("--gtfs-ride-source-url", default="")
+    parser.add_argument("--gtfs-ride-agency", default="")
     parser.add_argument("--native-variant", default="native_real_freqhrl")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--min-afc-rows", type=int, default=100)
@@ -585,6 +658,9 @@ def main() -> None:
         apc_csv=args.apc_csv,
         native_summary=args.native_summary,
         gtfs_ride_dir=args.gtfs_ride_dir,
+        gtfs_ride_source_kind=str(args.gtfs_ride_source_kind),
+        gtfs_ride_source_url=str(args.gtfs_ride_source_url),
+        gtfs_ride_agency=str(args.gtfs_ride_agency),
         native_variant=str(args.native_variant),
         min_afc_rows=int(args.min_afc_rows),
         min_afc_stations=int(args.min_afc_stations),

@@ -84,7 +84,15 @@ truth gap:
 
 The new coverage ledger accepts a `--gtfs-ride-dir` argument and will promote
 the relevant boundary rows from `external_missing` to `supported` when those
-files and fields are present.
+files and fields are present with real-agency provenance. The required
+provenance arguments are:
+
+- `--gtfs-ride-source-kind real_agency`
+- `--gtfs-ride-source-url <public-or-agency-source>`
+- `--gtfs-ride-agency <agency-name>`
+
+A schema-compatible local directory without this provenance is reported as
+`schema_supported_unverified_source`, not as paper-claim support.
 
 Reference: https://gtfsride.org/specification
 

@@ -296,3 +296,31 @@ script already supports an optional `--gtfs-ride-dir`; if a real GTFS-ride
 feed with `board_alight.txt`, `load_count/current_load`, and `rider_trip.txt`
 is supplied, the corresponding external truth rows move from
 `external_missing` to `supported`.
+
+## 2026-06-12 GTFS-Ride Closure Gate
+
+The external GTFS-ride path is now stricter. A directory with the right column
+names is not enough to close the paper claim. The coverage ledger requires
+source provenance through:
+
+- `--gtfs-ride-source-kind real_agency`
+- `--gtfs-ride-source-url <public-or-agency-source>`
+- `--gtfs-ride-agency <agency-name>`
+
+Accepted real-source kinds are `real_agency`, `public_agency`,
+`agency_export`, and `gtfs_ride_public`. If a local directory contains
+`board_alight.txt`, `load_count/current_load`, and `rider_trip.txt` but does
+not provide real-agency provenance, the status becomes
+`schema_supported_unverified_source`, not `supported`.
+
+Current result after refreshing `agency_demand_onboard_coverage_latest`:
+
+- evidence scope: `real_afc_apc_demand_plus_native_service_response`
+- real GTFS-ride board/alight: `external_missing`
+- real GTFS-ride onboard-load: `external_missing`
+- real GTFS-ride OD: `external_missing`
+- source kind: `unknown`
+- source verified: `False`
+
+So this can be closed, but only with a real external feed. The code path is
+ready; the data is still the blocker.

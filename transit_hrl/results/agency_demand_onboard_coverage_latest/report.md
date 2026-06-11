@@ -22,9 +22,9 @@ This ledger separates observed agency demand from native simulator service metri
 | A2 | real_apc_route_boarding_demand | supported | real APC-style route boarding demand | real onboard occupancy, alighting, or OD ground truth unless columns exist | rows=1000 routes=8 route_time_bins=1000 |
 | A3 | native_service_response_wait_alighting_throughput | supported | native public-demand service-response loop improves wait/alighting/throughput | external agency alighting or onboard-load ground-truth improvement | rows=96 seeds=48 board_wait=supported alighted=supported throughput=supported |
 | A4 | native_onboard_load_loop | supported | native onboard-load metric is recorded and audited | native onboard-load improvement is supported if CI is inconclusive | onboard_improvement=inconclusive |
-| A5 | real_gtfs_ride_board_alight | external_missing | real stop-level board/alight validation when GTFS-ride board_alight is supplied | real alighting ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_alightings=False |
-| A6 | real_gtfs_ride_onboard_load | external_missing | real onboard-load validation when GTFS-ride load_count/current_load is supplied | real onboard-load ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_onboard_load=False |
-| A7 | real_gtfs_ride_od | external_missing | real OD validation when rider_trip or origin/destination fields are supplied | real OD ground truth for the current AFC/APC-only cache | rider_trip_rows=0 has_od_fields=False |
+| A5 | real_gtfs_ride_board_alight | external_missing | real stop-level board/alight validation when GTFS-ride board_alight is supplied | real alighting ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_alightings=False source_kind=unknown source_verified=False |
+| A6 | real_gtfs_ride_onboard_load | external_missing | real onboard-load validation when GTFS-ride load_count/current_load is supplied | real onboard-load ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_onboard_load=False source_kind=unknown source_verified=False |
+| A7 | real_gtfs_ride_od | external_missing | real OD validation when rider_trip or origin/destination fields are supplied | real OD ground truth for the current AFC/APC-only cache | rider_trip_rows=0 has_od_fields=False source_kind=unknown source_verified=False |
 
 ## Native Service Metrics
 

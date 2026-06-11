@@ -157,6 +157,9 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
                 apc_csv=apc,
                 native_summary=native,
                 gtfs_ride_dir=gtfs_ride,
+                gtfs_ride_source_kind="real_agency",
+                gtfs_ride_source_url="https://example.org/agency/gtfs-ride.zip",
+                gtfs_ride_agency="Example Transit",
                 min_afc_rows=10,
                 min_afc_stations=3,
                 min_afc_time_bins=6,
@@ -172,6 +175,47 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             self.assertEqual(
                 payload["summary"]["evidence_scope"],
                 "real_gtfs_ride_od_onboard_plus_native_service_response",
+            )
+
+    def test_gtfs_ride_without_real_source_provenance_is_not_claim_supported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            afc = root / "afc.csv"
+            apc = root / "apc.csv"
+            native = root / "summary.json"
+            gtfs_ride = root / "gtfs_ride"
+            self._write_afc(afc)
+            self._write_apc(apc)
+            self._write_native_summary(native)
+            self._write_gtfs_ride(gtfs_ride)
+
+            payload = run_coverage(
+                output_dir=root / "out",
+                afc_csv=afc,
+                apc_csv=apc,
+                native_summary=native,
+                gtfs_ride_dir=gtfs_ride,
+                min_afc_rows=10,
+                min_afc_stations=3,
+                min_afc_time_bins=6,
+                min_apc_rows=10,
+                min_apc_routes=3,
+                min_apc_time_bins=10,
+            )
+
+            boundaries = {row["evidence_item"]: row for row in payload["claim_boundaries"]}
+            self.assertEqual(
+                boundaries["real_gtfs_ride_board_alight"]["status"],
+                "schema_supported_unverified_source",
+            )
+            self.assertEqual(
+                boundaries["real_gtfs_ride_onboard_load"]["status"],
+                "schema_supported_unverified_source",
+            )
+            self.assertEqual(boundaries["real_gtfs_ride_od"]["status"], "schema_supported_unverified_source")
+            self.assertEqual(
+                payload["summary"]["evidence_scope"],
+                "real_afc_apc_demand_plus_native_service_response",
             )
 
 
