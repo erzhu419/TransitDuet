@@ -10,6 +10,7 @@ from freq_hrl.experiments.theory_appendix import (
     promotion_detection_delay_bound,
     promotion_false_positive_bound,
     shaped_return_deviation_bound,
+    stress_claim_coverage_fraction,
     write_outputs,
 )
 
@@ -59,6 +60,10 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             0.0,
         )
+        self.assertAlmostEqual(
+            stress_claim_coverage_fraction(supported_regimes=4, required_regimes=5),
+            0.8,
+        )
 
     def test_theory_appendix_writes_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -67,10 +72,11 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
-            self.assertGreaterEqual(len(payload["theorems"]), 8)
+            self.assertGreaterEqual(len(payload["theorems"]), 9)
             self.assertIn("Theorem 1", report)
             self.assertIn("Theorem 5", report)
             self.assertIn("Proposition 8", report)
+            self.assertIn("Proposition 9", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)
 

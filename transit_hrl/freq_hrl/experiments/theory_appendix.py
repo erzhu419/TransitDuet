@@ -105,6 +105,13 @@ def conditional_no_tradeoff_margin(
     return float(baseline_advantage) - max(float(leakage_penalty_budget), 0.0) - max(float(constraint_slack), 0.0)
 
 
+def stress_claim_coverage_fraction(*, supported_regimes: int, required_regimes: int) -> float:
+    """Fraction of pre-registered stress regimes with supported evidence."""
+    required = max(int(required_regimes), 1)
+    supported = min(max(int(supported_regimes), 0), required)
+    return float(supported / required)
+
+
 def read_csv_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -356,6 +363,39 @@ def build_theorem_rows(examples: dict[str, Any]) -> list[dict[str, Any]]:
                 f"{_fmt(examples['conditional_no_tradeoff_margin_example'])}."
             ),
         },
+        {
+            "id": "Proposition 9",
+            "title": "Stress-Generalization Claims Are Intersection Claims",
+            "statement": (
+                "A global stress-generalization claim over a pre-registered set of "
+                "regimes is supported only if every required regime has paired "
+                "evidence for the stated metric; otherwise the valid claim is the "
+                "intersection of regimes that pass the evidence gate."
+            ),
+            "assumptions": [
+                "The stress-regime set is declared before selecting the headline evidence.",
+                "Each regime uses paired treatment/control validation with the same claim metric.",
+                "The reporting layer records missing, inconclusive, and not-supported regimes separately.",
+            ],
+            "proof": (
+                "Let R be the required regime set and S be the subset whose paired "
+                "evidence passes the claim gate. The statement 'the method improves "
+                "under all regimes in R' is the conjunction over every r in R. A "
+                "single missing or failed conjunct makes the global statement "
+                "unsupported. The strongest evidence-valid statement is therefore "
+                "restricted to S, with R minus S reported as a boundary."
+            ),
+            "limitation": (
+                "This proposition is a reporting rule rather than a statistical "
+                "power theorem. It prevents overclaiming but does not decide how many "
+                "seeds are needed within each regime."
+            ),
+            "diagnostic": "The unified matrix C9 lists required, supported, missing, and not-supported pressure regimes.",
+            "example": (
+                "Example coverage fraction for four supported of five regimes: "
+                f"{_fmt(examples['stress_claim_coverage_fraction_example'])}."
+            ),
+        },
     ]
 
 
@@ -396,6 +436,10 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             leakage_penalty_budget=0.07,
             constraint_slack=0.03,
         ),
+        "stress_claim_coverage_fraction_example": stress_claim_coverage_fraction(
+            supported_regimes=4,
+            required_regimes=5,
+        ),
     }
     cited_checks = {
         "transit_learned_promotion_wait": _check(checks, "transit_learned_promotion_wait_vs_interval"),
@@ -426,6 +470,7 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "A5: paired validation compares treatment/control on the same seed and source window.",
             "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
             "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples.",
+            "A8: global stress-generalization claims declare their required regime set before selecting headline artifacts.",
         ],
         "theorems": build_theorem_rows(examples),
         "examples": examples,

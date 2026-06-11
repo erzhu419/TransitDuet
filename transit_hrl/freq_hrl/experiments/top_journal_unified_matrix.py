@@ -10,6 +10,7 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v46_odshift": Path("transit_hrl/results/scheduler_native_promotion_v46_odshift_reward_wait_guard_512seed_merged/summary.json"),
     "native_promotion_v45_odshift": Path("transit_hrl/results/scheduler_native_promotion_v45_odshift_reward_floor_active_512seed_merged/summary.json"),
     "native_promotion_v44_odshift": Path("transit_hrl/results/scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4/summary.json"),
     "native_promotion_v42_odshift": Path("transit_hrl/results/transit_native_promotion_v42_odshift_512seed_merged/summary.json"),
@@ -22,6 +23,7 @@ DEFAULT_ARTIFACTS = {
     "native_promotion_v24_fixed": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_throughput_safe_wait_v6": Path("transit_hrl/results/transit_native_real_demand_throughput_safe_wait_v6_48pair_merged/summary.json"),
     "native_real_demand_alighting_throughput_v5": Path("transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json"),
     "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
@@ -34,13 +36,16 @@ DEFAULT_ARTIFACTS = {
     "order_book_manifest": Path("transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json"),
     "encoder_matrix": Path("transit_hrl/results/encoder_cross_domain_matrix/summary.json"),
     "encoder_matrix_latest": Path("transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json"),
+    "leakage_matrix_latest_patch": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest_patch/summary.json"),
     "leakage_matrix_v27_v5": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v27_v5/summary.json"),
     "leakage_matrix_v26_v4": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v26_v4/summary.json"),
     "leakage_matrix_v25_v3": Path("transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v25_v3/summary.json"),
     "leakage_matrix": Path("transit_hrl/results/leakage_no_tradeoff_matrix/summary.json"),
     "leakage_matrix_latest": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json"),
+    "theory_appendix_latest": Path("transit_hrl/results/freq_hrl_theory_appendix_latest/summary.json"),
     "theory_appendix": Path("transit_hrl/results/freq_hrl_theory_appendix/summary.json"),
     "theory_appendix_scheduler": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
+    "baseline_ablation_matrix_latest": Path("transit_hrl/results/baseline_ablation_matrix_latest/summary.json"),
     "baseline_ablation_matrix": Path("transit_hrl/results/baseline_ablation_matrix/summary.json"),
     "trading_pressure_matrix": Path("transit_hrl/results/trading_pressure_matrix/summary.json"),
 }
@@ -121,6 +126,7 @@ def _promotion_evidence(
     paths: dict[str, str],
 ) -> dict[str, Any]:
     candidates = [
+        "native_promotion_v46_odshift",
         "native_promotion_v45_odshift",
         "native_promotion_v44_odshift",
         "native_promotion_v42",
@@ -232,6 +238,7 @@ def _promotion_cross_stress_evidence(
 ) -> dict[str, Any]:
     persistent = _promotion_evidence(artifacts, paths)
     odshift_candidates = [
+        "native_promotion_v46_odshift",
         "native_promotion_v45_odshift",
         "native_promotion_v44_odshift",
         "native_promotion_v42_odshift",
@@ -310,6 +317,50 @@ def _promotion_cross_stress_evidence(
     }
 
 
+def _pressure_stress_evidence(
+    baseline_ablation: dict[str, Any],
+    pressure_matrix: dict[str, Any],
+) -> dict[str, Any]:
+    required = [
+        "stationary_low_noise",
+        "stationary_high_noise",
+        "localized_burst",
+        "persistent_shift",
+        "ood_period",
+    ]
+    winners = {
+        str(row.get("scenario")): row
+        for row in baseline_ablation.get("scenario_winners", []) or []
+        if isinstance(row, dict)
+    }
+    pressure_rows = pressure_matrix.get("per_seed", []) if isinstance(pressure_matrix, dict) else []
+    observed = sorted({str(row.get("scenario", "")) for row in pressure_rows if isinstance(row, dict)})
+    regime_status: dict[str, str] = {}
+    for regime in required:
+        if regime in winners:
+            regime_status[regime] = "supported" if bool(winners[regime].get("freq_family_wins")) else "not_supported"
+        elif regime in observed:
+            regime_status[regime] = "observed_without_ablation_winner"
+        else:
+            regime_status[regime] = "missing"
+    supported = [key for key, value in regime_status.items() if value == "supported"]
+    present = [key for key, value in regime_status.items() if value != "missing"]
+    status = _status_from_flags(
+        present=bool(present),
+        supported=len(supported) == len(required),
+        partial=bool(supported),
+    )
+    return {
+        "status": status,
+        "required": required,
+        "supported": supported,
+        "present": present,
+        "missing": [key for key, value in regime_status.items() if value == "missing"],
+        "regime_status": regime_status,
+        "observed": observed,
+    }
+
+
 def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     artifacts = {
         key: _read_json(results_root / path.relative_to("transit_hrl/results"))
@@ -328,7 +379,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     promotion_wait_noninferiority = promotion["wait_noninferiority"]
     promotion_score = promotion.get("best_score", {})
     real = (
-        artifacts["native_real_demand_alighting_throughput_v5"]
+        artifacts["native_real_demand_throughput_safe_wait_v6"]
+        or artifacts["native_real_demand_alighting_throughput_v5"]
         or artifacts["native_real_demand_alighting_wait_v4"]
         or artifacts["native_real_demand_alighting_safe_v2"]
         or artifacts["native_real_demand_v5"]
@@ -340,6 +392,12 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     real_reward = _check_by_metric(real, "ep_reward")
     real_wait = _check_by_metric(real, "native_avg_board_wait_min")
     real_alighted = _check_by_metric(real, "native_alighted_pax")
+    real_throughput = _check_by_metric(real, "native_completed_throughput_pax")
+    real_wait_proxy_noninferiority = _check_by_metric(
+        real,
+        "avg_wait_min",
+        check_contains="noninferiority",
+    )
     real_wait_noninferiority = _check_by_metric(
         real,
         "native_avg_board_wait_min",
@@ -350,21 +408,33 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         "native_alighted_pax",
         check_contains="noninferiority",
     )
+    real_throughput_noninferiority = _check_by_metric(
+        real,
+        "native_completed_throughput_pax",
+        check_contains="noninferiority",
+    )
     order_book_manifest = artifacts["order_book_manifest"] or {}
     order_book_l2 = artifacts["order_book_l2_matching"] or {}
     order_book_l3 = artifacts["order_book_l3_replay"] or {}
     encoder = artifacts["encoder_matrix"] or artifacts["encoder_matrix_latest"] or {}
     leakage = (
-        artifacts["leakage_matrix_v27_v5"]
+        artifacts["leakage_matrix_latest_patch"]
+        or artifacts["leakage_matrix_v27_v5"]
         or artifacts["leakage_matrix_v26_v4"]
         or artifacts["leakage_matrix_v25_v3"]
-        or artifacts["leakage_matrix"]
         or artifacts["leakage_matrix_latest"]
+        or artifacts["leakage_matrix"]
         or {}
     )
-    baseline_ablation = artifacts["baseline_ablation_matrix"] or {}
+    baseline_ablation = artifacts["baseline_ablation_matrix_latest"] or artifacts["baseline_ablation_matrix"] or {}
     pressure_matrix = artifacts["trading_pressure_matrix"] or {}
-    theory = artifacts["theory_appendix"] or artifacts["theory_appendix_scheduler"] or {}
+    pressure_stress = _pressure_stress_evidence(baseline_ablation, pressure_matrix)
+    theory = (
+        artifacts["theory_appendix_latest"]
+        or artifacts["theory_appendix"]
+        or artifacts["theory_appendix_scheduler"]
+        or {}
+    )
 
     encoder_domains = encoder.get("domain_summary", []) if isinstance(encoder, dict) else []
     encoder_supported_domains = [
@@ -374,7 +444,11 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     leakage_verdicts = leakage.get("domain_verdicts", []) if isinstance(leakage, dict) else []
     leakage_supported_domains = [
         row.get("domain") for row in leakage_verdicts
-        if row.get("verdict") == "no_tradeoff_supported"
+        if row.get("verdict") in {"no_tradeoff_supported", "no_tradeoff_strict_supported"}
+    ]
+    leakage_strict_domains = [
+        row.get("domain") for row in leakage_verdicts
+        if row.get("verdict") == "no_tradeoff_strict_supported"
     ]
     leakage_partial_domains = [
         row.get("domain") for row in leakage_verdicts
@@ -389,6 +463,10 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     ) or (_has_non_synthetic_sources(order_book_l2) and _has_non_synthetic_sources(order_book_l3))
     order_book_source_quality = str(
         order_book_manifest.get("coverage", {}).get("source_quality_status", "")
+    )
+    order_book_venue_session_pairs = int(
+        order_book_manifest.get("coverage", {}).get("venue_grade_l2_l3_session_pairs", 0)
+        or 0
     )
     baseline_summary = baseline_ablation.get("summary", {}) if isinstance(baseline_ablation, dict) else {}
     baseline_checks = baseline_ablation.get("paired_checks", []) if isinstance(baseline_ablation, dict) else []
@@ -422,28 +500,41 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         },
         {
             "id": "C2",
-            "claim": "Native real AFC/APC demand improves score/reward without wait/alighting loss",
+            "claim": "Native real AFC/APC demand improves score/reward and strict wait/alighting/throughput",
             "status": _status_from_flags(
                 present=bool(real),
                 supported=(
                     _supported(real_score)
                     and _supported(real_reward)
+                    and _supported(real_wait)
+                    and _supported(real_alighted)
+                    and _supported(real_throughput)
+                ),
+                partial=(
+                    _supported(real_score)
+                    and _supported(real_reward)
+                    and _positive(real_wait_proxy_noninferiority)
                     and _positive(real_wait_noninferiority)
                     and _positive(real_alighted_noninferiority)
+                    and _positive(real_throughput_noninferiority)
                 ),
-                partial=_supported(real_score) and _supported(real_reward),
             ),
             "evidence": (
                 f"score={real_score.get('status', 'missing')} "
                 f"reward={real_reward.get('status', 'missing')} "
                 f"wait={real_wait.get('status', 'missing')} "
+                f"wait_proxy_noharm={real_wait_proxy_noninferiority.get('status', 'missing')} "
                 f"wait_noharm={real_wait_noninferiority.get('status', 'missing')} "
                 f"alighted={real_alighted.get('status', 'missing')} "
-                f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')}"
+                f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')} "
+                f"throughput={real_throughput.get('status', 'missing')} "
+                f"throughput_noharm={real_throughput_noninferiority.get('status', 'missing')}"
             ),
-            "remaining_gap": "Strict wait/alighting/throughput improvement still needs v5 high-pressure validation if this row remains partial.",
+            "remaining_gap": "Strict wait/alighting/throughput improvement still needs throughput-safe v6 validation if this row remains partial.",
             "artifact": (
-                paths["native_real_demand_alighting_throughput_v5"]
+                paths["native_real_demand_throughput_safe_wait_v6"]
+                if artifacts["native_real_demand_throughput_safe_wait_v6"]
+                else paths["native_real_demand_alighting_throughput_v5"]
                 if artifacts["native_real_demand_alighting_throughput_v5"]
                 else paths["native_real_demand_alighting_wait_v4"]
                 if artifacts["native_real_demand_alighting_wait_v4"]
@@ -463,13 +554,21 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Large L2/L3 order-book replay path exists",
             "status": _status_from_flags(
                 present=bool(order_book_manifest or order_book_l2 or order_book_l3),
-                supported=bool(order_book_has_real_l2_l3 or order_book_source_quality == "venue_grade_ready"),
+                supported=bool(
+                    order_book_venue_session_pairs > 0
+                    or order_book_source_quality == "venue_grade_ready"
+                    or (
+                        order_book_has_real_l2_l3
+                        and order_book_source_quality == "venue_grade_ready"
+                    )
+                ),
                 partial=bool(order_book_l2 and order_book_l3),
             ),
             "evidence": (
                 f"l2_supported_checks={order_book_l2_supported} "
                 f"l3_positive_checks={order_book_l3_positive} "
                 f"source_quality={order_book_source_quality or 'missing'} "
+                f"venue_l2_l3_pairs={order_book_venue_session_pairs} "
                 f"manifest_coverage={order_book_manifest.get('coverage', {})}"
             ),
             "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
@@ -496,13 +595,19 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Leakage no-tradeoff holds beyond surrogate",
             "status": _status_from_flags(
                 present=bool(leakage_verdicts),
-                supported=len(leakage_supported_domains) >= 2,
+                supported=len(leakage_strict_domains) >= 1 and len(leakage_supported_domains) >= 2,
                 partial=bool(leakage_supported_domains),
             ),
-            "evidence": f"no_tradeoff_domains={leakage_supported_domains} partial_domains={leakage_partial_domains}",
+            "evidence": (
+                f"strict_no_tradeoff_domains={leakage_strict_domains} "
+                f"no_tradeoff_domains={leakage_supported_domains} "
+                f"partial_domains={leakage_partial_domains}"
+            ),
             "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
             "artifact": (
-                paths["leakage_matrix_v27_v5"]
+                paths["leakage_matrix_latest_patch"]
+                if artifacts["leakage_matrix_latest_patch"]
+                else paths["leakage_matrix_v27_v5"]
                 if artifacts["leakage_matrix_v27_v5"]
                 else paths["leakage_matrix_v26_v4"]
                 if artifacts["leakage_matrix_v26_v4"]
@@ -523,7 +628,13 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             ),
             "evidence": f"examples={sorted(theory_examples.keys())}",
             "remaining_gap": "Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration.",
-            "artifact": paths["theory_appendix"] if artifacts["theory_appendix"] else paths["theory_appendix_scheduler"],
+            "artifact": (
+                paths["theory_appendix_latest"]
+                if artifacts["theory_appendix_latest"]
+                else paths["theory_appendix"]
+                if artifacts["theory_appendix"]
+                else paths["theory_appendix_scheduler"]
+            ),
         },
         {
             "id": "C7",
@@ -548,12 +659,36 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "evidence": (
                 f"claim_status={baseline_status} "
                 f"positive_sharpe_baselines={[row.get('control') for row in positive_baseline_checks]} "
+                f"inconclusive={baseline_summary.get('required_baselines_inconclusive', [])} "
+                f"not_supported={baseline_summary.get('required_baselines_not_supported', [])} "
+                f"missing={baseline_summary.get('required_baselines_missing', [])} "
                 f"scenario_win_rate={baseline_summary.get('scenario_freq_family_win_rate', 'NA')} "
                 f"pressure_rows={len(pressure_rows)}"
             ),
             "remaining_gap": "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available.",
             "artifact": (
-                paths["baseline_ablation_matrix"]
+                paths["baseline_ablation_matrix_latest"]
+                if artifacts["baseline_ablation_matrix_latest"]
+                else paths["baseline_ablation_matrix"]
+                if artifacts["baseline_ablation_matrix"]
+                else paths["trading_pressure_matrix"]
+            ),
+        },
+        {
+            "id": "C9",
+            "claim": "Pressure validation covers stationary, burst, persistent, and OOD stress regimes",
+            "status": pressure_stress["status"],
+            "evidence": (
+                f"supported={pressure_stress['supported']} "
+                f"present={pressure_stress['present']} "
+                f"missing={pressure_stress['missing']} "
+                f"regime_status={pressure_stress['regime_status']}"
+            ),
+            "remaining_gap": "Any missing or not-supported regime must stay outside the global stress-generalization claim.",
+            "artifact": (
+                paths["baseline_ablation_matrix_latest"]
+                if artifacts["baseline_ablation_matrix_latest"]
+                else paths["baseline_ablation_matrix"]
                 if artifacts["baseline_ablation_matrix"]
                 else paths["trading_pressure_matrix"]
             ),

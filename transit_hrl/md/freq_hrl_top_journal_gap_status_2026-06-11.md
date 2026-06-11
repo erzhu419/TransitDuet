@@ -56,3 +56,36 @@ Current expected status after this patch:
 - C2 should remain partial until v5 high-pressure real-demand validation closes wait/alighting/throughput.
 - C5 should remain partial until native real-demand or trading leakage jointly supports drift reduction and reward/wait no-harm.
 - C8 should become explicit rather than implicit once `baseline_ablation_matrix` is generated from the current pressure/performance artifacts.
+
+## 2026-06-11 Follow-Up Patch 2
+
+Merged scheduler evidence and tightened the remaining paper-claim boundaries:
+
+1. OD-shift promotion v45 was merged at 512 seeds. It is valid no-harm evidence, but not a strong improvement result: reward delta is +5.3845 with CI [-3.1094, +19.4043], wait delta is +0.00292 min with CI [-0.00037, +0.00929]. Reward/wait noninferiority is supported; reward and wait improvement remain inconclusive/not supported.
+2. Native real-demand v5 was merged at 48 seed indices across AFC/APC, producing 96 paired source-seed comparisons. Score and reward are supported, wait is nearly improved but still inconclusive, and alighting/throughput remain not supported.
+3. Added `odshift_reward_wait_guard_v46`, a narrower OD-shift profile that keeps active wait-aware replanning but tightens pressure, candidate-scale, throughput-floor, and adaptive-drift accept regions after v45 showed a small wait regression.
+4. Added `throughput_safe_wait_v6`, a native AFC/APC profile that lowers lower-HF rescue side effects and adds stricter throughput/fleet floors. This is the next profile to validate for strict wait/alighting/throughput improvement and native leakage no-tradeoff.
+5. Added wait-proxy and completed-throughput noninferiority checks to native real-demand validation, so no-harm and strict-improvement claims are separated for `avg_wait_min`, `native_avg_board_wait_min`, `native_alighted_pax`, and `native_completed_throughput_pax`.
+6. Tightened `leakage_no_tradeoff_matrix.py`: native real-demand no-tradeoff now requires same-domain drift plus core reward/score/wait/alighting/throughput evidence, with a separate `no_tradeoff_strict_supported` verdict.
+7. Tightened order-book manifest source quality: `venue_grade_ready` now requires paired L2 and L3 sessions with venue, symbol, session metadata and venue-grade/price-time semantics. Real-but-unpaired files are reported as `real_unpaired_or_metadata_incomplete`.
+8. Added C9 to `top_journal_unified_matrix.py` for the pre-registered pressure regimes: stationary low noise, stationary high noise, localized burst, persistent shift, and OOD period. Current pressure matrix supports all five, so C9 is supported.
+9. Added Proposition 9 to the theory appendix: global stress-generalization is an intersection claim over the pre-registered regime set; missing or failed regimes must be reported as claim boundaries.
+
+Current unified matrix after this patch:
+
+- C1 supported: best native persistent-stress promotion remains supported.
+- C2 not supported under the stricter claim: real-demand score/reward are supported, but strict wait/alighting/throughput improvement is not closed.
+- C3 partial: L2/L3 replay path exists, but venue-grade paired L2/L3 sessions are still missing.
+- C4 supported: advanced encoder evidence spans current synthetic/real-demand domains.
+- C5 partial: surrogate leakage no-tradeoff is strict-supported, but native/trading no-tradeoff is not yet closed.
+- C6 supported: theory appendix now has 9 theorem/proposition rows.
+- C7 partial: persistent promotion is supported, OD-shift remains no-harm rather than strong reward/wait improvement.
+- C8 partial: baseline/ablation table is broad, but `no_promotion` Sharpe remains inconclusive.
+- C9 supported: five pre-registered pressure regimes are covered by the pressure matrix.
+
+Next scheduler validations should target:
+
+1. `odshift_reward_wait_guard_v46` at 512 seeds.
+2. `throughput_safe_wait_v6` across at least the same 48 AFC/APC seed indices as v5.
+3. A refreshed leakage matrix after v6, using the strict native real-demand core metrics.
+4. A venue-grade L2/L3 manifest once real exchange data is available.

@@ -164,6 +164,15 @@ def build_baseline_ablation_matrix(
         baseline for baseline in required_present
         if sharpe_checks[baseline].get("status") in ACCEPTED_POSITIVE
     ]
+    required_inconclusive = [
+        baseline for baseline in required_present
+        if sharpe_checks[baseline].get("status") == "inconclusive"
+    ]
+    required_not_supported = [
+        baseline for baseline in required_present
+        if sharpe_checks[baseline].get("status") == "not_supported"
+    ]
+    required_missing = sorted(required - set(required_present))
     scenario_winners = _scenario_winners(rows)
     scenario_win_rate = (
         sum(1 for row in scenario_winners if row["freq_family_wins"]) / len(scenario_winners)
@@ -186,6 +195,9 @@ def build_baseline_ablation_matrix(
             "missing": missing,
             "required_baselines_present": required_present,
             "required_baselines_positive": required_positive,
+            "required_baselines_inconclusive": required_inconclusive,
+            "required_baselines_not_supported": required_not_supported,
+            "required_baselines_missing": required_missing,
             "scenario_count": len(scenario_winners),
             "scenario_freq_family_win_rate": float(scenario_win_rate),
             "claim_status": claim_status_value,
@@ -226,6 +238,10 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "",
         f"- claim status: `{payload['summary']['claim_status']}`",
         f"- scenario Freq-HRL-family win rate: `{payload['summary']['scenario_freq_family_win_rate']:.3f}`",
+        f"- required baselines positive: `{payload['summary'].get('required_baselines_positive', [])}`",
+        f"- required baselines inconclusive: `{payload['summary'].get('required_baselines_inconclusive', [])}`",
+        f"- required baselines not supported: `{payload['summary'].get('required_baselines_not_supported', [])}`",
+        f"- required baselines missing: `{payload['summary'].get('required_baselines_missing', [])}`",
         "",
         "| check | status | metric | n | delta | CI95 low | CI95 high | win rate |",
         "|---|---|---|---:|---:|---:|---:|---:|",

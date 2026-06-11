@@ -53,6 +53,7 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             self.assertIn("v42", claims["C1"]["artifact"])
             self.assertIn("C7", claims)
             self.assertIn("C8", claims)
+            self.assertIn("C9", claims)
 
     def test_baseline_ablation_artifact_feeds_c8(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -79,6 +80,37 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             claims = {row["id"]: row for row in payload["claims"]}
             self.assertEqual(claims["C8"]["status"], "supported")
             self.assertIn("no_promotion", claims["C8"]["evidence"])
+
+    def test_pressure_regime_winners_feed_c9(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "baseline_ablation_matrix"
+            out.mkdir(parents=True)
+            regimes = [
+                "stationary_low_noise",
+                "stationary_high_noise",
+                "localized_burst",
+                "persistent_shift",
+                "ood_period",
+            ]
+            (out / "summary.json").write_text(
+                json.dumps({
+                    "summary": {
+                        "claim_status": "partial",
+                        "scenario_freq_family_win_rate": 1.0,
+                    },
+                    "scenario_winners": [
+                        {"scenario": regime, "freq_family_wins": True}
+                        for regime in regimes
+                    ],
+                    "paired_checks": [],
+                }),
+                encoding="utf-8",
+            )
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C9"]["status"], "supported")
+            self.assertIn("stationary_low_noise", claims["C9"]["evidence"])
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                     "avg_wait_min": 5.0,
                     "native_avg_board_wait_min": 4.0,
                     "native_alighted_pax": 50.0,
+                    "native_completed_throughput_pax": 50.0,
                     "native_avg_onboard_load": 0.5,
                     "shared_ppo_wait_replan_adaptive_drift_scale_mean": 1.0,
                     "shared_ppo_wait_replan_throughput_score_mean": 0.0,
@@ -55,6 +56,7 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                     "avg_wait_min": 4.0,
                     "native_avg_board_wait_min": 3.0,
                     "native_alighted_pax": 55.0,
+                    "native_completed_throughput_pax": 55.0,
                     "native_avg_onboard_load": 0.4,
                     "shared_ppo_wait_replan_adaptive_drift_scale_mean": 0.8,
                     "shared_ppo_wait_replan_throughput_score_mean": 0.4,
@@ -63,8 +65,12 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                     "shared_ppo_adaptive_drift_guard_rejects": 1.0,
                     "shared_ppo_gap_risk_guard_rejects": 1.0,
                 })
-        checks = {row["metric"]: row for row in paired_checks(rows, min_pairs=3)}
+        check_rows = paired_checks(rows, min_pairs=3)
+        checks = {row["metric"]: row for row in check_rows}
+        check_names = {row["check"] for row in check_rows}
         self.assertEqual(checks["control_score"]["status"], "supported")
+        self.assertIn("native_real_demand_wait_proxy_noninferiority", check_names)
+        self.assertIn("native_real_demand_completed_throughput_noninferiority", check_names)
         self.assertLess(checks["avg_wait_min"]["delta_mean"], 0.0)
         self.assertLess(
             checks["shared_ppo_wait_replan_adaptive_drift_scale_mean"]["delta_mean"],
@@ -127,6 +133,24 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         self.assertGreater(
             throughput["_offpolicy_replay_updates"],
             wait["_offpolicy_replay_updates"],
+        )
+        safe_wait = variants_for_control_profile("throughput_safe_wait_v6")["native_real_freqhrl"]
+        self.assertGreater(
+            safe_wait["_promotion_replan_reward_floor_throughput_weight"],
+            throughput["_promotion_replan_reward_floor_throughput_weight"],
+        )
+        self.assertEqual(safe_wait["_promotion_replan_throughput_floor_min_delta_fraction"], 0.0)
+        self.assertLess(
+            safe_wait["_promotion_replan_throughput_floor_fleet_util_max"],
+            throughput["_promotion_replan_throughput_floor_fleet_util_max"],
+        )
+        self.assertLess(
+            safe_wait["_lower_hf_wait_boarding_rescue_max_s"],
+            throughput["_lower_hf_wait_boarding_rescue_max_s"],
+        )
+        self.assertGreater(
+            safe_wait["_adaptive_lower_drift_penalty_gain"],
+            throughput["_adaptive_lower_drift_penalty_gain"],
         )
 
     def test_control_score_penalizes_completed_throughput_loss(self):

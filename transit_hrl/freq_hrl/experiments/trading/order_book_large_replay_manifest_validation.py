@@ -28,6 +28,8 @@ class ManifestEntry:
     session: str = ""
     source_id: str = ""
     source_type: str = ""
+    feed_level: str = ""
+    matching_semantics: str = ""
 
 
 def _as_entries(raw: Any) -> list[dict[str, Any]]:
@@ -76,6 +78,13 @@ def load_manifest(path: Path) -> list[ManifestEntry]:
                 or record.get("quality")
                 or ""
             ).strip().lower(),
+            feed_level=str(record.get("feed_level") or record.get("level") or "").strip().lower(),
+            matching_semantics=str(
+                record.get("matching_semantics")
+                or record.get("queue_priority")
+                or record.get("matching")
+                or ""
+            ).strip().lower(),
         ))
     return entries
 
@@ -98,6 +107,8 @@ def _filter_existing(
                 "session": entry.session,
                 "source_id": entry.source_id,
                 "source_type": entry.source_type,
+                "feed_level": entry.feed_level,
+                "matching_semantics": entry.matching_semantics,
             }
             if not allow_missing:
                 raise FileNotFoundError(f"manifest input missing: {entry.path}")
@@ -117,6 +128,8 @@ def _metadata_by_path(entries: list[ManifestEntry]) -> dict[str, dict[str, str]]
             "session": entry.session,
             "source_id": entry.source_id,
             "source_type": entry.source_type,
+            "feed_level": entry.feed_level,
+            "matching_semantics": entry.matching_semantics,
         }
         for entry in entries
     }
@@ -131,6 +144,23 @@ def _is_real_or_venue_grade(entry: ManifestEntry) -> bool:
     if any(token in source_id or token in path_text for token in ("synthetic", "fixture", "toy", "sample")):
         return False
     return False
+
+
+def _has_session_metadata(entry: ManifestEntry) -> bool:
+    return bool(str(entry.venue).strip() and str(entry.symbol).strip() and str(entry.session).strip())
+
+
+def _is_venue_grade_session(entry: ManifestEntry) -> bool:
+    if not _is_real_or_venue_grade(entry) or not _has_session_metadata(entry):
+        return False
+    source_type = str(entry.source_type).lower().replace("-", "_")
+    semantics = str(entry.matching_semantics).lower().replace("-", "_")
+    if entry.kind == "l3":
+        return (
+            source_type in {"venue_grade", "exchange", "production"}
+            or semantics in {"fifo", "price_time", "queue_priority", "exchange_replay"}
+        )
+    return source_type in {"real", "venue", "venue_grade", "exchange", "production"}
 
 
 def _enrich_rows(rows: list[dict[str, Any]], *, kind: str, entries: list[ManifestEntry]) -> list[dict[str, Any]]:
@@ -246,6 +276,8 @@ def run_manifest_validation(
         "l3_files": len(l3_entries),
         "real_l2_files": sum(1 for entry in l2_entries if _is_real_or_venue_grade(entry)),
         "real_l3_files": sum(1 for entry in l3_entries if _is_real_or_venue_grade(entry)),
+        "venue_grade_l2_files": sum(1 for entry in l2_entries if _is_venue_grade_session(entry)),
+        "venue_grade_l3_files": sum(1 for entry in l3_entries if _is_venue_grade_session(entry)),
         "fixture_l2_files": sum(1 for entry in l2_entries if not _is_real_or_venue_grade(entry)),
         "fixture_l3_files": sum(1 for entry in l3_entries if not _is_real_or_venue_grade(entry)),
         "methods": list(methods),
@@ -264,14 +296,32 @@ def run_manifest_validation(
         for entry in entries
         if _is_real_or_venue_grade(entry)
     }
-    if coverage["real_l2_files"] > 0 and coverage["real_l3_files"] > 0:
+    venue_l2_sessions = {
+        (entry.venue, entry.symbol, entry.session)
+        for entry in l2_entries
+        if _is_venue_grade_session(entry)
+    }
+    venue_l3_sessions = {
+        (entry.venue, entry.symbol, entry.session)
+        for entry in l3_entries
+        if _is_venue_grade_session(entry)
+    }
+    venue_l2_l3_pairs = sorted(venue_l2_sessions & venue_l3_sessions)
+    if venue_l2_l3_pairs:
         source_quality_status = "venue_grade_ready"
+    elif coverage["real_l2_files"] > 0 and coverage["real_l3_files"] > 0:
+        source_quality_status = "real_unpaired_or_metadata_incomplete"
     elif coverage["l2_files"] > 0 and coverage["l3_files"] > 0:
         source_quality_status = "mechanism_only"
     else:
         source_quality_status = "incomplete"
     coverage.update({
         "real_or_venue_grade_sessions": len(real_sessions),
+        "venue_grade_l2_l3_session_pairs": len(venue_l2_l3_pairs),
+        "venue_grade_sessions": [
+            {"venue": venue, "symbol": symbol, "session": session}
+            for venue, symbol, session in venue_l2_l3_pairs
+        ],
         "source_quality_status": source_quality_status,
     })
     payload = {
@@ -301,6 +351,7 @@ def run_manifest_validation(
         f"- L3 files: `{coverage['l3_files']}`",
         f"- real/venue-grade L2 files: `{coverage['real_l2_files']}`",
         f"- real/venue-grade L3 files: `{coverage['real_l3_files']}`",
+        f"- venue-grade paired L2/L3 sessions: `{coverage['venue_grade_l2_l3_session_pairs']}`",
         f"- source quality: `{coverage['source_quality_status']}`",
         f"- missing entries: `{coverage['missing_entries']}`",
         f"- boundary: {payload['boundary']}",

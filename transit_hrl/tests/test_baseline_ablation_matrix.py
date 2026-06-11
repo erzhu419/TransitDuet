@@ -70,6 +70,8 @@ class BaselineAblationMatrixTest(unittest.TestCase):
             self.assertEqual(checks["freq_hrl_vs_no_promotion_sharpe"]["status"], "supported")
             self.assertEqual(checks["freq_hrl_vs_swapped_FocusScore"]["status"], "supported")
             self.assertEqual(built["summary"]["claim_status"], "supported")
+            self.assertEqual(built["summary"]["required_baselines_inconclusive"], [])
+            self.assertIn("vanilla_rl", built["summary"]["required_baselines_missing"])
             write_outputs(root / "out", built)
             self.assertTrue((root / "out" / "summary.json").exists())
 

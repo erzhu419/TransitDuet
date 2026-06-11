@@ -16,6 +16,7 @@ DEFAULT_RESULT_PATHS = {
     "trading_ppo_primal_dual": Path("transit_hrl/results/trading_ppo_primal_dual_leakage/summary.json"),
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
     "transit_ppo_primal_dual": Path("transit_hrl/results/transit_ppo_primal_dual_leakage/summary.json"),
+    "native_real_demand_throughput_safe_wait_v6": Path("transit_hrl/results/transit_native_real_demand_throughput_safe_wait_v6_48pair_merged/summary.json"),
     "native_real_demand_alighting_throughput_v5": Path("transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json"),
     "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
@@ -46,6 +47,14 @@ CORE_PERFORMANCE_METRICS = {
     "native_completed_throughput_pax",
     "headway_cv",
     "max_drawdown",
+}
+NATIVE_REAL_DEMAND_REQUIRED_PERF = {
+    "control_score",
+    "ep_reward",
+    "avg_wait_min",
+    "native_avg_board_wait_min",
+    "native_alighted_pax",
+    "native_completed_throughput_pax",
 }
 
 
@@ -288,7 +297,17 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
     ]
     drift_ok_supported = bool(drift) and any(row["status"] == "supported" for row in drift)
     drift_ok_summary = bool(drift) and any(row["status"] == "summary_only_positive" for row in drift)
+    if domain.startswith("native_real_demand"):
+        perf = [
+            row for row in perf
+            if row["metric"] in NATIVE_REAL_DEMAND_REQUIRED_PERF
+        ]
+        required_perf = set(NATIVE_REAL_DEMAND_REQUIRED_PERF)
+    else:
+        required_perf = set()
     perf_metrics = sorted({row["metric"] for row in perf})
+    if required_perf:
+        perf_metrics = sorted(required_perf)
     perf_ok = bool(perf) and all(
         any(
             row["metric"] == metric and row["status"] in ACCEPTED_PERFORMANCE_STATUSES
@@ -296,8 +315,12 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         )
         for metric in perf_metrics
     )
+    strict_perf_ok = bool(perf) and all(
+        any(row["metric"] == metric and row["status"] == "supported" for row in perf)
+        for metric in perf_metrics
+    )
     if drift and drift_ok_supported and perf_ok:
-        verdict = "no_tradeoff_supported"
+        verdict = "no_tradeoff_strict_supported" if strict_perf_ok else "no_tradeoff_supported"
     elif drift and drift_ok_summary and perf_ok:
         verdict = "summary_only_noharm"
     elif not drift and perf_ok:
@@ -311,6 +334,8 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         "checks": len(group),
         "drift_checks": len(drift),
         "performance_checks": len(perf),
+        "required_performance_metrics": sorted(required_perf),
+        "strict_performance_supported": bool(strict_perf_ok),
         "supported": sum(1 for row in group if row["status"] == "supported"),
         "noninferiority_supported": sum(1 for row in group if row["status"] == "noninferiority_supported"),
         "positive_mixed": sum(1 for row in group if row["status"] == "positive_mixed"),
@@ -409,7 +434,10 @@ def main() -> None:
     }
     payload = build_leakage_matrix(paths, min_pairs=int(args.min_pairs))
     write_outputs(args.output_dir, payload)
-    supported = sum(1 for row in payload["domain_verdicts"] if row["verdict"] == "no_tradeoff_supported")
+    supported = sum(
+        1 for row in payload["domain_verdicts"]
+        if row["verdict"] in {"no_tradeoff_supported", "no_tradeoff_strict_supported"}
+    )
     print(f"leakage_no_tradeoff_matrix domains={len(payload['domain_verdicts'])} supported={supported}")
 
 

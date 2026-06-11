@@ -356,6 +356,62 @@ CONTROL_PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
             "_offpolicy_replay_updates": 4,
         },
     },
+    "throughput_safe_wait_v6": {
+        "native_real_freqhrl": {
+            "_promotion_gate_threshold": 0.24,
+            "_promotion_gate_strength_min": 0.18,
+            "_promotion_gate_wait_pressure_override_min": 0.16,
+            "_promotion_gate_max_replans": 2,
+            "_promotion_gate_cooldown_s": 420.0,
+            "_promotion_replan_wait_gain_s": 4.2,
+            "_promotion_replan_max_shift_s": 1.15,
+            "_promotion_replan_min_pressure": 0.16,
+            "_promotion_replan_max_pressure": 0.62,
+            "_promotion_replan_same_hold_max": 0.08,
+            "_promotion_replan_same_wait_min": 0.76,
+            "_promotion_replan_same_wait_max": 0.88,
+            "_promotion_replan_gap_guard_min_ratio": 1.00,
+            "_promotion_replan_gap_guard_max_ratio": 1.12,
+            "_promotion_replan_gap_risk_cap_full": 0.14,
+            "_promotion_replan_gap_risk_accept_max_scale": 0.90,
+            "_promotion_replan_adaptive_drift_penalty_gain": 0.10,
+            "_promotion_replan_adaptive_drift_penalty_min_scale": 0.78,
+            "_promotion_replan_adaptive_drift_accept_min_scale": 0.84,
+            "_promotion_replan_reward_floor_min_score": 0.06,
+            "_promotion_replan_reward_floor_wait_weight": 1.25,
+            "_promotion_replan_reward_floor_target_weight": 1.25,
+            "_promotion_replan_reward_floor_throughput_weight": 4.00,
+            "_promotion_replan_reward_floor_fleet_weight": 0.45,
+            "_promotion_replan_reward_floor_action_cost": 0.035,
+            "_promotion_replan_reward_floor_gap_cost": 0.20,
+            "_promotion_replan_reward_floor_hold_cost": 0.34,
+            "_promotion_replan_throughput_guard_min_score": 0.24,
+            "_promotion_replan_throughput_floor_min_score": 0.34,
+            "_promotion_replan_throughput_floor_min_delta_fraction": 0.0,
+            "_promotion_replan_throughput_floor_fleet_util_max": 0.82,
+            "_promotion_replan_throughput_floor_same_hold_max": 0.045,
+            "_promotion_replan_target_headway_min_s": 341.0,
+            "_promotion_replan_target_headway_max_s": 349.0,
+            "_promotion_replan_project_target_headway": True,
+            "_promotion_replan_final_delta_abs_min_s": 0.04,
+            "_promotion_replan_final_delta_abs_max_s": 1.10,
+            "_promotion_replan_base_action": "active",
+            "_promotion_replan_actor_base_trust_s": 0.0,
+            "_lower_hf_wait_action_gain_s": 7.0,
+            "_lower_hf_wait_min_scale": 0.0,
+            "_lower_hf_wait_max_scale": 0.38,
+            "_lower_hf_wait_load_damping_weight": 2.2,
+            "_lower_hf_wait_schedule_slack_damping_weight": 1.2,
+            "_lower_hf_wait_queue_boost_weight": 0.05,
+            "_lower_hf_wait_boarding_rescue_gain_s": 10.0,
+            "_lower_hf_wait_boarding_rescue_max_s": 3.5,
+            "_lower_hf_wait_boarding_rescue_queue_min": 0.04,
+            "_lower_hf_wait_boarding_rescue_load_max": 1.15,
+            "_adaptive_lower_drift_penalty_gain": 0.90,
+            "_adaptive_lower_drift_penalty_min_scale": 0.58,
+            "_offpolicy_replay_updates": 4,
+        },
+    },
 }
 
 
@@ -614,8 +670,23 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         for row in rows
         if row.get("variant") == "native_real_interval"
     ]
+    control_throughput = [
+        float(row.get("native_completed_throughput_pax", 0.0))
+        for row in rows
+        if row.get("variant") == "native_real_interval"
+    ]
     alighted_margin = max(1.0, 0.001 * float(np.mean(control_alighted))) if control_alighted else 1.0
+    throughput_margin = (
+        max(1.0, 0.001 * float(np.mean(control_throughput)))
+        if control_throughput else 1.0
+    )
     for check_name, metric, lower_is_better, margin in [
+        (
+            "native_real_demand_wait_proxy_noninferiority",
+            "avg_wait_min",
+            True,
+            0.10,
+        ),
         (
             "native_real_demand_wait_noninferiority",
             "native_avg_board_wait_min",
@@ -627,6 +698,12 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
             "native_alighted_pax",
             False,
             alighted_margin,
+        ),
+        (
+            "native_real_demand_completed_throughput_noninferiority",
+            "native_completed_throughput_pax",
+            False,
+            throughput_margin,
         ),
     ]:
         stats = paired_delta_stats(
