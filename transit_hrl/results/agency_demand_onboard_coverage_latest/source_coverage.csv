@@ -1,0 +1,4 @@
+source,path_status,rows,unique_station_complexes,unique_time_bins,time_start,time_end,total_ridership,has_station_entries,has_onboard_load,has_alightings,has_od_fields,claim_status,boundary,unique_routes,unique_route_time_bins,date_start,date_end,total_boardings,has_boardings
+public_afc_station_hour,present,1000,41,25,2024-10-01T00:00:00.000,2024-10-02T00:00:00.000,255352.0,True,False,False,False,supported,"observed station-hour entries; not onboard occupancy, alightings, or OD unless those fields are present",,,,,,
+public_apc_route_boarding,present,1000,,,,,,,False,False,False,supported,"observed route boardings; not onboard occupancy, alightings, or OD unless those fields are present",8,1000,1767261600000,1767780000000,75777.0,True
+gtfs_ride_external,not_configured,,,,,,,,,,,external_missing,optional external GTFS-ride directory was not supplied,,,,,,

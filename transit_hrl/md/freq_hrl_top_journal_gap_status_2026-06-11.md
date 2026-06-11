@@ -255,3 +255,39 @@ The multisymbol artifact is
 
 `top_journal_unified_matrix_latest` remains 9 supported and 0 partial after
 switching C3 to the multisymbol artifact.
+
+## 2026-06-12 Agency Demand / Onboard Claim Boundary
+
+Added `agency_demand_onboard_coverage.py` and the artifact
+`agency_demand_onboard_coverage_latest` to make the Transit real-data boundary
+auditable instead of implicit.
+
+Current coverage ledger:
+
+- overall scope: `real_afc_apc_demand_plus_native_service_response`
+- supported boundary rows: `4`
+- external-missing boundary rows: `3`
+- AFC station-hour demand: supported, 1000 rows, 41 station complexes, 25 time
+  bins
+- APC route-boarding demand: supported, 1000 rows, 8 routes
+- native service-response wait/alighting/throughput: supported, 96 rows and 48
+  seed indices
+- native onboard-load metric: recorded and audited, but onboard-load
+  improvement remains inconclusive
+- real GTFS-ride board/alight, onboard-load, and OD truth: external missing
+  for the current AFC/APC cache
+
+This tightens the paper boundary:
+
+- Allowed: real AFC/APC demand-driven native Transit validation.
+- Allowed: native simulator service-response improvements for wait,
+  alighting, and completed throughput under those public demand profiles.
+- Not allowed yet: external real OD, onboard occupancy, or agency alighting
+  ground-truth improvement.
+
+Also added `freq_hrl_manuscript_claim_boundaries_2026-06-12.md`, with
+paper-facing wording for what can and cannot be claimed. The new coverage
+script already supports an optional `--gtfs-ride-dir`; if a real GTFS-ride
+feed with `board_alight.txt`, `load_count/current_load`, and `rider_trip.txt`
+is supplied, the corresponding external truth rows move from
+`external_missing` to `supported`.

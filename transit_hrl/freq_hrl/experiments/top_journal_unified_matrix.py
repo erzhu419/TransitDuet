@@ -33,6 +33,7 @@ DEFAULT_ARTIFACTS = {
     "native_real_demand_v4": Path("transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json"),
     "native_real_demand_v3": Path("transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json"),
     "native_real_demand_v2": Path("transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json"),
+    "agency_demand_onboard_coverage": Path("transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json"),
     "order_book_l2_matching": Path("transit_hrl/results/trading_order_book_matching_validation/summary.json"),
     "order_book_l3_replay": Path("transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"),
     "order_book_manifest": Path("transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json"),
@@ -419,6 +420,23 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         "native_completed_throughput_pax",
         check_contains="noninferiority",
     )
+    agency_coverage = artifacts["agency_demand_onboard_coverage"] or {}
+    agency_boundary_status = {
+        str(row.get("evidence_item", "")): str(row.get("status", ""))
+        for row in agency_coverage.get("claim_boundaries", []) or []
+        if isinstance(row, dict)
+    }
+    agency_supported_boundaries = sorted(
+        key for key, value in agency_boundary_status.items() if value == "supported"
+    )
+    agency_external_missing = sorted(
+        key for key, value in agency_boundary_status.items() if value == "external_missing"
+    )
+    agency_scope = str(
+        agency_coverage.get("summary", {}).get("evidence_scope", "")
+        if isinstance(agency_coverage, dict)
+        else ""
+    )
     order_book_manifest = artifacts["order_book_manifest"] or {}
     order_book_l2 = artifacts["order_book_l2_matching"] or {}
     order_book_l3 = artifacts["order_book_l3_replay"] or {}
@@ -529,8 +547,9 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     if c2_status == "supported":
         c2_remaining_gap = (
             "Closed for the current public AFC/APC native service-response "
-            "validation; remaining work is broader real agency OD/onboard-load "
-            "replication."
+            "validation. External real OD/onboard-load/alighting ground truth "
+            "remains a data boundary unless supplied through GTFS-ride or an "
+            "agency APC/OD export."
         )
     elif not _positive(real_service_signal):
         c2_remaining_gap = (
@@ -620,11 +639,21 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')} "
                 f"throughput={real_throughput.get('status', 'missing')} "
                 f"throughput_noharm={real_throughput_noninferiority.get('status', 'missing')} "
-                f"service_signal={real_service_signal.get('status', 'missing')}"
+                f"service_signal={real_service_signal.get('status', 'missing')} "
+                f"agency_scope={agency_scope or 'missing'} "
+                f"agency_supported={agency_supported_boundaries} "
+                f"agency_external_missing={agency_external_missing}"
             ),
             "remaining_gap": c2_remaining_gap,
             "artifact": (
-                paths["native_real_demand_service_response_v7"]
+                (
+                    paths["native_real_demand_service_response_v7"]
+                    + (
+                        f" | {paths['agency_demand_onboard_coverage']}"
+                        if artifacts["agency_demand_onboard_coverage"]
+                        else ""
+                    )
+                )
                 if artifacts["native_real_demand_service_response_v7"]
                 else paths["native_real_demand_throughput_safe_wait_v6"]
                 if artifacts["native_real_demand_throughput_safe_wait_v6"]

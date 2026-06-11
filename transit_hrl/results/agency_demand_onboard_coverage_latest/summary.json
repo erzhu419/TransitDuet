@@ -1,0 +1,339 @@
+{
+  "summary": {
+    "evidence_scope": "real_afc_apc_demand_plus_native_service_response",
+    "supported_boundaries": 4,
+    "external_missing_boundaries": 3,
+    "source_count": 3
+  },
+  "source_coverage": [
+    {
+      "source": "public_afc_station_hour",
+      "path_status": "present",
+      "rows": 1000,
+      "unique_station_complexes": 41,
+      "unique_time_bins": 25,
+      "time_start": "2024-10-01T00:00:00.000",
+      "time_end": "2024-10-02T00:00:00.000",
+      "total_ridership": 255352.0,
+      "has_station_entries": true,
+      "has_onboard_load": false,
+      "has_alightings": false,
+      "has_od_fields": false,
+      "claim_status": "supported",
+      "boundary": "observed station-hour entries; not onboard occupancy, alightings, or OD unless those fields are present"
+    },
+    {
+      "source": "public_apc_route_boarding",
+      "path_status": "present",
+      "rows": 1000,
+      "unique_routes": 8,
+      "unique_route_time_bins": 1000,
+      "date_start": "1767261600000",
+      "date_end": "1767780000000",
+      "total_boardings": 75777.0,
+      "has_boardings": true,
+      "has_onboard_load": false,
+      "has_alightings": false,
+      "has_od_fields": false,
+      "claim_status": "supported",
+      "boundary": "observed route boardings; not onboard occupancy, alightings, or OD unless those fields are present"
+    },
+    {
+      "source": "gtfs_ride_external",
+      "path_status": "not_configured",
+      "claim_status": "external_missing",
+      "boundary": "optional external GTFS-ride directory was not supplied"
+    }
+  ],
+  "native_service": {
+    "source": "native_real_demand_service_response",
+    "path_status": "present",
+    "variant": "native_real_freqhrl",
+    "rows": 96,
+    "seeds": 48,
+    "sources": [
+      "afc",
+      "apc"
+    ],
+    "metrics": [
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "control_score",
+        "n": 96,
+        "mean": 486545.1723091004,
+        "min": 356551.6583888572,
+        "max": 592692.589420928
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "ep_reward",
+        "n": 96,
+        "mean": -7952.92534375,
+        "min": -14635.922,
+        "max": -2513.471
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "avg_wait_min",
+        "n": 96,
+        "mean": 38.02331555857567,
+        "min": 8.208219593342873,
+        "max": 132.80462183586684
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_avg_board_wait_min",
+        "n": 96,
+        "mean": 38.07773982224864,
+        "min": 8.260826214586,
+        "max": 132.8609500465683
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_boarded_pax",
+        "n": 96,
+        "mean": 19795.935951800555,
+        "min": 14647.784982355775,
+        "max": 24249.541177428007
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_alighted_pax",
+        "n": 96,
+        "mean": 19795.935951800555,
+        "min": 14647.784982355775,
+        "max": 24249.541177428007
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_completed_throughput_pax",
+        "n": 96,
+        "mean": 19795.935951800555,
+        "min": 14647.784982355775,
+        "max": 24249.541177428007
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_unalighted_pax",
+        "n": 96,
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_avg_onboard_load",
+        "n": 96,
+        "mean": 0.5205685531573863,
+        "min": 0.3953673483910725,
+        "max": 0.6436801897015596
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "native_peak_onboard_load",
+        "n": 96,
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      {
+        "variant": "native_real_freqhrl",
+        "metric": "LowerLFDrift",
+        "n": 96,
+        "mean": 0.8084227089040684,
+        "min": 0.7459433468506856,
+        "max": 0.8341025008268992
+      }
+    ],
+    "key_checks": {
+      "score": {
+        "check": "native_real_demand_control_score",
+        "metric": "control_score",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "increase",
+        "n_common": 96,
+        "delta_mean": 3496.2557979548237,
+        "delta_ci95_low": 2982.947736495579,
+        "delta_ci95_high": 3988.301337893005,
+        "improvement_mean": 3496.2557979548237,
+        "improvement_ci95_low": 2934.585852256747,
+        "improvement_ci95_high": 4027.2998713745774,
+        "win_rate": 1.0,
+        "sign_p_value": 2.5243548967072524e-29,
+        "status": "supported"
+      },
+      "reward": {
+        "check": "native_real_demand_ep_reward",
+        "metric": "ep_reward",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "increase",
+        "n_common": 96,
+        "delta_mean": 3074.8918645833332,
+        "delta_ci95_low": 2560.8985421875,
+        "delta_ci95_high": 3564.7558065104163,
+        "improvement_mean": 3074.8918645833332,
+        "improvement_ci95_low": 2514.685559375,
+        "improvement_ci95_high": 3605.8400763020836,
+        "win_rate": 0.9791666666666666,
+        "sign_p_value": 1.0097419586828904e-28,
+        "status": "supported"
+      },
+      "board_wait": {
+        "check": "native_real_demand_native_avg_board_wait_min",
+        "metric": "native_avg_board_wait_min",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "decrease",
+        "n_common": 96,
+        "delta_mean": -0.17596288660765935,
+        "delta_ci95_low": -0.17768862912478525,
+        "delta_ci95_high": -0.17401275120262616,
+        "improvement_mean": 0.17596288660765935,
+        "improvement_ci95_low": 0.17412352267208914,
+        "improvement_ci95_high": 0.17772517905202356,
+        "win_rate": 1.0,
+        "sign_p_value": 2.5243548967072524e-29,
+        "status": "supported"
+      },
+      "alighted": {
+        "check": "native_real_demand_native_alighted_pax",
+        "metric": "native_alighted_pax",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "increase",
+        "n_common": 96,
+        "delta_mean": 16.75886846722443,
+        "delta_ci95_low": 16.57332075143214,
+        "delta_ci95_high": 16.92272811720712,
+        "improvement_mean": 16.75886846722443,
+        "improvement_ci95_low": 16.58332646270419,
+        "improvement_ci95_high": 16.926636757199535,
+        "win_rate": 1.0,
+        "sign_p_value": 2.5243548967072524e-29,
+        "status": "supported"
+      },
+      "throughput": {
+        "check": "native_real_demand_native_completed_throughput_pax",
+        "metric": "native_completed_throughput_pax",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "increase",
+        "n_common": 96,
+        "delta_mean": 16.75886846722443,
+        "delta_ci95_low": 16.57332075143214,
+        "delta_ci95_high": 16.92272811720712,
+        "improvement_mean": 16.75886846722443,
+        "improvement_ci95_low": 16.58332646270419,
+        "improvement_ci95_high": 16.926636757199535,
+        "win_rate": 1.0,
+        "sign_p_value": 2.5243548967072524e-29,
+        "status": "supported"
+      },
+      "onboard_load": {
+        "check": "native_real_demand_native_avg_onboard_load",
+        "metric": "native_avg_onboard_load",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "decrease",
+        "n_common": 96,
+        "delta_mean": -4.8240972293223106e-08,
+        "delta_ci95_low": -1.6113393970680623e-07,
+        "delta_ci95_high": 1.6411022827136912e-08,
+        "improvement_mean": 4.8240972293223106e-08,
+        "improvement_ci95_low": -1.6411022827136912e-08,
+        "improvement_ci95_high": 1.6113393970680623e-07,
+        "win_rate": 0.010416666666666666,
+        "sign_p_value": 1.0,
+        "status": "inconclusive"
+      },
+      "lower_lf_drift": {
+        "check": "native_real_demand_LowerLFDrift",
+        "metric": "LowerLFDrift",
+        "treatment": "native_real_freqhrl",
+        "control": "native_real_interval",
+        "direction": "decrease",
+        "n_common": 96,
+        "delta_mean": -0.17265956882916442,
+        "delta_ci95_low": -0.17458390060409862,
+        "delta_ci95_high": -0.1705954439666294,
+        "improvement_mean": 0.17265956882916442,
+        "improvement_ci95_low": 0.1707038518442566,
+        "improvement_ci95_high": 0.17459646377419438,
+        "win_rate": 1.0,
+        "sign_p_value": 2.5243548967072524e-29,
+        "status": "supported"
+      }
+    },
+    "native_service_response_status": "supported",
+    "native_onboard_loop_status": "supported",
+    "native_onboard_improvement_status": "inconclusive",
+    "boundary": "native simulator service loop; onboard/alighting metrics are not external ground truth unless supplied by agency data"
+  },
+  "claim_boundaries": [
+    {
+      "id": "A1",
+      "evidence_item": "real_afc_station_hour_demand",
+      "status": "supported",
+      "allowed_wording": "real AFC-style station-hour entry demand",
+      "forbidden_wording": "real OD or onboard-load ground truth",
+      "evidence": "rows=1000 stations=41 time_bins=25"
+    },
+    {
+      "id": "A2",
+      "evidence_item": "real_apc_route_boarding_demand",
+      "status": "supported",
+      "allowed_wording": "real APC-style route boarding demand",
+      "forbidden_wording": "real onboard occupancy, alighting, or OD ground truth unless columns exist",
+      "evidence": "rows=1000 routes=8 route_time_bins=1000"
+    },
+    {
+      "id": "A3",
+      "evidence_item": "native_service_response_wait_alighting_throughput",
+      "status": "supported",
+      "allowed_wording": "native public-demand service-response loop improves wait/alighting/throughput",
+      "forbidden_wording": "external agency alighting or onboard-load ground-truth improvement",
+      "evidence": "rows=96 seeds=48 board_wait=supported alighted=supported throughput=supported"
+    },
+    {
+      "id": "A4",
+      "evidence_item": "native_onboard_load_loop",
+      "status": "supported",
+      "allowed_wording": "native onboard-load metric is recorded and audited",
+      "forbidden_wording": "native onboard-load improvement is supported if CI is inconclusive",
+      "evidence": "onboard_improvement=inconclusive"
+    },
+    {
+      "id": "A5",
+      "evidence_item": "real_gtfs_ride_board_alight",
+      "status": "external_missing",
+      "allowed_wording": "real stop-level board/alight validation when GTFS-ride board_alight is supplied",
+      "forbidden_wording": "real alighting ground truth for the current AFC/APC-only cache",
+      "evidence": "board_alight_rows=0 has_alightings=False"
+    },
+    {
+      "id": "A6",
+      "evidence_item": "real_gtfs_ride_onboard_load",
+      "status": "external_missing",
+      "allowed_wording": "real onboard-load validation when GTFS-ride load_count/current_load is supplied",
+      "forbidden_wording": "real onboard-load ground truth for the current AFC/APC-only cache",
+      "evidence": "board_alight_rows=0 has_onboard_load=False"
+    },
+    {
+      "id": "A7",
+      "evidence_item": "real_gtfs_ride_od",
+      "status": "external_missing",
+      "allowed_wording": "real OD validation when rider_trip or origin/destination fields are supplied",
+      "forbidden_wording": "real OD ground truth for the current AFC/APC-only cache",
+      "evidence": "rider_trip_rows=0 has_od_fields=False"
+    }
+  ],
+  "inputs": {
+    "afc_csv": "transit_hrl/data/public_afc_mta/hourly_ridership.csv",
+    "apc_csv": "transit_hrl/data/public_apc_halifax/route_boardings.csv",
+    "native_summary": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json",
+    "gtfs_ride_dir": ""
+  },
+  "boundary": "This ledger separates observed agency demand from native simulator service metrics.  Claims about real OD/onboard-load/alighting ground truth require external files that expose those fields."
+}

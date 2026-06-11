@@ -12,9 +12,9 @@
       "id": "C2",
       "claim": "Native real AFC/APC demand improves score/reward and strict wait/alighting/throughput",
       "status": "supported",
-      "evidence": "score=supported reward=supported wait=supported wait_proxy_noharm=supported wait_noharm=supported alighted=supported alighted_noharm=supported throughput=supported throughput_noharm=supported service_signal=supported",
-      "remaining_gap": "Closed for the current public AFC/APC native service-response validation; remaining work is broader real agency OD/onboard-load replication.",
-      "artifact": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json"
+      "evidence": "score=supported reward=supported wait=supported wait_proxy_noharm=supported wait_noharm=supported alighted=supported alighted_noharm=supported throughput=supported throughput_noharm=supported service_signal=supported agency_scope=real_afc_apc_demand_plus_native_service_response agency_supported=['native_onboard_load_loop', 'native_service_response_wait_alighting_throughput', 'real_afc_station_hour_demand', 'real_apc_route_boarding_demand'] agency_external_missing=['real_gtfs_ride_board_alight', 'real_gtfs_ride_od', 'real_gtfs_ride_onboard_load']",
+      "remaining_gap": "Closed for the current public AFC/APC native service-response validation. External real OD/onboard-load/alighting ground truth remains a data boundary unless supplied through GTFS-ride or an agency APC/OD export.",
+      "artifact": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json | transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json"
     },
     {
       "id": "C3",
@@ -103,6 +103,7 @@
     "native_real_demand_v4": "transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json",
     "native_real_demand_v3": "transit_hrl/results/scheduler_native_real_demand_reward_floor_throughput_v3_24pair/summary.json",
     "native_real_demand_v2": "transit_hrl/results/transit_native_real_demand_waitaware_v2_24seed_merged_drift/summary.json",
+    "agency_demand_onboard_coverage": "transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json",
     "order_book_l2_matching": "transit_hrl/results/trading_order_book_matching_validation/summary.json",
     "order_book_l3_replay": "transit_hrl/results/trading_order_book_l3_replay_validation/summary.json",
     "order_book_manifest": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json",
