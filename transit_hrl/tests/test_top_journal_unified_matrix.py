@@ -112,6 +112,72 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             self.assertEqual(claims["C9"]["status"], "supported")
             self.assertIn("stationary_low_noise", claims["C9"]["evidence"])
 
+    def test_c5_requires_native_leakage_selector_support(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "leakage_no_tradeoff_matrix"
+            out.mkdir(parents=True)
+            (out / "summary.json").write_text(
+                json.dumps({
+                    "domain_verdicts": [
+                        {
+                            "domain": "trading_ppo_primal_dual",
+                            "verdict": "no_tradeoff_strict_supported",
+                        },
+                        {
+                            "domain": "native_real_demand_service_response_v7",
+                            "verdict": "no_tradeoff_supported",
+                        },
+                    ],
+                    "adaptive_native_real_demand_selector": {
+                        "status": "supported",
+                        "selected_domain": "native_real_demand_service_response_v7",
+                        "selected_verdict": "no_tradeoff_supported",
+                        "supported": True,
+                        "strict_supported": False,
+                    },
+                }),
+                encoding="utf-8",
+            )
+
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C5"]["status"], "supported")
+            self.assertIn("native_selector_status=supported", claims["C5"]["evidence"])
+
+    def test_c5_stays_partial_without_native_selector_support(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "leakage_no_tradeoff_matrix"
+            out.mkdir(parents=True)
+            (out / "summary.json").write_text(
+                json.dumps({
+                    "domain_verdicts": [
+                        {
+                            "domain": "trading_ppo_primal_dual",
+                            "verdict": "no_tradeoff_strict_supported",
+                        },
+                        {
+                            "domain": "transit_real_surrogate",
+                            "verdict": "no_tradeoff_supported",
+                        },
+                    ],
+                    "adaptive_native_real_demand_selector": {
+                        "status": "blocked_no_native_no_tradeoff",
+                        "selected_domain": "native_real_demand_service_response_v7",
+                        "selected_verdict": "partial",
+                        "supported": False,
+                        "strict_supported": False,
+                    },
+                }),
+                encoding="utf-8",
+            )
+
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C5"]["status"], "partial")
+            self.assertIn("native_selector_status=blocked_no_native_no_tradeoff", claims["C5"]["evidence"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -459,6 +459,13 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         row.get("domain") for row in leakage_verdicts
         if row.get("verdict") in {"partial", "performance_noharm_only", "summary_only_noharm"}
     ]
+    leakage_native_selector = (
+        leakage.get("adaptive_native_real_demand_selector", {})
+        if isinstance(leakage, dict)
+        else {}
+    )
+    leakage_native_supported = bool(leakage_native_selector.get("supported", False))
+    leakage_native_strict = bool(leakage_native_selector.get("strict_supported", False))
     theory_examples = theory.get("examples", {}) if isinstance(theory, dict) else {}
     order_book_l2_supported = _count_checks(order_book_l2, {"supported"})
     order_book_l3_positive = _count_checks(order_book_l3, {"supported", "positive_mixed"})
@@ -602,15 +609,26 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Leakage no-tradeoff holds beyond surrogate",
             "status": _status_from_flags(
                 present=bool(leakage_verdicts),
-                supported=len(leakage_strict_domains) >= 1 and len(leakage_supported_domains) >= 2,
-                partial=bool(leakage_supported_domains),
+                supported=(
+                    leakage_native_supported
+                    and len(leakage_strict_domains) >= 1
+                    and len(leakage_supported_domains) >= 2
+                ),
+                partial=bool(leakage_supported_domains or leakage_native_selector),
             ),
             "evidence": (
                 f"strict_no_tradeoff_domains={leakage_strict_domains} "
                 f"no_tradeoff_domains={leakage_supported_domains} "
-                f"partial_domains={leakage_partial_domains}"
+                f"partial_domains={leakage_partial_domains} "
+                f"native_selector_status={leakage_native_selector.get('status', 'missing')} "
+                f"native_selector_domain={leakage_native_selector.get('selected_domain', '')} "
+                f"native_selector_strict={leakage_native_strict}"
             ),
-            "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
+            "remaining_gap": (
+                "Native real-demand C5 now uses the adaptive selector from the leakage matrix. "
+                "If this remains partial, the selected profile still lacks joint drift reduction "
+                "and reward/wait/alighting/throughput no-harm or strict CI support."
+            ),
             "artifact": (
                 paths["leakage_matrix_latest_patch"]
                 if artifacts["leakage_matrix_latest_patch"]

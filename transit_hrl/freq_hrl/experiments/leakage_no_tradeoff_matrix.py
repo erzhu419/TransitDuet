@@ -57,6 +57,15 @@ NATIVE_REAL_DEMAND_REQUIRED_PERF = {
     "native_alighted_pax",
     "native_completed_throughput_pax",
 }
+NATIVE_VERDICT_RANK = {
+    "no_tradeoff_strict_supported": 5,
+    "no_tradeoff_supported": 4,
+    "summary_only_noharm": 3,
+    "performance_noharm_only": 2,
+    "partial": 1,
+    "not_supported": 0,
+    "missing": -1,
+}
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -309,6 +318,25 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
     perf_metrics = sorted({row["metric"] for row in perf})
     if required_perf:
         perf_metrics = sorted(required_perf)
+    performance_status_by_metric = {
+        metric: sorted({
+            row["status"]
+            for row in perf
+            if row["metric"] == metric
+        })
+        for metric in perf_metrics
+    }
+    accepted_performance_metrics = [
+        metric for metric in perf_metrics
+        if any(
+            row["metric"] == metric and row["status"] in ACCEPTED_PERFORMANCE_STATUSES
+            for row in perf
+        )
+    ]
+    strict_performance_metrics = [
+        metric for metric in perf_metrics
+        if any(row["metric"] == metric and row["status"] == "supported" for row in perf)
+    ]
     perf_ok = bool(perf) and all(
         any(
             row["metric"] == metric and row["status"] in ACCEPTED_PERFORMANCE_STATUSES
@@ -336,6 +364,21 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         "drift_checks": len(drift),
         "performance_checks": len(perf),
         "required_performance_metrics": sorted(required_perf),
+        "performance_status_by_metric": performance_status_by_metric,
+        "accepted_performance_metrics": accepted_performance_metrics,
+        "blocking_performance_metrics": [
+            metric for metric in perf_metrics
+            if metric not in set(accepted_performance_metrics)
+        ],
+        "strict_performance_metrics": strict_performance_metrics,
+        "strict_blocking_performance_metrics": [
+            metric for metric in perf_metrics
+            if metric not in set(strict_performance_metrics)
+        ],
+        "drift_supported_metrics": sorted({
+            row["metric"] for row in drift
+            if row["status"] == "supported"
+        }),
         "strict_performance_supported": bool(strict_perf_ok),
         "supported": sum(1 for row in group if row["status"] == "supported"),
         "noninferiority_supported": sum(1 for row in group if row["status"] == "noninferiority_supported"),
@@ -344,6 +387,70 @@ def _domain_verdict(domain: str, checks: list[dict[str, Any]]) -> dict[str, Any]
         "summary_only_noharm": sum(1 for row in group if row["status"] == "summary_only_noharm"),
         "not_supported": sum(1 for row in group if row["status"] == "not_supported"),
         "verdict": verdict,
+    }
+
+
+def _adaptive_native_real_demand_selector(verdicts: list[dict[str, Any]]) -> dict[str, Any]:
+    candidates = [
+        row for row in verdicts
+        if str(row.get("domain", "")).startswith("native_real_demand")
+        and row.get("verdict") != "missing"
+    ]
+    if not candidates:
+        return {
+            "status": "missing",
+            "selected_domain": "",
+            "selected_verdict": "missing",
+            "supported": False,
+            "strict_supported": False,
+            "boundary": "No native real-demand leakage artifact was available.",
+        }
+    ranked = sorted(
+        candidates,
+        key=lambda row: (
+            NATIVE_VERDICT_RANK.get(str(row.get("verdict", "")), -1),
+            int(row.get("strict_performance_supported", False)),
+            int(row.get("supported", 0)),
+            int(row.get("noninferiority_supported", 0)),
+            -int(row.get("not_supported", 0)),
+        ),
+        reverse=True,
+    )
+    selected = ranked[0]
+    selected_verdict = str(selected.get("verdict", "missing"))
+    supported = selected_verdict in {"no_tradeoff_supported", "no_tradeoff_strict_supported"}
+    strict_supported = selected_verdict == "no_tradeoff_strict_supported"
+    if strict_supported:
+        status = "strict_supported"
+    elif supported:
+        status = "supported"
+    else:
+        status = "blocked_no_native_no_tradeoff"
+    return {
+        "status": status,
+        "selected_domain": str(selected.get("domain", "")),
+        "selected_verdict": selected_verdict,
+        "supported": bool(supported),
+        "strict_supported": bool(strict_supported),
+        "selected_blocking_performance_metrics": list(selected.get("blocking_performance_metrics", [])),
+        "selected_strict_blocking_performance_metrics": list(selected.get("strict_blocking_performance_metrics", [])),
+        "candidate_domains": [
+            {
+                "domain": str(row.get("domain", "")),
+                "verdict": str(row.get("verdict", "")),
+                "blocking_performance_metrics": list(row.get("blocking_performance_metrics", [])),
+                "strict_blocking_performance_metrics": list(row.get("strict_blocking_performance_metrics", [])),
+                "drift_supported_metrics": list(row.get("drift_supported_metrics", [])),
+            }
+            for row in ranked
+        ],
+        "boundary": (
+            "Adaptive native leakage selection is evidence-gated: it can select "
+            "a native real-demand profile only when that same profile has drift "
+            "reduction plus reward/wait/alighting/throughput no-harm. A strict "
+            "paper claim additionally requires all required performance metrics "
+            "to be CI-supported, not only noninferior."
+        ),
     }
 
 
@@ -365,9 +472,11 @@ def build_leakage_matrix(result_paths: dict[str, Path], *, min_pairs: int) -> di
             checks.extend(_from_existing_checks(domain, data, path))
     domains = sorted(set(result_paths) | {row["domain"] for row in checks})
     verdicts = [_domain_verdict(domain, checks) for domain in domains]
+    native_selector = _adaptive_native_real_demand_selector(verdicts)
     return {
         "paired_checks": checks,
         "domain_verdicts": verdicts,
+        "adaptive_native_real_demand_selector": native_selector,
         "missing": missing,
         "boundary": (
             "No-tradeoff is supported only when leakage/drift reduction and "
@@ -403,6 +512,13 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         "# Leakage No-Tradeoff Matrix",
         "",
         payload["boundary"],
+        "",
+        "## Adaptive Native Selector",
+        "",
+        f"- status: `{payload.get('adaptive_native_real_demand_selector', {}).get('status', 'missing')}`",
+        f"- selected domain: `{payload.get('adaptive_native_real_demand_selector', {}).get('selected_domain', '')}`",
+        f"- selected verdict: `{payload.get('adaptive_native_real_demand_selector', {}).get('selected_verdict', '')}`",
+        f"- boundary: {payload.get('adaptive_native_real_demand_selector', {}).get('boundary', '')}",
         "",
         "| domain | verdict | checks | drift checks | performance checks | supported | noninferiority | positive mixed | summary positive | summary no-harm | not supported |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
