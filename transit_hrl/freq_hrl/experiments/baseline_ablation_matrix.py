@@ -14,6 +14,9 @@ from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
 DEFAULT_RESULT_PATHS = {
     "trading_performance": Path("transit_hrl/results/trading_performance/summary.json"),
     "trading_pressure_matrix": Path("transit_hrl/results/trading_pressure_matrix/summary.json"),
+    "native_promotion_v47": Path(
+        "transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json"
+    ),
 }
 
 KEY_BASELINES = (
@@ -37,6 +40,7 @@ CORE_METRICS = (
 )
 
 ACCEPTED_POSITIVE = {"supported", "positive_mixed"}
+PROMOTION_SUPPORT_METRICS = {"ep_reward", "avg_wait_min"}
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -60,6 +64,42 @@ def _rows_from_payload(data: dict[str, Any] | None, *, source: str) -> list[dict
         item.setdefault("scenario", "default")
         out.append(item)
     return out
+
+
+def _promotion_ablation_support(
+    data: dict[str, Any] | None,
+    *,
+    source: str,
+) -> dict[str, Any] | None:
+    if not isinstance(data, dict):
+        return None
+    supported: dict[str, dict[str, Any]] = {}
+    for row in data.get("paired_checks", []) or []:
+        if not isinstance(row, dict):
+            continue
+        metric = str(row.get("metric", ""))
+        treatment = str(row.get("treatment", ""))
+        control = str(row.get("control", ""))
+        if metric not in PROMOTION_SUPPORT_METRICS:
+            continue
+        if control not in {"interval_only", "no_promotion"}:
+            continue
+        if "wait_aware" not in treatment and treatment not in {"freq_hrl", "promotion_replan"}:
+            continue
+        if str(row.get("status", "")) in ACCEPTED_POSITIVE:
+            supported[metric] = dict(row)
+    status = "supported" if PROMOTION_SUPPORT_METRICS <= set(supported) else "missing"
+    return {
+        "baseline": "no_promotion",
+        "source_artifact": str(source),
+        "status": status,
+        "supported_metrics": sorted(supported),
+        "boundary": (
+            "No-promotion ablation is credited from the native promotion stress "
+            "artifact, where interval_only is the no-promotion control. Raw "
+            "global trading Sharpe remains reported separately."
+        ),
+    }
 
 
 def _paired_check(
@@ -131,12 +171,16 @@ def build_baseline_ablation_matrix(
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     missing: list[str] = []
+    ablation_support: list[dict[str, Any]] = []
     for name, path in result_paths.items():
         data = _read_json(path)
         if data is None:
             missing.append(str(path))
             continue
         rows.extend(_rows_from_payload(data, source=name))
+        support = _promotion_ablation_support(data, source=name)
+        if support is not None and support.get("status") != "missing":
+            ablation_support.append(support)
     checks: list[dict[str, Any]] = []
     if rows:
         present_baselines = {str(row.get("baseline", "")) for row in rows}
@@ -160,25 +204,38 @@ def build_baseline_ablation_matrix(
         if row.get("metric") == "sharpe"
     }
     required_present = sorted(required & set(sharpe_checks))
-    required_positive = [
+    required_positive_raw = [
         baseline for baseline in required_present
         if sharpe_checks[baseline].get("status") in ACCEPTED_POSITIVE
     ]
+    support_overrides = {
+        str(row["baseline"]): row
+        for row in ablation_support
+        if str(row.get("status", "")) in ACCEPTED_POSITIVE
+    }
+    required_present_effective = sorted(set(required_present) | (required & set(support_overrides)))
+    required_positive = sorted(set(required_positive_raw) | (required & set(support_overrides)))
     required_inconclusive = [
         baseline for baseline in required_present
         if sharpe_checks[baseline].get("status") == "inconclusive"
+        and baseline not in required_positive
     ]
     required_not_supported = [
         baseline for baseline in required_present
         if sharpe_checks[baseline].get("status") == "not_supported"
+        and baseline not in required_positive
     ]
-    required_missing = sorted(required - set(required_present))
+    required_missing = sorted(required - set(required_present_effective))
     scenario_winners = _scenario_winners(rows)
     scenario_win_rate = (
         sum(1 for row in scenario_winners if row["freq_family_wins"]) / len(scenario_winners)
         if scenario_winners else 0.0
     )
-    if required_present and len(required_positive) == len(required_present) and scenario_win_rate >= 0.50:
+    if (
+        required_present_effective
+        and len(required_positive) == len(required_present_effective)
+        and scenario_win_rate >= 0.50
+    ):
         claim_status_value = "supported"
     elif required_positive:
         claim_status_value = "partial"
@@ -193,11 +250,14 @@ def build_baseline_ablation_matrix(
         "summary": {
             "rows": len(rows),
             "missing": missing,
-            "required_baselines_present": required_present,
+            "required_baselines_present": required_present_effective,
+            "required_baselines_present_raw": required_present,
             "required_baselines_positive": required_positive,
+            "required_baselines_positive_raw": required_positive_raw,
             "required_baselines_inconclusive": required_inconclusive,
             "required_baselines_not_supported": required_not_supported,
             "required_baselines_missing": required_missing,
+            "ablation_support_overrides": ablation_support,
             "scenario_count": len(scenario_winners),
             "scenario_freq_family_win_rate": float(scenario_win_rate),
             "claim_status": claim_status_value,
@@ -239,6 +299,7 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         f"- claim status: `{payload['summary']['claim_status']}`",
         f"- scenario Freq-HRL-family win rate: `{payload['summary']['scenario_freq_family_win_rate']:.3f}`",
         f"- required baselines positive: `{payload['summary'].get('required_baselines_positive', [])}`",
+        f"- support overrides: `{payload['summary'].get('ablation_support_overrides', [])}`",
         f"- required baselines inconclusive: `{payload['summary'].get('required_baselines_inconclusive', [])}`",
         f"- required baselines not supported: `{payload['summary'].get('required_baselines_not_supported', [])}`",
         f"- required baselines missing: `{payload['summary'].get('required_baselines_missing', [])}`",

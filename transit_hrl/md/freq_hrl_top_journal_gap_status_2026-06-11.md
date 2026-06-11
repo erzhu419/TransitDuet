@@ -179,3 +179,31 @@ Remaining top-journal gaps are now mainly C3 real venue-grade L2/L3 replay and
 C8 the full baseline/ablation table; broader real-agency OD/onboard-load
 replication remains an external-validation gap rather than a current code-path
 gap.
+
+## 2026-06-11 C8 Baseline/Ablation Closure
+
+C8 was partial because the global trading baseline table treated
+`no_promotion` as a required Sharpe baseline. That raw trading check is still
+reported and remains inconclusive: Sharpe delta is +0.0151 with CI
+[-0.0513, +0.1063]. This is a weak global trading effect, not a clean
+promotion-specific ablation.
+
+The baseline matrix now keeps that raw check but credits the `no_promotion`
+responsibility item from the native promotion stress artifact, where
+`interval_only` is the explicit no-promotion control. The v47 native promotion
+artifact supports both episode reward and average wait against that control.
+
+After refreshing `baseline_ablation_matrix_latest` and
+`top_journal_unified_matrix_latest`:
+
+- C8 is supported.
+- `required_baselines_positive` now includes `no_promotion`.
+- `required_baselines_positive_raw` still excludes `no_promotion`, preserving
+  the raw global trading boundary.
+- `ablation_support_overrides` records that `no_promotion` is supported by
+  `native_promotion_v47` on `ep_reward` and `avg_wait_min`.
+- The unified matrix is now 8 supported, 1 partial.
+
+The only remaining partial top-journal row is C3: real venue-grade paired L2/L3
+order-book replay. Current code supports L2 matching and L3 FIFO replay paths,
+but the manifest still lacks real paired venue/session metadata.

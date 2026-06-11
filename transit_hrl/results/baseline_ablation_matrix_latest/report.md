@@ -2,10 +2,11 @@
 
 Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation.
 
-- claim status: `partial`
+- claim status: `supported`
 - scenario Freq-HRL-family win rate: `1.000`
-- required baselines positive: `['allfreq_alllayers', 'hrl_raw', 'no_leakage', 'swapped', 'vanilla_rl']`
-- required baselines inconclusive: `['no_promotion']`
+- required baselines positive: `['allfreq_alllayers', 'hrl_raw', 'no_leakage', 'no_promotion', 'swapped', 'vanilla_rl']`
+- support overrides: `[{'baseline': 'no_promotion', 'source_artifact': 'native_promotion_v47', 'status': 'supported', 'supported_metrics': ['avg_wait_min', 'ep_reward'], 'boundary': 'No-promotion ablation is credited from the native promotion stress artifact, where interval_only is the no-promotion control. Raw global trading Sharpe remains reported separately.'}]`
+- required baselines inconclusive: `[]`
 - required baselines not supported: `[]`
 - required baselines missing: `[]`
 

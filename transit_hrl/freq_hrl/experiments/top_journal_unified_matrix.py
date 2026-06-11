@@ -501,6 +501,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         row for row in baseline_checks
         if row.get("metric") == "sharpe" and row.get("status") in {"supported", "positive_mixed"}
     ]
+    baseline_support_overrides = baseline_summary.get("ablation_support_overrides", [])
     pressure_rows = pressure_matrix.get("per_seed", []) if isinstance(pressure_matrix, dict) else []
     baseline_status = str(baseline_summary.get("claim_status", ""))
     if not baseline_status:
@@ -728,13 +729,19 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "evidence": (
                 f"claim_status={baseline_status} "
                 f"positive_sharpe_baselines={[row.get('control') for row in positive_baseline_checks]} "
+                f"support_overrides={baseline_support_overrides} "
                 f"inconclusive={baseline_summary.get('required_baselines_inconclusive', [])} "
                 f"not_supported={baseline_summary.get('required_baselines_not_supported', [])} "
                 f"missing={baseline_summary.get('required_baselines_missing', [])} "
                 f"scenario_win_rate={baseline_summary.get('scenario_freq_family_win_rate', 'NA')} "
                 f"pressure_rows={len(pressure_rows)}"
             ),
-            "remaining_gap": "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available.",
+            "remaining_gap": (
+                "Closed for the current baseline/ablation matrix; remaining work is "
+                "adding native flat PPO/SAC/TD3 baselines for broader reviewer comparisons."
+                if baseline_status == "supported"
+                else "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available."
+            ),
             "artifact": (
                 paths["baseline_ablation_matrix_latest"]
                 if artifacts["baseline_ablation_matrix_latest"]

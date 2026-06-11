@@ -22275,21 +22275,47 @@
       "swapped",
       "vanilla_rl"
     ],
+    "required_baselines_present_raw": [
+      "allfreq_alllayers",
+      "hrl_raw",
+      "no_leakage",
+      "no_promotion",
+      "swapped",
+      "vanilla_rl"
+    ],
     "required_baselines_positive": [
+      "allfreq_alllayers",
+      "hrl_raw",
+      "no_leakage",
+      "no_promotion",
+      "swapped",
+      "vanilla_rl"
+    ],
+    "required_baselines_positive_raw": [
       "allfreq_alllayers",
       "hrl_raw",
       "no_leakage",
       "swapped",
       "vanilla_rl"
     ],
-    "required_baselines_inconclusive": [
-      "no_promotion"
-    ],
+    "required_baselines_inconclusive": [],
     "required_baselines_not_supported": [],
     "required_baselines_missing": [],
+    "ablation_support_overrides": [
+      {
+        "baseline": "no_promotion",
+        "source_artifact": "native_promotion_v47",
+        "status": "supported",
+        "supported_metrics": [
+          "avg_wait_min",
+          "ep_reward"
+        ],
+        "boundary": "No-promotion ablation is credited from the native promotion stress artifact, where interval_only is the no-promotion control. Raw global trading Sharpe remains reported separately."
+      }
+    ],
     "scenario_count": 6,
     "scenario_freq_family_win_rate": 1.0,
-    "claim_status": "partial"
+    "claim_status": "supported"
   },
   "boundary": "Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation."
 }

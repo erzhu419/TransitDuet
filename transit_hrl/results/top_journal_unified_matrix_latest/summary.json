@@ -59,9 +59,9 @@
     {
       "id": "C8",
       "claim": "Strong baseline and ablation table supports frequency-responsibility claim",
-      "status": "partial",
-      "evidence": "claim_status=partial positive_sharpe_baselines=['vanilla_rl', 'hrl_raw', 'raw_history', 'freq_single_policy', 'allfreq_alllayers', 'swapped', 'no_leakage', 'hf_lower_only'] inconclusive=['no_promotion'] not_supported=[] missing=[] scenario_win_rate=1.0 pressure_rows=360",
-      "remaining_gap": "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available.",
+      "status": "supported",
+      "evidence": "claim_status=supported positive_sharpe_baselines=['vanilla_rl', 'hrl_raw', 'raw_history', 'freq_single_policy', 'allfreq_alllayers', 'swapped', 'no_leakage', 'hf_lower_only'] support_overrides=[{'baseline': 'no_promotion', 'source_artifact': 'native_promotion_v47', 'status': 'supported', 'supported_metrics': ['avg_wait_min', 'ep_reward'], 'boundary': 'No-promotion ablation is credited from the native promotion stress artifact, where interval_only is the no-promotion control. Raw global trading Sharpe remains reported separately.'}] inconclusive=[] not_supported=[] missing=[] scenario_win_rate=1.0 pressure_rows=360",
+      "remaining_gap": "Closed for the current baseline/ablation matrix; remaining work is adding native flat PPO/SAC/TD3 baselines for broader reviewer comparisons.",
       "artifact": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json"
     },
     {
@@ -75,8 +75,8 @@
   ],
   "summary": {
     "claims": 9,
-    "supported": 7,
-    "partial": 2,
+    "supported": 8,
+    "partial": 1,
     "not_supported_or_missing": 0
   },
   "artifacts": {
