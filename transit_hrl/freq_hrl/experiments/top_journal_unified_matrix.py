@@ -10,7 +10,7 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
-    "native_promotion_v47_odshift": Path("transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_merged/summary.json"),
+    "native_promotion_v47_odshift": Path("transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json"),
     "native_promotion_v46_odshift": Path("transit_hrl/results/scheduler_native_promotion_v46_odshift_reward_wait_guard_512seed_merged/summary.json"),
     "native_promotion_v45_odshift": Path("transit_hrl/results/scheduler_native_promotion_v45_odshift_reward_floor_active_512seed_merged/summary.json"),
     "native_promotion_v44_odshift": Path("transit_hrl/results/scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4/summary.json"),
@@ -408,6 +408,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         "native_avg_board_wait_min",
         check_contains="noninferiority",
     )
+    real_service_signal = _check_by_metric(real, "service_adjustment_signal")
     real_alighted_noninferiority = _check_by_metric(
         real,
         "native_alighted_pax",
@@ -504,6 +505,71 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     baseline_status = str(baseline_summary.get("claim_status", ""))
     if not baseline_status:
         baseline_status = "partial" if pressure_rows else "missing"
+    c2_supported = (
+        _supported(real_score)
+        and _supported(real_reward)
+        and _supported(real_wait)
+        and _supported(real_alighted)
+        and _supported(real_throughput)
+    )
+    c2_partial = (
+        _supported(real_score)
+        and _supported(real_reward)
+        and _positive(real_wait_proxy_noninferiority)
+        and _positive(real_wait_noninferiority)
+        and _positive(real_alighted_noninferiority)
+        and _positive(real_throughput_noninferiority)
+    )
+    c2_status = _status_from_flags(
+        present=bool(real),
+        supported=c2_supported,
+        partial=c2_partial,
+    )
+    if c2_status == "supported":
+        c2_remaining_gap = (
+            "Closed for the current public AFC/APC native service-response "
+            "validation; remaining work is broader real agency OD/onboard-load "
+            "replication."
+        )
+    elif not _positive(real_service_signal):
+        c2_remaining_gap = (
+            "Best native real-demand artifact has score/reward/no-harm support, "
+            "but the service-response signal is not supported after merge; rerun "
+            "or repair the control-profile accounting before claiming strict "
+            "wait/alighting/throughput improvement."
+        )
+    else:
+        c2_remaining_gap = (
+            "Service-response signal is present, but strict wait/alighting/"
+            "throughput improvement still needs a supported native real-demand CI."
+        )
+    c7_remaining_gap = (
+        "Closed for the current pre-registered persistent-stress and OD-shift "
+        "promotion matrices; remaining work is broader external stress replication."
+        if promotion_cross_stress["status"] == "supported"
+        else "Scale a pre-registered OD-shift profile until reward and wait improvement CIs are both supported."
+    )
+    c5_status = _status_from_flags(
+        present=bool(leakage_verdicts),
+        supported=(
+            leakage_native_supported
+            and len(leakage_strict_domains) >= 1
+            and len(leakage_supported_domains) >= 2
+        ),
+        partial=bool(leakage_supported_domains or leakage_native_selector),
+    )
+    c5_remaining_gap = (
+        "Closed for the current native real-demand service-response and transit "
+        "surrogate leakage matrix; remaining work is independent real-agency and "
+        "market-data replication."
+        if c5_status == "supported"
+        else (
+            "Native real-demand C5 uses the adaptive selector from the leakage "
+            "matrix. If this remains partial, the selected profile still lacks "
+            "joint drift reduction and reward/wait/alighting/throughput no-harm "
+            "or strict CI support."
+        )
+    )
 
     claims = [
         {
@@ -527,24 +593,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         {
             "id": "C2",
             "claim": "Native real AFC/APC demand improves score/reward and strict wait/alighting/throughput",
-            "status": _status_from_flags(
-                present=bool(real),
-                supported=(
-                    _supported(real_score)
-                    and _supported(real_reward)
-                    and _supported(real_wait)
-                    and _supported(real_alighted)
-                    and _supported(real_throughput)
-                ),
-                partial=(
-                    _supported(real_score)
-                    and _supported(real_reward)
-                    and _positive(real_wait_proxy_noninferiority)
-                    and _positive(real_wait_noninferiority)
-                    and _positive(real_alighted_noninferiority)
-                    and _positive(real_throughput_noninferiority)
-                ),
-            ),
+            "status": c2_status,
             "evidence": (
                 f"score={real_score.get('status', 'missing')} "
                 f"reward={real_reward.get('status', 'missing')} "
@@ -554,9 +603,10 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"alighted={real_alighted.get('status', 'missing')} "
                 f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')} "
                 f"throughput={real_throughput.get('status', 'missing')} "
-                f"throughput_noharm={real_throughput_noninferiority.get('status', 'missing')}"
+                f"throughput_noharm={real_throughput_noninferiority.get('status', 'missing')} "
+                f"service_signal={real_service_signal.get('status', 'missing')}"
             ),
-            "remaining_gap": "Strict wait/alighting/throughput improvement still needs throughput-safe v6 validation if this row remains partial.",
+            "remaining_gap": c2_remaining_gap,
             "artifact": (
                 paths["native_real_demand_service_response_v7"]
                 if artifacts["native_real_demand_service_response_v7"]
@@ -621,15 +671,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         {
             "id": "C5",
             "claim": "Leakage no-tradeoff holds beyond surrogate",
-            "status": _status_from_flags(
-                present=bool(leakage_verdicts),
-                supported=(
-                    leakage_native_supported
-                    and len(leakage_strict_domains) >= 1
-                    and len(leakage_supported_domains) >= 2
-                ),
-                partial=bool(leakage_supported_domains or leakage_native_selector),
-            ),
+            "status": c5_status,
             "evidence": (
                 f"strict_no_tradeoff_domains={leakage_strict_domains} "
                 f"no_tradeoff_domains={leakage_supported_domains} "
@@ -638,11 +680,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"native_selector_domain={leakage_native_selector.get('selected_domain', '')} "
                 f"native_selector_strict={leakage_native_strict}"
             ),
-            "remaining_gap": (
-                "Native real-demand C5 now uses the adaptive selector from the leakage matrix. "
-                "If this remains partial, the selected profile still lacks joint drift reduction "
-                "and reward/wait/alighting/throughput no-harm or strict CI support."
-            ),
+            "remaining_gap": c5_remaining_gap,
             "artifact": (
                 paths[leakage_key]
                 if leakage_key
@@ -680,7 +718,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"odshift_wait={promotion_cross_stress.get('odshift_wait', {}).get('status', 'missing')} "
                 f"odshift_wait_noharm={promotion_cross_stress.get('odshift_wait_noninferiority', {}).get('status', 'missing')}"
             ),
-            "remaining_gap": "Scale v45 or another pre-registered OD-shift profile until reward and wait improvement CIs are both supported.",
+            "remaining_gap": c7_remaining_gap,
             "artifact": promotion_cross_stress["artifact"],
         },
         {

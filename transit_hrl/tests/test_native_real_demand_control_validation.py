@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -12,6 +13,9 @@ from freq_hrl.experiments.transit.native_real_demand_control_validation import (
     paired_checks,
     run_validation,
     variants_for_control_profile,
+)
+from freq_hrl.experiments.transit.merge_native_real_demand_shards import (
+    merge_native_real_demand_shards,
 )
 
 
@@ -305,6 +309,84 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
             ],
         )
         self.assertTrue(payload["paired_checks"])
+
+    def test_merge_replays_service_adjustment_from_control_profile(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shard = root / "shard"
+            shard.mkdir()
+            compact_interval = {
+                "status": "done",
+                "summary": {
+                    "ep_reward_mean": -100.0,
+                    "avg_wait_min_mean": 10.0,
+                    "headway_cv_mean": 0.2,
+                    "native_avg_board_wait_min_mean": 7.5,
+                    "native_boarded_pax_mean": 1000.0,
+                    "native_alighted_pax_mean": 998.0,
+                    "native_avg_onboard_load_mean": 0.5,
+                    "lower_lf_drift_ratio_mean": 0.8,
+                    "upper_hf_power_ratio_mean": 0.1,
+                },
+            }
+            compact_freq = {
+                "status": "done",
+                "summary": {
+                    "ep_reward_mean": -95.0,
+                    "avg_wait_min_mean": 10.0,
+                    "headway_cv_mean": 0.2,
+                    "native_avg_board_wait_min_mean": 7.5,
+                    "native_boarded_pax_mean": 1000.0,
+                    "native_alighted_pax_mean": 998.0,
+                    "native_avg_onboard_load_mean": 0.5,
+                    "lower_lf_drift_ratio_mean": 0.8,
+                    "upper_hf_power_ratio_mean": 0.1,
+                    "shared_ppo_lower_hf_wait_prior_scale_mean_mean": 0.4,
+                    "shared_ppo_adaptive_lower_drift_penalty_scale_mean_mean": 0.6,
+                    "shared_ppo_lower_hf_wait_boarding_rescue_mean_mean": 0.8,
+                },
+            }
+            (shard / "summary.json").write_text(
+                json.dumps({
+                    "control_profile": "service_response_v7",
+                    "config_path": "fake.yaml",
+                    "sources": ["afc"],
+                    "seeds": [1],
+                    "episodes": 1,
+                    "metadata": [
+                        {
+                            "source": "afc",
+                            "rows": 10,
+                            "series": 1,
+                            "bins_per_hour": 1,
+                            "boundary": "fake",
+                        }
+                    ],
+                    "payloads": {
+                        "afc:1:native_real_interval": compact_interval,
+                        "afc:1:native_real_freqhrl": compact_freq,
+                    },
+                    "rows": [
+                        {
+                            "source": "afc",
+                            "seed": 1,
+                            "variant": "native_real_freqhrl",
+                            "native_service_adjusted": 0.0,
+                            "service_adjustment_signal": 0.0,
+                        }
+                    ],
+                }),
+                encoding="utf-8",
+            )
+            merged = merge_native_real_demand_shards(
+                [shard],
+                root / "merged",
+                min_pairs=1,
+            )
+            freq = next(row for row in merged["rows"] if row["variant"] == "native_real_freqhrl")
+            self.assertEqual(freq["native_service_adjusted"], 1.0)
+            self.assertGreater(freq["service_adjustment_signal"], 0.0)
+            self.assertLess(freq["native_avg_board_wait_min"], freq["native_raw_native_avg_board_wait_min"])
 
 
 if __name__ == "__main__":

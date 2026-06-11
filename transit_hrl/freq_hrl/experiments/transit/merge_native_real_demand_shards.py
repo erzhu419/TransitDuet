@@ -11,6 +11,7 @@ from freq_hrl.experiments.transit.native_real_demand_control_validation import (
     VARIANTS,
     _row_from_payload,
     paired_checks,
+    variants_for_control_profile,
     write_outputs,
 )
 
@@ -42,6 +43,8 @@ def merge_native_real_demand_shards(
             config_paths.append(str(payload["config_path"]))
         if payload.get("control_profile"):
             control_profiles.add(str(payload["control_profile"]))
+        shard_profile = str(payload.get("control_profile") or "default")
+        shard_variants = variants_for_control_profile(shard_profile)
         if "demand_scale_multiplier" in payload:
             demand_scale_multipliers.add(float(payload["demand_scale_multiplier"]))
         episodes = max(episodes, int(payload.get("episodes", 0)))
@@ -68,6 +71,7 @@ def merge_native_real_demand_shards(
                 seed=int(seed_text),
                 variant=variant,
                 payload=compact,
+                service_adjustment=shard_variants.get(variant, {}).get("_service_outcome_adjustment"),
             )
     rows = [
         rows_by_key[key]

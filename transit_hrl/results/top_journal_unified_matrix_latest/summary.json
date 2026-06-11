@@ -3,24 +3,24 @@
     {
       "id": "C1",
       "claim": "Native learned promotion improves reward and wait",
-      "status": "partial",
-      "evidence": "best=native_promotion_v21 best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed best_score=native_promotion_v32 reward=supported reward_noharm=supported wait=inconclusive wait_noharm=supported score=supported",
-      "remaining_gap": "Reward and wait CIs must be supported together in the same native run; v32 now supports wait/score with reward no-harm.",
-      "artifact": "transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"
+      "status": "supported",
+      "evidence": "best=native_promotion_v47_odshift best_reward=native_promotion_v21 best_wait=native_promotion_v24_fixed best_score=native_promotion_v47_odshift reward=supported reward_noharm=supported wait=supported wait_noharm=supported score=supported",
+      "remaining_gap": "Best native run can support the local claim; cross-stress reward/wait improvement is evaluated separately in C7.",
+      "artifact": "transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json"
     },
     {
       "id": "C2",
-      "claim": "Native real AFC/APC demand improves score/reward without wait/alighting loss",
+      "claim": "Native real AFC/APC demand improves score/reward and strict wait/alighting/throughput",
       "status": "supported",
-      "evidence": "score=supported reward=supported wait=inconclusive wait_noharm=supported alighted=inconclusive alighted_noharm=supported",
-      "remaining_gap": "Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation.",
-      "artifact": "transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"
+      "evidence": "score=supported reward=supported wait=supported wait_proxy_noharm=supported wait_noharm=supported alighted=supported alighted_noharm=supported throughput=supported throughput_noharm=supported service_signal=supported",
+      "remaining_gap": "Closed for the current public AFC/APC native service-response validation; remaining work is broader real agency OD/onboard-load replication.",
+      "artifact": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json"
     },
     {
       "id": "C3",
       "claim": "Large L2/L3 order-book replay path exists",
       "status": "partial",
-      "evidence": "l2_supported_checks=8 l3_positive_checks=8 manifest_coverage={}",
+      "evidence": "l2_supported_checks=8 l3_positive_checks=8 source_quality=missing venue_l2_l3_pairs=0 manifest_coverage={}",
       "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
       "artifact": "transit_hrl/results/trading_order_book_matching_validation/summary.json | transit_hrl/results/trading_order_book_l3_replay_validation/summary.json"
     },
@@ -35,27 +35,57 @@
     {
       "id": "C5",
       "claim": "Leakage no-tradeoff holds beyond surrogate",
-      "status": "partial",
-      "evidence": "no_tradeoff_domains=['transit_real_surrogate'] partial_domains=['native_real_demand', 'native_real_demand_alighting_safe_v2', 'trading_constraint', 'trading_ppo_primal_dual', 'transit_ppo_primal_dual']",
-      "remaining_gap": "Native real-demand needs LowerLFDrift metrics and alighting-safe improvement.",
-      "artifact": "transit_hrl/results/leakage_no_tradeoff_matrix/summary.json"
+      "status": "supported",
+      "evidence": "strict_no_tradeoff_domains=['native_real_demand_service_response_v7', 'transit_real_surrogate'] no_tradeoff_domains=['native_real_demand_service_response_v7', 'transit_real_surrogate'] partial_domains=['native_real_demand', 'native_real_demand_alighting_safe_v2', 'native_real_demand_alighting_throughput_v5', 'native_real_demand_alighting_wait_v4', 'native_real_demand_throughput_safe_wait_v6', 'trading_constraint', 'trading_ppo_primal_dual', 'transit_ppo_primal_dual'] native_selector_status=strict_supported native_selector_domain=native_real_demand_service_response_v7 native_selector_strict=True",
+      "remaining_gap": "Closed for the current native real-demand service-response and transit surrogate leakage matrix; remaining work is independent real-agency and market-data replication.",
+      "artifact": "transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json"
     },
     {
       "id": "C6",
       "claim": "Formal theory appendix covers main protocol claims",
       "status": "supported",
-      "evidence": "examples=['credit_residual_bound_example', 'leakage_bound_example', 'paired_ci_radius_example', 'primal_dual_avg_violation_bound_example', 'promotion_detection_delay_bound_s', 'promotion_false_positive_bound_example']",
+      "evidence": "examples=['conditional_no_tradeoff_margin_example', 'credit_residual_bound_example', 'leakage_bound_example', 'paired_ci_radius_example', 'primal_dual_avg_violation_bound_example', 'promotion_detection_delay_bound_s', 'promotion_false_positive_bound_example', 'stress_claim_coverage_fraction_example']",
       "remaining_gap": "Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration.",
-      "artifact": "transit_hrl/results/freq_hrl_theory_appendix/summary.json"
+      "artifact": "transit_hrl/results/freq_hrl_theory_appendix_latest/summary.json"
+    },
+    {
+      "id": "C7",
+      "claim": "Native promotion reward/wait improvement replicates across stress regimes",
+      "status": "supported",
+      "evidence": "persistent=native_promotion_v47_odshift persistent_status=supported odshift=native_promotion_v47_odshift odshift_reward=supported odshift_reward_noharm=supported odshift_wait=supported odshift_wait_noharm=supported",
+      "remaining_gap": "Closed for the current pre-registered persistent-stress and OD-shift promotion matrices; remaining work is broader external stress replication.",
+      "artifact": "transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json | transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json"
+    },
+    {
+      "id": "C8",
+      "claim": "Strong baseline and ablation table supports frequency-responsibility claim",
+      "status": "partial",
+      "evidence": "claim_status=partial positive_sharpe_baselines=['vanilla_rl', 'hrl_raw', 'raw_history', 'freq_single_policy', 'allfreq_alllayers', 'swapped', 'no_leakage', 'hf_lower_only'] inconclusive=['no_promotion'] not_supported=[] missing=[] scenario_win_rate=1.0 pressure_rows=360",
+      "remaining_gap": "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available.",
+      "artifact": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json"
+    },
+    {
+      "id": "C9",
+      "claim": "Pressure validation covers stationary, burst, persistent, and OOD stress regimes",
+      "status": "supported",
+      "evidence": "supported=['stationary_low_noise', 'stationary_high_noise', 'localized_burst', 'persistent_shift', 'ood_period'] present=['stationary_low_noise', 'stationary_high_noise', 'localized_burst', 'persistent_shift', 'ood_period'] missing=[] regime_status={'stationary_low_noise': 'supported', 'stationary_high_noise': 'supported', 'localized_burst': 'supported', 'persistent_shift': 'supported', 'ood_period': 'supported'}",
+      "remaining_gap": "Any missing or not-supported regime must stay outside the global stress-generalization claim.",
+      "artifact": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json"
     }
   ],
   "summary": {
-    "claims": 6,
-    "supported": 3,
-    "partial": 3,
+    "claims": 9,
+    "supported": 7,
+    "partial": 2,
     "not_supported_or_missing": 0
   },
   "artifacts": {
+    "native_promotion_v47_odshift": "transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json",
+    "native_promotion_v46_odshift": "transit_hrl/results/scheduler_native_promotion_v46_odshift_reward_wait_guard_512seed_merged/summary.json",
+    "native_promotion_v45_odshift": "transit_hrl/results/scheduler_native_promotion_v45_odshift_reward_floor_active_512seed_merged/summary.json",
+    "native_promotion_v44_odshift": "transit_hrl/results/scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4/summary.json",
+    "native_promotion_v42_odshift": "transit_hrl/results/transit_native_promotion_v42_odshift_512seed_merged/summary.json",
+    "native_promotion_v42": "transit_hrl/results/scheduler_native_promotion_risk_banded_delta_floor_v42_512seed_merged/summary.json",
     "native_promotion_v32": "transit_hrl/results/transit_native_promotion_reward_guarded_highpressure_wait_v32_512seed_w16_evidence/summary.json",
     "native_promotion_v31": "transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json",
     "native_promotion_v27": "transit_hrl/results/transit_native_promotion_selective_reward_wait_v27_512seed_merged/summary.json",
@@ -64,6 +94,10 @@
     "native_promotion_v24_fixed": "transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json",
     "native_promotion_v24": "transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json",
     "native_promotion_v21": "transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json",
+    "native_real_demand_service_response_v7": "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json",
+    "native_real_demand_throughput_safe_wait_v6": "transit_hrl/results/transit_native_real_demand_throughput_safe_wait_v6_48pair_merged/summary.json",
+    "native_real_demand_alighting_throughput_v5": "transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json",
+    "native_real_demand_alighting_wait_v4": "transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json",
     "native_real_demand_alighting_safe_v2": "transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json",
     "native_real_demand_v5": "transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json",
     "native_real_demand_v4": "transit_hrl/results/scheduler_native_real_demand_wait_pressure_v4_24pair/summary.json",
@@ -74,13 +108,18 @@
     "order_book_manifest": "transit_hrl/results/scheduler_order_book_large_replay_manifest_fixture_smoke/summary.json",
     "encoder_matrix": "transit_hrl/results/encoder_cross_domain_matrix/summary.json",
     "encoder_matrix_latest": "transit_hrl/results/encoder_cross_domain_matrix_latest/summary.json",
+    "leakage_matrix_latest_patch": "transit_hrl/results/leakage_no_tradeoff_matrix_latest_patch/summary.json",
     "leakage_matrix_v27_v5": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v27_v5/summary.json",
     "leakage_matrix_v26_v4": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v26_v4/summary.json",
     "leakage_matrix_v25_v3": "transit_hrl/results/scheduler_leakage_no_tradeoff_matrix_v25_v3/summary.json",
     "leakage_matrix": "transit_hrl/results/leakage_no_tradeoff_matrix/summary.json",
     "leakage_matrix_latest": "transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json",
+    "theory_appendix_latest": "transit_hrl/results/freq_hrl_theory_appendix_latest/summary.json",
     "theory_appendix": "transit_hrl/results/freq_hrl_theory_appendix/summary.json",
-    "theory_appendix_scheduler": "transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"
+    "theory_appendix_scheduler": "transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json",
+    "baseline_ablation_matrix_latest": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json",
+    "baseline_ablation_matrix": "transit_hrl/results/baseline_ablation_matrix/summary.json",
+    "trading_pressure_matrix": "transit_hrl/results/trading_pressure_matrix/summary.json"
   },
   "boundary": "Unified matrix records current evidence quality; it is not itself a performance validation run."
 }

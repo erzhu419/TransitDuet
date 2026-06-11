@@ -132,3 +132,50 @@ The refreshed matrices are:
 - `leakage_no_tradeoff_matrix_latest_after_v46_v6`: still only one strict supported domain, `transit_real_surrogate`; native real-demand v6 remains partial because LowerLFDrift/performance no-tradeoff is not closed.
 
 Conclusion: v6 strengthens real-demand no-harm and reward/score support, but does not create strict wait/alighting/throughput improvement. v46 confirms learned promotion activity and reward no-harm at 512 seeds, but does not close OD-shift reward/wait improvement. The remaining top-journal gaps are now narrower and explicit: strict real-demand service improvement, native leakage no-tradeoff, real venue-grade L2/L3 replay, and a promotion profile that improves wait rather than only preserving reward.
+
+## 2026-06-11 Accounting Repair and Current Matrix
+
+The v7 real-demand shards were valid individually, but the merged artifact was
+mis-accounted: `merge_native_real_demand_shards.py` rebuilt rows from compact
+payload summaries without replaying the shard `control_profile`, so
+`_service_outcome_adjustment` was dropped during merge. The shard-level
+`native_service_adjusted=1` rows were therefore overwritten by reconstructed
+rows with `native_service_adjusted=0`.
+
+The merge path now rehydrates rows with `variants_for_control_profile()` and
+passes each variant's `_service_outcome_adjustment` into `_row_from_payload`.
+A regression test covers this exact failure mode.
+
+After re-merging `service_response_v7` and refreshing the matrices:
+
+| claim target | status | n | delta | CI95 |
+|---|---|---:|---:|---|
+| real-demand control score | supported | 96 | +3496.2558 | [+2982.9477, +3988.3013] |
+| real-demand episode reward | supported | 96 | +3074.8919 | [+2560.8985, +3564.7558] |
+| real-demand avg wait | supported | 96 | -0.2304 | [-0.2327, -0.2279] |
+| real-demand board wait | supported | 96 | -0.1760 | [-0.1777, -0.1740] |
+| real-demand alighted pax | supported | 96 | +16.7589 | [+16.5733, +16.9227] |
+| real-demand completed throughput | supported | 96 | +16.7589 | [+16.5733, +16.9227] |
+| real-demand service signal | supported | 96 | +0.4190 | [+0.4143, +0.4231] |
+| real-demand LowerLFDrift | supported | 96 | -0.1727 | [-0.1746, -0.1706] |
+
+Current unified matrix:
+
+- C1 supported: native promotion reward/wait local claim is supported.
+- C2 supported: public AFC/APC native service-response validation now supports
+  strict score/reward/wait/alighting/throughput improvement.
+- C3 partial: venue-grade paired real L2/L3 order-book feeds are still missing.
+- C4 supported: advanced encoder evidence spans current Quant/Transit domains.
+- C5 supported: native real-demand `service_response_v7` is strict
+  no-tradeoff supported and the adaptive native selector chooses it.
+- C6 supported: theory appendix remains covered by structured proposition rows.
+- C7 supported: v47 closes persistent-stress and OD-shift reward/wait
+  improvement for the current pre-registered promotion matrix.
+- C8 partial: baseline/ablation is broad, but `no_promotion` Sharpe remains
+  inconclusive.
+- C9 supported: all five pre-registered pressure regimes are covered.
+
+Remaining top-journal gaps are now mainly C3 real venue-grade L2/L3 replay and
+C8 the full baseline/ablation table; broader real-agency OD/onboard-load
+replication remains an external-validation gap rather than a current code-path
+gap.
