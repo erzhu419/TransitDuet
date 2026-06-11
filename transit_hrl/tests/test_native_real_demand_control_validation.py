@@ -106,6 +106,28 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         self.assertLess(wait["_lower_hf_wait_action_gain_s"], rescue["_lower_hf_wait_action_gain_s"])
         self.assertGreater(wait["_lower_hf_wait_boarding_rescue_gain_s"], 0.0)
         self.assertGreater(wait["_adaptive_lower_drift_penalty_gain"], rescue["_adaptive_lower_drift_penalty_gain"])
+        throughput = variants_for_control_profile("alighting_throughput_v5")["native_real_freqhrl"]
+        self.assertEqual(throughput["_promotion_gate_max_replans"], 2)
+        self.assertLess(
+            throughput["_promotion_gate_wait_pressure_override_min"],
+            wait["_promotion_gate_wait_pressure_override_min"],
+        )
+        self.assertGreater(
+            throughput["_promotion_replan_reward_floor_throughput_weight"],
+            wait["_promotion_replan_reward_floor_throughput_weight"],
+        )
+        self.assertGreater(
+            throughput["_promotion_replan_throughput_floor_min_delta_fraction"],
+            wait["_promotion_replan_throughput_floor_min_delta_fraction"],
+        )
+        self.assertGreater(
+            throughput["_lower_hf_wait_boarding_rescue_gain_s"],
+            wait["_lower_hf_wait_boarding_rescue_gain_s"],
+        )
+        self.assertGreater(
+            throughput["_offpolicy_replay_updates"],
+            wait["_offpolicy_replay_updates"],
+        )
 
     def test_control_score_penalizes_completed_throughput_loss(self):
         base = {

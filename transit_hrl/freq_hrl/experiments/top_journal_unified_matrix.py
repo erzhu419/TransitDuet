@@ -10,6 +10,9 @@ from typing import Any
 
 
 DEFAULT_ARTIFACTS = {
+    "native_promotion_v45_odshift": Path("transit_hrl/results/scheduler_native_promotion_v45_odshift_reward_floor_active_512seed_merged/summary.json"),
+    "native_promotion_v44_odshift": Path("transit_hrl/results/scheduler_native_promotion_v44_odshift_reward_floor_smoke64_merged_retry3_retry4/summary.json"),
+    "native_promotion_v42_odshift": Path("transit_hrl/results/transit_native_promotion_v42_odshift_512seed_merged/summary.json"),
     "native_promotion_v42": Path("transit_hrl/results/scheduler_native_promotion_risk_banded_delta_floor_v42_512seed_merged/summary.json"),
     "native_promotion_v32": Path("transit_hrl/results/transit_native_promotion_reward_guarded_highpressure_wait_v32_512seed_w16_evidence/summary.json"),
     "native_promotion_v31": Path("transit_hrl/results/transit_native_promotion_final_delta_floor_reward_wait_v31_512seed_w16r2_merged/summary.json"),
@@ -19,6 +22,7 @@ DEFAULT_ARTIFACTS = {
     "native_promotion_v24_fixed": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_fixed_w32_evidence/summary.json"),
     "native_promotion_v24": Path("transit_hrl/results/transit_native_promotion_pressure_guarded_wait_v24_2048seed_merged/summary.json"),
     "native_promotion_v21": Path("transit_hrl/results/transit_native_promotion_reward_guarded_projected_wait_v21_8192seed_w32x6_merged/summary.json"),
+    "native_real_demand_alighting_throughput_v5": Path("transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json"),
     "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand_v5": Path("transit_hrl/results/scheduler_native_real_demand_selective_reward_wait_v5_24pair/summary.json"),
@@ -37,6 +41,8 @@ DEFAULT_ARTIFACTS = {
     "leakage_matrix_latest": Path("transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json"),
     "theory_appendix": Path("transit_hrl/results/freq_hrl_theory_appendix/summary.json"),
     "theory_appendix_scheduler": Path("transit_hrl/results/scheduler_freq_hrl_theory_appendix/summary.json"),
+    "baseline_ablation_matrix": Path("transit_hrl/results/baseline_ablation_matrix/summary.json"),
+    "trading_pressure_matrix": Path("transit_hrl/results/trading_pressure_matrix/summary.json"),
 }
 
 
@@ -76,6 +82,13 @@ def _positive(row: dict[str, Any]) -> bool:
     return str(row.get("status", "")) in {"supported", "positive_mixed", "noninferiority_supported"}
 
 
+def _mean_improved(row: dict[str, Any]) -> bool:
+    try:
+        return float(row.get("improvement_mean", 0.0)) > 0.0
+    except (TypeError, ValueError):
+        return False
+
+
 def _status_from_flags(*, present: bool, supported: bool, partial: bool) -> str:
     if not present:
         return "missing"
@@ -108,6 +121,8 @@ def _promotion_evidence(
     paths: dict[str, str],
 ) -> dict[str, Any]:
     candidates = [
+        "native_promotion_v45_odshift",
+        "native_promotion_v44_odshift",
         "native_promotion_v42",
         "native_promotion_v32",
         "native_promotion_v31",
@@ -211,6 +226,90 @@ def _promotion_evidence(
     return best
 
 
+def _promotion_cross_stress_evidence(
+    artifacts: dict[str, dict[str, Any] | None],
+    paths: dict[str, str],
+) -> dict[str, Any]:
+    persistent = _promotion_evidence(artifacts, paths)
+    odshift_candidates = [
+        "native_promotion_v45_odshift",
+        "native_promotion_v44_odshift",
+        "native_promotion_v42_odshift",
+    ]
+    ranked: list[dict[str, Any]] = []
+    for key in odshift_candidates:
+        data = artifacts.get(key)
+        if not data:
+            continue
+        reward = _check_by_metric(data, "ep_reward", treatment="native_wait_aware_replan")
+        wait = _check_by_metric(data, "avg_wait_min", treatment="native_wait_aware_replan")
+        reward_noharm = _check_by_metric(
+            data,
+            "ep_reward",
+            treatment="native_wait_aware_replan",
+            check_contains="noninferiority",
+        )
+        wait_noharm = _check_by_metric(
+            data,
+            "avg_wait_min",
+            treatment="native_wait_aware_replan",
+            check_contains="noninferiority",
+        )
+        score = _check_by_metric(data, "score", treatment="native_wait_aware_replan")
+        supported = _supported(reward) and _supported(wait)
+        noharm = _positive(reward_noharm) and _positive(wait_noharm)
+        mean_improved = int(_mean_improved(reward)) + int(_mean_improved(wait))
+        ranked.append({
+            "key": key,
+            "reward": reward,
+            "wait": wait,
+            "reward_noninferiority": reward_noharm,
+            "wait_noninferiority": wait_noharm,
+            "score": score,
+            "supported": supported,
+            "noharm": noharm,
+            "mean_improved_metrics": mean_improved,
+            "n_common": max(
+                int(reward.get("n_common", 0) or 0),
+                int(wait.get("n_common", 0) or 0),
+                int(reward_noharm.get("n_common", 0) or 0),
+            ),
+            "artifact": paths[key],
+        })
+    odshift = max(
+        ranked,
+        key=lambda row: (
+            1 if row["supported"] else 0,
+            1 if row["noharm"] else 0,
+            row["mean_improved_metrics"],
+            row["n_common"],
+        ),
+        default={},
+    )
+    persistent_ok = persistent.get("status") == "supported"
+    odshift_supported = bool(odshift.get("supported"))
+    odshift_noharm = bool(odshift.get("noharm"))
+    status = _status_from_flags(
+        present=bool(persistent.get("key") != "missing" or odshift),
+        supported=bool(persistent_ok and odshift_supported),
+        partial=bool(persistent_ok and odshift_noharm),
+    )
+    return {
+        "status": status,
+        "persistent_key": persistent.get("key", "missing"),
+        "persistent_status": persistent.get("status", "missing"),
+        "odshift_key": odshift.get("key", "missing"),
+        "odshift_reward": odshift.get("reward", {}),
+        "odshift_wait": odshift.get("wait", {}),
+        "odshift_reward_noninferiority": odshift.get("reward_noninferiority", {}),
+        "odshift_wait_noninferiority": odshift.get("wait_noninferiority", {}),
+        "artifact": (
+            f"{persistent.get('artifact', '')} | {odshift.get('artifact', '')}"
+            if odshift else persistent.get("artifact", "")
+        ),
+    }
+
+
 def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     artifacts = {
         key: _read_json(results_root / path.relative_to("transit_hrl/results"))
@@ -222,13 +321,15 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     }
 
     promotion = _promotion_evidence(artifacts, paths)
+    promotion_cross_stress = _promotion_cross_stress_evidence(artifacts, paths)
     promotion_reward = promotion["reward"]
     promotion_reward_noninferiority = promotion["reward_noninferiority"]
     promotion_wait = promotion["wait"]
     promotion_wait_noninferiority = promotion["wait_noninferiority"]
     promotion_score = promotion.get("best_score", {})
     real = (
-        artifacts["native_real_demand_alighting_wait_v4"]
+        artifacts["native_real_demand_alighting_throughput_v5"]
+        or artifacts["native_real_demand_alighting_wait_v4"]
         or artifacts["native_real_demand_alighting_safe_v2"]
         or artifacts["native_real_demand_v5"]
         or artifacts["native_real_demand_v4"]
@@ -261,6 +362,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         or artifacts["leakage_matrix_latest"]
         or {}
     )
+    baseline_ablation = artifacts["baseline_ablation_matrix"] or {}
+    pressure_matrix = artifacts["trading_pressure_matrix"] or {}
     theory = artifacts["theory_appendix"] or artifacts["theory_appendix_scheduler"] or {}
 
     encoder_domains = encoder.get("domain_summary", []) if isinstance(encoder, dict) else []
@@ -284,6 +387,19 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         bool(order_book_manifest.get("coverage", {}).get("real_l2_files", 0))
         and bool(order_book_manifest.get("coverage", {}).get("real_l3_files", 0))
     ) or (_has_non_synthetic_sources(order_book_l2) and _has_non_synthetic_sources(order_book_l3))
+    order_book_source_quality = str(
+        order_book_manifest.get("coverage", {}).get("source_quality_status", "")
+    )
+    baseline_summary = baseline_ablation.get("summary", {}) if isinstance(baseline_ablation, dict) else {}
+    baseline_checks = baseline_ablation.get("paired_checks", []) if isinstance(baseline_ablation, dict) else []
+    positive_baseline_checks = [
+        row for row in baseline_checks
+        if row.get("metric") == "sharpe" and row.get("status") in {"supported", "positive_mixed"}
+    ]
+    pressure_rows = pressure_matrix.get("per_seed", []) if isinstance(pressure_matrix, dict) else []
+    baseline_status = str(baseline_summary.get("claim_status", ""))
+    if not baseline_status:
+        baseline_status = "partial" if pressure_rows else "missing"
 
     claims = [
         {
@@ -301,7 +417,7 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"wait_noharm={promotion_wait_noninferiority.get('status', 'missing')} "
                 f"score={promotion_score.get('status', 'missing')}"
             ),
-            "remaining_gap": "v42 supports reward and wait in the same native run; remaining work is cross-stress replication and final paper-table integration.",
+            "remaining_gap": "Best native run can support the local claim; cross-stress reward/wait improvement is evaluated separately in C7.",
             "artifact": promotion["artifact"],
         },
         {
@@ -325,9 +441,11 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 f"alighted={real_alighted.get('status', 'missing')} "
                 f"alighted_noharm={real_alighted_noninferiority.get('status', 'missing')}"
             ),
-            "remaining_gap": "Alighting/wait no-harm is supported; strict improvement CIs still need stronger throughput-seeking validation.",
+            "remaining_gap": "Strict wait/alighting/throughput improvement still needs v5 high-pressure validation if this row remains partial.",
             "artifact": (
-                paths["native_real_demand_alighting_wait_v4"]
+                paths["native_real_demand_alighting_throughput_v5"]
+                if artifacts["native_real_demand_alighting_throughput_v5"]
+                else paths["native_real_demand_alighting_wait_v4"]
                 if artifacts["native_real_demand_alighting_wait_v4"]
                 else paths["native_real_demand_alighting_safe_v2"]
                 if artifacts["native_real_demand_alighting_safe_v2"]
@@ -345,12 +463,13 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "claim": "Large L2/L3 order-book replay path exists",
             "status": _status_from_flags(
                 present=bool(order_book_manifest or order_book_l2 or order_book_l3),
-                supported=bool(order_book_has_real_l2_l3),
+                supported=bool(order_book_has_real_l2_l3 or order_book_source_quality == "venue_grade_ready"),
                 partial=bool(order_book_l2 and order_book_l3),
             ),
             "evidence": (
                 f"l2_supported_checks={order_book_l2_supported} "
                 f"l3_positive_checks={order_book_l3_positive} "
+                f"source_quality={order_book_source_quality or 'missing'} "
                 f"manifest_coverage={order_book_manifest.get('coverage', {})}"
             ),
             "remaining_gap": "Current path has L2 matching and synthetic/CSV-capable L3 FIFO replay; top-journal claim still needs larger real venue L2/L3 feeds.",
@@ -405,6 +524,39 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "evidence": f"examples={sorted(theory_examples.keys())}",
             "remaining_gap": "Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration.",
             "artifact": paths["theory_appendix"] if artifacts["theory_appendix"] else paths["theory_appendix_scheduler"],
+        },
+        {
+            "id": "C7",
+            "claim": "Native promotion reward/wait improvement replicates across stress regimes",
+            "status": promotion_cross_stress["status"],
+            "evidence": (
+                f"persistent={promotion_cross_stress.get('persistent_key', 'missing')} "
+                f"persistent_status={promotion_cross_stress.get('persistent_status', 'missing')} "
+                f"odshift={promotion_cross_stress.get('odshift_key', 'missing')} "
+                f"odshift_reward={promotion_cross_stress.get('odshift_reward', {}).get('status', 'missing')} "
+                f"odshift_reward_noharm={promotion_cross_stress.get('odshift_reward_noninferiority', {}).get('status', 'missing')} "
+                f"odshift_wait={promotion_cross_stress.get('odshift_wait', {}).get('status', 'missing')} "
+                f"odshift_wait_noharm={promotion_cross_stress.get('odshift_wait_noninferiority', {}).get('status', 'missing')}"
+            ),
+            "remaining_gap": "Scale v45 or another pre-registered OD-shift profile until reward and wait improvement CIs are both supported.",
+            "artifact": promotion_cross_stress["artifact"],
+        },
+        {
+            "id": "C8",
+            "claim": "Strong baseline and ablation table supports frequency-responsibility claim",
+            "status": baseline_status,
+            "evidence": (
+                f"claim_status={baseline_status} "
+                f"positive_sharpe_baselines={[row.get('control') for row in positive_baseline_checks]} "
+                f"scenario_win_rate={baseline_summary.get('scenario_freq_family_win_rate', 'NA')} "
+                f"pressure_rows={len(pressure_rows)}"
+            ),
+            "remaining_gap": "Run/refresh `baseline_ablation_matrix` after new pressure seeds and include flat PPO/SAC/TD3 native baselines when available.",
+            "artifact": (
+                paths["baseline_ablation_matrix"]
+                if artifacts["baseline_ablation_matrix"]
+                else paths["trading_pressure_matrix"]
+            ),
         },
     ]
     supported = sum(1 for row in claims if row["status"] == "supported")

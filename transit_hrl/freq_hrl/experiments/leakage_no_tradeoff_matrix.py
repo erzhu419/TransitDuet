@@ -16,6 +16,7 @@ DEFAULT_RESULT_PATHS = {
     "trading_ppo_primal_dual": Path("transit_hrl/results/trading_ppo_primal_dual_leakage/summary.json"),
     "transit_real_surrogate": Path("transit_hrl/results/transit_real_demand_control/summary.json"),
     "transit_ppo_primal_dual": Path("transit_hrl/results/transit_ppo_primal_dual_leakage/summary.json"),
+    "native_real_demand_alighting_throughput_v5": Path("transit_hrl/results/transit_native_real_demand_alighting_throughput_v5_24pair_merged/summary.json"),
     "native_real_demand_alighting_wait_v4": Path("transit_hrl/results/transit_native_real_demand_alighting_wait_v4_24pair_merged/summary.json"),
     "native_real_demand_alighting_safe_v2": Path("transit_hrl/results/transit_native_real_demand_alighting_safe_v2_24pair_merged/summary.json"),
     "native_real_demand": Path("transit_hrl/results/transit_native_real_demand_control/summary.json"),

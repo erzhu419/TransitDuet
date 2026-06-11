@@ -36,3 +36,23 @@ This note records the current state after the latest native promotion, real-dema
 The implementation is stronger than the previous state because the matrix now separates supported claims from stress-specific failures and source-quality placeholders. The top-journal gap is still not closed: native promotion needs cross-stress reward/wait support, real-demand needs strict wait/alighting improvement, native leakage needs a no-tradeoff run, and order-book replay still needs real venue-grade L2/L3 data.
 
 After the v44 scheduler rerun, OD-shift promotion has moved from broken smoke to valid no-harm evidence. It still does not establish the stronger global reward/wait improvement claim.
+
+## 2026-06-11 Follow-Up Patch
+
+This patch turns the remaining paper gaps into explicit runnable evidence paths:
+
+1. Native promotion: added `odshift_reward_floor_active_v45`, a v44 successor that lowers the value guard enough to create active OD-shift replans while keeping reward-floor, throughput-floor, and adaptive-drift guards.
+2. Native real demand: added `alighting_throughput_v5`, a high-pressure AFC/APC profile focused on wait, alighting, completed throughput, and bounded lower-HF rescue.
+3. Leakage no-tradeoff: indexed the upcoming native real-demand v5 artifact in `leakage_no_tradeoff_matrix.py` so drift reduction and performance no-harm are judged in the same native domain.
+4. Strong baselines/ablations: added `baseline_ablation_matrix.py`, which computes paired Freq-HRL deltas against vanilla, raw HRL, all-frequency, swapped, no-promotion, no-leakage, LF-only, and HF-only baselines across identical seeds/stress scenarios.
+5. Cross-stress promotion: extended `top_journal_unified_matrix.py` with C7 so persistent-stress success and OD-shift no-harm/improvement are reported separately instead of folded into one global claim.
+6. Order-book evidence: added `source_quality_status` to the L2/L3 manifest runner. Fixture/sample data can only be `mechanism_only`; supported source-quality requires real or venue-grade L2 and L3 feeds.
+7. Theory: added Proposition 8, a sufficient no-tradeoff margin condition that prevents the paper from claiming leakage no-tradeoff without same-domain paired performance slack.
+
+Current expected status after this patch:
+
+- C1 can remain supported for the best native persistent-stress promotion artifact.
+- C7 should remain partial until v45 or another OD-shift profile supports reward and wait improvement CIs.
+- C2 should remain partial until v5 high-pressure real-demand validation closes wait/alighting/throughput.
+- C5 should remain partial until native real-demand or trading leakage jointly supports drift reduction and reward/wait no-harm.
+- C8 should become explicit rather than implicit once `baseline_ablation_matrix` is generated from the current pressure/performance artifacts.

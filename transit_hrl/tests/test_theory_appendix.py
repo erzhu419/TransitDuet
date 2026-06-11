@@ -4,6 +4,7 @@ from pathlib import Path
 
 from freq_hrl.experiments.theory_appendix import (
     build_theory_payload,
+    conditional_no_tradeoff_margin,
     finite_sample_mean_ci_radius,
     hierarchical_credit_residual_bound,
     promotion_detection_delay_bound,
@@ -50,6 +51,14 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             0.5,
         )
+        self.assertGreater(
+            conditional_no_tradeoff_margin(
+                baseline_advantage=0.20,
+                leakage_penalty_budget=0.05,
+                constraint_slack=0.03,
+            ),
+            0.0,
+        )
 
     def test_theory_appendix_writes_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -58,9 +67,10 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
-            self.assertGreaterEqual(len(payload["theorems"]), 7)
+            self.assertGreaterEqual(len(payload["theorems"]), 8)
             self.assertIn("Theorem 1", report)
             self.assertIn("Theorem 5", report)
+            self.assertIn("Proposition 8", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)
 

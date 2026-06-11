@@ -90,6 +90,21 @@ def primal_dual_average_violation_bound(
     return float((radius ** 2) / (2.0 * eta * t_safe) + 0.5 * eta * (grad ** 2))
 
 
+def conditional_no_tradeoff_margin(
+    *,
+    baseline_advantage: float,
+    leakage_penalty_budget: float,
+    constraint_slack: float,
+) -> float:
+    """Sufficient performance margin after leakage and constraint costs.
+
+    A positive value is a sufficient no-tradeoff condition for the simplified
+    appendix bookkeeping: the treatment's pre-constraint advantage exceeds the
+    worst-case leakage shaping budget and any constraint slack consumed.
+    """
+    return float(baseline_advantage) - max(float(leakage_penalty_budget), 0.0) - max(float(constraint_slack), 0.0)
+
+
 def read_csv_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -309,6 +324,38 @@ def build_theorem_rows(examples: dict[str, Any]) -> list[dict[str, Any]]:
                 f"{_fmt(examples['primal_dual_avg_violation_bound_example'])}."
             ),
         },
+        {
+            "id": "Proposition 8",
+            "title": "Leakage No-Tradeoff Requires Positive Slack",
+            "statement": (
+                "A leakage-constrained Freq-HRL variant can claim no-tradeoff only "
+                "when its paired task advantage exceeds the leakage shaping budget "
+                "and any consumed constraint slack on the same validation domain."
+            ),
+            "assumptions": [
+                "Treatment and control are evaluated on paired seeds or source windows.",
+                "The task metric is the same metric used for the no-tradeoff claim.",
+                "Leakage penalty and constraint-slack budgets are reported on the same rollout family.",
+            ],
+            "proof": (
+                "Let Delta be the unpenalized paired task advantage and let B be "
+                "the worst-case performance budget consumed by leakage shaping and "
+                "constraint slack. The shaped constrained advantage is at least "
+                "Delta - B by the return-gap bookkeeping in Theorem 2 and the "
+                "nonnegative slack budget. If Delta - B is positive, the treatment "
+                "remains no worse than the control under this sufficient condition."
+            ),
+            "limitation": (
+                "This is only a sufficient condition. If the margin is nonpositive, "
+                "empirical no-tradeoff may still occur, but it must be supported by "
+                "paired CIs rather than by this bookkeeping argument alone."
+            ),
+            "diagnostic": "Leakage no-tradeoff matrices must report drift reduction and task noninferiority on the same native or trading domain.",
+            "example": (
+                "Example no-tradeoff margin: "
+                f"{_fmt(examples['conditional_no_tradeoff_margin_example'])}."
+            ),
+        },
     ]
 
 
@@ -343,6 +390,11 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             total_credit=[1.0, 0.6, 0.2],
             upper_credit=[0.7, 0.4, 0.1],
             lower_credit=[0.2, 0.2, 0.1],
+        ),
+        "conditional_no_tradeoff_margin_example": conditional_no_tradeoff_margin(
+            baseline_advantage=0.18,
+            leakage_penalty_budget=0.07,
+            constraint_slack=0.03,
         ),
     }
     cited_checks = {

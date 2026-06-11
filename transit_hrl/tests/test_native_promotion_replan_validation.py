@@ -291,6 +291,38 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             VARIANTS.clear()
             VARIANTS.update(old_variants)
 
+    def test_odshift_reward_floor_active_profile_keeps_safety_but_allows_replans(self):
+        old_common = json.loads(json.dumps(COMMON_OVERRIDES))
+        old_variants = json.loads(json.dumps(VARIANTS))
+        try:
+            apply_persistent_stress_preset(profile="odshift_reward_floor_active_v45")
+            wait_aware = VARIANTS["native_wait_aware_replan"]
+            self.assertTrue(wait_aware["_promotion_gate_wait_pressure_override"])
+            self.assertEqual(wait_aware["_promotion_gate_max_replans"], 2)
+            self.assertLess(wait_aware["_promotion_gate_cooldown_s"], 450.0)
+            self.assertLess(
+                wait_aware["_promotion_replan_value_guard_min_score"],
+                0.02,
+            )
+            self.assertGreater(
+                wait_aware["_promotion_replan_reward_floor_min_score"],
+                0.0,
+            )
+            self.assertGreater(
+                wait_aware["_promotion_replan_throughput_floor_min_delta_fraction"],
+                0.0,
+            )
+            self.assertEqual(
+                wait_aware["_promotion_replan_value_guard_candidate_scales"],
+                "0.00,0.10,0.20,0.35,0.50,0.75,1.00,1.25",
+            )
+            self.assertGreater(wait_aware["_promotion_replan_wait_gain_s"], 4.0)
+        finally:
+            COMMON_OVERRIDES.clear()
+            COMMON_OVERRIDES.update(old_common)
+            VARIANTS.clear()
+            VARIANTS.update(old_variants)
+
     def test_paired_checks_gate_native_reward_and_wait(self):
         rows = [
             {

@@ -51,6 +51,34 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             self.assertEqual(claims["C1"]["status"], "supported")
             self.assertIn("native_promotion_v42", claims["C1"]["evidence"])
             self.assertIn("v42", claims["C1"]["artifact"])
+            self.assertIn("C7", claims)
+            self.assertIn("C8", claims)
+
+    def test_baseline_ablation_artifact_feeds_c8(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out = root / "baseline_ablation_matrix"
+            out.mkdir(parents=True)
+            (out / "summary.json").write_text(
+                json.dumps({
+                    "summary": {
+                        "claim_status": "supported",
+                        "scenario_freq_family_win_rate": 0.75,
+                    },
+                    "paired_checks": [
+                        {
+                            "metric": "sharpe",
+                            "control": "no_promotion",
+                            "status": "supported",
+                        }
+                    ],
+                }),
+                encoding="utf-8",
+            )
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C8"]["status"], "supported")
+            self.assertIn("no_promotion", claims["C8"]["evidence"])
 
 
 if __name__ == "__main__":

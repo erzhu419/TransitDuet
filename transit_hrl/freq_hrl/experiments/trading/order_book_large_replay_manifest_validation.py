@@ -254,6 +254,26 @@ def run_manifest_validation(
         "latency_bins": list(latency_bins),
         "execution_modes": list(execution_modes),
     }
+    real_sessions = {
+        (
+            entry.venue,
+            entry.symbol,
+            entry.session,
+            entry.kind,
+        )
+        for entry in entries
+        if _is_real_or_venue_grade(entry)
+    }
+    if coverage["real_l2_files"] > 0 and coverage["real_l3_files"] > 0:
+        source_quality_status = "venue_grade_ready"
+    elif coverage["l2_files"] > 0 and coverage["l3_files"] > 0:
+        source_quality_status = "mechanism_only"
+    else:
+        source_quality_status = "incomplete"
+    coverage.update({
+        "real_or_venue_grade_sessions": len(real_sessions),
+        "source_quality_status": source_quality_status,
+    })
     payload = {
         "manifest": str(manifest),
         "coverage": coverage,
@@ -281,6 +301,7 @@ def run_manifest_validation(
         f"- L3 files: `{coverage['l3_files']}`",
         f"- real/venue-grade L2 files: `{coverage['real_l2_files']}`",
         f"- real/venue-grade L3 files: `{coverage['real_l3_files']}`",
+        f"- source quality: `{coverage['source_quality_status']}`",
         f"- missing entries: `{coverage['missing_entries']}`",
         f"- boundary: {payload['boundary']}",
         "",

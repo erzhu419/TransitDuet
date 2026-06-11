@@ -74,6 +74,7 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             self.assertEqual(payload["coverage"]["real_l3_files"], 0)
             self.assertEqual(payload["coverage"]["fixture_l2_files"], 1)
             self.assertEqual(payload["coverage"]["fixture_l3_files"], 1)
+            self.assertEqual(payload["coverage"]["source_quality_status"], "mechanism_only")
             self.assertTrue((root / "out" / "summary.json").exists())
             self.assertTrue(any(row["book_kind"] == "l2" for row in payload["summary"]))
             self.assertTrue(any(row["book_kind"] == "l3" for row in payload["summary"]))
@@ -136,6 +137,8 @@ class OrderBookLargeReplayManifestValidationTest(unittest.TestCase):
             )
             self.assertEqual(payload["coverage"]["real_l2_files"], 1)
             self.assertEqual(payload["coverage"]["real_l3_files"], 1)
+            self.assertEqual(payload["coverage"]["source_quality_status"], "venue_grade_ready")
+            self.assertGreater(payload["coverage"]["real_or_venue_grade_sessions"], 0)
 
 
 if __name__ == "__main__":
