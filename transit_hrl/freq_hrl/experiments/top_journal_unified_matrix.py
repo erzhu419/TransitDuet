@@ -422,15 +422,29 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     order_book_l2 = artifacts["order_book_l2_matching"] or {}
     order_book_l3 = artifacts["order_book_l3_replay"] or {}
     encoder = artifacts["encoder_matrix"] or artifacts["encoder_matrix_latest"] or {}
-    leakage = (
-        artifacts["leakage_matrix_latest_patch"]
-        or artifacts["leakage_matrix_v27_v5"]
-        or artifacts["leakage_matrix_v26_v4"]
-        or artifacts["leakage_matrix_v25_v3"]
-        or artifacts["leakage_matrix_latest"]
-        or artifacts["leakage_matrix"]
-        or {}
-    )
+    leakage_candidate_keys = [
+        "leakage_matrix_latest",
+        "leakage_matrix_latest_patch",
+        "leakage_matrix_v27_v5",
+        "leakage_matrix_v26_v4",
+        "leakage_matrix_v25_v3",
+        "leakage_matrix",
+    ]
+    leakage_key = ""
+    leakage: dict[str, Any] = {}
+    for key in leakage_candidate_keys:
+        data = artifacts.get(key)
+        if isinstance(data, dict) and data.get("adaptive_native_real_demand_selector"):
+            leakage_key = key
+            leakage = data
+            break
+    if not leakage:
+        for key in leakage_candidate_keys:
+            data = artifacts.get(key)
+            if isinstance(data, dict):
+                leakage_key = key
+                leakage = data
+                break
     baseline_ablation = artifacts["baseline_ablation_matrix_latest"] or artifacts["baseline_ablation_matrix"] or {}
     pressure_matrix = artifacts["trading_pressure_matrix"] or {}
     pressure_stress = _pressure_stress_evidence(baseline_ablation, pressure_matrix)
@@ -630,16 +644,8 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
                 "and reward/wait/alighting/throughput no-harm or strict CI support."
             ),
             "artifact": (
-                paths["leakage_matrix_latest_patch"]
-                if artifacts["leakage_matrix_latest_patch"]
-                else paths["leakage_matrix_v27_v5"]
-                if artifacts["leakage_matrix_v27_v5"]
-                else paths["leakage_matrix_v26_v4"]
-                if artifacts["leakage_matrix_v26_v4"]
-                else paths["leakage_matrix_v25_v3"]
-                if artifacts["leakage_matrix_v25_v3"]
-                else paths["leakage_matrix"]
-                if artifacts["leakage_matrix"]
+                paths[leakage_key]
+                if leakage_key
                 else paths["leakage_matrix_latest"]
             ),
         },

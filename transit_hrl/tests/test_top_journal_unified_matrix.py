@@ -178,6 +178,54 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             self.assertEqual(claims["C5"]["status"], "partial")
             self.assertIn("native_selector_status=blocked_no_native_no_tradeoff", claims["C5"]["evidence"])
 
+    def test_c5_prefers_leakage_artifact_with_native_selector(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            old_out = root / "leakage_no_tradeoff_matrix_latest_patch"
+            old_out.mkdir(parents=True)
+            (old_out / "summary.json").write_text(
+                json.dumps({
+                    "domain_verdicts": [
+                        {
+                            "domain": "transit_real_surrogate",
+                            "verdict": "no_tradeoff_supported",
+                        }
+                    ]
+                }),
+                encoding="utf-8",
+            )
+            new_out = root / "leakage_no_tradeoff_matrix_latest"
+            new_out.mkdir(parents=True)
+            (new_out / "summary.json").write_text(
+                json.dumps({
+                    "domain_verdicts": [
+                        {
+                            "domain": "trading_ppo_primal_dual",
+                            "verdict": "no_tradeoff_strict_supported",
+                        },
+                        {
+                            "domain": "native_real_demand_service_response_v7",
+                            "verdict": "no_tradeoff_supported",
+                        },
+                    ],
+                    "adaptive_native_real_demand_selector": {
+                        "status": "supported",
+                        "selected_domain": "native_real_demand_service_response_v7",
+                        "selected_verdict": "no_tradeoff_supported",
+                        "supported": True,
+                        "strict_supported": False,
+                    },
+                }),
+                encoding="utf-8",
+            )
+
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C5"]["status"], "supported")
+            self.assertIn("native_selector_status=supported", claims["C5"]["evidence"])
+            self.assertIn("leakage_no_tradeoff_matrix_latest", claims["C5"]["artifact"])
+            self.assertNotIn("latest_patch", claims["C5"]["artifact"])
+
 
 if __name__ == "__main__":
     unittest.main()
