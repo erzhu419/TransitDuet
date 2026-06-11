@@ -102,3 +102,33 @@ Scheduler submission status:
 4. node001/node006 still show scheduler placement/env escalation behavior for this signature path. The queued w16 shards are therefore constrained to node002-node005 until the direct-node scheduler gate is cleared or those nodes free enough CPU tokens.
 
 Once t9937-t9942 finish, merge the fixed v6 real-demand shards and regenerate the strict leakage/top-journal matrices. Once t9943-t9958 finish, merge v46 promotion and check whether OD-shift reward/wait moves from no-harm to CI-supported improvement.
+
+## 2026-06-11 v46/v6 Merge Results
+
+The queued scheduler validations finished and were merged locally:
+
+1. Native real-demand `throughput_safe_wait_v6`: merged 48 seed indices and 96 AFC/APC paired comparisons into `transit_native_real_demand_throughput_safe_wait_v6_48pair_merged`.
+2. Native promotion `odshift_reward_wait_guard_v46`: merged 512 seeds and 1024 paired rows into `scheduler_native_promotion_v46_odshift_reward_wait_guard_512seed_merged`.
+
+Key outcomes:
+
+| claim target | status | n | delta | CI95 |
+|---|---|---:|---:|---|
+| real-demand control score | supported | 96 | +2936.6188 | [+2445.6933, +3404.4883] |
+| real-demand episode reward | supported | 96 | +2936.6188 | [+2445.6933, +3404.4883] |
+| real-demand avg wait | not supported | 96 | +0.0000 | [+0.0000, +0.0000] |
+| real-demand board wait | not supported | 96 | +0.0000 | [+0.0000, +0.0000] |
+| real-demand alighted pax | not supported | 96 | +0.0000 | [+0.0000, +0.0000] |
+| real-demand completed throughput | not supported | 96 | +0.0000 | [+0.0000, +0.0000] |
+| promotion v46 reward improvement | inconclusive | 512 | +3.9650 | [-2.1008, +14.2042] |
+| promotion v46 wait improvement | not supported | 512 | +0.0039 | [-0.0000, +0.0116] |
+| promotion v46 reward noninferiority | supported | 512 | +3.9650 | [-2.1008, +14.2042] |
+| promotion v46 wait noninferiority | positive_mixed | 512 | +0.0039 | [-0.0000, +0.0116] |
+| promotion v46 gate replans | supported | 512 | +0.0117 | [+0.0039, +0.0215] |
+
+The refreshed matrices are:
+
+- `top_journal_unified_matrix_latest_after_v46_v6`: 4 supported, 5 partial, 0 missing/not-supported. C7 now correctly reports the 512-seed v46 OD-shift artifact rather than the smaller v44 smoke.
+- `leakage_no_tradeoff_matrix_latest_after_v46_v6`: still only one strict supported domain, `transit_real_surrogate`; native real-demand v6 remains partial because LowerLFDrift/performance no-tradeoff is not closed.
+
+Conclusion: v6 strengthens real-demand no-harm and reward/score support, but does not create strict wait/alighting/throughput improvement. v46 confirms learned promotion activity and reward no-harm at 512 seeds, but does not close OD-shift reward/wait improvement. The remaining top-journal gaps are now narrower and explicit: strict real-demand service improvement, native leakage no-tradeoff, real venue-grade L2/L3 replay, and a promotion profile that improves wait rather than only preserving reward.

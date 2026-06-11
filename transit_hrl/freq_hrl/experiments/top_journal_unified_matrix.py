@@ -288,8 +288,8 @@ def _promotion_cross_stress_evidence(
         key=lambda row: (
             1 if row["supported"] else 0,
             1 if row["noharm"] else 0,
-            row["mean_improved_metrics"],
             row["n_common"],
+            row["mean_improved_metrics"],
         ),
         default={},
     )
