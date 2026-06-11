@@ -6,6 +6,7 @@ from freq_hrl.experiments.trading.order_book_large_replay_manifest_validation im
     run_manifest_validation,
 )
 from freq_hrl.experiments.trading.order_book_lobster_sample_validation import (
+    _sample_paths,
     convert_lobster_pair,
 )
 
@@ -66,6 +67,12 @@ class OrderBookLobsterSampleValidationTest(unittest.TestCase):
             self.assertEqual(payload["coverage"]["venue_grade_l2_l3_session_pairs"], 1)
             self.assertEqual(payload["coverage"]["venue_grade_claim_status"], "supported")
             self.assertEqual(payload["coverage"]["source_quality_status"], "venue_grade_ready")
+
+    def test_sample_paths_are_symbol_session_specific(self):
+        message, orderbook = _sample_paths("MSFT", session="2012-06-22", levels=1)
+        self.assertIn("LOBSTER_SampleFile_MSFT_2012-06-22_1", message)
+        self.assertIn("MSFT_2012-06-22_34200000_57600000_message_1.csv", message)
+        self.assertIn("MSFT_2012-06-22_34200000_57600000_orderbook_1.csv", orderbook)
 
 
 if __name__ == "__main__":

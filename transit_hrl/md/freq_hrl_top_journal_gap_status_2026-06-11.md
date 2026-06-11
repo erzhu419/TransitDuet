@@ -256,6 +256,11 @@ The multisymbol artifact is
 `top_journal_unified_matrix_latest` remains 9 supported and 0 partial after
 switching C3 to the multisymbol artifact.
 
+The LOBSTER runner now also accepts a `--sessions` list. The current committed
+artifact uses the public sample date `2012-06-21` for AAPL, AMZN, and GOOG, so
+it is three symbol-session pairs rather than a multi-day replay. A future
+multi-day venue feed can use the same code path by passing more sessions.
+
 ## 2026-06-12 Agency Demand / Onboard Claim Boundary
 
 Added `agency_demand_onboard_coverage.py` and the artifact

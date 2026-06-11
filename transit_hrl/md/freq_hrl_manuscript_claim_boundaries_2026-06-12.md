@@ -30,7 +30,8 @@ Current high-level status:
 
 - Unified claim matrix: 9 supported, 0 partial.
 - Order-book replay: venue-grade L2/L3 path supported on three XNAS
-  LOBSTER samples, one session per symbol.
+  LOBSTER symbol-session pairs. The runner supports multiple `--sessions`,
+  but the current public sample artifact uses one date, 2012-06-21.
 - Real agency Transit demand: supported for AFC station-hour entries and APC
   route boardings driving the native service-response loop.
 - Native service-response loop: supported for score, reward, wait, alighting,
@@ -47,7 +48,7 @@ Current high-level status:
 | Native Transit service | "Under public AFC/APC demand profiles, the native service-response adapter supports wait, alighting, and throughput improvements in the simulator." | "Observed agency alighting or onboard-load outcomes improve in the external data." |
 | Onboard load | "Native onboard-load metrics are recorded; onboard-load improvement remains an explicit boundary unless external load fields are supplied." | "Onboard-load improvement is externally supported." |
 | OD validation | "The code now supports GTFS-ride style OD validation when `rider_trip.txt` or origin/destination fields are supplied." | "Current public AFC/APC cache contains OD ground truth." |
-| L2/L3 order book | "Venue-grade L2/L3 replay is supported on three LOBSTER/NASDAQ TotalView-ITCH sample symbols with paired L2 snapshots and L3 events." | "Large-scale multi-day exchange replay or full queue-priority production execution is complete." |
+| L2/L3 order book | "Venue-grade L2/L3 replay is supported on three LOBSTER/NASDAQ TotalView-ITCH symbol-session pairs with paired L2 snapshots and L3 events." | "Large-scale multi-day exchange replay or full queue-priority production execution is complete." |
 | Promotion | "Native learned promotion supports reward/wait improvement in the current pre-registered stress matrix." | "Promotion is universally beneficial under arbitrary unseen shocks." |
 | Leakage | "Leakage no-tradeoff is supported for the current native service-response and Transit surrogate matrices." | "No-tradeoff is guaranteed without the stated margin and same-domain CI conditions." |
 | Theory | "The appendix gives sufficient-condition bounds and claim-boundary propositions." | "A universal convergence theorem for all nonlinear environments is proven." |

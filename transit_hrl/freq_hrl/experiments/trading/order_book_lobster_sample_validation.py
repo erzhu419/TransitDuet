@@ -24,6 +24,7 @@ SAMPLE_TICKER = "AMZN"
 SAMPLE_SESSION = "2012-06-21"
 SAMPLE_LEVELS = 1
 DEFAULT_SYMBOLS = ("AMZN", "GOOG", "AAPL")
+DEFAULT_SESSIONS = (SAMPLE_SESSION,)
 
 
 def _sample_paths(symbol: str, session: str = SAMPLE_SESSION, levels: int = SAMPLE_LEVELS) -> tuple[str, str]:
@@ -196,6 +197,7 @@ def run_lobster_sample_validation(
     *,
     raw_dir: Path,
     symbols: list[str],
+    sessions: list[str],
     max_rows: int,
     methods: list[str],
     steps: int,
@@ -207,32 +209,41 @@ def run_lobster_sample_validation(
     manifest_datasets: list[dict[str, Any]] = []
     for symbol in symbols:
         symbol = str(symbol).upper()
-        raw_message, raw_orderbook = download_lobster_sample(raw_dir, symbol=symbol)
-        converted = convert_lobster_pair(
-            message_csv=raw_message,
-            orderbook_csv=raw_orderbook,
-            output_dir=converted_root / symbol,
-            max_rows=int(max_rows),
-            symbol=symbol,
-        )
-        symbol_manifest = json.loads(Path(converted["manifest"]).read_text(encoding="utf-8"))
-        for entry in symbol_manifest["datasets"]:
-            item = dict(entry)
-            item["path"] = f"{symbol}/{item['path']}"
-            manifest_datasets.append(item)
-        conversion_rows.append({
-            "symbol": symbol,
-            "rows": int(converted["rows"]),
-            "l3_events": int(converted["l3_events"]),
-            "l2_csv": str(converted["l2_csv"]),
-            "l3_csv": str(converted["l3_csv"]),
-            "raw_message_csv": str(raw_message),
-            "raw_orderbook_csv": str(raw_orderbook),
-        })
+        for session in sessions:
+            session = str(session)
+            raw_message, raw_orderbook = download_lobster_sample(
+                raw_dir,
+                symbol=symbol,
+                session=session,
+            )
+            converted = convert_lobster_pair(
+                message_csv=raw_message,
+                orderbook_csv=raw_orderbook,
+                output_dir=converted_root / symbol,
+                max_rows=int(max_rows),
+                symbol=symbol,
+                session=session,
+            )
+            symbol_manifest = json.loads(Path(converted["manifest"]).read_text(encoding="utf-8"))
+            for entry in symbol_manifest["datasets"]:
+                item = dict(entry)
+                item["path"] = f"{symbol}/{item['path']}"
+                manifest_datasets.append(item)
+            conversion_rows.append({
+                "symbol": symbol,
+                "session": session,
+                "rows": int(converted["rows"]),
+                "l3_events": int(converted["l3_events"]),
+                "l2_csv": str(converted["l2_csv"]),
+                "l3_csv": str(converted["l3_csv"]),
+                "raw_message_csv": str(raw_message),
+                "raw_orderbook_csv": str(raw_orderbook),
+            })
     combined_manifest = {
         "datasets": manifest_datasets,
         "source": (
-            "LOBSTER public samples reconstructed from NASDAQ TotalView-ITCH; "
+            "Multi-symbol/multi-session LOBSTER public samples reconstructed "
+            "from NASDAQ TotalView-ITCH; "
             "downloaded from totalorganfailure/lobster-data on Hugging Face."
         ),
     }
@@ -260,6 +271,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw-dir", type=Path, default=Path("transit_hrl/data/lobster_sample_raw"))
     parser.add_argument("--symbols", nargs="+", default=list(DEFAULT_SYMBOLS))
+    parser.add_argument("--sessions", nargs="+", default=list(DEFAULT_SESSIONS))
     parser.add_argument("--max-rows", type=int, default=2400)
     parser.add_argument("--methods", nargs="+", default=["ema", "state_space", "adaptive_wavelet", "neural_state_space"])
     parser.add_argument("--steps", type=int, default=720)
@@ -274,6 +286,7 @@ def main() -> None:
         args.output_dir,
         raw_dir=args.raw_dir,
         symbols=list(args.symbols),
+        sessions=list(args.sessions),
         max_rows=int(args.max_rows),
         methods=list(args.methods),
         steps=int(args.steps),
