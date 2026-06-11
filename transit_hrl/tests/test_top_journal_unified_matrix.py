@@ -226,6 +226,54 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             self.assertIn("leakage_no_tradeoff_matrix_latest", claims["C5"]["artifact"])
             self.assertNotIn("latest_patch", claims["C5"]["artifact"])
 
+    def test_c2_reports_public_external_truth_boundary_when_available(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            real = root / "transit_native_real_demand_service_response_v7_48pair_merged"
+            real.mkdir(parents=True)
+            checks = [
+                {"metric": "control_score", "status": "supported"},
+                {"metric": "ep_reward", "status": "supported"},
+                {"metric": "native_avg_board_wait_min", "status": "supported"},
+                {"metric": "native_alighted_pax", "status": "supported"},
+                {"metric": "native_completed_throughput_pax", "status": "supported"},
+            ]
+            (real / "summary.json").write_text(json.dumps({"paired_checks": checks}), encoding="utf-8")
+            agency = root / "agency_demand_onboard_coverage_latest"
+            agency.mkdir(parents=True)
+            (agency / "summary.json").write_text(
+                json.dumps({
+                    "summary": {
+                        "evidence_scope": "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
+                    },
+                    "claim_boundaries": [
+                        {
+                            "evidence_item": "real_public_bus_stop_board_alight",
+                            "status": "supported",
+                        },
+                        {
+                            "evidence_item": "real_public_bus_stop_onboard_load",
+                            "status": "supported",
+                        },
+                        {
+                            "evidence_item": "real_public_subway_od_estimate",
+                            "status": "supported",
+                        },
+                        {
+                            "evidence_item": "real_gtfs_ride_od",
+                            "status": "external_missing",
+                        },
+                    ],
+                }),
+                encoding="utf-8",
+            )
+
+            payload = build_unified_matrix(root)
+            claims = {row["id"]: row for row in payload["claims"]}
+            self.assertEqual(claims["C2"]["status"], "supported")
+            self.assertIn("real_public_bus_stop_onboard_load", claims["C2"]["evidence"])
+            self.assertIn("public external board/alight/load/estimated-OD", claims["C2"]["remaining_gap"])
+
 
 if __name__ == "__main__":
     unittest.main()

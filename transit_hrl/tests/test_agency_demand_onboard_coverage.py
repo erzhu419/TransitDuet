@@ -102,6 +102,56 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def _write_external_truth_summary(self, path: Path) -> None:
+        payload = {
+            "summary": {
+                "evidence_scope": "real_public_board_alight_load_and_estimated_od",
+                "supported_boundaries": 3,
+            },
+            "source_coverage": [
+                {
+                    "source": "mbta_bus_stop_trip_ridership",
+                    "claim_status": "supported",
+                    "rows": 100,
+                    "unique_routes": 3,
+                    "unique_stops": 5,
+                    "boundary": "fixture board/alight/load",
+                },
+                {
+                    "source": "mta_subway_od_estimate_2024",
+                    "claim_status": "supported",
+                    "sample_rows": 100,
+                    "unique_origins": 4,
+                    "unique_destinations": 4,
+                    "boundary": "fixture estimated OD",
+                },
+            ],
+            "claim_boundaries": [
+                {
+                    "evidence_item": "real_public_bus_stop_board_alight",
+                    "status": "supported",
+                    "allowed_wording": "real public bus stop/trip boardings and alightings",
+                    "forbidden_wording": "GTFS-ride-native board_alight feed",
+                    "evidence": "rows=100",
+                },
+                {
+                    "evidence_item": "real_public_bus_stop_onboard_load",
+                    "status": "supported",
+                    "allowed_wording": "real public bus stop/trip onboard load",
+                    "forbidden_wording": "onboard-load improvement",
+                    "evidence": "rows=100",
+                },
+                {
+                    "evidence_item": "real_public_subway_od_estimate",
+                    "status": "supported",
+                    "allowed_wording": "real public agency subway OD estimates",
+                    "forbidden_wording": "observed individual OD truth",
+                    "evidence": "sample_rows=100",
+                },
+            ],
+        }
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
     def test_current_afc_apc_cache_keeps_external_od_load_boundary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -137,6 +187,44 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             self.assertEqual(
                 payload["summary"]["evidence_scope"],
                 "real_afc_apc_demand_plus_native_service_response",
+            )
+
+    def test_external_truth_summary_adds_public_board_load_od_without_relabeling_gtfs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            afc = root / "afc.csv"
+            apc = root / "apc.csv"
+            native = root / "summary.json"
+            external_truth = root / "external_truth.json"
+            self._write_afc(afc)
+            self._write_apc(apc)
+            self._write_native_summary(native)
+            self._write_external_truth_summary(external_truth)
+
+            payload = run_coverage(
+                output_dir=root / "out",
+                afc_csv=afc,
+                apc_csv=apc,
+                native_summary=native,
+                external_truth_summary=external_truth,
+                min_afc_rows=10,
+                min_afc_stations=3,
+                min_afc_time_bins=6,
+                min_apc_rows=10,
+                min_apc_routes=3,
+                min_apc_time_bins=10,
+            )
+
+            boundaries = {row["evidence_item"]: row for row in payload["claim_boundaries"]}
+            self.assertEqual(boundaries["real_public_bus_stop_board_alight"]["status"], "supported")
+            self.assertEqual(boundaries["real_public_bus_stop_onboard_load"]["status"], "supported")
+            self.assertEqual(boundaries["real_public_subway_od_estimate"]["status"], "supported")
+            self.assertEqual(boundaries["real_gtfs_ride_board_alight"]["status"], "external_missing")
+            self.assertEqual(boundaries["real_gtfs_ride_onboard_load"]["status"], "external_missing")
+            self.assertEqual(boundaries["real_gtfs_ride_od"]["status"], "external_missing")
+            self.assertEqual(
+                payload["summary"]["evidence_scope"],
+                "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
             )
 
     def test_optional_gtfs_ride_marks_real_od_and_onboard_supported(self):

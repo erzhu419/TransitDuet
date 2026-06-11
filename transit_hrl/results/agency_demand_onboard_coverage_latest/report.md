@@ -1,18 +1,20 @@
 # Agency Demand and Onboard-Load Coverage Ledger
 
-This ledger separates observed agency demand from native simulator service metrics.  Claims about real OD/onboard-load/alighting ground truth require external files that expose those fields.
+This ledger separates observed agency demand from native simulator service metrics and external truth-source coverage.  Public MBTA and MTA truth sources close data-availability boundaries only for the fields they expose; they do not by themselves prove native control improvement on those exact files.
 
-- overall scope: `real_afc_apc_demand_plus_native_service_response`
-- supported boundary rows: `4`
+- overall scope: `real_afc_apc_external_board_alight_load_od_plus_native_service_response`
+- supported boundary rows: `7`
 - external-missing boundary rows: `3`
 
 ## Source Coverage
 
 | source | status | rows | coverage | boundary |
 |---|---|---:|---|---|
-| public_afc_station_hour | supported | 1000 | stations=41 routes= time_bins=25 | observed station-hour entries; not onboard occupancy, alightings, or OD unless those fields are present |
-| public_apc_route_boarding | supported | 1000 | stations= routes=8 time_bins=1000 | observed route boardings; not onboard occupancy, alightings, or OD unless those fields are present |
-| gtfs_ride_external | external_missing | 0 | stations= routes= time_bins= | optional external GTFS-ride directory was not supplied |
+| public_afc_station_hour | supported | 1000 | stations=41 routes= stops= origins= destinations= time_bins=25 | observed station-hour entries; not onboard occupancy, alightings, or OD unless those fields are present |
+| public_apc_route_boarding | supported | 1000 | stations= routes=8 stops= origins= destinations= time_bins=1000 | observed route boardings; not onboard occupancy, alightings, or OD unless those fields are present |
+| gtfs_ride_external | external_missing | 0 | stations= routes= stops= origins= destinations= time_bins= | optional external GTFS-ride directory was not supplied |
+| mbta_bus_stop_trip_ridership | supported | 1202491 | stations= routes=152 stops=6775 origins= destinations= time_bins= | observed MBTA stop/trip bus averages with boardings, alightings, and onboard load; not OD |
+| mta_subway_od_estimate_2024 | supported | 5000 | stations= routes= stops= origins=422 destinations=422 time_bins= | agency-published subway OD estimate from fare data; not observed bus OD or onboard load |
 
 ## Claim Boundaries
 
@@ -25,6 +27,9 @@ This ledger separates observed agency demand from native simulator service metri
 | A5 | real_gtfs_ride_board_alight | external_missing | real stop-level board/alight validation when GTFS-ride board_alight is supplied | real alighting ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_alightings=False source_kind=unknown source_verified=False |
 | A6 | real_gtfs_ride_onboard_load | external_missing | real onboard-load validation when GTFS-ride load_count/current_load is supplied | real onboard-load ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_onboard_load=False source_kind=unknown source_verified=False |
 | A7 | real_gtfs_ride_od | external_missing | real OD validation when rider_trip or origin/destination fields are supplied | real OD ground truth for the current AFC/APC-only cache | rider_trip_rows=0 has_od_fields=False source_kind=unknown source_verified=False |
+| A8 | real_public_bus_stop_board_alight | supported | real public bus stop/trip boardings and alightings from MBTA | GTFS-ride-native board_alight feed unless supplied separately | rows=1202491 routes=152 stops=6775 total_boardings=987905.5 total_alightings=985893.8 |
+| A9 | real_public_bus_stop_onboard_load | supported | real public bus stop/trip onboard load averages from MBTA | onboard-load improvement under Freq-HRL unless linked to a control validation | rows=1202491 mean_load=10.0635 max_load=69.4980 |
+| A10 | real_public_subway_od_estimate | supported | real public agency subway OD estimates from MTA | observed individual OD truth or bus OD/onboard load | sample_rows=5000 full_table_rows=116279069 origins=422 destinations=422 od_pairs=4860 |
 
 ## Native Service Metrics
 

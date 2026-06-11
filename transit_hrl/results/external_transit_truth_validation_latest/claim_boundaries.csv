@@ -1,0 +1,4 @@
+id,evidence_item,status,allowed_wording,forbidden_wording,evidence
+E1,real_public_bus_stop_board_alight,supported,real public bus stop/trip boardings and alightings from MBTA,GTFS-ride-native board_alight feed unless supplied separately,rows=1202491 routes=152 stops=6775 total_boardings=987905.5 total_alightings=985893.8
+E2,real_public_bus_stop_onboard_load,supported,real public bus stop/trip onboard load averages from MBTA,onboard-load improvement under Freq-HRL unless linked to a control validation,rows=1202491 mean_load=10.0635 max_load=69.4980
+E3,real_public_subway_od_estimate,supported,real public agency subway OD estimates from MTA,observed individual OD truth or bus OD/onboard load,sample_rows=5000 full_table_rows=116279069 origins=422 destinations=422 od_pairs=4860

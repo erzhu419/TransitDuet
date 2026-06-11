@@ -23,6 +23,9 @@ DEFAULT_APC_CSV = Path("transit_hrl/data/public_apc_halifax/route_boardings.csv"
 DEFAULT_NATIVE_SUMMARY = Path(
     "transit_hrl/results/transit_native_real_demand_service_response_v7_48pair_merged/summary.json"
 )
+DEFAULT_EXTERNAL_TRUTH_SUMMARY = Path(
+    "transit_hrl/results/external_transit_truth_validation_latest/summary.json"
+)
 DEFAULT_OUTPUT_DIR = Path("transit_hrl/results/agency_demand_onboard_coverage_latest")
 
 AFC_TIMESTAMP_COLUMNS = ("transit_timestamp", "timestamp", "datetime", "date_time")
@@ -377,11 +380,47 @@ def summarize_native_summary(data: dict[str, Any], *, variant: str) -> dict[str,
     }
 
 
+def summarize_external_truth(data: dict[str, Any]) -> dict[str, Any]:
+    if not data:
+        return {
+            "source": "external_transit_truth",
+            "path_status": "not_configured",
+            "claim_status": "external_missing",
+            "boundary": "optional public external board/alight/load/OD truth summary was not supplied",
+            "claim_boundaries": [],
+            "source_coverage": [],
+        }
+    boundaries = [
+        dict(row) for row in data.get("claim_boundaries", [])
+        if isinstance(row, dict)
+    ]
+    source_coverage = [
+        dict(row) for row in data.get("source_coverage", [])
+        if isinstance(row, dict)
+    ]
+    supported = sum(1 for row in boundaries if str(row.get("status", "")) == "supported")
+    return {
+        "source": "external_transit_truth",
+        "path_status": "present",
+        "claim_status": "supported" if boundaries and supported == len(boundaries) else "partial",
+        "evidence_scope": str(data.get("summary", {}).get("evidence_scope", "")),
+        "supported_boundaries": supported,
+        "total_boundaries": len(boundaries),
+        "claim_boundaries": boundaries,
+        "source_coverage": source_coverage,
+        "boundary": (
+            "public external truth-source coverage; not a native control "
+            "improvement claim unless linked to a performance artifact"
+        ),
+    }
+
+
 def build_claim_boundaries(
     afc: dict[str, Any],
     apc: dict[str, Any],
     gtfs_ride: dict[str, Any],
     native: dict[str, Any],
+    external_truth: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     gtfs_has_alight = bool(gtfs_ride.get("has_alightings"))
     gtfs_has_load = bool(gtfs_ride.get("has_onboard_load"))
@@ -399,7 +438,7 @@ def build_claim_boundaries(
         f" source_kind={gtfs_ride.get('source_kind', 'unknown')} "
         f"source_verified={gtfs_source_verified}"
     )
-    return [
+    rows = [
         {
             "id": "A1",
             "evidence_item": "real_afc_station_hour_demand",
@@ -471,6 +510,27 @@ def build_claim_boundaries(
             ),
         },
     ]
+    external_truth = external_truth or {}
+    external_rows = [
+        dict(row) for row in external_truth.get("claim_boundaries", [])
+        if isinstance(row, dict)
+    ]
+    id_map = {
+        "real_public_bus_stop_board_alight": "A8",
+        "real_public_bus_stop_onboard_load": "A9",
+        "real_public_subway_od_estimate": "A10",
+    }
+    for row in external_rows:
+        item = str(row.get("evidence_item", ""))
+        rows.append({
+            "id": id_map.get(item, f"A{len(rows) + 1}"),
+            "evidence_item": item,
+            "status": str(row.get("status", "missing")),
+            "allowed_wording": str(row.get("allowed_wording", "")),
+            "forbidden_wording": str(row.get("forbidden_wording", "")),
+            "evidence": str(row.get("evidence", "")),
+        })
+    return rows
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -509,9 +569,12 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         coverage = (
             f"stations={row.get('unique_station_complexes', '')} "
             f"routes={row.get('unique_routes', '')} "
+            f"stops={row.get('unique_stops', '')} "
+            f"origins={row.get('unique_origins', '')} "
+            f"destinations={row.get('unique_destinations', '')} "
             f"time_bins={row.get('unique_time_bins', row.get('unique_route_time_bins', ''))}"
         )
-        rows = row.get("rows", row.get("board_alight_rows", 0))
+        rows = row.get("rows", row.get("sample_rows", row.get("board_alight_rows", 0)))
         lines.append(
             f"| {row.get('source', '')} | {row.get('claim_status', row.get('path_status', ''))} "
             f"| {rows} | {coverage} | {row.get('boundary', '')} |"
@@ -547,6 +610,7 @@ def run_coverage(
     afc_csv: Path = DEFAULT_AFC_CSV,
     apc_csv: Path = DEFAULT_APC_CSV,
     native_summary: Path = DEFAULT_NATIVE_SUMMARY,
+    external_truth_summary: Path | None = None,
     gtfs_ride_dir: Path | None = None,
     gtfs_ride_source_kind: str = "unknown",
     gtfs_ride_source_url: str = "",
@@ -562,6 +626,7 @@ def run_coverage(
     afc_rows, afc_fields = _read_csv_rows(afc_csv)
     apc_rows, apc_fields = _read_csv_rows(apc_csv)
     native_data = _read_json(native_summary)
+    external_truth_data = _read_json(external_truth_summary) if external_truth_summary else {}
     afc = summarize_afc_rows(
         afc_rows,
         afc_fields,
@@ -583,9 +648,14 @@ def run_coverage(
         agency=str(gtfs_ride_agency),
     )
     native = summarize_native_summary(native_data, variant=str(native_variant))
-    boundaries = build_claim_boundaries(afc, apc, gtfs_ride, native)
+    external_truth = summarize_external_truth(external_truth_data)
+    boundaries = build_claim_boundaries(afc, apc, gtfs_ride, native, external_truth)
     supported_boundaries = sum(1 for row in boundaries if row["status"] == "supported")
     external_missing = sum(1 for row in boundaries if row["status"] == "external_missing")
+    external_truth_supported = (
+        external_truth.get("claim_status") == "supported"
+        and int(external_truth.get("supported_boundaries", 0)) >= 3
+    )
     evidence_scope = (
         "real_afc_apc_demand_plus_native_service_response"
         if afc["claim_status"] == "supported"
@@ -599,20 +669,27 @@ def run_coverage(
         and gtfs_ride.get("source_verified")
     ):
         evidence_scope = "real_gtfs_ride_od_onboard_plus_native_service_response"
+    elif evidence_scope != "partial" and external_truth_supported:
+        evidence_scope = "real_afc_apc_external_board_alight_load_od_plus_native_service_response"
+    source_coverage = [afc, apc, gtfs_ride]
+    if external_truth.get("path_status") == "present":
+        source_coverage.extend(external_truth.get("source_coverage", []))
     payload = {
         "summary": {
             "evidence_scope": evidence_scope,
             "supported_boundaries": supported_boundaries,
             "external_missing_boundaries": external_missing,
-            "source_count": 3,
+            "source_count": len(source_coverage),
         },
-        "source_coverage": [afc, apc, gtfs_ride],
+        "source_coverage": source_coverage,
+        "external_truth": external_truth,
         "native_service": native,
         "claim_boundaries": boundaries,
         "inputs": {
             "afc_csv": str(afc_csv),
             "apc_csv": str(apc_csv),
             "native_summary": str(native_summary),
+            "external_truth_summary": str(external_truth_summary) if external_truth_summary else "",
             "gtfs_ride_dir": str(gtfs_ride_dir) if gtfs_ride_dir else "",
             "gtfs_ride_source_kind": str(gtfs_ride_source_kind),
             "gtfs_ride_source_url": str(gtfs_ride_source_url),
@@ -620,8 +697,10 @@ def run_coverage(
         },
         "boundary": (
             "This ledger separates observed agency demand from native simulator "
-            "service metrics.  Claims about real OD/onboard-load/alighting ground "
-            "truth require external files that expose those fields."
+            "service metrics and external truth-source coverage.  Public MBTA "
+            "and MTA truth sources close data-availability boundaries only for "
+            "the fields they expose; they do not by themselves prove native "
+            "control improvement on those exact files."
         ),
     }
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -639,6 +718,7 @@ def main() -> None:
     parser.add_argument("--afc-csv", type=Path, default=DEFAULT_AFC_CSV)
     parser.add_argument("--apc-csv", type=Path, default=DEFAULT_APC_CSV)
     parser.add_argument("--native-summary", type=Path, default=DEFAULT_NATIVE_SUMMARY)
+    parser.add_argument("--external-truth-summary", type=Path, default=DEFAULT_EXTERNAL_TRUTH_SUMMARY)
     parser.add_argument("--gtfs-ride-dir", type=Path, default=None)
     parser.add_argument("--gtfs-ride-source-kind", default="unknown")
     parser.add_argument("--gtfs-ride-source-url", default="")
@@ -657,6 +737,7 @@ def main() -> None:
         afc_csv=args.afc_csv,
         apc_csv=args.apc_csv,
         native_summary=args.native_summary,
+        external_truth_summary=args.external_truth_summary,
         gtfs_ride_dir=args.gtfs_ride_dir,
         gtfs_ride_source_kind=str(args.gtfs_ride_source_kind),
         gtfs_ride_source_url=str(args.gtfs_ride_source_url),

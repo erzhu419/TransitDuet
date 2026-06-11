@@ -324,3 +324,45 @@ Current result after refreshing `agency_demand_onboard_coverage_latest`:
 
 So this can be closed, but only with a real external feed. The code path is
 ready; the data is still the blocker.
+
+## 2026-06-12 Public External Transit Truth Sources
+
+Added `external_transit_truth_validation.py` and generated
+`transit_hrl/results/external_transit_truth_validation_latest`. This closes the
+data-availability part of the external Transit truth gap with two public agency
+sources:
+
+- MBTA Blue Book bus ridership by trip/season/route/stop:
+  `mbta_bus_stop_trip_ridership`, Spring/Fall archive, selected `Fall_2025`.
+  The validated file has 1,202,491 stop/trip rows, 152 routes, 6,775 stops,
+  987,905.5 average boardings, 985,893.8 average alightings, mean load 10.0635,
+  and max load 69.4980. Claim rows:
+  `real_public_bus_stop_board_alight=supported` and
+  `real_public_bus_stop_onboard_load=supported`.
+- MTA Subway Origin-Destination Ridership Estimate 2024:
+  `mta_subway_od_estimate_2024`, sampled through the public API. The local
+  validation uses 5,000 rows from a 116,279,069-row table, with 422 origins,
+  422 destinations, and 4,860 OD pairs. Claim row:
+  `real_public_subway_od_estimate=supported`.
+
+After refreshing `agency_demand_onboard_coverage_latest`:
+
+- evidence scope:
+  `real_afc_apc_external_board_alight_load_od_plus_native_service_response`
+- supported boundary rows: `7`
+- external-missing boundary rows: `3`
+- the remaining missing rows are specifically GTFS-ride-native:
+  `real_gtfs_ride_board_alight`, `real_gtfs_ride_onboard_load`, and
+  `real_gtfs_ride_od`
+
+After refreshing `top_journal_unified_matrix_latest`, the matrix remains 9
+supported and 0 partial. C2 now records both native real-demand
+service-response support and public external board/alight/load/estimated-OD
+source coverage. The remaining paper boundary is narrower: MBTA and MTA are
+not one joint agency OD/onboard-load native control loop, and a native
+GTFS-ride feed remains optional replication rather than current evidence.
+
+Raw downloaded caches are ignored under:
+
+- `transit_hrl/data/public_mbta_bus_ridership_raw/`
+- `transit_hrl/data/public_mta_od_raw/`

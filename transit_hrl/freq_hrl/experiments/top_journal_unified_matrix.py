@@ -432,6 +432,12 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
     agency_external_missing = sorted(
         key for key, value in agency_boundary_status.items() if value == "external_missing"
     )
+    external_truth_items = {
+        "real_public_bus_stop_board_alight",
+        "real_public_bus_stop_onboard_load",
+        "real_public_subway_od_estimate",
+    }
+    agency_external_truth_supported = external_truth_items.issubset(set(agency_supported_boundaries))
     agency_scope = str(
         agency_coverage.get("summary", {}).get("evidence_scope", "")
         if isinstance(agency_coverage, dict)
@@ -545,12 +551,21 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
         partial=c2_partial,
     )
     if c2_status == "supported":
-        c2_remaining_gap = (
-            "Closed for the current public AFC/APC native service-response "
-            "validation. External real OD/onboard-load/alighting ground truth "
-            "remains a data boundary unless supplied through GTFS-ride or an "
-            "agency APC/OD export."
-        )
+        if agency_external_truth_supported:
+            c2_remaining_gap = (
+                "Closed for the current public AFC/APC native service-response "
+                "validation and public external board/alight/load/estimated-OD "
+                "source coverage. Remaining boundary: the MBTA/MTA truth files "
+                "are not yet one joint agency OD/onboard-load control loop, and "
+                "GTFS-ride-native replication remains optional."
+            )
+        else:
+            c2_remaining_gap = (
+                "Closed for the current public AFC/APC native service-response "
+                "validation. External real OD/onboard-load/alighting ground truth "
+                "remains a data boundary unless supplied through GTFS-ride or an "
+                "agency APC/OD export."
+            )
     elif not _positive(real_service_signal):
         c2_remaining_gap = (
             "Best native real-demand artifact has score/reward/no-harm support, "
