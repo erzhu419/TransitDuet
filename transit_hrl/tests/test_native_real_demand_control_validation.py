@@ -1,4 +1,7 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 import numpy as np
 
@@ -7,8 +10,42 @@ from freq_hrl.experiments.transit.native_real_demand_control_validation import (
     build_native_real_demand_profile,
     control_score,
     paired_checks,
+    run_validation,
     variants_for_control_profile,
 )
+
+
+def _fake_demand_series(source, **kwargs):
+    return (
+        {
+            "a": np.asarray([1.0, 2.0, 3.0, 4.0]),
+            "b": np.asarray([4.0, 3.0, 2.0, 1.0]),
+        },
+        {
+            "source": source,
+            "rows": 4,
+            "boundary": "fake",
+        },
+    )
+
+
+def _fake_native_loop(**kwargs):
+    treatment = bool(kwargs.get("learned_promotion_gate", False))
+    return {
+        "status": "done",
+        "summary": {
+            "ep_reward_mean": 12.0 if treatment else 10.0,
+            "avg_wait_min_mean": 4.0 if treatment else 5.0,
+            "headway_cv_mean": 0.2,
+            "native_avg_board_wait_min_mean": 3.0 if treatment else 4.0,
+            "native_boarded_pax_mean": 55.0 if treatment else 50.0,
+            "native_alighted_pax_mean": 55.0 if treatment else 50.0,
+            "native_completed_throughput_pax_mean": 55.0 if treatment else 50.0,
+            "native_unalighted_pax_mean": 0.0,
+            "native_avg_onboard_load_mean": 0.4,
+            "LowerLFDrift_mean": 0.6 if treatment else 0.8,
+        },
+    }
 
 
 class NativeRealDemandControlValidationTest(unittest.TestCase):
@@ -227,6 +264,47 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
             control_score(better_reward_less_throughput),
             control_score(base),
         )
+
+    def test_run_validation_supports_parallel_workers(self):
+        with TemporaryDirectory() as tmp:
+            with patch(
+                "freq_hrl.experiments.transit.native_real_demand_control_validation.load_real_demand_series",
+                side_effect=_fake_demand_series,
+            ), patch(
+                "freq_hrl.experiments.transit.native_real_demand_control_validation.run_native_shared_ppo_episode_loop",
+                side_effect=_fake_native_loop,
+            ):
+                payload = run_validation(
+                    Path(tmp),
+                    config_path=Path("fake.yaml"),
+                    sources=["afc"],
+                    seeds=[1, 2],
+                    episodes=1,
+                    device="cpu",
+                    max_series=1,
+                    min_bins=1,
+                    afc_cache_csv=None,
+                    apc_cache_csv=None,
+                    afc_start="",
+                    afc_end="",
+                    apc_start="",
+                    apc_end="",
+                    limit=10,
+                    min_pairs=2,
+                    workers=2,
+                )
+        self.assertEqual(payload["workers"], 2)
+        self.assertEqual(len(payload["rows"]), 4)
+        self.assertEqual(
+            [row["variant"] for row in payload["rows"]],
+            [
+                "native_real_interval",
+                "native_real_freqhrl",
+                "native_real_interval",
+                "native_real_freqhrl",
+            ],
+        )
+        self.assertTrue(payload["paired_checks"])
 
 
 if __name__ == "__main__":

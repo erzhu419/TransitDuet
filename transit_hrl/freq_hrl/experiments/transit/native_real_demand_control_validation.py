@@ -9,6 +9,7 @@ onboard-load metrics from the simulator.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import csv
 import json
 from pathlib import Path
@@ -927,6 +928,166 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
     return checks
 
 
+def _run_native_real_demand_job(job: dict[str, Any]) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    source = str(job["source"])
+    seed = int(job["seed"])
+    variant = str(job["variant"])
+    overrides = dict(job["overrides"])
+    profile = build_native_real_demand_profile(
+        dict(job["series"]),
+        source=source,
+        seed=seed,
+        bins_per_hour=int(job["bins_per_hour"]),
+    )
+    merged = json.loads(json.dumps(COMMON_OVERRIDES))
+    _merge_dict(merged, {
+        key: value for key, value in overrides.items()
+        if not str(key).startswith("_")
+    })
+    env_overrides = merged.setdefault("env", {})
+    env_overrides["real_demand_profile"] = profile
+    demand_scale = max(float(job.get("demand_scale_multiplier", 1.0)), 0.0)
+    if abs(demand_scale - 1.0) > 1e-12:
+        env_overrides["demand_scale"] = demand_scale
+    payload = run_native_shared_ppo_episode_loop(
+        output_dir=Path(job["output_dir"]) / variant / source / f"seed_{seed}",
+        config_path=Path(job["config_path"]),
+        seed=seed,
+        episodes=int(job["episodes"]),
+        device=str(job["device"]),
+        config_overrides=merged,
+        learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
+        promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.55)),
+        promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
+        promotion_gate_age_min=float(overrides.get("_promotion_gate_age_min", 0.0)),
+        promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
+        promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
+        promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
+        promotion_gate_wait_pressure_override=bool(overrides.get("_promotion_gate_wait_pressure_override", False)),
+        promotion_gate_wait_pressure_override_min=float(
+            overrides.get("_promotion_gate_wait_pressure_override_min", 0.0)
+        ),
+        promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
+        promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
+        promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
+        promotion_replan_policy=str(overrides.get("_promotion_replan_policy", "actor")),
+        promotion_replan_wait_gain_s=float(overrides.get("_promotion_replan_wait_gain_s", 0.0)),
+        promotion_replan_max_shift_s=float(overrides.get("_promotion_replan_max_shift_s", 30.0)),
+        promotion_replan_state_wait_weight=float(overrides.get("_promotion_replan_state_wait_weight", 1.0)),
+        promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
+        promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
+        promotion_replan_max_pressure=float(overrides.get("_promotion_replan_max_pressure", 0.0)),
+        promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
+        promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
+        promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
+        promotion_replan_same_wait_min=float(overrides.get("_promotion_replan_same_wait_min", 0.0)),
+        promotion_replan_same_wait_max=float(overrides.get("_promotion_replan_same_wait_max", 0.0)),
+        promotion_replan_gap_guard_min_ratio=float(overrides.get("_promotion_replan_gap_guard_min_ratio", 0.0)),
+        promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
+        promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
+        promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
+        promotion_replan_adaptive_drift_penalty_gain=float(
+            overrides.get("_promotion_replan_adaptive_drift_penalty_gain", 0.0)
+        ),
+        promotion_replan_adaptive_drift_penalty_min_scale=float(
+            overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
+        ),
+        promotion_replan_adaptive_drift_accept_min_scale=float(
+            overrides.get("_promotion_replan_adaptive_drift_accept_min_scale", 0.0)
+        ),
+        promotion_replan_gap_risk_accept_max_scale=float(
+            overrides.get("_promotion_replan_gap_risk_accept_max_scale", 0.0)
+        ),
+        promotion_replan_reward_floor_min_score=float(
+            overrides.get("_promotion_replan_reward_floor_min_score", 0.0)
+        ),
+        promotion_replan_reward_floor_wait_weight=float(
+            overrides.get("_promotion_replan_reward_floor_wait_weight", 1.0)
+        ),
+        promotion_replan_reward_floor_target_weight=float(
+            overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
+        ),
+        promotion_replan_reward_floor_throughput_weight=float(
+            overrides.get("_promotion_replan_reward_floor_throughput_weight", 0.0)
+        ),
+        promotion_replan_reward_floor_fleet_weight=float(
+            overrides.get("_promotion_replan_reward_floor_fleet_weight", 0.0)
+        ),
+        promotion_replan_reward_floor_action_cost=float(
+            overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
+        ),
+        promotion_replan_reward_floor_gap_cost=float(overrides.get("_promotion_replan_reward_floor_gap_cost", 0.25)),
+        promotion_replan_reward_floor_hold_cost=float(
+            overrides.get("_promotion_replan_reward_floor_hold_cost", 0.35)
+        ),
+        promotion_replan_throughput_guard_min_score=float(
+            overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
+        ),
+        promotion_replan_throughput_floor_min_score=float(
+            overrides.get("_promotion_replan_throughput_floor_min_score", 0.0)
+        ),
+        promotion_replan_throughput_floor_min_delta_fraction=float(
+            overrides.get("_promotion_replan_throughput_floor_min_delta_fraction", 0.0)
+        ),
+        promotion_replan_throughput_floor_fleet_util_max=float(
+            overrides.get("_promotion_replan_throughput_floor_fleet_util_max", 0.0)
+        ),
+        promotion_replan_throughput_floor_same_hold_max=float(
+            overrides.get("_promotion_replan_throughput_floor_same_hold_max", 0.0)
+        ),
+        promotion_replan_target_headway_min_s=float(overrides.get("_promotion_replan_target_headway_min_s", 0.0)),
+        promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
+        promotion_replan_project_target_headway=bool(
+            overrides.get("_promotion_replan_project_target_headway", False)
+        ),
+        promotion_replan_target_headway_project_margin_s=float(
+            overrides.get("_promotion_replan_target_headway_project_margin_s", 0.25)
+        ),
+        promotion_replan_final_delta_abs_max_s=float(overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)),
+        promotion_replan_final_delta_abs_min_s=float(overrides.get("_promotion_replan_final_delta_abs_min_s", 0.0)),
+        promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
+        promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
+        promotion_replan_actor_base_trust_s=float(overrides.get("_promotion_replan_actor_base_trust_s", 0.0)),
+        promotion_replan_terminal_early_cap_s=float(overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)),
+        promotion_replan_terminal_early_relax=bool(overrides.get("_promotion_replan_terminal_early_relax", False)),
+        lower_hf_wait_action_gain_s=float(overrides.get("_lower_hf_wait_action_gain_s", 0.0)),
+        lower_hf_wait_context_dim=int(overrides.get("_lower_hf_wait_context_dim", 0)),
+        lower_hf_wait_min_scale=float(overrides.get("_lower_hf_wait_min_scale", 0.0)),
+        lower_hf_wait_max_scale=float(overrides.get("_lower_hf_wait_max_scale", 1.0)),
+        lower_hf_wait_load_damping_weight=float(overrides.get("_lower_hf_wait_load_damping_weight", 0.0)),
+        lower_hf_wait_schedule_slack_damping_weight=float(
+            overrides.get("_lower_hf_wait_schedule_slack_damping_weight", 0.0)
+        ),
+        lower_hf_wait_queue_boost_weight=float(overrides.get("_lower_hf_wait_queue_boost_weight", 0.0)),
+        lower_hf_wait_boarding_rescue_gain_s=float(overrides.get("_lower_hf_wait_boarding_rescue_gain_s", 0.0)),
+        lower_hf_wait_boarding_rescue_max_s=float(overrides.get("_lower_hf_wait_boarding_rescue_max_s", 0.0)),
+        lower_hf_wait_boarding_rescue_queue_min=float(
+            overrides.get("_lower_hf_wait_boarding_rescue_queue_min", 0.0)
+        ),
+        lower_hf_wait_boarding_rescue_load_max=float(
+            overrides.get("_lower_hf_wait_boarding_rescue_load_max", 0.0)
+        ),
+        adaptive_lower_drift_penalty_gain=float(overrides.get("_adaptive_lower_drift_penalty_gain", 0.0)),
+        adaptive_lower_drift_penalty_min_scale=float(
+            overrides.get("_adaptive_lower_drift_penalty_min_scale", 0.25)
+        ),
+        offpolicy_replay_updates=int(overrides.get("_offpolicy_replay_updates", 1)),
+    )
+    key = f"{source}:{seed}:{variant}"
+    compact = {
+        "summary": payload.get("summary", {}),
+        "status": payload.get("status", "missing"),
+    }
+    row = _row_from_payload(
+        source=source,
+        seed=seed,
+        variant=variant,
+        payload=payload,
+        service_adjustment=overrides.get("_service_outcome_adjustment"),
+    )
+    return key, compact, row
+
+
 def run_validation(
     output_dir: Path,
     *,
@@ -947,12 +1108,12 @@ def run_validation(
     min_pairs: int,
     control_profile: str = "default",
     demand_scale_multiplier: float = 1.0,
+    workers: int = 1,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     variants = variants_for_control_profile(control_profile)
-    rows: list[dict[str, Any]] = []
-    payloads: dict[str, Any] = {}
     metadata: list[dict[str, Any]] = []
+    jobs: list[dict[str, Any]] = []
     for source in sources:
         series, source_meta = load_real_demand_series(
             source,
@@ -969,184 +1130,40 @@ def run_validation(
         bins_per_hour = 1 if source == "afc" else 2
         metadata.append({**source_meta, "series": len(series), "bins_per_hour": bins_per_hour})
         for seed in seeds:
-            profile = build_native_real_demand_profile(
-                series,
-                source=source,
-                seed=int(seed),
-                bins_per_hour=bins_per_hour,
-            )
             for variant, overrides in variants.items():
-                merged = json.loads(json.dumps(COMMON_OVERRIDES))
-                _merge_dict(merged, {
-                    key: value for key, value in overrides.items()
-                    if not str(key).startswith("_")
+                jobs.append({
+                    "source": source,
+                    "series": series,
+                    "bins_per_hour": bins_per_hour,
+                    "seed": int(seed),
+                    "variant": variant,
+                    "overrides": overrides,
+                    "output_dir": output_dir,
+                    "config_path": config_path,
+                    "episodes": int(episodes),
+                    "device": str(device),
+                    "demand_scale_multiplier": float(demand_scale_multiplier),
                 })
-                env_overrides = merged.setdefault("env", {})
-                env_overrides["real_demand_profile"] = profile
-                demand_scale = max(float(demand_scale_multiplier), 0.0)
-                if abs(demand_scale - 1.0) > 1e-12:
-                    env_overrides["demand_scale"] = demand_scale
-                payload = run_native_shared_ppo_episode_loop(
-                    output_dir=output_dir / variant / str(source) / f"seed_{int(seed)}",
-                    config_path=config_path,
-                    seed=int(seed),
-                    episodes=int(episodes),
-                    device=str(device),
-                    config_overrides=merged,
-                    learned_promotion_gate=bool(overrides.get("_learned_promotion_gate", False)),
-                    promotion_gate_threshold=float(overrides.get("_promotion_gate_threshold", 0.55)),
-                    promotion_gate_strength_min=float(overrides.get("_promotion_gate_strength_min", 0.0)),
-                    promotion_gate_age_min=float(overrides.get("_promotion_gate_age_min", 0.0)),
-                    promotion_gate_min_elapsed_s=float(overrides.get("_promotion_gate_min_elapsed_s", 0.0)),
-                    promotion_gate_cooldown_s=float(overrides.get("_promotion_gate_cooldown_s", 0.0)),
-                    promotion_gate_preselect_action=bool(overrides.get("_promotion_gate_preselect_action", False)),
-                    promotion_gate_wait_pressure_override=bool(
-                        overrides.get("_promotion_gate_wait_pressure_override", False)
-                    ),
-                    promotion_gate_wait_pressure_override_min=float(
-                        overrides.get("_promotion_gate_wait_pressure_override_min", 0.0)
-                    ),
-                    promotion_gate_low_signal_min=float(overrides.get("_promotion_gate_low_signal_min", 0.0)),
-                    promotion_gate_max_hf_to_lf_ratio=float(overrides.get("_promotion_gate_max_hf_to_lf_ratio", 0.0)),
-                    promotion_gate_max_replans=int(overrides.get("_promotion_gate_max_replans", 0)),
-                    promotion_replan_policy=str(overrides.get("_promotion_replan_policy", "actor")),
-                    promotion_replan_wait_gain_s=float(overrides.get("_promotion_replan_wait_gain_s", 0.0)),
-                    promotion_replan_max_shift_s=float(overrides.get("_promotion_replan_max_shift_s", 30.0)),
-                    promotion_replan_state_wait_weight=float(overrides.get("_promotion_replan_state_wait_weight", 1.0)),
-                    promotion_replan_frequency_weight=float(overrides.get("_promotion_replan_frequency_weight", 1.0)),
-                    promotion_replan_min_pressure=float(overrides.get("_promotion_replan_min_pressure", 0.0)),
-                    promotion_replan_max_pressure=float(overrides.get("_promotion_replan_max_pressure", 0.0)),
-                    promotion_replan_require_shift=bool(overrides.get("_promotion_replan_require_shift", False)),
-                    promotion_replan_hold_guard_weight=float(overrides.get("_promotion_replan_hold_guard_weight", 0.0)),
-                    promotion_replan_same_hold_max=float(overrides.get("_promotion_replan_same_hold_max", 0.0)),
-                    promotion_replan_same_wait_min=float(overrides.get("_promotion_replan_same_wait_min", 0.0)),
-                    promotion_replan_same_wait_max=float(overrides.get("_promotion_replan_same_wait_max", 0.0)),
-                    promotion_replan_gap_guard_min_ratio=float(overrides.get("_promotion_replan_gap_guard_min_ratio", 0.0)),
-                    promotion_replan_gap_guard_max_ratio=float(overrides.get("_promotion_replan_gap_guard_max_ratio", 0.0)),
-                    promotion_replan_gap_risk_cap_start=float(overrides.get("_promotion_replan_gap_risk_cap_start", 0.0)),
-                    promotion_replan_gap_risk_cap_full=float(overrides.get("_promotion_replan_gap_risk_cap_full", 0.0)),
-                    promotion_replan_adaptive_drift_penalty_gain=float(
-                        overrides.get("_promotion_replan_adaptive_drift_penalty_gain", 0.0)
-                    ),
-                    promotion_replan_adaptive_drift_penalty_min_scale=float(
-                        overrides.get("_promotion_replan_adaptive_drift_penalty_min_scale", 0.25)
-                    ),
-                    promotion_replan_adaptive_drift_accept_min_scale=float(
-                        overrides.get("_promotion_replan_adaptive_drift_accept_min_scale", 0.0)
-                    ),
-                    promotion_replan_gap_risk_accept_max_scale=float(
-                        overrides.get("_promotion_replan_gap_risk_accept_max_scale", 0.0)
-                    ),
-                    promotion_replan_reward_floor_min_score=float(
-                        overrides.get("_promotion_replan_reward_floor_min_score", 0.0)
-                    ),
-                    promotion_replan_reward_floor_wait_weight=float(
-                        overrides.get("_promotion_replan_reward_floor_wait_weight", 1.0)
-                    ),
-                    promotion_replan_reward_floor_target_weight=float(
-                        overrides.get("_promotion_replan_reward_floor_target_weight", 1.0)
-                    ),
-                    promotion_replan_reward_floor_throughput_weight=float(
-                        overrides.get("_promotion_replan_reward_floor_throughput_weight", 0.0)
-                    ),
-                    promotion_replan_reward_floor_fleet_weight=float(
-                        overrides.get("_promotion_replan_reward_floor_fleet_weight", 0.0)
-                    ),
-                    promotion_replan_reward_floor_action_cost=float(
-                        overrides.get("_promotion_replan_reward_floor_action_cost", 0.05)
-                    ),
-                    promotion_replan_reward_floor_gap_cost=float(
-                        overrides.get("_promotion_replan_reward_floor_gap_cost", 0.25)
-                    ),
-                    promotion_replan_reward_floor_hold_cost=float(
-                        overrides.get("_promotion_replan_reward_floor_hold_cost", 0.35)
-                    ),
-                    promotion_replan_throughput_guard_min_score=float(
-                        overrides.get("_promotion_replan_throughput_guard_min_score", 0.0)
-                    ),
-                    promotion_replan_throughput_floor_min_score=float(
-                        overrides.get("_promotion_replan_throughput_floor_min_score", 0.0)
-                    ),
-                    promotion_replan_throughput_floor_min_delta_fraction=float(
-                        overrides.get("_promotion_replan_throughput_floor_min_delta_fraction", 0.0)
-                    ),
-                    promotion_replan_throughput_floor_fleet_util_max=float(
-                        overrides.get("_promotion_replan_throughput_floor_fleet_util_max", 0.0)
-                    ),
-                    promotion_replan_throughput_floor_same_hold_max=float(
-                        overrides.get("_promotion_replan_throughput_floor_same_hold_max", 0.0)
-                    ),
-                    promotion_replan_target_headway_min_s=float(
-                        overrides.get("_promotion_replan_target_headway_min_s", 0.0)
-                    ),
-                    promotion_replan_target_headway_max_s=float(overrides.get("_promotion_replan_target_headway_max_s", 0.0)),
-                    promotion_replan_project_target_headway=bool(
-                        overrides.get("_promotion_replan_project_target_headway", False)
-                    ),
-                    promotion_replan_target_headway_project_margin_s=float(
-                        overrides.get("_promotion_replan_target_headway_project_margin_s", 0.25)
-                    ),
-                    promotion_replan_final_delta_abs_max_s=float(
-                        overrides.get("_promotion_replan_final_delta_abs_max_s", 0.0)
-                    ),
-                    promotion_replan_final_delta_abs_min_s=float(
-                        overrides.get("_promotion_replan_final_delta_abs_min_s", 0.0)
-                    ),
-                    promotion_replan_shift_sign=float(overrides.get("_promotion_replan_shift_sign", -1.0)),
-                    promotion_replan_base_action=str(overrides.get("_promotion_replan_base_action", "active")),
-                    promotion_replan_actor_base_trust_s=float(
-                        overrides.get("_promotion_replan_actor_base_trust_s", 0.0)
-                    ),
-                    promotion_replan_terminal_early_cap_s=float(
-                        overrides.get("_promotion_replan_terminal_early_cap_s", 0.0)
-                    ),
-                    promotion_replan_terminal_early_relax=bool(
-                        overrides.get("_promotion_replan_terminal_early_relax", False)
-                    ),
-                    lower_hf_wait_action_gain_s=float(overrides.get("_lower_hf_wait_action_gain_s", 0.0)),
-                    lower_hf_wait_context_dim=int(overrides.get("_lower_hf_wait_context_dim", 0)),
-                    lower_hf_wait_min_scale=float(overrides.get("_lower_hf_wait_min_scale", 0.0)),
-                    lower_hf_wait_max_scale=float(overrides.get("_lower_hf_wait_max_scale", 1.0)),
-                    lower_hf_wait_load_damping_weight=float(
-                        overrides.get("_lower_hf_wait_load_damping_weight", 0.0)
-                    ),
-                    lower_hf_wait_schedule_slack_damping_weight=float(
-                        overrides.get("_lower_hf_wait_schedule_slack_damping_weight", 0.0)
-                    ),
-                    lower_hf_wait_queue_boost_weight=float(
-                        overrides.get("_lower_hf_wait_queue_boost_weight", 0.0)
-                    ),
-                    lower_hf_wait_boarding_rescue_gain_s=float(
-                        overrides.get("_lower_hf_wait_boarding_rescue_gain_s", 0.0)
-                    ),
-                    lower_hf_wait_boarding_rescue_max_s=float(
-                        overrides.get("_lower_hf_wait_boarding_rescue_max_s", 0.0)
-                    ),
-                    lower_hf_wait_boarding_rescue_queue_min=float(
-                        overrides.get("_lower_hf_wait_boarding_rescue_queue_min", 0.0)
-                    ),
-                    lower_hf_wait_boarding_rescue_load_max=float(
-                        overrides.get("_lower_hf_wait_boarding_rescue_load_max", 0.0)
-                    ),
-                    adaptive_lower_drift_penalty_gain=float(
-                        overrides.get("_adaptive_lower_drift_penalty_gain", 0.0)
-                    ),
-                    adaptive_lower_drift_penalty_min_scale=float(
-                        overrides.get("_adaptive_lower_drift_penalty_min_scale", 0.25)
-                    ),
-                    offpolicy_replay_updates=int(overrides.get("_offpolicy_replay_updates", 1)),
-                )
-                payloads[f"{source}:{seed}:{variant}"] = {
-                    "summary": payload.get("summary", {}),
-                    "status": payload.get("status", "missing"),
-                }
-                rows.append(_row_from_payload(
-                    source=source,
-                    seed=int(seed),
-                    variant=variant,
-                    payload=payload,
-                    service_adjustment=overrides.get("_service_outcome_adjustment"),
-                ))
+    rows: list[dict[str, Any]] = []
+    payloads: dict[str, Any] = {}
+    max_workers = max(1, min(int(workers), len(jobs) if jobs else 1))
+    if max_workers <= 1:
+        results = [_run_native_real_demand_job(job) for job in jobs]
+    else:
+        results = []
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(_run_native_real_demand_job, job) for job in jobs]
+            for future in as_completed(futures):
+                results.append(future.result())
+    for key, compact, row in results:
+        payloads[key] = compact
+        rows.append(row)
+    rows.sort(key=lambda row: (
+        str(row.get("source", "")),
+        int(row.get("seed", 0)),
+        list(variants).index(str(row.get("variant", "")))
+        if str(row.get("variant", "")) in variants else 999,
+    ))
     checks = paired_checks(rows, min_pairs=int(min_pairs))
     payload = {
         "metadata": metadata,
@@ -1154,6 +1171,7 @@ def run_validation(
         "sources": list(sources),
         "seeds": [int(seed) for seed in seeds],
         "episodes": int(episodes),
+        "workers": int(max_workers),
         "rows": rows,
         "paired_checks": checks,
         "payloads": payloads,
@@ -1247,6 +1265,7 @@ def main() -> None:
     parser.add_argument("--apc-end", default="2026-01-08")
     parser.add_argument("--limit", type=int, default=1000)
     parser.add_argument("--min-pairs", type=int, default=3)
+    parser.add_argument("--workers", type=int, default=1)
     parser.add_argument(
         "--control-profile",
         choices=sorted(CONTROL_PROFILE_OVERRIDES),
@@ -1284,6 +1303,7 @@ def main() -> None:
         min_pairs=int(args.min_pairs),
         control_profile=str(args.control_profile),
         demand_scale_multiplier=float(args.demand_scale_multiplier),
+        workers=int(args.workers),
     )
     score = next(row for row in payload["paired_checks"] if row["metric"] == "control_score")
     print(
