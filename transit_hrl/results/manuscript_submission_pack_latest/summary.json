@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "claims": 9,
+    "supported_claims": 9,
+    "baseline_rows": 40,
+    "real_data_rows": 12,
+    "figures": 5,
+    "output_dir": "transit_hrl/results/manuscript_submission_pack_latest",
+    "md_dir": "transit_hrl/md"
+  },
+  "artifacts": {
+    "unified": "transit_hrl/results/top_journal_unified_matrix_latest/summary.json",
+    "baseline": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json",
+    "agency": "transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json",
+    "external_truth": "transit_hrl/results/external_transit_truth_validation_latest/summary.json",
+    "order_book": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json",
+    "leakage": "transit_hrl/results/leakage_no_tradeoff_matrix_latest/summary.json",
+    "theory": "transit_hrl/results/freq_hrl_theory_appendix_latest/summary.json",
+    "encoder": "transit_hrl/results/encoder_cross_domain_matrix/summary.json"
+  },
+  "outputs": {
+    "claim_evidence_table": "transit_hrl/results/manuscript_submission_pack_latest/claim_evidence_table.csv",
+    "baseline_ablation_table": "transit_hrl/results/manuscript_submission_pack_latest/baseline_ablation_table.csv",
+    "real_data_table": "transit_hrl/results/manuscript_submission_pack_latest/real_data_table.csv",
+    "figure_plan": "transit_hrl/results/manuscript_submission_pack_latest/figure_plan.csv",
+    "submission_package": "transit_hrl/md/freq_hrl_submission_package_2026-06-12.md",
+    "methods_si": "transit_hrl/md/freq_hrl_methods_si_2026-06-12.md",
+    "figure_plan_md": "transit_hrl/md/freq_hrl_figure_plan_2026-06-12.md",
+    "data_code_availability": "transit_hrl/md/freq_hrl_data_code_availability_2026-06-12.md"
+  },
+  "boundary": "This package is submission-preparation scaffolding. It keeps claim wording conservative and defers actual figure rendering until a Python or R backend is selected."
+}
