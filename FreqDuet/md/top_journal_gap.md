@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-12 CST
+Last updated: 2026-06-14 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -798,21 +798,25 @@ Done means:
 
 ### 6. Phase 4 Terminal Dispatch Scope
 
-Status: `[x]` scoped as current-paper target-headway timetable; full terminal dispatch future work
+Status: `[x]` executable terminal-dispatch layer implemented; learned first-stop / terminal value layer still open
 
-The current promoted path is closer to a target-headway / executable timetable
-MVP. `dev_manual.md` also describes a stronger Phase 4 direction involving real
-terminal dispatch, actual launch time, and first-stop holding.
+The current promoted path is not just a target-headway MVP. A 2026-06-13 code
+audit confirms that the promoted main config resolves to
+`terminal_dispatch: true`, `terminal_shift_min_s: 0`, and
+`terminal_shift_max_s: 45`; `env/sim.py` uses `_freqduet_scheduled_launch` as
+the launch eligibility time and records `_actual_launch_time`. This implements
+the executable terminal-dispatch layer described in `dev_manual.md`.
 
-Done means one of the following:
+What remains open is the value layer:
 
-- implement and validate the stronger real terminal timetable path as the paper
-  main line; or
-- explicitly scope the paper method as a target-headway timetable policy and
-  move full terminal dispatch to future work / appendix.
+- a learned first-stop / terminal delay-release value model;
+- per-decision counterfactual labels or an equivalent causal estimator;
+- validation that the learned terminal action improves wait-CV-fleet tradeoffs
+  over promoted main, fixed-headway, and preserved TransitDuet-family baselines.
 
-If targeting a top transport journal, implementing the stronger Phase 4 path is
-preferred unless it destabilizes the method.
+If targeting a top transport journal, the right claim is therefore bounded
+executable terminal-dispatch timetable control, not a fully solved learned
+first-stop/terminal value policy.
 
 2026-06-08 update: the current fixed-headway-gap repair attempts provide
 evidence against heuristic terminal delay and lower value-cost penalties as the
@@ -821,15 +825,15 @@ learned first-stop / actual-terminal-launch value model with counterfactual
 wait-CV-fleet estimates, or scope full terminal dispatch as future work while
 paper-main remains target-headway executable timetable control.
 
-2026-06-10 decision: the current paper scope is now explicitly documented in
-`FreqDuet/md/phase4_scope_decision.md`. The promoted contribution remains a
-frequency-separated target-headway / executable timetable controller. Full
-actual terminal launch rescheduling and first-stop holding are kept as Phase 4
-future work unless a learned value model is later implemented and validated.
-This decision is based on negative or neutral heuristic evidence: `termhold45`
-neutral, `termfb30` near-zero bias and terminal regression, `termrelief20`
-real terminal action but wait/CV tradeoff, `termvalue20` weak/negative, and
-`valuesoft35` / LF-safe lower value-cost negative.
+2026-06-13 correction: `FreqDuet/md/phase4_scope_decision.md` has been updated
+to reflect the actual code path. Full terminal launch rescheduling is already
+implemented in bounded form; what should stay future work or appendix is the
+learned first-stop/terminal value model. This correction is consistent with the
+negative or neutral heuristic evidence: `termhold45` neutral, `termfb30`
+near-zero bias and terminal regression, `termrelief20` real terminal action but
+wait/CV tradeoff, `termvalue20` weak/negative, `valuesoft35` / LF-safe lower
+value-cost negative, and the 2026-06-13 action-level CRN/value audit showing
+that aggregate-context action selection does not beat `target0`.
 
 ### 7. External Baselines
 
@@ -1608,6 +1612,389 @@ now say that the demand-conditioned selector preserves fixed-headway-level
 robustness while improving the noisy-demand regime; a stronger top-journal claim
 still needs a true multi-candidate counterfactual value model or Phase-4
 terminal/first-stop dispatch validation.
+
+2026-06-13 multi-candidate counterfactual follow-up: tested
+`cfvalue_multicand`, a stricter executable approximation of the offline
+multi-candidate evidence that uses `headwayplanner_odgate` for
+terminal/highnoise and exact fixed-headway for OD/rush. It completed as
+scheduler-visible direct-node tasks on `node001-node006`:
+
+```text
+run: cfvalue_multicand_ep100_wu10
+t11369 node006 shard_0000_0014
+t11370 node002 shard_0014_0028
+t11371 node001 shard_0028_0042
+t11372 node003 shard_0042_0056
+t11373 node005 shard_0056_0070
+t11374 node004 shard_0070_0080
+```
+
+The run synced and aggregated `80/80` diagnostics under
+`results_freqduet/cfvalue_multicand_ep100_wu10/combined_summary`.
+
+```text
+cfvalue_multicand summary, composite mean
+terminal   1.4296
+highnoise  1.8199
+odshift    1.4414
+rushshift  1.2686
+
+cfvalue_multicand vs current main, candidate - main
+overall    -0.0101 CI [-0.0469,+0.0249]
+
+cfvalue_multicand vs fixed-headway, candidate - fixed
+overall    +0.0005 CI [-0.0119,+0.0135]
+
+cfvalue_multicand vs cfvalue_noisegate, candidate - noisegate
+terminal   -0.0026 CI [-0.0233,+0.0170]
+highnoise  +0.0329 CI [-0.0003,+0.0649]
+odshift    -0.0032 CI [-0.0204,+0.0141]
+rushshift  -0.0014 CI [-0.0087,+0.0060]
+overall    +0.0064 CI [-0.0026,+0.0155]
+```
+
+Decision: do not promote `cfvalue_multicand`. It ties current main and
+fixed-headway, but it is worse than `cfvalue_noisegate`, mainly because the
+highnoise odgate branch regressed on this rerun even though its YAML differs
+from `cfvalue_noisegate` only by `_name` / comments. This confirms that
+run-level candidate switching is too noisy to justify a stronger claim without
+common-random-number action labels or a genuinely learned value model.
+
+Tooling follow-up: added
+`scripts/export_freqduet_counterfactual_selector_configs.py`. Given
+`counterfactual_candidate_rows.csv`, it exports a selector audit and optional
+executable configs. On the current audit:
+
+```text
+conservative_vs_fixed selector
+terminal   fixed
+highnoise  odgate   delta vs fixed -0.1103 CI [-0.2068,-0.0138]
+odshift    fixed
+rushshift  fixed
+
+domain_mean exploratory selector
+terminal   odgate            delta vs fixed -0.0198 CI [-0.0887,+0.0598]
+highnoise  odgate            delta vs fixed -0.1103 CI [-0.1968,-0.0140]
+odshift    fixed
+rushshift  odgate_fixedrule  delta vs fixed -0.0238 CI [-0.0866,+0.0458]
+```
+
+Interpretation: the conservative bootstrap selector reconstructs
+`cfvalue_noisegate` from matched rollout labels, so `noisegate` is now
+documented as a data-driven conservative selector rather than a hand-tuned rule.
+The exploratory selector still has terminal/rush CIs crossing zero, so the
+remaining top-journal gap is not another domain-level router. It requires either
+action-level common-random-number counterfactual labels for terminal/headway
+choices, or a Phase-4 first-stop / actual terminal dispatch implementation.
+
+2026-06-13 action-level CRN follow-up: implemented a config-gated
+`upper.action_override` in `runner_v3.py`, generated the `cfaction_v1` matrix
+with `scripts/build_freqduet_action_counterfactual_configs.py`, and ran
+`cfaction_crn_screen_ep60_wu10` as 24 configs x 20 seeds x 60 episodes. The
+matrix covers four domains, two execution modes (`target`, `terminalhold45`),
+and three fixed upper deltas (`-20/0/+20s`). It completed as scheduler tasks
+`t11376-t11381` on node001-node006, with 480/480 diagnostics aggregated.
+
+The paired action analysis is in
+`results_freqduet/cfaction_crn_screen_ep60_wu10/action_counterfactual_analysis`
+from `scripts/summarize_freqduet_action_counterfactual.py`. Key composite
+deltas are:
+
+```text
+candidate - same-mode delta0, negative is better
+overall target -20s          +0.0063 CI [-0.0094,+0.0238]
+overall target +20s          +0.0257 CI [+0.0094,+0.0421]
+overall terminalhold45 -20s  -0.0097 CI [-0.0280,+0.0079]
+overall terminalhold45 +20s  -0.0106 CI [-0.0262,+0.0055]
+
+terminalhold45 - target, negative is better
+overall delta0               +0.0196 CI [+0.0034,+0.0360]
+overall +20s                 -0.0167 CI [-0.0313,-0.0014]
+
+best fixed action by composite
+terminal   target/delta0
+highnoise  target/delta0
+odshift    terminalhold45/+20s, delta vs target0 -0.0065 CI [-0.0281,+0.0132]
+rushshift  target/+20s,        delta vs target0 -0.0044 CI [-0.0154,+0.0062]
+overall    target/delta0
+```
+
+Decision: do not promote fixed action overrides. The action mechanism is wired
+correctly (`upper_delta_mean` tracks `-19/0/+19s`, and `+20s` produces about
+`43.9s` terminal launch shift under terminal execution), but no fixed
+headway/terminal delta robustly improves the overall objective. This closes the
+simple fixed-action CRN branch and strengthens the next-step requirement: a
+real counterfactual value model must be context conditioned at the
+decision/action level, or the work should move to the full Phase-4 terminal /
+first-stop dispatch implementation rather than another fixed-delta sweep.
+
+Action-conditioned value-model audit: using the same CRN labels, added
+`scripts/fit_freqduet_action_value_model.py` to fit a single offline
+`V(context, action)` ridge model over action features (`delta`, sign,
+terminalhold45 flag), domain features, current-main diagnostic context, and
+context-action interactions. This is stronger than the earlier per-candidate
+ridge audit because candidate effects share parameters through explicit action
+features. Seed-held-out CV still does not beat the baseline action:
+
+```text
+overall selected composite, lower is better
+global_action_mean / target0      1.4979
+action_domain                     1.5037, delta vs target0 +0.0058 CI [-0.0007,+0.0126]
+context_action                    1.5037, delta vs target0 +0.0058 CI [-0.0010,+0.0128]
+context_action_interact           1.5001, delta vs target0 +0.0022 CI [-0.0096,+0.0134]
+oracle best fixed action          1.4521
+```
+
+Interpretation: there is real oracle headroom inside the fixed-action candidate
+set, but aggregate episode/context diagnostics are not enough to select the
+right action on held-out seeds. The missing unit is per-decision
+counterfactual value, not another episode-level router. This makes the next
+credible implementation either (i) a true per-dispatch/first-stop
+counterfactual label mechanism, or (ii) the full Phase-4 actual terminal
+dispatch path.
+
+2026-06-13 trip-level value follow-up: synced all `480/480` `trip_details.csv`
+files from the same action CRN run and added
+`scripts/build_freqduet_trip_counterfactual_value_dataset.py`. The script
+matches rows by `(domain, seed, episode, trip id)` across the six action
+candidates and builds a trip-level action-value table. This is closer to the
+needed decision unit than episode summaries, but it is still based on realized
+rollout traces rather than exact simulator snapshot replay.
+
+For `gap_dev` over the last 30 episodes, the matched trip-level audit produced
+`41920` aligned trip contexts:
+
+```text
+selected trip gap cost, lower is better
+global_action_mean / target0      0.1606
+context_action                    0.1615, delta vs target0 +0.0009 CI [-0.0019,+0.0036]
+context_action_interact           0.1696, delta vs target0 +0.0091 CI [+0.0026,+0.0158]
+oracle best trip action           0.0378
+```
+
+Interpretation: the oracle gap is much larger at trip level than at episode
+level, but the old trip log features (`hour`, `trip id`, direction, period,
+headway, realized holding moments) are too shallow to learn a robust selector.
+`runner_v3.py` now logs richer per-dispatch context in `trip_details.csv`:
+upper-decision flags, promotion replan, effective launch shift, terminal gap
+pressure, fleet pressure, waiting total, and harmonic LF/HF/promotion context.
+The next experiment should rerun the action CRN matrix with these richer logs,
+then refit the trip-level value selector before touching the online policy.
+
+2026-06-13 rich-context CRN result: generated `cfaction_v2` configs with the
+same four domains, two execution modes, and three fixed deltas, but with
+`training.trip_dump_freq: 1` so every BiLevel episode dumps the enriched
+`trip_details.csv`. Synced the updated runner/scripts/configs to the isolated
+remote FreqDuet worktree and submitted
+`cfaction_v2_tripctx_ep60_wu10` as scheduler-visible direct-node CPU tasks:
+
+```text
+t11390 shard_0000_0080 done node006
+t11391 shard_0080_0160 done node001
+t11392 shard_0160_0240 done node002
+t11393 shard_0240_0320 done node003
+t11394 shard_0320_0400 done node005
+t11395 shard_0400_0480 done node004
+```
+
+The run synced and aggregated `480/480` diagnostics. Action-level paired
+summary is under
+`results_freqduet/cfaction_v2_tripctx_ep60_wu10/action_counterfactual_analysis`.
+The overall best fixed action is `terminalhold45/delta0`, but its improvement
+over `target0` is not significant:
+
+```text
+overall terminalhold45/delta0 - target0  -0.0054 CI [-0.0207,+0.0101]
+odshift target/+20s - target0             -0.0272 CI [-0.0516,-0.0017]
+rushshift terminalhold45/-20s - target0   -0.0106 CI [-0.0205,-0.0013]
+```
+
+The dense trip-level value audit used `480` `trip_details.csv` files and
+`628800` matched trip contexts (`3772800` long action rows). The script was
+optimized during this run to use vectorized trip selection, seed-level
+bootstrap, vectorized domain mean prediction, and summary-only exports for
+dense logs.
+
+```text
+trip gap cost, lower is better
+target0/global baseline          0.1098
+action_domain selected           0.1093, delta -0.0005 CI [-0.0021,+0.0009]
+context_action selected          0.1093, delta -0.0005 CI [-0.0020,+0.0008]
+context_action_interact selected 0.1172, delta +0.0074 CI [+0.0047,+0.0102]
+oracle best trip action          0.0259
+```
+
+Decision: do not promote the fixed-action value selector. Rich per-dispatch
+context confirms large trip-level oracle headroom, but it still cannot produce
+a seed-held-out selector with robust improvement over `target0`; adding
+context-action interactions overfits and significantly worsens gap cost. This
+closes the shallow fixed-delta/value branch as diagnostic evidence. The next
+credible repair is not another fixed action sweep; it is either simulator
+snapshot / replay counterfactual labels at the dispatch decision, or a Phase-4
+learned terminal / first-stop dispatch value layer.
+
+2026-06-14 snapshot-replay counterfactual value follow-up: added true
+per-dispatch snapshot audit tooling:
+
+- `scripts/audit_freqduet_snapshot_counterfactual.py`
+- `scripts/run_freqduet_snapshot_counterfactual_matrix.py`
+- `scripts/submit_freqduet_snapshot_cf_scheduleurm.py`
+- `scripts/fit_freqduet_snapshot_value_model.py`
+
+The first snapshot matrix (`snapshot_cf_v1_4domain_20seed_snap20_h600`) is now
+marked invalid for evidence because candidate replays did not restore common
+random numbers. Its apparent oracle gap should not be used in the paper. The
+audit script now captures/restores NumPy, Python, and Torch RNG states around
+every candidate replay so candidate actions are evaluated under matched
+passenger-arrival randomness and the audit does not perturb the live trajectory.
+
+The CRN ep0/toolchain run
+`snapshot_cf_v2_crn_earlyterm_4domain_20seed_snap20_h1800` showed the expected
+pattern: there is real terminal-action oracle headroom, but fixed early/late
+launch rules are unsafe on average. A residual seed-held-out random-forest
+selector produced only a small offline gain and was treated as tooling evidence,
+not a trained-policy result, because snapshots came from the initial/random
+policy state.
+
+The trained-state pilot
+`snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800` samples after 40
+burn-in episodes, uses five terminal candidates
+`term45_m60`, `term45_m30`, `term45_0`, `term45_p30`, and `term45_p60`, and
+replays each candidate for a 1800s horizon from identical simulator snapshots.
+It produced `2400` label rows (`4` domains x `10` seeds x `12` snapshots x `5`
+candidates). Key proxy-cost deltas versus `term45_0` are:
+
+```text
+oracle best overall        -0.0478 CI [-0.0569,-0.0374]
+RF residual selector       -0.0085 CI [-0.0152,-0.0021]
+ExtraTrees residual        -0.0044 CI [-0.0093,+0.0003]
+HistGB residual            -0.0033 CI [-0.0128,+0.0068]
+```
+
+Per-domain RF residual selector deltas:
+
+```text
+terminal   +0.0019 CI [-0.0063,+0.0106]
+highnoise  -0.0166 CI [-0.0236,-0.0092]
+odshift    -0.0187 CI [-0.0380,-0.0041]
+rushshift  -0.0006 CI [-0.0125,+0.0107]
+```
+
+Decision: this is the first positive trained-state counterfactual-value signal,
+but it is still an offline pilot, not an online-policy result. Do not promote it
+into the main runner yet. The next credible step is to scale the burn-in
+snapshot matrix to the full 20 paired seeds or switch to checkpoint-based
+snapshot sampling to avoid retraining burn-in episodes for every audit job, then
+wire the residual value selector into an online evaluation wrapper and compare
+against current main and fixed-headway under paired 100/200ep validation.
+
+2026-06-14 full 20-seed trained-state snapshot result: submitted
+`snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800` as
+scheduler-visible direct-node tasks `t11426-t11431` on `node001-node006`.
+The run completed with `80/80` audit jobs and produced `4800` label rows
+(`4` domains x `20` seeds x `12` snapshots x `5` candidates). All labels have
+`ep=40`, confirming post-burn-in sampling.
+
+Candidate/oracle deltas versus `term45_0`:
+
+```text
+oracle best overall  -0.0495 CI [-0.0573,-0.0431]
+term45_m30 overall   +0.0494 CI [+0.0072,+0.0990]
+term45_m60 overall   +0.0573 CI [+0.0131,+0.1083]
+term45_p30 overall   +0.0034 CI [-0.0097,+0.0145]
+term45_p60 overall   +0.0016 CI [-0.0121,+0.0132]
+```
+
+Seed-held-out residual selector results:
+
+```text
+RF residual selector       -0.0164 CI [-0.0254,-0.0091]
+ExtraTrees residual        -0.0158 CI [-0.0248,-0.0084]
+HistGB residual            -0.0144 CI [-0.0238,-0.0067]
+linear context interaction -0.0080 CI [-0.0193,+0.0015]
+```
+
+Per-domain RF residual selector deltas:
+
+```text
+terminal   -0.0085 CI [-0.0144,-0.0028]
+highnoise  -0.0113 CI [-0.0207,-0.0020]
+odshift    -0.0120 CI [-0.0246,-0.0012]
+rushshift  -0.0339 CI [-0.0645,-0.0111]
+overall    -0.0164 CI [-0.0254,-0.0091]
+```
+
+Decision update: the 10-seed pilot was not luck. The per-dispatch
+counterfactual value signal is now stable enough to justify an online guarded
+evaluation wrapper. It is still not promoted into paper-main until an executable
+online run shows paired improvement versus current main and fixed-headway under
+the normal 100/200ep evaluation protocol.
+
+2026-06-14 online wrapper result: the executable `snapshotRF` wrapper was
+implemented with a pure-NumPy random-forest artifact fallback so it runs in the
+isolated CPU conda env on `node001-node006` without installing sklearn. The
+first online matrix,
+`snapshotrf_online_ep100_wu10_4domain_20seed`, ran `8` configs x `20` seeds x
+`100` episodes as scheduler-visible direct-node tasks `t11437-t11453`
+(`16/16` done, `0` failed). It compared current main and online `snapshotRF`
+under the same seeds.
+
+```text
+snapshotRF m00 vs current main, composite delta candidate - main
+terminal   -0.0024 CI [-0.0213,+0.0171]
+highnoise  +0.0166 CI [-0.0172,+0.0545]
+odshift    +0.0034 CI [-0.0167,+0.0242]
+rushshift  +0.0035 CI [-0.0059,+0.0124]
+overall    +0.0053 CI [-0.0049,+0.0152]
+
+snapshotRF m00 vs fixed-headway, composite delta candidate - fixed
+terminal        -0.0029 CI [-0.0229,+0.0168]
+highnoise       -0.0380 CI [-0.0743,+0.0006]
+odshift         +0.0050 CI [-0.0136,+0.0236]
+rushshift       +0.0060 CI [-0.0049,+0.0172]
+overall_shared  -0.0075 CI [-0.0204,+0.0047]
+
+current main vs fixed-headway in the same run
+overall_shared  -0.0128 CI [-0.0240,-0.0014]
+```
+
+Interpretation: the current main now beats fixed-headway overall in this clean
+100ep paired run, while the online `snapshotRF` wrapper weakens that result and
+does not improve current main. Therefore `snapshotRF m00` is not promoted.
+
+2026-06-14 stricter guard check: added episode diagnostics
+`snapshot_value_*` and ran
+`snapshotrf_m02_online_ep100_wu10_4domain_20seed`, using the same RF model but
+requiring `improve_margin >= 0.02`. This matrix ran `4` candidate configs x
+`20` seeds x `100` episodes as tasks `t11499-t11506` (`8/8` done, `0` failed).
+
+```text
+snapshotRF m02 vs current main, composite delta candidate - main
+terminal   -0.0084 CI [-0.0240,+0.0088]
+highnoise  +0.0151 CI [-0.0122,+0.0428]
+odshift    +0.0091 CI [-0.0072,+0.0258]
+rushshift  -0.0040 CI [-0.0140,+0.0053]
+overall    +0.0029 CI [-0.0059,+0.0121]
+
+snapshotRF m02 vs snapshotRF m00
+terminal   -0.0061 CI [-0.0222,+0.0088]
+highnoise  -0.0015 CI [-0.0416,+0.0380]
+odshift    +0.0057 CI [-0.0102,+0.0198]
+rushshift  -0.0075 CI [-0.0179,+0.0026]
+overall    -0.0023 CI [-0.0119,+0.0071]
+
+snapshotRF m02 vs fixed-headway
+overall_shared  -0.0098 CI [-0.0218,+0.0026]
+```
+
+The stricter guard improves m00 slightly but still does not beat current main.
+The m02 diagnostics show the selector is evaluated on about `0.336-0.342` of
+trips and still changes about `0.129-0.158` of trips, with mean predicted margin
+`0.012-0.025`. This is not a robust online repair. Keep the snapshot replay and
+RF selector as mechanism/negative evidence. The next fixed-headway-gap work
+should pivot to either Phase-4 terminal/first-stop dispatch or a stronger
+counterfactual value design that trains from true online rollouts/checkpoints,
+not this direct RF wrapper.
 
 Done means:
 

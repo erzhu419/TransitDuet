@@ -301,6 +301,15 @@ class DiagnosticLog:
         'terminal_value_selector_target_cost_mean',
         'terminal_value_selector_target_cost_max',
         'terminal_value_selector_updates',
+        'snapshot_value_selector_enabled',
+        'snapshot_value_active_mean',
+        'snapshot_value_events',
+        'snapshot_value_changed_mean',
+        'snapshot_value_changed_events',
+        'snapshot_value_margin_mean',
+        'snapshot_value_margin_max',
+        'snapshot_value_pred_mean',
+        'snapshot_value_baseline_pred_mean',
         'terminal_headway_floor_mean', 'terminal_headway_floor_events',
         'fleet_noharm_upper_pressure_mean',
         'fleet_noharm_upper_adjust_mean',
@@ -411,6 +420,7 @@ class TransitDuetV2Runner:
     def __init__(self, config, device='cpu'):
         self.cfg = config
         self.device = device
+        self.exp_name = str(config.get('_name', 'v2'))
         self.base_seed = int(config.get('seed', 0))
         self.fleet_rng = np.random.RandomState(self.base_seed)
         self.decouple_init_seeds = bool(
@@ -948,6 +958,9 @@ class TransitDuetV2Runner:
         self.upper_action_low = np.asarray(action_low, dtype=np.float32)
         self.upper_action_high = np.asarray(action_high, dtype=np.float32)
         self.upper_action_bins = None
+        self.upper_action_override_enable = False
+        self.upper_action_override_values = None
+        self.upper_action_override_disable_value_selectors = True
         upper_bins = upper_cfg.get('action_bins', None)
         if upper_bins:
             action_bins = np.asarray(
@@ -959,6 +972,65 @@ class TransitDuetV2Runner:
             if action_bins.size < 2:
                 raise ValueError("upper.action_bins must contain at least two values")
             self.upper_action_bins = action_bins
+
+        action_override_cfg = upper_cfg.get('action_override', {}) or {}
+        self.upper_action_override_enable = bool(
+            action_override_cfg.get('enable', False))
+        if self.upper_action_override_enable:
+            raw_values = action_override_cfg.get(
+                'values_s',
+                action_override_cfg.get(
+                    'values',
+                    action_override_cfg.get('delta_s', 0.0)))
+            if isinstance(raw_values, (int, float)):
+                override_values = np.full(
+                    self.upper_action_dim, float(raw_values),
+                    dtype=np.float32)
+            else:
+                override_values = np.asarray(
+                    [float(x) for x in raw_values], dtype=np.float32).reshape(-1)
+                if override_values.size == 1 and self.upper_action_dim > 1:
+                    override_values = np.full(
+                        self.upper_action_dim, float(override_values[0]),
+                        dtype=np.float32)
+            if override_values.size != self.upper_action_dim:
+                raise ValueError(
+                    "upper.action_override values size must be 1 or match "
+                    f"upper action_dim={self.upper_action_dim}")
+            self.upper_action_override_values = np.clip(
+                override_values,
+                self.upper_action_low,
+                self.upper_action_high,
+            ).astype(np.float32)
+        self.upper_action_override_disable_value_selectors = bool(
+            action_override_cfg.get('disable_value_selectors', True))
+
+        snapshot_selector_cfg = (
+            upper_cfg.get('snapshot_value_selector', {}) or {})
+        self.snapshot_value_selector_enable = bool(
+            snapshot_selector_cfg.get('enable', False))
+        self.snapshot_value_selector_start_configured = (
+            'start_ep' in snapshot_selector_cfg)
+        self.snapshot_value_selector_start_ep = int(
+            snapshot_selector_cfg.get('start_ep', 30))
+        self.snapshot_value_selector_artifact = str(
+            snapshot_selector_cfg.get('artifact', '')).strip()
+        self.snapshot_value_selector_domain = str(
+            snapshot_selector_cfg.get('domain', '')).strip().lower()
+        self.snapshot_value_selector_improve_margin = max(float(
+            snapshot_selector_cfg.get('improve_margin', 0.0)), 0.0)
+        self.snapshot_value_selector_fallback_method = str(
+            snapshot_selector_cfg.get('fallback_method', 'term45_0')).strip()
+        self.snapshot_value_selector_probe_only = bool(
+            snapshot_selector_cfg.get('probe_only', False))
+        self.snapshot_value_selector_model = None
+        self.snapshot_value_selector_forest = None
+        self.snapshot_value_selector_meta = {}
+        self.snapshot_value_selector_feature_cols = []
+        self.snapshot_value_selector_feature_medians = {}
+        self.snapshot_value_selector_candidate_methods = []
+        if self.snapshot_value_selector_enable:
+            self._load_snapshot_value_selector()
 
         residual_selector_cfg = (
             upper_cfg.get('residual_value_selector', {}) or {})
@@ -1207,6 +1279,9 @@ class TransitDuetV2Runner:
             lr=coupling_cfg.get('measurement_lr', 0.01))
         self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
         self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+        if (self.snapshot_value_selector_enable
+                and not self.snapshot_value_selector_start_configured):
+            self.snapshot_value_selector_start_ep = int(self.upper_warmup)
         if (self.upper_residual_selector_enable
                 and not self.upper_residual_selector_start_configured):
             self.upper_residual_selector_start_ep = int(self.upper_warmup)
@@ -1594,11 +1669,10 @@ class TransitDuetV2Runner:
 
         # Logging
         seed = config.get('seed', 42)
-        exp_name = config.get('_name', 'v2')
         log_base = config.get('logging', {}).get('logs_dir', 'logs')
         if not os.path.isabs(log_base):
             log_base = os.path.join(str(SCRIPT_DIR), log_base)
-        self.log_dir = os.path.join(log_base, f'{exp_name}_seed{seed}')
+        self.log_dir = os.path.join(log_base, f'{self.exp_name}_seed{seed}')
         os.makedirs(self.log_dir, exist_ok=True)
         self.env.configure_frequency_logging(self.log_dir)
         self.history = defaultdict(list)
@@ -1953,6 +2027,315 @@ class TransitDuetV2Runner:
     def _prepare_upper_action(self, action_vec):
         action = self._apply_upper_fleet_noharm(action_vec)
         return self._quantize_upper_action(action)
+
+    def _resolve_local_path(self, path_text):
+        path = Path(str(path_text))
+        if path.is_absolute():
+            return path
+        return SCRIPT_DIR / path
+
+    def _load_snapshot_value_selector(self):
+        if not self.snapshot_value_selector_artifact:
+            self.snapshot_value_selector_enable = False
+            return
+        artifact_dir = self._resolve_local_path(
+            self.snapshot_value_selector_artifact)
+        model_path = artifact_dir / 'model.joblib'
+        forest_path = artifact_dir / 'forest_model.npz'
+        meta_path = artifact_dir / 'model_artifact.json'
+        if (not meta_path.exists()
+                or (not model_path.exists() and not forest_path.exists())):
+            raise FileNotFoundError(
+                "snapshot value selector artifact missing model.joblib/"
+                f"forest_model.npz or model_artifact.json under {artifact_dir}")
+        if model_path.exists():
+            try:
+                import joblib
+                self.snapshot_value_selector_model = joblib.load(model_path)
+            except ModuleNotFoundError:
+                self.snapshot_value_selector_model = None
+            except Exception as exc:
+                if not forest_path.exists():
+                    raise RuntimeError(
+                        "failed to load snapshot selector joblib artifact"
+                    ) from exc
+                self.snapshot_value_selector_model = None
+        if self.snapshot_value_selector_model is None:
+            if not forest_path.exists():
+                raise RuntimeError(
+                    "snapshot selector needs sklearn for model.joblib or a "
+                    "forest_model.npz fallback artifact")
+            with np.load(forest_path) as data:
+                self.snapshot_value_selector_forest = {
+                    key: data[key] for key in data.files
+                }
+        self.snapshot_value_selector_meta = json.loads(
+            meta_path.read_text(encoding='utf-8'))
+        self.snapshot_value_selector_feature_cols = list(
+            self.snapshot_value_selector_meta.get('feature_cols', []))
+        self.snapshot_value_selector_feature_medians = dict(
+            self.snapshot_value_selector_meta.get('feature_medians', {}))
+        self.snapshot_value_selector_candidate_methods = list(
+            self.snapshot_value_selector_meta.get('candidate_methods', []))
+        if not self.snapshot_value_selector_candidate_methods:
+            self.snapshot_value_selector_candidate_methods = [
+                'term45_m60', 'term45_m30', 'term45_0',
+                'term45_p30', 'term45_p60',
+            ]
+
+    def _snapshot_value_predict(self, x):
+        x = np.asarray(x, dtype=np.float64)
+        if self.snapshot_value_selector_model is not None:
+            return np.asarray(
+                self.snapshot_value_selector_model.predict(x),
+                dtype=np.float64)
+        forest = self.snapshot_value_selector_forest
+        if forest is None:
+            raise RuntimeError("snapshot value selector model is not loaded")
+        ptr = forest['tree_ptr']
+        left = forest['children_left']
+        right = forest['children_right']
+        feature = forest['feature']
+        threshold = forest['threshold']
+        value = forest['value']
+        out = np.zeros(x.shape[0], dtype=np.float64)
+        n_trees = max(1, len(ptr) - 1)
+        for row_idx, row in enumerate(x):
+            total = 0.0
+            for tree_idx in range(n_trees):
+                start = int(ptr[tree_idx])
+                node = 0
+                while True:
+                    global_node = start + node
+                    child_left = int(left[global_node])
+                    if child_left < 0:
+                        total += float(value[global_node])
+                        break
+                    feat_idx = int(feature[global_node])
+                    if float(row[feat_idx]) <= float(threshold[global_node]):
+                        node = child_left
+                    else:
+                        node = int(right[global_node])
+            out[row_idx] = total / float(n_trees)
+        return out
+
+    def _snapshot_selector_domain(self):
+        if self.snapshot_value_selector_domain:
+            return self.snapshot_value_selector_domain
+        name = self.exp_name
+        if 'gen_highnoise' in name:
+            return 'highnoise'
+        if 'gen_odshift' in name:
+            return 'odshift'
+        if 'gen_rushshift' in name:
+            return 'rushshift'
+        if 'terminal' in name:
+            return 'terminal'
+        return 'terminal'
+
+    @staticmethod
+    def _snapshot_selector_parse_action(method):
+        text = str(method)
+        if text.startswith('term45_'):
+            mode = 'term45'
+            token = text[len('term45_'):]
+        elif text.startswith('target_'):
+            mode = 'target'
+            token = text[len('target_'):]
+        elif text == 'target0':
+            mode = 'target'
+            token = '0'
+        else:
+            raise ValueError(f"unsupported snapshot selector action {method!r}")
+        if token == '0':
+            delta_s = 0.0
+        elif token.startswith('m'):
+            delta_s = -float(token[1:])
+        elif token.startswith('p'):
+            delta_s = float(token[1:])
+        else:
+            delta_s = float(token)
+        scale = 60.0
+        return {
+            'action_mode': mode,
+            'action_delta_s': delta_s,
+            'action_delta_norm': delta_s / scale,
+            'action_abs_delta_norm': abs(delta_s) / scale,
+            'action_positive': 1.0 if delta_s > 0 else 0.0,
+            'action_negative': 1.0 if delta_s < 0 else 0.0,
+            'action_zero': 1.0 if abs(delta_s) < 1e-9 else 0.0,
+            'action_term45': 1.0 if mode == 'term45' else 0.0,
+            'action_target': 1.0 if mode == 'target' else 0.0,
+            'action_term45_x_delta': (
+                (1.0 if mode == 'term45' else 0.0) * delta_s / scale),
+            'action_term45_x_abs_delta': (
+                (1.0 if mode == 'term45' else 0.0) * abs(delta_s) / scale),
+        }
+
+    def _snapshot_selector_headway_cv(self):
+        values = []
+        for bus in getattr(self.env, 'bus_all', []):
+            if not getattr(bus, 'on_route', False):
+                continue
+            for attr in ('forward_headway', 'backward_headway'):
+                value = float(getattr(bus, attr, 0.0) or 0.0)
+                if value > 0.0 and np.isfinite(value):
+                    values.append(value)
+        if len(values) < 2:
+            return 0.0
+        arr = np.asarray(values, dtype=np.float64)
+        return float(arr.std() / max(arr.mean(), 1.0))
+
+    def _snapshot_selector_context(self, trip):
+        launch = float(getattr(trip, 'launch_time', 0.0))
+        hour = 6 + int(launch) // 3600
+        period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
+            'off' if 9 < hour < 17 else 'trans')
+        try:
+            waiting = sum(
+                len(getattr(station, 'waiting_passengers', []))
+                for station in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting = 0
+        concurrent, n_fleet, _ = self._fleet_pressure()
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        base_hw = float(getattr(trip, 'target_headway', 360.0))
+        if self.timetable_planner is not None:
+            try:
+                base_hw = float(self.timetable_planner._base_headway(trip))
+            except Exception:
+                pass
+        fleet_target = max(float(n_fleet), 1.0)
+        return {
+            'dir_signed': 1.0 if bool(getattr(trip, 'direction', True)) else -1.0,
+            'dispatch_index_norm':
+                float(getattr(trip, 'launch_turn', 0.0)) / 262.0,
+            'snapshot_time_norm':
+                float(getattr(self.env, 'current_time', 0.0)) / 86400.0,
+            'scheduled_launch_norm': launch / 86400.0,
+            'hour_norm': float(hour) / 24.0,
+            'period_is_peak': 1.0 if period == 'peak' else 0.0,
+            'period_is_off': 1.0 if period == 'off' else 0.0,
+            'period_is_trans': 1.0 if period == 'trans' else 0.0,
+            'base_target_headway_norm': base_hw / 600.0,
+            'waiting_total_pre_norm': float(waiting) / 500.0,
+            'fleet_concurrent_pre_norm': float(concurrent) / 30.0,
+            'fleet_target_pre_norm': fleet_target / 30.0,
+            'fleet_pressure_pre': (
+                (float(concurrent) - fleet_target) / max(fleet_target, 1.0)),
+            'headway_cv_active_pre': self._snapshot_selector_headway_cv(),
+            'freq_low_demand': float(freq.get('freq_low_demand', 0.0)),
+            'freq_low_forecast': float(freq.get('freq_low_forecast', 0.0)),
+            'freq_high_energy': float(freq.get('freq_high_energy', 0.0)),
+            'freq_middle_energy': float(freq.get('freq_middle_energy', 0.0)),
+            'freq_od_entropy': float(freq.get('freq_od_entropy', 0.0)),
+            'freq_promotion_strength':
+                float(freq.get('freq_promotion_strength', 0.0)),
+            'freq_promotion_active':
+                float(freq.get('freq_promotion_active', 0.0)),
+        }
+
+    def _snapshot_selector_feature_row(self, method, context):
+        row = dict(context)
+        action = self._snapshot_selector_parse_action(method)
+        row.update(action)
+        domain = self._snapshot_selector_domain()
+        domains = ('terminal', 'highnoise', 'odshift', 'rushshift')
+        action_cols = [
+            'action_delta_norm', 'action_abs_delta_norm',
+            'action_positive', 'action_negative', 'action_zero',
+            'action_term45', 'action_target',
+            'action_term45_x_delta', 'action_term45_x_abs_delta',
+        ]
+        for dom in domains:
+            row[f'domain_is_{dom}'] = 1.0 if domain == dom else 0.0
+        for dom in domains:
+            domain_col = f'domain_is_{dom}'
+            for action_col in action_cols:
+                row[f'{domain_col}_x_{action_col}'] = (
+                    row[domain_col] * row[action_col])
+        for ctx_col in self.snapshot_value_selector_meta.get(
+                'context_cols', []):
+            for action_col in (
+                    'action_delta_norm', 'action_abs_delta_norm',
+                    'action_term45'):
+                row[f'{ctx_col}_x_{action_col}'] = (
+                    float(row.get(ctx_col, 0.0)) * row[action_col])
+        return row
+
+    def _select_snapshot_value_action(
+            self, action_vec, direction, trip=None, plan_origin_launch=None):
+        del direction, plan_origin_launch
+        info = {
+            'active': 0.0,
+            'selected_method': '',
+            'selected_pred': 0.0,
+            'baseline_pred': 0.0,
+            'margin': 0.0,
+        }
+        if (not self.snapshot_value_selector_enable
+                or (self.snapshot_value_selector_model is None
+                    and self.snapshot_value_selector_forest is None)
+                or trip is None
+                or self._current_ep < self.snapshot_value_selector_start_ep
+                or not self.timetable_terminal_dispatch):
+            return np.asarray(action_vec, dtype=np.float32), info
+
+        methods = list(self.snapshot_value_selector_candidate_methods)
+        if self.snapshot_value_selector_fallback_method not in methods:
+            methods.append(self.snapshot_value_selector_fallback_method)
+        context = self._snapshot_selector_context(trip)
+        rows = [
+            self._snapshot_selector_feature_row(method, context)
+            for method in methods
+        ]
+        matrix = []
+        for row in rows:
+            values = []
+            for col in self.snapshot_value_selector_feature_cols:
+                value = float(row.get(
+                    col,
+                    self.snapshot_value_selector_feature_medians.get(
+                        col, 0.0)))
+                if not np.isfinite(value):
+                    value = float(
+                        self.snapshot_value_selector_feature_medians.get(
+                            col, 0.0))
+                values.append(value)
+            matrix.append(values)
+        x = np.asarray(matrix, dtype=np.float64)
+        pred = self._snapshot_value_predict(x)
+        scores = {method: float(value) for method, value in zip(methods, pred)}
+        fallback = self.snapshot_value_selector_fallback_method
+        baseline_pred = float(scores.get(fallback, np.nan))
+        selected_method = min(scores, key=scores.get)
+        selected_pred = float(scores[selected_method])
+        margin = baseline_pred - selected_pred
+        if (not np.isfinite(margin)
+                or margin < self.snapshot_value_selector_improve_margin):
+            selected_method = fallback
+            selected_pred = baseline_pred
+            margin = 0.0
+        info.update({
+            'active': 1.0,
+            'selected_method': selected_method,
+            'selected_pred': float(selected_pred),
+            'baseline_pred': float(baseline_pred),
+            'margin': float(margin),
+        })
+        if self.snapshot_value_selector_probe_only:
+            return np.asarray(action_vec, dtype=np.float32), info
+        selected = self._snapshot_selector_parse_action(selected_method)
+        selected_vec = np.full(
+            self.upper_action_dim,
+            float(selected['action_delta_s']),
+            dtype=np.float32)
+        selected_vec = np.clip(
+            selected_vec, self.upper_action_low, self.upper_action_high)
+        return self._quantize_upper_action(selected_vec), info
 
     def _upper_residual_selector_slice(self, action_vec, direction):
         action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
@@ -4299,6 +4682,7 @@ class TransitDuetV2Runner:
         selector_x = None
         headway_selector_x = None
         terminal_selector_x = None
+        snapshot_selector_info = None
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         promotion_replan = False
@@ -4365,6 +4749,10 @@ class TransitDuetV2Runner:
                     s_upper, deterministic=False),
                 dtype=np.float32).reshape(-1)
 
+        if upper_decision_taken and self.upper_action_override_enable:
+            action_vec = self.upper_action_override_values.copy()
+            log_mu = None
+
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
             plan_origin_launch = float(trip.launch_time)
@@ -4381,13 +4769,17 @@ class TransitDuetV2Runner:
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
             action_vec = self._prepare_upper_action(action_vec)
-            action_vec, selector_x = self._select_upper_residual_value_action(
-                s_upper, action_vec, planner_dir, trip=trip,
-                plan_origin_launch=plan_origin_launch)
-            action_vec, headway_selector_x = (
-                self._select_headway_value_plan_action(
+            if not self.upper_action_override_disable_value_selectors:
+                action_vec, selector_x = self._select_upper_residual_value_action(
                     s_upper, action_vec, planner_dir, trip=trip,
-                    plan_origin_launch=plan_origin_launch))
+                    plan_origin_launch=plan_origin_launch)
+                action_vec, headway_selector_x = self._select_headway_value_plan_action(
+                    s_upper, action_vec, planner_dir, trip=trip,
+                    plan_origin_launch=plan_origin_launch)
+                action_vec, snapshot_selector_info = (
+                    self._select_snapshot_value_action(
+                        action_vec, planner_dir, trip=trip,
+                        plan_origin_launch=plan_origin_launch))
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
@@ -4420,7 +4812,8 @@ class TransitDuetV2Runner:
                     action_vec=action_vec,
                     plan_origin_launch=plan_origin_launch)
                 if self.timetable_terminal_dispatch else 0.0)
-            if self.timetable_terminal_dispatch and upper_decision_taken:
+            if (self.timetable_terminal_dispatch and upper_decision_taken
+                    and not self.upper_action_override_disable_value_selectors):
                 terminal_shift_bias_s, terminal_selector_x = (
                     self._select_terminal_value_bias(
                         bool(trip.direction), trip=trip,
@@ -4573,6 +4966,28 @@ class TransitDuetV2Runner:
             'target_headway': float(getattr(trip, 'target_headway', base_hw)),
         })
 
+        try:
+            freq_summary = self.env.frequency_summary()
+        except Exception:
+            freq_summary = {}
+        concurrent, n_fleet, fleet_pressure = self._fleet_pressure()
+        try:
+            waiting_total = sum(
+                len(st.waiting_passengers)
+                for st in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting_total = 0
+        now = float(getattr(self.env, 'current_time', trip.launch_time))
+        last_dispatch = float(getattr(
+            self.env, '_last_dispatch_time', {}).get(
+                bool(trip.direction), -9999.0))
+        terminal_gap_now = now - last_dispatch
+        target_for_gap = float(getattr(trip, 'target_headway', base_hw))
+        if terminal_gap_now > 9000.0 or terminal_gap_now < 0.0:
+            terminal_gap_now = target_for_gap
+        terminal_short_gap = max(0.0, target_for_gap - terminal_gap_now)
+        terminal_over_gap = max(0.0, terminal_gap_now - target_for_gap)
+
         # Per-trip record for step-level diagnostics
         hour = 6 + trip.launch_time // 3600
         period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
@@ -4587,6 +5002,34 @@ class TransitDuetV2Runner:
             'eff_hw': round(float(getattr(trip, 'target_headway', base_hw)), 0),
             's_hold_mean': round(s_upper[5] * 60, 1),
             's_hold_std': round(s_upper[6] * 60, 1),
+            'upper_decision': int(bool(upper_decision_taken)),
+            'promotion_replan': int(bool(promotion_replan)),
+            'launch_shift': float(launch_shift),
+            'effective_launch': int(planned_launch),
+            'terminal_gap_now': round(float(terminal_gap_now), 3),
+            'terminal_short_gap': round(float(terminal_short_gap), 3),
+            'terminal_over_gap': round(float(terminal_over_gap), 3),
+            'fleet_concurrent': float(concurrent),
+            'fleet_target': float(n_fleet),
+            'fleet_pressure': float(fleet_pressure),
+            'waiting_total': float(waiting_total),
+            'freq_low_demand': float(freq_summary.get('freq_low_demand', 0.0)),
+            'freq_low_forecast': float(freq_summary.get('freq_low_forecast', 0.0)),
+            'freq_high_energy': float(freq_summary.get('freq_high_energy', 0.0)),
+            'freq_middle_energy': float(freq_summary.get('freq_middle_energy', 0.0)),
+            'freq_od_entropy': float(freq_summary.get('freq_od_entropy', 0.0)),
+            'freq_promotion_strength': float(freq_summary.get('freq_promotion_strength', 0.0)),
+            'freq_promotion_active': float(freq_summary.get('freq_promotion_active', 0.0)),
+            'snapshot_value_active': float(
+                (snapshot_selector_info or {}).get('active', 0.0)),
+            'snapshot_value_method': str(
+                (snapshot_selector_info or {}).get('selected_method', '')),
+            'snapshot_value_pred': float(
+                (snapshot_selector_info or {}).get('selected_pred', 0.0)),
+            'snapshot_value_baseline_pred': float(
+                (snapshot_selector_info or {}).get('baseline_pred', 0.0)),
+            'snapshot_value_margin': float(
+                (snapshot_selector_info or {}).get('margin', 0.0)),
         })
 
         # In HIRO mode the target headway has been adjusted to base_hw + δ_t (above);
@@ -5236,6 +5679,31 @@ class TransitDuetV2Runner:
             self._ep_terminal_value_selector_feature_norms)
         terminal_selector_target_cost_stat = _stat(
             self._ep_terminal_value_selector_target_costs)
+        snapshot_value_active_stat = _stat([
+            float(rec.get('snapshot_value_active', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_changed_values = [
+            1.0 if (
+                float(rec.get('snapshot_value_active', 0.0)) > 0.5
+                and str(rec.get('snapshot_value_method', ''))
+                != str(self.snapshot_value_selector_fallback_method)
+            ) else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_changed_stat = _stat(snapshot_value_changed_values)
+        snapshot_value_margin_stat = _stat([
+            float(rec.get('snapshot_value_margin', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_pred_stat = _stat([
+            float(rec.get('snapshot_value_pred', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_baseline_pred_stat = _stat([
+            float(rec.get('snapshot_value_baseline_pred', 0.0))
+            for rec in self._ep_trip_records
+        ])
         terminal_headway_floor_stat = _stat(
             self._ep_terminal_headway_floors)
         fleet_noharm_upper_pressure_stat = _stat(
@@ -5543,6 +6011,26 @@ class TransitDuetV2Runner:
                 terminal_selector_target_cost_stat['max'],
             'terminal_value_selector_updates':
                 int(self.timetable_terminal_value_selector_updates),
+            'snapshot_value_selector_enabled':
+                1.0 if self.snapshot_value_selector_enable else 0.0,
+            'snapshot_value_active_mean':
+                snapshot_value_active_stat['mean'],
+            'snapshot_value_events': int(sum(
+                1 for rec in self._ep_trip_records
+                if float(rec.get('snapshot_value_active', 0.0)) > 0.5)),
+            'snapshot_value_changed_mean':
+                snapshot_value_changed_stat['mean'],
+            'snapshot_value_changed_events': int(sum(
+                1 for value in snapshot_value_changed_values
+                if float(value) > 0.5)),
+            'snapshot_value_margin_mean':
+                snapshot_value_margin_stat['mean'],
+            'snapshot_value_margin_max':
+                snapshot_value_margin_stat['max'],
+            'snapshot_value_pred_mean':
+                snapshot_value_pred_stat['mean'],
+            'snapshot_value_baseline_pred_mean':
+                snapshot_value_baseline_pred_stat['mean'],
             'terminal_headway_floor_mean':
                 terminal_headway_floor_stat['mean'],
             'terminal_headway_floor_events':
@@ -5794,6 +6282,17 @@ class TransitDuetV2Runner:
         write_header = not os.path.exists(trip_csv)
         fields = ['ep', 'tid', 'dir', 'hour', 'period', 'delta_t',
                   'base_hw', 'eff_hw', 's_hold_mean', 's_hold_std',
+                  'upper_decision', 'promotion_replan', 'launch_shift',
+                  'effective_launch', 'terminal_gap_now',
+                  'terminal_short_gap', 'terminal_over_gap',
+                  'fleet_concurrent', 'fleet_target', 'fleet_pressure',
+                  'waiting_total', 'freq_low_demand', 'freq_low_forecast',
+                  'freq_high_energy', 'freq_middle_energy',
+                  'freq_od_entropy', 'freq_promotion_strength',
+                  'freq_promotion_active',
+                  'snapshot_value_active', 'snapshot_value_method',
+                  'snapshot_value_pred', 'snapshot_value_baseline_pred',
+                  'snapshot_value_margin',
                   'hold_mean', 'hold_std', 'hold_max', 'hold_n',
                   'gap_dev', 'penalty', 'reward']
 

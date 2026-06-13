@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-11
+version: 2026-06-14
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -299,6 +299,33 @@ config_sets:
       cfvalue_noisegate: F_freqduet_gen_odshift_main_cfvalue_noisegate_hiro
     rushshift:
       cfvalue_noisegate: F_freqduet_gen_rushshift_main_cfvalue_noisegate_hiro
+
+  cfvalue_multicand_candidate_4x1:
+    terminal:
+      cfvalue_multicand: F_freqduet_terminal_main_cfvalue_multicand_hiro
+    highnoise:
+      cfvalue_multicand: F_freqduet_gen_highnoise_main_cfvalue_multicand_hiro
+    odshift:
+      cfvalue_multicand: F_freqduet_gen_odshift_main_cfvalue_multicand_hiro
+    rushshift:
+      cfvalue_multicand: F_freqduet_gen_rushshift_main_cfvalue_multicand_hiro
+
+  cfaction_v1_4x6:
+    source_manifest: results_freqduet/action_counterfactual_config_manifest_v1.json
+    generator: scripts/build_freqduet_action_counterfactual_configs.py
+    domains:
+      - terminal
+      - highnoise
+      - odshift
+      - rushshift
+    modes:
+      - target
+      - terminalhold45
+    deltas_s:
+      - -20
+      - 0
+      - 20
+    note: fixed upper-action common-random-number screen; config names follow F_freqduet_<domain>_main_cfaction_v1_<mode>_<delta>_hiro
 
   termhold45_candidate_4x1:
     terminal:
@@ -1395,6 +1422,157 @@ experiments:
       highnoise_vs_fixed_headway_delta_ci95: [-0.0722, -0.0049]
     note: strict fixed fallback plus highnoise learned odgate closes the fixed-headway gap to an overall statistical tie and significantly improves highnoise versus fixed-headway; keep as positive candidate evidence, but do not claim universal dominance over fixed-headway
 
+  cfvalue_multicand_ep100_wu10:
+    status: complete_negative_control
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfvalue_multicand_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t11369
+      - t11370
+      - t11371
+      - t11372
+      - t11373
+      - t11374
+    result_dir: results_freqduet/cfvalue_multicand_ep100_wu10
+    per_seed_csv: results_freqduet/cfvalue_multicand_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/cfvalue_multicand_ep100_wu10/compare_cfvalue_multicand_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/cfvalue_multicand_ep100_wu10/compare_cfvalue_multicand_vs_external_classical
+    comparison_dir_vs_cfvalue_noisegate: results_freqduet/cfvalue_multicand_ep100_wu10/compare_cfvalue_multicand_vs_cfvalue_noisegate
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: -0.0101
+      overall_vs_current_main_delta_ci95: [-0.0469, 0.0249]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0005
+      overall_vs_fixed_headway_delta_ci95: [-0.0119, 0.0135]
+      overall_vs_cfvalue_noisegate_delta_candidate_minus_noisegate: 0.0064
+      overall_vs_cfvalue_noisegate_delta_ci95: [-0.0026, 0.0155]
+      highnoise_vs_cfvalue_noisegate_delta_candidate_minus_noisegate: 0.0329
+      highnoise_vs_cfvalue_noisegate_delta_ci95: [-0.0003, 0.0649]
+    note: strict multi-candidate approximation uses odgate for terminal/highnoise and exact fixed-headway for OD/rush. It ties current main and fixed-headway but is worse than cfvalue_noisegate, driven by highnoise rerun variance; do not promote.
+
+  counterfactual_selector_export_current:
+    status: audit_complete
+    script: scripts/export_freqduet_counterfactual_selector_configs.py
+    input_candidate_rows: results_freqduet/counterfactual_value_ep100/current/counterfactual_candidate_rows.csv
+    outputs:
+      conservative_vs_fixed: results_freqduet/counterfactual_selector_exports/current_conservative_from_audit
+      domain_mean: results_freqduet/counterfactual_selector_exports/current_domainmean_from_audit
+    conservative_vs_fixed_policy:
+      terminal: fixed
+      highnoise: odgate
+      odshift: fixed
+      rushshift: fixed
+    domain_mean_policy:
+      terminal: odgate
+      highnoise: odgate
+      odshift: fixed
+      rushshift: odgate_fixedrule
+    note: conservative bootstrap selector reproduces cfvalue_noisegate from matched rollout labels; domain_mean remains exploratory because terminal and rush improvements versus fixed have CIs crossing zero.
+
+  cfaction_crn_screen_ep60_wu10:
+    status: complete_negative_control
+    episodes: 60
+    last_k: 30
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfaction_v1_4x6
+    runner: scripts/run_freqduet_ablation.py
+    analyzer: scripts/summarize_freqduet_action_counterfactual.py
+    scheduler_tasks:
+      - t11376
+      - t11377
+      - t11378
+      - t11379
+      - t11380
+      - t11381
+    result_dir: results_freqduet/cfaction_crn_screen_ep60_wu10
+    per_seed_csv: results_freqduet/cfaction_crn_screen_ep60_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    analysis_dir: results_freqduet/cfaction_crn_screen_ep60_wu10/action_counterfactual_analysis
+    action_value_audit_dir: results_freqduet/cfaction_crn_screen_ep60_wu10/action_value_audit
+    action_value_model_dir: results_freqduet/cfaction_crn_screen_ep60_wu10/action_value_model
+    trip_action_value_model_dir: results_freqduet/cfaction_crn_screen_ep60_wu10/trip_action_value_model
+    paired_findings:
+      overall_target_minus20_vs_zero_composite_delta: 0.0063
+      overall_target_minus20_vs_zero_composite_ci95: [-0.0094, 0.0238]
+      overall_target_plus20_vs_zero_composite_delta: 0.0257
+      overall_target_plus20_vs_zero_composite_ci95: [0.0094, 0.0421]
+      overall_terminalhold45_minus20_vs_zero_composite_delta: -0.0097
+      overall_terminalhold45_minus20_vs_zero_composite_ci95: [-0.0280, 0.0079]
+      overall_terminalhold45_plus20_vs_zero_composite_delta: -0.0106
+      overall_terminalhold45_plus20_vs_zero_composite_ci95: [-0.0262, 0.0055]
+      best_overall_fixed_action: target_delta0
+      best_overall_composite_mean: 1.4979
+    action_value_model_findings:
+      oracle_best_overall_composite_mean: 1.4521
+      global_target0_overall_composite_mean: 1.4979
+      context_action_interact_selected_composite_mean: 1.5001
+      context_action_interact_delta_vs_target0_ci95: [-0.0096, 0.0134]
+      interpretation: aggregate context plus action features cannot reliably recover the oracle fixed-action choices under seed-held-out CV
+    trip_action_value_findings:
+      metric: gap_dev
+      matched_trip_context_rows: 41920
+      global_target0_trip_gap_mean: 0.1606
+      oracle_best_trip_gap_mean: 0.0378
+      context_action_trip_gap_mean: 0.1615
+      context_action_delta_vs_target0_ci95: [-0.0019, 0.0036]
+      context_action_interact_trip_gap_mean: 0.1696
+      context_action_interact_delta_vs_target0_ci95: [0.0026, 0.0158]
+      interpretation: trip-level CRN labels expose large oracle headroom, but the old trip log only has shallow realized trip context; runner_v3 now logs terminal gap, fleet pressure, waiting, and frequency features for the next CRN rerun.
+    note: fixed headway/terminal-action candidates did not produce a robust improvement; action-conditioned offline value fitting exposes an oracle gap but does not generalize beyond target0. Trip-level matched labels show much larger decision-level headroom, so the next repair should rerun CRN with richer pre-dispatch context and then fit a per-decision value selector.
+
+  cfaction_v2_tripctx_ep60_wu10:
+    status: complete_diagnostic_not_promoted
+    episodes: 60
+    last_k: 30
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfaction_v2_4x6_trip_dump_freq_1
+    runner: scripts/run_freqduet_ablation.py
+    submitter: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    sync_aggregator: scripts/sync_freqduet_config_matrix_scheduleurm.py
+    followup_trip_value_script: scripts/build_freqduet_trip_counterfactual_value_dataset.py
+    scheduler_tasks:
+      - t11390
+      - t11391
+      - t11392
+      - t11393
+      - t11394
+      - t11395
+    result_dir: results_freqduet/cfaction_v2_tripctx_ep60_wu10
+    per_seed_csv: results_freqduet/cfaction_v2_tripctx_ep60_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    analysis_dir: results_freqduet/cfaction_v2_tripctx_ep60_wu10/action_counterfactual_analysis
+    trip_action_value_model_dir: results_freqduet/cfaction_v2_tripctx_ep60_wu10/trip_action_value_model_fast
+    config_manifest: results_freqduet/cfaction_v2_tripctx_config_manifest.json
+    paired_findings:
+      rows: 480
+      overall_best_fixed_action: terminalhold45_delta0
+      overall_best_composite_mean: 1.5012
+      overall_best_minus_target0_composite_delta: -0.0054
+      overall_best_minus_target0_composite_ci95: [-0.0207, 0.0101]
+      odshift_target_plus20_minus_target0_composite_delta: -0.0272
+      odshift_target_plus20_minus_target0_composite_ci95: [-0.0516, -0.0017]
+      rushshift_terminalhold45_minus20_minus_target0_composite_delta: -0.0106
+      rushshift_terminalhold45_minus20_minus_target0_composite_ci95: [-0.0205, -0.0013]
+    trip_action_value_findings:
+      metric: gap_dev
+      trip_files: 480
+      matched_trip_context_rows: 628800
+      long_rows: 3772800
+      heavy_exports_written: false
+      global_target0_trip_gap_mean: 0.1098
+      oracle_best_trip_gap_mean: 0.0259
+      action_domain_trip_gap_mean: 0.1093
+      action_domain_delta_vs_target0_ci95: [-0.0021, 0.0009]
+      context_action_trip_gap_mean: 0.1093
+      context_action_delta_vs_target0_ci95: [-0.0020, 0.0008]
+      context_action_interact_trip_gap_mean: 0.1172
+      context_action_interact_delta_vs_target0_ci95: [0.0047, 0.0102]
+      interpretation: rich per-dispatch context exposes large trip-level oracle headroom but still cannot produce a seed-held-out selector with robust improvement over target0; context-action interactions overfit and significantly worsen gap cost.
+    note: reran the same 4-domain x 6-action x 20-seed action CRN matrix with runner_v3 rich per-dispatch trip context and training.trip_dump_freq=1. The result closes this fixed-action/value branch as diagnostic evidence, not a promotion; the next credible repair needs simulator-snapshot counterfactual labels or a Phase-4 learned terminal/first-stop dispatch value model, not another shallow fixed-delta selector.
+
   current_main_vs_external_fixed_ep100_filtered:
     status: complete_evaluation_correction
     episodes: 100
@@ -1607,7 +1785,7 @@ manuscript_notes:
     path: ../md/realism_data_evidence.md
     purpose: realism, data, and calibration evidence boundary
   phase4_scope_decision:
-    status: documented_future_work_scope
+    status: documented_executable_dispatch_done_value_layer_open
     path: ../md/phase4_scope_decision.md
     purpose: Phase 4 terminal dispatch scope boundary and negative heuristic evidence
 
@@ -1621,10 +1799,21 @@ paper_scripts:
   - scripts/compare_freqduet_broad_candidate.py
   - scripts/compare_freqduet_candidate.py
   - scripts/compare_freqduet_external_baseline.py
+  - scripts/build_freqduet_counterfactual_value_dataset.py
+  - scripts/export_freqduet_counterfactual_selector_configs.py
+  - scripts/build_freqduet_action_counterfactual_configs.py
+  - scripts/summarize_freqduet_action_counterfactual.py
+  - scripts/fit_freqduet_action_value_model.py
+  - scripts/build_freqduet_trip_counterfactual_value_dataset.py
+  - scripts/audit_freqduet_snapshot_counterfactual.py
+  - scripts/run_freqduet_snapshot_counterfactual_matrix.py
+  - scripts/submit_freqduet_snapshot_cf_scheduleurm.py
+  - scripts/fit_freqduet_snapshot_value_model.py
   - scripts/make_freqduet_decomposer_figures.py
   - scripts/make_freqduet_mechanism_figures.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
+  - scripts/sync_freqduet_config_matrix_scheduleurm.py
   - scripts/submit_freqduet_broad_generalization_scheduleurm.py
   - scripts/sync_freqduet_broad_generalization.py
 
@@ -1664,11 +1853,201 @@ paper_packages:
 
 scope_decisions:
   phase4_terminal_dispatch:
-    status: scoped_as_future_work_for_current_paper
-    current_scope: target-headway executable timetable MVP
-    current_evidence: terminal-delay and lower-value-cost repair screens did not produce a universal improvement over promoted main
+    status: executable_terminal_dispatch_done_first_stop_value_open
+    current_scope: bounded executable terminal-dispatch timetable control
+    current_evidence: promoted main resolves to terminal_dispatch true with 0..45s launch shift and env/sim.py enforces _freqduet_scheduled_launch before actual launch
     note: ../md/phase4_scope_decision.md
-    future_work_requires: learned actual terminal launch / first-stop holding value model with paired 100/200ep validation
+    future_work_requires: learned actual terminal launch / first-stop holding value model with per-decision counterfactual labels and paired 100/200ep validation
+
+snapshot_counterfactual_value_labels:
+  status: full_20seed_trained_state_positive_offline_not_promoted
+  purpose: per-dispatch common-random-number snapshot labels for Phase-4 terminal/headway value selection
+  scripts:
+    audit: scripts/audit_freqduet_snapshot_counterfactual.py
+    matrix: scripts/run_freqduet_snapshot_counterfactual_matrix.py
+    submit_scheduleurm: scripts/submit_freqduet_snapshot_cf_scheduleurm.py
+    fit_value_model: scripts/fit_freqduet_snapshot_value_model.py
+  invalidated_runs:
+    snapshot_cf_v1_4domain_20seed_snap20_h600:
+      status: invalid_no_common_random_numbers
+      note: candidate replays did not restore RNG states; apparent oracle gap is not paper evidence
+      scheduler_tasks:
+        - t11403
+        - t11404
+        - t11405
+        - t11406
+        - t11407
+        - t11408
+  toolchain_runs:
+    snapshot_cf_v2_crn_earlyterm_4domain_20seed_snap20_h1800:
+      status: complete_ep0_toolchain_evidence
+      rows: 8000
+      result_dir: results_freqduet/snapshot_cf_v2_crn_earlyterm_4domain_20seed_snap20_h1800
+      scheduler_tasks:
+        - t11412
+        - t11413
+        - t11414
+        - t11415
+        - t11416
+        - t11417
+      note: CRN fixed; ep0/random-policy snapshots show oracle headroom but are not trained-state evidence
+  trained_state_pilots:
+    snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800:
+      status: complete_positive_offline_selector_pilot
+      domains:
+        - terminal
+        - highnoise
+        - odshift
+        - rushshift
+      seeds:
+        - 7
+        - 11
+        - 17
+        - 23
+        - 31
+        - 37
+        - 42
+        - 43
+        - 53
+        - 61
+      burn_in_episodes: 40
+      audit_episodes: 1
+      snapshots_per_run: 12
+      horizon_s: 1800
+      candidates:
+        - term45_m60
+        - term45_m30
+        - term45_0
+        - term45_p30
+        - term45_p60
+      rows: 2400
+      result_dir: results_freqduet/snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800
+      labels_csv: results_freqduet/snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800/shards/snapshot_counterfactual_all.csv
+      paired_summary_csv: results_freqduet/snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800/shards/snapshot_counterfactual_paired_summary.csv
+      value_model_dir: results_freqduet/snapshot_cf_v3_burn40_earlyterm_4domain_10seed_snap12_h1800/value_model_residual
+      scheduler_tasks:
+        - t11420
+        - t11421
+        - t11422
+        - t11423
+        - t11424
+        - t11425
+      baseline_method: term45_0
+      metric: proxy_cost
+      oracle_delta_vs_baseline: -0.0478
+      oracle_delta_ci95: [-0.0569, -0.0374]
+      best_offline_selector: random_forest_context_action_interact
+      best_selector_delta_vs_baseline: -0.0085
+      best_selector_delta_ci95: [-0.0152, -0.0021]
+      note: first positive trained-state per-dispatch value signal; requires full 20-seed/checkpoint-scaled labels and online wrapper validation before promotion
+    snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800:
+      status: complete_positive_20seed_offline_selector_not_promoted
+      domains:
+        - terminal
+        - highnoise
+        - odshift
+        - rushshift
+      seeds: paired_seeds_20
+      burn_in_episodes: 40
+      audit_episodes: 1
+      snapshots_per_run: 12
+      horizon_s: 1800
+      candidates:
+        - term45_m60
+        - term45_m30
+        - term45_0
+        - term45_p30
+        - term45_p60
+      rows: 4800
+      snapshots: 960
+      result_dir: results_freqduet/snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800
+      labels_csv: results_freqduet/snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800/shards/snapshot_counterfactual_all.csv
+      paired_summary_csv: results_freqduet/snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800/shards/snapshot_counterfactual_paired_summary.csv
+      value_model_dir: results_freqduet/snapshot_cf_v4_burn40_earlyterm_4domain_20seed_snap12_h1800/value_model_residual
+      scheduler_tasks:
+        - t11426
+        - t11427
+        - t11428
+        - t11429
+        - t11430
+        - t11431
+      baseline_method: term45_0
+      metric: proxy_cost
+      oracle_delta_vs_baseline: -0.0495
+      oracle_delta_ci95: [-0.0573, -0.0431]
+      best_offline_selector: random_forest_context_action_interact
+      best_selector_delta_vs_baseline: -0.0164
+      best_selector_delta_ci95: [-0.0254, -0.0091]
+      best_selector_domain_deltas:
+        terminal: [-0.0085, -0.0144, -0.0028]
+        highnoise: [-0.0113, -0.0207, -0.0020]
+        odshift: [-0.0120, -0.0246, -0.0012]
+        rushshift: [-0.0339, -0.0645, -0.0111]
+      note: full paired-seed offline snapshot replay confirms the per-dispatch value signal; next step is an online guarded selector wrapper evaluated against current main and fixed-headway
+    snapshotrf_online_ep100_wu10_4domain_20seed:
+      status: complete_online_wrapper_not_promoted
+      domains: [terminal, highnoise, odshift, rushshift]
+      seeds: paired_seeds_20
+      episodes: 100
+      last_k: 50
+      result_dir: results_freqduet/snapshotrf_online_ep100_wu10_4domain_20seed
+      per_seed_csv: results_freqduet/snapshotrf_online_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+      comparison_vs_main: results_freqduet/snapshotrf_online_ep100_wu10_4domain_20seed/compare_snapshotrf_vs_main/candidate_paired_deltas.csv
+      comparison_vs_fixed_headway: results_freqduet/snapshotrf_online_ep100_wu10_4domain_20seed/compare_snapshotrf_vs_external_fixed/external_baseline_paired_deltas.csv
+      scheduler_tasks:
+        - t11437
+        - t11438
+        - t11439
+        - t11440
+        - t11441
+        - t11442
+        - t11444
+        - t11445
+        - t11446
+        - t11447
+        - t11448
+        - t11449
+        - t11450
+        - t11451
+        - t11452
+        - t11453
+      snapshotrf_delta_vs_main_overall: 0.0053
+      snapshotrf_delta_vs_main_ci95: [-0.0049, 0.0152]
+      snapshotrf_delta_vs_fixed_overall_shared: -0.0075
+      snapshotrf_delta_vs_fixed_ci95: [-0.0204, 0.0047]
+      same_run_main_delta_vs_fixed_overall_shared: -0.0128
+      same_run_main_delta_vs_fixed_ci95: [-0.0240, -0.0014]
+      note: online RF wrapper weakens current main and is not promoted; same-run current main significantly beats fixed-headway overall
+    snapshotrf_m02_online_ep100_wu10_4domain_20seed:
+      status: complete_stricter_guard_not_promoted
+      domains: [terminal, highnoise, odshift, rushshift]
+      seeds: paired_seeds_20
+      episodes: 100
+      last_k: 50
+      improve_margin: 0.02
+      result_dir: results_freqduet/snapshotrf_m02_online_ep100_wu10_4domain_20seed
+      per_seed_csv: results_freqduet/snapshotrf_m02_online_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+      comparison_vs_main: results_freqduet/snapshotrf_m02_online_ep100_wu10_4domain_20seed/compare_snapshotrf_m02_vs_main/candidate_paired_deltas.csv
+      comparison_vs_snapshotrf_m00: results_freqduet/snapshotrf_m02_online_ep100_wu10_4domain_20seed/compare_snapshotrf_m02_vs_m00/candidate_paired_deltas.csv
+      comparison_vs_fixed_headway: results_freqduet/snapshotrf_m02_online_ep100_wu10_4domain_20seed/compare_snapshotrf_m02_vs_external_fixed/external_baseline_paired_deltas.csv
+      scheduler_tasks:
+        - t11499
+        - t11500
+        - t11501
+        - t11502
+        - t11503
+        - t11504
+        - t11505
+        - t11506
+      snapshotrf_m02_delta_vs_main_overall: 0.0029
+      snapshotrf_m02_delta_vs_main_ci95: [-0.0059, 0.0121]
+      snapshotrf_m02_delta_vs_m00_overall: -0.0023
+      snapshotrf_m02_delta_vs_m00_ci95: [-0.0119, 0.0071]
+      snapshotrf_m02_delta_vs_fixed_overall_shared: -0.0098
+      snapshotrf_m02_delta_vs_fixed_ci95: [-0.0218, 0.0026]
+      selector_changed_mean_range: [0.129, 0.158]
+      selector_margin_mean_range: [0.012, 0.025]
+      note: stricter guard improves m00 slightly but still does not beat current main; keep as negative/mechanism evidence and pivot to Phase-4 or stronger rollout-trained value model
 
 external_baselines:
   status: classical_full_matrix_complete_closest_preserved_transitduet_family_complete_external_rl_pending

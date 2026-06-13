@@ -15,6 +15,9 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
 CANDIDATE_METHOD_TOKENS = (
+    "snapshotrf_m02",
+    "snapshotrf",
+    "cfvalue_multicand",
     "cfvalue_noisegate",
     "cfvalue_domainmean",
     "upperres_planctx",

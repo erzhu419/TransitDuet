@@ -22,6 +22,9 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 CANDIDATE_METHOD_TOKENS = (
+    "snapshotrf_m02",
+    "snapshotrf",
+    "cfvalue_multicand",
     "cfvalue_noisegate",
     "cfvalue_domainmean",
     "upperres_planctx",
@@ -125,6 +128,15 @@ DEFAULT_METRICS = (
     "fixed_selector_context_fixed_value",
     "fixed_selector_context_margin",
     "fixed_selector_context_feature_norm",
+    "snapshot_value_selector_enabled",
+    "snapshot_value_active_mean",
+    "snapshot_value_events",
+    "snapshot_value_changed_mean",
+    "snapshot_value_changed_events",
+    "snapshot_value_margin_mean",
+    "snapshot_value_margin_max",
+    "snapshot_value_pred_mean",
+    "snapshot_value_baseline_pred_mean",
     "fleet_noharm_upper_adjust_mean",
     "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",
