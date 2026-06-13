@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_disc9_hiro
+
+# Fine-grained discrete holding candidate. This isolates the exp39-style
+# action-resolution change from the lower-context state expansion.
+lower:
+  action_bins: [0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 20.0, 30.0, 45.0]

@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperdisc3_hiro
+
+# Near-fixed upper residual alphabet. This tests whether the remaining
+# fixed-headway gap comes from continuous upper jitter rather than the
+# frequency split itself.
+upper:
+  action_bins: [-5.0, 0.0, 5.0]

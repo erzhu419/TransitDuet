@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperres_reliefguard_hiro
+
+# Guarded version of the learned residual selector. Unlike upperres_selector,
+# this candidate never adds negative residual offsets; it can only keep the
+# actor plan or relax same-direction headway compression when the causal value
+# model predicts enough benefit.
+upper:
+  residual_value_selector:
+    enable: true
+    learn_start_ep: 20
+    start_ep: 50
+    min_observations: 512
+    candidate_offsets_s: [0.0, 5.0, 10.0]
+    ridge: 0.50
+    feature_clip: 6.0
+    cost_clip: 8.0
+    epsilon: 0.0
+    improve_margin: 0.08
+    adjust_penalty: 0.12
+    adjust_norm_s: 10.0

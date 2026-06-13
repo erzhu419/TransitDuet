@@ -1,0 +1,13 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_cfvalue_domainmean_hiro
+
+# Counterfactual-value domain selector v1.
+# Matched-seed audit selected the fixed-headway expert for OD-profile shift.
+fixed_expert_selector:
+  enable: true
+  strict_headway_s: 360.0
+  start_ep: 0
+  count_start: selector_start
+  deterministic_rule:
+    enable: true
+    default: fixed

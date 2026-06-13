@@ -1,0 +1,18 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_uppervalue_hfgate_hiro
+
+# Learned upper residual value cost. Penalize negative upper residuals
+# (headway compression / frequency increase) only when fleet utilization is
+# already high and the causal HF/promotion signal does not justify the extra
+# fleet/CV risk.
+upper:
+  timetable_planner:
+    upper_residual_value_cost:
+      enable: true
+      weight: 0.35
+      action_norm_s: 15.0
+      fleet_util_start: 0.75
+      fleet_util_full: 1.05
+      high_energy_start: 0.045
+      high_energy_full: 0.085
+      promotion_relief: 0.5

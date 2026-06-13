@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_main_headwayplanner_local_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_odgate_hiro
+
+# OD-shift-gated local-credit planner. The ungated local-credit selector helped
+# OD-shift but hurt terminal/highnoise by over-applying negative headway deltas.
+# This causal gate activates only when OD entropy indicates a structured OD
+# regime shift while high/middle frequency energy remains stable.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      activation_gate:
+        enable: true
+        min_low_forecast: 0.435
+        max_high_energy: 0.070
+        max_middle_energy: 0.040
+        max_od_entropy: 0.9555

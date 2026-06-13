@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperdisc7_hiro
+
+# Slightly wider upper residual alphabet. This keeps occasional strong demand
+# compression available while removing continuous timestep jitter.
+upper:
+  action_bins: [-30.0, -15.0, -10.0, -5.0, 0.0, 5.0, 10.0]

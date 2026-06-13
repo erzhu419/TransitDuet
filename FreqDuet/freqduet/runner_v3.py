@@ -236,6 +236,31 @@ class DiagnosticLog:
         'lower_drift_cost_mean', 'lower_drift_cost_max',
         'lower_drift_cost_adaptive_gate_mean',
         'upper_hf_penalty_mean', 'upper_hf_penalty_max',
+        'upper_residual_value_cost_mean', 'upper_residual_value_cost_max',
+        'upper_residual_value_cost_active_mean',
+        'upper_residual_selector_enabled',
+        'upper_residual_selector_active_mean',
+        'upper_residual_selector_adjust_mean',
+        'upper_residual_selector_adjust_max',
+        'upper_residual_selector_margin_mean',
+        'upper_residual_selector_actor_pred_mean',
+        'upper_residual_selector_selected_pred_mean',
+        'upper_residual_selector_feature_norm_mean',
+        'upper_residual_selector_updates',
+        'headway_value_planner_enabled',
+        'headway_value_planner_active_mean',
+        'headway_value_planner_adjust_mean',
+        'headway_value_planner_adjust_max',
+        'headway_value_planner_delta_mean',
+        'headway_value_planner_delta_max',
+        'headway_value_planner_margin_mean',
+        'headway_value_planner_actor_pred_mean',
+        'headway_value_planner_selected_pred_mean',
+        'headway_value_planner_prior_mean',
+        'headway_value_planner_target_cost_mean',
+        'headway_value_planner_target_cost_max',
+        'headway_value_planner_feature_norm_mean',
+        'headway_value_planner_updates',
         # FreqDuet layer-frequency allocation diagnostics
         'upper_hf_power_ratio', 'lower_lf_drift_ratio',
         'demand_attr_score',
@@ -262,8 +287,20 @@ class DiagnosticLog:
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
         'terminal_shift_cap_mean', 'terminal_shift_cap_max',
+        'terminal_shift_min_mean', 'terminal_shift_min_min',
         'terminal_feedback_bias_mean', 'terminal_feedback_bias_max',
         'terminal_feedback_events',
+        'terminal_value_selector_enabled',
+        'terminal_value_selector_active_mean',
+        'terminal_value_selector_bias_mean',
+        'terminal_value_selector_bias_max',
+        'terminal_value_selector_margin_mean',
+        'terminal_value_selector_actor_pred_mean',
+        'terminal_value_selector_selected_pred_mean',
+        'terminal_value_selector_feature_norm_mean',
+        'terminal_value_selector_target_cost_mean',
+        'terminal_value_selector_target_cost_max',
+        'terminal_value_selector_updates',
         'terminal_headway_floor_mean', 'terminal_headway_floor_events',
         'fleet_noharm_upper_pressure_mean',
         'fleet_noharm_upper_adjust_mean',
@@ -295,6 +332,11 @@ class DiagnosticLog:
         'fixed_selector_fixed_cost_ema',
         'fixed_selector_learned_count',
         'fixed_selector_fixed_count',
+        'fixed_selector_context_enabled',
+        'fixed_selector_context_learned_value',
+        'fixed_selector_context_fixed_value',
+        'fixed_selector_context_margin',
+        'fixed_selector_context_feature_norm',
     ]
 
     def __init__(self, log_dir, resume=False):
@@ -370,6 +412,7 @@ class TransitDuetV2Runner:
         self.cfg = config
         self.device = device
         self.base_seed = int(config.get('seed', 0))
+        self.fleet_rng = np.random.RandomState(self.base_seed)
         self.decouple_init_seeds = bool(
             config.get('training', {}).get('decouple_init_seeds', False))
 
@@ -404,6 +447,17 @@ class TransitDuetV2Runner:
         self.timetable_plan_all_directions = False
         self.timetable_terminal_hf_shift_max_s = None
         self.timetable_terminal_hf_energy_min = 0.0
+        self.timetable_terminal_early_release_enable = False
+        self.timetable_terminal_early_release_base_min_s = 0.0
+        self.timetable_terminal_early_release_relaxed_min_s = 0.0
+        self.timetable_terminal_early_release_max_high_energy = None
+        self.timetable_terminal_early_release_max_middle_energy = None
+        self.timetable_terminal_early_release_min_od_entropy = None
+        self.timetable_terminal_early_release_max_od_high_energy = None
+        self.timetable_terminal_early_release_max_low_forecast = None
+        self.timetable_terminal_early_release_min_action_mean_s = None
+        self.timetable_terminal_early_release_min_current_delta_s = None
+        self.timetable_terminal_early_release_min_updates = 0
         self.timetable_terminal_feedback_enable = False
         self.timetable_terminal_feedback_gain = 0.0
         self.timetable_terminal_feedback_max_s = 0.0
@@ -425,9 +479,89 @@ class TransitDuetV2Runner:
         self.timetable_terminal_value_relief_gap_tolerance_s = 0.0
         self.timetable_terminal_value_relief_gap_gain = 1.0
         self.timetable_terminal_value_relief_demand_weight = 0.0
+        self.timetable_terminal_value_selector_enable = False
+        self.timetable_terminal_value_selector_start_configured = False
+        self.timetable_terminal_value_selector_learn_start_configured = False
+        self.timetable_terminal_value_selector_start_ep = 30
+        self.timetable_terminal_value_selector_learn_start_ep = 10
+        self.timetable_terminal_value_selector_min_observations = 32
+        self.timetable_terminal_value_selector_ridge = 0.25
+        self.timetable_terminal_value_selector_feature_clip = 8.0
+        self.timetable_terminal_value_selector_cost_clip = 8.0
+        self.timetable_terminal_value_selector_epsilon = 0.0
+        self.timetable_terminal_value_selector_improve_margin = 0.0
+        self.timetable_terminal_value_selector_delay_penalty = 0.0
+        self.timetable_terminal_value_selector_bias_norm_s = 5.0
+        self.timetable_terminal_value_selector_target = 'transition_reward'
+        self.timetable_terminal_value_selector_episode_weight = 1.0
+        self.timetable_terminal_value_selector_local_weight = 1.0
+        self.timetable_terminal_value_selector_reward_weight = 1.0
+        self.timetable_terminal_value_selector_candidates = np.asarray(
+            [0.0], dtype=np.float32)
+        self.timetable_terminal_value_selector_A = None
+        self.timetable_terminal_value_selector_b = None
+        self.timetable_terminal_value_selector_updates = 0
+        self.timetable_headway_value_planner_enable = False
+        self.timetable_headway_value_planner_start_configured = False
+        self.timetable_headway_value_planner_learn_start_configured = False
+        self.timetable_headway_value_planner_start_ep = 50
+        self.timetable_headway_value_planner_learn_start_ep = 20
+        self.timetable_headway_value_planner_min_observations = 256
+        self.timetable_headway_value_planner_ridge = 0.75
+        self.timetable_headway_value_planner_feature_clip = 8.0
+        self.timetable_headway_value_planner_cost_clip = 8.0
+        self.timetable_headway_value_planner_epsilon = 0.0
+        self.timetable_headway_value_planner_improve_margin = 0.0
+        self.timetable_headway_value_planner_adjust_penalty = 0.0
+        self.timetable_headway_value_planner_adjust_norm_s = 15.0
+        self.timetable_headway_value_planner_delta_norm_s = 20.0
+        self.timetable_headway_value_planner_candidate_deltas = np.asarray(
+            [0.0], dtype=np.float32)
+        self.timetable_headway_value_planner_candidate_offsets = np.zeros(
+            0, dtype=np.float32)
+        self.timetable_headway_value_planner_action_basis_enable = False
+        self.timetable_headway_value_planner_action_basis_mode = 'onehot_rbf'
+        self.timetable_headway_value_planner_action_basis_width_s = 10.0
+        self.timetable_headway_value_planner_action_basis_centers = np.asarray(
+            [-20.0, -10.0, 0.0, 5.0, 10.0], dtype=np.float32)
+        self.timetable_headway_value_planner_action_basis_interactions = True
+        self.timetable_headway_value_planner_prior_weight = 0.0
+        self.timetable_headway_value_planner_spacing_weight = 1.0
+        self.timetable_headway_value_planner_wait_weight = 0.5
+        self.timetable_headway_value_planner_fleet_weight = 0.5
+        self.timetable_headway_value_planner_cv_target = 0.438
+        self.timetable_headway_value_planner_overshoot_target = 0.13
+        self.timetable_headway_value_planner_wait_target_min = 5.5
+        self.timetable_headway_value_planner_terminal_shift_target_s = 12.0
+        self.timetable_headway_value_planner_target = 'episode_composite'
+        self.timetable_headway_value_planner_episode_weight = 1.0
+        self.timetable_headway_value_planner_local_weight = 1.0
+        self.timetable_headway_value_planner_reward_weight = 1.0
+        self.timetable_headway_value_planner_gate_enable = False
+        self.timetable_headway_value_planner_gate_min_low_forecast = None
+        self.timetable_headway_value_planner_gate_max_low_forecast = None
+        self.timetable_headway_value_planner_gate_min_high_energy = None
+        self.timetable_headway_value_planner_gate_max_high_energy = None
+        self.timetable_headway_value_planner_gate_min_middle_energy = None
+        self.timetable_headway_value_planner_gate_max_middle_energy = None
+        self.timetable_headway_value_planner_gate_min_od_entropy = None
+        self.timetable_headway_value_planner_gate_max_od_entropy = None
+        self.timetable_headway_value_planner_gate_max_promotion_strength = None
+        self.timetable_headway_value_planner_gate_any_of = []
+        self.timetable_headway_value_planner_A = None
+        self.timetable_headway_value_planner_b = None
+        self.timetable_headway_value_planner_updates = 0
         self.timetable_terminal_headway_floor_enable = False
         self.timetable_terminal_headway_floor_ratio = 0.0
         self.timetable_terminal_headway_floor_min_s = 0.0
+        self.upper_residual_value_cost_enable = False
+        self.upper_residual_value_cost_weight = 0.0
+        self.upper_residual_value_cost_action_norm_s = 15.0
+        self.upper_residual_value_cost_fleet_util_start = 0.75
+        self.upper_residual_value_cost_fleet_util_full = 1.05
+        self.upper_residual_value_cost_high_start = 0.045
+        self.upper_residual_value_cost_high_full = 0.085
+        self.upper_residual_value_cost_promotion_relief = 0.5
         self._active_timetable_plans = {}
         self._last_promotion_replan_launch = {}
         if bool(planner_cfg.get('enable', False)):
@@ -458,6 +592,39 @@ class TransitDuetV2Runner:
                 planner_cfg.get('terminal_shift_high_energy_min',
                                 planner_cfg.get('terminal_high_energy_min',
                                                 0.0))), 0.0)
+            early_release_cfg = (
+                planner_cfg.get('terminal_early_release_adaptive', {}) or {})
+            self.timetable_terminal_early_release_enable = bool(
+                early_release_cfg.get('enable', False))
+            self.timetable_terminal_early_release_base_min_s = float(
+                early_release_cfg.get(
+                    'base_min_s',
+                    self.timetable_planner.terminal_shift_min_s))
+            self.timetable_terminal_early_release_relaxed_min_s = float(
+                early_release_cfg.get(
+                    'relaxed_min_s',
+                    self.timetable_planner.terminal_shift_min_s))
+            self.timetable_terminal_early_release_min_updates = max(
+                0, int(early_release_cfg.get('min_updates_required', 0)))
+
+            def _optional_float(name):
+                value = early_release_cfg.get(name)
+                return None if value is None else float(value)
+
+            self.timetable_terminal_early_release_max_high_energy = (
+                _optional_float('max_high_energy'))
+            self.timetable_terminal_early_release_max_middle_energy = (
+                _optional_float('max_middle_energy'))
+            self.timetable_terminal_early_release_min_od_entropy = (
+                _optional_float('min_od_entropy'))
+            self.timetable_terminal_early_release_max_od_high_energy = (
+                _optional_float('max_od_high_energy'))
+            self.timetable_terminal_early_release_max_low_forecast = (
+                _optional_float('max_low_forecast'))
+            self.timetable_terminal_early_release_min_action_mean_s = (
+                _optional_float('min_action_mean_s'))
+            self.timetable_terminal_early_release_min_current_delta_s = (
+                _optional_float('min_current_delta_s'))
             terminal_fb_cfg = planner_cfg.get('terminal_feedback', {}) or {}
             self.timetable_terminal_feedback_enable = bool(
                 terminal_fb_cfg.get('enable', False))
@@ -505,6 +672,201 @@ class TransitDuetV2Runner:
                 terminal_value_cfg.get('gap_gain', 1.0)), 0.0)
             self.timetable_terminal_value_relief_demand_weight = max(float(
                 terminal_value_cfg.get('demand_weight', 0.0)), 0.0)
+            terminal_selector_cfg = (
+                planner_cfg.get('terminal_value_selector', {}) or {})
+            self.timetable_terminal_value_selector_enable = bool(
+                terminal_selector_cfg.get('enable', False))
+            self.timetable_terminal_value_selector_start_configured = (
+                'start_ep' in terminal_selector_cfg)
+            self.timetable_terminal_value_selector_learn_start_configured = (
+                'learn_start_ep' in terminal_selector_cfg)
+            self.timetable_terminal_value_selector_start_ep = int(
+                terminal_selector_cfg.get('start_ep', 30))
+            self.timetable_terminal_value_selector_learn_start_ep = int(
+                terminal_selector_cfg.get(
+                    'learn_start_ep',
+                    max(0, self.timetable_terminal_value_selector_start_ep - 20)))
+            self.timetable_terminal_value_selector_min_observations = max(
+                1, int(terminal_selector_cfg.get('min_observations', 32)))
+            self.timetable_terminal_value_selector_ridge = max(float(
+                terminal_selector_cfg.get('ridge', 0.25)), 1e-6)
+            self.timetable_terminal_value_selector_feature_clip = max(float(
+                terminal_selector_cfg.get('feature_clip', 8.0)), 0.0)
+            self.timetable_terminal_value_selector_cost_clip = max(float(
+                terminal_selector_cfg.get('cost_clip', 8.0)), 0.0)
+            self.timetable_terminal_value_selector_epsilon = float(np.clip(
+                terminal_selector_cfg.get('epsilon', 0.0), 0.0, 1.0))
+            self.timetable_terminal_value_selector_improve_margin = max(float(
+                terminal_selector_cfg.get('improve_margin', 0.0)), 0.0)
+            self.timetable_terminal_value_selector_delay_penalty = max(float(
+                terminal_selector_cfg.get('delay_penalty', 0.0)), 0.0)
+            self.timetable_terminal_value_selector_bias_norm_s = max(float(
+                terminal_selector_cfg.get('bias_norm_s', 5.0)), 1e-6)
+            self.timetable_terminal_value_selector_target = str(
+                terminal_selector_cfg.get(
+                    'target', 'transition_reward')).strip().lower()
+            self.timetable_terminal_value_selector_episode_weight = float(
+                terminal_selector_cfg.get('episode_weight', 1.0))
+            self.timetable_terminal_value_selector_local_weight = float(
+                terminal_selector_cfg.get('local_weight', 1.0))
+            self.timetable_terminal_value_selector_reward_weight = float(
+                terminal_selector_cfg.get('reward_weight', 1.0))
+            bias_candidates = terminal_selector_cfg.get(
+                'candidate_bias_s', [0.0, 5.0, 10.0, 15.0])
+            self.timetable_terminal_value_selector_candidates = np.asarray(
+                sorted({max(0.0, float(x)) for x in bias_candidates}),
+                dtype=np.float32)
+            if not np.any(np.isclose(
+                    self.timetable_terminal_value_selector_candidates, 0.0)):
+                self.timetable_terminal_value_selector_candidates = np.concatenate([
+                    np.asarray([0.0], dtype=np.float32),
+                    self.timetable_terminal_value_selector_candidates,
+                ])
+            headway_value_cfg = (
+                planner_cfg.get('headway_value_planner', {}) or {})
+            self.timetable_headway_value_planner_enable = bool(
+                headway_value_cfg.get('enable', False))
+            self.timetable_headway_value_planner_start_configured = (
+                'start_ep' in headway_value_cfg)
+            self.timetable_headway_value_planner_learn_start_configured = (
+                'learn_start_ep' in headway_value_cfg)
+            self.timetable_headway_value_planner_start_ep = int(
+                headway_value_cfg.get('start_ep', 50))
+            self.timetable_headway_value_planner_learn_start_ep = int(
+                headway_value_cfg.get(
+                    'learn_start_ep',
+                    max(0, self.timetable_headway_value_planner_start_ep - 30)))
+            self.timetable_headway_value_planner_min_observations = max(
+                1, int(headway_value_cfg.get('min_observations', 256)))
+            self.timetable_headway_value_planner_ridge = max(float(
+                headway_value_cfg.get('ridge', 0.75)), 1e-6)
+            self.timetable_headway_value_planner_feature_clip = max(float(
+                headway_value_cfg.get('feature_clip', 8.0)), 0.0)
+            self.timetable_headway_value_planner_cost_clip = max(float(
+                headway_value_cfg.get('cost_clip', 8.0)), 0.0)
+            self.timetable_headway_value_planner_epsilon = float(np.clip(
+                headway_value_cfg.get('epsilon', 0.0), 0.0, 1.0))
+            self.timetable_headway_value_planner_improve_margin = max(float(
+                headway_value_cfg.get('improve_margin', 0.0)), 0.0)
+            self.timetable_headway_value_planner_adjust_penalty = max(float(
+                headway_value_cfg.get('adjust_penalty', 0.0)), 0.0)
+            self.timetable_headway_value_planner_adjust_norm_s = max(float(
+                headway_value_cfg.get('adjust_norm_s', 15.0)), 1e-6)
+            self.timetable_headway_value_planner_delta_norm_s = max(float(
+                headway_value_cfg.get('delta_norm_s', 20.0)), 1e-6)
+            candidate_deltas = headway_value_cfg.get(
+                'candidate_deltas_s', [-20.0, -10.0, 0.0, 10.0, 20.0])
+            self.timetable_headway_value_planner_candidate_deltas = np.asarray(
+                sorted({float(x) for x in candidate_deltas}),
+                dtype=np.float32)
+            if not np.any(np.isclose(
+                    self.timetable_headway_value_planner_candidate_deltas,
+                    0.0)):
+                self.timetable_headway_value_planner_candidate_deltas = (
+                    np.concatenate([
+                        self.timetable_headway_value_planner_candidate_deltas,
+                        np.asarray([0.0], dtype=np.float32),
+                    ]))
+            candidate_offsets = headway_value_cfg.get(
+                'candidate_offsets_s', [])
+            self.timetable_headway_value_planner_candidate_offsets = (
+                np.asarray([float(x) for x in candidate_offsets],
+                           dtype=np.float32).reshape(-1))
+            action_basis_cfg = (
+                headway_value_cfg.get('action_basis', {}) or {})
+            self.timetable_headway_value_planner_action_basis_enable = bool(
+                action_basis_cfg.get('enable', False))
+            self.timetable_headway_value_planner_action_basis_mode = str(
+                action_basis_cfg.get('mode', 'onehot_rbf')).strip().lower()
+            self.timetable_headway_value_planner_action_basis_width_s = max(
+                float(action_basis_cfg.get('width_s', 10.0)), 1e-6)
+            basis_centers = action_basis_cfg.get(
+                'centers_s',
+                headway_value_cfg.get('candidate_deltas_s', candidate_deltas))
+            self.timetable_headway_value_planner_action_basis_centers = (
+                np.asarray(sorted({float(x) for x in basis_centers}),
+                           dtype=np.float32).reshape(-1))
+            if self.timetable_headway_value_planner_action_basis_centers.size == 0:
+                self.timetable_headway_value_planner_action_basis_centers = (
+                    np.asarray([0.0], dtype=np.float32))
+            self.timetable_headway_value_planner_action_basis_interactions = bool(
+                action_basis_cfg.get('interactions', True))
+            self.timetable_headway_value_planner_prior_weight = max(float(
+                headway_value_cfg.get('prior_weight', 0.0)), 0.0)
+            self.timetable_headway_value_planner_spacing_weight = max(float(
+                headway_value_cfg.get('spacing_weight', 1.0)), 0.0)
+            self.timetable_headway_value_planner_wait_weight = max(float(
+                headway_value_cfg.get('wait_weight', 0.5)), 0.0)
+            self.timetable_headway_value_planner_fleet_weight = max(float(
+                headway_value_cfg.get('fleet_weight', 0.5)), 0.0)
+            self.timetable_headway_value_planner_cv_target = float(
+                headway_value_cfg.get('cv_target', 0.438))
+            self.timetable_headway_value_planner_overshoot_target = max(float(
+                headway_value_cfg.get('overshoot_target', 0.13)), 0.0)
+            self.timetable_headway_value_planner_wait_target_min = max(float(
+                headway_value_cfg.get('wait_target_min', 5.5)), 0.0)
+            self.timetable_headway_value_planner_terminal_shift_target_s = max(
+                float(headway_value_cfg.get(
+                    'terminal_shift_target_s', 12.0)), 0.0)
+            self.timetable_headway_value_planner_target = str(
+                headway_value_cfg.get(
+                    'target', 'episode_composite')).strip().lower()
+            self.timetable_headway_value_planner_episode_weight = float(
+                headway_value_cfg.get('episode_weight', 1.0))
+            self.timetable_headway_value_planner_local_weight = float(
+                headway_value_cfg.get('local_weight', 1.0))
+            self.timetable_headway_value_planner_reward_weight = float(
+                headway_value_cfg.get('reward_weight', 1.0))
+            headway_gate_cfg = (
+                headway_value_cfg.get('activation_gate', {}) or {})
+            self.timetable_headway_value_planner_gate_enable = bool(
+                headway_gate_cfg.get('enable', False))
+
+            def _gate_optional_float(name):
+                value = headway_gate_cfg.get(name)
+                return None if value is None else float(value)
+
+            self.timetable_headway_value_planner_gate_min_low_forecast = (
+                _gate_optional_float('min_low_forecast'))
+            self.timetable_headway_value_planner_gate_max_low_forecast = (
+                _gate_optional_float('max_low_forecast'))
+            self.timetable_headway_value_planner_gate_min_high_energy = (
+                _gate_optional_float('min_high_energy'))
+            self.timetable_headway_value_planner_gate_max_high_energy = (
+                _gate_optional_float('max_high_energy'))
+            self.timetable_headway_value_planner_gate_min_middle_energy = (
+                _gate_optional_float('min_middle_energy'))
+            self.timetable_headway_value_planner_gate_max_middle_energy = (
+                _gate_optional_float('max_middle_energy'))
+            self.timetable_headway_value_planner_gate_min_od_entropy = (
+                _gate_optional_float('min_od_entropy'))
+            self.timetable_headway_value_planner_gate_max_od_entropy = (
+                _gate_optional_float('max_od_entropy'))
+            self.timetable_headway_value_planner_gate_max_promotion_strength = (
+                _gate_optional_float('max_promotion_strength'))
+            gate_any_of = headway_gate_cfg.get('any_of', []) or []
+            if isinstance(gate_any_of, dict):
+                gate_any_of = [gate_any_of]
+            self.timetable_headway_value_planner_gate_any_of = []
+            gate_keys = (
+                'min_low_forecast', 'max_low_forecast',
+                'min_high_energy', 'max_high_energy',
+                'min_middle_energy', 'max_middle_energy',
+                'min_od_entropy', 'max_od_entropy',
+                'max_promotion_strength',
+            )
+            if isinstance(gate_any_of, (list, tuple)):
+                for group in gate_any_of:
+                    if not isinstance(group, dict):
+                        continue
+                    parsed = {}
+                    for key in gate_keys:
+                        value = group.get(key)
+                        if value is not None:
+                            parsed[key] = float(value)
+                    if parsed:
+                        self.timetable_headway_value_planner_gate_any_of.append(
+                            parsed)
             terminal_floor_cfg = (
                 planner_cfg.get('terminal_headway_floor', {}) or {})
             self.timetable_terminal_headway_floor_enable = bool(
@@ -515,6 +877,24 @@ class TransitDuetV2Runner:
                 terminal_floor_cfg.get('ratio', default_ratio)), 0.0)
             self.timetable_terminal_headway_floor_min_s = max(float(
                 terminal_floor_cfg.get('min_s', 0.0)), 0.0)
+            upper_value_cfg = (
+                planner_cfg.get('upper_residual_value_cost', {}) or {})
+            self.upper_residual_value_cost_enable = bool(
+                upper_value_cfg.get('enable', False))
+            self.upper_residual_value_cost_weight = max(float(
+                upper_value_cfg.get('weight', 0.0)), 0.0)
+            self.upper_residual_value_cost_action_norm_s = max(float(
+                upper_value_cfg.get('action_norm_s', 15.0)), 1e-6)
+            self.upper_residual_value_cost_fleet_util_start = float(
+                upper_value_cfg.get('fleet_util_start', 0.75))
+            self.upper_residual_value_cost_fleet_util_full = float(
+                upper_value_cfg.get('fleet_util_full', 1.05))
+            self.upper_residual_value_cost_high_start = max(float(
+                upper_value_cfg.get('high_energy_start', 0.045)), 0.0)
+            self.upper_residual_value_cost_high_full = max(float(
+                upper_value_cfg.get('high_energy_full', 0.085)), 1e-6)
+            self.upper_residual_value_cost_promotion_relief = max(float(
+                upper_value_cfg.get('promotion_relief', 0.5)), 0.0)
         # v2k: elastic fleet — sample N_fleet per episode
         self.fleet_mode = upper_cfg.get('fleet_mode', 'fixed')
         self.fleet_min = upper_cfg.get('fleet_min', 8)
@@ -567,6 +947,74 @@ class TransitDuetV2Runner:
             action_high = [self.delta_max] * self.upper_action_dim
         self.upper_action_low = np.asarray(action_low, dtype=np.float32)
         self.upper_action_high = np.asarray(action_high, dtype=np.float32)
+        self.upper_action_bins = None
+        upper_bins = upper_cfg.get('action_bins', None)
+        if upper_bins:
+            action_bins = np.asarray(
+                [float(x) for x in upper_bins], dtype=np.float32)
+            action_bins = np.unique(np.clip(
+                action_bins,
+                float(self.upper_action_low.min()),
+                float(self.upper_action_high.max())))
+            if action_bins.size < 2:
+                raise ValueError("upper.action_bins must contain at least two values")
+            self.upper_action_bins = action_bins
+
+        residual_selector_cfg = (
+            upper_cfg.get('residual_value_selector', {}) or {})
+        self.upper_residual_selector_enable = bool(
+            residual_selector_cfg.get('enable', False))
+        self.upper_residual_selector_start_configured = (
+            'start_ep' in residual_selector_cfg)
+        self.upper_residual_selector_learn_start_configured = (
+            'learn_start_ep' in residual_selector_cfg)
+        self.upper_residual_selector_start_ep = int(
+            residual_selector_cfg.get('start_ep', self.upper_warmup
+                                      if hasattr(self, 'upper_warmup') else 30))
+        self.upper_residual_selector_learn_start_ep = int(
+            residual_selector_cfg.get(
+                'learn_start_ep', max(0, self.upper_residual_selector_start_ep - 20)))
+        self.upper_residual_selector_min_observations = max(
+            1, int(residual_selector_cfg.get('min_observations', 32)))
+        self.upper_residual_selector_ridge = max(float(
+            residual_selector_cfg.get('ridge', 0.25)), 1e-6)
+        self.upper_residual_selector_feature_clip = max(float(
+            residual_selector_cfg.get('feature_clip', 6.0)), 0.0)
+        self.upper_residual_selector_cost_clip = max(float(
+            residual_selector_cfg.get('cost_clip', 8.0)), 0.0)
+        self.upper_residual_selector_epsilon = float(np.clip(
+            residual_selector_cfg.get('epsilon', 0.0), 0.0, 1.0))
+        self.upper_residual_selector_improve_margin = max(float(
+            residual_selector_cfg.get('improve_margin', 0.0)), 0.0)
+        self.upper_residual_selector_adjust_penalty = max(float(
+            residual_selector_cfg.get('adjust_penalty', 0.02)), 0.0)
+        self.upper_residual_selector_adjust_norm_s = max(float(
+            residual_selector_cfg.get('adjust_norm_s', 10.0)), 1e-6)
+        self.upper_residual_selector_feature_mode = str(
+            residual_selector_cfg.get('feature_mode', 'legacy')).lower()
+        self.upper_residual_selector_plan_context = (
+            self.upper_residual_selector_feature_mode in {
+                'plan_context', 'local_plan', 'planctx', 'contextual_plan'})
+        self.upper_residual_selector_compression_safety_weight = max(float(
+            residual_selector_cfg.get('compression_safety_weight', 0.0)), 0.0)
+        self.upper_residual_selector_compression_norm_s = max(float(
+            residual_selector_cfg.get('compression_norm_s', 5.0)), 1e-6)
+        self.upper_residual_selector_short_gap_weight = max(float(
+            residual_selector_cfg.get('short_gap_weight', 0.0)), 0.0)
+        self.upper_residual_selector_fleet_pressure_weight = max(float(
+            residual_selector_cfg.get('fleet_pressure_weight', 0.0)), 0.0)
+        offsets = residual_selector_cfg.get(
+            'candidate_offsets_s', [-10.0, -5.0, 0.0, 5.0, 10.0])
+        self.upper_residual_selector_offsets = np.asarray(
+            [float(x) for x in offsets], dtype=np.float32).reshape(-1)
+        if not np.any(np.isclose(self.upper_residual_selector_offsets, 0.0)):
+            self.upper_residual_selector_offsets = np.concatenate([
+                self.upper_residual_selector_offsets,
+                np.asarray([0.0], dtype=np.float32),
+            ])
+        self.upper_residual_selector_A = None
+        self.upper_residual_selector_b = None
+        self.upper_residual_selector_updates = 0
 
         noharm_cfg = config.get('fleet_noharm', {}) or {}
         upper_noharm_cfg = noharm_cfg.get('upper', {}) or {}
@@ -759,6 +1207,27 @@ class TransitDuetV2Runner:
             lr=coupling_cfg.get('measurement_lr', 0.01))
         self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
         self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+        if (self.upper_residual_selector_enable
+                and not self.upper_residual_selector_start_configured):
+            self.upper_residual_selector_start_ep = int(self.upper_warmup)
+        if (self.upper_residual_selector_enable
+                and not self.upper_residual_selector_learn_start_configured):
+            self.upper_residual_selector_learn_start_ep = max(
+                0, int(self.upper_residual_selector_start_ep) - 20)
+        if (self.timetable_terminal_value_selector_enable
+                and not self.timetable_terminal_value_selector_start_configured):
+            self.timetable_terminal_value_selector_start_ep = int(self.upper_warmup)
+        if (self.timetable_terminal_value_selector_enable
+                and not self.timetable_terminal_value_selector_learn_start_configured):
+            self.timetable_terminal_value_selector_learn_start_ep = max(
+                0, int(self.timetable_terminal_value_selector_start_ep) - 20)
+        if (self.timetable_headway_value_planner_enable
+                and not self.timetable_headway_value_planner_start_configured):
+            self.timetable_headway_value_planner_start_ep = int(self.upper_warmup)
+        if (self.timetable_headway_value_planner_enable
+                and not self.timetable_headway_value_planner_learn_start_configured):
+            self.timetable_headway_value_planner_learn_start_ep = max(
+                0, int(self.timetable_headway_value_planner_start_ep) - 30)
         selector_cfg = config.get('fixed_expert_selector', {}) or {}
         self.fixed_selector_enable = bool(selector_cfg.get('enable', False))
         self.fixed_selector_start_ep = int(
@@ -776,9 +1245,82 @@ class TransitDuetV2Runner:
             selector_cfg.get('probe_mode', 'fixed')).lower()
         self.fixed_selector_count_start = str(
             selector_cfg.get('count_start', 'upper_warmup')).lower()
+        strict_headway = selector_cfg.get('strict_headway_s', None)
+        self.fixed_selector_strict_headway_s = (
+            None if strict_headway is None else float(strict_headway))
+        self.fixed_selector_reset_env_rng = bool(
+            selector_cfg.get('reset_env_rng', False))
         self.fixed_selector_cost_ema = {'learned': None, 'fixed': None}
         self.fixed_selector_counts = {'learned': 0, 'fixed': 0}
         self._fixed_expert_active = False
+        selector_rule_cfg = selector_cfg.get('deterministic_rule', {}) or {}
+        self.fixed_selector_rule_enable = bool(
+            selector_rule_cfg.get('enable', False))
+        self.fixed_selector_rule_default = str(
+            selector_rule_cfg.get('default', 'learned')).strip().lower()
+
+        def _rule_groups(name):
+            value = selector_rule_cfg.get(name, [])
+            if isinstance(value, dict):
+                return [dict(value)]
+            if isinstance(value, (list, tuple)):
+                return [
+                    dict(item) for item in value
+                    if isinstance(item, dict)
+                ]
+            return []
+
+        self.fixed_selector_rule_learned_when = _rule_groups('learned_when')
+        self.fixed_selector_rule_fixed_when = _rule_groups('fixed_when')
+        selector_context_cfg = selector_cfg.get('contextual_value', {}) or {}
+        self.fixed_selector_context_enable = bool(
+            selector_context_cfg.get('enable', False))
+        self.fixed_selector_context_ridge = max(float(
+            selector_context_cfg.get('ridge', 0.25)), 1e-6)
+        self.fixed_selector_context_feature_clip = max(float(
+            selector_context_cfg.get('feature_clip', 5.0)), 0.0)
+        self.fixed_selector_context_use_previous_performance = bool(
+            selector_context_cfg.get('use_previous_performance', True))
+        self.fixed_selector_context_features = [
+            'bias',
+            'cfg_demand_noise',
+            'cfg_od_noise',
+            'cfg_od_clip_width',
+            'cfg_peak_shift_abs',
+            'prev_freq_low_demand',
+            'prev_freq_low_forecast',
+            'prev_freq_high_energy',
+            'prev_freq_middle_energy',
+            'prev_freq_od_entropy',
+            'prev_freq_od_high_energy',
+            'prev_freq_promotion_strength',
+            'prev_freq_promotion_absorbed',
+            'prev_upper_hf_power_ratio',
+            'prev_lower_lf_drift_ratio',
+        ]
+        if self.fixed_selector_context_use_previous_performance:
+            self.fixed_selector_context_features.extend([
+                'prev_wait_norm',
+                'prev_overshoot_norm',
+                'prev_headway_cv',
+                'prev_terminal_shift_norm',
+                'prev_lower_drift_cost',
+            ])
+        context_dim = len(self.fixed_selector_context_features)
+        self.fixed_selector_context_A = {
+            key: self.fixed_selector_context_ridge
+            * np.eye(context_dim, dtype=np.float64)
+            for key in ('learned', 'fixed')
+        }
+        self.fixed_selector_context_b = {
+            key: np.zeros(context_dim, dtype=np.float64)
+            for key in ('learned', 'fixed')
+        }
+        self._fixed_selector_prev_diag = None
+        self._fixed_selector_current_context = None
+        self._fixed_selector_context_learned_value = 0.0
+        self._fixed_selector_context_fixed_value = 0.0
+        self._fixed_selector_context_margin = 0.0
 
         # FreqDuet leakage regularization:
         # upper should not emit high-frequency timetable shifts, and lower
@@ -813,13 +1355,38 @@ class TransitDuetV2Runner:
         self._ep_lower_drift_costs = []
         self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
+        self._ep_upper_residual_value_costs = []
+        self._ep_upper_residual_value_cost_active = []
+        self._ep_upper_residual_selector_active = []
+        self._ep_upper_residual_selector_adjusts = []
+        self._ep_upper_residual_selector_margins = []
+        self._ep_upper_residual_selector_actor_preds = []
+        self._ep_upper_residual_selector_selected_preds = []
+        self._ep_upper_residual_selector_feature_norms = []
+        self._ep_headway_value_planner_active = []
+        self._ep_headway_value_planner_adjusts = []
+        self._ep_headway_value_planner_deltas = []
+        self._ep_headway_value_planner_margins = []
+        self._ep_headway_value_planner_actor_preds = []
+        self._ep_headway_value_planner_selected_preds = []
+        self._ep_headway_value_planner_priors = []
+        self._ep_headway_value_planner_target_costs = []
+        self._ep_headway_value_planner_feature_norms = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_terminal_shift_mins = []
         self._ep_terminal_feedback_biases = []
+        self._ep_terminal_value_selector_active = []
+        self._ep_terminal_value_selector_biases = []
+        self._ep_terminal_value_selector_margins = []
+        self._ep_terminal_value_selector_actor_preds = []
+        self._ep_terminal_value_selector_selected_preds = []
+        self._ep_terminal_value_selector_feature_norms = []
+        self._ep_terminal_value_selector_target_costs = []
         self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
@@ -1371,6 +1938,1021 @@ class TransitDuetV2Runner:
             float(np.mean(np.abs(original - adjusted))))
         return adjusted
 
+    def _quantize_upper_action(self, action_vec):
+        action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        if self.upper_action_bins is None:
+            return action
+        quantized = action.copy()
+        for i, value in enumerate(action):
+            idx = int(np.argmin(np.abs(self.upper_action_bins - float(value))))
+            quantized[i] = float(self.upper_action_bins[idx])
+        return np.clip(
+            quantized, self.upper_action_low, self.upper_action_high
+        ).astype(np.float32)
+
+    def _prepare_upper_action(self, action_vec):
+        action = self._apply_upper_fleet_noharm(action_vec)
+        return self._quantize_upper_action(action)
+
+    def _upper_residual_selector_slice(self, action_vec, direction):
+        action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        if self.timetable_planner is not None:
+            b = max(1, int(self.timetable_planner.basis_per_direction))
+            if action.size == 2 * b:
+                return slice(0, b) if bool(direction) else slice(b, 2 * b)
+            if action.size == b:
+                return slice(0, b)
+        return slice(0, action.size)
+
+    def _upper_residual_selector_candidates(self, action_vec, direction):
+        base = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        base = np.clip(
+            base, self.upper_action_low, self.upper_action_high
+        ).astype(np.float32)
+        idx = self._upper_residual_selector_slice(base, direction)
+        candidates = [self._quantize_upper_action(base)]
+        for offset in self.upper_residual_selector_offsets:
+            if abs(float(offset)) < 1e-9:
+                continue
+            cand = base.copy()
+            cand[idx] = cand[idx] + float(offset)
+            cand = np.clip(
+                cand, self.upper_action_low, self.upper_action_high
+            ).astype(np.float32)
+            candidates.append(self._quantize_upper_action(cand))
+
+        deduped = []
+        seen = set()
+        for cand in candidates:
+            key = tuple(np.round(cand.astype(np.float64), 4).tolist())
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(cand)
+        return deduped
+
+    def _upper_residual_selector_plan_features(
+            self, action_vec, direction, trip=None, plan_origin_launch=None):
+        """Candidate-local timetable consequences for contextual residual choice."""
+        if (not self.upper_residual_selector_plan_context
+                or self.timetable_planner is None
+                or trip is None):
+            return np.zeros(0, dtype=np.float64)
+
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        direction = bool(direction)
+        current_launch = float(getattr(trip, 'launch_time', 0.0))
+        origin = (
+            current_launch if plan_origin_launch is None
+            else float(plan_origin_launch))
+        offset = current_launch - origin
+        base = self.timetable_planner._base_headway(trip)
+        target = self.timetable_planner.target_headway(
+            base, action, direction, offset)
+        delta = target - base
+
+        last_dispatch = float(getattr(
+            self.env, '_last_dispatch_time', {}).get(direction, -9999.0))
+        now = float(getattr(self.env, 'current_time', current_launch))
+        gap_now = now - last_dispatch
+        if gap_now > 9000.0 or gap_now < 0.0:
+            gap_now = base
+        gap_ratio = gap_now / max(target, 1.0)
+        gap_deficit = max(0.0, target - gap_now)
+        gap_excess = max(0.0, gap_now - target)
+
+        next_trip = None
+        for tt in getattr(self.env, 'timetables', []):
+            if bool(getattr(tt, 'direction', False)) != direction:
+                continue
+            if getattr(tt, 'launched', False):
+                continue
+            if float(getattr(tt, 'launch_time', 0.0)) <= current_launch:
+                continue
+            if next_trip is None or float(tt.launch_time) < float(next_trip.launch_time):
+                next_trip = tt
+
+        if next_trip is None:
+            next_base = base
+            next_target = target
+            next_gap = base
+        else:
+            next_base = self.timetable_planner._base_headway(next_trip)
+            next_offset = float(next_trip.launch_time) - origin
+            next_target = self.timetable_planner.target_headway(
+                next_base, action, direction, next_offset)
+            next_gap = float(next_trip.launch_time) - current_launch
+
+        next_delta = next_target - next_base
+        target_slope = next_target - target
+        next_gap_ratio = next_gap / max(next_target, 1.0)
+        current_compress = max(0.0, -delta)
+        next_compress = max(0.0, -next_delta)
+        current_relief = max(0.0, delta)
+        next_relief = max(0.0, next_delta)
+
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        concurrent, n_fleet, pressure = self._fleet_pressure()
+        util = float(concurrent) / max(float(n_fleet), 1.0)
+
+        return np.asarray([
+            target / 600.0,
+            delta / 30.0,
+            gap_now / 600.0,
+            gap_ratio,
+            gap_deficit / 60.0,
+            gap_excess / 60.0,
+            next_target / 600.0,
+            next_delta / 30.0,
+            target_slope / 30.0,
+            next_gap / 600.0,
+            next_gap_ratio,
+            current_compress / 15.0,
+            next_compress / 15.0,
+            current_relief / 15.0,
+            next_relief / 15.0,
+            util,
+            float(pressure) / max(float(n_fleet), 1.0),
+            float(freq.get('freq_low_forecast', 0.0)),
+            10.0 * float(freq.get('freq_high_energy', 0.0)),
+            float(freq.get('freq_promotion_strength', 0.0)),
+        ], dtype=np.float64)
+
+    def _upper_residual_selector_safety_penalty(
+            self, actor_vec, cand_vec, direction, trip=None,
+            plan_origin_launch=None):
+        if (self.upper_residual_selector_compression_safety_weight <= 0.0
+                or self.timetable_planner is None
+                or trip is None):
+            return 0.0
+        actor_feat = self._upper_residual_selector_plan_features(
+            actor_vec, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        cand_feat = self._upper_residual_selector_plan_features(
+            cand_vec, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        if actor_feat.size < 17 or cand_feat.size < 17:
+            return 0.0
+        actor_target = float(actor_feat[0] * 600.0)
+        cand_target = float(cand_feat[0] * 600.0)
+        extra_compression = max(0.0, actor_target - cand_target)
+        if extra_compression <= 0.0:
+            return 0.0
+        short_gap = max(0.0, 1.0 - float(cand_feat[3]))
+        fleet_pressure = max(0.0, float(cand_feat[16]))
+        penalty = (
+            self.upper_residual_selector_compression_safety_weight
+            * extra_compression
+            / self.upper_residual_selector_compression_norm_s)
+        penalty *= (
+            1.0
+            + self.upper_residual_selector_short_gap_weight * short_gap
+            + self.upper_residual_selector_fleet_pressure_weight * fleet_pressure)
+        return float(penalty)
+
+    def _upper_residual_selector_features(
+            self, s_upper, action_vec, direction, trip=None,
+            plan_origin_launch=None):
+        s = np.asarray(s_upper, dtype=np.float64).reshape(-1)
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        idx = self._upper_residual_selector_slice(action, direction)
+        block = np.asarray(action[idx], dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        block_mean = float(block.mean()) if block.size else 0.0
+        block_std = float(block.std()) if block.size else 0.0
+        block_slope = float(block[-1] - block[0]) if block.size >= 2 else 0.0
+        neg = max(0.0, -block_mean) / 15.0
+        pos = max(0.0, block_mean) / 15.0
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        concurrent, n_fleet, pressure = self._fleet_pressure()
+        util = float(concurrent) / max(float(n_fleet), 1.0)
+
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        demand_noise = float(getattr(self.env, 'demand_noise', 0.0))
+        od_noise = float(getattr(self.env, 'od_noise', 0.0))
+        peak_shift = self._fixed_selector_peak_shift_abs()
+        high_energy = float(freq.get('freq_high_energy', 0.0))
+        middle_energy = float(freq.get('freq_middle_energy', 0.0))
+        promotion = float(freq.get('freq_promotion_strength', 0.0))
+        absorbed = float(freq.get('freq_promotion_absorbed', 0.0))
+        low_demand = float(freq.get('freq_low_demand', 0.0))
+        low_forecast = float(freq.get('freq_low_forecast', 0.0))
+        prev_wait = _prev('avg_wait_min') / 10.0
+        prev_cv = _prev('headway_cv')
+        prev_overshoot = _prev('fleet_overshoot') / max(float(n_fleet), 1.0)
+
+        values = [
+            1.0,
+            1.0 if bool(direction) else -1.0,
+            demand_noise,
+            od_noise,
+            peak_shift,
+            util,
+            float(pressure) / max(float(n_fleet), 1.0),
+            low_demand,
+            low_forecast,
+            10.0 * high_energy,
+            10.0 * middle_energy,
+            promotion,
+            absorbed,
+            prev_wait,
+            prev_cv,
+            prev_overshoot,
+            block_mean / 30.0,
+            block_slope / 30.0,
+            block_std / 30.0,
+            neg,
+            pos,
+            float(np.linalg.norm(action)) / (
+                max(float(np.sqrt(max(action.size, 1))), 1.0) * 60.0),
+            util * neg,
+            (10.0 * high_energy) * neg,
+            promotion * neg,
+            prev_cv * neg,
+            demand_noise * neg,
+            od_noise * neg,
+            peak_shift * neg,
+            util * pos,
+            (10.0 * high_energy) * pos,
+        ]
+        clip = self.upper_residual_selector_feature_clip
+        state_part = s if clip <= 0.0 else np.clip(s, -clip, clip)
+        x = np.concatenate([
+            np.asarray(values, dtype=np.float64),
+            self._upper_residual_selector_plan_features(
+                action, direction, trip=trip,
+                plan_origin_launch=plan_origin_launch),
+            state_part,
+        ])
+        if clip > 0.0 and x.size > 1:
+            x[1:] = np.clip(x[1:], -clip, clip)
+        return x
+
+    def _ensure_upper_residual_selector_model(self, x):
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if self.upper_residual_selector_A is None:
+            dim = int(x.size)
+            self.upper_residual_selector_A = (
+                self.upper_residual_selector_ridge
+                * np.eye(dim, dtype=np.float64))
+            self.upper_residual_selector_b = np.zeros(dim, dtype=np.float64)
+            return True
+        return int(self.upper_residual_selector_A.shape[0]) == int(x.size)
+
+    def _upper_residual_selector_theta(self, x):
+        if not self._ensure_upper_residual_selector_model(x):
+            return None
+        try:
+            return np.linalg.solve(
+                self.upper_residual_selector_A,
+                self.upper_residual_selector_b)
+        except np.linalg.LinAlgError:
+            return np.linalg.lstsq(
+                self.upper_residual_selector_A,
+                self.upper_residual_selector_b,
+                rcond=None)[0]
+
+    def _update_upper_residual_selector(self, x, reward):
+        if not self.upper_residual_selector_enable or x is None:
+            return
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if not self._ensure_upper_residual_selector_model(x):
+            return
+        cost = -float(reward)
+        if self.upper_residual_selector_cost_clip > 0.0:
+            cost = float(np.clip(
+                cost,
+                -self.upper_residual_selector_cost_clip,
+                self.upper_residual_selector_cost_clip))
+        self.upper_residual_selector_A += np.outer(x, x)
+        self.upper_residual_selector_b += cost * x
+        self.upper_residual_selector_updates += 1
+
+    def _select_upper_residual_value_action(
+            self, s_upper, action_vec, direction, trip=None,
+            plan_origin_launch=None):
+        if not self.upper_residual_selector_enable:
+            return np.asarray(action_vec, dtype=np.float32), None
+        actor = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        actor_x = self._upper_residual_selector_features(
+            s_upper, actor, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        self._ep_upper_residual_selector_feature_norms.append(
+            float(np.linalg.norm(actor_x)))
+        if (int(self._current_ep) < int(self.upper_residual_selector_start_ep)
+                or self.upper_residual_selector_updates
+                < self.upper_residual_selector_min_observations):
+            self._ep_upper_residual_selector_active.append(0.0)
+            self._ep_upper_residual_selector_adjusts.append(0.0)
+            self._ep_upper_residual_selector_margins.append(0.0)
+            self._ep_upper_residual_selector_actor_preds.append(0.0)
+            self._ep_upper_residual_selector_selected_preds.append(0.0)
+            return actor, actor_x
+        theta = self._upper_residual_selector_theta(actor_x)
+        if theta is None:
+            self._ep_upper_residual_selector_active.append(0.0)
+            self._ep_upper_residual_selector_adjusts.append(0.0)
+            self._ep_upper_residual_selector_margins.append(0.0)
+            self._ep_upper_residual_selector_actor_preds.append(0.0)
+            self._ep_upper_residual_selector_selected_preds.append(0.0)
+            return actor, actor_x
+
+        candidates = self._upper_residual_selector_candidates(actor, direction)
+        scored = []
+        actor_pred = float(np.dot(actor_x, theta))
+        for cand in candidates:
+            x = self._upper_residual_selector_features(
+                s_upper, cand, direction, trip=trip,
+                plan_origin_launch=plan_origin_launch)
+            pred = float(np.dot(x, theta))
+            adjust = float(np.mean(np.abs(cand - actor)))
+            safety = self._upper_residual_selector_safety_penalty(
+                actor, cand, direction, trip=trip,
+                plan_origin_launch=plan_origin_launch)
+            score = (
+                pred
+                + self.upper_residual_selector_adjust_penalty
+                * adjust / self.upper_residual_selector_adjust_norm_s
+                + safety)
+            scored.append((score, pred, adjust, cand, x))
+
+        random_probe = (
+            self.upper_residual_selector_epsilon > 0.0
+            and np.random.random() < self.upper_residual_selector_epsilon)
+        if random_probe and len(scored) > 1:
+            chosen = scored[int(np.random.randint(len(scored)))]
+        else:
+            chosen = min(scored, key=lambda item: item[0])
+            actor_score = actor_pred
+            if (actor_score - float(chosen[0])
+                    < self.upper_residual_selector_improve_margin):
+                chosen = (actor_score, actor_pred, 0.0, actor, actor_x)
+
+        score, selected_pred, adjust, selected, selected_x = chosen
+        self._ep_upper_residual_selector_active.append(1.0)
+        self._ep_upper_residual_selector_adjusts.append(float(adjust))
+        self._ep_upper_residual_selector_margins.append(
+            float(actor_pred - score))
+        self._ep_upper_residual_selector_actor_preds.append(actor_pred)
+        self._ep_upper_residual_selector_selected_preds.append(
+            float(selected_pred))
+        return selected.astype(np.float32), selected_x
+
+    def _headway_value_planner_candidates(self, action_vec, direction):
+        base = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        base = np.clip(
+            base, self.upper_action_low, self.upper_action_high
+        ).astype(np.float32)
+        idx = self._upper_residual_selector_slice(base, direction)
+        candidates = [('actor', self._quantize_upper_action(base))]
+
+        for delta in self.timetable_headway_value_planner_candidate_deltas:
+            cand = base.copy()
+            cand[idx] = float(delta)
+            cand = np.clip(
+                cand, self.upper_action_low, self.upper_action_high
+            ).astype(np.float32)
+            candidates.append((f'const_{float(delta):+.1f}',
+                               self._quantize_upper_action(cand)))
+
+        for offset in self.timetable_headway_value_planner_candidate_offsets:
+            if abs(float(offset)) < 1e-9:
+                continue
+            cand = base.copy()
+            cand[idx] = cand[idx] + float(offset)
+            cand = np.clip(
+                cand, self.upper_action_low, self.upper_action_high
+            ).astype(np.float32)
+            candidates.append((f'offset_{float(offset):+.1f}',
+                               self._quantize_upper_action(cand)))
+
+        deduped = []
+        seen = set()
+        for name, cand in candidates:
+            key = tuple(np.round(cand.astype(np.float64), 4).tolist())
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append((name, cand))
+        return deduped
+
+    def _headway_value_planner_plan_features(
+            self, action_vec, direction, trip=None, plan_origin_launch=None):
+        if self.timetable_planner is None or trip is None:
+            return np.zeros(0, dtype=np.float64)
+
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        direction = bool(direction)
+        current_launch = float(getattr(trip, 'launch_time', 0.0))
+        origin = (
+            current_launch if plan_origin_launch is None
+            else float(plan_origin_launch))
+        offset = current_launch - origin
+        base = self.timetable_planner._base_headway(trip)
+        target = self.timetable_planner.target_headway(
+            base, action, direction, offset)
+        delta = target - base
+
+        last_dispatch = float(getattr(
+            self.env, '_last_dispatch_time', {}).get(direction, -9999.0))
+        now = float(getattr(self.env, 'current_time', current_launch))
+        gap_now = now - last_dispatch
+        if gap_now > 9000.0 or gap_now < 0.0:
+            gap_now = base
+        gap_ratio = gap_now / max(target, 1.0)
+        short_gap = max(0.0, target - gap_now)
+        gap_excess = max(0.0, gap_now - target)
+
+        future_targets = []
+        next_target = target
+        next_delta = delta
+        next_gap = base
+        next2_target = target
+        next2_delta = delta
+        next2_gap = base
+        future_trips = []
+        for tt in getattr(self.env, 'timetables', []):
+            if bool(getattr(tt, 'direction', False)) != direction:
+                continue
+            if getattr(tt, 'launched', False):
+                continue
+            launch = float(getattr(tt, 'launch_time', 0.0))
+            if launch < current_launch - 1e-6:
+                continue
+            tt_offset = launch - origin
+            if tt_offset > self.timetable_planner.horizon_s:
+                continue
+            future_trips.append(tt)
+        future_trips.sort(key=lambda tt: float(tt.launch_time))
+        after_current = 0
+        for tt in future_trips[:5]:
+            tt_base = self.timetable_planner._base_headway(tt)
+            tt_offset = float(tt.launch_time) - origin
+            tt_target = self.timetable_planner.target_headway(
+                tt_base, action, direction, tt_offset)
+            future_targets.append(float(tt_target))
+            if tt is not trip and float(tt.launch_time) > current_launch:
+                after_current += 1
+            if after_current == 1:
+                next_target = float(tt_target)
+                next_delta = float(tt_target - tt_base)
+                next_gap = float(tt.launch_time) - current_launch
+            elif after_current == 2:
+                next2_target = float(tt_target)
+                next2_delta = float(tt_target - tt_base)
+                next2_gap = float(tt.launch_time) - current_launch
+        if future_targets:
+            planned_mean = float(np.mean(future_targets))
+            planned_std = float(np.std(future_targets))
+        else:
+            planned_mean = float(target)
+            planned_std = 0.0
+
+        block = np.asarray(
+            action[self._upper_residual_selector_slice(action, direction)],
+            dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        block_mean = float(block.mean()) if block.size else 0.0
+        block_std = float(block.std()) if block.size else 0.0
+        block_slope = float(block[-1] - block[0]) if block.size >= 2 else 0.0
+        compression = max(0.0, -block_mean)
+        relief = max(0.0, block_mean)
+        prev_gap_error = gap_now - target
+        next_gap_error = next_gap - next_target
+        next2_gap_error = next2_gap - next2_target
+        prev_next_balance = next_gap - gap_now
+        target_slope = next_target - target
+
+        return np.asarray([
+            target / 600.0,
+            delta / 30.0,
+            gap_now / 600.0,
+            gap_ratio,
+            short_gap / 60.0,
+            gap_excess / 60.0,
+            next_target / 600.0,
+            next_delta / 30.0,
+            next_gap / 600.0,
+            next_gap / max(next_target, 1.0),
+            next2_target / 600.0,
+            next2_delta / 30.0,
+            next2_gap / 600.0,
+            next2_gap / max(next2_target, 1.0),
+            planned_mean / 600.0,
+            planned_std / 60.0,
+            block_mean / 30.0,
+            block_std / 30.0,
+            block_slope / 30.0,
+            compression / self.timetable_headway_value_planner_delta_norm_s,
+            relief / self.timetable_headway_value_planner_delta_norm_s,
+            prev_gap_error / 60.0,
+            next_gap_error / 60.0,
+            next2_gap_error / 60.0,
+            prev_next_balance / 600.0,
+            target_slope / 60.0,
+        ], dtype=np.float64)
+
+    def _headway_value_planner_prev_metrics(self):
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        n_fleet = max(float(self._current_N_fleet), 1.0)
+        wait = _prev('avg_wait_min')
+        cv = _prev('headway_cv')
+        overshoot = _prev('fleet_overshoot') / n_fleet
+        composite = (
+            wait / 10.0
+            + (_prev('fleet_overshoot') ** 2) / n_fleet
+            + cv)
+        return {
+            'wait': wait,
+            'cv': cv,
+            'overshoot_norm': overshoot,
+            'composite': composite,
+            'terminal_shift': _prev('terminal_launch_shift_mean'),
+            'lower_action': _prev('lower_action_mean'),
+            'lower_drift': _prev('lower_drift_cost_mean'),
+        }
+
+    def _headway_value_planner_action_basis_features(
+            self, action_vec, direction, freq, prev, util, pressure_norm):
+        """Discrete candidate embedding for demand-conditioned value selection."""
+        if not self.timetable_headway_value_planner_action_basis_enable:
+            return np.zeros(0, dtype=np.float64)
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        block = np.asarray(
+            action[self._upper_residual_selector_slice(action, direction)],
+            dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        mean_delta = float(block.mean()) if block.size else 0.0
+        block_std = float(block.std()) if block.size else 0.0
+        block_slope = float(block[-1] - block[0]) if block.size >= 2 else 0.0
+
+        centers = np.asarray(
+            self.timetable_headway_value_planner_action_basis_centers,
+            dtype=np.float64).reshape(-1)
+        if centers.size == 0:
+            centers = np.asarray([0.0], dtype=np.float64)
+        distances = np.abs(centers - mean_delta)
+        nearest = int(np.argmin(distances))
+        onehot = np.zeros(centers.size, dtype=np.float64)
+        onehot[nearest] = 1.0
+        width = max(
+            float(self.timetable_headway_value_planner_action_basis_width_s),
+            1e-6)
+        rbf = np.exp(-0.5 * ((mean_delta - centers) / width) ** 2)
+
+        mode = self.timetable_headway_value_planner_action_basis_mode
+        action_parts = []
+        if 'onehot' in mode or 'one_hot' in mode or mode == 'discrete':
+            action_parts.append(onehot)
+        if 'rbf' in mode or 'kernel' in mode:
+            action_parts.append(rbf)
+        if not action_parts:
+            action_parts.append(onehot)
+        action_key = np.concatenate(action_parts).astype(np.float64)
+
+        context = np.asarray([
+            1.0,
+            float(freq.get('freq_low_demand', 0.0)),
+            float(freq.get('freq_low_forecast', 0.0)),
+            10.0 * float(freq.get('freq_high_energy', 0.0)),
+            10.0 * float(freq.get('freq_middle_energy', 0.0)),
+            float(freq.get('freq_od_entropy', 0.0)),
+            float(freq.get('freq_promotion_strength', 0.0)),
+            float(freq.get('freq_promotion_absorbed', 0.0)),
+            float(prev.get('wait', 0.0)) / 10.0,
+            float(prev.get('cv', 0.0)),
+            float(prev.get('overshoot_norm', 0.0)),
+            float(prev.get('terminal_shift', 0.0)) / 45.0,
+            float(prev.get('lower_action', 0.0)) / 5.0,
+            float(prev.get('lower_drift', 0.0)),
+            float(util),
+            float(pressure_norm),
+            mean_delta / self.timetable_headway_value_planner_delta_norm_s,
+            block_std / self.timetable_headway_value_planner_delta_norm_s,
+            block_slope / self.timetable_headway_value_planner_delta_norm_s,
+            distances[nearest] / width,
+        ], dtype=np.float64)
+
+        feats = [
+            np.asarray([
+                mean_delta / self.timetable_headway_value_planner_delta_norm_s,
+                block_std / self.timetable_headway_value_planner_delta_norm_s,
+                block_slope / self.timetable_headway_value_planner_delta_norm_s,
+                centers[nearest]
+                / self.timetable_headway_value_planner_delta_norm_s,
+                distances[nearest] / width,
+            ], dtype=np.float64),
+            action_key,
+        ]
+        if self.timetable_headway_value_planner_action_basis_interactions:
+            feats.append(np.outer(action_key, context).reshape(-1))
+        return np.concatenate(feats).astype(np.float64)
+
+    def _headway_value_planner_features(
+            self, s_upper, action_vec, direction, trip=None,
+            plan_origin_launch=None):
+        direction = bool(direction)
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        plan = self._headway_value_planner_plan_features(
+            action, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        concurrent, n_fleet, pressure = self._fleet_pressure()
+        n_fleet = max(float(n_fleet), 1.0)
+        util = float(concurrent) / n_fleet
+        pressure_norm = float(pressure) / n_fleet
+        prev = self._headway_value_planner_prev_metrics()
+
+        waiting_total = 0
+        try:
+            waiting_total = sum(
+                len(st.waiting_passengers)
+                for st in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting_total = 0
+
+        block = np.asarray(
+            action[self._upper_residual_selector_slice(action, direction)],
+            dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        block_mean = float(block.mean()) if block.size else 0.0
+        compression = max(0.0, -block_mean)
+        relief = max(0.0, block_mean)
+        high_energy = float(freq.get('freq_high_energy', 0.0))
+        middle_energy = float(freq.get('freq_middle_energy', 0.0))
+        low_forecast = float(freq.get('freq_low_forecast', 0.0))
+        promotion = float(freq.get('freq_promotion_strength', 0.0))
+        action_basis = self._headway_value_planner_action_basis_features(
+            action, direction, freq, prev, util, pressure_norm)
+
+        values = [
+            1.0,
+            1.0 if direction else -1.0,
+            util,
+            pressure_norm,
+            waiting_total / 500.0,
+            float(freq.get('freq_low_demand', 0.0)),
+            low_forecast,
+            10.0 * high_energy,
+            10.0 * middle_energy,
+            promotion,
+            float(freq.get('freq_promotion_absorbed', 0.0)),
+            prev['wait'] / 10.0,
+            prev['cv'],
+            prev['overshoot_norm'],
+            prev['composite'],
+            prev['terminal_shift'] / 45.0,
+            prev['lower_action'] / 5.0,
+            prev['lower_drift'],
+            compression / self.timetable_headway_value_planner_delta_norm_s,
+            relief / self.timetable_headway_value_planner_delta_norm_s,
+            util * compression / self.timetable_headway_value_planner_delta_norm_s,
+            util * relief / self.timetable_headway_value_planner_delta_norm_s,
+            low_forecast * compression / self.timetable_headway_value_planner_delta_norm_s,
+            high_energy * compression / self.timetable_headway_value_planner_delta_norm_s,
+            pressure_norm * relief / self.timetable_headway_value_planner_delta_norm_s,
+        ]
+        clip = self.timetable_headway_value_planner_feature_clip
+        state_part = np.asarray(s_upper, dtype=np.float64).reshape(-1)
+        if clip > 0.0:
+            state_part = np.clip(state_part, -clip, clip)
+        x = np.concatenate([
+            np.asarray(values, dtype=np.float64),
+            action_basis,
+            plan,
+            state_part,
+        ])
+        if clip > 0.0 and x.size > 1:
+            x[1:] = np.clip(x[1:], -clip, clip)
+        return x
+
+    def _headway_value_planner_prior_cost(
+            self, action_vec, direction, trip=None, plan_origin_launch=None):
+        if self.timetable_headway_value_planner_prior_weight <= 0.0:
+            return 0.0
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        block = np.asarray(
+            action[self._upper_residual_selector_slice(action, direction)],
+            dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        mean_delta = float(block.mean()) if block.size else 0.0
+        compression = max(0.0, -mean_delta) / (
+            self.timetable_headway_value_planner_delta_norm_s)
+        relief = max(0.0, mean_delta) / (
+            self.timetable_headway_value_planner_delta_norm_s)
+
+        prev = self._headway_value_planner_prev_metrics()
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        _, n_fleet, pressure = self._fleet_pressure()
+        n_fleet = max(float(n_fleet), 1.0)
+        pressure_norm = float(pressure) / n_fleet
+        spacing_pressure = (
+            self.timetable_headway_value_planner_spacing_weight
+            * max(0.0, prev['cv']
+                  - self.timetable_headway_value_planner_cv_target)
+            / 0.02)
+        spacing_pressure += (
+            self.timetable_headway_value_planner_spacing_weight
+            * max(0.0, prev['overshoot_norm']
+                  - self.timetable_headway_value_planner_overshoot_target)
+            / 0.05)
+        spacing_pressure += (
+            self.timetable_headway_value_planner_fleet_weight
+            * max(0.0, pressure_norm))
+        wait_pressure = (
+            self.timetable_headway_value_planner_wait_weight
+            * max(0.0, prev['wait']
+                  - self.timetable_headway_value_planner_wait_target_min)
+            / 3.0)
+        wait_pressure += (
+            0.25 * self.timetable_headway_value_planner_wait_weight
+            * max(0.0, float(freq.get('freq_low_forecast', 0.0))))
+        shift_deficit = 0.0
+        if self.timetable_headway_value_planner_terminal_shift_target_s > 0.0:
+            shift_deficit = max(
+                0.0,
+                self.timetable_headway_value_planner_terminal_shift_target_s
+                - prev['terminal_shift'])
+            shift_deficit /= max(
+                self.timetable_headway_value_planner_terminal_shift_target_s,
+                1.0)
+
+        prior = (
+            compression * spacing_pressure
+            + relief * wait_pressure
+            - 0.5 * relief * (spacing_pressure + shift_deficit)
+            - 0.25 * compression * wait_pressure)
+        return float(np.clip(prior, -4.0, 4.0))
+
+    def _ensure_headway_value_planner_model(self, x):
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if self.timetable_headway_value_planner_A is None:
+            dim = int(x.size)
+            self.timetable_headway_value_planner_A = (
+                self.timetable_headway_value_planner_ridge
+                * np.eye(dim, dtype=np.float64))
+            self.timetable_headway_value_planner_b = np.zeros(
+                dim, dtype=np.float64)
+            return True
+        return int(self.timetable_headway_value_planner_A.shape[0]) == int(x.size)
+
+    def _headway_value_planner_theta(self, x):
+        if not self._ensure_headway_value_planner_model(x):
+            return None
+        try:
+            return np.linalg.solve(
+                self.timetable_headway_value_planner_A,
+                self.timetable_headway_value_planner_b)
+        except np.linalg.LinAlgError:
+            return np.linalg.lstsq(
+                self.timetable_headway_value_planner_A,
+                self.timetable_headway_value_planner_b,
+                rcond=None)[0]
+
+    def _headway_value_planner_target_cost(
+            self, episode_composite_cost, transition_reward=None,
+            local_credit_cost=None):
+        mode = str(
+            self.timetable_headway_value_planner_target
+        ).strip().lower()
+        episode_cost = float(episode_composite_cost)
+        reward_cost = (
+            -float(transition_reward)
+            if transition_reward is not None else episode_cost)
+        local_cost = (
+            float(local_credit_cost)
+            if local_credit_cost is not None else reward_cost)
+
+        if mode in {'episode', 'composite', 'episode_composite'}:
+            cost = episode_cost
+        elif mode in {'reward', 'transition_reward', 'reward_cost'}:
+            cost = self.timetable_headway_value_planner_reward_weight * reward_cost
+        elif mode in {'local', 'local_credit', 'credit', 'local_credit_cost'}:
+            cost = self.timetable_headway_value_planner_local_weight * local_cost
+        elif mode in {'blend', 'blended', 'episode_local', 'local_blend'}:
+            cost = (
+                self.timetable_headway_value_planner_episode_weight
+                * episode_cost
+                + self.timetable_headway_value_planner_local_weight
+                * local_cost)
+        elif mode in {'episode_reward', 'reward_blend'}:
+            cost = (
+                self.timetable_headway_value_planner_episode_weight
+                * episode_cost
+                + self.timetable_headway_value_planner_reward_weight
+                * reward_cost)
+        else:
+            cost = episode_cost
+        return float(cost)
+
+    def _headway_value_planner_gate_pass(self):
+        if not self.timetable_headway_value_planner_gate_enable:
+            return True
+        if getattr(self.env, 'frequency_tracker', None) is None:
+            return False
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            return False
+
+        def _group_pass(group):
+            checks = []
+
+            def _add_min(name, summary_key):
+                value = group.get(name)
+                if value is not None:
+                    checks.append(
+                        float(freq.get(summary_key, 0.0)) >= float(value))
+
+            def _add_max(name, summary_key):
+                value = group.get(name)
+                if value is not None:
+                    checks.append(
+                        float(freq.get(summary_key, 0.0)) <= float(value))
+
+            _add_min('min_low_forecast', 'freq_low_forecast')
+            _add_max('max_low_forecast', 'freq_low_forecast')
+            _add_min('min_high_energy', 'freq_high_energy')
+            _add_max('max_high_energy', 'freq_high_energy')
+            _add_min('min_middle_energy', 'freq_middle_energy')
+            _add_max('max_middle_energy', 'freq_middle_energy')
+            _add_min('min_od_entropy', 'freq_od_entropy')
+            _add_max('max_od_entropy', 'freq_od_entropy')
+            _add_max('max_promotion_strength', 'freq_promotion_strength')
+            return bool(checks and all(checks))
+
+        base_group = {
+            'min_low_forecast':
+                self.timetable_headway_value_planner_gate_min_low_forecast,
+            'max_low_forecast':
+                self.timetable_headway_value_planner_gate_max_low_forecast,
+            'min_high_energy':
+                self.timetable_headway_value_planner_gate_min_high_energy,
+            'max_high_energy':
+                self.timetable_headway_value_planner_gate_max_high_energy,
+            'min_middle_energy':
+                self.timetable_headway_value_planner_gate_min_middle_energy,
+            'max_middle_energy':
+                self.timetable_headway_value_planner_gate_max_middle_energy,
+            'min_od_entropy':
+                self.timetable_headway_value_planner_gate_min_od_entropy,
+            'max_od_entropy':
+                self.timetable_headway_value_planner_gate_max_od_entropy,
+            'max_promotion_strength':
+                self.timetable_headway_value_planner_gate_max_promotion_strength,
+        }
+        if _group_pass(base_group):
+            return True
+        return any(
+            _group_pass(group)
+            for group in self.timetable_headway_value_planner_gate_any_of)
+
+    def _update_headway_value_planner(self, x, cost):
+        if (not self.timetable_headway_value_planner_enable
+                or x is None):
+            return
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if not self._ensure_headway_value_planner_model(x):
+            return
+        cost = float(cost)
+        if self.timetable_headway_value_planner_cost_clip > 0.0:
+            cost = float(np.clip(
+                cost,
+                -self.timetable_headway_value_planner_cost_clip,
+                self.timetable_headway_value_planner_cost_clip))
+        self._ep_headway_value_planner_target_costs.append(cost)
+        self.timetable_headway_value_planner_A += np.outer(x, x)
+        self.timetable_headway_value_planner_b += cost * x
+        self.timetable_headway_value_planner_updates += 1
+
+    def _select_headway_value_plan_action(
+            self, s_upper, action_vec, direction, trip=None,
+            plan_origin_launch=None):
+        actor = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        if not self.timetable_headway_value_planner_enable:
+            return actor, None
+        actor_x = self._headway_value_planner_features(
+            s_upper, actor, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        self._ep_headway_value_planner_feature_norms.append(
+            float(np.linalg.norm(actor_x)))
+        gate_pass = self._headway_value_planner_gate_pass()
+        if (not gate_pass
+                or int(self._current_ep) < int(
+                self.timetable_headway_value_planner_start_ep)
+                or self.timetable_headway_value_planner_updates
+                < self.timetable_headway_value_planner_min_observations):
+            self._ep_headway_value_planner_active.append(0.0)
+            self._ep_headway_value_planner_adjusts.append(0.0)
+            self._ep_headway_value_planner_deltas.append(
+                float(actor[self._upper_residual_selector_slice(
+                    actor, direction)].mean()))
+            self._ep_headway_value_planner_margins.append(0.0)
+            self._ep_headway_value_planner_actor_preds.append(0.0)
+            self._ep_headway_value_planner_selected_preds.append(0.0)
+            self._ep_headway_value_planner_priors.append(0.0)
+            return actor, actor_x
+
+        theta = self._headway_value_planner_theta(actor_x)
+        if theta is None:
+            self._ep_headway_value_planner_active.append(0.0)
+            self._ep_headway_value_planner_adjusts.append(0.0)
+            self._ep_headway_value_planner_deltas.append(
+                float(actor[self._upper_residual_selector_slice(
+                    actor, direction)].mean()))
+            self._ep_headway_value_planner_margins.append(0.0)
+            self._ep_headway_value_planner_actor_preds.append(0.0)
+            self._ep_headway_value_planner_selected_preds.append(0.0)
+            self._ep_headway_value_planner_priors.append(0.0)
+            return actor, actor_x
+
+        actor_pred = float(np.dot(actor_x, theta))
+        actor_prior = self._headway_value_planner_prior_cost(
+            actor, direction, trip=trip,
+            plan_origin_launch=plan_origin_launch)
+        scored = []
+        for _, cand in self._headway_value_planner_candidates(actor, direction):
+            x = self._headway_value_planner_features(
+                s_upper, cand, direction, trip=trip,
+                plan_origin_launch=plan_origin_launch)
+            pred = float(np.dot(x, theta))
+            adjust = float(np.mean(np.abs(cand - actor)))
+            prior = self._headway_value_planner_prior_cost(
+                cand, direction, trip=trip,
+                plan_origin_launch=plan_origin_launch)
+            score = (
+                pred
+                + self.timetable_headway_value_planner_adjust_penalty
+                * adjust
+                / self.timetable_headway_value_planner_adjust_norm_s
+                + self.timetable_headway_value_planner_prior_weight * prior)
+            scored.append((score, pred, adjust, prior, cand, x))
+
+        random_probe = (
+            self.timetable_headway_value_planner_epsilon > 0.0
+            and np.random.random()
+            < self.timetable_headway_value_planner_epsilon)
+        if random_probe and len(scored) > 1:
+            chosen = scored[int(np.random.randint(len(scored)))]
+        else:
+            chosen = min(scored, key=lambda item: item[0])
+            actor_score = (
+                actor_pred
+                + self.timetable_headway_value_planner_prior_weight
+                * actor_prior)
+            if (actor_score - float(chosen[0])
+                    < self.timetable_headway_value_planner_improve_margin):
+                chosen = (actor_score, actor_pred, 0.0, actor_prior,
+                          actor, actor_x)
+
+        score, selected_pred, adjust, prior, selected, selected_x = chosen
+        selected_block = selected[self._upper_residual_selector_slice(
+            selected, direction)]
+        self._ep_headway_value_planner_active.append(1.0)
+        self._ep_headway_value_planner_adjusts.append(float(adjust))
+        self._ep_headway_value_planner_deltas.append(
+            float(np.asarray(selected_block, dtype=np.float64).mean()))
+        self._ep_headway_value_planner_margins.append(
+            float((actor_pred
+                   + self.timetable_headway_value_planner_prior_weight
+                   * actor_prior) - score))
+        self._ep_headway_value_planner_actor_preds.append(actor_pred)
+        self._ep_headway_value_planner_selected_preds.append(
+            float(selected_pred))
+        self._ep_headway_value_planner_priors.append(float(prior))
+        return selected.astype(np.float32), selected_x
+
     def _lower_value_guard_signal(self, bus, action_s):
         if bus is None:
             return 0.0, 0.0, 0.0
@@ -1678,12 +3260,22 @@ class TransitDuetV2Runner:
         return self._quantize_lower_action(action)
 
     def _fixed_headway_callback(self, s_upper_v1, trip):
+        if self.fixed_selector_strict_headway_s is not None:
+            headway = float(self.fixed_selector_strict_headway_s)
+            trip._freqduet_base_target_headway = headway
+            return headway
         base_hw = float(getattr(trip, 'target_headway', 360.0))
         if not hasattr(trip, '_freqduet_base_target_headway'):
             trip._freqduet_base_target_headway = base_hw
         return float(getattr(trip, '_freqduet_base_target_headway', base_hw))
 
     def _select_fixed_expert_for_episode(self, ep, training=True):
+        rule_decision = self._fixed_selector_rule_decision(
+            ep, training=training)
+        if rule_decision is not None:
+            return bool(rule_decision)
+        if self.fixed_selector_context_enable:
+            return self._select_fixed_expert_contextual(ep, training=training)
         if not (self.fixed_selector_enable and training):
             return False
         if int(ep) < int(self.fixed_selector_start_ep):
@@ -1727,6 +3319,176 @@ class TransitDuetV2Runner:
             self.fixed_selector_cost_ema[key] = (
                 alpha * cost + (1.0 - alpha) * float(prev))
         self.fixed_selector_counts[key] += 1
+        if self.fixed_selector_context_enable:
+            x = self._fixed_selector_current_context
+            if x is None:
+                x = self._fixed_selector_context_vector()
+            x = np.asarray(x, dtype=np.float64).reshape(-1)
+            self.fixed_selector_context_A[key] += np.outer(x, x)
+            self.fixed_selector_context_b[key] += cost * x
+
+    def _fixed_selector_peak_shift_abs(self):
+        choices = getattr(self.env, 'peak_shift_choices', None)
+        if not choices:
+            return 0.0
+        vals = np.asarray(choices, dtype=np.float64).reshape(-1)
+        probs = getattr(self.env, 'peak_shift_probs', None)
+        if probs is not None:
+            probs = np.asarray(probs, dtype=np.float64).reshape(-1)
+            if probs.size == vals.size and probs.sum() > 0:
+                probs = probs / probs.sum()
+                return float(np.sum(np.abs(vals) * probs) / 2.0)
+        return float(np.mean(np.abs(vals)) / 2.0)
+
+    def _fixed_selector_context_values(self):
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        od_clip = getattr(self.env, 'od_noise_clip', [1.0, 1.0])
+        try:
+            od_clip_width = (
+                abs(float(od_clip[1]) - float(od_clip[0])) / 2.0
+                if len(od_clip) >= 2 else 0.0)
+        except (TypeError, ValueError):
+            od_clip_width = 0.0
+        n_fleet = max(float(_prev('N_fleet', self.N_fleet_default)), 1.0)
+        values = {
+            'bias': 1.0,
+            'cfg_demand_noise': float(getattr(self.env, 'demand_noise', 0.0)),
+            'cfg_od_noise': float(getattr(self.env, 'od_noise', 0.0)),
+            'cfg_od_clip_width': od_clip_width,
+            'cfg_peak_shift_abs': self._fixed_selector_peak_shift_abs(),
+            'prev_freq_low_demand': _prev('freq_low_demand'),
+            'prev_freq_low_forecast': _prev('freq_low_forecast'),
+            'prev_freq_high_energy': 10.0 * _prev('freq_high_energy'),
+            'prev_freq_middle_energy': 10.0 * _prev('freq_middle_energy'),
+            'prev_freq_od_entropy': _prev('freq_od_entropy'),
+            'prev_freq_od_high_energy': 10.0 * _prev('freq_od_high_energy'),
+            'prev_freq_promotion_strength':
+                _prev('freq_promotion_strength'),
+            'prev_freq_promotion_absorbed':
+                _prev('freq_promotion_absorbed'),
+            'prev_upper_hf_power_ratio': _prev('upper_hf_power_ratio'),
+            'prev_lower_lf_drift_ratio': _prev('lower_lf_drift_ratio'),
+            'prev_wait_norm': _prev('avg_wait_min') / 10.0,
+            'prev_overshoot_norm': _prev('fleet_overshoot') / n_fleet,
+            'prev_headway_cv': _prev('headway_cv'),
+            'prev_terminal_shift_norm':
+                _prev('terminal_launch_shift_mean') / 60.0,
+            'prev_lower_drift_cost': _prev('lower_drift_cost_mean'),
+        }
+        return values
+
+    def _fixed_selector_context_vector(self):
+        values = self._fixed_selector_context_values()
+        x = np.asarray([
+            values[name] for name in self.fixed_selector_context_features
+        ], dtype=np.float64)
+        clip = self.fixed_selector_context_feature_clip
+        if clip > 0.0 and x.size > 1:
+            x[1:] = np.clip(x[1:], -clip, clip)
+        return x
+
+    def _fixed_selector_rule_group_pass(self, group, values):
+        if not group:
+            return False
+        checks = []
+        for key, threshold in group.items():
+            if threshold is None:
+                continue
+            key = str(key)
+            if key.startswith('min_'):
+                name = key[4:]
+                checks.append(
+                    float(values.get(name, 0.0)) >= float(threshold))
+            elif key.startswith('max_'):
+                name = key[4:]
+                checks.append(
+                    float(values.get(name, 0.0)) <= float(threshold))
+            elif key in values:
+                checks.append(
+                    abs(float(values.get(key, 0.0)) - float(threshold))
+                    <= 1e-9)
+        return bool(checks and all(checks))
+
+    def _fixed_selector_rule_decision(self, ep, training=True):
+        if not (
+                self.fixed_selector_rule_enable
+                and self.fixed_selector_enable
+                and training):
+            return None
+        if int(ep) < int(self.fixed_selector_start_ep):
+            return False
+        values = self._fixed_selector_context_values()
+        if any(
+                self._fixed_selector_rule_group_pass(group, values)
+                for group in self.fixed_selector_rule_fixed_when):
+            return True
+        if any(
+                self._fixed_selector_rule_group_pass(group, values)
+                for group in self.fixed_selector_rule_learned_when):
+            return False
+        return self.fixed_selector_rule_default in {
+            'fixed', 'fixed_headway', 'expert'}
+
+    def _fixed_selector_predict_context_cost(self, key, x):
+        A = self.fixed_selector_context_A[key]
+        b = self.fixed_selector_context_b[key]
+        try:
+            theta = np.linalg.solve(A, b)
+        except np.linalg.LinAlgError:
+            theta = np.linalg.lstsq(A, b, rcond=None)[0]
+        return float(np.dot(np.asarray(x, dtype=np.float64), theta))
+
+    def _select_fixed_expert_contextual(self, ep, training=True):
+        rule_decision = self._fixed_selector_rule_decision(
+            ep, training=training)
+        if rule_decision is not None:
+            self._fixed_selector_current_context = (
+                self._fixed_selector_context_vector())
+            self._fixed_selector_context_learned_value = 0.0
+            self._fixed_selector_context_fixed_value = 0.0
+            self._fixed_selector_context_margin = (
+                -1.0 if bool(rule_decision) else 1.0)
+            return bool(rule_decision)
+        self._fixed_selector_current_context = (
+            self._fixed_selector_context_vector())
+        x = self._fixed_selector_current_context
+        learned_pred = self._fixed_selector_predict_context_cost('learned', x)
+        fixed_pred = self._fixed_selector_predict_context_cost('fixed', x)
+        self._fixed_selector_context_learned_value = learned_pred
+        self._fixed_selector_context_fixed_value = fixed_pred
+        self._fixed_selector_context_margin = fixed_pred - learned_pred
+        if not (self.fixed_selector_enable and training):
+            return False
+        if int(ep) < int(self.fixed_selector_start_ep):
+            return False
+        fixed_count = self.fixed_selector_counts['fixed']
+        learned_count = self.fixed_selector_counts['learned']
+        if fixed_count < self.fixed_selector_min_observations:
+            return True
+        if learned_count < self.fixed_selector_min_observations:
+            return False
+        if (self.fixed_selector_probe_period > 0
+                and (int(ep) - int(self.fixed_selector_start_ep))
+                % self.fixed_selector_probe_period == 0):
+            probe_index = (
+                (int(ep) - int(self.fixed_selector_start_ep))
+                // self.fixed_selector_probe_period)
+            if self.fixed_selector_probe_mode in {'alternate', 'balanced'}:
+                return bool(probe_index % 2 == 0)
+            if self.fixed_selector_probe_mode in {'learned', 'learned_only'}:
+                return False
+            return True
+        if self.fixed_selector_epsilon > 0.0:
+            if np.random.random() < self.fixed_selector_epsilon:
+                return bool(np.random.random() < 0.5)
+        return bool(fixed_pred <= learned_pred + self.fixed_selector_margin)
 
     def _fixed_selector_update_start_ep(self):
         if self.fixed_selector_count_start in {'selector', 'selector_start',
@@ -1748,6 +3510,47 @@ class TransitDuetV2Runner:
         prev_delta_by_dir[direction] = delta_t
         return float(self.upper_hf_penalty * diff / max(self.delta_max, 1e-6))
 
+    def _upper_residual_value_cost(self, effective_delta):
+        """Penalty for upper headway compression without enough HF demand value."""
+        if (not self.upper_residual_value_cost_enable
+                or self.upper_residual_value_cost_weight <= 0.0):
+            return 0.0, 0.0
+        negative_residual = max(0.0, -float(effective_delta))
+        if negative_residual <= 0.0:
+            return 0.0, 0.0
+        concurrent, n_fleet, _ = self._fleet_pressure()
+        fleet_util = concurrent / max(float(n_fleet), 1.0)
+        fleet_strength = self._pressure_strength(
+            fleet_util,
+            self.upper_residual_value_cost_fleet_util_start,
+            self.upper_residual_value_cost_fleet_util_full)
+        if fleet_strength <= 0.0:
+            return 0.0, 0.0
+        freq_summary = self.env.frequency_summary()
+        high_energy = max(float(
+            freq_summary.get('freq_high_energy', 0.0)), 0.0)
+        high_value = self._pressure_strength(
+            high_energy,
+            self.upper_residual_value_cost_high_start,
+            self.upper_residual_value_cost_high_full)
+        promotion_value = max(float(
+            freq_summary.get('freq_promotion_strength', 0.0)), 0.0)
+        relief = min(
+            1.0,
+            high_value
+            + self.upper_residual_value_cost_promotion_relief
+            * promotion_value)
+        risk_gate = max(0.0, 1.0 - relief)
+        action_risk = (
+            negative_residual
+            / self.upper_residual_value_cost_action_norm_s)
+        cost = (
+            self.upper_residual_value_cost_weight
+            * action_risk
+            * fleet_strength
+            * risk_gate)
+        return float(cost), float(1.0 if cost > 1e-9 else 0.0)
+
     def _terminal_shift_max_for_frequency(self):
         if self.timetable_terminal_hf_shift_max_s is None:
             return None
@@ -1758,6 +3561,64 @@ class TransitDuetV2Runner:
                 < self.timetable_terminal_hf_energy_min):
             return None
         return float(self.timetable_terminal_hf_shift_max_s)
+
+    def _terminal_shift_min_for_frequency(
+            self, action_vec=None, current_delta_s=None):
+        """Causal adaptive early-release cap for executable terminal dispatch."""
+        if not self.timetable_terminal_early_release_enable:
+            return None
+        base_min = float(self.timetable_terminal_early_release_base_min_s)
+        relaxed_min = float(
+            self.timetable_terminal_early_release_relaxed_min_s)
+        if getattr(self.env, 'frequency_tracker', None) is None:
+            return base_min
+        freq_summary = self.env.frequency_summary()
+        if (float(freq_summary.get('freq_updates', 0.0))
+                < self.timetable_terminal_early_release_min_updates):
+            return base_min
+
+        checks = []
+
+        def _add_max(value, summary_key):
+            if value is not None:
+                checks.append(
+                    float(freq_summary.get(summary_key, 0.0)) <= float(value))
+
+        def _add_min(value, summary_key):
+            if value is not None:
+                checks.append(
+                    float(freq_summary.get(summary_key, 0.0)) >= float(value))
+
+        _add_max(
+            self.timetable_terminal_early_release_max_high_energy,
+            'freq_high_energy')
+        _add_max(
+            self.timetable_terminal_early_release_max_middle_energy,
+            'freq_middle_energy')
+        _add_min(
+            self.timetable_terminal_early_release_min_od_entropy,
+            'freq_od_entropy')
+        _add_max(
+            self.timetable_terminal_early_release_max_od_high_energy,
+            'freq_od_high_energy')
+        _add_max(
+            self.timetable_terminal_early_release_max_low_forecast,
+            'freq_low_forecast')
+        if (self.timetable_terminal_early_release_min_action_mean_s
+                is not None and action_vec is not None):
+            action_mean = float(np.mean(
+                np.asarray(action_vec, dtype=np.float32).reshape(-1)))
+            checks.append(
+                action_mean >= float(
+                    self.timetable_terminal_early_release_min_action_mean_s))
+        if (self.timetable_terminal_early_release_min_current_delta_s
+                is not None and current_delta_s is not None):
+            checks.append(
+                float(current_delta_s) >= float(
+                    self.timetable_terminal_early_release_min_current_delta_s))
+        if checks and all(checks):
+            return relaxed_min
+        return base_min
 
     def _terminal_feedback_bias(
             self, direction, trip=None, action_vec=None,
@@ -1860,6 +3721,253 @@ class TransitDuetV2Runner:
                         gap_room)
                     bias = max(bias, raw_bias)
         return float(max(bias, 0.0))
+
+    def _terminal_value_selector_features(
+            self, direction, trip=None, action_vec=None,
+            plan_origin_launch=None, bias_s=0.0):
+        direction = bool(direction)
+        bias_s = max(float(bias_s), 0.0)
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        concurrent, n_fleet, pressure = self._fleet_pressure()
+        util = float(concurrent) / max(float(n_fleet), 1.0)
+
+        current_launch = float(getattr(trip, 'launch_time', 0.0))
+        origin = (
+            current_launch if plan_origin_launch is None
+            else float(plan_origin_launch))
+        target = float(getattr(trip, 'target_headway', 360.0))
+        delta = 0.0
+        if (self.timetable_planner is not None
+                and trip is not None
+                and action_vec is not None):
+            offset = current_launch - origin
+            base = self.timetable_planner._base_headway(trip)
+            target = self.timetable_planner.target_headway(
+                base, action_vec, direction, offset)
+            delta = target - base
+
+        last_dispatch = float(getattr(
+            self.env, '_last_dispatch_time', {}).get(direction, -9999.0))
+        now = float(getattr(self.env, 'current_time', current_launch))
+        gap_now = now - last_dispatch
+        if gap_now > 9000.0 or gap_now < 0.0:
+            gap_now = target
+        post_gap = gap_now + bias_s
+        gap_ratio = gap_now / max(target, 1.0)
+        post_gap_ratio = post_gap / max(target, 1.0)
+        short_gap = max(0.0, target - gap_now)
+        post_short_gap = max(0.0, target - post_gap)
+        over_gap = max(0.0, post_gap - target)
+
+        waiting_total = 0
+        try:
+            waiting_total = sum(
+                len(st.waiting_passengers)
+                for st in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting_total = 0
+
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        values = [
+            1.0,
+            1.0 if direction else -1.0,
+            bias_s / 15.0,
+            target / 600.0,
+            delta / 30.0,
+            gap_now / 600.0,
+            gap_ratio,
+            post_gap_ratio,
+            short_gap / 60.0,
+            post_short_gap / 60.0,
+            over_gap / 60.0,
+            util,
+            float(pressure) / max(float(n_fleet), 1.0),
+            waiting_total / 500.0,
+            float(freq.get('freq_low_demand', 0.0)),
+            float(freq.get('freq_low_forecast', 0.0)),
+            10.0 * float(freq.get('freq_high_energy', 0.0)),
+            10.0 * float(freq.get('freq_middle_energy', 0.0)),
+            float(freq.get('freq_promotion_strength', 0.0)),
+            float(freq.get('freq_promotion_absorbed', 0.0)),
+            _prev('avg_wait_min') / 10.0,
+            _prev('headway_cv'),
+            _prev('fleet_overshoot') / max(float(n_fleet), 1.0),
+            _prev('terminal_launch_shift_mean') / 45.0,
+            _prev('lower_drift_cost_mean'),
+            bias_s * util / 15.0,
+            bias_s * max(0.0, float(pressure)) / (
+                15.0 * max(float(n_fleet), 1.0)),
+            bias_s * short_gap / (15.0 * 60.0),
+            bias_s * waiting_total / (15.0 * 500.0),
+        ]
+        x = np.asarray(values, dtype=np.float64)
+        clip = self.timetable_terminal_value_selector_feature_clip
+        if clip > 0.0 and x.size > 1:
+            x[1:] = np.clip(x[1:], -clip, clip)
+        return x
+
+    def _ensure_terminal_value_selector_model(self, x):
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if self.timetable_terminal_value_selector_A is None:
+            dim = int(x.size)
+            self.timetable_terminal_value_selector_A = (
+                self.timetable_terminal_value_selector_ridge
+                * np.eye(dim, dtype=np.float64))
+            self.timetable_terminal_value_selector_b = np.zeros(
+                dim, dtype=np.float64)
+            return True
+        return int(self.timetable_terminal_value_selector_A.shape[0]) == int(x.size)
+
+    def _terminal_value_selector_theta(self, x):
+        if not self._ensure_terminal_value_selector_model(x):
+            return None
+        try:
+            return np.linalg.solve(
+                self.timetable_terminal_value_selector_A,
+                self.timetable_terminal_value_selector_b)
+        except np.linalg.LinAlgError:
+            return np.linalg.lstsq(
+                self.timetable_terminal_value_selector_A,
+                self.timetable_terminal_value_selector_b,
+                rcond=None)[0]
+
+    def _terminal_value_selector_target_cost(
+            self, episode_composite_cost, transition_reward=None,
+            local_credit_cost=None):
+        mode = str(
+            self.timetable_terminal_value_selector_target
+        ).strip().lower()
+        episode_cost = float(episode_composite_cost)
+        reward_cost = (
+            -float(transition_reward)
+            if transition_reward is not None else episode_cost)
+        local_cost = (
+            float(local_credit_cost)
+            if local_credit_cost is not None else reward_cost)
+
+        if mode in {'episode', 'composite', 'episode_composite'}:
+            cost = episode_cost
+        elif mode in {'reward', 'transition_reward', 'reward_cost'}:
+            cost = self.timetable_terminal_value_selector_reward_weight * reward_cost
+        elif mode in {'local', 'local_credit', 'credit', 'local_credit_cost'}:
+            cost = self.timetable_terminal_value_selector_local_weight * local_cost
+        elif mode in {'blend', 'blended', 'episode_local', 'local_blend'}:
+            cost = (
+                self.timetable_terminal_value_selector_episode_weight
+                * episode_cost
+                + self.timetable_terminal_value_selector_local_weight
+                * local_cost)
+        elif mode in {'episode_reward', 'reward_blend'}:
+            cost = (
+                self.timetable_terminal_value_selector_episode_weight
+                * episode_cost
+                + self.timetable_terminal_value_selector_reward_weight
+                * reward_cost)
+        else:
+            cost = reward_cost
+        return float(cost)
+
+    def _update_terminal_value_selector(self, x, cost):
+        if (not self.timetable_terminal_value_selector_enable
+                or x is None):
+            return
+        x = np.asarray(x, dtype=np.float64).reshape(-1)
+        if not self._ensure_terminal_value_selector_model(x):
+            return
+        cost = float(cost)
+        if self.timetable_terminal_value_selector_cost_clip > 0.0:
+            cost = float(np.clip(
+                cost,
+                -self.timetable_terminal_value_selector_cost_clip,
+                self.timetable_terminal_value_selector_cost_clip))
+        self._ep_terminal_value_selector_target_costs.append(cost)
+        self.timetable_terminal_value_selector_A += np.outer(x, x)
+        self.timetable_terminal_value_selector_b += cost * x
+        self.timetable_terminal_value_selector_updates += 1
+
+    def _select_terminal_value_bias(
+            self, direction, trip=None, action_vec=None,
+            plan_origin_launch=None, base_bias_s=0.0):
+        base_bias = max(float(base_bias_s), 0.0)
+        if not self.timetable_terminal_value_selector_enable:
+            return base_bias, None
+        actor_x = self._terminal_value_selector_features(
+            direction, trip=trip, action_vec=action_vec,
+            plan_origin_launch=plan_origin_launch, bias_s=base_bias)
+        self._ep_terminal_value_selector_feature_norms.append(
+            float(np.linalg.norm(actor_x)))
+        if (int(self._current_ep) < int(
+                self.timetable_terminal_value_selector_start_ep)
+                or self.timetable_terminal_value_selector_updates
+                < self.timetable_terminal_value_selector_min_observations):
+            self._ep_terminal_value_selector_active.append(0.0)
+            self._ep_terminal_value_selector_biases.append(base_bias)
+            self._ep_terminal_value_selector_margins.append(0.0)
+            self._ep_terminal_value_selector_actor_preds.append(0.0)
+            self._ep_terminal_value_selector_selected_preds.append(0.0)
+            return base_bias, actor_x
+
+        theta = self._terminal_value_selector_theta(actor_x)
+        if theta is None:
+            self._ep_terminal_value_selector_active.append(0.0)
+            self._ep_terminal_value_selector_biases.append(base_bias)
+            self._ep_terminal_value_selector_margins.append(0.0)
+            self._ep_terminal_value_selector_actor_preds.append(0.0)
+            self._ep_terminal_value_selector_selected_preds.append(0.0)
+            return base_bias, actor_x
+
+        candidates = list(self.timetable_terminal_value_selector_candidates)
+        candidates.append(base_bias)
+        candidates = sorted({max(0.0, float(x)) for x in candidates})
+        actor_pred = float(np.dot(actor_x, theta))
+        scored = []
+        for bias in candidates:
+            x = self._terminal_value_selector_features(
+                direction, trip=trip, action_vec=action_vec,
+                plan_origin_launch=plan_origin_launch, bias_s=bias)
+            pred = float(np.dot(x, theta))
+            delay_cost = (
+                self.timetable_terminal_value_selector_delay_penalty
+                * bias / self.timetable_terminal_value_selector_bias_norm_s)
+            score = pred + delay_cost
+            scored.append((score, pred, bias, x))
+
+        random_probe = (
+            self.timetable_terminal_value_selector_epsilon > 0.0
+            and np.random.random()
+            < self.timetable_terminal_value_selector_epsilon)
+        if random_probe and len(scored) > 1:
+            chosen = scored[int(np.random.randint(len(scored)))]
+        else:
+            chosen = min(scored, key=lambda item: item[0])
+            actor_score = (
+                actor_pred
+                + self.timetable_terminal_value_selector_delay_penalty
+                * base_bias
+                / self.timetable_terminal_value_selector_bias_norm_s)
+            if (actor_score - float(chosen[0])
+                    < self.timetable_terminal_value_selector_improve_margin):
+                chosen = (actor_score, actor_pred, base_bias, actor_x)
+
+        score, selected_pred, selected_bias, selected_x = chosen
+        self._ep_terminal_value_selector_active.append(1.0)
+        self._ep_terminal_value_selector_biases.append(float(selected_bias))
+        self._ep_terminal_value_selector_margins.append(
+            float(actor_pred - score))
+        self._ep_terminal_value_selector_actor_preds.append(actor_pred)
+        self._ep_terminal_value_selector_selected_preds.append(
+            float(selected_pred))
+        return float(selected_bias), selected_x
 
     def _freq_wait_high_share(self, low_demand, local_high, positive_only=False):
         """Share of local passenger wait attributed to high-frequency demand."""
@@ -2188,6 +4296,9 @@ class TransitDuetV2Runner:
         log_mu = None
         upper_decision_taken = True
         plan_origin_launch = None
+        selector_x = None
+        headway_selector_x = None
+        terminal_selector_x = None
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         promotion_replan = False
@@ -2269,7 +4380,14 @@ class TransitDuetV2Runner:
                 action_vec = (
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
-            action_vec = self._apply_upper_fleet_noharm(action_vec)
+            action_vec = self._prepare_upper_action(action_vec)
+            action_vec, selector_x = self._select_upper_residual_value_action(
+                s_upper, action_vec, planner_dir, trip=trip,
+                plan_origin_launch=plan_origin_launch)
+            action_vec, headway_selector_x = (
+                self._select_headway_value_plan_action(
+                    s_upper, action_vec, planner_dir, trip=trip,
+                    plan_origin_launch=plan_origin_launch))
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
@@ -2280,13 +4398,19 @@ class TransitDuetV2Runner:
             self._ep_upper_plan_decisions += 1
         elif (not upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
-            action_vec = self._apply_upper_fleet_noharm(action_vec)
+            action_vec = self._prepare_upper_action(action_vec)
 
         delta_t = float(action_vec[0])
         base_hw = trip.target_headway if hasattr(trip, 'target_headway') else 360.0
         plan_summary = None
         plan_penalty = 0.0
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            current_plan_delta = self.timetable_planner.delta_at(
+                action_vec, bool(trip.direction), 0.0)
+            terminal_shift_min_s = (
+                self._terminal_shift_min_for_frequency(
+                    action_vec, current_delta_s=current_plan_delta)
+                if self.timetable_terminal_dispatch else None)
             terminal_shift_max_s = (
                 self._terminal_shift_max_for_frequency()
                 if self.timetable_terminal_dispatch else None)
@@ -2296,6 +4420,13 @@ class TransitDuetV2Runner:
                     action_vec=action_vec,
                     plan_origin_launch=plan_origin_launch)
                 if self.timetable_terminal_dispatch else 0.0)
+            if self.timetable_terminal_dispatch and upper_decision_taken:
+                terminal_shift_bias_s, terminal_selector_x = (
+                    self._select_terminal_value_bias(
+                        bool(trip.direction), trip=trip,
+                        action_vec=action_vec,
+                        plan_origin_launch=plan_origin_launch,
+                        base_bias_s=terminal_shift_bias_s))
             terminal_floor_ratio = (
                 self.timetable_terminal_headway_floor_ratio
                 if (self.timetable_terminal_dispatch
@@ -2310,6 +4441,7 @@ class TransitDuetV2Runner:
                 self.env.timetables, trip, action_vec,
                 origin_launch_s=plan_origin_launch,
                 write_scheduled_launch=self.timetable_terminal_dispatch,
+                terminal_shift_min_s=terminal_shift_min_s,
                 terminal_shift_max_s=terminal_shift_max_s,
                 terminal_shift_bias_s=terminal_shift_bias_s,
                 terminal_headway_floor_ratio=terminal_floor_ratio,
@@ -2320,6 +4452,10 @@ class TransitDuetV2Runner:
                 float(plan_summary.get(
                     'terminal_shift_max_s',
                     self.timetable_planner.terminal_shift_max_s)))
+            self._ep_terminal_shift_mins.append(
+                float(plan_summary.get(
+                    'terminal_shift_min_s',
+                    self.timetable_planner.terminal_shift_min_s)))
             self._ep_terminal_feedback_biases.append(
                 float(plan_summary.get('terminal_shift_bias_s', 0.0)))
             floor_n = int(plan_summary.get('terminal_headway_floor_n', 0))
@@ -2388,18 +4524,32 @@ class TransitDuetV2Runner:
         # executions of the previous low-frequency plan, not new policy actions.
         if upper_decision_taken:
             if self._prev_upper_state is not None:
+                prev = self._prev_upper_state
                 prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
-                    self._prev_upper_state)
+                    prev[:6])
+                value_cost = float(prev[6]) if len(prev) > 6 else 0.0
+                value_active = float(prev[7]) if len(prev) > 7 else 0.0
+                residual_selector_x = prev[8] if len(prev) > 8 else None
+                terminal_value_selector_x = prev[9] if len(prev) > 9 else None
+                headway_value_planner_x = prev[10] if len(prev) > 10 else None
                 self._episode_upper_transitions.append({
                     's': prev_s, 'a': prev_a, 'tid': prev_tid,
                     'dir': prev_dir, 'ns': s_upper.copy(), 'done': False,
                     'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
+                    'upper_value_cost': value_cost,
+                    'upper_value_active': value_active,
+                    'upper_residual_selector_x': residual_selector_x,
+                    'terminal_value_selector_x': terminal_value_selector_x,
+                    'headway_value_planner_x': headway_value_planner_x,
                 })
 
+            value_cost, value_active = self._upper_residual_value_cost(delta_t)
             self._prev_upper_state = (
                 s_upper.copy(),
                 action_vec.astype(np.float32),
-                trip.launch_turn, trip.direction, float(delta_t), float(plan_penalty))
+                trip.launch_turn, trip.direction, float(delta_t),
+                float(plan_penalty), float(value_cost), float(value_active),
+                selector_x, terminal_selector_x, headway_selector_x)
 
         # Record dispatch info (actual launch time captured post-episode from env).
         # Terminal-dispatch mode uses the planner's executable launch schedule.
@@ -2496,13 +4646,38 @@ class TransitDuetV2Runner:
         self._ep_lower_drift_costs = []
         self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
+        self._ep_upper_residual_value_costs = []
+        self._ep_upper_residual_value_cost_active = []
+        self._ep_upper_residual_selector_active = []
+        self._ep_upper_residual_selector_adjusts = []
+        self._ep_upper_residual_selector_margins = []
+        self._ep_upper_residual_selector_actor_preds = []
+        self._ep_upper_residual_selector_selected_preds = []
+        self._ep_upper_residual_selector_feature_norms = []
+        self._ep_headway_value_planner_active = []
+        self._ep_headway_value_planner_adjusts = []
+        self._ep_headway_value_planner_deltas = []
+        self._ep_headway_value_planner_margins = []
+        self._ep_headway_value_planner_actor_preds = []
+        self._ep_headway_value_planner_selected_preds = []
+        self._ep_headway_value_planner_priors = []
+        self._ep_headway_value_planner_target_costs = []
+        self._ep_headway_value_planner_feature_norms = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
         self._ep_terminal_shift_caps = []
+        self._ep_terminal_shift_mins = []
         self._ep_terminal_feedback_biases = []
+        self._ep_terminal_value_selector_active = []
+        self._ep_terminal_value_selector_biases = []
+        self._ep_terminal_value_selector_margins = []
+        self._ep_terminal_value_selector_actor_preds = []
+        self._ep_terminal_value_selector_selected_preds = []
+        self._ep_terminal_value_selector_feature_norms = []
+        self._ep_terminal_value_selector_target_costs = []
         self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
@@ -2532,7 +4707,7 @@ class TransitDuetV2Runner:
         if N_fleet_override is not None:
             self._current_N_fleet = int(N_fleet_override)
         elif self.fleet_mode == 'elastic' and training:
-            self._current_N_fleet = int(np.random.randint(
+            self._current_N_fleet = int(self.fleet_rng.randint(
                 self.fleet_min, self.fleet_max + 1))
         else:
             self._current_N_fleet = self.N_fleet_default
@@ -2726,12 +4901,23 @@ class TransitDuetV2Runner:
 
         # ── Finalize last upper transition ──
         if self._prev_upper_state is not None:
+            prev = self._prev_upper_state
             prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
-                self._prev_upper_state)
+                prev[:6])
+            value_cost = float(prev[6]) if len(prev) > 6 else 0.0
+            value_active = float(prev[7]) if len(prev) > 7 else 0.0
+            residual_selector_x = prev[8] if len(prev) > 8 else None
+            terminal_value_selector_x = prev[9] if len(prev) > 9 else None
+            headway_value_planner_x = prev[10] if len(prev) > 10 else None
             self._episode_upper_transitions.append({
                 's': prev_s, 'a': prev_a, 'tid': prev_tid,
                 'dir': prev_dir, 'ns': prev_s, 'done': True,
                 'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
+                'upper_value_cost': value_cost,
+                'upper_value_active': value_active,
+                'upper_residual_selector_x': residual_selector_x,
+                'terminal_value_selector_x': terminal_value_selector_x,
+                'headway_value_planner_x': headway_value_planner_x,
             })
 
         # ── Hindsight Credit Assignment (v2g: gap-based, not holding-based) ──
@@ -2740,6 +4926,11 @@ class TransitDuetV2Runner:
         #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
         z = self.env.measurement_vector
         N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
+        episode_overshoot = max(0.0, float(z[1]) - float(N_fleet))
+        episode_composite_cost = (
+            float(z[0]) / 10.0
+            + (episode_overshoot ** 2) / max(float(N_fleet), 1.0)
+            + float(z[2]))
         # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
         sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
         self._last_adj_weights = adj_w
@@ -2799,9 +4990,46 @@ class TransitDuetV2Runner:
                 trans.get('dir', True), a_u, prev_delta_by_dir)
             self._ep_upper_hf_penalties.append(upper_hf_pen)
             plan_pen = float(trans.get('plan_penalty', 0.0))
+            upper_value_cost = float(trans.get('upper_value_cost', 0.0))
+            upper_value_active = float(trans.get('upper_value_active', 0.0))
+            self._ep_upper_residual_value_costs.append(upper_value_cost)
+            self._ep_upper_residual_value_cost_active.append(
+                upper_value_active)
             wait_credit = float(upper_wait_credits.get(int(tid), 0.0))
             self._ep_upper_wait_credits.append(wait_credit)
-            r = sys_r + credit + wait_credit - upper_hf_pen - plan_pen
+            r = (
+                sys_r + credit + wait_credit
+                - upper_hf_pen - plan_pen - upper_value_cost)
+            upper_local_credit_cost = (
+                -float(credit)
+                - wait_credit
+                + upper_hf_pen
+                + plan_pen
+                + upper_value_cost)
+            terminal_value_target_cost = (
+                self._terminal_value_selector_target_cost(
+                    episode_composite_cost,
+                    transition_reward=r,
+                    local_credit_cost=upper_local_credit_cost))
+            headway_value_target_cost = (
+                self._headway_value_planner_target_cost(
+                    episode_composite_cost,
+                    transition_reward=r,
+                    local_credit_cost=upper_local_credit_cost))
+            if int(self._current_ep) >= int(
+                    self.upper_residual_selector_learn_start_ep):
+                self._update_upper_residual_selector(
+                    trans.get('upper_residual_selector_x'), r)
+            if int(self._current_ep) >= int(
+                    self.timetable_terminal_value_selector_learn_start_ep):
+                self._update_terminal_value_selector(
+                    trans.get('terminal_value_selector_x'),
+                    terminal_value_target_cost)
+            if int(self._current_ep) >= int(
+                    self.timetable_headway_value_planner_learn_start_ep):
+                self._update_headway_value_planner(
+                    trans.get('headway_value_planner_x'),
+                    headway_value_target_cost)
             backfilled.append({
                 's': trans['s'], 'a': trans['a'], 'r': r,
                 'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
@@ -2942,6 +5170,40 @@ class TransitDuetV2Runner:
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
+        upper_value_cost_stat = _stat(
+            self._ep_upper_residual_value_costs)
+        upper_value_active_stat = _stat(
+            self._ep_upper_residual_value_cost_active)
+        upper_selector_active_stat = _stat(
+            self._ep_upper_residual_selector_active)
+        upper_selector_adjust_stat = _stat(
+            self._ep_upper_residual_selector_adjusts)
+        upper_selector_margin_stat = _stat(
+            self._ep_upper_residual_selector_margins)
+        upper_selector_actor_pred_stat = _stat(
+            self._ep_upper_residual_selector_actor_preds)
+        upper_selector_selected_pred_stat = _stat(
+            self._ep_upper_residual_selector_selected_preds)
+        upper_selector_feature_norm_stat = _stat(
+            self._ep_upper_residual_selector_feature_norms)
+        headway_planner_active_stat = _stat(
+            self._ep_headway_value_planner_active)
+        headway_planner_adjust_stat = _stat(
+            self._ep_headway_value_planner_adjusts)
+        headway_planner_delta_stat = _stat(
+            self._ep_headway_value_planner_deltas)
+        headway_planner_margin_stat = _stat(
+            self._ep_headway_value_planner_margins)
+        headway_planner_actor_pred_stat = _stat(
+            self._ep_headway_value_planner_actor_preds)
+        headway_planner_selected_pred_stat = _stat(
+            self._ep_headway_value_planner_selected_preds)
+        headway_planner_prior_stat = _stat(
+            self._ep_headway_value_planner_priors)
+        headway_planner_target_cost_stat = _stat(
+            self._ep_headway_value_planner_target_costs)
+        headway_planner_feature_norm_stat = _stat(
+            self._ep_headway_value_planner_feature_norms)
         lower_wait_stat = _stat(self._ep_lower_wait_penalties)
         lower_board_credit_stat = _stat(self._ep_lower_board_credits)
         lower_board_credit_gate_stat = _stat(
@@ -2957,8 +5219,23 @@ class TransitDuetV2Runner:
         upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
         terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
         terminal_shift_cap_stat = _stat(self._ep_terminal_shift_caps)
+        terminal_shift_min_stat = _stat(self._ep_terminal_shift_mins)
         terminal_feedback_bias_stat = _stat(
             self._ep_terminal_feedback_biases)
+        terminal_selector_active_stat = _stat(
+            self._ep_terminal_value_selector_active)
+        terminal_selector_bias_stat = _stat(
+            self._ep_terminal_value_selector_biases)
+        terminal_selector_margin_stat = _stat(
+            self._ep_terminal_value_selector_margins)
+        terminal_selector_actor_pred_stat = _stat(
+            self._ep_terminal_value_selector_actor_preds)
+        terminal_selector_selected_pred_stat = _stat(
+            self._ep_terminal_value_selector_selected_preds)
+        terminal_selector_feature_norm_stat = _stat(
+            self._ep_terminal_value_selector_feature_norms)
+        terminal_selector_target_cost_stat = _stat(
+            self._ep_terminal_value_selector_target_costs)
         terminal_headway_floor_stat = _stat(
             self._ep_terminal_headway_floors)
         fleet_noharm_upper_pressure_stat = _stat(
@@ -3142,6 +5419,58 @@ class TransitDuetV2Runner:
                 lower_drift_cost_adaptive_gate_stat['mean'],
             'upper_hf_penalty_mean': upper_hf_stat['mean'],
             'upper_hf_penalty_max': upper_hf_stat['max'],
+            'upper_residual_value_cost_mean':
+                upper_value_cost_stat['mean'],
+            'upper_residual_value_cost_max':
+                upper_value_cost_stat['max'],
+            'upper_residual_value_cost_active_mean':
+                upper_value_active_stat['mean'],
+            'upper_residual_selector_enabled':
+                1.0 if self.upper_residual_selector_enable else 0.0,
+            'upper_residual_selector_active_mean':
+                upper_selector_active_stat['mean'],
+            'upper_residual_selector_adjust_mean':
+                upper_selector_adjust_stat['mean'],
+            'upper_residual_selector_adjust_max':
+                upper_selector_adjust_stat['max'],
+            'upper_residual_selector_margin_mean':
+                upper_selector_margin_stat['mean'],
+            'upper_residual_selector_actor_pred_mean':
+                upper_selector_actor_pred_stat['mean'],
+            'upper_residual_selector_selected_pred_mean':
+                upper_selector_selected_pred_stat['mean'],
+            'upper_residual_selector_feature_norm_mean':
+                upper_selector_feature_norm_stat['mean'],
+            'upper_residual_selector_updates':
+                int(self.upper_residual_selector_updates),
+            'headway_value_planner_enabled':
+                1.0 if self.timetable_headway_value_planner_enable else 0.0,
+            'headway_value_planner_active_mean':
+                headway_planner_active_stat['mean'],
+            'headway_value_planner_adjust_mean':
+                headway_planner_adjust_stat['mean'],
+            'headway_value_planner_adjust_max':
+                headway_planner_adjust_stat['max'],
+            'headway_value_planner_delta_mean':
+                headway_planner_delta_stat['mean'],
+            'headway_value_planner_delta_max':
+                headway_planner_delta_stat['max'],
+            'headway_value_planner_margin_mean':
+                headway_planner_margin_stat['mean'],
+            'headway_value_planner_actor_pred_mean':
+                headway_planner_actor_pred_stat['mean'],
+            'headway_value_planner_selected_pred_mean':
+                headway_planner_selected_pred_stat['mean'],
+            'headway_value_planner_prior_mean':
+                headway_planner_prior_stat['mean'],
+            'headway_value_planner_target_cost_mean':
+                headway_planner_target_cost_stat['mean'],
+            'headway_value_planner_target_cost_max':
+                headway_planner_target_cost_stat['max'],
+            'headway_value_planner_feature_norm_mean':
+                headway_planner_feature_norm_stat['mean'],
+            'headway_value_planner_updates':
+                int(self.timetable_headway_value_planner_updates),
             'upper_hf_power_ratio': upper_hf_power_ratio,
             'lower_lf_drift_ratio': lower_lf_drift_ratio,
             'demand_attr_score': demand_attr_score,
@@ -3187,9 +5516,33 @@ class TransitDuetV2Runner:
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
             'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],
             'terminal_shift_cap_max': terminal_shift_cap_stat['max'],
+            'terminal_shift_min_mean': terminal_shift_min_stat['mean'],
+            'terminal_shift_min_min': terminal_shift_min_stat['min'],
             'terminal_feedback_bias_mean': terminal_feedback_bias_stat['mean'],
             'terminal_feedback_bias_max': terminal_feedback_bias_stat['max'],
             'terminal_feedback_events': int(terminal_feedback_bias_stat['n']),
+            'terminal_value_selector_enabled':
+                1.0 if self.timetable_terminal_value_selector_enable else 0.0,
+            'terminal_value_selector_active_mean':
+                terminal_selector_active_stat['mean'],
+            'terminal_value_selector_bias_mean':
+                terminal_selector_bias_stat['mean'],
+            'terminal_value_selector_bias_max':
+                terminal_selector_bias_stat['max'],
+            'terminal_value_selector_margin_mean':
+                terminal_selector_margin_stat['mean'],
+            'terminal_value_selector_actor_pred_mean':
+                terminal_selector_actor_pred_stat['mean'],
+            'terminal_value_selector_selected_pred_mean':
+                terminal_selector_selected_pred_stat['mean'],
+            'terminal_value_selector_feature_norm_mean':
+                terminal_selector_feature_norm_stat['mean'],
+            'terminal_value_selector_target_cost_mean':
+                terminal_selector_target_cost_stat['mean'],
+            'terminal_value_selector_target_cost_max':
+                terminal_selector_target_cost_stat['max'],
+            'terminal_value_selector_updates':
+                int(self.timetable_terminal_value_selector_updates),
             'terminal_headway_floor_mean':
                 terminal_headway_floor_stat['mean'],
             'terminal_headway_floor_events':
@@ -3270,6 +5623,18 @@ class TransitDuetV2Runner:
             self.fixed_selector_counts['learned'])
         row['fixed_selector_fixed_count'] = int(
             self.fixed_selector_counts['fixed'])
+        row['fixed_selector_context_enabled'] = (
+            1.0 if self.fixed_selector_context_enable else 0.0)
+        row['fixed_selector_context_learned_value'] = float(
+            self._fixed_selector_context_learned_value)
+        row['fixed_selector_context_fixed_value'] = float(
+            self._fixed_selector_context_fixed_value)
+        row['fixed_selector_context_margin'] = float(
+            self._fixed_selector_context_margin)
+        context = self._fixed_selector_current_context
+        row['fixed_selector_context_feature_norm'] = (
+            float(np.linalg.norm(context)) if context is not None else 0.0)
+        self._fixed_selector_prev_diag = dict(row)
         self.diag.append(row)
 
         # Also keep lightweight history for quick plotting
@@ -3282,6 +5647,10 @@ class TransitDuetV2Runner:
                    'theta_wait', 'theta_fleet',
                    'surprise', 'belief_window',
                    'upper_hf_power_ratio', 'lower_lf_drift_ratio',
+                   'upper_residual_value_cost_mean',
+                   'upper_residual_selector_active_mean',
+                   'upper_residual_selector_adjust_mean',
+                   'upper_residual_selector_margin_mean',
                    'demand_attr_score', 'demand_attr_mi_score',
                    'shock_response_time_mean_s',
                    'shock_response_hit_rate',
@@ -3512,8 +5881,12 @@ class TransitDuetV2Runner:
               f"{bins_note}{last_note}")
         print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
+        if self.upper_action_bins is not None:
+            print(f"    upper_bins={self.upper_action_bins.tolist()}")
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
+        if self.fixed_selector_reset_env_rng:
+            np.random.seed(self.base_seed)
 
         for ep in range(self.resume_from_ep, total_episodes):
             row = self.run_episode(ep, training=True)

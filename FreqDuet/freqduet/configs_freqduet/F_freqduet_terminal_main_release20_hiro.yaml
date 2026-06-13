@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_release20_hiro
+
+# Phase-4 executable terminal-dispatch candidate: wider early-release cap for
+# testing whether fixed-headway gap comes from no-early-launch clipping.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -20.0
+    terminal_shift_max_s: 45.0

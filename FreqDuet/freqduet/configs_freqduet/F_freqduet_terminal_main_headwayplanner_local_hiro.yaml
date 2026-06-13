@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_headwayplanner_safe_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_local_hiro
+
+# Local-credit value target for the discrete demand-conditioned headway planner.
+# The selector still chooses among conservative discrete headway candidates, but
+# learns from per-dispatch gap/wait credit instead of assigning every upper
+# decision the same day-level composite label.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      target: local_credit
+      local_weight: 1.0
+      epsilon: 0.03
+      improve_margin: 0.035
+      adjust_penalty: 0.06

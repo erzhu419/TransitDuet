@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_headwayplanner_discctx_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_discctx_hfgate_hiro
+
+# The discrete-context planner helped high-noise demand but damaged OD/rush by
+# remaining active in low-HF regimes and compressing executable terminal shifts.
+# This variant only lets it override the actor under clear high-frequency
+# demand energy, leaving clean/OD/rush contexts on the promoted main path.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      activation_gate:
+        enable: true
+        min_high_energy: 0.075
+        max_middle_energy: 0.070
+        max_od_entropy: 0.960

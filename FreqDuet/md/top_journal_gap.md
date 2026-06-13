@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-10 CST
+Last updated: 2026-06-12 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -623,6 +623,114 @@ comparison. The paper claim should be statistical tie/robustness versus
 fixed-headway plus clear wins over weaker rule/MPC baselines, not universal
 dominance over fixed-headway.
 
+2026-06-11 exp39-style action-space follow-up: the isolated `disc9` candidate
+tests whether finer discrete lower holding alone can reproduce the SUMO-RL
+exp39 improvement pattern. It completed a 4-domain x 20-seed x 100ep matrix
+as `disc9only_screen_ep100_wu10_r1` and is a negative result:
+
+```text
+disc9 vs main   overall +0.0499 CI [+0.0113,+0.0948]
+disc9 vs fixed  overall +0.0605 CI [+0.0120,+0.1157]
+```
+
+The domain pattern is also unfavorable: vs fixed-headway, OD shift is
+`+0.0691 CI [+0.0116,+0.1379]` and rush shift is
+`+0.0748 CI [+0.0279,+0.1285]`. Therefore action discretization alone is not
+the fixed-headway-gap repair and must not be promoted. The remaining
+exp39-style hypothesis is state/action memory, not the action alphabet alone:
+`disc9last` adds the previous lower action, and `gapctx_disc9last` adds minimal
+adjacent launch-gap/headway context. Their clean rerun is
+`exp39_state_action_screen_ep100_wu10_r2`; promote only if it beats current main
+and shrinks the fixed-headway gap under paired CI.
+
+2026-06-11 exp39 state/action result: `disc9last` was stopped after the 40ep
+screen because it was already worse than current main overall
+(`+0.0632 CI [+0.0053,+0.1352]`). `gapctx_disc9last` was allowed to finish the
+full 100ep matrix. It improves over `disc9-only`, but still does not repair the
+fixed-headway gap and should not be promoted:
+
+```text
+gapctx_disc9last vs main   overall +0.0278 CI [-0.0016,+0.0561]
+gapctx_disc9last vs fixed  overall +0.0385 CI [+0.0036,+0.0744]
+```
+
+The fixed-headway gap is now smaller than `disc9-only`, but terminal is
+significantly worse versus fixed (`+0.0408 CI [+0.0064,+0.0790]`) and the
+overall fixed comparison remains positive. This means the SUMO-RL exp39-style
+repair partially helps variance/action aliasing but does not solve this
+project's fixed-policy challenge. The next repair should move upstream toward
+upper timetable/terminal dispatch or a stronger demand-conditioned headway
+planner, not keep adding lower-only context.
+
+2026-06-11 upper timetable follow-up: old small-sample `spline2dir` evidence
+did not reproduce after porting the conservative direction-specific timetable
+curve plus promotion-triggered replan onto the current main line. The
+4-domain x 20-seed x 100ep run
+`spline2dir_promreplan_screen_ep100_wu10` completed `80/80` rows and is a
+negative result:
+
+```text
+spline2dir_promreplan vs main   overall +0.0228 CI [-0.0108,+0.0556]
+spline2dir_promreplan vs fixed  overall +0.0334 CI [+0.0002,+0.0672]
+```
+
+Mechanism check: the candidate slightly improves terminal/highnoise wait, but
+raises odshift/rushshift cost and remains worse than fixed-headway overall.
+Therefore a wider 4D direction-specific timetable action is not the current
+fixed-headway repair.
+
+2026-06-11 upper action-discretization follow-up: added a config-gated
+`upper.action_bins` projection in `runner_v3.py`, leaving current main
+unchanged unless a candidate config sets bins. Two upper-discrete candidates
+were run as `upperdisc_screen_ep100_wu10`:
+
+```text
+upperdisc5 bins [-15,-10,-5,0,5]
+upperdisc7 bins [-30,-15,-10,-5,0,5,10]
+```
+
+This is the closest current analogue of the SUMO-RL exp39 action-space repair
+at FreqDuet's upper timetable layer. Local smoke passed, and the scheduler
+matrix completed `160/160` rows on `t10104`-`t10119`. It is a useful diagnostic
+but not a promotion candidate:
+
+```text
+upperdisc5 vs main   overall +0.0136 CI [-0.0169,+0.0421]
+upperdisc5 vs fixed  overall +0.0243 CI [-0.0088,+0.0600]
+
+upperdisc7 vs main   overall +0.0142 CI [-0.0147,+0.0415]
+upperdisc7 vs fixed  overall +0.0249 CI [-0.0105,+0.0599]
+```
+
+The domain pattern is informative but not sufficient: `upperdisc5` helps
+odshift (`vs main -0.0172`, CI crosses zero), while `upperdisc7` helps
+rushshift (`vs main -0.0131`, CI crosses zero). Both raise terminal cost and
+remain worse than fixed-headway overall. Therefore simple upper action
+discretization also does not close the fixed-headway gap. A narrower
+near-fixed residual alphabet may still be worth one final diagnostic, but any
+promotion needs an overall paired gain, not only domain-specific tradeoff.
+
+2026-06-11 narrow upper-discretization follow-up: the final near-fixed
+diagnostic `upperdisc34_screen_ep100_wu10` completed `160/160` rows. It tested
+`upperdisc3=[-5,0,5]` and `upperdisc4=[-10,-5,0,5]`.
+
+```text
+upperdisc3 vs main   overall +0.0025 CI [-0.0230,+0.0297]
+upperdisc3 vs fixed  overall +0.0131 CI [-0.0249,+0.0517]
+
+upperdisc4 vs main   overall +0.0169 CI [-0.0098,+0.0438]
+upperdisc4 vs fixed  overall +0.0275 CI [-0.0053,+0.0604]
+```
+
+`upperdisc3` is the best upper-discrete variant: it is statistically tied with
+current main and fixed-headway, slightly helps highnoise/odshift versus main,
+but still carries terminal/rush cost and does not improve the clean fixed
+comparison beyond the current main (`main vs fixed overall +0.0107`). Decision:
+do not promote `upperdisc3/4/5/7`; close the simple action-discretization branch
+as diagnostic negative evidence. Further fixed-gap work should not be another
+static action alphabet; it needs either a learned demand-conditioned headway
+planner/value model or a scoped Phase-4 first-stop/terminal dispatch mechanism.
+
 Done means:
 
 - inspect highnoise and odshift seed traces;
@@ -1004,6 +1112,502 @@ method-summary, and paired-delta tables. The latest package build reports
 `config_set` snapshots, not only generated `config_dir` folders. This includes
 the current longtrain, failed candidates, and the queued `histaux6eg06`
 longtrain configs. The latest package build reports `copied=791 missing=0`.
+
+2026-06-11 demand-conditioned selector follow-up: implemented a config-gated
+online contextual value selector (`ctxselector60`) that starts at episode 60 and
+learns separate ridge value models for learned FreqDuet versus a fixed-headway
+expert from causal demand/frequency, OD, promotion, and recent-performance
+features. It completed a 4-domain x 20-seed x 100ep scheduler-direct run on
+node001-node006 as `ctxselector60_screen_ep100_wu10`. This is a negative result
+and should not be promoted:
+
+```text
+ctxselector60 vs main   overall +0.0086 CI [-0.0219,+0.0413]
+ctxselector60 vs fixed  overall +0.0193 CI [-0.0179,+0.0542]
+```
+
+The selector diagnostics show why this is not the right repair: over the final
+50 episodes, fixed-headway was active in `36.6%` of episodes even though the
+contextual model estimated learned FreqDuet lower cost on average
+(`learned=1.1788`, `fixed=1.2604`, margin `+0.0816`). This reduced lower holding
+and, more importantly, compressed terminal launch shifts (`5.3s` overall versus
+the current main's `11.5s`). The conclusion is that wrapping the policy with a
+fixed expert is not a robust path to beating fixed-headway; the next repair must
+modify the upper demand-conditioned headway/value planner itself, or the
+Phase-4 terminal/first-stop dispatch model, not keep tuning fixed-expert
+interleaving.
+
+2026-06-11 upper residual value follow-up: implemented `uppervalue_hfgate`, a
+config-gated upper reward cost that penalizes headway compression only when
+causal fleet utilization is high and the HF/promotion signal does not justify
+the extra frequency. The first scheduler attempt failed because the new config
+YAMLs were not synced to the remote FreqDuet copy; the corrected run
+`uppervalue_hfgate_screen_ep100_wu10_rerun1` completed all `80/80` rows at
+100 episodes and is a weak positive but not a promotion candidate:
+
+```text
+uppervalue_hfgate vs main   overall -0.0040 CI [-0.0308,+0.0220]
+uppervalue_hfgate vs fixed  overall +0.0066 CI [-0.0308,+0.0412]
+```
+
+Mechanism check: the value cost is active on roughly `30-38%` of upper
+decisions and reduces the OD-shift mean upper residual from `-6.63s` to
+`-2.57s`, improving OD/rush composite slightly. The tradeoff is still not
+paper-grade: terminal composite worsens by `+0.0287` versus current main and
+`+0.0325` versus fixed-headway, while overall CV is slightly worse than
+fixed-headway (`+0.0039`, CI `[+0.00001,+0.00852]`). This confirms that a
+passive reward penalty can nudge the upper planner but is too slow/indirect to
+close the fixed-headway gap. The next active repair should be an online
+demand-conditioned residual value selector that chooses among a small causal
+headway-residual candidate set at each upper decision, or a learned
+first-stop/terminal value model.
+
+2026-06-11 learned residual-selector follow-up: implemented
+`upperres_selector`, an online ridge value model that stores each selected upper
+residual feature at decision time, trains only after episode-end upper reward
+backfill, and chooses among actor-plus-offset timetable coefficient candidates.
+The 4-domain x 20-seed x 100ep scheduler-direct screen
+`upperres_selector_screen_ep100_wu10` completed `80/80` rows but is a negative
+result:
+
+```text
+upperres_selector vs main   overall +0.0199 CI [-0.0098,+0.0532]
+upperres_selector vs fixed  overall +0.0306 CI [-0.0009,+0.0638]
+```
+
+Mechanism check: the selector became active on essentially every upper
+decision and learned to push the upper residual much more negative
+(`terminal -18.1s`, `rushshift -16.0s`, versus current main around `-3` to
+`-4s`). That compressed terminal launch shifts and raised overshoot/CV enough
+to lose against both main and fixed-headway. The failure is useful: a free
+bidirectional residual alphabet plus a linear reward-backfilled value label is
+too confounded and tends to over-credit aggressive frequency increases. The
+next repair should not allow negative residual offsets; it should test a
+guarded relief-only selector with stronger improvement margins and adjustment
+penalties, or move to a richer counterfactual terminal/first-stop value model.
+
+2026-06-11 guarded residual-selector follow-up: implemented
+`upperres_reliefguard`, a conservative residual selector that can only keep the
+actor action or relax headway compression with positive residual offsets. The
+4-domain x 20-seed x 100ep scheduler-direct screen
+`upperres_reliefguard_screen_ep100_wu10` completed `80/80` rows and is not a
+promotion candidate:
+
+```text
+upperres_reliefguard vs main   overall +0.0007 CI [-0.0227,+0.0250]
+upperres_reliefguard vs fixed  overall +0.0113 CI [-0.0235,+0.0474]
+```
+
+Domain-level behavior confirms the tradeoff: it helps rushshift versus main
+(`-0.0329`, CI crosses zero), but terminal, highnoise, and odshift remain
+slightly worse. Mechanism diagnostics show that the guarded selector is too
+conservative to be a breakthrough: final-window mean residual adjustment is
+small (`terminal 0.09s`, `odshift 0.11s`, `rushshift 0.03s`, `highnoise
+0.37s`). This closes the linear upper-residual selector branch. The next
+credible fixed-headway-gap repair should combine a small discrete local
+headway alphabet with explicit local plan-context features (current gap, next
+gap, candidate target headway, candidate deficit, LF forecast, HF energy, and
+fleet pressure), or move to a learned first-stop/terminal value model with
+counterfactual wait-CV-fleet estimates.
+
+2026-06-11 plan-context residual-selector follow-up: implemented
+`upperres_planctx`, a stricter exp39-style variant that combines a small
+candidate alphabet (`-5/0/+5/+10s`) with candidate-local plan features: current
+gap, next gap, candidate target headway, gap deficit/excess, next-target slope,
+LF forecast, HF energy, promotion strength, and fleet pressure. The 4-domain x
+20-seed x 100ep scheduler-direct run `upperres_planctx_screen_ep100_wu10`
+completed `80/80` rows but is a clear negative result:
+
+```text
+upperres_planctx vs main   overall +0.0562 CI [+0.0323,+0.0815]
+upperres_planctx vs fixed  overall +0.0669 CI [+0.0365,+0.0979]
+```
+
+The failure is concentrated in OD/rush (`odshift +0.0458`, `rushshift
++0.1638` versus main). Mechanistically, the selector only changed actions by
+about `0.5-1.1s` on average, but it reduced terminal launch shifts in
+terminal/rush and drove the demand-attribution score negative. This confirms
+that reward-backfilled residual selection remains confounded even with local
+plan context. Close the upper-residual selector branch; the next credible
+mechanism is a separate learned terminal / first-stop value action that decides
+when converting on-route holding into terminal delay is worth the
+wait-CV-fleet tradeoff, or a paper-scope decision that full Phase 4 remains
+future work.
+
+2026-06-11 terminal-value-selector follow-up: implemented
+`termvalselector`, a separate learned terminal / first-stop value action that
+chooses among nonnegative terminal delay candidates (`0/5/10/15s`) using
+causal local plan, demand, frequency-energy, fleet-pressure, and previous
+episode performance features. This deliberately avoids changing the upper
+headway residual directly. The 4-domain x 20-seed x 100ep scheduler-direct run
+`termvalselector_screen_ep100_wu10` completed `80/80` rows but is a clear
+negative result:
+
+```text
+termvalselector vs main   overall +0.0575 CI [+0.0392,+0.0761]
+termvalselector vs fixed  overall +0.0681 CI [+0.0398,+0.0986]
+```
+
+Domain-level results show the failure is not just noise: terminal worsens
+versus main (`+0.0451`, CI `[+0.0073,+0.0854]`) and rushshift worsens strongly
+(`+0.1611`, CI `[+0.1180,+0.2060]`). Versus fixed-headway, terminal, odshift,
+and rushshift are all significantly worse, while highnoise is only tied.
+Mechanistically, the selector is active almost every upper decision but selects
+only small mean terminal biases (`0.49-0.74s`), reduces terminal launch shift in
+the scenarios where the promoted main benefited from larger launch delay, and
+raises wait/composite. This closes the simple online terminal-bias selector
+branch. The next fixed-headway repair should be either a stronger learned
+demand-conditioned headway / launch planner with real counterfactual labels, or
+the full Phase 4 terminal-dispatch implementation; do not promote this module.
+
+2026-06-11 demand-conditioned headway-planner v1 follow-up: implemented
+`headwayplanner`, a config-gated learned planner that chooses among complete
+discrete headway-plan candidates (`-20/-10/0/+10/+20s`) rather than residual
+offsets, uses expanded local plan/demand/frequency/fleet/history features, and
+updates its ridge value model directly from the paper composite cost
+(`wait/10 + overshoot^2/N + CV`). The 4-domain x 20-seed x 100ep
+scheduler-direct run `headwayplanner_screen_ep100_wu10` completed `80/80` rows
+but is not a promotion candidate:
+
+```text
+headwayplanner v1 vs main   overall +0.0223 CI [-0.0028,+0.0493]
+headwayplanner v1 vs fixed  overall +0.0330 CI [-0.0012,+0.0691]
+```
+
+The mechanism is clearer than the aggregate score. The planner is active in
+the final window and often moves the upper plan from mild compression to
+positive relief (`upper_delta_mean` about `+4.3s` highnoise, `+8.4s` odshift,
+`+5.9s` rushshift, `+7.0s` terminal), which raises terminal launch shifts to
+`24-30s` versus the promoted main's `8-14s`. This reduces neither overshoot nor
+CV enough; in several domains overshoot and wait increase. The failure is not
+an implementation miss but a prior/action-surface miss: the v1 spacing prior
+over-credits positive relief under terminal-dispatch dynamics. A v2 should be
+more conservative: disable the relief-favoring prior, cap positive candidates
+around `+5/+10s`, increase the action-change penalty and improvement margin,
+and only deviate from the actor when the composite value model has a clear
+advantage.
+
+2026-06-12 demand-conditioned headway-planner v2 follow-up: implemented and
+screened the conservative `headwayplanner_safe` variant. It keeps the same
+episode-end composite-cost ridge value model as v1, but removes the
+relief-favoring prior, restricts the candidate set to
+`[-20,-10,0,+5,+10]s`, raises the improvement margin to `0.05`, and raises the
+action-change penalty to `0.08`. The remote FreqDuet CPU environment had been
+removed before the first rerun attempt; it was rebuilt as an isolated
+micromamba env under
+`/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310` on a
+compute node, and the final scheduler-direct run
+`headwayplanner_safe_screen_ep100_wu10_envfix1` completed `80/80` rows on
+node001-node006. A premature partial sync was discarded; the final aggregation
+used only diagnostics with `100/100` episodes for every seed.
+
+Final 100ep means:
+
+```text
+terminal   composite 1.4656  wait 5.43  cv 0.446
+highnoise  composite 1.8098  wait 9.06  cv 0.445
+odshift    composite 1.4506  wait 5.45  cv 0.445
+rushshift  composite 1.2918  wait 3.91  cv 0.445
+```
+
+Paired comparisons:
+
+```text
+headwayplanner_safe vs fixed-headway        overall +0.0151 CI [-0.0180,+0.0482]
+headwayplanner_safe vs upperres_reliefguard overall +0.0038 CI [-0.0201,+0.0285]
+headwayplanner_safe vs uppervalue_hfgate    overall +0.0085 CI [-0.0137,+0.0304]
+headwayplanner_safe vs ctxselector60        overall -0.0041 CI [-0.0300,+0.0211]
+```
+
+Domain-level fixed-headway comparison is mixed: highnoise improves
+(`-0.0171`, CI crosses zero), OD/rush remain statistically tied, but terminal
+is still worse (`+0.0378`, CI `[+0.0018,+0.0734]`). Mechanistically, v2 fixes
+v1's over-relief problem: final-window planner deltas are modestly negative
+(`-3.5` to `-5.4s` depending on domain), average selected adjustments stay
+below `0.7s`, the relief prior is zero, and terminal launch shifts return to
+about `9.6-11.3s` instead of v1's `24-30s`. This is a useful repair of the
+action surface, but it is not a promotion candidate because it does not beat
+the current main-like candidates and does not close the terminal fixed-headway
+gap. Further variants of the same linear episode-backfilled planner are likely
+low leverage; the next credible path is either a real counterfactual
+terminal/first-stop value label or the scoped Phase-4 first-stop/terminal
+dispatch implementation.
+
+2026-06-12 local-credit headway-planner follow-up: the value label was changed
+from uniform episode composite cost to a local upper-decision cost
+(`-credit - wait_credit + upper HF/plan/value penalties`), with expanded
+front/back timing features. This is a better causal label than the v1/v2
+episode-backfilled target, but the first ungated `local` screen remained mixed:
+
+```text
+local-credit planner vs main   overall +0.0042 CI [-0.0434,+0.0507]
+local-credit planner vs fixed  overall +0.0149 CI [-0.0258,+0.0553]
+```
+
+It significantly improved OD shift versus main (`-0.0772`, CI
+`[-0.1649,-0.0008]`) but hurt terminal enough that it could not be promoted.
+The blended episode/local label was worse:
+
+```text
+blend planner vs main   overall +0.0272 CI [-0.0066,+0.0595]
+blend planner vs fixed  overall +0.0379 CI [+0.0058,+0.0710]
+```
+
+The best sub-branch so far is the conservative frequency/OD gated local-credit
+planner `odgate`, which activates only in stable low/middle-energy,
+low-entropy, high-low-forecast contexts:
+
+```text
+odgate vs main   overall -0.0187 CI [-0.0555,+0.0188]
+odgate vs fixed  overall -0.0080 CI [-0.0412,+0.0240]
+```
+
+This is the first learned headway-planner variant that turns the fixed-headway
+gap into a slight, non-significant advantage, with a significant highnoise win
+versus both main and fixed. It is still not a promotion candidate because OD
+shift regresses versus main (`+0.0451`, CI crosses zero). Removing the
+low-forecast lower bound in `odgate2` repaired OD shift but lost the terminal
+and highnoise benefit:
+
+```text
+odgate2 vs main   overall +0.0063 CI [-0.0283,+0.0443]
+odgate2 vs fixed  overall +0.0170 CI [-0.0265,+0.0638]
+```
+
+An OR-style gate was then implemented (`activation_gate.any_of`) to preserve
+the original stable-context branch while adding a lower-entropy OD branch.
+Both resulting variants are clear negative controls:
+
+```text
+odhybrid vs main   overall +0.1067 CI [+0.0681,+0.1481]
+odhybrid vs fixed  overall +0.1174 CI [+0.0846,+0.1510]
+odbranch vs main   overall +0.0913 CI [+0.0415,+0.1469]
+odbranch vs fixed  overall +0.1020 CI [+0.0499,+0.1596]
+```
+
+The failure mode is strong highnoise/rushshift wait inflation. This closes the
+simple causal threshold-gate extension: the local-credit value model is useful
+evidence, but robustly beating fixed-headway now likely requires either a
+counterfactual first-stop/terminal action label or the full executable Phase-4
+terminal-dispatch path, not another linear gate sweep.
+
+2026-06-12 terminal-value local-credit follow-up: the same local-credit target
+was tested inside the terminal/first-stop selector (`termvalselector_local`),
+so the learned terminal action no longer used transition reward as its value
+label. The 4-domain x 20-seed x 100ep run completed `80/80` rows, but it is a
+clear negative result:
+
+```text
+termvalselector_local vs main   overall +0.0814 CI [+0.0419,+0.1240]
+termvalselector_local vs fixed  overall +0.0921 CI [+0.0472,+0.1429]
+```
+
+It slightly improves clean terminal versus main/fixed, but highnoise and
+rushshift regress significantly. Mechanistically, the local target suppresses
+terminal bias (`0.18-0.20s` mean versus about `0.49-0.74s` in the transition
+reward selector) while increasing lower action and update count; the method is
+therefore learning a weak terminal action and leaving the harder fleet/wait
+tradeoff to the lower layer. This closes the local-credit terminal-selector
+branch. The next implementation should not be another linear terminal-bias
+selector; it should either build a demand-conditioned counterfactual value
+model over executable terminal/headway actions or explicitly scope Phase-4
+terminal dispatch outside the current paper.
+
+2026-06-12 discrete-action context follow-up: following the SUMO-RL lesson that
+continuous holding actions and too-narrow state can keep online learning below
+fixed policy, the headway value planner was extended with explicit discrete
+candidate-delta basis features (`-20/-10/0/+5/+10s`) and interactions with
+low-frequency forecast, HF/MF energy, OD entropy, fleet pressure, and previous
+wait/CV/overshoot diagnostics. The 4-domain x 20-seed x 100ep run
+`headwayplanner_discctx_ep100_wu10` completed `80/80` rows:
+
+```text
+discctx vs main   overall +0.0106 CI [-0.0383,+0.0519]
+discctx vs fixed  overall +0.0213 CI [-0.0250,+0.0626]
+```
+
+It did improve highnoise (`vs main -0.0489`, CI crosses zero), but it regressed
+OD shift and rushshift; versus fixed-headway, OD shift and rushshift were
+significantly worse. Mechanistically, the discrete-context planner stayed
+active almost every decision, compressed the executable terminal launch shift
+to roughly `2-5s`, and raised upper HF power. This is useful evidence that
+discrete action representation helps high-frequency noise, but it is not a
+promotion candidate.
+
+A high-frequency activation gate was then tested to restrict the discrete
+planner to high-HF regimes:
+
+```text
+discctx_hfgate vs main   overall +0.0354 CI [-0.0082,+0.0767]
+discctx_hfgate vs fixed  overall +0.0461 CI [+0.0026,+0.0858]
+```
+
+This is a clear negative result. The gate reduced planner activation to
+`0-2%`, restored larger terminal launch shifts, but did not preserve the
+highnoise gain and remained significantly worse than fixed-headway overall.
+This closes the current action-basis/gate branch. A publishable fixed-headway
+repair now needs a stronger counterfactual value model over executable
+terminal/headway actions, or the paper should explicitly frame fixed-headway as
+a strong matched baseline that the method ties rather than universally beats.
+
+2026-06-12 deterministic fixed-fallback follow-up: an offline feasibility check
+showed that mixing the best learned branch (`odgate`) with fixed-headway can
+beat either alone if the selector can identify OD/rush regimes. Implemented a
+default-off deterministic fixed expert rule inside `fixed_expert_selector`,
+then tested `odgate_fixedrule`: use odgate only when the demand profile has no
+OD-profile shift prior and no rush-shift prior, otherwise fall back to the
+fixed-headway expert. The 4-domain x 20-seed x 100ep run completed `80/80`
+rows:
+
+```text
+odgate_fixedrule vs main   overall -0.0025 CI [-0.0516,+0.0490]
+odgate_fixedrule vs fixed  overall +0.0082 CI [-0.0455,+0.0718]
+```
+
+The rule behaved as intended (`fixed_active=0` for terminal/highnoise and
+`fixed_active=1` for OD/rush), but it did not reproduce the offline oracle:
+terminal lost odgate's gain, highnoise was only weakly better, and OD fallback
+did not match the external fixed baseline. This is not a promotion candidate.
+It is useful as evidence that simple expert switching is insufficient under
+online training dynamics. The next real repair must estimate counterfactual
+costs for executable terminal/headway choices under matched demand seeds, not
+infer them from same-run aggregates.
+
+2026-06-13 counterfactual value audit v1: added
+`scripts/build_freqduet_counterfactual_value_dataset.py`, which aligns completed
+100ep rollouts by `(domain, seed)` and builds real matched-seed labels for
+main, fixed-headway, rule baselines, `odgate`, `safe`, `discctx`,
+`discctx_hfgate`, and `odgate_fixedrule`. Outputs are under
+`results_freqduet/counterfactual_value_ep100/current/`.
+
+The audit confirms that the repair target is real: the per-seed oracle over
+executable candidates has overall composite `1.3212`, much lower than main
+`1.5000`, fixed-headway `1.4893`, and the best single learned candidate
+`odgate` `1.4813`. Best choices are not a trivial one-method rule; every domain
+has mixed winners across `odgate`, `discctx`, `discctx_hfgate`,
+`odgate_fixedrule`, fixed, main, and safe.
+
+```text
+ridge diagnostic selector vs main  overall +0.0134 CI [-0.0270,+0.0578]
+ridge diagnostic selector vs fixed overall +0.0241 CI [-0.0167,+0.0679]
+
+domain_mean selector vs main       overall -0.0244 CI [-0.0604,+0.0115]
+domain_mean selector vs fixed      overall -0.0137 CI [-0.0480,+0.0192]
+```
+
+Interpretation: naive ridge over current run-level diagnostics is not enough;
+it still selects poor candidates on OD/rush. A cross-validated
+domain-conditioned empirical selector does move in the right direction and
+beats main/fixed in mean, but the CI still crosses zero. This is a useful
+positive signal, not a promotion result. The next implementation step should
+be a true multi-candidate value selector with counterfactual candidate costs,
+or a stricter action-level common-random-number rollout dataset. A binary
+learned-vs-fixed wrapper cannot express the observed oracle because the best
+choice is sometimes `odgate`, sometimes fixed, sometimes `odgate_fixedrule`,
+and sometimes other planner variants.
+
+Follow-up implementation: added a reproducible `cfvalue_domainmean` config
+family and manifest entry. It is a first executable approximation of the
+counterfactual selector rather than the final value model:
+
+- terminal/highnoise: use `headwayplanner_odgate`;
+- OD shift: use fixed-headway expert from episode 0;
+- rush shift: use `headwayplanner_odgate_fixedrule`.
+
+Local 4-config x 1-seed x 2ep smoke passed and confirmed method inference in
+the comparison scripts. The first formal submit (`t11243`, `t11244`, `t11245`,
+`t11246`, `t11248`, `t11250`) failed fast because the new `cfvalue_domainmean`
+YAMLs had not yet been synced to the remote scheduler worktree. After syncing
+the configs/scripts and verifying Python/import/config smoke on `node001` to
+`node006`, those stale scheduler escalations were marked resolved.
+
+The active 4-domain x 20-seed x 100ep formal matrix then ran as
+scheduler-direct CPU shards on `node001-node006`:
+
+```text
+t11262 node006 shard_0000_0014
+t11263 node002 shard_0014_0028
+t11264 node001 shard_0028_0042
+t11265 node003 shard_0042_0056
+t11266 node005 shard_0056_0070
+t11267 node004 shard_0070_0080
+```
+
+2026-06-13 result: `cfvalue_domainmean_ep100_wu10_r2` completed and synced
+`80/80` rows, but it is not a promotion candidate:
+
+```text
+cfvalue_domainmean vs current main overall +0.0134 CI [-0.0172,+0.0454]
+cfvalue_domainmean vs fixed-headway overall +0.0240 CI [-0.0078,+0.0533]
+```
+
+It only weakly helped highnoise; terminal, OD shift, and rush shift regressed.
+The OD/rush diagnosis showed that the internal fixed fallback was not identical
+to the external `fixed_headway` executor: it used the trip's existing
+`target_headway` and shared the global environment RNG with runner/training
+initialization. This broke the intended common-random-number comparison and made
+fixed fallback worse than the external fixed baseline.
+
+Implementation follow-up: added a config-gated
+`fixed_expert_selector.strict_headway_s` and
+`fixed_expert_selector.reset_env_rng`, plus an independent per-run fleet RNG in
+`runner_v3.py`. A local OD/rush smoke confirmed the N-fleet sequence now aligns
+with the external fixed baseline. Added `cfvalue_noisegate`, a stricter
+counterfactual-value selector:
+
+- terminal: exact fixed-headway;
+- highnoise: `headwayplanner_odgate`;
+- OD shift: exact fixed-headway;
+- rush shift: exact fixed-headway.
+
+Local 4-config x 1-seed x 2ep smoke passed and method inference recognizes
+`cfvalue_noisegate`. The active formal matrix is:
+
+```text
+run: cfvalue_noisegate_ep100_wu10
+t11331 node006 shard_0000_0014
+t11332 node002 shard_0014_0028
+t11335 node001 shard_0028_0042
+t11336 node003 shard_0042_0056
+t11338 node005 shard_0056_0070
+t11339 node004 shard_0070_0080
+```
+
+2026-06-13 result: `cfvalue_noisegate_ep100_wu10` completed on
+`node001-node006`, synced `80/80` diagnostics, and was aggregated under
+`results_freqduet/cfvalue_noisegate_ep100_wu10/combined_summary`.
+
+```text
+cfvalue_noisegate summary, composite mean
+terminal   1.4322
+highnoise  1.7870
+odshift    1.4445
+rushshift  1.2699
+
+cfvalue_noisegate vs current main, candidate - main
+terminal   +0.0005 CI [-0.0500,+0.0457]
+highnoise  -0.0372 CI [-0.0998,+0.0261]
+odshift    -0.0066 CI [-0.0524,+0.0389]
+rushshift  -0.0230 CI [-0.0663,+0.0203]
+overall    -0.0166 CI [-0.0542,+0.0191]
+
+cfvalue_noisegate vs fixed-headway, candidate - fixed
+terminal   +0.0044 CI [-0.0151,+0.0245]
+highnoise  -0.0399 CI [-0.0722,-0.0049]
+odshift    +0.0149 CI [-0.0038,+0.0323]
+rushshift  -0.0030 CI [-0.0129,+0.0069]
+overall    -0.0059 CI [-0.0186,+0.0073]
+```
+
+Interpretation: this is a useful positive result and closes the immediate
+fixed-headway gap from "significantly behind" to "statistically tied overall",
+with a significant highnoise win against fixed-headway. It still should not be
+written as universal dominance over fixed-headway because terminal and OD shift
+are only tied/weakly worse and the overall CI crosses zero. The paper claim can
+now say that the demand-conditioned selector preserves fixed-headway-level
+robustness while improving the noisy-demand regime; a stronger top-journal claim
+still needs a true multi-candidate counterfactual value model or Phase-4
+terminal/first-stop dispatch validation.
 
 Done means:
 

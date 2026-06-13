@@ -1,0 +1,8 @@
+_extends: F_freqduet_terminal_main_spacectx_hiro.yaml
+_name: F_freqduet_terminal_main_spacectx_disc9_hiro
+
+# Same spatiotemporal state repair, with finer low-hold bins. This tests
+# whether the remaining fixed-headway gap comes from coarse 0-20s action
+# resolution rather than missing context alone.
+lower:
+  action_bins: [0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 20.0, 30.0, 45.0]

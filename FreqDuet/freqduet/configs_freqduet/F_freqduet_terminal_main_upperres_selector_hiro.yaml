@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperres_selector_hiro
+
+# Online demand-conditioned upper residual selector. It keeps the actor's
+# timetable action as a candidate, adds small same-direction coefficient
+# offsets, and uses a causal ridge value model trained from completed upper
+# transitions to select a lower predicted-cost residual.
+upper:
+  residual_value_selector:
+    enable: true
+    learn_start_ep: 20
+    start_ep: 40
+    min_observations: 48
+    candidate_offsets_s: [-10.0, -5.0, 0.0, 5.0, 10.0]
+    ridge: 0.35
+    feature_clip: 6.0
+    cost_clip: 8.0
+    epsilon: 0.05
+    improve_margin: 0.01
+    adjust_penalty: 0.03
+    adjust_norm_s: 10.0

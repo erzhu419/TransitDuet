@@ -527,7 +527,20 @@ class env_bus(object):
             'load', 'capacity', 'queue', 'speed_residual',
             'shock_age', 'schedule_slack']
         requested_context = lower_context_cfg.get('features', default_context)
-        allowed_context = set(default_context)
+        allowed_context = set(default_context) | {
+            'fwd_headway_norm',
+            'bwd_headway_norm',
+            'headway_balance',
+            'hold_value_proxy',
+            'route_progress',
+            'station_phase',
+            'prev_launch_gap',
+            'next_launch_gap',
+            'time_sin',
+            'time_cos',
+            'prev_queue',
+            'next_queue',
+        }
         self.lower_context_features = [
             str(x) for x in requested_context if str(x) in allowed_context
         ] if self.lower_context_enabled else []

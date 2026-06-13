@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_releaseadapt_hiro
+
+# Phase-4 executable terminal-dispatch candidate.
+# Use a conservative early-release cap by default, and only relax it under
+# stable, non-shifted, non-rush demand conditions.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -5.0
+    terminal_shift_max_s: 45.0
+    terminal_early_release_adaptive:
+      enable: true
+      base_min_s: -5.0
+      relaxed_min_s: -20.0
+      max_high_energy: 0.075
+      min_od_entropy: 0.955
+      max_low_forecast: 0.50
+      min_action_mean_s: -10.0
+      min_current_delta_s: -10.0
+      min_updates_required: 30

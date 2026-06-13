@@ -1,0 +1,13 @@
+_extends: F_freqduet_terminal_main_headwayplanner_local_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_odbranch_hiro
+
+# OD-shift-only causal gate. This is a control branch for the hybrid OR gate.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      activation_gate:
+        enable: true
+        max_low_forecast: 0.460
+        max_high_energy: 0.070
+        max_middle_energy: 0.040
+        max_od_entropy: 0.9530

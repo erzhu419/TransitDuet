@@ -1,0 +1,30 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_spacectx_hiro
+
+# SUMO exp39-style mainline repair candidate: keep the validated frequency
+# hierarchy and discrete lower holding, but expose local spatiotemporal
+# neighborhood context to the lower policy so small holding choices can be
+# conditioned on preceding/following vehicles, station phase, and time phase.
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
+      - fwd_headway_norm
+      - bwd_headway_norm
+      - headway_balance
+      - hold_value_proxy
+      - route_progress
+      - station_phase
+      - prev_launch_gap
+      - next_launch_gap
+      - time_sin
+      - time_cos
+      - prev_queue
+      - next_queue

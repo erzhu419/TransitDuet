@@ -1,0 +1,23 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_ctxselector60_hiro
+
+# Learned demand-conditioned expert selector. This keeps the promoted FreqDuet
+# main path intact through most training, then uses an online contextual value
+# model to choose between learned FreqDuet and the fixed-headway expert.
+fixed_expert_selector:
+  enable: true
+  start_ep: 60
+  count_start: selector_start
+  min_observations: 2
+  probe_period: 8
+  probe_mode: alternate
+  epsilon: 0.02
+  ema_alpha: 0.25
+  # Require fixed-headway to be predicted clearly better before it can override
+  # the learned policy, because early fixed episodes also reduce policy updates.
+  margin: -0.015
+  contextual_value:
+    enable: true
+    ridge: 0.15
+    feature_clip: 5.0
+    use_previous_performance: true

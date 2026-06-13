@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_termvalselector_hiro.yaml
+_name: F_freqduet_terminal_main_termvalselector_local_hiro
+
+# Phase-4 local-credit terminal/first-stop value selector. The original
+# selector learned from transition reward; this variant trains on the same
+# local upper credit cost used by the headway-value planner.
+upper:
+  timetable_planner:
+    terminal_value_selector:
+      target: local_credit
+      local_weight: 1.0
+      epsilon: 0.03
+      improve_margin: 0.04
+      delay_penalty: 0.08
+      candidate_bias_s: [0.0, 5.0, 10.0]

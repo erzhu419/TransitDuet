@@ -1,0 +1,18 @@
+_extends: F_freqduet_terminal_main_headwayplanner_odgate_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_odgate_fixedrule_hiro
+
+# Deterministic expert fallback around the best current learned planner. The
+# rule uses stable demand-profile priors rather than held-out domain labels:
+# use odgate when the day is not an OD-profile shift and not a rush-profile
+# shift; otherwise fall back to the fixed-headway expert.
+fixed_expert_selector:
+  enable: true
+  strict_headway_s: 360.0
+  start_ep: 1
+  count_start: selector_start
+  deterministic_rule:
+    enable: true
+    default: fixed
+    learned_when:
+      max_cfg_od_noise: 0.05
+      max_cfg_peak_shift_abs: 0.05

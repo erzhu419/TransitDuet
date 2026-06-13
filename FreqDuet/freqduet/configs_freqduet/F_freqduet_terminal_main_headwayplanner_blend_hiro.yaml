@@ -1,0 +1,15 @@
+_extends: F_freqduet_terminal_main_headwayplanner_safe_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_blend_hiro
+
+# Blended value target: retain the day-level paper composite signal but add the
+# local dispatch gap/wait credit so the discrete selector sees action-level
+# feedback.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      target: blend
+      episode_weight: 0.35
+      local_weight: 0.65
+      epsilon: 0.03
+      improve_margin: 0.04
+      adjust_penalty: 0.065

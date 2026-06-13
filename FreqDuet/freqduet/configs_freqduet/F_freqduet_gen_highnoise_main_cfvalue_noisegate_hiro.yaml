@@ -1,0 +1,6 @@
+_extends: F_freqduet_gen_highnoise_main_headwayplanner_odgate_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_cfvalue_noisegate_hiro
+
+# Counterfactual-value noise-gate selector.
+# High demand-noise is the only regime where the matched-seed evidence supports
+# using the learned odgate planner over exact fixed-headway.

@@ -1,0 +1,33 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_safe_hiro
+
+# Conservative v2 of the learned demand-conditioned headway planner. The v1
+# screen over-credited positive relief and inflated terminal launch shifts. This
+# version keeps the same composite-cost value model but removes the relief prior,
+# narrows positive candidates, and requires a larger value margin before
+# overriding the actor.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      enable: true
+      learn_start_ep: 20
+      start_ep: 50
+      min_observations: 512
+      ridge: 1.0
+      feature_clip: 8.0
+      cost_clip: 8.0
+      epsilon: 0.02
+      improve_margin: 0.05
+      adjust_penalty: 0.08
+      adjust_norm_s: 15.0
+      delta_norm_s: 20.0
+      candidate_deltas_s: [-20.0, -10.0, 0.0, 5.0, 10.0]
+      candidate_offsets_s: []
+      prior_weight: 0.0
+      spacing_weight: 0.0
+      wait_weight: 0.0
+      fleet_weight: 0.0
+      cv_target: 0.438
+      overshoot_target: 0.13
+      wait_target_min: 5.5
+      terminal_shift_target_s: 0.0

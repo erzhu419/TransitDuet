@@ -1,0 +1,33 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_hiro
+
+# Learned demand-conditioned headway planner. Unlike residual selectors, this
+# chooses among complete discrete headway-plan candidates and trains on the
+# paper composite cost (wait/10 + overshoot^2/N + CV). Candidate features include
+# current/next gap, candidate target headways, LF/HF demand-frequency signals,
+# fleet pressure, and previous-episode wait/CV/overshoot priors.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      enable: true
+      learn_start_ep: 20
+      start_ep: 50
+      min_observations: 512
+      ridge: 1.0
+      feature_clip: 8.0
+      cost_clip: 8.0
+      epsilon: 0.04
+      improve_margin: 0.015
+      adjust_penalty: 0.035
+      adjust_norm_s: 15.0
+      delta_norm_s: 20.0
+      candidate_deltas_s: [-20.0, -10.0, 0.0, 10.0, 20.0]
+      candidate_offsets_s: []
+      prior_weight: 0.035
+      spacing_weight: 1.0
+      wait_weight: 0.45
+      fleet_weight: 0.55
+      cv_target: 0.438
+      overshoot_target: 0.13
+      wait_target_min: 5.5
+      terminal_shift_target_s: 12.0

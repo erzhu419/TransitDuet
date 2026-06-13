@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_release15_hiro
+
+# Phase-4 executable terminal-dispatch candidate: allow moderate early release
+# for future trips when the upper timetable compresses headway.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -15.0
+    terminal_shift_max_s: 45.0

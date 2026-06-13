@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperdisc5_hiro
+
+# Exp39-style upper action reduction: keep the current 1D rolling timetable,
+# but execute/replay only a small residual alphabet around fixed headway.
+upper:
+  action_bins: [-15.0, -10.0, -5.0, 0.0, 5.0]

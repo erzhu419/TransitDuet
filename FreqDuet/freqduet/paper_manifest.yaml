@@ -280,6 +280,26 @@ config_sets:
     rushshift:
       fixedselector_balanced: F_freqduet_gen_rushshift_main_fixedselector_balanced_hiro
 
+  cfvalue_domainmean_candidate_4x1:
+    terminal:
+      cfvalue_domainmean: F_freqduet_terminal_main_cfvalue_domainmean_hiro
+    highnoise:
+      cfvalue_domainmean: F_freqduet_gen_highnoise_main_cfvalue_domainmean_hiro
+    odshift:
+      cfvalue_domainmean: F_freqduet_gen_odshift_main_cfvalue_domainmean_hiro
+    rushshift:
+      cfvalue_domainmean: F_freqduet_gen_rushshift_main_cfvalue_domainmean_hiro
+
+  cfvalue_noisegate_candidate_4x1:
+    terminal:
+      cfvalue_noisegate: F_freqduet_terminal_main_cfvalue_noisegate_hiro
+    highnoise:
+      cfvalue_noisegate: F_freqduet_gen_highnoise_main_cfvalue_noisegate_hiro
+    odshift:
+      cfvalue_noisegate: F_freqduet_gen_odshift_main_cfvalue_noisegate_hiro
+    rushshift:
+      cfvalue_noisegate: F_freqduet_gen_rushshift_main_cfvalue_noisegate_hiro
+
   termhold45_candidate_4x1:
     terminal:
       termhold45: F_freqduet_terminal_main_termhold45_hiro
@@ -1325,6 +1345,55 @@ experiments:
     comparison_dir_vs_main: results_freqduet/fixedselector_balanced_screen_ep100_wu10/compare_fixedselector_balanced_vs_current_main_ep100_reference
     comparison_dir_vs_external_classical: results_freqduet/fixedselector_balanced_screen_ep100_wu10/compare_fixedselector_balanced_vs_external_classical_filtered
     note: balanced selector starts EMA at selector_start and alternates probes, but still worsened main overall by +0.0485 CI [+0.0251,+0.0721], driven by rushshift wait; do not promote
+
+  cfvalue_domainmean_ep100_wu10_r2:
+    status: complete_negative_result
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfvalue_domainmean_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t11262
+      - t11263
+      - t11264
+      - t11265
+      - t11266
+      - t11267
+    result_dir: results_freqduet/cfvalue_domainmean_ep100_wu10_r2
+    per_seed_csv: results_freqduet/cfvalue_domainmean_ep100_wu10_r2/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/cfvalue_domainmean_ep100_wu10_r2/compare_cfvalue_domainmean_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/cfvalue_domainmean_ep100_wu10_r2/compare_cfvalue_domainmean_vs_external_classical
+    note: domain-mean counterfactual selector worsened current main overall by +0.0134 CI [-0.0172,+0.0454] and fixed-headway by +0.0240 CI [-0.0078,+0.0533]; do not promote
+
+  cfvalue_noisegate_ep100_wu10:
+    status: complete_positive_tie_highnoise_win
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfvalue_noisegate_candidate_4x1
+    runner: scripts/run_freqduet_ablation.py
+    scheduler_tasks:
+      - t11331
+      - t11332
+      - t11335
+      - t11336
+      - t11338
+      - t11339
+    result_dir: results_freqduet/cfvalue_noisegate_ep100_wu10
+    per_seed_csv: results_freqduet/cfvalue_noisegate_ep100_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/cfvalue_noisegate_ep100_wu10/compare_cfvalue_noisegate_vs_current_main_ep100_reference
+    comparison_dir_vs_external_classical: results_freqduet/cfvalue_noisegate_ep100_wu10/compare_cfvalue_noisegate_vs_external_classical
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: -0.0166
+      overall_vs_current_main_delta_ci95: [-0.0542, 0.0191]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: -0.0059
+      overall_vs_fixed_headway_delta_ci95: [-0.0186, 0.0073]
+      highnoise_vs_fixed_headway_delta_candidate_minus_fixed: -0.0399
+      highnoise_vs_fixed_headway_delta_ci95: [-0.0722, -0.0049]
+    note: strict fixed fallback plus highnoise learned odgate closes the fixed-headway gap to an overall statistical tie and significantly improves highnoise versus fixed-headway; keep as positive candidate evidence, but do not claim universal dominance over fixed-headway
 
   current_main_vs_external_fixed_ep100_filtered:
     status: complete_evaluation_correction

@@ -1,0 +1,26 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperres_planctx_hiro
+
+# Exp39-style upper repair: a small discrete residual alphabet plus local
+# plan-context value features. The selector sees candidate consequences for
+# current/next headway before choosing, instead of learning from action mean
+# alone.
+upper:
+  residual_value_selector:
+    enable: true
+    feature_mode: plan_context
+    learn_start_ep: 20
+    start_ep: 50
+    min_observations: 512
+    ridge: 0.75
+    feature_clip: 8.0
+    cost_clip: 8.0
+    epsilon: 0.05
+    improve_margin: 0.02
+    adjust_penalty: 0.04
+    adjust_norm_s: 5.0
+    candidate_offsets_s: [-5.0, 0.0, 5.0, 10.0]
+    compression_safety_weight: 0.05
+    compression_norm_s: 5.0
+    short_gap_weight: 1.0
+    fleet_pressure_weight: 2.0

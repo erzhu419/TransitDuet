@@ -1,0 +1,21 @@
+_extends: F_freqduet_terminal_main_headwayplanner_local_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_discctx_hiro
+
+# Discrete-context value planner. This keeps the local-credit target but gives
+# the ridge model explicit candidate-delta basis features, so the learned value
+# compares the conservative discrete headway actions as separate regimes rather
+# than extrapolating from one continuous delta coefficient.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      ridge: 2.0
+      feature_clip: 6.0
+      epsilon: 0.05
+      improve_margin: 0.04
+      adjust_penalty: 0.07
+      action_basis:
+        enable: true
+        mode: onehot_rbf
+        centers_s: [-20.0, -10.0, 0.0, 5.0, 10.0]
+        width_s: 7.5
+        interactions: true

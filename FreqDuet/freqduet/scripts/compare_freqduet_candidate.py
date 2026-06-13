@@ -22,6 +22,30 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 CANDIDATE_METHOD_TOKENS = (
+    "cfvalue_noisegate",
+    "cfvalue_domainmean",
+    "upperres_planctx",
+    "upperres_reliefguard",
+    "upperres_selector",
+    "uppervalue_hfgate",
+    "termvalselector",
+    "headwayplanner",
+    "releaseadapt",
+    "release20",
+    "release15",
+    "release10",
+    "release5",
+    "ctxselector60",
+    "upperdisc7",
+    "upperdisc5",
+    "upperdisc4",
+    "upperdisc3",
+    "spline2dir_promreplan",
+    "spacectx_disc9",
+    "gapctx_disc9last",
+    "disc9last",
+    "spacectx",
+    "disc9",
     "sumorl_rawhist_holdrl",
     "sumorl_holdrl",
     "histaux6eg06upper",
@@ -49,6 +73,26 @@ DEFAULT_METRICS = (
     "lower_drift_penalty_mean",
     "lower_drift_cost_mean",
     "lower_drift_cost_adaptive_gate_mean",
+    "upper_residual_value_cost_mean",
+    "upper_residual_value_cost_max",
+    "upper_residual_value_cost_active_mean",
+    "upper_residual_selector_active_mean",
+    "upper_residual_selector_adjust_mean",
+    "upper_residual_selector_adjust_max",
+    "upper_residual_selector_margin_mean",
+    "upper_residual_selector_updates",
+    "headway_value_planner_active_mean",
+    "headway_value_planner_adjust_mean",
+    "headway_value_planner_adjust_max",
+    "headway_value_planner_delta_mean",
+    "headway_value_planner_delta_max",
+    "headway_value_planner_margin_mean",
+    "headway_value_planner_actor_pred_mean",
+    "headway_value_planner_selected_pred_mean",
+    "headway_value_planner_prior_mean",
+    "headway_value_planner_target_cost_mean",
+    "headway_value_planner_target_cost_max",
+    "headway_value_planner_updates",
     "w_fleet",
     "theta_fleet",
     "upper_delta_mean",
@@ -57,9 +101,18 @@ DEFAULT_METRICS = (
     "terminal_launch_shift_mean",
     "terminal_launch_shift_std",
     "terminal_shift_cap_mean",
+    "terminal_shift_min_mean",
+    "terminal_shift_min_min",
     "terminal_feedback_bias_mean",
     "terminal_feedback_bias_max",
     "terminal_feedback_events",
+    "terminal_value_selector_active_mean",
+    "terminal_value_selector_bias_mean",
+    "terminal_value_selector_bias_max",
+    "terminal_value_selector_margin_mean",
+    "terminal_value_selector_target_cost_mean",
+    "terminal_value_selector_target_cost_max",
+    "terminal_value_selector_updates",
     "terminal_headway_floor_mean",
     "terminal_headway_floor_events",
     "fixed_selector_fixed_active",
@@ -67,6 +120,11 @@ DEFAULT_METRICS = (
     "fixed_selector_fixed_cost_ema",
     "fixed_selector_learned_count",
     "fixed_selector_fixed_count",
+    "fixed_selector_context_enabled",
+    "fixed_selector_context_learned_value",
+    "fixed_selector_context_fixed_value",
+    "fixed_selector_context_margin",
+    "fixed_selector_context_feature_norm",
     "fleet_noharm_upper_adjust_mean",
     "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",
@@ -315,7 +373,33 @@ def main() -> None:
 
     baseline = prepare(pd.read_csv(args.baseline_per_seed), "baseline")
     candidate = prepare(pd.read_csv(args.candidate_per_seed), "candidate")
-    candidate.loc[candidate["domain"] != "unknown", "method"] = args.candidate_method
+    candidate = candidate[candidate["domain"] != "unknown"].copy()
+    matched = candidate["method"] == args.candidate_method
+    if matched.any():
+        candidate = candidate[matched].copy()
+    else:
+        known_methods = sorted(
+            m for m in candidate["method"].dropna().unique()
+            if m != "unknown"
+        )
+        if known_methods:
+            raise SystemExit(
+                "candidate file contains inferred methods but none match "
+                f"{args.candidate_method!r}: {known_methods}"
+            )
+        candidate["method"] = args.candidate_method
+
+    duplicates = candidate.duplicated(["domain", "seed"], keep=False)
+    if duplicates.any():
+        bad = (
+            candidate.loc[duplicates, ["domain", "seed", "config"]]
+            .sort_values(["domain", "seed", "config"])
+            .head(20)
+        )
+        raise SystemExit(
+            "candidate has duplicate domain/seed rows after method filtering; "
+            f"first duplicates:\n{bad.to_string(index=False)}"
+        )
 
     metrics = [m.strip() for m in args.metrics.split(",") if m.strip()]
     baselines = [m.strip() for m in args.baselines.split(",") if m.strip()]

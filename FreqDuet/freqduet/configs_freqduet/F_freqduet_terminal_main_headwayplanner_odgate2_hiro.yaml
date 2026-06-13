@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_main_headwayplanner_local_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_odgate2_hiro
+
+# OD-shift-gated local-credit planner, v2. The first gate also required a high
+# low-forecast value and therefore barely activated in OD-shift. This variant
+# relies on causal OD entropy plus HF/middle-energy stability.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      activation_gate:
+        enable: true
+        max_high_energy: 0.070
+        max_middle_energy: 0.040
+        max_od_entropy: 0.9555

@@ -268,6 +268,7 @@ class Bus(object):
             self.obs.extend(speed_list)
 
             if self._lower_context_enabled:
+                target_hw_safe = max(float(target_hw), 1.0)
                 load_norm = len(self.passengers) / max(float(self.capacity), 1.0)
                 cap_remain_norm = max(0.0, 1.0 - load_norm)
                 queue_norm = (
@@ -286,7 +287,58 @@ class Bus(object):
                     shock_age = float(
                         self._frequency_tracker.local_promotion_summary(
                             station_id, self.direction).get("age", 0.0))
-                schedule_slack = (target_hw - self.forward_headway) / max(target_hw, 1.0)
+                schedule_slack = (target_hw - self.forward_headway) / target_hw_safe
+                fwd_norm = self.forward_headway / target_hw_safe
+                bwd_norm = self.backward_headway / target_hw_safe
+                headway_balance = (
+                    self.backward_headway - self.forward_headway
+                ) / target_hw_safe
+                # First-order proxy for whether extra holding improves local
+                # headway regularity: holding increases forward headway and
+                # decreases backward headway.
+                hold_value_proxy = (
+                    abs(self.forward_headway - target_hw)
+                    + abs(self.backward_headway - target_hw)
+                    - abs((self.forward_headway + 15.0) - target_hw)
+                    - abs((self.backward_headway - 15.0) - target_hw)
+                ) / target_hw_safe
+                route_len = max(
+                    float(sum(route.distance for route in self.effective_route)),
+                    1.0)
+                route_progress = float(self.travel_distance) / route_len
+                station_phase = float(self.last_station.station_id) / max(
+                    len(self.effective_station) - 1, 1)
+                prev_launch_gap = 1.0
+                next_launch_gap = 1.0
+                if len(self.forward_bus) != 0:
+                    prev_launch_gap = (
+                        float(self.launch_time)
+                        - float(getattr(self.forward_bus[0], 'launch_time',
+                                        self.launch_time - target_hw))
+                    ) / target_hw_safe
+                if len(self.backward_bus) != 0:
+                    next_launch_gap = (
+                        float(getattr(self.backward_bus[0], 'launch_time',
+                                      self.launch_time + target_hw))
+                        - float(self.launch_time)
+                    ) / target_hw_safe
+                day_phase = (
+                    (float(current_time) % (14.0 * 3600.0))
+                    / (14.0 * 3600.0))
+                time_angle = 2.0 * np.pi * day_phase
+                prev_queue = 0.0
+                next_queue = 0.0
+                current_idx = self.effective_station.index(self.last_station)
+                prev_idx = current_idx - 1
+                next_idx = current_idx + 1
+                if 0 <= prev_idx < len(self.effective_station):
+                    prev_queue = (
+                        len(self.effective_station[prev_idx].waiting_passengers)
+                        / self._lower_context_queue_norm)
+                if 0 <= next_idx < len(self.effective_station):
+                    next_queue = (
+                        len(self.effective_station[next_idx].waiting_passengers)
+                        / self._lower_context_queue_norm)
                 context_values = {
                     'load': float(np.clip(load_norm, 0.0, 2.0)),
                     'capacity': float(np.clip(cap_remain_norm, 0.0, 1.0)),
@@ -294,6 +346,18 @@ class Bus(object):
                     'speed_residual': float(np.clip(speed_residual, -2.0, 2.0)),
                     'shock_age': float(np.clip(shock_age, 0.0, 1.0)),
                     'schedule_slack': float(np.clip(schedule_slack, -2.0, 2.0)),
+                    'fwd_headway_norm': float(np.clip(fwd_norm, 0.0, 3.0)),
+                    'bwd_headway_norm': float(np.clip(bwd_norm, 0.0, 3.0)),
+                    'headway_balance': float(np.clip(headway_balance, -3.0, 3.0)),
+                    'hold_value_proxy': float(np.clip(hold_value_proxy, -1.0, 1.0)),
+                    'route_progress': float(np.clip(route_progress, 0.0, 1.0)),
+                    'station_phase': float(np.clip(station_phase, 0.0, 1.0)),
+                    'prev_launch_gap': float(np.clip(prev_launch_gap, 0.0, 3.0)),
+                    'next_launch_gap': float(np.clip(next_launch_gap, 0.0, 3.0)),
+                    'time_sin': float(np.sin(time_angle)),
+                    'time_cos': float(np.cos(time_angle)),
+                    'prev_queue': float(np.clip(prev_queue, 0.0, 2.0)),
+                    'next_queue': float(np.clip(next_queue, 0.0, 2.0)),
                 }
                 self.obs.extend([
                     context_values[name]

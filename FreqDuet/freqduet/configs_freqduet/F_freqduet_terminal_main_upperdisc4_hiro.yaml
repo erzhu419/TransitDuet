@@ -1,0 +1,7 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_upperdisc4_hiro
+
+# Slightly wider near-fixed alphabet: allows modest demand compression but
+# excludes the larger residual jumps that hurt terminal cost in upperdisc5/7.
+upper:
+  action_bins: [-10.0, -5.0, 0.0, 5.0]

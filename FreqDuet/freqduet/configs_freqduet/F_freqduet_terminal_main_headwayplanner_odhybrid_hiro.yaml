@@ -1,0 +1,19 @@
+_extends: F_freqduet_terminal_main_headwayplanner_local_hiro.yaml
+_name: F_freqduet_terminal_main_headwayplanner_odhybrid_hiro
+
+# Hybrid causal gate: retain the stable-context odgate branch, and add a
+# tighter OD-shift branch for low-entropy, low-forecast contexts.
+upper:
+  timetable_planner:
+    headway_value_planner:
+      activation_gate:
+        enable: true
+        min_low_forecast: 0.435
+        max_high_energy: 0.070
+        max_middle_energy: 0.040
+        max_od_entropy: 0.9555
+        any_of:
+          - max_low_forecast: 0.460
+            max_high_energy: 0.070
+            max_middle_energy: 0.040
+            max_od_entropy: 0.9530

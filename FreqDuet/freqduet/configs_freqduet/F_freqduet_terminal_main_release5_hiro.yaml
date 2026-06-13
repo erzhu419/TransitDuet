@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_release5_hiro
+
+# Phase-4 executable terminal-dispatch candidate: allow a small early release
+# for future trips when the upper timetable compresses headway. Keep the
+# promoted frequency split, lower holding policy, DriftFB, and terminal delay cap.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -5.0
+    terminal_shift_max_s: 45.0

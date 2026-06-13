@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_main_disc9last_hiro.yaml
+_name: F_freqduet_terminal_main_gapctx_disc9last_hiro
+
+# Minimal exp39-style spatiotemporal context: keep action space small, expose
+# only adjacent launch gaps and normalized local headway geometry.
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - prev_launch_gap
+      - next_launch_gap
+      - fwd_headway_norm
+      - bwd_headway_norm
+      - headway_balance
+      - station_phase
