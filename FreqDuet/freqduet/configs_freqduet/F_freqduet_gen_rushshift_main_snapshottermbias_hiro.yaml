@@ -1,0 +1,23 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshottermbias_hiro
+
+upper:
+  action_override:
+    disable_value_selectors: false
+  snapshot_value_selector:
+    enable: true
+    domain: rushshift
+    artifact: results_freqduet/phase4_snapshot_cf_v6_actorrel_burn40_4domain_20seed_snap12_h1800/value_model_residual/model_artifact
+    fallback_method: actor_term45_0
+    fallback_action: actor
+    apply_mode: terminal_bias
+    improve_margin: 0.0
+    allowed_methods:
+      - actor_term45_0
+      - actor_target_p15
+      - actor_target_p30
+      - actor_term45_p15
+      - actor_term45_p30
+
+training:
+  trip_dump_freq: 1

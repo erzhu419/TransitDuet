@@ -1996,6 +1996,67 @@ should pivot to either Phase-4 terminal/first-stop dispatch or a stronger
 counterfactual value design that trains from true online rollouts/checkpoints,
 not this direct RF wrapper.
 
+2026-06-16 Phase-4 terminal-bias repair: implemented a new
+`snapshot_value_selector.apply_mode: terminal_bias` path in `runner_v3.py`.
+Unlike the earlier online RF wrappers, this mode does not overwrite the actor's
+low-frequency headway/timetable action. It maps only positive selected
+counterfactual offsets into a nonnegative first-stop / terminal dispatch bias,
+and leaves the actor action unchanged (`snapshot_value_override_mean = 0`).
+
+The 40ep pilot
+`snapshottermbias_pilot_ep40_wu10_4domain_20seed` compared current main,
+`snapshottermbias` m00, and `snapshottermbias_m01` across the four held-out
+domains. m00 was rejected because rushshift worsened significantly. m01 was
+promising: terminal improved significantly and the fixed-headway gap collapsed
+to statistical parity.
+
+```text
+40ep m01 vs current main, composite delta candidate - main
+terminal   -0.0297 CI [-0.0552,-0.0048]
+highnoise  -0.0217 CI [-0.1002,+0.0576]
+odshift    -0.0184 CI [-0.0418,+0.0065]
+rushshift  +0.0083 CI [-0.0053,+0.0215]
+overall    -0.0154 CI [-0.0359,+0.0049]
+
+40ep m01 vs fixed-headway
+overall_shared  +0.0047 CI [-0.0452,+0.0551]
+```
+
+The decisive 100ep validation
+`snapshottermbias_m01_ep100_wu10_4domain_20seed` ran `8` configs x `20` seeds x
+`100` episodes as scheduler-visible direct-node tasks `t11689-t11720`
+(`32/32` done, `0` failed). It used `last-k=50` and compared old main against
+the m01 terminal-bias candidate under the same paired seeds.
+
+```text
+100ep m01 vs old main, composite delta candidate - main
+terminal   -0.0161 CI [-0.0336,+0.0022]
+highnoise  -0.0200 CI [-0.0618,+0.0206]
+odshift    -0.0149 CI [-0.0285,-0.0011]
+rushshift  +0.0023 CI [-0.0066,+0.0116]
+overall    -0.0122 CI [-0.0241,-0.0001]
+
+100ep old main vs fixed-headway
+overall_shared  +0.0077 CI [-0.0084,+0.0245]
+
+100ep m01 vs fixed-headway
+terminal        -0.0038 CI [-0.0194,+0.0118]
+highnoise       -0.0249 CI [-0.0626,+0.0141]
+odshift         +0.0089 CI [-0.0076,+0.0253]
+rushshift       +0.0020 CI [-0.0072,+0.0108]
+overall_shared  -0.0045 CI [-0.0153,+0.0077]
+```
+
+Decision: promote the m01 terminal-bias selector into
+`F_freqduet_terminal_main_hiro.yaml`. This closes the immediate fixed-headway
+gap: new main is significantly better than old main overall at 100ep and is
+statistically tied with fixed-headway while still strongly beating rule holding
+and rule MPC. Remaining Phase-4 work is no longer "prove first-stop/terminal
+value action can help"; it is to polish mechanism figures, rerun final current
+name matrices after the alias change, and decide whether to extend beyond
+bounded terminal bias into richer actual terminal launch / first-stop holding
+policy learning.
+
 Done means:
 
 - produce final main table;

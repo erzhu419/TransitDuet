@@ -306,6 +306,13 @@ class DiagnosticLog:
         'snapshot_value_events',
         'snapshot_value_changed_mean',
         'snapshot_value_changed_events',
+        'snapshot_value_override_mean',
+        'snapshot_value_override_events',
+        'snapshot_value_terminal_dispatch_mean',
+        'snapshot_value_terminal_dispatch_events',
+        'snapshot_value_terminal_bias_mean',
+        'snapshot_value_terminal_bias_max',
+        'snapshot_value_terminal_bias_events',
         'snapshot_value_margin_mean',
         'snapshot_value_margin_max',
         'snapshot_value_pred_mean',
@@ -942,7 +949,32 @@ class TransitDuetV2Runner:
         # Features appended to upper state:
         # [same-dir drift load, same-dir excess, other-dir drift load, other-dir excess].
         self.freq_driftfb_dim = 4 if self.freq_driftfb_enable else 0
-        self.upper_state_dim += self.freq_holdfb_dim + self.freq_driftfb_dim
+        state_history_cfg = upper_cfg.get('state_history', {}) or {}
+        self.upper_state_history_enable = bool(
+            state_history_cfg.get('enable', False))
+        self.upper_state_history_len = (
+            max(0, int(state_history_cfg.get('length', 0)))
+            if self.upper_state_history_enable else 0)
+        self.upper_state_history_action_norm_s = max(float(
+            state_history_cfg.get('action_norm_s', 60.0)), 1e-6)
+        self.upper_state_history_shift_norm_s = max(float(
+            state_history_cfg.get('shift_norm_s', 60.0)), 1e-6)
+        self.upper_state_history_wait_norm_min = max(float(
+            state_history_cfg.get('wait_norm_min', 10.0)), 1e-6)
+        self.upper_state_history_waiting_norm = max(float(
+            state_history_cfg.get('waiting_norm', 500.0)), 1e-6)
+        self.upper_state_history_plan_penalty_norm = max(float(
+            state_history_cfg.get('plan_penalty_norm', 5.0)), 1e-6)
+        self.upper_state_history_step_dim = (
+            23 if self.upper_state_history_len > 0 else 0)
+        self.upper_state_history_dim = (
+            self.upper_state_history_len
+            * self.upper_state_history_step_dim)
+        self._upper_state_history = deque(
+            maxlen=max(1, self.upper_state_history_len))
+        self.upper_state_dim += (
+            self.freq_holdfb_dim + self.freq_driftfb_dim
+            + self.upper_state_history_dim)
         self.upper_action_dim = int(upper_cfg.get('action_dim', 1))
         if self.timetable_planner is not None:
             self.upper_action_dim = self.timetable_planner.action_dim
@@ -1021,6 +1053,30 @@ class TransitDuetV2Runner:
             snapshot_selector_cfg.get('improve_margin', 0.0)), 0.0)
         self.snapshot_value_selector_fallback_method = str(
             snapshot_selector_cfg.get('fallback_method', 'term45_0')).strip()
+        self.snapshot_value_selector_fallback_action = str(
+            snapshot_selector_cfg.get('fallback_action', 'candidate')
+        ).strip().lower()
+        self.snapshot_value_selector_apply_mode = str(
+            snapshot_selector_cfg.get('apply_mode', 'action_override')
+        ).strip().lower()
+        if self.snapshot_value_selector_apply_mode in {
+                'terminal', 'terminal_bias_only', 'bias'}:
+            self.snapshot_value_selector_apply_mode = 'terminal_bias'
+        if self.snapshot_value_selector_apply_mode not in {
+                'action_override', 'terminal_bias'}:
+            raise ValueError(
+                "upper.snapshot_value_selector.apply_mode must be "
+                "'action_override' or 'terminal_bias'")
+        allowed_methods = snapshot_selector_cfg.get('allowed_methods', [])
+        blocked_methods = snapshot_selector_cfg.get('blocked_methods', [])
+        self.snapshot_value_selector_allowed_methods = {
+            str(method).strip() for method in allowed_methods
+            if str(method).strip()
+        }
+        self.snapshot_value_selector_blocked_methods = {
+            str(method).strip() for method in blocked_methods
+            if str(method).strip()
+        }
         self.snapshot_value_selector_probe_only = bool(
             snapshot_selector_cfg.get('probe_only', False))
         self.snapshot_value_selector_model = None
@@ -1891,6 +1947,90 @@ class TransitDuetV2Runner:
                          if getattr(bus, 'on_route', False))
         return float(concurrent), float(n_fleet), float(concurrent - n_fleet)
 
+    def _upper_state_history_vector(self):
+        if self.upper_state_history_dim <= 0:
+            return np.zeros(0, dtype=np.float32)
+        zero = np.zeros(self.upper_state_history_step_dim, dtype=np.float32)
+        rows = list(getattr(self, '_upper_state_history', []))
+        rows = rows[-self.upper_state_history_len:]
+        padded = [zero] * max(0, self.upper_state_history_len - len(rows))
+        padded.extend(rows)
+        return np.concatenate(padded).astype(np.float32)
+
+    def _augment_upper_state_history(self, state):
+        state = np.asarray(state, dtype=np.float32).reshape(-1)
+        if self.upper_state_history_dim <= 0:
+            return state
+        return np.concatenate([
+            state,
+            self._upper_state_history_vector(),
+        ]).astype(np.float32)
+
+    def _upper_state_history_row(
+            self, action_vec, direction, delta_t, launch_shift,
+            plan_penalty, upper_decision_taken, promotion_replan):
+        action = np.asarray(action_vec, dtype=np.float64).reshape(-1)
+        block = np.asarray(
+            action[self._upper_residual_selector_slice(action, direction)],
+            dtype=np.float64).reshape(-1)
+        if block.size == 0:
+            block = action
+        action_mean = float(block.mean()) if block.size else 0.0
+        action_std = float(block.std()) if block.size else 0.0
+        action_slope = float(block[-1] - block[0]) if block.size >= 2 else 0.0
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        prev = self._headway_value_planner_prev_metrics()
+        concurrent, n_fleet, pressure = self._fleet_pressure()
+        n_fleet = max(float(n_fleet), 1.0)
+        try:
+            waiting_total = sum(
+                len(st.waiting_passengers)
+                for st in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting_total = 0
+        action_norm = self.upper_state_history_action_norm_s
+        shift_norm = self.upper_state_history_shift_norm_s
+        return np.asarray([
+            action_mean / action_norm,
+            action_std / action_norm,
+            action_slope / action_norm,
+            float(delta_t) / action_norm,
+            float(launch_shift) / shift_norm,
+            float(plan_penalty) / self.upper_state_history_plan_penalty_norm,
+            1.0 if bool(direction) else -1.0,
+            1.0 if bool(upper_decision_taken) else 0.0,
+            1.0 if bool(promotion_replan) else 0.0,
+            float(prev.get('wait', 0.0)) / self.upper_state_history_wait_norm_min,
+            float(prev.get('cv', 0.0)),
+            float(prev.get('overshoot_norm', 0.0)),
+            float(prev.get('terminal_shift', 0.0)) / shift_norm,
+            float(prev.get('lower_action', 0.0)) / 5.0,
+            float(prev.get('lower_drift', 0.0)),
+            float(freq.get('freq_low_forecast', 0.0)),
+            10.0 * float(freq.get('freq_high_energy', 0.0)),
+            10.0 * float(freq.get('freq_middle_energy', 0.0)),
+            float(freq.get('freq_od_entropy', 0.0)),
+            float(freq.get('freq_promotion_strength', 0.0)),
+            float(concurrent) / n_fleet,
+            float(pressure) / n_fleet,
+            float(waiting_total) / self.upper_state_history_waiting_norm,
+        ], dtype=np.float32)
+
+    def _update_upper_state_history(
+            self, action_vec, direction, delta_t, launch_shift, plan_penalty,
+            upper_decision_taken, promotion_replan):
+        if self.upper_state_history_dim <= 0:
+            return
+        row = self._upper_state_history_row(
+            action_vec, direction, delta_t, launch_shift, plan_penalty,
+            upper_decision_taken, promotion_replan)
+        if row.size != self.upper_state_history_step_dim:
+            return
+        self._upper_state_history.append(row)
+
     @staticmethod
     def _pressure_strength(pressure, start, full):
         start = float(start)
@@ -2134,28 +2274,15 @@ class TransitDuetV2Runner:
         return 'terminal'
 
     @staticmethod
-    def _snapshot_selector_parse_action(method):
-        text = str(method)
-        if text.startswith('term45_'):
-            mode = 'term45'
-            token = text[len('term45_'):]
-        elif text.startswith('target_'):
-            mode = 'target'
-            token = text[len('target_'):]
-        elif text == 'target0':
-            mode = 'target'
-            token = '0'
-        else:
-            raise ValueError(f"unsupported snapshot selector action {method!r}")
-        if token == '0':
-            delta_s = 0.0
-        elif token.startswith('m'):
-            delta_s = -float(token[1:])
-        elif token.startswith('p'):
-            delta_s = float(token[1:])
-        else:
-            delta_s = float(token)
+    def _snapshot_selector_action_features(mode, delta_s, actor_delta_s=0.0,
+                                           offset_s=None):
+        delta_s = float(delta_s)
+        actor_delta_s = float(actor_delta_s)
+        if offset_s is None:
+            offset_s = delta_s - actor_delta_s
+        offset_s = float(offset_s)
         scale = 60.0
+        delta_minus_actor = delta_s - actor_delta_s
         return {
             'action_mode': mode,
             'action_delta_s': delta_s,
@@ -2170,7 +2297,61 @@ class TransitDuetV2Runner:
                 (1.0 if mode == 'term45' else 0.0) * delta_s / scale),
             'action_term45_x_abs_delta': (
                 (1.0 if mode == 'term45' else 0.0) * abs(delta_s) / scale),
+            'candidate_offset_norm': offset_s / scale,
+            'candidate_abs_offset_norm': abs(offset_s) / scale,
+            'candidate_above_actor':
+                1.0 if delta_minus_actor > 1e-9 else 0.0,
+            'candidate_below_actor':
+                1.0 if delta_minus_actor < -1e-9 else 0.0,
+            'candidate_same_as_actor':
+                1.0 if abs(delta_minus_actor) <= 1e-9 else 0.0,
+            'action_delta_minus_actor_norm': delta_minus_actor / scale,
+            'action_abs_delta_minus_actor_norm': abs(delta_minus_actor) / scale,
+            'action_term45_x_offset': (
+                (1.0 if mode == 'term45' else 0.0) * offset_s / scale),
+            'action_term45_x_abs_offset': (
+                (1.0 if mode == 'term45' else 0.0) * abs(offset_s) / scale),
         }
+
+    def _snapshot_selector_parse_action(self, method, actor_delta_s=0.0):
+        text = str(method)
+        actor_relative = False
+        actor_delta_s = float(actor_delta_s)
+        if text.startswith('actor_term45_'):
+            mode = 'term45'
+            token = text[len('actor_term45_'):]
+            actor_relative = True
+        elif text.startswith('actor_target_'):
+            mode = 'target'
+            token = text[len('actor_target_'):]
+            actor_relative = True
+        elif text.startswith('term45_'):
+            mode = 'term45'
+            token = text[len('term45_'):]
+        elif text.startswith('target_'):
+            mode = 'target'
+            token = text[len('target_'):]
+        elif text == 'target0':
+            mode = 'target'
+            token = '0'
+        else:
+            raise ValueError(f"unsupported snapshot selector action {method!r}")
+        if token == '0':
+            raw_delta_s = 0.0
+        elif token.startswith('m'):
+            raw_delta_s = -float(token[1:])
+        elif token.startswith('p'):
+            raw_delta_s = float(token[1:])
+        else:
+            raw_delta_s = float(token)
+        delta_s = actor_delta_s + raw_delta_s if actor_relative else raw_delta_s
+        delta_s = float(np.clip(
+            delta_s,
+            float(self.upper_action_low.min()),
+            float(self.upper_action_high.max())))
+        offset_s = delta_s - actor_delta_s if actor_relative else raw_delta_s
+        return self._snapshot_selector_action_features(
+            mode, delta_s, actor_delta_s=actor_delta_s, offset_s=offset_s)
 
     def _snapshot_selector_headway_cv(self):
         values = []
@@ -2186,7 +2367,7 @@ class TransitDuetV2Runner:
         arr = np.asarray(values, dtype=np.float64)
         return float(arr.std() / max(arr.mean(), 1.0))
 
-    def _snapshot_selector_context(self, trip):
+    def _snapshot_selector_context(self, trip, actor_action=None):
         launch = float(getattr(trip, 'launch_time', 0.0))
         hour = 6 + int(launch) // 3600
         period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
@@ -2208,6 +2389,10 @@ class TransitDuetV2Runner:
                 base_hw = float(self.timetable_planner._base_headway(trip))
             except Exception:
                 pass
+        actor = np.asarray(
+            actor_action if actor_action is not None else [0.0],
+            dtype=np.float64).reshape(-1)
+        actor_delta_s = float(actor[0]) if actor.size else 0.0
         fleet_target = max(float(n_fleet), 1.0)
         return {
             'dir_signed': 1.0 if bool(getattr(trip, 'direction', True)) else -1.0,
@@ -2221,6 +2406,10 @@ class TransitDuetV2Runner:
             'period_is_off': 1.0 if period == 'off' else 0.0,
             'period_is_trans': 1.0 if period == 'trans' else 0.0,
             'base_target_headway_norm': base_hw / 600.0,
+            'actor_delta_norm': actor_delta_s / 60.0,
+            'actor_abs_delta_norm': abs(actor_delta_s) / 60.0,
+            'actor_terminal_dispatch':
+                1.0 if self.timetable_terminal_dispatch else 0.0,
             'waiting_total_pre_norm': float(waiting) / 500.0,
             'fleet_concurrent_pre_norm': float(concurrent) / 30.0,
             'fleet_target_pre_norm': fleet_target / 30.0,
@@ -2240,7 +2429,9 @@ class TransitDuetV2Runner:
 
     def _snapshot_selector_feature_row(self, method, context):
         row = dict(context)
-        action = self._snapshot_selector_parse_action(method)
+        actor_delta_s = float(row.get('actor_delta_norm', 0.0)) * 60.0
+        action = self._snapshot_selector_parse_action(
+            method, actor_delta_s=actor_delta_s)
         row.update(action)
         domain = self._snapshot_selector_domain()
         domains = ('terminal', 'highnoise', 'odshift', 'rushshift')
@@ -2269,9 +2460,14 @@ class TransitDuetV2Runner:
     def _select_snapshot_value_action(
             self, action_vec, direction, trip=None, plan_origin_launch=None):
         del direction, plan_origin_launch
+        actor_action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
         info = {
             'active': 0.0,
             'selected_method': '',
+            'selected_mode': '',
+            'terminal_dispatch': 0.0,
+            'terminal_bias_s': 0.0,
+            'override_action': 0.0,
             'selected_pred': 0.0,
             'baseline_pred': 0.0,
             'margin': 0.0,
@@ -2285,9 +2481,19 @@ class TransitDuetV2Runner:
             return np.asarray(action_vec, dtype=np.float32), info
 
         methods = list(self.snapshot_value_selector_candidate_methods)
+        if self.snapshot_value_selector_allowed_methods:
+            methods = [
+                method for method in methods
+                if method in self.snapshot_value_selector_allowed_methods
+            ]
+        if self.snapshot_value_selector_blocked_methods:
+            methods = [
+                method for method in methods
+                if method not in self.snapshot_value_selector_blocked_methods
+            ]
         if self.snapshot_value_selector_fallback_method not in methods:
             methods.append(self.snapshot_value_selector_fallback_method)
-        context = self._snapshot_selector_context(trip)
+        context = self._snapshot_selector_context(trip, actor_action=actor_action)
         rows = [
             self._snapshot_selector_feature_row(method, context)
             for method in methods
@@ -2314,24 +2520,52 @@ class TransitDuetV2Runner:
         selected_method = min(scores, key=scores.get)
         selected_pred = float(scores[selected_method])
         margin = baseline_pred - selected_pred
+        actor_fallback = self.snapshot_value_selector_fallback_action in {
+            'actor', 'main', 'policy', 'keep_actor'
+        }
         if (not np.isfinite(margin)
                 or margin < self.snapshot_value_selector_improve_margin):
             selected_method = fallback
             selected_pred = baseline_pred
             margin = 0.0
+        override_action = not (actor_fallback and selected_method == fallback)
+        actor_delta_s = float(context.get('actor_delta_norm', 0.0)) * 60.0
+        selected_action = self._snapshot_selector_parse_action(
+            selected_method, actor_delta_s=actor_delta_s)
+        selected_mode = str(selected_action['action_mode'])
+        candidate_offset_s = (
+            float(selected_action.get('candidate_offset_norm', 0.0)) * 60.0)
+        terminal_bias_s = 0.0
+        if self.snapshot_value_selector_apply_mode == 'terminal_bias':
+            # In terminal-bias mode the counterfactual selector controls only
+            # first-stop delay. The actor's headway/timetable coefficients are
+            # preserved so the learned low-frequency plan is not overwritten.
+            override_action = False
+            terminal_bias_s = max(0.0, candidate_offset_s)
         info.update({
             'active': 1.0,
             'selected_method': selected_method,
+            'selected_mode': (
+                'actor' if not override_action
+                else selected_mode),
+            'terminal_dispatch': (
+                (1.0 if self.timetable_terminal_dispatch else 0.0)
+                if not override_action else
+                1.0 if selected_mode == 'term45'
+                else 0.0),
+            'terminal_bias_s': float(terminal_bias_s),
+            'override_action': 1.0 if override_action else 0.0,
             'selected_pred': float(selected_pred),
             'baseline_pred': float(baseline_pred),
             'margin': float(margin),
         })
         if self.snapshot_value_selector_probe_only:
-            return np.asarray(action_vec, dtype=np.float32), info
-        selected = self._snapshot_selector_parse_action(selected_method)
+            return actor_action, info
+        if not override_action:
+            return actor_action, info
         selected_vec = np.full(
             self.upper_action_dim,
-            float(selected['action_delta_s']),
+            float(selected_action['action_delta_s']),
             dtype=np.float32)
         selected_vec = np.clip(
             selected_vec, self.upper_action_low, self.upper_action_high)
@@ -4671,6 +4905,8 @@ class TransitDuetV2Runner:
             if self.freq_holdfb_enable:
                 s_upper[end - self.freq_holdfb_dim:end] = 0.0
 
+        s_upper = self._augment_upper_state_history(s_upper)
+
         # ─── TPC-Lower behaviour-policy sampling ───
         # During Phase 1 (after warmup, target_upper_trainer initialised), sample
         # δ_t from a mixture: ε from current upper (exploratory) + (1−ε) from
@@ -4683,6 +4919,7 @@ class TransitDuetV2Runner:
         headway_selector_x = None
         terminal_selector_x = None
         snapshot_selector_info = None
+        snapshot_write_terminal_dispatch = self.timetable_terminal_dispatch
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         promotion_replan = False
@@ -4711,6 +4948,10 @@ class TransitDuetV2Runner:
                     action_vec = np.asarray(
                         active_plan['action'], dtype=np.float32).reshape(-1)
                     plan_origin_launch = float(active_plan['origin'])
+                    snapshot_write_terminal_dispatch = bool(
+                        active_plan.get(
+                            'write_terminal_dispatch',
+                            self.timetable_terminal_dispatch))
                     upper_decision_taken = False
                     self._ep_upper_plan_reuses += 1
 
@@ -4780,9 +5021,16 @@ class TransitDuetV2Runner:
                     self._select_snapshot_value_action(
                         action_vec, planner_dir, trip=trip,
                         plan_origin_launch=plan_origin_launch))
+                if (snapshot_selector_info is not None
+                        and float(snapshot_selector_info.get('active', 0.0)) > 0.5):
+                    snapshot_write_terminal_dispatch = bool(
+                        float(snapshot_selector_info.get(
+                            'terminal_dispatch', 0.0)) > 0.5)
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'action': action_vec.astype(np.float32).copy(),
+                'write_terminal_dispatch': bool(
+                    snapshot_write_terminal_dispatch),
             }
             if promotion_replan:
                 self._last_promotion_replan_launch[planner_key] = float(
@@ -4802,17 +5050,24 @@ class TransitDuetV2Runner:
             terminal_shift_min_s = (
                 self._terminal_shift_min_for_frequency(
                     action_vec, current_delta_s=current_plan_delta)
-                if self.timetable_terminal_dispatch else None)
+                if snapshot_write_terminal_dispatch else None)
             terminal_shift_max_s = (
                 self._terminal_shift_max_for_frequency()
-                if self.timetable_terminal_dispatch else None)
+                if snapshot_write_terminal_dispatch else None)
             terminal_shift_bias_s = (
                 self._terminal_feedback_bias(
                     bool(trip.direction), trip=trip,
                     action_vec=action_vec,
                     plan_origin_launch=plan_origin_launch)
-                if self.timetable_terminal_dispatch else 0.0)
-            if (self.timetable_terminal_dispatch and upper_decision_taken
+                if snapshot_write_terminal_dispatch else 0.0)
+            snapshot_terminal_bias_s = (
+                float((snapshot_selector_info or {}).get(
+                    'terminal_bias_s', 0.0))
+                if snapshot_write_terminal_dispatch else 0.0)
+            if snapshot_terminal_bias_s > 0.0:
+                terminal_shift_bias_s = max(
+                    float(terminal_shift_bias_s), snapshot_terminal_bias_s)
+            if (snapshot_write_terminal_dispatch and upper_decision_taken
                     and not self.upper_action_override_disable_value_selectors):
                 terminal_shift_bias_s, terminal_selector_x = (
                     self._select_terminal_value_bias(
@@ -4822,18 +5077,18 @@ class TransitDuetV2Runner:
                         base_bias_s=terminal_shift_bias_s))
             terminal_floor_ratio = (
                 self.timetable_terminal_headway_floor_ratio
-                if (self.timetable_terminal_dispatch
+                if (snapshot_write_terminal_dispatch
                     and self.timetable_terminal_headway_floor_enable)
                 else 0.0)
             terminal_floor_min_s = (
                 self.timetable_terminal_headway_floor_min_s
-                if (self.timetable_terminal_dispatch
+                if (snapshot_write_terminal_dispatch
                     and self.timetable_terminal_headway_floor_enable)
                 else 0.0)
             plan_summary = self.timetable_planner.apply(
                 self.env.timetables, trip, action_vec,
                 origin_launch_s=plan_origin_launch,
-                write_scheduled_launch=self.timetable_terminal_dispatch,
+                write_scheduled_launch=snapshot_write_terminal_dispatch,
                 terminal_shift_min_s=terminal_shift_min_s,
                 terminal_shift_max_s=terminal_shift_max_s,
                 terminal_shift_bias_s=terminal_shift_bias_s,
@@ -4884,10 +5139,17 @@ class TransitDuetV2Runner:
             trip._original_launch = trip.launch_time
         if self.coupling_mode == 'hiro':
             trip._delta_t = 0  # no launch shift
-            if self.timetable_terminal_dispatch:
+            if snapshot_write_terminal_dispatch:
                 trip._freqduet_terminal_dispatch = True
                 if not hasattr(trip, '_freqduet_scheduled_launch'):
                     trip._freqduet_scheduled_launch = int(round(trip.launch_time))
+            else:
+                for attr in (
+                        '_freqduet_scheduled_launch',
+                        '_freqduet_terminal_dispatch',
+                        '_freqduet_min_dispatch_headway'):
+                    if hasattr(trip, attr):
+                        delattr(trip, attr)
             if plan_summary is None:
                 # Override the trip's target_headway so the lower's cost is goal-conditioned.
                 base_hw = (trip.target_headway
@@ -4949,7 +5211,7 @@ class TransitDuetV2Runner:
         # Otherwise channels/haar apply _delta_t to launch time and HIRO keeps the
         # baseline launch schedule.
         planned_launch = None
-        if self.timetable_terminal_dispatch:
+        if snapshot_write_terminal_dispatch:
             planned_launch = getattr(trip, '_freqduet_scheduled_launch', None)
         if planned_launch is None:
             planned_launch = (
@@ -5024,6 +5286,12 @@ class TransitDuetV2Runner:
                 (snapshot_selector_info or {}).get('active', 0.0)),
             'snapshot_value_method': str(
                 (snapshot_selector_info or {}).get('selected_method', '')),
+            'snapshot_value_override_action': float(
+                (snapshot_selector_info or {}).get('override_action', 0.0)),
+            'snapshot_value_terminal_dispatch': float(
+                (snapshot_selector_info or {}).get('terminal_dispatch', 0.0)),
+            'snapshot_value_terminal_bias_s': float(
+                (snapshot_selector_info or {}).get('terminal_bias_s', 0.0)),
             'snapshot_value_pred': float(
                 (snapshot_selector_info or {}).get('selected_pred', 0.0)),
             'snapshot_value_baseline_pred': float(
@@ -5031,6 +5299,15 @@ class TransitDuetV2Runner:
             'snapshot_value_margin': float(
                 (snapshot_selector_info or {}).get('margin', 0.0)),
         })
+        self._update_upper_state_history(
+            action_vec=action_vec,
+            direction=bool(trip.direction),
+            delta_t=float(delta_t),
+            launch_shift=float(launch_shift),
+            plan_penalty=float(plan_penalty),
+            upper_decision_taken=bool(upper_decision_taken),
+            promotion_replan=bool(promotion_replan),
+        )
 
         # In HIRO mode the target headway has been adjusted to base_hw + δ_t (above);
         # in default/HAAR mode the base headway is unchanged because δ_t was applied
@@ -5047,6 +5324,8 @@ class TransitDuetV2Runner:
         self._current_ep = ep
         self._episode_upper_transitions = []
         self._prev_upper_state = None
+        self._upper_state_history = deque(
+            maxlen=max(1, self.upper_state_history_len))
         self._ep_lower_actions = []
         self._ep_lower_rewards = []
         self._ep_upper_deltas = []
@@ -5692,6 +5971,26 @@ class TransitDuetV2Runner:
             for rec in self._ep_trip_records
         ]
         snapshot_value_changed_stat = _stat(snapshot_value_changed_values)
+        snapshot_value_override_values = [
+            float(rec.get('snapshot_value_override_action', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_override_stat = _stat(snapshot_value_override_values)
+        snapshot_value_terminal_dispatch_values = [
+            float(rec.get('snapshot_value_terminal_dispatch', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_terminal_dispatch_stat = _stat(
+            snapshot_value_terminal_dispatch_values)
+        snapshot_value_terminal_bias_values = [
+            float(rec.get('snapshot_value_terminal_bias_s', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_terminal_bias_stat = _stat(
+            snapshot_value_terminal_bias_values)
         snapshot_value_margin_stat = _stat([
             float(rec.get('snapshot_value_margin', 0.0))
             for rec in self._ep_trip_records
@@ -6023,6 +6322,23 @@ class TransitDuetV2Runner:
             'snapshot_value_changed_events': int(sum(
                 1 for value in snapshot_value_changed_values
                 if float(value) > 0.5)),
+            'snapshot_value_override_mean':
+                snapshot_value_override_stat['mean'],
+            'snapshot_value_override_events': int(sum(
+                1 for value in snapshot_value_override_values
+                if float(value) > 0.5)),
+            'snapshot_value_terminal_dispatch_mean':
+                snapshot_value_terminal_dispatch_stat['mean'],
+            'snapshot_value_terminal_dispatch_events': int(sum(
+                1 for value in snapshot_value_terminal_dispatch_values
+                if float(value) > 0.5)),
+            'snapshot_value_terminal_bias_mean':
+                snapshot_value_terminal_bias_stat['mean'],
+            'snapshot_value_terminal_bias_max':
+                snapshot_value_terminal_bias_stat['max'],
+            'snapshot_value_terminal_bias_events': int(sum(
+                1 for value in snapshot_value_terminal_bias_values
+                if float(value) > 1e-9)),
             'snapshot_value_margin_mean':
                 snapshot_value_margin_stat['mean'],
             'snapshot_value_margin_max':
@@ -6156,6 +6472,7 @@ class TransitDuetV2Runner:
                    'upper_plan_target_mean', 'upper_plan_decisions',
                    'upper_plan_reuse_ratio', 'terminal_launch_shift_mean',
                    'terminal_feedback_bias_mean',
+                   'snapshot_value_terminal_bias_mean',
                    'freq_promotion_flag', 'freq_promotion_strength',
                    'freq_promotion_active', 'freq_promotion_persistent',
                    'freq_promotion_ratio',
@@ -6291,6 +6608,9 @@ class TransitDuetV2Runner:
                   'freq_od_entropy', 'freq_promotion_strength',
                   'freq_promotion_active',
                   'snapshot_value_active', 'snapshot_value_method',
+                  'snapshot_value_override_action',
+                  'snapshot_value_terminal_dispatch',
+                  'snapshot_value_terminal_bias_s',
                   'snapshot_value_pred', 'snapshot_value_baseline_pred',
                   'snapshot_value_margin',
                   'hold_mean', 'hold_std', 'hold_max', 'hold_n',

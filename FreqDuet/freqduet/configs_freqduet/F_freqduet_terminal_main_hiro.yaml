@@ -7,7 +7,28 @@ _name: F_freqduet_terminal_main_hiro
 # promotion-gated raw lower-HF wait credit, high-energy raw-credit cap, and
 # DriftFB upper feedback. The 2026-06-03 200ep repair adds lower-drift excess as
 # a lower Lagrangian cost, closing the long-horizon drift loop that reward
-# shaping alone did not constrain.
+# shaping alone did not constrain. The 2026-06-16 Phase-4 repair adds the
+# rollout-trained snapshot value selector in terminal-bias mode: it preserves the
+# actor's LF headway/timetable action and only adds nonnegative first-stop /
+# terminal dispatch bias when the matched counterfactual model predicts a margin.
+upper:
+  action_override:
+    disable_value_selectors: false
+  snapshot_value_selector:
+    enable: true
+    domain: terminal
+    artifact: results_freqduet/phase4_snapshot_cf_v6_actorrel_burn40_4domain_20seed_snap12_h1800/value_model_residual/model_artifact
+    fallback_method: actor_term45_0
+    fallback_action: actor
+    apply_mode: terminal_bias
+    improve_margin: 0.01
+    allowed_methods:
+      - actor_term45_0
+      - actor_target_p15
+      - actor_target_p30
+      - actor_term45_p15
+      - actor_term45_p30
+
 frequency:
   promotion:
     adapt_local: false

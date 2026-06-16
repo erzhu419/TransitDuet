@@ -22,6 +22,8 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 CANDIDATE_METHOD_TOKENS = (
+    "snapshottermbias_m01",
+    "snapshottermbias",
     "snapshotrf_m02",
     "snapshotrf",
     "cfvalue_multicand",
@@ -133,6 +135,13 @@ DEFAULT_METRICS = (
     "snapshot_value_events",
     "snapshot_value_changed_mean",
     "snapshot_value_changed_events",
+    "snapshot_value_override_mean",
+    "snapshot_value_override_events",
+    "snapshot_value_terminal_dispatch_mean",
+    "snapshot_value_terminal_dispatch_events",
+    "snapshot_value_terminal_bias_mean",
+    "snapshot_value_terminal_bias_max",
+    "snapshot_value_terminal_bias_events",
     "snapshot_value_margin_mean",
     "snapshot_value_margin_max",
     "snapshot_value_pred_mean",

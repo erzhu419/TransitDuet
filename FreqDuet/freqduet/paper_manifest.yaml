@@ -1853,11 +1853,11 @@ paper_packages:
 
 scope_decisions:
   phase4_terminal_dispatch:
-    status: executable_terminal_dispatch_done_first_stop_value_open
-    current_scope: bounded executable terminal-dispatch timetable control
-    current_evidence: promoted main resolves to terminal_dispatch true with 0..45s launch shift and env/sim.py enforces _freqduet_scheduled_launch before actual launch
+    status: executable_terminal_dispatch_with_snapshot_terminal_bias_promoted
+    current_scope: bounded executable terminal-dispatch timetable control plus rollout-trained nonnegative terminal-bias value selector
+    current_evidence: promoted main resolves to terminal_dispatch true with 0..45s launch shift, env/sim.py enforces _freqduet_scheduled_launch before actual launch, and 2026-06-16 snapshottermbias_m01_ep100 improved old main overall while matching fixed-headway
     note: ../md/phase4_scope_decision.md
-    future_work_requires: learned actual terminal launch / first-stop holding value model with per-decision counterfactual labels and paired 100/200ep validation
+    future_work_requires: richer actual terminal launch / first-stop holding value model beyond bounded nonnegative terminal bias, plus paired 200ep and current-name final-matrix reruns
 
 snapshot_counterfactual_value_labels:
   status: full_20seed_trained_state_positive_offline_not_promoted
@@ -2048,6 +2048,61 @@ snapshot_counterfactual_value_labels:
       selector_changed_mean_range: [0.129, 0.158]
       selector_margin_mean_range: [0.012, 0.025]
       note: stricter guard improves m00 slightly but still does not beat current main; keep as negative/mechanism evidence and pivot to Phase-4 or stronger rollout-trained value model
+    snapshottermbias_m01_ep100_wu10_4domain_20seed:
+      status: complete_promoted_into_main
+      domains: [terminal, highnoise, odshift, rushshift]
+      seeds: paired_seeds_20
+      episodes: 100
+      last_k: 50
+      apply_mode: terminal_bias
+      improve_margin: 0.01
+      result_dir: results_freqduet/snapshottermbias_m01_ep100_wu10_4domain_20seed
+      per_seed_csv: results_freqduet/snapshottermbias_m01_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+      comparison_vs_main: results_freqduet/snapshottermbias_m01_ep100_wu10_4domain_20seed/compare_m01_vs_main/candidate_paired_deltas.csv
+      comparison_vs_fixed_headway: results_freqduet/snapshottermbias_m01_ep100_wu10_4domain_20seed/compare_m01_vs_external_classical/external_baseline_paired_deltas.csv
+      scheduler_tasks:
+        - t11689
+        - t11690
+        - t11691
+        - t11692
+        - t11693
+        - t11694
+        - t11695
+        - t11696
+        - t11697
+        - t11698
+        - t11699
+        - t11700
+        - t11701
+        - t11702
+        - t11703
+        - t11704
+        - t11705
+        - t11706
+        - t11707
+        - t11708
+        - t11709
+        - t11710
+        - t11711
+        - t11712
+        - t11713
+        - t11714
+        - t11715
+        - t11716
+        - t11717
+        - t11718
+        - t11719
+        - t11720
+      delta_vs_old_main_overall: -0.0122
+      delta_vs_old_main_ci95: [-0.0241, -0.0001]
+      delta_vs_old_main_domain_ci95:
+        terminal: [-0.0161, -0.0336, 0.0022]
+        highnoise: [-0.0200, -0.0618, 0.0206]
+        odshift: [-0.0149, -0.0285, -0.0011]
+        rushshift: [0.0023, -0.0066, 0.0116]
+      delta_vs_fixed_headway_overall_shared: -0.0045
+      delta_vs_fixed_headway_ci95: [-0.0153, 0.0077]
+      note: terminal-bias value selector preserves actor LF headway action, only adds nonnegative first-stop/terminal bias, significantly improves old main overall at 100ep, and closes the fixed-headway gap; promoted into F_freqduet_terminal_main_hiro
 
 external_baselines:
   status: classical_full_matrix_complete_closest_preserved_transitduet_family_complete_external_rl_pending
