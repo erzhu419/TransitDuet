@@ -22,7 +22,9 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 METHODS = (
     "main",
+    "freeze100",
     "main_driftcost",
+    "cfvalue_multicand",
     "cfvalue_noisegate",
     "cfvalue_domainmean",
     "upperres_planctx",
@@ -81,6 +83,8 @@ def infer_domain(config):
 
 def infer_method(config):
     for method in (
+        "freeze100",
+        "cfvalue_multicand",
         "cfvalue_noisegate",
         "cfvalue_domainmean",
         "upperres_planctx",

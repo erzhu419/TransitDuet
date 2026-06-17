@@ -22,6 +22,7 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 CANDIDATE_METHOD_TOKENS = (
+    "freeze100",
     "snapshottermbias_m01",
     "snapshottermbias",
     "snapshotrf_m02",
@@ -146,6 +147,9 @@ DEFAULT_METRICS = (
     "snapshot_value_margin_max",
     "snapshot_value_pred_mean",
     "snapshot_value_baseline_pred_mean",
+    "lower_policy_frozen",
+    "lower_critic_frozen",
+    "upper_policy_frozen",
     "fleet_noharm_upper_adjust_mean",
     "fleet_noharm_upper_gate_active_mean",
     "fleet_noharm_lower_adjust_mean",

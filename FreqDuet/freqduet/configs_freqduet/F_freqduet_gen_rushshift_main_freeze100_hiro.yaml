@@ -1,0 +1,7 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_freeze100_hiro
+
+training:
+  longtrain_stability:
+    freeze_lower_policy_after_ep: 100
+    freeze_upper_after_ep: 100

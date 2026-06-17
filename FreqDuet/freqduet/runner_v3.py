@@ -196,6 +196,7 @@ class DiagnosticLog:
         'lower_policy_loss', 'lower_pi_grad_norm', 'lower_q_grad_norm',
         'lower_alpha', 'lower_lambda',
         'lower_replay_size',
+        'lower_policy_frozen', 'lower_critic_frozen',
         # upper policy (only after warmup)
         'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
         'upper_reward_mean', 'upper_reward_std',
@@ -204,6 +205,7 @@ class DiagnosticLog:
         'upper_ood_loss', 'upper_policy_loss',
         'upper_pi_grad_norm', 'upper_q_grad_norm',
         'upper_alpha', 'upper_replay_size',
+        'upper_policy_frozen',
         # coupling
         'hold_fb_mean', 'hold_fb_std', 'hold_fb_n_trips',
         'hold_fb_dir0_mean', 'hold_fb_dir1_mean',
@@ -430,8 +432,24 @@ class TransitDuetV2Runner:
         self.exp_name = str(config.get('_name', 'v2'))
         self.base_seed = int(config.get('seed', 0))
         self.fleet_rng = np.random.RandomState(self.base_seed)
+        training_cfg = config.get('training', {}) or {}
         self.decouple_init_seeds = bool(
-            config.get('training', {}).get('decouple_init_seeds', False))
+            training_cfg.get('decouple_init_seeds', False))
+        stability_cfg = training_cfg.get('longtrain_stability', {}) or {}
+
+        def _optional_freeze_ep(name):
+            value = stability_cfg.get(name, training_cfg.get(name, None))
+            if value is None:
+                return None
+            value = int(value)
+            return value if value >= 0 else None
+
+        self.freeze_lower_policy_after_ep = _optional_freeze_ep(
+            'freeze_lower_policy_after_ep')
+        self.freeze_lower_critic_after_ep = _optional_freeze_ep(
+            'freeze_lower_critic_after_ep')
+        self.freeze_upper_after_ep = _optional_freeze_ep(
+            'freeze_upper_after_ep')
 
         # Environment
         env_path = os.path.join(str(SCRIPT_DIR), config['env']['path'])
@@ -5831,12 +5849,26 @@ class TransitDuetV2Runner:
             haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
 
         # Lower
-        if learned_training and len(self.replay_buffer) > self.batch_size:
+        lower_policy_frozen = (
+            self.freeze_lower_policy_after_ep is not None
+            and ep >= self.freeze_lower_policy_after_ep)
+        lower_critic_frozen = (
+            self.freeze_lower_critic_after_ep is not None
+            and ep >= self.freeze_lower_critic_after_ep)
+        upper_policy_frozen = (
+            self.freeze_upper_after_ep is not None
+            and ep >= self.freeze_upper_after_ep)
+
+        if (learned_training and not lower_critic_frozen
+                and len(self.replay_buffer) > self.batch_size):
             for _ in range(self.updates_per_episode):
                 lower_m = self.lower_trainer.update(
                     self.replay_buffer, self.batch_size, reward_scale=1.0,
                     weight_fn=weight_fn,
-                    tap_signal=haar_tap_signal)
+                    tap_signal=haar_tap_signal,
+                    update_policy=not lower_policy_frozen)
+        lower_m['lower_policy_frozen'] = 1.0 if lower_policy_frozen else 0.0
+        lower_m['lower_critic_frozen'] = 1.0 if lower_critic_frozen else 0.0
 
         # Train reachability classifier (HAAR mode only)
         if (self.coupling_mode == 'haar' and self.haar_use_reach_gate
@@ -5848,17 +5880,21 @@ class TransitDuetV2Runner:
             for trans in self._episode_upper_transitions:
                 self.upper_trainer.replay_buffer.push(
                     trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
-            if len(self.upper_trainer.replay_buffer) > self.upper_batch_size:
+            if (not upper_policy_frozen
+                    and len(self.upper_trainer.replay_buffer)
+                    > self.upper_batch_size):
                 for _ in range(self.upper_updates):
                     upper_m = self.upper_trainer.update(self.upper_batch_size)
 
             # ─── TPC: Polyak update EMA target after each upper training step ───
-            if self.tpc_enable and self.target_upper_trainer is not None:
+            if (not upper_policy_frozen and self.tpc_enable
+                    and self.target_upper_trainer is not None):
                 with torch.no_grad():
                     for p_t, p in zip(self.target_upper_trainer.policy_net.parameters(),
                                       self.upper_trainer.policy_net.parameters()):
                         p_t.data.mul_(1.0 - self.tpc_ema_tau).add_(
                             p.data, alpha=self.tpc_ema_tau)
+        upper_m['upper_policy_frozen'] = 1.0 if upper_policy_frozen else 0.0
 
         # Measurement projection (z already computed above for upper reward)
         if learned_training:
@@ -6103,6 +6139,8 @@ class TransitDuetV2Runner:
             'lower_alpha': lower_m.get('alpha', 0.),
             'lower_lambda': lower_m.get('lambda', self.lower_trainer.lambda_param),
             'lower_replay_size': len(self.replay_buffer),
+            'lower_policy_frozen': lower_m.get('lower_policy_frozen', 0.),
+            'lower_critic_frozen': lower_m.get('lower_critic_frozen', 0.),
             # upper policy
             'upper_delta_mean': round(ud_stat['mean'], 2),
             'upper_delta_std': round(ud_stat['std'], 2),
@@ -6121,6 +6159,7 @@ class TransitDuetV2Runner:
             'upper_q_grad_norm': upper_m.get('upper_q_grad_norm', 0.),
             'upper_alpha': upper_m.get('upper_alpha', 0.),
             'upper_replay_size': len(self.upper_trainer.replay_buffer),
+            'upper_policy_frozen': upper_m.get('upper_policy_frozen', 0.),
             # coupling
             'hold_fb_mean': hold_summary.get('mean', 0.),
             'hold_fb_std': hold_summary.get('std', 0.),
@@ -6702,6 +6741,17 @@ class TransitDuetV2Runner:
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
         if self.upper_action_bins is not None:
             print(f"    upper_bins={self.upper_action_bins.tolist()}")
+        freeze_notes = []
+        if self.freeze_lower_policy_after_ep is not None:
+            freeze_notes.append(
+                f"lower_policy@{self.freeze_lower_policy_after_ep}")
+        if self.freeze_lower_critic_after_ep is not None:
+            freeze_notes.append(
+                f"lower_critic@{self.freeze_lower_critic_after_ep}")
+        if self.freeze_upper_after_ep is not None:
+            freeze_notes.append(f"upper@{self.freeze_upper_after_ep}")
+        if freeze_notes:
+            print(f"  Longtrain stability freeze: {', '.join(freeze_notes)}")
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
         if self.fixed_selector_reset_env_rng:

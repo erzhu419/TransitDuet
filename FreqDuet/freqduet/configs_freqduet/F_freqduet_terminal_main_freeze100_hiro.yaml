@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_freeze100_hiro
+
+# Long-training stability candidate for the 200ep protocol.
+# The first 100 episodes learn normally; episodes 100+ keep the learned upper
+# actor fixed and allow only lower critic/statistical updates. This tests
+# whether the 100->200ep regression is policy drift rather than decomposer
+# failure, without selecting an evaluation window after the fact.
+training:
+  longtrain_stability:
+    freeze_lower_policy_after_ep: 100
+    freeze_upper_after_ep: 100

@@ -126,6 +126,64 @@ vs nopromotion -0.0542  CI [-0.0720, -0.0354]
 vs noleakage   -0.3052  CI [-0.3908, -0.2286]
 ```
 
+2026-06-17 200ep long-training closure: the current terminal-bias main
+completed under `final_matrix_current_terminalbias_ep200_wu10_4domain_20seed`
+(`480/480` rows). It still beats `noleakage` decisively and is close to the
+internal variants, but the `last-k=100` window exposes long-training policy
+drift. Against a fair ep200 external reference
+`external_baselines_ep200_wu10_4domain_20seed`, current main significantly
+lags fixed-headway:
+
+```text
+current main 200ep, composite delta main - baseline
+overall vs nofreq        -0.0145 CI [-0.0622,+0.0202]
+overall vs rawhistory    -0.0040 CI [-0.0219,+0.0146]
+overall vs allfreq       -0.0053 CI [-0.0308,+0.0206]
+overall vs nopromotion   -0.0062 CI [-0.0151,+0.0025]
+overall vs noleakage     -0.3106 CI [-0.3966,-0.2329]
+
+current main 200ep vs external ep200
+overall_shared vs fixed_headway +0.0412 CI [+0.0251,+0.0583]
+overall_shared vs rule_holding  -0.5806 CI [-0.6076,-0.5506]
+overall_shared vs rule_mpc      -1.9241 CI [-1.9860,-1.8672]
+```
+
+This failure is now diagnosed as long-horizon actor drift rather than a need to
+keep tuning the decomposer: the earlier `51-100` episode block is good, while
+`101-200` degrades. Implemented a preconfigured stability schedule in
+`runner_v3.py`:
+
+- `training.longtrain_stability.freeze_upper_after_ep`
+- `training.longtrain_stability.freeze_lower_policy_after_ep`
+- optional `training.longtrain_stability.freeze_lower_critic_after_ep`
+
+The promoted candidate configs `*_main_freeze100_hiro.yaml` learn normally for
+episodes `0-99`, then freeze upper and lower policy updates for episodes
+`100+` while still executing the full 200ep rollout. This is a causal training
+schedule, not post-hoc best-window selection. The scheduler-visible direct-node
+run `freeze100_ep200_wu10_4domain_20seed` completed as tasks `t11768-t11771`
+(`80/80` rows). It significantly repairs current-main drift and is
+statistically tied with fixed-headway overall:
+
+```text
+freeze100 200ep, composite delta candidate - baseline
+overall vs current main  -0.0348 CI [-0.0498,-0.0209]
+overall vs rawhistory    -0.0388 CI [-0.0515,-0.0257]
+overall vs nopromotion   -0.0410 CI [-0.0544,-0.0277]
+overall vs noleakage     -0.3454 CI [-0.4277,-0.2697]
+
+freeze100 200ep vs external ep200
+overall_shared vs fixed_headway +0.0064 CI [-0.0020,+0.0153]
+overall_shared vs rule_holding  -0.6154 CI [-0.6423,-0.5868]
+overall_shared vs rule_mpc      -1.9589 CI [-2.0221,-1.9022]
+```
+
+Interpretation: for the 200ep top-journal protocol, `freeze100` is now the
+credible long-training main candidate. The claim should be framed as matching
+the strong fixed-headway baseline while significantly beating weaker rule/MPC
+baselines and repairing the unfrozen online policy drift. It still does not
+justify claiming robust superiority over fixed-headway.
+
 Done means:
 
 - run current `main` against `nofreq`, `rawhistory`, `allfreq`,

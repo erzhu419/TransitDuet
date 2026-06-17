@@ -92,6 +92,37 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          current_tb.get("comparison_vs_external_classical")),
     ])
 
+    current_tb200 = experiment(manifest, "final_matrix_current_terminalbias_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("final_terminalbias_ep200_per_seed.csv", current_tb200.get("per_seed_csv")),
+        ("final_terminalbias_ep200_summary.csv", current_tb200.get("summary_csv")),
+        ("final_terminalbias_ep200_method_summary.csv",
+         Path(current_tb200.get("paper_summary_dir", "")) / "paper_matrix_method_summary.csv"
+         if current_tb200.get("paper_summary_dir") else None),
+        ("final_terminalbias_ep200_paired_deltas.csv",
+         Path(current_tb200.get("paper_summary_dir", "")) / "paper_matrix_paired_deltas.csv"
+         if current_tb200.get("paper_summary_dir") else None),
+        ("final_terminalbias_ep200_vs_external_classical.csv",
+         current_tb200.get("comparison_vs_external_classical_ep200")),
+    ])
+
+    freeze100 = experiment(manifest, "freeze100_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("freeze100_ep200_per_seed.csv", freeze100.get("per_seed_csv")),
+        ("freeze100_ep200_summary.csv", freeze100.get("summary_csv")),
+        ("freeze100_ep200_method_summary.csv",
+         Path(freeze100.get("paper_summary_dir", "")) / "paper_matrix_method_summary.csv"
+         if freeze100.get("paper_summary_dir") else None),
+        ("freeze100_ep200_vs_current.csv", freeze100.get("comparison_vs_current_ep200")),
+        ("freeze100_ep200_vs_external_classical.csv", freeze100.get("comparison_vs_external_ep200")),
+    ])
+
+    external_ep200 = experiment(manifest, "external_baselines_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("external_baselines_ep200_per_seed.csv", external_ep200.get("per_seed_csv")),
+        ("external_baselines_ep200_summary.csv", external_ep200.get("summary_csv")),
+    ])
+
     gen = experiment(manifest, "heldout_generalization_ep100_wu10")
     table_specs.extend([
         ("generalization_per_seed.csv", gen.get("per_seed_csv")),

@@ -110,6 +110,16 @@ config_sets:
       nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
       noleakage: F_freqduet_gen_rushshift_noleakage_hiro
 
+  freeze100_longtrain_4x1:
+    terminal:
+      freeze100: F_freqduet_terminal_main_freeze100_hiro
+    highnoise:
+      freeze100: F_freqduet_gen_highnoise_main_freeze100_hiro
+    odshift:
+      freeze100: F_freqduet_gen_odshift_main_freeze100_hiro
+    rushshift:
+      freeze100: F_freqduet_gen_rushshift_main_freeze100_hiro
+
   sumorl_holdrl_4x1:
     terminal:
       sumorl_holdrl: F_freqduet_terminal_sumorl_holdrl_hiro
@@ -1698,7 +1708,7 @@ experiments:
     note: current config-name rerun after terminal-bias promotion; main is statistically tied with fixed-headway and strongly better than rule holding/MPC, while rawhistory/nopromotion remain close internal baselines
 
   final_matrix_current_terminalbias_ep200_wu10_4domain_20seed:
-    status: launched_direct_node_running
+    status: complete_longtrain_drift_diagnostic
     domains: [terminal, highnoise, odshift, rushshift]
     seeds: paired_seeds_20
     episodes: 200
@@ -1706,6 +1716,10 @@ experiments:
     config_set: current_longtrain_4x6
     runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
     result_dir: results_freqduet/final_matrix_current_terminalbias_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/final_matrix_current_terminalbias_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/final_matrix_current_terminalbias_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/final_matrix_current_terminalbias_ep200_wu10_4domain_20seed/paper_summary
+    comparison_vs_external_classical_ep200: results_freqduet/final_matrix_current_terminalbias_ep200_wu10_4domain_20seed/compare_main_vs_external_classical_ep200/external_baseline_paired_deltas.csv
     scheduler_tasks:
       - t11752
       - t11753
@@ -1724,13 +1738,69 @@ experiments:
       - t11766
       - t11767
     scheduler_nodes: [node001, node002, node003, node004, node005, node006]
-    expected_rows: 480
-    aggregate_command: >
-      python3 scripts/sync_freqduet_config_matrix_scheduleurm.py
-      --run-name final_matrix_current_terminalbias_ep200_wu10_4domain_20seed
-      --configs <current_longtrain_4x6 configs>
-      --last-k 100
-    note: launched as scheduler-visible direct CPU tasks on node001-node006; close after sync, paired CI, and external fixed-headway comparison
+    rows: 480
+    completeness: 24 configs x 20 seeds, no duplicate config-seed pairs
+    main_vs_internal_overall_delta_ci95:
+      nofreq: [-0.0145, -0.0622, 0.0202]
+      rawhistory: [-0.0040, -0.0219, 0.0146]
+      allfreq: [-0.0053, -0.0308, 0.0206]
+      nopromotion: [-0.0062, -0.0151, 0.0025]
+      noleakage: [-0.3106, -0.3966, -0.2329]
+    main_vs_external_ep200_overall_shared_delta_ci95:
+      fixed_headway: [0.0412, 0.0251, 0.0583]
+      rule_holding: [-0.5806, -0.6076, -0.5506]
+      rule_mpc: [-1.9241, -1.9860, -1.8672]
+    note: current terminal-bias main improves over noleakage and is close to internal variants, but 200ep last-k=100 exposes policy drift; it significantly lags fixed-headway, motivating the freeze100 long-training stability candidate.
+
+  external_baselines_ep200_wu10_4domain_20seed:
+    status: complete_ep200_external_reference
+    domains: [terminal, highnoise, odshift, rushshift]
+    seeds: paired_seeds_20
+    episodes: 200
+    last_k: 100
+    variants: [fixed_headway, rule_holding, rule_mpc]
+    runner: scripts/submit_freqduet_external_baselines_scheduleurm.py
+    result_dir: results_freqduet/external_baselines_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/external_baselines_ep200_wu10_4domain_20seed/combined_summary/external_baselines_per_seed.csv
+    summary_csv: results_freqduet/external_baselines_ep200_wu10_4domain_20seed/combined_summary/external_baselines_summary.csv
+    rows: 240
+    fixed_headway_composite_mean:
+      terminal: 1.4757
+      highnoise: 1.8510
+      odshift: 1.4838
+      rushshift: 1.3106
+    scheduler_tasks: [t11772, t11773, t11774, t11775, t11776, t11777, t11778, t11779]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    note: fair ep200/last-k=100 external reference used for the long-training fixed-headway comparison.
+
+  freeze100_ep200_wu10_4domain_20seed:
+    status: complete_promotable_longtrain_stability_candidate
+    domains: [terminal, highnoise, odshift, rushshift]
+    seeds: paired_seeds_20
+    episodes: 200
+    last_k: 100
+    config_set: freeze100_longtrain_4x1
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/freeze100_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/freeze100_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/freeze100_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/freeze100_ep200_wu10_4domain_20seed/paper_summary
+    comparison_vs_current_ep200: results_freqduet/freeze100_ep200_wu10_4domain_20seed/compare_freeze100_vs_current_ep200/candidate_paired_deltas.csv
+    comparison_vs_external_ep200: results_freqduet/freeze100_ep200_wu10_4domain_20seed/compare_freeze100_vs_external_ep200/external_baseline_paired_deltas.csv
+    scheduler_tasks: [t11768, t11769, t11770, t11771]
+    scheduler_nodes: [node005, node004, node002, node006]
+    rows: 80
+    completeness: 4 configs x 20 seeds, no duplicate config-seed pairs
+    candidate_vs_current_main_overall_delta_ci95:
+      main: [-0.0348, -0.0498, -0.0209]
+      rawhistory: [-0.0388, -0.0515, -0.0257]
+      nopromotion: [-0.0410, -0.0544, -0.0277]
+      noleakage: [-0.3454, -0.4277, -0.2697]
+    candidate_vs_external_ep200_overall_shared_delta_ci95:
+      fixed_headway: [0.0064, -0.0020, 0.0153]
+      rule_holding: [-0.6154, -0.6423, -0.5868]
+      rule_mpc: [-1.9589, -2.0221, -1.9022]
+    note: preconfigured long-training stability schedule; episodes 0-99 learn normally, episodes 100+ freeze upper and lower policy updates while continuing the 200ep rollout. It significantly repairs current-main 200ep drift and is statistically tied with fixed-headway overall.
 
   termhold45_screen_ep40_wu10:
     status: complete_neutral_control_not_promoted

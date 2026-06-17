@@ -53,8 +53,13 @@ def config_path(name):
     return path
 
 
+def config_run_name(config):
+    name = Path(str(config)).name
+    return Path(name).stem if name.endswith(".yaml") else name
+
+
 def run_dir_for(config, seed, logs_dir):
-    return logs_dir / f"{config}_seed{seed}"
+    return logs_dir / f"{config_run_name(config)}_seed{seed}"
 
 
 def diagnostics_complete(run_dir, episodes):
@@ -405,7 +410,7 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
             csv_path = None
             source_logs_dir = None
             for logs_dir in logs_dirs:
-                candidate = logs_dir / f"{cfg}_seed{seed}" / "diagnostics.csv"
+                candidate = run_dir_for(cfg, seed, logs_dir) / "diagnostics.csv"
                 if candidate.exists():
                     csv_path = candidate
                     source_logs_dir = logs_dir
@@ -417,7 +422,7 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
             row = summarize_seed(csv_path, last_k)
             if row is None:
                 continue
-            row.update({"config": cfg, "seed": int(seed)})
+            row.update({"config": config_run_name(cfg), "seed": int(seed)})
             if source_logs_dir is not None:
                 row["logs_dir"] = str(source_logs_dir)
             per_seed.append(row)
@@ -588,10 +593,11 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
     ]
     summary = []
     for cfg in configs:
-        rows = [r for r in per_seed if r["config"] == cfg]
+        cfg_name = config_run_name(cfg)
+        rows = [r for r in per_seed if r["config"] == cfg_name]
         if not rows:
             continue
-        item = {"config": cfg, "n_seeds": len(rows)}
+        item = {"config": cfg_name, "n_seeds": len(rows)}
         for metric in metrics:
             vals = np.asarray([r[metric] for r in rows], dtype=np.float64)
             item[f"{metric}_mean"] = float(vals.mean())

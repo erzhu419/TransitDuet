@@ -15,6 +15,7 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
 CANDIDATE_METHOD_TOKENS = (
+    "freeze100",
     "snapshottermbias_m01",
     "snapshottermbias",
     "snapshotrf_m02",
