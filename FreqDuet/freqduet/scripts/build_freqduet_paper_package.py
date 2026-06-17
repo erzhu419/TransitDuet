@@ -78,6 +78,20 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          if promoted.get("paper_summary_dir") else None),
     ])
 
+    current_tb = experiment(manifest, "final_matrix_current_terminalbias_ep100_wu10_4domain_20seed")
+    table_specs.extend([
+        ("final_terminalbias_ep100_per_seed.csv", current_tb.get("per_seed_csv")),
+        ("final_terminalbias_ep100_summary.csv", current_tb.get("summary_csv")),
+        ("final_terminalbias_ep100_method_summary.csv",
+         Path(current_tb.get("paper_summary_dir", "")) / "paper_matrix_method_summary.csv"
+         if current_tb.get("paper_summary_dir") else None),
+        ("final_terminalbias_ep100_paired_deltas.csv",
+         Path(current_tb.get("paper_summary_dir", "")) / "paper_matrix_paired_deltas.csv"
+         if current_tb.get("paper_summary_dir") else None),
+        ("final_terminalbias_ep100_vs_external_classical.csv",
+         current_tb.get("comparison_vs_external_classical")),
+    ])
+
     gen = experiment(manifest, "heldout_generalization_ep100_wu10")
     table_specs.extend([
         ("generalization_per_seed.csv", gen.get("per_seed_csv")),
@@ -207,6 +221,8 @@ def collect_config_names(value: object) -> set[str]:
     if isinstance(value, str):
         names.add(value[:-5] if value.endswith(".yaml") else value)
     elif isinstance(value, dict):
+        if "configs" in value:
+            return collect_config_names(value["configs"])
         for child in value.values():
             names.update(collect_config_names(child))
     elif isinstance(value, (list, tuple, set)):

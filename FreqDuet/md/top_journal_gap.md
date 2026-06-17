@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-14 CST
+Last updated: 2026-06-17 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -2056,6 +2056,57 @@ value action can help"; it is to polish mechanism figures, rerun final current
 name matrices after the alias change, and decide whether to extend beyond
 bounded terminal bias into richer actual terminal launch / first-stop holding
 policy learning.
+
+2026-06-17 current-name final matrix follow-up: after promoting terminal-bias
+into the main aliases, reran the current config names under
+`final_matrix_current_terminalbias_ep100_wu10_4domain_20seed` (`4` domains x
+`6` methods x `20` paired seeds x `100` episodes, `last-k=50`). All `480/480`
+rows synced and aggregated. This confirms the paper table will not have an
+ambiguous "main" row.
+
+```text
+current-name 100ep main vs internal baselines, composite delta main - baseline
+overall vs nofreq      -0.0233 CI [-0.0764,+0.0102]
+overall vs rawhistory  +0.0106 CI [-0.0034,+0.0245]
+overall vs allfreq     -0.0050 CI [-0.0294,+0.0172]
+overall vs nopromotion +0.0024 CI [-0.0114,+0.0148]
+overall vs noleakage   -0.3251 CI [-0.4213,-0.2368]
+
+current-name 100ep main vs external baselines, composite delta main - baseline
+overall_shared vs fixed_headway +0.0041 CI [-0.0093,+0.0178]
+overall_shared vs rule_holding  -0.5858 CI [-0.6120,-0.5594]
+overall_shared vs rule_mpc      -2.0281 CI [-2.1370,-1.9175]
+```
+
+Interpretation: the promoted main is statistically tied with fixed-headway and
+strongly better than weaker classical baselines. Internally, `noleakage` is
+decisively bad and `nofreq` is weaker on average, but `rawhistory` and
+`nopromotion` remain close enough that the method claim should be framed as
+robust frequency-separated control with essential leakage/terminal-bias
+mechanisms, not universal dominance over every internal variant. The main
+selector is active in all four domains with nonzero terminal-bias events and
+`snapshot_value_override_mean = 0`, so the result is aligned with the Phase-4
+bounded terminal-dispatch design rather than an actor-action override.
+
+The matching 200ep current-name matrix has been launched as
+`final_matrix_current_terminalbias_ep200_wu10_4domain_20seed` with scheduler
+direct-node tasks `t11752-t11767` on `node001-node006` (`480` jobs,
+`last-k=100`). It remains open until sync, aggregation, paired CI, and external
+fixed-headway comparison are complete.
+
+2026-06-17 figure follow-up: generated updated current-name mechanism and
+decomposer packages:
+
+```text
+results_freqduet/mechanism_figures/current_terminalbias_ep100
+results_freqduet/decomposer_validation/current_terminalbias_trace
+```
+
+The mechanism package loaded `480` runs and `24000` last-k episode rows. The
+decomposer package uses `20` synthetic seeds plus logged traces and again shows
+the harmonic-prior decomposer is the useful causal path: `harmonic_prior`
+achieves lower synthetic LF RMSE and higher burst F1 than EMA, Haar, no-prior
+harmonic, and raw-history baselines.
 
 Done means:
 
