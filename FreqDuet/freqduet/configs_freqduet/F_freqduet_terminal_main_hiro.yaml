@@ -11,6 +11,11 @@ _name: F_freqduet_terminal_main_hiro
 # rollout-trained snapshot value selector in terminal-bias mode: it preserves the
 # actor's LF headway/timetable action and only adds nonnegative first-stop /
 # terminal dispatch bias when the matched counterfactual model predicts a margin.
+# The 2026-06-17 long-training repair keeps 0-99ep learning unchanged, then
+# freezes the upper actor and lower policy from ep100 onward while lower critic
+# statistics continue. The matched 200ep study showed this removes late policy
+# drift and ties fixed-headway under the 100ep evaluation window. Final learned
+# ablations inheriting this root share the same schedule for fair 200ep tables.
 upper:
   action_override:
     disable_value_selectors: false
@@ -62,3 +67,8 @@ leakage:
   lower_drift_cost_weight: 0.25
   lower_drift_cost_mode: excess
   lower_drift_cost_cap: 1.0
+
+training:
+  longtrain_stability:
+    freeze_lower_policy_after_ep: 100
+    freeze_upper_after_ep: 100

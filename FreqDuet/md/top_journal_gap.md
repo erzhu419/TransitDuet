@@ -184,6 +184,39 @@ the strong fixed-headway baseline while significantly beating weaker rule/MPC
 baselines and repairing the unfrozen online policy drift. It still does not
 justify claiming robust superiority over fixed-headway.
 
+2026-06-17 current-name final matrix closure: promoted the freeze100
+long-training schedule into the current main root config and reran the full
+current-name 4-domain x 6-method x 20-seed 200ep matrix as
+`final_matrix_current_freeze100_ep200_wu10_4domain_20seed` with scheduler
+direct-node tasks `t11792-t11807`. The matrix completed `480/480` rows with no
+duplicate domain-method-seed pairs. Because the final ablation configs inherit
+from the current main root, all learned final configs share the same
+`ep100+` freeze protocol; this makes the 200ep final table a fair
+long-training protocol comparison rather than a main-only stabilization.
+
+```text
+current-name freeze100 200ep, composite delta main - baseline
+overall vs nofreq        -0.0130 CI [-0.0530,+0.0122]
+overall vs rawhistory    -0.0010 CI [-0.0112,+0.0091]
+overall vs allfreq       -0.0082 CI [-0.0314,+0.0104]
+overall vs nopromotion   -0.0000 CI [-0.0066,+0.0073]
+overall vs noleakage     -0.3338 CI [-0.4327,-0.2486]
+
+current-name freeze100 200ep vs previous terminal-bias main
+overall main - previous main -0.0393 CI [-0.0546,-0.0247]
+
+current-name freeze100 200ep vs external ep200
+overall_shared vs fixed_headway +0.0018 CI [-0.0083,+0.0116]
+overall_shared vs rule_holding  -0.6200 CI [-0.6442,-0.5934]
+overall_shared vs rule_mpc      -1.9634 CI [-2.0225,-1.9083]
+```
+
+Interpretation update: the current config-name final matrix now closes the
+200ep naming ambiguity. The defensible paper claim remains that FreqDuet
+matches fixed-headway under the strong 200ep protocol and substantially beats
+weaker classical rule baselines, while `noleakage` is decisively invalid and
+`rawhistory` / `nopromotion` remain close internal controls.
+
 Done means:
 
 - run current `main` against `nofreq`, `rawhistory`, `allfreq`,

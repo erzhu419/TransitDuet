@@ -117,6 +117,27 @@ def copy_core_tables(manifest: dict, out_dir: Path,
         ("freeze100_ep200_vs_external_classical.csv", freeze100.get("comparison_vs_external_ep200")),
     ])
 
+    current_freeze100 = experiment(
+        manifest, "final_matrix_current_freeze100_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("final_current_freeze100_ep200_per_seed.csv",
+         current_freeze100.get("per_seed_csv")),
+        ("final_current_freeze100_ep200_summary.csv",
+         current_freeze100.get("summary_csv")),
+        ("final_current_freeze100_ep200_method_summary.csv",
+         Path(current_freeze100.get("paper_summary_dir", "")) / "paper_matrix_method_summary.csv"
+         if current_freeze100.get("paper_summary_dir") else None),
+        ("final_current_freeze100_ep200_paired_deltas.csv",
+         Path(current_freeze100.get("paper_summary_dir", "")) / "paper_matrix_paired_deltas.csv"
+         if current_freeze100.get("paper_summary_dir") else None),
+        ("final_current_freeze100_ep200_vs_internal.csv",
+         current_freeze100.get("comparison_vs_internal")),
+        ("final_current_freeze100_ep200_vs_external_classical.csv",
+         current_freeze100.get("comparison_vs_external_ep200")),
+        ("final_current_freeze100_ep200_vs_previous_terminalbias.csv",
+         current_freeze100.get("comparison_vs_previous_terminalbias_ep200")),
+    ])
+
     external_ep200 = experiment(manifest, "external_baselines_ep200_wu10_4domain_20seed")
     table_specs.extend([
         ("external_baselines_ep200_per_seed.csv", external_ep200.get("per_seed_csv")),

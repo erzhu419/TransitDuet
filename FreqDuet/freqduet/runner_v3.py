@@ -92,12 +92,15 @@ def load_config(path):
     if '_extends' in cfg:
         parent_path = cfg.pop('_extends')
         base_dir = os.path.dirname(os.path.abspath(path))
-        parent_full = os.path.join(base_dir, '..', parent_path) if not os.path.isabs(parent_path) else parent_path
-        if not os.path.exists(parent_full):
-            parent_full = os.path.join(base_dir, parent_path)
-        if not os.path.exists(parent_full):
-            # try relative to script dir
-            parent_full = os.path.join(str(SCRIPT_DIR), parent_path)
+        if os.path.isabs(parent_path):
+            parent_full = parent_path
+        else:
+            candidates = [
+                os.path.join(base_dir, parent_path),
+                os.path.join(base_dir, '..', parent_path),
+                os.path.join(str(SCRIPT_DIR), parent_path),
+            ]
+            parent_full = next((p for p in candidates if os.path.exists(p)), candidates[-1])
         parent = load_config(parent_full)
         cfg = _deep_merge(parent, cfg)
     return cfg

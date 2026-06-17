@@ -1773,6 +1773,60 @@ experiments:
     scheduler_nodes: [node001, node002, node003, node004, node005, node006]
     note: fair ep200/last-k=100 external reference used for the long-training fixed-headway comparison.
 
+  final_matrix_current_freeze100_ep200_wu10_4domain_20seed:
+    status: complete_current_name_longtrain_protocol
+    domains: [terminal, highnoise, odshift, rushshift]
+    seeds: paired_seeds_20
+    episodes: 200
+    last_k: 100
+    config_set: current_longtrain_4x6
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/paper_summary
+    comparison_vs_internal: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/compare_main_vs_internal/candidate_paired_deltas.csv
+    comparison_vs_external_ep200: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/compare_main_vs_external_ep200/external_baseline_paired_deltas.csv
+    comparison_vs_previous_terminalbias_ep200: results_freqduet/final_matrix_current_freeze100_ep200_wu10_4domain_20seed/compare_main_vs_previous_terminalbias_ep200/main_vs_main_paired_deltas.csv
+    scheduler_tasks:
+      - t11792
+      - t11793
+      - t11794
+      - t11795
+      - t11796
+      - t11797
+      - t11798
+      - t11799
+      - t11800
+      - t11801
+      - t11802
+      - t11803
+      - t11804
+      - t11805
+      - t11806
+      - t11807
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    rows: 480
+    completeness: 24 configs x 20 seeds, no duplicate domain-method-seed pairs
+    training_protocol_note: all learned final configs inherit the same freeze100 long-training schedule from the current main root; this is the fair 200ep protocol, not a main-only stabilization.
+    freeze_tail100_mean:
+      lower_policy_frozen: 1.0
+      lower_critic_frozen: 0.0
+      upper_policy_frozen: 1.0
+    main_vs_previous_terminalbias_ep200_overall_delta_ci95:
+      main: [-0.0393, -0.0546, -0.0247]
+    main_vs_internal_overall_delta_ci95:
+      nofreq: [-0.0130, -0.0530, 0.0122]
+      rawhistory: [-0.0010, -0.0112, 0.0091]
+      allfreq: [-0.0082, -0.0314, 0.0104]
+      nopromotion: [-0.0000, -0.0066, 0.0073]
+      noleakage: [-0.3338, -0.4327, -0.2486]
+    main_vs_external_ep200_overall_shared_delta_ci95:
+      fixed_headway: [0.0018, -0.0083, 0.0116]
+      rule_holding: [-0.6200, -0.6442, -0.5934]
+      rule_mpc: [-1.9634, -2.0225, -1.9083]
+    note: current config-name rerun after promoting the freeze100 long-training protocol into the main root. It significantly repairs the previous terminal-bias 200ep drift, is statistically tied with fixed-headway overall, and strongly beats rule holding/MPC. Internal noleakage remains decisively bad; rawhistory/nopromotion remain close.
+
   freeze100_ep200_wu10_4domain_20seed:
     status: complete_promotable_longtrain_stability_candidate
     domains: [terminal, highnoise, odshift, rushshift]
