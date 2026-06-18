@@ -1,6 +1,10 @@
 _extends: F_freqduet_terminal_main_hiro.yaml
 _name: F_freqduet_gen_odshift_main_hiro
 
+upper:
+  snapshot_value_selector:
+    domain: odshift
+
 env:
   demand_noise: 0.15
   od_noise: 0.35

@@ -2185,6 +2185,67 @@ direct-node tasks `t11752-t11767` on `node001-node006` (`480` jobs,
 `last-k=100`). It remains open until sync, aggregation, paired CI, and external
 fixed-headway comparison are complete.
 
+2026-06-17 domain-conditioned selector alignment audit: after the 200ep
+freeze100 closure, a config audit found that the promoted current-name
+generalization aliases (`F_freqduet_gen_highnoise_main_hiro`,
+`F_freqduet_gen_odshift_main_hiro`, and `F_freqduet_gen_rushshift_main_hiro`)
+were inheriting the terminal root's
+`upper.snapshot_value_selector.domain: terminal`. The validated m01
+terminal-bias matrix used domain-specific selector one-hots for highnoise,
+odshift, and rushshift, so the previous current-name final matrix did not fully
+match the tested m01 protocol outside the terminal domain.
+
+Fixed the alias layer by adding explicit domain overrides to all current-name
+held-out configs, including the learned ablation variants:
+
+```text
+highnoise configs -> snapshot_value_selector.domain: highnoise
+odshift configs   -> snapshot_value_selector.domain: odshift
+rushshift configs -> snapshot_value_selector.domain: rushshift
+```
+
+Local and remote config-load smoke tests confirmed the resolved domains. The
+corrected 24-config x 20-seed x 200ep current-name matrix has been launched as
+`final_matrix_current_domainfix_ep200_wu10_4domain_20seed` with scheduler
+direct-node CPU tasks `t11844-t11859` on `node001-node006`. This result should
+replace the previous current-name table if it improves or materially changes
+the paired conclusions. Do not push/promote the alias fix as a paper result
+until the matrix is aggregated and compared against the external fixed-headway,
+rule-holding, and rule-MPC baselines.
+
+2026-06-18 result: the domain-conditioned current-name matrix completed all
+`16/16` scheduler tasks (`t11844-t11859`). Because node-local result paths were
+not mirrored back into the local workspace automatically, the lightweight
+artifacts from `node001-node006` were manually consolidated on the HPC login
+side without checkpoints. Aggregation found the expected `480/480`
+`diagnostics.csv` files and wrote:
+
+```text
+results_freqduet/final_matrix_current_domainfix_ep200_wu10_4domain_20seed/combined_summary
+results_freqduet/final_matrix_current_domainfix_ep200_wu10_4domain_20seed/paper_matrix_summary
+results_freqduet/final_matrix_current_domainfix_ep200_wu10_4domain_20seed/external_fixed_comparison
+```
+
+The corrected current-name main is now statistically tied with the strong
+fixed-headway baseline overall, and the previous significant gap is largely
+removed. Composite delta is `main - fixed`, so positive is worse:
+
+```text
+terminal        +0.0102 CI [-0.0051,+0.0260]
+highnoise       +0.0031 CI [-0.0238,+0.0285]
+odshift         +0.0119 CI [-0.0015,+0.0262]
+rushshift       +0.0089 CI [-0.0005,+0.0203]
+overall_shared  +0.0085 CI [-0.0015,+0.0189]
+```
+
+Internal ablation conclusions are unchanged in direction. `noleakage` is
+strongly worse in every domain, confirming the leakage guard is necessary.
+`nofreq`, `allfreq`, `rawhistory`, and `nopromotion` remain close to main under
+the 200ep protocol; therefore this result supports the conservative paper claim
+that FreqDuet matches fixed-headway while improving over weaker external
+baselines and demonstrating necessary frequency/no-leakage structure, not a
+claim of robust universal superiority over fixed-headway.
+
 2026-06-17 figure follow-up: generated updated current-name mechanism and
 decomposer packages:
 

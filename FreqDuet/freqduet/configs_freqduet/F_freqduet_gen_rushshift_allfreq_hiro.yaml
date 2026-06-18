@@ -1,6 +1,10 @@
 _extends: F_freqduet_terminal_final_allfreq_hiro.yaml
 _name: F_freqduet_gen_rushshift_allfreq_hiro
 
+upper:
+  snapshot_value_selector:
+    domain: rushshift
+
 env:
   demand_noise: 0.0
   peak_shift_choices: [-2, -1, 1, 2]
