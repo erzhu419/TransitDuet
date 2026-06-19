@@ -51,7 +51,7 @@ ARTIFACTS = {
     "order_book_per_eval": Path("order_book_lobster_venue_grade_multisymbol/per_eval.csv"),
     "order_book_checks": Path("order_book_lobster_venue_grade_multisymbol/paired_checks.csv"),
     "order_book_summary": Path("order_book_lobster_venue_grade_multisymbol/summary.json"),
-    "encoder_domains": Path("encoder_cross_domain_matrix/domain_summary.csv"),
+    "encoder_domains": Path("encoder_cross_domain_matrix_latest/domain_summary.csv"),
 }
 
 
