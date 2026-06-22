@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_highnoise_main_snapshotriskdual_targetonly_m005_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_snapshotriskdual_targetnonpos_m005_hiro
+
+upper:
+  snapshot_action_value_selector:
+    allowed_methods:
+      - actor_target_m30
+      - actor_target_m15
+      - actor_target_0

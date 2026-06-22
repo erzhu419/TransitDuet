@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-17 CST
+Last updated: 2026-06-21 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -2245,6 +2245,1178 @@ the 200ep protocol; therefore this result supports the conservative paper claim
 that FreqDuet matches fixed-headway while improving over weaker external
 baselines and demonstrating necessary frequency/no-leakage structure, not a
 claim of robust universal superiority over fixed-headway.
+
+2026-06-18 fixed-gap optimization follow-up: the only promising earlier release
+branch was the minimal terminal early-release cap (`release5`), but the old
+generalization configs inherited the terminal snapshot-selector domain. To
+avoid repeating that alias bug, added current-domainfix variants that inherit
+the corrected per-domain current main roots and only change
+`upper.timetable_planner.terminal_shift_min_s` from `0s` to `-5s`:
+
+```text
+F_freqduet_terminal_main_release5_current_hiro.yaml
+F_freqduet_gen_highnoise_main_release5_current_hiro.yaml
+F_freqduet_gen_odshift_main_release5_current_hiro.yaml
+F_freqduet_gen_rushshift_main_release5_current_hiro.yaml
+```
+
+The 4-domain x 20-seed x 200ep run completed as scheduler tasks
+`t11873-t11878` on `node001-node006` and wrote:
+
+```text
+results_freqduet/release5_current_domainfix_ep200_wu10_4domain_20seed/combined_summary
+results_freqduet/release5_current_domainfix_ep200_wu10_4domain_20seed/compare_release5_current_vs_main_domainfix_ep200
+results_freqduet/release5_current_domainfix_ep200_wu10_4domain_20seed/compare_release5_current_vs_external_fixed_ep200
+```
+
+Composite paired delta is `release5_current - baseline`, so negative is better.
+Against current main:
+
+```text
+terminal  +0.0029 CI [-0.0163,+0.0262]
+highnoise -0.0118 CI [-0.0334,+0.0104]
+odshift   -0.0154 CI [-0.0313,+0.0004]
+rushshift +0.0042 CI [-0.0047,+0.0139]
+overall   -0.0050 CI [-0.0158,+0.0087]
+```
+
+Against external fixed-headway:
+
+```text
+terminal        +0.0130 CI [-0.0053,+0.0353]
+highnoise       -0.0087 CI [-0.0380,+0.0184]
+odshift         -0.0035 CI [-0.0145,+0.0078]
+rushshift       +0.0131 CI [+0.0033,+0.0237]
+overall_shared  +0.0035 CI [-0.0080,+0.0161]
+```
+
+Interpretation: `release5_current` is a weak local wait-reduction signal, not a
+promotion candidate. It improves wait overall versus fixed (`-0.0690`) and
+slightly improves highnoise/odshift composite versus main, but the benefit is
+offset by higher CV/overshoot and a significant rushshift loss to fixed-headway.
+Mechanistically, release5 increases terminal launch-shift variability versus
+main (`terminal_launch_shift_std` overall `+2.0934`, CI `[+0.7025,+3.5819]`),
+which is exactly the failure mode a terminal early-release gate must control.
+
+A no-rerun diagnostic domain gate that uses release5 only on highnoise+odshift
+and current main on terminal+rush is still not statistically decisive:
+
+```text
+vs main          overall -0.0068 CI [-0.0142,+0.0013]
+vs fixed-headway overall +0.0017 CI [-0.0090,+0.0124]
+```
+
+Decision: do not promote or push `release5_current` as paper main. Keep it as
+negative/mechanism evidence. The next credible fixed-headway repair should be a
+state-dependent terminal-release value/guard that explicitly penalizes launch
+shift variance and rush-pattern overshoot, or a first-stop/terminal dispatch
+value layer trained from matched counterfactual rollouts. More unconditional
+release-cap sweeps are unlikely to close the gap.
+
+2026-06-18 active follow-up: implemented the state-dependent conservative
+terminal release guard as `releaseguard`. It reuses the existing causal
+`terminal_early_release_adaptive` hook but adds previous-episode risk gates:
+
+```text
+min_prev_wait_min: 5.6
+max_prev_overshoot_norm: 0.22
+max_prev_headway_cv: 0.455
+max_prev_terminal_shift_mean_s: 23.0
+max_prev_terminal_shift_std_s: 11.0
+max_peak_shift_abs: 0.0
+base_min_s: 0.0
+relaxed_min_s: -5.0
+```
+
+This is deliberately not another unconditional release-cap sweep: the default
+path remains no early release, rush-shift scenarios are blocked by
+`max_peak_shift_abs`, and high launch-shift variance shuts the release gate in
+the next episode. Added current-domainfix configs:
+
+```text
+F_freqduet_terminal_main_releaseguard_hiro.yaml
+F_freqduet_gen_highnoise_main_releaseguard_hiro.yaml
+F_freqduet_gen_odshift_main_releaseguard_hiro.yaml
+F_freqduet_gen_rushshift_main_releaseguard_hiro.yaml
+```
+
+Local compile/config-load checks passed, and a 3-episode highnoise smoke ran
+without breaking runner execution. The full 4-domain x 20-seed x 200ep
+validation is now running as scheduler tasks `t11906-t11911`:
+
+```text
+results_freqduet/releaseguard_ep200_wu10_4domain_20seed
+```
+
+Do not promote or push this branch until it is synced, aggregated, and compared
+against both `final_matrix_current_domainfix_ep200_wu10_4domain_20seed` and
+`external_baselines_ep200_wu10_4domain_20seed`.
+
+2026-06-19 result: synced and aggregated the full `releaseguard` matrix
+(`4` domains x `20` seeds x `200` episodes). `releaseguard` is a real risk
+guard but not a paper-main improvement:
+
+```text
+vs current main, composite delta = releaseguard - main
+terminal  -0.0127 CI [-0.0245,-0.0021]
+highnoise +0.0111 CI [-0.0219,+0.0423]
+odshift   -0.0075 CI [-0.0229,+0.0082]
+rushshift +0.0045 CI [-0.0048,+0.0149]
+overall   -0.0011 CI [-0.0106,+0.0083]
+
+vs fixed-headway, composite delta = releaseguard - fixed
+terminal  -0.0026 CI [-0.0157,+0.0090]
+highnoise +0.0142 CI [-0.0190,+0.0479]
+odshift   +0.0044 CI [-0.0113,+0.0219]
+rushshift +0.0134 CI [+0.0033,+0.0250]
+overall   +0.0074 CI [-0.0042,+0.0204]
+```
+
+Mechanism check: compared with unconditional `release5`, the guard sharply
+reduces launch-shift variance (`terminal_launch_shift_std` terminal `-3.51s`,
+rushshift `-2.31s`) and blocks rushshift early release completely, but the main
+objective does not improve (`overall +0.0039` vs `release5`, CI crosses zero).
+Compared with fixed-headway, wait is lower overall (`-0.028 min`) but CV
+(`+0.0053`) and overshoot (`+0.0185`) increase, cancelling the wait gain.
+
+Decision: keep `releaseguard` as negative/mechanism evidence, do not promote it
+or push it as the new main. The next repair should stop tuning scalar release
+caps and move to matched counterfactual terminal/first-stop value selection:
+for each demand seed and state bucket, label candidate executable headway or
+first-stop release actions by rollout cost, then deploy only actions with a
+positive paired value margin and explicit CV/overshoot risk terms.
+
+2026-06-19 follow-up: after decomposing the `releaseguard` result, the 200ep
+fixed-headway gap is not a wait problem. Current main has slightly lower wait
+than fixed overall, but worse CV and fleet overshoot. Rather than expanding
+early release, added a smaller risk-screened terminal-bias variant
+`snapshottermbias_cap15` that keeps the promoted snapshot value selector and
+removes the larger `p30` terminal-bias candidates:
+
+```text
+allowed_methods:
+  - actor_term45_0
+  - actor_target_p15
+  - actor_term45_p15
+```
+
+This tests whether capping first-stop/terminal bias at the smaller +15s action
+keeps the m01 wait benefit while reducing CV/overshoot variance. Added current
+domainfix configs:
+
+```text
+F_freqduet_terminal_main_snapshottermbias_cap15_hiro.yaml
+F_freqduet_gen_highnoise_main_snapshottermbias_cap15_hiro.yaml
+F_freqduet_gen_odshift_main_snapshottermbias_cap15_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshottermbias_cap15_hiro.yaml
+```
+
+Local and remote config-load checks passed, with selector domains resolving to
+`terminal/highnoise/odshift/rushshift` respectively and `improve_margin=0.01`.
+The 4-domain x 20-seed x 200ep validation is running as scheduler-visible
+direct-node tasks `t11924-t11929`:
+
+```text
+results_freqduet/snapshottermbias_cap15_ep200_wu10_4domain_20seed
+```
+
+Decision rule: only promote or push if paired 200ep results improve current
+main overall and do not worsen the fixed-headway comparison; otherwise keep it
+as a documented negative cap experiment.
+
+2026-06-19 result: synced and aggregated the full
+`snapshottermbias_cap15` matrix (`80/80` runs). The smaller cap does reduce
+terminal-bias magnitude and launch-shift variance, but it does not improve the
+objective enough to promote:
+
+```text
+vs current main, composite delta = cap15 - main
+terminal  -0.0116 CI [-0.0253,+0.0010]
+highnoise +0.0220 CI [-0.0153,+0.0607]
+odshift   -0.0081 CI [-0.0234,+0.0076]
+rushshift -0.0043 CI [-0.0124,+0.0032]
+overall   -0.0005 CI [-0.0110,+0.0105]
+
+vs fixed-headway, composite delta = cap15 - fixed
+terminal  -0.0014 CI [-0.0150,+0.0116]
+highnoise +0.0251 CI [-0.0154,+0.0660]
+odshift   +0.0039 CI [-0.0126,+0.0221]
+rushshift +0.0045 CI [-0.0047,+0.0145]
+overall   +0.0080 CI [-0.0055,+0.0222]
+```
+
+Mechanism check: cap15 cuts `snapshot_value_terminal_bias_mean` from roughly
+`2.49s` to `1.90s` and `terminal_launch_shift_std` from roughly `10.26s` to
+`8.71s`, but highnoise loses the wait benefit from larger value-selected
+terminal bias. A no-rerun domain/prior gate that keeps current main in
+highnoise and uses cap15 only in terminal/odshift/rushshift would improve
+current main overall (`-0.0060`, CI `[-0.0116,-0.0007]`) while staying tied
+with fixed-headway (`+0.0025`, CI `[-0.0063,+0.0112]`). The next validation is
+therefore a causal snapshot candidate gate: retain `+30s` only when demand
+noise is high enough to justify it, otherwise cap positive terminal-bias
+candidates at `+15s`. Do not promote `snapshottermbias_cap15` itself.
+
+2026-06-19 active follow-up: implemented the causal candidate gate as
+`snapshotnoisegate`. The runner now supports
+`upper.snapshot_value_selector.candidate_gate` with a default positive-offset
+cap and an optional high-demand-noise cap. The validation candidate keeps the
+main snapshot value model and full candidate set, but applies:
+
+```text
+default_max_positive_offset_s: 15.0
+high_noise_min_demand_noise: 0.25
+high_noise_max_positive_offset_s: 30.0
+```
+
+Thus highnoise (`demand_noise=0.30`) keeps the `+30s` value-selected
+wait-relief path, while terminal/odshift/rushshift are capped at `+15s` to
+reduce CV/overshoot and launch-shift variance. Local compile/config checks and
+a 3-episode smoke passed; the smoke confirmed terminal max terminal-bias `15s`
+and highnoise max `30s`. Added current-domainfix configs:
+
+```text
+F_freqduet_terminal_main_snapshotnoisegate_hiro.yaml
+F_freqduet_gen_highnoise_main_snapshotnoisegate_hiro.yaml
+F_freqduet_gen_odshift_main_snapshotnoisegate_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotnoisegate_hiro.yaml
+```
+
+Decision rule: promote only if the full 200ep paired matrix reproduces the
+no-rerun hybrid signal: improvement over current main and no significant loss
+to fixed-headway. Otherwise keep it as a documented negative candidate.
+
+2026-06-19 result: the full `snapshotnoisegate` matrix completed (`80/80`) and
+was not promoted. It successfully expressed the intended mechanism in smoke,
+but the 200ep paired result did not improve the paper objective:
+
+```text
+vs current main, composite delta = snapshotnoisegate - main
+terminal  -0.0091 CI [-0.0222,+0.0033]
+highnoise +0.0131 CI [-0.0090,+0.0355]
+odshift   -0.0014 CI [-0.0135,+0.0105]
+rushshift -0.0004 CI [-0.0084,+0.0081]
+overall   +0.0005 CI [-0.0075,+0.0087]
+
+vs fixed-headway, composite delta = snapshotnoisegate - fixed
+terminal  +0.0011 CI [-0.0077,+0.0107]
+highnoise +0.0162 CI [-0.0085,+0.0430]
+odshift   +0.0105 CI [-0.0026,+0.0252]
+rushshift +0.0085 CI [-0.0024,+0.0207]
+overall   +0.0091 CI [-0.0004,+0.0202]
+```
+
+Decision: do not promote or push `snapshotnoisegate`. The useful signal remains
+the domain/prior split seen in the no-rerun hybrid: highnoise should keep the
+current main candidate set, while terminal/odshift/rushshift should use the
+smaller cap15 candidate set. Added `snapshotdomaincap` configs to validate that
+as a reproducible 4-domain method rather than a post-hoc table splice.
+
+2026-06-19 result: the full `snapshotdomaincap` matrix completed (`80/80`).
+It improved current main directionally, especially odshift, but it is not
+paper-main safe because rushshift becomes significantly worse than the strong
+fixed-headway baseline:
+
+```text
+vs current main, composite delta = snapshotdomaincap - main
+terminal  -0.0090 CI [-0.0197,+0.0013]
+highnoise -0.0078 CI [-0.0368,+0.0226]
+odshift   -0.0146 CI [-0.0281,-0.0011]
+rushshift +0.0008 CI [-0.0059,+0.0074]
+overall   -0.0077 CI [-0.0174,+0.0023]
+
+vs fixed-headway, composite delta = snapshotdomaincap - fixed
+terminal  +0.0012 CI [-0.0080,+0.0099]
+highnoise -0.0048 CI [-0.0294,+0.0223]
+odshift   -0.0027 CI [-0.0182,+0.0129]
+rushshift +0.0097 CI [+0.0006,+0.0198]
+overall   +0.0009 CI [-0.0083,+0.0110]
+```
+
+Decision: do not promote. The next targeted candidate is
+`snapshotodtermcap`: cap terminal and odshift only, while keeping highnoise and
+rushshift as current main. A no-rerun seed-level sanity check predicts
+`-0.0059` overall vs current main (CI `[-0.0105,-0.0014]`) and no overall loss
+to fixed-headway (`+0.0026`, CI `[-0.0060,+0.0110]`).
+
+2026-06-19 result: the full `snapshotodtermcap` matrix completed (`80/80`).
+It is a cleaner domain-prior version of the cap idea, but still does not meet
+the promotion rule:
+
+```text
+vs current main, composite delta = snapshotodtermcap - main
+terminal  -0.0014 CI [-0.0136,+0.0098]
+highnoise -0.0008 CI [-0.0322,+0.0297]
+odshift   -0.0060 CI [-0.0216,+0.0085]
+rushshift +0.0020 CI [-0.0045,+0.0090]
+overall   -0.0016 CI [-0.0108,+0.0076]
+
+vs fixed-headway, composite delta = snapshotodtermcap - fixed
+terminal  +0.0088 CI [+0.0001,+0.0178]
+highnoise +0.0023 CI [-0.0236,+0.0271]
+odshift   +0.0059 CI [-0.0127,+0.0250]
+rushshift +0.0109 CI [+0.0039,+0.0187]
+overall   +0.0070 CI [-0.0027,+0.0166]
+```
+
+Decision: do not promote. The targeted cap is not enough; it still loses to
+fixed-headway in terminal/rushshift. The next fixed-headway-gap attempt should
+move away from terminal-bias cap tuning and test the SUMO-RL-style repair:
+smaller/discrete lower holding actions plus explicit previous/following vehicle
+and time-phase state.
+
+2026-06-19 result: the `spacectx_disc9` matrix completed (`80/80`). This is
+the direct SUMO-RL-style candidate: keep the validated FreqDuet hierarchy, add
+lower spatiotemporal context (previous/following headways, launch gaps, station
+phase, route progress, time sin/cos, upstream/downstream queues), and replace
+continuous lower holding with 9 bins `[0,3,6,9,12,15,20,30,45]`.
+
+```text
+vs current main, composite delta = spacectx_disc9 - main
+terminal  +0.0142 CI [-0.0092,+0.0451]
+highnoise -0.0052 CI [-0.0324,+0.0226]
+odshift   -0.0098 CI [-0.0234,+0.0028]
+rushshift +0.0044 CI [-0.0046,+0.0126]
+overall   +0.0009 CI [-0.0095,+0.0129]
+
+vs fixed-headway, composite delta = spacectx_disc9 - fixed
+terminal  +0.0244 CI [+0.0009,+0.0609]
+highnoise -0.0021 CI [-0.0284,+0.0225]
+odshift   +0.0021 CI [-0.0126,+0.0176]
+rushshift +0.0132 CI [+0.0038,+0.0230]
+overall   +0.0094 CI [-0.0002,+0.0200]
+```
+
+Decision: do not promote. The state/action repair gives the right directional
+signal in highnoise and odshift, but it hurts terminal/rushshift and makes the
+fixed-headway gap domain-significant there. This rules out a global
+spacectx-disc9 main. If reused, it needs a causal gate that enables the richer
+lower context only in noisy/OD-shift regimes, not a universal replacement.
+
+2026-06-19 follow-up: implemented and validated `spacectx_causalgate`, a
+history-prior causal gate for the SUMO-RL-style lower context/action repair. The
+first two attempts were cancelled during early sanity checks because an
+episode-instantaneous gate opened too often in terminal seeds. The completed
+version uses a delayed historical EMA gate (`min_episode=40`,
+`min_history_episodes=30`) and highnoise evidence from
+`freq_promotion_absorbed >= 0.12`; OD-shift still uses
+`freq_od_entropy <= 0.9535`. This made the gate domain-specific in diagnostics:
+last-100 gate means were terminal `0.079`, highnoise `1.000`, odshift `0.821`,
+and rushshift `0.0005`.
+
+```text
+vs current main, composite delta = spacectx_causalgate - main
+terminal  +0.0003 CI [-0.0152,+0.0153]
+highnoise -0.0005 CI [-0.0268,+0.0237]
+odshift   -0.0003 CI [-0.0163,+0.0155]
+rushshift +0.0117 CI [-0.0007,+0.0235]
+overall   +0.0028 CI [-0.0078,+0.0127]
+
+vs fixed-headway, composite delta = spacectx_causalgate - fixed
+terminal  +0.0105 CI [-0.0012,+0.0219]
+highnoise +0.0026 CI [-0.0254,+0.0301]
+odshift   +0.0116 CI [-0.0030,+0.0267]
+rushshift +0.0206 CI [+0.0119,+0.0326]
+overall   +0.0113 CI [+0.0030,+0.0197]
+```
+
+Decision: do not promote and stop tuning this lower-spacectx/discrete-action
+branch globally. The causal gate fixed the specificity problem, but performance
+still only ties current main and remains significantly worse than fixed-headway
+overall, with a rushshift regression. The next credible fixed-headway-gap work
+should return to counterfactual value/Phase-4 dispatch, especially mechanisms
+that directly trade CV and fleet overshoot against wait, rather than expanding
+lower local state again.
+
+2026-06-19 active follow-up: implemented `snapshotriskpenalty`, a deploy-time
+risk penalty around the rollout-trained snapshot value selector. The value
+model and main candidate set are unchanged; only positive terminal-bias
+candidates above `+15s` receive an additional score penalty when previous
+episode or current dispatch risk is high. The risk terms are explicitly tied to
+the fixed-headway gap decomposition: previous `headway_cv`, normalized
+`fleet_overshoot`, `terminal_launch_shift_std`, current active headway CV, and
+current fleet pressure. Default main behavior is unchanged unless
+`upper.snapshot_value_selector.risk_penalty.enable` is set.
+
+Added configs:
+
+```text
+F_freqduet_terminal_main_snapshotriskpenalty_hiro.yaml
+F_freqduet_gen_highnoise_main_snapshotriskpenalty_hiro.yaml
+F_freqduet_gen_odshift_main_snapshotriskpenalty_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotriskpenalty_hiro.yaml
+```
+
+Local compile/config checks passed, and a forced early-selector smoke
+(`upper_warmup_eps=1`) confirmed the new diagnostics are written:
+`snapshot_value_risk_score_mean`, `snapshot_value_risk_penalty_mean`, and
+`snapshot_value_risk_penalty_max_mean`. The formal `4` domain x `20` seed x
+`200` episode validation is running through scheduler-visible direct-node tasks
+`t12022-t12027` on `node001-node006`:
+
+```text
+results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed
+```
+
+Decision rule: promote only if paired 200ep results improve or match current
+main while closing the fixed-headway CV/overshoot gap without a significant
+wait regression. If it simply reduces bias but loses wait, keep it as negative
+evidence and move to retraining the counterfactual value model with explicit
+CV/overshoot labels.
+
+2026-06-20 result: the full `snapshotriskpenalty` matrix completed (`80/80`).
+The deploy-time risk penalty is directionally useful, especially in highnoise,
+but the global risk-penalty branch is not itself safe enough to promote because
+rushshift remains significantly worse than fixed-headway:
+
+```text
+vs current main, composite delta = snapshotriskpenalty - main
+terminal  -0.0075 CI [-0.0192,+0.0033]
+highnoise -0.0204 CI [-0.0536,+0.0124]
+odshift   -0.0002 CI [-0.0138,+0.0120]
+rushshift +0.0035 CI [-0.0035,+0.0111]
+overall   -0.0062 CI [-0.0157,+0.0039]
+
+vs fixed-headway, composite delta = snapshotriskpenalty - fixed
+terminal  +0.0026 CI [-0.0104,+0.0149]
+highnoise -0.0173 CI [-0.0537,+0.0151]
+odshift   +0.0117 CI [-0.0009,+0.0247]
+rushshift +0.0124 CI [+0.0017,+0.0237]
+overall   +0.0023 CI [-0.0086,+0.0137]
+```
+
+Mechanism check: the risk-penalty diagnostics were active and small
+(`snapshot_value_risk_score_mean` around `0.33-0.36`; selected penalty near
+`1e-4-3e-4`; max candidate penalty around `0.001`). It reduced highnoise wait
+strongly, but the penalty is too weak or too global to fix rushshift. Decision:
+do not promote `snapshotriskpenalty` alone.
+
+The useful result is a domain-prior mix over completed 200ep matrices:
+
+```text
+terminal  -> snapshottermbias_cap15
+highnoise -> snapshotriskpenalty
+odshift   -> snapshotdomaincap
+rushshift -> snapshottermbias_cap15
+```
+
+This is now codified as `snapshotriskmix` configs and summarized as
+`snapshotriskmix_norerun_ep200_wu10_4domain_20seed`. Seed-level no-rerun
+paired CIs, using the already completed runs with the alias config names, are:
+
+```text
+vs current main, composite delta = snapshotriskmix - main
+terminal  -0.0116 CI [-0.0249,+0.0010]
+highnoise -0.0204 CI [-0.0525,+0.0112]
+odshift   -0.0146 CI [-0.0283,-0.0008]
+rushshift -0.0043 CI [-0.0123,+0.0029]
+overall   -0.0127 CI [-0.0228,-0.0026]
+
+vs fixed-headway, composite delta = snapshotriskmix - fixed
+terminal  -0.0014 CI [-0.0155,+0.0114]
+highnoise -0.0173 CI [-0.0541,+0.0151]
+odshift   -0.0027 CI [-0.0184,+0.0136]
+rushshift +0.0045 CI [-0.0045,+0.0143]
+overall   -0.0042 CI [-0.0159,+0.0078]
+```
+
+This is the first 200ep candidate in this branch that both improves current
+main significantly and removes the significant fixed-headway loss in every
+domain. The remaining caveat is that the mix was selected after seeing the
+completed domain matrices. Before calling it final paper main, either rerun the
+alias configs under the current method name or run a held-out-seed matrix with
+current main and fixed-headway.
+
+2026-06-20 validation update: the same-name `snapshotriskmix` alias rerun
+completed as `snapshotriskmix_ep200_wu10_4domain_20seed` (`80/80`). It
+preserves the positive direction but does not reproduce the post-hoc no-rerun
+significance, and rushshift still has a borderline fixed-headway gap:
+
+```text
+vs current main, composite delta = snapshotriskmix - main
+terminal  -0.0097 CI [-0.0238,+0.0031]
+highnoise -0.0107 CI [-0.0362,+0.0148]
+odshift   -0.0142 CI [-0.0287,+0.0002]
+rushshift -0.0007 CI [-0.0074,+0.0060]
+overall   -0.0088 CI [-0.0185,+0.0003]
+
+vs fixed-headway, composite delta = snapshotriskmix - fixed
+terminal  +0.0004 CI [-0.0108,+0.0118]
+highnoise -0.0076 CI [-0.0394,+0.0256]
+odshift   -0.0023 CI [-0.0179,+0.0139]
+rushshift +0.0082 CI [+0.0000,+0.0171]
+overall   -0.0003 CI [-0.0118,+0.0125]
+```
+
+Decision: `snapshotriskmix` remains useful evidence for domain-prior repair,
+but it should not be promoted as final main from this rerun alone.
+
+2026-06-20 rushshift zero-bias diagnostic: `snapshotzerobias` disables all
+positive terminal-bias candidates in rushshift and keeps only the actor
+fallback/zero-offset candidate. The 20-seed rush-only 200ep run completed under
+`snapshotzerobias_rush_ep200_wu10_20seed`. It did not improve rushshift:
+
+```text
+vs current main, composite delta = snapshotzerobias - main
+rushshift +0.0004 CI [-0.0074,+0.0071]
+
+vs fixed-headway, composite delta = snapshotzerobias - fixed
+rushshift +0.0093 CI [+0.0008,+0.0172]
+```
+
+Interpretation: the rush fixed-headway gap is not solved by removing positive
+terminal bias globally. Fully zeroing bias increases overshoot, while cap15
+still has the best rush mean among completed runs. The next repair is therefore
+a causal hard gate, not a static zero-bias policy.
+
+2026-06-20 active follow-up: added `snapshotrushriskgate`, a rush-only
+candidate gate that keeps the cap15 candidate set in normal states but hard
+caps positive terminal-bias offsets to `0s` after a high-risk previous episode
+(`headway_cv > 0.49`, normalized `fleet_overshoot > 0.30`, or
+`terminal_launch_shift_std > 14s`). This tests whether the useful cap15 branch
+can be retained while preventing launch-shift variance from compounding.
+
+```text
+config:
+F_freqduet_gen_rushshift_main_snapshotrushriskgate_hiro.yaml
+
+run:
+results_freqduet/snapshotrushriskgate_rush_ep200_wu10_20seed
+
+scheduler tasks:
+t12077-t12081 on node004/node001/node006/node002/node003
+```
+
+Promotion rule for this narrow repair: it must improve rushshift versus current
+main and remove the significant rushshift loss to fixed-headway; otherwise keep
+the hard gate as negative mechanism evidence and stop tuning static terminal
+bias caps.
+
+Parallel threshold sweep launched to avoid serially waiting on a single gate:
+
+```text
+configs:
+F_freqduet_gen_rushshift_main_snapshotrushriskgate_loose0_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotrushriskgate_soft7_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotrushriskgate_tight7_hiro.yaml
+
+run:
+results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed
+
+scheduler tasks:
+t12082-t12091 on node001-node006 direct CPU scheduler
+```
+
+Interpretation rule: if none of the hard/soft risk gates beats cap15/current
+main and removes the rush fixed-headway gap, this closes the static terminal
+bias gate branch. The next credible fixed-headway-gap repair would need
+matched counterfactual value labels with explicit CV/overshoot targets, not
+more hand-tuned caps.
+
+2026-06-20 result: both rush risk-gate runs completed. None satisfied the
+promotion rule. The best variant, `snapshotrushriskgate` (`mid0`), weakly
+improves rushshift versus current main but the effect is negligible and the CI
+crosses zero. It also only turns the fixed-headway comparison into a statistical
+tie; the mean remains worse than fixed-headway.
+
+```text
+rushshift composite, candidate delta; lower is better
+variant  comp    vs main                 vs fixed-headway
+mid0     1.3187  -0.0008 [-0.0067,+0.0057]  +0.0081 [-0.0013,+0.0182]
+tight7   1.3202  +0.0007 [-0.0065,+0.0084]  +0.0096 [-0.0005,+0.0206]
+soft7    1.3222  +0.0027 [-0.0037,+0.0091]  +0.0116 [+0.0012,+0.0232]
+loose0   1.3234  +0.0039 [-0.0031,+0.0114]  +0.0128 [+0.0041,+0.0216]
+```
+
+Mechanism diagnosis: the gates lowered selected terminal-bias magnitude, but
+wait/CV/overshoot did not jointly improve. This closes the static
+terminal-bias cap / risk-gate branch as negative evidence. The next repair
+should train or fit a value selector on matched counterfactual labels that
+include explicit CV/overshoot/launch-shift terms, rather than continuing to
+hand tune positive-bias thresholds.
+
+Immediate next repair launched: the existing v6 actor-relative snapshot labels
+show rushshift's integrated replay cost is lowest for target/headway actions
+(`actor_target_0` and nearby target offsets), not terminal-hold bias. Added two
+target-only action-override configs and launched them together with the existing
+full `snapshotactorrel` action-override config.
+
+2026-06-20 diagnostic correction: the first
+`snapshotactorrel_action_rush_ep200_wu10_3x20seed` screen completed, but it was
+invalid for the intended test because `snapshotactorrel_hiro` inherited
+`apply_mode: terminal_bias` from the current main root. Diagnostics confirmed
+`snapshot_value_override_mean = 0`, so no upper action override was actually
+executed. The result is kept only as an inheritance/config diagnostic, not as
+evidence against action override. The config now explicitly sets:
+
+```yaml
+upper:
+  snapshot_value_selector:
+    apply_mode: action_override
+```
+
+The corrected run is:
+
+```text
+configs:
+F_freqduet_gen_rushshift_main_snapshotactorrel_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_hiro.yaml
+F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_m02_hiro.yaml
+
+run:
+results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed
+
+scheduler tasks:
+t12151-t12160 on node001-node006 direct CPU scheduler
+```
+
+Decision rule: promote or fold into a new domain mix only if target/action
+override improves rushshift versus current main and removes the fixed-headway
+mean gap without creating a significant CV/overshoot regression. If it fails,
+the next step is to regenerate matched snapshot labels with a stronger
+CV/overshoot/launch-shift objective and train a new selector artifact.
+
+2026-06-21 result: the corrected action-override screen completed and the
+override path was active (`snapshot_value_override_mean > 0`,
+`snapshot_value_terminal_bias_mean = 0`). It still failed the promotion rule:
+
+```text
+rushshift composite, candidate delta; lower is better
+variant            comp    override_mean  vs main                 vs fixed-headway
+full actor-rel     1.3383  0.1546         +0.0189 [+0.0021,+0.0426]  +0.0277 [+0.0126,+0.0485]
+target-only        1.3213  0.3100         +0.0019 [-0.0027,+0.0067]  +0.0107 [+0.0014,+0.0222]
+target-only m02    1.3221  0.0836         +0.0027 [-0.0035,+0.0092]  +0.0115 [+0.0021,+0.0218]
+```
+
+Interpretation: the full actor-relative action override over-corrects and is
+significantly worse than current main. The target-only variants are statistically
+tied with current main, but both remain significantly worse than fixed-headway.
+This closes the direct reuse of the v6 snapshot actor-relative artifact as
+negative evidence. The active next step is a fresh matched common-random-number
+action-counterfactual label matrix with richer trip context, explicit terminal
+dispatch candidates, and trip-level value fitting:
+
+```text
+run:
+results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed
+
+matrix:
+4 domains x 6 fixed actions x 20 paired seeds = 480 runs
+episodes: 100
+last_k: 50
+trip_dump_freq: 1
+
+scheduler tasks:
+t12171-t12180 on node001-node006 direct CPU scheduler
+```
+
+This run should be used to fit and audit a stronger counterfactual value model.
+If the seed-held-out value model still cannot beat `target0`/fixed-action
+baselines, the fixed-delta action-value branch should be treated as diagnostic
+only and the next real repair should move to simulator-snapshot replay labels or
+Phase-4 first-stop/actual terminal dispatch.
+
+2026-06-21 result: the `cfaction_v2_ep100_wu10_4domain_20seed` matrix completed
+with `480/480` diagnostics and `480/480` `trip_details.csv` files. Episode-level
+paired fixed-action analysis again shows direction but not a promotable fixed
+action:
+
+```text
+best fixed action by episode composite, best - target0; lower is better
+terminal   target -20s          -0.0091 CI [-0.0272,+0.0082]
+highnoise  terminalhold45 -20s  -0.0180 CI [-0.0654,+0.0295]
+odshift    target -20s          -0.0087 CI [-0.0294,+0.0134]
+rushshift  terminalhold45 -20s  -0.0026 CI [-0.0132,+0.0084]
+overall    terminalhold45 -20s  -0.0081 CI [-0.0200,+0.0041]
+```
+
+Trip-level value fitting used `1,048,000` aligned trip contexts and `6,288,000`
+action rows over last-50 episodes. It exposes large oracle headroom but no
+seed-held-out deployable selector:
+
+```text
+metric: gap_dev, baseline target0
+oracle_best cost                 0.0238
+target0 cost                     0.1041
+action_domain selector delta     +0.0001 CI [-0.0008,+0.0010]
+context_action selector delta    +0.0001 CI [-0.0008,+0.0011]
+domain_action_mean selector      +0.0001 CI [-0.0008,+0.0011]
+context_action_interact delta    +0.0086 CI [+0.0052,+0.0134]
+```
+
+Interpretation: richer trip context and 100ep labels confirm the oracle gap, but
+the current linear/ridge action-value model cannot recover it; adding dense
+context-action interactions overfits and significantly worsens. The fixed-delta
+counterfactual branch should remain diagnostic evidence. The next credible
+repair is either (i) a non-linear/causal selector audit that does not overfit
+seed-held-out folds, or (ii) the larger Phase-4 move to simulator-snapshot
+replay labels / actual terminal and first-stop dispatch value.
+
+2026-06-21 nonlinear selector audit: added
+`scripts/fit_freqduet_trip_oracle_classifier.py`, which changes the diagnostic
+from row-wise linear cost regression to a seed-held-out context -> oracle-action
+classification problem. This keeps the same last-50 CRN labels but asks whether
+expanded state can select among the six discrete fixed actions. A local
+`HistGradientBoostingClassifier` audit (`max_iter=60`) produced the first
+positive fixed-action value signal:
+
+```text
+metric: gap_dev, classifier selected action - target0; lower is better
+terminal   -0.0106 CI [-0.0124,-0.0087]
+highnoise  -0.0098 CI [-0.0121,-0.0073]
+odshift    -0.0092 CI [-0.0121,-0.0068]
+rushshift  -0.0092 CI [-0.0118,-0.0063]
+overall    -0.0097 CI [-0.0110,-0.0084]
+```
+
+The selected cost drops from `target0 = 0.1041` to `0.0944`, while the oracle
+best remains `0.0238`, so the classifier captures a real but still partial
+piece of the available trip-level headroom. This does not yet promote a runtime
+policy: it is an offline seed-held-out diagnostic using realized trip context
+and local sklearn. The next implementable repair is to export this selector
+logic into a deployable, dependency-controlled runtime module or distill it into
+a small table/tree, then run an online 4-domain validation against current main
+and fixed-headway.
+
+2026-06-21 deployable action-tree distillation: added
+`upper/counterfactual_action_selector.py` and
+`scripts/fit_freqduet_trip_action_tree_selector.py`. The new script fits a
+shallow decision tree from the same matched trip-level labels, exports a JSON
+artifact, and the runtime scorer loads that artifact without sklearn. The
+seed-held-out offline tree (`max_depth=8`, `min_samples_leaf=1000`) retained a
+large fraction of the HGB signal:
+
+```text
+metric: gap_dev, tree selected action - target0; lower is better
+terminal   -0.0089 CI [-0.0108,-0.0070]
+highnoise  -0.0072 CI [-0.0097,-0.0041]
+odshift    -0.0096 CI [-0.0128,-0.0070]
+rushshift  -0.0068 CI [-0.0095,-0.0039]
+overall    -0.0081 CI [-0.0095,-0.0065]
+```
+
+Smoke test with `--upper-warmup-eps 0` confirmed the selector is active only at
+upper replan events, writes trip-level diagnostics, and can switch the
+executable action class. A 24-config online validation is now running on
+node001-node006 via scheduler as
+`cfactiontree_ep100_wu10_4domain_20seed` (`t12244`-`t12249`): per domain it
+compares current main, action-tree, fixedselector_balanced, target0,
+target_m20, and terminalhold45_m20. Do not promote until this online matrix is
+synced, aggregated, and paired against both current main and the fixed-headway
+wrapper.
+
+2026-06-21 online action-tree result: `cfactiontree` is **not promoted**. It
+slightly improves the current main on mean but not significantly:
+
+```text
+cfactiontree - main, composite; lower is better
+terminal   -0.0088 CI [-0.0267,+0.0097]
+highnoise  -0.0096 CI [-0.0622,+0.0451]
+odshift    -0.0020 CI [-0.0262,+0.0213]
+rushshift  +0.0011 CI [-0.0079,+0.0105]
+overall    -0.0048 CI [-0.0228,+0.0129]
+```
+
+Mechanistically it mostly collapsed to `target_m20`: selected delta averaged
+about `-18s`, terminal-dispatch was active only `4-6%`, and it did not beat the
+simple fixed-action candidates. However, the same online matrix shows a
+disturbance-conditioned simple rule has real headroom if it is validated without
+post-hoc leakage: terminal -> target0, highnoise -> terminalhold45_m20,
+odshift -> target_m20, rushshift -> target0 gives an already-runnable composite
+of `1.4774` versus current main `1.4939`, delta `-0.0165` CI
+`[-0.0312,-0.0009]`. Because the original generated target configs inherited
+terminal-dispatch plumbing from main, new explicit rule configs were added with
+true target-only branches where intended:
+
+```text
+F_freqduet_terminal_main_cfactionrule_v1_hiro        target0, terminal_dispatch=false
+F_freqduet_gen_highnoise_main_cfactionrule_v1_hiro  terminalhold45_m20
+F_freqduet_gen_odshift_main_cfactionrule_v1_hiro    target_m20, terminal_dispatch=false
+F_freqduet_gen_rushshift_main_cfactionrule_v1_hiro  target0, terminal_dispatch=false
+```
+
+The confirmatory 4-config x 20-seed x 100ep matrix completed as
+`cfactionrule_v1_ep100_wu10_4domain_20seed`. It is not promoted:
+
+```text
+cfactionrule_v1 - current main, composite; lower is better
+overall -0.0023 CI [-0.0214,+0.0127]
+terminal -0.0045 CI [-0.0230,+0.0123]
+highnoise -0.0198 CI [-0.0625,+0.0239]
+odshift +0.0097 CI [-0.0115,+0.0321]
+rushshift +0.0054 CI [-0.0014,+0.0122]
+```
+
+This also corrected an earlier interpretation trap: the generated
+`terminalhold45_*` action configs allow terminal shift, but under fixed
+`action_override` they do not create a terminal feedback/value bias, so measured
+`terminal_launch_shift_mean` is near zero. Treat them as discrete headway-action
+counterfactuals, not as validated Phase-4 terminal/first-stop dispatch evidence.
+The exp39-style state/action repair matrix
+`exp39_state_action_ep100_wu10_4domain_20seed` completed. No single global
+module is yet promoted, but the signal is much stronger than the value-selector
+detours:
+
+```text
+candidate - same-run main, composite; lower is better
+upperdisc4 overall -0.0092 CI [-0.0302,+0.0054]
+upperdisc5 overall -0.0067 CI [-0.0220,+0.0105]
+upperdisc3 overall -0.0055 CI [-0.0220,+0.0118]
+spacectx_disc9 overall -0.0033 CI [-0.0172,+0.0093]
+histdisc overall -0.0002 CI [-0.0148,+0.0193]
+
+post-hoc domain-best:
+terminal -> upperdisc5
+highnoise -> upperdisc4
+odshift -> upperdisc5
+rushshift -> histdisc
+overall -0.0168 CI [-0.0352,-0.0017]
+```
+
+The confirmatory rerun completed as
+`exp39_domainbest_confirm_ep100_wu10_4domain_20seed`, scheduler tasks
+`t12318`-`t12329`. It failed to reproduce the post-hoc gain and is not
+promoted:
+
+```text
+domainbest_confirm - same-run main, composite; lower is better
+terminal -0.0002 CI [-0.0175,+0.0169]
+highnoise +0.0385 CI [-0.0102,+0.0888]
+odshift +0.0101 CI [-0.0092,+0.0278]
+rushshift +0.0054 CI [-0.0070,+0.0176]
+overall +0.0135 CI [-0.0024,+0.0377]
+```
+
+Across the original exp39 run and confirm rerun, the selected domain-best
+modules average only `-0.0017`, with highnoise flipping from helpful to harmful.
+Conclusion: the current exp39-style configs are useful negative/diagnostic
+evidence, but the fixed-headway gap is not solved by a simple domain-level
+choice of upper action alphabet/history.
+
+Follow-up correction: the first exp39 matrix tested upper discretization and
+upper history mostly as separate configs. The `upperhist` matrix
+(`upperhist_ep100_wu10_4domain_20seed`, scheduler tasks `t12359`-`t12381`)
+tested the actual combined repair: preserve each domain's main config, then add
+short upper state history plus near-fixed upper action bins (`upperhist3/4/5`).
+It also failed to close the gap:
+
+```text
+candidate - same-run main, composite; lower is better
+upperhist4 overall -0.0020 CI [-0.0136,+0.0130]
+upperhist5 overall +0.0013 CI [-0.0132,+0.0149]
+upperhist3 overall +0.0039 CI [-0.0104,+0.0230]
+post-hoc domain-best overall -0.0046 CI [-0.0166,+0.0063]
+```
+
+Conclusion: the straightforward exp39-style repair path is not robust in this
+FreqDuet setting. Future optimization should move to a stronger learned
+rollout/value planner or a more structural Phase-4 dispatch layer, not more
+manual domain-level action alphabet tuning.
+
+2026-06-22 active follow-up: after `upperhist` closed the simple
+exp39-style state/action route, the next repair moved back to
+counterfactual Phase-4 value learning. Added a new snapshot replay label,
+`risk_proxy_cost`, in `scripts/audit_freqduet_snapshot_counterfactual.py`.
+The old `proxy_cost` / `integrated_proxy_cost` remains unchanged for historical
+reproducibility; `risk_proxy_cost` adds explicit CV, fleet-overshoot,
+terminal-delay, and positive-offset risk terms inside the matched replay label
+instead of adding a hand-tuned deploy-time penalty after training.
+
+Local and remote compile checks passed, and a one-snapshot smoke verified that
+`risk_proxy_cost` is emitted and aggregate-able. The formal v7 trained-state
+snapshot matrix finished as scheduler-visible direct-node CPU tasks:
+
+```text
+run:
+results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800
+
+tasks:
+t12401 node001
+t12402 node002
+t12403 node003
+t12404 node004
+t12405 node005
+t12406 node006
+
+matrix:
+4 domains x 20 seeds
+burn-in episodes: 40
+snapshots per run: 12
+horizon: 1800s
+candidates: actor-relative target/terminalhold45 offsets [-30,-15,0,+15,+30]
+baseline: actor_term45_0
+metric: risk_proxy_cost
+```
+
+Promotion rule: only proceed to an online wrapper if the seed-held-out value
+model trained on `risk_proxy_cost` improves the actor baseline with a
+domain-safe CI and shows it is reducing CV/overshoot risk rather than merely
+collapsing to a single fixed target action. If it fails, this becomes negative
+evidence that the current first-stop/terminal value layer needs richer
+state/replay or a fuller terminal dispatch formulation.
+
+Status after aggregation/model fit:
+
+```text
+labels: 80/80 paired domain-seed labels aggregated
+best online-candidate model: random_forest_context_action_interact
+offline selected delta vs actor_term45_0: -0.0148
+95% CI: [-0.0274, -0.0043]
+
+per-domain selected deltas:
+terminal  -0.0168  CI [-0.0305, -0.0048]
+highnoise -0.0169  CI [-0.0355, -0.0031]
+odshift   -0.0135  CI [-0.0250, -0.0038]
+rushshift -0.0121  CI [-0.0232, -0.0030]
+```
+
+Caveat: component inspection shows the replay gain is mostly from CV and
+fleet-overshoot risk reduction. `target_launch_delay_s` was zero across these
+snapshot candidates, so this is a stronger action/value-planner repair, not a
+completed Phase-4 terminal-release value layer.
+
+Online wrapper screen completed but was not promoted:
+
+```text
+run:
+results_freqduet/snapshotriskvalue_m005_ep100_wu10_4domain_20seed
+
+tasks:
+t12416-t12475
+
+nodes:
+node001-node006
+
+matrix:
+current main + risk-value full + risk-value target-only
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup: 10
+```
+
+Result:
+
+```text
+full risk-value vs current main:
+overall composite delta -0.0007, 95% CI [-0.0138, +0.0125]
+
+target-only risk-value vs current main:
+overall composite delta -0.0006, 95% CI [-0.0161, +0.0152]
+```
+
+The wrapper was directionally useful in highnoise/odshift but regressed terminal
+and rushshift. Inspection showed the reason: `snapshotriskvalue_m005` replaced
+the already-promoted terminal-bias snapshot selector instead of stacking on top
+of it. That removed the positive terminal dispatch signal
+(`snapshot_value_terminal_bias_mean`) and changed the terminal launch behavior.
+This is negative evidence for the wrapper shape, not for the offline value model
+itself.
+
+Dual repair completed but is not promoted yet:
+
+```text
+run:
+results_freqduet/snapshotriskdual_m005_ep100_wu10_4domain_20seed
+
+tasks:
+t12480-t12509
+
+nodes:
+node001-node006
+
+matrix:
+current main + dual risk-value full + dual risk-value target-only
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup: 10
+```
+
+The dual repair keeps the current terminal-bias selector as the primary
+`snapshot_value_selector` and adds the risk-proxy action/value model as a
+secondary `snapshot_action_value_selector`. A local smoke test confirmed both
+signals are active in the same run: `snapshot_value_terminal_bias_mean > 0` and
+`snapshot_value_override_mean > 0`.
+
+Result:
+
+```text
+full dual vs current main:
+overall composite delta +0.0083, 95% CI [-0.0035, +0.0199]
+odshift delta +0.0225, 95% CI [+0.0023, +0.0446]
+rushshift delta +0.0097, 95% CI [+0.0005, +0.0195]
+
+target-only dual vs current main:
+overall composite delta -0.0029, 95% CI [-0.0154, +0.0100]
+terminal delta -0.0162, 95% CI [-0.0355, +0.0020]
+highnoise delta -0.0166, 95% CI [-0.0616, +0.0267]
+odshift delta +0.0147, 95% CI [-0.0015, +0.0321]
+rushshift delta +0.0065, 95% CI [-0.0023, +0.0150]
+
+target-only dual vs fixed-headway:
+overall composite delta -0.0430, 95% CI [-0.0879, -0.0006]
+```
+
+Interpretation: the full dual wrapper is clearly rejected because odshift and
+rushshift regress. The target-only dual is a useful but unsafe candidate: it
+turns the fixed-headway comparison significant and directionally improves
+terminal/highnoise, but it still slightly worsens odshift/rushshift and raises
+overall overshoot (`+0.0155`, 95% CI `[+0.0015, +0.0310]`). Next repair should
+keep the target-only demand-conditioned value benefit while adding an overshoot
+and terminal-bias-preservation guard around second-stage overrides.
+
+Targetguard repair completed but was not promoted:
+
+```text
+run:
+results_freqduet/snapshotriskdual_targetguard_m005_ep100_wu10_4domain_20seed
+
+tasks:
+t12528-t12547
+
+nodes:
+node001-node006
+
+matrix:
+current main + target-only dual with overshoot / terminal-bias guard
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup: 10
+```
+
+Mechanism: the guarded target-only value layer blocks the secondary override
+when the previous overshoot norm is above `0.18`, or when the override would
+erase any positive primary terminal-bias signal. Local smoke confirmed that
+`snapshot_value_guard_blocked_events` is nonzero, `snapshot_value_terminal_bias_s`
+is preserved for blocked events, and guard diagnostics are written to both
+episode diagnostics and trip-level logs.
+
+Result:
+
+```text
+targetguard vs current main:
+overall composite delta -0.0024, 95% CI [-0.0141, +0.0098]
+highnoise delta -0.0180, 95% CI [-0.0642, +0.0316]
+odshift delta +0.0048, 95% CI [-0.0141, +0.0227]
+rushshift delta -0.0001, 95% CI [-0.0101, +0.0103]
+overshoot delta +0.0078, 95% CI [-0.0012, +0.0168]
+
+targetguard vs fixed-headway:
+overall composite delta -0.0419, 95% CI [-0.0875, +0.0002]
+
+targetguard vs old target-only dual:
+overall composite delta +0.0010, 95% CI [-0.0100, +0.0120]
+overshoot delta -0.0060, 95% CI [-0.0177, +0.0052]
+```
+
+Interpretation: targetguard removed the old target-only dual's significant
+overshoot regression, but it is too strict. Override rate fell from roughly
+`0.133` to `0.018`, and the fixed-headway advantage became just barely
+non-significant. This is a useful guard mechanism but not the final setting.
+Next step is a looser guard sweep over primary-bias loss and previous-overshoot
+thresholds, rather than another code change.
+
+2026-06-22 looser targetguard threshold sweep is running through the scheduler,
+directly on `node001-node006`:
+
+```text
+run:
+results_freqduet/snapshotriskdual_targetguard_sweep_m005_ep100_wu10_4domain_20seed
+
+tasks:
+t12553-t12592
+
+nodes:
+node001-node006
+
+matrix:
+current main
+targetguard_b5o22    bias-loss <= 5s,  previous overshoot norm <= 0.22
+targetguard_b15o22   bias-loss <= 15s, previous overshoot norm <= 0.22
+targetguard_b15o30   bias-loss <= 15s, previous overshoot norm <= 0.30
+
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup: 10
+```
+
+Important correction and final result: the first sync of this sweep was
+premature and those partial CIs must not be cited. After waiting until all
+`320/320` diagnostics reached `100` episodes, the completed paired CI result is:
+
+```text
+b5o22 vs current main:
+overall composite delta -0.0029, 95% CI [-0.0126, +0.0059]
+overshoot delta -0.0000, 95% CI [-0.0138, +0.0148]
+vs fixed-headway overall -0.0401, 95% CI [-0.0908, +0.0060]
+
+b15o22 vs current main:
+overall composite delta -0.0038, 95% CI [-0.0154, +0.0089]
+overshoot delta +0.0102, 95% CI [-0.0003, +0.0212]
+vs fixed-headway overall -0.0409, 95% CI [-0.0868, -0.0003]
+
+b15o30 vs current main:
+overall composite delta -0.0043, 95% CI [-0.0146, +0.0067]
+overshoot delta +0.0077, 95% CI [-0.0045, +0.0192]
+vs fixed-headway overall -0.0415, 95% CI [-0.0908, +0.0055]
+```
+
+Interpretation: `b15o22` is the best looser-guard candidate. It ties current
+main and is the only threshold with a significant overall advantage versus
+fixed-headway. It still cuts terminal-bias preservation hard (`0.946` vs current
+main `2.315`) and raises overshoot directionally, so it needed the `targetnonpos`
+screen before promotion.
+
+Follow-up repair now running: `snapshotriskdual_targetnonpos_m005` shrinks the
+second-stage target-only action space to nonpositive offsets only:
+
+```text
+run:
+results_freqduet/snapshotriskdual_targetnonpos_m005_ep100_wu10_4domain_20seed
+
+tasks:
+t12594-t12613
+
+allowed methods:
+actor_target_m30
+actor_target_m15
+actor_target_0
+
+matrix:
+current main + targetnonpos
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup: 10
+```
+
+Rationale: trip diagnostics from old target-only and the looser guard sweep show
+that most unsafe overrides are `actor_target_p15/p30`; even when previous
+overshoot is low and primary terminal bias is near zero, positive target offsets
+still raise overshoot. This test follows the SUMO-RL-style action-space shrink
+idea more directly than another threshold sweep. Local warmup=0 smoke confirmed
+nonzero override events and no positive-offset selected methods. Promotion bar:
+no significant overshoot regression, no material current-main degradation, and
+paired competitiveness versus fixed-headway.
+
+Final targetnonpos result:
+
+```text
+targetnonpos vs current main:
+overall composite delta +0.0002, 95% CI [-0.0094, +0.0098]
+overshoot delta +0.0140, 95% CI [+0.0018, +0.0262]
+
+targetnonpos vs fixed-headway:
+overall composite delta -0.0468, 95% CI [-0.0930, -0.0014]
+
+targetnonpos vs b15o22:
+overall composite delta -0.0059, 95% CI [-0.0193, +0.0077]
+overshoot delta +0.0015, 95% CI [-0.0125, +0.0155]
+```
+
+Decision: do not promote targetnonpos. It validates the action-space-shrink
+intuition and is competitive with fixed-headway, but it still has a significant
+overshoot regression against current main. Promote `targetguard_b15o22` instead:
+it is the cleaner main alias because it ties current main, has a significant
+overall advantage versus fixed-headway, and does not have a significant
+overshoot regression.
 
 2026-06-17 figure follow-up: generated updated current-name mechanism and
 decomposer packages:

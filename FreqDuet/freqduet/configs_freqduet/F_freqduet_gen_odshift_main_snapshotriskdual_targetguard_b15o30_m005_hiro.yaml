@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_odshift_main_snapshotriskdual_targetonly_m005_hiro.yaml
+_name: F_freqduet_gen_odshift_main_snapshotriskdual_targetguard_b15o30_m005_hiro
+
+upper:
+  snapshot_action_value_selector:
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.30
+      max_primary_terminal_bias_loss_s: 15.0

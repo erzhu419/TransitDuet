@@ -111,6 +111,7 @@ def infer_method(config):
         "disc9",
         "sumorl_rawhist_holdrl",
         "sumorl_holdrl",
+        "snapshotriskdual_targetnonpos",
         "fixedselector_balanced",
         "fixedselector",
         "headfloor100",

@@ -33,6 +33,27 @@ upper:
       - actor_target_p30
       - actor_term45_p15
       - actor_term45_p30
+  # 2026-06-22: promote the scheduler-verified b15o22 targetguard layer.
+  # It keeps the terminal-bias value selector from current main, then permits a
+  # guarded target-only upper action override when the rollout-trained
+  # risk-proxy model predicts enough margin.
+  snapshot_action_value_selector:
+    enable: true
+    domain: terminal
+    artifact: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/value_model_riskproxy_residual/model_artifact
+    fallback_method: actor_term45_0
+    fallback_action: actor
+    improve_margin: 0.005
+    allowed_methods:
+      - actor_target_m30
+      - actor_target_m15
+      - actor_target_0
+      - actor_target_p15
+      - actor_target_p30
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.22
+      max_primary_terminal_bias_loss_s: 15.0
 
 frequency:
   promotion:
@@ -69,6 +90,7 @@ leakage:
   lower_drift_cost_cap: 1.0
 
 training:
+  trip_dump_freq: 1
   longtrain_stability:
     freeze_lower_policy_after_ep: 100
     freeze_upper_after_ep: 100

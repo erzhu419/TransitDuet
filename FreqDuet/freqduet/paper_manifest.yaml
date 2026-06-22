@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-17
+version: 2026-06-21
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -78,6 +78,19 @@ metrics:
     - fixed_selector_fixed_cost_ema
     - fixed_selector_learned_count
     - fixed_selector_fixed_count
+    - snapshot_value_candidate_gate_cap_mean
+    - snapshot_value_candidate_gate_filtered_mean
+    - snapshot_value_risk_score_mean
+    - snapshot_value_risk_penalty_mean
+    - snapshot_value_risk_penalty_max_mean
+    - cf_action_selector_enabled
+    - cf_action_selector_active_mean
+    - cf_action_selector_events
+    - cf_action_selector_changed_mean
+    - cf_action_selector_terminal_dispatch_mean
+    - cf_action_selector_delta_mean
+    - cf_action_selector_delta_std
+    - cf_action_selector_confidence_mean
 
 config_sets:
   current_longtrain_4x6:
@@ -401,7 +414,91 @@ config_sets:
       - -20
       - 0
       - 20
-    note: trip-context action counterfactual export with diagnostics trip_dump_freq=1; negative evidence only
+    note: trip-context action counterfactual export with diagnostics trip_dump_freq=1; ep60 diagnostic was negative, ep100 rerun is active for stronger matched-label fitting
+
+  cfactiontree_online_validation_4x6:
+    generator: manual configs plus scripts/fit_freqduet_trip_action_tree_selector.py artifact
+    terminal:
+      main: F_freqduet_terminal_main_hiro
+      cfactiontree: F_freqduet_terminal_main_cfactiontree_hiro
+      fixedselector_balanced: F_freqduet_terminal_main_fixedselector_balanced_hiro
+      target0: F_freqduet_terminal_main_cfaction_v2_target_dp0_hiro
+      target_m20: F_freqduet_terminal_main_cfaction_v2_target_dm20_hiro
+      terminalhold45_m20: F_freqduet_terminal_main_cfaction_v2_terminalhold45_dm20_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_main_hiro
+      cfactiontree: F_freqduet_gen_highnoise_main_cfactiontree_hiro
+      fixedselector_balanced: F_freqduet_gen_highnoise_main_fixedselector_balanced_hiro
+      target0: F_freqduet_gen_highnoise_main_cfaction_v2_target_dp0_hiro
+      target_m20: F_freqduet_gen_highnoise_main_cfaction_v2_target_dm20_hiro
+      terminalhold45_m20: F_freqduet_gen_highnoise_main_cfaction_v2_terminalhold45_dm20_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_main_hiro
+      cfactiontree: F_freqduet_gen_odshift_main_cfactiontree_hiro
+      fixedselector_balanced: F_freqduet_gen_odshift_main_fixedselector_balanced_hiro
+      target0: F_freqduet_gen_odshift_main_cfaction_v2_target_dp0_hiro
+      target_m20: F_freqduet_gen_odshift_main_cfaction_v2_target_dm20_hiro
+      terminalhold45_m20: F_freqduet_gen_odshift_main_cfaction_v2_terminalhold45_dm20_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_main_hiro
+      cfactiontree: F_freqduet_gen_rushshift_main_cfactiontree_hiro
+      fixedselector_balanced: F_freqduet_gen_rushshift_main_fixedselector_balanced_hiro
+      target0: F_freqduet_gen_rushshift_main_cfaction_v2_target_dp0_hiro
+      target_m20: F_freqduet_gen_rushshift_main_cfaction_v2_target_dm20_hiro
+      terminalhold45_m20: F_freqduet_gen_rushshift_main_cfaction_v2_terminalhold45_dm20_hiro
+    note: online deployable tree selector validation; cfactiontree uses pure JSON tree scorer and disables later value selectors when active
+
+  cfactionrule_v1_4x1:
+    generator: manual disturbance-conditioned rule configs
+    terminal:
+      cfactionrule_v1: F_freqduet_terminal_main_cfactionrule_v1_hiro
+      rule_action: target0
+      terminal_dispatch: false
+    highnoise:
+      cfactionrule_v1: F_freqduet_gen_highnoise_main_cfactionrule_v1_hiro
+      rule_action: terminalhold45_m20
+      terminal_dispatch: true
+    odshift:
+      cfactionrule_v1: F_freqduet_gen_odshift_main_cfactionrule_v1_hiro
+      rule_action: target_m20
+      terminal_dispatch: false
+    rushshift:
+      cfactionrule_v1: F_freqduet_gen_rushshift_main_cfactionrule_v1_hiro
+      rule_action: target0
+      terminal_dispatch: false
+    note: explicit confirmatory configs for the best simple disturbance-conditioned rule from the cfactiontree online matrix; target-only branches override inherited terminal_dispatch plumbing; completed run was not promoted
+
+  exp39_state_action_4x6:
+    generator: existing exp39-style state/action repair configs
+    methods: [main, upperdisc3, upperdisc4, upperdisc5, histdisc, spacectx_disc9]
+    domains: [terminal, highnoise, odshift, rushshift]
+    note: tests whether the fixed-headway gap is better addressed by upper action discretization, short upper history, or local spatiotemporal context plus finer lower action bins
+
+  exp39_domainbest_confirm_4x2:
+    generator: manual confirmatory subset from exp39_state_action_4x6
+    terminal:
+      main: F_freqduet_terminal_main_hiro
+      candidate: F_freqduet_terminal_main_upperdisc5_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_main_hiro
+      candidate: F_freqduet_gen_highnoise_main_upperdisc4_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_main_hiro
+      candidate: F_freqduet_gen_odshift_main_upperdisc5_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_main_hiro
+      candidate: F_freqduet_gen_rushshift_main_histdisc_hiro
+    note: confirmatory rerun for the posthoc domain-best exp39-style repair before any promotion
+
+  upperhist_4x4:
+    generator: manual configs
+    methods: [main, upperhist3, upperhist4, upperhist5]
+    domains: [terminal, highnoise, odshift, rushshift]
+    note: >
+      True exp39-style combination test: each candidate preserves its domain
+      main config and adds short upper state history plus near-fixed upper
+      action bins. This avoids the earlier generated-domain inheritance trap
+      where some upperdisc variants extended terminal configs directly.
 
   termhold45_candidate_4x1:
     terminal:
@@ -1373,6 +1470,648 @@ experiments:
       adaptdrift: results_freqduet/noharm_loweronly_adaptdrift_ep200_wu10/compare_adaptdrift_ep200_vs_external_fixed/external_baseline_paired_deltas.csv
     note: lower-only no-harm did not survive 200ep; stronger/adaptive drift cost traded terminal/rush gains for OD/highnoise damage
 
+  snapshot_cap_candidates_ep200_wu10:
+    status: complete_negative_results
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_sets:
+      - snapshotnoisegate_4domain
+      - snapshotdomaincap_4domain
+      - snapshotodtermcap_4domain
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dirs:
+      snapshotnoisegate: results_freqduet/snapshotnoisegate_ep200_wu10_4domain_20seed
+      snapshotdomaincap: results_freqduet/snapshotdomaincap_ep200_wu10_4domain_20seed
+      snapshotodtermcap: results_freqduet/snapshotodtermcap_ep200_wu10_4domain_20seed
+    paired_deltas:
+      snapshotnoisegate:
+        overall_vs_current_main_delta_candidate_minus_main: 0.0005
+        overall_vs_current_main_delta_ci95: [-0.0075, 0.0087]
+        overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0091
+        overall_vs_fixed_headway_delta_ci95: [-0.0004, 0.0202]
+      snapshotdomaincap:
+        overall_vs_current_main_delta_candidate_minus_main: -0.0077
+        overall_vs_current_main_delta_ci95: [-0.0174, 0.0023]
+        rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0097
+        rushshift_vs_fixed_headway_delta_ci95: [0.0006, 0.0198]
+        overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0009
+        overall_vs_fixed_headway_delta_ci95: [-0.0083, 0.0110]
+      snapshotodtermcap:
+        overall_vs_current_main_delta_candidate_minus_main: -0.0016
+        overall_vs_current_main_delta_ci95: [-0.0108, 0.0076]
+        terminal_vs_fixed_headway_delta_candidate_minus_fixed: 0.0088
+        terminal_vs_fixed_headway_delta_ci95: [0.0001, 0.0178]
+        rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0109
+        rushshift_vs_fixed_headway_delta_ci95: [0.0039, 0.0187]
+        overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0070
+        overall_vs_fixed_headway_delta_ci95: [-0.0027, 0.0166]
+    note: terminal-bias candidate caps can improve selected domains but do not satisfy the promotion rule; snapshotdomaincap helps current-main directionally but loses to fixed-headway in rushshift, and snapshotodtermcap still loses to fixed-headway in terminal/rushshift. Keep as negative evidence, not paper main.
+
+  spacectx_disc9_ep200_wu10:
+    status: complete_negative_result
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: spacectx_disc9_4domain
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t11965, t11966, t11967, t11968, t11969, t11970]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/spacectx_disc9_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/spacectx_disc9_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/spacectx_disc9_ep200_wu10_4domain_20seed/compare_spacectx_disc9_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/spacectx_disc9_ep200_wu10_4domain_20seed/compare_spacectx_disc9_vs_external_fixed_ep200
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: 0.0009
+      overall_vs_current_main_delta_ci95: [-0.0095, 0.0129]
+      highnoise_vs_current_main_delta_candidate_minus_main: -0.0052
+      highnoise_vs_current_main_delta_ci95: [-0.0324, 0.0226]
+      odshift_vs_current_main_delta_candidate_minus_main: -0.0098
+      odshift_vs_current_main_delta_ci95: [-0.0234, 0.0028]
+      terminal_vs_fixed_headway_delta_candidate_minus_fixed: 0.0244
+      terminal_vs_fixed_headway_delta_ci95: [0.0009, 0.0609]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0132
+      rushshift_vs_fixed_headway_delta_ci95: [0.0038, 0.0230]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0094
+      overall_vs_fixed_headway_delta_ci95: [-0.0002, 0.0200]
+    note: SUMO-RL-style repair with lower spatiotemporal context and 9-bin discrete holding improves highnoise/odshift directionally but hurts terminal/rushshift and is significantly worse than fixed-headway in those domains; do not promote globally.
+
+  spacectx_causalgate_histprior_ep200_wu10:
+    status: complete_negative_result
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: spacectx_causalgate_4domain
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12009, t12010, t12011, t12012, t12013, t12014]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/spacectx_causalgate_histprior_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/spacectx_causalgate_histprior_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/spacectx_causalgate_histprior_ep200_wu10_4domain_20seed/compare_spacectx_causalgate_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/spacectx_causalgate_histprior_ep200_wu10_4domain_20seed/compare_spacectx_causalgate_vs_external_fixed_ep200
+    raw_logs_removed: true
+    candidate_mechanism: history-prior causal gate for lower spatiotemporal context and 9-bin lower holding; highnoise branch uses freq_promotion_absorbed >= 0.12, OD branch uses freq_od_entropy <= 0.9535, with min_episode 40 and min_history_episodes 30.
+    gate_diagnostics_last100_mean:
+      terminal: 0.0790
+      highnoise: 1.0000
+      odshift: 0.8210
+      rushshift: 0.0005
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: 0.0028
+      overall_vs_current_main_delta_ci95: [-0.0078, 0.0127]
+      terminal_vs_current_main_delta_candidate_minus_main: 0.0003
+      terminal_vs_current_main_delta_ci95: [-0.0152, 0.0153]
+      highnoise_vs_current_main_delta_candidate_minus_main: -0.0005
+      highnoise_vs_current_main_delta_ci95: [-0.0268, 0.0237]
+      odshift_vs_current_main_delta_candidate_minus_main: -0.0003
+      odshift_vs_current_main_delta_ci95: [-0.0163, 0.0155]
+      rushshift_vs_current_main_delta_candidate_minus_main: 0.0117
+      rushshift_vs_current_main_delta_ci95: [-0.0007, 0.0235]
+      terminal_vs_fixed_headway_delta_candidate_minus_fixed: 0.0105
+      terminal_vs_fixed_headway_delta_ci95: [-0.0012, 0.0219]
+      highnoise_vs_fixed_headway_delta_candidate_minus_fixed: 0.0026
+      highnoise_vs_fixed_headway_delta_ci95: [-0.0254, 0.0301]
+      odshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0116
+      odshift_vs_fixed_headway_delta_ci95: [-0.0030, 0.0267]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0206
+      rushshift_vs_fixed_headway_delta_ci95: [0.0119, 0.0326]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0113
+      overall_vs_fixed_headway_delta_ci95: [0.0030, 0.0197]
+    note: The causal gate solved the earlier global-spacectx specificity problem in diagnostics, but it did not improve performance; it statistically ties current main overall and remains significantly worse than fixed-headway overall, with a rushshift regression. This closes the lower spatiotemporal/discrete-action repair branch as negative evidence; do not promote or keep tuning this globally.
+
+  snapshotriskpenalty_ep200_wu10:
+    status: complete_candidate_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotriskpenalty_4domain
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12022, t12023, t12024, t12025, t12026, t12027]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed/compare_snapshotriskpenalty_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed/compare_snapshotriskpenalty_vs_external_fixed_ep200
+    candidate_mechanism: deploy-time risk penalty for rollout-trained snapshot terminal-bias value selector; keeps the main value model and candidate set, but penalizes positive offsets above +15s under previous/current CV, fleet overshoot, terminal launch-shift, and fleet-pressure risk.
+    config_files:
+      - configs_freqduet/F_freqduet_terminal_main_snapshotriskpenalty_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_highnoise_main_snapshotriskpenalty_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_odshift_main_snapshotriskpenalty_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotriskpenalty_hiro.yaml
+    new_diagnostics:
+      - snapshot_value_risk_score_mean
+      - snapshot_value_risk_penalty_mean
+      - snapshot_value_risk_penalty_max_mean
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: -0.0062
+      overall_vs_current_main_delta_ci95: [-0.0157, 0.0039]
+      terminal_vs_current_main_delta_candidate_minus_main: -0.0075
+      terminal_vs_current_main_delta_ci95: [-0.0192, 0.0033]
+      highnoise_vs_current_main_delta_candidate_minus_main: -0.0204
+      highnoise_vs_current_main_delta_ci95: [-0.0536, 0.0124]
+      odshift_vs_current_main_delta_candidate_minus_main: -0.0002
+      odshift_vs_current_main_delta_ci95: [-0.0138, 0.0120]
+      rushshift_vs_current_main_delta_candidate_minus_main: 0.0035
+      rushshift_vs_current_main_delta_ci95: [-0.0035, 0.0111]
+      terminal_vs_fixed_headway_delta_candidate_minus_fixed: 0.0026
+      terminal_vs_fixed_headway_delta_ci95: [-0.0104, 0.0149]
+      highnoise_vs_fixed_headway_delta_candidate_minus_fixed: -0.0173
+      highnoise_vs_fixed_headway_delta_ci95: [-0.0537, 0.0151]
+      odshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0117
+      odshift_vs_fixed_headway_delta_ci95: [-0.0009, 0.0247]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0124
+      rushshift_vs_fixed_headway_delta_ci95: [0.0017, 0.0237]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: 0.0023
+      overall_vs_fixed_headway_delta_ci95: [-0.0086, 0.0137]
+    note: Directionally improves current main and closes the overall fixed-headway gap, but rushshift remains significantly worse than fixed-headway; do not promote alone. Use as the highnoise branch in snapshotriskmix.
+
+  snapshotriskmix_norerun_ep200_wu10:
+    status: complete_candidate_promising_needs_alias_or_heldout_validation
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotriskmix_4domain
+    result_dir: results_freqduet/snapshotriskmix_norerun_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/snapshotriskmix_norerun_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/snapshotriskmix_norerun_ep200_wu10_4domain_20seed/compare_snapshotriskmix_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/snapshotriskmix_norerun_ep200_wu10_4domain_20seed/compare_snapshotriskmix_vs_external_fixed_ep200
+    source_completed_runs:
+      terminal: results_freqduet/snapshottermbias_cap15_ep200_wu10_4domain_20seed
+      highnoise: results_freqduet/snapshotriskpenalty_ep200_wu10_4domain_20seed
+      odshift: results_freqduet/snapshotdomaincap_ep200_wu10_4domain_20seed
+      rushshift: results_freqduet/snapshottermbias_cap15_ep200_wu10_4domain_20seed
+    config_files:
+      - configs_freqduet/F_freqduet_terminal_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_highnoise_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_odshift_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotriskmix_hiro.yaml
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: -0.0127
+      overall_vs_current_main_delta_ci95: [-0.0228, -0.0026]
+      terminal_vs_current_main_delta_candidate_minus_main: -0.0116
+      terminal_vs_current_main_delta_ci95: [-0.0249, 0.0010]
+      highnoise_vs_current_main_delta_candidate_minus_main: -0.0204
+      highnoise_vs_current_main_delta_ci95: [-0.0525, 0.0112]
+      odshift_vs_current_main_delta_candidate_minus_main: -0.0146
+      odshift_vs_current_main_delta_ci95: [-0.0283, -0.0008]
+      rushshift_vs_current_main_delta_candidate_minus_main: -0.0043
+      rushshift_vs_current_main_delta_ci95: [-0.0123, 0.0029]
+      terminal_vs_fixed_headway_delta_candidate_minus_fixed: -0.0014
+      terminal_vs_fixed_headway_delta_ci95: [-0.0155, 0.0114]
+      highnoise_vs_fixed_headway_delta_candidate_minus_fixed: -0.0173
+      highnoise_vs_fixed_headway_delta_ci95: [-0.0541, 0.0151]
+      odshift_vs_fixed_headway_delta_candidate_minus_fixed: -0.0027
+      odshift_vs_fixed_headway_delta_ci95: [-0.0184, 0.0136]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0045
+      rushshift_vs_fixed_headway_delta_ci95: [-0.0045, 0.0143]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: -0.0042
+      overall_vs_fixed_headway_delta_ci95: [-0.0159, 0.0078]
+    note: Seed-level no-rerun domain-prior mix over completed 200ep runs; first branch that significantly improves current main and removes significant fixed-headway losses in every domain. Because the mix was selected after inspecting completed candidate matrices, validate via same-name alias rerun or held-out-seed matrix before declaring final paper main.
+
+  snapshotriskmix_alias_ep200_wu10:
+    status: complete_candidate_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotriskmix_4domain
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12059, t12060, t12061, t12062, t12063, t12064]
+    result_dir: results_freqduet/snapshotriskmix_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/snapshotriskmix_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/snapshotriskmix_ep200_wu10_4domain_20seed/compare_snapshotriskmix_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/snapshotriskmix_ep200_wu10_4domain_20seed/compare_snapshotriskmix_vs_external_fixed_ep200
+    config_files:
+      - configs_freqduet/F_freqduet_terminal_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_highnoise_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_odshift_main_snapshotriskmix_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotriskmix_hiro.yaml
+    paired_deltas:
+      overall_vs_current_main_delta_candidate_minus_main: -0.0088
+      overall_vs_current_main_delta_ci95: [-0.0185, 0.0003]
+      terminal_vs_current_main_delta_candidate_minus_main: -0.0097
+      terminal_vs_current_main_delta_ci95: [-0.0238, 0.0031]
+      highnoise_vs_current_main_delta_candidate_minus_main: -0.0107
+      highnoise_vs_current_main_delta_ci95: [-0.0362, 0.0148]
+      odshift_vs_current_main_delta_candidate_minus_main: -0.0142
+      odshift_vs_current_main_delta_ci95: [-0.0287, 0.0002]
+      rushshift_vs_current_main_delta_candidate_minus_main: -0.0007
+      rushshift_vs_current_main_delta_ci95: [-0.0074, 0.0060]
+      terminal_vs_fixed_headway_delta_candidate_minus_fixed: 0.0004
+      terminal_vs_fixed_headway_delta_ci95: [-0.0108, 0.0118]
+      highnoise_vs_fixed_headway_delta_candidate_minus_fixed: -0.0076
+      highnoise_vs_fixed_headway_delta_ci95: [-0.0394, 0.0256]
+      odshift_vs_fixed_headway_delta_candidate_minus_fixed: -0.0023
+      odshift_vs_fixed_headway_delta_ci95: [-0.0179, 0.0139]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0082
+      rushshift_vs_fixed_headway_delta_ci95: [0.0000, 0.0171]
+      overall_vs_fixed_headway_delta_candidate_minus_fixed: -0.0003
+      overall_vs_fixed_headway_delta_ci95: [-0.0118, 0.0125]
+    note: Same-name alias validation remains directionally better than current main but does not reproduce the no-rerun significant improvement; rushshift is still borderline worse than fixed-headway. Do not promote as final main.
+
+  snapshotzerobias_rush_ep200_wu10:
+    status: complete_rush_diagnostic_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotzerobias_rush_only
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12067, t12068, t12069, t12070, t12071]
+    result_dir: results_freqduet/snapshotzerobias_rush_ep200_wu10_20seed
+    per_seed_csv: results_freqduet/snapshotzerobias_rush_ep200_wu10_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/snapshotzerobias_rush_ep200_wu10_20seed/compare_snapshotzerobias_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/snapshotzerobias_rush_ep200_wu10_20seed/compare_snapshotzerobias_vs_external_fixed_ep200
+    config_files:
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotzerobias_hiro.yaml
+    paired_deltas:
+      rushshift_vs_current_main_delta_candidate_minus_main: 0.0004
+      rushshift_vs_current_main_delta_ci95: [-0.0074, 0.0071]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0093
+      rushshift_vs_fixed_headway_delta_ci95: [0.0008, 0.0172]
+    note: Rush-only zero positive terminal-bias diagnostic; it ties current main and remains significantly worse than fixed-headway, so the fixed-headway gap is not solved by globally removing positive terminal bias.
+
+  snapshotrushriskgate_rush_ep200_wu10:
+    status: complete_rush_diagnostic_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotrushriskgate_rush_only
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12077, t12078, t12079, t12080, t12081]
+    scheduler_nodes: [node004, node001, node006, node002, node003]
+    result_dir: results_freqduet/snapshotrushriskgate_rush_ep200_wu10_20seed
+    per_seed_csv: results_freqduet/snapshotrushriskgate_rush_ep200_wu10_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dir_vs_main: results_freqduet/snapshotrushriskgate_rush_ep200_wu10_20seed/compare_snapshotrushriskgate_vs_main_domainfix_ep200
+    comparison_dir_vs_fixed_headway: results_freqduet/snapshotrushriskgate_rush_ep200_wu10_20seed/compare_snapshotrushriskgate_vs_external_fixed_ep200
+    config_files:
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotrushriskgate_hiro.yaml
+    candidate_mechanism: rush-only causal hard candidate gate; normal states use cap15 positive terminal-bias candidates, but previous-episode high CV, normalized overshoot, or launch-shift variance hard-caps positive offsets to zero.
+    paired_deltas:
+      rushshift_vs_current_main_delta_candidate_minus_main: -0.0008
+      rushshift_vs_current_main_delta_ci95: [-0.0067, 0.0057]
+      rushshift_vs_fixed_headway_delta_candidate_minus_fixed: 0.0081
+      rushshift_vs_fixed_headway_delta_ci95: [-0.0013, 0.0182]
+    note: Best rush risk-gate variant by mean, but improvement over current main is negligible and CI crosses zero; it only removes fixed-headway significance while remaining worse in mean. Do not promote.
+
+  snapshotrushriskgate_variants_rush_ep200_wu10:
+    status: complete_threshold_sweep_not_promoted
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotrushriskgate_variants_rush_only
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12082, t12083, t12084, t12085, t12086, t12087, t12088, t12089, t12090, t12091]
+    scheduler_nodes: [node005, node001, node006, node004, node002, node003, node005, node001, node006, node004]
+    result_dir: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed
+    per_seed_csv: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/combined_summary/freqduet_ablation_per_seed.csv
+    comparison_dirs_vs_main:
+      loose0: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_loose0_vs_main_domainfix_ep200
+      soft7: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_soft7_vs_main_domainfix_ep200
+      tight7: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_tight7_vs_main_domainfix_ep200
+    comparison_dirs_vs_fixed_headway:
+      loose0: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_loose0_vs_external_fixed_ep200
+      soft7: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_soft7_vs_external_fixed_ep200
+      tight7: results_freqduet/snapshotrushriskgate_variants_rush_ep200_wu10_3x20seed/compare_tight7_vs_external_fixed_ep200
+    config_files:
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotrushriskgate_loose0_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotrushriskgate_soft7_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotrushriskgate_tight7_hiro.yaml
+    candidate_mechanism: parallel rush-only threshold sweep over the same causal candidate gate; loose0 gates only extreme instability to zero, soft7 keeps a 7.5s positive option under mid-risk, and tight7 detects risk earlier while avoiding the full zero-bias failure mode.
+    paired_deltas:
+      loose0_vs_current_main_delta_candidate_minus_main: 0.0039
+      loose0_vs_current_main_delta_ci95: [-0.0031, 0.0114]
+      loose0_vs_fixed_headway_delta_candidate_minus_fixed: 0.0128
+      loose0_vs_fixed_headway_delta_ci95: [0.0041, 0.0216]
+      soft7_vs_current_main_delta_candidate_minus_main: 0.0027
+      soft7_vs_current_main_delta_ci95: [-0.0037, 0.0091]
+      soft7_vs_fixed_headway_delta_candidate_minus_fixed: 0.0116
+      soft7_vs_fixed_headway_delta_ci95: [0.0012, 0.0232]
+      tight7_vs_current_main_delta_candidate_minus_main: 0.0007
+      tight7_vs_current_main_delta_ci95: [-0.0065, 0.0084]
+      tight7_vs_fixed_headway_delta_candidate_minus_fixed: 0.0096
+      tight7_vs_fixed_headway_delta_ci95: [-0.0005, 0.0206]
+    note: None of the threshold variants improves current main or beats fixed-headway; static terminal-bias cap/risk-gate tuning is closed as negative evidence.
+
+  snapshotactorrel_action_rush_ep200_wu10:
+    status: complete_invalid_config_not_action_override
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotactorrel_action_rush_only
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12116, t12117, t12118, t12119, t12120, t12121, t12122, t12123, t12124, t12125]
+    scheduler_nodes: [node001, node006, node004, node002, node005, node003, node001, node006, node004, node002]
+    result_dir: results_freqduet/snapshotactorrel_action_rush_ep200_wu10_3x20seed
+    per_seed_csv: results_freqduet/snapshotactorrel_action_rush_ep200_wu10_3x20seed/combined_summary/freqduet_ablation_per_seed.csv
+    config_files:
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_m02_hiro.yaml
+    note: Invalid for intended action-override test because snapshotactorrel_hiro inherited apply_mode=terminal_bias from the current main root; diagnostics showed snapshot_value_override_mean=0. Keep only as config-inheritance diagnostic, not as performance evidence.
+
+  snapshotactorrel_actionfix_rush_ep200_wu10:
+    status: complete_negative_result
+    episodes: 200
+    last_k: 100
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: snapshotactorrel_action_rush_only
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12151, t12152, t12153, t12154, t12155, t12156, t12157, t12158, t12159, t12160]
+    scheduler_nodes: [node006, node004, node001, node002, node005, node003, node004, node001, node006, node002]
+    result_dir: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed
+    per_seed_csv: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/combined_summary/freqduet_ablation_summary.csv
+    comparison_dirs_vs_main:
+      snapshotactorrel: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_snapshotactorrel_vs_main_domainfix_ep200
+      targetonly: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_targetonly_vs_main_domainfix_ep200
+      targetonly_m02: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_targetonly_m02_vs_main_domainfix_ep200
+    comparison_dirs_vs_fixed_headway:
+      snapshotactorrel: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_snapshotactorrel_vs_external_fixed_ep200
+      targetonly: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_targetonly_vs_external_fixed_ep200
+      targetonly_m02: results_freqduet/snapshotactorrel_actionfix_rush_ep200_wu10_3x20seed/compare_targetonly_m02_vs_external_fixed_ep200
+    config_files:
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_hiro.yaml
+      - configs_freqduet/F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_m02_hiro.yaml
+    candidate_mechanism: corrected rush-only action-override value selector using the v6 actor-relative snapshot artifact; explicitly sets upper.snapshot_value_selector.apply_mode=action_override and tests full candidate set versus target-only candidate sets.
+    paired_findings:
+      snapshotactorrel_composite_mean: 1.3383
+      snapshotactorrel_override_mean: 0.1546
+      snapshotactorrel_vs_current_main_delta_candidate_minus_main: 0.0189
+      snapshotactorrel_vs_current_main_delta_ci95: [0.0021, 0.0426]
+      snapshotactorrel_vs_fixed_headway_delta_candidate_minus_fixed: 0.0277
+      snapshotactorrel_vs_fixed_headway_delta_ci95: [0.0126, 0.0485]
+      targetonly_composite_mean: 1.3213
+      targetonly_override_mean: 0.31
+      targetonly_vs_current_main_delta_candidate_minus_main: 0.0019
+      targetonly_vs_current_main_delta_ci95: [-0.0027, 0.0067]
+      targetonly_vs_fixed_headway_delta_candidate_minus_fixed: 0.0107
+      targetonly_vs_fixed_headway_delta_ci95: [0.0014, 0.0222]
+      targetonly_m02_composite_mean: 1.3221
+      targetonly_m02_override_mean: 0.0836
+      targetonly_m02_vs_current_main_delta_candidate_minus_main: 0.0027
+      targetonly_m02_vs_current_main_delta_ci95: [-0.0035, 0.0092]
+      targetonly_m02_vs_fixed_headway_delta_candidate_minus_fixed: 0.0115
+      targetonly_m02_vs_fixed_headway_delta_ci95: [0.0021, 0.0218]
+    note: Action override was active, but full actor-relative override significantly worsened current main and target-only variants remained significantly worse than fixed-headway. Do not promote; move to fresh matched CRN action labels with richer context.
+
+  cfaction_v2_ep100_wu10_4domain_20seed:
+    status: complete_diagnostic_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: cfaction_v2_4x6_trip_dump_freq_1
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    followup_trip_value_script: scripts/build_freqduet_trip_counterfactual_value_dataset.py
+    followup_oracle_classifier_script: scripts/fit_freqduet_trip_oracle_classifier.py
+    scheduler_tasks: [t12171, t12172, t12173, t12174, t12175, t12176, t12177, t12178, t12179, t12180]
+    scheduler_nodes: [node004, node006, node001, node002, node005, node003, node004, node006, node001, node002]
+    result_dir: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    analysis_dir: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/action_counterfactual_analysis
+    trip_action_value_model_dir: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/trip_action_value_model
+    trip_oracle_classifier_hgb_dir: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/trip_oracle_classifier_hgb
+    trip_value_scheduler_task: t12238
+    trip_value_scheduler_note: t12238 wrote complete summary files then scheduler marked it failed during/after process finalization; auto-retry t12240 was cancelled to avoid duplicate compute.
+    paired_findings:
+      rows: 480
+      overall_best_fixed_action: terminalhold45_delta_minus20
+      overall_best_composite_mean: 1.4889
+      overall_target0_composite_mean: 1.4970
+      overall_best_minus_target0_composite_delta: -0.0081
+      overall_best_minus_target0_composite_ci95: [-0.0200, 0.0041]
+      terminal_best_action: target_delta_minus20
+      terminal_best_minus_target0_composite_delta: -0.0091
+      terminal_best_minus_target0_composite_ci95: [-0.0272, 0.0082]
+      highnoise_best_action: terminalhold45_delta_minus20
+      highnoise_best_minus_target0_composite_delta: -0.0180
+      highnoise_best_minus_target0_composite_ci95: [-0.0654, 0.0295]
+      odshift_best_action: target_delta_minus20
+      odshift_best_minus_target0_composite_delta: -0.0087
+      odshift_best_minus_target0_composite_ci95: [-0.0294, 0.0134]
+      rushshift_best_action: terminalhold45_delta_minus20
+      rushshift_best_minus_target0_composite_delta: -0.0026
+      rushshift_best_minus_target0_composite_ci95: [-0.0132, 0.0084]
+    trip_action_value_findings:
+      metric: gap_dev
+      trip_files: 480
+      matched_trip_context_rows: 1048000
+      long_rows: 6288000
+      target0_trip_gap_mean: 0.1041
+      oracle_best_trip_gap_mean: 0.0238
+      action_domain_trip_gap_mean: 0.1042
+      action_domain_delta_vs_target0_ci95: [-0.0008, 0.0010]
+      context_action_trip_gap_mean: 0.1042
+      context_action_delta_vs_target0_ci95: [-0.0008, 0.0011]
+      domain_action_mean_trip_gap_mean: 0.1042
+      domain_action_mean_delta_vs_target0_ci95: [-0.0008, 0.0011]
+      context_action_interact_trip_gap_mean: 0.1127
+      context_action_interact_delta_vs_target0_ci95: [0.0052, 0.0134]
+      interpretation: last-50 trip-level CRN labels expose large oracle headroom but the current linear/ridge selectors do not improve seed-held-out target0; dense context-action interactions overfit and significantly worsen.
+    trip_oracle_classifier_findings:
+      model: sklearn_hist_gradient_boosting_classifier
+      max_iter: 60
+      metric: gap_dev
+      context_rows: 1048000
+      selected_trip_gap_mean: 0.0944
+      target0_trip_gap_mean: 0.1041
+      oracle_best_trip_gap_mean: 0.0238
+      overall_delta_vs_target0_mean: -0.0097
+      overall_delta_vs_target0_ci95: [-0.0110, -0.0084]
+      terminal_delta_vs_target0_mean: -0.0106
+      terminal_delta_vs_target0_ci95: [-0.0124, -0.0087]
+      highnoise_delta_vs_target0_mean: -0.0098
+      highnoise_delta_vs_target0_ci95: [-0.0121, -0.0073]
+      odshift_delta_vs_target0_mean: -0.0092
+      odshift_delta_vs_target0_ci95: [-0.0121, -0.0068]
+      rushshift_delta_vs_target0_mean: -0.0092
+      rushshift_delta_vs_target0_ci95: [-0.0118, -0.0063]
+      interpretation: nonlinear context-to-oracle-action classification recovers a statistically significant seed-held-out piece of trip-level headroom; this is promising offline evidence, but not yet a deployable online policy.
+    note: Full 4-domain x 6 fixed-action x 20-seed CRN matrix completed after snapshotactorrel actionfix failed. Linear/ridge value fitting remains negative, but the nonlinear oracle-action classifier produces a positive offline diagnostic. Next repair should distill/export this selector into a dependency-controlled runtime module and validate online before any promotion.
+
+  cfactiontree_ep100_wu10_4domain_20seed:
+    status: complete_online_validation_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: cfactiontree_online_validation_4x6
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12244, t12245, t12246, t12247, t12248, t12249]
+    scheduler_nodes: [node006, node001, node004, node002, node003, node005]
+    result_dir: results_freqduet/cfactiontree_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/cfactiontree_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/cfactiontree_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    tree_fit_script: scripts/fit_freqduet_trip_action_tree_selector.py
+    runtime_selector_module: upper/counterfactual_action_selector.py
+    tree_artifact: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/trip_action_tree_selector_depth8_leaf1000/model_artifact/tree_selector.json
+    tree_cv_summary_csv: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/trip_action_tree_selector_depth8_leaf1000/trip_action_tree_cv_summary.csv
+    tree_offline_findings:
+      model: sklearn_decision_tree_classifier_exported_to_json
+      max_depth: 8
+      min_samples_leaf: 1000
+      metric: gap_dev
+      context_rows: 1048000
+      overall_delta_vs_target0_mean: -0.0081
+      overall_delta_vs_target0_ci95: [-0.0095, -0.0065]
+      terminal_delta_vs_target0_mean: -0.0089
+      terminal_delta_vs_target0_ci95: [-0.0108, -0.0070]
+      highnoise_delta_vs_target0_mean: -0.0072
+      highnoise_delta_vs_target0_ci95: [-0.0097, -0.0041]
+      odshift_delta_vs_target0_mean: -0.0096
+      odshift_delta_vs_target0_ci95: [-0.0128, -0.0070]
+      rushshift_delta_vs_target0_mean: -0.0068
+      rushshift_delta_vs_target0_ci95: [-0.0095, -0.0039]
+      interpretation: shallow tree keeps most of the HGB offline action-selection signal while being deployable without sklearn at runtime.
+    online_findings:
+      paired_delta_csv: results_freqduet/cfactiontree_ep100_wu10_4domain_20seed/combined_summary/cfactiontree_paired_deltas.csv
+      cfactiontree_overall_mean: 1.4891
+      current_main_overall_mean: 1.4939
+      cfactiontree_minus_main_delta: -0.0048
+      cfactiontree_minus_main_ci95: [-0.0228, 0.0129]
+      cfactiontree_terminal_dispatch_mean_range: [0.0437, 0.0579]
+      cfactiontree_delta_mean_range_s: [-18.5449, -18.1184]
+      interpretation: runtime tree did not significantly beat current main and mostly collapsed to target_m20 with little terminal-dispatch use; do not promote.
+    posthoc_domain_rule_probe:
+      policy: terminal_target0__highnoise_terminalhold45_m20__odshift_target_m20__rushshift_target0
+      policy_overall_mean: 1.4774
+      current_main_overall_mean: 1.4939
+      policy_minus_main_delta: -0.0165
+      policy_minus_main_ci95: [-0.0312, -0.0009]
+      caution: posthoc rule from the same online matrix; requires explicit confirmatory run before promotion.
+    smoke_test:
+      command: runner_v3.py --config configs_freqduet/F_freqduet_terminal_main_cfactiontree_hiro.yaml --episodes 1 --seed 7 --upper-warmup-eps 0 --no-resume --logs-dir /tmp/freqduet_cfactiontree_smoke2
+      result: selector active on 88 upper replan events; selected target_m20 with terminal_dispatch=0; diagnostics and trip_details columns written.
+    note: Tree selector is retained as negative/diagnostic evidence; follow-up moved to explicit disturbance-conditioned cfactionrule_v1 validation.
+
+  cfactionrule_v1_ep100_wu10_4domain_20seed:
+    status: complete_confirmatory_validation_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: cfactionrule_v1_4x1
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12258, t12259, t12260, t12261, t12262, t12263]
+    scheduler_nodes: [node004, node006, node001, node002, node005, node003]
+    result_dir: results_freqduet/cfactionrule_v1_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/cfactionrule_v1_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/cfactionrule_v1_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paired_delta_csv: results_freqduet/cfactionrule_v1_ep100_wu10_4domain_20seed/combined_summary/cfactionrule_v1_vs_baselines_paired_deltas.csv
+    online_findings:
+      rule_overall_mean: 1.4916
+      current_main_overall_mean: 1.4939
+      rule_minus_main_delta: -0.0023
+      rule_minus_main_ci95: [-0.0214, 0.0127]
+      rule_minus_fixedselector_balanced_delta: -0.0418
+      rule_minus_fixedselector_balanced_ci95: [-0.1313, 0.0141]
+      interpretation: explicit rule is not statistically better than current main; old posthoc advantage was not robust enough for promotion.
+    note: Explicit rerun of the disturbance-conditioned rule because inherited terminal_dispatch in older target counterfactual configs made the first posthoc combination insufficient as final evidence. The run also clarifies that terminalhold45 action-counterfactual configs only allow shift; under fixed action_override they do not induce nonzero terminal feedback/value bias and should not be cited as true Phase-4 terminal-dispatch evidence.
+
+  exp39_state_action_ep100_wu10_4domain_20seed:
+    status: complete_exp39_style_repair_matrix_not_promoted_pending_confirm
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: exp39_state_action_4x6
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12280, t12281, t12282, t12283, t12284, t12285, t12286, t12287, t12288, t12289, t12290, t12291, t12292, t12293, t12294, t12295, t12296, t12297, t12298, t12299, t12300, t12301, t12302, t12303, t12304, t12305, t12306, t12307, t12308, t12309, t12310, t12311, t12312, t12313, t12314]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/exp39_state_action_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/exp39_state_action_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/exp39_state_action_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paired_delta_csv: results_freqduet/exp39_state_action_ep100_wu10_4domain_20seed/combined_summary/exp39_state_action_paired_deltas.csv
+    online_findings:
+      best_single_global_method: upperdisc4
+      upperdisc4_delta_vs_same_run_main: -0.0092
+      upperdisc4_delta_vs_same_run_main_ci95: [-0.0302, 0.0054]
+      domain_best_policy:
+        terminal: upperdisc5
+        highnoise: upperdisc4
+        odshift: upperdisc5
+        rushshift: histdisc
+      domain_best_delta_vs_same_run_main: -0.0168
+      domain_best_delta_vs_same_run_main_ci95: [-0.0352, -0.0017]
+      interpretation: posthoc domain-best signal is significant, but no single global config is; requires confirmatory rerun before promotion.
+    note: >
+      Scheduler-visible matrix dispatched to zhengliang-hpc node001-node006 to
+      test the sumo-rl-inspired repair path: reduce upper action space and/or
+      add previous/next local context before further value-model work.
+
+  exp39_domainbest_confirm_ep100_wu10_4domain_20seed:
+    status: complete_confirmatory_validation_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: exp39_domainbest_confirm_4x2
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12318, t12319, t12320, t12321, t12322, t12323, t12324, t12325, t12326, t12327, t12328, t12329]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/exp39_domainbest_confirm_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/exp39_domainbest_confirm_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/exp39_domainbest_confirm_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paired_delta_csv: results_freqduet/exp39_domainbest_confirm_ep100_wu10_4domain_20seed/combined_summary/exp39_domainbest_confirm_paired_deltas.csv
+    online_findings:
+      domain_best_confirm_delta_vs_same_run_main: 0.0135
+      domain_best_confirm_delta_vs_same_run_main_ci95: [-0.0024, 0.0377]
+      domain_deltas_vs_same_run_main:
+        terminal: [-0.0002, -0.0175, 0.0169]
+        highnoise: [0.0385, -0.0102, 0.0888]
+        odshift: [0.0101, -0.0092, 0.0278]
+        rushshift: [0.0054, -0.0070, 0.0176]
+      two_run_selected_module_mean_delta: -0.0017
+      interpretation: confirm rerun failed to reproduce the posthoc exp39 domain-best gain; do not promote.
+    note: >
+      Confirmatory rerun for the exp39 posthoc domain-best policy:
+      terminal=upperdisc5, highnoise=upperdisc4, odshift=upperdisc5,
+      rushshift=histdisc, paired against same-run current main. Result is a
+      negative confirmatory validation.
+
+  upperhist_ep100_wu10_4domain_20seed:
+    status: complete_combined_state_action_repair_not_promoted
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: null
+    seeds: paired_seeds_20
+    config_set: upperhist_4x4
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    scheduler_tasks: [t12359, t12360, t12361, t12362, t12363, t12364, t12365, t12366, t12367, t12368, t12369, t12370, t12371, t12372, t12373, t12374, t12375, t12376, t12377, t12378, t12379, t12380, t12381]
+    scheduler_nodes: [node001, node002, node003, node004, node005, node006]
+    result_dir: results_freqduet/upperhist_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/upperhist_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/upperhist_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    paired_delta_csv: results_freqduet/upperhist_ep100_wu10_4domain_20seed/combined_summary/upperhist_paired_deltas.csv
+    domainbest_delta_csv: results_freqduet/upperhist_ep100_wu10_4domain_20seed/combined_summary/upperhist_domainbest_paired_delta.csv
+    online_findings:
+      best_single_global_method: upperhist4
+      upperhist4_delta_vs_same_run_main: -0.0020
+      upperhist4_delta_vs_same_run_main_ci95: [-0.0136, 0.0130]
+      upperhist5_delta_vs_same_run_main: 0.0013
+      upperhist5_delta_vs_same_run_main_ci95: [-0.0132, 0.0149]
+      upperhist3_delta_vs_same_run_main: 0.0039
+      upperhist3_delta_vs_same_run_main_ci95: [-0.0104, 0.0230]
+      posthoc_domain_best_delta_vs_same_run_main: -0.0046
+      posthoc_domain_best_delta_vs_same_run_main_ci95: [-0.0166, 0.0063]
+      interpretation: combined upper history plus near-fixed upper action bins does not robustly improve current main.
+    note: >
+      Combined upper-history and near-fixed upper-discretization matrix,
+      submitted after exp39 domainbest confirmation failed. Negative result;
+      keep as evidence against simple manual exp39-style action-alphabet tuning.
+
   valueguard_local_screen_ep10_wu2:
     status: complete_candidate_screen_not_promoted
     episodes: 10
@@ -2310,6 +3049,252 @@ snapshot_counterfactual_value_labels:
         odshift: [-0.0120, -0.0246, -0.0012]
         rushshift: [-0.0339, -0.0645, -0.0111]
       note: full paired-seed offline snapshot replay confirms the per-dispatch value signal; next step is an online guarded selector wrapper evaluated against current main and fixed-headway
+    snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800:
+      status: complete_offline_positive_online_wrapper_running
+      purpose: retrain per-dispatch snapshot value labels with CV, fleet-overshoot, and terminal-delay risk inside the counterfactual cost rather than as deploy-time penalties
+      domains: [terminal, highnoise, odshift, rushshift]
+      seeds: paired_seeds_20
+      burn_in_episodes: 40
+      audit_episodes: 1
+      snapshots_per_run: 12
+      horizon_s: 1800
+      candidate_frame: actor_relative
+      modes: [target, terminalhold45]
+      deltas_s: [-30, -15, 0, 15, 30]
+      baseline_method: actor_term45_0
+      metric: risk_proxy_cost
+      risk_proxy_weights:
+        wait: 1.0
+        cv: 1.25
+        overshoot_sq: 1.50
+        overshoot_mean: 0.30
+        holding: 0.10
+        cv_excess_target: 0.44
+        cv_excess: 1.0
+        launch_delay: 0.02
+        positive_offset: 0.015
+      result_dir: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800
+      labels_csv: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/shards/snapshot_counterfactual_all.csv
+      paired_summary_csv: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/shards/snapshot_counterfactual_paired_summary.csv
+      scheduler_tasks: [t12401, t12402, t12403, t12404, t12405, t12406]
+      trained_value_model:
+        out_dir: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/value_model_riskproxy_residual
+        artifact: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/value_model_riskproxy_residual/model_artifact
+        selected_model: random_forest_context_action_interact
+        offline_delta_vs_actor_term45_0: -0.0148
+        offline_delta_ci95: [-0.0274, -0.0043]
+        per_domain_delta_ci95:
+          terminal: [-0.0168, -0.0305, -0.0048]
+          highnoise: [-0.0169, -0.0355, -0.0031]
+          odshift: [-0.0135, -0.0250, -0.0038]
+          rushshift: [-0.0121, -0.0232, -0.0030]
+        caveat: label gains are mostly CV/fleet-overshoot risk, while target_launch_delay_s was zero across the replay candidates; this is an action/value-planner repair, not a completed Phase-4 terminal-release value layer
+      online_wrapper_screen:
+        status: complete_not_promoted_replaced_terminal_bias
+        run_name: snapshotriskvalue_m005_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/snapshotriskvalue_m005_ep100_wu10_4domain_20seed
+        configs: current_main plus snapshotriskvalue_m005 full and targetonly variants for terminal, highnoise, odshift, and rushshift
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 60
+        scheduler_tasks: [t12416-t12475]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        per_seed_csv: results_freqduet/snapshotriskvalue_m005_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        comparison_vs_main:
+          full_overall_delta: -0.0007
+          full_overall_ci95: [-0.0138, 0.0125]
+          targetonly_overall_delta: -0.0006
+          targetonly_overall_ci95: [-0.0161, 0.0152]
+          note: overall statistically tied with current main; OD shift improved directionally, terminal/rushshift worsened directionally
+        comparison_vs_fixed_headway:
+          current_main_overall_delta: -0.0403
+          current_main_overall_ci95: [-0.0845, 0.0023]
+          full_overall_delta: -0.0410
+          full_overall_ci95: [-0.0950, 0.0078]
+          targetonly_overall_delta: -0.0410
+          targetonly_overall_ci95: [-0.0909, 0.0036]
+          note: fixed-headway is no longer the binding gap under this 100ep protocol; the wrapper does not improve over current main
+        failure_mode: snapshotriskvalue_m005 overwrote the promoted terminal-bias snapshot selector instead of stacking on top of it, removing snapshot_value_terminal_bias_mean and shifting terminal_launch_shift_mean from positive terminal dispatch to action override
+        online_promotion_rule: not promoted; use dual selector repair before any promotion decision
+      online_dual_wrapper_screen:
+        status: complete_targetonly_promising_not_promoted_overshoot_regression
+        run_name: snapshotriskdual_m005_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/snapshotriskdual_m005_ep100_wu10_4domain_20seed
+        mechanism: keep current main snapshot_value_selector in terminal_bias mode, then add snapshot_action_value_selector as a second-stage risk-proxy action override
+        configs: current_main plus snapshotriskdual_m005 full and targetonly variants for terminal, highnoise, odshift, and rushshift
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 30
+        scheduler_tasks: [t12480-t12509]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        per_seed_csv: results_freqduet/snapshotriskdual_m005_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        comparison_vs_main:
+          full_overall_delta: 0.0083
+          full_overall_ci95: [-0.0035, 0.0199]
+          full_failure_note: full dual is not promoted; odshift composite regressed with CI [0.0023, 0.0446] and rushshift regressed with CI [0.0005, 0.0195]
+          targetonly_overall_delta: -0.0029
+          targetonly_overall_ci95: [-0.0154, 0.0100]
+          targetonly_domain_deltas:
+            terminal: [-0.0162, -0.0355, 0.0020]
+            highnoise: [-0.0166, -0.0616, 0.0267]
+            odshift: [0.0147, -0.0015, 0.0321]
+            rushshift: [0.0065, -0.0023, 0.0150]
+          targetonly_metric_note: target-only dual reduces wait and CV directionally but worsens overall overshoot by +0.0155 with CI [0.0015, 0.0310], so it is not safe to promote
+        comparison_vs_fixed_headway:
+          current_main_overall_delta: -0.0400
+          current_main_overall_ci95: [-0.0875, 0.0051]
+          full_overall_delta: -0.0318
+          full_overall_ci95: [-0.0787, 0.0117]
+          targetonly_overall_delta: -0.0430
+          targetonly_overall_ci95: [-0.0879, -0.0006]
+          note: target-only dual significantly beats fixed-headway under the 100ep protocol, while current main remains directionally better but CI crosses zero
+        smoke_check: warmup=0 local smoke confirmed both snapshot_value_terminal_bias_mean and snapshot_value_override_mean are nonzero
+        promotion_rule: not promoted; next repair should keep the target-only demand-conditioned value benefit while adding an overshoot and terminal-bias-preservation guard around second-stage overrides
+      online_targetguard_screen:
+        status: complete_not_promoted_guard_too_strict
+        run_name: snapshotriskdual_targetguard_m005_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/snapshotriskdual_targetguard_m005_ep100_wu10_4domain_20seed
+        mechanism: target-only second-stage risk-value override with guard; blocks secondary override when previous overshoot norm exceeds 0.18 or when the override would erase any positive primary terminal-bias signal
+        configs: current_main plus snapshotriskdual_targetguard_m005 variants for terminal, highnoise, odshift, and rushshift
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 20
+        scheduler_tasks: [t12528-t12547]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        per_seed_csv: results_freqduet/snapshotriskdual_targetguard_m005_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        comparison_vs_main:
+          overall_delta: -0.0024
+          overall_ci95: [-0.0141, 0.0098]
+          terminal_delta: 0.0038
+          highnoise_delta: -0.0180
+          odshift_delta: 0.0048
+          rushshift_delta: -0.0001
+          overshoot_overall_delta: 0.0078
+          overshoot_overall_ci95: [-0.0012, 0.0168]
+        comparison_vs_fixed_headway:
+          overall_delta: -0.0419
+          overall_ci95: [-0.0875, 0.0002]
+          terminal_delta: -0.0448
+          odshift_delta: -0.0459
+        comparison_vs_old_targetonly:
+          overall_delta: 0.0010
+          overall_ci95: [-0.0100, 0.0120]
+          overshoot_overall_delta: -0.0060
+          overshoot_overall_ci95: [-0.0177, 0.0052]
+        guard_diagnostics:
+          override_mean_overall: 0.0181
+          guard_blocked_mean_overall: 0.1240
+          terminal_bias_mean_overall: 1.7525
+          note: guard removed the old significant overshoot regression but blocked too much of the target-only value benefit
+        smoke_check: local warmup=0 smoke confirmed guard_blocked events, preserved snapshot_value_terminal_bias_s in trip_details, and emitted guard diagnostics in diagnostics.csv
+        promotion_rule: not promoted; tune looser bias-loss and overshoot thresholds to recover target-only benefit without reintroducing significant overshoot regression
+      online_targetguard_threshold_sweep:
+        status: complete_promoted_b15o22_main_alias
+        run_name: snapshotriskdual_targetguard_sweep_m005_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/snapshotriskdual_targetguard_sweep_m005_ep100_wu10_4domain_20seed
+        mechanism: looser target-only second-stage risk-value guard sweep; compares bias-loss/previous-overshoot thresholds after the strict guard blocked too much of the target-only value benefit
+        configs:
+          baseline: current_main for terminal, highnoise, odshift, and rushshift
+          variants:
+            - snapshotriskdual_targetguard_b5o22_m005
+            - snapshotriskdual_targetguard_b15o22_m005
+            - snapshotriskdual_targetguard_b15o30_m005
+        thresholds:
+          b5o22:
+            max_primary_terminal_bias_loss_s: 5.0
+            max_prev_overshoot_norm: 0.22
+          b15o22:
+            max_primary_terminal_bias_loss_s: 15.0
+            max_prev_overshoot_norm: 0.22
+          b15o30:
+            max_primary_terminal_bias_loss_s: 15.0
+            max_prev_overshoot_norm: 0.30
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 40
+        scheduler_tasks: [t12553-t12592]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        submitted_with: scheduler-direct, no Slurm
+        per_seed_csv: results_freqduet/snapshotriskdual_targetguard_sweep_m005_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        completion_check: resynced after all 320/320 diagnostics reached 100 episodes and all 320/320 trip_details were present; earlier partial aggregation was discarded
+        comparison_vs_main:
+          b5o22_overall_delta: -0.0029
+          b5o22_overall_ci95: [-0.0126, 0.0059]
+          b5o22_overshoot_delta: -0.0000
+          b5o22_overshoot_ci95: [-0.0138, 0.0148]
+          b15o22_overall_delta: -0.0038
+          b15o22_overall_ci95: [-0.0154, 0.0089]
+          b15o22_overshoot_delta: 0.0102
+          b15o22_overshoot_ci95: [-0.0003, 0.0212]
+          b15o30_overall_delta: -0.0043
+          b15o30_overall_ci95: [-0.0146, 0.0067]
+          b15o30_overshoot_delta: 0.0077
+          b15o30_overshoot_ci95: [-0.0045, 0.0192]
+        comparison_vs_fixed_headway:
+          b5o22_overall_delta: -0.0401
+          b5o22_overall_ci95: [-0.0908, 0.0060]
+          b15o22_overall_delta: -0.0409
+          b15o22_overall_ci95: [-0.0868, -0.0003]
+          b15o30_overall_delta: -0.0415
+          b15o30_overall_ci95: [-0.0908, 0.0055]
+        guard_diagnostics:
+          b15o22_override_mean_overall: 0.0675
+          b15o22_guard_blocked_mean_overall: 0.0860
+          b15o22_terminal_bias_mean_overall: 0.9461
+          current_main_terminal_bias_mean_overall: 2.3150
+          note: b15o22 is the only looser guard threshold with significant overall advantage versus fixed-headway while tying current main; terminal-bias preservation is weaker than current main, so wait for targetnonpos before promotion
+        promotion_rule: promoted b15o22 into F_freqduet_*_main_hiro after targetnonpos tied main but had significant overshoot regression
+      online_targetnonpos_screen:
+        status: complete_not_promoted_overshoot_regression
+        run_name: snapshotriskdual_targetnonpos_m005_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/snapshotriskdual_targetnonpos_m005_ep100_wu10_4domain_20seed
+        mechanism: discrete action-space shrink for the target-only second-stage selector; removes actor_target_p15 and actor_target_p30 because trip diagnostics showed positive target offsets dominate unsafe overrides and reintroduce overshoot
+        configs: current_main plus snapshotriskdual_targetnonpos_m005 variants for terminal, highnoise, odshift, and rushshift
+        allowed_methods: [actor_target_m30, actor_target_m15, actor_target_0]
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 20
+        scheduler_tasks: [t12594-t12613]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        submitted_with: scheduler-direct, no Slurm
+        smoke_check: local warmup=0 two-episode smoke selected only actor_target_m30/m15/0 and produced nonzero override events
+        per_seed_csv: results_freqduet/snapshotriskdual_targetnonpos_m005_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        completion_check: synced after all 160/160 diagnostics reached 100 episodes and all 160/160 trip_details were present
+        comparison_vs_main:
+          overall_delta: 0.0002
+          overall_ci95: [-0.0094, 0.0098]
+          terminal_delta: -0.0066
+          highnoise_delta: 0.0111
+          odshift_delta: -0.0050
+          rushshift_delta: 0.0012
+          overshoot_delta: 0.0140
+          overshoot_ci95: [0.0018, 0.0262]
+        comparison_vs_fixed_headway:
+          overall_delta: -0.0468
+          overall_ci95: [-0.0930, -0.0014]
+          highnoise_delta: -0.0643
+          highnoise_ci95: [-0.1260, -0.0065]
+          odshift_delta: -0.0432
+          odshift_ci95: [-0.0896, -0.0011]
+        comparison_vs_b15o22:
+          overall_delta: -0.0059
+          overall_ci95: [-0.0193, 0.0077]
+          overshoot_delta: 0.0015
+          overshoot_ci95: [-0.0125, 0.0155]
+        mechanism_result: targetnonpos confirms action-space shrink can tie main and beat fixed-headway, but it still significantly increases overshoot versus current main and removes more terminal-bias preservation than b15o22
+        promotion_rule: not promoted; keep as mechanism/negative evidence for the action-space shrink idea
+      promotion_rule: fit seed-held-out value model on risk_proxy_cost; only wire online if offline selector improves actor_term45_0 with domain-safe CI and candidate choices reduce CV/overshoot risk without collapsing to a single fixed action
+      note: offline replay and seed-held-out value model passed; online action-override screen launched through scheduler-direct CPU tasks on node001-node006 after warmup=0 selector-active smoke confirmed nonzero snapshot_value_events and override events
     snapshotrf_online_ep100_wu10_4domain_20seed:
       status: complete_online_wrapper_not_promoted
       domains: [terminal, highnoise, odshift, rushshift]

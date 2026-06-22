@@ -67,6 +67,10 @@ from frequency.diagnostics import (
 from upper.resac_upper import RESACUpperTrainer
 from upper.measurement_proj import MeasurementProjection
 from upper.timetable_planner import TimetableCurvePlanner
+from upper.counterfactual_action_selector import (
+    ACTION_SPECS,
+    CounterfactualActionTreeSelector,
+)
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
 from coupling.holding_feedback import HoldingFeedback
@@ -192,6 +196,8 @@ class DiagnosticLog:
         'ep_steps', 'n_dispatches',
         # lower policy
         'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
+        'lower_context_gate_enabled', 'lower_context_gate_active_mean',
+        'lower_action_bins_gate_enabled', 'lower_action_bins_gate_active_mean',
         'lower_reward_mean', 'lower_reward_std',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
@@ -322,6 +328,23 @@ class DiagnosticLog:
         'snapshot_value_margin_max',
         'snapshot_value_pred_mean',
         'snapshot_value_baseline_pred_mean',
+        'snapshot_value_candidate_gate_cap_mean',
+        'snapshot_value_candidate_gate_filtered_mean',
+        'snapshot_value_risk_score_mean',
+        'snapshot_value_risk_penalty_mean',
+        'snapshot_value_risk_penalty_max_mean',
+        'snapshot_value_guard_blocked_mean',
+        'snapshot_value_guard_blocked_events',
+        'snapshot_value_guard_prev_overshoot_norm_mean',
+        'snapshot_value_guard_primary_bias_mean',
+        'cf_action_selector_enabled',
+        'cf_action_selector_active_mean',
+        'cf_action_selector_events',
+        'cf_action_selector_changed_mean',
+        'cf_action_selector_terminal_dispatch_mean',
+        'cf_action_selector_delta_mean',
+        'cf_action_selector_delta_std',
+        'cf_action_selector_confidence_mean',
         'terminal_headway_floor_mean', 'terminal_headway_floor_events',
         'fleet_noharm_upper_pressure_mean',
         'fleet_noharm_upper_adjust_mean',
@@ -495,6 +518,12 @@ class TransitDuetV2Runner:
         self.timetable_terminal_early_release_max_low_forecast = None
         self.timetable_terminal_early_release_min_action_mean_s = None
         self.timetable_terminal_early_release_min_current_delta_s = None
+        self.timetable_terminal_early_release_min_prev_wait_min = None
+        self.timetable_terminal_early_release_max_prev_overshoot_norm = None
+        self.timetable_terminal_early_release_max_prev_headway_cv = None
+        self.timetable_terminal_early_release_max_prev_terminal_shift_mean_s = None
+        self.timetable_terminal_early_release_max_prev_terminal_shift_std_s = None
+        self.timetable_terminal_early_release_max_peak_shift_abs = None
         self.timetable_terminal_early_release_min_updates = 0
         self.timetable_terminal_feedback_enable = False
         self.timetable_terminal_feedback_gain = 0.0
@@ -663,6 +692,18 @@ class TransitDuetV2Runner:
                 _optional_float('min_action_mean_s'))
             self.timetable_terminal_early_release_min_current_delta_s = (
                 _optional_float('min_current_delta_s'))
+            self.timetable_terminal_early_release_min_prev_wait_min = (
+                _optional_float('min_prev_wait_min'))
+            self.timetable_terminal_early_release_max_prev_overshoot_norm = (
+                _optional_float('max_prev_overshoot_norm'))
+            self.timetable_terminal_early_release_max_prev_headway_cv = (
+                _optional_float('max_prev_headway_cv'))
+            self.timetable_terminal_early_release_max_prev_terminal_shift_mean_s = (
+                _optional_float('max_prev_terminal_shift_mean_s'))
+            self.timetable_terminal_early_release_max_prev_terminal_shift_std_s = (
+                _optional_float('max_prev_terminal_shift_std_s'))
+            self.timetable_terminal_early_release_max_peak_shift_abs = (
+                _optional_float('max_peak_shift_abs'))
             terminal_fb_cfg = planner_cfg.get('terminal_feedback', {}) or {}
             self.timetable_terminal_feedback_enable = bool(
                 terminal_fb_cfg.get('enable', False))
@@ -1058,6 +1099,40 @@ class TransitDuetV2Runner:
         self.upper_action_override_disable_value_selectors = bool(
             action_override_cfg.get('disable_value_selectors', True))
 
+        cf_action_cfg = (
+            upper_cfg.get('counterfactual_action_selector', {}) or {})
+        self.cf_action_selector_enable = bool(
+            cf_action_cfg.get('enable', False))
+        self.cf_action_selector_start_ep = int(
+            cf_action_cfg.get('start_ep', 0))
+        self.cf_action_selector_artifact = str(
+            cf_action_cfg.get('artifact', '')).strip()
+        self.cf_action_selector_default_method = str(
+            cf_action_cfg.get('default_method', 'target0')).strip()
+        self.cf_action_selector_disable_value_selectors = bool(
+            cf_action_cfg.get('disable_value_selectors', True))
+        self.cf_action_selector_terminal_shift_min_s = float(
+            cf_action_cfg.get('terminal_shift_min_s', 0.0))
+        self.cf_action_selector_terminal_shift_max_s = float(
+            cf_action_cfg.get('terminal_shift_max_s', 45.0))
+        self.cf_action_selector_ep_norm_denominator = max(float(
+            cf_action_cfg.get('ep_norm_denominator', 99.0)), 1.0)
+        allowed_cf_methods = cf_action_cfg.get('allowed_methods', [])
+        self.cf_action_selector_allowed_methods = {
+            str(method).strip() for method in allowed_cf_methods
+            if str(method).strip()
+        }
+        self.cf_action_selector_model = None
+        if self.cf_action_selector_enable:
+            if not self.cf_action_selector_artifact:
+                raise ValueError(
+                    "upper.counterfactual_action_selector.artifact is required")
+            artifact_path = Path(self.cf_action_selector_artifact)
+            if not artifact_path.is_absolute():
+                artifact_path = SCRIPT_DIR / artifact_path
+            self.cf_action_selector_model = (
+                CounterfactualActionTreeSelector.load(artifact_path))
+
         snapshot_selector_cfg = (
             upper_cfg.get('snapshot_value_selector', {}) or {})
         self.snapshot_value_selector_enable = bool(
@@ -1098,6 +1173,77 @@ class TransitDuetV2Runner:
             str(method).strip() for method in blocked_methods
             if str(method).strip()
         }
+        snapshot_candidate_gate_cfg = (
+            snapshot_selector_cfg.get('candidate_gate', {}) or {})
+        self.snapshot_value_candidate_gate_enable = bool(
+            snapshot_candidate_gate_cfg.get('enable', False))
+
+        def _candidate_gate_float(name):
+            value = snapshot_candidate_gate_cfg.get(name)
+            return None if value is None else float(value)
+
+        self.snapshot_value_candidate_gate_default_max_positive_offset_s = (
+            _candidate_gate_float('default_max_positive_offset_s'))
+        self.snapshot_value_candidate_gate_high_noise_min_demand_noise = (
+            _candidate_gate_float('high_noise_min_demand_noise'))
+        self.snapshot_value_candidate_gate_high_noise_max_positive_offset_s = (
+            _candidate_gate_float('high_noise_max_positive_offset_s'))
+        self.snapshot_value_candidate_gate_risk_max_positive_offset_s = (
+            _candidate_gate_float('risk_max_positive_offset_s'))
+        self.snapshot_value_candidate_gate_max_prev_headway_cv = (
+            _candidate_gate_float('max_prev_headway_cv'))
+        self.snapshot_value_candidate_gate_max_prev_overshoot_norm = (
+            _candidate_gate_float('max_prev_overshoot_norm'))
+        self.snapshot_value_candidate_gate_max_prev_terminal_shift_std_s = (
+            _candidate_gate_float('max_prev_terminal_shift_std_s'))
+        snapshot_risk_penalty_cfg = (
+            snapshot_selector_cfg.get('risk_penalty', {}) or {})
+        self.snapshot_value_risk_penalty_enable = bool(
+            snapshot_risk_penalty_cfg.get('enable', False))
+
+        def _risk_penalty_float(name, default=None):
+            value = snapshot_risk_penalty_cfg.get(name, default)
+            return None if value is None else float(value)
+
+        self.snapshot_value_risk_penalty_weight = max(float(
+            snapshot_risk_penalty_cfg.get('weight', 0.0)), 0.0)
+        self.snapshot_value_risk_penalty_positive_offset_start_s = max(
+            _risk_penalty_float('positive_offset_start_s', 15.0) or 0.0,
+            0.0)
+        self.snapshot_value_risk_penalty_positive_offset_scale_s = max(
+            _risk_penalty_float('positive_offset_scale_s', 15.0) or 15.0,
+            1e-6)
+        self.snapshot_value_risk_penalty_max_score = max(
+            _risk_penalty_float('max_risk_score', 3.0) or 0.0,
+            0.0)
+        self.snapshot_value_risk_penalty_max_penalty = max(
+            _risk_penalty_float('max_penalty', 0.05) or 0.0,
+            0.0)
+        self.snapshot_value_risk_penalty_prev_headway_cv_target = (
+            _risk_penalty_float('prev_headway_cv_target'))
+        self.snapshot_value_risk_penalty_prev_headway_cv_width = max(
+            _risk_penalty_float('prev_headway_cv_width', 0.05) or 0.05,
+            1e-6)
+        self.snapshot_value_risk_penalty_prev_overshoot_norm_target = (
+            _risk_penalty_float('prev_overshoot_norm_target'))
+        self.snapshot_value_risk_penalty_prev_overshoot_norm_width = max(
+            _risk_penalty_float('prev_overshoot_norm_width', 0.075) or 0.075,
+            1e-6)
+        self.snapshot_value_risk_penalty_prev_terminal_shift_std_target_s = (
+            _risk_penalty_float('prev_terminal_shift_std_target_s'))
+        self.snapshot_value_risk_penalty_prev_terminal_shift_std_width_s = max(
+            _risk_penalty_float('prev_terminal_shift_std_width_s', 4.0) or 4.0,
+            1e-6)
+        self.snapshot_value_risk_penalty_context_headway_cv_target = (
+            _risk_penalty_float('context_headway_cv_target'))
+        self.snapshot_value_risk_penalty_context_headway_cv_width = max(
+            _risk_penalty_float('context_headway_cv_width', 0.05) or 0.05,
+            1e-6)
+        self.snapshot_value_risk_penalty_context_fleet_pressure_target = (
+            _risk_penalty_float('context_fleet_pressure_target'))
+        self.snapshot_value_risk_penalty_context_fleet_pressure_width = max(
+            _risk_penalty_float('context_fleet_pressure_width', 0.25) or 0.25,
+            1e-6)
         self.snapshot_value_selector_probe_only = bool(
             snapshot_selector_cfg.get('probe_only', False))
         self.snapshot_value_selector_model = None
@@ -1108,6 +1254,65 @@ class TransitDuetV2Runner:
         self.snapshot_value_selector_candidate_methods = []
         if self.snapshot_value_selector_enable:
             self._load_snapshot_value_selector()
+
+        snapshot_action_selector_cfg = (
+            upper_cfg.get('snapshot_action_value_selector', {}) or {})
+        self.snapshot_action_value_selector_enable = bool(
+            snapshot_action_selector_cfg.get('enable', False))
+        self.snapshot_action_value_selector_start_configured = (
+            'start_ep' in snapshot_action_selector_cfg)
+        self.snapshot_action_value_selector_start_ep = int(
+            snapshot_action_selector_cfg.get('start_ep', 30))
+        self.snapshot_action_value_selector_artifact = str(
+            snapshot_action_selector_cfg.get('artifact', '')).strip()
+        self.snapshot_action_value_selector_domain = str(
+            snapshot_action_selector_cfg.get('domain', '')).strip().lower()
+        self.snapshot_action_value_selector_improve_margin = max(float(
+            snapshot_action_selector_cfg.get('improve_margin', 0.0)), 0.0)
+        self.snapshot_action_value_selector_fallback_method = str(
+            snapshot_action_selector_cfg.get(
+                'fallback_method', 'actor_term45_0')).strip()
+        self.snapshot_action_value_selector_fallback_action = str(
+            snapshot_action_selector_cfg.get('fallback_action', 'actor')
+        ).strip().lower()
+        allowed_action_methods = snapshot_action_selector_cfg.get(
+            'allowed_methods', [])
+        blocked_action_methods = snapshot_action_selector_cfg.get(
+            'blocked_methods', [])
+        self.snapshot_action_value_selector_allowed_methods = {
+            str(method).strip() for method in allowed_action_methods
+            if str(method).strip()
+        }
+        self.snapshot_action_value_selector_blocked_methods = {
+            str(method).strip() for method in blocked_action_methods
+            if str(method).strip()
+        }
+        action_guard_cfg = (
+            snapshot_action_selector_cfg.get('guard', {}) or {})
+        self.snapshot_action_value_guard_enable = bool(
+            action_guard_cfg.get('enable', False))
+
+        def _action_guard_float(name, default=None):
+            value = action_guard_cfg.get(name, default)
+            if value is None:
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return default
+
+        self.snapshot_action_value_guard_max_prev_overshoot_norm = (
+            _action_guard_float('max_prev_overshoot_norm'))
+        self.snapshot_action_value_guard_max_primary_terminal_bias_loss_s = (
+            _action_guard_float('max_primary_terminal_bias_loss_s'))
+        self.snapshot_action_value_selector_model = None
+        self.snapshot_action_value_selector_forest = None
+        self.snapshot_action_value_selector_meta = {}
+        self.snapshot_action_value_selector_feature_cols = []
+        self.snapshot_action_value_selector_feature_medians = {}
+        self.snapshot_action_value_selector_candidate_methods = []
+        if self.snapshot_action_value_selector_enable:
+            self._load_snapshot_action_value_selector()
 
         residual_selector_cfg = (
             upper_cfg.get('residual_value_selector', {}) or {})
@@ -1303,9 +1508,26 @@ class TransitDuetV2Runner:
             if action_bins.size < 2:
                 raise ValueError("lower.action_bins must contain at least two values")
             self.lower_action_bins = action_bins
+        lower_bins_gate_cfg = lower_cfg.get('action_bins_gate', {}) or {}
+        self.lower_action_bins_gate_enabled = bool(
+            lower_bins_gate_cfg.get('enable', False))
+        self.lower_action_bins_gate_source = str(
+            lower_bins_gate_cfg.get('source', 'lower_context_gate')).lower()
+        self.lower_action_bins_gate_threshold = float(
+            lower_bins_gate_cfg.get('threshold', 0.5))
+        if self.lower_action_bins_gate_enabled and self.lower_action_bins is None:
+            raise ValueError(
+                "lower.action_bins_gate requires lower.action_bins to be set")
+        if (self.lower_action_bins_gate_enabled
+                and self.lower_action_bins_gate_source not in {
+                    'lower_context_gate', 'context_gate'}):
+            raise ValueError(
+                "lower.action_bins_gate.source only supports lower_context_gate")
         self.lower_use_last_action_feature = bool(
             lower_cfg.get('use_last_action_feature', False))
         lower_state_dim = state_dim + (1 if self.lower_use_last_action_feature else 0)
+        lower_trainer_action_bins = (
+            None if self.lower_action_bins_gate_enabled else self.lower_action_bins)
         if self.decouple_init_seeds:
             torch.manual_seed(self.base_seed + 2001)
         self.lower_trainer = RESACLagrangianTrainer(
@@ -1321,7 +1543,7 @@ class TransitDuetV2Runner:
             gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
             auto_entropy=lower_cfg['auto_entropy'],
             maximum_alpha=lower_cfg['maximum_alpha'],
-            action_bins=self.lower_action_bins,
+            action_bins=lower_trainer_action_bins,
             device=device)
         self.lower_state_dim = lower_state_dim
 
@@ -1359,6 +1581,9 @@ class TransitDuetV2Runner:
         if (self.snapshot_value_selector_enable
                 and not self.snapshot_value_selector_start_configured):
             self.snapshot_value_selector_start_ep = int(self.upper_warmup)
+        if (self.snapshot_action_value_selector_enable
+                and not self.snapshot_action_value_selector_start_configured):
+            self.snapshot_action_value_selector_start_ep = int(self.upper_warmup)
         if (self.upper_residual_selector_enable
                 and not self.upper_residual_selector_start_configured):
             self.upper_residual_selector_start_ep = int(self.upper_warmup)
@@ -1539,6 +1764,11 @@ class TransitDuetV2Runner:
         self._ep_terminal_value_selector_selected_preds = []
         self._ep_terminal_value_selector_feature_norms = []
         self._ep_terminal_value_selector_target_costs = []
+        self._ep_cf_action_selector_active = []
+        self._ep_cf_action_selector_changed = []
+        self._ep_cf_action_selector_terminal_dispatch = []
+        self._ep_cf_action_selector_deltas = []
+        self._ep_cf_action_selector_confidences = []
         self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
@@ -1737,6 +1967,8 @@ class TransitDuetV2Runner:
         self._episode_upper_transitions = []
         self._prev_upper_state = None
         self._ep_lower_actions = []     # all lower actions this episode
+        self._ep_lower_context_gate_values = []
+        self._ep_lower_action_bins_gate_values = []
         self._ep_lower_rewards = []     # all lower rewards this episode
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
@@ -1950,12 +2182,29 @@ class TransitDuetV2Runner:
         return float(drift), float(excess)
 
     def _quantize_lower_action(self, action):
-        """Project continuous holding to configured bins for smaller action space."""
+        """Project holding to bins, optionally only under a causal context gate."""
         value = self._lower_action_scalar(action)
-        if self.lower_action_bins is not None:
+        context_gate = float(np.clip(
+            getattr(self.env, 'lower_context_gate_value', 1.0), 0.0, 1.0))
+        bins_gate = self._lower_action_bins_gate_value(context_gate)
+        if hasattr(self, '_ep_lower_context_gate_values'):
+            self._ep_lower_context_gate_values.append(context_gate)
+        if hasattr(self, '_ep_lower_action_bins_gate_values'):
+            self._ep_lower_action_bins_gate_values.append(bins_gate)
+        if self.lower_action_bins is not None and bins_gate >= 0.5:
             idx = int(np.argmin(np.abs(self.lower_action_bins - value)))
             value = float(self.lower_action_bins[idx])
         return np.asarray([value], dtype=np.float32)
+
+    def _lower_action_bins_gate_value(self, context_gate):
+        if not self.lower_action_bins_gate_enabled:
+            return 1.0
+        if self.lower_action_bins_gate_source in {
+                'lower_context_gate', 'context_gate'}:
+            gate_value = float(context_gate)
+        else:
+            gate_value = 0.0
+        return 1.0 if gate_value >= self.lower_action_bins_gate_threshold else 0.0
 
     @staticmethod
     def _lower_action_scalar(action):
@@ -2195,12 +2444,8 @@ class TransitDuetV2Runner:
             return path
         return SCRIPT_DIR / path
 
-    def _load_snapshot_value_selector(self):
-        if not self.snapshot_value_selector_artifact:
-            self.snapshot_value_selector_enable = False
-            return
-        artifact_dir = self._resolve_local_path(
-            self.snapshot_value_selector_artifact)
+    def _load_snapshot_selector_artifact(self, artifact):
+        artifact_dir = self._resolve_local_path(artifact)
         model_path = artifact_dir / 'model.joblib'
         forest_path = artifact_dir / 'forest_model.npz'
         meta_path = artifact_dir / 'model_artifact.json'
@@ -2209,48 +2454,77 @@ class TransitDuetV2Runner:
             raise FileNotFoundError(
                 "snapshot value selector artifact missing model.joblib/"
                 f"forest_model.npz or model_artifact.json under {artifact_dir}")
+        model = None
+        forest = None
         if model_path.exists():
             try:
                 import joblib
-                self.snapshot_value_selector_model = joblib.load(model_path)
+                model = joblib.load(model_path)
             except ModuleNotFoundError:
-                self.snapshot_value_selector_model = None
+                model = None
             except Exception as exc:
                 if not forest_path.exists():
                     raise RuntimeError(
                         "failed to load snapshot selector joblib artifact"
                     ) from exc
-                self.snapshot_value_selector_model = None
-        if self.snapshot_value_selector_model is None:
+                model = None
+        if model is None:
             if not forest_path.exists():
                 raise RuntimeError(
                     "snapshot selector needs sklearn for model.joblib or a "
                     "forest_model.npz fallback artifact")
             with np.load(forest_path) as data:
-                self.snapshot_value_selector_forest = {
-                    key: data[key] for key in data.files
-                }
-        self.snapshot_value_selector_meta = json.loads(
-            meta_path.read_text(encoding='utf-8'))
-        self.snapshot_value_selector_feature_cols = list(
-            self.snapshot_value_selector_meta.get('feature_cols', []))
-        self.snapshot_value_selector_feature_medians = dict(
-            self.snapshot_value_selector_meta.get('feature_medians', {}))
-        self.snapshot_value_selector_candidate_methods = list(
-            self.snapshot_value_selector_meta.get('candidate_methods', []))
-        if not self.snapshot_value_selector_candidate_methods:
-            self.snapshot_value_selector_candidate_methods = [
+                forest = {key: data[key] for key in data.files}
+        meta = json.loads(meta_path.read_text(encoding='utf-8'))
+        feature_cols = list(meta.get('feature_cols', []))
+        feature_medians = dict(meta.get('feature_medians', {}))
+        candidate_methods = list(meta.get('candidate_methods', []))
+        if not candidate_methods:
+            candidate_methods = [
                 'term45_m60', 'term45_m30', 'term45_0',
                 'term45_p30', 'term45_p60',
             ]
+        return model, forest, meta, feature_cols, feature_medians, candidate_methods
 
-    def _snapshot_value_predict(self, x):
+    def _load_snapshot_value_selector(self):
+        if not self.snapshot_value_selector_artifact:
+            self.snapshot_value_selector_enable = False
+            return
+        loaded = self._load_snapshot_selector_artifact(
+            self.snapshot_value_selector_artifact)
+        (
+            self.snapshot_value_selector_model,
+            self.snapshot_value_selector_forest,
+            self.snapshot_value_selector_meta,
+            self.snapshot_value_selector_feature_cols,
+            self.snapshot_value_selector_feature_medians,
+            self.snapshot_value_selector_candidate_methods,
+        ) = loaded
+
+    def _load_snapshot_action_value_selector(self):
+        if not self.snapshot_action_value_selector_artifact:
+            self.snapshot_action_value_selector_enable = False
+            return
+        loaded = self._load_snapshot_selector_artifact(
+            self.snapshot_action_value_selector_artifact)
+        (
+            self.snapshot_action_value_selector_model,
+            self.snapshot_action_value_selector_forest,
+            self.snapshot_action_value_selector_meta,
+            self.snapshot_action_value_selector_feature_cols,
+            self.snapshot_action_value_selector_feature_medians,
+            self.snapshot_action_value_selector_candidate_methods,
+        ) = loaded
+
+    def _snapshot_value_predict(self, x, model=None, forest=None):
         x = np.asarray(x, dtype=np.float64)
-        if self.snapshot_value_selector_model is not None:
+        if model is None and forest is None:
+            model = self.snapshot_value_selector_model
+            forest = self.snapshot_value_selector_forest
+        if model is not None:
             return np.asarray(
-                self.snapshot_value_selector_model.predict(x),
+                model.predict(x),
                 dtype=np.float64)
-        forest = self.snapshot_value_selector_forest
         if forest is None:
             raise RuntimeError("snapshot value selector model is not loaded")
         ptr = forest['tree_ptr']
@@ -2293,6 +2567,11 @@ class TransitDuetV2Runner:
         if 'terminal' in name:
             return 'terminal'
         return 'terminal'
+
+    def _snapshot_action_selector_domain(self):
+        if self.snapshot_action_value_selector_domain:
+            return self.snapshot_action_value_selector_domain
+        return self._snapshot_selector_domain()
 
     @staticmethod
     def _snapshot_selector_action_features(mode, delta_s, actor_delta_s=0.0,
@@ -2446,15 +2725,21 @@ class TransitDuetV2Runner:
                 float(freq.get('freq_promotion_strength', 0.0)),
             'freq_promotion_active':
                 float(freq.get('freq_promotion_active', 0.0)),
+            'cfg_demand_noise': float(getattr(self.env, 'demand_noise', 0.0)),
+            'cfg_peak_shift_abs': self._fixed_selector_peak_shift_abs(),
         }
 
-    def _snapshot_selector_feature_row(self, method, context):
+    def _snapshot_selector_feature_row(self, method, context, meta=None,
+                                       domain=None):
         row = dict(context)
         actor_delta_s = float(row.get('actor_delta_norm', 0.0)) * 60.0
         action = self._snapshot_selector_parse_action(
             method, actor_delta_s=actor_delta_s)
         row.update(action)
-        domain = self._snapshot_selector_domain()
+        if meta is None:
+            meta = self.snapshot_value_selector_meta
+        if domain is None:
+            domain = self._snapshot_selector_domain()
         domains = ('terminal', 'highnoise', 'odshift', 'rushshift')
         action_cols = [
             'action_delta_norm', 'action_abs_delta_norm',
@@ -2469,14 +2754,163 @@ class TransitDuetV2Runner:
             for action_col in action_cols:
                 row[f'{domain_col}_x_{action_col}'] = (
                     row[domain_col] * row[action_col])
-        for ctx_col in self.snapshot_value_selector_meta.get(
-                'context_cols', []):
+        for ctx_col in meta.get('context_cols', []):
             for action_col in (
                     'action_delta_norm', 'action_abs_delta_norm',
                     'action_term45'):
                 row[f'{ctx_col}_x_{action_col}'] = (
                     float(row.get(ctx_col, 0.0)) * row[action_col])
         return row
+
+    def _snapshot_selector_candidate_gate_cap_s(self):
+        if not self.snapshot_value_candidate_gate_enable:
+            return None
+        cap = self.snapshot_value_candidate_gate_default_max_positive_offset_s
+        high_noise_min = (
+            self.snapshot_value_candidate_gate_high_noise_min_demand_noise)
+        high_noise_cap = (
+            self.snapshot_value_candidate_gate_high_noise_max_positive_offset_s)
+        demand_noise = float(getattr(self.env, 'demand_noise', 0.0))
+        if (high_noise_min is not None
+                and high_noise_cap is not None
+                and demand_noise >= float(high_noise_min)):
+            cap = float(high_noise_cap)
+        risk_cap = self.snapshot_value_candidate_gate_risk_max_positive_offset_s
+        if risk_cap is not None:
+            prev = self._fixed_selector_prev_diag or {}
+
+            def _prev(key, default=0.0):
+                try:
+                    return float(prev.get(key, default))
+                except (TypeError, ValueError):
+                    return float(default)
+
+            n_fleet = max(float(_prev('N_fleet', self.N_fleet_default)), 1.0)
+            risk = False
+            if self.snapshot_value_candidate_gate_max_prev_headway_cv is not None:
+                risk = risk or (
+                    _prev('headway_cv')
+                    > float(self.snapshot_value_candidate_gate_max_prev_headway_cv))
+            if self.snapshot_value_candidate_gate_max_prev_overshoot_norm is not None:
+                risk = risk or (
+                    _prev('fleet_overshoot') / n_fleet
+                    > float(self.snapshot_value_candidate_gate_max_prev_overshoot_norm))
+            if self.snapshot_value_candidate_gate_max_prev_terminal_shift_std_s is not None:
+                risk = risk or (
+                    _prev('terminal_launch_shift_std')
+                    > float(self.snapshot_value_candidate_gate_max_prev_terminal_shift_std_s))
+            if risk:
+                cap = (
+                    float(risk_cap) if cap is None
+                    else min(float(cap), float(risk_cap)))
+        return None if cap is None else max(0.0, float(cap))
+
+    def _snapshot_selector_apply_candidate_gate(self, methods, context):
+        cap_s = self._snapshot_selector_candidate_gate_cap_s()
+        if cap_s is None:
+            return list(methods), {'cap_s': 0.0, 'filtered': 0.0}
+        actor_delta_s = float(context.get('actor_delta_norm', 0.0)) * 60.0
+        fallback = self.snapshot_value_selector_fallback_method
+        kept = []
+        filtered = 0
+        for method in methods:
+            if method == fallback:
+                kept.append(method)
+                continue
+            try:
+                action = self._snapshot_selector_parse_action(
+                    method, actor_delta_s=actor_delta_s)
+                offset_s = (
+                    float(action.get('candidate_offset_norm', 0.0)) * 60.0)
+            except (TypeError, ValueError):
+                kept.append(method)
+                continue
+            if offset_s > cap_s + 1e-9:
+                filtered += 1
+                continue
+            kept.append(method)
+        if fallback not in kept:
+            kept.append(fallback)
+        return kept, {'cap_s': float(cap_s), 'filtered': float(filtered)}
+
+    def _snapshot_selector_risk_penalty_score(self, context):
+        if (not self.snapshot_value_risk_penalty_enable
+                or self.snapshot_value_risk_penalty_weight <= 0.0):
+            return 0.0
+
+        def _excess(value, target, width):
+            if target is None:
+                return 0.0
+            try:
+                value = float(value)
+                target = float(target)
+                width = max(float(width), 1e-6)
+            except (TypeError, ValueError):
+                return 0.0
+            if not np.isfinite(value):
+                return 0.0
+            return max(0.0, (value - target) / width)
+
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        n_fleet = max(float(_prev('N_fleet', self.N_fleet_default)), 1.0)
+        score = 0.0
+        score += _excess(
+            _prev('headway_cv'),
+            self.snapshot_value_risk_penalty_prev_headway_cv_target,
+            self.snapshot_value_risk_penalty_prev_headway_cv_width)
+        score += _excess(
+            _prev('fleet_overshoot') / n_fleet,
+            self.snapshot_value_risk_penalty_prev_overshoot_norm_target,
+            self.snapshot_value_risk_penalty_prev_overshoot_norm_width)
+        score += _excess(
+            _prev('terminal_launch_shift_std'),
+            self.snapshot_value_risk_penalty_prev_terminal_shift_std_target_s,
+            self.snapshot_value_risk_penalty_prev_terminal_shift_std_width_s)
+        score += _excess(
+            context.get('headway_cv_active_pre', 0.0),
+            self.snapshot_value_risk_penalty_context_headway_cv_target,
+            self.snapshot_value_risk_penalty_context_headway_cv_width)
+        score += _excess(
+            context.get('fleet_pressure_pre', 0.0),
+            self.snapshot_value_risk_penalty_context_fleet_pressure_target,
+            self.snapshot_value_risk_penalty_context_fleet_pressure_width)
+        return float(np.clip(
+            score,
+            0.0,
+            max(self.snapshot_value_risk_penalty_max_score, 0.0)))
+
+    def _snapshot_selector_risk_penalties(self, rows, context):
+        if (not self.snapshot_value_risk_penalty_enable
+                or self.snapshot_value_risk_penalty_weight <= 0.0):
+            return np.zeros(len(rows), dtype=np.float64), 0.0
+        risk_score = self._snapshot_selector_risk_penalty_score(context)
+        if risk_score <= 0.0:
+            return np.zeros(len(rows), dtype=np.float64), 0.0
+        penalties = []
+        for row in rows:
+            offset_s = float(row.get('candidate_offset_norm', 0.0)) * 60.0
+            excess_offset = max(
+                0.0,
+                offset_s
+                - self.snapshot_value_risk_penalty_positive_offset_start_s)
+            offset_factor = (
+                excess_offset
+                / self.snapshot_value_risk_penalty_positive_offset_scale_s)
+            penalty = (
+                self.snapshot_value_risk_penalty_weight
+                * offset_factor
+                * risk_score)
+            penalties.append(min(
+                float(penalty),
+                self.snapshot_value_risk_penalty_max_penalty))
+        return np.asarray(penalties, dtype=np.float64), float(risk_score)
 
     def _select_snapshot_value_action(
             self, action_vec, direction, trip=None, plan_origin_launch=None):
@@ -2492,6 +2926,11 @@ class TransitDuetV2Runner:
             'selected_pred': 0.0,
             'baseline_pred': 0.0,
             'margin': 0.0,
+            'candidate_gate_cap_s': 0.0,
+            'candidate_gate_filtered': 0.0,
+            'risk_score': 0.0,
+            'risk_penalty': 0.0,
+            'risk_penalty_max': 0.0,
         }
         if (not self.snapshot_value_selector_enable
                 or (self.snapshot_value_selector_model is None
@@ -2515,6 +2954,10 @@ class TransitDuetV2Runner:
         if self.snapshot_value_selector_fallback_method not in methods:
             methods.append(self.snapshot_value_selector_fallback_method)
         context = self._snapshot_selector_context(trip, actor_action=actor_action)
+        methods, gate_info = self._snapshot_selector_apply_candidate_gate(
+            methods, context)
+        info['candidate_gate_cap_s'] = float(gate_info['cap_s'])
+        info['candidate_gate_filtered'] = float(gate_info['filtered'])
         rows = [
             self._snapshot_selector_feature_row(method, context)
             for method in methods
@@ -2535,6 +2978,10 @@ class TransitDuetV2Runner:
             matrix.append(values)
         x = np.asarray(matrix, dtype=np.float64)
         pred = self._snapshot_value_predict(x)
+        risk_penalty, risk_score = self._snapshot_selector_risk_penalties(
+            rows, context)
+        if risk_penalty.size:
+            pred = pred + risk_penalty
         scores = {method: float(value) for method, value in zip(methods, pred)}
         fallback = self.snapshot_value_selector_fallback_method
         baseline_pred = float(scores.get(fallback, np.nan))
@@ -2557,6 +3004,13 @@ class TransitDuetV2Runner:
         candidate_offset_s = (
             float(selected_action.get('candidate_offset_norm', 0.0)) * 60.0)
         terminal_bias_s = 0.0
+        selected_penalty = 0.0
+        if risk_penalty.size:
+            try:
+                selected_index = methods.index(selected_method)
+                selected_penalty = float(risk_penalty[selected_index])
+            except (ValueError, IndexError):
+                selected_penalty = 0.0
         if self.snapshot_value_selector_apply_mode == 'terminal_bias':
             # In terminal-bias mode the counterfactual selector controls only
             # first-stop delay. The actor's headway/timetable coefficients are
@@ -2579,9 +3033,168 @@ class TransitDuetV2Runner:
             'selected_pred': float(selected_pred),
             'baseline_pred': float(baseline_pred),
             'margin': float(margin),
+            'risk_score': float(risk_score),
+            'risk_penalty': float(selected_penalty),
+            'risk_penalty_max': (
+                float(np.max(risk_penalty)) if risk_penalty.size else 0.0),
         })
         if self.snapshot_value_selector_probe_only:
             return actor_action, info
+        if not override_action:
+            return actor_action, info
+        selected_vec = np.full(
+            self.upper_action_dim,
+            float(selected_action['action_delta_s']),
+            dtype=np.float32)
+        selected_vec = np.clip(
+            selected_vec, self.upper_action_low, self.upper_action_high)
+        return self._quantize_upper_action(selected_vec), info
+
+    def _select_snapshot_action_value_action(
+            self, action_vec, direction, trip=None, plan_origin_launch=None,
+            primary_info=None):
+        del direction, plan_origin_launch
+        actor_action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        info = {
+            'active': 0.0,
+            'selected_method': '',
+            'selected_mode': '',
+            'terminal_dispatch': 0.0,
+            'terminal_bias_s': 0.0,
+            'override_action': 0.0,
+            'selected_pred': 0.0,
+            'baseline_pred': 0.0,
+            'margin': 0.0,
+            'candidate_gate_cap_s': 0.0,
+            'candidate_gate_filtered': 0.0,
+            'risk_score': 0.0,
+            'risk_penalty': 0.0,
+            'risk_penalty_max': 0.0,
+            'guard_blocked': 0.0,
+            'guard_prev_overshoot_norm': 0.0,
+            'guard_primary_terminal_bias_s': 0.0,
+        }
+        if (not self.snapshot_action_value_selector_enable
+                or (self.snapshot_action_value_selector_model is None
+                    and self.snapshot_action_value_selector_forest is None)
+                or trip is None
+                or self._current_ep < self.snapshot_action_value_selector_start_ep
+                or not self.timetable_terminal_dispatch):
+            return actor_action, info
+
+        methods = list(self.snapshot_action_value_selector_candidate_methods)
+        if self.snapshot_action_value_selector_allowed_methods:
+            methods = [
+                method for method in methods
+                if method in self.snapshot_action_value_selector_allowed_methods
+            ]
+        if self.snapshot_action_value_selector_blocked_methods:
+            methods = [
+                method for method in methods
+                if method not in self.snapshot_action_value_selector_blocked_methods
+            ]
+        fallback = self.snapshot_action_value_selector_fallback_method
+        if fallback not in methods:
+            methods.append(fallback)
+        context = self._snapshot_selector_context(trip, actor_action=actor_action)
+        rows = [
+            self._snapshot_selector_feature_row(
+                method,
+                context,
+                meta=self.snapshot_action_value_selector_meta,
+                domain=self._snapshot_action_selector_domain())
+            for method in methods
+        ]
+        matrix = []
+        for row in rows:
+            values = []
+            for col in self.snapshot_action_value_selector_feature_cols:
+                value = float(row.get(
+                    col,
+                    self.snapshot_action_value_selector_feature_medians.get(
+                        col, 0.0)))
+                if not np.isfinite(value):
+                    value = float(
+                        self.snapshot_action_value_selector_feature_medians.get(
+                            col, 0.0))
+                values.append(value)
+            matrix.append(values)
+        x = np.asarray(matrix, dtype=np.float64)
+        pred = self._snapshot_value_predict(
+            x,
+            model=self.snapshot_action_value_selector_model,
+            forest=self.snapshot_action_value_selector_forest)
+        scores = {method: float(value) for method, value in zip(methods, pred)}
+        baseline_pred = float(scores.get(fallback, np.nan))
+        selected_method = min(scores, key=scores.get)
+        selected_pred = float(scores[selected_method])
+        margin = baseline_pred - selected_pred
+        actor_fallback = self.snapshot_action_value_selector_fallback_action in {
+            'actor', 'main', 'policy', 'keep_actor'
+        }
+        if (not np.isfinite(margin)
+                or margin < self.snapshot_action_value_selector_improve_margin):
+            selected_method = fallback
+            selected_pred = baseline_pred
+            margin = 0.0
+        override_action = not (actor_fallback and selected_method == fallback)
+        actor_delta_s = float(context.get('actor_delta_norm', 0.0)) * 60.0
+        selected_action = self._snapshot_selector_parse_action(
+            selected_method, actor_delta_s=actor_delta_s)
+        selected_mode = str(selected_action['action_mode'])
+        primary_info = primary_info or {}
+        primary_terminal_bias_s = max(
+            0.0,
+            float(primary_info.get('terminal_bias_s', 0.0) or 0.0))
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev_float(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        prev_fleet = max(_prev_float('N_fleet', self.N_fleet_default), 1.0)
+        prev_overshoot_norm = (
+            _prev_float('fleet_overshoot', 0.0) / prev_fleet)
+        guard_blocked = False
+        if override_action and self.snapshot_action_value_guard_enable:
+            max_prev_overshoot = (
+                self.snapshot_action_value_guard_max_prev_overshoot_norm)
+            if (max_prev_overshoot is not None
+                    and prev_overshoot_norm > float(max_prev_overshoot)):
+                guard_blocked = True
+            max_bias_loss = (
+                self.snapshot_action_value_guard_max_primary_terminal_bias_loss_s)
+            if (max_bias_loss is not None
+                    and primary_terminal_bias_s > float(max_bias_loss)):
+                guard_blocked = True
+        if guard_blocked:
+            selected_method = fallback
+            selected_pred = baseline_pred
+            margin = 0.0
+            override_action = False
+            selected_mode = 'actor'
+        info.update({
+            'active': 1.0,
+            'selected_method': selected_method,
+            'selected_mode': (
+                'actor' if not override_action
+                else selected_mode),
+            'terminal_dispatch': (
+                (1.0 if self.timetable_terminal_dispatch else 0.0)
+                if not override_action else
+                1.0 if selected_mode == 'term45'
+                else 0.0),
+            'terminal_bias_s': 0.0,
+            'override_action': 1.0 if override_action else 0.0,
+            'selected_pred': float(selected_pred),
+            'baseline_pred': float(baseline_pred),
+            'margin': float(margin),
+            'guard_blocked': 1.0 if guard_blocked else 0.0,
+            'guard_prev_overshoot_norm': float(prev_overshoot_norm),
+            'guard_primary_terminal_bias_s': float(primary_terminal_bias_s),
+        })
         if not override_action:
             return actor_action, info
         selected_vec = np.full(
@@ -3591,6 +4204,138 @@ class TransitDuetV2Runner:
         self._ep_headway_value_planner_priors.append(float(prior))
         return selected.astype(np.float32), selected_x
 
+    def _counterfactual_action_domain_flags(self):
+        text = self.exp_name.lower()
+        domain = 'terminal'
+        if 'highnoise' in text:
+            domain = 'highnoise'
+        elif 'odshift' in text:
+            domain = 'odshift'
+        elif 'rushshift' in text:
+            domain = 'rushshift'
+        return {
+            'domain_is_terminal': 1.0 if domain == 'terminal' else 0.0,
+            'domain_is_highnoise': 1.0 if domain == 'highnoise' else 0.0,
+            'domain_is_odshift': 1.0 if domain == 'odshift' else 0.0,
+            'domain_is_rushshift': 1.0 if domain == 'rushshift' else 0.0,
+        }
+
+    def _counterfactual_action_feature_values(self, s_upper, trip, direction):
+        """Causal feature vector matching the trip-level CRN selector audit."""
+        try:
+            freq = self.env.frequency_summary()
+        except Exception:
+            freq = {}
+        concurrent, n_fleet, fleet_pressure = self._fleet_pressure()
+        try:
+            waiting_total = sum(
+                len(st.waiting_passengers)
+                for st in getattr(self.env, 'stations', []))
+        except Exception:
+            waiting_total = 0
+
+        base_hw = float(getattr(trip, 'target_headway', 360.0))
+        if self.timetable_planner is not None:
+            base_hw = float(self.timetable_planner._base_headway(trip))
+        current_launch = float(getattr(trip, 'launch_time', 0.0))
+        hour = 6 + int(current_launch // 3600)
+        period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
+            'off' if 9 < hour < 17 else 'trans')
+        max_tid = max(
+            1.0,
+            float(max(
+                [getattr(tt, 'launch_turn', 0)
+                 for tt in getattr(self.env, 'timetables', [])] or [1])),
+        )
+        last_dispatch = float(getattr(
+            self.env, '_last_dispatch_time', {}).get(bool(direction), -9999.0))
+        now = float(getattr(self.env, 'current_time', current_launch))
+        terminal_gap_now = now - last_dispatch
+        if terminal_gap_now > 9000.0 or terminal_gap_now < 0.0:
+            terminal_gap_now = base_hw
+        terminal_short_gap = max(0.0, base_hw - terminal_gap_now)
+        terminal_over_gap = max(0.0, terminal_gap_now - base_hw)
+        s_arr = np.asarray(s_upper, dtype=np.float64).reshape(-1)
+
+        values = {
+            'hour_norm': float(hour) / 24.0,
+            'tid_norm': float(getattr(trip, 'launch_turn', 0)) / max_tid,
+            'ep_norm': float(self._current_ep) / self.cf_action_selector_ep_norm_denominator,
+            'dir_signed': 1.0 if bool(direction) else -1.0,
+            'period_is_peak': 1.0 if period == 'peak' else 0.0,
+            'period_is_off': 1.0 if period == 'off' else 0.0,
+            'period_is_trans': 1.0 if period == 'trans' else 0.0,
+            'base_hw_norm': base_hw / 600.0,
+            'eff_hw_norm': base_hw / 600.0,
+            's_hold_mean_norm': float(s_arr[5]) if s_arr.size > 5 else 0.0,
+            's_hold_std_norm': float(s_arr[6]) if s_arr.size > 6 else 0.0,
+            'terminal_gap_now_norm': terminal_gap_now / 600.0,
+            'terminal_short_gap_norm': terminal_short_gap / 600.0,
+            'terminal_over_gap_norm': terminal_over_gap / 600.0,
+            'fleet_concurrent_norm': float(concurrent) / 30.0,
+            'fleet_target_norm': float(n_fleet) / 30.0,
+            'fleet_pressure_norm': float(fleet_pressure) / 30.0,
+            'waiting_total_norm': float(waiting_total) / 500.0,
+            'freq_low_demand_ctx': float(freq.get('freq_low_demand', 0.0)),
+            'freq_low_forecast_ctx': float(freq.get('freq_low_forecast', 0.0)),
+            'freq_high_energy_ctx': float(freq.get('freq_high_energy', 0.0)),
+            'freq_middle_energy_ctx': float(freq.get('freq_middle_energy', 0.0)),
+            'freq_od_entropy_ctx': float(freq.get('freq_od_entropy', 0.0)),
+            'freq_promotion_strength_ctx': float(freq.get('freq_promotion_strength', 0.0)),
+            'freq_promotion_active_ctx': float(freq.get('freq_promotion_active', 0.0)),
+        }
+        values.update(self._counterfactual_action_domain_flags())
+        return values
+
+    def _counterfactual_action_spec(self, method):
+        method = str(method).strip()
+        if self.cf_action_selector_allowed_methods:
+            if method not in self.cf_action_selector_allowed_methods:
+                method = self.cf_action_selector_default_method
+        if method not in ACTION_SPECS:
+            method = 'target0'
+        spec = ACTION_SPECS[method]
+        return method, float(spec['delta_s']), bool(spec['terminal_dispatch'])
+
+    def _select_counterfactual_action(
+            self, s_upper, action_vec, direction, trip=None):
+        actor = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        if (not self.cf_action_selector_enable
+                or self.cf_action_selector_model is None
+                or int(self._current_ep) < int(self.cf_action_selector_start_ep)
+                or trip is None):
+            return actor, None
+        values = self._counterfactual_action_feature_values(
+            s_upper, trip, direction)
+        pred = self.cf_action_selector_model.predict(values)
+        method, delta_s, terminal_dispatch = self._counterfactual_action_spec(
+            pred.method)
+        selected = np.full(
+            self.upper_action_dim, float(delta_s), dtype=np.float32)
+        selected = np.clip(
+            selected,
+            self.upper_action_low,
+            self.upper_action_high,
+        ).astype(np.float32)
+        actor_delta = float(np.asarray(actor, dtype=np.float64).mean())
+        info = {
+            'active': 1.0,
+            'selected_method': method,
+            'selected_delta_s': float(delta_s),
+            'actor_delta_s': actor_delta,
+            'changed': 1.0 if abs(actor_delta - float(delta_s)) > 1e-6 else 0.0,
+            'terminal_dispatch': 1.0 if terminal_dispatch else 0.0,
+            'confidence': float(pred.confidence),
+            'node_id': int(pred.node_id),
+        }
+        self._ep_cf_action_selector_active.append(1.0)
+        self._ep_cf_action_selector_changed.append(float(info['changed']))
+        self._ep_cf_action_selector_terminal_dispatch.append(
+            float(info['terminal_dispatch']))
+        self._ep_cf_action_selector_deltas.append(float(delta_s))
+        self._ep_cf_action_selector_confidences.append(float(pred.confidence))
+        return selected, info
+
     def _lower_value_guard_signal(self, bus, action_s):
         if bus is None:
             return 0.0, 0.0, 0.0
@@ -4254,6 +4999,47 @@ class TransitDuetV2Runner:
             checks.append(
                 float(current_delta_s) >= float(
                     self.timetable_terminal_early_release_min_current_delta_s))
+        if self.timetable_terminal_early_release_max_peak_shift_abs is not None:
+            checks.append(
+                self._fixed_selector_peak_shift_abs()
+                <= float(self.timetable_terminal_early_release_max_peak_shift_abs))
+
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev_float(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        if self.timetable_terminal_early_release_min_prev_wait_min is not None:
+            checks.append(
+                _prev_float('avg_wait_min')
+                >= float(self.timetable_terminal_early_release_min_prev_wait_min))
+        prev_fleet = max(
+            _prev_float('N_fleet', self.N_fleet_default),
+            1.0)
+        if self.timetable_terminal_early_release_max_prev_overshoot_norm is not None:
+            prev_overshoot_norm = (
+                _prev_float('fleet_overshoot') / prev_fleet)
+            checks.append(
+                prev_overshoot_norm
+                <= float(
+                    self.timetable_terminal_early_release_max_prev_overshoot_norm))
+        if self.timetable_terminal_early_release_max_prev_headway_cv is not None:
+            checks.append(
+                _prev_float('headway_cv')
+                <= float(self.timetable_terminal_early_release_max_prev_headway_cv))
+        if self.timetable_terminal_early_release_max_prev_terminal_shift_mean_s is not None:
+            checks.append(
+                _prev_float('terminal_launch_shift_mean')
+                <= float(
+                    self.timetable_terminal_early_release_max_prev_terminal_shift_mean_s))
+        if self.timetable_terminal_early_release_max_prev_terminal_shift_std_s is not None:
+            checks.append(
+                _prev_float('terminal_launch_shift_std')
+                <= float(
+                    self.timetable_terminal_early_release_max_prev_terminal_shift_std_s))
         if checks and all(checks):
             return relaxed_min
         return base_min
@@ -4940,6 +5726,7 @@ class TransitDuetV2Runner:
         headway_selector_x = None
         terminal_selector_x = None
         snapshot_selector_info = None
+        cf_action_selector_info = None
         snapshot_write_terminal_dispatch = self.timetable_terminal_dispatch
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
@@ -5031,7 +5818,21 @@ class TransitDuetV2Runner:
                     self.timetable_action_ema_alpha * action_vec
                 ).astype(np.float32)
             action_vec = self._prepare_upper_action(action_vec)
-            if not self.upper_action_override_disable_value_selectors:
+            action_vec, cf_action_selector_info = (
+                self._select_counterfactual_action(
+                    s_upper, action_vec, planner_dir, trip=trip))
+            cf_selector_active = (
+                cf_action_selector_info is not None
+                and float(cf_action_selector_info.get('active', 0.0)) > 0.5)
+            if cf_selector_active:
+                snapshot_write_terminal_dispatch = bool(
+                    float(cf_action_selector_info.get(
+                        'terminal_dispatch', 0.0)) > 0.5)
+            selectors_disabled = (
+                self.upper_action_override_disable_value_selectors
+                or (cf_selector_active
+                    and self.cf_action_selector_disable_value_selectors))
+            if not selectors_disabled:
                 action_vec, selector_x = self._select_upper_residual_value_action(
                     s_upper, action_vec, planner_dir, trip=trip,
                     plan_origin_launch=plan_origin_launch)
@@ -5042,6 +5843,29 @@ class TransitDuetV2Runner:
                     self._select_snapshot_value_action(
                         action_vec, planner_dir, trip=trip,
                         plan_origin_launch=plan_origin_launch))
+                action_vec, snapshot_action_selector_info = (
+                    self._select_snapshot_action_value_action(
+                        action_vec, planner_dir, trip=trip,
+                        plan_origin_launch=plan_origin_launch,
+                        primary_info=snapshot_selector_info))
+                if (snapshot_action_selector_info is not None
+                        and float(snapshot_action_selector_info.get(
+                            'override_action', 0.0)) > 0.5):
+                    primary_snapshot_info = snapshot_selector_info or {}
+                    combined_snapshot_info = dict(primary_snapshot_info)
+                    combined_snapshot_info.update(snapshot_action_selector_info)
+                    snapshot_selector_info = combined_snapshot_info
+                elif (snapshot_action_selector_info is not None
+                        and float(snapshot_action_selector_info.get(
+                            'guard_blocked', 0.0)) > 0.5):
+                    combined_snapshot_info = dict(snapshot_selector_info or {})
+                    for key in (
+                            'guard_blocked',
+                            'guard_prev_overshoot_norm',
+                            'guard_primary_terminal_bias_s'):
+                        combined_snapshot_info[key] = (
+                            snapshot_action_selector_info.get(key, 0.0))
+                    snapshot_selector_info = combined_snapshot_info
                 if (snapshot_selector_info is not None
                         and float(snapshot_selector_info.get('active', 0.0)) > 0.5):
                     snapshot_write_terminal_dispatch = bool(
@@ -5303,6 +6127,22 @@ class TransitDuetV2Runner:
             'freq_od_entropy': float(freq_summary.get('freq_od_entropy', 0.0)),
             'freq_promotion_strength': float(freq_summary.get('freq_promotion_strength', 0.0)),
             'freq_promotion_active': float(freq_summary.get('freq_promotion_active', 0.0)),
+            'cf_action_selector_active': float(
+                (cf_action_selector_info or {}).get('active', 0.0)),
+            'cf_action_selector_method': str(
+                (cf_action_selector_info or {}).get('selected_method', '')),
+            'cf_action_selector_delta_s': float(
+                (cf_action_selector_info or {}).get('selected_delta_s', 0.0)),
+            'cf_action_selector_actor_delta_s': float(
+                (cf_action_selector_info or {}).get('actor_delta_s', 0.0)),
+            'cf_action_selector_changed': float(
+                (cf_action_selector_info or {}).get('changed', 0.0)),
+            'cf_action_selector_terminal_dispatch': float(
+                (cf_action_selector_info or {}).get('terminal_dispatch', 0.0)),
+            'cf_action_selector_confidence': float(
+                (cf_action_selector_info or {}).get('confidence', 0.0)),
+            'cf_action_selector_node_id': int(
+                (cf_action_selector_info or {}).get('node_id', -1)),
             'snapshot_value_active': float(
                 (snapshot_selector_info or {}).get('active', 0.0)),
             'snapshot_value_method': str(
@@ -5319,6 +6159,26 @@ class TransitDuetV2Runner:
                 (snapshot_selector_info or {}).get('baseline_pred', 0.0)),
             'snapshot_value_margin': float(
                 (snapshot_selector_info or {}).get('margin', 0.0)),
+            'snapshot_value_candidate_gate_cap_s': float(
+                (snapshot_selector_info or {}).get(
+                    'candidate_gate_cap_s', 0.0)),
+            'snapshot_value_candidate_gate_filtered': float(
+                (snapshot_selector_info or {}).get(
+                    'candidate_gate_filtered', 0.0)),
+            'snapshot_value_risk_score': float(
+                (snapshot_selector_info or {}).get('risk_score', 0.0)),
+            'snapshot_value_risk_penalty': float(
+                (snapshot_selector_info or {}).get('risk_penalty', 0.0)),
+            'snapshot_value_risk_penalty_max': float(
+                (snapshot_selector_info or {}).get('risk_penalty_max', 0.0)),
+            'snapshot_value_guard_blocked': float(
+                (snapshot_selector_info or {}).get('guard_blocked', 0.0)),
+            'snapshot_value_guard_prev_overshoot_norm': float(
+                (snapshot_selector_info or {}).get(
+                    'guard_prev_overshoot_norm', 0.0)),
+            'snapshot_value_guard_primary_bias_s': float(
+                (snapshot_selector_info or {}).get(
+                    'guard_primary_terminal_bias_s', 0.0)),
         })
         self._update_upper_state_history(
             action_vec=action_vec,
@@ -5348,6 +6208,8 @@ class TransitDuetV2Runner:
         self._upper_state_history = deque(
             maxlen=max(1, self.upper_state_history_len))
         self._ep_lower_actions = []
+        self._ep_lower_context_gate_values = []
+        self._ep_lower_action_bins_gate_values = []
         self._ep_lower_rewards = []
         self._ep_upper_deltas = []
         self._ep_upper_rewards = []
@@ -5421,6 +6283,11 @@ class TransitDuetV2Runner:
         self._ep_terminal_value_selector_selected_preds = []
         self._ep_terminal_value_selector_feature_norms = []
         self._ep_terminal_value_selector_target_costs = []
+        self._ep_cf_action_selector_active = []
+        self._ep_cf_action_selector_changed = []
+        self._ep_cf_action_selector_terminal_dispatch = []
+        self._ep_cf_action_selector_deltas = []
+        self._ep_cf_action_selector_confidences = []
         self._ep_terminal_headway_floors = []
         self._ep_fleet_noharm_upper_pressures = []
         self._ep_fleet_noharm_upper_adjusts = []
@@ -5922,6 +6789,9 @@ class TransitDuetV2Runner:
         else:
             freq_driftfb_mean = np.zeros(4, dtype=np.float64)
         la_stat = _stat(self._ep_lower_actions)
+        lower_context_gate_stat = _stat(self._ep_lower_context_gate_values)
+        lower_action_bins_gate_stat = _stat(
+            self._ep_lower_action_bins_gate_values)
         lr_stat = _stat(self._ep_lower_rewards)
         ud_stat = _stat(self._ep_upper_deltas)
         ur_stat = _stat(self._ep_upper_rewards)
@@ -6042,6 +6912,48 @@ class TransitDuetV2Runner:
             float(rec.get('snapshot_value_baseline_pred', 0.0))
             for rec in self._ep_trip_records
         ])
+        snapshot_value_candidate_gate_cap_stat = _stat([
+            float(rec.get('snapshot_value_candidate_gate_cap_s', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_candidate_gate_filtered_stat = _stat([
+            float(rec.get('snapshot_value_candidate_gate_filtered', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_risk_score_stat = _stat([
+            float(rec.get('snapshot_value_risk_score', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_risk_penalty_stat = _stat([
+            float(rec.get('snapshot_value_risk_penalty', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_risk_penalty_max_stat = _stat([
+            float(rec.get('snapshot_value_risk_penalty_max', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_guard_blocked_values = [
+            float(rec.get('snapshot_value_guard_blocked', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_guard_blocked_stat = _stat(
+            snapshot_value_guard_blocked_values)
+        snapshot_value_guard_prev_overshoot_stat = _stat([
+            float(rec.get('snapshot_value_guard_prev_overshoot_norm', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_guard_primary_bias_stat = _stat([
+            float(rec.get('snapshot_value_guard_primary_bias_s', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        cf_action_active_stat = _stat(self._ep_cf_action_selector_active)
+        cf_action_changed_stat = _stat(self._ep_cf_action_selector_changed)
+        cf_action_terminal_dispatch_stat = _stat(
+            self._ep_cf_action_selector_terminal_dispatch)
+        cf_action_delta_stat = _stat(self._ep_cf_action_selector_deltas)
+        cf_action_confidence_stat = _stat(
+            self._ep_cf_action_selector_confidences)
         terminal_headway_floor_stat = _stat(
             self._ep_terminal_headway_floors)
         fleet_noharm_upper_pressure_stat = _stat(
@@ -6126,6 +7038,14 @@ class TransitDuetV2Runner:
             'lower_action_std': round(la_stat['std'], 2),
             'lower_action_min': round(la_stat['min'], 2),
             'lower_action_max': round(la_stat['max'], 2),
+            'lower_context_gate_enabled': int(getattr(
+                self.env, 'lower_context_gate_enabled', False)),
+            'lower_context_gate_active_mean': round(
+                lower_context_gate_stat['mean'], 4),
+            'lower_action_bins_gate_enabled': int(
+                self.lower_action_bins_gate_enabled),
+            'lower_action_bins_gate_active_mean': round(
+                lower_action_bins_gate_stat['mean'], 4),
             'lower_reward_mean': round(lr_stat['mean'], 4),
             'lower_reward_std': round(lr_stat['std'], 4),
             # lower training
@@ -6389,6 +7309,42 @@ class TransitDuetV2Runner:
                 snapshot_value_pred_stat['mean'],
             'snapshot_value_baseline_pred_mean':
                 snapshot_value_baseline_pred_stat['mean'],
+            'snapshot_value_candidate_gate_cap_mean':
+                snapshot_value_candidate_gate_cap_stat['mean'],
+            'snapshot_value_candidate_gate_filtered_mean':
+                snapshot_value_candidate_gate_filtered_stat['mean'],
+            'snapshot_value_risk_score_mean':
+                snapshot_value_risk_score_stat['mean'],
+            'snapshot_value_risk_penalty_mean':
+                snapshot_value_risk_penalty_stat['mean'],
+            'snapshot_value_risk_penalty_max_mean':
+                snapshot_value_risk_penalty_max_stat['mean'],
+            'snapshot_value_guard_blocked_mean':
+                snapshot_value_guard_blocked_stat['mean'],
+            'snapshot_value_guard_blocked_events': int(sum(
+                1 for value in snapshot_value_guard_blocked_values
+                if float(value) > 0.5)),
+            'snapshot_value_guard_prev_overshoot_norm_mean':
+                snapshot_value_guard_prev_overshoot_stat['mean'],
+            'snapshot_value_guard_primary_bias_mean':
+                snapshot_value_guard_primary_bias_stat['mean'],
+            'cf_action_selector_enabled':
+                1.0 if self.cf_action_selector_enable else 0.0,
+            'cf_action_selector_active_mean':
+                cf_action_active_stat['mean'],
+            'cf_action_selector_events': int(sum(
+                1 for value in self._ep_cf_action_selector_active
+                if float(value) > 0.5)),
+            'cf_action_selector_changed_mean':
+                cf_action_changed_stat['mean'],
+            'cf_action_selector_terminal_dispatch_mean':
+                cf_action_terminal_dispatch_stat['mean'],
+            'cf_action_selector_delta_mean':
+                cf_action_delta_stat['mean'],
+            'cf_action_selector_delta_std':
+                cf_action_delta_stat['std'],
+            'cf_action_selector_confidence_mean':
+                cf_action_confidence_stat['mean'],
             'terminal_headway_floor_mean':
                 terminal_headway_floor_stat['mean'],
             'terminal_headway_floor_events':
@@ -6649,12 +7605,23 @@ class TransitDuetV2Runner:
                   'freq_high_energy', 'freq_middle_energy',
                   'freq_od_entropy', 'freq_promotion_strength',
                   'freq_promotion_active',
+                  'cf_action_selector_active',
+                  'cf_action_selector_method',
+                  'cf_action_selector_delta_s',
+                  'cf_action_selector_actor_delta_s',
+                  'cf_action_selector_changed',
+                  'cf_action_selector_terminal_dispatch',
+                  'cf_action_selector_confidence',
+                  'cf_action_selector_node_id',
                   'snapshot_value_active', 'snapshot_value_method',
                   'snapshot_value_override_action',
                   'snapshot_value_terminal_dispatch',
                   'snapshot_value_terminal_bias_s',
                   'snapshot_value_pred', 'snapshot_value_baseline_pred',
                   'snapshot_value_margin',
+                  'snapshot_value_guard_blocked',
+                  'snapshot_value_guard_prev_overshoot_norm',
+                  'snapshot_value_guard_primary_bias_s',
                   'hold_mean', 'hold_std', 'hold_max', 'hold_n',
                   'gap_dev', 'penalty', 'reward']
 
@@ -6736,6 +7703,10 @@ class TransitDuetV2Runner:
         bins_note = (
             f"  bins={self.lower_action_bins.tolist()}"
             if self.lower_action_bins is not None else "")
+        if self.lower_action_bins_gate_enabled:
+            bins_note += (
+                f"  bins_gate={self.lower_action_bins_gate_source}"
+                f">={self.lower_action_bins_gate_threshold:g}")
         last_note = "  +last_action" if self.lower_use_last_action_feature else ""
         print(f"  Lower: state={self.lower_state_dim}  K={self.lower_trainer.ensemble_size}  "
               f"batch={self.batch_size}  updates/ep={self.updates_per_episode}"
