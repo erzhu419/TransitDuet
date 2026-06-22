@@ -3418,6 +3418,49 @@ it is the cleaner main alias because it ties current main, has a significant
 overall advantage versus fixed-headway, and does not have a significant
 overshoot regression.
 
+Current-name alias audit after promotion:
+
+```text
+main alias run:
+results_freqduet/paper_main_b15o22_alias_ep100_wu10_4domain_20seed
+tasks t12618-t12627
+
+pure fixed-headway run:
+results_freqduet/paper_external_fixed_headway_ep100_wu10_4domain_20seed
+tasks t12628-t12637
+
+protocol:
+4 domains x 20 seeds x 100 episodes
+last-k: 50
+upper warmup for learned main: 10
+baseline: scripts/run_freqduet_external_baselines.py fixed_headway
+```
+
+Final paired result against pure fixed-headway:
+
+```text
+terminal:        delta -0.0063, 95% CI [-0.0238, +0.0122]
+highnoise:       delta +0.0014, 95% CI [-0.0577, +0.0609]
+odshift:         delta -0.0132, 95% CI [-0.0323, +0.0067]
+rushshift:       delta +0.0109, 95% CI [+0.0002, +0.0213]
+overall_shared:  delta -0.0018, 95% CI [-0.0216, +0.0181]
+```
+
+Interpretation: the promoted current config name is valid and overall ties the
+strong pure fixed-headway baseline, but it does not dominate it. The remaining
+weak point is rushshift, where current main is slightly but significantly worse
+than fixed-headway under this 100ep protocol. Do not cite the earlier
+targetguard-vs-fixed numbers as the final pure-fixed comparison; the current
+audit is the clean table binding.
+
+Follow-up now running: `upperhist_current_b15o22_ep100_wu10_4domain_20seed`
+tests the SUMO-RL exp39-style repair under the current promoted main:
+short upper decision history plus small discrete residual action alphabets.
+This is motivated by old rushshift screens where `upperhist3/4` were closest
+to fixed-headway, unlike value-selector variants that tended to worsen
+rushshift. Scheduler-direct tasks `t12650-t12679` are running on
+`node001-node006`.
+
 2026-06-17 figure follow-up: generated updated current-name mechanism and
 decomposer packages:
 

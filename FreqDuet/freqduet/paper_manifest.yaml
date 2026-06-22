@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-21
+version: 2026-06-22
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -3293,6 +3293,62 @@ snapshot_counterfactual_value_labels:
           overshoot_ci95: [-0.0125, 0.0155]
         mechanism_result: targetnonpos confirms action-space shrink can tie main and beat fixed-headway, but it still significantly increases overshoot versus current main and removes more terminal-bias preservation than b15o22
         promotion_rule: not promoted; keep as mechanism/negative evidence for the action-space shrink idea
+      current_main_alias_vs_pure_fixed_headway:
+        status: complete_alias_validated_overall_tie_rushshift_gap
+        learned_run_name: paper_main_b15o22_alias_ep100_wu10_4domain_20seed
+        learned_result_dir: results_freqduet/paper_main_b15o22_alias_ep100_wu10_4domain_20seed
+        learned_per_seed_csv: results_freqduet/paper_main_b15o22_alias_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+        fixed_run_name: paper_external_fixed_headway_ep100_wu10_4domain_20seed
+        fixed_result_dir: results_freqduet/paper_external_fixed_headway_ep100_wu10_4domain_20seed
+        fixed_per_seed_csv: results_freqduet/paper_external_fixed_headway_ep100_wu10_4domain_20seed/combined_summary/external_baselines_per_seed.csv
+        comparison_dir: results_freqduet/paper_main_b15o22_alias_ep100_wu10_4domain_20seed/external_fixed_comparison
+        comparison_csv: results_freqduet/paper_main_b15o22_alias_ep100_wu10_4domain_20seed/external_fixed_comparison/external_baseline_paired_deltas.csv
+        domains: [terminal, highnoise, odshift, rushshift]
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        scheduler_tasks_learned: [t12618-t12627]
+        scheduler_tasks_fixed_headway: [t12628-t12637]
+        submitted_with: scheduler-direct, no Slurm
+        completion_check:
+          learned_rows: 80
+          fixed_rows: 80
+          expected_rows_each: 80
+        paired_deltas_main_minus_fixed:
+          terminal: [-0.0063, -0.0238, 0.0122]
+          highnoise: [0.0014, -0.0577, 0.0609]
+          odshift: [-0.0132, -0.0323, 0.0067]
+          rushshift: [0.0109, 0.0002, 0.0213]
+          overall_shared: [-0.0018, -0.0216, 0.0181]
+        note: current F_freqduet_*_main_hiro names now resolve to the promoted b15o22 selector and tie pure fixed-headway overall, but rushshift is slightly and significantly worse; use this as the clean fixed-headway table rather than the earlier targetguard-vs-fixed screen.
+      upperhist_current_b15o22_screen:
+        status: running_scheduler_direct
+        run_name: upperhist_current_b15o22_ep100_wu10_4domain_20seed
+        result_dir: results_freqduet/upperhist_current_b15o22_ep100_wu10_4domain_20seed
+        mechanism: SUMO-RL exp39-style current-main repair; add short upper decision history and restrict the residual action alphabet to small discrete bins after current b15o22 promotion
+        configs:
+          - F_freqduet_terminal_main_upperhist3_hiro
+          - F_freqduet_gen_highnoise_main_upperhist3_hiro
+          - F_freqduet_gen_odshift_main_upperhist3_hiro
+          - F_freqduet_gen_rushshift_main_upperhist3_hiro
+          - F_freqduet_terminal_main_upperhist4_hiro
+          - F_freqduet_gen_highnoise_main_upperhist4_hiro
+          - F_freqduet_gen_odshift_main_upperhist4_hiro
+          - F_freqduet_gen_rushshift_main_upperhist4_hiro
+          - F_freqduet_terminal_main_upperhist5_hiro
+          - F_freqduet_gen_highnoise_main_upperhist5_hiro
+          - F_freqduet_gen_odshift_main_upperhist5_hiro
+          - F_freqduet_gen_rushshift_main_upperhist5_hiro
+        seeds: paired_seeds_20
+        episodes: 100
+        last_k: 50
+        upper_warmup_eps: 10
+        shard_count: 30
+        scheduler_tasks: [t12650-t12679]
+        nodes: [node001, node002, node003, node004, node005, node006]
+        submitted_with: scheduler-direct, no Slurm
+        promotion_bar: promote only if it removes the rushshift fixed-headway gap without significant overall regression versus current main and without overshoot regression.
       promotion_rule: fit seed-held-out value model on risk_proxy_cost; only wire online if offline selector improves actor_term45_0 with domain-safe CI and candidate choices reduce CV/overshoot risk without collapsing to a single fixed action
       note: offline replay and seed-held-out value model passed; online action-override screen launched through scheduler-direct CPU tasks on node001-node006 after warmup=0 selector-active smoke confirmed nonzero snapshot_value_events and override events
     snapshotrf_online_ep100_wu10_4domain_20seed:
