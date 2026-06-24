@@ -22,6 +22,7 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 METHODS = (
     "main",
+    "cfaction_domainbest_v1",
     "domainbest_terminalonly",
     "freeze100",
     "main_driftcost",
@@ -101,6 +102,7 @@ def infer_domain(config):
 
 def infer_method(config):
     for method in (
+        "cfaction_domainbest_v1",
         "domainbest_terminalonly",
         "snapshotriskdual_compresssafe05",
         "snapshotriskdual_compresssafe10_terminalonly",

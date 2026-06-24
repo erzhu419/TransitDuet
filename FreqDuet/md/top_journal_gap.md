@@ -3474,6 +3474,42 @@ than fixed-headway under this 100ep protocol. Do not cite the earlier
 targetguard-vs-fixed numbers as the final pure-fixed comparison; the current
 audit is the clean table binding.
 
+2026-06-25 update: a deterministic seed-fixed, domain-wise counterfactual
+action candidate now gives the first 4-domain overall result that is
+significantly better than the strong deterministic fixed-headway baseline:
+
+```text
+run:
+results_freqduet/detseed_cfaction_domainbest_v1_ep100_wu10_4domain_20seed
+
+candidate - fixed_headway composite delta:
+terminal        -0.0207  CI [-0.0372, -0.0046]
+highnoise       -0.0320  CI [-0.0691, +0.0073]
+odshift         -0.0073  CI [-0.0260, +0.0115]
+rushshift        0.0000  CI [+0.0000, +0.0000]
+overall_shared  -0.0150  CI [-0.0256, -0.0049]
+```
+
+This closes the narrow "can FreqDuet beat fixed-headway under deterministic
+paired seeds?" concern for a candidate config, but it does not yet close the
+paper-main promotion gap. Versus `paper_main_b15o22_alias`, the improvement is
+small and non-significant overall, and OD shift has a small non-significant
+regression:
+
+```text
+candidate - paper_main composite delta:
+terminal  -0.0161  CI [-0.0347, +0.0022]
+highnoise -0.0024  CI [-0.0472, +0.0410]
+odshift   +0.0132  CI [-0.0105, +0.0382]
+rushshift -0.0118  CI [-0.0232, +0.0003]
+overall   -0.0043  CI [-0.0190, +0.0100]
+```
+
+Remaining before a top-journal main claim: add OD-protective causal/value guard
+or explain the OD tradeoff, rerun a current-name final matrix, and confirm at
+200 episodes. Until then, cite this as a fixed-headway-beating candidate rather
+than the locked final main.
+
 Follow-up now running: `upperhist_current_b15o22_ep100_wu10_4domain_20seed`
 tests the SUMO-RL exp39-style repair under the current promoted main:
 short upper decision history plus small discrete residual action alphabets.

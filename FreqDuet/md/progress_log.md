@@ -927,3 +927,59 @@ strong fixed-headway baseline, while highnoise/OD/rush generalization still
 needs a richer non-terminal action/value layer rather than more terminal-only
 tuning. Updated `F_freqduet_terminal_main_domainbest_terminalonly_hiro.yaml` to
 point to `cfaction_target_dm20_terminalonly`.
+
+## 2026-06-25 domain-wise counterfactual action candidate
+
+Added a conservative domain-wise alias family:
+
+```text
+F_freqduet_terminal_main_cfaction_domainbest_v1_hiro
+F_freqduet_gen_highnoise_main_cfaction_domainbest_v1_hiro
+F_freqduet_gen_odshift_main_cfaction_domainbest_v1_hiro
+F_freqduet_gen_rushshift_main_cfaction_domainbest_v1_hiro
+```
+
+This combines the deterministic terminal `target -20s` counterfactual action
+selector with the best historical non-terminal screen choices:
+
+- terminal: `cfaction_target_dm20_terminalonly`
+- highnoise: `cfaction_v2_terminalhold45_dm20`
+- odshift: `cfaction_v2_target_dm20`
+- rushshift: terminal-only fixed-safe path
+
+Scheduler run:
+
+```text
+results_freqduet/detseed_cfaction_domainbest_v1_ep100_wu10_4domain_20seed
+protocol: 4 domains x 20 paired seeds x 100 episodes, last_k=50, upper_warmup_eps=10
+tasks: t13062, t13064, t13066, t13068, t13070 on node001-node006 through scheduler
+```
+
+All 80 diagnostics files reached 100 episodes. Paired comparison against the
+deterministic fixed-headway baseline:
+
+```text
+candidate - fixed_headway composite delta
+terminal        -0.0207  CI [-0.0372, -0.0046], win=0.700
+highnoise       -0.0320  CI [-0.0691, +0.0073], win=0.700
+odshift         -0.0073  CI [-0.0260, +0.0115], win=0.650
+rushshift        0.0000  CI [+0.0000, +0.0000], win=0.350
+overall_shared  -0.0150  CI [-0.0256, -0.0049], win=0.650
+```
+
+Against the current `paper_main_b15o22_alias` matrix, the same candidate is
+only a small, non-significant improvement:
+
+```text
+candidate - paper_main composite delta
+terminal  -0.0161  CI [-0.0347, +0.0022]
+highnoise -0.0024  CI [-0.0472, +0.0410]
+odshift   +0.0132  CI [-0.0105, +0.0382]
+rushshift -0.0118  CI [-0.0232, +0.0003]
+overall   -0.0043  CI [-0.0190, +0.0100]
+```
+
+Decision: keep and push this as a fixed-headway-beating candidate, but do not
+overwrite the old `main` alias yet. The next repair should target OD protection
+and a cleaner causal/value guard, then rerun current-name final matrix and a
+200ep confirmation before promotion.

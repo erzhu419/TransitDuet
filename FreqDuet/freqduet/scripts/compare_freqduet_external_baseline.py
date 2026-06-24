@@ -15,6 +15,7 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 DEFAULT_METRICS = ("wait", "cv", "overshoot", "composite")
 CANDIDATE_METHOD_TOKENS = (
+    "cfaction_domainbest_v1",
     "domainbest_terminalonly",
     "snapshotriskdual_compresssafe05",
     "snapshotriskdual_compresssafe10_terminalonly",
