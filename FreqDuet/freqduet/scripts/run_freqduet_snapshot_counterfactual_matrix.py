@@ -138,11 +138,21 @@ def run_one(config: str, seed: int, args: argparse.Namespace) -> tuple[str, int,
         "--horizon-s", str(float(args.horizon_s)),
         f"--deltas-s={args.deltas_s}",
         "--modes", args.modes,
+        "--candidate-frame", args.candidate_frame,
         "--terminal-hold-s", str(float(args.terminal_hold_s)),
         "--terminal-min-s", str(float(args.terminal_min_s)),
         "--terminal-floor-ratio", str(float(args.terminal_floor_ratio)),
         "--terminal-floor-min-s", str(float(args.terminal_floor_min_s)),
         "--worker-threads", str(int(args.worker_threads)),
+        "--risk-proxy-wait-weight", str(float(args.risk_proxy_wait_weight)),
+        "--risk-proxy-cv-weight", str(float(args.risk_proxy_cv_weight)),
+        "--risk-proxy-overshoot-sq-weight", str(float(args.risk_proxy_overshoot_sq_weight)),
+        "--risk-proxy-overshoot-mean-weight", str(float(args.risk_proxy_overshoot_mean_weight)),
+        "--risk-proxy-holding-weight", str(float(args.risk_proxy_holding_weight)),
+        "--risk-proxy-cv-excess-target", str(float(args.risk_proxy_cv_excess_target)),
+        "--risk-proxy-cv-excess-weight", str(float(args.risk_proxy_cv_excess_weight)),
+        "--risk-proxy-launch-delay-weight", str(float(args.risk_proxy_launch_delay_weight)),
+        "--risk-proxy-positive-offset-weight", str(float(args.risk_proxy_positive_offset_weight)),
         "--out-dir", str(out_dir),
     ]
     if args.stochastic_lower:
@@ -241,24 +251,28 @@ def summarize_labels(
     df: pd.DataFrame,
     n_boot: int,
     baseline_method: str,
+    metric: str,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     keys = ["domain", "config", "seed", "ep", "dispatch_index"]
     df = df.copy()
-    df["proxy_cost"] = pd.to_numeric(df["proxy_cost"], errors="coerce")
-    df = df[np.isfinite(df["proxy_cost"])].copy()
+    if metric not in df.columns:
+        raise SystemExit(f"snapshot labels missing summary metric column: {metric}")
+    df[metric] = pd.to_numeric(df[metric], errors="coerce")
+    df = df[np.isfinite(df[metric])].copy()
 
     group_rows = []
     for (domain, method), group in df.groupby(["domain", "candidate_method"], sort=True):
-        values = group["proxy_cost"].to_numpy(dtype=np.float64)
+        values = group[metric].to_numpy(dtype=np.float64)
         lo, hi = bootstrap_ci(values, n_boot, stable_seed("group", domain, method))
         group_rows.append({
             "domain": domain,
             "candidate_method": method,
             "rows": int(len(group)),
             "snapshots": int(group[keys].drop_duplicates().shape[0]),
-            "proxy_cost_mean": float(values.mean()) if values.size else np.nan,
-            "proxy_cost_ci95_lo": lo,
-            "proxy_cost_ci95_hi": hi,
+            "metric": metric,
+            "cost_mean": float(values.mean()) if values.size else np.nan,
+            "cost_ci95_lo": lo,
+            "cost_ci95_hi": hi,
         })
     group_summary = pd.DataFrame(group_rows)
 
@@ -268,7 +282,7 @@ def summarize_labels(
         pivot = sub.pivot_table(
             index=keys,
             columns="candidate_method",
-            values="proxy_cost",
+            values=metric,
             aggfunc="mean",
         )
         if baseline_method not in pivot.columns:
@@ -284,6 +298,7 @@ def summarize_labels(
                 "domain": domain,
                 "candidate_method": method,
                 "baseline_method": baseline_method,
+                "metric": metric,
                 "pairs": int(len(pair)),
                 "seeds": int(pair["seed"].nunique()),
                 f"delta_candidate_minus_{baseline_method}": float(seed_delta.mean()) if seed_delta.size else np.nan,
@@ -301,6 +316,7 @@ def summarize_labels(
             "domain": domain,
             "candidate_method": "oracle_best",
             "baseline_method": baseline_method,
+            "metric": metric,
             "pairs": int(len(oracle)),
             "seeds": int(oracle["seed"].nunique()),
             f"delta_candidate_minus_{baseline_method}": float(seed_delta.mean()) if seed_delta.size else np.nan,
@@ -309,7 +325,7 @@ def summarize_labels(
         })
     paired_summary = pd.DataFrame(paired_rows)
 
-    best = df.loc[df.groupby(keys)["proxy_cost"].idxmin(), keys + ["candidate_method", "proxy_cost"]]
+    best = df.loc[df.groupby(keys)[metric].idxmin(), keys + ["candidate_method", metric]]
     share = (
         best.groupby(["domain", "candidate_method"], as_index=False)
         .size()
@@ -333,6 +349,7 @@ def aggregate(args: argparse.Namespace) -> None:
         df,
         int(args.n_boot),
         str(args.baseline_method),
+        str(args.summary_metric),
     )
     group_summary.to_csv(out_dir / "snapshot_counterfactual_group_summary.csv", index=False)
     paired_summary.to_csv(out_dir / "snapshot_counterfactual_paired_summary.csv", index=False)
@@ -354,11 +371,25 @@ def main() -> int:
     parser.add_argument("--horizon-s", type=float, default=600.0)
     parser.add_argument("--modes", default="target,terminalhold45")
     parser.add_argument("--deltas-s", default="-20,0,20")
+    parser.add_argument(
+        "--candidate-frame",
+        choices=["absolute", "actor_relative"],
+        default="absolute",
+    )
     parser.add_argument("--terminal-hold-s", type=float, default=45.0)
     parser.add_argument("--terminal-min-s", type=float, default=0.0)
     parser.add_argument("--terminal-floor-ratio", type=float, default=0.0)
     parser.add_argument("--terminal-floor-min-s", type=float, default=0.0)
     parser.add_argument("--stochastic-lower", action="store_true")
+    parser.add_argument("--risk-proxy-wait-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-cv-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-sq-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-mean-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-holding-weight", type=float, default=0.10)
+    parser.add_argument("--risk-proxy-cv-excess-target", type=float, default=0.44)
+    parser.add_argument("--risk-proxy-cv-excess-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-launch-delay-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-positive-offset-weight", type=float, default=0.0)
     parser.add_argument("--out-dir", default="results_freqduet/snapshot_counterfactual_matrix")
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--worker-threads", type=int, default=1)
@@ -370,6 +401,11 @@ def main() -> int:
     parser.add_argument("--aggregate-only", action="store_true")
     parser.add_argument("--n-boot", type=int, default=2000)
     parser.add_argument("--baseline-method", default="target_0")
+    parser.add_argument(
+        "--summary-metric",
+        default="proxy_cost",
+        help="Metric column used for aggregate candidate comparisons.",
+    )
     args = parser.parse_args()
 
     configs = parse_csv(args.configs, str)

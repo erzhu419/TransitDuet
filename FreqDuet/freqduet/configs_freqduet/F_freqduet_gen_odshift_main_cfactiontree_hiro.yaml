@@ -1,0 +1,20 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_cfactiontree_hiro
+
+upper:
+  counterfactual_action_selector:
+    enable: true
+    artifact: results_freqduet/cfaction_v2_ep100_wu10_4domain_20seed/trip_action_tree_selector_depth8_leaf1000/model_artifact/tree_selector.json
+    start_ep: 0
+    default_method: target0
+    disable_value_selectors: true
+    ep_norm_denominator: 99
+    terminal_shift_min_s: 0
+    terminal_shift_max_s: 45
+    allowed_methods:
+      - target_m20
+      - target0
+      - target_p20
+      - term45_m20
+      - term45_0
+      - term45_p20

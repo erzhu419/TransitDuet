@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_snapshottermbias_cap15_hiro
+
+# Risk-screened terminal-bias variant: keep the promoted snapshot value
+# selector, but remove p30 terminal-bias candidates so first-stop/terminal
+# dispatch can only add the smaller +15s bounded bias.
+upper:
+  snapshot_value_selector:
+    allowed_methods:
+      - actor_term45_0
+      - actor_target_p15
+      - actor_term45_p15

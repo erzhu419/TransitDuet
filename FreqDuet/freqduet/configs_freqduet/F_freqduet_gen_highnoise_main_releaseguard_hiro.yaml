@@ -1,0 +1,25 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_releaseguard_hiro
+
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: 0.0
+    terminal_shift_max_s: 45.0
+    terminal_early_release_adaptive:
+      enable: true
+      base_min_s: 0.0
+      relaxed_min_s: -5.0
+      min_updates_required: 30
+      max_peak_shift_abs: 0.0
+      min_prev_wait_min: 5.6
+      max_prev_overshoot_norm: 0.22
+      max_prev_headway_cv: 0.455
+      max_prev_terminal_shift_mean_s: 23.0
+      max_prev_terminal_shift_std_s: 11.0
+      max_high_energy: 0.075
+      max_middle_energy: 0.040
+      min_od_entropy: 0.955
+      max_low_forecast: 0.55
+      min_action_mean_s: -10.0
+      min_current_delta_s: -10.0

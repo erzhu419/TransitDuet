@@ -1,0 +1,10 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_snapshotnoisegate_hiro
+
+upper:
+  snapshot_value_selector:
+    candidate_gate:
+      enable: true
+      default_max_positive_offset_s: 15.0
+      high_noise_min_demand_noise: 0.25
+      high_noise_max_positive_offset_s: 30.0

@@ -1,0 +1,39 @@
+_extends: F_freqduet_gen_odshift_main_snapshotriskdual_targetnonpos_riskgate12_m005_hiro.yaml
+_name: F_freqduet_gen_odshift_main_snapshotriskdual_targetnonpos_riskmargin_tight_m005_hiro
+
+upper:
+  snapshot_action_value_selector:
+    improve_margin: 0.016
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.06
+      max_prev_headway_cv: 0.445
+      max_context_headway_cv: 0.45
+      max_fleet_pressure_norm: 0.0
+      max_abs_offset_s: 15.0
+      min_margin: 0.016
+      min_margin_per_abs_offset_norm: 0.020
+      max_primary_terminal_bias_loss_s: 8.0
+      max_negative_target_prev_overshoot_norm: 0.06
+      max_negative_target_fleet_pressure_norm: 0.0
+      min_negative_target_margin: 0.022
+    risk_margin:
+      enable: true
+      weight: 0.010
+      max_risk_score: 3.0
+      max_penalty: 0.045
+      abs_offset_scale_s: 15.0
+      target_base: 0.35
+      negative_multiplier: 1.40
+      positive_multiplier: 1.00
+      term45_multiplier: 1.00
+      prev_headway_cv_target: 0.425
+      prev_headway_cv_width: 0.035
+      prev_overshoot_norm_target: 0.040
+      prev_overshoot_norm_width: 0.050
+      context_headway_cv_target: 0.430
+      context_headway_cv_width: 0.035
+      context_fleet_pressure_target: 0.0
+      context_fleet_pressure_width: 0.15
+      primary_terminal_bias_target_s: 3.0
+      primary_terminal_bias_width_s: 5.0

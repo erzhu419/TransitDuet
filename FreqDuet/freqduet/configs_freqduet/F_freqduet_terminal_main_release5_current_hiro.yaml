@@ -1,0 +1,11 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_release5_current_hiro
+
+# Current main plus a minimal executable terminal early-release allowance.
+# Unlike the historical release5 configs, domain-specific variants inherit the
+# current per-domain selector roots before applying this terminal bound.
+upper:
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -5.0
+    terminal_shift_max_s: 45.0

@@ -1,0 +1,23 @@
+_extends: F_freqduet_gen_rushshift_main_snapshotriskdual_targetnonpos_m005_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotriskdual_targetnonpos_riskgate12_m005_hiro
+
+upper:
+  snapshot_action_value_selector:
+    improve_margin: 0.010
+    allowed_methods:
+      - actor_target_m15
+      - actor_target_0
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.12
+      max_prev_headway_cv: 0.465
+      max_context_headway_cv: 0.47
+      max_fleet_pressure_norm: 0.0
+      max_abs_offset_s: 15.0
+      min_margin: 0.010
+      min_margin_per_abs_offset_norm: 0.010
+      max_peak_shift_abs: 0.0
+      max_primary_terminal_bias_loss_s: 15.0
+      max_negative_target_prev_overshoot_norm: 0.12
+      max_negative_target_fleet_pressure_norm: 0.0
+      min_negative_target_margin: 0.012

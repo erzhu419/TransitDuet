@@ -1,30 +1,44 @@
 # Phase 4 Terminal Dispatch Scope Decision
 
-Last updated: 2026-06-10 CST
+Last updated: 2026-06-13 CST
 
 ## Decision
 
-The current paper main line is scoped as a frequency-separated
-target-headway / executable timetable controller. Full real terminal dispatch
-with actual launch-time rescheduling and first-stop holding is kept as Phase 4
-future work, not as the current promoted main path.
+The current paper main line is scoped as a frequency-separated executable
+timetable controller with bounded actual terminal dispatch. The promoted main
+config resolves to `upper.timetable_planner.terminal_dispatch: true`,
+`terminal_shift_min_s: 0`, and `terminal_shift_max_s: 45`; `env/sim.py` uses
+`_freqduet_scheduled_launch` as the launch eligibility time and records
+`_actual_launch_time` at dispatch. This satisfies the executable
+`launch_actual = max(ready, scheduled)` part of Phase 4.
 
-This is a scope decision, not a simplification of the method design. The
-validated implementation follows the `dev_manual.md` staged path:
+The remaining Phase 4 gap is narrower and more specific: a learned
+first-stop / terminal value model with per-decision counterfactual labels.
+The current main has executable terminal timing, but not a validated value
+model that can decide, at each dispatch, whether terminal delay/release beats
+the fixed or learned headway action under wait-CV-fleet tradeoffs.
+
+This is a scope correction, not a simplification of the method design. The
+validated implementation now covers the staged path as follows:
 
 - Phase 3: upper policy produces a smooth low-frequency target-headway
   timetable, evaluated through executable target headways in the existing HIRO
   runner.
-- Phase 4: upper policy directly changes actual terminal launch times and
-  treats first-stop holding as a separate physical control surface.
+- Phase 4 execution layer: the upper timetable writes executable scheduled
+  terminal launch times, and the environment delays actual launch until the
+  scheduled time is eligible.
+- Phase 4 value layer: still open. It requires per-decision first-stop /
+  terminal action labels or an equivalent causal value estimator.
 
-The paper should claim the Phase 3 contribution unless a learned Phase 4 value
-model is implemented and validated later.
+The paper should therefore claim bounded executable terminal-dispatch
+timetable control, while making clear that a learned first-stop/terminal value
+policy is not yet promoted.
 
-## Why Not Promote A Heuristic Phase 4 Patch
+## Why Not Promote A Heuristic Terminal-Value Patch
 
-The terminal-dispatch branch was tested through several causal, no-future-leak
-heuristics. None produced a stable improvement over the promoted main line.
+The terminal-value branch was tested through several causal, no-future-leak
+heuristics on top of the executable terminal-dispatch surface. None produced a
+stable improvement over the promoted main line.
 
 `termhold45` mostly repeated the existing terminal shift-cap surface. Its
 40-episode, 20-seed result was neutral:
@@ -64,7 +78,7 @@ terminal_launch_shift_mean overall: +2.22s
 ```
 
 The lower value-cost branch also does not justify substituting lower penalties
-for true terminal dispatch:
+for a terminal/first-stop value model:
 
 ```text
 valuesoft35 overall candidate - main composite: +0.0235 CI [-0.0111,+0.0552]
@@ -76,11 +90,10 @@ rules can reduce one component, but they raise passenger wait, CV, or
 domain-specific fleet overshoot elsewhere. This is not strong enough for a
 paper-main promotion.
 
-## What A Valid Phase 4 Upgrade Requires
+## What A Valid Phase 4 Value Upgrade Requires
 
-A credible Phase 4 implementation should not be another threshold rule. It
-needs a learned or explicitly estimated value model for first-stop / terminal
-delay:
+A credible upgrade should not be another threshold rule. It needs a learned or
+explicitly estimated value model for first-stop / terminal delay:
 
 - state: low-frequency demand trend, high-frequency energy, terminal queue,
   same-direction dispatch gap, fleet pressure, recent lower drift, and
@@ -102,6 +115,6 @@ Promotion criteria should be at least:
 - interpretable evidence that terminal delay is replacing harmful on-route
   holding rather than merely shifting cost between wait, CV, and overshoot.
 
-Until that evidence exists, the manuscript should present terminal dispatch as
-future work and keep the validated target-headway executable timetable as the
-main contribution.
+Until that evidence exists, the manuscript should present bounded executable
+terminal dispatch as implemented, but keep learned first-stop/terminal value
+control as future work or appendix rather than a promoted algorithmic claim.

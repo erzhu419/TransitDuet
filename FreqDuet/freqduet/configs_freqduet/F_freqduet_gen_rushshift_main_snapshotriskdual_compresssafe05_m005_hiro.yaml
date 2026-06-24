@@ -1,0 +1,15 @@
+_extends: F_freqduet_gen_rushshift_main_snapshotriskdual_targetonly_m005_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotriskdual_compresssafe05_m005_hiro
+
+# Target-only risk-value override with a causal compression guard. Negative
+# target actions are allowed only when previous overshoot is low, current fleet
+# pressure is non-positive, and the value margin is strong enough.
+upper:
+  snapshot_action_value_selector:
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.22
+      max_primary_terminal_bias_loss_s: 15.0
+      max_negative_target_prev_overshoot_norm: 0.05
+      max_negative_target_fleet_pressure_norm: 0.0
+      min_negative_target_margin: 0.015

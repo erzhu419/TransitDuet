@@ -1,0 +1,18 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotrushriskgate_loose0_hiro
+
+# Loose hard gate: keep cap15 almost everywhere, and block positive terminal
+# bias only after extreme previous-episode instability.
+upper:
+  snapshot_value_selector:
+    allowed_methods:
+      - actor_term45_0
+      - actor_target_p15
+      - actor_term45_p15
+    candidate_gate:
+      enable: true
+      default_max_positive_offset_s: 15.0
+      risk_max_positive_offset_s: 0.0
+      max_prev_headway_cv: 0.53
+      max_prev_overshoot_norm: 0.375
+      max_prev_terminal_shift_std_s: 18.0

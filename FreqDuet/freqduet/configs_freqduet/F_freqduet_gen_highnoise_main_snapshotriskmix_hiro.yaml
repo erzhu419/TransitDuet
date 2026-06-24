@@ -1,0 +1,6 @@
+_extends: F_freqduet_gen_highnoise_main_snapshotriskpenalty_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_snapshotriskmix_hiro
+
+# High demand-noise keeps the full snapshot candidate set but adds deploy-time
+# CV/overshoot risk penalty; this retained the wait-relief path and was the
+# strongest highnoise branch against fixed-headway.

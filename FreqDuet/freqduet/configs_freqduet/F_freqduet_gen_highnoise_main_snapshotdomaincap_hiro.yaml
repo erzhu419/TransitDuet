@@ -1,0 +1,6 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_snapshotdomaincap_hiro
+
+# High demand-noise is the one domain where the larger terminal-bias path still
+# carries wait-relief value. Keep current main unchanged here; the config exists
+# so the 4-domain candidate matrix has a single reproducible method name.

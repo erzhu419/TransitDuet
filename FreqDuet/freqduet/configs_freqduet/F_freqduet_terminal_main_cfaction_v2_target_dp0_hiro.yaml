@@ -1,0 +1,17 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_cfaction_v2_target_dp0_hiro
+
+# Generated action-level counterfactual config.
+# The upper actor is replaced by a fixed action for matched-seed rollout labels.
+upper:
+  action_override:
+    enable: true
+    delta_s: 0
+    disable_value_selectors: true
+  timetable_planner:
+    headway_value_planner:
+      enable: false
+    terminal_value_selector:
+      enable: false
+training:
+  trip_dump_freq: 1

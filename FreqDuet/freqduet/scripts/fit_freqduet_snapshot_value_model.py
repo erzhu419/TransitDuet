@@ -44,29 +44,51 @@ DEFAULT_CONTEXT_COLS = [
     "freq_od_entropy",
     "freq_promotion_strength",
     "freq_promotion_active",
+    "actor_delta_norm",
+    "actor_abs_delta_norm",
+    "actor_terminal_dispatch",
 ]
 
 
-ACTION_RE = re.compile(r"^(?P<mode>target|term45)_(?P<delta>m\d+|0|p\d+)$")
+ACTION_RE = re.compile(
+    r"^(?P<actor>actor_)?(?P<mode>target|term45)_(?P<delta>m\d+|0|p\d+)$"
+)
 
 
-def parse_action(method: str) -> dict[str, float | str]:
+def parse_action(
+    method: str,
+    candidate_delta_s: float | None = None,
+    candidate_offset_s: float | None = None,
+    actor_delta_s: float | None = None,
+) -> dict[str, float | str]:
     text = str(method)
     if text == "target0":
         mode = "target"
         token = "0"
+        actor_relative = False
     else:
         match = ACTION_RE.match(text)
         if not match:
             raise SystemExit(f"candidate_method {method!r} is not a supported discrete action")
         mode = match.group("mode")
         token = match.group("delta")
-    if token == "0":
-        delta_s = 0.0
-    elif token.startswith("m"):
-        delta_s = -float(token[1:])
+        actor_relative = bool(match.group("actor"))
+    if candidate_offset_s is None or not np.isfinite(float(candidate_offset_s)):
+        if token == "0":
+            offset_s = 0.0
+        elif token.startswith("m"):
+            offset_s = -float(token[1:])
+        else:
+            offset_s = float(token[1:])
     else:
-        delta_s = float(token[1:])
+        offset_s = float(candidate_offset_s)
+    if candidate_delta_s is None or not np.isfinite(float(candidate_delta_s)):
+        base = float(actor_delta_s or 0.0) if actor_relative else 0.0
+        delta_s = base + float(offset_s)
+    else:
+        delta_s = float(candidate_delta_s)
+    actor_delta = float(actor_delta_s or 0.0)
+    delta_minus_actor = float(delta_s - actor_delta)
     norm = 60.0
     return {
         "action_mode": mode,
@@ -80,6 +102,15 @@ def parse_action(method: str) -> dict[str, float | str]:
         "action_target": 1.0 if mode == "target" else 0.0,
         "action_term45_x_delta": (1.0 if mode == "term45" else 0.0) * delta_s / norm,
         "action_term45_x_abs_delta": (1.0 if mode == "term45" else 0.0) * abs(delta_s) / norm,
+        "candidate_offset_norm": offset_s / norm,
+        "candidate_abs_offset_norm": abs(offset_s) / norm,
+        "candidate_above_actor": 1.0 if delta_minus_actor > 1e-9 else 0.0,
+        "candidate_below_actor": 1.0 if delta_minus_actor < -1e-9 else 0.0,
+        "candidate_same_as_actor": 1.0 if abs(delta_minus_actor) <= 1e-9 else 0.0,
+        "action_delta_minus_actor_norm": delta_minus_actor / norm,
+        "action_abs_delta_minus_actor_norm": abs(delta_minus_actor) / norm,
+        "action_term45_x_offset": (1.0 if mode == "term45" else 0.0) * offset_s / norm,
+        "action_term45_x_abs_offset": (1.0 if mode == "term45" else 0.0) * abs(offset_s) / norm,
     }
 
 
@@ -96,6 +127,14 @@ def read_labels(path: Path) -> pd.DataFrame:
 
 
 def prepare_labels(labels: pd.DataFrame, metric: str) -> pd.DataFrame:
+    if metric == "auto":
+        metric = "integrated_proxy_cost" if "integrated_proxy_cost" in labels.columns else "proxy_cost"
+    elif metric == "integrated_proxy_cost" and metric not in labels.columns and "proxy_cost" in labels.columns:
+        print(
+            "WARN integrated_proxy_cost missing; falling back to legacy proxy_cost",
+            flush=True,
+        )
+        metric = "proxy_cost"
     required = set(SNAPSHOT_KEYS + ["candidate_method", metric])
     missing = sorted(required - set(labels.columns))
     if missing:
@@ -104,7 +143,27 @@ def prepare_labels(labels: pd.DataFrame, metric: str) -> pd.DataFrame:
     data["seed"] = data["seed"].astype(int)
     data["cost"] = pd.to_numeric(data[metric], errors="coerce")
     data = data[np.isfinite(data["cost"])].copy()
-    action = pd.DataFrame([parse_action(method) for method in data["candidate_method"]])
+    candidate_delta_col = pd.to_numeric(
+        data.get("candidate_delta_s", pd.Series(np.nan, index=data.index)),
+        errors="coerce",
+    )
+    candidate_offset_col = pd.to_numeric(
+        data.get("candidate_offset_s", pd.Series(np.nan, index=data.index)),
+        errors="coerce",
+    )
+    actor_delta_col = pd.to_numeric(
+        data.get("actor_delta_s", pd.Series(0.0, index=data.index)),
+        errors="coerce",
+    ).fillna(0.0)
+    action = pd.DataFrame([
+        parse_action(
+            method,
+            candidate_delta_s=float(candidate_delta_col.iloc[idx]),
+            candidate_offset_s=float(candidate_offset_col.iloc[idx]),
+            actor_delta_s=float(actor_delta_col.iloc[idx]),
+        )
+        for idx, method in enumerate(data["candidate_method"])
+    ])
     data = pd.concat([data.reset_index(drop=True), action], axis=1)
 
     data["dir_signed"] = np.where(pd.to_numeric(data.get("dir", 0), errors="coerce") > 0, 1.0, -1.0)
@@ -119,6 +178,13 @@ def prepare_labels(labels: pd.DataFrame, metric: str) -> pd.DataFrame:
         data.get("base_target_headway_s", data.get("base_headway", 360.0)),
         errors="coerce",
     ) / 600.0
+    data["actor_delta_s"] = actor_delta_col.reset_index(drop=True)
+    data["actor_delta_norm"] = data["actor_delta_s"] / 60.0
+    data["actor_abs_delta_norm"] = data["actor_delta_s"].abs() / 60.0
+    data["actor_terminal_dispatch"] = pd.to_numeric(
+        data.get("actor_terminal_dispatch", 0.0),
+        errors="coerce",
+    ).fillna(0.0)
     data["waiting_total_pre_norm"] = pd.to_numeric(data.get("waiting_total_pre", 0.0), errors="coerce") / 500.0
     data["fleet_concurrent_pre_norm"] = pd.to_numeric(data.get("fleet_concurrent_pre", 0.0), errors="coerce") / 30.0
     data["fleet_target_pre_norm"] = pd.to_numeric(data.get("fleet_target_pre", 1.0), errors="coerce") / 30.0
@@ -570,7 +636,11 @@ def print_compact(summary: pd.DataFrame, candidate_summary: pd.DataFrame, baseli
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--metric", default="proxy_cost")
+    parser.add_argument(
+        "--metric",
+        default="auto",
+        help="Cost label column. Use auto to prefer integrated_proxy_cost and fall back to proxy_cost.",
+    )
     parser.add_argument("--baseline-method", default="target_0")
     parser.add_argument("--target-mode", choices=["absolute", "residual"], default="absolute")
     parser.add_argument("--folds", type=int, default=5)
@@ -594,6 +664,8 @@ def main() -> int:
     labels = prepare_labels(read_labels(args.labels), args.metric)
     if args.baseline_method not in set(labels["candidate_method"]):
         raise SystemExit(f"baseline method {args.baseline_method!r} not in labels")
+    if int(labels["seed"].nunique()) < 2:
+        raise SystemExit("snapshot value-model CV requires at least 2 distinct seeds")
     labels = add_model_target(labels, args.baseline_method, args.target_mode)
     cols = context_cols(labels)
     cv_parts = []

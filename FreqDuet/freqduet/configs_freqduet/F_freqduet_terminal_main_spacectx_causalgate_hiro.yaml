@@ -1,0 +1,47 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_spacectx_causalgate_hiro
+
+# Causal SUMO exp39-style repair candidate. The lower state dimension is fixed,
+# but richer local spatiotemporal context is zeroed unless the online frequency
+# prior indicates high-frequency noise or OD-shift structure. The holding action
+# is also projected to low-duration bins only under that same gate, so base-day
+# episodes keep the current continuous mainline behavior.
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
+      - fwd_headway_norm
+      - bwd_headway_norm
+      - headway_balance
+      - hold_value_proxy
+      - route_progress
+      - station_phase
+      - prev_launch_gap
+      - next_launch_gap
+      - time_sin
+      - time_cos
+      - prev_queue
+      - next_queue
+    gate:
+      enable: true
+      mode: history_ema
+      min_episode: 40
+      min_history_episodes: 30
+      history_alpha: 0.1
+      min_freq_updates: 3
+      min_freq_promotion_absorbed: 0.12
+      max_freq_od_entropy: 0.9535
+
+lower:
+  action_bins: [0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 20.0, 30.0, 45.0]
+  action_bins_gate:
+    enable: true
+    source: lower_context_gate
+    threshold: 0.5

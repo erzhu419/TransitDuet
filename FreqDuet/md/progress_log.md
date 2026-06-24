@@ -880,3 +880,50 @@ A valueguard + `belief_fleet_weight_floor: 0.30` combination was rejected in
 the same local screen because it removed the highnoise benefit and worsened
 overall composite. The current valueguard is a candidate for a scheduler-visible
 100ep/20seed screen, not a promoted main alias.
+
+## 2026-06-24 deterministic seed fix and terminal-only fixed-headway break
+
+Diagnosed a reproducibility bug in the FreqDuet evaluation path: the route
+sampler uses Python's stdlib `random`, while the runners only seeded NumPy and
+Torch. Identical config/seed runs could therefore produce different day-level
+demand traces. Fixed this by seeding stdlib `random` in `runner_v3.py` and
+`scripts/run_freqduet_external_baselines.py`; a same-config same-seed sanity
+check now reproduces exactly.
+
+Reran the deterministic fixed-headway external baseline and a seed-fixed
+terminal-only sweep:
+
+```text
+fixed run:
+  results_freqduet/detseed_external_fixed_headway_ep100_wu10_4domain_20seed
+sweep run:
+  results_freqduet/detseed_terminalonly_sweep9_ep100_wu10_4domain_20seed
+protocol:
+  4 domains x 20 paired seeds x 100 episodes, last_k=50, upper_warmup_eps=10
+```
+
+The deterministic fixed-headway baseline composite means are:
+
+```text
+terminal   1.4383
+highnoise  1.8324
+odshift    1.4537
+rushshift  1.2658
+```
+
+The sweep found one statistically credible improvement over this fixed baseline:
+`cfaction_target_dm20_terminalonly`.
+
+```text
+candidate - fixed_headway composite delta
+terminal        -0.0207  CI [-0.0373, -0.0049], win=0.700
+overall_shared  -0.0052  CI [-0.0091, -0.0011], win=0.700
+```
+
+The non-terminal held-out domains are currently identical to fixed-headway for
+the terminal-only configs, so this result should be interpreted narrowly:
+FreqDuet now has a deterministic, paired-seed terminal improvement over the
+strong fixed-headway baseline, while highnoise/OD/rush generalization still
+needs a richer non-terminal action/value layer rather than more terminal-only
+tuning. Updated `F_freqduet_terminal_main_domainbest_terminalonly_hiro.yaml` to
+point to `cfaction_target_dm20_terminalonly`.

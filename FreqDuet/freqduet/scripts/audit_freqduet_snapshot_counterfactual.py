@@ -128,16 +128,21 @@ def find_trip(env, reference_trip):
     )
 
 
-def action_name(mode: str, delta_s: float) -> str:
-    prefix = "term45" if mode == "terminalhold45" else "target"
+def _delta_token(delta_s: float) -> str:
     delta = int(round(float(delta_s)))
     if delta == 0:
-        suffix = "0"
-    elif delta < 0:
-        suffix = f"m{abs(delta)}"
+        return "0"
+    if delta < 0:
+        return f"m{abs(delta)}"
+    return f"p{delta}"
+
+
+def action_name(mode: str, delta_s: float, frame: str = "absolute") -> str:
+    if frame == "actor_relative":
+        prefix = "actor_term45" if mode == "terminalhold45" else "actor_target"
     else:
-        suffix = f"p{delta}"
-    return f"{prefix}_{suffix}"
+        prefix = "term45" if mode == "terminalhold45" else "target"
+    return f"{prefix}_{_delta_token(delta_s)}"
 
 
 def launched_count(env) -> int:
@@ -150,6 +155,46 @@ def waiting_total(env) -> int:
 
 def fleet_concurrent(env) -> int:
     return int(sum(1 for bus in getattr(env, "bus_all", []) if getattr(bus, "on_route", False)))
+
+
+def holding_concurrent(env) -> int:
+    count = 0
+    for bus in getattr(env, "bus_all", []):
+        if not getattr(bus, "on_route", False):
+            continue
+        state_name = str(getattr(getattr(bus, "state", None), "name", ""))
+        holding_time = float(getattr(bus, "holding_time", 0.0) or 0.0)
+        dwelling_time = float(getattr(bus, "dwelling_time", 0.0) or 0.0)
+        if state_name in {"HOLDING", "DWELLING"} or holding_time > 0.0 or dwelling_time > 0.0:
+            count += 1
+    return int(count)
+
+
+def applied_holding_total(env) -> tuple[float, int]:
+    total = 0.0
+    count = 0
+    for bus in getattr(env, "bus_all", []):
+        actions = getattr(bus, "applied_actions", []) or []
+        count += len(actions)
+        total += sum(float(x) for x in actions)
+    return float(total), int(count)
+
+
+def boarded_wait_totals(env) -> tuple[float, int]:
+    total_wait = 0.0
+    count = 0
+    for station in getattr(env, "stations", []):
+        for passenger in getattr(station, "total_passenger", []) or []:
+            boarding_time = getattr(passenger, "boarding_time", None)
+            appear_time = getattr(passenger, "appear_time", None)
+            if boarding_time is None or appear_time is None:
+                continue
+            try:
+                total_wait += float(boarding_time) - float(appear_time)
+                count += 1
+            except (TypeError, ValueError):
+                continue
+    return float(total_wait), int(count)
 
 
 def active_headway_cv(env) -> float:
@@ -351,6 +396,8 @@ def replay_horizon(env, runner, horizon_s: float, deterministic_lower: bool) -> 
     start_time = float(getattr(env, "current_time", 0.0))
     end_time = start_time + float(horizon_s)
     start_launched = launched_count(env)
+    start_wait_s, start_boarded = boarded_wait_totals(env)
+    start_hold_s, start_hold_actions = applied_holding_total(env)
     env._upper_policy_callback = noop_upper_callback
 
     state_dict = copy.deepcopy(getattr(env, "state", {}))
@@ -358,8 +405,28 @@ def replay_horizon(env, runner, horizon_s: float, deterministic_lower: bool) -> 
     action_dict = {key: None for key in range(int(getattr(env, "max_agent_num", 0)))}
     lower_last_action = {key: 0.0 for key in range(int(getattr(env, "max_agent_num", 0)))}
     steps = 0
+    wait_area = 0.0
+    cv_area = 0.0
+    overshoot_area = 0.0
+    overshoot_sq_area = 0.0
+    holding_area = 0.0
+    fleet_area = 0.0
 
     while not getattr(env, "done", False) and float(getattr(env, "current_time", 0.0)) < end_time:
+        current_time = float(getattr(env, "current_time", 0.0))
+        dt = max(1.0, float(getattr(env, "time_step", 1.0) or 1.0))
+        if current_time + dt > end_time:
+            dt = max(0.0, end_time - current_time)
+        concurrent_now = fleet_concurrent(env)
+        n_fleet_now = float(getattr(env, "_n_fleet_target", 25))
+        overshoot_now = max(0.0, float(concurrent_now) - n_fleet_now)
+        wait_area += float(waiting_total(env)) * dt
+        cv_area += float(active_headway_cv(env)) * dt
+        overshoot_area += overshoot_now * dt
+        overshoot_sq_area += (overshoot_now * overshoot_now) * dt
+        holding_area += float(holding_concurrent(env)) * dt
+        fleet_area += float(concurrent_now) * dt
+
         for key in list(state_dict.keys()):
             if key not in action_dict:
                 action_dict[key] = None
@@ -395,24 +462,85 @@ def replay_horizon(env, runner, horizon_s: float, deterministic_lower: bool) -> 
         state_dict, reward_dict, _cost_dict, _done = env.step(action_dict, render=False)
         steps += 1
 
+    elapsed = max(float(getattr(env, "current_time", 0.0)) - start_time, 1.0)
     concurrent = fleet_concurrent(env)
     n_fleet = float(getattr(env, "_n_fleet_target", 25))
     overshoot = max(0.0, float(concurrent) - n_fleet)
     wait = float(waiting_total(env))
     cv = active_headway_cv(env)
-    proxy_cost = wait / 500.0 + (overshoot * overshoot) / max(n_fleet, 1.0) + cv
+    end_wait_s, end_boarded = boarded_wait_totals(env)
+    end_hold_s, end_hold_actions = applied_holding_total(env)
+    boarded_delta = max(0, int(end_boarded) - int(start_boarded))
+    completed_wait_delta_s = max(0.0, float(end_wait_s) - float(start_wait_s))
+    holding_action_delta_s = max(0.0, float(end_hold_s) - float(start_hold_s))
+    holding_action_delta_count = max(0, int(end_hold_actions) - int(start_hold_actions))
+    endpoint_proxy_cost = wait / 500.0 + (overshoot * overshoot) / max(n_fleet, 1.0) + cv
+    wait_area_norm = wait_area / (elapsed * 500.0)
+    cv_mean = cv_area / elapsed
+    overshoot_mean = overshoot_area / elapsed
+    overshoot_sq_mean = overshoot_sq_area / elapsed
+    holding_ratio_mean = holding_area / (elapsed * max(n_fleet, 1.0))
+    fleet_mean = fleet_area / elapsed
+    boarded_wait_mean_min = (
+        completed_wait_delta_s / max(float(boarded_delta), 1.0) / 60.0
+        if boarded_delta > 0 else 0.0)
+    integrated_proxy_cost = (
+        wait_area_norm
+        + cv_mean
+        + overshoot_sq_mean / max(n_fleet, 1.0)
+        + 0.10 * holding_ratio_mean
+    )
     return {
         "replay_start_time_s": start_time,
         "replay_end_time_s": float(getattr(env, "current_time", 0.0)),
+        "replay_elapsed_s": float(elapsed),
         "replay_steps": float(steps),
         "waiting_total": wait,
+        "waiting_area_passenger_s": float(wait_area),
+        "waiting_area_norm": float(wait_area_norm),
+        "boarded_delta": float(boarded_delta),
+        "completed_wait_delta_s": float(completed_wait_delta_s),
+        "boarded_wait_mean_min": float(boarded_wait_mean_min),
         "fleet_concurrent": float(concurrent),
         "fleet_target": n_fleet,
         "fleet_overshoot": overshoot,
+        "fleet_mean": float(fleet_mean),
+        "fleet_overshoot_mean": float(overshoot_mean),
+        "fleet_overshoot_sq_mean": float(overshoot_sq_mean),
         "headway_cv_active": cv,
-        "proxy_cost": float(proxy_cost),
+        "headway_cv_active_mean": float(cv_mean),
+        "holding_concurrent_mean": float(holding_area / elapsed),
+        "holding_ratio_mean": float(holding_ratio_mean),
+        "holding_action_delta_s": float(holding_action_delta_s),
+        "holding_action_delta_count": float(holding_action_delta_count),
+        "endpoint_proxy_cost": float(endpoint_proxy_cost),
+        "integrated_proxy_cost": float(integrated_proxy_cost),
+        "proxy_cost": float(integrated_proxy_cost),
         "launched_delta": float(launched_count(env) - start_launched),
     }
+
+
+def risk_proxy_cost(replay: dict[str, float | str], out: dict[str, float | str], args) -> float:
+    """Risk-aware snapshot label used for Phase-4 value-model retraining."""
+    fleet_target = max(float(replay.get("fleet_target", 25.0) or 25.0), 1.0)
+    wait = float(replay.get("waiting_area_norm", 0.0) or 0.0)
+    cv = float(replay.get("headway_cv_active_mean", 0.0) or 0.0)
+    overshoot_sq = float(replay.get("fleet_overshoot_sq_mean", 0.0) or 0.0) / fleet_target
+    overshoot_mean = float(replay.get("fleet_overshoot_mean", 0.0) or 0.0) / fleet_target
+    holding = float(replay.get("holding_ratio_mean", 0.0) or 0.0)
+    launch_delay = max(0.0, float(out.get("target_launch_delay_s", 0.0) or 0.0)) / 60.0
+    positive_offset = max(0.0, float(out.get("candidate_offset_s", 0.0) or 0.0)) / 60.0
+    cv_excess = max(0.0, cv - float(args.risk_proxy_cv_excess_target))
+    return float(
+        float(args.risk_proxy_wait_weight) * wait
+        + float(args.risk_proxy_cv_weight) * cv
+        + float(args.risk_proxy_overshoot_sq_weight) * overshoot_sq
+        + float(args.risk_proxy_overshoot_mean_weight) * overshoot_mean
+        + float(args.risk_proxy_holding_weight) * holding
+        + float(args.risk_proxy_cv_excess_weight) * cv_excess
+        + float(args.risk_proxy_launch_delay_weight) * launch_delay
+        + float(args.risk_proxy_positive_offset_weight) * positive_offset
+    )
 
 
 def evaluate_candidate(
@@ -421,6 +549,9 @@ def evaluate_candidate(
     reference_trip,
     mode: str,
     delta_s: float,
+    method_name: str,
+    candidate_offset_s: float,
+    candidate_frame: str,
     args,
 ) -> dict[str, float | str]:
     env = copy.deepcopy(snapshot_env)
@@ -452,14 +583,17 @@ def evaluate_candidate(
     actual = target_actual_launch(env, reference_trip)
     launch_time = float(getattr(trip, "launch_time", 0.0))
     out: dict[str, float | str] = {
-        "candidate_method": action_name(mode, delta_s),
+        "candidate_method": method_name,
         "candidate_mode": mode,
         "candidate_delta_s": float(delta_s),
+        "candidate_offset_s": float(candidate_offset_s),
+        "candidate_frame": candidate_frame,
         "target_actual_launch_s": float(actual) if actual is not None else np.nan,
         "target_launch_delay_s": float(actual - launch_time) if actual is not None else np.nan,
     }
     out.update(plan)
     out.update(replay)
+    out["risk_proxy_cost"] = risk_proxy_cost(replay, out, args)
     return out
 
 
@@ -513,6 +647,9 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
         runner.diag = DiagnosticLog(runner.log_dir, resume=False)
     modes = parse_csv(args.modes, str)
     deltas = parse_csv(args.deltas_s, float)
+    candidate_frame = str(args.candidate_frame).strip().lower()
+    if candidate_frame not in {"absolute", "actor_relative"}:
+        raise SystemExit(f"unsupported candidate frame: {args.candidate_frame}")
     rows: list[dict] = []
     dispatch_count = 0
     audit_count = 0
@@ -527,11 +664,15 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
             and dispatch_count >= int(args.start_dispatch)
             and (dispatch_count - int(args.start_dispatch)) % max(1, int(args.snapshot_stride)) == 0
         )
+        snapshot_env = None
+        snapshot_trip = None
+        rng_state_before = None
+        context = None
         if should_sample:
             try:
                 snapshot_env = copy.deepcopy(runner.env)
                 snapshot_trip = find_trip(snapshot_env, trip)
-                rng_state = capture_rng_state()
+                rng_state_before = capture_rng_state()
                 context = build_context_row(
                     int(getattr(runner, "_current_ep", 0)),
                     dispatch_count,
@@ -541,21 +682,69 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
                 context["config"] = cfg_path.stem
                 context["seed"] = int(args.seed)
                 context["domain"] = infer_domain(cfg_path.stem)
+            except Exception as exc:
+                print(
+                    f"WARN snapshot capture failed ep={getattr(runner, '_current_ep', None)} "
+                    f"dispatch={dispatch_count}: {exc}",
+                    flush=True,
+                )
+                snapshot_env = None
+                snapshot_trip = None
+                rng_state_before = None
+                context = None
+
+        actor_target = original_callback(s_upper_v1, trip)
+
+        if should_sample and snapshot_env is not None and snapshot_trip is not None and context is not None:
+            rng_state_after_actor = capture_rng_state()
+            try:
+                actor_base = float(context.get("base_target_headway_s", 360.0))
+                actor_delta = float(actor_target) - actor_base
+                actor_delta = float(np.clip(
+                    actor_delta,
+                    float(getattr(runner, "upper_action_low", np.asarray([-120.0]))[0]),
+                    float(getattr(runner, "upper_action_high", np.asarray([120.0]))[0]),
+                ))
+                context["actor_target_headway_s"] = float(actor_target)
+                context["actor_delta_s"] = float(actor_delta)
+                context["actor_delta_norm"] = float(actor_delta / 60.0)
+                context["actor_abs_delta_norm"] = float(abs(actor_delta) / 60.0)
+                context["actor_terminal_dispatch"] = float(
+                    1.0 if getattr(trip, "_freqduet_terminal_dispatch", False) else 0.0)
+                context["actor_scheduled_launch_s"] = float(
+                    getattr(trip, "_freqduet_scheduled_launch", getattr(trip, "launch_time", 0.0)))
                 for mode in modes:
-                    for delta_s in deltas:
-                        restore_rng_state(rng_state)
+                    for raw_delta_s in deltas:
+                        if candidate_frame == "actor_relative":
+                            candidate_offset_s = float(raw_delta_s)
+                            candidate_delta_s = float(np.clip(
+                                actor_delta + candidate_offset_s,
+                                float(getattr(runner, "upper_action_low", np.asarray([-120.0]))[0]),
+                                float(getattr(runner, "upper_action_high", np.asarray([120.0]))[0]),
+                            ))
+                            method_name = action_name(
+                                mode, candidate_offset_s, frame=candidate_frame)
+                        else:
+                            candidate_offset_s = float(raw_delta_s)
+                            candidate_delta_s = float(raw_delta_s)
+                            method_name = action_name(
+                                mode, candidate_delta_s, frame=candidate_frame)
+                        restore_rng_state(rng_state_before)
                         candidate = evaluate_candidate(
                             snapshot_env,
                             runner,
                             snapshot_trip,
                             mode,
-                            delta_s,
+                            candidate_delta_s,
+                            method_name,
+                            candidate_offset_s,
+                            candidate_frame,
                             args,
                         )
                         row = dict(context)
                         row.update(candidate)
                         rows.append(row)
-                restore_rng_state(rng_state)
+                restore_rng_state(rng_state_after_actor)
                 audit_count += 1
                 print(
                     f"SNAPSHOT ep={context['ep']} dispatch={dispatch_count} "
@@ -568,7 +757,8 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
                     f"dispatch={dispatch_count}: {exc}",
                     flush=True,
                 )
-        return original_callback(s_upper_v1, trip)
+                restore_rng_state(rng_state_after_actor)
+        return actor_target
 
     for burn_ep in range(int(args.burn_in_episodes)):
         runner.run_episode(ep=burn_ep, training=True)
@@ -586,9 +776,10 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
     out_dir = Path(args.out_dir)
     if not out_dir.is_absolute():
         out_dir = ROOT / out_dir
+    burn_tag = f"_burn{int(args.burn_in_episodes)}" if int(args.burn_in_episodes) > 0 else ""
     run_name = (
         f"{cfg_path.stem}_seed{int(args.seed)}_ep{int(args.episodes)}"
-        f"_snap{int(args.max_snapshots)}_h{int(args.horizon_s)}"
+        f"{burn_tag}_snap{int(args.max_snapshots)}_h{int(args.horizon_s)}"
     )
     run_dir = out_dir / run_name
     csv_path = run_dir / "snapshot_counterfactual_labels.csv"
@@ -602,6 +793,7 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
         "horizon_s": float(args.horizon_s),
         "modes": modes,
         "deltas_s": deltas,
+        "candidate_frame": candidate_frame,
         "max_snapshots": int(args.max_snapshots),
         "snapshots_collected": int(audit_count),
         "dispatches_seen": int(dispatch_count),
@@ -612,7 +804,10 @@ def run_audit(args) -> tuple[Path, dict[str, object]]:
             "Offline audit labels from env deepcopy inside the upper dispatch "
             "callback. Replay uses deterministic lower policy unless "
             "--stochastic-lower is set; pending lower last-action state is "
-            "reinitialized at the snapshot."
+            "reinitialized at the snapshot. The default proxy_cost is an "
+            "integrated horizon label over waiting area, active headway CV, "
+            "fleet overshoot, and a small holding regularizer; the legacy "
+            "endpoint-only label is kept as endpoint_proxy_cost."
         ),
     }
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -635,12 +830,30 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--horizon-s", type=float, default=900.0)
     parser.add_argument("--modes", default="target,terminalhold45")
     parser.add_argument("--deltas-s", default="-20,0,20")
+    parser.add_argument(
+        "--candidate-frame",
+        choices=["absolute", "actor_relative"],
+        default="absolute",
+        help=(
+            "absolute treats deltas-s as executable action deltas; "
+            "actor_relative treats them as offsets around the live actor action."
+        ),
+    )
     parser.add_argument("--terminal-hold-s", type=float, default=45.0)
     parser.add_argument("--terminal-min-s", type=float, default=0.0)
     parser.add_argument("--terminal-floor-ratio", type=float, default=0.0)
     parser.add_argument("--terminal-floor-min-s", type=float, default=0.0)
     parser.add_argument("--stochastic-lower", action="store_true")
     parser.add_argument("--worker-threads", type=int, default=1)
+    parser.add_argument("--risk-proxy-wait-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-cv-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-sq-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-mean-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-holding-weight", type=float, default=0.10)
+    parser.add_argument("--risk-proxy-cv-excess-target", type=float, default=0.44)
+    parser.add_argument("--risk-proxy-cv-excess-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-launch-delay-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-positive-offset-weight", type=float, default=0.0)
     parser.add_argument(
         "--out-dir",
         default="results_freqduet/snapshot_counterfactual",

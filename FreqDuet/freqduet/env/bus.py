@@ -51,6 +51,7 @@ class Bus(object):
         self._lower_context_enabled = False
         self._lower_context_queue_norm = 50.0
         self._lower_context_features = []
+        self._lower_context_gate_value = 1.0
 
         self.alight_num = 0. # 下车人数
         self.board_num = 0. # 上车人数
@@ -178,13 +179,15 @@ class Bus(object):
     def drive(self, current_time, action, bus_all, debug, target_headway=360.0,
               frequency_tracker=None, lower_frequency_enabled=False,
               lower_context_enabled=False, lower_context_queue_norm=50.0,
-              lower_context_features=None):
+              lower_context_features=None, lower_context_gate_value=1.0):
         self._target_headway = target_headway
         self._frequency_tracker = frequency_tracker
         self._lower_frequency_enabled = lower_frequency_enabled
         self._lower_context_enabled = lower_context_enabled
         self._lower_context_queue_norm = max(float(lower_context_queue_norm), 1e-6)
         self._lower_context_features = list(lower_context_features or [])
+        self._lower_context_gate_value = float(np.clip(
+            lower_context_gate_value, 0.0, 1.0))
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -359,8 +362,9 @@ class Bus(object):
                     'prev_queue': float(np.clip(prev_queue, 0.0, 2.0)),
                     'next_queue': float(np.clip(next_queue, 0.0, 2.0)),
                 }
+                gate = self._lower_context_gate_value
                 self.obs.extend([
-                    context_values[name]
+                    gate * context_values[name]
                     for name in self._lower_context_features
                     if name in context_values
                 ])

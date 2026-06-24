@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_odshift_main_cfaction_v2_target_dm20_hiro.yaml
+_name: F_freqduet_gen_odshift_main_cfactionrule_v1_hiro
+
+# Disturbance-conditioned fixed-action rule, v1.
+# OD-profile shift needs headway compression but terminal holding did not help
+# in the paired matrix, so use target_m20.
+upper:
+  timetable_planner:
+    terminal_dispatch: false

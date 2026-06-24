@@ -1,0 +1,23 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_snapshotint_hiro
+
+upper:
+  delta_max: 60.0
+  action_override:
+    disable_value_selectors: false
+  timetable_planner:
+    delta_min_s: -60.0
+    delta_max_s: 60.0
+    terminal_dispatch: true
+    terminal_shift_min_s: -60.0
+    terminal_shift_max_s: 60.0
+  snapshot_value_selector:
+    enable: true
+    domain: highnoise
+    artifact: results_freqduet/phase4_snapshot_cf_v5_integrated_burn40_4domain_20seed_snap12_h1800/value_model_residual/model_artifact
+    fallback_method: target_0
+    fallback_action: actor
+    improve_margin: 0.0
+
+training:
+  trip_dump_freq: 1

@@ -81,10 +81,20 @@ def build_inner_cmd(
         "--horizon-s", str(float(args.horizon_s)),
         f"--deltas-s={args.deltas_s}",
         "--modes", args.modes,
+        "--candidate-frame", args.candidate_frame,
         "--terminal-hold-s", str(float(args.terminal_hold_s)),
         "--terminal-min-s", str(float(args.terminal_min_s)),
         "--terminal-floor-ratio", str(float(args.terminal_floor_ratio)),
         "--terminal-floor-min-s", str(float(args.terminal_floor_min_s)),
+        "--risk-proxy-wait-weight", str(float(args.risk_proxy_wait_weight)),
+        "--risk-proxy-cv-weight", str(float(args.risk_proxy_cv_weight)),
+        "--risk-proxy-overshoot-sq-weight", str(float(args.risk_proxy_overshoot_sq_weight)),
+        "--risk-proxy-overshoot-mean-weight", str(float(args.risk_proxy_overshoot_mean_weight)),
+        "--risk-proxy-holding-weight", str(float(args.risk_proxy_holding_weight)),
+        "--risk-proxy-cv-excess-target", str(float(args.risk_proxy_cv_excess_target)),
+        "--risk-proxy-cv-excess-weight", str(float(args.risk_proxy_cv_excess_weight)),
+        "--risk-proxy-launch-delay-weight", str(float(args.risk_proxy_launch_delay_weight)),
+        "--risk-proxy-positive-offset-weight", str(float(args.risk_proxy_positive_offset_weight)),
         "--workers", str(int(args.workers)),
         "--worker-threads", "1",
         "--job-start", str(int(start)),
@@ -155,11 +165,25 @@ def main() -> int:
     parser.add_argument("--horizon-s", type=float, default=600.0)
     parser.add_argument("--modes", default="target,terminalhold45")
     parser.add_argument("--deltas-s", default="-20,0,20")
+    parser.add_argument(
+        "--candidate-frame",
+        choices=["absolute", "actor_relative"],
+        default="absolute",
+    )
     parser.add_argument("--terminal-hold-s", type=float, default=45.0)
     parser.add_argument("--terminal-min-s", type=float, default=0.0)
     parser.add_argument("--terminal-floor-ratio", type=float, default=0.0)
     parser.add_argument("--terminal-floor-min-s", type=float, default=0.0)
     parser.add_argument("--stochastic-lower", action="store_true")
+    parser.add_argument("--risk-proxy-wait-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-cv-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-sq-weight", type=float, default=1.0)
+    parser.add_argument("--risk-proxy-overshoot-mean-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-holding-weight", type=float, default=0.10)
+    parser.add_argument("--risk-proxy-cv-excess-target", type=float, default=0.44)
+    parser.add_argument("--risk-proxy-cv-excess-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-launch-delay-weight", type=float, default=0.0)
+    parser.add_argument("--risk-proxy-positive-offset-weight", type=float, default=0.0)
     parser.add_argument("--shard-size", type=int, default=14)
     parser.add_argument("--workers", type=int, default=14)
     parser.add_argument("--cpu", type=int, default=14)
@@ -169,6 +193,8 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
+    parser.add_argument("--baseline-method", default="target_0")
+    parser.add_argument("--summary-metric", default="proxy_cost")
     args = parser.parse_args()
 
     configs = parse_csv(args.configs, str)
@@ -201,7 +227,8 @@ def main() -> int:
     print(
         "  python3 scripts/run_freqduet_snapshot_counterfactual_matrix.py "
         f"--aggregate-only --out-dir results_freqduet/{args.run_name}/shards "
-        "--baseline-method term45_0"
+        f"--baseline-method {shlex.quote(args.baseline_method)} "
+        f"--summary-metric {shlex.quote(args.summary_metric)}"
     )
     return 0
 

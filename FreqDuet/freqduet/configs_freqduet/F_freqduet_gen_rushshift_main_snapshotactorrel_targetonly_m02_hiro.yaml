@@ -1,0 +1,8 @@
+_extends: F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_m02_hiro
+
+# Same target-only action override, but require a small predicted improvement
+# before changing the actor action.
+upper:
+  snapshot_value_selector:
+    improve_margin: 0.02

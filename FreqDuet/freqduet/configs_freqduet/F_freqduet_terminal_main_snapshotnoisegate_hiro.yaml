@@ -1,0 +1,14 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_snapshotnoisegate_hiro
+
+# Candidate-gated terminal-bias selector. Keep the promoted snapshot value
+# model and candidate set, but only allow +30s terminal bias under high demand
+# noise. Stable/noise-light regimes use +15s max to reduce launch-shift
+# variance without removing the highnoise wait-relief path.
+upper:
+  snapshot_value_selector:
+    candidate_gate:
+      enable: true
+      default_max_positive_offset_s: 15.0
+      high_noise_min_demand_noise: 0.25
+      high_noise_max_positive_offset_s: 30.0

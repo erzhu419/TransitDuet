@@ -1,0 +1,14 @@
+_extends: F_freqduet_gen_rushshift_main_snapshotactorrel_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotactorrel_targetonly_hiro
+
+# Rush labels from the actor-relative snapshot replay prefer target/headway
+# actions more than terminal-hold bias. Keep the v6 value artifact but restrict
+# executable candidates to target-mode action overrides around the actor.
+upper:
+  snapshot_value_selector:
+    allowed_methods:
+      - actor_target_m30
+      - actor_target_m15
+      - actor_target_0
+      - actor_target_p15
+      - actor_target_p30

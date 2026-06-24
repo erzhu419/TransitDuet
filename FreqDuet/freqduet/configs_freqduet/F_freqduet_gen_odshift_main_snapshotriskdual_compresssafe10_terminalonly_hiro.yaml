@@ -1,0 +1,14 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_snapshotriskdual_compresssafe10_terminalonly_hiro
+
+fixed_expert_selector:
+  enable: true
+  strict_headway_s: 360.0
+  reset_env_rng: true
+  start_ep: 0
+  count_start: selector_start
+  deterministic_rule:
+    enable: true
+    default: learned
+    fixed_when:
+      - min_cfg_od_noise: 0.10

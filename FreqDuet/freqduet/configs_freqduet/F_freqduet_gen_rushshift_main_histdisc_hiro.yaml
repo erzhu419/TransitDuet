@@ -1,0 +1,14 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_histdisc_hiro
+
+upper:
+  delta_max: 60.0
+  action_bins: [-60, -30, -15, 0, 15, 30, 60]
+  state_history:
+    enable: true
+    length: 3
+    action_norm_s: 60.0
+    shift_norm_s: 60.0
+    wait_norm_min: 10.0
+    waiting_norm: 500.0
+    plan_penalty_norm: 5.0

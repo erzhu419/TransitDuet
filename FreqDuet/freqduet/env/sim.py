@@ -98,6 +98,20 @@ class env_bus(object):
         self.lower_context_dim = 0
         self.lower_context_queue_norm = 50.0
         self.lower_context_features = []
+        self.lower_context_gate_enabled = False
+        self.lower_context_gate_value = 1.0
+        self.lower_context_gate_mode = 'current'
+        self.lower_context_gate_min_episode = 0
+        self.lower_context_gate_min_history_episodes = 0
+        self.lower_context_gate_history_alpha = 0.2
+        self.lower_context_gate_history_count = 0
+        self.lower_context_gate_history_last_episode = None
+        self.lower_context_gate_history_summary = {}
+        self.lower_context_gate_min_freq_updates = 0
+        self.lower_context_gate_min_freq_high_energy = None
+        self.lower_context_gate_max_freq_od_entropy = None
+        self.lower_context_gate_min_freq_od_high_energy = None
+        self.lower_context_gate_min_freq_promotion_absorbed = None
 
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
@@ -209,7 +223,10 @@ class env_bus(object):
         self._od_multipliers = self._sample_od_multipliers()
 
         if self.frequency_tracker is not None:
+            self._update_lower_context_gate_history()
             self.frequency_tracker.reset()
+        self.lower_context_gate_value = (
+            0.0 if self.lower_context_gate_enabled else 1.0)
         if self.frequency_logger is not None:
             self.frequency_logger.start_episode(
                 int(getattr(self, '_freqduet_episode', 0)))
@@ -407,6 +424,7 @@ class env_bus(object):
                         self.bus_all,
                         self.frequency_tracker,
                         bin_applied=bin_applied)
+            self.lower_context_gate_value = self._lower_context_gate_value()
             # station_state.append(len(station.waiting_passengers))
         # update bus state
         for bus in self.bus_all:
@@ -421,7 +439,8 @@ class env_bus(object):
                           lower_frequency_enabled=self.frequency_lower_enabled,
                           lower_context_enabled=self.lower_context_enabled,
                           lower_context_queue_norm=self.lower_context_queue_norm,
-                          lower_context_features=self.lower_context_features)
+                          lower_context_features=self.lower_context_features,
+                          lower_context_gate_value=self.lower_context_gate_value)
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))
@@ -547,6 +566,40 @@ class env_bus(object):
         self.lower_context_dim = len(self.lower_context_features)
         self.lower_context_queue_norm = max(
             float(lower_context_cfg.get('queue_norm', 50.0)), 1e-6)
+        lower_context_gate_cfg = lower_context_cfg.get('gate', {}) or {}
+        self.lower_context_gate_enabled = bool(
+            lower_context_gate_cfg.get('enable', False))
+        self.lower_context_gate_value = (
+            0.0 if self.lower_context_gate_enabled else 1.0)
+        self.lower_context_gate_mode = str(
+            lower_context_gate_cfg.get('mode', 'current')).lower()
+        if self.lower_context_gate_mode not in {'current', 'history_ema'}:
+            raise ValueError(
+                "frequency.lower_context.gate.mode must be current or history_ema")
+        self.lower_context_gate_min_episode = max(
+            0, int(lower_context_gate_cfg.get('min_episode', 0)))
+        self.lower_context_gate_min_history_episodes = max(
+            0, int(lower_context_gate_cfg.get('min_history_episodes', 0)))
+        self.lower_context_gate_history_alpha = float(np.clip(
+            lower_context_gate_cfg.get('history_alpha', 0.2), 0.0, 1.0))
+        self.lower_context_gate_history_count = 0
+        self.lower_context_gate_history_last_episode = None
+        self.lower_context_gate_history_summary = {}
+        self.lower_context_gate_min_freq_updates = max(
+            0, int(lower_context_gate_cfg.get('min_freq_updates', 0)))
+
+        def _optional_float(name):
+            value = lower_context_gate_cfg.get(name)
+            return None if value is None else float(value)
+
+        self.lower_context_gate_min_freq_high_energy = _optional_float(
+            'min_freq_high_energy')
+        self.lower_context_gate_max_freq_od_entropy = _optional_float(
+            'max_freq_od_entropy')
+        self.lower_context_gate_min_freq_od_high_energy = _optional_float(
+            'min_freq_od_high_energy')
+        self.lower_context_gate_min_freq_promotion_absorbed = _optional_float(
+            'min_freq_promotion_absorbed')
 
         if self.frequency_enabled:
             method = str(cfg.get('method', '')).lower()
@@ -594,6 +647,85 @@ class env_bus(object):
             bin_only=self.frequency_logger_cfg.get('bin_only', True),
             include_empty_stations=self.frequency_logger_cfg.get(
                 'include_empty_stations', False))
+
+    def _lower_context_gate_value(self):
+        """Return the causal gate for optional richer lower local context."""
+        if not self.lower_context_gate_enabled:
+            return 1.0
+        if self.frequency_tracker is None:
+            return 0.0
+        episode = int(getattr(self, '_freqduet_episode', 0))
+        if episode < self.lower_context_gate_min_episode:
+            return 0.0
+        if self.lower_context_gate_mode == 'history_ema':
+            if (self.lower_context_gate_history_count
+                    < self.lower_context_gate_min_history_episodes):
+                return 0.0
+            summary = self.lower_context_gate_history_summary
+        else:
+            summary = self.frequency_tracker.summary()
+        updates = int(summary.get('freq_updates', 0))
+        if updates < self.lower_context_gate_min_freq_updates:
+            return 0.0
+
+        active = False
+        high_threshold = self.lower_context_gate_min_freq_high_energy
+        if high_threshold is not None:
+            active = active or (
+                float(summary.get('freq_high_energy', 0.0))
+                >= float(high_threshold))
+        entropy_threshold = self.lower_context_gate_max_freq_od_entropy
+        if entropy_threshold is not None:
+            active = active or (
+                float(summary.get('freq_od_entropy', 1.0))
+                <= float(entropy_threshold))
+        od_high_threshold = self.lower_context_gate_min_freq_od_high_energy
+        if od_high_threshold is not None:
+            active = active or (
+                float(summary.get('freq_od_high_energy', 0.0))
+                >= float(od_high_threshold))
+        absorbed_threshold = (
+            self.lower_context_gate_min_freq_promotion_absorbed)
+        if absorbed_threshold is not None:
+            active = active or (
+                float(summary.get('freq_promotion_absorbed', 0.0))
+                >= float(absorbed_threshold))
+        return 1.0 if active else 0.0
+
+    def _update_lower_context_gate_history(self):
+        if (not self.lower_context_gate_enabled
+                or self.lower_context_gate_mode != 'history_ema'
+                or self.frequency_tracker is None):
+            return
+        current_episode = int(getattr(self, '_freqduet_episode', 0))
+        previous_episode = current_episode - 1
+        if previous_episode < 0:
+            return
+        if self.lower_context_gate_history_last_episode == previous_episode:
+            return
+        summary = self.frequency_tracker.summary()
+        updates = int(summary.get('freq_updates', 0))
+        if updates <= 0:
+            return
+        alpha = self.lower_context_gate_history_alpha
+
+        def _ema(name, default=0.0):
+            new_value = float(summary.get(name, default))
+            old_value = self.lower_context_gate_history_summary.get(name)
+            if old_value is None:
+                return new_value
+            return alpha * new_value + (1.0 - alpha) * float(old_value)
+
+        self.lower_context_gate_history_summary = {
+            'freq_updates': updates,
+            'freq_high_energy': _ema('freq_high_energy', 0.0),
+            'freq_od_entropy': _ema('freq_od_entropy', 1.0),
+            'freq_od_high_energy': _ema('freq_od_high_energy', 0.0),
+            'freq_promotion_absorbed': _ema(
+                'freq_promotion_absorbed', 0.0),
+        }
+        self.lower_context_gate_history_count += 1
+        self.lower_context_gate_history_last_episode = previous_episode
 
     def _build_harmonic_prior(self, cfg):
         """Fit harmonic priors from the historical OD table used by the env.

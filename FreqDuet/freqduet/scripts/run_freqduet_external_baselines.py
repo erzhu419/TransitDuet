@@ -8,6 +8,7 @@ import csv
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 import os
+import random
 import sys
 import time
 from pathlib import Path
@@ -199,6 +200,7 @@ def run_one(
     upper_cfg = cfg.get("upper", {})
     env_cfg = cfg.get("env", {})
     rng = np.random.RandomState(int(seed))
+    random.seed(int(seed))
     np.random.seed(int(seed))
     rows = []
     t_start = time.time()

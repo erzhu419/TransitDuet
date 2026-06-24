@@ -37,6 +37,7 @@ import sys
 import argparse
 import csv
 import json
+import random
 import time
 import yaml
 import numpy as np
@@ -335,7 +336,12 @@ class DiagnosticLog:
         'snapshot_value_risk_penalty_max_mean',
         'snapshot_value_guard_blocked_mean',
         'snapshot_value_guard_blocked_events',
+        'snapshot_value_guard_negative_target_mean',
+        'snapshot_value_guard_negative_target_events',
+        'snapshot_value_guard_negative_target_blocked_mean',
+        'snapshot_value_guard_negative_target_blocked_events',
         'snapshot_value_guard_prev_overshoot_norm_mean',
+        'snapshot_value_guard_fleet_pressure_norm_mean',
         'snapshot_value_guard_primary_bias_mean',
         'cf_action_selector_enabled',
         'cf_action_selector_active_mean',
@@ -1303,8 +1309,99 @@ class TransitDuetV2Runner:
 
         self.snapshot_action_value_guard_max_prev_overshoot_norm = (
             _action_guard_float('max_prev_overshoot_norm'))
+        self.snapshot_action_value_guard_max_prev_headway_cv = (
+            _action_guard_float('max_prev_headway_cv'))
+        self.snapshot_action_value_guard_max_context_headway_cv = (
+            _action_guard_float('max_context_headway_cv'))
+        self.snapshot_action_value_guard_max_fleet_pressure_norm = (
+            _action_guard_float('max_fleet_pressure_norm'))
+        self.snapshot_action_value_guard_max_abs_offset_s = (
+            _action_guard_float('max_abs_offset_s'))
+        self.snapshot_action_value_guard_min_margin = (
+            _action_guard_float('min_margin'))
+        self.snapshot_action_value_guard_min_margin_per_abs_offset_norm = (
+            _action_guard_float('min_margin_per_abs_offset_norm', 0.0))
+        self.snapshot_action_value_guard_max_peak_shift_abs = (
+            _action_guard_float('max_peak_shift_abs'))
         self.snapshot_action_value_guard_max_primary_terminal_bias_loss_s = (
             _action_guard_float('max_primary_terminal_bias_loss_s'))
+        self.snapshot_action_value_guard_max_negative_target_prev_overshoot_norm = (
+            _action_guard_float('max_negative_target_prev_overshoot_norm'))
+        self.snapshot_action_value_guard_max_negative_target_fleet_pressure_norm = (
+            _action_guard_float('max_negative_target_fleet_pressure_norm'))
+        self.snapshot_action_value_guard_min_negative_target_margin = (
+            _action_guard_float('min_negative_target_margin'))
+        action_risk_margin_cfg = (
+            snapshot_action_selector_cfg.get('risk_margin', {}) or {})
+        self.snapshot_action_value_risk_margin_enable = bool(
+            action_risk_margin_cfg.get('enable', False))
+
+        def _action_risk_margin_float(name, default=None):
+            value = action_risk_margin_cfg.get(name, default)
+            if value is None:
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return default
+
+        self.snapshot_action_value_risk_margin_weight = max(float(
+            action_risk_margin_cfg.get('weight', 0.0)), 0.0)
+        self.snapshot_action_value_risk_margin_max_score = max(
+            _action_risk_margin_float('max_risk_score', 3.0) or 0.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_max_penalty = max(
+            _action_risk_margin_float('max_penalty', 0.05) or 0.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_abs_offset_scale_s = max(
+            _action_risk_margin_float('abs_offset_scale_s', 15.0) or 15.0,
+            1e-6)
+        self.snapshot_action_value_risk_margin_target_base = max(
+            _action_risk_margin_float('target_base', 0.0) or 0.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_negative_multiplier = max(
+            _action_risk_margin_float('negative_multiplier', 1.0) or 1.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_positive_multiplier = max(
+            _action_risk_margin_float('positive_multiplier', 1.0) or 1.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_term45_multiplier = max(
+            _action_risk_margin_float('term45_multiplier', 1.0) or 1.0,
+            0.0)
+        self.snapshot_action_value_risk_margin_prev_headway_cv_target = (
+            _action_risk_margin_float('prev_headway_cv_target'))
+        self.snapshot_action_value_risk_margin_prev_headway_cv_width = max(
+            _action_risk_margin_float('prev_headway_cv_width', 0.05) or 0.05,
+            1e-6)
+        self.snapshot_action_value_risk_margin_prev_overshoot_norm_target = (
+            _action_risk_margin_float('prev_overshoot_norm_target'))
+        self.snapshot_action_value_risk_margin_prev_overshoot_norm_width = max(
+            _action_risk_margin_float('prev_overshoot_norm_width', 0.075)
+            or 0.075,
+            1e-6)
+        self.snapshot_action_value_risk_margin_context_headway_cv_target = (
+            _action_risk_margin_float('context_headway_cv_target'))
+        self.snapshot_action_value_risk_margin_context_headway_cv_width = max(
+            _action_risk_margin_float('context_headway_cv_width', 0.05)
+            or 0.05,
+            1e-6)
+        self.snapshot_action_value_risk_margin_context_fleet_pressure_target = (
+            _action_risk_margin_float('context_fleet_pressure_target'))
+        self.snapshot_action_value_risk_margin_context_fleet_pressure_width = max(
+            _action_risk_margin_float('context_fleet_pressure_width', 0.25)
+            or 0.25,
+            1e-6)
+        self.snapshot_action_value_risk_margin_primary_bias_target_s = (
+            _action_risk_margin_float('primary_terminal_bias_target_s'))
+        self.snapshot_action_value_risk_margin_primary_bias_width_s = max(
+            _action_risk_margin_float('primary_terminal_bias_width_s', 6.0)
+            or 6.0,
+            1e-6)
+        self.snapshot_action_value_risk_margin_peak_shift_abs_target = (
+            _action_risk_margin_float('peak_shift_abs_target'))
+        self.snapshot_action_value_risk_margin_peak_shift_abs_width = max(
+            _action_risk_margin_float('peak_shift_abs_width', 1.0) or 1.0,
+            1e-6)
         self.snapshot_action_value_selector_model = None
         self.snapshot_action_value_selector_forest = None
         self.snapshot_action_value_selector_meta = {}
@@ -2912,6 +3009,98 @@ class TransitDuetV2Runner:
                 self.snapshot_value_risk_penalty_max_penalty))
         return np.asarray(penalties, dtype=np.float64), float(risk_score)
 
+    def _snapshot_action_value_risk_score(self, context, primary_info=None):
+        if (not self.snapshot_action_value_risk_margin_enable
+                or self.snapshot_action_value_risk_margin_weight <= 0.0):
+            return 0.0
+
+        def _excess(value, target, width):
+            if target is None:
+                return 0.0
+            try:
+                value = float(value)
+                target = float(target)
+                width = max(float(width), 1e-6)
+            except (TypeError, ValueError):
+                return 0.0
+            if not np.isfinite(value):
+                return 0.0
+            return max(0.0, (value - target) / width)
+
+        prev = self._fixed_selector_prev_diag or {}
+
+        def _prev(key, default=0.0):
+            try:
+                return float(prev.get(key, default))
+            except (TypeError, ValueError):
+                return float(default)
+
+        primary_info = primary_info or {}
+        n_fleet = max(float(_prev('N_fleet', self.N_fleet_default)), 1.0)
+        primary_bias_s = max(
+            0.0,
+            float(primary_info.get('terminal_bias_s', 0.0) or 0.0))
+        score = 0.0
+        score += _excess(
+            _prev('headway_cv'),
+            self.snapshot_action_value_risk_margin_prev_headway_cv_target,
+            self.snapshot_action_value_risk_margin_prev_headway_cv_width)
+        score += _excess(
+            _prev('fleet_overshoot') / n_fleet,
+            self.snapshot_action_value_risk_margin_prev_overshoot_norm_target,
+            self.snapshot_action_value_risk_margin_prev_overshoot_norm_width)
+        score += _excess(
+            context.get('headway_cv_active_pre', 0.0),
+            self.snapshot_action_value_risk_margin_context_headway_cv_target,
+            self.snapshot_action_value_risk_margin_context_headway_cv_width)
+        score += _excess(
+            context.get('fleet_pressure_pre', 0.0),
+            self.snapshot_action_value_risk_margin_context_fleet_pressure_target,
+            self.snapshot_action_value_risk_margin_context_fleet_pressure_width)
+        score += _excess(
+            primary_bias_s,
+            self.snapshot_action_value_risk_margin_primary_bias_target_s,
+            self.snapshot_action_value_risk_margin_primary_bias_width_s)
+        score += _excess(
+            abs(float(context.get('cfg_peak_shift_abs', 0.0) or 0.0)),
+            self.snapshot_action_value_risk_margin_peak_shift_abs_target,
+            self.snapshot_action_value_risk_margin_peak_shift_abs_width)
+        return float(np.clip(
+            score,
+            0.0,
+            max(self.snapshot_action_value_risk_margin_max_score, 0.0)))
+
+    def _snapshot_action_value_risk_penalties(
+            self, rows, context, primary_info=None):
+        if (not self.snapshot_action_value_risk_margin_enable
+                or self.snapshot_action_value_risk_margin_weight <= 0.0):
+            return np.zeros(len(rows), dtype=np.float64), 0.0
+        risk_score = self._snapshot_action_value_risk_score(
+            context, primary_info=primary_info)
+        if risk_score <= 0.0:
+            return np.zeros(len(rows), dtype=np.float64), 0.0
+        penalties = []
+        for row in rows:
+            offset_s = float(row.get('candidate_offset_norm', 0.0)) * 60.0
+            factor = abs(offset_s) / (
+                self.snapshot_action_value_risk_margin_abs_offset_scale_s)
+            if float(row.get('action_target', 0.0)) > 0.5:
+                factor += self.snapshot_action_value_risk_margin_target_base
+            if float(row.get('action_term45', 0.0)) > 0.5:
+                factor *= self.snapshot_action_value_risk_margin_term45_multiplier
+            if offset_s < -1e-9:
+                factor *= self.snapshot_action_value_risk_margin_negative_multiplier
+            elif offset_s > 1e-9:
+                factor *= self.snapshot_action_value_risk_margin_positive_multiplier
+            penalty = (
+                self.snapshot_action_value_risk_margin_weight
+                * float(risk_score)
+                * max(0.0, float(factor)))
+            penalties.append(min(
+                float(penalty),
+                self.snapshot_action_value_risk_margin_max_penalty))
+        return np.asarray(penalties, dtype=np.float64), float(risk_score)
+
     def _select_snapshot_value_action(
             self, action_vec, direction, trip=None, plan_origin_launch=None):
         del direction, plan_origin_launch
@@ -3071,7 +3260,10 @@ class TransitDuetV2Runner:
             'risk_penalty': 0.0,
             'risk_penalty_max': 0.0,
             'guard_blocked': 0.0,
+            'guard_negative_target': 0.0,
+            'guard_negative_target_blocked': 0.0,
             'guard_prev_overshoot_norm': 0.0,
+            'guard_fleet_pressure_norm': 0.0,
             'guard_primary_terminal_bias_s': 0.0,
         }
         if (not self.snapshot_action_value_selector_enable
@@ -3124,6 +3316,11 @@ class TransitDuetV2Runner:
             x,
             model=self.snapshot_action_value_selector_model,
             forest=self.snapshot_action_value_selector_forest)
+        risk_penalty, risk_score = (
+            self._snapshot_action_value_risk_penalties(
+                rows, context, primary_info=primary_info))
+        if risk_penalty.size:
+            pred = pred + risk_penalty
         scores = {method: float(value) for method, value in zip(methods, pred)}
         baseline_pred = float(scores.get(fallback, np.nan))
         selected_method = min(scores, key=scores.get)
@@ -3157,24 +3354,97 @@ class TransitDuetV2Runner:
         prev_fleet = max(_prev_float('N_fleet', self.N_fleet_default), 1.0)
         prev_overshoot_norm = (
             _prev_float('fleet_overshoot', 0.0) / prev_fleet)
+        prev_headway_cv = _prev_float('headway_cv', 0.0)
+        context_headway_cv = float(
+            context.get('headway_cv_active_pre', 0.0) or 0.0)
+        fleet_pressure_norm = float(context.get('fleet_pressure_pre', 0.0) or 0.0)
+        selected_offset_s = (
+            float(selected_action.get('candidate_offset_norm', 0.0)) * 60.0)
+        abs_offset_norm = abs(float(
+            selected_action.get('candidate_offset_norm', 0.0)))
+        negative_target = (
+            bool(override_action)
+            and selected_mode == 'target'
+            and selected_offset_s < -1e-9)
         guard_blocked = False
+        negative_target_blocked = False
         if override_action and self.snapshot_action_value_guard_enable:
             max_prev_overshoot = (
                 self.snapshot_action_value_guard_max_prev_overshoot_norm)
             if (max_prev_overshoot is not None
                     and prev_overshoot_norm > float(max_prev_overshoot)):
                 guard_blocked = True
+            max_prev_cv = (
+                self.snapshot_action_value_guard_max_prev_headway_cv)
+            if (max_prev_cv is not None
+                    and prev_headway_cv > float(max_prev_cv)):
+                guard_blocked = True
+            max_context_cv = (
+                self.snapshot_action_value_guard_max_context_headway_cv)
+            if (max_context_cv is not None
+                    and context_headway_cv > float(max_context_cv)):
+                guard_blocked = True
+            max_pressure = (
+                self.snapshot_action_value_guard_max_fleet_pressure_norm)
+            if (max_pressure is not None
+                    and fleet_pressure_norm > float(max_pressure)):
+                guard_blocked = True
+            max_abs_offset = (
+                self.snapshot_action_value_guard_max_abs_offset_s)
+            if (max_abs_offset is not None
+                    and abs(selected_offset_s) > float(max_abs_offset)):
+                guard_blocked = True
+            max_peak_shift = (
+                self.snapshot_action_value_guard_max_peak_shift_abs)
+            if (max_peak_shift is not None and float(
+                    context.get('cfg_peak_shift_abs', 0.0) or 0.0)
+                    > float(max_peak_shift)):
+                guard_blocked = True
+            min_margin = self.snapshot_action_value_guard_min_margin
+            margin_per_offset = (
+                self.snapshot_action_value_guard_min_margin_per_abs_offset_norm
+                or 0.0)
+            if min_margin is not None or margin_per_offset > 0.0:
+                required_margin = (
+                    (float(min_margin) if min_margin is not None else 0.0)
+                    + float(margin_per_offset) * float(abs_offset_norm))
+                if margin < required_margin:
+                    guard_blocked = True
             max_bias_loss = (
                 self.snapshot_action_value_guard_max_primary_terminal_bias_loss_s)
             if (max_bias_loss is not None
                     and primary_terminal_bias_s > float(max_bias_loss)):
                 guard_blocked = True
+            if negative_target:
+                max_neg_prev_overshoot = (
+                    self.snapshot_action_value_guard_max_negative_target_prev_overshoot_norm)
+                if (max_neg_prev_overshoot is not None
+                        and prev_overshoot_norm > float(max_neg_prev_overshoot)):
+                    negative_target_blocked = True
+                max_neg_pressure = (
+                    self.snapshot_action_value_guard_max_negative_target_fleet_pressure_norm)
+                if (max_neg_pressure is not None
+                        and fleet_pressure_norm > float(max_neg_pressure)):
+                    negative_target_blocked = True
+                min_neg_margin = (
+                    self.snapshot_action_value_guard_min_negative_target_margin)
+                if (min_neg_margin is not None
+                        and margin < float(min_neg_margin)):
+                    negative_target_blocked = True
+                guard_blocked = guard_blocked or negative_target_blocked
         if guard_blocked:
             selected_method = fallback
             selected_pred = baseline_pred
             margin = 0.0
             override_action = False
             selected_mode = 'actor'
+        selected_penalty = 0.0
+        if risk_penalty.size:
+            try:
+                selected_penalty = float(risk_penalty[methods.index(
+                    selected_method)])
+            except (ValueError, IndexError):
+                selected_penalty = 0.0
         info.update({
             'active': 1.0,
             'selected_method': selected_method,
@@ -3191,8 +3461,16 @@ class TransitDuetV2Runner:
             'selected_pred': float(selected_pred),
             'baseline_pred': float(baseline_pred),
             'margin': float(margin),
+            'risk_score': float(risk_score),
+            'risk_penalty': float(selected_penalty),
+            'risk_penalty_max': (
+                float(np.max(risk_penalty)) if risk_penalty.size else 0.0),
             'guard_blocked': 1.0 if guard_blocked else 0.0,
+            'guard_negative_target': 1.0 if negative_target else 0.0,
+            'guard_negative_target_blocked': (
+                1.0 if negative_target_blocked else 0.0),
             'guard_prev_overshoot_norm': float(prev_overshoot_norm),
+            'guard_fleet_pressure_norm': float(fleet_pressure_norm),
             'guard_primary_terminal_bias_s': float(primary_terminal_bias_s),
         })
         if not override_action:
@@ -5860,8 +6138,26 @@ class TransitDuetV2Runner:
                             'guard_blocked', 0.0)) > 0.5):
                     combined_snapshot_info = dict(snapshot_selector_info or {})
                     for key in (
+                            'risk_score',
+                            'risk_penalty',
+                            'risk_penalty_max',
                             'guard_blocked',
+                            'guard_negative_target',
+                            'guard_negative_target_blocked',
                             'guard_prev_overshoot_norm',
+                            'guard_fleet_pressure_norm',
+                            'guard_primary_terminal_bias_s'):
+                        combined_snapshot_info[key] = (
+                            snapshot_action_selector_info.get(key, 0.0))
+                    snapshot_selector_info = combined_snapshot_info
+                elif snapshot_action_selector_info is not None:
+                    combined_snapshot_info = dict(snapshot_selector_info or {})
+                    for key in (
+                            'risk_score',
+                            'risk_penalty',
+                            'risk_penalty_max',
+                            'guard_prev_overshoot_norm',
+                            'guard_fleet_pressure_norm',
                             'guard_primary_terminal_bias_s'):
                         combined_snapshot_info[key] = (
                             snapshot_action_selector_info.get(key, 0.0))
@@ -6173,9 +6469,17 @@ class TransitDuetV2Runner:
                 (snapshot_selector_info or {}).get('risk_penalty_max', 0.0)),
             'snapshot_value_guard_blocked': float(
                 (snapshot_selector_info or {}).get('guard_blocked', 0.0)),
+            'snapshot_value_guard_negative_target': float(
+                (snapshot_selector_info or {}).get('guard_negative_target', 0.0)),
+            'snapshot_value_guard_negative_target_blocked': float(
+                (snapshot_selector_info or {}).get(
+                    'guard_negative_target_blocked', 0.0)),
             'snapshot_value_guard_prev_overshoot_norm': float(
                 (snapshot_selector_info or {}).get(
                     'guard_prev_overshoot_norm', 0.0)),
+            'snapshot_value_guard_fleet_pressure_norm': float(
+                (snapshot_selector_info or {}).get(
+                    'guard_fleet_pressure_norm', 0.0)),
             'snapshot_value_guard_primary_bias_s': float(
                 (snapshot_selector_info or {}).get(
                     'guard_primary_terminal_bias_s', 0.0)),
@@ -6939,8 +7243,26 @@ class TransitDuetV2Runner:
         ]
         snapshot_value_guard_blocked_stat = _stat(
             snapshot_value_guard_blocked_values)
+        snapshot_value_guard_negative_target_values = [
+            float(rec.get('snapshot_value_guard_negative_target', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_guard_negative_target_blocked_values = [
+            float(rec.get('snapshot_value_guard_negative_target_blocked', 0.0))
+            if float(rec.get('snapshot_value_active', 0.0)) > 0.5 else 0.0
+            for rec in self._ep_trip_records
+        ]
+        snapshot_value_guard_negative_target_stat = _stat(
+            snapshot_value_guard_negative_target_values)
+        snapshot_value_guard_negative_target_blocked_stat = _stat(
+            snapshot_value_guard_negative_target_blocked_values)
         snapshot_value_guard_prev_overshoot_stat = _stat([
             float(rec.get('snapshot_value_guard_prev_overshoot_norm', 0.0))
+            for rec in self._ep_trip_records
+        ])
+        snapshot_value_guard_fleet_pressure_stat = _stat([
+            float(rec.get('snapshot_value_guard_fleet_pressure_norm', 0.0))
             for rec in self._ep_trip_records
         ])
         snapshot_value_guard_primary_bias_stat = _stat([
@@ -7324,8 +7646,20 @@ class TransitDuetV2Runner:
             'snapshot_value_guard_blocked_events': int(sum(
                 1 for value in snapshot_value_guard_blocked_values
                 if float(value) > 0.5)),
+            'snapshot_value_guard_negative_target_mean':
+                snapshot_value_guard_negative_target_stat['mean'],
+            'snapshot_value_guard_negative_target_events': int(sum(
+                1 for value in snapshot_value_guard_negative_target_values
+                if float(value) > 0.5)),
+            'snapshot_value_guard_negative_target_blocked_mean':
+                snapshot_value_guard_negative_target_blocked_stat['mean'],
+            'snapshot_value_guard_negative_target_blocked_events': int(sum(
+                1 for value in snapshot_value_guard_negative_target_blocked_values
+                if float(value) > 0.5)),
             'snapshot_value_guard_prev_overshoot_norm_mean':
                 snapshot_value_guard_prev_overshoot_stat['mean'],
+            'snapshot_value_guard_fleet_pressure_norm_mean':
+                snapshot_value_guard_fleet_pressure_stat['mean'],
             'snapshot_value_guard_primary_bias_mean':
                 snapshot_value_guard_primary_bias_stat['mean'],
             'cf_action_selector_enabled':
@@ -7620,7 +7954,10 @@ class TransitDuetV2Runner:
                   'snapshot_value_pred', 'snapshot_value_baseline_pred',
                   'snapshot_value_margin',
                   'snapshot_value_guard_blocked',
+                  'snapshot_value_guard_negative_target',
+                  'snapshot_value_guard_negative_target_blocked',
                   'snapshot_value_guard_prev_overshoot_norm',
+                  'snapshot_value_guard_fleet_pressure_norm',
                   'snapshot_value_guard_primary_bias_s',
                   'hold_mean', 'hold_std', 'hold_max', 'hold_n',
                   'gap_dev', 'penalty', 'reward']
@@ -7729,6 +8066,7 @@ class TransitDuetV2Runner:
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
         if self.fixed_selector_reset_env_rng:
+            random.seed(self.base_seed)
             np.random.seed(self.base_seed)
 
         for ep in range(self.resume_from_ep, total_episodes):
@@ -7831,6 +8169,7 @@ def main():
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
+    random.seed(args.seed)
     np.random.seed(args.seed)
 
     config_path = os.path.join(str(SCRIPT_DIR), args.config)

@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_rushshift_main_cfaction_v2_target_dp0_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_cfactionrule_v1_hiro
+
+# Disturbance-conditioned fixed-action rule, v1.
+# Rush-pattern shift is already handled by the current frequency controller;
+# fixed compression worsens slightly, so keep the neutral target action.
+upper:
+  timetable_planner:
+    terminal_dispatch: false

@@ -1,0 +1,12 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_snapshotdomaincap_hiro
+
+# Domain/prior cap candidate. Terminal is a low-noise regime, so keep the
+# promoted snapshot value selector but cap positive terminal-bias candidates at
+# +15s by removing the larger p30 actions.
+upper:
+  snapshot_value_selector:
+    allowed_methods:
+      - actor_term45_0
+      - actor_target_p15
+      - actor_term45_p15

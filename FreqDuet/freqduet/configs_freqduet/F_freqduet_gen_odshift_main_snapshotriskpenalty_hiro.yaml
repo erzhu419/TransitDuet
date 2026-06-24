@@ -1,0 +1,22 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_snapshotriskpenalty_hiro
+
+upper:
+  snapshot_value_selector:
+    risk_penalty:
+      enable: true
+      weight: 0.006
+      positive_offset_start_s: 15.0
+      positive_offset_scale_s: 15.0
+      max_risk_score: 3.0
+      max_penalty: 0.030
+      prev_headway_cv_target: 0.50
+      prev_headway_cv_width: 0.05
+      prev_overshoot_norm_target: 0.30
+      prev_overshoot_norm_width: 0.075
+      prev_terminal_shift_std_target_s: 14.0
+      prev_terminal_shift_std_width_s: 4.0
+      context_headway_cv_target: 0.50
+      context_headway_cv_width: 0.05
+      context_fleet_pressure_target: 0.0
+      context_fleet_pressure_width: 0.25

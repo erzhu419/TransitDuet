@@ -1,0 +1,23 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_fixedfallback_noharm_hiro
+
+fixed_expert_selector:
+  enable: true
+  strict_headway_s: 360.0
+  reset_env_rng: true
+  start_ep: 0
+  count_start: selector_start
+  deterministic_rule:
+    enable: true
+    default: learned
+    fixed_when:
+      - min_cfg_demand_noise: 0.25
+      - min_cfg_peak_shift_abs: 0.05
+      - min_prev_headway_cv: 0.450
+      - min_prev_overshoot_norm: 0.120
+      - min_prev_terminal_shift_norm: 0.250
+    learned_when:
+      - max_cfg_demand_noise: 0.05
+        max_cfg_peak_shift_abs: 0.05
+        max_prev_headway_cv: 0.435
+        max_prev_overshoot_norm: 0.080

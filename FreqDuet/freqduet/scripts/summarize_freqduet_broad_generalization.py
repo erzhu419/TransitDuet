@@ -20,6 +20,10 @@ import pandas as pd
 
 METHODS = (
     "main",
+    "upperhist_fixedguard",
+    "upperhist_safe",
+    "upperhist_bestmix",
+    "cfvalue_multicand",
     "cfvalue_noisegate",
     "cfvalue_domainmean",
     "upperres_planctx",
@@ -59,6 +63,7 @@ METHODS = (
     "histaux6eg06upper",
     "sumorl_rawhist_holdrl",
     "sumorl_holdrl",
+    "snapshotriskdual_targetnonpos_domainmix",
 )
 DEFAULT_SCENARIOS = (
     "noise10",

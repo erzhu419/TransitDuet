@@ -1,0 +1,6 @@
+_extends: F_freqduet_gen_odshift_main_hiro.yaml
+_name: F_freqduet_gen_odshift_main_snapshotriskdual_targetnonpos_domainmix_hiro
+
+# OD-shift did not benefit from the target override in the current protocol.
+# Keep the promoted main path so the mixed policy does not spend variance on a
+# weak domain.

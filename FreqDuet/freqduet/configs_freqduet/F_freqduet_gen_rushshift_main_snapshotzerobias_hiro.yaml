@@ -1,0 +1,11 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotzerobias_hiro
+
+# Rush-shift repair screen: disable positive snapshot terminal-bias candidates
+# and keep only the actor-preserving fallback. This tests whether the remaining
+# fixed-headway gap in rushshift is caused by value-selected terminal bias
+# increasing headway CV / fleet overshoot.
+upper:
+  snapshot_value_selector:
+    allowed_methods:
+      - actor_term45_0

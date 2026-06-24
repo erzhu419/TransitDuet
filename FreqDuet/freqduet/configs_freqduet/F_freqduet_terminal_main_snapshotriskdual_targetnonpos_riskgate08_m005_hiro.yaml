@@ -1,0 +1,25 @@
+_extends: F_freqduet_terminal_main_snapshotriskdual_targetnonpos_m005_hiro.yaml
+_name: F_freqduet_terminal_main_snapshotriskdual_targetnonpos_riskgate08_m005_hiro
+
+# Conservative no-harm gate for the nonpositive target override: keep the
+# targetnonpos wait benefit only when recent overshoot/CV/fleet pressure are
+# low and the rollout value margin is large enough for the selected offset.
+upper:
+  snapshot_action_value_selector:
+    improve_margin: 0.008
+    allowed_methods:
+      - actor_target_m15
+      - actor_target_0
+    guard:
+      enable: true
+      max_prev_overshoot_norm: 0.08
+      max_prev_headway_cv: 0.455
+      max_context_headway_cv: 0.46
+      max_fleet_pressure_norm: 0.0
+      max_abs_offset_s: 15.0
+      min_margin: 0.008
+      min_margin_per_abs_offset_norm: 0.010
+      max_primary_terminal_bias_loss_s: 15.0
+      max_negative_target_prev_overshoot_norm: 0.08
+      max_negative_target_fleet_pressure_norm: 0.0
+      min_negative_target_margin: 0.012

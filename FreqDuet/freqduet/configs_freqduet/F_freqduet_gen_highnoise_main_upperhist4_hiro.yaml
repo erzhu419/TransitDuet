@@ -1,0 +1,13 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_upperhist4_hiro
+
+upper:
+  action_bins: [-10.0, -5.0, 0.0, 5.0]
+  state_history:
+    enable: true
+    length: 3
+    action_norm_s: 20.0
+    shift_norm_s: 45.0
+    wait_norm_min: 10.0
+    waiting_norm: 500.0
+    plan_penalty_norm: 5.0

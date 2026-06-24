@@ -1,0 +1,35 @@
+_extends: F_freqduet_gen_rushshift_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_snapshotriskvalue_m005_hiro
+
+upper:
+  delta_max: 60.0
+  action_override:
+    disable_value_selectors: false
+  timetable_planner:
+    delta_min_s: -60.0
+    delta_max_s: 60.0
+    terminal_dispatch: true
+    terminal_shift_min_s: -60.0
+    terminal_shift_max_s: 45.0
+  snapshot_value_selector:
+    enable: true
+    domain: rushshift
+    artifact: results_freqduet/snapshot_cf_v7_riskproxy_burn40_actorrel_4domain_20seed_snap12_h1800/value_model_riskproxy_residual/model_artifact
+    fallback_method: actor_term45_0
+    fallback_action: actor
+    apply_mode: action_override
+    improve_margin: 0.005
+    allowed_methods:
+      - actor_target_m30
+      - actor_target_m15
+      - actor_target_0
+      - actor_target_p15
+      - actor_target_p30
+      - actor_term45_m30
+      - actor_term45_m15
+      - actor_term45_0
+      - actor_term45_p15
+      - actor_term45_p30
+
+training:
+  trip_dump_freq: 1

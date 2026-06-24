@@ -1,0 +1,6 @@
+_extends: F_freqduet_terminal_main_snapshotriskdual_targetnonpos_riskgate12_m005_hiro.yaml
+_name: F_freqduet_terminal_main_snapshotriskdual_targetnonpos_domainmix_hiro
+
+# Domain-aware conservative mix:
+# nominal/high-noise keep the riskgate12 nonpositive target override, which
+# preserves the terminal-bias selector and only rarely overrides the actor.

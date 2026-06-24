@@ -1,0 +1,10 @@
+_extends: F_freqduet_terminal_main_cfaction_v2_target_dp0_hiro.yaml
+_name: F_freqduet_terminal_main_cfactionrule_v1_hiro
+
+# Disturbance-conditioned fixed-action rule, v1.
+# Base calibrated terminal domain has no explicit demand/OD/rush perturbation,
+# so keep the neutral target-headway action. This config is behavior-equivalent
+# to target0 and is included to make the rule reproducible by name.
+upper:
+  timetable_planner:
+    terminal_dispatch: false

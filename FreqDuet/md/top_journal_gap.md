@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-21 CST
+Last updated: 2026-06-24 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -216,6 +216,27 @@ Interpretation update: the current config-name final matrix now closes the
 matches fixed-headway under the strong 200ep protocol and substantially beats
 weaker classical rule baselines, while `noleakage` is decisively invalid and
 `rawhistory` / `nopromotion` remain close internal controls.
+
+2026-06-24 deterministic fixed-headway update: a reproducibility bug was found
+in the evaluation path because route generation used Python stdlib `random`
+without seeding it. After seeding stdlib `random` in the main runner and
+external baseline runner, the deterministic 100ep / 20-seed protocol was rerun
+for fixed-headway and a nine-variant terminal-only sweep. The best candidate,
+`cfaction_target_dm20_terminalonly`, significantly beats deterministic
+fixed-headway in the terminal domain and in the four-domain shared average:
+
+```text
+candidate - fixed_headway composite delta
+terminal        -0.0207 CI [-0.0373,-0.0049], win=0.700
+overall_shared  -0.0052 CI [-0.0091,-0.0011], win=0.700
+```
+
+This is a narrower but stronger claim than the previous fixed-headway result:
+the terminal dispatch/action-value layer can beat the strong fixed-headway
+baseline under paired deterministic seeds, but the terminal-only configs are
+currently identical to fixed-headway on highnoise, OD-shift, and rush-shift.
+The next gap is extending the counterfactual action/value layer beyond the
+terminal-only setting without losing the fixed-headway no-harm property.
 
 Done means:
 

@@ -24,6 +24,7 @@ import pandas as pd
 
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 METRICS = ("wait", "cv", "overshoot", "composite")
+DEFAULT_BASELINE_METHODS = ("main", "fixed", "fixed_headway")
 
 DIAGNOSTIC_FEATURE_CANDIDATES = (
     "upper_hf_power_ratio",
@@ -327,6 +328,7 @@ def run_cv(
     n_folds: int,
     alpha: float,
     feature_set: str,
+    baseline_methods: list[str],
 ) -> pd.DataFrame:
     data = context.merge(wide, on=["domain", "seed"], how="inner")
     if data.empty:
@@ -370,7 +372,7 @@ def run_cv(
                     - test_data.loc[row_idx, "oracle_best_cost"]
                 ),
             }
-            for base in ("main", "fixed", "fixed_headway"):
+            for base in baseline_methods:
                 if f"cost_{base}" in test_data.columns:
                     out[f"delta_vs_{base}"] = float(
                         test_data.loc[row_idx, f"cost_{method}"]
@@ -389,6 +391,7 @@ def run_mean_selector_cv(
     candidate_methods: list[str],
     n_folds: int,
     selector: str,
+    baseline_methods: list[str],
 ) -> pd.DataFrame:
     data = context[["domain", "seed"]].merge(wide, on=["domain", "seed"], how="inner")
     n_folds = max(2, min(int(n_folds), int(data["seed"].nunique())))
@@ -425,7 +428,7 @@ def run_mean_selector_cv(
                 "oracle_best_cost": float(item["oracle_best_cost"]),
                 "oracle_regret": float(item[f"cost_{method}"] - item["oracle_best_cost"]),
             }
-            for base in ("main", "fixed", "fixed_headway"):
+            for base in baseline_methods:
                 if f"cost_{base}" in item.index:
                     out[f"delta_vs_{base}"] = float(item[f"cost_{method}"] - item[f"cost_{base}"])
             rows.append(out)
@@ -437,6 +440,7 @@ def derive_margin_fallback_rows(
     candidate_methods: list[str],
     fallback_method: str,
     margins: list[float],
+    baseline_methods: list[str],
 ) -> pd.DataFrame:
     if fallback_method not in candidate_methods:
         return pd.DataFrame()
@@ -467,7 +471,7 @@ def derive_margin_fallback_rows(
                 "oracle_best_cost": float(item["oracle_best_cost"]),
                 "oracle_regret": float(item[true_cols[method]] - item["oracle_best_cost"]),
             }
-            for base in ("main", "fixed", "fixed_headway"):
+            for base in baseline_methods:
                 col = true_cols.get(base)
                 if col and col in item.index:
                     out[f"delta_vs_{base}"] = float(item[true_cols[method]] - item[col])
@@ -619,6 +623,15 @@ def main() -> int:
     ap.add_argument("--fallback-method", default="fixed")
     ap.add_argument("--fallback-margins", default="0,0.025,0.05,0.10")
     ap.add_argument(
+        "--baseline-method",
+        action="append",
+        default=[],
+        help=(
+            "Candidate method to report selected-cost deltas against. May be "
+            "repeated; defaults include main/fixed/fixed_headway when present."
+        ),
+    )
+    ap.add_argument(
         "--extra-feature",
         action="append",
         default=[],
@@ -640,6 +653,10 @@ def main() -> int:
         raise SystemExit("no common domain/seed rows across reference and candidates")
     long_df, wide_df = build_long_and_wide(context, candidates, args.metric, metrics)
     candidate_methods = sorted(long_df["candidate_method"].unique())
+    baseline_methods = list(dict.fromkeys([
+        *DEFAULT_BASELINE_METHODS,
+        *[item.strip() for item in args.baseline_method if item.strip()],
+    ]))
 
     context_keep = [
         "domain",
@@ -673,6 +690,7 @@ def main() -> int:
             n_folds=args.folds,
             alpha=args.ridge_alpha,
             feature_set=feature_set,
+            baseline_methods=baseline_methods,
         )
         cv_parts.append(cv)
     cv_rows = pd.concat(cv_parts, ignore_index=True)
@@ -684,6 +702,7 @@ def main() -> int:
                 candidate_methods,
                 n_folds=args.folds,
                 selector=selector,
+                baseline_methods=baseline_methods,
             )
         )
     margins = [
@@ -697,6 +716,7 @@ def main() -> int:
             candidate_methods,
             fallback_method=args.fallback_method,
             margins=margins,
+            baseline_methods=baseline_methods,
         )
     )
     cv_rows = pd.concat([part for part in cv_parts if not part.empty], ignore_index=True)
@@ -721,6 +741,7 @@ def main() -> int:
         "n_context_rows": int(len(context_rows)),
         "domains": {domain: int((context_rows["domain"] == domain).sum()) for domain in DOMAINS},
         "candidate_methods": candidate_methods,
+        "baseline_methods": baseline_methods,
         "diagnostic_features": diagnostic_features,
         "domain_prior_features": domain_prior_features,
         "oracle_best_counts_by_domain": oracle_counts,

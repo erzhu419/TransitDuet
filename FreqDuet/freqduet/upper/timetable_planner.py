@@ -122,6 +122,16 @@ class TimetableCurvePlanner:
         scheduled_launches = []
         headway_floors = []
         current_seen = False
+        terminal_attrs = (
+            "_freqduet_scheduled_launch",
+            "_freqduet_terminal_dispatch",
+            "_freqduet_min_dispatch_headway",
+        )
+
+        def _clear_terminal_schedule(tt):
+            for attr in terminal_attrs:
+                if hasattr(tt, attr):
+                    delattr(tt, attr)
 
         def _apply_terminal_headway_floor(tt, base, target):
             floor = 0.0
@@ -188,6 +198,8 @@ class TimetableCurvePlanner:
                     scheduled_launches.append(
                         float(tt._freqduet_scheduled_launch))
                     prev_scheduled = float(tt._freqduet_scheduled_launch)
+                else:
+                    _clear_terminal_schedule(tt)
                 if tt is current_trip:
                     current_seen = True
 
@@ -220,6 +232,8 @@ class TimetableCurvePlanner:
                 current_trip._freqduet_scheduled_launch = int(round(scheduled))
                 current_trip._freqduet_terminal_dispatch = True
                 scheduled_launches.append(float(current_trip._freqduet_scheduled_launch))
+            else:
+                _clear_terminal_schedule(current_trip)
 
         targets = np.asarray(planned_targets, dtype=np.float64)
         scheduled = np.asarray(scheduled_launches, dtype=np.float64)
