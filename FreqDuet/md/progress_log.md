@@ -1304,3 +1304,38 @@ domain-best improvement. V2 is retained as a negative confirmation run showing
 that the current V1 fixed-headway advantage is not an artifact of the V2
 action mix. Local V2 checkpoints/trip dumps were deleted after aggregation;
 remote raw artifacts were left intact.
+
+## 2026-06-25 paper-scale V1 ablation launch
+
+Prepared the first paper-scale confirmation matrix for canonical paper-main V1:
+
+```text
+run:
+results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed
+
+protocol:
+4 domains x 6 methods x 60 paired seeds x 200 episodes
+domains: terminal, highnoise, odshift, rushshift
+methods: main, nofreq, rawhistory, allfreq, nopromotion, noleakage
+last_k: 50
+upper_warmup_eps: 10
+total runs: 1440
+shards: 90 x 16 runs
+
+scheduler:
+t13223-t13312
+nodes: node001-node006
+```
+
+The code now supports `FREQDUET_SUPPRESS_HEAVY_ARTIFACTS=1`, and the scheduler
+submitters expose `--suppress-heavy-artifacts`; this disables
+`trip_details.csv` and checkpoints for large paper-scale training shards. A
+local 1ep smoke test confirmed the flag suppresses both artifact classes.
+
+The submission was interrupted only after all 90 shards were created. Direct
+queue-file inspection showed 71 running and 19 queued shards at launch-time
+audit. The persistent `scheduleurm watch` process remains active, so queued
+shards should launch as node001-node006 capacity frees. We explicitly did not
+move the remaining shards to `jtl110cpu/jtl110cpu2` after the user cancelled
+that routing. External baseline and broad held-out paper matrices are queued as
+next work but were not additionally submitted on top of this saturated batch.

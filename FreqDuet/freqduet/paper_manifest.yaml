@@ -30,6 +30,68 @@ paired_seeds_20:
   - 789
   - 2026
 
+paired_seeds_60:
+  - 7
+  - 11
+  - 17
+  - 23
+  - 31
+  - 37
+  - 42
+  - 43
+  - 53
+  - 61
+  - 71
+  - 83
+  - 97
+  - 109
+  - 123
+  - 127
+  - 149
+  - 456
+  - 789
+  - 2026
+  - 2039
+  - 2053
+  - 2063
+  - 2081
+  - 2099
+  - 2111
+  - 2129
+  - 2141
+  - 2153
+  - 2161
+  - 2179
+  - 2203
+  - 2221
+  - 2237
+  - 2251
+  - 2269
+  - 2281
+  - 2297
+  - 2311
+  - 2333
+  - 2351
+  - 2371
+  - 2389
+  - 2411
+  - 2423
+  - 2441
+  - 2467
+  - 2477
+  - 2503
+  - 2521
+  - 2539
+  - 2551
+  - 2579
+  - 2591
+  - 2609
+  - 2621
+  - 2633
+  - 2657
+  - 2671
+  - 2689
+
 metrics:
   primary: composite
   lower_is_better:
@@ -132,6 +194,36 @@ config_sets:
       main: F_freqduet_gen_odshift_paper_main_hiro
     rushshift:
       main: F_freqduet_gen_rushshift_paper_main_hiro
+
+  paper_ablation_v1_4x6:
+    terminal:
+      main: F_freqduet_terminal_paper_main_hiro
+      nofreq: F_freqduet_terminal_final_nofreq_hiro
+      rawhistory: F_freqduet_terminal_final_rawhistory_hiro
+      allfreq: F_freqduet_terminal_final_allfreq_hiro
+      nopromotion: F_freqduet_terminal_final_nopromotion_hiro
+      noleakage: F_freqduet_terminal_final_noleakage_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_paper_main_hiro
+      nofreq: F_freqduet_gen_highnoise_nofreq_hiro
+      rawhistory: F_freqduet_gen_highnoise_rawhistory_hiro
+      allfreq: F_freqduet_gen_highnoise_allfreq_hiro
+      nopromotion: F_freqduet_gen_highnoise_nopromotion_hiro
+      noleakage: F_freqduet_gen_highnoise_noleakage_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_paper_main_hiro
+      nofreq: F_freqduet_gen_odshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_odshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_odshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_odshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_odshift_noleakage_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_paper_main_hiro
+      nofreq: F_freqduet_gen_rushshift_nofreq_hiro
+      rawhistory: F_freqduet_gen_rushshift_rawhistory_hiro
+      allfreq: F_freqduet_gen_rushshift_allfreq_hiro
+      nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
+      noleakage: F_freqduet_gen_rushshift_noleakage_hiro
 
   cfaction_domainbest_v2_4x1:
     terminal:
@@ -783,6 +875,57 @@ experiments:
       odshift: 1.484
       rushshift: 1.304
     purpose: current-name paper-main alias rerun to remove table naming ambiguity after v1 promotion
+
+  paper_ablation_v1_ep200_wu10_4domain_60seed:
+    status: running_scheduler
+    episodes: 200
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_60
+    config_set: paper_ablation_v1_4x6
+    domains: [terminal, highnoise, odshift, rushshift]
+    methods: [main, nofreq, rawhistory, allfreq, nopromotion, noleakage]
+    total_runs: 1440
+    shard_size: 16
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed
+    per_seed_csv: results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_summary.csv
+    paper_summary_dir: results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/paper_summary
+    scheduler_task_range: t13223-t13312
+    scheduler_status_at_submit:
+      running: 71
+      queued: 19
+      note: >
+        Submission was interrupted only after all 90 shards were created. The
+        persistent scheduleurm watcher remains active, so queued shards should
+        launch as node001-node006 capacity frees. The user cancelled using
+        jtl110cpu/jtl110cpu2 for these remaining shards.
+    heavy_artifact_policy: FREQDUET_SUPPRESS_HEAVY_ARTIFACTS=1 disables trip_details.csv and checkpoints for paper-scale training shards.
+    submit_command: >
+      python3 scripts/submit_freqduet_config_matrix_scheduleurm.py
+      --configs F_freqduet_terminal_paper_main_hiro,F_freqduet_terminal_final_nofreq_hiro,F_freqduet_terminal_final_rawhistory_hiro,F_freqduet_terminal_final_allfreq_hiro,F_freqduet_terminal_final_nopromotion_hiro,F_freqduet_terminal_final_noleakage_hiro,F_freqduet_gen_highnoise_paper_main_hiro,F_freqduet_gen_highnoise_nofreq_hiro,F_freqduet_gen_highnoise_rawhistory_hiro,F_freqduet_gen_highnoise_allfreq_hiro,F_freqduet_gen_highnoise_nopromotion_hiro,F_freqduet_gen_highnoise_noleakage_hiro,F_freqduet_gen_odshift_paper_main_hiro,F_freqduet_gen_odshift_nofreq_hiro,F_freqduet_gen_odshift_rawhistory_hiro,F_freqduet_gen_odshift_allfreq_hiro,F_freqduet_gen_odshift_nopromotion_hiro,F_freqduet_gen_odshift_noleakage_hiro,F_freqduet_gen_rushshift_paper_main_hiro,F_freqduet_gen_rushshift_nofreq_hiro,F_freqduet_gen_rushshift_rawhistory_hiro,F_freqduet_gen_rushshift_allfreq_hiro,F_freqduet_gen_rushshift_nopromotion_hiro,F_freqduet_gen_rushshift_noleakage_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689
+      --episodes 200
+      --last-k 50
+      --upper-warmup-eps 10
+      --run-name paper_ablation_v1_ep200_wu10_4domain_60seed
+      --shard-size 16
+      --workers 16
+      --cpu 16
+      --ram-mb 18432
+      --nodes node001,node002,node003,node004,node005,node006
+      --priority normal
+      --suppress-heavy-artifacts
+      --dispatch
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_paper_main_hiro,F_freqduet_terminal_final_nofreq_hiro,F_freqduet_terminal_final_rawhistory_hiro,F_freqduet_terminal_final_allfreq_hiro,F_freqduet_terminal_final_nopromotion_hiro,F_freqduet_terminal_final_noleakage_hiro,F_freqduet_gen_highnoise_paper_main_hiro,F_freqduet_gen_highnoise_nofreq_hiro,F_freqduet_gen_highnoise_rawhistory_hiro,F_freqduet_gen_highnoise_allfreq_hiro,F_freqduet_gen_highnoise_nopromotion_hiro,F_freqduet_gen_highnoise_noleakage_hiro,F_freqduet_gen_odshift_paper_main_hiro,F_freqduet_gen_odshift_nofreq_hiro,F_freqduet_gen_odshift_rawhistory_hiro,F_freqduet_gen_odshift_allfreq_hiro,F_freqduet_gen_odshift_nopromotion_hiro,F_freqduet_gen_odshift_noleakage_hiro,F_freqduet_gen_rushshift_paper_main_hiro,F_freqduet_gen_rushshift_nofreq_hiro,F_freqduet_gen_rushshift_rawhistory_hiro,F_freqduet_gen_rushshift_allfreq_hiro,F_freqduet_gen_rushshift_nopromotion_hiro,F_freqduet_gen_rushshift_noleakage_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689
+      --aggregate-only
+      --aggregate-logs-dirs "$(find results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
+      --last-k 50
+      --out-dir results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
     status: complete_broad_aggressive_palette_screen_no_global_promotion

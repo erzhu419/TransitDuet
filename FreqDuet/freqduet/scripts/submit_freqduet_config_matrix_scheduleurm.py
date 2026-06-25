@@ -77,6 +77,8 @@ def build_inner_cmd(
         "TORCH_NUM_THREADS=1",
         "FREQDUET_TORCH_THREADS=1",
     ]
+    if args.suppress_heavy_artifacts:
+        env_bits.append("FREQDUET_SUPPRESS_HEAVY_ARTIFACTS=1")
     cmd = [
         str(REMOTE_PYTHON),
         "-u",
@@ -181,6 +183,11 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
+    parser.add_argument(
+        "--suppress-heavy-artifacts",
+        action="store_true",
+        help="Disable trip_details.csv and checkpoint writes for large paper matrices.",
+    )
     args = parser.parse_args()
 
     configs = parse_csv(args.configs, str)

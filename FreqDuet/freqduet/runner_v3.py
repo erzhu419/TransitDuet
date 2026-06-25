@@ -8026,8 +8026,17 @@ class TransitDuetV2Runner:
         return self.resume_from_ep
 
     def train(self, total_episodes=300):
-        diag_freq = self.cfg.get('training', {}).get('diag_freq', 10)
-        trip_dump_freq = self.cfg.get('training', {}).get('trip_dump_freq', 25)
+        training_cfg = self.cfg.get('training', {})
+        diag_freq = training_cfg.get('diag_freq', 10)
+        trip_dump_freq = int(training_cfg.get('trip_dump_freq', 25))
+        save_checkpoints = bool(training_cfg.get('save_checkpoints', True))
+        checkpoint_freq = int(training_cfg.get('checkpoint_freq', 50))
+        suppress_heavy_artifacts = str(
+            os.environ.get('FREQDUET_SUPPRESS_HEAVY_ARTIFACTS', '')
+        ).strip().lower() in ('1', 'true', 'yes', 'on')
+        if suppress_heavy_artifacts:
+            trip_dump_freq = 0
+            save_checkpoints = False
         # Init diag now (after resume decision so CSV header handled correctly)
         if self.diag is None:
             self.diag = DiagnosticLog(self.log_dir, resume=(self.resume_from_ep > 0))
@@ -8063,6 +8072,8 @@ class TransitDuetV2Runner:
             freeze_notes.append(f"upper@{self.freeze_upper_after_ep}")
         if freeze_notes:
             print(f"  Longtrain stability freeze: {', '.join(freeze_notes)}")
+        if suppress_heavy_artifacts:
+            print("  Heavy artifacts suppressed: no trip_details.csv, no checkpoints")
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
         if self.fixed_selector_reset_env_rng:
@@ -8092,14 +8103,15 @@ class TransitDuetV2Runner:
                 self._print_diagnostic_block(row)
 
             # ── Per-trip breakdown ──
-            if ep % trip_dump_freq == 0 and row['stage'] == 'BiLevel':
+            if trip_dump_freq > 0 and ep % trip_dump_freq == 0 and row['stage'] == 'BiLevel':
                 self._dump_trip_breakdown(ep)
 
             # ── Checkpoint ──
-            if (ep + 1) % 50 == 0:
+            if save_checkpoints and checkpoint_freq > 0 and (ep + 1) % checkpoint_freq == 0:
                 self._save_checkpoint(ep)
 
-        self._save_checkpoint(total_episodes - 1)
+        if save_checkpoints:
+            self._save_checkpoint(total_episodes - 1)
         self.diag.save_json()
         self._save_history()
         print(f"\nDone. Results in {self.log_dir}/")
