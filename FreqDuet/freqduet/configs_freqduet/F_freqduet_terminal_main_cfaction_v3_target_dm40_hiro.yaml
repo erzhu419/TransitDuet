@@ -1,0 +1,17 @@
+_extends: F_freqduet_terminal_main_hiro.yaml
+_name: F_freqduet_terminal_main_cfaction_v3_target_dm40_hiro
+
+# V3 palette screen: aggressive fixed target-headway compression.
+upper:
+  action_override:
+    enable: true
+    delta_s: -40
+    disable_value_selectors: true
+  timetable_planner:
+    terminal_dispatch: false
+    headway_value_planner:
+      enable: false
+    terminal_value_selector:
+      enable: false
+training:
+  trip_dump_freq: 1

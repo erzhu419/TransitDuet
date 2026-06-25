@@ -1,0 +1,19 @@
+_extends: F_freqduet_gen_highnoise_main_hiro.yaml
+_name: F_freqduet_gen_highnoise_main_cfaction_v3_terminalhold60_dm30_hiro
+
+# V3 palette screen: stronger compression plus a wider 60s terminal hold room.
+upper:
+  action_override:
+    enable: true
+    delta_s: -30
+    disable_value_selectors: true
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: 0
+    terminal_shift_max_s: 60
+    headway_value_planner:
+      enable: false
+    terminal_value_selector:
+      enable: false
+training:
+  trip_dump_freq: 1
