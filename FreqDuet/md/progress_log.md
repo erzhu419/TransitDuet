@@ -1031,3 +1031,71 @@ another OD-main guard; it is to either promote v1 as the paper-main candidate
 with clear counterfactual-action framing, or replace the fixed domain actions
 with a rollout-trained value/action selector that reproduces v1's terminal and
 rush gains without hard domain overrides.
+
+## 2026-06-25 200ep deterministic confirmation and paper-main alias
+
+Ran the deterministic 200ep confirmation:
+
+```text
+learned run:
+results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed
+tasks: t13108-t13117
+
+external fixed run:
+results_freqduet/detseed_external_fixed_headway_ep200_wu10_4domain_20seed
+tasks: t13118-t13122
+
+protocol:
+4 domains x 20 paired seeds
+learned configs: current main + cfaction_domainbest_v1
+external variant: fixed_headway
+episodes: 200
+last_k: 50
+upper_warmup_eps: 10 for learned configs
+```
+
+`cfaction_domainbest_v1` vs deterministic current main:
+
+```text
+terminal  -0.0009  CI [-0.0199, +0.0183]
+highnoise -0.0350  CI [-0.0849, +0.0104]
+odshift   +0.0054  CI [-0.0159, +0.0255]
+rushshift -0.0161  CI [-0.0271, -0.0058]
+overall   -0.0117  CI [-0.0278, +0.0024]
+```
+
+`cfaction_domainbest_v1` vs deterministic fixed-headway:
+
+```text
+terminal        -0.0033  CI [-0.0227, +0.0163]
+highnoise       -0.0525  CI [-0.0885, -0.0139]
+odshift         -0.0107  CI [-0.0361, +0.0162]
+rushshift        0.0000  CI [-0.0000, +0.0000]
+overall_shared  -0.0166  CI [-0.0304, -0.0026]
+```
+
+Deterministic current main vs fixed-headway:
+
+```text
+terminal        -0.0024  CI [-0.0171, +0.0125]
+highnoise       -0.0175  CI [-0.0632, +0.0327]
+odshift         -0.0161  CI [-0.0457, +0.0134]
+rushshift       +0.0161  CI [+0.0059, +0.0273]
+overall_shared  -0.0050  CI [-0.0212, +0.0114]
+```
+
+Decision: promote v1 as the paper-main candidate, but keep the old
+`F_freqduet_*_main_hiro` configs as current-main baselines to avoid a cyclic
+inheritance chain. Added paper-main aliases:
+
+```text
+F_freqduet_terminal_paper_main_hiro
+F_freqduet_gen_highnoise_paper_main_hiro
+F_freqduet_gen_odshift_paper_main_hiro
+F_freqduet_gen_rushshift_paper_main_hiro
+```
+
+These aliases extend the validated `cfaction_domainbest_v1` configs. The next
+step is to run a current-name final matrix using these paper-main aliases and
+then package the final tables/figures around the deterministic ep100/ep200
+evidence.

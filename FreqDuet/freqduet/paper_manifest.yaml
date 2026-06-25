@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-22
+version: 2026-06-25
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -122,6 +122,30 @@ config_sets:
       allfreq: F_freqduet_gen_rushshift_allfreq_hiro
       nopromotion: F_freqduet_gen_rushshift_nopromotion_hiro
       noleakage: F_freqduet_gen_rushshift_noleakage_hiro
+
+  paper_main_cfaction_domainbest_v1_4x1:
+    terminal:
+      main: F_freqduet_terminal_paper_main_hiro
+    highnoise:
+      main: F_freqduet_gen_highnoise_paper_main_hiro
+    odshift:
+      main: F_freqduet_gen_odshift_paper_main_hiro
+    rushshift:
+      main: F_freqduet_gen_rushshift_paper_main_hiro
+
+  current_vs_cfaction_domainbest_v1_4x2:
+    terminal:
+      current_main: F_freqduet_terminal_main_hiro
+      cfaction_domainbest_v1: F_freqduet_terminal_main_cfaction_domainbest_v1_hiro
+    highnoise:
+      current_main: F_freqduet_gen_highnoise_main_hiro
+      cfaction_domainbest_v1: F_freqduet_gen_highnoise_main_cfaction_domainbest_v1_hiro
+    odshift:
+      current_main: F_freqduet_gen_odshift_main_hiro
+      cfaction_domainbest_v1: F_freqduet_gen_odshift_main_cfaction_domainbest_v1_hiro
+    rushshift:
+      current_main: F_freqduet_gen_rushshift_main_hiro
+      cfaction_domainbest_v1: F_freqduet_gen_rushshift_main_cfaction_domainbest_v1_hiro
 
   freeze100_longtrain_4x1:
     terminal:
@@ -643,6 +667,60 @@ experiments:
       --baseline-per-seed results_freqduet/paper_longtrain_current_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
       --candidate-per-seed results_freqduet/driftcost_longtrain_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
       --out-dir results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary
+
+  detseed_cfaction_domainbest_v1_ep200_wu10_4domain_20seed:
+    status: complete_deterministic_paper_main_candidate
+    episodes: 200
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: current_vs_cfaction_domainbest_v1_4x2
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    comparison_vs_current_main: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed/compare_v1_vs_main/candidate_paired_deltas.csv
+    comparison_vs_fixed_headway: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed/compare_v1_vs_fixed_ep200/external_baseline_paired_deltas.csv
+    comparison_current_main_vs_fixed_headway: results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed/compare_main_vs_fixed_ep200/external_baseline_paired_deltas.csv
+    scheduler_tasks:
+      - t13108
+      - t13109
+      - t13110
+      - t13111
+      - t13112
+      - t13113
+      - t13114
+      - t13115
+      - t13116
+      - t13117
+    conclusion:
+      v1_vs_fixed_overall_shared_delta_ci95: [-0.0166, -0.0304, -0.0026]
+      v1_vs_current_main_overall_delta_ci95: [-0.0117, -0.0278, 0.0024]
+      v1_vs_current_main_rushshift_delta_ci95: [-0.0161, -0.0271, -0.0058]
+      current_main_vs_fixed_overall_shared_delta_ci95: [-0.0050, -0.0212, 0.0114]
+      current_main_vs_fixed_rushshift_delta_ci95: [0.0161, 0.0059, 0.0273]
+
+  detseed_external_fixed_headway_ep200_wu10_4domain_20seed:
+    status: complete_deterministic_external_fixed_reference
+    episodes: 200
+    last_k: 50
+    seeds: paired_seeds_20
+    variants: [fixed_headway]
+    runner: scripts/submit_freqduet_external_baselines_scheduleurm.py
+    result_dir: results_freqduet/detseed_external_fixed_headway_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/detseed_external_fixed_headway_ep200_wu10_4domain_20seed/combined_summary/external_baselines_per_seed.csv
+    summary_csv: results_freqduet/detseed_external_fixed_headway_ep200_wu10_4domain_20seed/combined_summary/external_baselines_summary.csv
+    scheduler_tasks:
+      - t13118
+      - t13119
+      - t13120
+      - t13121
+      - t13122
+    fixed_headway_composite_mean:
+      terminal: 1.4764
+      highnoise: 1.8646
+      odshift: 1.4943
+      rushshift: 1.3042
 
   heldout_generalization_ep100_wu10:
     status: complete_promoted_current

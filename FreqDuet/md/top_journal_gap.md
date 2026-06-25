@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-24 CST
+Last updated: 2026-06-25 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -237,6 +237,69 @@ baseline under paired deterministic seeds, but the terminal-only configs are
 currently identical to fixed-headway on highnoise, OD-shift, and rush-shift.
 The next gap is extending the counterfactual action/value layer beyond the
 terminal-only setting without losing the fixed-headway no-harm property.
+
+2026-06-25 deterministic 200ep confirmation: the domain-wise counterfactual
+action candidate `cfaction_domainbest_v1` was rerun against deterministic
+current main and deterministic fixed-headway at 200 episodes:
+
+```text
+learned:
+results_freqduet/detseed_main_vs_cfaction_domainbest_v1_ep200_wu10_4domain_20seed
+tasks: t13108-t13117
+
+external fixed:
+results_freqduet/detseed_external_fixed_headway_ep200_wu10_4domain_20seed
+tasks: t13118-t13122
+
+protocol:
+4 domains x 20 paired seeds
+episodes: 200
+last_k: 50
+upper_warmup_eps: 10 for learned configs
+```
+
+The 200ep result confirms that v1 is the strongest deterministic paper-main
+candidate:
+
+```text
+cfaction_domainbest_v1 - current main composite delta
+terminal  -0.0009 CI [-0.0199,+0.0183]
+highnoise -0.0350 CI [-0.0849,+0.0104]
+odshift   +0.0054 CI [-0.0159,+0.0255]
+rushshift -0.0161 CI [-0.0271,-0.0058]
+overall   -0.0117 CI [-0.0278,+0.0024]
+
+cfaction_domainbest_v1 - fixed_headway composite delta
+terminal        -0.0033 CI [-0.0227,+0.0163]
+highnoise       -0.0525 CI [-0.0885,-0.0139]
+odshift         -0.0107 CI [-0.0361,+0.0162]
+rushshift        0.0000 CI [-0.0000,+0.0000]
+overall_shared  -0.0166 CI [-0.0304,-0.0026]
+
+current main - fixed_headway composite delta
+terminal        -0.0024 CI [-0.0171,+0.0125]
+highnoise       -0.0175 CI [-0.0632,+0.0327]
+odshift         -0.0161 CI [-0.0457,+0.0134]
+rushshift       +0.0161 CI [+0.0059,+0.0273]
+overall_shared  -0.0050 CI [-0.0212,+0.0114]
+```
+
+Decision: promote `cfaction_domainbest_v1` as the deterministic paper-main
+candidate. The old `F_freqduet_*_main_hiro` configs stay as current-main
+baselines to avoid cyclic inheritance. The paper-main alias configs are:
+
+```text
+F_freqduet_terminal_paper_main_hiro
+F_freqduet_gen_highnoise_paper_main_hiro
+F_freqduet_gen_odshift_paper_main_hiro
+F_freqduet_gen_rushshift_paper_main_hiro
+```
+
+These aliases extend the validated v1 configs and let final tables use method
+name `main` without losing the historical current-main baseline. The remaining
+gap for this item is no longer "does the advantage survive 200ep"; it is the
+clean current-name final matrix using the paper-main aliases, followed by the
+final table/figure package.
 
 Done means:
 
@@ -3505,10 +3568,14 @@ rushshift -0.0118  CI [-0.0232, +0.0003]
 overall   -0.0043  CI [-0.0190, +0.0100]
 ```
 
-Remaining before a top-journal main claim: add OD-protective causal/value guard
-or explain the OD tradeoff, rerun a current-name final matrix, and confirm at
-200 episodes. Until then, cite this as a fixed-headway-beating candidate rather
-than the locked final main.
+This 100ep result has now been superseded by the 200ep deterministic
+confirmation above. The defensible current claim is stronger: v1 is promoted as
+the deterministic paper-main candidate because it significantly beats
+fixed-headway in the four-domain shared average at both 100ep and 200ep while
+keeping rushshift fixed-safe. The remaining paper-main gap is naming and
+packaging, not another OD fallback: rerun the final matrix under the
+`*_paper_main_hiro` aliases, then generate the final tables/figures and
+negative-results appendix.
 
 Deterministic current-main rerun resolved a comparison ambiguity. The older
 `paper_main_b15o22_alias` matrix was not enough after the stdlib-random seed
@@ -3543,13 +3610,10 @@ overall   -0.0095  CI [-0.0201, +0.0010]
 ```
 
 The attempted OD-main guard (`cfaction_domainbest_v2_odguard`) did not improve
-v1 and should stay a negative result. The next promotion gap is therefore not a
-simple OD fallback. It is either:
-
-- promote v1 as the deterministic paper-main candidate and run 200ep/current
-  final matrix confirmation; or
-- train a selector/value layer that reproduces v1's domain actions without
-  hard domain overrides, then compare it against v1, current main, and fixed.
+v1 and should stay a negative result. The 200ep rerun resolved the promotion
+question in favor of v1. A learned selector/value layer that reproduces v1's
+domain actions without hard domain aliases remains a future paper-strengthening
+direction, not a blocker for the current deterministic paper-main package.
 
 Follow-up now running: `upperhist_current_b15o22_ep100_wu10_4domain_20seed`
 tests the SUMO-RL exp39-style repair under the current promoted main:
