@@ -301,6 +301,17 @@ gap for this item is no longer "does the advantage survive 200ep"; it is the
 clean current-name final matrix using the paper-main aliases, followed by the
 final table/figure package.
 
+Alias final-matrix status: submitted as
+`detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed`.
+The first scheduler attempt (`t13127-t13131`) failed before training because
+the remote `scheduleurm_work` tree lacked the new alias YAML files. After
+syncing the four alias configs to the remote `configs_freqduet` directory, the
+same run name was resubmitted with `--allow-duplicate`; active tasks are
+`t13132-t13136`. Early status showed all five shards running with nonzero RAM,
+so the previous config-load failure is resolved. This item remains open until
+the alias run is synced, aggregated, and compared against the already completed
+v1/current/fixed deterministic 200ep tables.
+
 Done means:
 
 - run current `main` against `nofreq`, `rawhistory`, `allfreq`,

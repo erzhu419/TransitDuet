@@ -1099,3 +1099,26 @@ These aliases extend the validated `cfaction_domainbest_v1` configs. The next
 step is to run a current-name final matrix using these paper-main aliases and
 then package the final tables/figures around the deterministic ep100/ep200
 evidence.
+
+Alias final-matrix rerun submitted:
+
+```text
+run:
+results_freqduet/detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed
+
+protocol:
+4 paper-main alias configs x 20 paired seeds x 200 episodes
+last_k: 50
+upper_warmup_eps: 10
+
+active scheduler tasks:
+t13132-t13136
+```
+
+The first submission (`t13127-t13131`) failed before training because the
+remote `scheduleurm_work` tree did not yet contain the newly added alias YAML
+files. The four alias configs were synced to the remote `configs_freqduet`
+directory, then the same clean run name was resubmitted with
+`--allow-duplicate`. Early status after resubmission showed all five shards
+running on scheduler CPU resources with nonzero RAM, so config loading is now
+past the previous failure point.

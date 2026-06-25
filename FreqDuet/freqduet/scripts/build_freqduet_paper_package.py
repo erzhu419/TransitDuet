@@ -78,6 +78,30 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          if promoted.get("paper_summary_dir") else None),
     ])
 
+    detseed_v1 = experiment(
+        manifest, "detseed_cfaction_domainbest_v1_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("detseed_cfaction_domainbest_v1_ep200_per_seed.csv",
+         detseed_v1.get("per_seed_csv")),
+        ("detseed_cfaction_domainbest_v1_ep200_summary.csv",
+         detseed_v1.get("summary_csv")),
+        ("detseed_cfaction_domainbest_v1_ep200_vs_current_main.csv",
+         detseed_v1.get("comparison_vs_current_main")),
+        ("detseed_cfaction_domainbest_v1_ep200_vs_fixed_headway.csv",
+         detseed_v1.get("comparison_vs_fixed_headway")),
+        ("detseed_current_main_ep200_vs_fixed_headway.csv",
+         detseed_v1.get("comparison_current_main_vs_fixed_headway")),
+    ])
+
+    detseed_fixed = experiment(
+        manifest, "detseed_external_fixed_headway_ep200_wu10_4domain_20seed")
+    table_specs.extend([
+        ("detseed_external_fixed_headway_ep200_per_seed.csv",
+         detseed_fixed.get("per_seed_csv")),
+        ("detseed_external_fixed_headway_ep200_summary.csv",
+         detseed_fixed.get("summary_csv")),
+    ])
+
     current_tb = experiment(manifest, "final_matrix_current_terminalbias_ep100_wu10_4domain_20seed")
     table_specs.extend([
         ("final_terminalbias_ep100_per_seed.csv", current_tb.get("per_seed_csv")),
@@ -271,7 +295,9 @@ def copy_config_snapshots(manifest: dict, out_dir: Path,
 def collect_config_names(value: object) -> set[str]:
     names: set[str] = set()
     if isinstance(value, str):
-        names.add(value[:-5] if value.endswith(".yaml") else value)
+        name = value[:-5] if value.endswith(".yaml") else value
+        if Path(name).name.startswith("F_freqduet_"):
+            names.add(name)
     elif isinstance(value, dict):
         if "configs" in value:
             return collect_config_names(value["configs"])
