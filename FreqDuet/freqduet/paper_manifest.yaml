@@ -769,6 +769,63 @@ experiments:
       --out-dir results_freqduet/detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed/combined_summary
     purpose: current-name paper-main alias rerun to remove table naming ambiguity after v1 promotion
 
+  detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
+    status: running_broad_aggressive_palette_screen
+    episodes: 100
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    domains: [terminal, highnoise, odshift, rushshift]
+    configs_per_domain: 12
+    total_runs: 960
+    shard_size: 16
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    palette_summary_dir: results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/palette_summary
+    scheduler_task_range: t13137-t13196
+    active_status_at_submit:
+      running: 57
+      queued: 3
+      queued_tasks_after_repin:
+        t13143: node004
+        t13144: node005
+        t13145: node006
+    action_families:
+      - paper_main_v1_alias
+      - cfaction_v2_target_dm20
+      - cfaction_v2_target_dp0
+      - cfaction_v2_target_dp20
+      - cfaction_v2_terminalhold45_dm20
+      - cfaction_v2_terminalhold45_dp0
+      - cfaction_v2_terminalhold45_dp20
+      - cfaction_v3_target_dm30
+      - cfaction_v3_target_dm40
+      - cfaction_v3_terminalhold45_dm30
+      - cfaction_v3_terminalhold60_dm30
+      - cfaction_v3_terminalhold60_dm40
+    submit_note: >
+      Aggressive post-v1 screen to test whether larger target and terminal-hold
+      counterfactual action deltas can improve over cfaction_domainbest_v1.
+      Remote configs were synced before submit. Initial scheduler blocklist came
+      from the failed paper-main alias pre-sync tasks t13127-t13131; those stale
+      ENV_MISSING escalations were resolved after the alias YAMLs were synced.
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs <the 48 submitted configs>
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs "$(find results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
+      --last-k 50
+      --out-dir results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary
+    palette_summary_command: >
+      python3 scripts/summarize_freqduet_palette.py
+      --per-seed results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/palette_summary
+      --baseline-action paper_main_v1
+    purpose: broad v2/v3 action-palette search for a possible successor to the validated v1 paper-main candidate
+
   heldout_generalization_ep100_wu10:
     status: complete_promoted_current
     episodes: 100

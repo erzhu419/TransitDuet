@@ -1122,3 +1122,63 @@ directory, then the same clean run name was resubmitted with
 `--allow-duplicate`. Early status after resubmission showed all five shards
 running on scheduler CPU resources with nonzero RAM, so config loading is now
 past the previous failure point.
+
+## 2026-06-25 Aggressive cfaction v3 Palette Screen
+
+A larger post-v1 action palette was added and submitted to test whether the
+validated `cfaction_domainbest_v1` paper-main candidate can still be improved,
+rather than only polishing around the current v1 optimum.
+
+Run:
+
+```text
+results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed
+tasks: t13137-t13196
+```
+
+Protocol:
+
+```text
+4 domains x 12 configs/domain x 20 paired seeds
+episodes: 100
+last_k: 50
+upper_warmup_eps: 10
+shard_size: 16
+```
+
+The palette compares paper-main v1 aliases, existing v2 cfaction candidates,
+and five more aggressive v3 families per domain:
+
+```text
+target_dm30
+target_dm40
+terminalhold45_dm30
+terminalhold60_dm30
+terminalhold60_dm40
+```
+
+The initial dispatch was partly blocked by stale scheduler `ENV_MISSING`
+escalations from the failed pre-sync alias tasks `t13127-t13131`. Those were
+resolved after the remote alias/config YAMLs had been synced and replacement
+alias tasks had passed config load. After unblocking, the v3 screen reached
+`57/60` running shards across `node001-node006`; the remaining queued shards
+were re-pinned from the stale blocked nodes to:
+
+```text
+t13143 -> node004
+t13144 -> node005
+t13145 -> node006
+```
+
+Early log samples from `node001-node006` show normal `RUN ... episodes=100`
+startup lines for v3 and paper-main configs, with no config-missing/import
+crash in the sampled logs.
+
+Decision rule once complete:
+
+- summarize with `scripts/summarize_freqduet_palette.py` against
+  `paper_main_v1`;
+- promote only if a candidate improves the paired composite mean without
+  creating a domain-specific regression, especially on rushshift/fixed safety;
+- if only one domain benefits, create a domain-best v2 alias and confirm with a
+  200ep paired matrix against paper-main v1 and fixed-headway.
