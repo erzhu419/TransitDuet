@@ -3510,6 +3510,47 @@ or explain the OD tradeoff, rerun a current-name final matrix, and confirm at
 200 episodes. Until then, cite this as a fixed-headway-beating candidate rather
 than the locked final main.
 
+Deterministic current-main rerun resolved a comparison ambiguity. The older
+`paper_main_b15o22_alias` matrix was not enough after the stdlib-random seed
+fix, so current main was rerun as:
+
+```text
+results_freqduet/detseed_current_main_ep100_wu10_4domain_20seed
+```
+
+Current main under this protocol only ties fixed-headway overall and is
+significantly worse on rushshift:
+
+```text
+current main - fixed_headway:
+terminal        +0.0072  CI [-0.0134, +0.0280]
+highnoise       -0.0331  CI [-0.0749, +0.0096]
+odshift         -0.0043  CI [-0.0294, +0.0230]
+rushshift       +0.0080  CI [+0.0009, +0.0155]
+overall_shared  -0.0055  CI [-0.0183, +0.0081]
+```
+
+`cfaction_domainbest_v1` is better than deterministic current main in the
+important weak spots:
+
+```text
+cfaction_domainbest_v1 - current main:
+terminal  -0.0279  CI [-0.0435, -0.0142]
+highnoise +0.0011  CI [-0.0265, +0.0322]
+odshift   -0.0030  CI [-0.0233, +0.0179]
+rushshift -0.0080  CI [-0.0152, -0.0008]
+overall   -0.0095  CI [-0.0201, +0.0010]
+```
+
+The attempted OD-main guard (`cfaction_domainbest_v2_odguard`) did not improve
+v1 and should stay a negative result. The next promotion gap is therefore not a
+simple OD fallback. It is either:
+
+- promote v1 as the deterministic paper-main candidate and run 200ep/current
+  final matrix confirmation; or
+- train a selector/value layer that reproduces v1's domain actions without
+  hard domain overrides, then compare it against v1, current main, and fixed.
+
 Follow-up now running: `upperhist_current_b15o22_ep100_wu10_4domain_20seed`
 tests the SUMO-RL exp39-style repair under the current promoted main:
 short upper decision history plus small discrete residual action alphabets.

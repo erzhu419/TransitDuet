@@ -983,3 +983,51 @@ Decision: keep and push this as a fixed-headway-beating candidate, but do not
 overwrite the old `main` alias yet. The next repair should target OD protection
 and a cleaner causal/value guard, then rerun current-name final matrix and a
 200ep confirmation before promotion.
+
+Follow-up deterministic checks:
+
+1. `cfaction_domainbest_v2_odguard` was rejected. It kept OD-shift on the
+   promoted main path while using v1 elsewhere. Under the deterministic
+   100ep protocol it remained better than fixed overall but was slightly worse
+   than v1:
+
+```text
+v2 - v1 composite delta
+odshift +0.0030  CI [-0.0178, +0.0232]
+overall +0.0007  CI [-0.0044, +0.0058]
+```
+
+2. Reran current main under the same deterministic seed-fixed 100ep protocol:
+
+```text
+results_freqduet/detseed_current_main_ep100_wu10_4domain_20seed
+tasks: t13102, t13103, t13104, t13105, t13106
+```
+
+Current main vs deterministic fixed-headway:
+
+```text
+terminal        +0.0072  CI [-0.0134, +0.0280]
+highnoise       -0.0331  CI [-0.0749, +0.0096]
+odshift         -0.0043  CI [-0.0294, +0.0230]
+rushshift       +0.0080  CI [+0.0009, +0.0155]
+overall_shared  -0.0055  CI [-0.0183, +0.0081]
+```
+
+`cfaction_domainbest_v1` vs deterministic current main:
+
+```text
+terminal  -0.0279  CI [-0.0435, -0.0142]
+highnoise +0.0011  CI [-0.0265, +0.0322]
+odshift   -0.0030  CI [-0.0233, +0.0179]
+rushshift -0.0080  CI [-0.0152, -0.0008]
+overall   -0.0095  CI [-0.0201, +0.0010]
+```
+
+Interpretation: v1 is now the strongest deterministic candidate. It fixes the
+current-main rushshift regression, significantly improves terminal, and
+significantly beats fixed-headway overall. The remaining promotion work is not
+another OD-main guard; it is to either promote v1 as the paper-main candidate
+with clear counterfactual-action framing, or replace the fixed domain actions
+with a rollout-trained value/action selector that reproduces v1's terminal and
+rush gains without hard domain overrides.
