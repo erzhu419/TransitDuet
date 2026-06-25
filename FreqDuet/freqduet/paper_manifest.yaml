@@ -786,12 +786,19 @@ experiments:
     palette_summary_dir: results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/palette_summary
     scheduler_task_range: t13137-t13196
     active_status_at_submit:
-      running: 57
-      queued: 3
-      queued_tasks_after_repin:
+      running: 60
+      queued: 0
+      initially_queued_tasks_repin:
         t13143: node004
         t13144: node005
         t13145: node006
+      running_distribution:
+        node001: 11
+        node002: 11
+        node003: 6
+        node004: 11
+        node005: 10
+        node006: 11
     action_families:
       - paper_main_v1_alias
       - cfaction_v2_target_dm20

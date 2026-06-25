@@ -1160,9 +1160,9 @@ terminalhold60_dm40
 The initial dispatch was partly blocked by stale scheduler `ENV_MISSING`
 escalations from the failed pre-sync alias tasks `t13127-t13131`. Those were
 resolved after the remote alias/config YAMLs had been synced and replacement
-alias tasks had passed config load. After unblocking, the v3 screen reached
-`57/60` running shards across `node001-node006`; the remaining queued shards
-were re-pinned from the stale blocked nodes to:
+alias tasks had passed config load. After unblocking and re-dispatch, the v3
+screen reached `60/60` running shards across `node001-node006`. The last three
+queued shards were re-pinned from the stale blocked nodes to:
 
 ```text
 t13143 -> node004
@@ -1173,6 +1173,17 @@ t13145 -> node006
 Early log samples from `node001-node006` show normal `RUN ... episodes=100`
 startup lines for v3 and paper-main configs, with no config-missing/import
 crash in the sampled logs.
+
+Running distribution at launch:
+
+```text
+node001: 11
+node002: 11
+node003: 6
+node004: 11
+node005: 10
+node006: 11
+```
 
 Decision rule once complete:
 
