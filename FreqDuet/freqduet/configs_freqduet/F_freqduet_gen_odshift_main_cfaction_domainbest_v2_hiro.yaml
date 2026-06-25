@@ -1,0 +1,8 @@
+_extends: F_freqduet_gen_odshift_main_cfaction_v3_target_dm30_hiro.yaml
+_name: F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro
+
+# Domain-best v2 candidate from the v3 palette screen:
+# odshift selected target_-30. Keep the policy identical to the screened
+# config, but suppress heavy trip_details dumps for long confirmation runs.
+training:
+  trip_dump_freq: 999999

@@ -1,0 +1,9 @@
+_extends: F_freqduet_gen_rushshift_paper_main_hiro.yaml
+_name: F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+
+# Domain-best v2 candidate from the v3 palette screen:
+# rushshift kept paper-main v1 because every aggressive action increased
+# composite risk in the screen. Suppress heavy trip_details dumps for long
+# confirmation runs.
+training:
+  trip_dump_freq: 999999
