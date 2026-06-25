@@ -22,6 +22,7 @@ import pandas as pd
 DOMAINS = ("terminal", "highnoise", "odshift", "rushshift")
 BASELINE_METHODS = ("main", "nofreq", "rawhistory", "allfreq", "nopromotion", "noleakage")
 CANDIDATE_METHOD_TOKENS = (
+    "cfaction_domainbest_v2",
     "cfaction_domainbest_v1",
     "domainbest_terminalonly",
     "snapshotriskdual_compresssafe05",

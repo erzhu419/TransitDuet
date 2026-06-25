@@ -872,7 +872,7 @@ experiments:
     purpose: broad v2/v3 action-palette search for a possible successor to the validated v1 paper-main candidate
 
   detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed:
-    status: running_200ep_confirmation
+    status: complete_not_promoted
     episodes: 200
     last_k: 50
     upper_warmup_eps: 10
@@ -882,6 +882,8 @@ experiments:
     result_dir: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed
     per_seed_csv: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
     summary_csv: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    comparison_vs_paper_main_v1_alias_dir: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/comparison_vs_paper_main_v1_alias
+    comparison_vs_external_fixed_headway_dir: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/comparison_vs_external_fixed_headway
     scheduler_tasks:
       - t13216
       - t13217
@@ -913,6 +915,32 @@ experiments:
     purpose: >
       Confirm the weak 100ep domain-best v2 direction against the current
       paper-main v1 alias and fixed-headway before considering any promotion.
+    result:
+      decision: keep_cfaction_domainbest_v1_as_paper_main
+      domainbest_v2_vs_paper_main_v1_alias:
+        overall_delta_ci95: [0.001027, -0.011075, 0.013655]
+        terminal_delta_ci95: [-0.004416, -0.026479, 0.017911]
+        highnoise_delta_ci95: [0.004197, -0.033958, 0.042710]
+        odshift_delta_ci95: [0.004326, -0.016454, 0.024618]
+        rushshift_delta_ci95: [0.0, 0.0, 0.0]
+        interpretation: >
+          The domain-best action mix did not improve over the current V1
+          paper-main alias at 200 episodes. Terminal improved weakly, but
+          highnoise and odshift regressed weakly; all confidence intervals
+          cross zero.
+      domainbest_v2_vs_fixed_headway:
+        overall_shared_delta_ci95: [-0.015581, -0.028693, -0.001504]
+        terminal_delta_ci95: [-0.007696, -0.026694, 0.012982]
+        highnoise_delta_ci95: [-0.048266, -0.083048, -0.013639]
+        odshift_delta_ci95: [-0.006365, -0.029107, 0.014448]
+        rushshift_delta_ci95: [0.000001, -0.000002, 0.000003]
+        interpretation: >
+          V2 remains significantly better than deterministic fixed-headway
+          overall, mostly through highnoise, but it is not better than V1.
+      local_cleanup_note: >
+        Local checkpoints and trip dumps under this run were deleted after
+        diagnostics and aggregate tables were synced. Remote raw artifacts were
+        left intact.
 
   heldout_generalization_ep100_wu10:
     status: complete_promoted_current

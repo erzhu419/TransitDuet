@@ -1260,3 +1260,47 @@ protocol:
 last_k: 50
 upper_warmup_eps: 10
 ```
+
+200ep confirmation result:
+
+```text
+aggregated:
+results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary
+
+comparison vs paper-main v1 alias:
+results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/comparison_vs_paper_main_v1_alias
+
+comparison vs deterministic fixed-headway:
+results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/comparison_vs_external_fixed_headway
+```
+
+`cfaction_domainbest_v2` does not improve over the current paper-main V1 at
+200 episodes:
+
+```text
+domain       V2 - V1 composite delta      CI95
+terminal     -0.0044                      [-0.0265, +0.0179]
+highnoise    +0.0042                      [-0.0340, +0.0427]
+odshift      +0.0043                      [-0.0165, +0.0246]
+rushshift    +0.0000                      [+0.0000, +0.0000]
+overall      +0.0010                      [-0.0111, +0.0137]
+```
+
+It still significantly beats deterministic fixed-headway overall, mainly from
+the highnoise domain:
+
+```text
+domain          V2 - fixed composite delta      CI95
+terminal        -0.0077                         [-0.0267, +0.0130]
+highnoise       -0.0483                         [-0.0830, -0.0136]
+odshift         -0.0064                         [-0.0291, +0.0144]
+rushshift       +0.0000                         [-0.0000, +0.0000]
+overall_shared  -0.0156                         [-0.0287, -0.0015]
+```
+
+Decision: do not promote V2. Keep `cfaction_domainbest_v1` as the canonical
+paper-main because the 200ep confirmation did not reproduce the weak 100ep
+domain-best improvement. V2 is retained as a negative confirmation run showing
+that the current V1 fixed-headway advantage is not an artifact of the V2
+action mix. Local V2 checkpoints/trip dumps were deleted after aggregation;
+remote raw artifacts were left intact.
