@@ -877,7 +877,7 @@ experiments:
     purpose: current-name paper-main alias rerun to remove table naming ambiguity after v1 promotion
 
   paper_ablation_v1_ep200_wu10_4domain_60seed:
-    status: running_scheduler
+    status: complete
     episodes: 200
     last_k: 50
     upper_warmup_eps: 10
@@ -901,6 +901,12 @@ experiments:
         persistent scheduleurm watcher remains active, so queued shards should
         launch as node001-node006 capacity frees. The user cancelled using
         jtl110cpu/jtl110cpu2 for these remaining shards.
+    completion_audit:
+      scheduler_tasks_done: 90
+      per_seed_rows: 1440
+      configs: 24
+      seeds_per_config: 60
+      heavy_artifact_files: 0
     heavy_artifact_policy: FREQDUET_SUPPRESS_HEAVY_ARTIFACTS=1 disables trip_details.csv and checkpoints for paper-scale training shards.
     submit_command: >
       python3 scripts/submit_freqduet_config_matrix_scheduleurm.py
@@ -926,6 +932,67 @@ experiments:
       --aggregate-logs-dirs "$(find results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
       --last-k 50
       --out-dir results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary
+    paper_summary_command: >
+      python3 scripts/summarize_freqduet_paper_matrix.py
+      --per-seed results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_per_seed.csv
+      --out-dir results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/paper_summary
+      --paired-metric composite
+    overall_composite_mean:
+      main: 1.5285
+      nofreq: 1.5365
+      rawhistory: 1.5339
+      allfreq: 1.5229
+      nopromotion: 1.5384
+      noleakage: 1.8525
+    paired_delta_main_minus_baseline:
+      nofreq: [-0.0080, -0.0382, 0.0220]
+      rawhistory: [-0.0054, -0.0326, 0.0233]
+      allfreq: [0.0056, -0.0189, 0.0325]
+      nopromotion: [-0.0099, -0.0213, 0.0001]
+      noleakage: [-0.3240, -0.3853, -0.2649]
+    key_result: >
+      60-seed confirmation supports leakage prevention as a necessary mechanism:
+      noleakage is strongly worse in every domain. Paper-main is robust and
+      significantly better in rushshift, but the internal allfreq/rawhistory/
+      nopromotion deltas are small with confidence intervals crossing zero.
+      Therefore the paper claim should emphasize mechanism necessity and
+      robustness rather than asserting broad internal dominance.
+
+  paper_external_classical_v1_ep200_wu10_4domain_60seed:
+    status: running_scheduler
+    episodes: 200
+    last_k: 50
+    seeds: paired_seeds_60
+    config_set: paper_main_cfaction_domainbest_v1_4x1
+    domains: [terminal, highnoise, odshift, rushshift]
+    variants: [fixed_headway, rule_holding, rule_mpc]
+    total_runs: 720
+    shard_size: 16
+    runner: scripts/submit_freqduet_external_baselines_scheduleurm.py
+    result_dir: results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed
+    per_seed_csv: results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/combined_summary/external_baselines_per_seed.csv
+    summary_csv: results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/combined_summary/external_baselines_summary.csv
+    scheduler_task_range: t13353-t13397
+    scheduler_status_at_submit:
+      running: 45
+      queued: 0
+      nodes:
+        node001: 8
+        node002: 8
+        node003: 8
+        node004: 7
+        node005: 7
+        node006: 7
+    purpose: 60-seed external classical baseline confirmation for fixed-headway/rule-holding/rule-MPC paper table.
+    aggregate_command: >
+      python3 scripts/run_freqduet_external_baselines.py
+      --configs F_freqduet_terminal_paper_main_hiro,F_freqduet_gen_highnoise_paper_main_hiro,F_freqduet_gen_odshift_paper_main_hiro,F_freqduet_gen_rushshift_paper_main_hiro
+      --variants fixed_headway,rule_holding,rule_mpc
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689
+      --aggregate-only
+      --aggregate-logs-dirs "$(find results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
+      --last-k 50
+      --out-dir results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/combined_summary
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
     status: complete_broad_aggressive_palette_screen_no_global_promotion

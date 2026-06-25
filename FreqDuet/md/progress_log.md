@@ -1339,3 +1339,81 @@ shards should launch as node001-node006 capacity frees. We explicitly did not
 move the remaining shards to `jtl110cpu/jtl110cpu2` after the user cancelled
 that routing. External baseline and broad held-out paper matrices are queued as
 next work but were not additionally submitted on top of this saturated batch.
+
+## 2026-06-26 paper-scale V1 ablation result
+
+The 60-seed paper ablation matrix completed and synced cleanly:
+
+```text
+run:
+results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed
+
+completion:
+90 scheduler shards done
+24 configs x 60 seeds = 1440 per-seed rows
+heavy artifact files synced locally: 0
+
+summary outputs:
+combined_summary/freqduet_ablation_per_seed.csv
+combined_summary/freqduet_ablation_summary.csv
+paper_summary/paper_matrix_method_summary.csv
+paper_summary/paper_matrix_paired_deltas.csv
+paper_summary/paper_matrix_summary.json
+```
+
+Overall composite means:
+
+```text
+main        1.5285
+nofreq      1.5365
+rawhistory  1.5339
+allfreq     1.5229
+nopromotion 1.5384
+noleakage   1.8525
+```
+
+Paired deltas are main minus baseline, so negative means main is better:
+
+```text
+overall vs nofreq      -0.0080  CI [-0.0382, +0.0220]
+overall vs rawhistory  -0.0054  CI [-0.0326, +0.0233]
+overall vs allfreq     +0.0056  CI [-0.0189, +0.0325]
+overall vs nopromotion -0.0099  CI [-0.0213, +0.0001]
+overall vs noleakage   -0.3240  CI [-0.3853, -0.2649]
+```
+
+Domain-specific note:
+
+```text
+rushshift vs nofreq      -0.0257  CI [-0.0506, -0.0082]
+rushshift vs rawhistory  -0.0258  CI [-0.0557, -0.0047]
+rushshift vs allfreq     -0.0125  CI [-0.0290, -0.0006]
+rushshift vs nopromotion -0.0327  CI [-0.0643, -0.0087]
+rushshift vs noleakage   -0.3153  CI [-0.3728, -0.2594]
+```
+
+Interpretation: the 60-seed confirmation supports leakage prevention as a
+strong necessary mechanism, and shows the promoted V1 main is robust. It should
+not be written as broad dominance over every internal variant: rawhistory,
+allfreq, and nopromotion remain statistically close overall. The clean paper
+claim is that frequency separation plus leakage control prevents a large failure
+mode and remains competitive/robust, with clear gains in rush-shift stress.
+
+Submitted the external classical 60-seed matrix immediately after the ablation
+aggregation:
+
+```text
+run:
+results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed
+
+protocol:
+4 paper-main domains x 3 baselines x 60 seeds x 200 episodes
+baselines: fixed_headway, rule_holding, rule_mpc
+total runs: 720
+shards: 45 x 16 runs
+
+scheduler:
+t13353-t13397
+status after dispatch: 45 running, 0 queued
+nodes: node001-node006
+```
