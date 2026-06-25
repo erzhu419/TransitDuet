@@ -1193,3 +1193,70 @@ Decision rule once complete:
   creating a domain-specific regression, especially on rushshift/fixed safety;
 - if only one domain benefits, create a domain-best v2 alias and confirm with a
   200ep paired matrix against paper-main v1 and fixed-headway.
+
+Completion result:
+
+```text
+combined summary:
+results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary
+
+palette summary:
+results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/palette_summary
+```
+
+No single global v2/v3 action beats `paper_main_v1` overall. The best global
+alternative is still slightly worse:
+
+```text
+target_-20 / terminalhold45_-20 vs paper_main_v1:
+overall composite delta = +0.001834
+CI = [-0.000678, +0.003993]
+```
+
+The best per-domain screen result is:
+
+```text
+terminal   target_-30
+highnoise  target_-40
+odshift    target_-30
+rushshift  paper_main_v1
+```
+
+As a synthetic domain-best combination, this is only weakly directional:
+
+```text
+domainbest_v2 - paper_main_v1 overall composite delta = -0.003715
+CI = [-0.013513, +0.006523]
+win_rate = 0.65
+```
+
+So v3 is not promoted directly. I added `cfaction_domainbest_v2` configs only
+as a 200ep confirmation candidate:
+
+```text
+F_freqduet_terminal_main_cfaction_domainbest_v2_hiro
+F_freqduet_gen_highnoise_main_cfaction_domainbest_v2_hiro
+F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro
+F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+```
+
+These configs suppress heavy `trip_details.csv` dumping with
+`training.trip_dump_freq: 999999`; the initial v3 local sync accidentally
+pulled `trip_details.csv`/checkpoints, and those local heavy files were deleted
+after diagnostics/history/harness files were synced and aggregated. Remote raw
+artifacts were left intact.
+
+200ep confirmation submitted:
+
+```text
+run:
+results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed
+
+tasks:
+t13216-t13220
+
+protocol:
+4 configs x 20 paired seeds x 200 episodes
+last_k: 50
+upper_warmup_eps: 10
+```

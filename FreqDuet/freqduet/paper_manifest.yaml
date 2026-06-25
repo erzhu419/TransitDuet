@@ -133,6 +133,16 @@ config_sets:
     rushshift:
       main: F_freqduet_gen_rushshift_paper_main_hiro
 
+  cfaction_domainbest_v2_4x1:
+    terminal:
+      cfaction_domainbest_v2: F_freqduet_terminal_main_cfaction_domainbest_v2_hiro
+    highnoise:
+      cfaction_domainbest_v2: F_freqduet_gen_highnoise_main_cfaction_domainbest_v2_hiro
+    odshift:
+      cfaction_domainbest_v2: F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro
+    rushshift:
+      cfaction_domainbest_v2: F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+
   current_vs_cfaction_domainbest_v1_4x2:
     terminal:
       current_main: F_freqduet_terminal_main_hiro
@@ -723,7 +733,7 @@ experiments:
       rushshift: 1.3042
 
   detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed:
-    status: running_alias_final_matrix_after_remote_config_sync
+    status: complete_alias_final_matrix_after_remote_config_sync
     episodes: 200
     last_k: 50
     upper_warmup_eps: 10
@@ -767,10 +777,15 @@ experiments:
       --aggregate-logs-dirs "$(find results_freqduet/detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
       --last-k 50
       --out-dir results_freqduet/detseed_paper_main_cfaction_domainbest_v1_alias_ep200_wu10_4domain_20seed/combined_summary
+    composite_mean_ep200:
+      terminal: 1.473
+      highnoise: 1.812
+      odshift: 1.484
+      rushshift: 1.304
     purpose: current-name paper-main alias rerun to remove table naming ambiguity after v1 promotion
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
-    status: running_broad_aggressive_palette_screen
+    status: complete_broad_aggressive_palette_screen_no_global_promotion
     episodes: 100
     last_k: 50
     upper_warmup_eps: 10
@@ -831,7 +846,73 @@ experiments:
       --per-seed results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
       --out-dir results_freqduet/detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed/palette_summary
       --baseline-action paper_main_v1
+    results:
+      best_single_action_overall: paper_main_v1
+      best_single_action_overall_composite: 1.482562
+      best_single_action_note: >
+        No global v2/v3 action beat paper_main_v1 overall. The closest global
+        alternative was target_-20 / terminalhold45_-20 with composite delta
+        +0.001834 vs paper_main_v1 and CI crossing zero.
+      best_by_domain:
+        terminal: target_-30
+        highnoise: target_-40
+        odshift: target_-30
+        rushshift: paper_main_v1
+      synthetic_domainbest_v2_vs_paper_main_v1:
+        overall_composite_delta_ci95: [-0.003715, -0.013513, 0.006523]
+        terminal_delta_ci95: [-0.000769, -0.017867, 0.016996]
+        highnoise_delta_ci95: [-0.009554, -0.043198, 0.022698]
+        odshift_delta_ci95: [-0.004536, -0.025093, 0.013112]
+        rushshift_delta_ci95: [0.0, 0.0, 0.0]
+        decision: weak_directional_candidate_confirm_with_200ep_not_promoted
+      local_cleanup_note: >
+        Full rsync initially pulled trip_details.csv and checkpoints. Local
+        trip_details/ckpt files were deleted after diagnostics/history/harness
+        files were synced and aggregated; remote raw artifacts were left intact.
     purpose: broad v2/v3 action-palette search for a possible successor to the validated v1 paper-main candidate
+
+  detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed:
+    status: running_200ep_confirmation
+    episodes: 200
+    last_k: 50
+    upper_warmup_eps: 10
+    seeds: paired_seeds_20
+    config_set: cfaction_domainbest_v2_4x1
+    runner: scripts/submit_freqduet_config_matrix_scheduleurm.py
+    result_dir: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed
+    per_seed_csv: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary/freqduet_ablation_summary.csv
+    scheduler_tasks:
+      - t13216
+      - t13217
+      - t13218
+      - t13219
+      - t13220
+    selected_configs:
+      terminal: F_freqduet_terminal_main_cfaction_domainbest_v2_hiro
+      highnoise: F_freqduet_gen_highnoise_main_cfaction_domainbest_v2_hiro
+      odshift: F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro
+      rushshift: F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+    submit_command: >
+      python3 scripts/submit_freqduet_config_matrix_scheduleurm.py
+      --configs F_freqduet_terminal_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_highnoise_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --episodes 200 --last-k 50 --upper-warmup-eps 10
+      --run-name detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed
+      --shard-size 16 --workers 16 --cpu 16 --ram-mb 18432
+      --nodes node001,node002,node003,node004,node005,node006
+      --priority normal --dispatch
+    aggregate_command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_highnoise_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_odshift_main_cfaction_domainbest_v2_hiro,F_freqduet_gen_rushshift_main_cfaction_domainbest_v2_hiro
+      --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026
+      --aggregate-only
+      --aggregate-logs-dirs "$(find results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
+      --last-k 50
+      --out-dir results_freqduet/detseed_cfaction_domainbest_v2_ep200_wu10_4domain_20seed/combined_summary
+    purpose: >
+      Confirm the weak 100ep domain-best v2 direction against the current
+      paper-main v1 alias and fixed-headway before considering any promotion.
 
   heldout_generalization_ep100_wu10:
     status: complete_promoted_current
