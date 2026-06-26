@@ -884,6 +884,34 @@ experiments:
       audits. Does not support MTA APC/onboard-load, full-day historical AVL,
       field deployment outcomes, or any FreqHRL paper result claim.
 
+  route_day_heldout_readiness_v1:
+    status: generated_protocol_and_coverage_audit_not_policy_matrix
+    purpose: route-family and service-day held-out readiness tables for top-journal claim boundaries
+    script: scripts/audit_route_day_heldout_readiness.py
+    result_dir: results_freqduet/route_day_heldout_readiness/v1
+    route_family_coverage_csv: results_freqduet/route_day_heldout_readiness/v1/route_family_coverage.csv
+    service_day_split_protocol_csv: results_freqduet/route_day_heldout_readiness/v1/service_day_split_protocol.csv
+    claim_boundaries_csv: results_freqduet/route_day_heldout_readiness/v1/route_day_claim_boundaries.csv
+    summary_json: results_freqduet/route_day_heldout_readiness/v1/route_day_heldout_readiness_summary.json
+    summary:
+      mta_routes: 378
+      mta_route_families: 27
+      mta_route_stop_rows: 22730
+      mta_vehicle_snapshot_rows: 144
+      mbta_top_routes: 30
+      mbta_route_families: 4
+      route_family_rows: 31
+      protocol_rows: 4
+      claim_boundary_rows: 5
+    command: >
+      python3 scripts/audit_route_day_heldout_readiness.py
+      --out-dir results_freqduet/route_day_heldout_readiness/v1
+    data_boundary: >
+      Supports route-family and service-day held-out protocol design from the
+      offline MTA Bus Time route/stop/vehicle cache and MBTA APC/GTFS evidence.
+      It does not support a completed route/day FreqDuet policy matrix,
+      same-day AFC/APC/AVL/OD field calibration, or observed deployment gains.
+
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
     episodes: 200
@@ -2114,12 +2142,12 @@ experiments:
     summary_csv: results_freqduet/external_baselines_promoted_ep100/combined_summary/external_baselines_summary.csv
 
   transitduet_like_baseline_ep200:
-    status: complete_closest_preserved_transitduet_family
+    status: complete_closest_preserved_transitduet_family_60seed
     episodes: 200
-    last_k: 100
-    seeds: paired_seeds_20
-    source_experiment: promoted_longtrain_ep200_wu10
-    source_per_seed_csv: results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+    last_k: 50
+    seeds: paired_seeds_60
+    source_experiment: paper_ablation_v1_ep200_wu10_4domain_60seed
+    source_per_seed_csv: results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_per_seed.csv
     baseline_method: transitduet_like_nofreq_hiro
     boundary: closest preserved TransitDuet-family control inside the FreqDuet runner with frequency decomposition disabled; not the unmodified original TransitDuet repository
     builder: scripts/build_freqduet_transitduet_baseline.py
@@ -2128,16 +2156,16 @@ experiments:
     summary_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_summary.csv
     paired_deltas_csv: results_freqduet/transitduet_like_baseline_ep200/transitduet_like_paired_deltas.csv
     result_summary:
-      rows: 160
-      expected_rows: 160
+      rows: 480
+      expected_rows: 480
       missing_rows: 0
-      overall_delta_main_minus_transitduet_like: -0.0719
-      overall_delta_ci95: [-0.1322, -0.0266]
-      overall_main_win_rate: 0.700
-      conclusion: promoted FreqDuet main beats the closest preserved no-frequency TransitDuet-family baseline in the 200ep paired matrix; original unmodified TransitDuet remains out of scope unless restored separately.
+      overall_delta_main_minus_transitduet_like: -0.0080
+      overall_delta_ci95: [-0.0382, 0.0220]
+      overall_main_win_rate: 0.600
+      conclusion: paper-main V1 is statistically close to the closest preserved no-frequency TransitDuet-family baseline in the 60-seed 200ep paired matrix, with a significant rushshift advantage but no overall dominance claim. Original unmodified TransitDuet remains out of scope unless restored separately.
     command: >
       python3 scripts/build_freqduet_transitduet_baseline.py
-      --source-per-seed results_freqduet/paper_longtrain_promoted_ep200_wu10/combined_summary/freqduet_ablation_per_seed.csv
+      --source-per-seed results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_per_seed.csv
       --out-dir results_freqduet/transitduet_like_baseline_ep200
 
   sumorl_style_holdrl_baseline_ep100_wu10:
@@ -3877,6 +3905,18 @@ manuscript_notes:
     status: documented_executable_dispatch_done_value_layer_open
     path: ../md/phase4_scope_decision.md
     purpose: Phase 4 terminal dispatch scope boundary and negative heuristic evidence
+  paper_claim_scope:
+    status: drafted_claim_evidence_boundary
+    path: ../md/paper_claim_scope.md
+    purpose: safe top-journal claim language and terminology ledger
+  data_availability_reproducibility:
+    status: drafted_data_availability_and_reproducibility_plan
+    path: ../md/data_availability_reproducibility.md
+    purpose: paper-ready Data Availability, repository actions, and FAIR risk flags
+  paper_figure_table_plan:
+    status: drafted_main_panel_and_table_plan
+    path: ../md/paper_figure_table_plan.md
+    purpose: final main-table/main-figure curation plan and claim-evidence map
 
 paper_scripts:
   - runner_v3.py
@@ -3903,6 +3943,8 @@ paper_scripts:
   - scripts/audit_external_afc_apc_profiles.py
   - scripts/audit_external_od_onboard_truth.py
   - scripts/audit_mbta_same_network_calibration.py
+  - scripts/audit_route_day_heldout_readiness.py
+  - scripts/curate_freqduet_paper_panels.py
   - scripts/download_mta_bus_time_offline_cache.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
@@ -3911,25 +3953,58 @@ paper_scripts:
   - scripts/sync_freqduet_broad_generalization.py
   - scripts/audit_demand_trace.py
 
+paper_curation:
+  current:
+    status: generated_zero_missing
+    required: true
+    script: scripts/curate_freqduet_paper_panels.py
+    out_dir: results_freqduet/paper_curation/current
+    command: >
+      python3 scripts/curate_freqduet_paper_panels.py
+      --out-dir results_freqduet/paper_curation/current
+    build_audit:
+      tables: 6
+      figures: 7
+      missing: 0
+    outputs:
+      - paper_table_manifest.csv
+      - paper_panel_manifest.csv
+      - paper_curation_manifest.json
+      - claim_evidence_map.md
+      - main_tables/table1_external_classical_paired_deltas.csv
+      - main_tables/table2_internal_ablation_paired_deltas.csv
+      - main_tables/table3_broad_generalization_paired_deltas.csv
+      - main_tables/table4_route_family_coverage.csv
+      - supplementary_tables/edtable1_transitduet_like_paired_deltas.csv
+      - supplementary_tables/edtable2_route_day_claim_boundaries.csv
+      - main_figures/fig1a_decomposer_synthetic_components.png
+      - main_figures/fig1b_decomposer_trace_alignment.png
+      - main_figures/fig2a_mechanism_domain_method_bars.png
+      - main_figures/fig2b_hf_energy_to_holding.png
+      - main_figures/fig3a_external_afc_apc_profile_overlay.png
+      - main_figures/fig3b_mbta_route111_apc_load_profile.png
+      - supplementary_figures/edfig1_action_state_spectrum.png
+
 paper_packages:
   current:
-    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_same_network_and_mta_bus_time_sources
+    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_route_day_protocol_and_curation
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 22:53 CST
-      copied_artifacts: 311
+      checked_at: 2026-06-26 23:22 CST
+      copied_artifacts: 339
       missing_artifacts: 0
       package_size: 167M
-      tables: 47
+      tables: 53
       figure_files: 71
       config_files: 136
-      scripts: 31
-      manuscript_notes: 4
+      scripts: 33
+      manuscript_notes: 7
       data_source_files: 20
+      curation_files: 17
       appendix_files: 1
     canonical_tables:
       - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
@@ -3968,6 +4043,12 @@ paper_packages:
       - tables/mta_bus_time_route_stop_sequences.csv
       - tables/mta_bus_time_vehicle_snapshot_meta.csv
       - tables/mta_bus_time_vehicle_snapshots.csv
+      - tables/route_family_coverage.csv
+      - tables/service_day_split_protocol.csv
+      - tables/route_day_claim_boundaries.csv
+      - tables/transitduet_like_per_seed.csv
+      - tables/transitduet_like_summary.csv
+      - tables/transitduet_like_paired_deltas.csv
     required_figures:
       - figures/external_afc_apc_profile_audit_v1
       - figures/external_od_onboard_truth_audit_v1
@@ -3985,7 +4066,9 @@ paper_packages:
       data-only public AFC/APC demand-profile evidence plus separate public
       OD-estimate/onboard-load truth-source coverage plus same-agency MBTA
       APC-to-GTFS route/stop calibration readiness evidence and FreqDuet-only
-      MTA Bus Time API offline cache tables.
+      MTA Bus Time API offline cache tables. Route/day held-out readiness and
+      curated paper panel manifests are included, but the package still does
+      not claim completed route-family/service-day policy validation.
     outputs:
       - README.md
       - package_manifest.json

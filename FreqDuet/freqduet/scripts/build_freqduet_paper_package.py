@@ -37,6 +37,26 @@ def copy_file(src: Path, dst: Path, copied: list[dict], missing: list[str]) -> N
     copied.append({"src": str(src), "dst": str(dst)})
 
 
+def copy_tree_files(
+    src_dir: Path,
+    dst_dir: Path,
+    copied: list[dict],
+    missing: list[str],
+    optional: bool = False,
+) -> None:
+    if not src_dir.exists():
+        if not optional:
+            missing.append(str(src_dir))
+        return
+    files = sorted(path for path in src_dir.rglob("*") if path.is_file())
+    if not files:
+        if not optional:
+            missing.append(str(src_dir))
+        return
+    for src in files:
+        copy_file(src, dst_dir / src.relative_to(src_dir), copied, missing)
+
+
 def copy_glob(src_dir: Path, pattern: str, dst_dir: Path,
               copied: list[dict], missing: list[str],
               optional: bool = False) -> None:
@@ -351,6 +371,16 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          mta_bus_time.get("vehicle_snapshots_csv")),
     ])
 
+    route_day = experiment(manifest, "route_day_heldout_readiness_v1")
+    table_specs.extend([
+        ("route_family_coverage.csv",
+         route_day.get("route_family_coverage_csv")),
+        ("service_day_split_protocol.csv",
+         route_day.get("service_day_split_protocol_csv")),
+        ("route_day_claim_boundaries.csv",
+         route_day.get("claim_boundaries_csv")),
+    ])
+
     for name, src in table_specs:
         required = name.startswith("paper_")
         if not src:
@@ -442,6 +472,23 @@ def copy_paper_scripts(manifest: dict, out_dir: Path,
                        copied: list[dict], missing: list[str]) -> None:
     for item in manifest.get("paper_scripts", []):
         copy_file(rel(item), out_dir / "scripts" / Path(item).name, copied, missing)
+
+
+def copy_paper_curation(manifest: dict, out_dir: Path,
+                        copied: list[dict], missing: list[str]) -> None:
+    for key, item in manifest.get("paper_curation", {}).items():
+        src = item.get("out_dir")
+        if not src:
+            if item.get("required", False):
+                missing.append(f"manifest paper curation source missing for {key}")
+            continue
+        copy_tree_files(
+            rel(src),
+            out_dir / "curation" / key,
+            copied,
+            missing,
+            optional=not bool(item.get("required", False)),
+        )
 
 
 def copy_data_sources(manifest: dict, out_dir: Path,
@@ -561,6 +608,7 @@ def write_readme(out_dir: Path, manifest: dict, copied: list[dict],
         "- `configs/`: generated paper config snapshots",
         "- `scripts/`: paper-facing run, sync, summarize, and plotting scripts",
         "- `manuscript_notes/`: method framing and realism/data evidence notes",
+        "- `curation/`: selected main-table/main-figure manifests and copied panels",
         "- `appendix/negative_results_appendix.md`: failed candidate summary",
         "- `package_manifest.json`: copied and missing artifacts",
         "",
@@ -599,6 +647,7 @@ def main() -> None:
     copy_config_snapshots(manifest, out_dir, copied, missing)
     copy_data_sources(manifest, out_dir, copied, missing)
     copy_paper_scripts(manifest, out_dir, copied, missing)
+    copy_paper_curation(manifest, out_dir, copied, missing)
     build_negative_appendix(manifest, out_dir, copied, missing)
     write_readme(out_dir, manifest, copied, missing)
 

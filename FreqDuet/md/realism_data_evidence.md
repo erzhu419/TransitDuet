@@ -50,7 +50,7 @@ the MTA API cache is not FreqHRL paper result data.
 | MBTA derived SUMO APC/AVL full-day replay | Present and packaged as pointer/evidence | `results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_source_coverage.csv`; CFCMT `sumo_apc_avl_benchmark/sumo_full_day/mbta_all`. | Supports semi-real full-day APC/AVL replay evidence from MBTA-derived H2Oplus/SUMO inputs. | Derived simulation, not observed field AVL/control-loop outcome. |
 | MTA Bus Time API offline cache | Present and packaged | `data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z`; `scripts/download_mta_bus_time_offline_cache.py`. | Supports offline New York bus route/stop/sequence geometry and route-filtered SIRI vehicle snapshots. | Not MTA APC/onboard-load, not full-day historical AVL, not FreqDuet field outcome, and not FreqHRL paper result data. |
 | Same-network real AFC/APC/AVL/OD field calibration | Not yet present | No FreqDuet-specific multi-day same-route OD/onboard-load/AVL calibration or real-agency control replay. | Cannot claim field deployment validation. | Remaining top-journal realism gap. |
-| Multi-day / route-family held-out profiles | Not packaged | Current matrix uses demand-noise, OD-shift, and rush-shift perturbations from one OD table. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
+| Multi-day / route-family held-out profiles | Protocol packaged, policy matrix not run | `results_freqduet/route_day_heldout_readiness/v1`; MTA route-family coverage, MBTA APC day-type split protocol, Route 111 case profile. | Can be framed as route/day held-out readiness and explicit next-experiment design. | Still not a completed route-family/service-day FreqDuet policy evaluation. |
 | Dwell, fleet, service stochasticity matrix | Partly supported in code, not packaged as a matrix | `route_sigma`, elastic fleet code paths exist; no final robustness table found. | Mention only as simulator parameters unless run. | Needs a reproducible matrix before paper claims. |
 
 ## What Can Be Claimed Now
@@ -104,10 +104,12 @@ Do not claim any of the following until new artifacts exist:
 
 2. Service-day held-out profiles
 
-   Build `paper_generalization_dayheldout` configs that fit the harmonic prior
-   on one set of service-day profiles and evaluate on separate day profiles. If
-   real days are unavailable, create clearly labelled semi-real day profiles
-   derived from the OD table with fixed seeds and documented perturbation rules.
+   The readiness audit now specifies MBTA APC day-type and MTA route-family
+   split protocols under `results_freqduet/route_day_heldout_readiness/v1`.
+   The next stronger step is to convert those protocols into executable
+   `paper_generalization_dayheldout` configs that fit the harmonic prior on one
+   service-day or route-family set and evaluate on separate held-out profiles.
+   Until that matrix exists, claim only protocol readiness.
 
 3. Broader robustness matrix
 

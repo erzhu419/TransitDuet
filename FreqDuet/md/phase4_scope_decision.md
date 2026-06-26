@@ -1,6 +1,6 @@
 # Phase 4 Terminal Dispatch Scope Decision
 
-Last updated: 2026-06-13 CST
+Last updated: 2026-06-26 CST
 
 ## Decision
 
@@ -33,6 +33,13 @@ validated implementation now covers the staged path as follows:
 The paper should therefore claim bounded executable terminal-dispatch
 timetable control, while making clear that a learned first-stop/terminal value
 policy is not yet promoted.
+
+2026-06-26 scope update: the final paper evidence should use the conservative
+60-seed wording. Paper-main V1 is statistically tied with strong fixed-headway
+and significantly better than rule-holding/rule-MPC, but learned
+first-stop/terminal launch value control is still not validated. Do not use
+Phase 4 language to imply real terminal launch deployment or same-day field
+calibration.
 
 ## Why Not Promote A Heuristic Terminal-Value Patch
 

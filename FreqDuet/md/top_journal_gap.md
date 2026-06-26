@@ -33,6 +33,10 @@ working prototype. The current promoted line includes:
   evidence;
 - a FreqDuet-only MTA Bus Time API offline cache for route/stop/vehicle snapshot
   evidence, explicitly separated from FreqHRL paper results;
+- a route/day held-out readiness audit with MTA route-family coverage, MBTA APC
+  day-type split protocol, and explicit claim boundaries;
+- a concise paper curation bundle that selects main tables, main figures,
+  extended-data items, and claim-evidence mappings;
 - a canonical `results_freqduet/paper_package/current` bundle with no missing
   required artifacts.
 
@@ -40,12 +44,14 @@ Canonical paper package status:
 
 ```text
 package: results_freqduet/paper_package/current
-copied artifacts: 311
+copied artifacts: 339
 missing artifacts: 0
-tables: 47
+tables: 53
 figure/source files: 71
 config files: 136
-scripts: 31
+scripts: 33
+manuscript notes: 7
+curation files: 17
 ```
 
 Current main evidence summary:
@@ -78,13 +84,16 @@ Remaining top-journal non-text gaps are now narrower:
   truth-source coverage, MBTA same-agency APC-to-static-GTFS route/stop
   calibration-readiness evidence, local MBTA live GTFS-RT snapshots, and
   derived MBTA SUMO APC/AVL replay evidence are now present; MTA Bus Time API
-  route/stop/vehicle snapshot data are also cached offline under FreqDuet, but
-  exact same-day historical AFC/APC/AVL/OD calibration, service-day splits, and
-  route-family validation are still absent locally;
-- preserved original TransitDuet or a closest locked TransitDuet baseline is
-  still useful if reviewers demand a lineage baseline;
-- final figure-panel selection and manuscript table curation still need to turn
-  the package into a concise paper presentation;
+  route/stop/vehicle snapshot data are also cached offline under FreqDuet, and
+  route/day held-out protocols are packaged, but exact same-day historical
+  AFC/APC/AVL/OD calibration and completed route-family/service-day policy
+  matrices are still absent locally;
+- the closest locked TransitDuet-family baseline has been rebuilt from the
+  canonical 60-seed paper matrix; the unmodified original TransitDuet remains
+  out of scope unless restored separately;
+- final figure-panel selection and manuscript table curation are now scripted
+  under `results_freqduet/paper_curation/current`, but final visual layout for
+  the manuscript still needs human panel design;
 - full actual terminal-launch/first-stop dispatch remains a scoped future-work
   item unless implemented and validated separately.
 
@@ -1317,10 +1326,17 @@ Done means:
 
 ### 12. Paper Tables, Figures, And Negative Results
 
-Status: `[x]` current package assembled; manuscript curation pending
+Status: `[x]` current package assembled; manuscript curation scripted
 
 The code has many raw results; the current paper-facing package is now
-assembled, with final manuscript curation still pending.
+assembled, and a concise main-table/main-figure curation bundle is generated
+under `results_freqduet/paper_curation/current`.
+
+2026-06-26 curation update: the current package rebuild reports
+`copied=339 missing=0`, with 53 table CSVs, 71 figure/source-data files, 136
+config snapshots, 33 scripts, 7 manuscript notes, and 17 curation files. The
+curation bundle selects 4 main tables, 3 main figure groups, 2 extended-data
+tables, 1 extended-data figure, and a claim-evidence map.
 
 2026-06-08 update: `scripts/build_freqduet_paper_package.py` now assembles the
 current paper bundle at `results_freqduet/paper_package/current`. The package
