@@ -4,15 +4,18 @@ Last updated: 2026-06-26 CST
 
 ## Bottom Line
 
-FreqDuet currently has a credible simulation evidence package but not yet a
-top-transport-journal calibration package. The simulator is not toy-random: it
+FreqDuet currently has a credible simulation evidence package and a newly added
+public AFC/APC demand-profile audit, but not yet a full field-calibration
+package. The simulator is not toy-random: it
 loads a historical OD spreadsheet, station data, route data, and timetable data,
 then generates passenger arrivals from time-varying OD intensities. The current
 paper package also includes held-out demand perturbations, trace logs, external
-classical baselines, decomposer validation, and mechanism figures. However, no
-local AFC/APC dataset, service-day family split, or independent real-demand
-calibration report was found in the FreqDuet tree. This must be stated as a
-remaining realism gap unless those data are added later.
+classical baselines, decomposer validation, and mechanism figures. The AFC/APC
+addition is intentionally data-only: public MTA AFC station-entry profiles and
+Halifax APC route-boarding profiles are copied under the FreqDuet tree and
+audited against the local OD demand shape. This supports external passenger-count
+profile evidence, not exact AFC/APC OD geometry, onboard-load calibration, or
+observed field deployment outcomes.
 
 ## Current Evidence
 
@@ -28,7 +31,8 @@ remaining realism gap unless those data are added later.
 | Decomposer validation | Present and packaged | `results_freqduet/paper_package/current/figures/decomposer_validation_paper_v1_60seed`. | Supports causal LF/HF separation and trace-alignment claims. | Final manuscript must select panels and explain source traces. |
 | Mechanism figures | Present and packaged | `results_freqduet/paper_package/current/figures/mechanism_paper_ablation_v1_ep200_60seed` and `figures/mechanism_paper_v1_trace_alignment`. | Supports HF response, lower drift, promotion, leakage failure, and action spectrum. | Mechanism evidence does not replace real calibration. |
 | External classical baselines | Present and packaged | `results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed`. | Adds fixed-headway, rule-holding, and simple MPC/forecast comparators. | Preserved TransitDuet and external RL baselines remain open. |
-| Real AFC/APC calibration | Not found locally | No `afc`, `apc`, `calibration`, or real-service data file found under FreqDuet. | Cannot be claimed. | Major top-journal realism gap. |
+| Public AFC/APC demand-profile evidence | Present and packaged | `data/external_afc_apc/`; `results_freqduet/real_afc_apc_profile_audit/v1`; `scripts/audit_external_afc_apc_profiles.py`. | Supports "public AFC/APC demand-profile evidence" and profile-shape realism audit. | Does not provide exact OD geometry, onboard load, alighting, or field deployment outcomes. |
+| Full real AFC/APC calibration | Not yet present | No FreqDuet-specific multi-day AFC/APC OD/onboard-load calibration or real-agency control replay. | Cannot claim field calibration or deployment validation. | Remaining top-journal realism gap. |
 | Multi-day / route-family held-out profiles | Not packaged | Current matrix uses demand-noise, OD-shift, and rush-shift perturbations from one OD table. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
 | Dwell, fleet, service stochasticity matrix | Partly supported in code, not packaged as a matrix | `route_sigma`, elastic fleet code paths exist; no final robustness table found. | Mention only as simulator parameters unless run. | Needs a reproducible matrix before paper claims. |
 
@@ -42,7 +46,10 @@ tables and stochastic passenger arrivals. The main result is stress-tested in a
 rush-timing scenarios. The decomposer is also audited on logged simulator demand
 traces and on synthetic LF/HF truth, and the final package preserves seed-level
 paired results, source data for figures, exact configs, scripts, and negative
-candidate screens.
+candidate screens. A data-only external profile audit adds public MTA AFC
+station-entry and Halifax APC route-boarding count profiles to document that the
+paper package includes real passenger-count demand shapes, while keeping the
+claim short of OD/onboard-load calibration.
 
 This claim is defensible because every part maps to a current artifact.
 
@@ -50,7 +57,8 @@ This claim is defensible because every part maps to a current artifact.
 
 Do not claim any of the following until new artifacts exist:
 
-- "Calibrated on AFC/APC data" or "validated on real passenger-card data".
+- "Calibrated on exact AFC/APC OD data" or "validated in real agency deployment".
+- "Observed wait-time improvement on real AFC/APC field operations".
 - "Generalizes across multiple real routes or days".
 - "Robust to all fleet sizes, dwell distributions, and arrival processes".
 - "Dominates fixed-headway in every operating regime".
@@ -60,11 +68,10 @@ Do not claim any of the following until new artifacts exist:
 
 1. Real-demand calibration audit
 
-   If AFC/APC or AVL/APC data are available, add them under a documented
-   FreqDuet data path, not in the original TransitDuet tree. Create a calibration
-   script that compares hourly OD totals, station boarding totals, peak timing,
-   headway distribution, dwell time, and wait-time proxies against simulator
-   outputs.
+   The first data-only AFC/APC profile audit is now present. The next stronger
+   step is a true calibration script that compares hourly OD totals, station
+   boarding totals, peak timing, headway distribution, dwell time, and wait-time
+   proxies against simulator outputs over multiple service days.
 
 2. Service-day held-out profiles
 
@@ -108,8 +115,11 @@ station, route, timetable, and passenger OD tables. Passenger arrivals are
 sampled from time-varying OD intensities, and robustness is evaluated under
 held-out demand noise, OD-profile perturbation, and rush-timing shifts. These
 experiments test the causal frequency-allocation mechanism under controlled
-exogenous demand shifts. They do not constitute field deployment validation; a
-multi-day AFC/APC calibration study and actual terminal-dispatch execution are
-left for future work."
+exogenous demand shifts. To ground the demand-shape assumptions, we include a
+data-only audit of public MTA AFC station-entry profiles and Halifax APC
+route-boarding profiles. These data support external passenger-count profile
+evidence, but they do not constitute exact OD/onboard-load calibration or field
+deployment validation; a multi-day AFC/APC calibration study and actual
+terminal-dispatch execution remain future work."
 
 This is strong enough for the current evidence and avoids overclaiming.

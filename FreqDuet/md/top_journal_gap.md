@@ -69,8 +69,9 @@ fixed-headway or every internal ablation.
 
 Remaining top-journal non-text gaps are now narrower:
 
-- real AFC/APC or AVL/APC calibration, multi-day held-out profiles, and route
-  family validation are still absent locally;
+- public AFC/APC demand-profile evidence is now present as a data-only audit,
+  but exact AFC/APC OD/onboard-load calibration, AVL/APC service-day splits,
+  and route-family validation are still absent locally;
 - preserved original TransitDuet or a closest locked TransitDuet baseline is
   still useful if reviewers demand a lineage baseline;
 - final figure-panel selection and manuscript table curation still need to turn
@@ -1282,9 +1283,15 @@ evidence supports an OD-driven simulator claim: `env/sim.py` reads
 `data/passenger_OD.xlsx`, station/route/timetable spreadsheets are used by the
 environment, the harmonic prior is fit from the historical OD table, and the
 paper package includes highnoise, odshift, rushshift, trace, decomposer,
-mechanism, and external classical baseline artifacts. No local AFC/APC
-calibration dataset or multi-day real profile split was found, so this remains a
-realism gap rather than a closed paper claim.
+mechanism, and external classical baseline artifacts.
+
+2026-06-26 update: added a data-only public AFC/APC profile audit under
+`FreqDuet/freqduet/data/external_afc_apc/` and
+`FreqDuet/freqduet/results_freqduet/real_afc_apc_profile_audit/v1`. This closes
+the narrow "no local AFC/APC profile evidence" gap, but not the stronger
+field-calibration gap: exact AFC/APC OD geometry, onboard-load calibration,
+multi-day real service splits, and observed agency wait-time outcomes are still
+not claimed.
 
 Done means:
 

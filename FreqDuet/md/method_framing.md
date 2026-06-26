@@ -1,6 +1,6 @@
 # FreqDuet Method Framing
 
-Last updated: 2026-06-08 CST
+Last updated: 2026-06-26 CST
 
 ## Core Argument
 
@@ -13,9 +13,11 @@ cross-frequency correction through promotion and leakage/drift control. The
 current evidence supports this argument in a simulated transit corridor with a
 historical OD spreadsheet, held-out demand perturbations, paired long-training
 ablations, decomposer audits, mechanism figures, and documented negative repair
-screens. The current boundary is also explicit: FreqDuet is validated as a
-target-headway executable timetable method, not yet as a full actual-terminal
-launch / first-stop holding dispatch system calibrated on external AFC/APC data.
+screens. A data-only public AFC/APC profile audit now adds external
+passenger-count demand-shape evidence. The current boundary is also explicit:
+FreqDuet is validated as a target-headway executable timetable method, not yet
+as a full actual-terminal launch / first-stop holding dispatch system calibrated
+on exact external AFC/APC OD or onboard-load data.
 
 ## Terminology Ledger
 
@@ -169,9 +171,10 @@ The current method should not overclaim the following:
 - Full Phase 4 terminal dispatch is not validated. The promoted method controls
   target-headway / executable timetable behavior; actual launch-time and
   first-stop holding remain a future or appendix scope.
-- Real AFC/APC calibration is not present in the local FreqDuet evidence tree.
-  The simulator uses a historical OD spreadsheet, but the provenance and
-  calibration quality still need to be documented.
+- Public AFC/APC demand-profile evidence is present as a data-only audit, but
+  full AFC/APC OD geometry, onboard-load calibration, and agency deployment
+  validation are not present. The simulator uses a historical OD spreadsheet,
+  but the provenance and calibration quality still need to be documented.
 - Generalization covers three held-out perturbation families, not a full route,
   fleet, dwell, and service-day matrix.
 - Fixed-headway remains a serious baseline. This should be reported explicitly

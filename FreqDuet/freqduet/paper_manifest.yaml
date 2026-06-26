@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-25
+version: 2026-06-26
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
@@ -153,6 +153,19 @@ metrics:
     - cf_action_selector_delta_mean
     - cf_action_selector_delta_std
     - cf_action_selector_confidence_mean
+
+data_sources:
+  external_afc_apc_profile_v1:
+    status: copied_public_profile_cache_data_only
+    purpose: public AFC/APC demand-profile evidence for FreqDuet realism audit
+    files:
+      - data/external_afc_apc/README.md
+      - data/external_afc_apc/public_afc_mta/hourly_ridership.csv
+      - data/external_afc_apc/public_apc_halifax/route_boardings.csv
+    boundary: >
+      Data-only reuse of public AFC/APC cache files. The separate transit_hrl
+      algorithm implementation, checkpoints, and result claims are not imported
+      into FreqDuet.
 
 config_sets:
   current_longtrain_4x6:
@@ -721,6 +734,24 @@ config_sets:
       histaux6eg06upper: F_freqduet_gen_rushshift_main_histaux6eg06upper_hiro
 
 experiments:
+  external_afc_apc_profile_audit_v1:
+    status: generated_data_only_profile_audit
+    purpose: external public AFC/APC demand-profile coverage and profile-shape audit for the paper realism package
+    script: scripts/audit_external_afc_apc_profiles.py
+    result_dir: results_freqduet/real_afc_apc_profile_audit/v1
+    source_coverage_csv: results_freqduet/real_afc_apc_profile_audit/v1/external_afc_apc_source_coverage.csv
+    aggregate_profile_csv: results_freqduet/real_afc_apc_profile_audit/v1/external_afc_apc_aggregate_profile.csv
+    profile_alignment_csv: results_freqduet/real_afc_apc_profile_audit/v1/external_afc_apc_profile_alignment.csv
+    summary_json: results_freqduet/real_afc_apc_profile_audit/v1/summary.json
+    figure: results_freqduet/real_afc_apc_profile_audit/v1/external_afc_apc_profile_overlay.png
+    command: >
+      PYTHONPATH=. python3 scripts/audit_external_afc_apc_profiles.py
+      --out-dir results_freqduet/real_afc_apc_profile_audit/v1
+    data_boundary: >
+      Supports public AFC/APC demand-profile evidence only. Does not support
+      exact OD geometry, onboard-load calibration, agency deployment, or
+      observed field wait-time improvement claims.
+
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
     episodes: 200
@@ -3443,6 +3474,22 @@ experiments:
     note: LF-safe low-forecast gate did not repair rushshift and worsened overall composite by +0.0826 CI [+0.0605,+0.1044], do not promote
 
 figures:
+  external_afc_apc_profile_audit_v1:
+    status: generated_data_only_profile_audit
+    required: true
+    script: scripts/audit_external_afc_apc_profiles.py
+    out_dir: results_freqduet/real_afc_apc_profile_audit/v1
+    command: >
+      PYTHONPATH=. python3 scripts/audit_external_afc_apc_profiles.py
+      --out-dir results_freqduet/real_afc_apc_profile_audit/v1
+    outputs:
+      - external_afc_apc_profile_overlay
+      - external_afc_apc_source_coverage.csv
+      - external_afc_apc_aggregate_profile.csv
+      - external_afc_apc_profile_alignment.csv
+      - external_afc_apc_profile_audit.md
+      - summary.json
+
   decomposer_validation_paper_v1_60seed:
     status: generated_with_trace_alignment
     required: true
@@ -3645,7 +3692,7 @@ manuscript_notes:
     path: ../md/method_framing.md
     purpose: method and discussion framing for frequency-separated HRL
   realism_data_evidence:
-    status: audit_complete_real_calibration_open
+    status: audit_complete_public_afc_apc_profile_added
     path: ../md/realism_data_evidence.md
     purpose: realism, data, and calibration evidence boundary
   phase4_scope_decision:
@@ -3675,6 +3722,7 @@ paper_scripts:
   - scripts/fit_freqduet_snapshot_value_model.py
   - scripts/make_freqduet_decomposer_figures.py
   - scripts/make_freqduet_mechanism_figures.py
+  - scripts/audit_external_afc_apc_profiles.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
@@ -3684,22 +3732,23 @@ paper_scripts:
 
 paper_packages:
   current:
-    status: generated_current_60seed_canonical_trace_aligned
+    status: generated_current_60seed_canonical_trace_aligned_with_external_afc_apc_profiles
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 19:15 CST
-      copied_artifacts: 234
+      checked_at: 2026-06-26 20:40 CST
+      copied_artifacts: 247
       missing_artifacts: 0
       package_size: 155M
-      tables: 24
-      figure_files: 42
+      tables: 27
+      figure_files: 48
       config_files: 136
-      scripts: 27
+      scripts: 28
       manuscript_notes: 3
+      data_source_files: 3
       appendix_files: 1
     canonical_tables:
       - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
@@ -3717,7 +3766,11 @@ paper_packages:
       - tables/paper_trace_diag_v1_4domain_3seed_per_seed.csv
       - tables/paper_trace_diag_v1_4domain_3seed_summary.csv
       - tables/paper_trace_diag_v1_4domain_3seed_audit.csv
+      - tables/external_afc_apc_source_coverage.csv
+      - tables/external_afc_apc_aggregate_profile.csv
+      - tables/external_afc_apc_profile_alignment.csv
     required_figures:
+      - figures/external_afc_apc_profile_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment
@@ -3727,7 +3780,8 @@ paper_packages:
       failed candidate artifacts are copied only if present and are no longer
       treated as required package artifacts. The package also includes
       trace-enabled paper-main diagnostics and source data for decomposer
-      trace alignment and HF residual-to-holding/wait mechanism plots.
+      trace alignment, HF residual-to-holding/wait mechanism plots, and
+      data-only public AFC/APC demand-profile evidence.
     outputs:
       - README.md
       - package_manifest.json
@@ -3747,10 +3801,15 @@ paper_packages:
       - tables/paper_trace_diag_v1_4domain_3seed_audit.csv
       - tables/paper_trace_diag_v1_4domain_3seed_per_seed.csv
       - tables/paper_trace_diag_v1_4domain_3seed_summary.csv
+      - tables/external_afc_apc_source_coverage.csv
+      - tables/external_afc_apc_aggregate_profile.csv
+      - tables/external_afc_apc_profile_alignment.csv
       - configs/paper_generalization
       - configs/paper_ablation_v1_4x6
       - configs/paper_main_cfaction_domainbest_v1_4x1
       - configs/paper_main_trace_v1_4x1
+      - data_sources/external_afc_apc
+      - figures/external_afc_apc_profile_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment

@@ -289,6 +289,16 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          if sumorl_rawhist.get("comparison_dir_vs_plain_sumorl") else None),
     ])
 
+    real_profiles = experiment(manifest, "external_afc_apc_profile_audit_v1")
+    table_specs.extend([
+        ("external_afc_apc_source_coverage.csv",
+         real_profiles.get("source_coverage_csv")),
+        ("external_afc_apc_aggregate_profile.csv",
+         real_profiles.get("aggregate_profile_csv")),
+        ("external_afc_apc_profile_alignment.csv",
+         real_profiles.get("profile_alignment_csv")),
+    ])
+
     for name, src in table_specs:
         required = name.startswith("paper_")
         if not src:
@@ -380,6 +390,19 @@ def copy_paper_scripts(manifest: dict, out_dir: Path,
                        copied: list[dict], missing: list[str]) -> None:
     for item in manifest.get("paper_scripts", []):
         copy_file(rel(item), out_dir / "scripts" / Path(item).name, copied, missing)
+
+
+def copy_data_sources(manifest: dict, out_dir: Path,
+                      copied: list[dict], missing: list[str]) -> None:
+    for key, item in manifest.get("data_sources", {}).items():
+        for src in item.get("files", []):
+            src_path = rel(src)
+            src_rel = Path(src)
+            if src_rel.parts and src_rel.parts[0] == "data":
+                dst_rel = Path(*src_rel.parts[1:])
+            else:
+                dst_rel = Path(key) / src_rel.name
+            copy_file(src_path, out_dir / "data_sources" / dst_rel, copied, missing)
 
 
 def _fmt(value: float) -> str:
@@ -482,6 +505,7 @@ def write_readme(out_dir: Path, manifest: dict, copied: list[dict],
         "- canonical 60-seed paper tables use the `paper_*_60seed_*.csv` names",
         "- `tables/`: final seed-level and summary CSVs",
         "- `figures/`: decomposer and mechanism figures with source data",
+        "- `data_sources/`: small public AFC/APC profile caches and README files",
         "- `configs/`: generated paper config snapshots",
         "- `scripts/`: paper-facing run, sync, summarize, and plotting scripts",
         "- `manuscript_notes/`: method framing and realism/data evidence notes",
@@ -521,6 +545,7 @@ def main() -> None:
     copy_figures(manifest, out_dir, copied, missing)
     copy_manuscript_notes(manifest, out_dir, copied, missing)
     copy_config_snapshots(manifest, out_dir, copied, missing)
+    copy_data_sources(manifest, out_dir, copied, missing)
     copy_paper_scripts(manifest, out_dir, copied, missing)
     build_negative_appendix(manifest, out_dir, copied, missing)
     write_readme(out_dir, manifest, copied, missing)
