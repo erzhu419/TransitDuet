@@ -822,15 +822,18 @@ experiments:
       supported:
         - same_agency_apc_static_gtfs_route_stop_match
         - route111_apc_load_calibration_targets
+        - mbta_live_gtfsrt_avl_snapshot
+        - mbta_sumo_apc_avl_full_day_replay
       not_supported:
         - same_period_static_schedule_alignment
-        - same_period_avl_arrival_departure_events
+        - same_period_historical_avl_arrival_departure_events
         - same_network_od_apc_avl_control_loop
     data_boundary: >
       Supports same-agency MBTA APC-to-static-GTFS structural calibration and
-      Route 111 public APC load targets. Does not support exact same-day
-      historical AVL, route-level OD, field deployment, or observed FreqDuet
-      wait-time improvements.
+      Route 111 public APC load targets, local live GTFS-RT AVL/occupancy
+      snapshots, and derived full-day SUMO APC/AVL replay evidence. Does not
+      support exact Fall 2025 same-day historical AVL, route-level OD, field
+      deployment, or observed FreqDuet wait-time improvements.
 
   current_longtrain_ep200_wu10:
     status: complete_predriftcost

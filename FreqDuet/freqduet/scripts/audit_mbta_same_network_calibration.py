@@ -34,6 +34,33 @@ DEFAULT_MBTA_GTFS_DIR = Path(os.environ.get(
     "FREQDUET_MBTA_GTFS_DIR",
     "/home/erzhu419/mine_code/CFCMT/H2Oplus/downloads/open_transit/mbta/gtfs",
 ))
+DEFAULT_MBTA_LIVE_SUMMARY_JSON = Path(os.environ.get(
+    "FREQDUET_MBTA_LIVE_GTFSRT_SUMMARY_JSON",
+    "/home/erzhu419/mine_code/CFCMT/H2Oplus/downloads/open_transit/"
+    "gtfsrt_occupancy_snapshots/mbta_live_summary.json",
+))
+DEFAULT_MBTA_LIVE_SNAPSHOT_CSV = Path(os.environ.get(
+    "FREQDUET_MBTA_LIVE_GTFSRT_SNAPSHOT_CSV",
+    "/home/erzhu419/mine_code/CFCMT/H2Oplus/downloads/open_transit/"
+    "gtfsrt_occupancy_snapshots/mbta_live_vehicle_snapshots.csv",
+))
+DEFAULT_MBTA_SUMO_APC_AVL_REPORT = Path(os.environ.get(
+    "FREQDUET_MBTA_SUMO_APC_AVL_REPORT",
+    "/home/erzhu419/mine_code/CFCMT/cf_h2o/results/"
+    "sumo_apc_avl_snapshot_generation_full_day.json",
+))
+DEFAULT_MBTA_SUMO_AVL_CSV = Path(os.environ.get(
+    "FREQDUET_MBTA_SUMO_AVL_CSV",
+    "/home/erzhu419/mine_code/CFCMT/H2Oplus/downloads/"
+    "sumo_apc_avl_benchmark/sumo_full_day/mbta_all/full/snapshots/"
+    "avl_snapshots.csv",
+))
+DEFAULT_MBTA_SUMO_APC_CSV = Path(os.environ.get(
+    "FREQDUET_MBTA_SUMO_APC_CSV",
+    "/home/erzhu419/mine_code/CFCMT/H2Oplus/downloads/"
+    "sumo_apc_avl_benchmark/sumo_full_day/mbta_all/full/snapshots/"
+    "apc_events.csv",
+))
 MBTA_APC_SOURCE_URL = "https://gis.data.mass.gov/datasets/8daf4a33925a4df59183f860826d29ee"
 MBTA_GTFS_DOC_URL = "https://github.com/mbta/gtfs-documentation"
 MBTA_TRANSIT_PERFORMANCE_URL = "https://github.com/mbta/transit-performance"
@@ -87,6 +114,14 @@ def _as_rel(path: Path) -> str:
 def _write_csv(path: Path, rows: list[dict[str, Any]] | pd.DataFrame) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(path, index=False)
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, dict) else {}
 
 
 def load_gtfs(gtfs_dir: Path, apc_routes: set[str], focus_route: str) -> dict[str, Any]:
@@ -410,7 +445,17 @@ def enrich_focus_profile(apc_focus: pd.DataFrame, gtfs: dict[str, Any]) -> pd.Da
     return profile.sort_values(["day_type", "direction_id", "stop_sequence_num", "stop_id"])
 
 
-def build_source_coverage(apc: dict[str, Any], gtfs: dict[str, Any], gtfs_dir: Path, apc_csv: Path) -> pd.DataFrame:
+def build_source_coverage(
+    apc: dict[str, Any],
+    gtfs: dict[str, Any],
+    gtfs_dir: Path,
+    apc_csv: Path,
+    live_summary_json: Path,
+    live_snapshot_csv: Path,
+    sumo_report: Path,
+    sumo_avl_csv: Path,
+    sumo_apc_csv: Path,
+) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     rows.append(apc["coverage"] if apc.get("coverage") else {
         "source": "mbta_bus_ridership_fall2025_apc",
@@ -444,23 +489,70 @@ def build_source_coverage(apc: dict[str, Any], gtfs: dict[str, Any], gtfs_dir: P
             "local_file": str(gtfs_dir),
             "boundary": f"Missing GTFS files: {gtfs.get('missing', [])}",
         })
-    rows.extend([
-        {
-            "source": "mbta_gtfs_realtime_vehicle_positions",
-            "source_kind": "public_or_developer_realtime_avl_feed",
-            "claim_status": "not_collected_locally",
-            "source_url": MBTA_TRANSIT_PERFORMANCE_URL,
+    live_summary = _load_json(live_summary_json)
+    if live_summary and live_snapshot_csv.exists():
+        rows.append({
+            "source": "mbta_live_gtfsrt_vehicle_positions_snapshot",
+            "source_kind": "public_live_gtfsrt_avl_occupancy_snapshot",
+            "claim_status": "supported_live_snapshot",
+            "source_url": str(live_summary.get("live_url", "https://cdn.mbta.com/realtime/VehiclePositions.pb")),
             "standard_url": GTFS_RT_REFERENCE_URL,
-            "boundary": "Can support future AVL collection/replay, but no local same-day historical VehiclePositions archive is present.",
-        },
-        {
-            "source": "mta_bus_time_realtime_api",
-            "source_kind": "developer_realtime_bus_avl_api",
-            "claim_status": "api_key_needed_for_mta_bus",
-            "source_url": MTA_BUS_TIME_KEY_URL,
-            "boundary": "Useful only if switching to MTA bus AVL; it does not solve MBTA APC+AVL same-day matching.",
-        },
-    ])
+            "local_file": str(live_snapshot_csv),
+            "rows": int(live_summary.get("rows", 0)),
+            "snapshots": int(live_summary.get("snapshots", 0)),
+            "vehicles": int(live_summary.get("vehicles", 0)),
+            "unique_routes": int(live_summary.get("routes", 0)),
+            "rows_with_position": int(live_summary.get("rows_with_position", 0)),
+            "rows_with_occupancy_status": int(live_summary.get("rows_with_occupancy_status", 0)),
+            "occupancy_status_rate": float(live_summary.get("occupancy_status_rate", math.nan)),
+            "boundary": "Local MBTA live GTFS-RT VehiclePositions/occupancy snapshot exists; it is June 2026 live data, not Fall 2025 APC-matched historical AVL.",
+        })
+    else:
+        rows.append({
+            "source": "mbta_live_gtfsrt_vehicle_positions_snapshot",
+            "source_kind": "public_live_gtfsrt_avl_occupancy_snapshot",
+            "claim_status": "local_snapshot_missing",
+            "source_url": "https://cdn.mbta.com/realtime/VehiclePositions.pb",
+            "standard_url": GTFS_RT_REFERENCE_URL,
+            "local_file": str(live_snapshot_csv),
+            "boundary": "Can support future AVL collection/replay, but local MBTA live snapshot files were not found.",
+        })
+
+    sumo_data = _load_json(sumo_report).get("cities", {}).get("mbta_all", {})
+    if sumo_data and sumo_avl_csv.exists() and sumo_apc_csv.exists():
+        rows.append({
+            "source": "mbta_sumo_apc_avl_full_day_snapshots",
+            "source_kind": "derived_sumo_apc_avl_from_mbta_gtfs_apc_h2o",
+            "claim_status": "supported_derived_simulation_snapshot",
+            "local_file": str(sumo_avl_csv),
+            "apc_file": str(sumo_apc_csv),
+            "rows": int(sumo_data.get("avl_rows", 0)),
+            "apc_rows": int(sumo_data.get("apc_rows", 0)),
+            "vehicles": int(sumo_data.get("unique_vehicles_in_avl", 0)),
+            "unique_routes": int(sumo_data.get("unique_lines_in_avl", 0)),
+            "boardings_total": float(sumo_data.get("boardings_total", math.nan)),
+            "alightings_total": float(sumo_data.get("alightings_total", math.nan)),
+            "occupancy_min": float(sumo_data.get("occupancy_min", math.nan)),
+            "occupancy_max": float(sumo_data.get("occupancy_max", math.nan)),
+            "boundary": "Full-day MBTA APC/AVL snapshots generated from the H2Oplus/SUMO benchmark; useful as semi-real replay evidence, not observed field AVL.",
+        })
+    else:
+        rows.append({
+            "source": "mbta_sumo_apc_avl_full_day_snapshots",
+            "source_kind": "derived_sumo_apc_avl_from_mbta_gtfs_apc_h2o",
+            "claim_status": "local_snapshot_missing",
+            "local_file": str(sumo_avl_csv),
+            "apc_file": str(sumo_apc_csv),
+            "boundary": "Derived SUMO APC/AVL MBTA snapshots were not found locally.",
+        })
+
+    rows.append({
+        "source": "mta_bus_time_realtime_api",
+        "source_kind": "developer_realtime_bus_avl_api",
+        "claim_status": "api_key_needed_for_mta_bus",
+        "source_url": MTA_BUS_TIME_KEY_URL,
+        "boundary": "Useful only if switching to MTA bus AVL; it does not solve MBTA APC+AVL same-day matching.",
+    })
     return pd.DataFrame(rows)
 
 
@@ -503,15 +595,33 @@ def build_claim_boundaries(overlap: pd.DataFrame, focus_profile: pd.DataFrame) -
         },
         {
             "id": "S4",
-            "evidence_item": "same_period_avl_arrival_departure_events",
-            "status": "not_supported",
-            "allowed_wording": "GTFS-RT/AVL collection path is identified",
-            "forbidden_wording": "same-day historical AVL arrival/departure calibration",
-            "evidence": "no local historical GTFS-RT VehiclePositions/TripUpdates archive paired with Fall 2025 APC",
-            "api_or_data_needed": "MBTA historical AVL archive or prospective GTFS-RT collection window",
+            "evidence_item": "mbta_live_gtfsrt_avl_snapshot",
+            "status": "supported",
+            "allowed_wording": "local MBTA live GTFS-RT VehiclePositions/occupancy snapshots are available for AVL realism evidence",
+            "forbidden_wording": "Fall 2025 APC matched to same-day observed AVL events",
+            "evidence": "local mbta_live_vehicle_snapshots.csv contains vehicle positions, route IDs, stop IDs, timestamps, and occupancy fields",
+            "api_or_data_needed": "historical GTFS-RT archive or prospective collection over the APC/service-day calibration window",
         },
         {
             "id": "S5",
+            "evidence_item": "mbta_sumo_apc_avl_full_day_replay",
+            "status": "supported_derived",
+            "allowed_wording": "derived full-day MBTA APC/AVL replay snapshots exist from the H2Oplus/SUMO benchmark",
+            "forbidden_wording": "observed MBTA field AVL/control-loop outcome",
+            "evidence": "local CFCMT SUMO benchmark contains MBTA full-day avl_snapshots.csv and apc_events.csv",
+            "api_or_data_needed": "none for semi-real replay; observed AVL archive needed for field calibration",
+        },
+        {
+            "id": "S6",
+            "evidence_item": "same_period_historical_avl_arrival_departure_events",
+            "status": "not_supported",
+            "allowed_wording": "GTFS-RT/AVL data and derived replay paths are identified",
+            "forbidden_wording": "same-day historical AVL arrival/departure calibration",
+            "evidence": "local live snapshot is June 2026 and SUMO APC/AVL is derived; neither is a Fall 2025 historical AVL archive paired with APC",
+            "api_or_data_needed": "MBTA historical AVL archive or prospective GTFS-RT collection window",
+        },
+        {
+            "id": "S7",
             "evidence_item": "same_network_od_apc_avl_control_loop",
             "status": "not_supported",
             "allowed_wording": "same-agency APC/load targets plus separate public OD evidence",
@@ -562,8 +672,9 @@ def write_audit_note(
         "",
         "This audit checks public MBTA APC board/alight/load data against MBTA static GTFS.",
         "It is intentionally conservative: it records route/stop matching evidence and",
-        "keeps same-day AVL, exact OD, and deployment claims out of scope until those",
-        "data exist.",
+        "separates observed APC/GTFS evidence, live GTFS-RT AVL snapshots, derived",
+        "SUMO APC/AVL replay evidence, and still-missing same-day historical OD/AVL",
+        "control-loop evidence.",
         "",
         "## Match Summary",
         "",
@@ -578,9 +689,13 @@ def write_audit_note(
         "to static MBTA route/stop geometry, with Route 111 as a concrete route-level",
         "calibration target.",
         "",
-        "Not allowed yet: exact same-day AFC/APC/AVL field calibration, historical",
-        "arrival/departure replay, route-level OD calibration, or observed field",
-        "wait-time improvement.",
+        "Allowed with boundary: local MBTA live GTFS-RT VehiclePositions snapshots",
+        "exist, and the CFCMT/H2Oplus SUMO benchmark contains derived full-day MBTA",
+        "APC/AVL replay snapshots.",
+        "",
+        "Not allowed yet: exact Fall 2025 same-day AFC/APC/AVL/OD field calibration,",
+        "observed historical arrival/departure replay paired with the APC season,",
+        "route-level OD calibration, or observed field wait-time improvement.",
         "",
         "## Claim Table",
         "",
@@ -602,6 +717,11 @@ def main() -> None:
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT))
     parser.add_argument("--focus-route", default="111")
     parser.add_argument("--chunksize", type=int, default=200_000)
+    parser.add_argument("--live-summary-json", default=str(DEFAULT_MBTA_LIVE_SUMMARY_JSON))
+    parser.add_argument("--live-snapshot-csv", default=str(DEFAULT_MBTA_LIVE_SNAPSHOT_CSV))
+    parser.add_argument("--sumo-report", default=str(DEFAULT_MBTA_SUMO_APC_AVL_REPORT))
+    parser.add_argument("--sumo-avl-csv", default=str(DEFAULT_MBTA_SUMO_AVL_CSV))
+    parser.add_argument("--sumo-apc-csv", default=str(DEFAULT_MBTA_SUMO_APC_CSV))
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -614,7 +734,17 @@ def main() -> None:
     gtfs = load_gtfs(gtfs_dir, set(apc["routes"]), focus_route)
     overlap, route_stop_pairs = build_overlap_tables(apc, gtfs, focus_route)
     focus_profile = enrich_focus_profile(apc["focus_profile"], gtfs)
-    source_coverage = build_source_coverage(apc, gtfs, gtfs_dir, apc_csv)
+    source_coverage = build_source_coverage(
+        apc,
+        gtfs,
+        gtfs_dir,
+        apc_csv,
+        Path(args.live_summary_json),
+        Path(args.live_snapshot_csv),
+        Path(args.sumo_report),
+        Path(args.sumo_avl_csv),
+        Path(args.sumo_apc_csv),
+    )
     claim_boundaries = build_claim_boundaries(overlap, focus_profile)
 
     _write_csv(out_dir / "mbta_same_network_source_coverage.csv", source_coverage)

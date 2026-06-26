@@ -51,11 +51,15 @@ The paper package now includes:
 - public MTA subway OD-estimate samples;
 - public MBTA bus board/alight/onboard-load calibration targets;
 - MBTA same-network APC-to-static-GTFS route/stop matching with Route 111 as a
-  route-level load calibration target.
+  route-level load calibration target;
+- local MBTA live GTFS-RT VehiclePositions/occupancy snapshots;
+- derived full-day MBTA SUMO APC/AVL replay snapshots from the H2Oplus/CFCMT
+  benchmark.
 
-The same-network audit supports structural field-calibration readiness, not a
-full field validation. Exact same-day AFC/APC/AVL/OD calibration still needs
-historical AVL and route-level OD for the same service days.
+The same-network audit now supports structural field-calibration readiness plus
+AVL realism evidence. It still is not a full field validation: exact same-day
+AFC/APC/AVL/OD calibration needs historical AVL and route-level OD for the same
+service days as the APC targets.
 
 ## Safe Claim
 

@@ -6,8 +6,8 @@ Last updated: 2026-06-26 CST
 
 FreqDuet currently has a credible simulation evidence package, a public AFC/APC
 demand-profile audit, a separate public OD/onboard-load truth-source audit, and
-a same-agency MBTA APC-to-GTFS route/stop calibration-readiness audit. The
-simulator is not toy-random: it
+a same-agency MBTA APC/GTFS/AVL calibration-readiness audit. The simulator is
+not toy-random: it
 loads a historical OD spreadsheet, station data, route data, and timetable data,
 then generates passenger arrivals from time-varying OD intensities. The current
 paper package also includes held-out demand perturbations, trace logs, external
@@ -17,9 +17,11 @@ Halifax APC route-boarding profiles, MTA agency-estimated subway OD samples, and
 MBTA bus stop/trip board-alight-load calibration targets are audited under the
 FreqDuet tree. The MBTA same-network audit shows that Fall 2025 APC route/stop
 load targets can be structurally matched to MBTA static GTFS route/stop
-identifiers, with Route 111 packaged as a concrete load profile. This supports
-external passenger-count, OD-estimate, onboard-load, and same-agency route/stop
-calibration-readiness evidence. It still does not constitute a single same-day
+identifiers, with Route 111 packaged as a concrete load profile. It also records
+local MBTA live GTFS-RT VehiclePositions/occupancy snapshots and derived
+full-day MBTA SUMO APC/AVL replay snapshots from CFCMT/H2Oplus. This supports
+external passenger-count, OD-estimate, onboard-load, same-agency route/stop, and
+AVL-realism evidence. It still does not constitute a single same-day
 AFC/APC/AVL/OD field calibration or observed FreqDuet deployment outcome.
 
 ## Current Evidence
@@ -39,7 +41,9 @@ AFC/APC/AVL/OD field calibration or observed FreqDuet deployment outcome.
 | Public AFC/APC demand-profile evidence | Present and packaged | `data/external_afc_apc/`; `results_freqduet/real_afc_apc_profile_audit/v1`; `scripts/audit_external_afc_apc_profiles.py`. | Supports "public AFC/APC demand-profile evidence" and profile-shape realism audit. | Does not provide exact OD geometry, onboard load, alighting, or field deployment outcomes. |
 | Public OD-estimate truth source | Present and packaged | `data/external_truth_sources/mta_subway_od/`; `results_freqduet/external_od_onboard_truth_audit/v1`; `scripts/audit_external_od_onboard_truth.py`. | Supports "public agency-estimated subway OD matrices from MTA". | Estimate from fare-derived inference; not observed individual AFC OD truth, bus OD, or onboard load. |
 | Public onboard-load truth source | Present and packaged | `results_freqduet/external_od_onboard_truth_audit/v1/mbta_*`; MBTA raw cache path documented in `data/external_truth_sources/README.md`. | Supports "public MBTA bus board/alight/load calibration targets". | Different agency/network from MTA OD and FreqDuet simulator; not a matched control-loop validation. |
-| MBTA same-agency APC-to-GTFS route/stop calibration | Present and packaged | `results_freqduet/mbta_same_network_calibration_audit/v1`; `scripts/audit_mbta_same_network_calibration.py`. | Supports same-agency route/stop structural matching and Route 111 public APC load calibration targets. | Uses Fall 2025 APC with current Spring 2026 GTFS geometry; not same-day historical schedule/AVL/OD control-loop calibration. |
+| MBTA same-agency APC-to-GTFS route/stop calibration | Present and packaged | `results_freqduet/mbta_same_network_calibration_audit/v1`; `scripts/audit_mbta_same_network_calibration.py`. | Supports same-agency route/stop structural matching and Route 111 public APC load calibration targets. | Uses Fall 2025 APC with current Spring 2026 GTFS geometry; not exact same-season historical schedule replay. |
+| MBTA live GTFS-RT AVL/occupancy snapshot | Present and packaged | `results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_source_coverage.csv`. | Supports public live AVL/occupancy realism evidence. | Snapshot is June 2026 live data, not Fall 2025 APC-matched historical AVL. |
+| MBTA derived SUMO APC/AVL full-day replay | Present and packaged as pointer/evidence | `results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_source_coverage.csv`; CFCMT `sumo_apc_avl_benchmark/sumo_full_day/mbta_all`. | Supports semi-real full-day APC/AVL replay evidence from MBTA-derived H2Oplus/SUMO inputs. | Derived simulation, not observed field AVL/control-loop outcome. |
 | Same-network real AFC/APC/AVL/OD field calibration | Not yet present | No FreqDuet-specific multi-day same-route OD/onboard-load/AVL calibration or real-agency control replay. | Cannot claim field deployment validation. | Remaining top-journal realism gap. |
 | Multi-day / route-family held-out profiles | Not packaged | Current matrix uses demand-noise, OD-shift, and rush-shift perturbations from one OD table. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
 | Dwell, fleet, service stochasticity matrix | Partly supported in code, not packaged as a matrix | `route_sigma`, elastic fleet code paths exist; no final robustness table found. | Mention only as simulator parameters unless run. | Needs a reproducible matrix before paper claims. |
@@ -59,8 +63,10 @@ station-entry and Halifax APC route-boarding count profiles to document that the
 paper package includes real passenger-count demand shapes. A separate
 truth-source audit adds MTA agency-estimated subway OD samples and MBTA bus
 board/alight/onboard-load calibration targets. A same-agency MBTA audit adds
-APC-to-static-GTFS route/stop overlap and a Route 111 load profile. The claim
-remains short of a single same-day AFC/APC/AVL/OD field calibration.
+APC-to-static-GTFS route/stop overlap, a Route 111 load profile, local live
+GTFS-RT AVL/occupancy snapshots, and derived full-day SUMO APC/AVL replay
+snapshots. The claim remains short of a single same-day AFC/APC/AVL/OD field
+calibration.
 
 This claim is defensible because every part maps to a current artifact.
 
@@ -80,11 +86,12 @@ Do not claim any of the following until new artifacts exist:
 1. Real-demand calibration audit
 
    The first data-only AFC/APC profile audit, separate OD/onboard-load
-   truth-source audit, and MBTA same-agency APC-to-GTFS route/stop audit are
-   now present. The next stronger step is a true same-day calibration package
-   that compares hourly OD totals, station boarding totals, peak timing,
-   onboard load, AVL-derived headway distribution, dwell time, and wait-time
-   proxies against simulator outputs over multiple service days.
+   truth-source audit, MBTA same-agency APC-to-GTFS route/stop audit, live
+   GTFS-RT snapshot evidence, and derived SUMO APC/AVL replay evidence are now
+   present. The next stronger step is a true same-day calibration package that
+   compares hourly OD totals, station boarding totals, peak timing, onboard
+   load, AVL-derived headway distribution, dwell time, and wait-time proxies
+   against simulator outputs over multiple service days.
 
 2. Service-day held-out profiles
 
@@ -132,11 +139,12 @@ exogenous demand shifts. To ground the demand and load assumptions, we include
 data-only audits of public MTA AFC station-entry profiles, Halifax APC
 route-boarding profiles, MTA agency-estimated subway OD samples, and MBTA bus
 stop/trip board-alight-load targets. We also audit MBTA Fall 2025 APC
-route/stop targets against MBTA static GTFS geometry, showing same-agency
-route/stop calibration readiness and packaging Route 111 as a concrete load
-profile. These data support external passenger-count, OD-estimate, onboard-load,
-and same-agency structural calibration evidence, but they do not constitute a
-same-day AFC/APC/AVL/OD field deployment validation; a multi-day matched AVL and
-route-level OD calibration study remains future work."
+route/stop targets against MBTA static GTFS geometry, local MBTA live GTFS-RT
+VehiclePositions/occupancy snapshots, and derived full-day MBTA SUMO APC/AVL
+replay snapshots. These data support external passenger-count, OD-estimate,
+onboard-load, same-agency structural calibration, and AVL-realism evidence, but
+they do not constitute a same-day AFC/APC/AVL/OD field deployment validation; a
+multi-day matched historical AVL and route-level OD calibration study remains
+future work."
 
 This is strong enough for the current evidence and avoids overclaiming.
