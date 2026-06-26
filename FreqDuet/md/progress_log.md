@@ -1467,3 +1467,37 @@ statistically tied with paper-main V1 at 60 seeds. The defensible paper claim is
 that FreqDuet matches fixed-headway while strongly outperforming weaker
 classical rule-holding and MPC baselines; it should not claim robust dominance
 over fixed-headway.
+
+## 2026-06-26 paper-scale broad generalization launch
+
+Submitted the 60-seed held-out broad generalization matrix after the external
+classical baseline confirmation:
+
+```text
+run:
+results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed
+
+protocol:
+8 held-out scenarios x 6 internal methods x 60 seeds x 100 episodes
+scenarios: noise10, noise20, noise40, od20, od50, rush_early, rush_late, rush_extreme
+methods: main, nofreq, rawhistory, allfreq, nopromotion, noleakage
+total runs: 2880
+shards: 180 x 16 runs
+
+scheduler:
+t13434-t13613
+nodes: node001-node006
+status at 2026-06-26 08:40 CST: 72 running, 108 queued
+per node: 12 running + 18 queued
+```
+
+This is the paper-scale replacement for the earlier 20-seed
+`broad_generalization_ep100_wu10` robustness table. It should be synced and
+aggregated only after all 180 shards are done:
+
+```bash
+python3 scripts/sync_freqduet_broad_generalization.py \
+  --run-name paper_broad_generalization_v1_ep100_wu10_60seed \
+  --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689 \
+  --last-k 50
+```
