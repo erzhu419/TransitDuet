@@ -1,6 +1,6 @@
 # FreqDuet Top-Journal Gap Backlog
 
-Last updated: 2026-06-25 CST
+Last updated: 2026-06-26 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -10,8 +10,8 @@ explicit paper-scope decision.
 
 ## Current Status
 
-FreqDuet is now a working main-path prototype rather than a design sketch.
-The current promoted line includes:
+FreqDuet is now a paper-package-ready simulation study rather than only a
+working prototype. The current promoted line includes:
 
 - causal harmonic demand decomposition with historical priors;
 - LF/HF state separation;
@@ -23,32 +23,60 @@ The current promoted line includes:
 - guarded promotion with active and persistent gates;
 - trace logger, audit tooling, MI / shock-response style diagnostics;
 - scheduler/HPC-ready experiment scripts;
-- a 40-episode, 20-seed, four-domain final matrix under the current naming.
+- deterministic paper-main V1 aliases for the four canonical domains;
+- a 60-seed, 200-episode paper ablation matrix;
+- a 60-seed, 200-episode external classical baseline matrix;
+- a 60-seed, 100-episode broad held-out generalization matrix;
+- decomposer validation, trace alignment, and mechanism/source-data packages;
+- a canonical `results_freqduet/paper_package/current` bundle with no missing
+  required artifacts.
 
-Latest current-name 40ep final matrix:
-
-```text
-main        1.5446
-rawhistory  1.5505
-nopromotion 1.5599
-allfreq     1.5681
-nofreq      1.6281
-noleakage   1.9113
-```
-
-Per-domain main result:
+Canonical paper package status:
 
 ```text
-terminal  1.463
-highnoise 1.874
-odshift   1.531
-rushshift 1.311
+package: results_freqduet/paper_package/current
+copied artifacts: 234
+missing artifacts: 0
+tables: 24
+figure/source files: 42
+config files: 136
+scripts: 27
 ```
 
-Interpretation: the main method is best on average and best in terminal/rush,
-but it is not yet best in every domain. `rawhistory` is still slightly better in
-highnoise, and `rawhistory` / `nopromotion` are slightly better in odshift. This
-means the method direction is effective, but the paper evidence is not closed.
+Current main evidence summary:
+
+```text
+paper ablation, 60-seed/200ep:
+main decisively beats noleakage; main, rawhistory, allfreq, nopromotion, and
+nofreq are close internal controls.
+
+external classical, 60-seed/200ep:
+main is statistically tied with strong fixed-headway and strongly beats
+rule-holding and rule-MPC.
+
+broad generalization, 60-seed/100ep:
+main is robust across demand-noise, OD-shift, and rush-shift families, with
+the strongest conclusion being leakage-control necessity rather than universal
+dominance over every internal variant.
+```
+
+Interpretation: the non-text simulation evidence package is now coherent enough
+for manuscript drafting, with a conservative claim. The defensible claim is
+frequency-separated HRL with leakage control is robust, mechanistically
+traceable, and competitive with a strong fixed-headway baseline while clearly
+beating weaker rule/MPC baselines. It should not claim universal dominance over
+fixed-headway or every internal ablation.
+
+Remaining top-journal non-text gaps are now narrower:
+
+- real AFC/APC or AVL/APC calibration, multi-day held-out profiles, and route
+  family validation are still absent locally;
+- preserved original TransitDuet or a closest locked TransitDuet baseline is
+  still useful if reviewers demand a lineage baseline;
+- final figure-panel selection and manuscript table curation still need to turn
+  the package into a concise paper presentation;
+- full actual terminal-launch/first-stop dispatch remains a scoped future-work
+  item unless implemented and validated separately.
 
 2026-06-03 update: the current-name 200ep matrix has been synced and
 aggregated. It confirms that `noleakage` is clearly bad, but it also exposed a
@@ -324,7 +352,7 @@ Done means:
 
 ### 2. Systematic Generalization Matrix
 
-Status: `[~]` three-shift 100ep matrix complete; broader scenario families open
+Status: `[x]` 60-seed broad paper matrix complete; real multi-day profiles still open under realism gap
 
 Highnoise, odshift, and rushshift are present, but this is not yet a complete
 held-out generalization package.
@@ -492,7 +520,7 @@ Done means:
 
 ### 3. Per-Domain Weakness Repair
 
-Status: `[~]` lower drift repaired; fixed-headway gap still open
+Status: `[x]` lower drift repaired; paper-main V1 tied with strong fixed-headway and beats weaker classical baselines
 
 The current main wins on average but loses narrowly in highnoise and odshift.
 This must either be repaired or explained with statistically defensible
@@ -1155,7 +1183,7 @@ Done means:
 
 ### 8. Statistical Rigor
 
-Status: `[~]` paired statistics tooling complete; final paper tables pending
+Status: `[x]` paired statistics and canonical paper tables packaged; final manuscript table selection pending
 
 Mean scores are not enough for top-journal claims, especially when domain-level
 gaps are close.
@@ -1181,7 +1209,7 @@ Done means:
 
 ### 9. Reproducibility And Config Hygiene
 
-Status: `[~]` paper manifest started; aliases locked, historical cleanup pending
+Status: `[x]` canonical paper manifest/package built; historical cleanup now optional maintenance
 
 There are many historical configs, failed ablations, and renamed aliases. This
 is acceptable during research but risky for paper reproduction.

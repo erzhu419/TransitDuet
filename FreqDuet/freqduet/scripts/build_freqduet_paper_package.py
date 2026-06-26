@@ -114,6 +114,16 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          paper_broad.get("paired_deltas_csv")),
     ])
 
+    paper_trace = experiment(manifest, "paper_trace_diag_v1_4domain_3seed")
+    table_specs.extend([
+        ("paper_trace_diag_v1_4domain_3seed_per_seed.csv",
+         paper_trace.get("per_seed_csv")),
+        ("paper_trace_diag_v1_4domain_3seed_summary.csv",
+         paper_trace.get("summary_csv")),
+        ("paper_trace_diag_v1_4domain_3seed_audit.csv",
+         paper_trace.get("trace_audit_csv")),
+    ])
+
     promoted = experiment(manifest, "promoted_longtrain_ep200_wu10")
     table_specs.extend([
         ("longtrain_promoted_per_seed.csv", promoted.get("per_seed_csv")),

@@ -1,6 +1,6 @@
 # FreqDuet Realism And Data Evidence Audit
 
-Last updated: 2026-06-08 CST
+Last updated: 2026-06-26 CST
 
 ## Bottom Line
 
@@ -21,15 +21,15 @@ remaining realism gap unless those data are added later.
 | Historical OD demand source | Present | `FreqDuet/freqduet/env/sim.py` reads `env/data/passenger_OD.xlsx`; harmonic prior is fit from the same OD table. | Supports "semi-real / OD-driven simulation", not pure synthetic demand. | Spreadsheet provenance and calibration quality are not documented. |
 | Station, route, timetable inputs | Present | `env/data/stop_news.xlsx`, `env/data/route_news.xlsx`, `env/data/time_table.xlsx`. | Supports route-level realism. | Need route description and data source statement. |
 | Passenger arrival process | Present | `env/sim.py` uses OD-hour intensities and stochastic passenger generation. | Supports exogenous time-varying demand formulation. | Arrival model assumptions still need methods text. |
-| Demand-noise held-out test | Present | `F_freqduet_gen_highnoise_*`: `demand_noise: 0.30`. | Tests hour-level demand intensity uncertainty. | Only one high-noise level is packaged. |
-| OD-shift held-out test | Present | `F_freqduet_gen_odshift_*`: `od_noise: 0.35`, clipped multipliers. | Tests OD profile robustness. | Only one OD perturbation family is packaged. |
-| Rush-pattern held-out test | Present | `F_freqduet_gen_rushshift_*`: peak shift choices `[-2, -1, 1, 2]`. | Tests peak timing shift. | Still generated from the same base OD table. |
-| Frequency trace logging | Present | `F_freqduet_terminal_main_trace_hiro.yaml`; `demand_trace.csv`, `demand_station_trace.csv`. | Supports decomposer and mechanism audits. | Trace package is from simulator traces, not external field traces. |
-| Decomposer validation | Present and packaged | `results_freqduet/paper_package/current/figures/decomposer_validation_current_trace`. | Supports causal LF/HF separation claim. | Final manuscript must select panels and explain source traces. |
-| Mechanism figures | Present and packaged | `results_freqduet/paper_package/current/figures/mechanism_*`. | Supports HF response, lower drift, promotion, and action spectrum. | Mechanism evidence does not replace real calibration. |
-| External classical baselines | Present and packaged | `results_freqduet/external_baselines_promoted_ep100`. | Adds fixed-headway, rule-holding, and simple MPC/forecast comparators. | Preserved TransitDuet and external RL baselines remain open. |
+| Demand-noise held-out tests | Present and packaged | `results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed`; scenarios `noise10`, `noise20`, `noise40`. | Tests multiple hour-level demand intensity perturbations. | Still generated from the same base OD table. |
+| OD-shift held-out tests | Present and packaged | `results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed`; scenarios `od20`, `od50`. | Tests OD-profile robustness at two perturbation strengths. | Still not a separate real service-day split. |
+| Rush-pattern held-out tests | Present and packaged | `results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed`; scenarios `rush_early`, `rush_late`, `rush_extreme`. | Tests peak timing shifts. | Still generated from the same base OD table. |
+| Frequency trace logging | Present and packaged | `configs/paper_main_trace_v1_4x1` and `tables/paper_trace_diag_v1_4domain_3seed_audit.csv` inside `results_freqduet/paper_package/current`. | Supports decomposer and mechanism audits. | Trace package is from simulator traces, not external field traces. |
+| Decomposer validation | Present and packaged | `results_freqduet/paper_package/current/figures/decomposer_validation_paper_v1_60seed`. | Supports causal LF/HF separation and trace-alignment claims. | Final manuscript must select panels and explain source traces. |
+| Mechanism figures | Present and packaged | `results_freqduet/paper_package/current/figures/mechanism_paper_ablation_v1_ep200_60seed` and `figures/mechanism_paper_v1_trace_alignment`. | Supports HF response, lower drift, promotion, leakage failure, and action spectrum. | Mechanism evidence does not replace real calibration. |
+| External classical baselines | Present and packaged | `results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed`. | Adds fixed-headway, rule-holding, and simple MPC/forecast comparators. | Preserved TransitDuet and external RL baselines remain open. |
 | Real AFC/APC calibration | Not found locally | No `afc`, `apc`, `calibration`, or real-service data file found under FreqDuet. | Cannot be claimed. | Major top-journal realism gap. |
-| Multi-day / route-family held-out profiles | Not packaged | Current matrix uses highnoise, odshift, rushshift only. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
+| Multi-day / route-family held-out profiles | Not packaged | Current matrix uses demand-noise, OD-shift, and rush-shift perturbations from one OD table. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
 | Dwell, fleet, service stochasticity matrix | Partly supported in code, not packaged as a matrix | `route_sigma`, elastic fleet code paths exist; no final robustness table found. | Mention only as simulator parameters unless run. | Needs a reproducible matrix before paper claims. |
 
 ## What Can Be Claimed Now
@@ -37,11 +37,12 @@ remaining realism gap unless those data are added later.
 The safest current claim is:
 
 FreqDuet is evaluated in an OD-driven corridor simulator using historical demand
-tables and stochastic passenger arrivals. The main result is stress-tested under
-three held-out perturbation families: increased demand noise, OD-profile
-perturbation, and shifted rush timing. The decomposer is also audited on logged
-simulator demand traces and on synthetic LF/HF truth, and the final package
-preserves seed-level paired results and negative candidate screens.
+tables and stochastic passenger arrivals. The main result is stress-tested in a
+60-seed broad matrix spanning multiple demand-noise, OD-profile, and shifted
+rush-timing scenarios. The decomposer is also audited on logged simulator demand
+traces and on synthetic LF/HF truth, and the final package preserves seed-level
+paired results, source data for figures, exact configs, scripts, and negative
+candidate screens.
 
 This claim is defensible because every part maps to a current artifact.
 

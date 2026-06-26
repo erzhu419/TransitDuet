@@ -1614,7 +1614,114 @@ domain-method bars, action/state spectrum, longtrain drift curves,
 mechanism_episode_rows.csv, mechanism_per_seed.csv, mechanism_summary.csv
 ```
 
-Remaining non-text gap: decomposer trace alignment is still open because no
-`demand_trace.csv` files are currently present locally. The decomposer package
-therefore contains synthetic LF/HF/burst and cutoff/window sensitivity evidence,
-but not real trace LF/HF-to-wait/holding alignment yet.
+At this rebuild point, the remaining non-text gap was decomposer trace
+alignment because no `demand_trace.csv` files were present locally. The
+decomposer package therefore contained synthetic LF/HF/burst and cutoff/window
+sensitivity evidence, but not real trace LF/HF-to-wait/holding alignment yet.
+This is superseded by the trace-alignment entry below.
+
+## 2026-06-26 paper-main trace alignment evidence
+
+Closed the local `demand_trace.csv` gap with trace-only paper-main configs:
+
+```text
+F_freqduet_terminal_paper_main_trace_hiro
+F_freqduet_gen_highnoise_paper_main_trace_hiro
+F_freqduet_gen_odshift_paper_main_trace_hiro
+F_freqduet_gen_rushshift_paper_main_trace_hiro
+```
+
+These configs only inherit the paper-main aliases and enable frequency logging:
+
+```yaml
+frequency:
+  logging:
+    enable: true
+    bin_only: true
+    station_rows: true
+    include_empty_stations: false
+```
+
+Trace diagnostic protocol:
+
+```text
+run:
+results_freqduet/trace_diag_paper_v1_60seed
+
+configs:
+4 paper-main trace aliases
+
+seeds:
+7, 42, 123
+
+episodes:
+3
+
+outputs:
+12 demand_trace.csv files
+trace_audit.csv
+decomposer_trace_alignment.{png,pdf,csv}
+trace_hf_lag_audit.csv
+```
+
+Trace audit:
+
+```text
+demand_trace files: 12
+mean trace rows per run: 2456.9167
+mean station trace rows per run: 32918.8333
+mean arrivals: 8.5433
+mean queue total: 182.2021
+mean board wait: 356.0069 s
+mean lower action: 7.7229 s
+mean HF energy: 0.0553
+corr(HF energy, lower action): 0.0408
+corr(HF energy, board wait): 0.0789
+corr(LF queue, queue total): 0.3902
+corr(station HF queue, queue total): 0.3123
+corr(station LF queue, queue total): 0.3220
+```
+
+HF lag audit:
+
+```text
+best absolute lower-action association:
+  lower_action_mean_s at lag 8, corr 0.2501, terminal
+
+best board-wait domain-specific association:
+  board_wait_mean_s at lag -2, corr 0.1980, highnoise
+
+mean board-wait lag association:
+  lag 2, corr 0.0796
+```
+
+Generated/updated paper figure source packages:
+
+```text
+results_freqduet/decomposer_validation/paper_v1_60seed
+results_freqduet/mechanism_figures/paper_v1_trace_alignment
+```
+
+The current paper package was rebuilt after adding trace evidence:
+
+```text
+package:
+results_freqduet/paper_package/current
+
+audit:
+copied artifacts: 234
+missing artifacts: 0
+package size: 155M
+tables: 24
+figure/source files: 42
+config files: 136
+scripts: 27
+manuscript notes: 3
+appendix files: 1
+```
+
+Interpretation: this closes the decomposer/trace-alignment non-text gap for the
+simulator paper package. It supports the mechanism chain that LF queue features
+track queue load and HF residual energy is traceable to lower holding/wait
+responses. It should not be presented as field-data calibration or as a new
+performance matrix.

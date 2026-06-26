@@ -195,6 +195,16 @@ config_sets:
     rushshift:
       main: F_freqduet_gen_rushshift_paper_main_hiro
 
+  paper_main_trace_v1_4x1:
+    terminal:
+      main_trace: F_freqduet_terminal_paper_main_trace_hiro
+    highnoise:
+      main_trace: F_freqduet_gen_highnoise_paper_main_trace_hiro
+    odshift:
+      main_trace: F_freqduet_gen_odshift_paper_main_trace_hiro
+    rushshift:
+      main_trace: F_freqduet_gen_rushshift_paper_main_trace_hiro
+
   paper_ablation_v1_4x6:
     terminal:
       main: F_freqduet_terminal_paper_main_hiro
@@ -1128,6 +1138,75 @@ experiments:
       worse across all scenario families. The broad robustness claim should
       emphasize stability and the necessity of leakage control rather than
       claiming broad dominance over every internal variant.
+
+  paper_trace_diag_v1_4domain_3seed:
+    status: complete_mechanism_trace_diagnostic
+    package_required: true
+    episodes: 3
+    last_k: 1
+    seeds: [7, 42, 123]
+    config_set: paper_main_trace_v1_4x1
+    configs:
+      - F_freqduet_terminal_paper_main_trace_hiro
+      - F_freqduet_gen_highnoise_paper_main_trace_hiro
+      - F_freqduet_gen_odshift_paper_main_trace_hiro
+      - F_freqduet_gen_rushshift_paper_main_trace_hiro
+    runner: scripts/run_freqduet_ablation.py
+    logs_dir: results_freqduet/trace_diag_paper_v1_60seed/logs
+    result_dir: results_freqduet/trace_diag_paper_v1_60seed
+    summary_dir: results_freqduet/trace_diag_paper_v1_60seed/summary
+    per_seed_csv: results_freqduet/trace_diag_paper_v1_60seed/summary/freqduet_ablation_per_seed.csv
+    summary_csv: results_freqduet/trace_diag_paper_v1_60seed/summary/freqduet_ablation_summary.csv
+    trace_audit_csv: results_freqduet/trace_diag_paper_v1_60seed/trace_audit.csv
+    purpose: >
+      Lightweight mechanism trace diagnostic for paper figures. These runs
+      enable demand_trace.csv logging on the paper-main V1 aliases across the
+      four canonical domains; they are source evidence for decomposer
+      trace-alignment and HF residual-to-holding/wait lag plots, not a
+      performance matrix.
+    command: >
+      python3 scripts/run_freqduet_ablation.py
+      --configs F_freqduet_terminal_paper_main_trace_hiro,F_freqduet_gen_highnoise_paper_main_trace_hiro,F_freqduet_gen_odshift_paper_main_trace_hiro,F_freqduet_gen_rushshift_paper_main_trace_hiro
+      --seeds 7,42,123
+      --episodes 3
+      --last-k 1
+      --workers 4
+      --worker-threads 1
+      --clean
+      --logs-dir results_freqduet/trace_diag_paper_v1_60seed/logs
+      --out-dir results_freqduet/trace_diag_paper_v1_60seed/summary
+    trace_audit_command: >
+      python3 scripts/audit_demand_trace.py
+      results_freqduet/trace_diag_paper_v1_60seed/logs
+      --out results_freqduet/trace_diag_paper_v1_60seed/trace_audit.csv
+    completion_audit:
+      runs: 12
+      demand_trace_files: 12
+      trace_rows_mean: 2456.9167
+      station_trace_rows_mean: 32918.8333
+    overall_trace_means:
+      mean_arrivals: 8.5433
+      mean_queue_total: 182.2021
+      mean_board_wait_s: 356.0069
+      mean_lower_action_s: 7.7229
+      mean_hf_energy: 0.0553
+      corr_hf_energy_action: 0.0408
+      corr_hf_energy_board_wait: 0.0789
+      corr_low_queue: 0.3902
+      corr_station_high_queue: 0.3123
+      corr_station_low_queue: 0.3220
+    domain_trace_notes:
+      highnoise: {corr_low_queue: 0.5052, corr_hf_energy_action: 0.0604, corr_hf_energy_board_wait: 0.0642, corr_station_high_queue: 0.2518}
+      odshift: {corr_low_queue: 0.4289, corr_hf_energy_action: 0.0538, corr_hf_energy_board_wait: 0.0715, corr_station_high_queue: 0.2780}
+      rushshift: {corr_low_queue: 0.1874, corr_hf_energy_action: 0.0000, corr_hf_energy_board_wait: 0.0864, corr_station_high_queue: 0.3857}
+      terminal: {corr_low_queue: 0.4391, corr_hf_energy_action: 0.0490, corr_hf_energy_board_wait: 0.0934, corr_station_high_queue: 0.3337}
+    key_result: >
+      The paper-main trace diagnostic closes the previous demand_trace gap:
+      LF queue features align with queue load, station-level high-frequency
+      residuals show nonzero queue alignment, and HF energy has weak but
+      directionally positive associations with lower holding and board-wait
+      response. This is mechanism trace evidence, not a standalone performance
+      claim.
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
     status: complete_broad_aggressive_palette_screen_no_global_promotion
@@ -3365,22 +3444,28 @@ experiments:
 
 figures:
   decomposer_validation_paper_v1_60seed:
-    status: generated_synthetic_sensitivity_trace_alignment_open
+    status: generated_with_trace_alignment
     required: true
     script: scripts/make_freqduet_decomposer_figures.py
+    trace_logs:
+      - results_freqduet/trace_diag_paper_v1_60seed/logs
     out_dir: results_freqduet/decomposer_validation/paper_v1_60seed
     command: >
       PYTHONPATH=. python3 scripts/make_freqduet_decomposer_figures.py
       --out-dir results_freqduet/decomposer_validation/paper_v1_60seed
+      --trace-logs results_freqduet/trace_diag_paper_v1_60seed/logs
       --formats png,pdf
       --n-seeds 20
-    rows: 20 synthetic seeds; trace alignment omitted because no demand_trace.csv files are currently present locally.
+    rows: 20 synthetic seeds plus 12 paper-main trace rollouts across the four canonical domains.
     outputs:
       - decomposer_synthetic_components
       - decomposer_cutoff_window_sensitivity
+      - decomposer_trace_alignment
       - decomposer_synthetic_per_seed.csv
       - decomposer_synthetic_summary.csv
       - decomposer_cutoff_window_sensitivity.csv
+      - decomposer_trace_alignment.csv
+      - decomposer_validation_manifest.json
 
   mechanism_paper_ablation_v1_ep200_60seed:
     status: generated
@@ -3407,6 +3492,40 @@ figures:
       - mechanism_episode_rows.csv
       - mechanism_per_seed.csv
       - mechanism_summary.csv
+
+  mechanism_paper_v1_trace_alignment:
+    status: generated
+    required: true
+    script: scripts/make_freqduet_mechanism_figures.py
+    logs:
+      - results_freqduet/trace_diag_paper_v1_60seed/logs
+    out_dir: results_freqduet/mechanism_figures/paper_v1_trace_alignment
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_mechanism_figures.py
+      --logs results_freqduet/trace_diag_paper_v1_60seed/logs
+      --out-dir results_freqduet/mechanism_figures/paper_v1_trace_alignment
+      --last-k 3
+      --sample 12000
+      --formats png,pdf
+    rows: 12 trace-enabled runs, 36 episode rows, and 408 HF lag audit rows
+    key_trace_result: >
+      Best absolute lag association is lower_action_mean_s at lag 8
+      (corr 0.2501, terminal). Board-wait response is weaker but positive:
+      lag 2 mean corr 0.0796, with the strongest domain-specific association
+      in highnoise at lag -2 (corr 0.1980). This supports traceability of
+      HF residuals into control/wait responses while keeping the claim
+      mechanistic rather than causal-performance dominant.
+    outputs:
+      - mechanism_hf_energy_to_holding
+      - mechanism_lower_drift_by_method
+      - mechanism_promotion_active_vs_inactive
+      - mechanism_domain_method_bars
+      - mechanism_action_state_spectrum
+      - mechanism_longtrain_drift_curves
+      - mechanism_episode_rows.csv
+      - mechanism_per_seed.csv
+      - mechanism_summary.csv
+      - trace_hf_lag_audit.csv
 
   decomposer_validation_current_trace:
     status: generated
@@ -3561,24 +3680,25 @@ paper_scripts:
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
   - scripts/submit_freqduet_broad_generalization_scheduleurm.py
   - scripts/sync_freqduet_broad_generalization.py
+  - scripts/audit_demand_trace.py
 
 paper_packages:
   current:
-    status: generated_current_60seed_canonical
+    status: generated_current_60seed_canonical_trace_aligned
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 16:20 CST
-      copied_artifacts: 207
+      checked_at: 2026-06-26 19:15 CST
+      copied_artifacts: 234
       missing_artifacts: 0
-      package_size: 153M
-      tables: 21
-      figure_files: 23
-      config_files: 132
-      scripts: 26
+      package_size: 155M
+      tables: 24
+      figure_files: 42
+      config_files: 136
+      scripts: 27
       manuscript_notes: 3
       appendix_files: 1
     canonical_tables:
@@ -3594,15 +3714,20 @@ paper_packages:
       - tables/paper_broad_generalization_v1_ep100_60seed_completion_audit.csv
       - tables/paper_broad_generalization_v1_ep100_60seed_method_summary.csv
       - tables/paper_broad_generalization_v1_ep100_60seed_paired_deltas.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_per_seed.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_summary.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_audit.csv
     required_figures:
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
+      - figures/mechanism_paper_v1_trace_alignment
     note: >
       The current package now rebuilds from the paper-scale 60-seed ablation,
       external classical, and broad held-out matrices. Historical 20-seed or
       failed candidate artifacts are copied only if present and are no longer
-      treated as required package artifacts. Decomposer trace alignment remains
-      open because no demand_trace.csv files are currently present locally.
+      treated as required package artifacts. The package also includes
+      trace-enabled paper-main diagnostics and source data for decomposer
+      trace alignment and HF residual-to-holding/wait mechanism plots.
     outputs:
       - README.md
       - package_manifest.json
@@ -3619,11 +3744,16 @@ paper_packages:
       - tables/paper_external_classical_v1_ep200_60seed_paired_deltas.csv
       - tables/paper_external_classical_v1_ep200_60seed_per_seed.csv
       - tables/paper_external_classical_v1_ep200_60seed_summary.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_audit.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_per_seed.csv
+      - tables/paper_trace_diag_v1_4domain_3seed_summary.csv
       - configs/paper_generalization
       - configs/paper_ablation_v1_4x6
       - configs/paper_main_cfaction_domainbest_v1_4x1
+      - configs/paper_main_trace_v1_4x1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
+      - figures/mechanism_paper_v1_trace_alignment
       - scripts
       - manuscript_notes/method_framing.md
       - manuscript_notes/realism_data_evidence.md
