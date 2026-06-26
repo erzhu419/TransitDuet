@@ -1501,3 +1501,59 @@ python3 scripts/sync_freqduet_broad_generalization.py \
   --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689 \
   --last-k 50
 ```
+
+## 2026-06-26 paper-scale broad generalization result
+
+The 60-seed broad matrix completed and was synced/aggregated:
+
+```text
+run:
+results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed
+
+completion:
+180 scheduler shards done
+2880 per-seed rows observed / 2880 expected
+48 config summary rows
+0 missing rows
+
+summary:
+results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed/paper_summary
+```
+
+Overall composite means:
+
+```text
+method        mean
+main          1.4915
+nofreq        1.4910
+rawhistory    1.4823
+allfreq       1.4783
+nopromotion   1.4928
+noleakage     1.8073
+```
+
+Paired deltas are main minus baseline:
+
+```text
+overall vs nofreq       +0.0004  CI [-0.0337, +0.0352]
+overall vs rawhistory   +0.0092  CI [-0.0247, +0.0434]
+overall vs allfreq      +0.0131  CI [-0.0119, +0.0424]
+overall vs nopromotion  -0.0014  CI [-0.0067, +0.0043]
+overall vs noleakage    -0.3158  CI [-0.3913, -0.2441]
+```
+
+Scenario notes:
+
+```text
+od20 vs allfreq       +0.0350  CI [+0.0067, +0.0695]
+noise40 vs noleakage  -0.3735  CI [-0.4692, -0.2830]
+rush family noleakage -0.3030  CI [-0.3757, -0.2321]
+```
+
+Interpretation: the paper-scale held-out matrix supports V1 as robust but not
+dominant over all internal variants. The strongest broad claim is that leakage
+control is necessary: noleakage is substantially worse across demand-noise,
+OD-shift, and rush-shift families. Main, nofreq, rawhistory, allfreq, and
+nopromotion are statistically close overall; allfreq has one significant od20
+advantage. This should be written as a mechanism/stability result rather than a
+blanket performance win.

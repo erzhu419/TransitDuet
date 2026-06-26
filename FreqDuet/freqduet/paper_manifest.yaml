@@ -1020,7 +1020,7 @@ experiments:
       claiming robust dominance over it.
 
   paper_broad_generalization_v1_ep100_wu10_60seed:
-    status: running_scheduler
+    status: complete
     episodes: 100
     last_k: 50
     upper_warmup_eps: 10
@@ -1067,6 +1067,14 @@ experiments:
         node004: {running: 12, queued: 18}
         node005: {running: 12, queued: 18}
         node006: {running: 12, queued: 18}
+    completion_audit:
+      checked_at: 2026-06-26 16:19 CST
+      scheduler_tasks_done: 180
+      per_seed_rows: 2880
+      summary_rows: 48
+      expected_rows: 2880
+      missing_rows: 0
+      shards_synced: 180
     total_runs: 2880
     result_dir: results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed
     per_seed_csv: results_freqduet/paper_broad_generalization_v1_ep100_wu10_60seed/combined_summary/freqduet_ablation_per_seed.csv
@@ -1096,11 +1104,30 @@ experiments:
       --run-name paper_broad_generalization_v1_ep100_wu10_60seed
       --seeds 7,11,17,23,31,37,42,43,53,61,71,83,97,109,123,127,149,456,789,2026,2039,2053,2063,2081,2099,2111,2129,2141,2153,2161,2179,2203,2221,2237,2251,2269,2281,2297,2311,2333,2351,2371,2389,2411,2423,2441,2467,2477,2503,2521,2539,2551,2579,2591,2609,2621,2633,2657,2671,2689
       --last-k 50
-    note: >
-      This is the paper-scale 60-seed broad matrix. It supersedes the earlier
-      20-seed broad_generalization_ep100_wu10 for final robustness reporting,
-      but should not be aggregated until scheduler tasks t13434-t13613 are all
-      done.
+    overall_composite_mean:
+      main: 1.4915
+      nofreq: 1.4910
+      rawhistory: 1.4823
+      allfreq: 1.4783
+      nopromotion: 1.4928
+      noleakage: 1.8073
+    paired_delta_main_minus_baseline:
+      nofreq: [0.0004, -0.0337, 0.0352]
+      rawhistory: [0.0092, -0.0247, 0.0434]
+      allfreq: [0.0131, -0.0119, 0.0424]
+      nopromotion: [-0.0014, -0.0067, 0.0043]
+      noleakage: [-0.3158, -0.3913, -0.2441]
+    notable_scenario_delta_main_minus_baseline:
+      od20_allfreq: [0.0350, 0.0067, 0.0695]
+      noise40_noleakage: [-0.3735, -0.4692, -0.2830]
+      rush_shift_family_noleakage: [-0.3030, -0.3757, -0.2321]
+    key_result: >
+      The 60-seed broad held-out matrix is complete with no missing rows.
+      Paper-main V1 is statistically tied with nofreq, rawhistory, allfreq,
+      and nopromotion overall; noleakage is consistently and substantially
+      worse across all scenario families. The broad robustness claim should
+      emphasize stability and the necessity of leakage control rather than
+      claiming broad dominance over every internal variant.
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
     status: complete_broad_aggressive_palette_screen_no_global_promotion
