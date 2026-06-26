@@ -167,6 +167,19 @@ data_sources:
       algorithm implementation, checkpoints, and result claims are not imported
       into FreqDuet.
 
+  external_od_onboard_truth_v1:
+    status: copied_public_mta_sample_and_external_mbta_source_pointer
+    purpose: public agency OD-estimate and onboard-load truth-source audit for FreqDuet realism evidence
+    files:
+      - data/external_truth_sources/README.md
+      - data/external_truth_sources/mta_subway_od/mta_subway_od_2024_sample_5000.json
+      - data/external_truth_sources/mta_subway_od/mta_subway_od_2024_count.json
+      - data/external_truth_sources/mta_subway_od/mta_subway_od_2024_metadata.json
+    boundary: >
+      MTA OD sample and metadata are copied into FreqDuet. The MBTA bus
+      stop/trip board-alight-load raw CSV is large and remains an external
+      local cache; FreqDuet packages only derived calibration-target tables.
+
 config_sets:
   current_longtrain_4x6:
     terminal:
@@ -751,6 +764,33 @@ experiments:
       Supports public AFC/APC demand-profile evidence only. Does not support
       exact OD geometry, onboard-load calibration, agency deployment, or
       observed field wait-time improvement claims.
+
+  external_od_onboard_truth_audit_v1:
+    status: generated_separate_public_truth_source_audit
+    purpose: public agency OD-estimate and bus onboard-load truth-source coverage for realism evidence
+    script: scripts/audit_external_od_onboard_truth.py
+    result_dir: results_freqduet/external_od_onboard_truth_audit/v1
+    source_coverage_csv: results_freqduet/external_od_onboard_truth_audit/v1/external_truth_source_coverage.csv
+    claim_boundaries_csv: results_freqduet/external_od_onboard_truth_audit/v1/external_truth_claim_boundaries.csv
+    mbta_route_targets_csv: results_freqduet/external_od_onboard_truth_audit/v1/mbta_onboard_route_targets.csv
+    mbta_hourly_profile_csv: results_freqduet/external_od_onboard_truth_audit/v1/mbta_hourly_board_alight_load.csv
+    mta_od_top_pairs_csv: results_freqduet/external_od_onboard_truth_audit/v1/mta_od_sample_top_pairs.csv
+    mta_od_hourly_profile_csv: results_freqduet/external_od_onboard_truth_audit/v1/mta_od_sample_hourly_profile.csv
+    summary_json: results_freqduet/external_od_onboard_truth_audit/v1/summary.json
+    command: >
+      PYTHONPATH=. python3 scripts/audit_external_od_onboard_truth.py
+      --out-dir results_freqduet/external_od_onboard_truth_audit/v1
+    expected_claim_boundaries:
+      supported:
+        - real_public_bus_stop_board_alight
+        - real_public_bus_stop_onboard_load
+        - real_public_subway_od_estimate
+      not_supported:
+        - joint_same_network_od_onboard_control_loop
+    data_boundary: >
+      Supports separate public agency OD-estimate and bus onboard-load
+      truth-source coverage. Does not support exact same-network AFC/APC
+      OD plus onboard-load field calibration for FreqDuet deployment.
 
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
@@ -3490,6 +3530,28 @@ figures:
       - external_afc_apc_profile_audit.md
       - summary.json
 
+  external_od_onboard_truth_audit_v1:
+    status: generated_separate_public_truth_source_audit
+    required: true
+    script: scripts/audit_external_od_onboard_truth.py
+    out_dir: results_freqduet/external_od_onboard_truth_audit/v1
+    command: >
+      PYTHONPATH=. python3 scripts/audit_external_od_onboard_truth.py
+      --out-dir results_freqduet/external_od_onboard_truth_audit/v1
+    outputs:
+      - mbta_onboard_load_distribution
+      - mbta_weekday_hourly_board_alight_load
+      - mta_od_sample_top_pairs
+      - external_truth_source_coverage.csv
+      - external_truth_claim_boundaries.csv
+      - mbta_onboard_route_targets.csv
+      - mbta_hourly_board_alight_load.csv
+      - mbta_stop_sequence_load_curve.csv
+      - mta_od_sample_top_pairs.csv
+      - mta_od_sample_hourly_profile.csv
+      - external_od_onboard_truth_audit.md
+      - summary.json
+
   decomposer_validation_paper_v1_60seed:
     status: generated_with_trace_alignment
     required: true
@@ -3723,6 +3785,7 @@ paper_scripts:
   - scripts/make_freqduet_decomposer_figures.py
   - scripts/make_freqduet_mechanism_figures.py
   - scripts/audit_external_afc_apc_profiles.py
+  - scripts/audit_external_od_onboard_truth.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
@@ -3732,23 +3795,23 @@ paper_scripts:
 
 paper_packages:
   current:
-    status: generated_current_60seed_canonical_trace_aligned_with_external_afc_apc_profiles
+    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_sources
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 20:40 CST
-      copied_artifacts: 247
+      checked_at: 2026-06-26 21:25 CST
+      copied_artifacts: 272
       missing_artifacts: 0
-      package_size: 155M
-      tables: 27
-      figure_files: 48
+      package_size: 160M
+      tables: 33
+      figure_files: 62
       config_files: 136
-      scripts: 28
+      scripts: 29
       manuscript_notes: 3
-      data_source_files: 3
+      data_source_files: 7
       appendix_files: 1
     canonical_tables:
       - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
@@ -3769,8 +3832,15 @@ paper_packages:
       - tables/external_afc_apc_source_coverage.csv
       - tables/external_afc_apc_aggregate_profile.csv
       - tables/external_afc_apc_profile_alignment.csv
+      - tables/external_truth_source_coverage.csv
+      - tables/external_truth_claim_boundaries.csv
+      - tables/mbta_onboard_route_targets.csv
+      - tables/mbta_hourly_board_alight_load.csv
+      - tables/mta_od_sample_top_pairs.csv
+      - tables/mta_od_sample_hourly_profile.csv
     required_figures:
       - figures/external_afc_apc_profile_audit_v1
+      - figures/external_od_onboard_truth_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment
@@ -3781,7 +3851,8 @@ paper_packages:
       treated as required package artifacts. The package also includes
       trace-enabled paper-main diagnostics and source data for decomposer
       trace alignment, HF residual-to-holding/wait mechanism plots, and
-      data-only public AFC/APC demand-profile evidence.
+      data-only public AFC/APC demand-profile evidence plus separate public
+      OD-estimate and onboard-load truth-source coverage.
     outputs:
       - README.md
       - package_manifest.json
@@ -3804,12 +3875,20 @@ paper_packages:
       - tables/external_afc_apc_source_coverage.csv
       - tables/external_afc_apc_aggregate_profile.csv
       - tables/external_afc_apc_profile_alignment.csv
+      - tables/external_truth_source_coverage.csv
+      - tables/external_truth_claim_boundaries.csv
+      - tables/mbta_onboard_route_targets.csv
+      - tables/mbta_hourly_board_alight_load.csv
+      - tables/mta_od_sample_top_pairs.csv
+      - tables/mta_od_sample_hourly_profile.csv
       - configs/paper_generalization
       - configs/paper_ablation_v1_4x6
       - configs/paper_main_cfaction_domainbest_v1_4x1
       - configs/paper_main_trace_v1_4x1
       - data_sources/external_afc_apc
+      - data_sources/external_truth_sources
       - figures/external_afc_apc_profile_audit_v1
+      - figures/external_od_onboard_truth_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment

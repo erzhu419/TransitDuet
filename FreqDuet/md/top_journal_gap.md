@@ -70,7 +70,8 @@ fixed-headway or every internal ablation.
 Remaining top-journal non-text gaps are now narrower:
 
 - public AFC/APC demand-profile evidence is now present as a data-only audit,
-  but exact AFC/APC OD/onboard-load calibration, AVL/APC service-day splits,
+  and separate public OD-estimate/onboard-load truth-source coverage is now
+  present, but exact same-network AFC/APC/AVL calibration, service-day splits,
   and route-family validation are still absent locally;
 - preserved original TransitDuet or a closest locked TransitDuet baseline is
   still useful if reviewers demand a lineage baseline;
@@ -1288,10 +1289,15 @@ mechanism, and external classical baseline artifacts.
 2026-06-26 update: added a data-only public AFC/APC profile audit under
 `FreqDuet/freqduet/data/external_afc_apc/` and
 `FreqDuet/freqduet/results_freqduet/real_afc_apc_profile_audit/v1`. This closes
-the narrow "no local AFC/APC profile evidence" gap, but not the stronger
-field-calibration gap: exact AFC/APC OD geometry, onboard-load calibration,
-multi-day real service splits, and observed agency wait-time outcomes are still
-not claimed.
+the narrow "no local AFC/APC profile evidence" gap.
+
+2026-06-26 follow-up: added a separate public OD/onboard-load truth-source audit
+under `FreqDuet/freqduet/data/external_truth_sources/` and
+`FreqDuet/freqduet/results_freqduet/external_od_onboard_truth_audit/v1`. This
+supports MTA agency-estimated subway OD coverage and MBTA bus stop/trip
+board-alight-load calibration targets. The remaining realism gap is now more
+specific: exact same-network AFC/APC/AVL calibration, multi-day real service
+splits, and observed agency wait-time outcomes are still not claimed.
 
 Done means:
 

@@ -13,11 +13,12 @@ cross-frequency correction through promotion and leakage/drift control. The
 current evidence supports this argument in a simulated transit corridor with a
 historical OD spreadsheet, held-out demand perturbations, paired long-training
 ablations, decomposer audits, mechanism figures, and documented negative repair
-screens. A data-only public AFC/APC profile audit now adds external
-passenger-count demand-shape evidence. The current boundary is also explicit:
-FreqDuet is validated as a target-headway executable timetable method, not yet
-as a full actual-terminal launch / first-stop holding dispatch system calibrated
-on exact external AFC/APC OD or onboard-load data.
+screens. Data-only public AFC/APC profile and OD/onboard-load truth-source
+audits now add external passenger-count, agency-estimated OD, and onboard-load
+evidence. The current boundary is also explicit: FreqDuet is validated as a
+target-headway executable timetable method, not yet as a full actual-terminal
+launch / first-stop holding dispatch system calibrated on a same-network
+AFC/APC/AVL field dataset.
 
 ## Terminology Ledger
 
@@ -171,10 +172,12 @@ The current method should not overclaim the following:
 - Full Phase 4 terminal dispatch is not validated. The promoted method controls
   target-headway / executable timetable behavior; actual launch-time and
   first-stop holding remain a future or appendix scope.
-- Public AFC/APC demand-profile evidence is present as a data-only audit, but
-  full AFC/APC OD geometry, onboard-load calibration, and agency deployment
-  validation are not present. The simulator uses a historical OD spreadsheet,
-  but the provenance and calibration quality still need to be documented.
+- Public AFC/APC demand-profile evidence, MTA agency-estimated subway OD
+  samples, and MBTA bus onboard-load calibration targets are present as
+  data-only audits. Full same-network OD/onboard-load calibration and agency
+  deployment validation are not present. The simulator uses a historical OD
+  spreadsheet, but the provenance and calibration quality still need to be
+  documented.
 - Generalization covers three held-out perturbation families, not a full route,
   fleet, dwell, and service-day matrix.
 - Fixed-headway remains a serious baseline. This should be reported explicitly

@@ -299,6 +299,22 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          real_profiles.get("profile_alignment_csv")),
     ])
 
+    real_truth = experiment(manifest, "external_od_onboard_truth_audit_v1")
+    table_specs.extend([
+        ("external_truth_source_coverage.csv",
+         real_truth.get("source_coverage_csv")),
+        ("external_truth_claim_boundaries.csv",
+         real_truth.get("claim_boundaries_csv")),
+        ("mbta_onboard_route_targets.csv",
+         real_truth.get("mbta_route_targets_csv")),
+        ("mbta_hourly_board_alight_load.csv",
+         real_truth.get("mbta_hourly_profile_csv")),
+        ("mta_od_sample_top_pairs.csv",
+         real_truth.get("mta_od_top_pairs_csv")),
+        ("mta_od_sample_hourly_profile.csv",
+         real_truth.get("mta_od_hourly_profile_csv")),
+    ])
+
     for name, src in table_specs:
         required = name.startswith("paper_")
         if not src:

@@ -4,18 +4,20 @@ Last updated: 2026-06-26 CST
 
 ## Bottom Line
 
-FreqDuet currently has a credible simulation evidence package and a newly added
-public AFC/APC demand-profile audit, but not yet a full field-calibration
-package. The simulator is not toy-random: it
+FreqDuet currently has a credible simulation evidence package, a public AFC/APC
+demand-profile audit, and a separate public OD/onboard-load truth-source audit,
+but not yet a same-network field-calibration package. The simulator is not toy-random: it
 loads a historical OD spreadsheet, station data, route data, and timetable data,
 then generates passenger arrivals from time-varying OD intensities. The current
 paper package also includes held-out demand perturbations, trace logs, external
 classical baselines, decomposer validation, and mechanism figures. The AFC/APC
-addition is intentionally data-only: public MTA AFC station-entry profiles and
-Halifax APC route-boarding profiles are copied under the FreqDuet tree and
-audited against the local OD demand shape. This supports external passenger-count
-profile evidence, not exact AFC/APC OD geometry, onboard-load calibration, or
-observed field deployment outcomes.
+additions are intentionally data-only: public MTA AFC station-entry profiles,
+Halifax APC route-boarding profiles, MTA agency-estimated subway OD samples, and
+MBTA bus stop/trip board-alight-load calibration targets are audited under the
+FreqDuet tree. This supports external passenger-count, OD-estimate, and
+onboard-load truth-source evidence. It still does not constitute a single
+same-network AFC/APC OD plus onboard-load field calibration or observed FreqDuet
+deployment outcome.
 
 ## Current Evidence
 
@@ -32,7 +34,9 @@ observed field deployment outcomes.
 | Mechanism figures | Present and packaged | `results_freqduet/paper_package/current/figures/mechanism_paper_ablation_v1_ep200_60seed` and `figures/mechanism_paper_v1_trace_alignment`. | Supports HF response, lower drift, promotion, leakage failure, and action spectrum. | Mechanism evidence does not replace real calibration. |
 | External classical baselines | Present and packaged | `results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed`. | Adds fixed-headway, rule-holding, and simple MPC/forecast comparators. | Preserved TransitDuet and external RL baselines remain open. |
 | Public AFC/APC demand-profile evidence | Present and packaged | `data/external_afc_apc/`; `results_freqduet/real_afc_apc_profile_audit/v1`; `scripts/audit_external_afc_apc_profiles.py`. | Supports "public AFC/APC demand-profile evidence" and profile-shape realism audit. | Does not provide exact OD geometry, onboard load, alighting, or field deployment outcomes. |
-| Full real AFC/APC calibration | Not yet present | No FreqDuet-specific multi-day AFC/APC OD/onboard-load calibration or real-agency control replay. | Cannot claim field calibration or deployment validation. | Remaining top-journal realism gap. |
+| Public OD-estimate truth source | Present and packaged | `data/external_truth_sources/mta_subway_od/`; `results_freqduet/external_od_onboard_truth_audit/v1`; `scripts/audit_external_od_onboard_truth.py`. | Supports "public agency-estimated subway OD matrices from MTA". | Estimate from fare-derived inference; not observed individual AFC OD truth, bus OD, or onboard load. |
+| Public onboard-load truth source | Present and packaged | `results_freqduet/external_od_onboard_truth_audit/v1/mbta_*`; MBTA raw cache path documented in `data/external_truth_sources/README.md`. | Supports "public MBTA bus board/alight/load calibration targets". | Different agency/network from MTA OD and FreqDuet simulator; not a matched control-loop validation. |
+| Same-network real AFC/APC calibration | Not yet present | No FreqDuet-specific multi-day same-route OD/onboard-load calibration or real-agency control replay. | Cannot claim field calibration or deployment validation. | Remaining top-journal realism gap. |
 | Multi-day / route-family held-out profiles | Not packaged | Current matrix uses demand-noise, OD-shift, and rush-shift perturbations from one OD table. | Can be framed as robustness perturbations, not full deployment validation. | Reviewers may ask whether the method overfits one corridor/day. |
 | Dwell, fleet, service stochasticity matrix | Partly supported in code, not packaged as a matrix | `route_sigma`, elastic fleet code paths exist; no final robustness table found. | Mention only as simulator parameters unless run. | Needs a reproducible matrix before paper claims. |
 
@@ -48,8 +52,10 @@ traces and on synthetic LF/HF truth, and the final package preserves seed-level
 paired results, source data for figures, exact configs, scripts, and negative
 candidate screens. A data-only external profile audit adds public MTA AFC
 station-entry and Halifax APC route-boarding count profiles to document that the
-paper package includes real passenger-count demand shapes, while keeping the
-claim short of OD/onboard-load calibration.
+paper package includes real passenger-count demand shapes. A separate
+truth-source audit adds MTA agency-estimated subway OD samples and MBTA bus
+board/alight/onboard-load calibration targets. The claim remains short of a
+single same-network AFC/APC OD plus onboard-load field calibration.
 
 This claim is defensible because every part maps to a current artifact.
 
@@ -57,7 +63,7 @@ This claim is defensible because every part maps to a current artifact.
 
 Do not claim any of the following until new artifacts exist:
 
-- "Calibrated on exact AFC/APC OD data" or "validated in real agency deployment".
+- "Calibrated on exact same-network AFC/APC OD plus onboard-load data" or "validated in real agency deployment".
 - "Observed wait-time improvement on real AFC/APC field operations".
 - "Generalizes across multiple real routes or days".
 - "Robust to all fleet sizes, dwell distributions, and arrival processes".
@@ -68,10 +74,11 @@ Do not claim any of the following until new artifacts exist:
 
 1. Real-demand calibration audit
 
-   The first data-only AFC/APC profile audit is now present. The next stronger
-   step is a true calibration script that compares hourly OD totals, station
-   boarding totals, peak timing, headway distribution, dwell time, and wait-time
-   proxies against simulator outputs over multiple service days.
+   The first data-only AFC/APC profile audit and separate OD/onboard-load
+   truth-source audit are now present. The next stronger step is a true
+   same-network calibration script that compares hourly OD totals, station
+   boarding totals, peak timing, onboard load, headway distribution, dwell time,
+   and wait-time proxies against simulator outputs over multiple service days.
 
 2. Service-day held-out profiles
 
@@ -115,11 +122,13 @@ station, route, timetable, and passenger OD tables. Passenger arrivals are
 sampled from time-varying OD intensities, and robustness is evaluated under
 held-out demand noise, OD-profile perturbation, and rush-timing shifts. These
 experiments test the causal frequency-allocation mechanism under controlled
-exogenous demand shifts. To ground the demand-shape assumptions, we include a
-data-only audit of public MTA AFC station-entry profiles and Halifax APC
-route-boarding profiles. These data support external passenger-count profile
-evidence, but they do not constitute exact OD/onboard-load calibration or field
-deployment validation; a multi-day AFC/APC calibration study and actual
-terminal-dispatch execution remain future work."
+exogenous demand shifts. To ground the demand and load assumptions, we include
+data-only audits of public MTA AFC station-entry profiles, Halifax APC
+route-boarding profiles, MTA agency-estimated subway OD samples, and MBTA bus
+stop/trip board-alight-load targets. These data support external
+passenger-count, OD-estimate, and onboard-load truth-source evidence, but they do
+not constitute a same-network field deployment validation; a multi-day matched
+AFC/APC/AVL calibration study and actual terminal-dispatch execution remain
+future work."
 
 This is strong enough for the current evidence and avoids overclaiming.
