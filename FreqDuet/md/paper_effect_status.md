@@ -55,11 +55,16 @@ The paper package now includes:
 - local MBTA live GTFS-RT VehiclePositions/occupancy snapshots;
 - derived full-day MBTA SUMO APC/AVL replay snapshots from the H2Oplus/CFCMT
   benchmark.
+- FreqDuet-only MTA Bus Time API offline cache with 378 routes, 13,585 stops,
+  22,730 route-stop sequence rows, and 144 route-filtered SIRI
+  VehicleMonitoring rows.
 
 The same-network audit now supports structural field-calibration readiness plus
 AVL realism evidence. It still is not a full field validation: exact same-day
 AFC/APC/AVL/OD calibration needs historical AVL and route-level OD for the same
-service days as the APC targets.
+service days as the APC targets. The MTA Bus Time cache is route/stop/AVL
+geometry evidence only; it is not APC/onboard-load data and not FreqHRL result
+data.
 
 ## Safe Claim
 

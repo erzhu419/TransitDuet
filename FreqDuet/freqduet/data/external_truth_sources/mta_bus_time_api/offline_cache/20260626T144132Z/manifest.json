@@ -1,0 +1,4699 @@
+{
+  "snapshot_id": "20260626T144132Z",
+  "created_utc": "2026-06-26T14:48:41.728894+00:00",
+  "out_dir": "/home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet/data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z",
+  "api_key_written_to_disk": false,
+  "agencies": [
+    "MTA NYCT",
+    "MTABC"
+  ],
+  "route_count": 378,
+  "stop_count": 13585,
+  "route_stop_sequence_rows": 22730,
+  "failed_route_count": 0,
+  "vehicle_route_snapshots": 8,
+  "vehicle_rows": 144,
+  "raw_dir": "raw",
+  "parsed_dir": "parsed",
+  "requests": [
+    {
+      "label": "agencies_with_coverage",
+      "endpoint": "https://bustime-classic.mta.info/api/where/agencies-with-coverage.json",
+      "params": {
+        "key": "<redacted>"
+      },
+      "raw_path": "raw/agencies_with_coverage.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "routes_for_agency_MTA NYCT",
+      "endpoint": "https://bustime-classic.mta.info/api/where/routes-for-agency/MTA%20NYCT.json",
+      "params": {
+        "key": "<redacted>"
+      },
+      "raw_path": "raw/routes_for_agency_MTA_NYCT.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "routes_for_agency_MTABC",
+      "endpoint": "https://bustime-classic.mta.info/api/where/routes-for-agency/MTABC.json",
+      "params": {
+        "key": "<redacted>"
+      },
+      "raw_path": "raw/routes_for_agency_MTABC.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M34+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M34%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M34+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B106",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B106.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B106.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B102",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B102.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B102.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B52",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B52.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B52.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q24",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q24.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q24.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S66",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S66.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S66.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q27",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q27.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q27.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q29",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q29.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q29.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B46+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B46%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B46+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S61",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S61.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S61.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q20",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q20.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q20.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S62",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S62.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S62.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B44",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B44.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B44.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B43",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B43.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B43.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B46",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B46.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B46.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B45",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B45.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B45.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B48",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B48.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B48.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T403",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T403.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T403.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B47",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B47.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B47.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM9",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM9.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM9.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B49",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B49.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B49.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM6",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM6.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM6.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B60",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B60.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B60.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B62",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B62.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B62.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM1C",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM1C.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM1C.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B61",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B61.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B61.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B64",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B64.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B64.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B63",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B63.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B63.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S76",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S76.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S76.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q36",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q36.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q36.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S78",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S78.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S78.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S79+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S79%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S79+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q38",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q38.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q38.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q39",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q39.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q39.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX12+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX12%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX12+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q30",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q30.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q30.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM24",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM24.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM24.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM25",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM25.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM25.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S74",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S74.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S74.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM26",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM26.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM26.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B54",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B54.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B54.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B57",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B57.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B57.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM22",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM22.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM22.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_L90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_L90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_L90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM23",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM23.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM23.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_L92",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_L92.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_L92.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T430",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T430.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T430.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B70",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B70.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B70.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_X28",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_X28.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_X28.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_X27",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_X27.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_X27.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX6",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX6.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX6.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B74",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B74.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B74.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q45",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q45.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q45.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S86",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S86.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S86.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S89",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S89.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S89.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q46",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q46.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q46.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q48",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q48.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q48.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S81",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S81.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S81.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M116",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M116.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M116.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q43",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q43.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q43.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S84",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S84.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S84.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B65",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B65.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B65.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B68",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B68.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B68.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B67",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B67.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B67.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T426",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T426.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T426.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B69",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B69.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B69.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M23+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M23%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M23+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B82",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B82.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B82.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_X37",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_X37.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_X37.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B116",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B116.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B116.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B84",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B84.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B84.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B83",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B83.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B83.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_X38",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_X38.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_X38.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q56",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q56.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q56.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S98",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S98.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S98.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM33C",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM33C.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM33C.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q55",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q55.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q55.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q58",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q58.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q58.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q59",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q59.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q59.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S92",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S92.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S92.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S91",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S91.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S91.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S94",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S94.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S94.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M106",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M106.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M106.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S93",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S93.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S93.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q54",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q54.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q54.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S96",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S96.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S96.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M101",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M101.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M101.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B111",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B111.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B111.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M102",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M102.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M102.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M103",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M103.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M103.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX9",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX9.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX9.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M104",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M104.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M104.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M100",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M100.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M100.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX13",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX13.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX13.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX12",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX12.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX12.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B93",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B93.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B93.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B94",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B94.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B94.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B96",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B96.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B96.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q67",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q67.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q67.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX19",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX19.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX19.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX17",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX17.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX17.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX16",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX16.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX16.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q61",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q61.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q61.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M14A+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M14A%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M14A+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B82+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B82%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B82+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T323",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T323.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T323.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T321",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T321.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T321.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T320",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T320.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T320.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q77",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q77.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q77.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q76",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q76.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q76.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q75",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q75.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q75.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B99",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B99.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B99.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_J90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_J90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_J90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M125",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M125.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M125.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T113",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T113.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T113.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX34",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX34.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX34.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T354",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T354.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T354.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX33",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX33.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX33.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T232",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T232.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T232.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX32",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX32.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX32.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX30",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX30.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX30.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q89",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q89.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q89.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q88",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q88.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q88.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX39",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX39.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX39.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX38",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX38.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX38.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX36",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX36.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX36.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q83",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q83.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q83.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q82",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q82.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q82.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q85",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q85.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q85.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q84",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q84.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q84.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q87",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q87.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q87.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q86",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q86.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q86.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX24",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX24.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX24.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T464",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T464.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T464.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX22",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX22.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX22.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX21",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX21.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX21.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX20",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX20.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX20.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M15+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M15%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M15+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX29",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX29.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX29.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX28",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX28.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX28.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX27",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX27.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX27.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX26",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX26.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX26.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX25",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX25.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX25.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q96",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q96.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q96.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M12",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M12.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M12.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q98",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q98.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q98.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q97",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q97.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q97.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M86+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M86%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M86+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M21",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M21.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M21.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M20",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M20.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M20.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX41+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX41%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX41+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX4A",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX4A.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX4A.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M22",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M22.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M22.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T127",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T127.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T127.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX46",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX46.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX46.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX41",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX41.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX41.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX40",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX40.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX40.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M14D+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M14D%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M14D+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T117",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T117.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T117.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M60+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M60%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M60+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX18A",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX18A.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX18A.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX18B",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX18B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX18B.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q44+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q44%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q44+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M9",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M9.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M9.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_T260",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_T260.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_T260.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M55",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M55.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M55.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M57",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M57.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M57.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX6+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX6%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX6+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M50",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M50.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M50.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX95",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX95.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX95.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM4C",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM4C.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM4C.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M66",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M66.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M66.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_BX92",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_BX92.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_BX92.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_QM68",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_QM68.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_QM68.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B20",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B20.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B20.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_QM63",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_QM63.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_QM63.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_QM64",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_QM64.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_QM64.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B13",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B13.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B13.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B12",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B12.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B12.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B14",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B14.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B14.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B17",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B17.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B17.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M72",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M72.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M72.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B16",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B16.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B16.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q121",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q121.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q121.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S44",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S44.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S44.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S46",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S46.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S46.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S48",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S48.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S48.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S40",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S40.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S40.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM32",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM32.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM32.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B24",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B24.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B24.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M34A+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M34A%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M34A+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM33",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM33.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM33.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM34",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM34.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM34.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B26",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B26.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B26.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B25",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B25.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B25.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B44+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B44%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B44+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM30",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM30.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM30.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B41",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B41.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B41.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M79+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M79%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M79+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q12",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q12.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q12.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S54",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S54.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S54.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S53",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S53.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S53.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q14",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q14.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q14.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S56",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S56.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S56.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_SIM3C",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_SIM3C.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_SIM3C.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B6",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B6.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B6.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q13",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q13.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q13.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S55",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S55.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S55.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q16",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q16.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q16.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S57",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S57.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S57.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B9",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B9.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B9.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q17",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q17.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q17.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S59",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S59.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S59.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M96",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M96.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M96.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M98",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M98.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M98.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q109",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q109.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q109.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S52",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S52.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S52.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_S51",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_S51.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_S51.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_Q108",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_Q108.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_Q108.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B32",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B32.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B32.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_M90",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_M90.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_M90.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B37",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B37.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B37.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B36",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B36.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B36.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B39",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B39.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B39.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTA NYCT_B38",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTA%20NYCT_B38.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTA_NYCT_B38.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q64",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q64.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q64.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q63",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q63.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q63.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q60",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q60.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q60.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q69",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q69.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q69.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q66",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q66.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q66.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q65",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q65.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q65.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q51",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q51.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q51.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q50",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q50.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q50.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BX23",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BX23.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BX23.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q40",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q40.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q40.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q41",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q41.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q41.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q47",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q47.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q47.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q49",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q49.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q49.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM17",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM17.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM17.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM18",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM18.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM18.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM15",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM15.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM15.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM16",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM16.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM16.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q52+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q52%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q52+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM12",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM12.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM12.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q37",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q37.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q37.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q33",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q33.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q33.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q32",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q32.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q32.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM20",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM20.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM20.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM21",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM21.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM21.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM24",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM24.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM24.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q53+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q53%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q53+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM25",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM25.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM25.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BM4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BM4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BM4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_B100",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_B100.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_B100.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BM3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BM3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BM3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BM5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BM5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BM5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_B103",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_B103.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_B103.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q70+",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q70%2B.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q70+.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM18",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM18.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM18.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BM2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BM2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BM2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BM1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BM1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BM1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q80",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q80.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q80.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q72",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q72.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q72.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q74",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q74.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q74.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q101",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q101.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q101.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q100",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q100.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q100.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q103",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q103.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q103.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q102",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q102.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q102.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q104",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q104.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q104.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q112",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q112.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q112.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q111",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q111.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q111.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q114",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q114.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q114.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q113",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q113.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q113.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q115",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q115.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q115.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q110",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q110.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q110.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM5",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM5.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM5.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM6",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM6.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM6.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM2",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM2.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM2.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM1",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM1.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM1.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM6",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM6.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM6.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM4",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM4.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM4.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM3",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM3.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM3.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM9",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM9.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM9.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM8",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM8.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM8.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_BXM7",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_BXM7.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_BXM7.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q26",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q26.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q26.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q25",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q25.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q25.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q28",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q28.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q28.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q22",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q22.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q22.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q23",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q23.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q23.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM31",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM31.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM31.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM32",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM32.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM32.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM35",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM35.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM35.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM36",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM36.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM36.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM34",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM34.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM34.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q11",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q11.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q11.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q10",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q10.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q10.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q19",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q19.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q19.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q18",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q18.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q18.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM42",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM42.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM42.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM40",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM40.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM40.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM44",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM44.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM44.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q06",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q06.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q06.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q08",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q08.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q08.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q07",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q07.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q07.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_Q09",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_Q09.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_Q09.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "stops_for_route_MTABC_QM65",
+      "endpoint": "https://bustime-classic.mta.info/api/where/stops-for-route/MTABC_QM65.json",
+      "params": {
+        "key": "<redacted>",
+        "includePolylines": "false",
+        "version": "2"
+      },
+      "raw_path": "raw/stops_for_route/MTABC_QM65.json",
+      "status_code": 200,
+      "status_text": "OK"
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_M15+",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_M15+",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_M15+.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_B63",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_B63",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_B63.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_M1",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_M1",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_M1.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTABC_Q60",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTABC_Q60",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTABC_Q60.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_B46+",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_B46+",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_B46+.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_Q44+",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_Q44+",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_Q44+.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_S79+",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_S79+",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_S79+.json",
+      "status_code": null,
+      "status_text": null
+    },
+    {
+      "label": "vehicle_monitoring_MTA NYCT_BX12+",
+      "endpoint": "https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json",
+      "params": {
+        "key": "<redacted>",
+        "version": "2",
+        "LineRef": "MTA NYCT_BX12+",
+        "VehicleMonitoringDetailLevel": "normal",
+        "MaximumStopVisits": "40"
+      },
+      "raw_path": "raw/vehicle_monitoring/MTA_NYCT_BX12+.json",
+      "status_code": null,
+      "status_text": null
+    }
+  ],
+  "boundary": "MTA Bus Time API cache for FreqDuet external data only. It is not FreqHRL paper result data, and it is not a field deployment result."
+}

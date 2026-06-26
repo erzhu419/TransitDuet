@@ -331,6 +331,26 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          same_network.get("route_stop_overlap_csv")),
     ])
 
+    mta_bus_time = experiment(manifest, "mta_bus_time_offline_cache_v1")
+    table_specs.extend([
+        ("mta_bus_time_source_coverage.csv",
+         mta_bus_time.get("source_coverage_csv")),
+        ("mta_bus_time_claim_boundaries.csv",
+         mta_bus_time.get("claim_boundaries_csv")),
+        ("mta_bus_time_agencies.csv",
+         mta_bus_time.get("agencies_csv")),
+        ("mta_bus_time_routes.csv",
+         mta_bus_time.get("routes_csv")),
+        ("mta_bus_time_stops.csv",
+         mta_bus_time.get("stops_csv")),
+        ("mta_bus_time_route_stop_sequences.csv",
+         mta_bus_time.get("route_stop_sequences_csv")),
+        ("mta_bus_time_vehicle_snapshot_meta.csv",
+         mta_bus_time.get("vehicle_snapshot_meta_csv")),
+        ("mta_bus_time_vehicle_snapshots.csv",
+         mta_bus_time.get("vehicle_snapshots_csv")),
+    ])
+
     for name, src in table_specs:
         required = name.startswith("paper_")
         if not src:

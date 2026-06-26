@@ -1,0 +1,4 @@
+id,evidence_item,status,allowed_wording,forbidden_wording,evidence
+MTA1,mta_bus_time_static_route_stop_cache,supported,"offline MTA Bus Time route, stop, and route-stop sequence cache",MTA APC/onboard-load or FreqDuet field outcome,routes=378 stops=13585 route_sequences=22730
+MTA2,mta_bus_time_vehicle_snapshot_cache,supported,route-filtered SIRI VehicleMonitoring snapshots are cached for offline AVL realism checks,full-day historical AVL archive or control-loop field validation,route_snapshots=8 vehicle_rows=144
+MTA3,separation_from_freqhrl_results,supported,raw MTA API data downloaded for FreqDuet external data audit,reuse of FreqHRL paper results or checkpoints,cache path is under FreqDuet/freqduet/data/external_truth_sources/mta_bus_time_api

@@ -21,6 +21,19 @@ FreqDuet's realism audit.
   - Source: `https://data.ny.gov/api/views/jsu2-fbtj`.
   - Purpose: documents official dataset metadata and column schema.
 
+- `mta_bus_time_api/offline_cache/20260626T144132Z/parsed/*.csv`
+  - Source: MTA Bus Time OneBusAway discovery API and SIRI
+    VehicleMonitoring API.
+  - API roots:
+    `https://bustime-classic.mta.info/api/where/` and
+    `https://bustime-classic.mta.info/api/siri/vehicle-monitoring.json`.
+  - Observation: offline MTA bus route, stop, route-stop sequence, and
+    route-filtered vehicle snapshot data.
+  - Boundary: MTA Bus Time API cache for FreqDuet external-data audit only.
+    This is not MTA APC/onboard-load data, not a full-day historical AVL
+    archive, not a FreqDuet field deployment result, and not FreqHRL paper
+    result data.
+
 ## External Large Data
 
 The MBTA bus stop/trip ridership file is intentionally not committed because it

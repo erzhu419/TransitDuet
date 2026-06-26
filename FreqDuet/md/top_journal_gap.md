@@ -31,6 +31,8 @@ working prototype. The current promoted line includes:
 - public OD/onboard-load and MBTA same-agency APC-to-GTFS route/stop calibration
   readiness audits, plus local MBTA live GTFS-RT and derived SUMO APC/AVL replay
   evidence;
+- a FreqDuet-only MTA Bus Time API offline cache for route/stop/vehicle snapshot
+  evidence, explicitly separated from FreqHRL paper results;
 - a canonical `results_freqduet/paper_package/current` bundle with no missing
   required artifacts.
 
@@ -38,12 +40,12 @@ Canonical paper package status:
 
 ```text
 package: results_freqduet/paper_package/current
-copied artifacts: 290
+copied artifacts: 311
 missing artifacts: 0
-tables: 39
+tables: 47
 figure/source files: 71
 config files: 136
-scripts: 30
+scripts: 31
 ```
 
 Current main evidence summary:
@@ -75,9 +77,10 @@ Remaining top-journal non-text gaps are now narrower:
 - public AFC/APC demand-profile evidence, separate public OD-estimate/onboard-load
   truth-source coverage, MBTA same-agency APC-to-static-GTFS route/stop
   calibration-readiness evidence, local MBTA live GTFS-RT snapshots, and
-  derived MBTA SUMO APC/AVL replay evidence are now present, but exact same-day
-  historical AFC/APC/AVL/OD calibration, service-day splits, and route-family
-  validation are still absent locally;
+  derived MBTA SUMO APC/AVL replay evidence are now present; MTA Bus Time API
+  route/stop/vehicle snapshot data are also cached offline under FreqDuet, but
+  exact same-day historical AFC/APC/AVL/OD calibration, service-day splits, and
+  route-family validation are still absent locally;
 - preserved original TransitDuet or a closest locked TransitDuet baseline is
   still useful if reviewers demand a lineage baseline;
 - final figure-panel selection and manuscript table curation still need to turn

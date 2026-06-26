@@ -180,6 +180,27 @@ data_sources:
       stop/trip board-alight-load raw CSV is large and remains an external
       local cache; FreqDuet packages only derived calibration-target tables.
 
+  mta_bus_time_api_offline_cache_v1:
+    status: downloaded_offline_mta_api_cache_freqduet_only
+    purpose: offline MTA Bus Time API route/stop/vehicle snapshot cache for FreqDuet external-data audits
+    files:
+      - data/external_truth_sources/mta_bus_time_api/README.md
+      - data/external_truth_sources/mta_bus_time_api/.gitignore
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/latest_manifest.json
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/manifest.json
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_agencies.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_routes.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_stops.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_route_stop_sequences.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_vehicle_snapshot_meta.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_vehicle_snapshots.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_source_coverage.csv
+      - data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_claim_boundaries.csv
+    boundary: >
+      FreqDuet-only offline MTA Bus Time API route/stop/vehicle snapshot cache.
+      This is not MTA APC/onboard-load data, not a full-day historical AVL
+      archive, not a field deployment result, and not FreqHRL paper result data.
+
   mbta_same_network_calibration_v1:
     status: local_public_source_pointer_and_generated_audit
     purpose: same-agency MBTA APC-to-GTFS route/stop structural calibration evidence
@@ -834,6 +855,34 @@ experiments:
       snapshots, and derived full-day SUMO APC/AVL replay evidence. Does not
       support exact Fall 2025 same-day historical AVL, route-level OD, field
       deployment, or observed FreqDuet wait-time improvements.
+
+  mta_bus_time_offline_cache_v1:
+    status: downloaded_offline_mta_api_cache_freqduet_only
+    purpose: offline MTA Bus Time route/stop/vehicle snapshot data for FreqDuet external realism and replay audits
+    script: scripts/download_mta_bus_time_offline_cache.py
+    result_dir: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z
+    source_coverage_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_source_coverage.csv
+    claim_boundaries_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_claim_boundaries.csv
+    agencies_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_agencies.csv
+    routes_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_routes.csv
+    stops_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_stops.csv
+    route_stop_sequences_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_route_stop_sequences.csv
+    vehicle_snapshot_meta_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_vehicle_snapshot_meta.csv
+    vehicle_snapshots_csv: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/parsed/mta_bus_time_vehicle_snapshots.csv
+    manifest_json: data/external_truth_sources/mta_bus_time_api/offline_cache/20260626T144132Z/manifest.json
+    command: >
+      MTA_BUS_TIME_API_KEY=<redacted> PYTHONPATH=.
+      python3 scripts/download_mta_bus_time_offline_cache.py --delay-sec 0.05
+    expected_claim_boundaries:
+      supported:
+        - mta_bus_time_static_route_stop_cache
+        - mta_bus_time_vehicle_snapshot_cache
+        - separation_from_freqhrl_results
+    data_boundary: >
+      Supports offline MTA Bus Time static route/stop/sequence data and
+      route-filtered SIRI VehicleMonitoring snapshots for FreqDuet external-data
+      audits. Does not support MTA APC/onboard-load, full-day historical AVL,
+      field deployment outcomes, or any FreqHRL paper result claim.
 
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
@@ -3854,6 +3903,7 @@ paper_scripts:
   - scripts/audit_external_afc_apc_profiles.py
   - scripts/audit_external_od_onboard_truth.py
   - scripts/audit_mbta_same_network_calibration.py
+  - scripts/download_mta_bus_time_offline_cache.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
@@ -3863,23 +3913,23 @@ paper_scripts:
 
 paper_packages:
   current:
-    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_and_same_network_sources
+    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_same_network_and_mta_bus_time_sources
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 22:22 CST
-      copied_artifacts: 290
+      checked_at: 2026-06-26 22:53 CST
+      copied_artifacts: 311
       missing_artifacts: 0
-      package_size: 161M
-      tables: 39
+      package_size: 167M
+      tables: 47
       figure_files: 71
       config_files: 136
-      scripts: 30
+      scripts: 31
       manuscript_notes: 4
-      data_source_files: 8
+      data_source_files: 20
       appendix_files: 1
     canonical_tables:
       - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
@@ -3911,6 +3961,13 @@ paper_packages:
       - tables/mbta_same_network_overlap_summary.csv
       - tables/mbta_route111_apc_gtfs_profile.csv
       - tables/mbta_apc_top_routes.csv
+      - tables/mta_bus_time_source_coverage.csv
+      - tables/mta_bus_time_claim_boundaries.csv
+      - tables/mta_bus_time_routes.csv
+      - tables/mta_bus_time_stops.csv
+      - tables/mta_bus_time_route_stop_sequences.csv
+      - tables/mta_bus_time_vehicle_snapshot_meta.csv
+      - tables/mta_bus_time_vehicle_snapshots.csv
     required_figures:
       - figures/external_afc_apc_profile_audit_v1
       - figures/external_od_onboard_truth_audit_v1
@@ -3927,7 +3984,8 @@ paper_packages:
       trace alignment, HF residual-to-holding/wait mechanism plots, and
       data-only public AFC/APC demand-profile evidence plus separate public
       OD-estimate/onboard-load truth-source coverage plus same-agency MBTA
-      APC-to-GTFS route/stop calibration readiness evidence.
+      APC-to-GTFS route/stop calibration readiness evidence and FreqDuet-only
+      MTA Bus Time API offline cache tables.
     outputs:
       - README.md
       - package_manifest.json
@@ -3962,6 +4020,14 @@ paper_packages:
       - tables/mbta_route111_apc_gtfs_profile.csv
       - tables/mbta_apc_top_routes.csv
       - tables/mbta_apc_route_stop_gtfs_overlap.csv
+      - tables/mta_bus_time_source_coverage.csv
+      - tables/mta_bus_time_claim_boundaries.csv
+      - tables/mta_bus_time_agencies.csv
+      - tables/mta_bus_time_routes.csv
+      - tables/mta_bus_time_stops.csv
+      - tables/mta_bus_time_route_stop_sequences.csv
+      - tables/mta_bus_time_vehicle_snapshot_meta.csv
+      - tables/mta_bus_time_vehicle_snapshots.csv
       - configs/paper_generalization
       - configs/paper_ablation_v1_4x6
       - configs/paper_main_cfaction_domainbest_v1_4x1
