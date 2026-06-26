@@ -180,6 +180,16 @@ data_sources:
       stop/trip board-alight-load raw CSV is large and remains an external
       local cache; FreqDuet packages only derived calibration-target tables.
 
+  mbta_same_network_calibration_v1:
+    status: local_public_source_pointer_and_generated_audit
+    purpose: same-agency MBTA APC-to-GTFS route/stop structural calibration evidence
+    files:
+      - data/external_truth_sources/mbta_same_network/README.md
+    boundary: >
+      Supports same-agency APC board/alight/load to static GTFS route/stop
+      matching and Route 111 calibration targets. Does not support same-day
+      AFC/APC/AVL/OD control-loop calibration or field deployment outcomes.
+
 config_sets:
   current_longtrain_4x6:
     terminal:
@@ -791,6 +801,36 @@ experiments:
       Supports separate public agency OD-estimate and bus onboard-load
       truth-source coverage. Does not support exact same-network AFC/APC
       OD plus onboard-load field calibration for FreqDuet deployment.
+
+  mbta_same_network_calibration_audit_v1:
+    status: generated_same_agency_route_stop_calibration_audit
+    purpose: MBTA APC board/alight/load to MBTA GTFS route/stop matching audit for same-network realism evidence
+    script: scripts/audit_mbta_same_network_calibration.py
+    result_dir: results_freqduet/mbta_same_network_calibration_audit/v1
+    source_coverage_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_source_coverage.csv
+    claim_boundaries_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_claim_boundaries.csv
+    overlap_summary_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_same_network_overlap_summary.csv
+    focus_profile_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_route111_apc_gtfs_profile.csv
+    top_routes_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_apc_top_routes.csv
+    route_stop_overlap_csv: results_freqduet/mbta_same_network_calibration_audit/v1/mbta_apc_route_stop_gtfs_overlap.csv
+    summary_json: results_freqduet/mbta_same_network_calibration_audit/v1/summary.json
+    command: >
+      PYTHONPATH=. python3 scripts/audit_mbta_same_network_calibration.py
+      --out-dir results_freqduet/mbta_same_network_calibration_audit/v1
+      --focus-route 111
+    expected_claim_boundaries:
+      supported:
+        - same_agency_apc_static_gtfs_route_stop_match
+        - route111_apc_load_calibration_targets
+      not_supported:
+        - same_period_static_schedule_alignment
+        - same_period_avl_arrival_departure_events
+        - same_network_od_apc_avl_control_loop
+    data_boundary: >
+      Supports same-agency MBTA APC-to-static-GTFS structural calibration and
+      Route 111 public APC load targets. Does not support exact same-day
+      historical AVL, route-level OD, field deployment, or observed FreqDuet
+      wait-time improvements.
 
   current_longtrain_ep200_wu10:
     status: complete_predriftcost
@@ -3552,6 +3592,26 @@ figures:
       - external_od_onboard_truth_audit.md
       - summary.json
 
+  mbta_same_network_calibration_audit_v1:
+    status: generated_same_agency_route_stop_calibration_audit
+    required: true
+    script: scripts/audit_mbta_same_network_calibration.py
+    out_dir: results_freqduet/mbta_same_network_calibration_audit/v1
+    command: >
+      PYTHONPATH=. python3 scripts/audit_mbta_same_network_calibration.py
+      --out-dir results_freqduet/mbta_same_network_calibration_audit/v1
+      --focus-route 111
+    outputs:
+      - mbta_route111_apc_load_profile
+      - mbta_same_network_source_coverage.csv
+      - mbta_same_network_claim_boundaries.csv
+      - mbta_same_network_overlap_summary.csv
+      - mbta_route111_apc_gtfs_profile.csv
+      - mbta_apc_top_routes.csv
+      - mbta_apc_route_stop_gtfs_overlap.csv
+      - mbta_same_network_calibration_audit.md
+      - summary.json
+
   decomposer_validation_paper_v1_60seed:
     status: generated_with_trace_alignment
     required: true
@@ -3754,9 +3814,13 @@ manuscript_notes:
     path: ../md/method_framing.md
     purpose: method and discussion framing for frequency-separated HRL
   realism_data_evidence:
-    status: audit_complete_public_afc_apc_profile_added
+    status: audit_complete_public_afc_apc_profile_external_truth_and_mbta_same_network_added
     path: ../md/realism_data_evidence.md
     purpose: realism, data, and calibration evidence boundary
+  paper_effect_status:
+    status: drafted_current_effect_boundary
+    path: ../md/paper_effect_status.md
+    purpose: current paper effect status and safe/unsafe claim boundary
   phase4_scope_decision:
     status: documented_executable_dispatch_done_value_layer_open
     path: ../md/phase4_scope_decision.md
@@ -3786,6 +3850,7 @@ paper_scripts:
   - scripts/make_freqduet_mechanism_figures.py
   - scripts/audit_external_afc_apc_profiles.py
   - scripts/audit_external_od_onboard_truth.py
+  - scripts/audit_mbta_same_network_calibration.py
   - scripts/build_freqduet_paper_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
@@ -3795,23 +3860,23 @@ paper_scripts:
 
 paper_packages:
   current:
-    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_sources
+    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_and_same_network_sources
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
     build_audit:
-      checked_at: 2026-06-26 21:25 CST
-      copied_artifacts: 272
+      checked_at: 2026-06-26 22:22 CST
+      copied_artifacts: 290
       missing_artifacts: 0
-      package_size: 160M
-      tables: 33
-      figure_files: 62
+      package_size: 161M
+      tables: 39
+      figure_files: 71
       config_files: 136
-      scripts: 29
-      manuscript_notes: 3
-      data_source_files: 7
+      scripts: 30
+      manuscript_notes: 4
+      data_source_files: 8
       appendix_files: 1
     canonical_tables:
       - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
@@ -3838,9 +3903,15 @@ paper_packages:
       - tables/mbta_hourly_board_alight_load.csv
       - tables/mta_od_sample_top_pairs.csv
       - tables/mta_od_sample_hourly_profile.csv
+      - tables/mbta_same_network_source_coverage.csv
+      - tables/mbta_same_network_claim_boundaries.csv
+      - tables/mbta_same_network_overlap_summary.csv
+      - tables/mbta_route111_apc_gtfs_profile.csv
+      - tables/mbta_apc_top_routes.csv
     required_figures:
       - figures/external_afc_apc_profile_audit_v1
       - figures/external_od_onboard_truth_audit_v1
+      - figures/mbta_same_network_calibration_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment
@@ -3852,7 +3923,8 @@ paper_packages:
       trace-enabled paper-main diagnostics and source data for decomposer
       trace alignment, HF residual-to-holding/wait mechanism plots, and
       data-only public AFC/APC demand-profile evidence plus separate public
-      OD-estimate and onboard-load truth-source coverage.
+      OD-estimate/onboard-load truth-source coverage plus same-agency MBTA
+      APC-to-GTFS route/stop calibration readiness evidence.
     outputs:
       - README.md
       - package_manifest.json
@@ -3881,6 +3953,12 @@ paper_packages:
       - tables/mbta_hourly_board_alight_load.csv
       - tables/mta_od_sample_top_pairs.csv
       - tables/mta_od_sample_hourly_profile.csv
+      - tables/mbta_same_network_source_coverage.csv
+      - tables/mbta_same_network_claim_boundaries.csv
+      - tables/mbta_same_network_overlap_summary.csv
+      - tables/mbta_route111_apc_gtfs_profile.csv
+      - tables/mbta_apc_top_routes.csv
+      - tables/mbta_apc_route_stop_gtfs_overlap.csv
       - configs/paper_generalization
       - configs/paper_ablation_v1_4x6
       - configs/paper_main_cfaction_domainbest_v1_4x1
@@ -3889,12 +3967,14 @@ paper_packages:
       - data_sources/external_truth_sources
       - figures/external_afc_apc_profile_audit_v1
       - figures/external_od_onboard_truth_audit_v1
+      - figures/mbta_same_network_calibration_audit_v1
       - figures/decomposer_validation_paper_v1_60seed
       - figures/mechanism_paper_ablation_v1_ep200_60seed
       - figures/mechanism_paper_v1_trace_alignment
       - scripts
       - manuscript_notes/method_framing.md
       - manuscript_notes/realism_data_evidence.md
+      - manuscript_notes/paper_effect_status.md
       - manuscript_notes/phase4_scope_decision.md
       - appendix/negative_results_appendix.md
 

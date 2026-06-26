@@ -28,6 +28,8 @@ working prototype. The current promoted line includes:
 - a 60-seed, 200-episode external classical baseline matrix;
 - a 60-seed, 100-episode broad held-out generalization matrix;
 - decomposer validation, trace alignment, and mechanism/source-data packages;
+- public OD/onboard-load and MBTA same-agency APC-to-GTFS route/stop calibration
+  readiness audits;
 - a canonical `results_freqduet/paper_package/current` bundle with no missing
   required artifacts.
 
@@ -35,12 +37,12 @@ Canonical paper package status:
 
 ```text
 package: results_freqduet/paper_package/current
-copied artifacts: 234
+copied artifacts: 290
 missing artifacts: 0
-tables: 24
-figure/source files: 42
+tables: 39
+figure/source files: 71
 config files: 136
-scripts: 27
+scripts: 30
 ```
 
 Current main evidence summary:
@@ -69,10 +71,11 @@ fixed-headway or every internal ablation.
 
 Remaining top-journal non-text gaps are now narrower:
 
-- public AFC/APC demand-profile evidence is now present as a data-only audit,
-  and separate public OD-estimate/onboard-load truth-source coverage is now
-  present, but exact same-network AFC/APC/AVL calibration, service-day splits,
-  and route-family validation are still absent locally;
+- public AFC/APC demand-profile evidence, separate public OD-estimate/onboard-load
+  truth-source coverage, and MBTA same-agency APC-to-static-GTFS route/stop
+  calibration-readiness evidence are now present, but exact same-day
+  AFC/APC/AVL/OD calibration, service-day splits, and route-family validation
+  are still absent locally;
 - preserved original TransitDuet or a closest locked TransitDuet baseline is
   still useful if reviewers demand a lineage baseline;
 - final figure-panel selection and manuscript table curation still need to turn

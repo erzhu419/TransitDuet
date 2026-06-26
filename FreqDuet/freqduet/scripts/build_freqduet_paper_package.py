@@ -315,6 +315,22 @@ def copy_core_tables(manifest: dict, out_dir: Path,
          real_truth.get("mta_od_hourly_profile_csv")),
     ])
 
+    same_network = experiment(manifest, "mbta_same_network_calibration_audit_v1")
+    table_specs.extend([
+        ("mbta_same_network_source_coverage.csv",
+         same_network.get("source_coverage_csv")),
+        ("mbta_same_network_claim_boundaries.csv",
+         same_network.get("claim_boundaries_csv")),
+        ("mbta_same_network_overlap_summary.csv",
+         same_network.get("overlap_summary_csv")),
+        ("mbta_route111_apc_gtfs_profile.csv",
+         same_network.get("focus_profile_csv")),
+        ("mbta_apc_top_routes.csv",
+         same_network.get("top_routes_csv")),
+        ("mbta_apc_route_stop_gtfs_overlap.csv",
+         same_network.get("route_stop_overlap_csv")),
+    ])
+
     for name, src in table_specs:
         required = name.startswith("paper_")
         if not src:
