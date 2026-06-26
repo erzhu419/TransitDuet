@@ -959,7 +959,7 @@ experiments:
       robustness rather than asserting broad internal dominance.
 
   paper_external_classical_v1_ep200_wu10_4domain_60seed:
-    status: running_scheduler
+    status: complete
     episodes: 200
     last_k: 50
     seeds: paired_seeds_60
@@ -984,6 +984,12 @@ experiments:
         node005: 7
         node006: 7
     purpose: 60-seed external classical baseline confirmation for fixed-headway/rule-holding/rule-MPC paper table.
+    completion_audit:
+      scheduler_tasks_done: 45
+      per_seed_rows: 720
+      configs: 4
+      variants: 3
+      seeds_per_config_variant: 60
     aggregate_command: >
       python3 scripts/run_freqduet_external_baselines.py
       --configs F_freqduet_terminal_paper_main_hiro,F_freqduet_gen_highnoise_paper_main_hiro,F_freqduet_gen_odshift_paper_main_hiro,F_freqduet_gen_rushshift_paper_main_hiro
@@ -993,6 +999,25 @@ experiments:
       --aggregate-logs-dirs "$(find results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
       --last-k 50
       --out-dir results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/combined_summary
+    comparison_vs_main_dir: results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/compare_main_vs_external_classical
+    comparison_vs_main_command: >
+      python3 scripts/compare_freqduet_external_baseline.py
+      --candidate-per-seed results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/combined_summary/freqduet_ablation_per_seed.csv
+      --baseline-per-seed results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/combined_summary/external_baselines_per_seed.csv
+      --candidate-method main
+      --baseline-methods fixed_headway,rule_holding,rule_mpc
+      --paired-metric composite
+      --out-dir results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/compare_main_vs_external_classical
+    overall_shared_delta_main_minus_external:
+      fixed_headway: [0.0084, -0.0100, 0.0321]
+      rule_holding: [-0.6010, -0.6243, -0.5742]
+      rule_mpc: [-1.9865, -2.0480, -1.9254]
+    key_result: >
+      In the 60-seed external baseline confirmation, paper-main V1 remains
+      statistically tied with the strong fixed-headway baseline while strongly
+      outperforming rule_holding and rule_mpc. The paper should describe
+      fixed-headway as a strong, statistically matched baseline rather than
+      claiming robust dominance over it.
 
   detseed_cfaction_v3_palette_ep100_wu10_4domain_20seed:
     status: complete_broad_aggressive_palette_screen_no_global_promotion

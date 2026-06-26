@@ -1417,3 +1417,53 @@ t13353-t13397
 status after dispatch: 45 running, 0 queued
 nodes: node001-node006
 ```
+
+## 2026-06-26 external classical 60-seed result
+
+The external classical matrix completed, synced, aggregated, and was compared
+against the 60-seed paper-main V1 ablation table:
+
+```text
+run:
+results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed
+
+completion:
+45 scheduler shards done
+4 paper-main domains x 3 baselines x 60 seeds = 720 per-seed rows
+
+comparison:
+results_freqduet/paper_external_classical_v1_ep200_wu10_4domain_60seed/compare_main_vs_external_classical
+```
+
+External baseline means:
+
+```text
+domain       fixed     rule_holding  rule_mpc
+terminal     1.4644    2.0821        3.4759
+highnoise    1.8475    2.4851        3.9111
+odshift      1.4719    2.0669        3.3978
+rushshift    1.2965    1.8837        3.2751
+```
+
+Paired deltas are main minus external baseline:
+
+```text
+overall vs fixed_headway  +0.0084  CI [-0.0100, +0.0321]
+overall vs rule_holding   -0.6010  CI [-0.6243, -0.5742]
+overall vs rule_mpc       -1.9865  CI [-2.0480, -1.9254]
+```
+
+Domain notes:
+
+```text
+terminal vs fixed_headway  +0.0121  CI [-0.0102, +0.0411]
+highnoise vs fixed_headway -0.0068  CI [-0.0391, +0.0335]
+odshift vs fixed_headway   +0.0283  CI [-0.0039, +0.0670]
+rushshift vs fixed_headway -0.0000  CI [-0.0000, +0.0000]
+```
+
+Interpretation: fixed-headway remains a very strong baseline and is
+statistically tied with paper-main V1 at 60 seeds. The defensible paper claim is
+that FreqDuet matches fixed-headway while strongly outperforming weaker
+classical rule-holding and MPC baselines; it should not claim robust dominance
+over fixed-headway.
