@@ -42,6 +42,14 @@ def parse_csv_list(value, cast=str):
     return [cast(v.strip()) for v in str(value).split(",") if v.strip()]
 
 
+def parse_csv_file(path, cast=str):
+    items = []
+    with open(path, "r") as f:
+        for line in f:
+            items.extend(parse_csv_list(line, cast=cast))
+    return items
+
+
 def config_path(name):
     filename = name if name.endswith(".yaml") else f"{name}.yaml"
     path = Path("configs_freqduet") / filename
@@ -702,6 +710,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--configs", default=",".join(DEFAULT_CONFIGS),
                     help="comma-separated config names without .yaml")
+    ap.add_argument("--configs-file", default=None,
+                    help="file containing comma- or newline-separated config names")
     ap.add_argument("--seeds", default="42,123,456")
     ap.add_argument("--episodes", type=int, default=30)
     ap.add_argument("--last-k", type=int, default=10)
@@ -729,7 +739,10 @@ def main():
                     help="flattened config x seed end index for scheduler shards")
     args = ap.parse_args()
 
-    configs = parse_csv_list(args.configs, str)
+    configs = (
+        parse_csv_file(args.configs_file, str)
+        if args.configs_file else parse_csv_list(args.configs, str)
+    )
     seeds = parse_csv_list(args.seeds, int)
     logs_dir = ROOT / args.logs_dir
     env_job_start = os.environ.get("SCHEDULEURM_CPU_START")

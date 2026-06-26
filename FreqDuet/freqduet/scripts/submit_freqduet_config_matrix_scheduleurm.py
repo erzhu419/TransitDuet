@@ -34,6 +34,14 @@ def parse_csv(value: str, cast=str) -> list:
     return [cast(x.strip()) for x in str(value).split(",") if x.strip()]
 
 
+def parse_csv_file(path: str | Path, cast=str) -> list:
+    items = []
+    with open(path, "r") as f:
+        for line in f:
+            items.extend(parse_csv(line, cast=cast))
+    return items
+
+
 def shard_ranges(total: int, shard_size: int) -> list[tuple[int, int]]:
     shard_size = max(1, int(shard_size))
     return [
@@ -49,7 +57,12 @@ def run_command(command: list[str], dry_run: bool) -> None:
     proc = subprocess.run(command, text=True, capture_output=True)
     output = (proc.stdout or "") + (proc.stderr or "")
     if proc.returncode != 0:
-        if "duplicate" in output.lower() or "already queued" in output.lower():
+        lowered = output.lower()
+        if (
+            "duplicate" in lowered
+            or "already queued" in lowered
+            or "destination already in use" in lowered
+        ):
             print(output.strip())
             return
         print(output, file=sys.stderr)
@@ -83,7 +96,6 @@ def build_inner_cmd(
         str(REMOTE_PYTHON),
         "-u",
         "scripts/run_freqduet_ablation.py",
-        "--configs", configs_csv,
         "--seeds", seeds_csv,
         "--episodes", str(args.episodes),
         "--last-k", str(args.last_k),
@@ -96,6 +108,10 @@ def build_inner_cmd(
         "--skip-existing",
         "--no-aggregate",
     ]
+    if args.configs_file:
+        cmd.extend(["--configs-file", args.configs_file])
+    else:
+        cmd.extend(["--configs", configs_csv])
     if args.upper_warmup_eps is not None:
         cmd.extend(["--upper-warmup-eps", str(args.upper_warmup_eps)])
     return " ".join(env_bits + [shlex.join(cmd)])
@@ -147,7 +163,8 @@ def submit_shard(
 
 
 def print_aggregate_hint(run_name: str, configs: list[str],
-                         seeds: list[int], last_k: int) -> None:
+                         seeds: list[int], last_k: int,
+                         configs_file: str | None = None) -> None:
     configs_csv = ",".join(configs)
     seeds_csv = ",".join(str(s) for s in seeds)
     logs_expr = (
@@ -155,10 +172,13 @@ def print_aggregate_hint(run_name: str, configs: list[str],
         "-mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
     )
     print("\nAggregate after result sync:")
+    config_arg = (
+        f"--configs-file {shlex.quote(configs_file)}"
+        if configs_file else f"--configs {shlex.quote(configs_csv)}"
+    )
     print(
         "  python3 scripts/run_freqduet_ablation.py "
-        f"--configs {shlex.quote(configs_csv)} "
-        f"--seeds {shlex.quote(seeds_csv)} "
+        f"{config_arg} --seeds {shlex.quote(seeds_csv)} "
         "--aggregate-only "
         f"--aggregate-logs-dirs \"{logs_expr}\" "
         f"--last-k {int(last_k)} "
@@ -168,7 +188,9 @@ def print_aggregate_hint(run_name: str, configs: list[str],
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--configs", required=True)
+    parser.add_argument("--configs", default=None)
+    parser.add_argument("--configs-file", default=None,
+                        help="file containing config names; same path must exist on remote cwd")
     parser.add_argument("--seeds", default=",".join(str(x) for x in DEFAULT_SEEDS))
     parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--last-k", type=int, default=50)
@@ -190,7 +212,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    configs = parse_csv(args.configs, str)
+    if args.configs_file:
+        configs = parse_csv_file(args.configs_file, str)
+    elif args.configs:
+        configs = parse_csv(args.configs, str)
+    else:
+        raise SystemExit("Either --configs or --configs-file is required")
     seeds = parse_csv(args.seeds, int)
     nodes = parse_csv(args.nodes, str)
     total_jobs = len(configs) * len(seeds)
@@ -200,7 +227,9 @@ def main() -> None:
         f"seeds={len(seeds)}; total jobs={total_jobs}; shards={len(ranges)}; "
         f"nodes={','.join(nodes)}"
     )
-    print_aggregate_hint(args.run_name, configs, seeds, args.last_k)
+    print_aggregate_hint(
+        args.run_name, configs, seeds, args.last_k,
+        configs_file=args.configs_file)
 
     configs_csv = ",".join(configs)
     seeds_csv = ",".join(str(x) for x in seeds)

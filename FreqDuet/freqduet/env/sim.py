@@ -117,6 +117,37 @@ class env_bus(object):
         self._upper_policy_callback = None  # Set by runner
         self._peak_concurrent = 0
 
+    def _period_hour(self, value):
+        if hasattr(value, 'hour'):
+            return int(value.hour)
+        text = str(value)
+        try:
+            return int(text.split(':', 1)[0])
+        except Exception:
+            return None
+
+    def _build_route_effective_period(self, service_start_hour, service_end_hour):
+        route_periods = [
+            col for col in self.routes_set.columns[5:]
+            if self._period_hour(col) is not None
+        ]
+        periods = route_periods or self.effective_period
+        if not periods:
+            return self.effective_period
+        by_hour = {}
+        for period in periods:
+            hour = self._period_hour(period)
+            if hour is not None and hour not in by_hour:
+                by_hour[hour] = period
+        if not by_hour:
+            return periods
+        shifted = []
+        last = periods[-1]
+        for hour in range(int(service_start_hour), int(service_end_hour) + 1):
+            last = by_hour.get(hour, last)
+            shifted.append(last)
+        return shifted or periods
+
     @property
     def bus_in_terminal(self):
         return [bus for bus in self.bus_all if not bus.on_route]
@@ -189,6 +220,26 @@ class env_bus(object):
         else:
             self._demand_multipliers = None
 
+        demand_hourly_multipliers = getattr(
+            self, 'demand_hourly_multipliers', None)
+        if demand_hourly_multipliers is not None:
+            profile = {}
+            for h in range(6, 20):
+                value = 1.0
+                for key in (h, str(h), f"{h:02d}", f"{h:02d}:00:00"):
+                    if key in demand_hourly_multipliers:
+                        value = demand_hourly_multipliers[key]
+                        break
+                profile[h] = max(0.0, float(value))
+            if self._demand_multipliers is None:
+                self._demand_multipliers = profile
+            else:
+                self._demand_multipliers = {
+                    h: float(self._demand_multipliers.get(h, 1.0))
+                    * float(profile.get(h, 1.0))
+                    for h in range(6, 20)
+                }
+
         peak_shift_choices = getattr(self, 'peak_shift_choices', None)
         if peak_shift_choices is not None:
             try:
@@ -220,6 +271,14 @@ class env_bus(object):
             self._peak_shift = 0
         self._demand_scale = max(
             0.0, float(getattr(self, 'demand_scale', 1.0)))
+        default_start_hour = 6
+        default_end_hour = default_start_hour + max(len(self.effective_period), 1) - 1
+        self._service_start_hour = int(getattr(
+            self, 'service_start_hour', default_start_hour))
+        self._service_end_hour = int(getattr(
+            self, 'service_end_hour', default_end_hour))
+        self._route_effective_period = self._build_route_effective_period(
+            self._service_start_hour, self._service_end_hour)
         self._od_multipliers = self._sample_od_multipliers()
 
         if self.frequency_tracker is not None:
@@ -374,7 +433,7 @@ class env_bus(object):
         # update route speed limit by freq
         if self.current_time % self.args['route_state_update_freq'] == 0:
             for route in self.routes:
-                route.route_update(self.current_time, self.effective_period)
+                route.route_update(self.current_time, self._route_effective_period)
                 route_state.append(route.speed_limit)
             self.route_state = route_state
         # update waiting passengers of every station every second
@@ -395,6 +454,8 @@ class env_bus(object):
                         demand_scale=self._demand_scale,
                         od_multipliers=self._od_multipliers,
                         peak_shift=self._peak_shift,
+                        service_start_hour=self._service_start_hour,
+                        service_end_hour=self._service_end_hour,
                         return_details=True)
                 else:
                     new_count = station.station_update(
@@ -403,6 +464,8 @@ class env_bus(object):
                         demand_scale=self._demand_scale,
                         od_multipliers=self._od_multipliers,
                         peak_shift=self._peak_shift,
+                        service_start_hour=self._service_start_hour,
+                        service_end_hour=self._service_end_hour,
                         return_details=False)
                     od_counts = {}
                 if self.frequency_enabled and new_count:

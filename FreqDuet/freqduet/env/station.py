@@ -51,6 +51,7 @@ class Station(object):
     def station_update(self, current_time, stations, passenger_update_interval=1,
                         demand_multipliers=None, demand_scale=1.0,
                         od_multipliers=None, peak_shift=0,
+                        service_start_hour=6, service_end_hour=19,
                         return_details=False):
         """
         每秒更新一次，减少不必要的泊松分布计算
@@ -60,9 +61,15 @@ class Station(object):
         new_passenger_count = 0
         new_passenger_od = {} if return_details else None
         if self.od is not None:
-            hour = 6 + min(current_time // 3600, 13)
+            service_start_hour = int(service_start_hour)
+            service_end_hour = int(service_end_hour)
+            hour = service_start_hour + int(current_time // 3600)
+            hour = max(service_start_hour, min(service_end_hour, hour))
             # Apply peak shift: look up demand from shifted hour
-            lookup_hour = max(6, min(19, hour + peak_shift))
+            lookup_hour = max(
+                service_start_hour,
+                min(service_end_hour, hour + int(peak_shift)),
+            )
             effective_period_str = f"{lookup_hour:02}:00:00"
             period_od = self.od[effective_period_str]
 

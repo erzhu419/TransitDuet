@@ -492,6 +492,10 @@ class TransitDuetV2Runner:
         env_cfg = config.get('env', {})
         self.env.demand_noise = env_cfg.get('demand_noise', 0.0)
         self.env.demand_scale = env_cfg.get('demand_scale', 1.0)
+        self.env.demand_hourly_multipliers = env_cfg.get(
+            'demand_hourly_multipliers', None)
+        self.env.service_start_hour = env_cfg.get('service_start_hour', 6)
+        self.env.service_end_hour = env_cfg.get('service_end_hour', 19)
         self.env.od_noise = env_cfg.get('od_noise', 0.0)
         self.env.od_noise_clip = env_cfg.get('od_noise_clip', [0.3, 2.0])
         self.env.peak_shift_choices = env_cfg.get('peak_shift_choices', None)

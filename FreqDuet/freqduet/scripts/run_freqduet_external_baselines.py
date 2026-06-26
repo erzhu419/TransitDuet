@@ -38,6 +38,14 @@ def parse_csv_list(value: str, cast=str) -> list:
     return [cast(v.strip()) for v in str(value).split(",") if v.strip()]
 
 
+def parse_csv_file(path: str | Path, cast=str) -> list:
+    items = []
+    with open(path, "r") as f:
+        for line in f:
+            items.extend(parse_csv_list(line, cast=cast))
+    return items
+
+
 def config_path(name: str) -> Path:
     filename = name if name.endswith(".yaml") else f"{name}.yaml"
     return ROOT / "configs_freqduet" / filename
@@ -95,11 +103,18 @@ def make_env_from_config(config_name: str):
     cfg = load_config(str(config_path(config_name)))
     env_cfg = cfg.get("env", {})
     upper_cfg = cfg.get("upper", {})
-    env = env_bus(str(ROOT / "env"), route_sigma=env_cfg.get("route_sigma", cfg.get("env", {}).get("route_sigma", 1.5)))
+    env_path = env_cfg.get("path", "env")
+    env = env_bus(
+        str(resolve_under_root(env_path)),
+        route_sigma=env_cfg.get("route_sigma", cfg.get("env", {}).get("route_sigma", 1.5)),
+    )
     env.enable_plot = False
     env._n_fleet_target = upper_cfg.get("N_fleet", 12)
     env.demand_noise = env_cfg.get("demand_noise", 0.0)
     env.demand_scale = env_cfg.get("demand_scale", 1.0)
+    env.demand_hourly_multipliers = env_cfg.get("demand_hourly_multipliers", None)
+    env.service_start_hour = env_cfg.get("service_start_hour", 6)
+    env.service_end_hour = env_cfg.get("service_end_hour", 19)
     env.od_noise = env_cfg.get("od_noise", 0.0)
     env.od_noise_clip = env_cfg.get("od_noise_clip", [0.3, 2.0])
     env.peak_shift_choices = env_cfg.get("peak_shift_choices", None)
@@ -385,6 +400,8 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--configs", default=",".join(DEFAULT_DOMAIN_CONFIGS.values()))
+    ap.add_argument("--configs-file", default=None,
+                    help="file containing comma- or newline-separated config names")
     ap.add_argument("--variants", default="fixed_headway,rule_holding,rule_mpc")
     ap.add_argument("--seeds", default="42,123,456,789,2026")
     ap.add_argument("--episodes", type=int, default=20)
@@ -407,7 +424,10 @@ def main() -> None:
                     help="flattened config x variant x seed end index for scheduler shards")
     args = ap.parse_args()
 
-    configs = parse_csv_list(args.configs)
+    configs = (
+        parse_csv_file(args.configs_file)
+        if args.configs_file else parse_csv_list(args.configs)
+    )
     variants = parse_csv_list(args.variants)
     seeds = parse_csv_list(args.seeds, int)
     unknown = sorted(set(variants) - set(BASELINE_VARIANTS))

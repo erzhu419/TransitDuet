@@ -17,6 +17,7 @@ from submit_freqduet_config_matrix_scheduleurm import (
     REMOTE_ROOT,
     SCHEDULER,
     parse_csv,
+    parse_csv_file,
     run_command,
     shard_ranges,
 )
@@ -50,7 +51,6 @@ def build_inner_cmd(
         str(REMOTE_PYTHON),
         "-u",
         "scripts/run_freqduet_external_baselines.py",
-        "--configs", configs_csv,
         "--variants", variants_csv,
         "--seeds", seeds_csv,
         "--episodes", str(args.episodes),
@@ -64,6 +64,10 @@ def build_inner_cmd(
         "--skip-existing",
         "--no-aggregate",
     ]
+    if args.configs_file:
+        cmd.extend(["--configs-file", args.configs_file])
+    else:
+        cmd.extend(["--configs", configs_csv])
     return " ".join(env_bits + [shlex.join(cmd)])
 
 
@@ -120,16 +124,20 @@ def print_aggregate_hint(
     variants: list[str],
     seeds: list[int],
     last_k: int,
+    configs_file: str | None = None,
 ) -> None:
     logs_expr = (
         f"$(find results_freqduet/{run_name}/logs_shards "
         "-mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)"
     )
     print("\nAggregate after result sync:")
+    config_arg = (
+        f"--configs-file {shlex.quote(configs_file)}"
+        if configs_file else f"--configs {shlex.quote(','.join(configs))}"
+    )
     print(
         "  python3 scripts/run_freqduet_external_baselines.py "
-        f"--configs {shlex.quote(','.join(configs))} "
-        f"--variants {shlex.quote(','.join(variants))} "
+        f"{config_arg} --variants {shlex.quote(','.join(variants))} "
         f"--seeds {shlex.quote(','.join(str(s) for s in seeds))} "
         "--aggregate-only "
         f"--aggregate-logs-dirs \"{logs_expr}\" "
@@ -140,7 +148,9 @@ def print_aggregate_hint(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--configs", required=True)
+    parser.add_argument("--configs", default=None)
+    parser.add_argument("--configs-file", default=None,
+                        help="file containing config names; same path must exist on remote cwd")
     parser.add_argument("--variants", default=",".join(DEFAULT_VARIANTS))
     parser.add_argument("--seeds", default=",".join(str(x) for x in DEFAULT_SEEDS))
     parser.add_argument("--episodes", type=int, default=100)
@@ -157,7 +167,12 @@ def main() -> None:
     parser.add_argument("--allow-duplicate", action="store_true")
     args = parser.parse_args()
 
-    configs = parse_csv(args.configs, str)
+    if args.configs_file:
+        configs = parse_csv_file(args.configs_file, str)
+    elif args.configs:
+        configs = parse_csv(args.configs, str)
+    else:
+        raise SystemExit("Either --configs or --configs-file is required")
     variants = parse_csv(args.variants, str)
     seeds = parse_csv(args.seeds, int)
     nodes = parse_csv(args.nodes, str)
@@ -168,7 +183,9 @@ def main() -> None:
         f"variants={len(variants)}; seeds={len(seeds)}; total jobs={total_jobs}; "
         f"shards={len(ranges)}; nodes={','.join(nodes)}"
     )
-    print_aggregate_hint(args.run_name, configs, variants, seeds, args.last_k)
+    print_aggregate_hint(
+        args.run_name, configs, variants, seeds, args.last_k,
+        configs_file=args.configs_file)
 
     configs_csv = ",".join(configs)
     variants_csv = ",".join(variants)

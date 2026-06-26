@@ -1,0 +1,43 @@
+_extends: F_freqduet_terminal_final_nofreq_hiro.yaml
+_name: F_freqduet_routeday_mbta_r22_d0_key_high_ridership_sun_nofreq_hiro
+_paper_route_day:
+  scenario_id: mbta_r22_d0_key_high_ridership
+  agency: MBTA
+  route_id: '22'
+  target_direction: 0
+  env_direction: 0
+  env_name: 22_D0_P001_2816BEFD
+  route_family: key_high_ridership
+  day_type: Sun
+  method: nofreq
+  source: H2Oplus GTFS/APC line env + MBTA APC day-type profile
+  wkdy_boardings: 4007.8
+  wkdy_mean_load: 15.02125738103508
+  wkdy_max_load: 43.0
+env:
+  path: data/external_route_envs/mbta_route_day_v1/_line_envs/22_D0_P001_2816BEFD
+  route_sigma: 1.5
+  demand_noise: 0.0
+  demand_scale: 0.4665
+  demand_hourly_multipliers:
+    6: 0.45
+    7: 0.45
+    8: 0.6098
+    9: 1.2799
+    10: 1.6247
+    11: 1.6095
+    12: 1.6572
+    13: 1.4032
+    14: 1.0076
+    15: 0.9593
+    16: 0.9151
+    17: 0.9313
+    18: 1.1492
+    19: 1.3506
+  service_start_hour: 5
+  service_end_hour: 23
+  od_noise: 0.0
+  peak_shift_choices:
+  - 0
+  peak_shift_probs:
+  - 1.0

@@ -26,7 +26,8 @@ class Bus(object):
         self.current_speed = 0. # current speed of bus
 
         self.trip_turn = len(self.trip_id_list)
-        self.effective_station = self.stations_list[:round(len(self.stations_list) / 2)] if self.direction else self.stations_list[round(len(self.stations_list) / 2) - 1:] # 从所有站点中抽取有效站点
+        station_split = (len(self.stations_list) + 1) // 2
+        self.effective_station = self.stations_list[:station_split] if self.direction else self.stations_list[station_split - 1:] # 从所有站点中抽取有效站点
         self.last_station = self.effective_station[0] # 初始化首站
         self.next_station = self.effective_station[1] # 初始化次站
         self.last_station_dis = 0. # 上一站到当前站的距离
@@ -505,7 +506,8 @@ class Bus(object):
             self.back_to_terminal_time = current_time
             self.last_station = self.effective_station[-1]
             self.direction = int(not self.direction)
-            self.effective_station = self.stations_list[:round(len(self.stations_list) / 2)] if self.direction else self.stations_list[round(len(self.stations_list) / 2) - 1:]
+            station_split = (len(self.stations_list) + 1) // 2
+            self.effective_station = self.stations_list[:station_split] if self.direction else self.stations_list[station_split - 1:]
             self.next_station = self.next_station_func()
         else:
             # if next_station is normal station, update last_station to its next_station, reset the relative distance of bus
