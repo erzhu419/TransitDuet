@@ -21,6 +21,11 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "paper_manifest.yaml"
 DEFAULT_OUT = ROOT / "results_freqduet" / "paper_package" / "current"
+PACKAGE_CONFIG_EXPERIMENTS = {
+    "paper_ablation_v1_ep200_wu10_4domain_60seed",
+    "paper_external_classical_v1_ep200_wu10_4domain_60seed",
+    "paper_broad_generalization_v1_ep100_wu10_60seed",
+}
 
 
 def copy_file(src: Path, dst: Path, copied: list[dict], missing: list[str]) -> None:
@@ -65,6 +70,49 @@ def experiment(manifest: dict, key: str) -> dict:
 def copy_core_tables(manifest: dict, out_dir: Path,
                      copied: list[dict], missing: list[str]) -> None:
     table_specs = []
+
+    paper_ablation = experiment(manifest, "paper_ablation_v1_ep200_wu10_4domain_60seed")
+    table_specs.extend([
+        ("paper_ablation_v1_ep200_60seed_per_seed.csv",
+         paper_ablation.get("per_seed_csv")),
+        ("paper_ablation_v1_ep200_60seed_summary.csv",
+         paper_ablation.get("summary_csv")),
+        ("paper_ablation_v1_ep200_60seed_method_summary.csv",
+         Path(paper_ablation.get("paper_summary_dir", "")) / "paper_matrix_method_summary.csv"
+         if paper_ablation.get("paper_summary_dir") else None),
+        ("paper_ablation_v1_ep200_60seed_paired_deltas.csv",
+         Path(paper_ablation.get("paper_summary_dir", "")) / "paper_matrix_paired_deltas.csv"
+         if paper_ablation.get("paper_summary_dir") else None),
+    ])
+
+    paper_external = experiment(
+        manifest, "paper_external_classical_v1_ep200_wu10_4domain_60seed")
+    table_specs.extend([
+        ("paper_external_classical_v1_ep200_60seed_per_seed.csv",
+         paper_external.get("per_seed_csv")),
+        ("paper_external_classical_v1_ep200_60seed_summary.csv",
+         paper_external.get("summary_csv")),
+        ("paper_external_classical_v1_ep200_60seed_paired_deltas.csv",
+         Path(paper_external.get("comparison_vs_main_dir", ""))
+         / "external_baseline_paired_deltas.csv"
+         if paper_external.get("comparison_vs_main_dir") else None),
+    ])
+
+    paper_broad = experiment(
+        manifest, "paper_broad_generalization_v1_ep100_wu10_60seed")
+    table_specs.extend([
+        ("paper_broad_generalization_v1_ep100_60seed_per_seed.csv",
+         paper_broad.get("per_seed_csv")),
+        ("paper_broad_generalization_v1_ep100_60seed_summary.csv",
+         paper_broad.get("summary_csv")),
+        ("paper_broad_generalization_v1_ep100_60seed_completion_audit.csv",
+         paper_broad.get("completion_audit_csv")),
+        ("paper_broad_generalization_v1_ep100_60seed_method_summary.csv",
+         Path(paper_broad.get("paper_summary_dir", "")) / "broad_method_summary.csv"
+         if paper_broad.get("paper_summary_dir") else None),
+        ("paper_broad_generalization_v1_ep100_60seed_paired_deltas.csv",
+         paper_broad.get("paired_deltas_csv")),
+    ])
 
     promoted = experiment(manifest, "promoted_longtrain_ep200_wu10")
     table_specs.extend([
@@ -232,10 +280,15 @@ def copy_core_tables(manifest: dict, out_dir: Path,
     ])
 
     for name, src in table_specs:
+        required = name.startswith("paper_")
         if not src:
-            missing.append(f"manifest table source missing for {name}")
+            if required:
+                missing.append(f"manifest table source missing for {name}")
             continue
-        copy_file(rel(src), out_dir / "tables" / name, copied, missing)
+        src_path = rel(src)
+        if not src_path.exists() and not required:
+            continue
+        copy_file(src_path, out_dir / "tables" / name, copied, missing)
 
 
 def copy_figures(manifest: dict, out_dir: Path,
@@ -244,11 +297,13 @@ def copy_figures(manifest: dict, out_dir: Path,
     for key, item in figures.items():
         if "out_dir" not in item:
             continue
+        required = bool(item.get("required", False))
         src_dir = rel(item["out_dir"])
         dst_dir = out_dir / "figures" / key
-        copy_glob(src_dir, "*.png", dst_dir, copied, missing)
-        copy_glob(src_dir, "*.pdf", dst_dir, copied, missing)
-        copy_glob(src_dir, "*.csv", dst_dir / "source_data", copied, missing)
+        copy_glob(src_dir, "*.png", dst_dir, copied, missing, optional=not required)
+        copy_glob(src_dir, "*.pdf", dst_dir, copied, missing, optional=not required)
+        copy_glob(src_dir, "*.csv", dst_dir / "source_data", copied, missing,
+                  optional=not required)
         copy_glob(
             src_dir,
             "*.json",
@@ -274,6 +329,8 @@ def copy_manuscript_notes(manifest: dict, out_dir: Path,
 def copy_config_snapshots(manifest: dict, out_dir: Path,
                           copied: list[dict], missing: list[str]) -> None:
     for key, item in manifest.get("experiments", {}).items():
+        if key not in PACKAGE_CONFIG_EXPERIMENTS and not item.get("package_required"):
+            continue
         config_dir = item.get("config_dir")
         if not config_dir:
             config_set_name = item.get("config_set")
@@ -412,6 +469,7 @@ def write_readme(out_dir: Path, manifest: dict, copied: list[dict],
         "# FreqDuet Paper Package",
         "",
         f"- manifest version: `{manifest.get('version', 'unknown')}`",
+        "- canonical 60-seed paper tables use the `paper_*_60seed_*.csv` names",
         "- `tables/`: final seed-level and summary CSVs",
         "- `figures/`: decomposer and mechanism figures with source data",
         "- `configs/`: generated paper config snapshots",
@@ -431,10 +489,17 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT))
+    parser.add_argument(
+        "--no-clean",
+        action="store_true",
+        help="Append/update files in an existing package instead of rebuilding it.",
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
     out_dir = Path(args.out_dir)
+    if out_dir.exists() and not args.no_clean:
+        shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = read_manifest(manifest_path)

@@ -3364,6 +3364,50 @@ experiments:
     note: LF-safe low-forecast gate did not repair rushshift and worsened overall composite by +0.0826 CI [+0.0605,+0.1044], do not promote
 
 figures:
+  decomposer_validation_paper_v1_60seed:
+    status: generated_synthetic_sensitivity_trace_alignment_open
+    required: true
+    script: scripts/make_freqduet_decomposer_figures.py
+    out_dir: results_freqduet/decomposer_validation/paper_v1_60seed
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_decomposer_figures.py
+      --out-dir results_freqduet/decomposer_validation/paper_v1_60seed
+      --formats png,pdf
+      --n-seeds 20
+    rows: 20 synthetic seeds; trace alignment omitted because no demand_trace.csv files are currently present locally.
+    outputs:
+      - decomposer_synthetic_components
+      - decomposer_cutoff_window_sensitivity
+      - decomposer_synthetic_per_seed.csv
+      - decomposer_synthetic_summary.csv
+      - decomposer_cutoff_window_sensitivity.csv
+
+  mechanism_paper_ablation_v1_ep200_60seed:
+    status: generated
+    required: true
+    script: scripts/make_freqduet_mechanism_figures.py
+    logs:
+      - results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/logs_shards/shard_*
+    out_dir: results_freqduet/mechanism_figures/paper_ablation_v1_ep200_60seed
+    command: >
+      PYTHONPATH=. python3 scripts/make_freqduet_mechanism_figures.py
+      --logs results_freqduet/paper_ablation_v1_ep200_wu10_4domain_60seed/logs_shards/shard_*
+      --out-dir results_freqduet/mechanism_figures/paper_ablation_v1_ep200_60seed
+      --last-k 50
+      --sample 12000
+      --formats png,pdf
+    rows: 1440 runs and 72000 last-k episode rows
+    outputs:
+      - mechanism_hf_energy_to_holding
+      - mechanism_lower_drift_by_method
+      - mechanism_promotion_active_vs_inactive
+      - mechanism_domain_method_bars
+      - mechanism_action_state_spectrum
+      - mechanism_longtrain_drift_curves
+      - mechanism_episode_rows.csv
+      - mechanism_per_seed.csv
+      - mechanism_summary.csv
+
   decomposer_validation_current_trace:
     status: generated
     script: scripts/make_freqduet_decomposer_figures.py
@@ -3520,46 +3564,66 @@ paper_scripts:
 
 paper_packages:
   current:
-    status: generated
+    status: generated_current_60seed_canonical
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
       python3 scripts/build_freqduet_paper_package.py
       --out-dir results_freqduet/paper_package/current
+    build_audit:
+      checked_at: 2026-06-26 16:20 CST
+      copied_artifacts: 207
+      missing_artifacts: 0
+      package_size: 153M
+      tables: 21
+      figure_files: 23
+      config_files: 132
+      scripts: 26
+      manuscript_notes: 3
+      appendix_files: 1
+    canonical_tables:
+      - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
+      - tables/paper_ablation_v1_ep200_60seed_summary.csv
+      - tables/paper_ablation_v1_ep200_60seed_method_summary.csv
+      - tables/paper_ablation_v1_ep200_60seed_paired_deltas.csv
+      - tables/paper_external_classical_v1_ep200_60seed_per_seed.csv
+      - tables/paper_external_classical_v1_ep200_60seed_summary.csv
+      - tables/paper_external_classical_v1_ep200_60seed_paired_deltas.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_per_seed.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_summary.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_completion_audit.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_method_summary.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_paired_deltas.csv
+    required_figures:
+      - figures/decomposer_validation_paper_v1_60seed
+      - figures/mechanism_paper_ablation_v1_ep200_60seed
+    note: >
+      The current package now rebuilds from the paper-scale 60-seed ablation,
+      external classical, and broad held-out matrices. Historical 20-seed or
+      failed candidate artifacts are copied only if present and are no longer
+      treated as required package artifacts. Decomposer trace alignment remains
+      open because no demand_trace.csv files are currently present locally.
     outputs:
       - README.md
       - package_manifest.json
       - paper_manifest.yaml
-      - tables/detseed_cfaction_domainbest_v1_ep200_per_seed.csv
-      - tables/detseed_cfaction_domainbest_v1_ep200_summary.csv
-      - tables/detseed_cfaction_domainbest_v1_ep200_vs_current_main.csv
-      - tables/detseed_cfaction_domainbest_v1_ep200_vs_fixed_headway.csv
-      - tables/detseed_current_main_ep200_vs_fixed_headway.csv
-      - tables/detseed_external_fixed_headway_ep200_per_seed.csv
-      - tables/detseed_external_fixed_headway_ep200_summary.csv
-      - tables/longtrain_promoted_method_summary.csv
-      - tables/longtrain_promoted_paired_deltas.csv
-      - tables/final_terminalbias_ep100_method_summary.csv
-      - tables/final_terminalbias_ep100_paired_deltas.csv
-      - tables/final_terminalbias_ep100_per_seed.csv
-      - tables/final_terminalbias_ep100_summary.csv
-      - tables/final_terminalbias_ep100_vs_external_classical.csv
-      - tables/generalization_summary.csv
-      - tables/broad_generalization_per_seed.csv
-      - tables/broad_generalization_summary.csv
-      - tables/broad_generalization_completion_audit.csv
-      - tables/broad_generalization_method_summary.csv
-      - tables/broad_generalization_paired_deltas.csv
-      - tables/external_baselines_summary.csv
-      - tables/transitduet_like_per_seed.csv
-      - tables/transitduet_like_summary.csv
-      - tables/transitduet_like_paired_deltas.csv
+      - tables/paper_ablation_v1_ep200_60seed_method_summary.csv
+      - tables/paper_ablation_v1_ep200_60seed_paired_deltas.csv
+      - tables/paper_ablation_v1_ep200_60seed_per_seed.csv
+      - tables/paper_ablation_v1_ep200_60seed_summary.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_completion_audit.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_method_summary.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_paired_deltas.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_per_seed.csv
+      - tables/paper_broad_generalization_v1_ep100_60seed_summary.csv
+      - tables/paper_external_classical_v1_ep200_60seed_paired_deltas.csv
+      - tables/paper_external_classical_v1_ep200_60seed_per_seed.csv
+      - tables/paper_external_classical_v1_ep200_60seed_summary.csv
       - configs/paper_generalization
-      - configs/current_longtrain_4x6
-      - configs/histaux6eg06_longtrain_4x2
-      - configs/histaux6eg06upper_candidate_4x1
-      - figures/decomposer_validation_current_terminalbias_trace
-      - figures/mechanism_current_terminalbias_ep100
+      - configs/paper_ablation_v1_4x6
+      - configs/paper_main_cfaction_domainbest_v1_4x1
+      - figures/decomposer_validation_paper_v1_60seed
+      - figures/mechanism_paper_ablation_v1_ep200_60seed
       - scripts
       - manuscript_notes/method_framing.md
       - manuscript_notes/realism_data_evidence.md

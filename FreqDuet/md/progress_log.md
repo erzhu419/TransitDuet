@@ -1557,3 +1557,64 @@ OD-shift, and rush-shift families. Main, nofreq, rawhistory, allfreq, and
 nopromotion are statistically close overall; allfreq has one significant od20
 advantage. This should be written as a mechanism/stability result rather than a
 blanket performance win.
+
+## 2026-06-26 paper package 60-seed canonical rebuild
+
+Rebuilt the current paper package around the latest paper-scale evidence:
+
+```text
+package:
+results_freqduet/paper_package/current
+
+canonical inputs:
+paper_ablation_v1_ep200_wu10_4domain_60seed
+paper_external_classical_v1_ep200_wu10_4domain_60seed
+paper_broad_generalization_v1_ep100_wu10_60seed
+
+audit:
+copied artifacts: 207
+missing artifacts: 0
+package size: 153M
+tables: 21
+figure/source files: 23
+config files: 132
+scripts: 26
+manuscript notes: 3
+appendix files: 1
+```
+
+The package builder now gives canonical table names to the latest 60-seed
+results:
+
+```text
+paper_ablation_v1_ep200_60seed_*.csv
+paper_external_classical_v1_ep200_60seed_*.csv
+paper_broad_generalization_v1_ep100_60seed_*.csv
+```
+
+It also defaults to rebuilding the package directory from scratch, so stale
+historical CSVs cannot silently remain in `paper_package/current`. Historical
+candidate artifacts are copied only when present; missing old failed-candidate
+files no longer count as package failures.
+
+New required figure/source packages:
+
+```text
+results_freqduet/decomposer_validation/paper_v1_60seed
+results_freqduet/mechanism_figures/paper_ablation_v1_ep200_60seed
+```
+
+Mechanism figures were generated from the 60-seed ablation logs:
+
+```text
+1440 runs
+72000 last-k episode rows
+outputs: HF-to-holding, lower drift, promotion active/inactive,
+domain-method bars, action/state spectrum, longtrain drift curves,
+mechanism_episode_rows.csv, mechanism_per_seed.csv, mechanism_summary.csv
+```
+
+Remaining non-text gap: decomposer trace alignment is still open because no
+`demand_trace.csv` files are currently present locally. The decomposer package
+therefore contains synthetic LF/HF/burst and cutoff/window sensitivity evidence,
+but not real trace LF/HF-to-wait/holding alignment yet.
