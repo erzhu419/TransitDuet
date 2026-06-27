@@ -1,0 +1,21 @@
+# Freq-HRL Shared-Core Audit
+
+Date: 2026-06-27
+
+Audit question: do Transit and Quant evidence paths instantiate one Freq-HRL core, or two unrelated implementations? The answer should be reviewed through explicit adapter boundaries.
+
+| audit_item | status | path | role | next_upgrade |
+| --- | --- | --- | --- | --- |
+| shared data contracts | supported | transit_hrl/freq_hrl/core/types.py | ExogenousBin and FrequencyFeatures keep domain adapters outside the core. | Keep interface frozen; domain code may only enter through adapters. |
+| causal encoder interface | supported | transit_hrl/freq_hrl/encoders/base.py | Encoders expose causal low/mid/high frequency summaries. | Keep interface frozen; domain code may only enter through adapters. |
+| promotion gate | supported | transit_hrl/freq_hrl/core/promotion_gate.py | Persistent high-frequency energy can trigger high-level replanning. | Keep interface frozen; domain code may only enter through adapters. |
+| leakage accounting | supported | transit_hrl/freq_hrl/core/leakage.py | Upper HF power and lower LF drift are measured as responsibility leakage. | Keep interface frozen; domain code may only enter through adapters. |
+| dual actor-critic core | supported | transit_hrl/freq_hrl/rl/training.py | Dual-level PPO training loop is domain-agnostic through rollout adapters. | Keep interface frozen; domain code may only enter through adapters. |
+| Transit native adapter | supported | transit_hrl/freq_transitduet/runner_v3.py | Transit runner consumes Freq-HRL configs and native wait/promotion metrics. | Keep interface frozen; domain code may only enter through adapters. |
+| Transit native full config | supported | transit_hrl/freq_transitduet/configs_freqduet/T_freqhrl_native_full.yaml | Native Transit instantiation of the protocol. | Keep interface frozen; domain code may only enter through adapters. |
+| Trading policy adapter | supported | transit_hrl/freq_hrl/policies/ac_trading.py | Quant/trading policy path uses the same frequency-responsibility protocol. | Keep interface frozen; domain code may only enter through adapters. |
+| Order-book replay adapter | supported | transit_hrl/freq_hrl/experiments/top_journal_unified_matrix.py | Order-book evidence is pulled into the same claim matrix. | Keep interface frozen; domain code may only enter through adapters. |
+
+## Reviewer-Facing Boundary
+
+The shared core claim is supported for the current protocol and evidence matrix. A stronger final-paper claim should add a native Quant runner and a native Transit runner both calling the same `train_dual_ppo` path directly, with only rollout adapters differing.

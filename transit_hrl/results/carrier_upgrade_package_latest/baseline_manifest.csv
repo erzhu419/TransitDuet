@@ -1,0 +1,15 @@
+baseline,purpose,tier,headline_status,sharpe_delta,return_delta,focus_delta,n_common,paper_role
+vanilla_rl,flat non-hierarchical baseline,current,supported,54.2815,0.9734,0.9917,35,main_table
+hrl_raw,generic HRL with raw state,current,supported,50.3703,0.7933,0.9904,35,main_table
+raw_history,raw demand/history feature baseline,current,supported,6.3517,0.0556,0.8172,35,main_table
+freq_single_policy,frequency features without HRL responsibility split,current,supported,23.8301,0.3120,1.1376,35,main_table
+allfreq_alllayers,all frequency bands visible to all layers,current,supported,24.2308,0.3334,1.1387,35,main_table
+swapped,misrouted LF/HF responsibility ablation,current,supported,24.2032,0.2810,1.4160,35,main_table
+no_promotion,promotion removed,current_with_native_override,partial,0.0151,0.0001,0.0080,35,main_table
+no_leakage,leakage regularization removed,current,supported,2.4905,0.0227,0.1509,35,main_table
+lf_upper_only,upper gets LF without lower HF completion,current_boundary,partial,0.0151,0.0001,0.0080,35,main_table
+hf_lower_only,lower gets HF without full upper protocol,current_boundary,supported,18.0472,0.1698,0.9220,35,main_table
+flat_ppo,strong flat learned-policy baseline,upgrade_required,missing,,,,,next_major_validation
+flat_sac,off-policy continuous-control baseline,upgrade_required,missing,,,,,next_major_validation
+flat_td3,deterministic actor-critic baseline,upgrade_required,missing,,,,,next_major_validation
+generic_hrl_ppo,non-frequency learned HRL baseline,upgrade_required,missing,,,,,next_major_validation

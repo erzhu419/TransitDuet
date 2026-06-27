@@ -1,0 +1,32 @@
+{
+  "date": "2026-06-27",
+  "claims": 9,
+  "supported_claims": 9,
+  "shared_core_supported": 9,
+  "shared_core_total": 9,
+  "baseline_rows": 14,
+  "data_scaleup_rows": 5,
+  "proof_rows": 5,
+  "repro_commands": 6,
+  "output_dir": "transit_hrl/results/carrier_upgrade_package_latest",
+  "md_dir": "transit_hrl/md",
+  "documents": {
+    "carrier_plan": "transit_hrl/md/freq_hrl_carrier_upgrade_plan_2026-06-27.md",
+    "algorithm_spec": "transit_hrl/md/freq_hrl_algorithm_spec_2026-06-27.md",
+    "shared_core": "transit_hrl/md/freq_hrl_shared_core_audit_2026-06-27.md",
+    "baseline": "transit_hrl/md/freq_hrl_baseline_manifest_2026-06-27.md",
+    "real_data": "transit_hrl/md/freq_hrl_real_data_scaleup_plan_2026-06-27.md",
+    "theory": "transit_hrl/md/freq_hrl_theory_proof_appendix_2026-06-27.md",
+    "manuscript": "transit_hrl/md/freq_hrl_full_manuscript_draft_2026-06-27.md",
+    "repro": "transit_hrl/md/freq_hrl_reproducibility_package_2026-06-27.md"
+  },
+  "manifests": {
+    "claim_freeze": "transit_hrl/results/carrier_upgrade_package_latest/claim_freeze.csv",
+    "shared_core_audit": "transit_hrl/results/carrier_upgrade_package_latest/shared_core_audit.csv",
+    "baseline_manifest": "transit_hrl/results/carrier_upgrade_package_latest/baseline_manifest.csv",
+    "data_scaleup_manifest": "transit_hrl/results/carrier_upgrade_package_latest/data_scaleup_manifest.csv",
+    "proof_manifest": "transit_hrl/results/carrier_upgrade_package_latest/proof_manifest.csv",
+    "reproducibility_commands": "transit_hrl/results/carrier_upgrade_package_latest/reproducibility_commands.csv"
+  },
+  "boundary": "Carrier upgrade package freezes the protocol and manuscript plan; it does not substitute for future same-agency Transit deployment or large multi-session market replay."
+}

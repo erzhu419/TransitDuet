@@ -1,0 +1,6 @@
+proof_item,status,statement,paper_use
+causal encoder lemma,formalized_skeleton,"If E_phi only consumes x_{<=t}, no policy action can depend on future exogenous observations through the encoder.",guards against lookahead leakage in all frequency features
+frequency responsibility proposition,formalized_skeleton,"Under band-separated exogenous drivers and bounded cross-band covariance, routing LF features to upper and HF residuals to lower reduces cross-level credit variance.",turns frequency decomposition from feature engineering into an HRL responsibility principle
+leakage bound,formalized_skeleton,"With an LPF penalty on cumulative lower actions and an HPF penalty on upper actions, responsibility leakage is bounded by the constraint budget plus optimization residual.",supports the no-tradeoff boundary when performance gates also pass
+promotion detection tradeoff,formalized_skeleton,Persistence thresholds induce an explicit false-positive/false-negative tradeoff between early replanning and shock overreaction.,explains why promotion claims are stress-registered rather than universal
+paired-CI claim rule,formalized_skeleton,A claim is supported only when paired deltas pass direction-aware confidence gates over matched seeds or source windows.,connects statistical evidence to claim boundaries
