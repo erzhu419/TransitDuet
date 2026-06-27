@@ -38,6 +38,12 @@ CONSERVATIVE_CLAIM_WORDING = {
     "C9": "Stress-generalization support is limited to the registered stress regimes that pass paired evidence gates.",
 }
 
+CENTRAL_MANUSCRIPT_CLAIM = (
+    "Frequency-responsibility routing improves hierarchical reinforcement "
+    "learning for non-stationary time-series control under the registered "
+    "paired validation boundaries."
+)
+
 
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -156,6 +162,59 @@ def build_real_data_table(agency: dict[str, Any], external_truth: dict[str, Any]
     return rows
 
 
+def build_manuscript_boundary_table(
+    *,
+    baseline: dict[str, Any],
+    agency: dict[str, Any],
+    order_book: dict[str, Any],
+    theory: dict[str, Any],
+) -> list[dict[str, Any]]:
+    baseline_summary = baseline.get("summary", {}) if isinstance(baseline.get("summary"), dict) else {}
+    agency_summary = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
+    coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
+    theorem_count = len(theory.get("theorems", []) or [])
+    return [
+        {
+            "item": "central_claim",
+            "status": "supported",
+            "allowed_wording": CENTRAL_MANUSCRIPT_CLAIM,
+            "disallowed_wording": "Freq-HRL is a universally optimal controller for every time-series deployment.",
+            "evidence_hook": "C1-C9 conservative claim matrix plus baseline, Transit, leakage, stress, encoder, and replay artifacts.",
+        },
+        {
+            "item": "strong_learned_baselines",
+            "status": str(baseline_summary.get("strong_learned_baseline_status", "registered_missing")),
+            "allowed_wording": "Flat PPO/SAC/TD3 and generic HRL are registered reviewer baselines.",
+            "disallowed_wording": "Flat PPO/SAC/TD3 are complete supported baselines unless paired rows are present.",
+            "evidence_hook": str(baseline_summary.get("learned_baseline_manifest", [])),
+        },
+        {
+            "item": "same_agency_native_transit_control",
+            "status": str(agency_summary.get("same_agency_native_control_status", "external_missing")),
+            "allowed_wording": "Public Transit evidence combines native public-demand service response with separate external truth-source coverage.",
+            "disallowed_wording": "The current package proves one same-agency OD/onboard-load native deployment loop.",
+            "evidence_hook": (
+                f"scope={agency_summary.get('evidence_scope', '')}; "
+                f"field_complete={agency_summary.get('field_complete_data_status', '')}"
+            ),
+        },
+        {
+            "item": "venue_grade_order_book_scale",
+            "status": str(coverage.get("source_quality_status", "missing")),
+            "allowed_wording": "Venue-grade L2/L3 replay infrastructure is validated on the registered symbol-session pairs.",
+            "disallowed_wording": "Production exchange execution or exhaustive multi-day L2/L3 replay is solved.",
+            "evidence_hook": f"pairs={coverage.get('venue_grade_l2_l3_session_pairs', '')}",
+        },
+        {
+            "item": "formal_theory_scope",
+            "status": "supported" if theorem_count >= 9 else "partial",
+            "allowed_wording": "The appendix gives sufficient-condition and reporting-boundary results.",
+            "disallowed_wording": "The paper proves universal nonconvex actor-critic convergence.",
+            "evidence_hook": f"theorems_or_propositions={theorem_count}",
+        },
+    ]
+
+
 def build_figure_plan() -> list[dict[str, Any]]:
     return [
         {
@@ -207,6 +266,8 @@ def _source_summary(agency: dict[str, Any], external_truth: dict[str, Any], orde
         "agency_scope": agency.get("summary", {}).get("evidence_scope", ""),
         "agency_supported_boundaries": agency.get("summary", {}).get("supported_boundaries", ""),
         "agency_external_missing": agency.get("summary", {}).get("external_missing_boundaries", ""),
+        "same_agency_native_control_status": agency.get("summary", {}).get("same_agency_native_control_status", ""),
+        "field_complete_data_status": agency.get("summary", {}).get("field_complete_data_status", ""),
         "external_truth_scope": external_truth.get("summary", {}).get("evidence_scope", ""),
         "external_truth_supported": external_truth.get("summary", {}).get("supported_boundaries", ""),
         "order_book_pairs": coverage.get("venue_grade_l2_l3_session_pairs", ""),
@@ -222,6 +283,8 @@ def write_submission_package(
     agency: dict[str, Any],
     external_truth: dict[str, Any],
     order_book: dict[str, Any],
+    theory: dict[str, Any],
+    boundary_rows: list[dict[str, Any]],
 ) -> None:
     source_summary = _source_summary(agency, external_truth, order_book)
     baseline_summary = baseline.get("summary", {}) if isinstance(baseline.get("summary"), dict) else {}
@@ -232,7 +295,11 @@ def write_submission_package(
         "",
         "## One-Sentence Argument",
         "",
-        "In time-series control environments with separable slow trends and fast residual disturbances, Freq-HRL provides a frequency-separated hierarchical policy protocol, supported by paired validation across synthetic trading, native Transit, public demand and external truth-source coverage, and venue-grade order-book replay paths, while leaving full deployment validation and joint agency OD/load control as explicit boundaries.",
+        CENTRAL_MANUSCRIPT_CLAIM,
+        "",
+        "## Manuscript Thesis",
+        "",
+        "The manuscript should keep one argumentative spine: frequency decomposition is a responsibility-routing principle for HRL. Low-frequency evidence belongs to upper planning, high-frequency residuals belong to lower control, persistent residuals become promotion-triggered replanning, and leakage diagnostics prevent responsibility drift.",
         "",
         "## Title Options",
         "",
@@ -256,12 +323,18 @@ def write_submission_package(
         "",
         *_markdown_table(claim_rows, ["id", "status", "conservative_wording", "boundary"]),
         "",
+        "## Manuscript Boundary Table",
+        "",
+        *_markdown_table(boundary_rows, ["item", "status", "allowed_wording", "disallowed_wording", "evidence_hook"]),
+        "",
         "## Main Baseline And Data Facts",
         "",
         f"- baseline/ablation claim status: `{baseline_summary.get('claim_status', '')}`",
         f"- scenario Freq-HRL-family win rate: `{baseline_summary.get('scenario_freq_family_win_rate', '')}`",
         f"- required positive baselines: `{baseline_summary.get('required_baselines_positive', [])}`",
+        f"- strong learned baseline status: `{baseline_summary.get('strong_learned_baseline_status', '')}`",
         f"- real-demand evidence scope: `{source_summary['agency_scope']}`",
+        f"- field-complete / same-agency native control: `{source_summary['field_complete_data_status']}` / `{source_summary['same_agency_native_control_status']}`",
         f"- agency supported / external-missing boundaries: `{source_summary['agency_supported_boundaries']}` / `{source_summary['agency_external_missing']}`",
         f"- public external truth scope: `{source_summary['external_truth_scope']}`",
         f"- venue-grade L2/L3 order-book pairs: `{source_summary['order_book_pairs']}` with source quality `{source_summary['order_book_quality']}`",
@@ -300,6 +373,8 @@ def write_methods_si(md_path: Path, paths: dict[str, Path]) -> None:
         "## Method Overview",
         "",
         "Freq-HRL treats each domain as a causal time-series control environment with endogenous state `z_t`, exogenous stream `x_t`, and action-dependent outcomes. A causal encoder maps `x_{<=t}` into low-frequency trend, middle-frequency regime buffer, high-frequency residual, uncertainty, persistence, and energy summaries. The upper controller consumes low-frequency trend and bounded residual summaries to produce a plan action. The lower controller consumes the active plan, local state, and high-frequency context to produce fast control actions. A promotion gate monitors persistent residual events and can trigger early upper-level replanning. Leakage diagnostics and constraints measure whether upper and lower controllers are acting outside their assigned frequency responsibilities.",
+        "",
+        f"Central claim: {CENTRAL_MANUSCRIPT_CLAIM}",
         "",
         "## Algorithmic Modules",
         "",
@@ -425,6 +500,12 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
     claim_rows = build_claim_table(artifacts["unified"])
     baseline_rows = build_baseline_table(artifacts["baseline"])
     real_data_rows = build_real_data_table(artifacts["agency"], artifacts["external_truth"])
+    boundary_rows = build_manuscript_boundary_table(
+        baseline=artifacts["baseline"],
+        agency=artifacts["agency"],
+        order_book=artifacts["order_book"],
+        theory=artifacts["theory"],
+    )
     figure_rows = build_figure_plan()
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -432,6 +513,7 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
     _write_csv(output_dir / "claim_evidence_table.csv", claim_rows)
     _write_csv(output_dir / "baseline_ablation_table.csv", baseline_rows)
     _write_csv(output_dir / "real_data_table.csv", real_data_rows)
+    _write_csv(output_dir / "manuscript_boundary_table.csv", boundary_rows)
     _write_csv(output_dir / "figure_plan.csv", figure_rows)
 
     submission_md = md_dir / "freq_hrl_submission_package_2026-06-12.md"
@@ -445,6 +527,8 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
         agency=artifacts["agency"],
         external_truth=artifacts["external_truth"],
         order_book=artifacts["order_book"],
+        theory=artifacts["theory"],
+        boundary_rows=boundary_rows,
     )
     write_methods_si(methods_md, paths)
     write_figure_plan(figure_md, figure_rows)
@@ -456,6 +540,7 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
             "supported_claims": sum(1 for row in claim_rows if row["status"] == "supported"),
             "baseline_rows": len(baseline_rows),
             "real_data_rows": len(real_data_rows),
+            "boundary_rows": len(boundary_rows),
             "figures": len(figure_rows),
             "output_dir": str(output_dir),
             "md_dir": str(md_dir),
@@ -465,6 +550,7 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
             "claim_evidence_table": str(output_dir / "claim_evidence_table.csv"),
             "baseline_ablation_table": str(output_dir / "baseline_ablation_table.csv"),
             "real_data_table": str(output_dir / "real_data_table.csv"),
+            "manuscript_boundary_table": str(output_dir / "manuscript_boundary_table.csv"),
             "figure_plan": str(output_dir / "figure_plan.csv"),
             "submission_package": str(submission_md),
             "methods_si": str(methods_md),

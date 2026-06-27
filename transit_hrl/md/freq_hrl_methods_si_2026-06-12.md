@@ -6,6 +6,8 @@ Date: 2026-06-12
 
 Freq-HRL treats each domain as a causal time-series control environment with endogenous state `z_t`, exogenous stream `x_t`, and action-dependent outcomes. A causal encoder maps `x_{<=t}` into low-frequency trend, middle-frequency regime buffer, high-frequency residual, uncertainty, persistence, and energy summaries. The upper controller consumes low-frequency trend and bounded residual summaries to produce a plan action. The lower controller consumes the active plan, local state, and high-frequency context to produce fast control actions. A promotion gate monitors persistent residual events and can trigger early upper-level replanning. Leakage diagnostics and constraints measure whether upper and lower controllers are acting outside their assigned frequency responsibilities.
 
+Central claim: Frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.
+
 ## Algorithmic Modules
 
 | module | role | artifact hook |

@@ -64,6 +64,8 @@ class ManuscriptSubmissionPackTest(unittest.TestCase):
                         "evidence_scope": "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
                         "supported_boundaries": 7,
                         "external_missing_boundaries": 3,
+                        "field_complete_data_status": "partial_external_truth_source_union",
+                        "same_agency_native_control_status": "external_truth_not_control_linked",
                     },
                     "claim_boundaries": [
                         {
@@ -107,6 +109,13 @@ class ManuscriptSubmissionPackTest(unittest.TestCase):
                     }
                 },
             )
+            self._write_json(
+                root,
+                "freq_hrl_theory_appendix_latest/summary.json",
+                {
+                    "theorems": [{"id": f"Theorem {i}"} for i in range(1, 10)],
+                },
+            )
 
             payload = build_submission_pack(
                 results_root=root,
@@ -119,11 +128,15 @@ class ManuscriptSubmissionPackTest(unittest.TestCase):
             self.assertTrue((root / "pack" / "claim_evidence_table.csv").exists())
             self.assertTrue((root / "pack" / "baseline_ablation_table.csv").exists())
             self.assertTrue((root / "pack" / "real_data_table.csv").exists())
+            self.assertTrue((root / "pack" / "manuscript_boundary_table.csv").exists())
             submission = (root / "md" / "freq_hrl_submission_package_2026-06-12.md").read_text(
                 encoding="utf-8"
             )
             self.assertIn("Conservative Submission Package", submission)
-            self.assertIn("full deployment validation", submission)
+            self.assertIn("frequency decomposition is a responsibility-routing principle", submission)
+            self.assertIn("same_agency_native_transit_control", submission)
+            self.assertIn("fully validated for all real-world deployments", submission)
+            self.assertEqual(payload["summary"]["boundary_rows"], 5)
 
 
 if __name__ == "__main__":

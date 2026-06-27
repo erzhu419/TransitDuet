@@ -8,7 +8,13 @@ Many control problems are driven by exogenous time series that mix slow regime s
 
 ## 1. Introduction
 
-The paper's core claim is narrow: frequency decomposition is not merely a representation trick; it is a control-responsibility principle for HRL. The low-frequency component should primarily shape plans, the high-frequency component should primarily shape local corrections, and persistent high-frequency evidence should trigger controlled replanning.
+The paper's core claim is narrow: frequency decomposition is not merely a representation trick; it is a control-responsibility principle for HRL. The low-frequency component should primarily shape plans, the high-frequency component should primarily shape local corrections, and persistent high-frequency evidence should trigger controlled replanning. The manuscript should not drift into a deployment paper or a universal RL-convergence paper.
+
+## Claim Boundary
+
+Allowed claim: frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.
+
+Disallowed claims: full same-agency Transit OD/onboard-load deployment validation, production exchange execution, universal encoder dominance, and universal nonconvex actor-critic convergence.
 
 ## 2. Method
 

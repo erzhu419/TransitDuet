@@ -4,7 +4,11 @@ Date: 2026-06-12
 
 ## One-Sentence Argument
 
-In time-series control environments with separable slow trends and fast residual disturbances, Freq-HRL provides a frequency-separated hierarchical policy protocol, supported by paired validation across synthetic trading, native Transit, public demand and external truth-source coverage, and venue-grade order-book replay paths, while leaving full deployment validation and joint agency OD/load control as explicit boundaries.
+Frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.
+
+## Manuscript Thesis
+
+The manuscript should keep one argumentative spine: frequency decomposition is a responsibility-routing principle for HRL. Low-frequency evidence belongs to upper planning, high-frequency residuals belong to lower control, persistent residuals become promotion-triggered replanning, and leakage diagnostics prevent responsibility drift.
 
 ## Title Options
 
@@ -38,12 +42,24 @@ Time-series control problems often couple slowly varying operating regimes with 
 | C8 | supported | Frequency-responsibility evidence is supported against non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives. | Closed for the current baseline/ablation matrix; remaining work is adding native flat PPO/SAC/TD3 baselines for broader reviewer comparisons. |
 | C9 | supported | Stress-generalization support is limited to the registered stress regimes that pass paired evidence gates. | Any missing or not-supported regime must stay outside the global stress-generalization claim. |
 
+## Manuscript Boundary Table
+
+| item | status | allowed_wording | disallowed_wording | evidence_hook |
+| --- | --- | --- | --- | --- |
+| central_claim | supported | Frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries. | Freq-HRL is a universally optimal controller for every time-series deployment. | C1-C9 conservative claim matrix plus baseline, Transit, leakage, stress, encoder, and replay artifacts. |
+| strong_learned_baselines | registered_missing | Flat PPO/SAC/TD3 and generic HRL are registered reviewer baselines. | Flat PPO/SAC/TD3 are complete supported baselines unless paired rows are present. | [{'baseline': 'flat_ppo', 'purpose': 'strong flat on-policy learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'flat_sac', 'purpose': 'strong off-policy entropy-regularized learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'flat_td3', 'purpose': 'strong deterministic actor-critic learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'generic_hrl_ppo', 'purpose': 'non-frequency learned HRL baseline with comparable hierarchy capacity', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}] |
+| same_agency_native_transit_control | external_truth_not_control_linked | Public Transit evidence combines native public-demand service response with separate external truth-source coverage. | The current package proves one same-agency OD/onboard-load native deployment loop. | scope=real_afc_apc_external_board_alight_load_od_plus_native_service_response; field_complete=partial_external_truth_source_union |
+| venue_grade_order_book_scale | venue_grade_ready | Venue-grade L2/L3 replay infrastructure is validated on the registered symbol-session pairs. | Production exchange execution or exhaustive multi-day L2/L3 replay is solved. | pairs=3 |
+| formal_theory_scope | supported | The appendix gives sufficient-condition and reporting-boundary results. | The paper proves universal nonconvex actor-critic convergence. | theorems_or_propositions=9 |
+
 ## Main Baseline And Data Facts
 
 - baseline/ablation claim status: `supported`
 - scenario Freq-HRL-family win rate: `1.0`
 - required positive baselines: `['allfreq_alllayers', 'hrl_raw', 'no_leakage', 'no_promotion', 'swapped', 'vanilla_rl']`
+- strong learned baseline status: `registered_missing`
 - real-demand evidence scope: `real_afc_apc_external_board_alight_load_od_plus_native_service_response`
+- field-complete / same-agency native control: `partial_external_truth_source_union` / `external_truth_not_control_linked`
 - agency supported / external-missing boundaries: `7` / `3`
 - public external truth scope: `real_public_board_alight_load_and_estimated_od`
 - venue-grade L2/L3 order-book pairs: `3` with source quality `venue_grade_ready`
