@@ -23,6 +23,7 @@ ARTIFACTS = {
     "agency": Path("agency_demand_onboard_coverage_latest/summary.json"),
     "order_book": Path("order_book_lobster_venue_grade_multisymbol/summary.json"),
     "claims": Path("top_journal_unified_matrix_latest/summary.json"),
+    "sensitivity": Path("sensitivity_robustness_matrix_latest/summary.json"),
 }
 
 
@@ -84,6 +85,7 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
     strong = _summary_section(_read_json(paths["strong_learned"]))
     baseline = _summary_section(_read_json(paths["baseline"]))
     agency = _summary_section(_read_json(paths["agency"]))
+    sensitivity = _summary_section(_read_json(paths["sensitivity"]))
     order_book = _read_json(paths["order_book"])
     order_coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
     venue_pairs = int(order_coverage.get("venue_grade_l2_l3_session_pairs", 0) or 0)
@@ -161,13 +163,12 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
             "id": "E5",
             "experiment": "sensitivity and robustness",
             "review_question": "Does the result survive promotion/leakage/plan hyperparameter perturbations?",
-            "current_status": "registered_executable",
-            "artifact": "transit_hrl/results/sensitivity_robustness_matrix_latest/summary.json",
+            "current_status": str(sensitivity.get("robustness_status", "registered_executable")),
+            "artifact": str(paths["sensitivity"]),
             "claim_gate": "Report stress-registered sensitivity; do not claim universal hyperparameter robustness.",
             "command": (
                 "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m "
-                "freq_hrl.experiments.trading.strong_learned_baseline_validation "
-                "--scenarios persistent_shift promotion_recovery stationary_high_noise localized_burst ood_period "
+                "freq_hrl.experiments.trading.sensitivity_robustness_matrix "
                 "--output-dir transit_hrl/results/sensitivity_robustness_matrix_latest"
             ),
             "paper_table": "robustness_appendix",

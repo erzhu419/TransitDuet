@@ -460,6 +460,12 @@ def build_repro_commands() -> list[dict[str, Any]]:
             "expected": "reviewer-facing experiment ledger with commands, gates, and claim boundaries",
         },
         {
+            "stage": "sensitivity_robustness",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.sensitivity_robustness_matrix --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
+            "output": "profile-wise robustness rows and paired noninferiority checks",
+            "expected": "stress-registered plan/leakage/constraint/recenter sensitivity boundaries",
+        },
+        {
             "stage": "figures",
             "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.manuscript_figures --output-dir transit_hrl/results/manuscript_figures_latest",
             "output": "SVG/PDF/PNG/TIFF figures and source_data CSVs",

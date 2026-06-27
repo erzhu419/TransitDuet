@@ -54,7 +54,7 @@
       "current_status": "registered_executable",
       "artifact": "transit_hrl/results/sensitivity_robustness_matrix_latest/summary.json",
       "claim_gate": "Report stress-registered sensitivity; do not claim universal hyperparameter robustness.",
-      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift promotion_recovery stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.sensitivity_robustness_matrix --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
       "paper_table": "robustness_appendix",
       "priority": 5
     },
@@ -125,7 +125,7 @@
     {
       "id": "E5",
       "priority": 5,
-      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift promotion_recovery stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.sensitivity_robustness_matrix --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
       "expected_artifact": "transit_hrl/results/sensitivity_robustness_matrix_latest/summary.json",
       "paper_table": "robustness_appendix"
     },
