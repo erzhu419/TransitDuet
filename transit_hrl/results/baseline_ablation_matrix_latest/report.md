@@ -1,14 +1,24 @@
 # Baseline And Ablation Matrix
 
-Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation.
+Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation. Flat PPO/SAC/TD3 and generic learned HRL are registered separately and are not credited unless their paired rows are present.
 
 - claim status: `supported`
 - scenario Freq-HRL-family win rate: `1.000`
 - required baselines positive: `['allfreq_alllayers', 'hrl_raw', 'no_leakage', 'no_promotion', 'swapped', 'vanilla_rl']`
 - support overrides: `[{'baseline': 'no_promotion', 'source_artifact': 'native_promotion_v47', 'status': 'supported', 'supported_metrics': ['avg_wait_min', 'ep_reward'], 'boundary': 'No-promotion ablation is credited from the native promotion stress artifact, where interval_only is the no-promotion control. Raw global trading Sharpe remains reported separately.'}]`
+- strong learned baseline status: `registered_missing`
 - required baselines inconclusive: `[]`
 - required baselines not supported: `[]`
 - required baselines missing: `[]`
+
+## Strong Learned Baseline Registration
+
+| baseline | evidence status | required metrics | supported metrics | paper role |
+|---|---|---|---|---|
+| flat_ppo | registered_missing | sharpe,total_return,FocusScore |  | must_complete_or_limit |
+| flat_sac | registered_missing | sharpe,total_return,FocusScore |  | must_complete_or_limit |
+| flat_td3 | registered_missing | sharpe,total_return,FocusScore |  | must_complete_or_limit |
+| generic_hrl_ppo | registered_missing | sharpe,total_return,FocusScore |  | must_complete_or_limit |
 
 | check | status | metric | n | delta | CI95 low | CI95 high | win rate |
 |---|---|---|---:|---:|---:|---:|---:|

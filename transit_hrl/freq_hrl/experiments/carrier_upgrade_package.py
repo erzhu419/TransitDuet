@@ -224,7 +224,16 @@ def build_shared_core_audit(source_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def build_baseline_manifest(baseline_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def build_baseline_manifest(
+    baseline_rows: list[dict[str, Any]],
+    baseline_summary: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    baseline_summary = dict(baseline_summary or {})
+    learned_manifest = {
+        str(row.get("baseline", "")): row
+        for row in baseline_summary.get("learned_baseline_manifest", []) or []
+        if isinstance(row, dict)
+    }
     required = [
         ("vanilla_rl", "flat non-hierarchical baseline", "current"),
         ("hrl_raw", "generic HRL with raw state", "current"),
@@ -236,10 +245,10 @@ def build_baseline_manifest(baseline_rows: list[dict[str, Any]]) -> list[dict[st
         ("no_leakage", "leakage regularization removed", "current"),
         ("lf_upper_only", "upper gets LF without lower HF completion", "current_boundary"),
         ("hf_lower_only", "lower gets HF without full upper protocol", "current_boundary"),
-        ("flat_ppo", "strong flat learned-policy baseline", "upgrade_required"),
-        ("flat_sac", "off-policy continuous-control baseline", "upgrade_required"),
-        ("flat_td3", "deterministic actor-critic baseline", "upgrade_required"),
-        ("generic_hrl_ppo", "non-frequency learned HRL baseline", "upgrade_required"),
+        ("flat_ppo", "strong flat learned-policy baseline", "registered_strong_learned"),
+        ("flat_sac", "off-policy continuous-control baseline", "registered_strong_learned"),
+        ("flat_td3", "deterministic actor-critic baseline", "registered_strong_learned"),
+        ("generic_hrl_ppo", "non-frequency learned HRL baseline", "registered_strong_learned"),
     ]
     support: dict[str, dict[str, Any]] = {}
     for row in baseline_rows:
@@ -261,16 +270,27 @@ def build_baseline_manifest(baseline_rows: list[dict[str, Any]]) -> list[dict[st
             metrics.get(metric, {}).get("status", "missing")
             for metric in ("sharpe", "total_return", "FocusScore")
         ]
+        learned = learned_manifest.get(baseline, {})
+        headline_status = (
+            "supported" if headline and all(s == "supported" for s in headline)
+            else ("missing" if not metrics else "partial")
+        )
+        if learned:
+            evidence_status = str(learned.get("evidence_status", headline_status))
+            headline_status = evidence_status
         rows.append({
             "baseline": baseline,
             "purpose": purpose,
             "tier": tier,
-            "headline_status": "supported" if headline and all(s == "supported" for s in headline) else ("missing" if not metrics else "partial"),
+            "headline_status": headline_status,
             "sharpe_delta": _fmt_float(metrics.get("sharpe", {}).get("delta_mean")),
             "return_delta": _fmt_float(metrics.get("total_return", {}).get("delta_mean")),
             "focus_delta": _fmt_float(metrics.get("FocusScore", {}).get("delta_mean")),
             "n_common": metrics.get("sharpe", {}).get("n_common", ""),
-            "paper_role": "main_table" if tier.startswith("current") else "next_major_validation",
+            "paper_role": (
+                "main_table" if tier.startswith("current")
+                else str(learned.get("paper_role", "must_complete_or_limit"))
+            ),
         })
     return rows
 
@@ -514,7 +534,7 @@ def write_baseline(path: Path, rows: list[dict[str, Any]]) -> None:
         "",
         "## Main-Table Rule",
         "",
-        "The manuscript main table should include all `current` rows and mark `upgrade_required` rows as either completed before submission or explicitly moved to limitations. Do not let flat SAC/TD3 appear only as an afterthought if the target venue expects strong RL baselines.",
+        "The manuscript main table should include all `current` rows. `registered_strong_learned` rows (flat PPO/SAC/TD3 and generic learned HRL) must either be completed with paired evidence or explicitly moved to limitations; they cannot be silently counted as supported.",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -629,6 +649,7 @@ def build_carrier_upgrade_package(
     paths = _artifact_paths(results_root)
     claim_rows = _read_csv(paths["claims"])
     baseline_rows = _read_csv(paths["baseline_checks"])
+    baseline_summary = _read_json(paths["baseline_summary"])
     external_truth = _read_json(paths["external_truth_summary"])
     agency = _read_json(paths["agency_summary"])
     order_book = _read_json(paths["order_book_summary"])
@@ -636,7 +657,7 @@ def build_carrier_upgrade_package(
     claim_freeze = build_claim_freeze(claim_rows)
     shared_core = build_shared_core_audit(source_root)
     shared_core_validation = audit_shared_training_core(source_root)
-    baseline_manifest = build_baseline_manifest(baseline_rows)
+    baseline_manifest = build_baseline_manifest(baseline_rows, baseline_summary)
     data_scaleup = build_data_scaleup_manifest(external_truth, agency, order_book)
     proof_manifest = build_proof_manifest()
     repro_commands = build_repro_commands()

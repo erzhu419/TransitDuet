@@ -22315,7 +22315,54 @@
     ],
     "scenario_count": 6,
     "scenario_freq_family_win_rate": 1.0,
-    "claim_status": "supported"
+    "claim_status": "supported",
+    "learned_baseline_manifest": [
+      {
+        "baseline": "flat_ppo",
+        "purpose": "strong flat on-policy learned policy baseline",
+        "registration_status": "registered",
+        "evidence_status": "registered_missing",
+        "required_metrics": "sharpe,total_return,FocusScore",
+        "supported_metrics": "",
+        "metric_statuses": "{\"FocusScore\": \"missing\", \"sharpe\": \"missing\", \"total_return\": \"missing\"}",
+        "paper_role": "must_complete_or_limit",
+        "claim_boundary": "This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics."
+      },
+      {
+        "baseline": "flat_sac",
+        "purpose": "strong off-policy entropy-regularized learned policy baseline",
+        "registration_status": "registered",
+        "evidence_status": "registered_missing",
+        "required_metrics": "sharpe,total_return,FocusScore",
+        "supported_metrics": "",
+        "metric_statuses": "{\"FocusScore\": \"missing\", \"sharpe\": \"missing\", \"total_return\": \"missing\"}",
+        "paper_role": "must_complete_or_limit",
+        "claim_boundary": "This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics."
+      },
+      {
+        "baseline": "flat_td3",
+        "purpose": "strong deterministic actor-critic learned policy baseline",
+        "registration_status": "registered",
+        "evidence_status": "registered_missing",
+        "required_metrics": "sharpe,total_return,FocusScore",
+        "supported_metrics": "",
+        "metric_statuses": "{\"FocusScore\": \"missing\", \"sharpe\": \"missing\", \"total_return\": \"missing\"}",
+        "paper_role": "must_complete_or_limit",
+        "claim_boundary": "This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics."
+      },
+      {
+        "baseline": "generic_hrl_ppo",
+        "purpose": "non-frequency learned HRL baseline with comparable hierarchy capacity",
+        "registration_status": "registered",
+        "evidence_status": "registered_missing",
+        "required_metrics": "sharpe,total_return,FocusScore",
+        "supported_metrics": "",
+        "metric_statuses": "{\"FocusScore\": \"missing\", \"sharpe\": \"missing\", \"total_return\": \"missing\"}",
+        "paper_role": "must_complete_or_limit",
+        "claim_boundary": "This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics."
+      }
+    ],
+    "strong_learned_baseline_status": "registered_missing"
   },
-  "boundary": "Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation."
+  "boundary": "Baseline/ablation evidence is paired over identical seeds and stress scenarios. It checks whether Freq-HRL beats non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives; it does not replace native Transit learned-policy validation. Flat PPO/SAC/TD3 and generic learned HRL are registered separately and are not credited unless their paired rows are present."
 }

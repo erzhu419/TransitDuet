@@ -9,7 +9,7 @@ no_promotion,promotion removed,current_with_native_override,partial,0.0151,0.000
 no_leakage,leakage regularization removed,current,supported,2.4905,0.0227,0.1509,35,main_table
 lf_upper_only,upper gets LF without lower HF completion,current_boundary,partial,0.0151,0.0001,0.0080,35,main_table
 hf_lower_only,lower gets HF without full upper protocol,current_boundary,supported,18.0472,0.1698,0.9220,35,main_table
-flat_ppo,strong flat learned-policy baseline,upgrade_required,missing,,,,,next_major_validation
-flat_sac,off-policy continuous-control baseline,upgrade_required,missing,,,,,next_major_validation
-flat_td3,deterministic actor-critic baseline,upgrade_required,missing,,,,,next_major_validation
-generic_hrl_ppo,non-frequency learned HRL baseline,upgrade_required,missing,,,,,next_major_validation
+flat_ppo,strong flat learned-policy baseline,registered_strong_learned,missing,,,,,must_complete_or_limit
+flat_sac,off-policy continuous-control baseline,registered_strong_learned,missing,,,,,must_complete_or_limit
+flat_td3,deterministic actor-critic baseline,registered_strong_learned,missing,,,,,must_complete_or_limit
+generic_hrl_ppo,non-frequency learned HRL baseline,registered_strong_learned,missing,,,,,must_complete_or_limit

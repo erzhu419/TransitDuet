@@ -32,6 +32,15 @@ KEY_BASELINES = (
     "hf_lower_only",
 )
 
+STRONG_LEARNED_BASELINES = (
+    "flat_ppo",
+    "flat_sac",
+    "flat_td3",
+    "generic_hrl_ppo",
+)
+
+BASELINE_ROSTER = KEY_BASELINES + STRONG_LEARNED_BASELINES
+
 CORE_METRICS = (
     ("sharpe", False),
     ("total_return", False),
@@ -41,6 +50,7 @@ CORE_METRICS = (
 
 ACCEPTED_POSITIVE = {"supported", "positive_mixed"}
 PROMOTION_SUPPORT_METRICS = {"ep_reward", "avg_wait_min"}
+LEARNED_BASELINE_MAIN_METRICS = ("sharpe", "total_return", "FocusScore")
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -164,6 +174,77 @@ def _scenario_winners(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def _learned_baseline_manifest(checks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    checks_by_control: dict[str, dict[str, dict[str, Any]]] = {}
+    for row in checks:
+        control = str(row.get("control", ""))
+        if control not in STRONG_LEARNED_BASELINES:
+            continue
+        metric = str(row.get("metric", ""))
+        checks_by_control.setdefault(control, {})[metric] = row
+
+    purpose = {
+        "flat_ppo": "strong flat on-policy learned policy baseline",
+        "flat_sac": "strong off-policy entropy-regularized learned policy baseline",
+        "flat_td3": "strong deterministic actor-critic learned policy baseline",
+        "generic_hrl_ppo": "non-frequency learned HRL baseline with comparable hierarchy capacity",
+    }
+    rows: list[dict[str, Any]] = []
+    for baseline in STRONG_LEARNED_BASELINES:
+        metrics = checks_by_control.get(baseline, {})
+        statuses = [
+            str(metrics.get(metric, {}).get("status", "missing"))
+            for metric in LEARNED_BASELINE_MAIN_METRICS
+        ]
+        supported = [
+            metric for metric in LEARNED_BASELINE_MAIN_METRICS
+            if str(metrics.get(metric, {}).get("status", "")) in ACCEPTED_POSITIVE
+        ]
+        if metrics and len(supported) == len(LEARNED_BASELINE_MAIN_METRICS):
+            evidence_status = "supported"
+        elif metrics and supported:
+            evidence_status = "partial"
+        elif metrics:
+            evidence_status = "not_supported"
+        else:
+            evidence_status = "registered_missing"
+        rows.append({
+            "baseline": baseline,
+            "purpose": purpose[baseline],
+            "registration_status": "registered",
+            "evidence_status": evidence_status,
+            "required_metrics": ",".join(LEARNED_BASELINE_MAIN_METRICS),
+            "supported_metrics": ",".join(supported),
+            "metric_statuses": json.dumps(dict(zip(LEARNED_BASELINE_MAIN_METRICS, statuses)), sort_keys=True),
+            "paper_role": "must_complete_or_limit",
+            "claim_boundary": (
+                "This row is not credited as a strong learned baseline unless "
+                "paired evidence exists for all main metrics."
+            ),
+        })
+    return rows
+
+
+def _learned_baseline_status(manifest: list[dict[str, Any]]) -> str:
+    if not manifest:
+        return "missing"
+    supported = [
+        row for row in manifest
+        if str(row.get("evidence_status", "")) == "supported"
+    ]
+    partial = [
+        row for row in manifest
+        if str(row.get("evidence_status", "")) == "partial"
+    ]
+    if len(supported) == len(manifest):
+        return "supported"
+    if supported or partial:
+        return "partial"
+    if all(str(row.get("evidence_status", "")) == "registered_missing" for row in manifest):
+        return "registered_missing"
+    return "not_supported"
+
+
 def build_baseline_ablation_matrix(
     result_paths: dict[str, Path],
     *,
@@ -184,7 +265,7 @@ def build_baseline_ablation_matrix(
     checks: list[dict[str, Any]] = []
     if rows:
         present_baselines = {str(row.get("baseline", "")) for row in rows}
-        for baseline in KEY_BASELINES:
+        for baseline in BASELINE_ROSTER:
             if baseline not in present_baselines:
                 continue
             for metric, lower_is_better in CORE_METRICS:
@@ -227,6 +308,8 @@ def build_baseline_ablation_matrix(
     ]
     required_missing = sorted(required - set(required_present_effective))
     scenario_winners = _scenario_winners(rows)
+    learned_manifest = _learned_baseline_manifest(checks)
+    learned_status = _learned_baseline_status(learned_manifest)
     scenario_win_rate = (
         sum(1 for row in scenario_winners if row["freq_family_wins"]) / len(scenario_winners)
         if scenario_winners else 0.0
@@ -258,6 +341,8 @@ def build_baseline_ablation_matrix(
             "required_baselines_not_supported": required_not_supported,
             "required_baselines_missing": required_missing,
             "ablation_support_overrides": ablation_support,
+            "learned_baseline_manifest": learned_manifest,
+            "strong_learned_baseline_status": learned_status,
             "scenario_count": len(scenario_winners),
             "scenario_freq_family_win_rate": float(scenario_win_rate),
             "claim_status": claim_status_value,
@@ -266,7 +351,9 @@ def build_baseline_ablation_matrix(
             "Baseline/ablation evidence is paired over identical seeds and "
             "stress scenarios. It checks whether Freq-HRL beats non-frequency, "
             "misrouted-frequency, no-promotion, and no-leakage alternatives; "
-            "it does not replace native Transit learned-policy validation."
+            "it does not replace native Transit learned-policy validation. "
+            "Flat PPO/SAC/TD3 and generic learned HRL are registered separately "
+            "and are not credited unless their paired rows are present."
         ),
     }
 
@@ -289,6 +376,10 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(output_dir / "paired_checks.csv", payload["paired_checks"])
     _write_csv(output_dir / "scenario_winners.csv", payload["scenario_winners"])
+    _write_csv(
+        output_dir / "learned_baseline_manifest.csv",
+        payload["summary"].get("learned_baseline_manifest", []),
+    )
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     lines = [
@@ -300,13 +391,26 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         f"- scenario Freq-HRL-family win rate: `{payload['summary']['scenario_freq_family_win_rate']:.3f}`",
         f"- required baselines positive: `{payload['summary'].get('required_baselines_positive', [])}`",
         f"- support overrides: `{payload['summary'].get('ablation_support_overrides', [])}`",
+        f"- strong learned baseline status: `{payload['summary'].get('strong_learned_baseline_status', '')}`",
         f"- required baselines inconclusive: `{payload['summary'].get('required_baselines_inconclusive', [])}`",
         f"- required baselines not supported: `{payload['summary'].get('required_baselines_not_supported', [])}`",
         f"- required baselines missing: `{payload['summary'].get('required_baselines_missing', [])}`",
         "",
+        "## Strong Learned Baseline Registration",
+        "",
+        "| baseline | evidence status | required metrics | supported metrics | paper role |",
+        "|---|---|---|---|---|",
+    ]
+    for row in payload["summary"].get("learned_baseline_manifest", []):
+        lines.append(
+            f"| {row['baseline']} | {row['evidence_status']} | "
+            f"{row['required_metrics']} | {row['supported_metrics']} | {row['paper_role']} |"
+        )
+    lines.extend([
+        "",
         "| check | status | metric | n | delta | CI95 low | CI95 high | win rate |",
         "|---|---|---|---:|---:|---:|---:|---:|",
-    ]
+    ])
     for row in payload["paired_checks"]:
         lines.append(
             f"| {row['check']} | {row['status']} | {row['metric']} "

@@ -73,8 +73,18 @@ class BaselineAblationMatrixTest(unittest.TestCase):
             self.assertEqual(built["summary"]["claim_status"], "supported")
             self.assertEqual(built["summary"]["required_baselines_inconclusive"], [])
             self.assertIn("vanilla_rl", built["summary"]["required_baselines_missing"])
+            self.assertEqual(
+                built["summary"]["strong_learned_baseline_status"],
+                "registered_missing",
+            )
+            learned = {
+                row["baseline"]: row
+                for row in built["summary"]["learned_baseline_manifest"]
+            }
+            self.assertEqual(learned["flat_ppo"]["evidence_status"], "registered_missing")
             write_outputs(root / "out", built)
             self.assertTrue((root / "out" / "summary.json").exists())
+            self.assertTrue((root / "out" / "learned_baseline_manifest.csv").exists())
 
     def test_native_promotion_artifact_can_support_no_promotion_ablation_role(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -146,6 +156,45 @@ class BaselineAblationMatrixTest(unittest.TestCase):
                 summary["ablation_support_overrides"][0]["status"],
                 "supported",
             )
+
+    def test_learned_baseline_rows_are_credited_only_when_present(self):
+        rows = []
+        for seed in (1, 2, 3, 4):
+            rows.extend([
+                {
+                    "source_artifact": "learned",
+                    "scenario": "persistent_shift",
+                    "seed": seed,
+                    "baseline": "freq_hrl",
+                    "sharpe": 2.0,
+                    "total_return": 0.10,
+                    "FocusScore": 1.0,
+                    "LowerLFDrift": 0.10,
+                },
+                {
+                    "source_artifact": "learned",
+                    "scenario": "persistent_shift",
+                    "seed": seed,
+                    "baseline": "flat_ppo",
+                    "sharpe": 1.0,
+                    "total_return": 0.04,
+                    "FocusScore": 0.3,
+                    "LowerLFDrift": 0.20,
+                },
+            ])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "learned" / "summary.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"per_seed": rows}), encoding="utf-8")
+            built = build_baseline_ablation_matrix({"learned": path}, min_pairs=3)
+            learned = {
+                row["baseline"]: row
+                for row in built["summary"]["learned_baseline_manifest"]
+            }
+            self.assertEqual(learned["flat_ppo"]["evidence_status"], "supported")
+            self.assertEqual(learned["flat_sac"]["evidence_status"], "registered_missing")
+            self.assertEqual(built["summary"]["strong_learned_baseline_status"], "partial")
 
 
 if __name__ == "__main__":

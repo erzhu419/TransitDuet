@@ -16,11 +16,11 @@ Purpose: separate genuine frequency-responsibility gains from gains caused by mo
 | no_leakage | current | supported | 2.4905 | 0.0227 | 0.1509 | 35 | main_table |
 | lf_upper_only | current_boundary | partial | 0.0151 | 0.0001 | 0.0080 | 35 | main_table |
 | hf_lower_only | current_boundary | supported | 18.0472 | 0.1698 | 0.9220 | 35 | main_table |
-| flat_ppo | upgrade_required | missing |  |  |  |  | next_major_validation |
-| flat_sac | upgrade_required | missing |  |  |  |  | next_major_validation |
-| flat_td3 | upgrade_required | missing |  |  |  |  | next_major_validation |
-| generic_hrl_ppo | upgrade_required | missing |  |  |  |  | next_major_validation |
+| flat_ppo | registered_strong_learned | missing |  |  |  |  | must_complete_or_limit |
+| flat_sac | registered_strong_learned | missing |  |  |  |  | must_complete_or_limit |
+| flat_td3 | registered_strong_learned | missing |  |  |  |  | must_complete_or_limit |
+| generic_hrl_ppo | registered_strong_learned | missing |  |  |  |  | must_complete_or_limit |
 
 ## Main-Table Rule
 
-The manuscript main table should include all `current` rows and mark `upgrade_required` rows as either completed before submission or explicitly moved to limitations. Do not let flat SAC/TD3 appear only as an afterthought if the target venue expects strong RL baselines.
+The manuscript main table should include all `current` rows. `registered_strong_learned` rows (flat PPO/SAC/TD3 and generic learned HRL) must either be completed with paired evidence or explicitly moved to limitations; they cannot be silently counted as supported.
