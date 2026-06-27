@@ -6,6 +6,8 @@ Date: 2026-06-27
 
 Freq-HRL is a frequency-responsibility protocol for hierarchical reinforcement learning in environments driven by non-stationary exogenous time series. A causal encoder decomposes the exogenous stream into low-frequency trend, middle-frequency regime buffer, and high-frequency residual. The upper controller owns slow plan variables; the lower controller owns fast residual correction; promotion transfers persistent high-frequency shocks into upper-level replanning; leakage penalties prevent either layer from acting outside its frequency responsibility.
 
+Machine-checkable contract: `transit_hrl/freq_hrl/core/spec.py`. The carrier package writes `spec_validation.json` so the frozen C1-C9 claim ledger and shared-core path audit can be verified without reading prose.
+
 ## Frozen Interface
 
 | component | required contract |

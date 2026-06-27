@@ -15,6 +15,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.core.spec import (
+    default_spec,
+    validate_claim_freeze,
+    validate_shared_core_paths,
+)
+
 
 DATE_TAG = "2026-06-27"
 DEFAULT_RESULTS_ROOT = Path("transit_hrl/results")
@@ -433,6 +439,8 @@ def write_algorithm_spec(path: Path, claim_freeze: list[dict[str, Any]]) -> None
         "",
         "Freq-HRL is a frequency-responsibility protocol for hierarchical reinforcement learning in environments driven by non-stationary exogenous time series. A causal encoder decomposes the exogenous stream into low-frequency trend, middle-frequency regime buffer, and high-frequency residual. The upper controller owns slow plan variables; the lower controller owns fast residual correction; promotion transfers persistent high-frequency shocks into upper-level replanning; leakage penalties prevent either layer from acting outside its frequency responsibility.",
         "",
+        "Machine-checkable contract: `transit_hrl/freq_hrl/core/spec.py`. The carrier package writes `spec_validation.json` so the frozen C1-C9 claim ledger and shared-core path audit can be verified without reading prose.",
+        "",
         "## Frozen Interface",
         "",
         "| component | required contract |",
@@ -467,6 +475,8 @@ def write_shared_core(path: Path, rows: list[dict[str, Any]]) -> None:
         f"Date: {DATE_TAG}",
         "",
         "Audit question: do Transit and Quant evidence paths instantiate one Freq-HRL core, or two unrelated implementations? The answer should be reviewed through explicit adapter boundaries.",
+        "",
+        "Machine-checkable audit: `transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json` validates that every shared-core row points to a real code artifact.",
         "",
         *_md_table(rows, ["audit_item", "status", "path", "role", "next_upgrade"]),
         "",
@@ -625,6 +635,12 @@ def build_carrier_upgrade_package(
     _write_csv(output_dir / "proof_manifest.csv", proof_manifest)
     _write_csv(output_dir / "reproducibility_commands.csv", repro_commands)
 
+    spec_validation = {
+        "frozen_spec": default_spec().to_mapping(),
+        "claim_freeze": validate_claim_freeze(claim_freeze),
+        "shared_core": validate_shared_core_paths(shared_core, source_root=source_root),
+    }
+
     md_paths = {
         key: md_dir / name
         for key, name in MD_NAMES.items()
@@ -658,6 +674,12 @@ def build_carrier_upgrade_package(
             "data_scaleup_manifest": str(output_dir / "data_scaleup_manifest.csv"),
             "proof_manifest": str(output_dir / "proof_manifest.csv"),
             "reproducibility_commands": str(output_dir / "reproducibility_commands.csv"),
+            "spec_validation": str(output_dir / "spec_validation.json"),
+        },
+        "spec_validation": {
+            "version": spec_validation["frozen_spec"]["version"],
+            "claim_freeze_status": spec_validation["claim_freeze"]["status"],
+            "shared_core_status": spec_validation["shared_core"]["status"],
         },
         "boundary": (
             "Carrier upgrade package freezes the protocol and manuscript plan; it "
@@ -665,6 +687,8 @@ def build_carrier_upgrade_package(
             "large multi-session market replay."
         ),
     }
+    with (output_dir / "spec_validation.json").open("w", encoding="utf-8") as f:
+        json.dump(spec_validation, f, indent=2)
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     return summary

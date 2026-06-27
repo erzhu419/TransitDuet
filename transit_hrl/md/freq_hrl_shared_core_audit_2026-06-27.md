@@ -4,6 +4,8 @@ Date: 2026-06-27
 
 Audit question: do Transit and Quant evidence paths instantiate one Freq-HRL core, or two unrelated implementations? The answer should be reviewed through explicit adapter boundaries.
 
+Machine-checkable audit: `transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json` validates that every shared-core row points to a real code artifact.
+
 | audit_item | status | path | role | next_upgrade |
 | --- | --- | --- | --- | --- |
 | shared data contracts | supported | transit_hrl/freq_hrl/core/types.py | ExogenousBin and FrequencyFeatures keep domain adapters outside the core. | Keep interface frozen; domain code may only enter through adapters. |

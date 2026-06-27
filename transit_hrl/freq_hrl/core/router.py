@@ -12,6 +12,8 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from .spec import validate_lower_policy_state, validate_upper_policy_state
+
 
 def _copy_value(value: Any) -> Any:
     if isinstance(value, np.ndarray):
@@ -92,11 +94,7 @@ class FrequencyRouter:
         return state
 
     def assert_upper_contract(self, state: Mapping[str, Any]) -> None:
-        for key in self.upper_forbidden_keys:
-            assert key not in state, f"upper state leaked forbidden key {key!r}"
-        assert "x_high" not in state, "upper state must not contain raw high residual"
+        validate_upper_policy_state(state)
 
     def assert_lower_contract(self, state: Mapping[str, Any]) -> None:
-        for key in self.lower_forbidden_keys:
-            assert key not in state, f"lower state leaked forbidden key {key!r}"
-        assert "x_low_forecast" not in state, "lower state must not contain full low forecast"
+        validate_lower_policy_state(state)

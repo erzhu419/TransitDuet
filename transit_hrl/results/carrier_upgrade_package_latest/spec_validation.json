@@ -1,0 +1,70 @@
+{
+  "frozen_spec": {
+    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "required_frequency_features": [
+      "timestamp",
+      "x_low",
+      "x_low_forecast",
+      "x_low_uncertainty",
+      "x_mid",
+      "x_high",
+      "x_high_energy",
+      "x_high_persistence",
+      "shock_age"
+    ],
+    "upper_required_keys": [
+      "z_upper",
+      "x_low",
+      "x_low_forecast",
+      "x_low_uncertainty",
+      "x_high_energy",
+      "x_high_persistence",
+      "promotion",
+      "leakage_feedback"
+    ],
+    "lower_required_keys": [
+      "z_lower",
+      "current_plan",
+      "x_high",
+      "x_mid",
+      "shock_age"
+    ],
+    "upper_forbidden_keys": [
+      "x_high",
+      "x_high_sequence",
+      "x_high_raw_sequence",
+      "x_high_local_station_vector",
+      "raw_high_frequency",
+      "future_high"
+    ],
+    "lower_forbidden_keys": [
+      "x_low_forecast",
+      "x_low_forecast_full",
+      "x_low_forecast_horizon",
+      "future_low",
+      "high_level_value"
+    ],
+    "required_claim_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  "claim_freeze": {
+    "status": "supported",
+    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "claims": 9,
+    "required_claims": 9
+  },
+  "shared_core": {
+    "status": "supported",
+    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "shared_core_rows": 9
+  }
+}

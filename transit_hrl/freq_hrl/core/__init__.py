@@ -18,6 +18,15 @@ from .phase0 import (
 from .promotion_gate import CausalPromotionGate
 from .reward import RewardAttributionAccumulator
 from .router import FrequencyRouter
+from .spec import (
+    FrozenFreqHRLSpec,
+    default_spec,
+    validate_claim_freeze,
+    validate_frequency_features,
+    validate_lower_policy_state,
+    validate_shared_core_paths,
+    validate_upper_policy_state,
+)
 from .stream_adapter import BinnedExogenousStreamAdapter, MultiEntityBinnedStream
 from .types import ExogenousBin, FrequencyFeatures, PromotionSignal
 
@@ -32,6 +41,7 @@ __all__ = [
     "FrequencyDiagnostics",
     "FrequencyFeatures",
     "FrequencyRouter",
+    "FrozenFreqHRLSpec",
     "LeakageRegularizer",
     "MultiEntityBinnedStream",
     "PHASE0_REQUIRED_FIELDS",
@@ -40,6 +50,12 @@ __all__ = [
     "PromotionSignal",
     "RewardAttributionAccumulator",
     "binned_mutual_information",
+    "default_spec",
     "load_phase0_records",
+    "validate_claim_freeze",
+    "validate_frequency_features",
+    "validate_lower_policy_state",
     "validate_phase0_record_schema",
+    "validate_shared_core_paths",
+    "validate_upper_policy_state",
 ]

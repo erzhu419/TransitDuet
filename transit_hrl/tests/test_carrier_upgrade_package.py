@@ -1,4 +1,5 @@
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -37,6 +38,14 @@ class CarrierUpgradePackageTest(unittest.TestCase):
                 baseline_rows = list(csv.DictReader(f))
             self.assertTrue(any(row["baseline"] == "flat_sac" for row in baseline_rows))
             self.assertTrue(any(row["baseline"] == "swapped" for row in baseline_rows))
+
+            spec_validation = json.loads((out / "spec_validation.json").read_text(encoding="utf-8"))
+            self.assertEqual(spec_validation["claim_freeze"]["status"], "supported")
+            self.assertEqual(spec_validation["shared_core"]["status"], "supported")
+            self.assertEqual(
+                payload["spec_validation"]["version"],
+                "freq_hrl_frozen_spec_2026_06_27",
+            )
 
             repro = (md / "freq_hrl_reproducibility_package_2026-06-27.md").read_text(
                 encoding="utf-8"
