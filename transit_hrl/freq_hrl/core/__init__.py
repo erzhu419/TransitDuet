@@ -18,6 +18,7 @@ from .phase0 import (
 from .promotion_gate import CausalPromotionGate
 from .reward import RewardAttributionAccumulator
 from .router import FrequencyRouter
+from .shared_core_audit import audit_shared_training_core
 from .spec import (
     FrozenFreqHRLSpec,
     default_spec,
@@ -49,6 +50,7 @@ __all__ = [
     "Phase0TraceLogger",
     "PromotionSignal",
     "RewardAttributionAccumulator",
+    "audit_shared_training_core",
     "binned_mutual_information",
     "default_spec",
     "load_phase0_records",

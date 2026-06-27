@@ -5,7 +5,13 @@ import numpy as np
 from freq_hrl.experiments.transit.ppo_surrogate import train_transit_surrogate_ppo
 from freq_hrl.experiments.trading.ppo_actor_critic import train_ppo_actor_critic
 from freq_hrl.policies import BernsteinPlanCurve
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, LearnedPlanActionMapper, TrajectoryBatch
+from freq_hrl.rl import (
+    DualActorCriticPPO,
+    DualPPOConfig,
+    LearnedPlanActionMapper,
+    TrajectoryBatch,
+    apply_replay_updates,
+)
 
 
 class DualActorCriticTest(unittest.TestCase):
@@ -37,6 +43,45 @@ class DualActorCriticTest(unittest.TestCase):
         self.assertIn("policy_loss", metrics)
         self.assertIn("value_loss", metrics)
         self.assertIn("constraint_mean", metrics)
+
+    def test_apply_replay_updates_records_shared_kernel_rows(self):
+        cfg = DualPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=0,
+            epochs=1,
+            minibatch_size=4,
+        )
+        model = DualActorCriticPPO(cfg)
+        batch = TrajectoryBatch(
+            upper_state=np.zeros((4, 3), dtype=np.float32),
+            lower_state=np.zeros((4, 2), dtype=np.float32),
+            upper_action=np.zeros((4, 1), dtype=np.float32),
+            lower_action=np.zeros((4, 1), dtype=np.float32),
+            reward=np.ones(4, dtype=np.float32) * 0.01,
+            done=np.array([0, 0, 0, 1], dtype=np.float32),
+            old_upper_logp=np.zeros(4, dtype=np.float32),
+            old_lower_logp=np.zeros(4, dtype=np.float32),
+            old_upper_value=np.zeros(4, dtype=np.float32),
+            old_lower_value=np.zeros(4, dtype=np.float32),
+            constraint=np.ones(4, dtype=np.float32) * 0.2,
+        )
+        rows = []
+        metrics = apply_replay_updates(
+            model,
+            batch,
+            rows,
+            episode=7,
+            replay_updates=2,
+            metadata={"domain": "unit"},
+        )
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["episode"], 7)
+        self.assertEqual(rows[1]["replay_update"], 1)
+        self.assertEqual(rows[0]["domain"], "unit")
+        self.assertIn("policy_loss", metrics)
 
     def test_learned_plan_action_mapper(self):
         mapper = LearnedPlanActionMapper(

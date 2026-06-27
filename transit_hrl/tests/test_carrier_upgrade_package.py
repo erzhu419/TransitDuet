@@ -46,6 +46,15 @@ class CarrierUpgradePackageTest(unittest.TestCase):
                 payload["spec_validation"]["version"],
                 "freq_hrl_frozen_spec_2026_06_27",
             )
+            shared_core_validation = json.loads(
+                (out / "shared_core_validation.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(shared_core_validation["status"], "supported")
+            self.assertEqual(shared_core_validation["core_boundary"]["violations"], [])
+            self.assertEqual(
+                payload["shared_core_validation"]["status"],
+                "supported",
+            )
 
             repro = (md / "freq_hrl_reproducibility_package_2026-06-27.md").read_text(
                 encoding="utf-8"

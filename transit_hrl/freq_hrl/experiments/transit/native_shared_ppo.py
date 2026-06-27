@@ -20,7 +20,12 @@ from typing import Any
 
 import numpy as np
 
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig, TrajectoryBatch
+from freq_hrl.rl import (
+    DualActorCriticPPO,
+    DualPPOConfig,
+    TrajectoryBatch,
+    apply_replay_updates,
+)
 
 
 TRANSIT_HRL_ROOT = Path(__file__).resolve().parents[3]
@@ -2812,15 +2817,13 @@ def run_native_shared_ppo_episode_loop(
         collector.rows.clear()
         row = runner.run_episode(ep, training=True)
         batch = collector.to_batch()
-        update_metrics: dict[str, Any] = {}
-        if batch is not None:
-            for replay_idx in range(replay_updates):
-                update_metrics = bridge.model.update(batch)
-                updates.append({
-                    "episode": int(ep),
-                    "replay_update": int(replay_idx),
-                    **update_metrics,
-                })
+        update_metrics = apply_replay_updates(
+            bridge.model,
+            batch,
+            updates,
+            episode=int(ep),
+            replay_updates=replay_updates,
+        )
         row = dict(row)
         row.update({
             "native_shared_ppo": True,

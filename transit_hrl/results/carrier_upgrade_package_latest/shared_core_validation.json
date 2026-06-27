@@ -1,0 +1,43 @@
+{
+  "status": "supported",
+  "core_boundary": {
+    "status": "supported",
+    "checked_files": 24,
+    "violations": []
+  },
+  "adapter_evidence": [
+    {
+      "adapter": "trading_ppo",
+      "status": "supported",
+      "path": "transit_hrl/freq_hrl/experiments/trading/ppo_actor_critic.py",
+      "required_symbol": "train_dual_ppo",
+      "role": "Quant/trading rollout adapter calls the shared dual-level PPO loop.",
+      "evidence": "`train_dual_ppo` is present in adapter source"
+    },
+    {
+      "adapter": "transit_surrogate_ppo",
+      "status": "supported",
+      "path": "transit_hrl/freq_hrl/experiments/transit/ppo_surrogate.py",
+      "required_symbol": "train_dual_ppo",
+      "role": "Transit surrogate rollout adapter calls the same shared dual-level PPO loop.",
+      "evidence": "`train_dual_ppo` is present in adapter source"
+    },
+    {
+      "adapter": "transit_native_replay_update",
+      "status": "supported",
+      "path": "transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py",
+      "required_symbol": "apply_replay_updates",
+      "role": "Native Transit episode loop delegates PPO replay updates to the shared RL kernel.",
+      "evidence": "`apply_replay_updates` is present in adapter source"
+    },
+    {
+      "adapter": "transit_native_actor_core",
+      "status": "supported",
+      "path": "transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py",
+      "required_symbol": "DualActorCriticPPO",
+      "role": "Native Transit bridge instantiates the shared upper/lower actor-critic.",
+      "evidence": "`DualActorCriticPPO` is present in adapter source"
+    }
+  ],
+  "boundary_statement": "Core/encoder/RL modules stay domain-agnostic; Quant and Transit adapters collect domain rollouts and delegate learning to shared DualActorCriticPPO, train_dual_ppo, or apply_replay_updates."
+}

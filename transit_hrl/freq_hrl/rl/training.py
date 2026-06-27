@@ -53,6 +53,39 @@ def summarize_numeric_rows(rows: list[dict[str, Any]], keys: list[str] | None = 
     return summary
 
 
+def apply_replay_updates(
+    model: DualActorCriticPPO,
+    batch: TrajectoryBatch | None,
+    updates: list[dict[str, Any]] | None = None,
+    *,
+    episode: int = 0,
+    replay_updates: int = 1,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Apply PPO updates to an already-collected domain rollout batch.
+
+    Native simulators often own the episode loop because they need to install
+    policy proxies into existing control code.  This helper keeps the learning
+    update itself in the shared Freq-HRL RL core: domains may collect
+    `TrajectoryBatch` objects differently, but PPO replay updates are recorded
+    through one implementation.
+    """
+    if batch is None:
+        return {}
+    row_metadata = dict(metadata or {})
+    latest: dict[str, Any] = {}
+    for replay_idx in range(max(1, int(replay_updates))):
+        latest = model.update(batch)
+        if updates is not None:
+            updates.append({
+                "episode": int(episode),
+                "replay_update": int(replay_idx),
+                **row_metadata,
+                **latest,
+            })
+    return latest
+
+
 def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> dict[str, float]:
     out = {"sampled_objective": float(np.mean([objective_fn(row) for row in rows])) if rows else 0.0}
     if rows and "sharpe" in rows[0]:

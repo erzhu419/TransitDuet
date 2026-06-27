@@ -27,12 +27,19 @@
     "data_scaleup_manifest": "transit_hrl/results/carrier_upgrade_package_latest/data_scaleup_manifest.csv",
     "proof_manifest": "transit_hrl/results/carrier_upgrade_package_latest/proof_manifest.csv",
     "reproducibility_commands": "transit_hrl/results/carrier_upgrade_package_latest/reproducibility_commands.csv",
-    "spec_validation": "transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json"
+    "spec_validation": "transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json",
+    "shared_core_validation": "transit_hrl/results/carrier_upgrade_package_latest/shared_core_validation.json"
   },
   "spec_validation": {
     "version": "freq_hrl_frozen_spec_2026_06_27",
     "claim_freeze_status": "supported",
     "shared_core_status": "supported"
+  },
+  "shared_core_validation": {
+    "status": "supported",
+    "checked_files": 24,
+    "adapter_entries": 4,
+    "boundary_violations": 0
   },
   "boundary": "Carrier upgrade package freezes the protocol and manuscript plan; it does not substitute for future same-agency Transit deployment or large multi-session market replay."
 }

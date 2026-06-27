@@ -6,7 +6,7 @@ from .dual_actor_critic import (
     TrajectoryBatch,
 )
 from .plan_actions import LearnedPlanActionMapper, PlanActionResult
-from .training import concat_batches, summarize_numeric_rows, train_dual_ppo
+from .training import apply_replay_updates, concat_batches, summarize_numeric_rows, train_dual_ppo
 
 __all__ = [
     "DualActorCriticPPO",
@@ -14,6 +14,7 @@ __all__ = [
     "LearnedPlanActionMapper",
     "PlanActionResult",
     "TrajectoryBatch",
+    "apply_replay_updates",
     "concat_batches",
     "summarize_numeric_rows",
     "train_dual_ppo",

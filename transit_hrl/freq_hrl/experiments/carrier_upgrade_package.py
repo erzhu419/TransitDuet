@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.core.shared_core_audit import audit_shared_training_core
 from freq_hrl.core.spec import (
     default_spec,
     validate_claim_freeze,
@@ -468,7 +469,13 @@ def write_algorithm_spec(path: Path, claim_freeze: list[dict[str, Any]]) -> None
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_shared_core(path: Path, rows: list[dict[str, Any]]) -> None:
+def write_shared_core(
+    path: Path,
+    rows: list[dict[str, Any]],
+    shared_core_validation: dict[str, Any],
+) -> None:
+    adapter_rows = list(shared_core_validation.get("adapter_evidence", []))
+    boundary = dict(shared_core_validation.get("core_boundary", {}) or {})
     lines = [
         "# Freq-HRL Shared-Core Audit",
         "",
@@ -476,13 +483,21 @@ def write_shared_core(path: Path, rows: list[dict[str, Any]]) -> None:
         "",
         "Audit question: do Transit and Quant evidence paths instantiate one Freq-HRL core, or two unrelated implementations? The answer should be reviewed through explicit adapter boundaries.",
         "",
-        "Machine-checkable audit: `transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json` validates that every shared-core row points to a real code artifact.",
+        "Machine-checkable audits: `transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json` validates shared-core artifact paths; `transit_hrl/results/carrier_upgrade_package_latest/shared_core_validation.json` checks that core/encoder/RL modules do not import domain code and that Quant/Transit adapters use the shared training entries.",
         "",
         *_md_table(rows, ["audit_item", "status", "path", "role", "next_upgrade"]),
         "",
+        "## Source Boundary Audit",
+        "",
+        f"- status: `{shared_core_validation.get('status', 'unknown')}`",
+        f"- checked core files: `{boundary.get('checked_files', 0)}`",
+        f"- boundary violations: `{len(boundary.get('violations', []))}`",
+        "",
+        *_md_table(adapter_rows, ["adapter", "status", "required_symbol", "role", "evidence"]),
+        "",
         "## Reviewer-Facing Boundary",
         "",
-        "The shared core claim is supported for the current protocol and evidence matrix. A stronger final-paper claim should add a native Quant runner and a native Transit runner both calling the same `train_dual_ppo` path directly, with only rollout adapters differing.",
+        "The shared core claim is supported at the training-kernel level: domain code owns rollout construction, while learning goes through `DualActorCriticPPO`, `train_dual_ppo`, or `apply_replay_updates`. A stronger final-paper claim may still report native Transit as an existing-simulator episode-loop adapter rather than pretending it is byte-identical to the synthetic rollout loop.",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -620,6 +635,7 @@ def build_carrier_upgrade_package(
 
     claim_freeze = build_claim_freeze(claim_rows)
     shared_core = build_shared_core_audit(source_root)
+    shared_core_validation = audit_shared_training_core(source_root)
     baseline_manifest = build_baseline_manifest(baseline_rows)
     data_scaleup = build_data_scaleup_manifest(external_truth, agency, order_book)
     proof_manifest = build_proof_manifest()
@@ -647,7 +663,7 @@ def build_carrier_upgrade_package(
     }
     write_carrier_plan(md_paths["carrier_plan"], claim_rows)
     write_algorithm_spec(md_paths["algorithm_spec"], claim_freeze)
-    write_shared_core(md_paths["shared_core"], shared_core)
+    write_shared_core(md_paths["shared_core"], shared_core, shared_core_validation)
     write_baseline(md_paths["baseline"], baseline_manifest)
     write_real_data(md_paths["real_data"], data_scaleup)
     write_theory(md_paths["theory"], proof_manifest)
@@ -675,11 +691,18 @@ def build_carrier_upgrade_package(
             "proof_manifest": str(output_dir / "proof_manifest.csv"),
             "reproducibility_commands": str(output_dir / "reproducibility_commands.csv"),
             "spec_validation": str(output_dir / "spec_validation.json"),
+            "shared_core_validation": str(output_dir / "shared_core_validation.json"),
         },
         "spec_validation": {
             "version": spec_validation["frozen_spec"]["version"],
             "claim_freeze_status": spec_validation["claim_freeze"]["status"],
             "shared_core_status": spec_validation["shared_core"]["status"],
+        },
+        "shared_core_validation": {
+            "status": shared_core_validation["status"],
+            "checked_files": shared_core_validation["core_boundary"]["checked_files"],
+            "adapter_entries": len(shared_core_validation["adapter_evidence"]),
+            "boundary_violations": len(shared_core_validation["core_boundary"]["violations"]),
         },
         "boundary": (
             "Carrier upgrade package freezes the protocol and manuscript plan; it "
@@ -689,6 +712,8 @@ def build_carrier_upgrade_package(
     }
     with (output_dir / "spec_validation.json").open("w", encoding="utf-8") as f:
         json.dump(spec_validation, f, indent=2)
+    with (output_dir / "shared_core_validation.json").open("w", encoding="utf-8") as f:
+        json.dump(shared_core_validation, f, indent=2)
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     return summary
