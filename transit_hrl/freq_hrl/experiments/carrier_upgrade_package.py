@@ -54,6 +54,7 @@ MD_NAMES = {
     "real_data": f"freq_hrl_real_data_scaleup_plan_{DATE_TAG}.md",
     "theory": f"freq_hrl_theory_proof_appendix_{DATE_TAG}.md",
     "manuscript": f"freq_hrl_full_manuscript_draft_{DATE_TAG}.md",
+    "cs_venue": f"freq_hrl_cs_top_venue_strategy_{DATE_TAG}.md",
     "repro": f"freq_hrl_reproducibility_package_{DATE_TAG}.md",
 }
 
@@ -563,6 +564,147 @@ def build_repro_artifact_manifest(
     return rows
 
 
+def build_cs_top_venue_readiness(
+    *,
+    baseline_summary: dict[str, Any],
+    agency: dict[str, Any],
+    order_book: dict[str, Any],
+    theory_summary: dict[str, Any],
+    shared_core_validation: dict[str, Any],
+    claim_freeze: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Reviewer-facing readiness matrix for CS top venues."""
+    baseline_meta = baseline_summary.get("summary", {}) if isinstance(baseline_summary.get("summary"), dict) else {}
+    agency_meta = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
+    order_coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
+    theorem_count = len(theory_summary.get("theorems", []) or [])
+    claims_supported = sum(1 for row in claim_freeze if row.get("status") == "supported")
+    learned_status = str(baseline_meta.get("strong_learned_baseline_status", "registered_missing"))
+    same_agency_status = str(agency_meta.get("same_agency_native_control_status", "external_missing"))
+    venue_pairs = int(order_coverage.get("venue_grade_l2_l3_session_pairs", 0) or 0)
+    return [
+        {
+            "review_axis": "single_algorithm_claim",
+            "cs_expectation": "One crisp algorithmic contribution, not a domain engineering story.",
+            "current_status": "paper_ready_with_boundary" if claims_supported >= 9 else "partial",
+            "evidence": f"supported_claims={claims_supported}; frozen_spec=freq_hrl_frozen_spec_2026_06_27",
+            "next_action": "Lead with frequency-responsibility routing; keep FreqDuet as prior domain origin.",
+            "venue_risk": "Rejected as incremental feature engineering if routing/credit/leakage are not foregrounded.",
+        },
+        {
+            "review_axis": "shared_training_core",
+            "cs_expectation": "Quant and Transit must look like adapters around one algorithm.",
+            "current_status": str(shared_core_validation.get("status", "missing")),
+            "evidence": (
+                f"checked_core_files={shared_core_validation.get('core_boundary', {}).get('checked_files', 0)}; "
+                f"adapter_entries={len(shared_core_validation.get('adapter_evidence', []) or [])}"
+            ),
+            "next_action": "In the paper, show one pseudocode block and two domain-adapter instantiations.",
+            "venue_risk": "If this reads like two systems, ML/RL reviewers will discount generality.",
+        },
+        {
+            "review_axis": "strong_rl_baselines",
+            "cs_expectation": "Flat PPO/SAC/TD3 and generic HRL baselines must be explicit.",
+            "current_status": "blocker" if learned_status in {"registered_missing", "missing"} else learned_status,
+            "evidence": f"strong_learned_baseline_status={learned_status}",
+            "next_action": "Run or clearly limit flat PPO/SAC/TD3 and generic HRL; do not count heuristic baselines as learned RL.",
+            "venue_risk": "Top ML/RL venues will treat missing learned baselines as a core empirical weakness.",
+        },
+        {
+            "review_axis": "ablation_completeness",
+            "cs_expectation": "Ablate frequency routing, promotion, leakage, encoder, and plan curve separately.",
+            "current_status": str(baseline_meta.get("claim_status", "missing")),
+            "evidence": (
+                f"required_positive={baseline_meta.get('required_baselines_positive', [])}; "
+                f"scenario_win_rate={baseline_meta.get('scenario_freq_family_win_rate', '')}"
+            ),
+            "next_action": "Keep the main ablation table compact; move long stress matrices to appendix.",
+            "venue_risk": "A reviewer may accept bounded claims if ablations are clean and pre-registered.",
+        },
+        {
+            "review_axis": "real_world_evidence",
+            "cs_expectation": "Real data must support generality without overclaiming deployment.",
+            "current_status": "paper_ready_with_boundary",
+            "evidence": (
+                f"scope={agency_meta.get('evidence_scope', '')}; "
+                f"same_agency_control={same_agency_status}"
+            ),
+            "next_action": "State public truth-source coverage; do not claim same-agency deployment validation.",
+            "venue_risk": "Overclaiming Transit data linkage is more dangerous than calling it a limitation.",
+        },
+        {
+            "review_axis": "order_book_scale",
+            "cs_expectation": "Market evidence should be reproducible and not rely on tiny toy fixtures.",
+            "current_status": "partial_scale" if venue_pairs < 20 else "strong_scale",
+            "evidence": (
+                f"venue_grade_pairs={venue_pairs}; "
+                f"quality={order_coverage.get('source_quality_status', '')}"
+            ),
+            "next_action": "For a finance/data-mining venue, expand to more symbol-session pairs; for ML/RL, keep as secondary evidence.",
+            "venue_risk": "A finance-heavy reviewer may ask for much larger venue-grade replay.",
+        },
+        {
+            "review_axis": "theory_scope",
+            "cs_expectation": "Formal statements should support the method but avoid false convergence claims.",
+            "current_status": "paper_ready_with_boundary" if theorem_count >= 9 else "partial",
+            "evidence": f"formal_theorems_or_propositions={theorem_count}",
+            "next_action": "Frame theory as causality/leakage/promotion/CI reporting bounds, not universal RL convergence.",
+            "venue_risk": "The theory is adequate for an empirical ML systems paper, not a theory-track claim.",
+        },
+        {
+            "review_axis": "reproducibility",
+            "cs_expectation": "Artifacts, seeds, source data, and raw-cache commands must be auditable.",
+            "current_status": "paper_ready_with_boundary",
+            "evidence": "carrier package emits claim, baseline, data, proof, seed, and reproducibility manifests",
+            "next_action": "Attach artifact checklist in appendix and avoid committing raw third-party caches.",
+            "venue_risk": "Usually a strength if the claim wording remains conservative.",
+        },
+    ]
+
+
+def write_cs_venue_strategy(path: Path, rows: list[dict[str, Any]]) -> None:
+    blocker_rows = [row for row in rows if row.get("current_status") == "blocker"]
+    lines = [
+        "# Freq-HRL CS Top-Venue Strategy",
+        "",
+        f"Date: {DATE_TAG}",
+        "",
+        "Target: CS top conference/journal review standards, especially ML/RL/AI/data-mining reviewers who will judge novelty, baselines, ablations, statistical evidence, and reproducibility before domain details.",
+        "",
+        "## Submission Positioning",
+        "",
+        "Main thesis: frequency-responsibility routing is an algorithmic principle for time-series HRL. FreqDuet is the origin story and Transit is one domain adapter; Freq-HRL must be presented as the general method.",
+        "",
+        "Recommended framing: submit as an empirical ML/RL method with strong systems-style reproducibility, not as a Transit-only paper. The paper should lead with one algorithm box, one interface contract, one claim matrix, and two domain instantiations.",
+        "",
+        "## Readiness Matrix",
+        "",
+        *_md_table(rows, ["review_axis", "cs_expectation", "current_status", "evidence", "next_action", "venue_risk"]),
+        "",
+        "## Current Blocking Items",
+        "",
+    ]
+    if blocker_rows:
+        for row in blocker_rows:
+            lines.append(f"- {row['review_axis']}: {row['next_action']}")
+    else:
+        lines.append("- No hard blocker is registered by the current matrix; remaining risks are claim-boundary and scale risks.")
+    lines.extend([
+        "",
+        "## Venue Fit",
+        "",
+        "- NeurIPS/ICML/ICLR style: strongest if flat PPO/SAC/TD3 and generic HRL baselines are completed; otherwise position as a bounded empirical method and expect baseline objections.",
+        "- KDD/WebConf/AAAI/IJCAI style: stronger if real-data and cross-domain evidence are foregrounded, with cautious claims about deployment.",
+        "- JMLR/TMLR style: requires a cleaner algorithmic narrative, strong reproducibility, and a larger appendix; results can be broader but must be statistically disciplined.",
+        "- Transportation or fintech journals: evidence depth matters more than algorithmic minimalism; same-agency Transit and larger L2/L3 replay become higher priority.",
+        "",
+        "## Non-Negotiable Writing Rule",
+        "",
+        "Do not claim production deployment, universal encoder dominance, or universal RL convergence. The publishable claim is domain-general frequency-responsibility routing with conservative empirical support.",
+    ])
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def write_carrier_plan(path: Path, claim_rows: list[dict[str, Any]]) -> None:
     lines = [
         "# Freq-HRL Carrier Upgrade Plan",
@@ -827,6 +969,14 @@ def build_carrier_upgrade_package(
         output_dir,
         scheduler_seed_manifest,
     )
+    cs_top_venue_readiness = build_cs_top_venue_readiness(
+        baseline_summary=baseline_summary,
+        agency=agency,
+        order_book=order_book,
+        theory_summary=theory_summary,
+        shared_core_validation=shared_core_validation,
+        claim_freeze=claim_freeze,
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     md_dir.mkdir(parents=True, exist_ok=True)
@@ -839,6 +989,7 @@ def build_carrier_upgrade_package(
     _write_csv(output_dir / "reproducibility_commands.csv", repro_commands)
     _write_csv(output_dir / "scheduler_seed_manifest.csv", scheduler_seed_manifest)
     _write_csv(output_dir / "reproducibility_artifact_manifest.csv", repro_artifacts)
+    _write_csv(output_dir / "cs_top_venue_readiness.csv", cs_top_venue_readiness)
 
     spec_validation = {
         "frozen_spec": default_spec().to_mapping(),
@@ -857,6 +1008,7 @@ def build_carrier_upgrade_package(
     write_real_data(md_paths["real_data"], data_scaleup)
     write_theory(md_paths["theory"], proof_manifest)
     write_manuscript(md_paths["manuscript"], claim_freeze)
+    write_cs_venue_strategy(md_paths["cs_venue"], cs_top_venue_readiness)
     write_repro(md_paths["repro"], repro_commands, repro_artifacts, scheduler_seed_manifest)
 
     summary = {
@@ -871,6 +1023,12 @@ def build_carrier_upgrade_package(
         "repro_commands": len(repro_commands),
         "repro_artifacts": len(repro_artifacts),
         "scheduler_seed_rows": len(scheduler_seed_manifest),
+        "cs_top_venue_readiness_rows": len(cs_top_venue_readiness),
+        "cs_top_venue_blockers": [
+            row["review_axis"]
+            for row in cs_top_venue_readiness
+            if row.get("current_status") == "blocker"
+        ],
         "output_dir": str(output_dir),
         "md_dir": str(md_dir),
         "documents": {key: str(path) for key, path in md_paths.items()},
@@ -883,6 +1041,7 @@ def build_carrier_upgrade_package(
             "reproducibility_commands": str(output_dir / "reproducibility_commands.csv"),
             "reproducibility_artifact_manifest": str(output_dir / "reproducibility_artifact_manifest.csv"),
             "scheduler_seed_manifest": str(output_dir / "scheduler_seed_manifest.csv"),
+            "cs_top_venue_readiness": str(output_dir / "cs_top_venue_readiness.csv"),
             "spec_validation": str(output_dir / "spec_validation.json"),
             "shared_core_validation": str(output_dir / "shared_core_validation.json"),
         },

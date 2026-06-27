@@ -10,6 +10,10 @@
   "repro_commands": 9,
   "repro_artifacts": 5,
   "scheduler_seed_rows": 2,
+  "cs_top_venue_readiness_rows": 8,
+  "cs_top_venue_blockers": [
+    "strong_rl_baselines"
+  ],
   "output_dir": "transit_hrl/results/carrier_upgrade_package_latest",
   "md_dir": "transit_hrl/md",
   "documents": {
@@ -20,6 +24,7 @@
     "real_data": "transit_hrl/md/freq_hrl_real_data_scaleup_plan_2026-06-27.md",
     "theory": "transit_hrl/md/freq_hrl_theory_proof_appendix_2026-06-27.md",
     "manuscript": "transit_hrl/md/freq_hrl_full_manuscript_draft_2026-06-27.md",
+    "cs_venue": "transit_hrl/md/freq_hrl_cs_top_venue_strategy_2026-06-27.md",
     "repro": "transit_hrl/md/freq_hrl_reproducibility_package_2026-06-27.md"
   },
   "manifests": {
@@ -31,6 +36,7 @@
     "reproducibility_commands": "transit_hrl/results/carrier_upgrade_package_latest/reproducibility_commands.csv",
     "reproducibility_artifact_manifest": "transit_hrl/results/carrier_upgrade_package_latest/reproducibility_artifact_manifest.csv",
     "scheduler_seed_manifest": "transit_hrl/results/carrier_upgrade_package_latest/scheduler_seed_manifest.csv",
+    "cs_top_venue_readiness": "transit_hrl/results/carrier_upgrade_package_latest/cs_top_venue_readiness.csv",
     "spec_validation": "transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json",
     "shared_core_validation": "transit_hrl/results/carrier_upgrade_package_latest/shared_core_validation.json"
   },
