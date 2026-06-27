@@ -61,11 +61,25 @@ class CarrierUpgradePackageTest(unittest.TestCase):
                 payload["shared_core_validation"]["status"],
                 "supported",
             )
+            with (out / "scheduler_seed_manifest.csv").open("r", newline="", encoding="utf-8") as f:
+                seed_rows = list(csv.DictReader(f))
+            self.assertTrue(any(row["artifact"].startswith("native_promotion") for row in seed_rows))
+            self.assertTrue(any(int(row["seed_count"]) > 0 for row in seed_rows))
+            with (out / "reproducibility_artifact_manifest.csv").open(
+                "r",
+                newline="",
+                encoding="utf-8",
+            ) as f:
+                artifact_rows = list(csv.DictReader(f))
+            self.assertTrue(any(row["artifact"] == "figure_source_data" for row in artifact_rows))
+            self.assertTrue(any(row["artifact"] == "external_transit_raw_cache" for row in artifact_rows))
 
             repro = (md / "freq_hrl_reproducibility_package_2026-06-27.md").read_text(
                 encoding="utf-8"
             )
             self.assertIn("carrier_upgrade", repro)
+            self.assertIn("external_truth_raw_cache", repro)
+            self.assertIn("Scheduler Seed Ledger", repro)
 
 
 if __name__ == "__main__":

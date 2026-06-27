@@ -426,6 +426,18 @@ def build_repro_commands() -> list[dict[str, Any]]:
             "expected": "9 conservative claims with explicit boundaries",
         },
         {
+            "stage": "external_truth_raw_cache",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.transit.external_transit_truth_validation --download-missing --mta-od-total-rows 116279069 --output-dir transit_hrl/results/external_transit_truth_validation_latest",
+            "output": "public MBTA/MTA derived summaries; raw caches remain ignored",
+            "expected": "supported public board/alight/load and estimated OD coverage",
+        },
+        {
+            "stage": "agency_coverage",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage --output-dir transit_hrl/results/agency_demand_onboard_coverage_latest",
+            "output": "source_coverage.csv, claim_boundaries.csv, deployment_data_gate.csv",
+            "expected": "field coverage and same-agency native-control boundary ledger",
+        },
+        {
             "stage": "baseline_manifest",
             "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.baseline_ablation_matrix --output-dir transit_hrl/results/baseline_ablation_matrix_latest",
             "output": "paired baseline and ablation checks",
@@ -444,12 +456,111 @@ def build_repro_commands() -> list[dict[str, Any]]:
             "expected": "claim tables, methods/SI, data availability",
         },
         {
+            "stage": "theory_appendix",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.theory_appendix --output-dir transit_hrl/results/freq_hrl_theory_appendix_latest",
+            "output": "formal theorem/proposition appendix",
+            "expected": "sufficient-condition and reporting-boundary statements",
+        },
+        {
             "stage": "carrier_upgrade",
             "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.carrier_upgrade_package --output-dir transit_hrl/results/carrier_upgrade_package_latest",
             "output": "carrier upgrade md and manifests",
             "expected": "frozen spec, audit, baseline, data, theory, manuscript, reproducibility package",
         },
     ]
+
+
+def _seed_summary(path: Path, *, artifact: str, role: str) -> dict[str, Any]:
+    data = _read_json(path)
+    seeds = data.get("seeds", []) if isinstance(data, dict) else []
+    seeds = [int(seed) for seed in seeds if str(seed).strip()]
+    stride = 0
+    if len(seeds) >= 2:
+        diffs = sorted({b - a for a, b in zip(seeds, seeds[1:])})
+        stride = diffs[0] if len(diffs) == 1 else 0
+    return {
+        "artifact": artifact,
+        "role": role,
+        "path": str(path),
+        "status": "present" if path.exists() else "missing",
+        "seed_count": len(seeds),
+        "first_seed": seeds[0] if seeds else "",
+        "last_seed": seeds[-1] if seeds else "",
+        "seed_stride": stride,
+        "boundary": "scheduler seed ledger; raw shard logs are not committed",
+    }
+
+
+def build_scheduler_seed_manifest(results_root: Path) -> list[dict[str, Any]]:
+    return [
+        _seed_summary(
+            results_root / "transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json",
+            artifact="native_promotion_v47_odshift_wait_first_512seed",
+            role="C1/C7 native learned-promotion evidence",
+        ),
+        _seed_summary(
+            results_root / "transit_native_real_demand_service_response_v7_48pair_merged/summary.json",
+            artifact="native_real_demand_service_response_v7_48pair",
+            role="C2 native real-demand service-response evidence",
+        ),
+    ]
+
+
+def build_repro_artifact_manifest(
+    results_root: Path,
+    output_dir: Path,
+    scheduler_seed_manifest: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    figure_source_dir = results_root / "manuscript_figures_latest/source_data"
+    figure_sources = sorted(figure_source_dir.glob("*.csv")) if figure_source_dir.exists() else []
+    rows = [
+        {
+            "artifact": "claim_matrix",
+            "path": str(results_root / "top_journal_unified_matrix_latest/summary.json"),
+            "kind": "evidence_table",
+            "status": "present" if (results_root / "top_journal_unified_matrix_latest/summary.json").exists() else "missing",
+            "count": "",
+            "reproduce_stage": "claim_matrix",
+            "commit_policy": "commit compact summary and claim tables",
+        },
+        {
+            "artifact": "figure_source_data",
+            "path": str(figure_source_dir),
+            "kind": "source_data",
+            "status": "present" if figure_sources else "missing",
+            "count": len(figure_sources),
+            "reproduce_stage": "figures",
+            "commit_policy": "commit source_data CSVs and lightweight figure drafts",
+        },
+        {
+            "artifact": "scheduler_seed_manifest",
+            "path": str(output_dir / "scheduler_seed_manifest.csv"),
+            "kind": "seed_ledger",
+            "status": "present" if scheduler_seed_manifest else "missing",
+            "count": sum(int(row.get("seed_count", 0) or 0) for row in scheduler_seed_manifest),
+            "reproduce_stage": "claim_matrix",
+            "commit_policy": "commit compact seed ledger, not raw scheduler scratch",
+        },
+        {
+            "artifact": "external_transit_raw_cache",
+            "path": "transit_hrl/data/public_mbta_bus_ridership_raw; transit_hrl/data/public_mta_od_raw",
+            "kind": "ignored_raw_cache",
+            "status": "regenerate_with_command",
+            "count": "",
+            "reproduce_stage": "external_truth_raw_cache",
+            "commit_policy": "do not commit raw third-party cache",
+        },
+        {
+            "artifact": "carrier_validation_json",
+            "path": str(output_dir / "spec_validation.json"),
+            "kind": "machine_check",
+            "status": "present",
+            "count": 1,
+            "reproduce_stage": "carrier_upgrade",
+            "commit_policy": "commit compact validation JSON",
+        },
+    ]
+    return rows
 
 
 def write_carrier_plan(path: Path, claim_rows: list[dict[str, Any]]) -> None:
@@ -658,7 +769,12 @@ def write_manuscript(path: Path, claim_freeze: list[dict[str, Any]]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_repro(path: Path, commands: list[dict[str, Any]]) -> None:
+def write_repro(
+    path: Path,
+    commands: list[dict[str, Any]],
+    artifact_manifest: list[dict[str, Any]],
+    scheduler_seed_manifest: list[dict[str, Any]],
+) -> None:
     lines = [
         "# Freq-HRL Reproducibility Package",
         "",
@@ -667,6 +783,14 @@ def write_repro(path: Path, commands: list[dict[str, Any]]) -> None:
         "This package records the commands required to regenerate the current claim matrix, manuscript tables, figures, and carrier-upgrade artifacts. Raw third-party caches remain ignored; regeneration commands must download or rebuild them explicitly.",
         "",
         *_md_table(commands, ["stage", "command", "output", "expected"]),
+        "",
+        "## Reproducibility Artifacts",
+        "",
+        *_md_table(artifact_manifest, ["artifact", "kind", "status", "count", "reproduce_stage", "commit_policy"]),
+        "",
+        "## Scheduler Seed Ledger",
+        "",
+        *_md_table(scheduler_seed_manifest, ["artifact", "role", "status", "seed_count", "first_seed", "last_seed", "seed_stride", "boundary"]),
         "",
         "## Artifact Policy",
         "",
@@ -697,6 +821,12 @@ def build_carrier_upgrade_package(
     data_scaleup = build_data_scaleup_manifest(external_truth, agency, order_book)
     proof_manifest = build_proof_manifest(theory_summary)
     repro_commands = build_repro_commands()
+    scheduler_seed_manifest = build_scheduler_seed_manifest(results_root)
+    repro_artifacts = build_repro_artifact_manifest(
+        results_root,
+        output_dir,
+        scheduler_seed_manifest,
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     md_dir.mkdir(parents=True, exist_ok=True)
@@ -707,6 +837,8 @@ def build_carrier_upgrade_package(
     _write_csv(output_dir / "data_scaleup_manifest.csv", data_scaleup)
     _write_csv(output_dir / "proof_manifest.csv", proof_manifest)
     _write_csv(output_dir / "reproducibility_commands.csv", repro_commands)
+    _write_csv(output_dir / "scheduler_seed_manifest.csv", scheduler_seed_manifest)
+    _write_csv(output_dir / "reproducibility_artifact_manifest.csv", repro_artifacts)
 
     spec_validation = {
         "frozen_spec": default_spec().to_mapping(),
@@ -725,7 +857,7 @@ def build_carrier_upgrade_package(
     write_real_data(md_paths["real_data"], data_scaleup)
     write_theory(md_paths["theory"], proof_manifest)
     write_manuscript(md_paths["manuscript"], claim_freeze)
-    write_repro(md_paths["repro"], repro_commands)
+    write_repro(md_paths["repro"], repro_commands, repro_artifacts, scheduler_seed_manifest)
 
     summary = {
         "date": DATE_TAG,
@@ -737,6 +869,8 @@ def build_carrier_upgrade_package(
         "data_scaleup_rows": len(data_scaleup),
         "proof_rows": len(proof_manifest),
         "repro_commands": len(repro_commands),
+        "repro_artifacts": len(repro_artifacts),
+        "scheduler_seed_rows": len(scheduler_seed_manifest),
         "output_dir": str(output_dir),
         "md_dir": str(md_dir),
         "documents": {key: str(path) for key, path in md_paths.items()},
@@ -747,6 +881,8 @@ def build_carrier_upgrade_package(
             "data_scaleup_manifest": str(output_dir / "data_scaleup_manifest.csv"),
             "proof_manifest": str(output_dir / "proof_manifest.csv"),
             "reproducibility_commands": str(output_dir / "reproducibility_commands.csv"),
+            "reproducibility_artifact_manifest": str(output_dir / "reproducibility_artifact_manifest.csv"),
+            "scheduler_seed_manifest": str(output_dir / "scheduler_seed_manifest.csv"),
             "spec_validation": str(output_dir / "spec_validation.json"),
             "shared_core_validation": str(output_dir / "shared_core_validation.json"),
         },
