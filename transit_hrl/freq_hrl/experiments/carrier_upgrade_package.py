@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.experiments.theory_appendix import build_theory_payload
 from freq_hrl.core.shared_core_audit import audit_shared_training_core
 from freq_hrl.core.spec import (
     default_spec,
@@ -358,7 +359,24 @@ def build_data_scaleup_manifest(
     ]
 
 
-def build_proof_manifest() -> list[dict[str, Any]]:
+def build_proof_manifest(theory_payload: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    theory_payload = dict(theory_payload or {})
+    theorem_rows = [
+        dict(row) for row in theory_payload.get("theorems", []) or []
+        if isinstance(row, dict)
+    ]
+    if theorem_rows:
+        return [
+            {
+                "proof_item": f"{row.get('id', '')}: {row.get('title', '')}".strip(": "),
+                "status": "formalized_statement",
+                "statement": str(row.get("statement", "")),
+                "paper_use": str(row.get("diagnostic", "")),
+                "assumption_count": len(row.get("assumptions", []) or []),
+                "limitation": str(row.get("limitation", "")),
+            }
+            for row in theorem_rows
+        ]
     return [
         {
             "proof_item": "causal encoder lemma",
@@ -575,7 +593,7 @@ def write_theory(path: Path, rows: list[dict[str, Any]]) -> None:
         "",
         "The target is not a universal convergence theorem. The target is a defensible set of sufficient-condition statements that support the method's claim boundaries.",
         "",
-        *_md_table(rows, ["proof_item", "status", "statement", "paper_use"]),
+        *_md_table(rows, ["proof_item", "status", "statement", "paper_use", "assumption_count", "limitation"]),
         "",
         "## Suggested Assumptions",
         "",
@@ -664,13 +682,14 @@ def build_carrier_upgrade_package(
     external_truth = _read_json(paths["external_truth_summary"])
     agency = _read_json(paths["agency_summary"])
     order_book = _read_json(paths["order_book_summary"])
+    theory_summary = _read_json(paths["theory_summary"]) or build_theory_payload(results_root)
 
     claim_freeze = build_claim_freeze(claim_rows)
     shared_core = build_shared_core_audit(source_root)
     shared_core_validation = audit_shared_training_core(source_root)
     baseline_manifest = build_baseline_manifest(baseline_rows, baseline_summary)
     data_scaleup = build_data_scaleup_manifest(external_truth, agency, order_book)
-    proof_manifest = build_proof_manifest()
+    proof_manifest = build_proof_manifest(theory_summary)
     repro_commands = build_repro_commands()
 
     output_dir.mkdir(parents=True, exist_ok=True)
