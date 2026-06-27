@@ -303,12 +303,23 @@ def build_data_scaleup_manifest(
     coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
     agency_summary = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
     truth_summary = external_truth.get("summary", {}) if isinstance(external_truth.get("summary"), dict) else {}
+    same_agency_control = str(
+        agency_summary.get("same_agency_native_control_status", "")
+        or "external_missing"
+    )
+    field_complete = str(
+        agency_summary.get("field_complete_data_status", "")
+        or "external_missing"
+    )
     return [
         {
             "domain": "Transit",
             "upgrade": "same-agency AFC/APC/OD/onboard-load native control loop",
-            "current_status": "partial_supported",
-            "current_evidence": str(agency_summary.get("evidence_scope", "")),
+            "current_status": same_agency_control,
+            "current_evidence": (
+                f"scope={agency_summary.get('evidence_scope', '')}; "
+                f"field_complete={field_complete}"
+            ),
             "minimum_next_dataset": "one public or partnered agency feed with board, alight, onboard load, OD, and GTFS/GTFS-ride alignment",
             "claim_boundary": "current public MBTA/MTA sources are truth-source coverage, not one linked deployment loop",
         },

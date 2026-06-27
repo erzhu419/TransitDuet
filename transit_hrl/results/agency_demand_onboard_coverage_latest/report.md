@@ -31,6 +31,21 @@ This ledger separates observed agency demand from native simulator service metri
 | A9 | real_public_bus_stop_onboard_load | supported | real public bus stop/trip onboard load averages from MBTA | onboard-load improvement under Freq-HRL unless linked to a control validation | rows=1202491 mean_load=10.0635 max_load=69.4980 |
 | A10 | real_public_subway_od_estimate | supported | real public agency subway OD estimates from MTA | observed individual OD truth or bus OD/onboard load | sample_rows=5000 full_table_rows=116279069 origins=422 destinations=422 od_pairs=4860 |
 
+## Deployment Data Gate
+
+- same-agency native control status: `external_truth_not_control_linked`
+- field-complete data status: `partial_external_truth_source_union`
+
+| gate | status | required for | evidence | boundary |
+|---|---|---|---|---|
+| afc_station_hour_entries | supported | public demand coverage | rows=1000 stations=41 | entry demand only, not OD/load |
+| apc_route_boardings | supported | public route boarding coverage | rows=1000 routes=8 | boardings only unless alight/load/OD columns exist |
+| external_truth_board_alight_load_od | supported | public truth-source field coverage | supported_boundaries=3 total=3 | may combine public sources; not necessarily one same-agency control feed |
+| verified_gtfs_ride_board_alight_load_od | external_missing | same-agency field-complete Transit validation | agency= board_alight_rows=0 rider_trip_rows=0 | requires verified real agency GTFS-ride or equivalent AVL/APC export |
+| native_service_response | supported | native performance loop | rows=96 seeds=48 | native simulator metrics, not external ground truth by itself |
+| same_agency_field_union | partial_external_truth_source_union | deployment-grade Transit evidence | gtfs_full_fields=False external_truth_supported=True | supported only by one verified field-complete agency feed |
+| native_control_linkage | external_truth_not_control_linked | full native real-demand control validation | native_supported=True gtfs_full_fields=False external_truth_supported=True | full deployment claim requires native control driven by the same field-complete feed |
+
 ## Native Service Metrics
 
 - variant: `native_real_freqhrl`

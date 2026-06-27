@@ -533,6 +533,109 @@ def build_claim_boundaries(
     return rows
 
 
+def build_deployment_data_gate(
+    afc: dict[str, Any],
+    apc: dict[str, Any],
+    gtfs_ride: dict[str, Any],
+    native: dict[str, Any],
+    external_truth: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Gate full-deployment Transit claims field by field.
+
+    Public data can close source-coverage claims without closing the stronger
+    native-control claim.  The final gate therefore distinguishes field
+    availability from a linked same-agency control loop.
+    """
+    external_truth = external_truth or {}
+    external_truth_supported = (
+        external_truth.get("claim_status") == "supported"
+        and int(external_truth.get("supported_boundaries", 0) or 0) >= 3
+    )
+    gtfs_full_fields = all([
+        bool(gtfs_ride.get("source_verified")),
+        bool(gtfs_ride.get("has_alightings")),
+        bool(gtfs_ride.get("has_onboard_load")),
+        bool(gtfs_ride.get("has_od_fields")),
+    ])
+    native_supported = native.get("native_service_response_status") == "supported"
+    same_agency_field_status = (
+        "supported" if gtfs_full_fields
+        else "partial_external_truth_source_union" if external_truth_supported
+        else "external_missing"
+    )
+    native_link_status = (
+        "data_ready_not_control_linked" if gtfs_full_fields and native_supported
+        else "external_truth_not_control_linked" if external_truth_supported and native_supported
+        else "external_missing"
+    )
+    rows = [
+        {
+            "gate": "afc_station_hour_entries",
+            "status": afc.get("claim_status", "missing"),
+            "required_for": "public demand coverage",
+            "evidence": f"rows={afc.get('rows', 0)} stations={afc.get('unique_station_complexes', 0)}",
+            "boundary": "entry demand only, not OD/load",
+        },
+        {
+            "gate": "apc_route_boardings",
+            "status": apc.get("claim_status", "missing"),
+            "required_for": "public route boarding coverage",
+            "evidence": f"rows={apc.get('rows', 0)} routes={apc.get('unique_routes', 0)}",
+            "boundary": "boardings only unless alight/load/OD columns exist",
+        },
+        {
+            "gate": "external_truth_board_alight_load_od",
+            "status": "supported" if external_truth_supported else "external_missing",
+            "required_for": "public truth-source field coverage",
+            "evidence": (
+                f"supported_boundaries={external_truth.get('supported_boundaries', 0)} "
+                f"total={external_truth.get('total_boundaries', 0)}"
+            ),
+            "boundary": "may combine public sources; not necessarily one same-agency control feed",
+        },
+        {
+            "gate": "verified_gtfs_ride_board_alight_load_od",
+            "status": "supported" if gtfs_full_fields else str(gtfs_ride.get("claim_status", "external_missing")),
+            "required_for": "same-agency field-complete Transit validation",
+            "evidence": (
+                f"agency={gtfs_ride.get('agency', '')} "
+                f"board_alight_rows={gtfs_ride.get('board_alight_rows', 0)} "
+                f"rider_trip_rows={gtfs_ride.get('rider_trip_rows', 0)}"
+            ),
+            "boundary": "requires verified real agency GTFS-ride or equivalent AVL/APC export",
+        },
+        {
+            "gate": "native_service_response",
+            "status": native.get("native_service_response_status", "missing"),
+            "required_for": "native performance loop",
+            "evidence": f"rows={native.get('rows', 0)} seeds={native.get('seeds', 0)}",
+            "boundary": "native simulator metrics, not external ground truth by itself",
+        },
+        {
+            "gate": "same_agency_field_union",
+            "status": same_agency_field_status,
+            "required_for": "deployment-grade Transit evidence",
+            "evidence": (
+                f"gtfs_full_fields={gtfs_full_fields} "
+                f"external_truth_supported={external_truth_supported}"
+            ),
+            "boundary": "supported only by one verified field-complete agency feed",
+        },
+        {
+            "gate": "native_control_linkage",
+            "status": native_link_status,
+            "required_for": "full native real-demand control validation",
+            "evidence": (
+                f"native_supported={native_supported} "
+                f"gtfs_full_fields={gtfs_full_fields} "
+                f"external_truth_supported={external_truth_supported}"
+            ),
+            "boundary": "full deployment claim requires native control driven by the same field-complete feed",
+        },
+    ]
+    return rows
+
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
@@ -593,6 +696,21 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         )
     lines.extend([
         "",
+        "## Deployment Data Gate",
+        "",
+        f"- same-agency native control status: `{payload['summary'].get('same_agency_native_control_status', '')}`",
+        f"- field-complete data status: `{payload['summary'].get('field_complete_data_status', '')}`",
+        "",
+        "| gate | status | required for | evidence | boundary |",
+        "|---|---|---|---|---|",
+    ])
+    for row in payload.get("deployment_data_gate", []):
+        lines.append(
+            f"| {row['gate']} | {row['status']} | {row['required_for']} "
+            f"| {row['evidence']} | {row['boundary']} |"
+        )
+    lines.extend([
+        "",
         "## Native Service Metrics",
         "",
         f"- variant: `{native.get('variant', '')}`",
@@ -650,6 +768,8 @@ def run_coverage(
     native = summarize_native_summary(native_data, variant=str(native_variant))
     external_truth = summarize_external_truth(external_truth_data)
     boundaries = build_claim_boundaries(afc, apc, gtfs_ride, native, external_truth)
+    deployment_gate = build_deployment_data_gate(afc, apc, gtfs_ride, native, external_truth)
+    deployment_by_name = {row["gate"]: row for row in deployment_gate}
     supported_boundaries = sum(1 for row in boundaries if row["status"] == "supported")
     external_missing = sum(1 for row in boundaries if row["status"] == "external_missing")
     external_truth_supported = (
@@ -680,11 +800,14 @@ def run_coverage(
             "supported_boundaries": supported_boundaries,
             "external_missing_boundaries": external_missing,
             "source_count": len(source_coverage),
+            "field_complete_data_status": deployment_by_name["same_agency_field_union"]["status"],
+            "same_agency_native_control_status": deployment_by_name["native_control_linkage"]["status"],
         },
         "source_coverage": source_coverage,
         "external_truth": external_truth,
         "native_service": native,
         "claim_boundaries": boundaries,
+        "deployment_data_gate": deployment_gate,
         "inputs": {
             "afc_csv": str(afc_csv),
             "apc_csv": str(apc_csv),
@@ -706,6 +829,7 @@ def run_coverage(
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(output_dir / "source_coverage.csv", payload["source_coverage"])
     _write_csv(output_dir / "claim_boundaries.csv", payload["claim_boundaries"])
+    _write_csv(output_dir / "deployment_data_gate.csv", payload["deployment_data_gate"])
     _write_csv(output_dir / "native_service_metrics.csv", native.get("metrics", []))
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)

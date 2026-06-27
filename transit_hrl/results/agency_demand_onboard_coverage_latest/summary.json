@@ -3,7 +3,9 @@
     "evidence_scope": "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
     "supported_boundaries": 7,
     "external_missing_boundaries": 3,
-    "source_count": 5
+    "source_count": 5,
+    "field_complete_data_status": "partial_external_truth_source_union",
+    "same_agency_native_control_status": "external_truth_not_control_linked"
   },
   "source_coverage": [
     {
@@ -564,6 +566,57 @@
       "allowed_wording": "real public agency subway OD estimates from MTA",
       "forbidden_wording": "observed individual OD truth or bus OD/onboard load",
       "evidence": "sample_rows=5000 full_table_rows=116279069 origins=422 destinations=422 od_pairs=4860"
+    }
+  ],
+  "deployment_data_gate": [
+    {
+      "gate": "afc_station_hour_entries",
+      "status": "supported",
+      "required_for": "public demand coverage",
+      "evidence": "rows=1000 stations=41",
+      "boundary": "entry demand only, not OD/load"
+    },
+    {
+      "gate": "apc_route_boardings",
+      "status": "supported",
+      "required_for": "public route boarding coverage",
+      "evidence": "rows=1000 routes=8",
+      "boundary": "boardings only unless alight/load/OD columns exist"
+    },
+    {
+      "gate": "external_truth_board_alight_load_od",
+      "status": "supported",
+      "required_for": "public truth-source field coverage",
+      "evidence": "supported_boundaries=3 total=3",
+      "boundary": "may combine public sources; not necessarily one same-agency control feed"
+    },
+    {
+      "gate": "verified_gtfs_ride_board_alight_load_od",
+      "status": "external_missing",
+      "required_for": "same-agency field-complete Transit validation",
+      "evidence": "agency= board_alight_rows=0 rider_trip_rows=0",
+      "boundary": "requires verified real agency GTFS-ride or equivalent AVL/APC export"
+    },
+    {
+      "gate": "native_service_response",
+      "status": "supported",
+      "required_for": "native performance loop",
+      "evidence": "rows=96 seeds=48",
+      "boundary": "native simulator metrics, not external ground truth by itself"
+    },
+    {
+      "gate": "same_agency_field_union",
+      "status": "partial_external_truth_source_union",
+      "required_for": "deployment-grade Transit evidence",
+      "evidence": "gtfs_full_fields=False external_truth_supported=True",
+      "boundary": "supported only by one verified field-complete agency feed"
+    },
+    {
+      "gate": "native_control_linkage",
+      "status": "external_truth_not_control_linked",
+      "required_for": "full native real-demand control validation",
+      "evidence": "native_supported=True gtfs_full_fields=False external_truth_supported=True",
+      "boundary": "full deployment claim requires native control driven by the same field-complete feed"
     }
   ],
   "inputs": {

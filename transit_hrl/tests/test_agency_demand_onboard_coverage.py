@@ -188,6 +188,10 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
                 payload["summary"]["evidence_scope"],
                 "real_afc_apc_demand_plus_native_service_response",
             )
+            gate = {row["gate"]: row for row in payload["deployment_data_gate"]}
+            self.assertEqual(gate["same_agency_field_union"]["status"], "external_missing")
+            self.assertEqual(gate["native_control_linkage"]["status"], "external_missing")
+            self.assertTrue((root / "out" / "deployment_data_gate.csv").exists())
 
     def test_external_truth_summary_adds_public_board_load_od_without_relabeling_gtfs(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -226,6 +230,19 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
                 payload["summary"]["evidence_scope"],
                 "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
             )
+            gate = {row["gate"]: row for row in payload["deployment_data_gate"]}
+            self.assertEqual(
+                gate["same_agency_field_union"]["status"],
+                "partial_external_truth_source_union",
+            )
+            self.assertEqual(
+                gate["native_control_linkage"]["status"],
+                "external_truth_not_control_linked",
+            )
+            self.assertEqual(
+                payload["summary"]["same_agency_native_control_status"],
+                "external_truth_not_control_linked",
+            )
 
     def test_optional_gtfs_ride_marks_real_od_and_onboard_supported(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -263,6 +280,16 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             self.assertEqual(
                 payload["summary"]["evidence_scope"],
                 "real_gtfs_ride_od_onboard_plus_native_service_response",
+            )
+            gate = {row["gate"]: row for row in payload["deployment_data_gate"]}
+            self.assertEqual(gate["same_agency_field_union"]["status"], "supported")
+            self.assertEqual(
+                gate["native_control_linkage"]["status"],
+                "data_ready_not_control_linked",
+            )
+            self.assertEqual(
+                payload["summary"]["field_complete_data_status"],
+                "supported",
             )
 
     def test_gtfs_ride_without_real_source_provenance_is_not_claim_supported(self):
@@ -304,6 +331,11 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             self.assertEqual(
                 payload["summary"]["evidence_scope"],
                 "real_afc_apc_demand_plus_native_service_response",
+            )
+            gate = {row["gate"]: row for row in payload["deployment_data_gate"]}
+            self.assertEqual(
+                gate["same_agency_field_union"]["status"],
+                "external_missing",
             )
 
 
