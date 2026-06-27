@@ -14,6 +14,7 @@ import torch
 from freq_hrl.core import (
     CausalLeakageRewardShaper,
     CausalLowFrequencyEffectProjector,
+    FrequencyDiagnostics,
     LeakageRegularizer,
 )
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
@@ -28,6 +29,13 @@ from freq_hrl.rl import (
 )
 
 from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
+
+
+POLICY_MODES = (
+    "freq_hrl",
+    "flat_ppo",
+    "generic_hrl_ppo",
+)
 
 
 def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
@@ -67,33 +75,75 @@ def make_tracker(assets: int) -> TradingFrequencyTracker:
     )
 
 
-def feature_vectors(freq: dict[str, Any], position: np.ndarray, target: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+def feature_vectors(
+    freq: dict[str, Any],
+    position: np.ndarray,
+    target: np.ndarray | None = None,
+    policy_mode: str = "freq_hrl",
+) -> tuple[np.ndarray, np.ndarray]:
     dim = int(position.size)
     scale = 0.0014
     x_low = resize(freq.get("x_low", np.zeros(dim)), dim) / scale
     x_mid = resize(freq.get("x_mid", np.zeros(dim)), dim) / scale
     x_high = resize(freq.get("x_high", np.zeros(dim)), dim) / scale
+    raw = x_low + x_mid + x_high
     promotion = dict(freq.get("promotion", {}) or {})
     strength = float(promotion.get("promotion_strength", 0.0)) if promotion.get("promote", False) else 0.0
-    upper_state = np.concatenate([
-        x_low,
-        x_mid,
-        x_high,
-        strength * x_mid,
-        np.asarray(position, dtype=np.float64),
-        np.ones(1, dtype=np.float64),
-    ])
     if target is None:
         target = np.zeros(dim, dtype=np.float64)
     gap = np.asarray(target, dtype=np.float64) - np.asarray(position, dtype=np.float64)
     energy = np.sqrt(np.maximum(resize(freq.get("x_high_energy", np.zeros(dim)), dim), 0.0)) / scale
-    align = np.tanh(np.sign(gap) * x_high)
-    lower_state = np.concatenate([
-        gap,
-        align,
-        np.tanh(energy),
-        np.ones(1, dtype=np.float64),
-    ])
+    mode = str(policy_mode or "freq_hrl")
+    if mode == "freq_hrl":
+        upper_state = np.concatenate([
+            x_low,
+            x_mid,
+            x_high,
+            strength * x_mid,
+            np.asarray(position, dtype=np.float64),
+            np.ones(1, dtype=np.float64),
+        ])
+        align = np.tanh(np.sign(gap) * x_high)
+        lower_state = np.concatenate([
+            gap,
+            align,
+            np.tanh(energy),
+            np.ones(1, dtype=np.float64),
+        ])
+    elif mode == "flat_ppo":
+        upper_state = np.concatenate([
+            raw,
+            x_low,
+            x_mid,
+            x_high,
+            np.asarray(position, dtype=np.float64),
+            np.ones(1, dtype=np.float64),
+        ])
+        lower_state = np.concatenate([
+            gap,
+            np.zeros(dim, dtype=np.float64),
+            np.zeros(dim, dtype=np.float64),
+            np.ones(1, dtype=np.float64),
+        ])
+    elif mode == "generic_hrl_ppo":
+        raw_tanh = np.tanh(raw)
+        raw_abs = np.tanh(np.abs(raw))
+        upper_state = np.concatenate([
+            raw,
+            raw_tanh,
+            raw_abs,
+            np.asarray(position, dtype=np.float64),
+            raw * np.asarray(position, dtype=np.float64),
+            np.ones(1, dtype=np.float64),
+        ])
+        lower_state = np.concatenate([
+            gap,
+            raw,
+            np.asarray(position, dtype=np.float64),
+            np.ones(1, dtype=np.float64),
+        ])
+    else:
+        raise ValueError(f"unknown policy_mode: {policy_mode}")
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
@@ -169,6 +219,7 @@ def rollout(
     lower_lf_effect_filter_gain: float = 1.0,
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_scale: float = 0.10,
+    policy_mode: str = "freq_hrl",
 ) -> tuple[TrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -195,6 +246,7 @@ def rollout(
         )
         if int(lower_lf_effect_filter_window) > 0 else None
     )
+    diagnostics = FrequencyDiagnostics(mi_bins=8)
     upper_states: list[np.ndarray] = []
     lower_states: list[np.ndarray] = []
     upper_actions: list[np.ndarray] = []
@@ -221,7 +273,11 @@ def rollout(
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
         if bool(dict(freq.get("promotion", {}) or {}).get("promote", False)):
             promotions += 1
-        upper_state, lower_state_probe = feature_vectors(dict(freq), env.position.copy())
+        upper_state, lower_state_probe = feature_vectors(
+            dict(freq),
+            env.position.copy(),
+            policy_mode=policy_mode,
+        )
         upper_out = model.act_upper(upper_state, sample=sample)
         if plan_mapper is None:
             target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
@@ -230,7 +286,12 @@ def rollout(
             target = gross_cap(plan.target)
             plan_smoothness.append(float(plan.smoothness_penalty))
             plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
-        _, lower_state = feature_vectors(dict(freq), env.position.copy(), target=target)
+        _, lower_state = feature_vectors(
+            dict(freq),
+            env.position.copy(),
+            target=target,
+            policy_mode=policy_mode,
+        )
         lower_out = model.act_lower(lower_state, sample=sample)
         speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
         pre_gap = np.asarray(target, dtype=np.float64) - env.position.copy()
@@ -248,6 +309,23 @@ def rollout(
         lower_effect = (
             lower_effect_projector.transform(raw_lower_effect)
             if lower_effect_projector is not None else raw_lower_effect
+        )
+        diagnostics.log_step(
+            t=float(t * 60.0),
+            states={
+                "regime_shift": t == int(data["regime_shift_t"][0]),
+                "shock": bool(np.any(data["shock_mask"][t])),
+                "lower_responded": float(info["turnover"]) > 0.02,
+            },
+            actions={
+                "upper": target,
+                "lower": np.asarray(info["trade"], dtype=np.float64),
+            },
+            freq_features=dict(freq),
+            effects={
+                "upper": target,
+                "lower": lower_effect,
+            },
         )
         leak_info = leakage.update(upper_effect=target, lower_effect=lower_effect, reward=float(reward))
         step_reward = float(leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward)
@@ -284,7 +362,10 @@ def rollout(
         "LowerLFDrift": 0.0,
         "LowerLFDriftAbs": 0.0,
     }
+    diag = diagnostics.summarize_episode()
     row = {
+        "baseline": str(policy_mode),
+        "policy_mode": str(policy_mode),
         "seed": int(seed),
         "scenario": scenario,
         "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
@@ -298,6 +379,11 @@ def rollout(
         "LowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
         "RawLowerLFDriftAbs": float(raw_leak["LowerLFDriftAbs"]),
+        "FocusScore": float(diag["FocusScore"]),
+        "upper_low_mi": float(diag.get("upper_low_mi", 0.0)),
+        "upper_high_mi": float(diag.get("upper_high_mi", 0.0)),
+        "lower_high_mi": float(diag.get("lower_high_mi", 0.0)),
+        "lower_low_mi": float(diag.get("lower_low_mi", 0.0)),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
@@ -340,6 +426,11 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "LowerLFDriftAbs",
         "RawLowerLFDrift",
         "RawLowerLFDriftAbs",
+        "FocusScore",
+        "upper_low_mi",
+        "upper_high_mi",
+        "lower_high_mi",
+        "lower_low_mi",
         "plan_smoothness",
         "plan_coeff_abs",
         "lower_lf_effect_filter_window",
@@ -371,7 +462,11 @@ def train_ppo_actor_critic(
     lower_lf_effect_filter_gain: float = 1.0,
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_scale: float = 0.10,
+    policy_mode: str = "freq_hrl",
 ) -> tuple[dict[str, Any], list[dict[str, float]], DualActorCriticPPO]:
+    policy_mode = str(policy_mode or "freq_hrl")
+    if policy_mode not in POLICY_MODES:
+        raise ValueError(f"unknown policy_mode: {policy_mode}")
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
     plan_mapper = make_plan_mapper(
@@ -398,7 +493,8 @@ def train_ppo_actor_critic(
         constraint_max_lambda=20.0,
     )
     model = DualActorCriticPPO(config)
-    initialize_frequency_prior(model, assets, plan_basis_dim=plan_basis_dim)
+    if policy_mode == "freq_hrl":
+        initialize_frequency_prior(model, assets, plan_basis_dim=plan_basis_dim)
     payload, heldout_rows, model = train_dual_ppo(
         model=model,
         train_seeds=train_seeds,
@@ -417,13 +513,16 @@ def train_ppo_actor_critic(
             lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
             lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
             lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
+            policy_mode=policy_mode,
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
         summary_fn=summarize,
-        policy="ppo_dual_actor_critic",
+        policy=f"{policy_mode}_shared_ppo",
         trainer="shared_dual_level_ppo",
         domain="trading",
         metadata={
+            "policy_mode": policy_mode,
+            "baseline": policy_mode,
             "scenario": scenario,
             "steps": int(steps),
             "assets": int(assets),
@@ -446,6 +545,9 @@ def train_ppo_actor_critic(
             }),
         },
     )
+    for row in heldout_rows:
+        row["baseline"] = policy_mode
+        row["policy_mode"] = policy_mode
     return payload, heldout_rows, model
 
 
@@ -465,6 +567,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         "# PPO Dual Actor-Critic Trading Validation",
         "",
         f"- trainer: `{payload['trainer']}`",
+        f"- policy mode: `{payload.get('policy_mode', payload.get('baseline', 'freq_hrl'))}`",
         f"- plan mode: `{payload['plan_mode']}`",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- lower LF effect projector: window={payload['lower_lf_effect_filter_window']}, gain={payload['lower_lf_effect_filter_gain']}",
@@ -481,6 +584,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- LowerLFDriftAbs mean: {summary['LowerLFDriftAbs_mean']:.6f}",
         f"- RawLowerLFDrift mean: {summary['RawLowerLFDrift_mean']:.4f}",
         f"- RawLowerLFDriftAbs mean: {summary['RawLowerLFDriftAbs_mean']:.6f}",
+        f"- FocusScore mean: {summary['FocusScore_mean']:.4f}",
         f"- raw recenter boost mean: {summary['raw_recenter_boost_mean_mean']:.4f}",
         f"- plan smoothness mean: {summary['plan_smoothness_mean']:.4f}",
         f"- plan coefficient abs mean: {summary['plan_coeff_abs_mean']:.4f}",
@@ -512,6 +616,7 @@ def main() -> None:
     parser.add_argument("--lower-lf-effect-filter-gain", type=float, default=1.0)
     parser.add_argument("--lower-lf-raw-recenter-gain", type=float, default=0.0)
     parser.add_argument("--lower-lf-raw-recenter-scale", type=float, default=0.10)
+    parser.add_argument("--policy-mode", choices=POLICY_MODES, default="freq_hrl")
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -535,6 +640,7 @@ def main() -> None:
         lower_lf_effect_filter_gain=args.lower_lf_effect_filter_gain,
         lower_lf_raw_recenter_gain=args.lower_lf_raw_recenter_gain,
         lower_lf_raw_recenter_scale=args.lower_lf_raw_recenter_scale,
+        policy_mode=args.policy_mode,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

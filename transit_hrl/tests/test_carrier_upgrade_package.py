@@ -20,7 +20,7 @@ class CarrierUpgradePackageTest(unittest.TestCase):
                 source_root=Path("."),
             )
 
-            self.assertEqual(len(payload["documents"]), 9)
+            self.assertEqual(len(payload["documents"]), 10)
             self.assertGreaterEqual(payload["claims"], 1)
             self.assertGreaterEqual(payload["shared_core_supported"], 5)
 
@@ -78,6 +78,10 @@ class CarrierUpgradePackageTest(unittest.TestCase):
             readiness = {row["review_axis"]: row for row in readiness_rows}
             self.assertEqual(readiness["strong_rl_baselines"]["current_status"], "blocker")
             self.assertIn("strong_rl_baselines", payload["cs_top_venue_blockers"])
+            with (out / "cs_top_venue_experiment_matrix.csv").open("r", newline="", encoding="utf-8") as f:
+                experiment_rows = list(csv.DictReader(f))
+            self.assertEqual(len(experiment_rows), 8)
+            self.assertIn("cs_top_venue_experiment_matrix", payload["manifests"])
 
             repro = (md / "freq_hrl_reproducibility_package_2026-06-27.md").read_text(
                 encoding="utf-8"
@@ -85,11 +89,17 @@ class CarrierUpgradePackageTest(unittest.TestCase):
             self.assertIn("carrier_upgrade", repro)
             self.assertIn("external_truth_raw_cache", repro)
             self.assertIn("Scheduler Seed Ledger", repro)
+            self.assertIn("strong_learned_baselines", repro)
             cs_strategy = (md / "freq_hrl_cs_top_venue_strategy_2026-06-27.md").read_text(
                 encoding="utf-8"
             )
             self.assertIn("CS top conference/journal", cs_strategy)
             self.assertIn("strong_rl_baselines", cs_strategy)
+            cs_experiments = (md / "freq_hrl_cs_top_venue_experiment_matrix_2026-06-27.md").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("strong learned", cs_experiments)
+            self.assertIn("same-agency", cs_experiments)
 
 
 if __name__ == "__main__":

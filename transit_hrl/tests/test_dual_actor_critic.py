@@ -108,6 +108,24 @@ class DualActorCriticTest(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertIn("sharpe_mean", payload["summary"])
 
+    def test_trading_ppo_learned_baseline_modes_emit_main_metrics(self):
+        for mode in ("flat_ppo", "generic_hrl_ppo"):
+            with self.subTest(mode=mode):
+                payload, rows, _ = train_ppo_actor_critic(
+                    train_seeds=[42],
+                    eval_seeds=[123],
+                    steps=32,
+                    assets=2,
+                    scenario="persistent_shift",
+                    iterations=1,
+                    seed=7,
+                    policy_mode=mode,
+                )
+                self.assertEqual(payload["policy_mode"], mode)
+                self.assertEqual(rows[0]["baseline"], mode)
+                self.assertIn("FocusScore", rows[0])
+                self.assertIn("FocusScore_mean", payload["summary"])
+
     def test_transit_surrogate_ppo_smoke(self):
         payload, rows, _ = train_transit_surrogate_ppo(
             train_seeds=[11],

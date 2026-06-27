@@ -14,6 +14,9 @@ from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
 DEFAULT_RESULT_PATHS = {
     "trading_performance": Path("transit_hrl/results/trading_performance/summary.json"),
     "trading_pressure_matrix": Path("transit_hrl/results/trading_pressure_matrix/summary.json"),
+    "strong_learned_baseline_validation": Path(
+        "transit_hrl/results/strong_learned_baseline_validation_latest/summary.json"
+    ),
     "native_promotion_v47": Path(
         "transit_hrl/results/transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly/summary.json"
     ),

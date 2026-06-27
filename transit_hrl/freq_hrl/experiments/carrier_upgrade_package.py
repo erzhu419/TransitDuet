@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.experiments.cs_top_venue_experiment_matrix import build_cs_top_venue_experiment_matrix
 from freq_hrl.experiments.theory_appendix import build_theory_payload
 from freq_hrl.core.shared_core_audit import audit_shared_training_core
 from freq_hrl.core.spec import (
@@ -43,6 +44,7 @@ ARTIFACTS = {
     "external_truth_summary": Path("external_transit_truth_validation_latest/summary.json"),
     "agency_summary": Path("agency_demand_onboard_coverage_latest/summary.json"),
     "theory_summary": Path("freq_hrl_theory_appendix_latest/summary.json"),
+    "cs_experiment_summary": Path("cs_top_venue_experiment_matrix_latest/summary.json"),
 }
 
 
@@ -55,6 +57,7 @@ MD_NAMES = {
     "theory": f"freq_hrl_theory_proof_appendix_{DATE_TAG}.md",
     "manuscript": f"freq_hrl_full_manuscript_draft_{DATE_TAG}.md",
     "cs_venue": f"freq_hrl_cs_top_venue_strategy_{DATE_TAG}.md",
+    "cs_experiments": f"freq_hrl_cs_top_venue_experiment_matrix_{DATE_TAG}.md",
     "repro": f"freq_hrl_reproducibility_package_{DATE_TAG}.md",
 }
 
@@ -445,6 +448,18 @@ def build_repro_commands() -> list[dict[str, Any]]:
             "expected": "frequency-responsibility baselines supported where registered",
         },
         {
+            "stage": "strong_learned_baselines",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+            "output": "learned PPO-family per-seed rows, paired checks, parameter budget, and sample-efficiency tables",
+            "expected": "matched-budget Freq-HRL PPO vs flat PPO and generic HRL PPO evidence; SAC/TD3 remain explicit registered baselines until implemented",
+        },
+        {
+            "stage": "cs_top_venue_experiment_matrix",
+            "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.cs_top_venue_experiment_matrix --output-dir transit_hrl/results/cs_top_venue_experiment_matrix_latest",
+            "output": "1-8 experiment matrix and scheduler manifest",
+            "expected": "reviewer-facing experiment ledger with commands, gates, and claim boundaries",
+        },
+        {
             "stage": "figures",
             "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.manuscript_figures --output-dir transit_hrl/results/manuscript_figures_latest",
             "output": "SVG/PDF/PNG/TIFF figures and source_data CSVs",
@@ -543,6 +558,15 @@ def build_repro_artifact_manifest(
             "commit_policy": "commit compact seed ledger, not raw scheduler scratch",
         },
         {
+            "artifact": "cs_top_venue_experiment_matrix",
+            "path": str(output_dir / "cs_top_venue_experiment_matrix.csv"),
+            "kind": "experiment_ledger",
+            "status": "present" if (output_dir / "cs_top_venue_experiment_matrix.csv").exists() else "generated_by_carrier",
+            "count": "",
+            "reproduce_stage": "cs_top_venue_experiment_matrix",
+            "commit_policy": "commit compact reviewer-facing ledger and scheduler manifest",
+        },
+        {
             "artifact": "external_transit_raw_cache",
             "path": "transit_hrl/data/public_mbta_bus_ridership_raw; transit_hrl/data/public_mta_od_raw",
             "kind": "ignored_raw_cache",
@@ -572,8 +596,15 @@ def build_cs_top_venue_readiness(
     theory_summary: dict[str, Any],
     shared_core_validation: dict[str, Any],
     claim_freeze: list[dict[str, Any]],
+    cs_experiment_summary: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Reviewer-facing readiness matrix for CS top venues."""
+    cs_experiment_summary = dict(cs_experiment_summary or {})
+    cs_exp_meta = (
+        cs_experiment_summary.get("summary", {})
+        if isinstance(cs_experiment_summary.get("summary"), dict)
+        else {}
+    )
     baseline_meta = baseline_summary.get("summary", {}) if isinstance(baseline_summary.get("summary"), dict) else {}
     agency_meta = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
     order_coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
@@ -606,7 +637,10 @@ def build_cs_top_venue_readiness(
             "review_axis": "strong_rl_baselines",
             "cs_expectation": "Flat PPO/SAC/TD3 and generic HRL baselines must be explicit.",
             "current_status": "blocker" if learned_status in {"registered_missing", "missing"} else learned_status,
-            "evidence": f"strong_learned_baseline_status={learned_status}",
+            "evidence": (
+                f"strong_learned_baseline_status={learned_status}; "
+                f"experiment_matrix_status={cs_exp_meta.get('strong_learned_status', 'missing')}"
+            ),
             "next_action": "Run or clearly limit flat PPO/SAC/TD3 and generic HRL; do not count heuristic baselines as learned RL.",
             "venue_risk": "Top ML/RL venues will treat missing learned baselines as a core empirical weakness.",
         },
@@ -702,6 +736,39 @@ def write_cs_venue_strategy(path: Path, rows: list[dict[str, Any]]) -> None:
         "",
         "Do not claim production deployment, universal encoder dominance, or universal RL convergence. The publishable claim is domain-general frequency-responsibility routing with conservative empirical support.",
     ])
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def write_cs_experiments(path: Path, payload: dict[str, Any]) -> None:
+    rows = [
+        dict(row) for row in payload.get("experiments", []) or []
+        if isinstance(row, dict)
+    ]
+    summary = (
+        payload.get("summary", {})
+        if isinstance(payload.get("summary"), dict)
+        else {}
+    )
+    lines = [
+        "# Freq-HRL CS Top-Venue Experiment Matrix",
+        "",
+        f"Date: {DATE_TAG}",
+        "",
+        "Purpose: make the eight reviewer-critical experiments explicit, executable, and claim-gated. This prevents the manuscript from silently counting protocol smoke tests as top-venue empirical evidence.",
+        "",
+        f"- experiment count: `{summary.get('experiment_count', len(rows))}`",
+        f"- blocker count: `{summary.get('blocker_count', '')}`",
+        f"- strong learned status: `{summary.get('strong_learned_status', '')}`",
+        f"- learned cross-stress scenarios: `{summary.get('learned_cross_stress_scenarios', '')}`",
+        f"- same-agency status: `{summary.get('same_agency_status', '')}`",
+        f"- venue-grade pairs: `{summary.get('venue_grade_pairs', '')}`",
+        "",
+        *_md_table(rows, ["id", "experiment", "current_status", "claim_gate", "artifact", "paper_table", "priority"]),
+        "",
+        "## Scheduler Use",
+        "",
+        "The companion CSV `cs_top_venue_scheduler_manifest.csv` contains the command for each row. Commands may be dispatched on CPU nodes; raw third-party data remain outside the committed repository unless explicitly licensed and compact.",
+    ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -955,6 +1022,10 @@ def build_carrier_upgrade_package(
     agency = _read_json(paths["agency_summary"])
     order_book = _read_json(paths["order_book_summary"])
     theory_summary = _read_json(paths["theory_summary"]) or build_theory_payload(results_root)
+    cs_experiment_payload = (
+        _read_json(paths["cs_experiment_summary"])
+        or build_cs_top_venue_experiment_matrix(results_root)
+    )
 
     claim_freeze = build_claim_freeze(claim_rows)
     shared_core = build_shared_core_audit(source_root)
@@ -976,7 +1047,16 @@ def build_carrier_upgrade_package(
         theory_summary=theory_summary,
         shared_core_validation=shared_core_validation,
         claim_freeze=claim_freeze,
+        cs_experiment_summary=cs_experiment_payload,
     )
+    cs_experiment_rows = [
+        dict(row) for row in cs_experiment_payload.get("experiments", []) or []
+        if isinstance(row, dict)
+    ]
+    cs_scheduler_rows = [
+        dict(row) for row in cs_experiment_payload.get("scheduler_manifest", []) or []
+        if isinstance(row, dict)
+    ]
 
     output_dir.mkdir(parents=True, exist_ok=True)
     md_dir.mkdir(parents=True, exist_ok=True)
@@ -990,6 +1070,8 @@ def build_carrier_upgrade_package(
     _write_csv(output_dir / "scheduler_seed_manifest.csv", scheduler_seed_manifest)
     _write_csv(output_dir / "reproducibility_artifact_manifest.csv", repro_artifacts)
     _write_csv(output_dir / "cs_top_venue_readiness.csv", cs_top_venue_readiness)
+    _write_csv(output_dir / "cs_top_venue_experiment_matrix.csv", cs_experiment_rows)
+    _write_csv(output_dir / "cs_top_venue_scheduler_manifest.csv", cs_scheduler_rows)
 
     spec_validation = {
         "frozen_spec": default_spec().to_mapping(),
@@ -1009,6 +1091,7 @@ def build_carrier_upgrade_package(
     write_theory(md_paths["theory"], proof_manifest)
     write_manuscript(md_paths["manuscript"], claim_freeze)
     write_cs_venue_strategy(md_paths["cs_venue"], cs_top_venue_readiness)
+    write_cs_experiments(md_paths["cs_experiments"], cs_experiment_payload)
     write_repro(md_paths["repro"], repro_commands, repro_artifacts, scheduler_seed_manifest)
 
     summary = {
@@ -1024,11 +1107,17 @@ def build_carrier_upgrade_package(
         "repro_artifacts": len(repro_artifacts),
         "scheduler_seed_rows": len(scheduler_seed_manifest),
         "cs_top_venue_readiness_rows": len(cs_top_venue_readiness),
+        "cs_top_venue_experiment_rows": len(cs_experiment_rows),
         "cs_top_venue_blockers": [
             row["review_axis"]
             for row in cs_top_venue_readiness
             if row.get("current_status") == "blocker"
         ],
+        "cs_top_venue_experiment_blockers": (
+            cs_experiment_payload.get("summary", {}).get("blockers", [])
+            if isinstance(cs_experiment_payload.get("summary"), dict)
+            else []
+        ),
         "output_dir": str(output_dir),
         "md_dir": str(md_dir),
         "documents": {key: str(path) for key, path in md_paths.items()},
@@ -1042,6 +1131,8 @@ def build_carrier_upgrade_package(
             "reproducibility_artifact_manifest": str(output_dir / "reproducibility_artifact_manifest.csv"),
             "scheduler_seed_manifest": str(output_dir / "scheduler_seed_manifest.csv"),
             "cs_top_venue_readiness": str(output_dir / "cs_top_venue_readiness.csv"),
+            "cs_top_venue_experiment_matrix": str(output_dir / "cs_top_venue_experiment_matrix.csv"),
+            "cs_top_venue_scheduler_manifest": str(output_dir / "cs_top_venue_scheduler_manifest.csv"),
             "spec_validation": str(output_dir / "spec_validation.json"),
             "shared_core_validation": str(output_dir / "shared_core_validation.json"),
         },

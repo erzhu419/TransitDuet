@@ -1,0 +1,166 @@
+{
+  "experiments": [
+    {
+      "id": "E1",
+      "experiment": "strong learned RL baselines",
+      "review_question": "Does Freq-HRL beat learned flat PPO and generic learned HRL under matched training?",
+      "current_status": "registered_executable",
+      "artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/summary.json",
+      "claim_gate": "PPO-family learned baselines need paired Sharpe/return/FocusScore; SAC/TD3 must remain explicit limitations until implemented.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "paper_table": "main_baseline_table",
+      "priority": 1
+    },
+    {
+      "id": "E2",
+      "experiment": "learned-baseline cross-stress regime",
+      "review_question": "Do learned-policy results replicate across stationary, burst, persistent, and OOD regimes?",
+      "current_status": "registered_executable",
+      "artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/summary.json",
+      "claim_gate": "At least four stress regimes with paired learned-policy rows.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "paper_table": "stress_generalization_table",
+      "priority": 2
+    },
+    {
+      "id": "E3",
+      "experiment": "complete ablation main table",
+      "review_question": "Are frequency routing, promotion, leakage, encoder, and plan-curve ablations all visible?",
+      "current_status": "supported",
+      "artifact": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json",
+      "claim_gate": "Baseline matrix must include heuristic ablations plus learned rows when present.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.baseline_ablation_matrix --output-dir transit_hrl/results/baseline_ablation_matrix_latest",
+      "paper_table": "main_ablation_table",
+      "priority": 3
+    },
+    {
+      "id": "E4",
+      "experiment": "parameter-budget fair comparison",
+      "review_question": "Are gains caused by frequency responsibility rather than more parameters?",
+      "current_status": "registered_executable",
+      "artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/parameter_budget.csv",
+      "claim_gate": "Freq-HRL, flat PPO, and generic HRL PPO must share state/action dimensions and parameter counts.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --policy-modes freq_hrl flat_ppo generic_hrl_ppo --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "paper_table": "parameter_budget_appendix",
+      "priority": 4
+    },
+    {
+      "id": "E5",
+      "experiment": "sensitivity and robustness",
+      "review_question": "Does the result survive promotion/leakage/plan hyperparameter perturbations?",
+      "current_status": "registered_executable",
+      "artifact": "transit_hrl/results/sensitivity_robustness_matrix_latest/summary.json",
+      "claim_gate": "Report stress-registered sensitivity; do not claim universal hyperparameter robustness.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift promotion_recovery stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
+      "paper_table": "robustness_appendix",
+      "priority": 5
+    },
+    {
+      "id": "E6",
+      "experiment": "runtime and sample efficiency",
+      "review_question": "What is the wall-clock and environment-step cost of the learned method?",
+      "current_status": "registered_executable",
+      "artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/sample_efficiency.csv",
+      "claim_gate": "Report environment steps, iterations, elapsed seconds, and held-out objective proxy.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "paper_table": "sample_efficiency_appendix",
+      "priority": 6
+    },
+    {
+      "id": "E7",
+      "experiment": "same-agency real Transit",
+      "review_question": "Is real AFC/APC/OD/onboard-load evidence one linked agency control loop?",
+      "current_status": "boundary_registered",
+      "artifact": "transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json",
+      "claim_gate": "Current public truth-source coverage is not a full same-agency deployment loop unless the gate says supported.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage --output-dir transit_hrl/results/agency_demand_onboard_coverage_latest",
+      "paper_table": "real_data_boundary_table",
+      "priority": 7
+    },
+    {
+      "id": "E8",
+      "experiment": "larger L2/L3 order-book replay",
+      "review_question": "Does market evidence scale beyond fixture/sample replay?",
+      "current_status": "partial_scale",
+      "artifact": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json",
+      "claim_gate": "Finance/data-mining venues should see at least 20 venue-grade symbol-session pairs or a limitation.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.order_book_large_replay_manifest_validation --manifest transit_hrl/data/order_book_large_manifest.csv --output-dir transit_hrl/results/order_book_large_replay_manifest_latest",
+      "paper_table": "order_book_scale_appendix",
+      "priority": 8
+    }
+  ],
+  "scheduler_manifest": [
+    {
+      "id": "E1",
+      "priority": 1,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "expected_artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/summary.json",
+      "paper_table": "main_baseline_table"
+    },
+    {
+      "id": "E2",
+      "priority": 2,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "expected_artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/summary.json",
+      "paper_table": "stress_generalization_table"
+    },
+    {
+      "id": "E3",
+      "priority": 3,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.baseline_ablation_matrix --output-dir transit_hrl/results/baseline_ablation_matrix_latest",
+      "expected_artifact": "transit_hrl/results/baseline_ablation_matrix_latest/summary.json",
+      "paper_table": "main_ablation_table"
+    },
+    {
+      "id": "E4",
+      "priority": 4,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --policy-modes freq_hrl flat_ppo generic_hrl_ppo --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "expected_artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/parameter_budget.csv",
+      "paper_table": "parameter_budget_appendix"
+    },
+    {
+      "id": "E5",
+      "priority": 5,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift promotion_recovery stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/sensitivity_robustness_matrix_latest",
+      "expected_artifact": "transit_hrl/results/sensitivity_robustness_matrix_latest/summary.json",
+      "paper_table": "robustness_appendix"
+    },
+    {
+      "id": "E6",
+      "priority": 6,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
+      "expected_artifact": "transit_hrl/results/strong_learned_baseline_validation_latest/sample_efficiency.csv",
+      "paper_table": "sample_efficiency_appendix"
+    },
+    {
+      "id": "E7",
+      "priority": 7,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.transit.agency_demand_onboard_coverage --output-dir transit_hrl/results/agency_demand_onboard_coverage_latest",
+      "expected_artifact": "transit_hrl/results/agency_demand_onboard_coverage_latest/summary.json",
+      "paper_table": "real_data_boundary_table"
+    },
+    {
+      "id": "E8",
+      "priority": 8,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.order_book_large_replay_manifest_validation --manifest transit_hrl/data/order_book_large_manifest.csv --output-dir transit_hrl/results/order_book_large_replay_manifest_latest",
+      "expected_artifact": "transit_hrl/results/order_book_lobster_venue_grade_multisymbol/summary.json",
+      "paper_table": "order_book_scale_appendix"
+    }
+  ],
+  "summary": {
+    "experiment_count": 8,
+    "blockers": [
+      "E1",
+      "E2",
+      "E4",
+      "E5",
+      "E6"
+    ],
+    "blocker_count": 5,
+    "strong_learned_status": "registered_executable",
+    "learned_cross_stress_scenarios": 0,
+    "same_agency_status": "external_truth_not_control_linked",
+    "venue_grade_pairs": 3
+  },
+  "boundary": "This is an experiment readiness matrix, not a claim of completion. Rows only upgrade paper claims when their artifact gates pass."
+}

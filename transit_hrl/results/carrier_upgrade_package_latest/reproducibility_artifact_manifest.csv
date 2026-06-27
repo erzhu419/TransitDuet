@@ -2,5 +2,6 @@ artifact,path,kind,status,count,reproduce_stage,commit_policy
 claim_matrix,transit_hrl/results/top_journal_unified_matrix_latest/summary.json,evidence_table,present,,claim_matrix,commit compact summary and claim tables
 figure_source_data,transit_hrl/results/manuscript_figures_latest/source_data,source_data,present,11,figures,commit source_data CSVs and lightweight figure drafts
 scheduler_seed_manifest,transit_hrl/results/carrier_upgrade_package_latest/scheduler_seed_manifest.csv,seed_ledger,present,560,claim_matrix,"commit compact seed ledger, not raw scheduler scratch"
+cs_top_venue_experiment_matrix,transit_hrl/results/carrier_upgrade_package_latest/cs_top_venue_experiment_matrix.csv,experiment_ledger,generated_by_carrier,,cs_top_venue_experiment_matrix,commit compact reviewer-facing ledger and scheduler manifest
 external_transit_raw_cache,transit_hrl/data/public_mbta_bus_ridership_raw; transit_hrl/data/public_mta_od_raw,ignored_raw_cache,regenerate_with_command,,external_truth_raw_cache,do not commit raw third-party cache
 carrier_validation_json,transit_hrl/results/carrier_upgrade_package_latest/spec_validation.json,machine_check,present,1,carrier_upgrade,commit compact validation JSON
