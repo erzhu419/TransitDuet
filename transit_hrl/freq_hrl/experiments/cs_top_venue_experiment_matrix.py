@@ -106,6 +106,7 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
             ),
             "paper_table": "main_baseline_table",
             "priority": 1,
+            "scheduler_note": "Shardable with --num-shards N --shard-index K; merge shards with --merge-inputs.",
         },
         {
             "id": "E2",
@@ -122,6 +123,7 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
             ),
             "paper_table": "stress_generalization_table",
             "priority": 2,
+            "scheduler_note": "Shardable over scenario/policy-mode pairs with --num-shards N --shard-index K.",
         },
         {
             "id": "E3",
@@ -153,6 +155,7 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
             ),
             "paper_table": "parameter_budget_appendix",
             "priority": 4,
+            "scheduler_note": "Parameter-budget rows are emitted by every strong learned baseline shard and checked after merge.",
         },
         {
             "id": "E5",
@@ -184,6 +187,7 @@ def build_cs_top_venue_experiment_matrix(results_root: Path = DEFAULT_RESULTS_RO
             ),
             "paper_table": "sample_efficiency_appendix",
             "priority": 6,
+            "scheduler_note": "Sample-efficiency rows are emitted per scenario/policy-mode shard and merged with per-seed rows.",
         },
         {
             "id": "E7",

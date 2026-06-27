@@ -9,7 +9,8 @@
       "claim_gate": "PPO-family learned baselines need paired Sharpe/return/FocusScore; SAC/TD3 must remain explicit limitations until implemented.",
       "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
       "paper_table": "main_baseline_table",
-      "priority": 1
+      "priority": 1,
+      "scheduler_note": "Shardable with --num-shards N --shard-index K; merge shards with --merge-inputs."
     },
     {
       "id": "E2",
@@ -20,7 +21,8 @@
       "claim_gate": "At least four stress regimes with paired learned-policy rows.",
       "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --scenarios persistent_shift stationary_high_noise localized_burst ood_period --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
       "paper_table": "stress_generalization_table",
-      "priority": 2
+      "priority": 2,
+      "scheduler_note": "Shardable over scenario/policy-mode pairs with --num-shards N --shard-index K."
     },
     {
       "id": "E3",
@@ -42,7 +44,8 @@
       "claim_gate": "Freq-HRL, flat PPO, and generic HRL PPO must share state/action dimensions and parameter counts.",
       "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --policy-modes freq_hrl flat_ppo generic_hrl_ppo --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
       "paper_table": "parameter_budget_appendix",
-      "priority": 4
+      "priority": 4,
+      "scheduler_note": "Parameter-budget rows are emitted by every strong learned baseline shard and checked after merge."
     },
     {
       "id": "E5",
@@ -64,7 +67,8 @@
       "claim_gate": "Report environment steps, iterations, elapsed seconds, and held-out objective proxy.",
       "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.trading.strong_learned_baseline_validation --output-dir transit_hrl/results/strong_learned_baseline_validation_latest",
       "paper_table": "sample_efficiency_appendix",
-      "priority": 6
+      "priority": 6,
+      "scheduler_note": "Sample-efficiency rows are emitted per scenario/policy-mode shard and merged with per-seed rows."
     },
     {
       "id": "E7",

@@ -70,6 +70,28 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def _read_csv(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    with path.open("r", newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def selected_scenario_policy_pairs(
+    scenarios: list[str],
+    policy_modes: list[str],
+    *,
+    shard_index: int = 0,
+    num_shards: int = 1,
+) -> list[tuple[str, str]]:
+    pairs = [(scenario, mode) for scenario in scenarios for mode in policy_modes]
+    shards = max(1, int(num_shards))
+    index = int(shard_index)
+    if index < 0 or index >= shards:
+        raise ValueError(f"shard_index must be in [0, {shards - 1}], got {index}")
+    return [pair for idx, pair in enumerate(pairs) if idx % shards == index]
+
+
 def _policy_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for scenario in sorted({str(row.get("scenario", "")) for row in rows}):
@@ -136,30 +158,39 @@ def build_experiment_manifest(
     steps: int,
     assets: int,
     iterations: int,
+    shard_index: int = 0,
+    num_shards: int = 1,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for scenario in scenarios:
-        for mode in policy_modes:
-            rows.append({
-                "scenario": scenario,
-                "policy_mode": mode,
-                "train_seeds": " ".join(str(seed) for seed in train_seeds),
-                "eval_seeds": " ".join(str(seed) for seed in eval_seeds),
-                "steps": int(steps),
-                "assets": int(assets),
-                "iterations": int(iterations),
-                "trainer": "shared_dual_level_ppo",
-                "command": (
-                    "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m "
-                    "freq_hrl.experiments.trading.ppo_actor_critic "
-                    f"--scenario {scenario} --policy-mode {mode} "
-                    f"--steps {int(steps)} --assets {int(assets)} --iterations {int(iterations)} "
-                    "--train-seeds "
-                    + " ".join(str(seed) for seed in train_seeds)
-                    + " --eval-seeds "
-                    + " ".join(str(seed) for seed in eval_seeds)
-                ),
-            })
+    pairs = selected_scenario_policy_pairs(
+        scenarios,
+        policy_modes,
+        shard_index=int(shard_index),
+        num_shards=int(num_shards),
+    )
+    for scenario, mode in pairs:
+        rows.append({
+            "scenario": scenario,
+            "policy_mode": mode,
+            "train_seeds": " ".join(str(seed) for seed in train_seeds),
+            "eval_seeds": " ".join(str(seed) for seed in eval_seeds),
+            "steps": int(steps),
+            "assets": int(assets),
+            "iterations": int(iterations),
+            "trainer": "shared_dual_level_ppo",
+            "shard_index": int(shard_index),
+            "num_shards": int(num_shards),
+            "command": (
+                "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m "
+                "freq_hrl.experiments.trading.ppo_actor_critic "
+                f"--scenario {scenario} --policy-mode {mode} "
+                f"--steps {int(steps)} --assets {int(assets)} --iterations {int(iterations)} "
+                "--train-seeds "
+                + " ".join(str(seed) for seed in train_seeds)
+                + " --eval-seeds "
+                + " ".join(str(seed) for seed in eval_seeds)
+            ),
+        })
     return rows
 
 
@@ -174,79 +205,94 @@ def run_strong_learned_baseline_validation(
     iterations: int,
     optimizer_seed: int,
     min_pairs: int,
+    shard_index: int = 0,
+    num_shards: int = 1,
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     run_rows: list[dict[str, Any]] = []
     parameter_budget: list[dict[str, Any]] = []
     sample_efficiency: list[dict[str, Any]] = []
-    for scenario in scenarios:
+    pairs = selected_scenario_policy_pairs(
+        scenarios,
+        policy_modes,
+        shard_index=int(shard_index),
+        num_shards=int(num_shards),
+    )
+    for pair_idx, (scenario, mode) in enumerate(pairs):
         if scenario not in SCENARIOS:
             raise ValueError(f"unknown scenario: {scenario}")
-        for mode_idx, mode in enumerate(policy_modes):
-            if mode not in POLICY_MODES:
-                raise ValueError(f"unknown policy_mode: {mode}")
-            start = time.perf_counter()
-            payload, heldout_rows, model = train_ppo_actor_critic(
-                train_seeds=train_seeds,
-                eval_seeds=eval_seeds,
-                steps=int(steps),
-                assets=int(assets),
-                scenario=scenario,
-                iterations=int(iterations),
-                seed=int(optimizer_seed) + 1009 * mode_idx + 7919 * len(rows),
-                policy_mode=mode,
-            )
-            elapsed = float(time.perf_counter() - start)
-            params = count_parameters(model)
-            for row in heldout_rows:
-                item = dict(row)
-                item["scenario"] = scenario
-                item["baseline"] = mode
-                item["policy_mode"] = mode
-                item["trainer"] = payload["trainer"]
-                item["source_artifact"] = "strong_learned_baseline_validation"
-                rows.append(item)
-            run_rows.append({
-                "scenario": scenario,
-                "policy_mode": mode,
-                "elapsed_sec": elapsed,
-                "train_seed_count": len(train_seeds),
-                "eval_seed_count": len(eval_seeds),
-                "steps": int(steps),
-                "iterations": int(iterations),
-                "parameter_count": params,
-                "best_score": float(payload.get("best_score", 0.0)),
-                "sharpe_mean": float(payload["summary"].get("sharpe_mean", 0.0)),
-                "total_return_mean": float(payload["summary"].get("total_return_mean", 0.0)),
-                "FocusScore_mean": float(payload["summary"].get("FocusScore_mean", 0.0)),
-                "LowerLFDrift_mean": float(payload["summary"].get("LowerLFDrift_mean", 0.0)),
-            })
-            parameter_budget.append({
-                "scenario": scenario,
-                "policy_mode": mode,
-                "parameter_count": params,
-                "upper_state_dim": int(model.config.upper_state_dim),
-                "lower_state_dim": int(model.config.lower_state_dim),
-                "upper_action_dim": int(model.config.upper_action_dim),
-                "lower_action_dim": int(model.config.lower_action_dim),
-                "hidden_dim": int(model.config.hidden_dim),
-                "matched_budget_group": "trading_shared_dual_ppo_linear",
-            })
-            train_steps = int(len(train_seeds) * steps * max(1, int(iterations)))
-            sample_efficiency.append({
-                "scenario": scenario,
-                "policy_mode": mode,
-                "environment_steps_train": train_steps,
-                "environment_steps_eval": int(len(eval_seeds) * steps),
-                "iterations": int(iterations),
-                "best_score": float(payload.get("best_score", 0.0)),
-                "heldout_objective_proxy": float(np.mean([
-                    float(row.get("total_return", 0.0))
-                    + 0.01 * float(row.get("sharpe", 0.0))
-                    for row in heldout_rows
-                ])) if heldout_rows else 0.0,
-                "elapsed_sec": elapsed,
-            })
+        if mode not in POLICY_MODES:
+            raise ValueError(f"unknown policy_mode: {mode}")
+        start = time.perf_counter()
+        payload, heldout_rows, model = train_ppo_actor_critic(
+            train_seeds=train_seeds,
+            eval_seeds=eval_seeds,
+            steps=int(steps),
+            assets=int(assets),
+            scenario=scenario,
+            iterations=int(iterations),
+            seed=int(optimizer_seed) + 1009 * pair_idx + 7919 * int(shard_index),
+            policy_mode=mode,
+        )
+        elapsed = float(time.perf_counter() - start)
+        params = count_parameters(model)
+        for row in heldout_rows:
+            item = dict(row)
+            item["scenario"] = scenario
+            item["baseline"] = mode
+            item["policy_mode"] = mode
+            item["trainer"] = payload["trainer"]
+            item["source_artifact"] = "strong_learned_baseline_validation"
+            item["shard_index"] = int(shard_index)
+            item["num_shards"] = int(num_shards)
+            rows.append(item)
+        run_rows.append({
+            "scenario": scenario,
+            "policy_mode": mode,
+            "elapsed_sec": elapsed,
+            "train_seed_count": len(train_seeds),
+            "eval_seed_count": len(eval_seeds),
+            "steps": int(steps),
+            "iterations": int(iterations),
+            "parameter_count": params,
+            "best_score": float(payload.get("best_score", 0.0)),
+            "sharpe_mean": float(payload["summary"].get("sharpe_mean", 0.0)),
+            "total_return_mean": float(payload["summary"].get("total_return_mean", 0.0)),
+            "FocusScore_mean": float(payload["summary"].get("FocusScore_mean", 0.0)),
+            "LowerLFDrift_mean": float(payload["summary"].get("LowerLFDrift_mean", 0.0)),
+            "shard_index": int(shard_index),
+            "num_shards": int(num_shards),
+        })
+        parameter_budget.append({
+            "scenario": scenario,
+            "policy_mode": mode,
+            "parameter_count": params,
+            "upper_state_dim": int(model.config.upper_state_dim),
+            "lower_state_dim": int(model.config.lower_state_dim),
+            "upper_action_dim": int(model.config.upper_action_dim),
+            "lower_action_dim": int(model.config.lower_action_dim),
+            "hidden_dim": int(model.config.hidden_dim),
+            "matched_budget_group": "trading_shared_dual_ppo_linear",
+            "shard_index": int(shard_index),
+            "num_shards": int(num_shards),
+        })
+        train_steps = int(len(train_seeds) * steps * max(1, int(iterations)))
+        sample_efficiency.append({
+            "scenario": scenario,
+            "policy_mode": mode,
+            "environment_steps_train": train_steps,
+            "environment_steps_eval": int(len(eval_seeds) * steps),
+            "iterations": int(iterations),
+            "best_score": float(payload.get("best_score", 0.0)),
+            "heldout_objective_proxy": float(np.mean([
+                float(row.get("total_return", 0.0))
+                + 0.01 * float(row.get("sharpe", 0.0))
+                for row in heldout_rows
+            ])) if heldout_rows else 0.0,
+            "elapsed_sec": elapsed,
+            "shard_index": int(shard_index),
+            "num_shards": int(num_shards),
+        })
     checks = build_paired_checks(rows, min_pairs=int(min_pairs))
     supported_or_mixed = {
         row["control"] for row in checks
@@ -272,10 +318,14 @@ def run_strong_learned_baseline_validation(
             steps=int(steps),
             assets=int(assets),
             iterations=int(iterations),
+            shard_index=int(shard_index),
+            num_shards=int(num_shards),
         ),
         "summary": {
             "rows": len(rows),
             "scenario_count": len(set(scenarios)),
+            "selected_scenario_count": len({scenario for scenario, _ in pairs}),
+            "selected_pair_count": len(pairs),
             "policy_modes": list(policy_modes),
             "train_seed_count": len(train_seeds),
             "eval_seed_count": len(eval_seeds),
@@ -289,11 +339,74 @@ def run_strong_learned_baseline_validation(
                 if len({row["parameter_count"] for row in parameter_budget}) == 1
                 else "mismatch"
             ),
+            "shard_index": int(shard_index),
+            "num_shards": int(num_shards),
         },
         "boundary": (
             "This artifact closes the PPO-family learned baseline path under a "
             "matched shared-core parameter budget. It does not claim SAC/TD3 "
             "coverage; those are registered as remaining off-policy baselines."
+        ),
+    }
+
+
+def merge_strong_learned_baseline_shards(
+    input_dirs: list[Path],
+    *,
+    min_pairs: int,
+) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    run_rows: list[dict[str, Any]] = []
+    parameter_budget: list[dict[str, Any]] = []
+    sample_efficiency: list[dict[str, Any]] = []
+    experiment_manifest: list[dict[str, Any]] = []
+    for directory in input_dirs:
+        base = Path(directory)
+        rows.extend(_read_csv(base / "per_seed.csv"))
+        run_rows.extend(_read_csv(base / "run_summary.csv"))
+        parameter_budget.extend(_read_csv(base / "parameter_budget.csv"))
+        sample_efficiency.extend(_read_csv(base / "sample_efficiency.csv"))
+        experiment_manifest.extend(_read_csv(base / "experiment_manifest.csv"))
+    checks = build_paired_checks(rows, min_pairs=int(min_pairs))
+    supported_or_mixed = {
+        row["control"] for row in checks
+        if row["metric"] in {"sharpe", "total_return", "FocusScore"}
+        and row["status"] in {"supported", "positive_mixed"}
+    }
+    ppo_baseline_status = (
+        "supported" if {"flat_ppo", "generic_hrl_ppo"} <= supported_or_mixed
+        else ("partial" if supported_or_mixed else "not_supported")
+    )
+    param_counts = {
+        str(row.get("parameter_count", ""))
+        for row in parameter_budget
+        if str(row.get("parameter_count", "")).strip()
+    }
+    scenarios = sorted({str(row.get("scenario", "")) for row in rows if str(row.get("scenario", ""))})
+    policy_modes = sorted({str(row.get("policy_mode", row.get("baseline", ""))) for row in rows if str(row.get("policy_mode", row.get("baseline", "")))})
+    return {
+        "per_seed": rows,
+        "run_summary": run_rows,
+        "policy_summary": _policy_summary(rows),
+        "paired_checks": checks,
+        "parameter_budget": parameter_budget,
+        "sample_efficiency": sample_efficiency,
+        "experiment_manifest": experiment_manifest,
+        "summary": {
+            "rows": len(rows),
+            "scenario_count": len(scenarios),
+            "selected_scenario_count": len(scenarios),
+            "selected_pair_count": len({(row.get("scenario"), row.get("policy_mode")) for row in rows}),
+            "policy_modes": policy_modes,
+            "shard_count": len(input_dirs),
+            "ppo_strong_baseline_status": ppo_baseline_status,
+            "sac_td3_status": "registered_external_missing",
+            "parameter_budget_status": "matched" if len(param_counts) == 1 else "mismatch",
+            "merge_status": "merged",
+        },
+        "boundary": (
+            "Merged shard artifact for PPO-family learned baselines. SAC/TD3 "
+            "remain registered external baselines until off-policy implementations run."
         ),
     }
 
@@ -344,6 +457,9 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=6)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
     parser.add_argument("--min-pairs", type=int, default=3)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--num-shards", type=int, default=1)
+    parser.add_argument("--merge-inputs", nargs="*", type=Path, default=[])
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -351,17 +467,25 @@ def main() -> None:
     )
     args = parser.parse_args()
     torch.set_num_threads(1)
-    payload = run_strong_learned_baseline_validation(
-        scenarios=list(args.scenarios),
-        policy_modes=list(args.policy_modes),
-        train_seeds=list(args.train_seeds),
-        eval_seeds=list(args.eval_seeds),
-        steps=int(args.steps),
-        assets=int(args.assets),
-        iterations=int(args.iterations),
-        optimizer_seed=int(args.optimizer_seed),
-        min_pairs=int(args.min_pairs),
-    )
+    if args.merge_inputs:
+        payload = merge_strong_learned_baseline_shards(
+            list(args.merge_inputs),
+            min_pairs=int(args.min_pairs),
+        )
+    else:
+        payload = run_strong_learned_baseline_validation(
+            scenarios=list(args.scenarios),
+            policy_modes=list(args.policy_modes),
+            train_seeds=list(args.train_seeds),
+            eval_seeds=list(args.eval_seeds),
+            steps=int(args.steps),
+            assets=int(args.assets),
+            iterations=int(args.iterations),
+            optimizer_seed=int(args.optimizer_seed),
+            min_pairs=int(args.min_pairs),
+            shard_index=int(args.shard_index),
+            num_shards=int(args.num_shards),
+        )
     write_outputs(args.output_dir, payload)
     print(
         "strong_learned_baseline_validation "

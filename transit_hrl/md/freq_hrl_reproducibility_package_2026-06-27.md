@@ -25,7 +25,7 @@ This package records the commands required to regenerate the current claim matri
 | claim_matrix | evidence_table | present |  | claim_matrix | commit compact summary and claim tables |
 | figure_source_data | source_data | present | 11 | figures | commit source_data CSVs and lightweight figure drafts |
 | scheduler_seed_manifest | seed_ledger | present | 560 | claim_matrix | commit compact seed ledger, not raw scheduler scratch |
-| cs_top_venue_experiment_matrix | experiment_ledger | generated_by_carrier |  | cs_top_venue_experiment_matrix | commit compact reviewer-facing ledger and scheduler manifest |
+| cs_top_venue_experiment_matrix | experiment_ledger | present |  | cs_top_venue_experiment_matrix | commit compact reviewer-facing ledger and scheduler manifest |
 | external_transit_raw_cache | ignored_raw_cache | regenerate_with_command |  | external_truth_raw_cache | do not commit raw third-party cache |
 | carrier_validation_json | machine_check | present | 1 | carrier_upgrade | commit compact validation JSON |
 
