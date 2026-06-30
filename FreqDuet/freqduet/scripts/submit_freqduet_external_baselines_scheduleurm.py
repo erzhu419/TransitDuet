@@ -68,6 +68,10 @@ def build_inner_cmd(
         cmd.extend(["--configs-file", args.configs_file])
     else:
         cmd.extend(["--configs", configs_csv])
+    if args.headway_policy_csv:
+        cmd.extend(["--headway-policy-csv", args.headway_policy_csv])
+    if args.policy_default_headway is not None:
+        cmd.extend(["--policy-default-headway", str(args.policy_default_headway)])
     return " ".join(env_bits + [shlex.join(cmd)])
 
 
@@ -156,6 +160,10 @@ def main() -> None:
     parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--last-k", type=int, default=50)
     parser.add_argument("--run-name", required=True)
+    parser.add_argument("--headway-policy-csv", default=None,
+                        help="CSV mapping route policy variants/configs[/seeds] to target headways")
+    parser.add_argument("--policy-default-headway", type=float, default=None,
+                        help="fallback target for route policy variants missing from the CSV")
     parser.add_argument("--shard-size", type=int, default=30)
     parser.add_argument("--workers", type=int, default=30)
     parser.add_argument("--cpu", type=int, default=30)

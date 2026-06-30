@@ -26,6 +26,12 @@ from run_baseline_rule import hour_to_slot, mpc_plan, rule_holding_action
 
 
 BASELINE_VARIANTS = ("fixed_headway", "rule_holding", "rule_mpc")
+ROUTE_HEADWAY_POLICY_PREFIXES = (
+    "route_value_",
+    "route_headway_",
+    "route_oracle_",
+)
+DEFAULT_FIXED_HEADWAY_S = 360.0
 DEFAULT_DOMAIN_CONFIGS = {
     "terminal": "F_freqduet_terminal_main_hiro",
     "highnoise": "F_freqduet_gen_highnoise_main_hiro",
@@ -44,6 +50,45 @@ def parse_csv_file(path: str | Path, cast=str) -> list:
         for line in f:
             items.extend(parse_csv_list(line, cast=cast))
     return items
+
+
+def fixed_headway_target_s(variant: str) -> float | None:
+    """Return the target seconds for fixed-headway variants.
+
+    ``fixed_headway`` keeps the historical 360 s baseline.  Dynamic names such
+    as ``fixed_headway_330`` and ``fixed_headway_h330`` are used for route-day
+    counterfactual candidate sweeps.
+    """
+    text = str(variant).strip()
+    if text == "fixed_headway":
+        return DEFAULT_FIXED_HEADWAY_S
+    for prefix in ("fixed_headway_", "fixed_h"):
+        if not text.startswith(prefix):
+            continue
+        suffix = text[len(prefix):]
+        if suffix.startswith("h"):
+            suffix = suffix[1:]
+        try:
+            target = float(suffix)
+        except ValueError:
+            return None
+        if target <= 0:
+            return None
+        return target
+    return None
+
+
+def is_route_headway_policy_variant(variant: str) -> bool:
+    text = str(variant).strip()
+    return any(text.startswith(prefix) for prefix in ROUTE_HEADWAY_POLICY_PREFIXES)
+
+
+def is_known_variant(variant: str) -> bool:
+    return (
+        str(variant) in BASELINE_VARIANTS
+        or fixed_headway_target_s(variant) is not None
+        or is_route_headway_policy_variant(variant)
+    )
 
 
 def config_path(name: str) -> Path:
@@ -99,6 +144,81 @@ def infer_domain(config: str) -> str:
     return "unknown"
 
 
+def load_headway_policy(path: str | Path | None) -> dict[tuple[str, str, int | None], float]:
+    """Load route-day policy targets keyed by (variant, config, seed-or-None)."""
+    if not path:
+        return {}
+    policy_path = resolve_under_root(path)
+    if not policy_path.exists():
+        raise SystemExit(f"headway policy csv does not exist: {policy_path}")
+    df = pd.read_csv(policy_path)
+    if df.empty:
+        raise SystemExit(f"headway policy csv is empty: {policy_path}")
+    if "config" not in df.columns:
+        raise SystemExit("headway policy csv must include a config column")
+    target_col = None
+    for col in ("target_headway_s", "selected_target_headway_s", "headway_s"):
+        if col in df.columns:
+            target_col = col
+            break
+    if target_col is None:
+        if "selected_method" in df.columns:
+            df["target_headway_s"] = df["selected_method"].map(fixed_headway_target_s)
+            target_col = "target_headway_s"
+        else:
+            raise SystemExit(
+                "headway policy csv must include target_headway_s or selected_method")
+    variant_col = None
+    for col in ("policy_variant", "variant", "policy_name"):
+        if col in df.columns:
+            variant_col = col
+            break
+    if variant_col is None:
+        df["policy_variant"] = "route_value_policy"
+        variant_col = "policy_variant"
+
+    policy: dict[tuple[str, str, int | None], float] = {}
+    for _, row in df.iterrows():
+        variant = str(row[variant_col]).strip()
+        config = str(row["config"]).strip()
+        if not variant or not config:
+            continue
+        target = pd.to_numeric(row[target_col], errors="coerce")
+        if not np.isfinite(target) or float(target) <= 0:
+            continue
+        seed_key = None
+        if "seed" in df.columns and not pd.isna(row.get("seed")):
+            seed_val = pd.to_numeric(row.get("seed"), errors="coerce")
+            if np.isfinite(seed_val):
+                seed_key = int(seed_val)
+        policy[(variant, config, seed_key)] = float(target)
+    if not policy:
+        raise SystemExit(f"no usable rows in headway policy csv: {policy_path}")
+    return policy
+
+
+def route_policy_target_s(
+    policy: dict[tuple[str, str, int | None], float],
+    variant: str,
+    config: str,
+    seed: int,
+    default_headway_s: float | None,
+) -> float:
+    keys = [
+        (variant, config, int(seed)),
+        (variant, config, None),
+        ("*", config, int(seed)),
+        ("*", config, None),
+    ]
+    for key in keys:
+        if key in policy:
+            return float(policy[key])
+    if default_headway_s is not None:
+        return float(default_headway_s)
+    raise KeyError(
+        f"no route headway policy target for variant={variant} config={config} seed={seed}")
+
+
 def make_env_from_config(config_name: str):
     cfg = load_config(str(config_path(config_name)))
     env_cfg = cfg.get("env", {})
@@ -135,9 +255,20 @@ def mpc_candidates() -> list[tuple[float, float, float]]:
     return triples
 
 
-def run_episode_external(env, variant: str, n_fleet: int, rng: np.random.RandomState, demand_noise: float):
+def run_episode_external(
+    env,
+    variant: str,
+    n_fleet: int,
+    rng: np.random.RandomState,
+    demand_noise: float,
+    route_headway_target_s: float | None = None,
+):
     env._n_fleet_target = int(n_fleet)
-    chosen_triple = (360.0, 360.0, 360.0)
+    fixed_target = fixed_headway_target_s(variant)
+    if fixed_target is None and route_headway_target_s is not None:
+        fixed_target = float(route_headway_target_s)
+    base_target = DEFAULT_FIXED_HEADWAY_S if fixed_target is None else fixed_target
+    chosen_triple = (base_target, base_target, base_target)
     candidates = None
     if variant == "rule_mpc":
         candidates = mpc_candidates()
@@ -156,7 +287,7 @@ def run_episode_external(env, variant: str, n_fleet: int, rng: np.random.RandomS
                 candidates=candidates,
             )
             return float(chosen_triple[hour_to_slot(hour)])
-        return 360.0
+        return float(base_target)
 
     env.reset()
     env._upper_policy_callback = upper_cb
@@ -174,7 +305,7 @@ def run_episode_external(env, variant: str, n_fleet: int, rng: np.random.RandomS
                 if bus.bus_id == int(obs[0]) and bus.on_route:
                     last_target[key] = float(getattr(bus, "_target_headway", 360.0))
                     break
-            if variant == "fixed_headway":
+            if fixed_target is not None:
                 action_dict[key] = 0.0
             else:
                 action_dict[key] = rule_holding_action(obs, last_target[key])
@@ -207,6 +338,8 @@ def run_one(
     episodes: int,
     logs_dir: Path,
     worker_threads: int | None = None,
+    headway_policy: dict[tuple[str, str, int | None], float] | None = None,
+    policy_default_headway_s: float | None = None,
 ) -> Path:
     apply_worker_threads(worker_threads)
     run_dir = run_dir_for(config, variant, seed, logs_dir)
@@ -217,6 +350,15 @@ def run_one(
     rng = np.random.RandomState(int(seed))
     random.seed(int(seed))
     np.random.seed(int(seed))
+    route_headway_target = None
+    if is_route_headway_policy_variant(variant):
+        route_headway_target = route_policy_target_s(
+            headway_policy or {},
+            variant=variant,
+            config=config,
+            seed=int(seed),
+            default_headway_s=policy_default_headway_s,
+        )
     rows = []
     t_start = time.time()
     for ep in range(int(episodes)):
@@ -231,6 +373,7 @@ def run_one(
             n_fleet=n_fleet,
             rng=rng,
             demand_noise=float(env_cfg.get("demand_noise", 0.0)),
+            route_headway_target_s=route_headway_target,
         )
         row.update({
             "ep": ep,
@@ -300,6 +443,8 @@ def run_jobs(
     worker_threads: int | None = None,
     job_start: int | None = None,
     job_end: int | None = None,
+    headway_policy: dict[tuple[str, str, int | None], float] | None = None,
+    policy_default_headway_s: float | None = None,
 ) -> None:
     jobs = []
     for config, variant, seed in selected_jobs(
@@ -322,6 +467,8 @@ def run_jobs(
             run_dir = run_one(
                 config, variant, seed, episodes, logs_dir,
                 worker_threads=worker_threads,
+                headway_policy=headway_policy,
+                policy_default_headway_s=policy_default_headway_s,
             )
             print(f"DONE {config} {variant} seed={seed}: {run_dir}")
         return
@@ -331,6 +478,8 @@ def run_jobs(
             pool.submit(
                 run_one, config, variant, seed, episodes, logs_dir,
                 worker_threads,
+                headway_policy,
+                policy_default_headway_s,
             )
             for config, variant, seed in jobs
         ]
@@ -418,6 +567,10 @@ def main() -> None:
                     help="numeric-library threads per baseline process")
     ap.add_argument("--skip-existing", action="store_true",
                     help="skip runs whose diagnostics already has enough rows")
+    ap.add_argument("--headway-policy-csv", default=None,
+                    help="CSV mapping route policy variants/configs[/seeds] to target headways")
+    ap.add_argument("--policy-default-headway", type=float, default=None,
+                    help="fallback target for route policy variants missing from the CSV")
     ap.add_argument("--job-start", type=int, default=None,
                     help="flattened config x variant x seed start index for scheduler shards")
     ap.add_argument("--job-end", type=int, default=None,
@@ -430,9 +583,17 @@ def main() -> None:
     )
     variants = parse_csv_list(args.variants)
     seeds = parse_csv_list(args.seeds, int)
-    unknown = sorted(set(variants) - set(BASELINE_VARIANTS))
+    unknown = sorted(v for v in set(variants) if not is_known_variant(v))
     if unknown:
         raise SystemExit(f"Unknown variants: {unknown}")
+    if (
+        not args.aggregate_only
+        and any(is_route_headway_policy_variant(v) for v in variants)
+        and not args.headway_policy_csv
+    ):
+        raise SystemExit(
+            "route headway policy variants require --headway-policy-csv")
+    headway_policy = load_headway_policy(args.headway_policy_csv)
 
     logs_dir = resolve_under_root(args.logs_dir)
     out_dir = resolve_under_root(args.out_dir)
@@ -462,6 +623,8 @@ def main() -> None:
             worker_threads=args.worker_threads,
             job_start=job_start,
             job_end=job_end,
+            headway_policy=headway_policy,
+            policy_default_headway_s=args.policy_default_headway,
         )
     if args.no_aggregate:
         print("Skipped aggregation (--no-aggregate).")

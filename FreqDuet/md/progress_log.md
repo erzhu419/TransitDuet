@@ -1725,3 +1725,504 @@ simulator paper package. It supports the mechanism chain that LF queue features
 track queue load and HF residual energy is traceable to lower holding/wait
 responses. It should not be presented as field-data calibration or as a new
 performance matrix.
+
+## 2026-06-28 route-day guard screen result
+
+The route-family/service-day matrix exposed a large held-out gap for paper-main
+V1 against the strong fixed-headway baseline. The completed v1b screen used
+historical fixed-expert guards inherited from `F_freqduet_terminal_main_hiro`;
+the follow-up v2 screen added paper-main V1 guard aliases and reran the same
+20-route x 3-day x 5-seed screen.
+
+Completed runs:
+
+```text
+historical guard screen:
+results_freqduet/route_day_guard_screen_v1b_ep100_wu10_5seed
+
+paper-main guard screen:
+results_freqduet/route_day_guard_screen_v2_papermain_ep100_wu10_5seed
+tasks: t14303-t14323, 20/20 shards done, 900/900 diagnostics
+```
+
+Paper-main v2 paired deltas are primary minus fixed-headway:
+
+```text
+main vs fixed_headway:
+  composite +0.9122 CI [+0.8554,+0.9708]
+
+paper_fixedselector_balanced vs fixed_headway:
+  composite +0.0837 CI [+0.0685,+0.1039]
+
+paper_fixedfallback_noharm vs fixed_headway:
+  composite +0.0019 CI [-0.0010,+0.0049]
+```
+
+Selector diagnostics:
+
+```text
+main fixed-active: 0.0000
+paper_fixedselector_balanced fixed-active: 0.9065
+paper_fixedfallback_noharm fixed-active: 0.9942
+```
+
+Interpretation: `paper_fixedfallback_noharm` statistically matches
+fixed-headway on this 5-seed route-day screen, but it does so by falling back to
+fixed-headway almost all the time. It is therefore a valid no-harm safety guard,
+not evidence that FreqDuet beats fixed-headway on route/day held-out profiles.
+`paper_fixedselector_balanced` reduces the gap but remains significantly worse
+than fixed. Do not promote either route-day guard as a paper-main improvement or
+push as a "better than fixed" result. The defensible claim remains that
+paper-main V1 works on the canonical 4-domain simulator matrix and is
+statistically tied with strong fixed-headway at paper scale, while route/day
+held-out profiles require a stronger route-conditioned or counterfactual
+value-planning layer to surpass fixed-headway.
+
+## 2026-06-28 route-conditioned value planner setup
+
+The next improvement path is no longer another global fallback guard. The guard
+screens showed that the only safe route-day guard was essentially fixed-headway
+itself. To create real counterfactual labels for a route-conditioned planner,
+the external fixed-headway baseline runner now supports executable target
+variants such as `fixed_headway_300`, `fixed_headway_330`, and
+`fixed_headway_420`, while preserving historical `fixed_headway = 360s`.
+
+Code added/changed:
+
+```text
+scripts/run_freqduet_external_baselines.py
+  dynamic fixed-headway variants: fixed_headway_<seconds>
+
+scripts/build_freqduet_route_day_value_dataset.py
+  route-day counterfactual oracle/value dataset builder
+  keys: scenario_id, day_type, seed
+  outputs: oracle best target, target distribution, seed-CV and route-CV value selector
+
+scripts/sync_freqduet_external_baselines_scheduleurm.py
+  sync + aggregate helper for external-baseline scheduleurm runs
+```
+
+Local smoke:
+
+```text
+results_freqduet/_smoke_fixed_sweep
+config: F_freqduet_routeday_mbta_r66_d0_key_high_ridership_wkdy_main_hiro
+variants: fixed_headway_300, fixed_headway
+episodes: 1
+
+oracle smoke delta vs fixed_headway:
+  composite -0.3112
+```
+
+Submitted route-day fixed-headway sweep:
+
+```text
+run:
+results_freqduet/route_day_fixed_headway_sweep_v1_ep100_5seed
+
+configs:
+results_freqduet/route_day_guard_screen_v2_papermain/config_setup/external_main_configs.txt
+60 route-day configs = 20 routes x 3 service-day profiles
+
+variants:
+fixed_headway_240
+fixed_headway_270
+fixed_headway_300
+fixed_headway_330
+fixed_headway_360
+fixed_headway_390
+fixed_headway_420
+fixed_headway_450
+fixed_headway_480
+
+seeds:
+7,11,17,23,31
+
+jobs:
+60 configs x 9 targets x 5 seeds = 2700 rollout jobs
+90 scheduleurm shards, t14406-t14497
+initial scheduler state after dispatch: 31 running, 59 queued
+nodes: node001-node006 only
+```
+
+After completion, aggregate with:
+
+```text
+python3 scripts/sync_freqduet_external_baselines_scheduleurm.py \
+  --run-name route_day_fixed_headway_sweep_v1_ep100_5seed \
+  --configs-file results_freqduet/route_day_guard_screen_v2_papermain/config_setup/external_main_configs.txt \
+  --variants fixed_headway_240,fixed_headway_270,fixed_headway_300,fixed_headway_330,fixed_headway_360,fixed_headway_390,fixed_headway_420,fixed_headway_450,fixed_headway_480 \
+  --seeds 7,11,17,23,31 \
+  --last-k 50
+```
+
+Then build the route-conditioned value dataset with:
+
+```text
+python3 scripts/build_freqduet_route_day_value_dataset.py \
+  --manifest results_freqduet/route_day_guard_screen_v2_papermain/config_setup/config_manifest.csv \
+  --external-per-seed results_freqduet/route_day_fixed_headway_sweep_v1_ep100_5seed/combined_summary/external_baselines_per_seed.csv \
+  --baseline-method fixed_headway_360 \
+  --out-dir results_freqduet/route_day_fixed_headway_sweep_v1_ep100_5seed/value_dataset
+```
+
+Decision rule for the next step: if the oracle best fixed-headway target
+meaningfully beats `fixed_headway_360` across route/day held-out rows, then
+train/promote a route-conditioned value selector and expand to 20 seeds. If the
+oracle itself cannot beat 360s, then fixed-target planning is not enough and the
+next structural candidate should move to terminal/first-stop dispatch or richer
+rollout-trained action candidates.
+
+### 2026-06-28 Route-Day Headway Value Planner Execution Path
+
+Completed first route-day fixed-headway sweep:
+
+```text
+run: route_day_fixed_headway_sweep_v1_ep100_5seed
+status: 90/90 scheduleurm shards done
+rows: 60 configs x 9 targets x 5 seeds = 2700
+targets: 240,270,300,330,360,390,420,450,480 s
+```
+
+Overall composite means from the first sweep:
+
+```text
+fixed_headway_480  1.9099
+fixed_headway_450  1.9528
+fixed_headway_420  2.0068
+fixed_headway_390  2.0589
+fixed_headway_360  2.1012
+fixed_headway_330  2.1445
+fixed_headway_300  2.1935
+fixed_headway_270  2.2604
+fixed_headway_240  2.3366
+```
+
+Value/oracle dataset:
+
+```text
+script:
+scripts/build_freqduet_route_day_value_dataset.py
+
+out:
+results_freqduet/route_day_fixed_headway_sweep_v1_ep100_5seed/value_dataset
+
+oracle vs fixed_headway_360:
+mean delta = -0.2183
+95% bootstrap CI = [-0.2344, -0.2029]
+
+seed-CV ridge selector vs fixed_headway_360:
+mean delta = -0.1921
+95% bootstrap CI = [-0.2134, -0.1705]
+win rate = 0.9467
+oracle regret = 0.0262
+
+route_id-CV ridge selector vs fixed_headway_360:
+mean delta = -0.1822
+95% bootstrap CI = [-0.2031, -0.1610]
+win rate = 0.9133
+oracle regret = 0.0361
+```
+
+Important interpretation:
+
+```text
+The first sweep proves fixed_headway_360 is not the tuned fixed-headway ceiling
+on route-day held-out MBTA profiles.  However, fixed_headway_480 is the upper
+boundary and is selected for most rows, so this is not yet evidence that a
+route-conditioned planner beats a tuned fixed-headway baseline.  Need the
+high-target sweep before making the paper claim.
+```
+
+Added executable route-day headway policy path:
+
+```text
+scripts/export_freqduet_route_day_headway_policy.py
+  exports policy_variant/config[/seed] -> target_headway_s
+  variants:
+    route_value_seed_cv
+    route_value_route_cv
+    route_value_global_best
+    route_oracle_mean
+    route_oracle_seed
+
+scripts/run_freqduet_external_baselines.py
+  now supports route_* policy variants via --headway-policy-csv
+
+scripts/submit_freqduet_external_baselines_scheduleurm.py
+  now forwards --headway-policy-csv and --policy-default-headway
+```
+
+Local smoke:
+
+```text
+policy CSV:
+results_freqduet/route_day_fixed_headway_sweep_v1_ep100_5seed/value_dataset/route_day_headway_policy.csv
+
+config:
+F_freqduet_routeday_mbta_r66_d0_key_high_ridership_wkdy_main_hiro
+
+variants:
+route_value_global_best
+fixed_headway_480
+
+episodes: 2
+result: identical metrics, confirming route_value_global_best executes the
+same 480 s target as fixed_headway_480 on this config.
+```
+
+Submitted high-target boundary sweep:
+
+```text
+run: route_day_fixed_headway_high_sweep_v1_ep100_5seed
+targets: 480,540,600,660,720,780,840,900 s
+jobs: 60 configs x 8 targets x 5 seeds = 2400
+shards: 80 scheduleurm tasks
+nodes: node001-node006 only
+current checkpoint: 30 running, 50 queued because node001-node006 are full
+```
+
+After high sweep completes:
+
+```text
+python3 scripts/sync_freqduet_external_baselines_scheduleurm.py \
+  --run-name route_day_fixed_headway_high_sweep_v1_ep100_5seed \
+  --configs-file results_freqduet/route_day_guard_screen_v2_papermain/config_setup/external_main_configs.txt \
+  --variants fixed_headway_480,fixed_headway_540,fixed_headway_600,fixed_headway_660,fixed_headway_720,fixed_headway_780,fixed_headway_840,fixed_headway_900 \
+  --seeds 7,11,17,23,31 \
+  --last-k 50
+
+combine low+high, de-duplicate fixed_headway_480, then rebuild the value dataset
+over 240-900 s.  If the best target remains a single global headway, write the
+claim as "tuned fixed-headway beats historical 360; route-conditioned value
+model has limited incremental value."  If target choice varies by route/day
+and seed/route CV holds, promote route_value_* to a formal external baseline.
+```
+
+### 2026-06-28 Combined 240-900 Headway Value Results
+
+High sweep completed and was synchronized:
+
+```text
+run: route_day_fixed_headway_high_sweep_v1_ep100_5seed
+status: 80/80 scheduleurm shards done
+targets: 480,540,600,660,720,780,840,900 s
+rows: 60 configs x 8 targets x 5 seeds = 2400
+```
+
+Combined low+high matrix:
+
+```text
+out:
+results_freqduet/route_day_fixed_headway_combined_240_900_ep100_5seed/external_baselines_per_seed.csv
+
+rows: 4800
+methods: 16 fixed-headway candidates
+configs: 60
+seeds: 5
+
+overall composite means:
+fixed_headway_540  1.8663
+fixed_headway_600  1.9081
+fixed_headway_480  1.9099
+fixed_headway_450  1.9528
+fixed_headway_660  1.9946
+fixed_headway_420  2.0068
+fixed_headway_390  2.0589
+fixed_headway_360  2.1012
+```
+
+Oracle and original ridge selector:
+
+```text
+oracle vs fixed_headway_360:
+mean delta = -0.5390
+CI = [-0.5695, -0.5096]
+
+oracle vs fixed_headway_540:
+mean delta = -0.3041
+CI = [-0.3400, -0.2711]
+
+original ridge seed-CV vs fixed_headway_540:
+mean delta = +0.0065
+CI = [-0.0568, +0.0774]
+
+original ridge route-CV vs fixed_headway_540:
+mean delta = +0.0394
+CI = [-0.0352, +0.1226]
+```
+
+Interpretation:
+
+```text
+fixed_headway_540 is the tuned fixed-headway baseline on the 5-seed route-day
+matrix.  The oracle shows large remaining counterfactual value, but the first
+ridge selector is not enough.  This justifies using historical route-day priors
+instead of single-day online variance.
+```
+
+Added stronger matched-rollout value model:
+
+```text
+script:
+scripts/fit_freqduet_route_day_headway_value_model.py
+
+out:
+results_freqduet/route_day_fixed_headway_combined_240_900_ep100_5seed/headway_value_models_vs540
+
+best seed-held-out CV selectors:
+route_value_extra_fdr_seed_cv
+  delta vs fixed_headway_540 = -0.2929
+  CI = [-0.3291, -0.2605]
+  win rate = 0.9433
+  oracle regret = 0.0112
+
+route_value_extra_fd_seed_cv
+  delta vs fixed_headway_540 = -0.2908
+  CI = [-0.3245, -0.2594]
+  win rate = 0.9400
+  oracle regret = 0.0134
+
+route-held-out CV:
+  best ridge route-CV is near tie with fixed_headway_540
+  delta = +0.0144, CI includes 0.
+  Do not claim unseen-route superiority yet.
+```
+
+Train-all policy exported for new-seed validation:
+
+```text
+policy:
+results_freqduet/route_day_fixed_headway_combined_240_900_ep100_5seed/headway_value_models_vs540/route_day_headway_value_model_train_all_policy.csv
+
+candidate formal variants:
+route_value_extra_fd_trainall
+route_value_extra_fdr_trainall
+route_value_rf_fd_trainall
+route_value_gbr_fd_trainall
+```
+
+Submitted new-seed validation matrix:
+
+```text
+run:
+route_day_headway_value_trainall_v2_ep100_20seed
+
+purpose:
+test whether historical 5-seed matched-rollout policy generalizes to 20 new
+stochastic service-day seeds, compared with tuned fixed headways.
+
+variants:
+fixed_headway_480
+fixed_headway_540
+fixed_headway_600
+route_value_extra_fd_trainall
+route_value_extra_fdr_trainall
+route_value_rf_fd_trainall
+route_value_gbr_fd_trainall
+
+seeds:
+101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197
+
+jobs:
+60 configs x 7 variants x 20 seeds = 8400 rollout jobs
+35 scheduleurm shards, shard_size=240, workers=30, cpu=30
+nodes: node001-node006 only
+
+initial scheduler status:
+35 matched, 34 running, 1 queued
+
+discarded partial old run:
+route_day_headway_value_trainall_v1_ep100_20seed
+13 accidental small shards were cancelled before using results.
+```
+
+After completion, aggregate with:
+
+```text
+python3 scripts/sync_freqduet_external_baselines_scheduleurm.py \
+  --run-name route_day_headway_value_trainall_v2_ep100_20seed \
+  --configs-file results_freqduet/route_day_guard_screen_v2_papermain/config_setup/external_main_configs.txt \
+  --variants fixed_headway_480,fixed_headway_540,fixed_headway_600,route_value_extra_fd_trainall,route_value_extra_fdr_trainall,route_value_rf_fd_trainall,route_value_gbr_fd_trainall \
+  --seeds 101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197 \
+  --last-k 50
+```
+
+### 2026-07-01 Train-All Route-Day Value Validation
+
+The 20-new-seed train-all validation finished and was synchronized:
+
+```text
+run:
+route_day_headway_value_trainall_v2_ep100_20seed
+
+status:
+35/35 scheduleurm shards done
+
+rows:
+60 configs x 7 variants x 20 seeds = 8400 rollout jobs
+
+aggregate:
+results_freqduet/route_day_headway_value_trainall_v2_ep100_20seed/combined_summary
+```
+
+Aggregate composite means:
+
+```text
+route_value_extra_fd_trainall   1.5516
+route_value_extra_fdr_trainall  1.5520
+route_value_rf_fd_trainall      1.5560
+route_value_gbr_fd_trainall     1.7279
+fixed_headway_540               1.8284
+fixed_headway_480               1.8717
+fixed_headway_600               1.8787
+```
+
+Paired deltas vs tuned `fixed_headway_540`:
+
+```text
+route_value_extra_fd_trainall:
+  delta = -0.2767
+  CI = [-0.2954, -0.2586]
+  win rate = 0.9567
+
+route_value_extra_fdr_trainall:
+  delta = -0.2763
+  CI = [-0.2956, -0.2581]
+  win rate = 0.9408
+
+route_value_rf_fd_trainall:
+  delta = -0.2724
+  CI = [-0.2925, -0.2534]
+  win rate = 0.9283
+
+route_value_gbr_fd_trainall:
+  delta = -0.1004
+  CI = [-0.1199, -0.0820]
+  win rate = 0.5358
+```
+
+Interpretation:
+
+```text
+This is the first clean positive result beyond tuned fixed-headway:
+historical matched-rollout route/day priors generalize to 20 unseen stochastic
+seeds and significantly beat the tuned fixed_headway_540 baseline.
+
+The strongest current policy is route_value_extra_fd_trainall.  It uses
+family/day + demand/profile features and a matched-rollout ExtraTrees value
+model trained on the 5-seed 240-900 counterfactual sweep.
+
+Claim boundary remains important:
+  supported: same route-day family/profile, new stochastic service-day seeds
+  not yet supported: completely unseen-route held-out superiority
+```
+
+Key result files:
+
+```text
+results_freqduet/route_day_headway_value_trainall_v2_ep100_20seed/combined_summary/external_baselines_per_seed.csv
+results_freqduet/route_day_headway_value_trainall_v2_ep100_20seed/combined_summary/external_baselines_summary.csv
+results_freqduet/route_day_headway_value_trainall_v2_ep100_20seed/combined_summary/trainall_policy_paired_deltas_vs_fixed540.csv
+results_freqduet/route_day_headway_value_trainall_v2_ep100_20seed/combined_summary/trainall_policy_family_day_deltas_vs_fixed540.csv
+```
