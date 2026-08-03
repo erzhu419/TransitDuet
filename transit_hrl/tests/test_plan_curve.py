@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from freq_hrl.policies import BernsteinPlanCurve, CausalPlanCurveState
+from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 from freq_transitduet.upper.timetable_planner import TimetableCurvePlanner
 
 
@@ -105,6 +106,26 @@ class PlanCurveTest(unittest.TestCase):
         )
         self.assertLessEqual(trips[1]._freqduet_scheduled_launch, 330)
         self.assertLessEqual(trips[2]._freqduet_scheduled_launch, 660)
+
+    def test_learned_plan_snapshot_keeps_counterfactual_curve(self):
+        mapper = LearnedPlanActionMapper(
+            curve=BernsteinPlanCurve(
+                horizon_s=10.0,
+                basis_dim=3,
+                n_entities=1,
+                delta_min=-1.0,
+                delta_max=1.0,
+            ),
+            coefficient_scale=1.0,
+            anchor_first_coefficient=True,
+        )
+        state = LearnedPlanCurveState(mapper=mapper, gross_cap=None)
+        state.activate(now_s=0.0, current_value=[0.0], latent_action=[0.5, 0.5])
+        old_plan = state.snapshot()
+        old_value = old_plan.value_at(5.0)
+        state.activate(now_s=5.0, current_value=[0.0], latent_action=[-0.5, -0.5])
+        np.testing.assert_allclose(old_plan.value_at(5.0), old_value)
+        self.assertFalse(np.allclose(state.value_at(10.0), old_plan.value_at(10.0)))
 
 
 if __name__ == "__main__":

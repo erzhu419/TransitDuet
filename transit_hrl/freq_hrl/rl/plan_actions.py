@@ -154,6 +154,23 @@ class LearnedPlanCurveState:
         ], dtype=np.float64)
         return self._cap(values)
 
+    def snapshot(self) -> "LearnedPlanCurveState":
+        """Return an independent causal copy of the currently active curve."""
+
+        if not self.active:
+            raise RuntimeError("activate must be called before snapshot")
+        copied = LearnedPlanCurveState(
+            mapper=self.mapper,
+            gross_cap=self.gross_cap,
+        )
+        copied.origin_s = float(self.origin_s)
+        copied.base_value = np.asarray(self.base_value, dtype=np.float64).copy()
+        copied.coefficients = np.asarray(
+            self.coefficients, dtype=np.float64
+        ).copy()
+        copied.activation_count = int(self.activation_count)
+        return copied
+
     def activate(
         self,
         *,
