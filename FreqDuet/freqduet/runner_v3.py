@@ -1782,11 +1782,15 @@ class TransitDuetV2Runner:
                 weight_reg_mode=upper_cfg.get('weight_reg_mode', 'sum'),
                 lr=upper_cfg.get('lr', 3e-4),
                 gamma=upper_cfg.get('gamma', 0.95),
+                soft_tau=upper_cfg.get('soft_tau', 5e-3),
+                auto_entropy=upper_cfg.get('auto_entropy', True),
                 maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
                 initial_alpha=upper_cfg.get('initial_alpha', 0.1),
                 minimum_alpha=upper_cfg.get('minimum_alpha', 1e-5),
                 temperature_contract=upper_cfg.get(
                     'temperature_contract', 'legacy_capped_scalar'),
+                critic_aggregation=upper_cfg.get(
+                    'critic_aggregation', 'ensemble_mean_lcb'),
                 policy_sample_seed=(
                     self.randomness.seed('upper_policy')
                     if self.randomness.isolated else None),
@@ -1969,6 +1973,8 @@ class TransitDuetV2Runner:
                     'entropy_action_coordinates', 'physical_legacy'),
                 cost_limit_semantics=lower_cfg.get(
                     'cost_limit_semantics', 'per_decision_rate'),
+                critic_aggregation=lower_cfg.get(
+                    'critic_aggregation', 'ensemble_mean_lcb'),
                 policy_sample_seed=(
                     self.randomness.seed('lower_policy')
                     if self.randomness.isolated else None),

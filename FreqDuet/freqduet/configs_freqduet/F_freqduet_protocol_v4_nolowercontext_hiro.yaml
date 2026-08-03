@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v4_main_hiro.yaml
+_name: F_freqduet_protocol_v4_nolowercontext_hiro
+
+protocol:
+  role: ablation_no_causal_lower_context
+  lower_context_contract: no_rich_context_ablation
+
+frequency:
+  lower_context:
+    enable: false

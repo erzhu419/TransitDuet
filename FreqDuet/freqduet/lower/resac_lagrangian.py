@@ -10,7 +10,7 @@ Its explicit algorithm identifier is
 
 Key differences from vanilla SAC (dsac_lagrangian.py):
   - Ensemble Q-networks (K=10) instead of twin-Q
-  - Independent targets per ensemble member (no min)
+  - Shared ensemble-mean Bellman target instead of twin-min backup
   - Epistemic penalty: policy loss uses mean(Q) + beta*std(Q) with beta<0
   - OOD regularization on critic: penalize cross-ensemble disagreement
   - L1 weight regularization on critic
@@ -290,6 +290,7 @@ class RESACLagrangianTrainer:
                  temperature_contract="legacy_capped_scalar",
                  entropy_action_coordinates="physical_legacy",
                  cost_limit_semantics="per_decision_rate",
+                 critic_aggregation="ensemble_mean_lcb",
                  policy_sample_seed=None,
                  device='cpu'):
         self.device = device
@@ -303,6 +304,13 @@ class RESACLagrangianTrainer:
                 "per_decision_rate")
         self.auto_entropy = auto_entropy
         self.ensemble_size = ensemble_size
+        self.critic_aggregation = str(critic_aggregation).strip().lower()
+        if self.critic_aggregation not in {
+                "ensemble_mean_lcb", "twin_min"}:
+            raise ValueError(
+                "critic_aggregation must be ensemble_mean_lcb or twin_min")
+        if self.critic_aggregation == "twin_min" and int(ensemble_size) != 2:
+            raise ValueError("twin_min requires ensemble_size=2")
         self.beta = beta              # LCB coefficient (negative = pessimistic)
         self.beta_ood = beta_ood      # OOD regularization weight
         self.weight_reg = weight_reg  # L1 regularization weight
@@ -424,6 +432,18 @@ class RESACLagrangianTrainer:
         c_flat = cost_q_net(state_rep, action_rep)
         return c_flat.view(batch, n_actions)
 
+    def _aggregate_target_q(self, q_all):
+        if self.critic_aggregation == "twin_min":
+            return q_all.min(dim=0).values
+        return q_all.mean(dim=0)
+
+    def _policy_q_value(self, q_all):
+        q_mean = q_all.mean(dim=0)
+        q_std = q_all.std(dim=0)
+        if self.critic_aggregation == "twin_min":
+            return q_all.min(dim=0).values, q_mean, q_std
+        return q_mean + self.beta * q_std, q_mean, q_std
+
     def update(self, replay_buffer, batch_size, reward_scale=10.0,
                update_policy=True, tap_signal=None, weight_fn=None):
         """One gradient step for ensemble critic, policy, cost critic, and lambda.
@@ -469,14 +489,15 @@ class RESACLagrangianTrainer:
                 target_q_all = self._discrete_q_values(
                     self.target_q_net, next_state)  # [K, B, A]
                 # Use ensemble MEAN for shared target -> prevents member divergence.
-                target_q_mean = target_q_all.mean(dim=0)  # [B, A]
+                target_q_mean = self._aggregate_target_q(
+                    target_q_all)  # [B, A]
                 target_q_mean = (next_probs * (
                     target_q_mean - self.alpha * next_log_probs)).sum(dim=-1)
             else:
                 next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
                 target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
                 # Use ensemble MEAN for shared target -> prevents member divergence.
-                target_q_mean = target_q_all.mean(dim=0)  # [B]
+                target_q_mean = self._aggregate_target_q(target_q_all)  # [B]
                 target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)  # [B]
             r = reward.squeeze(-1)   # [B]
             d = done.squeeze(-1)     # [B]
@@ -553,21 +574,16 @@ class RESACLagrangianTrainer:
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
-                q_mean = q_all.mean(dim=0)              # [B, A]
-                q_std = q_all.std(dim=0)                # [B, A]
+                q_lcb, q_mean, q_std = self._policy_q_value(q_all)
                 cost_q_new = self._discrete_cost_values(
                     self.cost_q_net, state)             # [B, A]
                 entropy_log_prob = (probs * log_probs).sum(
                     dim=-1, keepdim=True)
             else:
                 q_all = self.q_net(state, new_action)  # [K, B]
-                q_mean = q_all.mean(dim=0)              # [B]
-                q_std = q_all.std(dim=0)                # [B]
+                q_lcb, q_mean, q_std = self._policy_q_value(q_all)
                 cost_q_new = self.cost_q_net(state, new_action)
                 entropy_log_prob = log_prob
-
-            # LCB: pessimistic Q estimate (beta < 0 → subtract uncertainty)
-            q_lcb = q_mean + self.beta * q_std      # [B]
 
             lam = self.log_lambda.exp().detach()
 
@@ -664,6 +680,7 @@ class RESACLagrangianTrainer:
             'alpha': float(self.alpha),
             'temperature_contract': self.temperature_contract,
             'cost_limit_semantics': self.cost_limit_semantics,
+            'critic_aggregation': self.critic_aggregation,
             'policy_sampling_state': self.policy_net.sampling_state(),
         }
 
@@ -674,6 +691,8 @@ class RESACLagrangianTrainer:
             raise ValueError('lower temperature contract mismatch')
         if state.get('cost_limit_semantics') != self.cost_limit_semantics:
             raise ValueError('lower cost-limit semantics mismatch')
+        if state.get('critic_aggregation') != self.critic_aggregation:
+            raise ValueError('lower critic aggregation mismatch')
         self.policy_net.load_state_dict(state['policy'])
         self.q_net.load_state_dict(state['q_net'])
         self.target_q_net.load_state_dict(state['target_q_net'])
@@ -700,6 +719,7 @@ class RESACLagrangianTrainer:
             'log_lambda': self.log_lambda.data,
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
             'temperature_contract': self.temperature_contract,
+            'critic_aggregation': self.critic_aggregation,
             'entropy_action_coordinates': getattr(
                 self.policy_net, 'entropy_action_coordinates', 'categorical'),
             'policy_sampling_state': self.policy_net.sampling_state(),
@@ -707,6 +727,10 @@ class RESACLagrangianTrainer:
 
     def load(self, path):
         ckpt = torch.load(path, weights_only=True)
+        saved_aggregation = ckpt.get(
+            'critic_aggregation', 'ensemble_mean_lcb')
+        if saved_aggregation != self.critic_aggregation:
+            raise ValueError('lower checkpoint critic aggregation mismatch')
         self.policy_net.load_state_dict(ckpt['policy'])
         self.q_net.load_state_dict(ckpt['q_net'])
         self.target_q_net.load_state_dict(ckpt['q_net'])

@@ -66,9 +66,36 @@ PYTHONPATH=. python3 scripts/validate_freqduet_protocol_v4_configs.py
 
 The validator rejects legacy fleet, observation, reward, frequency ownership,
 temperature, randomness, TPC-density, timetable, and checkpoint contracts.
+It also compares each resolved ablation with the canonical main configuration
+and rejects undeclared secondary changes, so a mechanism row cannot silently
+change learning rates, network size, or another control component.
 Diagnostics and frozen-evaluation manifests record the resolved-config hash,
 randomness fingerprint, observation-ledger hash, scenario tape, policy digest,
 physical fleet statistics, and projection mode.
+
+## Locked selection axes
+
+The initial v4 screen uses single-axis variants only:
+
+| Config suffix | Scientific question |
+| --- | --- |
+| `main` | Full causal LF/HF ownership with discrete holding |
+| `csac` | Does the 10-critic pessimistic ensemble improve on twin-min constrained SAC? |
+| `nofreq` | Does any frequency-aware control help? |
+| `rawhistory` | Does harmonic decomposition help beyond the same causal raw history? |
+| `allfreq` | Does assigning all frequency state to both levels hurt specialization? |
+| `nopromotion` | Is persistent HF-to-LF promotion useful? |
+| `noleakage` | Is the explicit cross-timescale leakage regularizer useful? |
+| `nodriftfb` | Is causal lower drift feedback to the upper controller useful? |
+| `noprior` | Does the historical harmonic prior reduce single-day variance? |
+| `continuous_holding` | Is the discrete holding action set important? |
+| `nolowercontext` | Does the causal load/queue/shock/slack context improve lower control? |
+
+All rows retain the exact timetable, fixed vehicle inventory, deployable
+APC/AVL observation, independent RNG streams, frozen scenario-tape evaluation,
+and exact checkpoint contracts. `nofreq` and `rawhistory` cannot use LF/HF
+passenger ownership by definition; their upper interval therefore receives the
+same all-passenger wait quantity without a second reward-attribution term.
 
 ## Evidence sequence
 

@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v4_main_hiro.yaml
+_name: F_freqduet_protocol_v4_continuous_holding_hiro
+
+protocol:
+  role: ablation_continuous_holding_action
+  action_contract: continuous_holding_ablation
+
+lower:
+  action_bins: null

@@ -4,6 +4,9 @@ _name: F_freqduet_protocol_v4_main_hiro
 protocol:
   version: freqduet-eval-v4
   role: physical_causal_frequency_owned_main
+  frequency_contract: split_owned
+  action_contract: discrete_holding_v4
+  lower_context_contract: causal_rich_v4
 
 randomness:
   mode: isolated_streams_v4
@@ -16,6 +19,11 @@ env:
 
 upper:
   algorithm_id: pessimistic_ensemble_sac_v4
+  critic_aggregation: ensemble_mean_lcb
+  soft_tau: 0.005
+  auto_entropy: true
+  beta_ood: 0.01
+  weight_reg: 0.01
   initial_alpha: 0.02
   minimum_alpha: 0.0001
   temperature_contract: bounded_log_parameter_v4
@@ -31,6 +39,7 @@ upper:
 
 lower:
   algorithm_id: pessimistic_ensemble_sac_lagrangian_v4
+  critic_aggregation: ensemble_mean_lcb
   observation_contract: deployable_apc_avl_v4
   headway_reward_mode: forward_event_only
   unobserved_action_mode: zero

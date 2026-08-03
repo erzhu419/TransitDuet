@@ -1,0 +1,28 @@
+_extends: F_freqduet_protocol_v4_main_hiro.yaml
+_name: F_freqduet_protocol_v4_nofreq_hiro
+
+protocol:
+  role: ablation_no_frequency_system
+  frequency_contract: no_frequency_control
+
+upper:
+  # Base dispatch state (11) plus fixed-pool readiness (4).
+  state_dim: 15
+  interval_credit:
+    wait_ownership: all_wait_legacy
+
+frequency:
+  enable: false
+  upper_features: false
+  lower_features: false
+  use_historical_prior: false
+  promotion:
+    enable: false
+  drift_feedback:
+    enable: false
+
+reward_attribution:
+  enable: false
+
+leakage:
+  enable: false

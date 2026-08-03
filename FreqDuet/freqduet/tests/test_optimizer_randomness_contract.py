@@ -53,6 +53,35 @@ class RandomnessContractTest(unittest.TestCase):
 
 
 class OptimizerContractTest(unittest.TestCase):
+    def test_standard_sac_ablation_uses_twin_min_backup_and_actor_value(self):
+        trainer = RESACLagrangianTrainer(
+            state_dim=2,
+            ensemble_size=2,
+            hidden_dim=8,
+            critic_aggregation="twin_min",
+            auto_entropy=False,
+        )
+        q_all = torch.tensor([[1.0, 3.0], [2.0, -1.0]])
+
+        torch.testing.assert_close(
+            trainer._aggregate_target_q(q_all),
+            torch.tensor([1.0, -1.0]),
+        )
+        actor_q, q_mean, _ = trainer._policy_q_value(q_all)
+        torch.testing.assert_close(actor_q, torch.tensor([1.0, -1.0]))
+        torch.testing.assert_close(q_mean, torch.tensor([1.5, 1.0]))
+
+    def test_twin_min_rejects_more_than_two_critics(self):
+        with self.assertRaisesRegex(ValueError, "requires ensemble_size=2"):
+            RESACUpperTrainer(
+                state_dim=2,
+                action_dim=1,
+                action_low=[-1.0],
+                action_high=[1.0],
+                ensemble_size=3,
+                critic_aggregation="twin_min",
+            )
+
     def test_lower_entropy_uses_dimensionless_action_coordinates(self):
         physical = GaussianPolicy(
             3, action_range=60.0,

@@ -451,12 +451,20 @@ class RESACUpperTrainer:
                  auto_entropy=True, maximum_alpha=0.3,
                  initial_alpha=0.1, minimum_alpha=1e-5,
                  temperature_contract="legacy_capped_scalar",
+                 critic_aggregation="ensemble_mean_lcb",
                  policy_sample_seed=None, replay_seed=None,
                  replay_capacity=50000, device='cpu'):
         self.device = device
         self.gamma = gamma
         self.soft_tau = soft_tau
         self.ensemble_size = ensemble_size
+        self.critic_aggregation = str(critic_aggregation).strip().lower()
+        if self.critic_aggregation not in {
+                "ensemble_mean_lcb", "twin_min"}:
+            raise ValueError(
+                "critic_aggregation must be ensemble_mean_lcb or twin_min")
+        if self.critic_aggregation == "twin_min" and int(ensemble_size) != 2:
+            raise ValueError("twin_min requires ensemble_size=2")
         self.beta = beta
         self.beta_ood = beta_ood
         self.weight_reg = weight_reg
@@ -573,6 +581,18 @@ class RESACUpperTrainer:
         q_flat = q_net(state_rep, action_rep)
         return q_flat.view(q_flat.shape[0], batch, n_actions)
 
+    def _aggregate_target_q(self, q_all):
+        if self.critic_aggregation == "twin_min":
+            return q_all.min(dim=0).values
+        return q_all.mean(dim=0)
+
+    def _policy_q_value(self, q_all):
+        q_mean = q_all.mean(dim=0)
+        q_std = q_all.std(dim=0)
+        if self.critic_aggregation == "twin_min":
+            return q_all.min(dim=0).values, q_mean, q_std
+        return q_mean + self.beta * q_std, q_mean, q_std
+
     def update(self, batch_size=64):
         """One gradient step from replay buffer."""
         if len(self.replay_buffer) < batch_size:
@@ -596,7 +616,7 @@ class RESACUpperTrainer:
                     next_state)
                 target_q_all = self._discrete_q_values(
                     self.target_q_net, next_state)
-                target_q_mean = target_q_all.mean(dim=0)
+                target_q_mean = self._aggregate_target_q(target_q_all)
                 target_q_mean = (next_probs * (
                     target_q_mean
                     - self.alpha * next_log_probs)).sum(dim=-1)
@@ -605,7 +625,7 @@ class RESACUpperTrainer:
                     self.policy_net.evaluate(next_state))
                 target_q_all = self.target_q_net(
                     next_state, next_action)
-                target_q_mean = target_q_all.mean(dim=0)
+                target_q_mean = self._aggregate_target_q(target_q_all)
                 target_q_mean = (
                     target_q_mean - self.alpha
                     * next_log_prob.squeeze(-1))
@@ -636,9 +656,7 @@ class RESACUpperTrainer:
         if discrete_policy:
             probs, log_probs, _ = self.policy_net.dist_info(state)
             q_all = self._discrete_q_values(self.q_net, state)
-            q_mean = q_all.mean(dim=0)
-            q_std = q_all.std(dim=0)
-            q_lcb = q_mean + self.beta * q_std
+            q_lcb, q_mean, q_std = self._policy_q_value(q_all)
             policy_loss = (probs * (
                 self.alpha * log_probs - q_lcb)).sum(dim=-1).mean()
             entropy_log_prob = (
@@ -646,9 +664,7 @@ class RESACUpperTrainer:
         else:
             new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
             q_all = self.q_net(state, new_action)
-            q_mean = q_all.mean(dim=0)
-            q_std = q_all.std(dim=0)
-            q_lcb = q_mean + self.beta * q_std
+            q_lcb, q_mean, q_std = self._policy_q_value(q_all)
             policy_loss = (
                 self.alpha * log_prob.squeeze(-1) - q_lcb).mean()
             entropy_log_prob = log_prob
@@ -713,6 +729,7 @@ class RESACUpperTrainer:
                 if self.auto_entropy else None),
             'alpha': float(self.alpha),
             'temperature_contract': self.temperature_contract,
+            'critic_aggregation': self.critic_aggregation,
             'policy_sampling_state': self.policy_net.sampling_state(),
             'replay_buffer': self.replay_buffer.state_dict(),
         }
@@ -722,6 +739,8 @@ class RESACUpperTrainer:
             raise ValueError('not a FreqDuet v4 upper training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('upper temperature contract mismatch')
+        if state.get('critic_aggregation') != self.critic_aggregation:
+            raise ValueError('upper critic aggregation mismatch')
         self.policy_net.load_state_dict(state['policy'])
         self.q_net.load_state_dict(state['q_net'])
         self.target_q_net.load_state_dict(state['target_q_net'])
@@ -743,6 +762,7 @@ class RESACUpperTrainer:
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
             'discrete_critic': self.discrete_critic,
             'temperature_contract': self.temperature_contract,
+            'critic_aggregation': self.critic_aggregation,
             'policy_sampling_state': self.policy_net.sampling_state(),
             'replay_sampling_state': self.replay_buffer.rng_state(),
         }, path)
@@ -755,6 +775,10 @@ class RESACUpperTrainer:
             raise ValueError(
                 "checkpoint discrete critic does not match configured "
                 f"critic: saved={saved_critic}, configured={self.discrete_critic}")
+        saved_aggregation = ckpt.get(
+            'critic_aggregation', 'ensemble_mean_lcb')
+        if saved_aggregation != self.critic_aggregation:
+            raise ValueError('upper checkpoint critic aggregation mismatch')
         saved_candidates = ckpt['policy'].get('action_candidates')
         if self.discrete_actions is None and saved_candidates is not None:
             raise ValueError(
