@@ -7,13 +7,52 @@ from freq_hrl.domains.trading import (
     PortfolioExecutionEnv,
     TradingCreditAssigner,
 )
-from freq_hrl.experiments.trading.ppo_actor_critic import train_ppo_actor_critic
+from freq_hrl.experiments.trading.ppo_actor_critic import (
+    promotion_gate_feature_vector,
+    train_ppo_actor_critic,
+)
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 
 
 class FullMethodContractTest(unittest.TestCase):
-    def test_full_training_entrypoint_executes_all_v3_contracts(self):
+    def test_learned_gate_features_do_not_include_heuristic_gate_decision(self):
+        base = {
+            key: np.asarray([0.1, -0.2], dtype=np.float64)
+            for key in (
+                "x_low",
+                "x_low_forecast",
+                "x_low_uncertainty",
+                "x_mid",
+                "x_high",
+                "x_high_delta",
+                "x_high_energy",
+                "x_high_persistence",
+                "shock_age",
+            )
+        }
+        inactive = {
+            **base,
+            "promotion": {"promote": False, "promotion_strength": 0.0},
+        }
+        active = {
+            **base,
+            "promotion": {"promote": True, "promotion_strength": 1.0},
+        }
+        kwargs = dict(
+            position=np.asarray([0.0, 0.0]),
+            target=np.asarray([0.2, -0.2]),
+            leakage_feedback=0.1,
+            progress=0.5,
+            elapsed_steps=6,
+            upper_period=12,
+        )
+        np.testing.assert_allclose(
+            promotion_gate_feature_vector(inactive, **kwargs),
+            promotion_gate_feature_vector(active, **kwargs),
+        )
+
+    def test_full_training_entrypoint_executes_all_v4_contracts(self):
         payload, rows, _ = train_ppo_actor_critic(
             train_seeds=[42],
             validation_seeds=[84],
@@ -32,11 +71,12 @@ class FullMethodContractTest(unittest.TestCase):
             upper_period=12,
             min_upper_duration=3,
             execution_timeline_contract="causal_post_trade_v3",
-            method_contract="full_freq_hrl_v3",
+            method_contract="full_freq_hrl_v4",
             volume_impact_bps=10.0,
             plan_smoothness_weight=0.01,
+            promotion_replan_cost=0.001,
         )
-        self.assertEqual(payload["method_contract"], "full_freq_hrl_v3")
+        self.assertEqual(payload["method_contract"], "full_freq_hrl_v4")
         self.assertEqual(
             payload["execution_timeline_contract"], "causal_post_trade_v3"
         )
@@ -44,6 +84,9 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertTrue(payload["executed_plan_curve"])
         self.assertTrue(payload["additive_frequency_credit"])
         self.assertTrue(payload["raw_lower_effect_constraint"])
+        self.assertTrue(payload["learned_promotion_gate"])
+        self.assertTrue(payload["heuristic_promotion_disabled"])
+        self.assertGreater(payload["promotion_gate_state_dim"], 0)
         self.assertTrue(payload["plan_anchor_first_coefficient"])
         self.assertEqual(len(rows), 1)
         row = rows[0]
@@ -56,6 +99,14 @@ class FullMethodContractTest(unittest.TestCase):
         )
         self.assertGreater(row["plan_target_step_change_mean"], 0.0)
         self.assertLess(row["upper_decision_count"], row["lower_decision_count"])
+        self.assertGreater(row["promotion_gate_transition_count"], 0)
+        self.assertEqual(row["promotion_gate_owned_primitive_steps"], 33)
+        self.assertGreaterEqual(row["promotion_gate_probability_mean"], 0.0)
+        self.assertLessEqual(row["promotion_gate_probability_mean"], 1.0)
+        self.assertEqual(row["heuristic_promotion_disabled"], 1.0)
+        self.assertGreater(
+            payload["history"][-1]["promotion_actor_optimizer_steps"], 0.0
+        )
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
         common = dict(
@@ -69,7 +120,7 @@ class FullMethodContractTest(unittest.TestCase):
             seed=7,
             leakage_scale=0.1,
             plan_basis_dim=3,
-            method_contract="full_freq_hrl_v3",
+            method_contract="full_freq_hrl_v4",
         )
         with self.assertRaisesRegex(ValueError, "causal_post_trade_v3"):
             train_ppo_actor_critic(**common)

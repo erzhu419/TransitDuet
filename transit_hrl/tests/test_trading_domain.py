@@ -70,6 +70,26 @@ class TradingDomainTest(unittest.TestCase):
         self.assertEqual(tracker.summary()["freq_method"], "adaptive_wavelet")
         self.assertGreater(tracker.upper_features().shape[0], 0)
 
+    def test_learned_promotion_is_explicit_when_heuristic_gate_is_disabled(self):
+        tracker = TradingFrequencyTracker(
+            bar_sec=60,
+            method="ema",
+            low_period_s=3600,
+            fast_period_s=60,
+            feature_norm=[0.01],
+            promotion_enable=False,
+            promotion_adapt_gain=0.5,
+        )
+        tracker.update_bar([0.0])
+        features = tracker.update_bar([0.1])
+        self.assertNotIn("promotion", features)
+        low_before = np.asarray(features["x_low"]).copy()
+        promoted = tracker.promote_residual(strength=1.0)
+        self.assertTrue(promoted["learned_promotion"]["applied"])
+        self.assertGreater(promoted["learned_promotion"]["absorbed_norm"], 0.0)
+        self.assertFalse(np.allclose(promoted["x_low"], low_before))
+        self.assertEqual(tracker.summary()["freq_promotion_absorptions"], 1)
+
     def test_trading_tracker_neural_state_space_runs(self):
         tracker = TradingFrequencyTracker(
             bar_sec=60,

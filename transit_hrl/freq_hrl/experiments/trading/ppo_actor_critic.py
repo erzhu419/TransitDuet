@@ -41,6 +41,7 @@ from freq_hrl.rl import (
     JointTrajectoryBatch,
     LearnedPlanActionMapper,
     LearnedPlanCurveState,
+    PromotionRolloutBuilder,
     SMDPPPOConfig,
     TemporalDecisionScheduler,
     causal_gru_actor_parameter_count,
@@ -66,7 +67,12 @@ POLICY_MODES = ("freq_hrl",) + FLAT_PPO_MODES + GENERIC_HRL_MODES
 LEARNED_BASELINE_IMPLEMENTATION_VERSION = (
     "learned_baselines_v5_causal_gru_controls_2026_08_03"
 )
-FULL_METHOD_IMPLEMENTATION_VERSION = "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
+FULL_METHOD_IMPLEMENTATION_VERSION = (
+    "freq_hrl_full_v4_learned_promotion_credit_plan_leakage_2026_08_03"
+)
+FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
+    "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
+)
 EXECUTION_TIMELINE_CONTRACTS = (
     "legacy_pre_trade_v2",
     "causal_post_trade_v3",
@@ -75,6 +81,7 @@ METHOD_CONTRACTS = (
     "routing_core_v2",
     "curve_credit_control_v3",
     "full_freq_hrl_v3",
+    "full_freq_hrl_v4",
 )
 
 RAW_HISTORY_WINDOW = 120
@@ -89,8 +96,20 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
     return {
         "execute_plan_curve": contract != "routing_core_v2",
         "use_additive_frequency_credit": contract != "routing_core_v2",
-        "constrain_raw_lower_effect": contract == "full_freq_hrl_v3",
+        "constrain_raw_lower_effect": contract in {
+            "full_freq_hrl_v3",
+            "full_freq_hrl_v4",
+        },
+        "learned_promotion_gate": contract == "full_freq_hrl_v4",
     }
+
+
+def full_method_implementation_version(method_contract: str) -> str:
+    if str(method_contract) == "full_freq_hrl_v4":
+        return FULL_METHOD_IMPLEMENTATION_VERSION
+    if str(method_contract) == "full_freq_hrl_v3":
+        return FULL_METHOD_V3_IMPLEMENTATION_VERSION
+    return "not_applicable"
 
 
 def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
@@ -108,7 +127,11 @@ def resize(value: Any, dim: int) -> np.ndarray:
     return arr
 
 
-def make_tracker(assets: int) -> TradingFrequencyTracker:
+def make_tracker(
+    assets: int,
+    *,
+    heuristic_promotion: bool = True,
+) -> TradingFrequencyTracker:
     return TradingFrequencyTracker(
         bar_sec=60.0,
         method="ema",
@@ -119,13 +142,13 @@ def make_tracker(assets: int) -> TradingFrequencyTracker:
         persistence_period_s=30 * 60.0,
         persistence_threshold=0.0010,
         feature_norm=np.ones(assets) * 0.0015,
-        promotion_enable=True,
+        promotion_enable=bool(heuristic_promotion),
         promotion_window_s=30 * 60.0,
         promotion_residual_threshold=0.00035,
         promotion_persistence_ratio=0.50,
         promotion_cooldown_s=10 * 60.0,
         promotion_regime_threshold=3e-05,
-        promotion_adapt_low=True,
+        promotion_adapt_low=bool(heuristic_promotion),
         promotion_adapt_gain=0.05,
     )
 
@@ -137,6 +160,7 @@ def frequency_separated_feature_vectors(
     *,
     leakage_feedback: float = 0.0,
     progress: float = 0.0,
+    include_heuristic_promotion: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Build v2 policy vectors through the machine-checked router contract."""
     dim = int(position.size)
@@ -164,7 +188,19 @@ def frequency_separated_feature_vectors(
 
     forecast = resize(upper["x_low_forecast"], dim) / scale
     energy = np.sqrt(np.maximum(resize(upper["x_high_energy"], dim), 0.0)) / scale
-    promote = 1.0 if bool(promotion.get("promote", False)) else 0.0
+    promote = (
+        1.0
+        if include_heuristic_promotion and bool(promotion.get("promote", False))
+        else 0.0
+    )
+    promotion_strength = (
+        float(promotion.get("promotion_strength", 0.0))
+        if include_heuristic_promotion else 0.0
+    )
+    promotion_shock_age = (
+        float(promotion.get("shock_age", 0.0))
+        if include_heuristic_promotion else 0.0
+    )
     upper_state = np.concatenate([
         resize(upper["x_low"], dim) / scale,
         forecast,
@@ -174,8 +210,8 @@ def frequency_separated_feature_vectors(
         np.asarray(position, dtype=np.float64),
         np.asarray([
             promote,
-            float(promotion.get("promotion_strength", 0.0)),
-            float(promotion.get("shock_age", 0.0)) / 30.0,
+            promotion_strength,
+            promotion_shock_age / 30.0,
             float(leakage_feedback),
             float(np.clip(progress, 0.0, 1.0)),
         ], dtype=np.float64),
@@ -194,6 +230,62 @@ def frequency_separated_feature_vectors(
         np.asarray([float(np.clip(progress, 0.0, 1.0))], dtype=np.float64),
     ])
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
+
+
+def promotion_gate_state_dim(assets: int) -> int:
+    return 12 * int(assets) + 4
+
+
+def promotion_gate_feature_vector(
+    freq: dict[str, Any],
+    *,
+    position: np.ndarray,
+    target: np.ndarray,
+    leakage_feedback: float,
+    progress: float,
+    elapsed_steps: int,
+    upper_period: int,
+) -> np.ndarray:
+    """Causal gate features without the deterministic promotion decision."""
+
+    position_arr = np.asarray(position, dtype=np.float64).reshape(-1)
+    dim = int(position_arr.size)
+    target_arr = resize(target, dim)
+    scale = 0.0014
+    period = max(int(upper_period), 1)
+    elapsed_fraction = float(np.clip(int(elapsed_steps) / period, 0.0, 1.0))
+    time_to_schedule = float(
+        np.clip((period - int(elapsed_steps)) / period, 0.0, 1.0)
+    )
+    energy = np.sqrt(
+        np.maximum(resize(freq.get("x_high_energy", 0.0), dim), 0.0)
+    ) / scale
+    state = np.concatenate([
+        resize(freq.get("x_low", 0.0), dim) / scale,
+        resize(freq.get("x_low_forecast", 0.0), dim) / scale,
+        resize(freq.get("x_low_uncertainty", 0.0), dim) / scale,
+        resize(freq.get("x_mid", 0.0), dim) / scale,
+        resize(freq.get("x_high", 0.0), dim) / scale,
+        resize(freq.get("x_high_delta", 0.0), dim) / scale,
+        np.tanh(energy),
+        np.tanh(resize(freq.get("x_high_persistence", 0.0), dim)),
+        np.tanh(resize(freq.get("shock_age", 0.0), dim) / 30.0),
+        target_arr,
+        position_arr,
+        target_arr - position_arr,
+        np.asarray([
+            elapsed_fraction,
+            time_to_schedule,
+            float(leakage_feedback),
+            float(np.clip(progress, 0.0, 1.0)),
+        ], dtype=np.float64),
+    ])
+    expected = promotion_gate_state_dim(dim)
+    if state.size != expected:
+        raise RuntimeError(
+            f"promotion gate state dim mismatch: expected {expected}, got {state.size}"
+        )
+    return state.astype(np.float32)
 
 
 def causal_raw_history_window(
@@ -283,6 +375,7 @@ def smdp_policy_feature_vectors(
     leakage_feedback: float,
     progress: float = 0.0,
     history_window: int = RAW_HISTORY_WINDOW,
+    include_heuristic_promotion: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     if str(policy_mode) == "freq_hrl":
         return frequency_separated_feature_vectors(
@@ -291,6 +384,7 @@ def smdp_policy_feature_vectors(
             target=target,
             leakage_feedback=leakage_feedback,
             progress=progress,
+            include_heuristic_promotion=include_heuristic_promotion,
         )
     return raw_hierarchical_feature_vectors(
         raw_history,
@@ -359,6 +453,17 @@ def _value_parameter_count(state_dim: int, hidden_dim: int) -> int:
     return int(hidden * hidden + hidden * (int(state_dim) + 3) + 1)
 
 
+def _bernoulli_actor_parameter_count(state_dim: int, hidden_dim: int) -> int:
+    hidden = int(hidden_dim)
+    if hidden <= 0:
+        return int(state_dim + 1)
+    return int(
+        hidden * hidden
+        + hidden * (int(state_dim) + 3)
+        + 1
+    )
+
+
 def smdp_parameter_count(config: SMDPPPOConfig) -> int:
     """Analytic active-parameter count for the two-level PPO core."""
 
@@ -380,15 +485,23 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
                 hidden_dim=config.hidden_dim,
             )
 
-        return int(
+        count = int(
             actor(config.upper_state_dim, config.upper_action_dim)
             + actor(config.lower_state_dim, config.lower_action_dim)
             + value(config.upper_state_dim)
             + 2 * value(config.lower_state_dim)
         )
+        if int(config.promotion_state_dim) > 0:
+            count += _bernoulli_actor_parameter_count(
+                config.promotion_state_dim, config.hidden_dim
+            )
+            count += _value_parameter_count(
+                config.promotion_state_dim, config.hidden_dim
+            )
+        return int(count)
     if str(config.state_encoder) != "mlp":
         raise ValueError(f"unknown state_encoder: {config.state_encoder}")
-    return int(
+    count = int(
         _actor_parameter_count(
             config.upper_state_dim, config.upper_action_dim, config.hidden_dim
         )
@@ -398,6 +511,14 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
         + _value_parameter_count(config.upper_state_dim, config.hidden_dim)
         + 2 * _value_parameter_count(config.lower_state_dim, config.hidden_dim)
     )
+    if int(config.promotion_state_dim) > 0:
+        count += _bernoulli_actor_parameter_count(
+            config.promotion_state_dim, config.hidden_dim
+        )
+        count += _value_parameter_count(
+            config.promotion_state_dim, config.hidden_dim
+        )
+    return int(count)
 
 
 def joint_parameter_count(config: JointPPOConfig) -> int:
@@ -835,6 +956,8 @@ def smdp_rollout(
     use_additive_frequency_credit: bool = False,
     constrain_raw_lower_effect: bool = False,
     plan_smoothness_weight: float = 0.0,
+    learned_promotion_gate: bool = False,
+    promotion_replan_cost: float = 0.0,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     method_contract: str = "routing_core_v2",
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
@@ -852,6 +975,17 @@ def smdp_rollout(
         raise ValueError(
             "additive frequency credit requires post_trade mark-to-market timing"
         )
+    if not np.isfinite(float(promotion_replan_cost)) or float(promotion_replan_cost) < 0.0:
+        raise ValueError("promotion_replan_cost must be finite and non-negative")
+    if learned_promotion_gate:
+        if policy_mode != "freq_hrl":
+            raise ValueError("learned promotion gate requires policy_mode='freq_hrl'")
+        expected_gate_dim = promotion_gate_state_dim(assets)
+        if int(model.config.promotion_state_dim) != expected_gate_dim:
+            raise ValueError(
+                "learned promotion state dim mismatch: "
+                f"expected {expected_gate_dim}, got {model.config.promotion_state_dim}"
+            )
     history_window = int(
         getattr(model.config, "raw_history_window", 0) or RAW_HISTORY_WINDOW
     )
@@ -866,7 +1000,10 @@ def smdp_rollout(
         mark_to_market_timing=str(mark_to_market_timing),
     )
     env = PortfolioExecutionEnv(data["returns"], volumes=data["volume"], config=env_config)
-    tracker = make_tracker(assets)
+    tracker = make_tracker(
+        assets,
+        heuristic_promotion=not bool(learned_promotion_gate),
+    )
     leakage = CausalLeakageRewardShaper(
         regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
         reward_penalty_scale=leakage_scale,
@@ -884,6 +1021,10 @@ def smdp_rollout(
         min_upper_duration=int(min_upper_duration),
     )
     builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
+    promotion_builder = (
+        PromotionRolloutBuilder(gamma=float(model.config.gamma))
+        if learned_promotion_gate else None
+    )
     diagnostics = FrequencyDiagnostics(mi_bins=8)
     plan_state = (
         LearnedPlanCurveState(mapper=plan_mapper, gross_cap=1.0)
@@ -911,6 +1052,10 @@ def smdp_rollout(
     lower_leakage_costs: list[float] = []
     decision_reasons: list[str] = []
     promotion_signals = 0
+    learned_gate_probabilities: list[float] = []
+    learned_gate_actions: list[float] = []
+    learned_promotion_absorbed_norm: list[float] = []
+    learned_replan_cost_total = 0.0
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
     raw_history: list[np.ndarray] = []
@@ -922,12 +1067,68 @@ def smdp_rollout(
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
         promotion = dict(freq.get("promotion", {}) or {})
         promote = bool(promotion.get("promote", False))
-        if promote:
-            promotion_signals += 1
-        reason = scheduler.decision_reason(
-            t,
-            promotion=bool(promote and policy_mode == "freq_hrl"),
-        )
+        learned_replan_cost_this_step = 0.0
+        forced_reason = scheduler.decision_reason(t, promotion=False)
+        if forced_reason is not None:
+            reason = forced_reason
+        elif learned_promotion_gate:
+            if current_target is None or scheduler.last_upper_step is None:
+                raise RuntimeError("learned promotion requires an active upper plan")
+            elapsed = int(t - scheduler.last_upper_step)
+            if elapsed >= int(min_upper_duration):
+                gate_state = promotion_gate_feature_vector(
+                    dict(freq),
+                    position=env.position.copy(),
+                    target=current_target,
+                    leakage_feedback=latest_leakage_feedback,
+                    progress=t / max(int(steps) - 1, 1),
+                    elapsed_steps=elapsed,
+                    upper_period=int(upper_period),
+                )
+                gate_out = model.act_promotion(gate_state, sample=sample)
+                gate_action = float(gate_out["action"])
+                if promotion_builder is None:
+                    raise RuntimeError("learned promotion builder is unavailable")
+                promotion_builder.begin(
+                    state=gate_state,
+                    action=gate_action,
+                    logp=float(gate_out["logp"]),
+                    value=float(gate_out["value"]),
+                )
+                learned_gate_probabilities.append(
+                    float(gate_out["probability"])
+                )
+                learned_gate_actions.append(gate_action)
+                if gate_action >= 0.5:
+                    promoted_freq = tracker.promote_residual(strength=1.0)
+                    learned_info = dict(
+                        promoted_freq.get("learned_promotion", {}) or {}
+                    )
+                    learned_promotion_absorbed_norm.append(
+                        float(learned_info.get("absorbed_norm", 0.0))
+                    )
+                    freq = promoted_freq
+                    promotion_signals += 1
+                    learned_replan_cost_this_step = float(
+                        promotion_replan_cost
+                    )
+                    learned_replan_cost_total += learned_replan_cost_this_step
+                    reason = scheduler.decision_reason(t, promotion=True)
+                    if reason != "promotion":
+                        raise RuntimeError(
+                            "eligible learned gate did not produce a promotion decision"
+                        )
+                else:
+                    reason = None
+            else:
+                reason = None
+        else:
+            if promote:
+                promotion_signals += 1
+            reason = scheduler.decision_reason(
+                t,
+                promotion=bool(promote and policy_mode == "freq_hrl"),
+            )
         if reason is not None:
             upper_state, _ = smdp_policy_feature_vectors(
                 policy_mode=policy_mode,
@@ -938,6 +1139,7 @@ def smdp_rollout(
                 leakage_feedback=latest_leakage_feedback,
                 progress=t / max(int(steps) - 1, 1),
                 history_window=history_window,
+                include_heuristic_promotion=not learned_promotion_gate,
             )
             upper_out = model.act_upper(upper_state, sample=sample)
             if plan_mapper is None:
@@ -988,6 +1190,7 @@ def smdp_rollout(
             leakage_feedback=latest_leakage_feedback,
             progress=t / max(int(steps) - 1, 1),
             history_window=history_window,
+            include_heuristic_promotion=not learned_promotion_gate,
         )
         lower_out = model.act_lower(lower_state, sample=sample)
         speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
@@ -1081,6 +1284,15 @@ def smdp_rollout(
             upper_cost=0.0,
             done=bool(done),
         )
+        if promotion_builder is not None:
+            promotion_builder.add_reward(
+                float(reward_scale)
+                * (
+                    float(info["task_reward"])
+                    - learned_replan_cost_this_step
+                ),
+                done=bool(done),
+            )
 
         upper_credits.append(upper_credit)
         lower_credits.append(lower_credit)
@@ -1103,6 +1315,9 @@ def smdp_rollout(
 
     builder.finish(terminal=True)
     trajectory = builder.build()
+    if promotion_builder is not None:
+        promotion_builder.finish(terminal=True)
+        trajectory.promotion = promotion_builder.build()
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
     reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
@@ -1132,6 +1347,30 @@ def smdp_rollout(
         "promotion_count": int(promotion_signals),
         "promotion_replan_count": int(sum(reason == "promotion" for reason in decision_reasons)),
         "scheduled_replan_count": int(sum(reason == "scheduled" for reason in decision_reasons)),
+        "promotion_gate_transition_count": int(
+            trajectory.promotion.size if trajectory.promotion is not None else 0
+        ),
+        "promotion_gate_owned_primitive_steps": int(
+            np.sum(trajectory.promotion.duration)
+            if trajectory.promotion is not None else 0
+        ),
+        "promotion_gate_mean_duration": float(
+            np.mean(trajectory.promotion.duration)
+            if trajectory.promotion is not None else 0.0
+        ),
+        "promotion_gate_probability_mean": float(
+            np.mean(learned_gate_probabilities)
+        ) if learned_gate_probabilities else 0.0,
+        "promotion_gate_action_rate": float(
+            np.mean(learned_gate_actions)
+        ) if learned_gate_actions else 0.0,
+        "promotion_replan_cost_total": float(learned_replan_cost_total),
+        "promotion_absorbed_norm_mean": float(
+            np.mean(learned_promotion_absorbed_norm)
+        ) if learned_promotion_absorbed_norm else 0.0,
+        "promotion_absorbed_norm_total": float(
+            np.sum(learned_promotion_absorbed_norm)
+        ) if learned_promotion_absorbed_norm else 0.0,
         "upper_decision_count": int(trajectory.upper.size),
         "lower_decision_count": int(trajectory.lower.size),
         "upper_mean_duration": float(np.mean(trajectory.upper.duration)),
@@ -1173,8 +1412,7 @@ def smdp_rollout(
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
         "protocol_valid": 1.0,
         "full_method_implementation_version": (
-            FULL_METHOD_IMPLEMENTATION_VERSION
-            if method_contract == "full_freq_hrl_v3" else "not_applicable"
+            full_method_implementation_version(method_contract)
         ),
         "execution_timeline_contract": str(execution_timeline_contract),
         "method_contract": str(method_contract),
@@ -1183,6 +1421,9 @@ def smdp_rollout(
         "executed_plan_curve": float(bool(execute_plan_curve)),
         "additive_frequency_credit": float(bool(use_additive_frequency_credit)),
         "raw_lower_effect_constraint": float(bool(constrain_raw_lower_effect)),
+        "learned_promotion_gate": float(bool(learned_promotion_gate)),
+        "heuristic_promotion_disabled": float(bool(learned_promotion_gate)),
+        "promotion_replan_cost": float(promotion_replan_cost),
         "plan_smoothness_weight": float(plan_smoothness_weight),
         "routing_contract": (
             "frequency_responsibility"
@@ -1213,6 +1454,14 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_count",
         "promotion_replan_count",
         "scheduled_replan_count",
+        "promotion_gate_transition_count",
+        "promotion_gate_owned_primitive_steps",
+        "promotion_gate_mean_duration",
+        "promotion_gate_probability_mean",
+        "promotion_gate_action_rate",
+        "promotion_replan_cost_total",
+        "promotion_absorbed_norm_mean",
+        "promotion_absorbed_norm_total",
         "upper_decision_count",
         "lower_decision_count",
         "upper_mean_duration",
@@ -1249,6 +1498,9 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "executed_plan_curve",
         "additive_frequency_credit",
         "raw_lower_effect_constraint",
+        "learned_promotion_gate",
+        "heuristic_promotion_disabled",
+        "promotion_replan_cost",
         "volume_impact_bps",
         "plan_smoothness_weight",
         "protocol_valid",
@@ -1294,6 +1546,8 @@ def train_ppo_actor_critic(
     method_contract: str = "routing_core_v2",
     volume_impact_bps: float = 0.0,
     plan_smoothness_weight: float = 0.0,
+    promotion_replan_cost: float = 0.0,
+    promotion_init_logit: float = -2.0,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -1325,9 +1579,14 @@ def train_ppo_actor_critic(
     )
     if not np.isfinite(float(volume_impact_bps)) or float(volume_impact_bps) < 0.0:
         raise ValueError("volume_impact_bps must be finite and non-negative")
-    for name, value in (("plan_smoothness_weight", plan_smoothness_weight),):
+    for name, value in (
+        ("plan_smoothness_weight", plan_smoothness_weight),
+        ("promotion_replan_cost", promotion_replan_cost),
+    ):
         if not np.isfinite(float(value)) or float(value) < 0.0:
             raise ValueError(f"{name} must be finite and non-negative")
+    if not np.isfinite(float(promotion_init_logit)):
+        raise ValueError("promotion_init_logit must be finite")
     if method_contract != "routing_core_v2":
         if policy_mode in FLAT_PPO_MODES:
             raise ValueError(
@@ -1341,17 +1600,23 @@ def train_ppo_actor_critic(
             raise ValueError(
                 f"{method_contract} requires plan_basis_dim >= 2"
             )
-    if method_contract == "full_freq_hrl_v3":
+    if method_contract in {"full_freq_hrl_v3", "full_freq_hrl_v4"}:
         if policy_mode != "freq_hrl":
-            raise ValueError("full_freq_hrl_v3 requires policy_mode='freq_hrl'")
+            raise ValueError(
+                f"{method_contract} requires policy_mode='freq_hrl'"
+            )
         if not (
             float(leakage_scale) > 0.0
             or float(lower_lf_constraint_coef) > 0.0
             or float(lower_lf_dual_lr) > 0.0
         ):
             raise ValueError(
-                "full_freq_hrl_v3 requires an active raw leakage penalty or constraint"
+                f"{method_contract} requires an active raw leakage penalty or constraint"
             )
+    if not method_flags["learned_promotion_gate"] and float(promotion_replan_cost) > 0.0:
+        raise ValueError(
+            "promotion_replan_cost is only valid for full_freq_hrl_v4"
+        )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -1382,12 +1647,18 @@ def train_ppo_actor_critic(
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=assets,
+        promotion_state_dim=(
+            promotion_gate_state_dim(assets)
+            if method_flags["learned_promotion_gate"] else 0
+        ),
         hidden_dim=int(hidden_dim),
         upper_learning_rate=float(learning_rate),
         lower_learning_rate=float(learning_rate),
+        promotion_learning_rate=float(learning_rate),
         epochs=int(ppo_epochs),
         minibatch_size=int(minibatch_size),
         init_log_std=float(init_log_std),
+        promotion_init_logit=float(promotion_init_logit),
         lower_cost_target=float(lower_lf_constraint_target),
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
@@ -1513,9 +1784,7 @@ def train_ppo_actor_critic(
                 "mark_to_market_timing": mark_to_market_timing,
                 "volume_impact_bps": float(volume_impact_bps),
                 "full_method_implementation_version": (
-                    FULL_METHOD_IMPLEMENTATION_VERSION
-                    if method_contract == "full_freq_hrl_v3"
-                    else "not_applicable"
+                    full_method_implementation_version(method_contract)
                 ),
                 "training_path_protocol": (
                     "fresh_deterministic_path_per_root_and_iteration_v2"
@@ -1655,6 +1924,8 @@ def train_ppo_actor_critic(
                 "constrain_raw_lower_effect"
             ],
             plan_smoothness_weight=float(plan_smoothness_weight),
+            learned_promotion_gate=method_flags["learned_promotion_gate"],
+            promotion_replan_cost=float(promotion_replan_cost),
             execution_timeline_contract=execution_timeline_contract,
             method_contract=method_contract,
         ),
@@ -1718,9 +1989,7 @@ def train_ppo_actor_critic(
             "mark_to_market_timing": mark_to_market_timing,
             "volume_impact_bps": float(volume_impact_bps),
             "full_method_implementation_version": (
-                FULL_METHOD_IMPLEMENTATION_VERSION
-                if method_contract == "full_freq_hrl_v3"
-                else "not_applicable"
+                full_method_implementation_version(method_contract)
             ),
             "executed_plan_curve": bool(method_flags["execute_plan_curve"]),
             "additive_frequency_credit": bool(
@@ -1729,6 +1998,17 @@ def train_ppo_actor_critic(
             "raw_lower_effect_constraint": bool(
                 method_flags["constrain_raw_lower_effect"]
             ),
+            "learned_promotion_gate": bool(
+                method_flags["learned_promotion_gate"]
+            ),
+            "heuristic_promotion_disabled": bool(
+                method_flags["learned_promotion_gate"]
+            ),
+            "promotion_gate_state_dim": int(
+                reference_smdp_config.promotion_state_dim
+            ),
+            "promotion_replan_cost": float(promotion_replan_cost),
+            "promotion_init_logit": float(promotion_init_logit),
             "plan_smoothness_weight": float(plan_smoothness_weight),
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
@@ -1864,6 +2144,8 @@ def main() -> None:
     )
     parser.add_argument("--volume-impact-bps", type=float, default=0.0)
     parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
+    parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
+    parser.add_argument("--promotion-init-logit", type=float, default=-2.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -1905,6 +2187,8 @@ def main() -> None:
         method_contract=args.method_contract,
         volume_impact_bps=args.volume_impact_bps,
         plan_smoothness_weight=args.plan_smoothness_weight,
+        promotion_replan_cost=args.promotion_replan_cost,
+        promotion_init_logit=args.promotion_init_logit,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

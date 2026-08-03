@@ -395,6 +395,9 @@ def train_frequency_separated_ppo(
         "lower_actor_optimizer_steps": 0.0,
         "lower_value_optimizer_steps": 0.0,
         "lower_cost_value_optimizer_steps": 0.0,
+        "promotion_actor_optimizer_steps": 0.0,
+        "promotion_value_optimizer_steps": 0.0,
+        "promotion_cost_value_optimizer_steps": 0.0,
     }]
 
     for iteration in range(max(1, int(iterations))):
@@ -433,6 +436,7 @@ def train_frequency_separated_ppo(
     actor_optimizer_steps = int(sum(
         float(row.get("upper_actor_optimizer_steps", 0.0))
         + float(row.get("lower_actor_optimizer_steps", 0.0))
+        + float(row.get("promotion_actor_optimizer_steps", 0.0))
         for row in history
     ))
     critic_optimizer_steps = int(sum(
@@ -440,6 +444,7 @@ def train_frequency_separated_ppo(
         + float(row.get("lower_value_optimizer_steps", 0.0))
         + float(row.get("upper_cost_value_optimizer_steps", 0.0))
         + float(row.get("lower_cost_value_optimizer_steps", 0.0))
+        + float(row.get("promotion_value_optimizer_steps", 0.0))
         for row in history
     ))
     payload = {
@@ -465,7 +470,17 @@ def train_frequency_separated_ppo(
         "trajectory_contract": {
             "upper": "one transition per macro action with gamma^duration bootstrap",
             "lower": "one transition per primitive control action",
-            "policy_ratios": "independent upper and lower PPO ratios",
+            "promotion": (
+                "one sparse Bernoulli transition per eligible replan probe; "
+                "reward and gamma duration extend until the next gate decision"
+                if int(getattr(model.config, "promotion_state_dim", 0)) > 0
+                else "disabled"
+            ),
+            "policy_ratios": (
+                "independent upper, lower, and promotion PPO ratios"
+                if int(getattr(model.config, "promotion_state_dim", 0)) > 0
+                else "independent upper and lower PPO ratios"
+            ),
         },
         **metadata,
     }

@@ -17,7 +17,7 @@ import torch
 from torch import nn
 
 from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
-from .dual_actor_critic import GaussianActor, ValueNet
+from .dual_actor_critic import BernoulliActor, GaussianActor, ValueNet
 
 
 @dataclass
@@ -26,12 +26,14 @@ class SMDPPPOConfig:
     lower_state_dim: int
     upper_action_dim: int
     lower_action_dim: int
+    promotion_state_dim: int = 0
     hidden_dim: int = 0
     state_encoder: str = "mlp"
     raw_history_window: int = 0
     raw_feature_dim: int = 0
     upper_learning_rate: float = 3e-3
     lower_learning_rate: float = 3e-3
+    promotion_learning_rate: float = 0.0
     gamma: float = 0.995
     gae_lambda: float = 0.95
     clip_ratio: float = 0.2
@@ -42,6 +44,7 @@ class SMDPPPOConfig:
     epochs: int = 4
     minibatch_size: int = 512
     init_log_std: float = -1.0
+    promotion_init_logit: float = -2.0
     lower_cost_target: float = 0.0
     lower_dual_lr: float = 0.0
     lower_lambda_init: float = 0.0
@@ -100,6 +103,7 @@ class LevelTrajectoryBatch:
 class HierarchicalTrajectoryBatch:
     upper: LevelTrajectoryBatch
     lower: LevelTrajectoryBatch
+    promotion: LevelTrajectoryBatch | None = None
 
 
 class TemporalDecisionScheduler:
@@ -252,6 +256,94 @@ class HierarchicalRolloutBuilder:
         )
 
 
+class PromotionRolloutBuilder:
+    """Build sparse SMDP transitions for a learned replan/continue gate."""
+
+    def __init__(self, gamma: float) -> None:
+        if not 0.0 < float(gamma) <= 1.0:
+            raise ValueError("gamma must be in (0, 1]")
+        self.gamma = float(gamma)
+        self._data: dict[str, list[Any]] = {
+            key: []
+            for key in (
+                "state",
+                "action",
+                "reward",
+                "duration",
+                "done",
+                "old_logp",
+                "old_value",
+                "cost",
+            )
+        }
+        self._pending: dict[str, Any] | None = None
+
+    @property
+    def has_pending(self) -> bool:
+        return self._pending is not None
+
+    def begin(
+        self,
+        *,
+        state: np.ndarray,
+        action: float,
+        logp: float,
+        value: float,
+    ) -> None:
+        self.close(done=False)
+        self._pending = {
+            "state": np.asarray(state, dtype=np.float32).copy(),
+            "action": np.asarray([float(action)], dtype=np.float32),
+            "logp": float(logp),
+            "value": float(value),
+            "rewards": [],
+        }
+
+    def add_reward(self, reward: float, *, done: bool = False) -> None:
+        if self._pending is None:
+            return
+        self._pending["rewards"].append(float(reward))
+        if done:
+            self.close(done=True)
+
+    def close(self, *, done: bool) -> None:
+        pending = self._pending
+        if pending is None:
+            return
+        rewards = list(pending["rewards"])
+        if not rewards:
+            raise RuntimeError(
+                "a learned promotion decision must own at least one primitive reward"
+            )
+        discounts = np.power(
+            self.gamma,
+            np.arange(len(rewards), dtype=np.float64),
+        )
+        self._data["state"].append(pending["state"])
+        self._data["action"].append(pending["action"])
+        self._data["reward"].append(
+            float(np.dot(discounts, np.asarray(rewards, dtype=np.float64)))
+        )
+        self._data["duration"].append(int(len(rewards)))
+        self._data["done"].append(float(bool(done)))
+        self._data["old_logp"].append(float(pending["logp"]))
+        self._data["old_value"].append(float(pending["value"]))
+        self._data["cost"].append(0.0)
+        self._pending = None
+
+    def finish(self, *, terminal: bool = True) -> None:
+        self.close(done=bool(terminal))
+        if self._data["done"] and terminal:
+            self._data["done"][-1] = 1.0
+
+    def build(self) -> LevelTrajectoryBatch | None:
+        if self._pending is not None:
+            raise RuntimeError("finish must be called before build")
+        if not self._data["reward"]:
+            return None
+        return HierarchicalRolloutBuilder._level(self._data)
+
+
 def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajectoryBatch:
     items = list(batches)
     if not items:
@@ -277,9 +369,23 @@ def concat_hierarchical_batches(
     items = list(batches)
     if not items:
         raise ValueError("at least one hierarchical batch is required")
+    promotion_batches = [item.promotion for item in items]
+    if any(item is None for item in promotion_batches) and not all(
+        item is None for item in promotion_batches
+    ):
+        raise ValueError(
+            "promotion trajectories must be present for every batch or none"
+        )
     return HierarchicalTrajectoryBatch(
         upper=concat_level_batches(item.upper for item in items),
         lower=concat_level_batches(item.lower for item in items),
+        promotion=(
+            None
+            if all(item is None for item in promotion_batches)
+            else concat_level_batches(
+                item for item in promotion_batches if item is not None
+            )
+        ),
     )
 
 
@@ -344,6 +450,30 @@ class FrequencySeparatedActorCriticPPO:
             ).to(self.device)
         else:
             raise ValueError(f"unknown state_encoder: {config.state_encoder}")
+        self.promotion_actor: BernoulliActor | None = None
+        self.promotion_value: ValueNet | None = None
+        self.promotion_actor_optimizer: torch.optim.Optimizer | None = None
+        self.promotion_value_optimizer: torch.optim.Optimizer | None = None
+        if int(config.promotion_state_dim) > 0:
+            self.promotion_actor = BernoulliActor(
+                state_dim=int(config.promotion_state_dim),
+                hidden_dim=int(config.hidden_dim),
+                init_logit=float(config.promotion_init_logit),
+            ).to(self.device)
+            self.promotion_value = ValueNet(
+                int(config.promotion_state_dim), int(config.hidden_dim)
+            ).to(self.device)
+            promotion_lr = (
+                float(config.promotion_learning_rate)
+                if float(config.promotion_learning_rate) > 0.0
+                else float(config.upper_learning_rate)
+            )
+            self.promotion_actor_optimizer = torch.optim.Adam(
+                self.promotion_actor.parameters(), lr=promotion_lr
+            )
+            self.promotion_value_optimizer = torch.optim.Adam(
+                self.promotion_value.parameters(), lr=promotion_lr
+            )
         self.upper_actor_optimizer = torch.optim.Adam(
             self.upper_actor.parameters(),
             lr=float(config.upper_learning_rate),
@@ -367,7 +497,7 @@ class FrequencySeparatedActorCriticPPO:
         self.constraint_lambda = float(config.lower_lambda_init)
 
     def state_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "config": self.config.__dict__,
             "upper_actor": self.upper_actor.state_dict(),
             "lower_actor": self.lower_actor.state_dict(),
@@ -381,6 +511,14 @@ class FrequencySeparatedActorCriticPPO:
             "lower_cost_value_optimizer": self.lower_cost_value_optimizer.state_dict(),
             "constraint_lambda": float(self.constraint_lambda),
         }
+        if self.promotion_actor is not None and self.promotion_value is not None:
+            payload.update({
+                "promotion_actor": self.promotion_actor.state_dict(),
+                "promotion_value": self.promotion_value.state_dict(),
+                "promotion_actor_optimizer": self.promotion_actor_optimizer.state_dict(),
+                "promotion_value_optimizer": self.promotion_value_optimizer.state_dict(),
+            })
+        return payload
 
     def load_state_dict(self, payload: dict[str, Any]) -> None:
         self.upper_actor.load_state_dict(payload["upper_actor"])
@@ -388,15 +526,25 @@ class FrequencySeparatedActorCriticPPO:
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
         self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
+        if self.promotion_actor is not None and self.promotion_value is not None:
+            if "promotion_actor" not in payload or "promotion_value" not in payload:
+                raise ValueError(
+                    "checkpoint is missing the configured learned promotion gate"
+                )
+            self.promotion_actor.load_state_dict(payload["promotion_actor"])
+            self.promotion_value.load_state_dict(payload["promotion_value"])
         for name in (
             "upper_actor_optimizer",
             "upper_value_optimizer",
             "lower_actor_optimizer",
             "lower_value_optimizer",
             "lower_cost_value_optimizer",
+            "promotion_actor_optimizer",
+            "promotion_value_optimizer",
         ):
-            if name in payload:
-                getattr(self, name).load_state_dict(payload[name])
+            optimizer = getattr(self, name, None)
+            if name in payload and optimizer is not None:
+                optimizer.load_state_dict(payload[name])
         self.constraint_lambda = float(payload.get("constraint_lambda", self.constraint_lambda))
 
     def _state_tensor(self, state: np.ndarray) -> torch.Tensor:
@@ -424,6 +572,25 @@ class FrequencySeparatedActorCriticPPO:
             "logp": float(logp.item()),
             "value": float(value.item()),
             "cost_value": float(cost_value.item()),
+        }
+
+    @torch.no_grad()
+    def act_promotion(
+        self,
+        state: np.ndarray,
+        sample: bool = True,
+    ) -> dict[str, float]:
+        if self.promotion_actor is None or self.promotion_value is None:
+            raise RuntimeError("learned promotion gate is not configured")
+        tensor = self._state_tensor(state)
+        action, logp = self.promotion_actor(tensor, sample=sample)
+        value = self.promotion_value(tensor)
+        probability = self.promotion_actor.distribution(tensor).probs
+        return {
+            "action": float(action.item()),
+            "probability": float(probability.item()),
+            "logp": float(logp.item()),
+            "value": float(value.item()),
         }
 
     def _gae(
@@ -461,16 +628,25 @@ class FrequencySeparatedActorCriticPPO:
         *,
         level: str,
         batch: LevelTrajectoryBatch,
-        actor: GaussianActor,
-        value_net: ValueNet,
+        actor: nn.Module,
+        value_net: nn.Module,
         actor_optimizer: torch.optim.Optimizer,
         value_optimizer: torch.optim.Optimizer,
         cost_value_net: ValueNet | None = None,
         cost_value_optimizer: torch.optim.Optimizer | None = None,
     ) -> dict[str, float]:
         cfg = self.config
-        state_dim = cfg.upper_state_dim if level == "upper" else cfg.lower_state_dim
-        action_dim = cfg.upper_action_dim if level == "upper" else cfg.lower_action_dim
+        if level == "upper":
+            state_dim = cfg.upper_state_dim
+            action_dim = cfg.upper_action_dim
+        elif level == "lower":
+            state_dim = cfg.lower_state_dim
+            action_dim = cfg.lower_action_dim
+        elif level == "promotion":
+            state_dim = cfg.promotion_state_dim
+            action_dim = 1
+        else:
+            raise ValueError(f"unknown policy level: {level}")
         batch.validate(state_dim=state_dim, action_dim=action_dim, level=level)
         if batch.size == 0:
             empty = {
@@ -598,6 +774,32 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.lower_value_optimizer,
             cost_value_optimizer=self.lower_cost_value_optimizer,
         )
+        promotion_metrics: dict[str, float] = {}
+        if batch.promotion is not None:
+            if (
+                self.promotion_actor is None
+                or self.promotion_value is None
+                or self.promotion_actor_optimizer is None
+                or self.promotion_value_optimizer is None
+            ):
+                raise ValueError(
+                    "promotion trajectory provided to a model without a learned gate"
+                )
+            promotion_metrics = self._update_level(
+                level="promotion",
+                batch=batch.promotion,
+                actor=self.promotion_actor,
+                value_net=self.promotion_value,
+                actor_optimizer=self.promotion_actor_optimizer,
+                value_optimizer=self.promotion_value_optimizer,
+            )
+        elif self.promotion_actor is not None:
+            promotion_metrics = {
+                "promotion_transitions": 0.0,
+                "promotion_actor_optimizer_steps": 0.0,
+                "promotion_value_optimizer_steps": 0.0,
+                "promotion_cost_value_optimizer_steps": 0.0,
+            }
         cost_mean = float(np.mean(batch.lower.cost)) if batch.lower.cost is not None else 0.0
         if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:
             updated = self.constraint_lambda + float(self.config.lower_dual_lr) * (
@@ -607,6 +809,7 @@ class FrequencySeparatedActorCriticPPO:
         return {
             **upper_metrics,
             **lower_metrics,
+            **promotion_metrics,
             "constraint_mean": cost_mean,
             "constraint_lambda": float(self.constraint_lambda),
         }

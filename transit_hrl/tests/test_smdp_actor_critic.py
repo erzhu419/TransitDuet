@@ -7,6 +7,7 @@ import torch
 from freq_hrl.rl import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
+    PromotionRolloutBuilder,
     SMDPPPOConfig,
     TemporalDecisionScheduler,
     concat_hierarchical_batches,
@@ -79,6 +80,29 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
         self.assertEqual(float(batch.upper.done[-1]), 1.0)
         self.assertEqual(float(batch.lower.done[-1]), 1.0)
 
+    def test_sparse_promotion_gate_owns_rewards_until_next_decision(self):
+        builder = PromotionRolloutBuilder(gamma=0.9)
+        builder.begin(
+            state=np.asarray([1.0, 0.0], dtype=np.float32),
+            action=1.0,
+            logp=-0.2,
+            value=0.1,
+        )
+        builder.add_reward(1.0)
+        builder.add_reward(2.0)
+        builder.begin(
+            state=np.asarray([0.0, 1.0], dtype=np.float32),
+            action=0.0,
+            logp=-0.3,
+            value=0.2,
+        )
+        builder.add_reward(3.0, done=True)
+        batch = builder.build()
+        self.assertIsNotNone(batch)
+        np.testing.assert_array_equal(batch.duration, [2, 1])
+        np.testing.assert_allclose(batch.reward, [2.8, 3.0])
+        np.testing.assert_array_equal(batch.action.reshape(-1), [1.0, 0.0])
+
 
 class FrequencySeparatedActorCriticTest(unittest.TestCase):
     @staticmethod
@@ -122,6 +146,45 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("upper_policy_loss", metrics)
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
+
+    def test_learned_promotion_gate_has_independent_ppo_stream(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            promotion_state_dim=4,
+            promotion_init_logit=-2.0,
+            epochs=1,
+            minibatch_size=8,
+        ))
+        initial = model.act_promotion(
+            np.zeros(4, dtype=np.float32), sample=False
+        )
+        self.assertEqual(initial["action"], 0.0)
+        self.assertLess(initial["probability"], 0.5)
+
+        gate = PromotionRolloutBuilder(gamma=0.99)
+        gate.begin(
+            state=np.ones(4, dtype=np.float32),
+            action=1.0,
+            logp=-2.0,
+            value=0.0,
+        )
+        gate.add_reward(1.0)
+        gate.begin(
+            state=np.zeros(4, dtype=np.float32),
+            action=0.0,
+            logp=-0.2,
+            value=0.0,
+        )
+        gate.add_reward(0.2, done=True)
+        batch = self._batch()
+        batch.promotion = gate.build()
+        metrics = model.update(batch)
+        self.assertEqual(metrics["promotion_transitions"], 2.0)
+        self.assertGreater(metrics["promotion_actor_optimizer_steps"], 0.0)
+        self.assertGreater(metrics["promotion_value_optimizer_steps"], 0.0)
 
     def test_concatenation_preserves_level_specific_counts(self):
         batch = concat_hierarchical_batches([self._batch(1), self._batch(2)])

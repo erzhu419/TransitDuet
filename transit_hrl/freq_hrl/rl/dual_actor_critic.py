@@ -98,6 +98,44 @@ class GaussianActor(nn.Module):
         return dist.log_prob(action).sum(dim=-1), dist.entropy().sum(dim=-1)
 
 
+class BernoulliActor(nn.Module):
+    """Binary actor for learned option termination or promotion decisions."""
+
+    def __init__(
+        self,
+        state_dim: int,
+        hidden_dim: int,
+        init_logit: float = -2.0,
+    ) -> None:
+        super().__init__()
+        self.net = _mlp(state_dim, 1, hidden_dim, output_gain=0.01)
+        final = self.net[-1]
+        if not isinstance(final, nn.Linear):
+            raise TypeError("Bernoulli actor must end with a linear layer")
+        nn.init.constant_(final.bias, float(init_logit))
+
+    def distribution(self, state: torch.Tensor) -> torch.distributions.Bernoulli:
+        return torch.distributions.Bernoulli(logits=self.net(state))
+
+    def forward(
+        self,
+        state: torch.Tensor,
+        sample: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        dist = self.distribution(state)
+        action = dist.sample() if sample else (dist.probs >= 0.5).to(state.dtype)
+        logp = dist.log_prob(action).sum(dim=-1)
+        return action, logp
+
+    def log_prob_entropy(
+        self,
+        state: torch.Tensor,
+        action: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        dist = self.distribution(state)
+        return dist.log_prob(action).sum(dim=-1), dist.entropy().sum(dim=-1)
+
+
 class ValueNet(nn.Module):
     def __init__(self, state_dim: int, hidden_dim: int) -> None:
         super().__init__()

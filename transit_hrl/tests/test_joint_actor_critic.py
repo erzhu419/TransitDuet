@@ -38,6 +38,34 @@ class JointActorCriticPPOTest(unittest.TestCase):
             old_value=np.zeros(12, dtype=np.float32),
         )
 
+    def test_smdp_capacity_count_includes_learned_promotion_actor_and_critic(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=17,
+            lower_state_dim=19,
+            upper_action_dim=4,
+            lower_action_dim=2,
+            promotion_state_dim=28,
+            hidden_dim=16,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        modules = [
+            model.upper_actor,
+            model.lower_actor,
+            model.upper_value,
+            model.lower_value,
+            model.lower_cost_value,
+            model.promotion_actor,
+            model.promotion_value,
+        ]
+        actual = sum(
+            parameter.numel()
+            for module in modules
+            if module is not None
+            for parameter in module.parameters()
+            if parameter.requires_grad
+        )
+        self.assertEqual(actual, smdp_parameter_count(config))
+
     def test_standard_joint_update_uses_one_actor_and_one_value(self):
         model = JointActorCriticPPO(JointPPOConfig(
             state_dim=5,

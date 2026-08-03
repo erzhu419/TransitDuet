@@ -332,6 +332,38 @@ class TradingFrequencyTracker:
                 "shock_age": z,
             }
 
+    def promote_residual(
+        self,
+        *,
+        strength: float = 1.0,
+        gain: float | None = None,
+    ) -> dict[str, Any]:
+        """Apply one causal, externally selected residual-to-LF promotion."""
+
+        if not hasattr(self.encoder, "promote_residual"):
+            raise RuntimeError(
+                f"encoder {self.method!r} does not support residual promotion"
+            )
+        selected_gain = (
+            self.promotion_adapt_gain if gain is None else max(float(gain), 0.0)
+        )
+        absorbed = float(self.encoder.promote_residual(
+            "market",
+            strength=float(np.clip(strength, 0.0, 1.0)),
+            gain=selected_gain,
+        ))
+        if absorbed > 0.0:
+            self.promotion_absorptions += 1
+            self.promotion_absorbed_norm += absorbed
+        features = self.features()
+        features["learned_promotion"] = {
+            "applied": bool(absorbed > 0.0),
+            "absorbed_norm": absorbed,
+            "strength": float(np.clip(strength, 0.0, 1.0)),
+            "gain": selected_gain,
+        }
+        return features
+
     def upper_features(self, mode: str | None = None) -> np.ndarray:
         feats = self.features()
         norm = self._norm(_arr(feats["x_low"]).size)
