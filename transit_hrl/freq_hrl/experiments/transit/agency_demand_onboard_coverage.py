@@ -351,14 +351,29 @@ def summarize_native_summary(data: dict[str, Any], *, variant: str) -> dict[str,
     checks = [dict(row) for row in data.get("paired_checks", []) if isinstance(row, dict)]
     variant_rows = [row for row in rows if str(row.get("variant", "")) == str(variant)]
     metrics = _native_metric_summaries(rows, variant)
+    legacy_projection_contaminated = any(
+        float(row.get("native_service_adjusted", 0.0) or 0.0) > 0.0
+        for row in variant_rows
+    )
+
+    def _raw_first(raw_metric: str, canonical_metric: str) -> dict[str, Any]:
+        raw = _find_check(checks, raw_metric)
+        return raw if raw else _find_check(checks, canonical_metric)
+
     key_checks = {
-        "score": _find_check(checks, "control_score"),
+        "score": {} if legacy_projection_contaminated else _find_check(checks, "control_score"),
         "reward": _find_check(checks, "ep_reward"),
-        "board_wait": _find_check(checks, "native_avg_board_wait_min"),
-        "alighted": _find_check(checks, "native_alighted_pax"),
-        "throughput": _find_check(checks, "native_completed_throughput_pax"),
+        "board_wait": _raw_first(
+            "native_raw_native_avg_board_wait_min",
+            "native_avg_board_wait_min",
+        ),
+        "alighted": _raw_first("native_raw_native_alighted_pax", "native_alighted_pax"),
+        "throughput": _raw_first(
+            "native_raw_native_completed_throughput_pax",
+            "native_completed_throughput_pax",
+        ),
         "onboard_load": _find_check(checks, "native_avg_onboard_load"),
-        "lower_lf_drift": _find_check(checks, "LowerLFDrift"),
+        "lower_lf_drift": _raw_first("native_raw_LowerLFDrift", "LowerLFDrift"),
     }
     supported_service = all(
         str(key_checks[name].get("status", "")) == "supported"
@@ -373,6 +388,7 @@ def summarize_native_summary(data: dict[str, Any], *, variant: str) -> dict[str,
         "sources": sorted({str(row.get("source", "")) for row in variant_rows if row.get("source")}),
         "metrics": metrics,
         "key_checks": key_checks,
+        "legacy_projection_contaminated": legacy_projection_contaminated,
         "native_service_response_status": "supported" if supported_service else "not_supported",
         "native_onboard_loop_status": "supported" if any(row["metric"] == "native_avg_onboard_load" for row in metrics) else "not_supported",
         "native_onboard_improvement_status": str(key_checks["onboard_load"].get("status", "missing")),
@@ -438,6 +454,7 @@ def build_claim_boundaries(
         f" source_kind={gtfs_ride.get('source_kind', 'unknown')} "
         f"source_verified={gtfs_source_verified}"
     )
+    native_service_supported = native.get("native_service_response_status") == "supported"
     rows = [
         {
             "id": "A1",
@@ -459,13 +476,18 @@ def build_claim_boundaries(
             "id": "A3",
             "evidence_item": "native_service_response_wait_alighting_throughput",
             "status": native.get("native_service_response_status", "missing"),
-            "allowed_wording": "native public-demand service-response loop improves wait/alighting/throughput",
+            "allowed_wording": (
+                "native public-demand service-response loop improves raw wait/alighting/throughput"
+                if native_service_supported
+                else "native public-demand service-response loop is implemented; strict raw wait/alighting/throughput improvement remains unresolved"
+            ),
             "forbidden_wording": "external agency alighting or onboard-load ground-truth improvement",
             "evidence": (
                 f"rows={native.get('rows', 0)} seeds={native.get('seeds', 0)} "
                 f"board_wait={native.get('key_checks', {}).get('board_wait', {}).get('status', 'missing')} "
                 f"alighted={native.get('key_checks', {}).get('alighted', {}).get('status', 'missing')} "
                 f"throughput={native.get('key_checks', {}).get('throughput', {}).get('status', 'missing')}"
+                f" projection_contaminated={native.get('legacy_projection_contaminated', False)}"
             ),
         },
         {
@@ -566,6 +588,7 @@ def build_deployment_data_gate(
     native_link_status = (
         "data_ready_not_control_linked" if gtfs_full_fields and native_supported
         else "external_truth_not_control_linked" if external_truth_supported and native_supported
+        else "native_control_outcome_unresolved" if external_truth_supported
         else "external_missing"
     )
     rows = [

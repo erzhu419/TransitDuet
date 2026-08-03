@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from freq_hrl.experiments.top_journal_unified_matrix import build_unified_matrix
+
 
 DEFAULT_RESULTS_ROOT = Path("transit_hrl/results")
 DEFAULT_OUTPUT_DIR = Path("transit_hrl/results/manuscript_submission_pack_latest")
@@ -27,21 +29,21 @@ ARTIFACTS = {
 
 
 CONSERVATIVE_CLAIM_WORDING = {
-    "C1": "Native learned promotion improves reward and waiting-time metrics in the current registered stress evidence.",
-    "C2": "Native real-demand Transit validation is supported under public AFC/APC profiles, with separate public source coverage for board/alight/load and estimated OD.",
-    "C3": "Venue-grade L2/L3 order-book replay is supported as a reproducible replay path on three LOBSTER symbol-session pairs.",
-    "C4": "Advanced encoders have cross-domain support, with public-market and L3 rows kept as bounded or mixed evidence where appropriate.",
+    "C1": "Native learned promotion is evaluated from observed raw reward and wait outcomes in one frozen artifact.",
+    "C2": "Native Transit uses public AFC/APC demand profiles; strict performance claims require raw simulator outcome CIs.",
+    "C3": "A small LOBSTER-format L2/L3 replay path is implemented; large-scale venue replay remains unvalidated.",
+    "C4": "Advanced encoder evidence is mixed and requires primary-outcome support on real Quant and Transit data.",
     "C5": "Leakage no-tradeoff is supported only where same-domain drift reduction and performance noninferiority or strict CI gates both pass.",
     "C6": "The formal appendix gives sufficient-condition bounds and reporting propositions rather than a universal convergence theorem.",
-    "C7": "Promotion reward/wait improvement replicates across the current registered persistent-stress and OD-shift matrices.",
-    "C8": "Frequency-responsibility evidence is supported against non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives.",
-    "C9": "Stress-generalization support is limited to the registered stress regimes that pass paired evidence gates.",
+    "C7": "Cross-stress promotion replication requires distinct frozen persistent-shift and OD-shift artifacts.",
+    "C8": "Frequency-responsibility evidence requires matched learned PPO/SAC/TD3 baselines in addition to heuristic ablations.",
+    "C9": "Synthetic stress coverage is limited to registered regimes that pass paired evidence gates.",
 }
 
 CENTRAL_MANUSCRIPT_CLAIM = (
-    "Frequency-responsibility routing improves hierarchical reinforcement "
-    "learning for non-stationary time-series control under the registered "
-    "paired validation boundaries."
+    "Freq-HRL implements frequency-responsibility routing for hierarchical "
+    "time-series control; its performance claims are limited to raw observed "
+    "outcomes that pass frozen confirmatory gates."
 )
 
 
@@ -168,18 +170,23 @@ def build_manuscript_boundary_table(
     agency: dict[str, Any],
     order_book: dict[str, Any],
     theory: dict[str, Any],
+    claim_rows: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     baseline_summary = baseline.get("summary", {}) if isinstance(baseline.get("summary"), dict) else {}
     agency_summary = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
     coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
     theorem_count = len(theory.get("theorems", []) or [])
+    supported_claims = sum(row.get("status") == "supported" for row in claim_rows)
+    claims_by_id = {str(row.get("id", "")): row for row in claim_rows}
+    order_book_claim_status = str(claims_by_id.get("C3", {}).get("status", "missing"))
+    theory_claim_status = str(claims_by_id.get("C6", {}).get("status", "missing"))
     return [
         {
             "item": "central_claim",
-            "status": "supported",
+            "status": "supported" if supported_claims == len(claim_rows) and claim_rows else "partial",
             "allowed_wording": CENTRAL_MANUSCRIPT_CLAIM,
             "disallowed_wording": "Freq-HRL is a universally optimal controller for every time-series deployment.",
-            "evidence_hook": "C1-C9 conservative claim matrix plus baseline, Transit, leakage, stress, encoder, and replay artifacts.",
+            "evidence_hook": f"supported_claims={supported_claims}/{len(claim_rows)}; raw-only unified matrix.",
         },
         {
             "item": "strong_learned_baselines",
@@ -200,15 +207,21 @@ def build_manuscript_boundary_table(
         },
         {
             "item": "venue_grade_order_book_scale",
-            "status": str(coverage.get("source_quality_status", "missing")),
-            "allowed_wording": "Venue-grade L2/L3 replay infrastructure is validated on the registered symbol-session pairs.",
+            "status": order_book_claim_status,
+            "allowed_wording": (
+                "The current small L2/L3 artifact validates the replay interface only; "
+                "large multi-session replay remains unresolved."
+            ),
             "disallowed_wording": "Production exchange execution or exhaustive multi-day L2/L3 replay is solved.",
             "evidence_hook": f"pairs={coverage.get('venue_grade_l2_l3_session_pairs', '')}",
         },
         {
             "item": "formal_theory_scope",
-            "status": "supported" if theorem_count >= 9 else "partial",
-            "allowed_wording": "The appendix gives sufficient-condition and reporting-boundary results.",
+            "status": theory_claim_status,
+            "allowed_wording": (
+                "The appendix contains structured sufficient-condition statements and "
+                "reporting boundaries; independent proof verification remains unresolved."
+            ),
             "disallowed_wording": "The paper proves universal nonconvex actor-critic convergence.",
             "evidence_hook": f"theorems_or_propositions={theorem_count}",
         },
@@ -228,7 +241,7 @@ def build_figure_plan() -> list[dict[str, Any]]:
         {
             "figure": "Fig. 2",
             "title": "Claim and ablation evidence matrix",
-            "main_conclusion": "The current evidence matrix is fully supported under conservative claim boundaries.",
+            "main_conclusion": "The matrix separates supported, partial, missing, and projection-ineligible evidence.",
             "panels": "A: C1-C9 claim matrix; B: baseline/ablation deltas; C: stress-regime coverage; D: unsupported or bounded rows.",
             "primary_artifacts": "top_journal_unified_matrix_latest; baseline_ablation_matrix_latest; trading_pressure_matrix",
             "review_risk": "Show no-promotion override as native promotion evidence, not as a raw trading Sharpe win.",
@@ -236,8 +249,8 @@ def build_figure_plan() -> list[dict[str, Any]]:
         {
             "figure": "Fig. 3",
             "title": "Native Transit promotion and real-demand service response",
-            "main_conclusion": "Native Transit evidence supports wait/reward promotion claims and service-response improvements under public AFC/APC demand profiles.",
-            "panels": "A: promotion reward/wait CIs; B: real-demand score/wait/alighting/throughput CIs; C: service-response signal; D: claim boundary notes.",
+            "main_conclusion": "Raw native reward, wait, alighting, throughput, and leakage outcomes define the current claim boundary.",
+            "panels": "A: raw promotion reward/wait CIs; B: raw real-demand wait/leakage CIs; C: raw throughput CIs; D: raw reward CI.",
             "primary_artifacts": "transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly; transit_native_real_demand_service_response_v7_48pair_merged",
             "review_risk": "Do not call MBTA/MTA external truth a linked native control loop.",
         },
@@ -252,7 +265,7 @@ def build_figure_plan() -> list[dict[str, Any]]:
         {
             "figure": "Fig. 5",
             "title": "Order-book replay and encoder generalization",
-            "main_conclusion": "The trading path supports venue-grade replay infrastructure and cross-domain encoder evidence, with L3 and public-market rows bounded.",
+            "main_conclusion": "The trading path currently provides a small replay implementation and mixed encoder evidence.",
             "panels": "A: L2/L3 manifest coverage; B: matching/replay semantics; C: encoder domain matrix; D: execution sensitivity table.",
             "primary_artifacts": "order_book_lobster_venue_grade_multisymbol; encoder_cross_domain_matrix",
             "review_risk": "Keep large-scale multi-day venue replay as future scale, not current evidence.",
@@ -288,6 +301,8 @@ def write_submission_package(
 ) -> None:
     source_summary = _source_summary(agency, external_truth, order_book)
     baseline_summary = baseline.get("summary", {}) if isinstance(baseline.get("summary"), dict) else {}
+    supported_ids = [row["id"] for row in claim_rows if row.get("status") == "supported"]
+    unresolved_ids = [row["id"] for row in claim_rows if row.get("status") != "supported"]
     lines = [
         "# Freq-HRL Conservative Submission Package",
         "",
@@ -309,15 +324,28 @@ def write_submission_package(
         "",
         "## Draft Abstract",
         "",
-        "Time-series control problems often couple slowly varying operating regimes with high-frequency disturbances. Conventional flat policies and generic hierarchical policies can mix these responsibilities, making recovery, attribution, and stress generalization difficult to validate. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol that routes low-frequency trend and planning signals to an upper controller, high-frequency residual control to a lower controller, and persistent shocks to a promotion-driven replanning path. The protocol includes causal frequency encoders, plan-curve actions, frequency-attributed credit, and leakage constraints that explicitly penalize responsibility drift. Across the current validation matrix, all nine conservative evidence claims are supported, including native learned promotion, native Transit real-demand service response, leakage no-tradeoff gates, baseline ablations, stress-regime coverage, public external Transit truth-source coverage, and venue-grade L2/L3 order-book replay paths. Public Transit evidence combines AFC/APC demand-driven native simulation with MBTA bus board/alight/load coverage and MTA estimated OD coverage, while order-book evidence uses LOBSTER/NASDAQ TotalView-ITCH symbol-session replay. These results support Freq-HRL as a domain-general protocol for frequency-routed time-series control, not as a completed deployment validation for every real transit agency or exchange venue.",
+        (
+            "Time-series control problems often couple slowly varying regimes with "
+            "high-frequency disturbances. We introduce Freq-HRL, a frequency-routed "
+            "hierarchical control protocol with causal encoders, temporally distinct "
+            "upper and lower policies, promotion-triggered replanning, and leakage "
+            "accounting. The current raw-only evidence ledger supports "
+            f"{len(supported_ids)} of {len(claim_rows)} registered claims "
+            f"({', '.join(supported_ids) or 'none'}); unresolved claims are "
+            f"{', '.join(unresolved_ids) or 'none'}. Counterfactual outcome projections "
+            "are reported only as sensitivity analyses and do not determine claim "
+            "status. The implementation and data adapters therefore establish a "
+            "research protocol under confirmatory validation, not a completed "
+            "domain-general deployment result."
+        ),
         "",
         "## Core Contributions",
         "",
         "1. A domain-general Freq-HRL protocol that separates low-frequency planning, high-frequency control, promotion-based replanning, and leakage accounting.",
-        "2. Native Transit validation with learned promotion, wait-credit, real-demand service response, and same-domain leakage no-tradeoff gates.",
+        "2. Native Transit paths for learned promotion, wait credit, public-demand profile replay, and raw service metrics, with unresolved effects kept explicit.",
         "3. Public external Transit data coverage for MBTA board/alight/load and MTA estimated OD, kept separate from native-control performance claims.",
-        "4. Quant and order-book validation that includes baseline/ablation matrices, stress regimes, encoder variants, and venue-grade L2/L3 replay paths.",
-        "5. A formal appendix with causal encoder, leakage, promotion, credit, paired-CI, and stress-claim boundary propositions.",
+        "4. Quant and order-book experiment infrastructure for baselines, stress regimes, encoder variants, and L2/L3 replay, with scale limits reported.",
+        "5. A theory scaffold with causal encoder, leakage, promotion, credit, and reporting propositions pending formal verification.",
         "",
         "## Main Claim Table",
         "",
@@ -497,6 +525,7 @@ def write_data_availability(md_path: Path) -> None:
 def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) -> dict[str, Any]:
     paths = _artifact_paths(results_root)
     artifacts = {key: _read_json(path) for key, path in paths.items()}
+    artifacts["unified"] = build_unified_matrix(results_root)
     claim_rows = build_claim_table(artifacts["unified"])
     baseline_rows = build_baseline_table(artifacts["baseline"])
     real_data_rows = build_real_data_table(artifacts["agency"], artifacts["external_truth"])
@@ -505,6 +534,7 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
         agency=artifacts["agency"],
         order_book=artifacts["order_book"],
         theory=artifacts["theory"],
+        claim_rows=claim_rows,
     )
     figure_rows = build_figure_plan()
 

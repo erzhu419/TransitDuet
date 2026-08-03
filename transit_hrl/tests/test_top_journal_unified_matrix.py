@@ -7,34 +7,34 @@ from freq_hrl.experiments.top_journal_unified_matrix import build_unified_matrix
 
 
 class TopJournalUnifiedMatrixTest(unittest.TestCase):
-    def test_v42_native_promotion_closes_c1(self):
+    def test_frozen_v47_raw_promotion_checks_can_close_c1(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             out = (
                 root
-                / "scheduler_native_promotion_risk_banded_delta_floor_v42_512seed_merged"
+                / "transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly"
             )
             out.mkdir(parents=True)
             checks = [
                 {
-                    "check": "native_wait_aware_replan_vs_interval_ep_reward",
-                    "metric": "ep_reward",
+                    "check": "native_wait_aware_replan_vs_interval_promotion_raw_ep_reward",
+                    "metric": "promotion_raw_ep_reward",
                     "treatment": "native_wait_aware_replan",
                     "control": "interval_only",
                     "status": "supported",
                     "n_common": 512,
                 },
                 {
-                    "check": "native_wait_aware_replan_vs_interval_avg_wait_min",
-                    "metric": "avg_wait_min",
+                    "check": "native_wait_aware_replan_vs_interval_promotion_raw_avg_wait_min",
+                    "metric": "promotion_raw_avg_wait_min",
                     "treatment": "native_wait_aware_replan",
                     "control": "interval_only",
                     "status": "supported",
                     "n_common": 512,
                 },
                 {
-                    "check": "native_wait_aware_replan_vs_interval_score",
-                    "metric": "score",
+                    "check": "native_wait_aware_replan_vs_interval_promotion_raw_score",
+                    "metric": "promotion_raw_score",
                     "treatment": "native_wait_aware_replan",
                     "control": "interval_only",
                     "status": "supported",
@@ -49,8 +49,8 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             payload = build_unified_matrix(root)
             claims = {row["id"]: row for row in payload["claims"]}
             self.assertEqual(claims["C1"]["status"], "supported")
-            self.assertIn("native_promotion_v42", claims["C1"]["evidence"])
-            self.assertIn("v42", claims["C1"]["artifact"])
+            self.assertIn("native_promotion_v47_odshift", claims["C1"]["evidence"])
+            self.assertIn("v47", claims["C1"]["artifact"])
             self.assertIn("C7", claims)
             self.assertIn("C8", claims)
             self.assertIn("C9", claims)
@@ -78,8 +78,9 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             )
             payload = build_unified_matrix(root)
             claims = {row["id"]: row for row in payload["claims"]}
-            self.assertEqual(claims["C8"]["status"], "supported")
+            self.assertEqual(claims["C8"]["status"], "partial")
             self.assertIn("no_promotion", claims["C8"]["evidence"])
+            self.assertIn("strong_ppo=missing", claims["C8"]["evidence"])
 
     def test_pressure_regime_winners_feed_c9(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -142,8 +143,9 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
 
             payload = build_unified_matrix(root)
             claims = {row["id"]: row for row in payload["claims"]}
-            self.assertEqual(claims["C5"]["status"], "supported")
+            self.assertEqual(claims["C5"]["status"], "partial")
             self.assertIn("native_selector_status=supported", claims["C5"]["evidence"])
+            self.assertIn("projection_contaminated=True", claims["C5"]["evidence"])
 
     def test_c5_stays_partial_without_native_selector_support(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -221,7 +223,7 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
 
             payload = build_unified_matrix(root)
             claims = {row["id"]: row for row in payload["claims"]}
-            self.assertEqual(claims["C5"]["status"], "supported")
+            self.assertEqual(claims["C5"]["status"], "partial")
             self.assertIn("native_selector_status=supported", claims["C5"]["evidence"])
             self.assertIn("leakage_no_tradeoff_matrix_latest", claims["C5"]["artifact"])
             self.assertNotIn("latest_patch", claims["C5"]["artifact"])
@@ -231,14 +233,32 @@ class TopJournalUnifiedMatrixTest(unittest.TestCase):
             root = Path(tmp)
             real = root / "transit_native_real_demand_service_response_v7_48pair_merged"
             real.mkdir(parents=True)
-            checks = [
-                {"metric": "control_score", "status": "supported"},
-                {"metric": "ep_reward", "status": "supported"},
-                {"metric": "native_avg_board_wait_min", "status": "supported"},
-                {"metric": "native_alighted_pax", "status": "supported"},
-                {"metric": "native_completed_throughput_pax", "status": "supported"},
-            ]
-            (real / "summary.json").write_text(json.dumps({"paired_checks": checks}), encoding="utf-8")
+            rows = []
+            for seed in (1, 2, 3):
+                common = {
+                    "source": "afc",
+                    "seed": seed,
+                    "ep_reward": 10.0,
+                    "avg_wait_min": 5.0,
+                    "headway_cv": 0.2,
+                    "native_avg_board_wait_min": 4.0,
+                    "native_boarded_pax": 100.0,
+                    "native_alighted_pax": 98.0,
+                }
+                rows.append({**common, "variant": "native_real_interval"})
+                rows.append({
+                    **common,
+                    "variant": "native_real_freqhrl",
+                    "ep_reward": 12.0,
+                    "avg_wait_min": 4.5,
+                    "native_avg_board_wait_min": 3.5,
+                    "native_boarded_pax": 103.0,
+                    "native_alighted_pax": 102.0,
+                })
+            (real / "summary.json").write_text(
+                json.dumps({"rows": rows, "min_pairs": 3, "paired_checks": []}),
+                encoding="utf-8",
+            )
             agency = root / "agency_demand_onboard_coverage_latest"
             agency.mkdir(parents=True)
             (agency / "summary.json").write_text(

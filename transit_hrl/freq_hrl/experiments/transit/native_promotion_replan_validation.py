@@ -11,6 +11,11 @@ from typing import Any
 
 import numpy as np
 
+from freq_hrl.experiments.evidence_policy import (
+    OBSERVED_EVIDENCE,
+    PROJECTION_EVIDENCE,
+    annotate_check,
+)
 from freq_hrl.experiments.statistics import (
     claim_status,
     noninferiority_status,
@@ -1588,7 +1593,14 @@ def apply_promotion_outcome_adjustment(
     adjustment: dict[str, Any] | None,
 ) -> dict[str, Any]:
     _copy_raw_promotion_metrics(row)
+    row["evidence_class"] = OBSERVED_EVIDENCE
+    row["headline_eligible"] = True
     row["promotion_outcome_adjusted"] = 0.0
+    row["promotion_projection_available"] = 0.0
+    row["promotion_projection_evidence_class"] = PROJECTION_EVIDENCE
+    row["projected_ep_reward"] = float(row.get("ep_reward", 0.0))
+    row["projected_avg_wait_min"] = float(row.get("avg_wait_min", 0.0))
+    row["projected_score"] = float(row.get("score", 0.0))
     row["promotion_outcome_adjustment_signal"] = 0.0
     row["promotion_outcome_reward_gain"] = 0.0
     row["promotion_outcome_wait_reduction_min"] = 0.0
@@ -1611,9 +1623,9 @@ def apply_promotion_outcome_adjustment(
         max(float(adjustment.get("reward_gain", 0.0)), 0.0) * signal
         + max(float(adjustment.get("wait_reward_gain", 0.0)), 0.0) * wait_reduction,
     )
-    row["avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
-    row["ep_reward"] = float(row.get("ep_reward", 0.0)) + reward_gain
-    row["score"] = (
+    row["projected_avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
+    row["projected_ep_reward"] = float(row.get("ep_reward", 0.0)) + reward_gain
+    row["projected_score"] = (
         float(row.get("score", 0.0))
         + reward_gain
         + max(float(adjustment.get("score_wait_gain", 0.0)), 0.0) * wait_reduction
@@ -1622,7 +1634,7 @@ def apply_promotion_outcome_adjustment(
         max(float(adjustment.get("max_replans", 1.0)), 0.0),
         1.0 + max(signal - 0.75, 0.0),
     )
-    row["promotion_outcome_adjusted"] = 1.0
+    row["promotion_projection_available"] = 1.0
     row["promotion_outcome_adjustment_signal"] = signal
     row["promotion_outcome_reward_gain"] = reward_gain
     row["promotion_outcome_wait_reduction_min"] = wait_reduction
@@ -1873,6 +1885,10 @@ def paired_checks(
             ("promotion_raw_ep_reward", False),
             ("promotion_raw_avg_wait_min", True),
             ("promotion_raw_score", False),
+            ("projected_ep_reward", False),
+            ("projected_avg_wait_min", True),
+            ("projected_score", False),
+            ("promotion_projection_available", False),
             ("promotion_outcome_adjusted", False),
             ("promotion_outcome_adjustment_signal", False),
             ("promotion_outcome_reward_gain", False),
@@ -1895,11 +1911,11 @@ def paired_checks(
             control="interval_only",
             lower_is_better=lower_is_better,
         )
-        checks.append({
+        checks.append(annotate_check({
             "check": f"{treatment}_vs_interval_{metric}",
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
-            })
+        }))
     if treatment in {"native_learned_gate", "native_wait_aware_replan"}:
         for metric, lower_is_better, margin in [
             ("ep_reward", False, 15.0),
@@ -1914,7 +1930,7 @@ def paired_checks(
                 control="interval_only",
                 lower_is_better=lower_is_better,
             )
-            checks.append({
+            checks.append(annotate_check({
                 "check": f"{treatment}_vs_interval_{metric}_noninferiority",
                 **stats,
                 "noninferiority_margin": float(margin),
@@ -1923,7 +1939,7 @@ def paired_checks(
                     max_loss=float(margin),
                     min_pairs=int(min_pairs),
                 ),
-            })
+            }, evidence_class=OBSERVED_EVIDENCE, headline_eligible=True))
     if treatment == "native_wait_aware_replan":
         checks.extend(stress_subset_checks(
             rows,
@@ -2005,7 +2021,7 @@ def stress_subset_checks(
                 control="interval_only",
                 lower_is_better=lower_is_better,
             )
-            checks.append({
+            checks.append(annotate_check({
                 "check": f"{treatment}_{selector_name}_vs_interval_{metric}",
                 **stats,
                 "selector": selector_name,
@@ -2013,7 +2029,7 @@ def stress_subset_checks(
                 "selector_threshold": float(threshold),
                 "stress_subset": True,
                 "status": claim_status(stats, min_pairs=int(min_pairs)),
-            })
+            }))
     return checks
 
 

@@ -193,6 +193,64 @@ class AgencyDemandOnboardCoverageTest(unittest.TestCase):
             self.assertEqual(gate["native_control_linkage"]["status"], "external_missing")
             self.assertTrue((root / "out" / "deployment_data_gate.csv").exists())
 
+    def test_legacy_projected_service_metrics_cannot_close_native_claim(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            afc = root / "afc.csv"
+            apc = root / "apc.csv"
+            native = root / "summary.json"
+            self._write_afc(afc)
+            self._write_apc(apc)
+            self._write_native_summary(native)
+            payload = json.loads(native.read_text(encoding="utf-8"))
+            for row in payload["rows"]:
+                if row["variant"] == "native_real_freqhrl":
+                    row["native_service_adjusted"] = 1.0
+            payload["paired_checks"].extend([
+                {
+                    "metric": "native_raw_native_avg_board_wait_min",
+                    "check": "raw_wait",
+                    "status": "not_supported",
+                },
+                {
+                    "metric": "native_raw_native_alighted_pax",
+                    "check": "raw_alighted",
+                    "status": "not_supported",
+                },
+                {
+                    "metric": "native_raw_native_completed_throughput_pax",
+                    "check": "raw_throughput",
+                    "status": "not_supported",
+                },
+                {
+                    "metric": "native_raw_LowerLFDrift",
+                    "check": "raw_drift",
+                    "status": "not_supported",
+                },
+            ])
+            native.write_text(json.dumps(payload), encoding="utf-8")
+
+            result = run_coverage(
+                output_dir=root / "out",
+                afc_csv=afc,
+                apc_csv=apc,
+                native_summary=native,
+                min_afc_rows=10,
+                min_afc_stations=3,
+                min_afc_time_bins=6,
+                min_apc_rows=10,
+                min_apc_routes=3,
+                min_apc_time_bins=10,
+            )
+
+            native_summary = result["native_service"]
+            self.assertTrue(native_summary["legacy_projection_contaminated"])
+            self.assertEqual(native_summary["native_service_response_status"], "not_supported")
+            boundary = next(
+                row for row in result["claim_boundaries"] if row["id"] == "A3"
+            )
+            self.assertIn("remains unresolved", boundary["allowed_wording"])
+
     def test_external_truth_summary_adds_public_board_load_od_without_relabeling_gtfs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

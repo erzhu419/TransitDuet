@@ -1,6 +1,6 @@
 # Freq-HRL Manuscript Claim Boundaries
 
-Date: 2026-06-12
+Date: 2026-06-12; raw-evidence correction: 2026-08-03
 
 This note is the paper-facing boundary ledger after the current multi-symbol
 order-book and agency-demand coverage updates.  Its purpose is to keep the
@@ -30,7 +30,7 @@ Current strongest local artifacts:
 
 Current high-level status:
 
-- Unified claim matrix: 9 supported, 0 partial.
+- Unified raw-only claim matrix: 1 supported, 6 partial, 2 not supported.
 - Order-book replay: venue-grade L2/L3 path supported on three XNAS
   LOBSTER symbol-session pairs. The runner supports multiple `--sessions`,
   but the current public sample artifact uses one date, 2012-06-21.
@@ -39,8 +39,9 @@ Current high-level status:
 - Public external Transit truth-source coverage: supported for MBTA bus
   stop/trip boardings, alightings, and onboard load, plus MTA subway
   origin-destination ridership estimates.
-- Native service-response loop: supported for score, reward, wait, alighting,
-  and completed throughput under public AFC/APC demand profiles.
+- Native service-response loop: raw score/reward and noninferiority are partial
+  evidence; strict raw wait, alighting, and throughput improvement is not
+  supported. The deterministic response projection is sensitivity-only.
 - GTFS-ride-native Transit OD/onboard-load ground truth: not present in the
   current cache; supported only as an optional GTFS-ride ingestion path.
 
@@ -48,17 +49,17 @@ Current high-level status:
 
 | Topic | Supported wording | Do not claim |
 |---|---|---|
-| Overall method | "Freq-HRL is a domain-general frequency-separated HRL protocol validated across synthetic trading, native Transit, real public demand traces, and venue-grade order-book replay paths." | "Fully validated on all real-world HFT and Transit deployment settings." |
+| Overall method | "Freq-HRL is a frequency-separated HRL research implementation under raw-outcome confirmatory validation." | "Freq-HRL is already a fully validated domain-general controller." |
 | Transit demand | "Real AFC station-hour entries and real APC route boardings drive native Transit service-response validation." | "The AFC/APC cache itself contains full OD and onboard occupancy truth." |
 | External board/alight/load truth | "MBTA public bus ridership data support external stop/trip boardings, alightings, and onboard-load source coverage." | "Freq-HRL has proven external onboard-load improvement on MBTA outcomes." |
 | External OD truth | "MTA public subway OD data support an agency-published estimated OD source." | "Observed individual OD truth or bus OD truth is fully validated." |
-| Native Transit service | "Under public AFC/APC demand profiles, the native service-response adapter supports wait, alighting, and throughput improvements in the simulator." | "Observed agency alighting or onboard-load outcomes improve in the external data." |
+| Native Transit service | "Public AFC/APC profiles drive a native passenger loop with raw wait, alighting, throughput, and load metrics." | "The hand-set service-response projection is an observed simulator improvement." |
 | Onboard load | "Native onboard-load metrics are recorded, and external MBTA load fields are now source-supported; improvement remains linked only to native-control artifacts." | "External onboard-load improvement is proven without a linked control validation." |
 | OD validation | "The code supports GTFS-ride style OD validation, and public MTA estimated OD coverage is now recorded as a separate external source." | "Current public AFC/APC cache contains OD ground truth." |
-| L2/L3 order book | "Venue-grade L2/L3 replay is supported on three LOBSTER/NASDAQ TotalView-ITCH symbol-session pairs with paired L2 snapshots and L3 events." | "Large-scale multi-day exchange replay or full queue-priority production execution is complete." |
-| Promotion | "Native learned promotion supports reward/wait improvement in the current pre-registered stress matrix." | "Promotion is universally beneficial under arbitrary unseen shocks." |
-| Leakage | "Leakage no-tradeoff is supported for the current native service-response and Transit surrogate matrices." | "No-tradeoff is guaranteed without the stated margin and same-domain CI conditions." |
-| Theory | "The appendix gives sufficient-condition bounds and claim-boundary propositions." | "A universal convergence theorem for all nonlinear environments is proven." |
+| L2/L3 order book | "A three-symbol, one-session LOBSTER-format L2/L3 replay path is implemented." | "Large-scale multi-day exchange replay or full queue-priority production execution is complete." |
+| Promotion | "Native promotion has a frozen raw-outcome artifact with inconclusive reward and unsupported wait improvement." | "Adjusted promotion outcomes or one artifact reused across stresses prove improvement." |
+| Leakage | "Surrogate leakage evidence is bounded; native no-tradeoff remains unresolved under raw outcomes." | "Projection-contaminated native evidence proves no-tradeoff." |
+| Theory | "The appendix contains structured propositions pending proof verification." | "The project already has verified formal bounds or universal convergence." |
 
 ## Current Agency-Demand Boundary
 
@@ -69,7 +70,7 @@ GTFS-ride-native data gaps:
 |---|---|---|
 | Real AFC station-hour demand | supported | real AFC-style station-hour entry demand |
 | Real APC route boarding demand | supported | real APC-style route boarding demand |
-| Native service-response wait/alighting/throughput | supported | native public-demand service-response improvement |
+| Native service-response wait/alighting/throughput | partial | native raw service metrics; strict improvement unresolved |
 | Native onboard-load loop | supported as recorded metric | native onboard-load metric is audited |
 | Real stop-level board/alight GTFS-ride | external missing | supported only when `board_alight.txt` is supplied |
 | Real onboard-load GTFS-ride | external missing | supported only when `load_count` or `current_load` is supplied |
@@ -78,7 +79,7 @@ GTFS-ride-native data gaps:
 | Real public bus stop onboard load | supported | MBTA stop/trip onboard-load averages |
 | Real public subway OD estimate | supported | MTA agency-published subway OD estimates |
 
-This means the paper can claim real agency demand-driven native control and
+This means the paper can claim public-profile-driven native simulation and
 separate public external source coverage for bus board/alight/load and
 estimated subway OD. It should not claim that MBTA and MTA form one joint
 agency OD/onboard-load control loop, or that GTFS-ride-native replication is

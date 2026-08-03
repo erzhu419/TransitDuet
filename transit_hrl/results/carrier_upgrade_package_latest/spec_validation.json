@@ -1,6 +1,6 @@
 {
   "frozen_spec": {
-    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "version": "freq_hrl_v2_spec_2026_08_03",
     "required_frequency_features": [
       "timestamp",
       "x_low",
@@ -54,17 +54,29 @@
       "C7",
       "C8",
       "C9"
+    ],
+    "allowed_claim_statuses": [
+      "supported",
+      "partial",
+      "not_supported",
+      "missing"
     ]
   },
   "claim_freeze": {
-    "status": "supported",
-    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "status": "valid",
+    "version": "freq_hrl_v2_spec_2026_08_03",
     "claims": 9,
-    "required_claims": 9
+    "required_claims": 9,
+    "status_counts": {
+      "supported": 1,
+      "partial": 6,
+      "not_supported": 2,
+      "missing": 0
+    }
   },
   "shared_core": {
     "status": "supported",
-    "version": "freq_hrl_frozen_spec_2026_06_27",
+    "version": "freq_hrl_v2_spec_2026_08_03",
     "shared_core_rows": 9
   }
 }

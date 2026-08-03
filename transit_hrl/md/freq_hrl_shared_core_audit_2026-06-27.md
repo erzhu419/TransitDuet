@@ -20,17 +20,17 @@ Machine-checkable audits: `transit_hrl/results/carrier_upgrade_package_latest/sp
 
 ## Source Boundary Audit
 
-- status: `supported`
-- checked core files: `24`
+- status: `partial`
+- checked core files: `25`
 - boundary violations: `0`
 
 | adapter | status | required_symbol | role | evidence |
 | --- | --- | --- | --- | --- |
-| trading_ppo | supported | train_dual_ppo | Quant/trading rollout adapter calls the shared dual-level PPO loop. | `train_dual_ppo` is present in adapter source |
-| transit_surrogate_ppo | supported | train_dual_ppo | Transit surrogate rollout adapter calls the same shared dual-level PPO loop. | `train_dual_ppo` is present in adapter source |
-| transit_native_replay_update | supported | apply_replay_updates | Native Transit episode loop delegates PPO replay updates to the shared RL kernel. | `apply_replay_updates` is present in adapter source |
-| transit_native_actor_core | supported | DualActorCriticPPO | Native Transit bridge instantiates the shared upper/lower actor-critic. | `DualActorCriticPPO` is present in adapter source |
+| trading_ppo | supported | train_frequency_separated_ppo | Trading Freq-HRL calls the asynchronous SMDP training loop. | `train_frequency_separated_ppo` is imported and called |
+| transit_surrogate_ppo | failed | train_frequency_separated_ppo | Transit surrogate must migrate to the asynchronous SMDP loop. | `train_frequency_separated_ppo` is not both imported and called |
+| transit_native_replay_update | failed | apply_smdp_updates | Native Transit must update separate upper and lower SMDP trajectories. | `apply_smdp_updates` is not both imported and called |
+| transit_native_actor_core | failed | FrequencySeparatedActorCriticPPO | Native Transit bridge must instantiate the v2 frequency-separated actor-critic. | `FrequencySeparatedActorCriticPPO` is not both imported and called |
 
 ## Reviewer-Facing Boundary
 
-The shared core claim is supported at the training-kernel level: domain code owns rollout construction, while learning goes through `DualActorCriticPPO`, `train_dual_ppo`, or `apply_replay_updates`. A stronger final-paper claim may still report native Transit as an existing-simulator episode-loop adapter rather than pretending it is byte-identical to the synthetic rollout loop.
+The v2 shared-core migration is incomplete: trading uses the asynchronous SMDP kernel, while Transit surrogate/native adapters still use legacy joint-PPO entries. This is a paper blocker, not a supported shared-core claim.

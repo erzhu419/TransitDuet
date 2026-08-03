@@ -384,7 +384,7 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
             VARIANTS.clear()
             VARIANTS.update(old_variants)
 
-    def test_promotion_outcome_adjustment_preserves_raw_reward_wait_boundary(self):
+    def test_promotion_projection_never_overwrites_observed_reward_wait(self):
         row = {
             "ep_reward": 100.0,
             "avg_wait_min": 5.0,
@@ -413,8 +413,13 @@ class NativePromotionReplanValidationTest(unittest.TestCase):
         })
         self.assertEqual(adjusted["promotion_raw_ep_reward"], 100.0)
         self.assertEqual(adjusted["promotion_raw_avg_wait_min"], 5.0)
-        self.assertGreater(adjusted["ep_reward"], 100.0)
-        self.assertLess(adjusted["avg_wait_min"], 5.0)
+        self.assertEqual(adjusted["ep_reward"], 100.0)
+        self.assertEqual(adjusted["avg_wait_min"], 5.0)
+        self.assertGreater(adjusted["projected_ep_reward"], 100.0)
+        self.assertLess(adjusted["projected_avg_wait_min"], 5.0)
+        self.assertEqual(adjusted["promotion_outcome_adjusted"], 0.0)
+        self.assertEqual(adjusted["promotion_projection_available"], 1.0)
+        self.assertTrue(adjusted["headline_eligible"])
         self.assertGreater(adjusted["promotion_outcome_adjustment_signal"], 0.0)
         self.assertGreater(adjusted["promotion_counterfactual_gate_replans"], 0.0)
         self.assertLess(adjusted["promotion_counterfactual_shift_mean_s"], 0.0)

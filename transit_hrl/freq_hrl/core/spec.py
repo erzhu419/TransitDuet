@@ -9,10 +9,17 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 
-SPEC_VERSION = "freq_hrl_frozen_spec_2026_06_27"
+SPEC_VERSION = "freq_hrl_v2_spec_2026_08_03"
 
 
 REQUIRED_CLAIM_IDS = tuple(f"C{i}" for i in range(1, 10))
+
+ALLOWED_CLAIM_STATUSES = (
+    "supported",
+    "partial",
+    "not_supported",
+    "missing",
+)
 
 
 REQUIRED_FREQUENCY_FEATURES = (
@@ -87,6 +94,7 @@ class FrozenFreqHRLSpec:
     upper_forbidden_keys: tuple[str, ...] = UPPER_FORBIDDEN_KEYS
     lower_forbidden_keys: tuple[str, ...] = LOWER_FORBIDDEN_KEYS
     required_claim_ids: tuple[str, ...] = REQUIRED_CLAIM_IDS
+    allowed_claim_statuses: tuple[str, ...] = ALLOWED_CLAIM_STATUSES
 
     def to_mapping(self) -> dict[str, Any]:
         return {
@@ -97,6 +105,7 @@ class FrozenFreqHRLSpec:
             "upper_forbidden_keys": list(self.upper_forbidden_keys),
             "lower_forbidden_keys": list(self.lower_forbidden_keys),
             "required_claim_ids": list(self.required_claim_ids),
+            "allowed_claim_statuses": list(self.allowed_claim_statuses),
         }
 
 
@@ -202,21 +211,32 @@ def validate_claim_freeze(
     *,
     spec: FrozenFreqHRLSpec | None = None,
 ) -> dict[str, Any]:
-    """Validate the frozen C1-C9 claim ledger."""
+    """Validate claim identity and status without forcing an all-green ledger."""
     spec = spec or default_spec()
-    by_id = {str(row.get("claim_id", row.get("id", ""))): row for row in rows}
+    claim_ids = [str(row.get("claim_id", row.get("id", ""))) for row in rows]
+    duplicates = sorted({claim_id for claim_id in claim_ids if claim_ids.count(claim_id) > 1})
+    by_id = {claim_id: row for claim_id, row in zip(claim_ids, rows)}
     missing = [claim_id for claim_id in spec.required_claim_ids if claim_id not in by_id]
-    unsupported = [
+    invalid_status = [
         claim_id for claim_id in spec.required_claim_ids
-        if str(by_id.get(claim_id, {}).get("status", "")) != "supported"
+        if claim_id in by_id
+        and str(by_id[claim_id].get("status", "")) not in spec.allowed_claim_statuses
     ]
-    if missing or unsupported:
-        raise ValueError(f"claim freeze failed: missing={missing} unsupported={unsupported}")
+    if missing or duplicates or invalid_status:
+        raise ValueError(
+            "claim freeze failed: "
+            f"missing={missing} duplicates={duplicates} invalid_status={invalid_status}"
+        )
+    counts = {
+        status: sum(str(by_id[claim_id].get("status", "")) == status for claim_id in spec.required_claim_ids)
+        for status in spec.allowed_claim_statuses
+    }
     return {
-        "status": "supported",
+        "status": "valid",
         "version": spec.version,
         "claims": len(rows),
         "required_claims": len(spec.required_claim_ids),
+        "status_counts": counts,
     }
 
 

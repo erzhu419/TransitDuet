@@ -18,6 +18,8 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import FancyArrowPatch, Rectangle
 
+from freq_hrl.experiments.top_journal_unified_matrix import build_unified_matrix
+
 
 DEFAULT_RESULTS_ROOT = Path("transit_hrl/results")
 DEFAULT_OUTPUT_DIR = Path("transit_hrl/results/manuscript_figures_latest")
@@ -385,19 +387,31 @@ def _ci_barh(ax: plt.Axes, df: pd.DataFrame, labels: list[str], title: str) -> N
 def fig3_transit(paths: dict[str, Path], output_dir: Path, source_dir: Path) -> dict[str, Any]:
     promotion = _read_csv(paths["promotion"])
     real = _read_csv(paths["real_demand"])
-    prom = _select_checks(promotion, ["ep_reward", "avg_wait_min", "score", "shared_ppo_gate_replans"])
+    prom_names = {
+        "promotion_raw_ep_reward": "reward",
+        "promotion_raw_avg_wait_min": "wait",
+        "promotion_raw_score": "score",
+        "shared_ppo_gate_replans": "replans",
+    }
+    prom = _select_checks(promotion, list(prom_names))
+    prom["evidence_class"] = np.where(
+        prom["metric"].astype(str).str.startswith("promotion_raw_"),
+        "observed_environment_outcome",
+        "mechanism_diagnostic",
+    )
+    real_names = {
+        "ep_reward": "episode reward",
+        "native_raw_avg_wait_min": "avg wait",
+        "native_raw_native_avg_board_wait_min": "board wait",
+        "native_raw_native_alighted_pax": "alighted pax",
+        "native_raw_native_completed_throughput_pax": "completed throughput",
+        "native_raw_LowerLFDrift": "lower LF drift",
+    }
     real_main = _select_checks(
         real,
-        [
-            "control_score",
-            "ep_reward",
-            "avg_wait_min",
-            "native_avg_board_wait_min",
-            "native_alighted_pax",
-            "native_completed_throughput_pax",
-            "LowerLFDrift",
-        ],
+        list(real_names),
     )
+    real_main["evidence_class"] = "observed_environment_outcome"
     prom.to_csv(source_dir / "fig3_promotion_source.csv", index=False)
     real_main.to_csv(source_dir / "fig3_real_demand_source.csv", index=False)
 
@@ -409,24 +423,48 @@ def fig3_transit(paths: dict[str, Path], output_dir: Path, source_dir: Path) -> 
     ax_d = fig.add_subplot(gs[1, 1])
 
     _panel(ax_a, "a")
-    prom_labels = ["reward", "wait", "score", "replans"]
-    _ci_barh(ax_a, prom, prom_labels, "Native promotion CIs")
+    prom_labels = [prom_names[str(metric)] for metric in prom["metric"]]
+    _ci_barh(ax_a, prom, prom_labels, "Native promotion raw CIs")
 
     _panel(ax_b, "b")
-    wait = real_main[real_main["metric"].isin(["avg_wait_min", "native_avg_board_wait_min", "LowerLFDrift"])]
-    _ci_barh(ax_b, wait, ["avg wait", "board wait", "lower LF drift"], "Wait and leakage improvements")
+    wait = real_main[real_main["metric"].isin([
+        "native_raw_avg_wait_min",
+        "native_raw_native_avg_board_wait_min",
+        "native_raw_LowerLFDrift",
+    ])]
+    _ci_barh(
+        ax_b,
+        wait,
+        [real_names[str(metric)] for metric in wait["metric"]],
+        "Observed wait and leakage",
+    )
 
     _panel(ax_c, "c")
-    throughput = real_main[real_main["metric"].isin(["native_alighted_pax", "native_completed_throughput_pax"])]
-    _ci_barh(ax_c, throughput, ["alighted pax", "completed throughput"], "Passenger throughput")
+    throughput = real_main[real_main["metric"].isin([
+        "native_raw_native_alighted_pax",
+        "native_raw_native_completed_throughput_pax",
+    ])]
+    _ci_barh(
+        ax_c,
+        throughput,
+        [real_names[str(metric)] for metric in throughput["metric"]],
+        "Observed passenger throughput",
+    )
 
     _panel(ax_d, "d")
-    score = real_main[real_main["metric"].isin(["control_score", "ep_reward"])]
-    _ci_barh(ax_d, score, ["control score", "episode reward"], "Native real-demand score")
+    score = real_main[real_main["metric"].isin(["ep_reward"])]
+    _ci_barh(
+        ax_d,
+        score,
+        [real_names[str(metric)] for metric in score["metric"]],
+        "Observed native real-demand reward",
+    )
+    promotion_n = int(prom["n_common"].max()) if len(prom) else 0
+    real_n = int(real_main["n_common"].max()) if len(real_main) else 0
     ax_d.text(
         0.98,
         0.08,
-        "n=512 promotion pairs\nn=96 real-demand pairs",
+        f"n={promotion_n} promotion pairs\nn={real_n} real-demand pairs",
         transform=ax_d.transAxes,
         ha="right",
         va="bottom",
@@ -611,6 +649,12 @@ def build_figures(results_root: Path, output_dir: Path) -> dict[str, Any]:
     figures_dir = output_dir / "figures"
     source_dir = output_dir / "source_data"
     source_dir.mkdir(parents=True, exist_ok=True)
+    current_claims_path = source_dir / "current_raw_claims.csv"
+    pd.DataFrame(build_unified_matrix(results_root)["claims"]).to_csv(
+        current_claims_path,
+        index=False,
+    )
+    paths["claims"] = current_claims_path
     records = [
         fig1_protocol(figures_dir, source_dir),
         fig2_evidence_matrix(paths, figures_dir, source_dir),

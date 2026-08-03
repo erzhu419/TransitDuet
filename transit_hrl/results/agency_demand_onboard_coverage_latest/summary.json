@@ -1,11 +1,11 @@
 {
   "summary": {
-    "evidence_scope": "real_afc_apc_external_board_alight_load_od_plus_native_service_response",
-    "supported_boundaries": 7,
+    "evidence_scope": "partial",
+    "supported_boundaries": 6,
     "external_missing_boundaries": 3,
     "source_count": 5,
     "field_complete_data_status": "partial_external_truth_source_union",
-    "same_agency_native_control_status": "external_truth_not_control_linked"
+    "same_agency_native_control_status": "native_control_outcome_unresolved"
   },
   "source_coverage": [
     {
@@ -361,23 +361,7 @@
       }
     ],
     "key_checks": {
-      "score": {
-        "check": "native_real_demand_control_score",
-        "metric": "control_score",
-        "treatment": "native_real_freqhrl",
-        "control": "native_real_interval",
-        "direction": "increase",
-        "n_common": 96,
-        "delta_mean": 3496.2557979548237,
-        "delta_ci95_low": 2982.947736495579,
-        "delta_ci95_high": 3988.301337893005,
-        "improvement_mean": 3496.2557979548237,
-        "improvement_ci95_low": 2934.585852256747,
-        "improvement_ci95_high": 4027.2998713745774,
-        "win_rate": 1.0,
-        "sign_p_value": 2.5243548967072524e-29,
-        "status": "supported"
-      },
+      "score": {},
       "reward": {
         "check": "native_real_demand_ep_reward",
         "metric": "ep_reward",
@@ -396,55 +380,55 @@
         "status": "supported"
       },
       "board_wait": {
-        "check": "native_real_demand_native_avg_board_wait_min",
-        "metric": "native_avg_board_wait_min",
+        "check": "native_real_demand_native_raw_native_avg_board_wait_min",
+        "metric": "native_raw_native_avg_board_wait_min",
         "treatment": "native_real_freqhrl",
         "control": "native_real_interval",
         "direction": "decrease",
         "n_common": 96,
-        "delta_mean": -0.17596288660765935,
-        "delta_ci95_low": -0.17768862912478525,
-        "delta_ci95_high": -0.17401275120262616,
-        "improvement_mean": 0.17596288660765935,
-        "improvement_ci95_low": 0.17412352267208914,
-        "improvement_ci95_high": 0.17772517905202356,
-        "win_rate": 1.0,
-        "sign_p_value": 2.5243548967072524e-29,
-        "status": "supported"
+        "delta_mean": 5.232298196100604e-06,
+        "delta_ci95_low": 0.0,
+        "delta_ci95_high": 1.5052658959328427e-05,
+        "improvement_mean": -5.232298196100604e-06,
+        "improvement_ci95_low": -1.5052658959328427e-05,
+        "improvement_ci95_high": 0.0,
+        "win_rate": 0.0,
+        "sign_p_value": 0.5,
+        "status": "not_supported"
       },
       "alighted": {
-        "check": "native_real_demand_native_alighted_pax",
-        "metric": "native_alighted_pax",
+        "check": "native_real_demand_native_raw_native_alighted_pax",
+        "metric": "native_raw_native_alighted_pax",
         "treatment": "native_real_freqhrl",
         "control": "native_real_interval",
         "direction": "increase",
         "n_common": 96,
-        "delta_mean": 16.75886846722443,
-        "delta_ci95_low": 16.57332075143214,
-        "delta_ci95_high": 16.92272811720712,
-        "improvement_mean": 16.75886846722443,
-        "improvement_ci95_low": 16.58332646270419,
-        "improvement_ci95_high": 16.926636757199535,
-        "win_rate": 1.0,
-        "sign_p_value": 2.5243548967072524e-29,
-        "status": "supported"
+        "delta_mean": 0.0,
+        "delta_ci95_low": 0.0,
+        "delta_ci95_high": 0.0,
+        "improvement_mean": 0.0,
+        "improvement_ci95_low": 0.0,
+        "improvement_ci95_high": 0.0,
+        "win_rate": 0.0,
+        "sign_p_value": 1.0,
+        "status": "not_supported"
       },
       "throughput": {
-        "check": "native_real_demand_native_completed_throughput_pax",
-        "metric": "native_completed_throughput_pax",
+        "check": "native_real_demand_native_raw_native_completed_throughput_pax",
+        "metric": "native_raw_native_completed_throughput_pax",
         "treatment": "native_real_freqhrl",
         "control": "native_real_interval",
         "direction": "increase",
         "n_common": 96,
-        "delta_mean": 16.75886846722443,
-        "delta_ci95_low": 16.57332075143214,
-        "delta_ci95_high": 16.92272811720712,
-        "improvement_mean": 16.75886846722443,
-        "improvement_ci95_low": 16.58332646270419,
-        "improvement_ci95_high": 16.926636757199535,
-        "win_rate": 1.0,
-        "sign_p_value": 2.5243548967072524e-29,
-        "status": "supported"
+        "delta_mean": 0.0,
+        "delta_ci95_low": 0.0,
+        "delta_ci95_high": 0.0,
+        "improvement_mean": 0.0,
+        "improvement_ci95_low": 0.0,
+        "improvement_ci95_high": 0.0,
+        "win_rate": 0.0,
+        "sign_p_value": 1.0,
+        "status": "not_supported"
       },
       "onboard_load": {
         "check": "native_real_demand_native_avg_onboard_load",
@@ -464,24 +448,25 @@
         "status": "inconclusive"
       },
       "lower_lf_drift": {
-        "check": "native_real_demand_LowerLFDrift",
-        "metric": "LowerLFDrift",
+        "check": "native_real_demand_native_raw_LowerLFDrift",
+        "metric": "native_raw_LowerLFDrift",
         "treatment": "native_real_freqhrl",
         "control": "native_real_interval",
         "direction": "decrease",
         "n_common": 96,
-        "delta_mean": -0.17265956882916442,
-        "delta_ci95_low": -0.17458390060409862,
-        "delta_ci95_high": -0.1705954439666294,
-        "improvement_mean": 0.17265956882916442,
-        "improvement_ci95_low": 0.1707038518442566,
-        "improvement_ci95_high": 0.17459646377419438,
-        "win_rate": 1.0,
-        "sign_p_value": 2.5243548967072524e-29,
-        "status": "supported"
+        "delta_mean": 5.951292752226963e-07,
+        "delta_ci95_low": -2.413240104172376e-07,
+        "delta_ci95_high": 2.0267118360853265e-06,
+        "improvement_mean": -5.951292752226963e-07,
+        "improvement_ci95_low": -2.0267118360853265e-06,
+        "improvement_ci95_high": 2.413240104172376e-07,
+        "win_rate": 0.010416666666666666,
+        "sign_p_value": 1.0,
+        "status": "not_supported"
       }
     },
-    "native_service_response_status": "supported",
+    "legacy_projection_contaminated": true,
+    "native_service_response_status": "not_supported",
     "native_onboard_loop_status": "supported",
     "native_onboard_improvement_status": "inconclusive",
     "boundary": "native simulator service loop; onboard/alighting metrics are not external ground truth unless supplied by agency data"
@@ -506,10 +491,10 @@
     {
       "id": "A3",
       "evidence_item": "native_service_response_wait_alighting_throughput",
-      "status": "supported",
-      "allowed_wording": "native public-demand service-response loop improves wait/alighting/throughput",
+      "status": "not_supported",
+      "allowed_wording": "native public-demand service-response loop is implemented; strict raw wait/alighting/throughput improvement remains unresolved",
       "forbidden_wording": "external agency alighting or onboard-load ground-truth improvement",
-      "evidence": "rows=96 seeds=48 board_wait=supported alighted=supported throughput=supported"
+      "evidence": "rows=96 seeds=48 board_wait=not_supported alighted=not_supported throughput=not_supported projection_contaminated=True"
     },
     {
       "id": "A4",
@@ -599,7 +584,7 @@
     },
     {
       "gate": "native_service_response",
-      "status": "supported",
+      "status": "not_supported",
       "required_for": "native performance loop",
       "evidence": "rows=96 seeds=48",
       "boundary": "native simulator metrics, not external ground truth by itself"
@@ -613,9 +598,9 @@
     },
     {
       "gate": "native_control_linkage",
-      "status": "external_truth_not_control_linked",
+      "status": "native_control_outcome_unresolved",
       "required_for": "full native real-demand control validation",
-      "evidence": "native_supported=True gtfs_full_fields=False external_truth_supported=True",
+      "evidence": "native_supported=False gtfs_full_fields=False external_truth_supported=True",
       "boundary": "full deployment claim requires native control driven by the same field-complete feed"
     }
   ],

@@ -32,12 +32,12 @@ Machine-checkable contract: `transit_hrl/freq_hrl/core/spec.py`. The carrier pac
 
 | claim_id | status | allowed_wording | disallowed_wording |
 | --- | --- | --- | --- |
-| C1 | supported | Native learned promotion improves reward/wait under the registered native stress artifact. | Do not claim learned promotion is universally superior under every deployment stress. |
-| C2 | supported | Native public AFC/APC demand service-response improves score, wait, alighting, and throughput in the current validation loop. | Do not claim one joint agency APC/AFC/OD/onboard-load control deployment. |
-| C3 | supported | Venue-grade L2/L3 replay infrastructure is supported on the current LOBSTER/NASDAQ TotalView-ITCH symbol sessions. | Do not claim production-scale exchange execution is solved. |
-| C4 | supported | Advanced encoder paths have cross-domain support under bounded public-market and L3 caveats. | Do not claim every advanced encoder dominates in every domain. |
-| C5 | supported | Leakage no-tradeoff is supported where same-domain drift reduction and performance gates both pass. | Do not claim no-tradeoff outside domains passing both drift and performance gates. |
-| C6 | supported | The formal appendix gives sufficient-condition results for the protocol claims. | Do not claim a universal convergence theorem. |
-| C7 | supported | Promotion improvement replicates across the current registered persistent and OD-shift stress matrices. | Do not claim all possible stress regimes are covered. |
-| C8 | supported | Baseline and ablation evidence supports frequency responsibility over non-frequency and misrouted alternatives. | Do not claim frequency features alone are the contribution. |
-| C9 | supported | Stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes. | Do not extrapolate to unregistered stress families. |
+| C1 | partial | The frozen evidence partially supports 'Native learned promotion improves reward and wait'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim learned promotion is universally superior under every deployment stress. |
+| C2 | partial | The frozen evidence partially supports 'Native real AFC/APC-profile demand improves observed score/reward and strict wait/alighting/throughput'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim one joint agency APC/AFC/OD/onboard-load control deployment. |
+| C3 | not_supported | The frozen evidence does not support 'Large-scale venue-grade L2/L3 order-book replay is validated'; report it as an unresolved target. | Do not claim production-scale exchange execution is solved. |
+| C4 | partial | The frozen evidence partially supports 'Advanced encoder evidence spans Quant and Transit'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim every advanced encoder dominates in every domain. |
+| C5 | partial | The frozen evidence partially supports 'Leakage no-tradeoff holds beyond surrogate'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim no-tradeoff outside domains passing both drift and performance gates. |
+| C6 | partial | The frozen evidence partially supports 'Formal theory appendix covers main protocol claims'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim a universal convergence theorem. |
+| C7 | not_supported | The frozen evidence does not support 'Native promotion reward/wait improvement replicates across stress regimes'; report it as an unresolved target. | Do not claim all possible stress regimes are covered. |
+| C8 | partial | The frozen evidence partially supports 'Strong baseline and ablation table supports frequency-responsibility claim'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. | Do not claim frequency features alone are the contribution. |
+| C9 | supported | Synthetic stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes. | Do not extrapolate to unregistered stress families. |

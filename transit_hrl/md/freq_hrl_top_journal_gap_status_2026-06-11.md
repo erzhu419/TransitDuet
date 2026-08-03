@@ -1,5 +1,13 @@
 # Freq-HRL Top-Journal Gap Status - 2026-06-11
 
+> **Superseded evidence ledger (2026-08-03).** The dated entries below are
+> retained only as an experiment history. They used legacy gates that admitted
+> deterministic service/promotion projections and path-existence checks. The
+> current raw-only source of truth is
+> `transit_hrl/results/top_journal_unified_matrix_latest/summary.json`: 1 of 9
+> claims is supported, 6 are partial, and 2 are not supported. No historical
+> status in this file may be quoted as the current paper result.
+
 This note records the current state after the latest native promotion, real-demand, leakage, and order-book replay updates. It is intentionally conservative: a path is marked supported only when the available paired validation supports the stated claim.
 
 ## Current Claim State
@@ -229,11 +237,9 @@ Current C3 evidence:
 - L2 supported checks: `8`
 - L3 positive checks: `8`
 
-After refreshing `top_journal_unified_matrix_latest`, all 9 rows are supported
-and 0 rows remain partial. The remaining paper work is no longer a missing
-code-path gap; it is scale/replication: larger multi-symbol, multi-session
-venue replay, deeper real agency OD/onboard-load replication, and manuscript
-presentation of claim boundaries.
+At that historical checkpoint, the legacy matrix reported 9 supported rows and
+0 partial rows. That verdict is invalid under the 2026-08-03 raw-only evidence
+policy: the small sample closes an interface test, not the large-replay claim.
 
 ## 2026-06-12 Multi-Symbol LOBSTER Extension
 
@@ -253,8 +259,10 @@ The multisymbol artifact is
 - source quality: `venue_grade_ready`
 - venue-grade claim status: `supported`
 
-`top_journal_unified_matrix_latest` remains 9 supported and 0 partial after
-switching C3 to the multisymbol artifact.
+At that historical checkpoint, the legacy matrix still reported 9 supported
+rows and 0 partial rows after switching C3 to the multisymbol artifact. The
+current fixed large-replay gate rejects this three-symbol, one-session,
+one-level artifact as under-scale.
 
 The LOBSTER runner now also accepts a `--sessions` list. The current committed
 artifact uses the public sample date `2012-06-21` for AAPL, AMZN, and GOOG, so

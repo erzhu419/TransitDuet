@@ -123,7 +123,7 @@ class ManuscriptSubmissionPackTest(unittest.TestCase):
                 md_dir=root / "md",
             )
 
-            self.assertEqual(payload["summary"]["claims"], 1)
+            self.assertEqual(payload["summary"]["claims"], 9)
             self.assertEqual(payload["summary"]["figures"], 5)
             self.assertTrue((root / "pack" / "claim_evidence_table.csv").exists())
             self.assertTrue((root / "pack" / "baseline_ablation_table.csv").exists())
@@ -136,6 +136,8 @@ class ManuscriptSubmissionPackTest(unittest.TestCase):
             self.assertIn("frequency decomposition is a responsibility-routing principle", submission)
             self.assertIn("same_agency_native_transit_control", submission)
             self.assertIn("fully validated for all real-world deployments", submission)
+            self.assertNotIn("all nine conservative evidence claims are supported", submission)
+            self.assertIn("raw-only evidence ledger", submission)
             self.assertEqual(payload["summary"]["boundary_rows"], 5)
 
 

@@ -132,13 +132,26 @@ def build_claim_freeze(claim_rows: list[dict[str, Any]]) -> list[dict[str, Any]]
             "claim": str(row.get("claim", "")),
             "frozen_boundary": str(row.get("boundary", row.get("remaining_gap", ""))),
             "evidence_artifact": str(row.get("artifact", "")),
-            "allowed_wording": _allowed_wording(claim_id, str(row.get("claim", ""))),
+            "allowed_wording": _allowed_wording(
+                claim_id,
+                str(row.get("claim", "")),
+                status=str(row.get("status", "missing")),
+            ),
             "disallowed_wording": _disallowed_wording(claim_id),
         })
     return out
 
 
-def _allowed_wording(claim_id: str, claim: str) -> str:
+def _allowed_wording(claim_id: str, claim: str, *, status: str) -> str:
+    if status == "partial":
+        return (
+            f"The frozen evidence partially supports '{claim}'; only subchecks "
+            "explicitly marked supported in the raw-only claim matrix may be stated."
+        )
+    if status == "not_supported":
+        return f"The frozen evidence does not support '{claim}'; report it as an unresolved target."
+    if status == "missing":
+        return f"No eligible frozen evidence supports '{claim}'; report the evidence as missing."
     allowed = {
         "C1": "Native learned promotion improves reward/wait under the registered native stress artifact.",
         "C2": "Native public AFC/APC demand service-response improves score, wait, alighting, and throughput in the current validation loop.",
@@ -148,7 +161,7 @@ def _allowed_wording(claim_id: str, claim: str) -> str:
         "C6": "The formal appendix gives sufficient-condition results for the protocol claims.",
         "C7": "Promotion improvement replicates across the current registered persistent and OD-shift stress matrices.",
         "C8": "Baseline and ablation evidence supports frequency responsibility over non-frequency and misrouted alternatives.",
-        "C9": "Stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes.",
+        "C9": "Synthetic stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes.",
     }
     return allowed.get(claim_id, claim)
 
@@ -624,7 +637,7 @@ def build_cs_top_venue_readiness(
             "review_axis": "single_algorithm_claim",
             "cs_expectation": "One crisp algorithmic contribution, not a domain engineering story.",
             "current_status": "paper_ready_with_boundary" if claims_supported >= 9 else "partial",
-            "evidence": f"supported_claims={claims_supported}; frozen_spec=freq_hrl_frozen_spec_2026_06_27",
+            "evidence": f"supported_claims={claims_supported}; frozen_spec={default_spec().version}",
             "next_action": "Lead with frequency-responsibility routing; keep FreqDuet as prior domain origin.",
             "venue_risk": "Rejected as incremental feature engineering if routing/credit/leakage are not foregrounded.",
         },
@@ -872,7 +885,11 @@ def write_shared_core(
         "",
         "## Reviewer-Facing Boundary",
         "",
-        "The shared core claim is supported at the training-kernel level: domain code owns rollout construction, while learning goes through `DualActorCriticPPO`, `train_dual_ppo`, or `apply_replay_updates`. A stronger final-paper claim may still report native Transit as an existing-simulator episode-loop adapter rather than pretending it is byte-identical to the synthetic rollout loop.",
+        (
+            "The v2 shared-core claim is supported."
+            if shared_core_validation.get("status") == "supported"
+            else "The v2 shared-core migration is incomplete: trading uses the asynchronous SMDP kernel, while Transit surrogate/native adapters still use legacy joint-PPO entries. This is a paper blocker, not a supported shared-core claim."
+        ),
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -940,6 +957,7 @@ def write_theory(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def write_manuscript(path: Path, claim_freeze: list[dict[str, Any]]) -> None:
+    supported = sum(row.get("status") == "supported" for row in claim_freeze)
     lines = [
         "# Frequency-Separated Hierarchical Reinforcement Learning For Time-Series Control",
         "",
@@ -947,7 +965,7 @@ def write_manuscript(path: Path, claim_freeze: list[dict[str, Any]]) -> None:
         "",
         "## Abstract",
         "",
-        "Many control problems are driven by exogenous time series that mix slow regime structure with fast residual disturbances. Generic flat policies and generic hierarchical policies can blur these responsibilities: high-level policies overreact to noise, while low-level controllers accumulate local corrections into long-horizon plan drift. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol that routes low-frequency trend and forecasts to the upper planner, high-frequency residuals to the lower controller, and persistent residual shocks to a promotion-driven replanning path. Leakage diagnostics penalize upper high-frequency oscillation and lower low-frequency drift. Across the current registered evidence matrix, Freq-HRL is supported against non-frequency, raw-history, misrouted-frequency, no-promotion, and no-leakage alternatives, with native Transit promotion, public AFC/APC demand service-response, conservative leakage no-tradeoff gates, and venue-grade L2/L3 replay paths. We present Freq-HRL as a validated protocol for exogenous time-series HRL, while reserving full deployment-scale Transit and production exchange claims for future same-agency and multi-session external validation.",
+        "Many control problems are driven by exogenous time series that mix slow regime structure with fast residual disturbances. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol with causal routing, promotion-triggered replanning, and leakage accounting. The v2 evidence policy admits only observed raw outcomes to headline claim status; deterministic outcome projections remain sensitivity analyses. The current package is therefore a research implementation under confirmatory validation, not a completed domain-general performance result.",
         "",
         "## 1. Introduction",
         "",
@@ -955,7 +973,7 @@ def write_manuscript(path: Path, claim_freeze: list[dict[str, Any]]) -> None:
         "",
         "## Claim Boundary",
         "",
-        "Allowed claim: frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.",
+        "Allowed claim: Freq-HRL implements and evaluates frequency-responsibility routing under explicit raw-outcome validation boundaries.",
         "",
         "Disallowed claims: full same-agency Transit OD/onboard-load deployment validation, production exchange execution, universal encoder dominance, and universal nonconvex actor-critic convergence.",
         "",
@@ -969,13 +987,13 @@ def write_manuscript(path: Path, claim_freeze: list[dict[str, Any]]) -> None:
         "",
         "## 4. Results",
         "",
-        "The current conservative claim matrix is fully supported under registered boundaries.",
+        f"The raw-only matrix currently supports {supported} of {len(claim_freeze)} registered claims.",
         "",
         *_md_table(claim_freeze, ["claim_id", "status", "allowed_wording"]),
         "",
         "## 5. Discussion And Limitations",
         "",
-        "The evidence supports a domain-general protocol claim, not unrestricted deployment readiness. Remaining carrier-class work is concentrated in same-agency Transit data loops, larger venue-grade market replay, stronger flat SAC/TD3 baselines, and final notation polish for the theory appendix.",
+        "The current evidence supports implementation and bounded mechanism claims. Raw native improvement, matched learned baselines, large real replay, and verified theory remain open.",
         "",
         "## Figure Plan",
         "",
@@ -1104,8 +1122,8 @@ def build_carrier_upgrade_package(
         "date": DATE_TAG,
         "claims": len(claim_freeze),
         "supported_claims": sum(1 for row in claim_freeze if row.get("status") == "supported"),
-        "shared_core_supported": sum(1 for row in shared_core if row.get("status") == "supported"),
-        "shared_core_total": len(shared_core),
+        "component_inventory_present": sum(1 for row in shared_core if row.get("status") == "supported"),
+        "component_inventory_total": len(shared_core),
         "baseline_rows": len(baseline_manifest),
         "data_scaleup_rows": len(data_scaleup),
         "proof_rows": len(proof_manifest),
@@ -1145,7 +1163,7 @@ def build_carrier_upgrade_package(
         "spec_validation": {
             "version": spec_validation["frozen_spec"]["version"],
             "claim_freeze_status": spec_validation["claim_freeze"]["status"],
-            "shared_core_status": spec_validation["shared_core"]["status"],
+            "shared_core_path_inventory_status": spec_validation["shared_core"]["status"],
         },
         "shared_core_validation": {
             "status": shared_core_validation["status"],

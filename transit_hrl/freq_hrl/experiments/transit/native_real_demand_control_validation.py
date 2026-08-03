@@ -17,6 +17,11 @@ from typing import Any
 
 import numpy as np
 
+from freq_hrl.experiments.evidence_policy import (
+    OBSERVED_EVIDENCE,
+    PROJECTION_EVIDENCE,
+    annotate_check,
+)
 from freq_hrl.experiments.statistics import (
     claim_status,
     noninferiority_status,
@@ -628,18 +633,29 @@ def apply_service_outcome_adjustment(
     row: dict[str, Any],
     adjustment: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    """Map Freq-HRL lower/upper control diagnostics into native service metrics.
+    """Compute a labelled service-response projection without changing raw outcomes.
 
     The copied native runner exposes passenger metrics but, in current real-
     demand runs, does not propagate lower HF action-prior changes into those
-    aggregate service counters.  This adapter keeps the raw counters and writes
-    a deterministic service-response estimate driven only by observed control
-    diagnostics, so claim tables can distinguish raw simulator evidence from
-    the response-adjusted control path.
+    aggregate service counters. The projection is retained for sensitivity
+    analysis, but canonical metrics remain the observed simulator outcomes.
     """
     _copy_raw_service_metrics(row)
+    row["evidence_class"] = OBSERVED_EVIDENCE
+    row["headline_eligible"] = True
+    row["native_service_adjusted"] = 0.0
+    row["service_projection_available"] = 0.0
+    row["service_projection_evidence_class"] = PROJECTION_EVIDENCE
+    row["projected_avg_wait_min"] = float(row.get("avg_wait_min", 0.0))
+    row["projected_native_avg_board_wait_min"] = float(row.get("native_avg_board_wait_min", 0.0))
+    row["projected_native_boarded_pax"] = float(row.get("native_boarded_pax", 0.0))
+    row["projected_native_alighted_pax"] = float(row.get("native_alighted_pax", 0.0))
+    row["projected_native_completed_throughput_pax"] = float(
+        row.get("native_completed_throughput_pax", 0.0)
+    )
+    row["projected_native_unalighted_pax"] = float(row.get("native_unalighted_pax", 0.0))
+    row["projected_LowerLFDrift"] = float(row.get("LowerLFDrift", 0.0))
     if not adjustment or not bool(adjustment.get("enable", False)):
-        row["native_service_adjusted"] = 0.0
         row["service_adjustment_signal"] = 0.0
         row["service_adjustment_wait_reduction_min"] = 0.0
         row["service_adjustment_board_wait_reduction_min"] = 0.0
@@ -670,24 +686,24 @@ def apply_service_outcome_adjustment(
         max(float(adjustment.get("drift_gain", 0.0)), 0.0) * signal,
     )
 
-    row["avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
-    row["native_avg_board_wait_min"] = max(
+    row["projected_avg_wait_min"] = max(float(row.get("avg_wait_min", 0.0)) - wait_reduction, 0.0)
+    row["projected_native_avg_board_wait_min"] = max(
         float(row.get("native_avg_board_wait_min", 0.0)) - board_wait_reduction,
         0.0,
     )
-    row["native_boarded_pax"] = raw_boarded + throughput_gain
-    row["native_alighted_pax"] = raw_alighted + throughput_gain
-    row["native_completed_throughput_pax"] = min(
-        float(row.get("native_boarded_pax", 0.0)),
-        float(row.get("native_alighted_pax", 0.0)),
+    row["projected_native_boarded_pax"] = raw_boarded + throughput_gain
+    row["projected_native_alighted_pax"] = raw_alighted + throughput_gain
+    row["projected_native_completed_throughput_pax"] = min(
+        float(row.get("projected_native_boarded_pax", 0.0)),
+        float(row.get("projected_native_alighted_pax", 0.0)),
     )
-    row["native_unalighted_pax"] = max(
-        float(row.get("native_boarded_pax", 0.0))
-        - float(row.get("native_alighted_pax", 0.0)),
+    row["projected_native_unalighted_pax"] = max(
+        float(row.get("projected_native_boarded_pax", 0.0))
+        - float(row.get("projected_native_alighted_pax", 0.0)),
         0.0,
     )
-    row["LowerLFDrift"] = max(raw_drift - drift_reduction, 0.0)
-    row["native_service_adjusted"] = 1.0
+    row["projected_LowerLFDrift"] = max(raw_drift - drift_reduction, 0.0)
+    row["service_projection_available"] = 1.0
     row["service_adjustment_signal"] = signal
     row["service_adjustment_wait_reduction_min"] = wait_reduction
     row["service_adjustment_board_wait_reduction_min"] = board_wait_reduction
@@ -695,6 +711,23 @@ def apply_service_outcome_adjustment(
     row["service_adjustment_lower_lf_drift_reduction"] = drift_reduction
     row["service_adjustment_boundary"] = str(adjustment.get("boundary", ""))
     return row
+
+
+def projected_control_score(row: dict[str, Any]) -> float:
+    projected = dict(row)
+    for canonical in (
+        "avg_wait_min",
+        "native_avg_board_wait_min",
+        "native_boarded_pax",
+        "native_alighted_pax",
+        "native_completed_throughput_pax",
+        "native_unalighted_pax",
+        "LowerLFDrift",
+    ):
+        key = f"projected_{canonical}"
+        if key in row:
+            projected[canonical] = row[key]
+    return control_score(projected)
 
 
 def _row_from_payload(
@@ -798,6 +831,7 @@ def _row_from_payload(
     }
     apply_service_outcome_adjustment(row, service_adjustment)
     row["control_score"] = control_score(row)
+    row["projected_control_score"] = projected_control_score(row)
     return row
 
 
@@ -813,6 +847,15 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
         ("native_completed_throughput_pax", False),
         ("native_unalighted_pax", True),
         ("native_avg_onboard_load", True),
+        ("projected_control_score", False),
+        ("projected_avg_wait_min", True),
+        ("projected_native_avg_board_wait_min", True),
+        ("projected_native_boarded_pax", False),
+        ("projected_native_alighted_pax", False),
+        ("projected_native_completed_throughput_pax", False),
+        ("projected_native_unalighted_pax", True),
+        ("projected_LowerLFDrift", True),
+        ("service_projection_available", False),
         ("native_service_adjusted", False),
         ("service_adjustment_signal", False),
         ("service_adjustment_wait_reduction_min", False),
@@ -860,11 +903,11 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
             control="native_real_interval",
             lower_is_better=lower_is_better,
         )
-        checks.append({
+        checks.append(annotate_check({
             "check": f"native_real_demand_{metric}",
             **stats,
             "status": claim_status(stats, min_pairs=int(min_pairs)),
-        })
+        }))
     control_alighted = [
         float(row.get("native_alighted_pax", 0.0))
         for row in rows
@@ -915,7 +958,7 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
             control="native_real_interval",
             lower_is_better=lower_is_better,
         )
-        checks.append({
+        checks.append(annotate_check({
             "check": check_name,
             **stats,
             "noninferiority_margin": float(margin),
@@ -924,7 +967,7 @@ def paired_checks(rows: list[dict[str, Any]], min_pairs: int = 3) -> list[dict[s
                 max_loss=float(margin),
                 min_pairs=int(min_pairs),
             ),
-        })
+        }, evidence_class=OBSERVED_EVIDENCE, headline_eligible=True))
     return checks
 
 
@@ -1178,7 +1221,11 @@ def run_validation(
         "control_profile": str(control_profile),
         "demand_scale_multiplier": float(demand_scale_multiplier),
         "variant_overrides": variants,
-        "boundary": "native simulator passenger loop with public AFC/APC profile mapping, not exact AFC/APC OD geometry",
+        "boundary": (
+            "Native simulator passenger loop with public AFC/APC profile mapping, "
+            "not exact AFC/APC OD geometry. Canonical metrics are observed raw "
+            "simulator outcomes; projected_* fields are non-headline sensitivity results."
+        ),
     }
     write_outputs(output_dir, payload)
     return payload

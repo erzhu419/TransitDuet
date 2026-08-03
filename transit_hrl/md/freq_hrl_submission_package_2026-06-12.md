@@ -4,7 +4,7 @@ Date: 2026-06-12
 
 ## One-Sentence Argument
 
-Frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.
+Freq-HRL implements frequency-responsibility routing for hierarchical time-series control; its performance claims are limited to raw observed outcomes that pass frozen confirmatory gates.
 
 ## Manuscript Thesis
 
@@ -18,39 +18,39 @@ The manuscript should keep one argumentative spine: frequency decomposition is a
 
 ## Draft Abstract
 
-Time-series control problems often couple slowly varying operating regimes with high-frequency disturbances. Conventional flat policies and generic hierarchical policies can mix these responsibilities, making recovery, attribution, and stress generalization difficult to validate. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol that routes low-frequency trend and planning signals to an upper controller, high-frequency residual control to a lower controller, and persistent shocks to a promotion-driven replanning path. The protocol includes causal frequency encoders, plan-curve actions, frequency-attributed credit, and leakage constraints that explicitly penalize responsibility drift. Across the current validation matrix, all nine conservative evidence claims are supported, including native learned promotion, native Transit real-demand service response, leakage no-tradeoff gates, baseline ablations, stress-regime coverage, public external Transit truth-source coverage, and venue-grade L2/L3 order-book replay paths. Public Transit evidence combines AFC/APC demand-driven native simulation with MBTA bus board/alight/load coverage and MTA estimated OD coverage, while order-book evidence uses LOBSTER/NASDAQ TotalView-ITCH symbol-session replay. These results support Freq-HRL as a domain-general protocol for frequency-routed time-series control, not as a completed deployment validation for every real transit agency or exchange venue.
+Time-series control problems often couple slowly varying regimes with high-frequency disturbances. We introduce Freq-HRL, a frequency-routed hierarchical control protocol with causal encoders, temporally distinct upper and lower policies, promotion-triggered replanning, and leakage accounting. The current raw-only evidence ledger supports 1 of 9 registered claims (C9); unresolved claims are C1, C2, C3, C4, C5, C6, C7, C8. Counterfactual outcome projections are reported only as sensitivity analyses and do not determine claim status. The implementation and data adapters therefore establish a research protocol under confirmatory validation, not a completed domain-general deployment result.
 
 ## Core Contributions
 
 1. A domain-general Freq-HRL protocol that separates low-frequency planning, high-frequency control, promotion-based replanning, and leakage accounting.
-2. Native Transit validation with learned promotion, wait-credit, real-demand service response, and same-domain leakage no-tradeoff gates.
+2. Native Transit paths for learned promotion, wait credit, public-demand profile replay, and raw service metrics, with unresolved effects kept explicit.
 3. Public external Transit data coverage for MBTA board/alight/load and MTA estimated OD, kept separate from native-control performance claims.
-4. Quant and order-book validation that includes baseline/ablation matrices, stress regimes, encoder variants, and venue-grade L2/L3 replay paths.
-5. A formal appendix with causal encoder, leakage, promotion, credit, paired-CI, and stress-claim boundary propositions.
+4. Quant and order-book experiment infrastructure for baselines, stress regimes, encoder variants, and L2/L3 replay, with scale limits reported.
+5. A theory scaffold with causal encoder, leakage, promotion, credit, and reporting propositions pending formal verification.
 
 ## Main Claim Table
 
 | id | status | conservative_wording | boundary |
 | --- | --- | --- | --- |
-| C1 | supported | Native learned promotion improves reward and waiting-time metrics in the current registered stress evidence. | Best native run can support the local claim; cross-stress reward/wait improvement is evaluated separately in C7. |
-| C2 | supported | Native real-demand Transit validation is supported under public AFC/APC profiles, with separate public source coverage for board/alight/load and estimated OD. | Closed for the current public AFC/APC native service-response validation and public external board/alight/load/estimated-OD source coverage. Remaining boundary: the MBTA/MTA truth files are not yet one joint agency OD/onboard-load control loop, and GTFS-ride-native replication remains optional. |
-| C3 | supported | Venue-grade L2/L3 order-book replay is supported as a reproducible replay path on three LOBSTER symbol-session pairs. | Closed for the current LOBSTER/NASDAQ TotalView-ITCH venue-grade L2/L3 smoke path; remaining work is larger multi-symbol, multi-session venue replay for final paper scale. |
-| C4 | supported | Advanced encoders have cross-domain support, with public-market and L3 rows kept as bounded or mixed evidence where appropriate. | Public market needs paired multi-window CIs; L3 remains mixed. |
-| C5 | supported | Leakage no-tradeoff is supported only where same-domain drift reduction and performance noninferiority or strict CI gates both pass. | Closed for the current native real-demand service-response and transit surrogate leakage matrix; remaining work is independent real-agency and market-data replication. |
-| C6 | supported | The formal appendix gives sufficient-condition bounds and reporting propositions rather than a universal convergence theorem. | Theory appendix now has structured theorem/proof rows; remaining work is manuscript notation polish and reviewer-facing assumption calibration. |
-| C7 | supported | Promotion reward/wait improvement replicates across the current registered persistent-stress and OD-shift matrices. | Closed for the current pre-registered persistent-stress and OD-shift promotion matrices; remaining work is broader external stress replication. |
-| C8 | supported | Frequency-responsibility evidence is supported against non-frequency, misrouted-frequency, no-promotion, and no-leakage alternatives. | Closed for the current baseline/ablation matrix; remaining work is adding native flat PPO/SAC/TD3 baselines for broader reviewer comparisons. |
-| C9 | supported | Stress-generalization support is limited to the registered stress regimes that pass paired evidence gates. | Any missing or not-supported regime must stay outside the global stress-generalization claim. |
+| C1 | partial | Native learned promotion is evaluated from observed raw reward and wait outcomes in one frozen artifact. | Run one frozen v2 native promotion protocol on untouched seeds; only raw reward and wait outcomes are eligible. |
+| C2 | partial | Native Transit uses public AFC/APC demand profiles; strict performance claims require raw simulator outcome CIs. | The frozen artifact does not support strict improvement from raw simulator outcomes. projected_* service-response estimates are sensitivity-only and cannot close this claim. |
+| C3 | not_supported | A small LOBSTER-format L2/L3 replay path is implemented; large-scale venue replay remains unvalidated. | Current artifact is a small replay path. The large-replay gate requires at least 20 paired files, 5 symbols, 5 sessions, 10k events per run, and 5 depth levels. |
+| C4 | partial | Advanced encoder evidence is mixed and requires primary-outcome support on real Quant and Transit data. | Advanced encoders need primary-outcome paired CIs on public daily/intraday market, real L3, and real-demand Transit; isolated diagnostic wins do not close C4. |
+| C5 | partial | Leakage no-tradeoff is supported only where same-domain drift reduction and performance noninferiority or strict CI gates both pass. | Native real-demand C5 uses the adaptive selector from the leakage matrix. If this remains partial, the selected profile still lacks joint drift reduction and reward/wait/alighting/throughput no-harm or strict CI support. |
+| C6 | partial | The formal appendix gives sufficient-condition bounds and reporting propositions rather than a universal convergence theorem. | Structured propositions are present, but C6 remains partial until assumptions and proofs receive an explicit verification audit. |
+| C7 | not_supported | Cross-stress promotion replication requires distinct frozen persistent-shift and OD-shift artifacts. | Scale a pre-registered OD-shift profile until reward and wait improvement CIs are both supported. |
+| C8 | partial | Frequency-responsibility evidence requires matched learned PPO/SAC/TD3 baselines in addition to heuristic ablations. | Implement and run matched v2 flat PPO, generic HRL, SAC, and TD3 baselines; heuristic ablations alone cannot support C8. |
+| C9 | supported | Synthetic stress coverage is limited to registered regimes that pass paired evidence gates. | Any missing or not-supported regime must stay outside the global stress-generalization claim. |
 
 ## Manuscript Boundary Table
 
 | item | status | allowed_wording | disallowed_wording | evidence_hook |
 | --- | --- | --- | --- | --- |
-| central_claim | supported | Frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries. | Freq-HRL is a universally optimal controller for every time-series deployment. | C1-C9 conservative claim matrix plus baseline, Transit, leakage, stress, encoder, and replay artifacts. |
+| central_claim | partial | Freq-HRL implements frequency-responsibility routing for hierarchical time-series control; its performance claims are limited to raw observed outcomes that pass frozen confirmatory gates. | Freq-HRL is a universally optimal controller for every time-series deployment. | supported_claims=1/9; raw-only unified matrix. |
 | strong_learned_baselines | registered_missing | Flat PPO/SAC/TD3 and generic HRL are registered reviewer baselines. | Flat PPO/SAC/TD3 are complete supported baselines unless paired rows are present. | [{'baseline': 'flat_ppo', 'purpose': 'strong flat on-policy learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'flat_sac', 'purpose': 'strong off-policy entropy-regularized learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'flat_td3', 'purpose': 'strong deterministic actor-critic learned policy baseline', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}, {'baseline': 'generic_hrl_ppo', 'purpose': 'non-frequency learned HRL baseline with comparable hierarchy capacity', 'registration_status': 'registered', 'evidence_status': 'registered_missing', 'required_metrics': 'sharpe,total_return,FocusScore', 'supported_metrics': '', 'metric_statuses': '{"FocusScore": "missing", "sharpe": "missing", "total_return": "missing"}', 'paper_role': 'must_complete_or_limit', 'claim_boundary': 'This row is not credited as a strong learned baseline unless paired evidence exists for all main metrics.'}] |
-| same_agency_native_transit_control | external_truth_not_control_linked | Public Transit evidence combines native public-demand service response with separate external truth-source coverage. | The current package proves one same-agency OD/onboard-load native deployment loop. | scope=real_afc_apc_external_board_alight_load_od_plus_native_service_response; field_complete=partial_external_truth_source_union |
-| venue_grade_order_book_scale | venue_grade_ready | Venue-grade L2/L3 replay infrastructure is validated on the registered symbol-session pairs. | Production exchange execution or exhaustive multi-day L2/L3 replay is solved. | pairs=3 |
-| formal_theory_scope | supported | The appendix gives sufficient-condition and reporting-boundary results. | The paper proves universal nonconvex actor-critic convergence. | theorems_or_propositions=9 |
+| same_agency_native_transit_control | native_control_outcome_unresolved | Public Transit evidence combines native public-demand service response with separate external truth-source coverage. | The current package proves one same-agency OD/onboard-load native deployment loop. | scope=partial; field_complete=partial_external_truth_source_union |
+| venue_grade_order_book_scale | not_supported | The current small L2/L3 artifact validates the replay interface only; large multi-session replay remains unresolved. | Production exchange execution or exhaustive multi-day L2/L3 replay is solved. | pairs=3 |
+| formal_theory_scope | partial | The appendix contains structured sufficient-condition statements and reporting boundaries; independent proof verification remains unresolved. | The paper proves universal nonconvex actor-critic convergence. | theorems_or_propositions=9 |
 
 ## Main Baseline And Data Facts
 
@@ -58,9 +58,9 @@ Time-series control problems often couple slowly varying operating regimes with 
 - scenario Freq-HRL-family win rate: `1.0`
 - required positive baselines: `['allfreq_alllayers', 'hrl_raw', 'no_leakage', 'no_promotion', 'swapped', 'vanilla_rl']`
 - strong learned baseline status: `registered_missing`
-- real-demand evidence scope: `real_afc_apc_external_board_alight_load_od_plus_native_service_response`
-- field-complete / same-agency native control: `partial_external_truth_source_union` / `external_truth_not_control_linked`
-- agency supported / external-missing boundaries: `7` / `3`
+- real-demand evidence scope: `partial`
+- field-complete / same-agency native control: `partial_external_truth_source_union` / `native_control_outcome_unresolved`
+- agency supported / external-missing boundaries: `6` / `3`
 - public external truth scope: `real_public_board_alight_load_and_estimated_od`
 - venue-grade L2/L3 order-book pairs: `3` with source quality `venue_grade_ready`
 

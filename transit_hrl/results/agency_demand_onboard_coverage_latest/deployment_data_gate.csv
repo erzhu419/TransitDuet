@@ -3,6 +3,6 @@ afc_station_hour_entries,supported,public demand coverage,rows=1000 stations=41,
 apc_route_boardings,supported,public route boarding coverage,rows=1000 routes=8,boardings only unless alight/load/OD columns exist
 external_truth_board_alight_load_od,supported,public truth-source field coverage,supported_boundaries=3 total=3,may combine public sources; not necessarily one same-agency control feed
 verified_gtfs_ride_board_alight_load_od,external_missing,same-agency field-complete Transit validation,agency= board_alight_rows=0 rider_trip_rows=0,requires verified real agency GTFS-ride or equivalent AVL/APC export
-native_service_response,supported,native performance loop,rows=96 seeds=48,"native simulator metrics, not external ground truth by itself"
+native_service_response,not_supported,native performance loop,rows=96 seeds=48,"native simulator metrics, not external ground truth by itself"
 same_agency_field_union,partial_external_truth_source_union,deployment-grade Transit evidence,gtfs_full_fields=False external_truth_supported=True,supported only by one verified field-complete agency feed
-native_control_linkage,external_truth_not_control_linked,full native real-demand control validation,native_supported=True gtfs_full_fields=False external_truth_supported=True,full deployment claim requires native control driven by the same field-complete feed
+native_control_linkage,native_control_outcome_unresolved,full native real-demand control validation,native_supported=False gtfs_full_fields=False external_truth_supported=True,full deployment claim requires native control driven by the same field-complete feed

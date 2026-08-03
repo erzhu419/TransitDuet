@@ -2,8 +2,8 @@
 
 This ledger separates observed agency demand from native simulator service metrics and external truth-source coverage.  Public MBTA and MTA truth sources close data-availability boundaries only for the fields they expose; they do not by themselves prove native control improvement on those exact files.
 
-- overall scope: `real_afc_apc_external_board_alight_load_od_plus_native_service_response`
-- supported boundary rows: `7`
+- overall scope: `partial`
+- supported boundary rows: `6`
 - external-missing boundary rows: `3`
 
 ## Source Coverage
@@ -22,7 +22,7 @@ This ledger separates observed agency demand from native simulator service metri
 |---|---|---|---|---|---|
 | A1 | real_afc_station_hour_demand | supported | real AFC-style station-hour entry demand | real OD or onboard-load ground truth | rows=1000 stations=41 time_bins=25 |
 | A2 | real_apc_route_boarding_demand | supported | real APC-style route boarding demand | real onboard occupancy, alighting, or OD ground truth unless columns exist | rows=1000 routes=8 route_time_bins=1000 |
-| A3 | native_service_response_wait_alighting_throughput | supported | native public-demand service-response loop improves wait/alighting/throughput | external agency alighting or onboard-load ground-truth improvement | rows=96 seeds=48 board_wait=supported alighted=supported throughput=supported |
+| A3 | native_service_response_wait_alighting_throughput | not_supported | native public-demand service-response loop is implemented; strict raw wait/alighting/throughput improvement remains unresolved | external agency alighting or onboard-load ground-truth improvement | rows=96 seeds=48 board_wait=not_supported alighted=not_supported throughput=not_supported projection_contaminated=True |
 | A4 | native_onboard_load_loop | supported | native onboard-load metric is recorded and audited | native onboard-load improvement is supported if CI is inconclusive | onboard_improvement=inconclusive |
 | A5 | real_gtfs_ride_board_alight | external_missing | real stop-level board/alight validation when GTFS-ride board_alight is supplied | real alighting ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_alightings=False source_kind=unknown source_verified=False |
 | A6 | real_gtfs_ride_onboard_load | external_missing | real onboard-load validation when GTFS-ride load_count/current_load is supplied | real onboard-load ground truth for the current AFC/APC-only cache | board_alight_rows=0 has_onboard_load=False source_kind=unknown source_verified=False |
@@ -33,7 +33,7 @@ This ledger separates observed agency demand from native simulator service metri
 
 ## Deployment Data Gate
 
-- same-agency native control status: `external_truth_not_control_linked`
+- same-agency native control status: `native_control_outcome_unresolved`
 - field-complete data status: `partial_external_truth_source_union`
 
 | gate | status | required for | evidence | boundary |
@@ -42,14 +42,14 @@ This ledger separates observed agency demand from native simulator service metri
 | apc_route_boardings | supported | public route boarding coverage | rows=1000 routes=8 | boardings only unless alight/load/OD columns exist |
 | external_truth_board_alight_load_od | supported | public truth-source field coverage | supported_boundaries=3 total=3 | may combine public sources; not necessarily one same-agency control feed |
 | verified_gtfs_ride_board_alight_load_od | external_missing | same-agency field-complete Transit validation | agency= board_alight_rows=0 rider_trip_rows=0 | requires verified real agency GTFS-ride or equivalent AVL/APC export |
-| native_service_response | supported | native performance loop | rows=96 seeds=48 | native simulator metrics, not external ground truth by itself |
+| native_service_response | not_supported | native performance loop | rows=96 seeds=48 | native simulator metrics, not external ground truth by itself |
 | same_agency_field_union | partial_external_truth_source_union | deployment-grade Transit evidence | gtfs_full_fields=False external_truth_supported=True | supported only by one verified field-complete agency feed |
-| native_control_linkage | external_truth_not_control_linked | full native real-demand control validation | native_supported=True gtfs_full_fields=False external_truth_supported=True | full deployment claim requires native control driven by the same field-complete feed |
+| native_control_linkage | native_control_outcome_unresolved | full native real-demand control validation | native_supported=False gtfs_full_fields=False external_truth_supported=True | full deployment claim requires native control driven by the same field-complete feed |
 
 ## Native Service Metrics
 
 - variant: `native_real_freqhrl`
 - rows: `96`
 - seeds: `48`
-- service-response status: `supported`
+- service-response status: `not_supported`
 - onboard improvement status: `inconclusive`

@@ -4,7 +4,7 @@ Draft date: 2026-06-27
 
 ## Abstract
 
-Many control problems are driven by exogenous time series that mix slow regime structure with fast residual disturbances. Generic flat policies and generic hierarchical policies can blur these responsibilities: high-level policies overreact to noise, while low-level controllers accumulate local corrections into long-horizon plan drift. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol that routes low-frequency trend and forecasts to the upper planner, high-frequency residuals to the lower controller, and persistent residual shocks to a promotion-driven replanning path. Leakage diagnostics penalize upper high-frequency oscillation and lower low-frequency drift. Across the current registered evidence matrix, Freq-HRL is supported against non-frequency, raw-history, misrouted-frequency, no-promotion, and no-leakage alternatives, with native Transit promotion, public AFC/APC demand service-response, conservative leakage no-tradeoff gates, and venue-grade L2/L3 replay paths. We present Freq-HRL as a validated protocol for exogenous time-series HRL, while reserving full deployment-scale Transit and production exchange claims for future same-agency and multi-session external validation.
+Many control problems are driven by exogenous time series that mix slow regime structure with fast residual disturbances. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol with causal routing, promotion-triggered replanning, and leakage accounting. The v2 evidence policy admits only observed raw outcomes to headline claim status; deterministic outcome projections remain sensitivity analyses. The current package is therefore a research implementation under confirmatory validation, not a completed domain-general performance result.
 
 ## 1. Introduction
 
@@ -12,7 +12,7 @@ The paper's core claim is narrow: frequency decomposition is not merely a repres
 
 ## Claim Boundary
 
-Allowed claim: frequency-responsibility routing improves hierarchical reinforcement learning for non-stationary time-series control under the registered paired validation boundaries.
+Allowed claim: Freq-HRL implements and evaluates frequency-responsibility routing under explicit raw-outcome validation boundaries.
 
 Disallowed claims: full same-agency Transit OD/onboard-load deployment validation, production exchange execution, universal encoder dominance, and universal nonconvex actor-critic convergence.
 
@@ -26,23 +26,23 @@ Experiments are organized around claim boundaries rather than isolated metrics: 
 
 ## 4. Results
 
-The current conservative claim matrix is fully supported under registered boundaries.
+The raw-only matrix currently supports 1 of 9 registered claims.
 
 | claim_id | status | allowed_wording |
 | --- | --- | --- |
-| C1 | supported | Native learned promotion improves reward/wait under the registered native stress artifact. |
-| C2 | supported | Native public AFC/APC demand service-response improves score, wait, alighting, and throughput in the current validation loop. |
-| C3 | supported | Venue-grade L2/L3 replay infrastructure is supported on the current LOBSTER/NASDAQ TotalView-ITCH symbol sessions. |
-| C4 | supported | Advanced encoder paths have cross-domain support under bounded public-market and L3 caveats. |
-| C5 | supported | Leakage no-tradeoff is supported where same-domain drift reduction and performance gates both pass. |
-| C6 | supported | The formal appendix gives sufficient-condition results for the protocol claims. |
-| C7 | supported | Promotion improvement replicates across the current registered persistent and OD-shift stress matrices. |
-| C8 | supported | Baseline and ablation evidence supports frequency responsibility over non-frequency and misrouted alternatives. |
-| C9 | supported | Stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes. |
+| C1 | partial | The frozen evidence partially supports 'Native learned promotion improves reward and wait'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C2 | partial | The frozen evidence partially supports 'Native real AFC/APC-profile demand improves observed score/reward and strict wait/alighting/throughput'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C3 | not_supported | The frozen evidence does not support 'Large-scale venue-grade L2/L3 order-book replay is validated'; report it as an unresolved target. |
+| C4 | partial | The frozen evidence partially supports 'Advanced encoder evidence spans Quant and Transit'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C5 | partial | The frozen evidence partially supports 'Leakage no-tradeoff holds beyond surrogate'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C6 | partial | The frozen evidence partially supports 'Formal theory appendix covers main protocol claims'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C7 | not_supported | The frozen evidence does not support 'Native promotion reward/wait improvement replicates across stress regimes'; report it as an unresolved target. |
+| C8 | partial | The frozen evidence partially supports 'Strong baseline and ablation table supports frequency-responsibility claim'; only subchecks explicitly marked supported in the raw-only claim matrix may be stated. |
+| C9 | supported | Synthetic stress coverage is supported for the registered stationary, burst, persistent, and OOD regimes. |
 
 ## 5. Discussion And Limitations
 
-The evidence supports a domain-general protocol claim, not unrestricted deployment readiness. Remaining carrier-class work is concentrated in same-agency Transit data loops, larger venue-grade market replay, stronger flat SAC/TD3 baselines, and final notation polish for the theory appendix.
+The current evidence supports implementation and bounded mechanism claims. Raw native improvement, matched learned baselines, large real replay, and verified theory remain open.
 
 ## Figure Plan
 

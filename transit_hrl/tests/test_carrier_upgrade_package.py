@@ -22,7 +22,11 @@ class CarrierUpgradePackageTest(unittest.TestCase):
 
             self.assertEqual(len(payload["documents"]), 10)
             self.assertGreaterEqual(payload["claims"], 1)
-            self.assertGreaterEqual(payload["shared_core_supported"], 5)
+            self.assertGreaterEqual(payload["component_inventory_present"], 5)
+            self.assertEqual(
+                payload["component_inventory_present"],
+                payload["component_inventory_total"],
+            )
 
             for path in payload["documents"].values():
                 doc = Path(path)
@@ -46,21 +50,29 @@ class CarrierUpgradePackageTest(unittest.TestCase):
             self.assertTrue(all(row["status"] == "formalized_statement" for row in proof_rows))
 
             spec_validation = json.loads((out / "spec_validation.json").read_text(encoding="utf-8"))
-            self.assertEqual(spec_validation["claim_freeze"]["status"], "supported")
+            self.assertEqual(spec_validation["claim_freeze"]["status"], "valid")
             self.assertEqual(spec_validation["shared_core"]["status"], "supported")
             self.assertEqual(
                 payload["spec_validation"]["version"],
-                "freq_hrl_frozen_spec_2026_06_27",
+                "freq_hrl_v2_spec_2026_08_03",
             )
             shared_core_validation = json.loads(
                 (out / "shared_core_validation.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(shared_core_validation["status"], "supported")
+            self.assertEqual(shared_core_validation["status"], "partial")
             self.assertEqual(shared_core_validation["core_boundary"]["violations"], [])
             self.assertEqual(
                 payload["shared_core_validation"]["status"],
-                "supported",
+                "partial",
             )
+            self.assertNotIn("shared_core_supported", payload)
+            with (out / "claim_freeze.csv").open(encoding="utf-8") as f:
+                claim_freeze = {
+                    row["claim_id"]: row
+                    for row in csv.DictReader(f)
+                }
+            self.assertIn("does not support", claim_freeze["C3"]["allowed_wording"])
+            self.assertIn("does not support", claim_freeze["C7"]["allowed_wording"])
             with (out / "scheduler_seed_manifest.csv").open("r", newline="", encoding="utf-8") as f:
                 seed_rows = list(csv.DictReader(f))
             self.assertTrue(any(row["artifact"].startswith("native_promotion") for row in seed_rows))

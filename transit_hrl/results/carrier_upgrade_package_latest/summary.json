@@ -1,9 +1,9 @@
 {
   "date": "2026-06-27",
   "claims": 9,
-  "supported_claims": 9,
-  "shared_core_supported": 9,
-  "shared_core_total": 9,
+  "supported_claims": 1,
+  "component_inventory_present": 9,
+  "component_inventory_total": 9,
   "baseline_rows": 14,
   "data_scaleup_rows": 5,
   "proof_rows": 9,
@@ -52,13 +52,13 @@
     "shared_core_validation": "transit_hrl/results/carrier_upgrade_package_latest/shared_core_validation.json"
   },
   "spec_validation": {
-    "version": "freq_hrl_frozen_spec_2026_06_27",
-    "claim_freeze_status": "supported",
-    "shared_core_status": "supported"
+    "version": "freq_hrl_v2_spec_2026_08_03",
+    "claim_freeze_status": "valid",
+    "shared_core_path_inventory_status": "supported"
   },
   "shared_core_validation": {
-    "status": "supported",
-    "checked_files": 24,
+    "status": "partial",
+    "checked_files": 25,
     "adapter_entries": 4,
     "boundary_violations": 0
   },

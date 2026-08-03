@@ -32,7 +32,7 @@ class FrozenSpecTest(unittest.TestCase):
 
     def test_default_spec_freezes_c1_to_c9(self):
         spec = default_spec()
-        self.assertEqual(spec.version, "freq_hrl_frozen_spec_2026_06_27")
+        self.assertEqual(spec.version, "freq_hrl_v2_spec_2026_08_03")
         self.assertEqual(spec.required_claim_ids, tuple(f"C{i}" for i in range(1, 10)))
         self.assertIn("x_high", spec.upper_forbidden_keys)
         self.assertIn("x_low_forecast", spec.lower_forbidden_keys)
@@ -70,9 +70,18 @@ class FrozenSpecTest(unittest.TestCase):
             {"claim_id": f"C{i}", "status": "supported"}
             for i in range(1, 10)
         ]
-        self.assertEqual(validate_claim_freeze(rows)["status"], "supported")
+        self.assertEqual(validate_claim_freeze(rows)["status"], "valid")
+        mixed = [
+            {"claim_id": f"C{i}", "status": "supported" if i == 9 else "partial"}
+            for i in range(1, 10)
+        ]
+        result = validate_claim_freeze(mixed)
+        self.assertEqual(result["status_counts"]["supported"], 1)
+        self.assertEqual(result["status_counts"]["partial"], 8)
         with self.assertRaises(ValueError):
             validate_claim_freeze(rows[:-1])
+        with self.assertRaises(ValueError):
+            validate_claim_freeze(rows + [rows[-1]])
 
         audit_rows = [
             {"path": "transit_hrl/freq_hrl/core/types.py"},

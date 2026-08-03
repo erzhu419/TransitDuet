@@ -35,26 +35,26 @@ ADAPTER_EVIDENCE = (
     AdapterEvidenceSpec(
         adapter="trading_ppo",
         path=Path("transit_hrl/freq_hrl/experiments/trading/ppo_actor_critic.py"),
-        required_symbol="train_dual_ppo",
-        role="Quant/trading rollout adapter calls the shared dual-level PPO loop.",
+        required_symbol="train_frequency_separated_ppo",
+        role="Trading Freq-HRL calls the asynchronous SMDP training loop.",
     ),
     AdapterEvidenceSpec(
         adapter="transit_surrogate_ppo",
         path=Path("transit_hrl/freq_hrl/experiments/transit/ppo_surrogate.py"),
-        required_symbol="train_dual_ppo",
-        role="Transit surrogate rollout adapter calls the same shared dual-level PPO loop.",
+        required_symbol="train_frequency_separated_ppo",
+        role="Transit surrogate must migrate to the asynchronous SMDP loop.",
     ),
     AdapterEvidenceSpec(
         adapter="transit_native_replay_update",
         path=Path("transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py"),
-        required_symbol="apply_replay_updates",
-        role="Native Transit episode loop delegates PPO replay updates to the shared RL kernel.",
+        required_symbol="apply_smdp_updates",
+        role="Native Transit must update separate upper and lower SMDP trajectories.",
     ),
     AdapterEvidenceSpec(
         adapter="transit_native_actor_core",
         path=Path("transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py"),
-        required_symbol="DualActorCriticPPO",
-        role="Native Transit bridge instantiates the shared upper/lower actor-critic.",
+        required_symbol="FrequencySeparatedActorCriticPPO",
+        role="Native Transit bridge must instantiate the v2 frequency-separated actor-critic.",
     ),
 )
 
@@ -94,6 +94,16 @@ def _called_names(tree: ast.AST) -> set[str]:
     return names
 
 
+def _imported_names(tree: ast.AST) -> set[str]:
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.update(alias.asname or alias.name.rsplit(".", 1)[-1] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            names.update(alias.asname or alias.name for alias in node.names)
+    return names
+
+
 def audit_core_import_boundaries(source_root: Path = Path(".")) -> dict[str, Any]:
     """Check that core/encoder/RL modules do not import domain code."""
     violations: list[dict[str, Any]] = []
@@ -125,12 +135,12 @@ def audit_adapter_shared_entries(source_root: Path = Path(".")) -> list[dict[str
         if path.exists():
             tree = _parse_python(path)
             calls = _called_names(tree)
-            text = path.read_text(encoding="utf-8")
-            has_symbol = spec.required_symbol in calls or spec.required_symbol in text
+            imports = _imported_names(tree)
+            has_symbol = spec.required_symbol in calls and spec.required_symbol in imports
             status = "supported" if has_symbol else "failed"
             evidence = (
-                f"`{spec.required_symbol}` is present in adapter source"
-                if has_symbol else f"`{spec.required_symbol}` was not found in adapter source"
+                f"`{spec.required_symbol}` is imported and called"
+                if has_symbol else f"`{spec.required_symbol}` is not both imported and called"
             )
         rows.append({
             "adapter": spec.adapter,
@@ -148,14 +158,21 @@ def audit_shared_training_core(source_root: Path = Path(".")) -> dict[str, Any]:
     boundary = audit_core_import_boundaries(source_root)
     adapters = audit_adapter_shared_entries(source_root)
     adapter_status = all(row["status"] == "supported" for row in adapters)
-    status = "supported" if boundary["status"] == "supported" and adapter_status else "failed"
+    status = (
+        "supported"
+        if boundary["status"] == "supported" and adapter_status
+        else "partial"
+        if boundary["status"] == "supported" and any(row["status"] == "supported" for row in adapters)
+        else "failed"
+    )
     return {
         "status": status,
         "core_boundary": boundary,
         "adapter_evidence": adapters,
         "boundary_statement": (
             "Core/encoder/RL modules stay domain-agnostic; Quant and Transit "
-            "adapters collect domain rollouts and delegate learning to shared "
-            "DualActorCriticPPO, train_dual_ppo, or apply_replay_updates."
+            "adapters must collect separate upper/lower trajectories and delegate "
+            "learning to FrequencySeparatedActorCriticPPO v2. Legacy joint-PPO "
+            "entries do not satisfy this audit."
         ),
     }

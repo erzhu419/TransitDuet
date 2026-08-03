@@ -16,7 +16,7 @@ Review risk: Avoid implying a universal convergence theorem; label assumptions a
 
 ## Fig. 2: Claim and ablation evidence matrix
 
-Conclusion: The current evidence matrix is fully supported under conservative claim boundaries.
+Conclusion: The matrix separates supported, partial, missing, and projection-ineligible evidence.
 
 Panels: A: C1-C9 claim matrix; B: baseline/ablation deltas; C: stress-regime coverage; D: unsupported or bounded rows.
 
@@ -26,9 +26,9 @@ Review risk: Show no-promotion override as native promotion evidence, not as a r
 
 ## Fig. 3: Native Transit promotion and real-demand service response
 
-Conclusion: Native Transit evidence supports wait/reward promotion claims and service-response improvements under public AFC/APC demand profiles.
+Conclusion: Raw native reward, wait, alighting, throughput, and leakage outcomes define the current claim boundary.
 
-Panels: A: promotion reward/wait CIs; B: real-demand score/wait/alighting/throughput CIs; C: service-response signal; D: claim boundary notes.
+Panels: A: raw promotion reward/wait CIs; B: raw real-demand wait/leakage CIs; C: raw throughput CIs; D: raw reward CI.
 
 Primary artifacts: `transit_native_promotion_v47_odshift_wait_first_512seed_summaryonly; transit_native_real_demand_service_response_v7_48pair_merged`
 
@@ -46,7 +46,7 @@ Review risk: Separate observed load/source coverage from Freq-HRL-improved load 
 
 ## Fig. 5: Order-book replay and encoder generalization
 
-Conclusion: The trading path supports venue-grade replay infrastructure and cross-domain encoder evidence, with L3 and public-market rows bounded.
+Conclusion: The trading path currently provides a small replay implementation and mixed encoder evidence.
 
 Panels: A: L2/L3 manifest coverage; B: matching/replay semantics; C: encoder domain matrix; D: execution sensitivity table.
 

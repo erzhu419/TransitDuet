@@ -209,7 +209,7 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
             0.0,
         )
 
-    def test_service_outcome_adjustment_preserves_raw_and_improves_service_proxy(self):
+    def test_service_projection_never_overwrites_observed_native_outcomes(self):
         row = {
             "ep_reward": -100.0,
             "avg_wait_min": 10.0,
@@ -242,12 +242,18 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
         })
         self.assertEqual(adjusted["native_raw_avg_wait_min"], 10.0)
         self.assertEqual(adjusted["native_raw_native_alighted_pax"], 998.0)
-        self.assertLess(adjusted["avg_wait_min"], 10.0)
-        self.assertLess(adjusted["native_avg_board_wait_min"], 7.5)
-        self.assertGreater(adjusted["native_completed_throughput_pax"], 998.0)
-        self.assertLess(adjusted["LowerLFDrift"], 0.80)
+        self.assertEqual(adjusted["avg_wait_min"], 10.0)
+        self.assertEqual(adjusted["native_avg_board_wait_min"], 7.5)
+        self.assertEqual(adjusted["native_completed_throughput_pax"], 998.0)
+        self.assertEqual(adjusted["LowerLFDrift"], 0.80)
+        self.assertLess(adjusted["projected_avg_wait_min"], 10.0)
+        self.assertLess(adjusted["projected_native_avg_board_wait_min"], 7.5)
+        self.assertGreater(adjusted["projected_native_completed_throughput_pax"], 998.0)
+        self.assertLess(adjusted["projected_LowerLFDrift"], 0.80)
         self.assertGreater(adjusted["service_adjustment_signal"], 0.0)
-        self.assertEqual(adjusted["native_service_adjusted"], 1.0)
+        self.assertEqual(adjusted["native_service_adjusted"], 0.0)
+        self.assertEqual(adjusted["service_projection_available"], 1.0)
+        self.assertTrue(adjusted["headline_eligible"])
 
     def test_control_score_penalizes_completed_throughput_loss(self):
         base = {
@@ -384,9 +390,14 @@ class NativeRealDemandControlValidationTest(unittest.TestCase):
                 min_pairs=1,
             )
             freq = next(row for row in merged["rows"] if row["variant"] == "native_real_freqhrl")
-            self.assertEqual(freq["native_service_adjusted"], 1.0)
+            self.assertEqual(freq["native_service_adjusted"], 0.0)
+            self.assertEqual(freq["service_projection_available"], 1.0)
             self.assertGreater(freq["service_adjustment_signal"], 0.0)
-            self.assertLess(freq["native_avg_board_wait_min"], freq["native_raw_native_avg_board_wait_min"])
+            self.assertEqual(freq["native_avg_board_wait_min"], freq["native_raw_native_avg_board_wait_min"])
+            self.assertLess(
+                freq["projected_native_avg_board_wait_min"],
+                freq["native_raw_native_avg_board_wait_min"],
+            )
 
 
 if __name__ == "__main__":
