@@ -33,6 +33,24 @@ class FrequencyCreditConservationTest(unittest.TestCase):
         tracker.update({(3, True): 100})
         self.assertAlmostEqual(low + high, 1.0)
 
+    def test_offline_credit_label_does_not_leak_into_deployable_state(self):
+        tracker = DemandFrequencyTracker(
+            update_interval_s=60.0,
+            bin_sec=60.0,
+            method="harmonic",
+            fourier_k=0,
+        )
+
+        tracker.causal_arrival_band_shares(
+            9,
+            False,
+            observed_count=4,
+            observation_interval_s=60.0,
+            register_state=False,
+        )
+
+        self.assertNotIn((9, False), tracker.local_states)
+
     def test_wait_and_journey_bands_are_exactly_conserved(self):
         station = SimpleNamespace(station_name="A")
         destination = SimpleNamespace(station_name="B")

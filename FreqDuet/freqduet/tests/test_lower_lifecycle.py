@@ -166,6 +166,22 @@ class LowerLifecycleTest(unittest.TestCase):
         self.assertAlmostEqual(reward, expected_reward)
         self.assertAlmostEqual(cost, (90.0 / 360.0) ** 2)
 
+    def test_v4_reward_uses_only_exact_forward_arrival_headway(self):
+        bus = Bus.__new__(Bus)
+        bus.forward_bus = [object()]
+        bus.backward_bus = [object()]
+        bus.forward_headway = 450.0
+        bus.backward_headway = 30.0
+        bus.forward_headway_source = "arrival_event"
+        bus._headway_reward_mode = "forward_event_only"
+
+        reward, cost = bus._headway_reward_cost(360.0)
+
+        self.assertAlmostEqual(reward, -0.25)
+        self.assertAlmostEqual(cost, 0.25 ** 2)
+        bus.forward_headway_source = "spatial_fallback"
+        self.assertEqual(bus._headway_reward_cost(360.0), (0.0, 0.0))
+
     def test_lower_headway_uses_prior_same_stop_arrival_causally(self):
         recorder = HeadwayEventRecorder()
         recorder.record(7, True, 100.0, 0)

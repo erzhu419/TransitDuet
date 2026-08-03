@@ -534,6 +534,7 @@ class DemandFrequencyTracker:
         direction,
         observed_count,
         observation_interval_s=None,
+        register_state=True,
     ):
         """Partition a just-observed arrival batch using the pre-update prior.
 
@@ -546,7 +547,12 @@ class DemandFrequencyTracker:
         if count <= 0.0:
             return 1.0, 0.0
         key = (int(station_id), bool(direction))
-        state = self._get_local_state(key)
+        state = self.local_states.get(key)
+        if state is None:
+            if register_state:
+                state = self._get_local_state(key)
+            else:
+                state = self._new_state(self._prior_for("local", key))
         interval_s = (
             self.update_interval_s
             if observation_interval_s is None

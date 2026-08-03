@@ -64,6 +64,16 @@ class env_bus(object):
         )
         self.headway_state_mode = 'arrival_event'
         self.lower_state_input_schema = 'legacy_headway_deviation'
+        self.lower_observation_contract = str(self.env_config.get(
+            'observation_contract', 'latent_oracle_legacy')).strip().lower()
+        self.headway_reward_mode = str(self.env_config.get(
+            'headway_reward_mode', 'symmetric_legacy')).strip().lower()
+        if self.lower_observation_contract not in {
+                'latent_oracle_legacy', 'deployable_apc_avl_v4'}:
+            raise ValueError('unknown lower observation contract')
+        if self.headway_reward_mode not in {
+                'symmetric_legacy', 'forward_event_only'}:
+            raise ValueError('unknown lower headway reward mode')
         
         self.time_step = args["time_step"]
         self.passenger_update_freq = args["passenger_state_update_freq"]
@@ -130,6 +140,7 @@ class env_bus(object):
         self.frequency_upper_enabled = False
         self.frequency_lower_enabled = False
         self.frequency_replace_upper_demand = True
+        self.frequency_observation_source = 'latent_arrivals'
         self.frequency_tracker = None
         self.frequency_logger = None
         self.frequency_logging_enabled = False
@@ -168,6 +179,7 @@ class env_bus(object):
             'target_default': 0,
         }
         self._measurement_details = {}
+        self._invalid_headway_decisions_masked = 0
 
     def _period_hour(self, value):
         if hasattr(value, 'hour'):
@@ -291,6 +303,7 @@ class env_bus(object):
         self._completed_trip_ids = set()
         self._measurement_details = {}
         self._done_reason = None
+        self._invalid_headway_decisions_masked = 0
         service_hours = range(
             self._service_start_hour, self._service_end_hour + 1)
 
@@ -684,6 +697,9 @@ class env_bus(object):
                             station.direction,
                             new_count,
                             observation_interval_s=self.passenger_update_freq,
+                            register_state=(
+                                self.frequency_observation_source
+                                == 'latent_arrivals'),
                         )
                     )
                     for passenger in station.total_passenger[passenger_start:]:
@@ -699,7 +715,8 @@ class env_bus(object):
                         for od_key, od_count in od_counts.items():
                             freq_od_arrivals[od_key] = (
                                 freq_od_arrivals.get(od_key, 0) + int(od_count))
-            if self.frequency_enabled and self.frequency_tracker is not None:
+            if (self.frequency_enabled and self.frequency_tracker is not None
+                    and self.frequency_observation_source == 'latent_arrivals'):
                 prev_freq_updates = int(self.frequency_tracker.total_updates)
                 self.frequency_tracker.update(freq_arrivals, freq_od_arrivals)
                 bin_applied = int(self.frequency_tracker.total_updates) > prev_freq_updates
@@ -714,6 +731,7 @@ class env_bus(object):
             self.lower_context_gate_value = self._lower_context_gate_value()
             # station_state.append(len(station.waiting_passengers))
         # update bus state
+        apc_frequency_counts = {}
         for bus in self.bus_all:
             if bus.on_route:
                 self._ensure_agent_slot(bus.bus_id, action)
@@ -741,13 +759,26 @@ class env_bus(object):
                               if self.headway_state_mode == 'arrival_event'
                               else None),
                           lower_state_input_schema=(
-                              self.lower_state_input_schema))
+                              self.lower_state_input_schema),
+                          lower_observation_contract=(
+                              self.lower_observation_contract),
+                          headway_reward_mode=self.headway_reward_mode)
+                if getattr(bus, '_invalid_headway_mask_time', None) == float(
+                        self.current_time):
+                    self._invalid_headway_decisions_masked += 1
                 if was_on_route and not bus.on_route:
                     self._completed_trip_ids.add(arrival_trip_id)
                 if (bus.last_board_time == self.current_time
                         and previous_board_time != bus.last_board_time
                         and (self.include_terminal_headways
                              or int(arrival_station.station_type) != 0)):
+                    if self.frequency_observation_source == 'apc_boardings':
+                        apc_key = (
+                            int(arrival_station.station_id), arrival_direction)
+                        apc_frequency_counts[apc_key] = (
+                            apc_frequency_counts.get(apc_key, 0)
+                            + int(bus.last_board_count)
+                        )
                     source = str(getattr(
                         bus, 'forward_headway_source', 'target_default'))
                     if source not in self._headway_state_source_counts:
@@ -760,6 +791,23 @@ class env_bus(object):
                         trip_id=arrival_trip_id,
                         target_headway_s=float(target_hw),
                     )
+
+        if (self.frequency_enabled and self.frequency_tracker is not None
+                and self.frequency_observation_source == 'apc_boardings'
+                and self.current_time % self.passenger_update_freq == 0):
+            previous_updates = int(self.frequency_tracker.total_updates)
+            self.frequency_tracker.update(apc_frequency_counts, {})
+            bin_applied = (
+                int(self.frequency_tracker.total_updates) > previous_updates)
+            if self.frequency_logger is not None:
+                self.frequency_logger.log_step(
+                    self.current_time,
+                    apc_frequency_counts,
+                    self.stations,
+                    self.bus_all,
+                    self.frequency_tracker,
+                    bin_applied=bin_applied,
+                )
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))
@@ -879,6 +927,14 @@ class env_bus(object):
         """Enable/disable FreqDuet demand-frequency state augmentation."""
         cfg = dict(cfg or {})
         self.frequency_enabled = bool(cfg.get('enable', False))
+        self.frequency_observation_source = str(
+            cfg.get('observation_source', 'latent_arrivals')
+        ).strip().lower()
+        if self.frequency_observation_source not in {
+                'latent_arrivals', 'apc_boardings'}:
+            raise ValueError(
+                "frequency.observation_source must be latent_arrivals or "
+                "apc_boardings")
         self.frequency_upper_enabled = bool(cfg.get('upper_features', True))
         self.frequency_lower_enabled = bool(cfg.get('lower_features', True))
         self.frequency_replace_upper_demand = bool(
@@ -1314,6 +1370,13 @@ class env_bus(object):
                 headway_state_event_count / max(headway_state_total, 1)),
             'headway_state_mode': str(self.headway_state_mode),
             'lower_state_input_schema': str(self.lower_state_input_schema),
+            'lower_observation_contract': str(
+                self.lower_observation_contract),
+            'headway_reward_mode': str(self.headway_reward_mode),
+            'invalid_headway_decisions_masked': int(
+                self._invalid_headway_decisions_masked),
+            'frequency_observation_source': str(
+                self.frequency_observation_source),
             'peak_fleet': int(self._peak_concurrent),
             'fleet_inventory_mode': str(self.fleet_inventory_mode),
             'physical_vehicle_count': int(len(self.bus_all)),

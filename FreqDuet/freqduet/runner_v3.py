@@ -81,6 +81,7 @@ from upper.counterfactual_action_selector import (
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
 from lower.lifecycle import LowerEpisodeLifecycle
+from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
@@ -1815,11 +1816,36 @@ class TransitDuetV2Runner:
         self.lower_state_input_schema = str(lower_state_encoder_cfg.get(
             'input_schema', 'legacy_headway_deviation')).strip().lower()
         if self.lower_state_input_schema not in {
-                'legacy_headway_deviation', 'explicit_target_v2'}:
+                'legacy_headway_deviation', 'explicit_target_v2',
+                'causal_forward_v4'}:
             raise ValueError(
                 "lower.state_encoder.input_schema must be "
-                "legacy_headway_deviation or explicit_target_v2")
+                "legacy_headway_deviation, explicit_target_v2, or "
+                "causal_forward_v4")
         self.env.lower_state_input_schema = self.lower_state_input_schema
+        self.lower_observation_contract = str(lower_cfg.get(
+            'observation_contract', self.env.lower_observation_contract
+        )).strip().lower()
+        self.lower_headway_reward_mode = str(lower_cfg.get(
+            'headway_reward_mode', self.env.headway_reward_mode
+        )).strip().lower()
+        if self.lower_observation_contract not in {
+                'latent_oracle_legacy', 'deployable_apc_avl_v4'}:
+            raise ValueError('unknown lower.observation_contract')
+        if self.lower_headway_reward_mode not in {
+                'symmetric_legacy', 'forward_event_only'}:
+            raise ValueError('unknown lower.headway_reward_mode')
+        self.lower_observation_spec = LowerObservationContract.create(
+            mode=self.lower_observation_contract,
+            input_schema=self.lower_state_input_schema,
+            reward_mode=self.lower_headway_reward_mode,
+            unobserved_action_mode=self.lower_unobserved_action_mode,
+            frequency_enabled=self.env.frequency_enabled,
+            frequency_source=self.env.frequency_observation_source,
+            context_features=self.env.lower_context_features,
+        )
+        self.env.lower_observation_contract = self.lower_observation_contract
+        self.env.headway_reward_mode = self.lower_headway_reward_mode
         self.lower_state_encoder = None
         if bool(lower_state_encoder_cfg.get('enable', False)):
             encoder_mode = str(lower_state_encoder_cfg.get(
@@ -8047,6 +8073,25 @@ class TransitDuetV2Runner:
                 float(env_details['avg_wait_observed_min']), 3),
             'restricted_wait_horizon_min': round(
                 float(env_details['restricted_wait_horizon_min']), 3),
+            'avg_wait_lf_observed_min': round(float(
+                env_details.get('avg_wait_lf_observed_min', 0.0)), 6),
+            'avg_wait_hf_observed_min': round(float(
+                env_details.get('avg_wait_hf_observed_min', 0.0)), 6),
+            'restricted_wait_lf_horizon_min': round(float(
+                env_details.get('restricted_wait_lf_horizon_min', 0.0)), 6),
+            'restricted_wait_hf_horizon_min': round(float(
+                env_details.get('restricted_wait_hf_horizon_min', 0.0)), 6),
+            'frequency_share_max_error': float(
+                env_details.get('frequency_share_max_error', 0.0)),
+            'avg_in_vehicle_observed_min': round(float(
+                env_details.get('avg_in_vehicle_observed_min', 0.0)), 6),
+            'restricted_in_vehicle_horizon_min': round(float(
+                env_details.get('restricted_in_vehicle_horizon_min', 0.0)), 6),
+            'avg_total_journey_observed_min': round(float(
+                env_details.get('avg_total_journey_observed_min', 0.0)), 6),
+            'restricted_total_journey_horizon_min': round(float(
+                env_details.get('restricted_total_journey_horizon_min', 0.0)),
+                6),
             'passengers_generated': int(
                 env_details['passengers_generated']),
             'passengers_unserved': int(
@@ -8075,6 +8120,35 @@ class TransitDuetV2Runner:
             'done_reason': str(env_details['done_reason']),
             'scenario_tape_id': str(env_details['scenario_tape_id']),
             'peak_fleet': int(z[1]),
+            'fleet_inventory_mode': str(
+                env_details.get('fleet_inventory_mode', 'elastic_legacy')),
+            'physical_vehicle_count': int(
+                env_details.get('physical_vehicle_count', len(self.env.bus_all))),
+            'fleet_denied_dispatch_events': int(
+                env_details.get('fleet_denied_dispatch_events', 0)),
+            'fleet_denied_trips': int(
+                env_details.get('fleet_denied_trips', 0)),
+            'fleet_readiness_delay_mean_s': round(float(
+                env_details.get('fleet_readiness_delay_mean_s', 0.0)), 6),
+            'fleet_readiness_delay_max_s': round(float(
+                env_details.get('fleet_readiness_delay_max_s', 0.0)), 6),
+            'holding_vehicle_seconds': round(float(
+                env_details.get('holding_vehicle_seconds', 0.0)), 6),
+            'holding_passenger_seconds': round(float(
+                env_details.get('holding_passenger_seconds', 0.0)), 6),
+            'invalid_headway_decisions_masked': int(
+                env_details.get('invalid_headway_decisions_masked', 0)),
+            'lower_observation_contract': str(
+                env_details.get('lower_observation_contract',
+                                self.lower_observation_contract)),
+            'headway_reward_mode': str(
+                env_details.get('headway_reward_mode',
+                                self.lower_headway_reward_mode)),
+            'frequency_observation_source': str(
+                env_details.get('frequency_observation_source',
+                                self.env.frequency_observation_source)),
+            'lower_observation_ledger_hash': (
+                self.lower_observation_spec.fingerprint),
             'headway_cv': round(z[2], 4),
             'service_cost': round(episode_composite_cost, 6),
             'service_cost_wait_metric': self.objective_wait_metric,

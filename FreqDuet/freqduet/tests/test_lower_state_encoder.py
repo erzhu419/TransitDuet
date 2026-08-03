@@ -78,6 +78,24 @@ class PhysicalLowerStateEncoderTest(unittest.TestCase):
                 input_schema="unknown",
             )
 
+    def test_causal_schema_preserves_forward_validity_flag(self):
+        encoder = PhysicalLowerStateEncoder(
+            base_state_dim=10,
+            max_station_id=22,
+            service_duration_h=14.0,
+            action_range_s=45.0,
+            input_schema="causal_forward_v4",
+        )
+        raw = np.asarray([
+            91.0, 5.0, 7.0, 1.0, 420.0, 1.0, 20.0, 360.0,
+            15.0, 7.5,
+        ], dtype=np.float32)
+
+        encoded = encoder.encode(raw)
+
+        self.assertEqual(encoded[5], 1.0)
+        self.assertAlmostEqual(encoded[6], 20.0 / 300.0)
+
     def test_rejects_incompatible_schema(self):
         with self.assertRaisesRegex(ValueError, "shorter"):
             self.encoder.encode(np.zeros(9, dtype=np.float32))

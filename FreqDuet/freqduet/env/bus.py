@@ -63,6 +63,8 @@ class Bus(object):
         self._headway_recorder = None
         self.forward_headway_source = "target_default"
         self._lower_state_input_schema = "legacy_headway_deviation"
+        self._lower_observation_contract = "latent_oracle_legacy"
+        self._headway_reward_mode = "symmetric_legacy"
         self._lower_frequency_enabled = False
         self._lower_context_enabled = False
         self._lower_context_queue_norm = 50.0
@@ -79,6 +81,8 @@ class Bus(object):
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
+        self.last_service_dwell_s = 0.0
+        self.last_left_behind_count = 0
         self.last_action_s = 0.0
         self.last_action_time = None
         self.last_action_station_id = int(self.last_station.station_id)
@@ -215,6 +219,9 @@ class Bus(object):
         )
 
         self.holding_time = max(self.alight_num, (self.board_num * 2.)) + 4.
+        self.last_service_dwell_s = float(self.holding_time)
+        self.last_left_behind_count = int(
+            len(self.next_station.waiting_passengers))
         # print('Bus id: ',self.bus_id, ', stop id: ', self.last_station.station_id," ,holding time: ", self.holding_time)
         # if self.bus_id == 2 and debug:
         #     print('Bus: ', self.bus_id, ' at station: ', self.next_station.station_id ,' ,current time: ', current_time,' ,holding time: ', self.holding_time)
@@ -233,11 +240,15 @@ class Bus(object):
               lower_context_enabled=False, lower_context_queue_norm=50.0,
               lower_context_features=None, lower_context_gate_value=1.0,
               headway_recorder=None,
-              lower_state_input_schema="legacy_headway_deviation"):
+              lower_state_input_schema="legacy_headway_deviation",
+              lower_observation_contract="latent_oracle_legacy",
+              headway_reward_mode="symmetric_legacy"):
         self._target_headway = target_headway
         self._frequency_tracker = frequency_tracker
         self._headway_recorder = headway_recorder
         self._lower_state_input_schema = str(lower_state_input_schema)
+        self._lower_observation_contract = str(lower_observation_contract)
+        self._headway_reward_mode = str(headway_reward_mode)
         self._lower_frequency_enabled = lower_frequency_enabled
         self._lower_context_enabled = lower_context_enabled
         self._lower_context_queue_norm = max(float(lower_context_queue_norm), 1e-6)
@@ -308,18 +319,40 @@ class Bus(object):
         self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
 
-        action_requested = (
-            self.next_station in self.effective_station[2:]
-            and (len(self.forward_bus) != 0 or len(self.backward_bus) != 0)
-        )
+        controlled_stop = self.next_station in self.effective_station[2:]
+        exact_forward_valid = (
+            getattr(self, 'forward_headway_source', 'target_default')
+            == 'arrival_event')
+        if getattr(
+                self, '_lower_state_input_schema',
+                'legacy_headway_deviation') == 'causal_forward_v4':
+            action_requested = controlled_stop and exact_forward_valid
+            if controlled_stop and not exact_forward_valid:
+                self._invalid_headway_mask_time = float(current_time)
+        else:
+            action_requested = (
+                controlled_stop
+                and (len(self.forward_bus) != 0 or len(self.backward_bus) != 0)
+            )
         if action_requested:
             target_hw = self._target_headway
             headway_dev = (self.forward_headway - target_hw) / max(target_hw, 1.0)
             target_or_deviation = (
                 float(target_hw)
-                if self._lower_state_input_schema == "explicit_target_v2"
+                if self._lower_state_input_schema in {
+                    "explicit_target_v2", "causal_forward_v4"}
                 else float(headway_dev)
             )
+
+            if self._lower_state_input_schema == 'causal_forward_v4':
+                follower_or_validity = float(exact_forward_valid)
+                service_or_downstream = float(self.last_service_dwell_s)
+            else:
+                follower_or_validity = float(self.backward_headway)
+                service_or_downstream = (
+                    len(self.next_station.waiting_passengers) * 1.5
+                    + self.current_route.distance / self.current_route.speed_limit
+                )
 
             self.obs = [
                 self.bus_id,
@@ -327,8 +360,8 @@ class Bus(object):
                 current_time // 3600,
                 self.direction,
                 self.forward_headway,
-                self.backward_headway,
-                len(self.next_station.waiting_passengers) * 1.5 + self.current_route.distance / self.current_route.speed_limit,
+                follower_or_validity,
+                service_or_downstream,
                 target_or_deviation,
             ]
             all_route = self.routes_list[:len(self.routes_list) // 2] if self.direction else self.routes_list[len(self.routes_list) // 2:]
@@ -339,9 +372,14 @@ class Bus(object):
                 target_hw_safe = max(float(target_hw), 1.0)
                 load_norm = len(self.passengers) / max(float(self.capacity), 1.0)
                 cap_remain_norm = max(0.0, 1.0 - load_norm)
-                queue_norm = (
-                    len(self.next_station.waiting_passengers)
-                    / self._lower_context_queue_norm)
+                if self._lower_observation_contract == 'deployable_apc_avl_v4':
+                    queue_norm = (
+                        self.last_left_behind_count
+                        / self._lower_context_queue_norm)
+                else:
+                    queue_norm = (
+                        len(self.next_station.waiting_passengers)
+                        / self._lower_context_queue_norm)
                 route_speed_mean = max(float(np.mean(speed_list)), 1e-6)
                 speed_residual = (
                     float(self.current_route.speed_limit) - route_speed_mean
@@ -497,6 +535,15 @@ class Bus(object):
 
         def headway_reward(headway):
             return -min(abs(float(headway) - target_hw) / target_hw, 1.0)
+
+        if getattr(self, '_headway_reward_mode', 'symmetric_legacy') == (
+                'forward_event_only'):
+            if getattr(self, 'forward_headway_source', None) != 'arrival_event':
+                return 0.0, 0.0
+            reward = headway_reward(self.forward_headway)
+            headway_dev = (
+                (float(self.forward_headway) - target_hw) / target_hw)
+            return float(reward), float(min(headway_dev ** 2, 1.0))
 
         has_forward = bool(self.forward_bus)
         has_backward = bool(self.backward_bus)
@@ -706,6 +753,8 @@ class Bus(object):
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
+        self.last_service_dwell_s = 0.0
+        self.last_left_behind_count = 0
         self.last_action_s = 0.0
         self.last_action_time = None
         self.last_action_station_id = int(self.last_station.station_id)

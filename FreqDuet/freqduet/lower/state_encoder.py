@@ -39,10 +39,11 @@ class PhysicalLowerStateEncoder:
         if self.input_schema not in {
             "legacy_headway_deviation",
             "explicit_target_v2",
+            "causal_forward_v4",
         }:
             raise ValueError(
                 "lower state input_schema must be legacy_headway_deviation "
-                "or explicit_target_v2")
+                "or an explicit-target causal schema")
 
     @classmethod
     def from_config(
@@ -111,7 +112,7 @@ class PhysicalLowerStateEncoder:
             if direction_up
             else (self.max_station_id - station) / self.max_station_id
         )
-        if self.input_schema == "explicit_target_v2":
+        if self.input_schema in {"explicit_target_v2", "causal_forward_v4"}:
             target_s = float(np.clip(
                 values[7], self.target_min_s, self.target_max_s))
             deviation = (float(values[4]) - target_s) / max(target_s, 1.0)
@@ -127,8 +128,11 @@ class PhysicalLowerStateEncoder:
         encoded[3] = 1.0 if direction_up else -1.0
         encoded[4] = np.clip(
             values[4] / target_s, 0.0, self.headway_ratio_clip)
-        encoded[5] = np.clip(
-            values[5] / target_s, 0.0, self.headway_ratio_clip)
+        if self.input_schema == "causal_forward_v4":
+            encoded[5] = np.clip(values[5], 0.0, 1.0)
+        else:
+            encoded[5] = np.clip(
+                values[5] / target_s, 0.0, self.headway_ratio_clip)
         encoded[6] = np.clip(
             values[6] / self.dwell_norm_s, 0.0, self.dwell_clip)
         encoded[7] = np.clip(
