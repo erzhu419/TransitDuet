@@ -32,7 +32,12 @@ from freq_hrl.policies import (
     PolicyGradientTradingPlanner,
 )
 
-from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
+from .metrics import (
+    SELECTION_OBJECTIVE_VERSION,
+    periods_per_year_from_bar_seconds,
+    summarize_pnl_series,
+    validation_utility,
+)
 from .performance_validation import SCENARIOS, make_synthetic_market
 
 
@@ -185,13 +190,7 @@ def objective(
         + max(float(lower_lf_policy_loss_scale), 0.0) * lower_lf
         + max(float(lower_lf_lagrange_multiplier), 0.0) * lower_violation
     )
-    return (
-        float(row["total_return"])
-        + 0.01 * float(row.get("episode_information_ratio", row["sharpe"]))
-        - 0.25 * float(row["max_drawdown"])
-        - 0.0005 * float(row["turnover"])
-        - leakage_penalty
-    )
+    return validation_utility(row) - leakage_penalty
 
 
 def _arr(value: Any, dim: int | None = None) -> np.ndarray:
@@ -785,7 +784,7 @@ def train_policy_gradient(
             "deterministic_objective": score,
             "deterministic_task_objective": float(np.mean([objective(row) for row in eval_rows])),
             "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
-            "selection_metric": "episode_information_ratio",
+            "selection_metric": SELECTION_OBJECTIVE_VERSION,
             "grad_norm": float(np.linalg.norm(grad_mean)),
             "policy_loss_leakage_penalty": float(np.mean([
                 row.get("policy_loss_leakage_penalty", 0.0)
@@ -951,7 +950,7 @@ def train_actor_critic(
             "deterministic_objective": score,
             "deterministic_task_objective": float(np.mean([objective(row) for row in eval_rows])),
             "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
-            "selection_metric": "episode_information_ratio",
+            "selection_metric": SELECTION_OBJECTIVE_VERSION,
             "td_error_abs_mean": float(np.mean([row["td_error_abs_mean"] for row in sampled_rows])),
             "critic_value_loss": float(np.mean([row["critic_value_loss"] for row in sampled_rows])),
             "actor_grad_norm": float(np.linalg.norm(actor_grad_mean)),

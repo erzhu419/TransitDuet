@@ -24,6 +24,7 @@ from freq_hrl.rl import FlatOffPolicyActorCritic, OffPolicyConfig, ReplayBuffer
 
 from .metrics import (
     METRIC_CONTRACT_VERSION,
+    SELECTION_OBJECTIVE_VERSION,
     periods_per_year_from_bar_seconds,
     summarize_pnl_series,
 )
@@ -257,14 +258,21 @@ def train_flat_offpolicy_baseline(
     validation_seeds: list[int] | None = None,
     resample_training_paths: bool = True,
     hidden_dim: int = 64,
+    learning_rate: float = 3e-4,
     replay_capacity: int = 100_000,
     warmup_steps: int = 256,
     batch_size: int = 64,
     updates_per_step: int = 1,
     objective_fn: Callable[[dict[str, Any]], float] = objective,
+    evaluation_role: str = "heldout_test",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
+    evaluation_role = str(evaluation_role)
+    if evaluation_role not in {"heldout_test", "tuning_validation"}:
+        raise ValueError(
+            "evaluation_role must be 'heldout_test' or 'tuning_validation'"
+        )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -275,7 +283,7 @@ def train_flat_offpolicy_baseline(
         ]
     else:
         validation_seed_list = list(validation_seeds)
-    validation_seed_list, heldout_test_seeds = validate_evaluation_seed_roles(
+    validation_seed_list, evaluation_seeds = validate_evaluation_seed_roles(
         validation_seed_list, eval_seeds
     )
     algorithm = "sac" if policy_mode == "flat_sac" else "td3"
@@ -289,6 +297,9 @@ def train_flat_offpolicy_baseline(
         action_dim=action_dim,
         algorithm=algorithm,
         hidden_dim=int(hidden_dim),
+        actor_learning_rate=float(learning_rate),
+        critic_learning_rate=float(learning_rate),
+        alpha_learning_rate=float(learning_rate),
     )
     agent = FlatOffPolicyActorCritic(config)
     replay = ReplayBuffer(
@@ -381,7 +392,7 @@ def train_flat_offpolicy_baseline(
             "environment_steps": int(global_step),
         })
     agent.load_state_dict(best_state)
-    heldout_rows = [
+    evaluation_rows = [
         run_offpolicy_episode(
             agent,
             seed=int(eval_seed),
@@ -391,7 +402,7 @@ def train_flat_offpolicy_baseline(
             policy_mode=policy_mode,
             training=False,
         )[0]
-        for eval_seed in heldout_test_seeds
+        for eval_seed in evaluation_seeds
     ]
     payload = {
         "policy": policy_mode,
@@ -404,15 +415,23 @@ def train_flat_offpolicy_baseline(
         "rollout_seed_roots": list(rollout_seed_roots),
         "validation_seeds": list(validation_seed_list),
         "selection_seeds": list(validation_seed_list),
-        "eval_seeds": list(heldout_test_seeds),
-        "heldout_test_seeds": list(heldout_test_seeds),
+        "eval_seeds": list(evaluation_seeds),
+        "evaluation_role": evaluation_role,
+        "tuning_validation_seeds": (
+            list(evaluation_seeds)
+            if evaluation_role == "tuning_validation" else []
+        ),
+        "heldout_test_seeds": (
+            list(evaluation_seeds)
+            if evaluation_role == "heldout_test" else []
+        ),
         "steps": int(steps),
         "assets": int(assets),
         "iterations": int(iterations),
         "best_score": best_score,
         "config": config.to_dict(),
         "history": history,
-        "summary": summarize(heldout_rows),
+        "summary": summarize(evaluation_rows),
         "replay_capacity": int(replay_capacity),
         "warmup_steps": int(warmup_steps),
         "batch_size": int(batch_size),
@@ -421,7 +440,7 @@ def train_flat_offpolicy_baseline(
         "environment_steps_validation": int(
             len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
         ),
-        "environment_steps_eval": int(len(heldout_test_seeds) * int(steps)),
+        "environment_steps_eval": int(len(evaluation_seeds) * int(steps)),
         "unique_training_path_count": int(
             len(rollout_seed_roots)
             * (max(1, int(iterations)) if resample_training_paths else 1)
@@ -446,8 +465,9 @@ def train_flat_offpolicy_baseline(
         ),
         "action_contract": "joint target weights and execution speeds every primitive step",
         "metric_contract_version": METRIC_CONTRACT_VERSION,
+        "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
     }
-    return payload, heldout_rows, agent
+    return payload, evaluation_rows, agent
 
 
 def _write_rows(path: Path, rows: list[dict[str, Any]]) -> None:

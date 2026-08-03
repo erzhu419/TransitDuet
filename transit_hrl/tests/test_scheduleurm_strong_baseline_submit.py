@@ -25,6 +25,7 @@ def args_fixture() -> argparse.Namespace:
         ppo_minibatch_size=64,
         ppo_init_log_std=-1.0,
         offpolicy_hidden_dim=32,
+        offpolicy_learning_rate=3e-4,
         offpolicy_replay_capacity=1000,
         offpolicy_warmup_steps=8,
         offpolicy_batch_size=8,

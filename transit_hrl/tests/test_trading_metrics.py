@@ -4,13 +4,32 @@ import numpy as np
 
 from freq_hrl.experiments.trading.metrics import (
     METRIC_CONTRACT_VERSION,
+    SELECTION_OBJECTIVE_VERSION,
     max_drawdown,
     periods_per_year_from_bar_seconds,
     summarize_pnl_series,
+    validation_utility,
 )
 
 
 class TradingMetricsTest(unittest.TestCase):
+    def test_validation_utility_uses_net_growth_and_drawdown_only(self):
+        row = {
+            "total_return": 0.10,
+            "max_drawdown": 0.04,
+            "turnover": 1_000_000.0,
+            "episode_information_ratio": -999.0,
+        }
+        self.assertEqual(SELECTION_OBJECTIVE_VERSION, "log_growth_drawdown_utility_v3")
+        self.assertAlmostEqual(
+            validation_utility(row),
+            float(np.log1p(0.10) - 0.25 * 0.04),
+        )
+
+    def test_validation_utility_rejects_invalid_wealth(self):
+        with self.assertRaisesRegex(ValueError, "greater than -1"):
+            validation_utility({"total_return": -1.0, "max_drawdown": 1.0})
+
     def test_annualized_sharpe_uses_sample_standard_deviation(self):
         returns = np.asarray([0.01, -0.01, 0.02], dtype=np.float64)
         equity = np.cumprod(1.0 + returns)

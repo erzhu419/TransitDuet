@@ -33,7 +33,11 @@ from freq_hrl.experiments.reproducibility import (
 from freq_hrl.rl import summarize_numeric_rows
 
 from .performance_validation import SCENARIOS
-from .metrics import METRIC_CONTRACT_VERSION
+from .metrics import (
+    METRIC_CONTRACT_VERSION,
+    SELECTION_OBJECTIVE_VERSION,
+    validation_utility,
+)
 from .offpolicy_baseline_validation import (
     OFFPOLICY_MODES,
     train_flat_offpolicy_baseline,
@@ -355,6 +359,10 @@ def build_paired_checks(
                     str(row.get("checkpoint_selection_protocol", "missing"))
                     for row in relevant
                 } == {SELECTION_PROTOCOL}
+                and {
+                    str(row.get("selection_objective_version", "missing"))
+                    for row in relevant
+                } == {SELECTION_OBJECTIVE_VERSION}
             )
             stats = paired_delta_stats(
                 rows,
@@ -456,6 +464,7 @@ def build_experiment_manifest(
     ppo_minibatch_size: int = 512,
     ppo_init_log_std: float = -1.0,
     offpolicy_hidden_dim: int = 64,
+    offpolicy_learning_rate: float = 3e-4,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
     offpolicy_batch_size: int = 64,
@@ -517,6 +526,7 @@ def build_experiment_manifest(
                 + f" --ppo-minibatch-size {int(ppo_minibatch_size)}"
                 + f" --ppo-init-log-std {float(ppo_init_log_std)}"
                 + f" --offpolicy-hidden-dim {int(offpolicy_hidden_dim)}"
+                + f" --offpolicy-learning-rate {float(offpolicy_learning_rate)}"
                 + f" --offpolicy-replay-capacity {int(offpolicy_replay_capacity)}"
                 + f" --offpolicy-warmup-steps {int(offpolicy_warmup_steps)}"
                 + f" --offpolicy-batch-size {int(offpolicy_batch_size)}"
@@ -628,6 +638,7 @@ def run_strong_learned_baseline_validation(
     ppo_minibatch_size: int = 512,
     ppo_init_log_std: float = -1.0,
     offpolicy_hidden_dim: int = 64,
+    offpolicy_learning_rate: float = 3e-4,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
     offpolicy_batch_size: int = 64,
@@ -696,6 +707,7 @@ def run_strong_learned_baseline_validation(
                 iterations=int(iterations),
                 seed=run_seed,
                 hidden_dim=int(offpolicy_hidden_dim),
+                learning_rate=float(offpolicy_learning_rate),
                 replay_capacity=int(offpolicy_replay_capacity),
                 warmup_steps=int(offpolicy_warmup_steps),
                 batch_size=int(offpolicy_batch_size),
@@ -721,6 +733,7 @@ def run_strong_learned_baseline_validation(
                 "validation_seeds": list(validation_seed_list),
                 "heldout_test_seeds": list(heldout_test_seeds),
                 "metric_contract_version": METRIC_CONTRACT_VERSION,
+                "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             },
         })
         for row in heldout_rows:
@@ -737,6 +750,9 @@ def run_strong_learned_baseline_validation(
             )
             item["checkpoint_selection_protocol"] = str(
                 payload.get("checkpoint_selection_protocol", "missing")
+            )
+            item["selection_objective_version"] = str(
+                payload.get("selection_objective_version", "missing")
             )
             item["rollout_seed_roots"] = " ".join(
                 str(seed) for seed in rollout_seed_roots
@@ -764,6 +780,9 @@ def run_strong_learned_baseline_validation(
             "training_path_protocol": str(payload.get("training_path_protocol", "")),
             "checkpoint_selection_protocol": str(
                 payload.get("checkpoint_selection_protocol", "")
+            ),
+            "selection_objective_version": str(
+                payload.get("selection_objective_version", "")
             ),
             "optimizer_seed": run_seed,
             "gradient_updates_train": int(payload.get("gradient_updates_train", 0)),
@@ -816,16 +835,11 @@ def run_strong_learned_baseline_validation(
             "environment_steps_eval": int(len(heldout_test_seeds) * steps),
             "iterations": int(iterations),
             "best_score": float(payload.get("best_score", 0.0)),
-            "heldout_objective_proxy": float(np.mean([
-                float(row.get("total_return", 0.0))
-                + 0.01 * float(row.get(
-                    "episode_information_ratio",
-                    row.get("sharpe", 0.0),
-                ))
-                for row in heldout_rows
+            "heldout_objective": float(np.mean([
+                validation_utility(row) for row in heldout_rows
             ])) if heldout_rows else 0.0,
             "elapsed_sec": elapsed,
-            "selection_metric": "episode_information_ratio",
+            "selection_metric": SELECTION_OBJECTIVE_VERSION,
             "training_path_protocol": str(payload.get("training_path_protocol", "")),
             "checkpoint_selection_protocol": str(
                 payload.get("checkpoint_selection_protocol", "")
@@ -905,6 +919,7 @@ def run_strong_learned_baseline_validation(
             ppo_minibatch_size=int(ppo_minibatch_size),
             ppo_init_log_std=float(ppo_init_log_std),
             offpolicy_hidden_dim=int(offpolicy_hidden_dim),
+            offpolicy_learning_rate=float(offpolicy_learning_rate),
             offpolicy_replay_capacity=int(offpolicy_replay_capacity),
             offpolicy_warmup_steps=int(offpolicy_warmup_steps),
             offpolicy_batch_size=int(offpolicy_batch_size),
@@ -930,6 +945,7 @@ def run_strong_learned_baseline_validation(
             "independent_unit": "training_replicate_seed",
             "training_path_protocol": TRAINING_PATH_PROTOCOL,
             "checkpoint_selection_protocol": SELECTION_PROTOCOL,
+            "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "training_protocol_status": "valid",
             "steps": int(steps),
             "assets": int(assets),
@@ -1060,10 +1076,15 @@ def merge_strong_learned_baseline_shards(
         str(row.get("checkpoint_selection_protocol", "")) for row in rows
         if str(row.get("checkpoint_selection_protocol", "")).strip()
     }
+    selection_objectives = {
+        str(row.get("selection_objective_version", "")) for row in rows
+        if str(row.get("selection_objective_version", "")).strip()
+    }
     training_protocol_status = (
         "valid"
         if training_protocols == {TRAINING_PATH_PROTOCOL}
         and selection_protocols == {SELECTION_PROTOCOL}
+        and selection_objectives == {SELECTION_OBJECTIVE_VERSION}
         else "invalid_or_mixed"
     )
     if coverage["matrix_coverage_status"] != "complete":
@@ -1107,6 +1128,10 @@ def merge_strong_learned_baseline_shards(
             "checkpoint_selection_protocol": (
                 next(iter(selection_protocols))
                 if len(selection_protocols) == 1 else "mixed_or_missing"
+            ),
+            "selection_objective_version": (
+                next(iter(selection_objectives))
+                if len(selection_objectives) == 1 else "mixed_or_missing"
             ),
             "ppo_strong_baseline_status": ppo_baseline_status,
             "ppo_metric_status": metric_status,
@@ -1231,6 +1256,7 @@ def main() -> None:
     parser.add_argument("--ppo-minibatch-size", type=int, default=512)
     parser.add_argument("--ppo-init-log-std", type=float, default=-1.0)
     parser.add_argument("--offpolicy-hidden-dim", type=int, default=64)
+    parser.add_argument("--offpolicy-learning-rate", type=float, default=3e-4)
     parser.add_argument("--offpolicy-replay-capacity", type=int, default=100_000)
     parser.add_argument("--offpolicy-warmup-steps", type=int, default=2048)
     parser.add_argument("--offpolicy-batch-size", type=int, default=64)
@@ -1274,6 +1300,7 @@ def main() -> None:
             ppo_minibatch_size=int(args.ppo_minibatch_size),
             ppo_init_log_std=float(args.ppo_init_log_std),
             offpolicy_hidden_dim=int(args.offpolicy_hidden_dim),
+            offpolicy_learning_rate=float(args.offpolicy_learning_rate),
             offpolicy_replay_capacity=int(args.offpolicy_replay_capacity),
             offpolicy_warmup_steps=int(args.offpolicy_warmup_steps),
             offpolicy_batch_size=int(args.offpolicy_batch_size),

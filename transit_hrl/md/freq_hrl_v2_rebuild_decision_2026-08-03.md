@@ -216,10 +216,12 @@ artifacts are now ineligible even if they carry a training-replicate label.
 
 The v2 confirmatory runner uses the following role-separated protocol:
 
-1. PPO-family policies use identical two-layer MLP actors and critics, optimizer
-   settings, update epochs, and environment-step budgets. The default hidden
-   width is 64; it remains subject to a validation-only pilot before the final
-   matrix is frozen.
+1. PPO-family policies use identical two-layer MLP capacity and environment-step
+   budgets. Hidden width is frozen at 64. Each policy may select optimizer and
+   exploration settings from the same-size preregistered search space; this is
+   a stronger baseline protocol than forcing one potentially unfavorable
+   setting on every algorithm. Parameter equality and HPO-budget equality are
+   audited separately.
 2. Every `(training replicate, rollout root, iteration)` deterministically
    derives a fresh exogenous training path. Treatment and baselines receive the
    same paths within a replicate, while different replicates vary both model
@@ -235,8 +237,27 @@ The v2 confirmatory runner uses the following role-separated protocol:
    steps, and metric-contract version.
 6. Merge gates require both
    `fresh_deterministic_path_per_root_and_iteration_v2` and
-   `disjoint_validation_paths`. Missing or mixed protocols invalidate the
+   `disjoint_validation_paths`, plus the versioned selection utility
+   `log_growth_drawdown_utility_v3`. Missing or mixed protocols invalidate the
    headline evidence even when metric rows are otherwise complete.
+
+Checkpoint and hyperparameter selection now use a four-role partition:
+
+1. fresh training paths update model parameters;
+2. checkpoint-validation paths select the iteration within one training run;
+3. disjoint tuning-validation paths rank hyperparameter candidates; and
+4. held-out test paths are unavailable to the HPO executable and are loaded
+   only by the final confirmatory runner.
+
+The selection utility is log terminal net wealth minus 0.25 times maximum
+drawdown. Net wealth already contains transaction costs, so turnover is not
+penalized a second time. Short-episode information ratio remains a reported
+risk endpoint but no longer selects checkpoints or hyperparameters. The HPO
+artifact records an empty `heldout_test_seeds` field and
+`heldout_test_access_status=not_loaded`; merge rejects any cell that violates
+this rule. Candidate ranking averages tuning paths within each scenario, then
+clusters uncertainty by independent training replicate and ranks by the lower
+95% bootstrap bound.
 
 The full stress matrix contains stationary low-noise, stationary high-noise,
 localized burst, persistent shift, and OOD-period regimes. With five learned

@@ -41,7 +41,12 @@ from freq_hrl.rl import (
     train_frequency_separated_ppo,
 )
 
-from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
+from .metrics import (
+    SELECTION_OBJECTIVE_VERSION,
+    periods_per_year_from_bar_seconds,
+    summarize_pnl_series,
+    validation_utility,
+)
 from .performance_validation import SCENARIOS, make_synthetic_market
 
 
@@ -863,8 +868,7 @@ def smdp_rollout(
 
 
 def objective(row: dict[str, float]) -> float:
-    risk_adjusted = float(row.get("episode_information_ratio", row["sharpe"]))
-    return float(row["total_return"]) + 0.01 * risk_adjusted - 0.25 * float(row["max_drawdown"]) - 0.0005 * float(row["turnover"])
+    return validation_utility(row)
 
 
 def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
@@ -937,6 +941,7 @@ def train_ppo_actor_critic(
     upper_period: int = 30,
     min_upper_duration: int = 5,
     use_handcrafted_frequency_prior: bool = False,
+    evaluation_role: str = "heldout_test",
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -945,6 +950,11 @@ def train_ppo_actor_critic(
     policy_mode = str(policy_mode or "freq_hrl")
     if policy_mode not in POLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
+    evaluation_role = str(evaluation_role)
+    if evaluation_role not in {"heldout_test", "tuning_validation"}:
+        raise ValueError(
+            "evaluation_role must be 'heldout_test' or 'tuning_validation'"
+        )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -955,7 +965,7 @@ def train_ppo_actor_critic(
         ]
     else:
         validation_seed_list = list(validation_seeds)
-    validation_seed_list, heldout_test_seeds = validate_evaluation_seed_roles(
+    validation_seed_list, evaluation_seeds = validate_evaluation_seed_roles(
         validation_seed_list, eval_seeds
     )
     torch.manual_seed(int(seed))
@@ -1010,7 +1020,7 @@ def train_ppo_actor_critic(
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
         train_seeds=rollout_seed_roots,
-        eval_seeds=heldout_test_seeds,
+        eval_seeds=evaluation_seeds,
         iterations=iterations,
         selection_seeds=validation_seed_list,
         training_seed_fn=(
@@ -1065,7 +1075,16 @@ def train_ppo_actor_critic(
             "training_replicate_seed": int(seed),
             "rollout_seed_roots": list(rollout_seed_roots),
             "validation_seeds": list(validation_seed_list),
-            "heldout_test_seeds": list(heldout_test_seeds),
+            "evaluation_role": evaluation_role,
+            "tuning_validation_seeds": (
+                list(evaluation_seeds)
+                if evaluation_role == "tuning_validation" else []
+            ),
+            "heldout_test_seeds": (
+                list(evaluation_seeds)
+                if evaluation_role == "heldout_test" else []
+            ),
+            "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
                 if resample_training_paths else "fixed_path_reuse_legacy"
@@ -1098,7 +1117,7 @@ def train_ppo_actor_critic(
     payload["environment_steps_validation"] = int(
         len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
     )
-    payload["environment_steps_eval"] = int(len(heldout_test_seeds) * int(steps))
+    payload["environment_steps_eval"] = int(len(evaluation_seeds) * int(steps))
     payload["unique_training_path_count"] = int(
         len(rollout_seed_roots)
         * (max(1, int(iterations)) if resample_training_paths else 1)

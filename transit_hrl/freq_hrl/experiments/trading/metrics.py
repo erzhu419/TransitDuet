@@ -10,6 +10,32 @@ import numpy as np
 TRADING_DAYS_PER_YEAR = 252.0
 TRADING_HOURS_PER_DAY = 6.5
 METRIC_CONTRACT_VERSION = "trading_metrics_v2"
+SELECTION_OBJECTIVE_VERSION = "log_growth_drawdown_utility_v3"
+DEFAULT_SELECTION_DRAWDOWN_WEIGHT = 0.25
+
+
+def validation_utility(
+    row: dict[str, Any],
+    *,
+    drawdown_weight: float = DEFAULT_SELECTION_DRAWDOWN_WEIGHT,
+) -> float:
+    """Return the preregistered checkpoint/HPO selection utility.
+
+    Net return already includes transaction costs, so turnover is not charged a
+    second time. Episode information ratios remain reportable endpoints, but
+    are excluded from selection because they are noisy on short episodes.
+    """
+
+    total_return = float(row["total_return"])
+    max_drawdown_value = float(row["max_drawdown"])
+    weight = float(drawdown_weight)
+    if not np.isfinite(total_return) or total_return <= -1.0:
+        raise ValueError("total_return must be finite and greater than -1")
+    if not np.isfinite(max_drawdown_value) or max_drawdown_value < 0.0:
+        raise ValueError("max_drawdown must be finite and non-negative")
+    if not np.isfinite(weight) or weight < 0.0:
+        raise ValueError("drawdown_weight must be finite and non-negative")
+    return float(np.log1p(total_return) - weight * max_drawdown_value)
 
 
 def periods_per_year_from_bar_seconds(
