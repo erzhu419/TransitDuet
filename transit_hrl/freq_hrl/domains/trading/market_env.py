@@ -216,20 +216,46 @@ class PortfolioExecutionEnv:
         hf_overlay_incremental_inventory_drift_cost = float(
             inventory_drift_cost - tracking_inventory_drift_cost
         )
-        hf_overlay_task_effect = float(
-            hf_overlay_return
-            - hf_overlay_incremental_transaction_cost
-            - hf_overlay_incremental_inventory_drift_cost
+        pre_step_equity = float(self.equity)
+        pre_step_peak_equity = float(self.peak_equity)
+        tracking_equity = pre_step_equity * max(
+            0.0,
+            1.0 + tracking_portfolio_return - tracking_transaction_cost,
+        )
+        tracking_peak_equity = max(pre_step_peak_equity, tracking_equity)
+        tracking_drawdown = float(
+            1.0 - tracking_equity / max(tracking_peak_equity, 1e-12)
+        )
+        tracking_drawdown_cost = float(
+            self.config.drawdown_penalty * tracking_drawdown
         )
         self.equity *= max(0.0, 1.0 + portfolio_return - cost)
         self.peak_equity = max(self.peak_equity, self.equity)
         drawdown = 1.0 - self.equity / max(self.peak_equity, 1e-12)
         drawdown_cost = float(self.config.drawdown_penalty * drawdown)
+        hf_overlay_incremental_drawdown_cost = float(
+            drawdown_cost - tracking_drawdown_cost
+        )
+        tracking_task_reward = float(
+            tracking_portfolio_return
+            - tracking_transaction_cost
+            - tracking_inventory_drift_cost
+            - tracking_drawdown_cost
+        )
+        hf_overlay_task_effect = float(
+            hf_overlay_return
+            - hf_overlay_incremental_transaction_cost
+            - hf_overlay_incremental_inventory_drift_cost
+            - hf_overlay_incremental_drawdown_cost
+        )
         reward = (
             portfolio_return
             - cost
             - inventory_drift_cost
             - drawdown_cost
+        )
+        tracking_hf_reconstruction_error = float(
+            tracking_task_reward + hf_overlay_task_effect - reward
         )
 
         self.t += 1
@@ -249,6 +275,11 @@ class PortfolioExecutionEnv:
             "tracking_portfolio_return": tracking_portfolio_return,
             "tracking_transaction_cost": tracking_transaction_cost,
             "tracking_inventory_drift_cost": tracking_inventory_drift_cost,
+            "tracking_equity": tracking_equity,
+            "tracking_peak_equity": tracking_peak_equity,
+            "tracking_drawdown": tracking_drawdown,
+            "tracking_drawdown_cost": tracking_drawdown_cost,
+            "tracking_task_reward": tracking_task_reward,
             "hf_overlay_return": hf_overlay_return,
             "hf_overlay_incremental_transaction_cost": (
                 hf_overlay_incremental_transaction_cost
@@ -256,7 +287,13 @@ class PortfolioExecutionEnv:
             "hf_overlay_incremental_inventory_drift_cost": (
                 hf_overlay_incremental_inventory_drift_cost
             ),
+            "hf_overlay_incremental_drawdown_cost": (
+                hf_overlay_incremental_drawdown_cost
+            ),
             "hf_overlay_task_effect": hf_overlay_task_effect,
+            "tracking_hf_task_reconstruction_error": (
+                tracking_hf_reconstruction_error
+            ),
             "target": self.target.copy(),
             "position": self.position.copy(),
             "pre_trade_position": old_position.copy(),

@@ -1,7 +1,11 @@
 """Trading-specific adapters for Freq-HRL."""
 
 from .action_effect import TradingActionEffectOperator
-from .credit import TradingCreditAssigner, TradingCreditBreakdown
+from .credit import (
+    TradingCreditAssigner,
+    TradingCreditBreakdown,
+    TradingTacticalCreditBreakdown,
+)
 from .market_env import PortfolioExecutionConfig, PortfolioExecutionEnv
 from .tracker import TradingFrequencyTracker
 
@@ -11,5 +15,6 @@ __all__ = [
     "TradingActionEffectOperator",
     "TradingCreditAssigner",
     "TradingCreditBreakdown",
+    "TradingTacticalCreditBreakdown",
     "TradingFrequencyTracker",
 ]

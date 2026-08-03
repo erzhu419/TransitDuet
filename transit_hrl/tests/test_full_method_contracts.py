@@ -284,7 +284,75 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertAlmostEqual(info["tracking_portfolio_return"], 0.0)
         self.assertAlmostEqual(info["hf_overlay_return"], 0.02)
         self.assertAlmostEqual(info["hf_overlay_task_effect"], 0.02)
+        self.assertAlmostEqual(info["tracking_task_reward"], 0.0)
+        self.assertAlmostEqual(info["tracking_hf_task_reconstruction_error"], 0.0)
         self.assertAlmostEqual(reward, 0.02)
+
+    def test_hf_counterfactual_includes_incremental_drawdown(self):
+        env = PortfolioExecutionEnv(
+            np.asarray([[-0.20]], dtype=np.float64),
+            config=PortfolioExecutionConfig(
+                transaction_cost_bps=0.0,
+                slippage_bps=0.0,
+                inventory_drift_penalty=0.0,
+                drawdown_penalty=0.5,
+                mark_to_market_timing="post_trade",
+            ),
+        )
+        env.set_target([0.0])
+        _, reward, _, info = env.lower_step(
+            {"execution_speed": [1.0], "residual_order": [0.5]}
+        )
+        self.assertAlmostEqual(info["tracking_drawdown_cost"], 0.0)
+        self.assertAlmostEqual(info["hf_overlay_incremental_drawdown_cost"], 0.05)
+        self.assertAlmostEqual(info["hf_overlay_return"], -0.1)
+        self.assertAlmostEqual(info["hf_overlay_task_effect"], -0.15)
+        self.assertAlmostEqual(reward, -0.15)
+        self.assertAlmostEqual(info["tracking_hf_task_reconstruction_error"], 0.0)
+
+    def test_tactical_credit_exactly_reconstructs_three_policy_reward(self):
+        env = PortfolioExecutionEnv(
+            np.asarray([[-0.08, 0.03]], dtype=np.float64),
+            volumes=np.asarray([[0.8, 1.2]], dtype=np.float64),
+            config=PortfolioExecutionConfig(
+                transaction_cost_bps=8.0,
+                slippage_bps=2.0,
+                volume_impact_bps=15.0,
+                inventory_drift_penalty=0.1,
+                drawdown_penalty=0.2,
+                mark_to_market_timing="post_trade",
+            ),
+        )
+        plan = np.asarray([0.4, -0.2], dtype=np.float64)
+        env.set_target(plan)
+        _, reward, _, info = env.lower_step(
+            {
+                "execution_speed": [0.5, 0.75],
+                "residual_order": [-0.1, 0.05],
+            }
+        )
+        credit = TradingCreditAssigner().assign_tactical(
+            info,
+            active_plan=plan,
+            upper_leakage_cost=0.03,
+            tracking_leakage_cost=0.02,
+            hf_leakage_cost=0.01,
+            plan_smoothness_cost=0.005,
+        )
+        self.assertAlmostEqual(
+            credit.upper_task_credit
+            + credit.tracking_task_credit
+            + credit.hf_task_credit,
+            reward,
+        )
+        self.assertAlmostEqual(credit.hf_task_credit, info["hf_overlay_task_effect"])
+        self.assertAlmostEqual(credit.task_reconstruction_error, 0.0)
+        self.assertAlmostEqual(
+            credit.upper_training_credit
+            + credit.tracking_training_credit
+            + credit.hf_training_credit,
+            reward - 0.03 - 0.02 - 0.01 - 0.005,
+        )
 
     def test_frequency_credit_exactly_reconstructs_observed_reward(self):
         env = PortfolioExecutionEnv(
