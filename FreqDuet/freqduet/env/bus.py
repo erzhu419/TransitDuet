@@ -3,6 +3,18 @@ import numbers
 import numpy as np
 
 
+def _remove_indices_preserve_order(values, removed_indices):
+    """Return an array without selected positions while retaining FIFO order."""
+    array = np.asarray(values)
+    if array.size == 0 or not removed_indices:
+        return array.copy()
+    keep = np.ones(len(array), dtype=bool)
+    indices = np.asarray(removed_indices, dtype=np.int64)
+    indices = indices[(indices >= 0) & (indices < len(array))]
+    keep[indices] = False
+    return array[keep]
+
+
 class BusState(Enum):
     HOLDING = auto()
     WAITING_ACTION = auto()
@@ -153,9 +165,8 @@ class Bus(object):
                 self.alight_num += 1
                 index_of_passenger_on_bus.append(i)
         # remove passengers from bus
-        self.passengers = self.passengers[
-            list(set(range(len(self.passengers))) - set(index_of_passenger_on_bus))] if len(
-            self.passengers) > 0 else np.array([])
+        self.passengers = _remove_indices_preserve_order(
+            self.passengers, index_of_passenger_on_bus)
         # passengers boarding from station(self.next_station)
         for i, passenger in enumerate(self.next_station.waiting_passengers):
             if len(self.passengers) < self.capacity:
@@ -169,9 +180,10 @@ class Bus(object):
                 self.board_num += 1
                 index_of_passenger_in_station.append(i)
 
-        self.next_station.waiting_passengers = self.next_station.waiting_passengers[
-            list(set(range(len(self.next_station.waiting_passengers))) - set(index_of_passenger_in_station))] if len(
-            self.next_station.waiting_passengers) > 0 else np.array([])
+        self.next_station.waiting_passengers = _remove_indices_preserve_order(
+            self.next_station.waiting_passengers,
+            index_of_passenger_in_station,
+        )
 
         self.holding_time = max(self.alight_num, (self.board_num * 2.)) + 4.
         # print('Bus id: ',self.bus_id, ', stop id: ', self.last_station.station_id," ,holding time: ", self.holding_time)

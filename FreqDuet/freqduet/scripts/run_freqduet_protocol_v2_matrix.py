@@ -101,7 +101,11 @@ def worker_env(worker_threads: int, suppress_heavy_artifacts: bool) -> dict[str,
     return env
 
 
-def training_complete(path: Path, episodes: int) -> bool:
+def training_complete(
+    path: Path,
+    episodes: int,
+    protocol_version: str = PROTOCOL_VERSION,
+) -> bool:
     diagnostics = path / "diagnostics.csv"
     checkpoints = path / "checkpoints"
     if not diagnostics.exists() or not checkpoints.exists():
@@ -117,7 +121,8 @@ def training_complete(path: Path, episodes: int) -> bool:
         len(frame) == int(episodes)
         and actual_episodes == expected_episodes
         and "protocol_version" in frame
-        and set(frame["protocol_version"].astype(str)) == {PROTOCOL_VERSION}
+        and set(frame["protocol_version"].astype(str)) == {
+            str(protocol_version)}
         and (checkpoints / f"lower_ep{final_ep}.pt").exists()
         and (checkpoints / f"upper_ep{final_ep}.pt").exists()
         and (checkpoints / f"runner_ep{final_ep}.pt").exists()
@@ -129,6 +134,7 @@ def validate_evaluation_frame(
     eval_seeds: list[int],
     source: Path | str,
     checkpoint_ep: int | None = None,
+    protocol_version: str = PROTOCOL_VERSION,
 ) -> None:
     expected = [int(seed) for seed in eval_seeds]
     if len(expected) != len(set(expected)):
@@ -147,7 +153,7 @@ def validate_evaluation_frame(
     if set(actual) != set(expected):
         raise ValueError(
             f"{source}: evaluation seed set does not match manifest")
-    if set(frame["protocol_version"].astype(str)) != {PROTOCOL_VERSION}:
+    if set(frame["protocol_version"].astype(str)) != {str(protocol_version)}:
         raise ValueError(f"{source}: protocol version mismatch")
     if frame["policy_digest"].astype(str).nunique() != 1:
         raise ValueError(f"{source}: policy digest changed within evaluation")
@@ -165,7 +171,10 @@ def validate_evaluation_frame(
 
 
 def evaluation_complete(
-    path: Path, eval_seeds: list[int], checkpoint_ep: int | None = None
+    path: Path,
+    eval_seeds: list[int],
+    checkpoint_ep: int | None = None,
+    protocol_version: str = PROTOCOL_VERSION,
 ) -> bool:
     result = path / "frozen_evaluation" / "evaluation.csv"
     manifest_path = result.parent / "evaluation_manifest.json"
@@ -174,9 +183,14 @@ def evaluation_complete(
     try:
         frame = pd.read_csv(result)
         validate_evaluation_frame(
-            frame, eval_seeds, result, checkpoint_ep=checkpoint_ep)
+            frame,
+            eval_seeds,
+            result,
+            checkpoint_ep=checkpoint_ep,
+            protocol_version=protocol_version,
+        )
         manifest = json.loads(manifest_path.read_text())
-        if manifest.get("protocol_version") != PROTOCOL_VERSION:
+        if manifest.get("protocol_version") != str(protocol_version):
             return False
         if [int(seed) for seed in manifest.get("scenario_seeds", [])] \
                 != [int(seed) for seed in eval_seeds]:
@@ -195,13 +209,14 @@ def validate_evaluation_manifest(
     config: str,
     train_seed: int,
     eval_seeds: list[int],
+    protocol_version: str = PROTOCOL_VERSION,
 ) -> None:
     manifest_path = result.parent / "evaluation_manifest.json"
     if not manifest_path.exists():
         raise ValueError(f"{result}: missing evaluation manifest")
     manifest = json.loads(manifest_path.read_text())
     expected = {
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": str(protocol_version),
         "config_name": config_name(config),
         "training_seed": int(train_seed),
         "scenario_seeds": [int(seed) for seed in eval_seeds],
@@ -246,6 +261,7 @@ def run_job(
     skip_existing: bool,
 ) -> tuple[str, int, Path]:
     path = run_dir(logs_dir, config, train_seed)
+    protocol_version = protocol_version_for_config(config)
     if clean and path.exists():
         shutil.rmtree(path)
     expected_manifest = run_manifest(
@@ -268,7 +284,8 @@ def run_job(
     path.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(expected_manifest, indent=2) + "\n")
     env = worker_env(worker_threads, suppress_heavy_artifacts)
-    if not (skip_existing and training_complete(path, train_episodes)):
+    if not (skip_existing and training_complete(
+            path, train_episodes, protocol_version=protocol_version)):
         train_command = [
             sys.executable,
             "runner_v3.py",
@@ -284,11 +301,15 @@ def run_job(
         ]
         run_subprocess(train_command, ROOT, env, path / "train_stdout.log")
 
-    if not training_complete(path, train_episodes):
+    if not training_complete(
+            path, train_episodes, protocol_version=protocol_version):
         raise RuntimeError(f"incomplete training artifacts in {path}")
     final_ep = int(train_episodes) - 1
     if not (skip_existing and evaluation_complete(
-            path, eval_seeds, checkpoint_ep=final_ep)):
+            path,
+            eval_seeds,
+            checkpoint_ep=final_ep,
+            protocol_version=protocol_version)):
         eval_command = [
             sys.executable,
             "runner_v3.py",
@@ -309,7 +330,11 @@ def run_job(
             str(logs_dir),
         ]
         run_subprocess(eval_command, ROOT, env, path / "eval_stdout.log")
-    if not evaluation_complete(path, eval_seeds, checkpoint_ep=final_ep):
+    if not evaluation_complete(
+            path,
+            eval_seeds,
+            checkpoint_ep=final_ep,
+            protocol_version=protocol_version):
         raise RuntimeError(f"incomplete frozen evaluation in {path}")
     return config_name(config), int(train_seed), path
 
@@ -435,6 +460,32 @@ def config_fingerprint(name: str) -> dict[str, object]:
     return {"sha256": digest.hexdigest(), "lineage": labels}
 
 
+def resolved_config(name: str) -> dict[str, object]:
+    """Resolve one YAML inheritance chain without importing the training runner."""
+    result: dict[str, object] = {}
+
+    def merge(base: dict, override: dict) -> dict:
+        for key, value in override.items():
+            if (key in base and isinstance(base[key], dict)
+                    and isinstance(value, dict)):
+                merge(base[key], value)
+            else:
+                base[key] = value
+        return base
+
+    for path in config_lineage(config_path(name)):
+        payload = yaml.safe_load(path.read_text()) or {}
+        payload.pop("_extends", None)
+        merge(result, payload)
+    return result
+
+
+def protocol_version_for_config(name: str) -> str:
+    payload = resolved_config(name)
+    protocol = payload.get("protocol", {}) or {}
+    return str(protocol.get("version", PROTOCOL_VERSION))
+
+
 def source_fingerprint() -> dict[str, object]:
     paths = {ROOT / relative for relative in SOURCE_FIXED_FILES}
     for package in SOURCE_PACKAGE_DIRS:
@@ -469,7 +520,7 @@ def run_manifest(
 ) -> dict[str, object]:
     return {
         "manifest_version": RUN_MANIFEST_VERSION,
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": protocol_version_for_config(config),
         "config_name": config_name(config),
         "config_fingerprint": config_fingerprint(config),
         "source_fingerprint": source_fingerprint(),
@@ -520,6 +571,13 @@ def aggregate(
     configs: list[str], train_seeds: list[int], eval_seeds: list[int],
     logs_dirs: list[Path], out_dir: Path, reference: str
 ) -> None:
+    protocol_versions = {
+        protocol_version_for_config(config) for config in configs}
+    if len(protocol_versions) != 1:
+        raise ValueError(
+            "one matrix cannot mix protocol versions: "
+            f"{sorted(protocol_versions)}")
+    protocol_version = next(iter(protocol_versions))
     records = []
     missing_runs = []
     run_manifests = []
@@ -547,16 +605,23 @@ def aggregate(
                 eval_seeds,
                 result,
                 checkpoint_ep=None,
+                protocol_version=protocol_version,
             )
             validate_evaluation_manifest(
-                result, frame, config, train_seed, eval_seeds)
+                result,
+                frame,
+                config,
+                train_seed,
+                eval_seeds,
+                protocol_version=protocol_version,
+            )
             run_manifest_path = result.parent.parent / RUN_MANIFEST_NAME
             if run_manifest_path.exists():
                 manifest = validate_run_manifest(
                     run_manifest_path, source=result.parent.parent)
                 expected_config = config_fingerprint(config)
                 expected_fields = {
-                    "protocol_version": PROTOCOL_VERSION,
+                    "protocol_version": protocol_version,
                     "config_name": name,
                     "config_fingerprint": expected_config,
                     "train_seed": int(train_seed),
@@ -673,7 +738,7 @@ def aggregate(
     pd.DataFrame(summary_rows).to_csv(out_dir / "frozen_summary.csv", index=False)
     pd.DataFrame(delta_rows).to_csv(out_dir / "frozen_paired_deltas.csv", index=False)
     (out_dir / "matrix_manifest.json").write_text(json.dumps({
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": protocol_version,
         "configs": [config_name(value) for value in configs],
         "train_seeds": train_seeds,
         "eval_seeds": [int(seed) for seed in eval_seeds],

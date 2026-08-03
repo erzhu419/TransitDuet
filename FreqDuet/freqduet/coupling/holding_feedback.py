@@ -38,7 +38,7 @@ class HoldingFeedback:
         self._trip_actions = defaultdict(list)
 
         # Rolling history across trips (per direction):
-        #   deque of (trip_id, mean_hold, std_hold, n_stops)
+        #   deque of per-trip holding summaries.
         self._history = {
             True: deque(maxlen=window_size),   # direction=True (上行)
             False: deque(maxlen=window_size),   # direction=False (下行)
@@ -46,6 +46,7 @@ class HoldingFeedback:
 
         # Cross-episode persistence: EMA of mean holding per direction
         self._ema_holding = {True: 0.0, False: 0.0}
+        self._ema_total_holding = {True: 0.0, False: 0.0}
         self._ema_alpha = 0.3  # EMA decay
         self._finalized_trips = set()
 
@@ -57,6 +58,7 @@ class HoldingFeedback:
             for history in self._history.values():
                 history.clear()
             self._ema_holding = {True: 0.0, False: 0.0}
+            self._ema_total_holding = {True: 0.0, False: 0.0}
 
     def record_action(self, trip_id, action):
         """
@@ -89,9 +91,11 @@ class HoldingFeedback:
             self._finalized_trips.add(trip_id)
             return False
 
+        direction = bool(direction)
         mean_hold = np.mean(actions)
         std_hold = np.std(actions)
         max_hold = np.max(actions)
+        total_hold = np.sum(np.maximum(actions, 0.0))
         n_stops = len(actions)
 
         self._history[direction].append({
@@ -99,6 +103,7 @@ class HoldingFeedback:
             'mean': mean_hold,
             'std': std_hold,
             'max': max_hold,
+            'total': total_hold,
             'n_stops': n_stops,
         })
 
@@ -106,6 +111,10 @@ class HoldingFeedback:
         self._ema_holding[direction] = (
             self._ema_alpha * mean_hold +
             (1 - self._ema_alpha) * self._ema_holding[direction]
+        )
+        self._ema_total_holding[direction] = (
+            self._ema_alpha * total_hold
+            + (1 - self._ema_alpha) * self._ema_total_holding[direction]
         )
         self._finalized_trips.add(trip_id)
         return True
@@ -126,8 +135,14 @@ class HoldingFeedback:
             'mean': np.mean(actions),
             'std': np.std(actions),
             'max': np.max(actions),
+            'total': np.sum(np.maximum(actions, 0.0)),
             'n_stops': len(actions),
         }
+
+    def get_trip_total(self, trip_id):
+        """Return cumulative non-negative holding for one physical trip."""
+        stats = self.get_trip_stats(trip_id)
+        return 0.0 if stats is None else float(stats['total'])
 
     def get_direction_stats(self, direction):
         """
@@ -148,6 +163,10 @@ class HoldingFeedback:
                 'rolling_std': 0.0,
                 'rolling_trend': 0.0,
                 'ema': self._ema_holding[direction],
+                'rolling_total_mean': 0.0,
+                'rolling_total_std': 0.0,
+                'rolling_total_trend': 0.0,
+                'ema_total': self._ema_total_holding[direction],
                 'n_trips': 0,
             }
 
@@ -162,12 +181,55 @@ class HoldingFeedback:
         else:
             slope = 0.0
 
+        totals = [float(h.get('total', h['mean'] * h['n_stops']))
+                  for h in history]
+        rolling_total_mean = np.mean(totals)
+        rolling_total_std = np.std(totals) if len(totals) > 1 else 0.0
+        if len(totals) >= 3:
+            total_slope = np.polyfit(np.arange(len(totals)), totals, 1)[0]
+        else:
+            total_slope = 0.0
+
         return {
             'rolling_mean': float(rolling_mean),
             'rolling_std': float(rolling_std),
             'rolling_trend': float(slope),
             'ema': float(self._ema_holding[direction]),
+            'rolling_total_mean': float(rolling_total_mean),
+            'rolling_total_std': float(rolling_total_std),
+            'rolling_total_trend': float(total_slope),
+            'ema_total': float(self._ema_total_holding[direction]),
             'n_trips': len(history),
+        }
+
+    def get_direction_total_stats(self, direction, budget_s=0.0):
+        """Summarize causal completed-trip cumulative holding by direction."""
+        direction = bool(direction)
+        totals = np.asarray([
+            float(item.get('total', item['mean'] * item['n_stops']))
+            for item in self._history[direction]
+        ], dtype=np.float64)
+        if totals.size == 0:
+            return {
+                'rolling_mean': 0.0,
+                'rolling_std': 0.0,
+                'rolling_trend': 0.0,
+                'mean_excess': 0.0,
+                'max': 0.0,
+                'ema': float(self._ema_total_holding[direction]),
+                'n_trips': 0,
+            }
+        trend = (float(np.polyfit(np.arange(totals.size), totals, 1)[0])
+                 if totals.size >= 3 else 0.0)
+        excess = np.maximum(totals - max(float(budget_s), 0.0), 0.0)
+        return {
+            'rolling_mean': float(totals.mean()),
+            'rolling_std': float(totals.std()) if totals.size > 1 else 0.0,
+            'rolling_trend': trend,
+            'mean_excess': float(excess.mean()),
+            'max': float(totals.max()),
+            'ema': float(self._ema_total_holding[direction]),
+            'n_trips': int(totals.size),
         }
 
     def compute_timetable_correction(self, trip_id):
@@ -204,10 +266,28 @@ class HoldingFeedback:
         for actions in self._trip_actions.values():
             all_actions.extend(actions)
         if not all_actions:
-            return {'mean': 0.0, 'std': 0.0, 'total_interventions': 0}
+            return {
+                'mean': 0.0,
+                'std': 0.0,
+                'total_interventions': 0,
+                'total_holding_s': 0.0,
+                'trip_total_mean': 0.0,
+                'trip_total_std': 0.0,
+                'trip_total_max': 0.0,
+                'n_trips': 0,
+            }
+        trip_totals = np.asarray([
+            np.sum(np.maximum(actions, 0.0))
+            for actions in self._trip_actions.values()
+            if actions
+        ], dtype=np.float64)
         return {
             'mean': float(np.mean(all_actions)),
             'std': float(np.std(all_actions)),
             'total_interventions': len(all_actions),
+            'total_holding_s': float(trip_totals.sum()),
+            'trip_total_mean': float(trip_totals.mean()),
+            'trip_total_std': float(trip_totals.std()),
+            'trip_total_max': float(trip_totals.max()),
             'n_trips': len(self._trip_actions),
         }

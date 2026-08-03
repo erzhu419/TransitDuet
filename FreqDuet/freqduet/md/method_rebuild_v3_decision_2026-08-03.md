@@ -80,21 +80,35 @@ removed from the canonical paper-main claim.  A publishable main must use one
 algorithmic configuration across held-out domains, with only exogenous
 environment parameters changing.
 
-## Remaining Physical-Credit Defect
+## Physical-Credit And Objective Repair
 
-The current lower leakage state is a fixed-length deque of action events pooled
-across all buses in a direction.  It therefore measures recent aggregate
-holding volume, not the physical downstream delay accumulated by a particular
-trip.  The next rebuild will make the lower penalty depend on each trip's
-cumulative executed holding and make `DriftFB` depend on completed-trip totals
-over a causal time/trip window.  The legacy event-pooled mode will remain only
-for reproducibility.
+The lower leakage implementation now has an explicit `trip_cumulative` mode.
+Its penalty and Lagrangian cost use cumulative executed holding for the same
+physical trip; they no longer mix action events from concurrent buses.
+`DriftFB` in this mode uses only completed-trip totals from the causal
+directional history.  The event-pooled `rolling_action_window` mode remains the
+default for exact reproduction of old configurations.
+
+Passenger removal during boarding and alighting now uses order-preserving
+boolean masks instead of set differences, so FIFO station queues and onboard
+ordering are deterministic.
+
+The audit also found that the environment measurement vector used restricted
+horizon wait while the scalar `service_cost` used boarded-only observed wait.
+Both scalar costs are now emitted explicitly.  Old configs retain `observed`
+as their default; the new versioned paper protocol must declare
+`objective.wait_metric: restricted`, and matrix/external-baseline manifests
+reject mixed protocol versions.
 
 ## Active Clean-Protocol Screens
 
 - `protocol_v25_causal_contract_interval_ep80_s16_v1`: 9 configurations, 16
-  train seeds, 12 frozen CRN evaluation seeds; isolates lifecycle, forecast,
-  decomposer-prior, and exact interval-credit choices.
+  train seeds, 12 frozen CRN evaluation seeds; complete with 1,728 frozen
+  rollouts.  Additive interval credit reduces restricted wait by `0.0427 min`
+  relative to the legacy compact planner, hierarchical 95% CI
+  `[-0.0655, -0.0220]`.  Its observed-wait composite delta is `-0.0199`, CI
+  `[-0.0443, +0.0054]`, so the composite claim is not yet confirmatory.
+  Forecast and no-boundary-prior harmonic variants do not pass promotion.
 - `protocol_v26_repaired_timetable_curve_ep80_s16_v1`: 8 configurations under
   the same seed protocol; compares the two-coefficient repeatability control
   with three/four-coefficient local curves, a joint bidirectional curve, EMA,

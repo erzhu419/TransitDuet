@@ -1,6 +1,8 @@
 import unittest
 from types import SimpleNamespace
 
+import numpy as np
+
 from coupling.holding_feedback import HoldingFeedback
 from env.bus import Bus, BusState
 from lower.lifecycle import LowerEpisodeLifecycle
@@ -98,6 +100,25 @@ class LowerLifecycleTest(unittest.TestCase):
         self.assertEqual(feedback.get_direction_stats(False)["n_trips"], 0)
         self.assertEqual(feedback.get_direction_stats(False)["ema"], 0.0)
 
+    def test_completed_trip_totals_are_physical_and_causal(self):
+        feedback = HoldingFeedback(window_size=10)
+        feedback.finalize_trip(4, True, actions=[5.0, 0.0, 15.0])
+        feedback.finalize_trip(6, True, actions=[10.0, 20.0])
+
+        self.assertEqual(feedback.get_trip_total(4), 20.0)
+        direction = feedback.get_direction_stats(True)
+        self.assertEqual(direction["n_trips"], 2)
+        self.assertEqual(direction["rolling_total_mean"], 25.0)
+        totals = feedback.get_direction_total_stats(True, budget_s=20.0)
+        self.assertEqual(totals["rolling_mean"], 25.0)
+        self.assertEqual(totals["mean_excess"], 5.0)
+        self.assertEqual(totals["max"], 30.0)
+
+        episode = feedback.episode_summary
+        self.assertEqual(episode["total_holding_s"], 50.0)
+        self.assertEqual(episode["trip_total_mean"], 25.0)
+        self.assertEqual(episode["trip_total_max"], 30.0)
+
     def test_all_decisions_trace_records_zero_holding(self):
         bus = Bus.__new__(Bus)
         bus.trip_id = 4
@@ -175,6 +196,38 @@ class LowerLifecycleTest(unittest.TestCase):
         bus._prepare_for_action(current_time=100, bus_all=[], debug=False)
 
         self.assertEqual(bus.state, BusState.WAITING_ACTION)
+
+    def test_passenger_exchange_preserves_onboard_and_station_order(self):
+        destination_here = SimpleNamespace(station_name="B")
+        destination_later = SimpleNamespace(station_name="C")
+        onboard_first = SimpleNamespace(destination_station=destination_later)
+        alighting = SimpleNamespace(destination_station=destination_here)
+        onboard_last = SimpleNamespace(destination_station=destination_later)
+        waiting = [
+            SimpleNamespace(destination_station=destination_later, appear_time=10.0),
+            SimpleNamespace(destination_station=destination_later, appear_time=20.0),
+            SimpleNamespace(destination_station=destination_later, appear_time=30.0),
+        ]
+        station = SimpleNamespace(
+            station_name="B",
+            station_id=2,
+            waiting_passengers=np.asarray(waiting, dtype=object),
+        )
+        bus = Bus.__new__(Bus)
+        bus.next_station = station
+        bus.passengers = np.asarray(
+            [onboard_first, alighting, onboard_last], dtype=object)
+        bus.capacity = 3
+        bus.alight_num = 0.0
+        bus.board_num = 0.0
+
+        bus.exchange_passengers(current_time=100.0, debug=False)
+
+        self.assertEqual(
+            list(bus.passengers), [onboard_first, onboard_last, waiting[0]])
+        self.assertEqual(list(station.waiting_passengers), waiting[1:])
+        self.assertTrue(alighting.arrived)
+        self.assertEqual(waiting[0].boarding_time, 100.0)
 
 
 if __name__ == "__main__":

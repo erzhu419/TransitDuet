@@ -10,6 +10,7 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     PROTOCOL_VERSION,
     config_fingerprint,
     paired_sign_flip_p,
+    protocol_version_for_config,
     source_fingerprint,
     validate_evaluation_frame,
     validate_run_manifest,
@@ -57,6 +58,13 @@ class ProtocolV2MatrixTest(unittest.TestCase):
         self.assertTrue(
             result["lineage"][-1].endswith(
                 "F_freqduet_protocol_v2_upperdisc_hiro.yaml"))
+
+    def test_protocol_version_is_resolved_through_config_inheritance(self):
+        self.assertEqual(
+            protocol_version_for_config(
+                "F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro"),
+            PROTOCOL_VERSION,
+        )
 
     def test_source_fingerprint_covers_code_and_base_environment_data(self):
         first = source_fingerprint()

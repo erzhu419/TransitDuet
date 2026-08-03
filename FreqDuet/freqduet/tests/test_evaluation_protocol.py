@@ -6,6 +6,8 @@ from env.evaluation import (
     HeadwayEventRecorder,
     composite_service_cost,
     compute_wait_metrics,
+    normalize_wait_metric,
+    service_cost_views,
 )
 
 
@@ -82,6 +84,24 @@ class MeasurementTest(unittest.TestCase):
         )
         self.assertGreater(invalid, valid)
         self.assertAlmostEqual(components["incomplete_service"], 0.2)
+
+    def test_service_cost_exposes_both_wait_bases(self):
+        costs = service_cost_views(
+            {
+                "avg_wait_observed_min": 4.0,
+                "restricted_wait_horizon_min": 7.0,
+                "passenger_unserved_rate": 0.0,
+                "trip_completion_rate": 1.0,
+            },
+            peak_fleet=12,
+            headway_cv=0.2,
+            n_fleet=12,
+        )
+        self.assertAlmostEqual(costs["observed"], 0.6)
+        self.assertAlmostEqual(costs["restricted"], 0.9)
+        self.assertEqual(normalize_wait_metric("censored"), "restricted")
+        with self.assertRaisesRegex(ValueError, "wait metric"):
+            normalize_wait_metric("unknown")
 
 
 if __name__ == "__main__":

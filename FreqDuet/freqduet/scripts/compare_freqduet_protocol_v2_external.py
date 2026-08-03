@@ -11,7 +11,6 @@ import pandas as pd
 
 from run_freqduet_protocol_v2_matrix import (
     METRIC_DIRECTIONS,
-    PROTOCOL_VERSION,
     hierarchical_bootstrap,
     paired_sign_flip_p,
 )
@@ -51,8 +50,15 @@ def compare(
         missing = sorted(required - set(frame.columns))
         if missing:
             raise ValueError(f"{label} input is missing columns {missing}")
-        if set(frame["protocol_version"].astype(str)) != {PROTOCOL_VERSION}:
-            raise ValueError(f"{label} protocol version mismatch")
+        versions = set(frame["protocol_version"].astype(str))
+        if len(versions) != 1:
+            raise ValueError(f"{label} mixes protocol versions: {versions}")
+    learned_version = str(learned["protocol_version"].iloc[0])
+    external_version = str(external["protocol_version"].iloc[0])
+    if learned_version != external_version:
+        raise ValueError(
+            "learned/external protocol version mismatch: "
+            f"{learned_version} != {external_version}")
 
     rows = []
     paired_frames = []

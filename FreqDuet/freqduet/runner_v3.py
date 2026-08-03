@@ -63,7 +63,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from env.sim import env_bus
-from env.evaluation import composite_service_cost
+from env.evaluation import normalize_wait_metric, service_cost_views
 from frequency.diagnostics import (
     demand_attribution_mi,
     shock_response_metrics,
@@ -209,7 +209,10 @@ class DiagnosticLog:
         'headway_sample_count', 'trips_unlaunched', 'trip_launch_rate',
         'trips_completed', 'trips_incomplete', 'trip_completion_rate',
         'simulation_end_time_s', 'done_reason', 'scenario_tape_id',
-        'peak_fleet', 'headway_cv', 'service_cost', 'ep_reward', 'ep_cost',
+        'peak_fleet', 'headway_cv',
+        'service_cost', 'service_cost_wait_metric',
+        'service_cost_observed', 'service_cost_restricted',
+        'ep_reward', 'ep_cost',
         'ep_steps', 'n_dispatches',
         # lower policy
         'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
@@ -280,9 +283,13 @@ class DiagnosticLog:
         'freq_promotion_ratio',
         'freq_promotion_absorptions', 'freq_promotion_absorbed',
         # FreqDuet frequency-leakage regularization
+        'lower_drift_signal_mode',
+        'lower_drift_load_mean', 'lower_drift_load_max',
         'lower_drift_penalty_mean', 'lower_drift_penalty_max',
         'lower_drift_cost_mean', 'lower_drift_cost_max',
         'lower_drift_cost_adaptive_gate_mean',
+        'lower_trip_hold_total_mean', 'lower_trip_hold_total_std',
+        'lower_trip_hold_total_max',
         'upper_hf_penalty_mean', 'upper_hf_penalty_max',
         'upper_residual_value_cost_mean', 'upper_residual_value_cost_max',
         'upper_residual_value_cost_active_mean',
@@ -505,6 +512,9 @@ class TransitDuetV2Runner:
         self.cfg = config
         self.device = device
         self.exp_name = str(config.get('_name', 'v2'))
+        self.protocol_version = str(
+            (config.get('protocol', {}) or {}).get(
+                'version', 'freqduet-eval-v2'))
         self.base_seed = int(config.get('seed', 0))
         self.fleet_rng = np.random.RandomState(self.base_seed)
         training_cfg = config.get('training', {}) or {}
@@ -525,8 +535,11 @@ class TransitDuetV2Runner:
             'freeze_lower_critic_after_ep')
         self.freeze_upper_after_ep = _optional_freeze_ep(
             'freeze_upper_after_ep')
+        objective_cfg = config.get('objective', {}) or {}
         self.objective_weights = dict(
-            (config.get('objective', {}) or {}).get('weights', {}) or {})
+            objective_cfg.get('weights', {}) or {})
+        self.objective_wait_metric = normalize_wait_metric(
+            objective_cfg.get('wait_metric', 'observed'))
 
         # Environment
         env_cfg = config.get('env', {})
@@ -1997,6 +2010,22 @@ class TransitDuetV2Runner:
             leak_cfg.get('lower_drift_cost_cap', 1.0))
         self.lower_drift_cost_mode = str(
             leak_cfg.get('lower_drift_cost_mode', 'excess')).lower()
+        drift_signal_mode = str(leak_cfg.get(
+            'lower_drift_signal_mode', 'rolling_action_window')).lower()
+        drift_signal_aliases = {
+            'legacy': 'rolling_action_window',
+            'rolling': 'rolling_action_window',
+            'direction_window': 'rolling_action_window',
+            'physical_trip': 'trip_cumulative',
+            'trip_total': 'trip_cumulative',
+        }
+        self.lower_drift_signal_mode = drift_signal_aliases.get(
+            drift_signal_mode, drift_signal_mode)
+        if self.lower_drift_signal_mode not in {
+                'rolling_action_window', 'trip_cumulative'}:
+            raise ValueError(
+                'leakage.lower_drift_signal_mode must be one of '
+                "['rolling_action_window', 'trip_cumulative']")
         drift_cost_adapt_cfg = (
             leak_cfg.get('lower_drift_cost_adaptive', {}) or {})
         self.lower_drift_cost_adaptive_enable = bool(
@@ -2013,6 +2042,7 @@ class TransitDuetV2Runner:
         }
         self._ep_lower_drift_penalties = []
         self._ep_lower_drift_costs = []
+        self._ep_lower_drift_loads = []
         self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_residual_value_costs = []
@@ -2425,21 +2455,34 @@ class TransitDuetV2Runner:
             return w
         return fn
 
-    def _lower_drift_penalty(self, direction, action_s):
-        """Rolling penalty for lower holding that accumulates as timetable drift."""
+    def _lower_drift_load(
+            self, direction, action_s, trip_id, action_already_recorded=False):
+        """Return a drift load with explicit legacy or physical-trip semantics."""
         direction = bool(direction)
         action_s = max(float(action_s), 0.0)
+        if self.lower_drift_signal_mode == 'trip_cumulative':
+            trip_id = int(trip_id)
+            cumulative = (
+                self.holding_feedback.get_trip_total(trip_id)
+                if trip_id >= 0 else 0.0)
+            if not action_already_recorded:
+                cumulative += action_s
+            return float(cumulative)
+
         hist = self._lower_drift_by_dir[direction]
         hist.append(action_s)
+        return float(sum(hist))
+
+    def _lower_drift_penalty(self, drift_load_s):
+        """Penalty for lower holding that accumulates as timetable drift."""
         if not self.leakage_enable or self.lower_drift_penalty <= 0:
             return 0.0
-        rolling_hold = float(sum(hist))
-        excess = max(0.0, rolling_hold - self.lower_drift_budget_s)
+        excess = max(0.0, float(drift_load_s) - self.lower_drift_budget_s)
         penalty = self.lower_drift_penalty * (
             excess / max(self.lower_drift_budget_s, 1e-6))
         return float(penalty)
 
-    def _lower_drift_cost(self, direction):
+    def _lower_drift_cost(self, drift_load_s):
         """Optional Lagrangian cost for lower holding that becomes LF drift."""
         if (not self.leakage_enable
                 or self.lower_drift_cost_weight <= 0.0):
@@ -2454,8 +2497,7 @@ class TransitDuetV2Runner:
                 weight += self.lower_drift_cost_adaptive_extra_weight
         self._ep_lower_drift_cost_adaptive_gate.append(
             1.0 if adaptive_active else 0.0)
-        hist = self._lower_drift_by_dir[bool(direction)]
-        rolling_hold = float(sum(hist))
+        rolling_hold = max(float(drift_load_s), 0.0)
         budget = max(self.lower_drift_budget_s, 1e-6)
         if self.lower_drift_cost_mode in {'total', 'rolling', 'hold'}:
             signal = rolling_hold / budget
@@ -2467,11 +2509,17 @@ class TransitDuetV2Runner:
         return float(cost)
 
     def _drift_feedback_pair(self, direction):
-        hist = self._lower_drift_by_dir[bool(direction)]
-        rolling_hold = float(sum(hist))
+        if self.lower_drift_signal_mode == 'trip_cumulative':
+            stats = self.holding_feedback.get_direction_total_stats(
+                bool(direction), budget_s=self.lower_drift_budget_s)
+            rolling_hold = float(stats['rolling_mean'])
+            excess_s = float(stats['mean_excess'])
+        else:
+            hist = self._lower_drift_by_dir[bool(direction)]
+            rolling_hold = float(sum(hist))
+            excess_s = max(0.0, rolling_hold - self.lower_drift_budget_s)
         drift = rolling_hold / self.freq_driftfb_norm_s
-        excess = max(0.0, rolling_hold - self.lower_drift_budget_s)
-        excess = excess / self.freq_driftfb_norm_s
+        excess = excess_s / self.freq_driftfb_norm_s
         if self.freq_driftfb_clip > 0.0:
             drift = min(drift, self.freq_driftfb_clip)
             excess = min(excess, self.freq_driftfb_clip)
@@ -5247,8 +5295,14 @@ class TransitDuetV2Runner:
                 cur_dir = bool(getattr(context_bus, 'direction', True))
 
         self._ep_lower_terminal_transitions += int(transition_done)
-        drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
-        drift_cost = self._lower_drift_cost(cur_dir)
+        drift_load = self._lower_drift_load(
+            cur_dir,
+            act_val,
+            cur_tid,
+            action_already_recorded=not record_holding_action,
+        )
+        drift_penalty = self._lower_drift_penalty(drift_load)
+        drift_cost = self._lower_drift_cost(drift_load)
         lower_value_soft_cost = self._lower_value_soft_cost(
             context_bus, act_val)
         total_cost = float(cost) + drift_cost + lower_value_soft_cost
@@ -5333,6 +5387,7 @@ class TransitDuetV2Runner:
         self._ep_lower_rewards.append(shaped_reward)
         self._ep_lower_drift_penalties.append(drift_penalty)
         self._ep_lower_drift_costs.append(drift_cost)
+        self._ep_lower_drift_loads.append(drift_load)
         if cur_tid >= 0 and record_holding_action:
             self.holding_feedback.record_action(cur_tid, act_val)
         if tracker is not None:
@@ -7068,6 +7123,7 @@ class TransitDuetV2Runner:
         }
         self._ep_lower_drift_penalties = []
         self._ep_lower_drift_costs = []
+        self._ep_lower_drift_loads = []
         self._ep_lower_drift_cost_adaptive_gate = []
         self._ep_upper_hf_penalties = []
         self._ep_upper_residual_value_costs = []
@@ -7291,18 +7347,17 @@ class TransitDuetV2Runner:
         env_details = self.env.measurement_details
         N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
         episode_overshoot = max(0.0, float(z[1]) - float(N_fleet))
-        episode_composite_cost, service_cost_components = (
-            composite_service_cost(
-                avg_wait_min=float(env_details['avg_wait_observed_min']),
-                peak_fleet=float(z[1]),
-                headway_cv=float(z[2]),
-                n_fleet=float(N_fleet),
-                passenger_unserved_rate=float(
-                    env_details['passenger_unserved_rate']),
-                trip_completion_rate=float(
-                    env_details['trip_completion_rate']),
-                weights=self.objective_weights,
-            ))
+        service_cost_by_wait = service_cost_views(
+            env_details,
+            peak_fleet=float(z[1]),
+            headway_cv=float(z[2]),
+            n_fleet=float(N_fleet),
+            weights=self.objective_weights,
+        )
+        observed_service_cost = service_cost_by_wait['observed']
+        restricted_service_cost = service_cost_by_wait['restricted']
+        episode_composite_cost = service_cost_by_wait[
+            self.objective_wait_metric]
         # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
         sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
         self._last_adj_weights = adj_w
@@ -7645,6 +7700,7 @@ class TransitDuetV2Runner:
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
+        lower_drift_load_stat = _stat(self._ep_lower_drift_loads)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -7891,7 +7947,7 @@ class TransitDuetV2Runner:
             'wall_env_s': round(env_time, 1),
             'wall_train_s': round(train_time, 1),
             # env
-            'protocol_version': 'freqduet-eval-v2',
+            'protocol_version': self.protocol_version,
             'avg_wait_min': round(z[0], 3),
             'avg_wait_observed_min': round(
                 float(env_details['avg_wait_observed_min']), 3),
@@ -7919,6 +7975,9 @@ class TransitDuetV2Runner:
             'peak_fleet': int(z[1]),
             'headway_cv': round(z[2], 4),
             'service_cost': round(episode_composite_cost, 6),
+            'service_cost_wait_metric': self.objective_wait_metric,
+            'service_cost_observed': round(observed_service_cost, 6),
+            'service_cost_restricted': round(restricted_service_cost, 6),
             'ep_reward': round(episode_reward, 3),
             'ep_cost': round(episode_cost, 3),
             'ep_steps': episode_steps,
@@ -8083,12 +8142,21 @@ class TransitDuetV2Runner:
                 'freq_promotion_absorptions', 0),
             'freq_promotion_absorbed': freq_summary.get(
                 'freq_promotion_absorbed', 0.0),
+            'lower_drift_signal_mode': self.lower_drift_signal_mode,
+            'lower_drift_load_mean': lower_drift_load_stat['mean'],
+            'lower_drift_load_max': lower_drift_load_stat['max'],
             'lower_drift_penalty_mean': lower_drift_stat['mean'],
             'lower_drift_penalty_max': lower_drift_stat['max'],
             'lower_drift_cost_mean': lower_drift_cost_stat['mean'],
             'lower_drift_cost_max': lower_drift_cost_stat['max'],
             'lower_drift_cost_adaptive_gate_mean':
                 lower_drift_cost_adaptive_gate_stat['mean'],
+            'lower_trip_hold_total_mean': hold_summary.get(
+                'trip_total_mean', 0.0),
+            'lower_trip_hold_total_std': hold_summary.get(
+                'trip_total_std', 0.0),
+            'lower_trip_hold_total_max': hold_summary.get(
+                'trip_total_max', 0.0),
             'upper_hf_penalty_mean': upper_hf_stat['mean'],
             'upper_hf_penalty_max': upper_hf_stat['max'],
             'upper_residual_value_cost_mean':
@@ -8663,7 +8731,7 @@ class TransitDuetV2Runner:
             if hasattr(self, name)
         }
         return {
-            'protocol_version': 'freqduet-eval-v2',
+            'protocol_version': self.protocol_version,
             'episode': int(ep),
             'measurement_theta': self.measurement_proj.theta.copy(),
             'measurement_iter': int(self.measurement_proj._iter),
@@ -8771,10 +8839,10 @@ class TransitDuetV2Runner:
             self.loaded_checkpoint_protocol = 'legacy'
             self._deployment_state_loaded = False
         if (require_deployment_state
-                and self.loaded_checkpoint_protocol != 'freqduet-eval-v2'):
+                and self.loaded_checkpoint_protocol != self.protocol_version):
             raise ValueError(
-                'checkpoint deployment state is not freqduet-eval-v2: '
-                f'{self.loaded_checkpoint_protocol}')
+                'checkpoint deployment protocol mismatch: '
+                f'{self.loaded_checkpoint_protocol} != {self.protocol_version}')
         return int(ep)
 
     def _policy_digest(self):
@@ -8847,7 +8915,7 @@ class TransitDuetV2Runner:
             writer.writerows(rows)
         with (destination / 'evaluation_manifest.json').open('w') as f:
             json.dump({
-                'protocol_version': 'freqduet-eval-v2',
+                'protocol_version': self.protocol_version,
                 'config_name': self.exp_name,
                 'training_seed': self.base_seed,
                 'checkpoint_ep': int(
@@ -8975,7 +9043,7 @@ class TransitDuetV2Runner:
         self.loaded_checkpoint_ep = int(ep)
         with open(os.path.join(ckpt_dir, 'checkpoint_meta.json'), 'w') as f:
             json.dump({
-                'protocol_version': 'freqduet-eval-v2',
+                'protocol_version': self.protocol_version,
                 'latest_episode': int(ep),
                 'config_name': self.exp_name,
                 'seed': self.base_seed,

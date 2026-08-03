@@ -45,10 +45,10 @@ def config_name(value: str) -> str:
 
 
 def external_policy_digest(
-    config: str, variant: str, n_fleet: int
+    config: str, variant: str, n_fleet: int, protocol_version: str
 ) -> str:
     payload = json.dumps({
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": str(protocol_version),
         "config": config_name(config),
         "variant": str(variant),
         "n_fleet": int(n_fleet),
@@ -66,8 +66,13 @@ def evaluate_variant(
     env, cfg = make_env_from_config(config)
     env._freqduet_training = False
     upper = cfg.get("upper", {}) or {}
+    objective = cfg.get("objective", {}) or {}
+    protocol_version = str(
+        (cfg.get("protocol", {}) or {}).get(
+            "version", PROTOCOL_VERSION))
     n_fleet = int(upper.get("N_fleet", 12))
-    digest = external_policy_digest(config, variant, n_fleet)
+    digest = external_policy_digest(
+        config, variant, n_fleet, protocol_version)
     rows = []
     for eval_seed in eval_seeds:
         random.seed(int(eval_seed))
@@ -81,10 +86,13 @@ def evaluate_variant(
             rng=rng,
             demand_noise=float((cfg.get("env", {}) or {}).get(
                 "demand_noise", 0.0)),
+            objective_wait_metric=str(
+                objective.get("wait_metric", "observed")),
+            objective_weights=dict(objective.get("weights", {}) or {}),
         )
         row = dict(row)
         row.update({
-            "protocol_version": PROTOCOL_VERSION,
+            "protocol_version": protocol_version,
             "config": config_name(config),
             "variant": variant,
             "eval_seed": int(eval_seed),
@@ -105,7 +113,7 @@ def evaluate_variant(
         writer.writeheader()
         writer.writerows(rows)
     (output_dir / f"{variant}_manifest.json").write_text(json.dumps({
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": protocol_version,
         "config_name": config_name(config),
         "variant": variant,
         "fleet_protocol": "fixed_config_default",
@@ -135,9 +143,11 @@ def main() -> None:
     if unknown:
         raise SystemExit(f"unknown variants: {unknown}")
     resolved = load_config(str(config_path(args.config)))
-    if (resolved.get("protocol", {}) or {}).get("version") \
-            != PROTOCOL_VERSION:
-        raise SystemExit("external protocol-v2 evaluation requires a v2 config")
+    protocol_version = str(
+        (resolved.get("protocol", {}) or {}).get("version", ""))
+    if not protocol_version.startswith("freqduet-eval-v"):
+        raise SystemExit(
+            "external frozen evaluation requires a versioned protocol config")
 
     output_dir = Path(args.out_dir)
     all_rows = []

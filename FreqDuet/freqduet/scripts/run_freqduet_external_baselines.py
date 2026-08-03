@@ -21,7 +21,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from env.sim import env_bus
-from env.evaluation import composite_service_cost
+from env.evaluation import (
+    composite_service_cost,
+    normalize_wait_metric,
+    service_cost_views,
+)
 from runner_v3 import load_config
 from run_baseline_rule import hour_to_slot, mpc_plan, rule_holding_action
 
@@ -251,6 +255,7 @@ def composite(
     n_fleet: int,
     passenger_unserved_rate: float = 0.0,
     trip_completion_rate: float = 1.0,
+    weights: dict | None = None,
 ) -> float:
     value, _ = composite_service_cost(
         avg_wait_min=wait,
@@ -259,6 +264,7 @@ def composite(
         n_fleet=n_fleet,
         passenger_unserved_rate=passenger_unserved_rate,
         trip_completion_rate=trip_completion_rate,
+        weights=weights,
     )
     return value
 
@@ -279,6 +285,8 @@ def run_episode_external(
     rng: np.random.RandomState,
     demand_noise: float,
     route_headway_target_s: float | None = None,
+    objective_wait_metric: str = "observed",
+    objective_weights: dict | None = None,
 ):
     env._n_fleet_target = int(n_fleet)
     fixed_target = fixed_headway_target_s(variant)
@@ -338,6 +346,17 @@ def run_episode_external(
     peak_fleet = float(z[1])
     cv = float(z[2])
     overshoot = max(0.0, peak_fleet - float(n_fleet))
+    service_cost_by_wait = service_cost_views(
+        details,
+        peak_fleet=peak_fleet,
+        headway_cv=cv,
+        n_fleet=n_fleet,
+        weights=objective_weights,
+    )
+    observed_service_cost = service_cost_by_wait["observed"]
+    restricted_service_cost = service_cost_by_wait["restricted"]
+    wait_metric = normalize_wait_metric(objective_wait_metric)
+    selected_service_cost = service_cost_by_wait[wait_metric]
     return {
         "avg_wait_min": wait,
         "peak_fleet": peak_fleet,
@@ -358,15 +377,10 @@ def run_episode_external(
         "scenario_tape_id": str(details["scenario_tape_id"]),
         "N_fleet": int(n_fleet),
         "fleet_overshoot": overshoot,
-        "composite": composite(
-            float(details["avg_wait_observed_min"]),
-            cv,
-            peak_fleet,
-            n_fleet,
-            passenger_unserved_rate=float(
-                details["passenger_unserved_rate"]),
-            trip_completion_rate=float(details["trip_completion_rate"]),
-        ),
+        "composite": selected_service_cost,
+        "service_cost_wait_metric": wait_metric,
+        "service_cost_observed": observed_service_cost,
+        "service_cost_restricted": restricted_service_cost,
         "target_peak": chosen_triple[0],
         "target_offpeak": chosen_triple[1],
         "target_transition": chosen_triple[2],
@@ -403,13 +417,14 @@ def run_one(
         )
     rows = []
     t_start = time.time()
-    protocol_v2 = (
-        (cfg.get("protocol", {}) or {}).get("version")
-        == "freqduet-eval-v2")
+    protocol_version = str(
+        (cfg.get("protocol", {}) or {}).get("version", "legacy"))
+    frozen_protocol = protocol_version.startswith("freqduet-eval-v")
+    objective_cfg = cfg.get("objective", {}) or {}
     for ep in range(int(episodes)):
         env.scenario_seed = int(seed) * 1000003 + int(ep)
         if (upper_cfg.get("fleet_mode", "fixed") == "elastic"
-                and not protocol_v2):
+                and not frozen_protocol):
             n_fleet = int(rng.randint(int(upper_cfg.get("fleet_min", 8)), int(upper_cfg.get("fleet_max", 16)) + 1))
         else:
             n_fleet = int(upper_cfg.get("N_fleet", 12))
@@ -421,6 +436,9 @@ def run_one(
             rng=rng,
             demand_noise=float(env_cfg.get("demand_noise", 0.0)),
             route_headway_target_s=route_headway_target,
+            objective_wait_metric=str(
+                objective_cfg.get("wait_metric", "observed")),
+            objective_weights=dict(objective_cfg.get("weights", {}) or {}),
         )
         row.update({
             "ep": ep,
@@ -428,8 +446,7 @@ def run_one(
             "config": config,
             "domain": infer_domain(config),
             "seed": int(seed),
-            "protocol_version": (
-                "freqduet-eval-v2" if protocol_v2 else "legacy"),
+            "protocol_version": protocol_version,
             "wall_s": round(time.time() - t0, 3),
         })
         rows.append(row)

@@ -214,3 +214,49 @@ def composite_service_cost(
     }
     total = sum(configured[name] * value for name, value in components.items())
     return float(total), components
+
+
+def normalize_wait_metric(value: str | None) -> str:
+    """Normalize the configured wait basis used for scalar model selection."""
+    aliases = {
+        "boarded": "observed",
+        "boarded_only": "observed",
+        "censored": "restricted",
+        "restricted_horizon": "restricted",
+    }
+    metric = aliases.get(str(value or "observed").strip().lower(),
+                         str(value or "observed").strip().lower())
+    if metric not in {"observed", "restricted"}:
+        raise ValueError(
+            "wait metric must be 'observed' or 'restricted'")
+    return metric
+
+
+def service_cost_views(
+    measurement_details: Mapping[str, Any],
+    peak_fleet: float,
+    headway_cv: float,
+    n_fleet: float,
+    weights: Mapping[str, float] | None = None,
+) -> dict[str, float]:
+    """Compute boarded-only and restricted-horizon costs on one outcome."""
+    common = {
+        "peak_fleet": peak_fleet,
+        "headway_cv": headway_cv,
+        "n_fleet": n_fleet,
+        "passenger_unserved_rate": float(
+            measurement_details.get("passenger_unserved_rate", 0.0)),
+        "trip_completion_rate": float(
+            measurement_details.get("trip_completion_rate", 1.0)),
+        "weights": weights,
+    }
+    observed, _ = composite_service_cost(
+        avg_wait_min=float(measurement_details["avg_wait_observed_min"]),
+        **common,
+    )
+    restricted, _ = composite_service_cost(
+        avg_wait_min=float(
+            measurement_details["restricted_wait_horizon_min"]),
+        **common,
+    )
+    return {"observed": float(observed), "restricted": float(restricted)}
