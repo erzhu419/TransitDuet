@@ -11,11 +11,13 @@ from pathlib import Path
 
 from submit_freqduet_config_matrix_scheduleurm import (
     DEFAULT_SEEDS,
-    REMOTE_ROOT,
     parse_csv,
     parse_csv_file,
 )
-from submit_freqduet_external_baselines_scheduleurm import DEFAULT_VARIANTS
+from submit_freqduet_external_baselines_scheduleurm import (
+    DEFAULT_VARIANTS,
+    REMOTE_ROOT,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +43,8 @@ def rsync_remote(args: argparse.Namespace) -> None:
             "rsync",
             "-az",
             "--partial",
+            "--exclude=checkpoints/",
+            "--exclude=*.pt",
             "-e",
             ssh_cmd,
             f"{args.host}:{remote_result}/",

@@ -14,16 +14,26 @@ from submit_freqduet_config_matrix_scheduleurm import (
     DEFAULT_NODES,
     DEFAULT_SEEDS,
     REMOTE_PYTHON,
-    REMOTE_ROOT,
+    REMOTE_ROOT as LEGACY_REMOTE_ROOT,
     SCHEDULER,
     parse_csv,
     parse_csv_file,
     run_command,
     shard_ranges,
 )
+from submit_freqduet_protocol_v2_scheduleurm import (
+    preflight_source,
+    protocol_label,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
+LOCAL_WORKSPACE_ROOT = Path("/home/erzhu419/mine_code")
+REMOTE_WORKSPACE_ROOT = Path("/home/zhengliang01/scheduleurm_work")
+try:
+    REMOTE_ROOT = REMOTE_WORKSPACE_ROOT / ROOT.relative_to(LOCAL_WORKSPACE_ROOT)
+except ValueError:
+    REMOTE_ROOT = LEGACY_REMOTE_ROOT
 DEFAULT_VARIANTS = ["fixed_headway", "rule_holding", "rule_mpc"]
 
 
@@ -72,6 +82,8 @@ def build_inner_cmd(
         cmd.extend(["--headway-policy-csv", args.headway_policy_csv])
     if args.policy_default_headway is not None:
         cmd.extend(["--policy-default-headway", str(args.policy_default_headway)])
+    if args.direct_scenario_seeds:
+        cmd.append("--direct-scenario-seeds")
     return " ".join(env_bits + [shlex.join(cmd)])
 
 
@@ -90,7 +102,7 @@ def submit_shard(
     result_base = f"results_freqduet/{args.run_name}"
     logs_dir = f"{result_base}/logs_shards/shard_{shard_id}"
     out_dir = f"{result_base}/shard_summaries/shard_{shard_id}"
-    remote_result_dir = str(REMOTE_ROOT / logs_dir)
+    remote_result_dir = str(Path(args.remote_root) / logs_dir)
     local_result_dir = str(ROOT / logs_dir)
     cmd = build_inner_cmd(
         args, configs_csv, variants_csv, seeds_csv, start, end, logs_dir, out_dir)
@@ -169,6 +181,10 @@ def main() -> None:
     parser.add_argument("--cpu", type=int, default=30)
     parser.add_argument("--ram-mb", type=int, default=32768)
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
+    parser.add_argument("--remote-root", default=str(REMOTE_ROOT))
+    parser.add_argument("--direct-scenario-seeds", action="store_true")
+    parser.add_argument("--require-clean-source", action="store_true")
+    parser.add_argument("--expected-commit", default=None)
     parser.add_argument("--priority", choices=["low", "normal", "high"], default="normal")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--dispatch", action="store_true")
@@ -184,6 +200,15 @@ def main() -> None:
     variants = parse_csv(args.variants, str)
     seeds = parse_csv(args.seeds, int)
     nodes = parse_csv(args.nodes, str)
+    if args.direct_scenario_seeds and int(args.episodes) != 1:
+        raise SystemExit("--direct-scenario-seeds requires --episodes 1")
+    protocol = protocol_label(configs)
+    try:
+        commit = preflight_source(
+            configs, protocol, args.require_clean_source,
+            args.expected_commit)
+    except RuntimeError as exc:
+        raise SystemExit(str(exc)) from exc
     total_jobs = len(configs) * len(variants) * len(seeds)
     ranges = shard_ranges(total_jobs, args.shard_size)
     print(
@@ -191,6 +216,9 @@ def main() -> None:
         f"variants={len(variants)}; seeds={len(seeds)}; total jobs={total_jobs}; "
         f"shards={len(ranges)}; nodes={','.join(nodes)}"
     )
+    print(
+        f"source_commit={commit} local_root={ROOT} "
+        f"remote_root={Path(args.remote_root)}")
     print_aggregate_hint(
         args.run_name, configs, variants, seeds, args.last_k,
         configs_file=args.configs_file)
