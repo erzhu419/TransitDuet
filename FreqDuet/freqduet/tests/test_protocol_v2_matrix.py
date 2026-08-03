@@ -7,7 +7,9 @@ import pandas as pd
 
 from scripts.run_freqduet_protocol_v2_matrix import (
     METRICS,
+    OPTIONAL_COST_METRICS,
     PROTOCOL_VERSION,
+    analysis_metrics_for_frame,
     config_fingerprint,
     paired_sign_flip_p,
     protocol_version_for_config,
@@ -33,6 +35,24 @@ def evaluation_frame(seeds):
 
 
 class ProtocolV2MatrixTest(unittest.TestCase):
+    def test_analysis_metrics_accept_complete_explicit_cost_views(self):
+        frame = evaluation_frame([101, 102])
+        for metric in OPTIONAL_COST_METRICS:
+            frame[metric] = 1.0
+
+        self.assertEqual(
+            analysis_metrics_for_frame(frame),
+            METRICS + OPTIONAL_COST_METRICS,
+        )
+
+    def test_analysis_metrics_reject_mixed_cost_contract(self):
+        frame = evaluation_frame([101, 102])
+        frame["service_cost_observed"] = [1.0, np.nan]
+        frame["service_cost_restricted"] = [1.0, 1.0]
+
+        with self.assertRaisesRegex(RuntimeError, "incomplete explicit"):
+            analysis_metrics_for_frame(frame)
+
     def test_evaluation_frame_requires_exact_unique_seed_rows(self):
         frame = evaluation_frame([101, 101])
         with self.assertRaisesRegex(ValueError, "one row per"):

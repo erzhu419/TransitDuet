@@ -62,7 +62,10 @@ class MeasurementTest(unittest.TestCase):
 
     def test_headway_uses_every_stop_arrival_event(self):
         recorder = HeadwayEventRecorder()
+        self.assertIsNone(recorder.previous_arrival_time(3, True))
         recorder.record(3, True, 100, 0)
+        self.assertEqual(recorder.previous_arrival_time(3, True), 100.0)
+        self.assertIsNone(recorder.previous_arrival_time(3, False))
         recorder.record(3, True, 400, 2)
         recorder.record(3, True, 760, 4)
         recorder.record(4, True, 120, 0)

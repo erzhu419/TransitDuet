@@ -41,8 +41,14 @@ METRICS = [
     "upper_delta_mean",
     "lower_action_mean",
 ]
+OPTIONAL_COST_METRICS = [
+    "service_cost_observed",
+    "service_cost_restricted",
+]
 METRIC_DIRECTIONS = {
     "service_cost": "min",
+    "service_cost_observed": "min",
+    "service_cost_restricted": "min",
     "avg_wait_observed_min": "min",
     "restricted_wait_horizon_min": "min",
     "passenger_unserved_rate": "min",
@@ -51,6 +57,27 @@ METRIC_DIRECTIONS = {
     "trip_launch_rate": "max",
     "trip_completion_rate": "max",
 }
+
+
+def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
+    """Select explicit cost views only when the whole matrix provides both."""
+    optional_any = {
+        metric: metric in frame.columns and frame[metric].notna().any()
+        for metric in OPTIONAL_COST_METRICS
+    }
+    optional_complete = {
+        metric: metric in frame.columns and frame[metric].notna().all()
+        for metric in OPTIONAL_COST_METRICS
+    }
+    if (len(set(optional_any.values())) > 1
+            or optional_any != optional_complete):
+        raise RuntimeError(
+            "matrix contains incomplete explicit service-cost views: "
+            f"any={optional_any}, complete={optional_complete}")
+    metrics = list(METRICS)
+    if all(optional_complete.values()):
+        metrics.extend(OPTIONAL_COST_METRICS)
+    return metrics
 PROTOCOL_VERSION = "freqduet-eval-v2"
 RUN_MANIFEST_VERSION = "freqduet-run-manifest-v1"
 RUN_MANIFEST_NAME = "protocol_run_manifest.json"
@@ -664,6 +691,7 @@ def aggregate(
     if not tape_counts.eq(1).all():
         raise RuntimeError(
             "paired policies did not use identical scenario tapes")
+    analysis_metrics = analysis_metrics_for_frame(per_eval)
     summary_rows = []
     for name, frame in per_eval.groupby("config", sort=False):
         row = {
@@ -672,7 +700,7 @@ def aggregate(
             "n_eval_seeds": int(frame["eval_seed"].nunique()),
             "n_rollouts": int(len(frame)),
         }
-        for metric in METRICS:
+        for metric in analysis_metrics:
             values = frame[metric].astype(float)
             lo, hi = hierarchical_interval(frame, metric)
             row[f"{metric}_mean"] = float(values.mean())
@@ -700,7 +728,7 @@ def aggregate(
             "reference": reference_name,
             "n_pairs": int(len(merged)),
         }
-        for metric in METRICS:
+        for metric in analysis_metrics:
             delta_col = f"delta_{metric}"
             delta_frame[delta_col] = (
                 merged[f"{metric}_candidate"].astype(float)
@@ -743,7 +771,7 @@ def aggregate(
         "train_seeds": train_seeds,
         "eval_seeds": [int(seed) for seed in eval_seeds],
         "reference": reference_name,
-        "metrics": METRICS,
+        "metrics": analysis_metrics,
         "uncertainty": "hierarchical bootstrap over train seed and eval seed",
         "paired_test": "two-sided sign-flip test over train-seed mean deltas",
         "strict_complete": True,

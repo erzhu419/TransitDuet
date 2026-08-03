@@ -93,6 +93,17 @@ Passenger removal during boarding and alighting now uses order-preserving
 boolean masks instead of set differences, so FIFO station queues and onboard
 ordering are deterministic.
 
+The lower controller's forward-headway state had a second physical defect.  It
+looked up the preceding bus in `trajectory_dict`, but all writes to that
+dictionary had been commented out.  The policy therefore received a
+distance/average-speed approximation at almost every stop while evaluation used
+same-stop arrival events.  The state now queries the shared event recorder
+before recording the current arrival, giving an exact causal same-stop headway.
+The first arrival for each stop and direction uses a guarded spatial/default
+fallback.  Episode diagnostics expose event, spatial-fallback, and default
+counts plus the event-use rate; the integration test requires the event-state
+count to equal the evaluation headway sample count.
+
 The audit also found that the environment measurement vector used restricted
 horizon wait while the scalar `service_cost` used boarded-only observed wait.
 Both scalar costs are now emitted explicitly.  Old configs retain `observed`
@@ -110,11 +121,25 @@ reject mixed protocol versions.
   `[-0.0443, +0.0054]`, so the composite claim is not yet confirmatory.
   Forecast and no-boundary-prior harmonic variants do not pass promotion.
 - `protocol_v26_repaired_timetable_curve_ep80_s16_v1`: 8 configurations under
-  the same seed protocol; compares the two-coefficient repeatability control
-  with three/four-coefficient local curves, a joint bidirectional curve, EMA,
-  and pure interval credit.
+  the same seed protocol, complete with 1,536 frozen rollouts and verified
+  source/config/tape identity.  The joint three-coefficient-per-direction plan
+  has service cost `1.1988`, and the direction-local four-coefficient plan has
+  `1.2006`.  Relative to the legacy compact reference their paired deltas are
+  respectively `-0.0287` (95% CI `[-0.0529, -0.0076]`) and `-0.0269`
+  (`[-0.0477, -0.0098]`).  Relative to the strict two-coefficient repair,
+  however, the deltas are only `-0.0088` and `-0.0070`, and both intervals cross
+  zero.  Global-three versus local-four is also indistinguishable
+  (`-0.0018`, CI `[-0.0141, +0.0109]`).  The defensible conclusion is that the
+  strict lifecycle/causal credit repair drives the confirmed gain; richer curve
+  parameterization remains a secondary candidate.  Removing upper wait credit
+  or EMA does not improve the strict reference.
 
 Neither screen uses the old domain-specific paper-main aliases.
+
+Protocol v3 must retrain from scratch with the event-headway state,
+`trip_cumulative` drift, and explicit restricted-wait objective.  It will carry
+both strict compact and global-three timetable variants until the new physical
+contract identifies a winner; v2 checkpoints cannot be evaluated as v3.
 
 ## Promotion Gate
 

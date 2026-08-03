@@ -117,6 +117,13 @@ class HeadwayEventRecorder:
             ),
         })
 
+    def previous_arrival_time(
+        self, station_id: int, direction: bool
+    ) -> float | None:
+        """Return the last causal arrival before the caller records its event."""
+        value = self._last_arrival.get((int(station_id), bool(direction)))
+        return None if value is None else float(value)
+
     def summary(self) -> dict[str, float | int]:
         values = np.asarray(self.headways_s, dtype=np.float64)
         if values.size == 0:

@@ -39,6 +39,11 @@ class SimulationProtocolIntegrationTest(unittest.TestCase):
         self.assertEqual(no_hold["simulation_end_time_s"], 1200)
         self.assertEqual(held["simulation_end_time_s"], 1200)
         self.assertGreater(no_hold["headway_sample_count"], 0)
+        self.assertEqual(
+            no_hold["headway_state_arrival_event_count"],
+            no_hold["headway_sample_count"],
+        )
+        self.assertGreater(no_hold["headway_state_arrival_event_rate"], 0.0)
         self.assertLessEqual(
             no_hold["trips_completed"], no_hold["trips_launched"])
         self.assertAlmostEqual(

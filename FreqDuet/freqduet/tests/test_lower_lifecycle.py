@@ -5,6 +5,7 @@ import numpy as np
 
 from coupling.holding_feedback import HoldingFeedback
 from env.bus import Bus, BusState
+from env.evaluation import HeadwayEventRecorder
 from lower.lifecycle import LowerEpisodeLifecycle
 
 
@@ -164,6 +165,30 @@ class LowerLifecycleTest(unittest.TestCase):
         )
         self.assertAlmostEqual(reward, expected_reward)
         self.assertAlmostEqual(cost, (90.0 / 360.0) ** 2)
+
+    def test_lower_headway_uses_prior_same_stop_arrival_causally(self):
+        recorder = HeadwayEventRecorder()
+        recorder.record(7, True, 100.0, 0)
+        recorder.record(7, True, 420.0, 2)
+        event_count = len(recorder.events)
+
+        bus = Bus.__new__(Bus)
+        bus._headway_recorder = recorder
+        bus.next_station = SimpleNamespace(station_id=7)
+        bus.direction = True
+
+        self.assertEqual(bus._recorded_forward_headway(805.0), 385.0)
+        self.assertEqual(len(recorder.events), event_count)
+
+    def test_lower_headway_has_no_cross_direction_leakage(self):
+        recorder = HeadwayEventRecorder()
+        recorder.record(7, False, 420.0, 1)
+        bus = Bus.__new__(Bus)
+        bus._headway_recorder = recorder
+        bus.next_station = SimpleNamespace(station_id=7)
+        bus.direction = True
+
+        self.assertIsNone(bus._recorded_forward_headway(805.0))
 
     def test_unobserved_station_does_not_reuse_stale_action(self):
         bus = Bus.__new__(Bus)

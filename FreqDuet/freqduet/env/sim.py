@@ -149,6 +149,11 @@ class env_bus(object):
         self.protocol = None
         self.scenario_tape = None
         self.headway_events = HeadwayEventRecorder()
+        self._headway_state_source_counts = {
+            'arrival_event': 0,
+            'spatial_fallback': 0,
+            'target_default': 0,
+        }
         self._measurement_details = {}
 
     def _period_hour(self, value):
@@ -263,6 +268,11 @@ class env_bus(object):
         self.scenario_tape = ScenarioTape(
             int(getattr(self, 'scenario_seed', 0)))
         self.headway_events = HeadwayEventRecorder()
+        self._headway_state_source_counts = {
+            'arrival_event': 0,
+            'spatial_fallback': 0,
+            'target_default': 0,
+        }
         if self._upper_interval_outcome_tracker is not None:
             self._upper_interval_outcome_tracker.reset()
         self._completed_trip_ids = set()
@@ -610,13 +620,19 @@ class env_bus(object):
                           lower_context_enabled=self.lower_context_enabled,
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features,
-                          lower_context_gate_value=self.lower_context_gate_value)
+                          lower_context_gate_value=self.lower_context_gate_value,
+                          headway_recorder=self.headway_events)
                 if was_on_route and not bus.on_route:
                     self._completed_trip_ids.add(arrival_trip_id)
                 if (bus.last_board_time == self.current_time
                         and previous_board_time != bus.last_board_time
                         and (self.include_terminal_headways
                              or int(arrival_station.station_type) != 0)):
+                    source = str(getattr(
+                        bus, 'forward_headway_source', 'target_default'))
+                    if source not in self._headway_state_source_counts:
+                        source = 'target_default'
+                    self._headway_state_source_counts[source] += 1
                     self.headway_events.record(
                         station_id=int(arrival_station.station_id),
                         direction=arrival_direction,
@@ -1162,9 +1178,20 @@ class env_bus(object):
             range(total_trips)))
         unfinished_buses = sum(1 for bus in self.bus_all if bus.on_route)
         onboard_at_end = sum(len(bus.passengers) for bus in self.bus_all)
+        headway_state_total = sum(self._headway_state_source_counts.values())
+        headway_state_event_count = self._headway_state_source_counts[
+            'arrival_event']
         self._measurement_details = {
             **wait_metrics,
             **headway_metrics,
+            'headway_state_arrival_event_count': int(
+                headway_state_event_count),
+            'headway_state_spatial_fallback_count': int(
+                self._headway_state_source_counts['spatial_fallback']),
+            'headway_state_target_default_count': int(
+                self._headway_state_source_counts['target_default']),
+            'headway_state_arrival_event_rate': (
+                headway_state_event_count / max(headway_state_total, 1)),
             'peak_fleet': int(self._peak_concurrent),
             'timetable_trips_available': int(self.total_timetable_rows),
             'timetable_trips_evaluated': int(total_trips),

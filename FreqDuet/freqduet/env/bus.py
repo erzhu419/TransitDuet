@@ -60,6 +60,8 @@ class Bus(object):
         self.cost = None  # Lagrangian cost (headway deviation²)
         self._target_headway = 360.0  # set by sim via drive()
         self._frequency_tracker = None
+        self._headway_recorder = None
+        self.forward_headway_source = "target_default"
         self._lower_frequency_enabled = False
         self._lower_context_enabled = False
         self._lower_context_queue_norm = 50.0
@@ -202,9 +204,11 @@ class Bus(object):
     def drive(self, current_time, action, bus_all, debug, target_headway=360.0,
               frequency_tracker=None, lower_frequency_enabled=False,
               lower_context_enabled=False, lower_context_queue_norm=50.0,
-              lower_context_features=None, lower_context_gate_value=1.0):
+              lower_context_features=None, lower_context_gate_value=1.0,
+              headway_recorder=None):
         self._target_headway = target_headway
         self._frequency_tracker = frequency_tracker
+        self._headway_recorder = headway_recorder
         self._lower_frequency_enabled = lower_frequency_enabled
         self._lower_context_enabled = lower_context_enabled
         self._lower_context_queue_norm = max(float(lower_context_queue_norm), 1e-6)
@@ -520,6 +524,17 @@ class Bus(object):
         except (TypeError, ValueError):
             return None
 
+    def _recorded_forward_headway(self, current_time):
+        """Return the causal same-stop arrival headway when one is available."""
+        recorder = getattr(self, '_headway_recorder', None)
+        if recorder is None or not hasattr(recorder, 'previous_arrival_time'):
+            return None
+        previous = recorder.previous_arrival_time(
+            int(self.next_station.station_id), bool(self.direction))
+        if previous is None:
+            return None
+        return max(0.0, float(current_time) - float(previous))
+
     def arrive_station(self, current_time, bus_all, debug):
         # Because we have to use the self.holding_time later, so we exchange passenger first when arrived a station
         # self.exchange_passengers(current_time) # self.holding_time is set in this function
@@ -530,28 +545,41 @@ class Bus(object):
         self._stop_start_time = current_time
         self._stop_station = self.next_station.station_name
 
-        self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
-        if len(self.forward_bus) != 0:
-            # print('there is a forward bus')
-            forward_record = [record[1] for record in
-                              self.forward_bus[0].trajectory_dict[self.next_station.station_name] if
-                              record[-1] == self.trip_id - 2]
-            # 当前车到达过当前站点，此时用当前时间减去前车到达当前站点的时间，再加上本车在当前站点的停车时间，减去前车在当前站点的停车时间，即为前车车头时距
-            if len(forward_record) != 0:
-                self.forward_headway = current_time + self.holding_time - min(forward_record)
-            # 当前车没有到达当前站点，此时用当前车的绝对距离减去前车的绝对距离，再除以前车的速度，即为前车车头时距
+        self.forward_bus = list(filter(
+            lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
+        recorded_headway = self._recorded_forward_headway(current_time)
+        if recorded_headway is not None:
+            # The recorder has not seen this bus yet, so this is the exact
+            # same-stop headway to the preceding arrival with no look-ahead.
+            self.forward_headway = recorded_headway
+            self.forward_headway_source = "arrival_event"
+        elif len(self.forward_bus) != 0:
+            forward = self.forward_bus[0]
+            if not forward.on_route:
+                forward_travel_distance = (
+                    len(self.stations_list) // 2 * 500
+                    + forward.travel_distance)
             else:
-                if not self.forward_bus[0].on_route:
-                    forward_travel_distance = len(self.stations_list) // 2 * 500 + self.forward_bus[
-                        0].travel_distance
-                else:
-                    forward_travel_distance = self.forward_bus[0].travel_distance
-                # absolute_distance should be 10000 if direction is 0 else 0
-                self.forward_headway = -(self.travel_distance - forward_travel_distance) / (
-                        self.travel_distance / (current_time + self.holding_time - self.launch_time))
+                forward_travel_distance = forward.travel_distance
+            elapsed_s = max(
+                float(current_time) + float(self.holding_time)
+                - float(self.launch_time),
+                1.0,
+            )
+            average_speed = max(float(self.travel_distance), 0.0) / elapsed_s
+            if average_speed > 1e-6:
+                distance_gap = max(
+                    0.0,
+                    float(forward_travel_distance) - float(self.travel_distance),
+                )
+                self.forward_headway = distance_gap / average_speed
+                self.forward_headway_source = "spatial_fallback"
+            else:
+                self.forward_headway = float(self._target_headway)
+                self.forward_headway_source = "target_default"
         else:
-            # If there is no bus in the forward
-            self.forward_headway = 360
+            self.forward_headway = float(self._target_headway)
+            self.forward_headway_source = "target_default"
 
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
         self.backward_headway = self.backward_bus[0].forward_headway if len(self.backward_bus) != 0 else 360

@@ -207,6 +207,10 @@ class DiagnosticLog:
         'passengers_generated', 'passengers_unserved',
         'passenger_unserved_rate',
         'headway_sample_count', 'trips_unlaunched', 'trip_launch_rate',
+        'headway_state_arrival_event_count',
+        'headway_state_spatial_fallback_count',
+        'headway_state_target_default_count',
+        'headway_state_arrival_event_rate',
         'trips_completed', 'trips_incomplete', 'trip_completion_rate',
         'simulation_end_time_s', 'done_reason', 'scenario_tape_id',
         'peak_fleet', 'headway_cv',
@@ -7961,6 +7965,14 @@ class TransitDuetV2Runner:
                 float(env_details['passenger_unserved_rate']), 6),
             'headway_sample_count': int(
                 env_details['headway_sample_count']),
+            'headway_state_arrival_event_count': int(
+                env_details.get('headway_state_arrival_event_count', 0)),
+            'headway_state_spatial_fallback_count': int(
+                env_details.get('headway_state_spatial_fallback_count', 0)),
+            'headway_state_target_default_count': int(
+                env_details.get('headway_state_target_default_count', 0)),
+            'headway_state_arrival_event_rate': round(float(
+                env_details.get('headway_state_arrival_event_rate', 0.0)), 6),
             'trips_unlaunched': int(env_details['trips_unlaunched']),
             'trip_launch_rate': round(
                 float(env_details['trip_launch_rate']), 6),
