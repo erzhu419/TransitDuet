@@ -605,6 +605,7 @@ def capacity_matched_smdp_hidden_dim(
     state_encoder: str = "mlp",
     raw_history_window: int = 0,
     raw_feature_dim: int = 0,
+    promotion_state_dim: int = 0,
 ) -> tuple[int, int, float]:
     """Match a full-window generic HRL to the active Freq-HRL capacity."""
 
@@ -619,6 +620,7 @@ def capacity_matched_smdp_hidden_dim(
             state_encoder=str(state_encoder),
             raw_history_window=int(raw_history_window),
             raw_feature_dim=int(raw_feature_dim),
+            promotion_state_dim=int(promotion_state_dim),
         )
         count = smdp_parameter_count(config)
         return 0, count, float(count / max(int(target_parameter_count), 1))
@@ -634,6 +636,7 @@ def capacity_matched_smdp_hidden_dim(
             state_encoder=str(state_encoder),
             raw_history_window=int(raw_history_window),
             raw_feature_dim=int(raw_feature_dim),
+            promotion_state_dim=int(promotion_state_dim),
         )
         count = smdp_parameter_count(config)
         candidates.append((abs(count - int(target_parameter_count)), hidden, count))
@@ -1812,6 +1815,7 @@ def train_ppo_actor_critic(
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     method_contract: str = "routing_core_v2",
+    capacity_reference_method_contract: str | None = None,
     volume_impact_bps: float = 0.0,
     plan_smoothness_weight: float = 0.0,
     promotion_replan_cost: float = 0.0,
@@ -1841,6 +1845,14 @@ def train_ppo_actor_critic(
         )
     method_contract = str(method_contract)
     method_flags = resolve_method_contract(method_contract)
+    capacity_reference_method_contract = str(
+        method_contract
+        if capacity_reference_method_contract is None
+        else capacity_reference_method_contract
+    )
+    capacity_reference_flags = resolve_method_contract(
+        capacity_reference_method_contract
+    )
     mark_to_market_timing = (
         "post_trade"
         if execution_timeline_contract == "causal_post_trade_v3"
@@ -1869,6 +1881,15 @@ def train_ppo_actor_critic(
         if int(plan_basis_dim) < 2:
             raise ValueError(
                 f"{method_contract} requires plan_basis_dim >= 2"
+            )
+    if capacity_reference_method_contract != "routing_core_v2":
+        if execution_timeline_contract != "causal_post_trade_v3":
+            raise ValueError(
+                "non-routing capacity reference requires causal_post_trade_v3"
+            )
+        if int(plan_basis_dim) < 2:
+            raise ValueError(
+                "non-routing capacity reference requires plan_basis_dim >= 2"
             )
     if method_contract in {"full_freq_hrl_v3", "full_freq_hrl_v4"}:
         if policy_mode != "freq_hrl":
@@ -1916,7 +1937,7 @@ def train_ppo_actor_critic(
             execution_timeline_contract == "causal_post_trade_v3"
         ),
     )
-    reference_smdp_config = SMDPPPOConfig(
+    policy_smdp_config = SMDPPPOConfig(
         upper_state_dim=6 * assets + 5,
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
@@ -1939,6 +1960,17 @@ def train_ppo_actor_critic(
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
         lower_max_lambda=20.0,
+    )
+    reference_smdp_config = replace(
+        policy_smdp_config,
+        lower_action_dim=(
+            2 * assets
+            if capacity_reference_flags["lower_hf_overlay"] else assets
+        ),
+        promotion_state_dim=(
+            promotion_gate_state_dim(assets)
+            if capacity_reference_flags["learned_promotion_gate"] else 0
+        ),
     )
     target_parameter_count = smdp_parameter_count(reference_smdp_config)
     if policy_mode in FLAT_PPO_MODES:
@@ -2033,6 +2065,14 @@ def train_ppo_actor_critic(
                     "no inactive padding parameters"
                 ),
                 "capacity_target_parameter_count": int(target_parameter_count),
+                "capacity_reference_method_contract": (
+                    capacity_reference_method_contract
+                ),
+                "capacity_reference_implementation_version": (
+                    full_method_implementation_version(
+                        capacity_reference_method_contract
+                    )
+                ),
                 "capacity_actual_parameter_count": int(joint_count),
                 "capacity_ratio": float(capacity_ratio),
                 "capacity_match_status": capacity_match_status(capacity_ratio),
@@ -2098,10 +2138,12 @@ def train_ppo_actor_critic(
         )
         return payload, heldout_rows, joint_model
 
-    smdp_capacity_count = int(target_parameter_count)
-    smdp_capacity_ratio = 1.0
+    smdp_capacity_count = smdp_parameter_count(policy_smdp_config)
+    smdp_capacity_ratio = float(
+        smdp_capacity_count / max(int(target_parameter_count), 1)
+    )
     effective_hidden_dim = int(hidden_dim)
-    smdp_config = reference_smdp_config
+    smdp_config = policy_smdp_config
     raw_history_window = RAW_HISTORY_WINDOW
     state_encoder = "mlp"
     if policy_mode in GENERIC_HRL_MODES:
@@ -2115,22 +2157,42 @@ def train_ppo_actor_critic(
                 target_parameter_count=target_parameter_count,
                 upper_state_dim=upper_state_dim,
                 lower_state_dim=lower_state_dim,
-                upper_action_dim=reference_smdp_config.upper_action_dim,
-                lower_action_dim=reference_smdp_config.lower_action_dim,
+                upper_action_dim=policy_smdp_config.upper_action_dim,
+                lower_action_dim=policy_smdp_config.lower_action_dim,
                 requested_hidden_dim=int(hidden_dim),
                 state_encoder=state_encoder,
                 raw_history_window=raw_history_window,
                 raw_feature_dim=assets,
+                promotion_state_dim=policy_smdp_config.promotion_state_dim,
             )
         )
         smdp_config = replace(
-            reference_smdp_config,
+            policy_smdp_config,
             upper_state_dim=upper_state_dim,
             lower_state_dim=lower_state_dim,
             hidden_dim=int(effective_hidden_dim),
             state_encoder=state_encoder,
             raw_history_window=int(raw_history_window),
             raw_feature_dim=int(assets),
+        )
+    elif smdp_capacity_count != int(target_parameter_count):
+        effective_hidden_dim, smdp_capacity_count, smdp_capacity_ratio = (
+            capacity_matched_smdp_hidden_dim(
+                target_parameter_count=target_parameter_count,
+                upper_state_dim=policy_smdp_config.upper_state_dim,
+                lower_state_dim=policy_smdp_config.lower_state_dim,
+                upper_action_dim=policy_smdp_config.upper_action_dim,
+                lower_action_dim=policy_smdp_config.lower_action_dim,
+                requested_hidden_dim=int(hidden_dim),
+                state_encoder=policy_smdp_config.state_encoder,
+                raw_history_window=policy_smdp_config.raw_history_window,
+                raw_feature_dim=policy_smdp_config.raw_feature_dim,
+                promotion_state_dim=policy_smdp_config.promotion_state_dim,
+            )
+        )
+        smdp_config = replace(
+            policy_smdp_config,
+            hidden_dim=int(effective_hidden_dim),
         )
     smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
     if policy_mode == "freq_hrl" and bool(use_handcrafted_frequency_prior):
@@ -2238,6 +2300,14 @@ def train_ppo_actor_critic(
                 "within 5%; equal optimizer, epochs, and rollout seed budget"
             ),
             "capacity_target_parameter_count": int(target_parameter_count),
+            "capacity_reference_method_contract": (
+                capacity_reference_method_contract
+            ),
+            "capacity_reference_implementation_version": (
+                full_method_implementation_version(
+                    capacity_reference_method_contract
+                )
+            ),
             "capacity_actual_parameter_count": int(smdp_capacity_count),
             "capacity_ratio": float(smdp_capacity_ratio),
             "capacity_match_status": capacity_match_status(smdp_capacity_ratio),
@@ -2283,7 +2353,14 @@ def train_ppo_actor_critic(
                 method_flags["learned_promotion_gate"]
             ),
             "promotion_gate_state_dim": int(
+                smdp_config.promotion_state_dim
+            ),
+            "capacity_reference_promotion_state_dim": int(
                 reference_smdp_config.promotion_state_dim
+            ),
+            "lower_action_dim": int(smdp_config.lower_action_dim),
+            "capacity_reference_lower_action_dim": int(
+                reference_smdp_config.lower_action_dim
             ),
             "promotion_replan_cost": float(promotion_replan_cost),
             "promotion_init_logit": float(promotion_init_logit),
@@ -2424,6 +2501,11 @@ def main() -> None:
         choices=METHOD_CONTRACTS,
         default="routing_core_v2",
     )
+    parser.add_argument(
+        "--capacity-reference-method-contract",
+        choices=METHOD_CONTRACTS,
+        default=None,
+    )
     parser.add_argument("--volume-impact-bps", type=float, default=0.0)
     parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
@@ -2468,6 +2550,9 @@ def main() -> None:
         use_handcrafted_frequency_prior=args.use_handcrafted_frequency_prior,
         execution_timeline_contract=args.execution_timeline_contract,
         method_contract=args.method_contract,
+        capacity_reference_method_contract=(
+            args.capacity_reference_method_contract
+        ),
         volume_impact_bps=args.volume_impact_bps,
         plan_smoothness_weight=args.plan_smoothness_weight,
         promotion_replan_cost=args.promotion_replan_cost,

@@ -66,6 +66,42 @@ class JointActorCriticPPOTest(unittest.TestCase):
         )
         self.assertEqual(actual, smdp_parameter_count(config))
 
+    def test_baselines_can_match_full_v4_capacity_without_inactive_modules(self):
+        for policy_mode, method_contract in (
+            ("flat_ppo", "routing_core_v2"),
+            ("generic_hrl_ppo", "curve_credit_control_v3"),
+        ):
+            with self.subTest(policy_mode=policy_mode):
+                payload, _, model = train_ppo_actor_critic(
+                    train_seeds=[42],
+                    validation_seeds=[84],
+                    eval_seeds=[123],
+                    steps=24,
+                    assets=2,
+                    scenario="persistent_shift",
+                    iterations=1,
+                    seed=7,
+                    hidden_dim=64,
+                    policy_mode=policy_mode,
+                    plan_basis_dim=3,
+                    execution_timeline_contract="causal_post_trade_v3",
+                    method_contract=method_contract,
+                    capacity_reference_method_contract="full_freq_hrl_v4",
+                    volume_impact_bps=10.0,
+                )
+                self.assertEqual(
+                    payload["capacity_reference_method_contract"],
+                    "full_freq_hrl_v4",
+                )
+                self.assertLessEqual(abs(payload["capacity_ratio"] - 1.0), 0.05)
+                if policy_mode == "generic_hrl_ppo":
+                    self.assertEqual(payload["promotion_gate_state_dim"], 0)
+                    self.assertEqual(payload["lower_action_dim"], 2)
+                    self.assertEqual(
+                        payload["capacity_reference_lower_action_dim"], 4
+                    )
+                    self.assertIsNone(model.promotion_actor)
+
     def test_standard_joint_update_uses_one_actor_and_one_value(self):
         model = JointActorCriticPPO(JointPPOConfig(
             state_dim=5,
