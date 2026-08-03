@@ -119,6 +119,7 @@ class ScheduleurmFullMethodHPOSubmitTest(unittest.TestCase):
             self.assertIn("environment.json", spec["ckpt_glob"])
             self.assertIn(DEFAULT_LINUX_PYTHON, str(spec["cmd"]))
             self.assertIn("torch_num_threads", str(spec["cmd"]))
+            self.assertTrue(str(spec["cmd"]).endswith("&& echo DONE"))
 
     def test_skip_launch_staging_registers_only_freq_hrl_source(self):
         args = normalize_args(build_parser().parse_args([

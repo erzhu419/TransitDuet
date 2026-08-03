@@ -188,7 +188,7 @@ def build_preflight_command(
         "TORCH_NUM_THREADS=1",
         "CUDA_VISIBLE_DEVICES=",
     ]
-    command_text = " ".join([*env, shlex.join(command)]) + " && echo READY"
+    command_text = " ".join([*env, shlex.join(command)]) + " && echo DONE"
     if str(args.launch_subdir) == "scripts":
         return f"cd .. && {command_text}"
     return command_text
