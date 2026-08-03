@@ -16,6 +16,7 @@ import numpy as np
 import torch
 from torch import nn
 
+from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
 from .dual_actor_critic import GaussianActor, ValueNet
 
 
@@ -26,6 +27,9 @@ class SMDPPPOConfig:
     upper_action_dim: int
     lower_action_dim: int
     hidden_dim: int = 0
+    state_encoder: str = "mlp"
+    raw_history_window: int = 0
+    raw_feature_dim: int = 0
     upper_learning_rate: float = 3e-3
     lower_learning_rate: float = 3e-3
     gamma: float = 0.995
@@ -285,15 +289,61 @@ class FrequencySeparatedActorCriticPPO:
     def __init__(self, config: SMDPPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
-        self.upper_actor = GaussianActor(
-            config.upper_state_dim, config.upper_action_dim, config.hidden_dim, config.init_log_std
-        ).to(self.device)
-        self.lower_actor = GaussianActor(
-            config.lower_state_dim, config.lower_action_dim, config.hidden_dim, config.init_log_std
-        ).to(self.device)
-        self.upper_value = ValueNet(config.upper_state_dim, config.hidden_dim).to(self.device)
-        self.lower_value = ValueNet(config.lower_state_dim, config.hidden_dim).to(self.device)
-        self.lower_cost_value = ValueNet(config.lower_state_dim, config.hidden_dim).to(self.device)
+        if str(config.state_encoder) == "mlp":
+            self.upper_actor = GaussianActor(
+                config.upper_state_dim,
+                config.upper_action_dim,
+                config.hidden_dim,
+                config.init_log_std,
+            ).to(self.device)
+            self.lower_actor = GaussianActor(
+                config.lower_state_dim,
+                config.lower_action_dim,
+                config.hidden_dim,
+                config.init_log_std,
+            ).to(self.device)
+            self.upper_value = ValueNet(
+                config.upper_state_dim, config.hidden_dim
+            ).to(self.device)
+            self.lower_value = ValueNet(
+                config.lower_state_dim, config.hidden_dim
+            ).to(self.device)
+            self.lower_cost_value = ValueNet(
+                config.lower_state_dim, config.hidden_dim
+            ).to(self.device)
+        elif str(config.state_encoder) == "causal_gru":
+            actor_kwargs = {
+                "history_window": config.raw_history_window,
+                "raw_feature_dim": config.raw_feature_dim,
+                "hidden_dim": config.hidden_dim,
+                "init_log_std": config.init_log_std,
+            }
+            value_kwargs = {
+                "history_window": config.raw_history_window,
+                "raw_feature_dim": config.raw_feature_dim,
+                "hidden_dim": config.hidden_dim,
+            }
+            self.upper_actor = CausalGRUGaussianActor(
+                state_dim=config.upper_state_dim,
+                action_dim=config.upper_action_dim,
+                **actor_kwargs,
+            ).to(self.device)
+            self.lower_actor = CausalGRUGaussianActor(
+                state_dim=config.lower_state_dim,
+                action_dim=config.lower_action_dim,
+                **actor_kwargs,
+            ).to(self.device)
+            self.upper_value = CausalGRUValueNet(
+                state_dim=config.upper_state_dim, **value_kwargs
+            ).to(self.device)
+            self.lower_value = CausalGRUValueNet(
+                state_dim=config.lower_state_dim, **value_kwargs
+            ).to(self.device)
+            self.lower_cost_value = CausalGRUValueNet(
+                state_dim=config.lower_state_dim, **value_kwargs
+            ).to(self.device)
+        else:
+            raise ValueError(f"unknown state_encoder: {config.state_encoder}")
         self.upper_actor_optimizer = torch.optim.Adam(
             self.upper_actor.parameters(),
             lr=float(config.upper_learning_rate),

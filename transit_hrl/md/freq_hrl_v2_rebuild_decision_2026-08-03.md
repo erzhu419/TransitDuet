@@ -139,19 +139,22 @@ are ineligible for baseline headline claims and must be rerun.
 
 ## Capacity-matched learned baselines
 
-The PPO-family comparison uses two explicit algorithm contracts. `freq_hrl` and
-`generic_hrl_ppo` use the same asynchronous SMDP trainer, while `flat_ppo` is a
-canonical primitive-rate PPO with one joint
+The PPO-family comparison uses two explicit algorithm contracts. `freq_hrl`,
+`generic_hrl_ppo`, and `generic_hrl_gru_ppo` use the same asynchronous SMDP
+trainer, while `flat_ppo` and `flat_gru_ppo` are canonical primitive-rate PPO
+policies with one joint
 target/execution action, one joint probability ratio, and one value critic. Its
 hidden width is chosen to keep its active parameter count within 5% of the
-Freq-HRL reference core; generic HRL is matched by the same rule after its raw
-input expansion, and inactive padding parameters are forbidden. Epoch,
+Freq-HRL reference core; every generic or recurrent control is matched by the
+same rule after its encoder is fixed, and inactive padding parameters are
+forbidden. Epoch,
 environment-step, HPO-search, train/validation/test seed, and metric budgets are
 matched. Freq-HRL alone receives frequency-responsibility observations and
-promotion. Generic HRL and flat PPO receive every observation in the complete
-contiguous 120-bar causal raw window. The default comparison disables the
-handcrafted Freq-HRL actor prior; prior-enabled results belong in a separate
-ablation.
+promotion. The MLP controls receive every observation in a contiguous 120-bar
+causal raw window. The GRU controls receive every observation from episode start
+through the current decision, with no bidirectional or future context. The
+default comparison disables the handcrafted Freq-HRL actor prior; prior-enabled
+results belong in a separate ablation.
 
 ## Complete off-policy learned baselines
 
@@ -162,15 +165,26 @@ action, persistent replay, twin Q critics, soft target updates, and deterministi
 held-out evaluation. SAC includes a squashed Gaussian actor and learned entropy
 temperature; TD3 includes target-policy smoothing and delayed actor updates.
 
-All five policies use the same market paths, transaction costs, held-out seeds,
+All seven policies use the same market paths, transaction costs, held-out seeds,
 primitive environment-step budget, and `trading_metrics_v2`. Generic HRL, flat
-PPO, SAC, and TD3 receive the complete contiguous 120-bar causal raw window,
-plus position, active or previous target, target gap, and episode progress. Flat
-PPO, SAC, and TD3 also share the same bounded target and
+PPO, SAC, and TD3 receive a complete contiguous causal raw history plus position,
+active or previous target, target gap, and episode progress. The MLP/off-policy
+controls use the registered 120-bar horizon; the two GRU controls use the full
+causal episode history. Flat PPO, flat GRU PPO, SAC, and TD3 share the bounded
+target and
 execution-speed action semantics. Near-equal active capacity is claimed only
 inside the PPO family because standard SAC/TD3 necessarily use twin critics and
 different actor parameterizations. All trainable parameter counts and actor,
 critic, temperature, and total optimizer-step counts are reported explicitly.
+
+The recurrent controls use independent single-layer unidirectional GRU encoders
+inside each actor and critic. Raw samples are reshaped oldest-to-newest; static
+position, plan, gap, coverage, and progress context is projected separately and
+fused only after the GRU. They are trained by the same PPO ratio, GAE, optimizer,
+checkpoint-selection, and seed protocols as their MLP counterparts. Closed-form
+GRU parameter counts are regression-tested against the instantiated trainable
+parameters, and encoder width is selected without dummy parameters to remain
+within 5% of the Freq-HRL reference capacity.
 
 ## Confirmatory strong-baseline gate
 
@@ -217,10 +231,10 @@ artifacts are now ineligible even if they carry a training-replicate label.
 
 The v2 confirmatory runner uses the following role-separated protocol:
 
-1. PPO-family policies use capacity-matched two-layer MLPs and identical
-   environment-step budgets. The Freq-HRL reference hidden width is frozen at
-   64; raw-input baselines use the analytically closest active width within 5%
-   of that reference budget. Each policy may select optimizer and
+1. PPO-family policies use capacity-matched MLP or causal-GRU encoders and
+   identical environment-step budgets. The Freq-HRL reference hidden width is
+   frozen at 64; raw-input baselines use the analytically closest active width
+   within 5% of that reference budget. Each policy may select optimizer and
    exploration settings from the same-size preregistered search space; this is
    a stronger baseline protocol than forcing one potentially unfavorable
    setting on every algorithm. Parameter equality and HPO-budget equality are
@@ -280,27 +294,25 @@ was not a canonical flat PPO. It has been replaced by one primitive-rate policy
 over a joint target/execution action, one joint Gaussian probability ratio, one
 task-return GAE, and one state-value critic. Its hidden width is selected
 analytically to match the active Freq-HRL parameter count within 5%; no unused
-padding parameters are counted. Both this policy and generic HRL receive all 120
-direct causal observations in oldest-to-newest order, so they no longer
-subsample the preregistered 120-bar comparison horizon. This closes both previous
-information asymmetries: the first raw baseline saw only the current predictor,
-and v3 still sampled only five lagged points. It does not establish exact memory
-equivalence to a stateful EMA, whose exponentially decayed state can retain
-older observations; a full-episode recurrent raw baseline remains a required
-robustness comparison before a representation-efficiency claim is made.
+padding parameters are counted. The MLP controls receive all 120 direct causal
+observations in oldest-to-newest order, so they no longer subsample the
+preregistered comparison horizon. This closes the v3 sparse-lag defect. The new
+flat and hierarchical GRU controls additionally consume the complete causal
+episode, closing the longer-memory objection against comparison with a stateful
+EMA. Any representation-efficiency claim must beat both MLP and GRU controls.
 
 The full stress matrix contains stationary low-noise, stationary high-noise,
-localized burst, persistent shift, and OOD-period regimes. With five learned
-policies and ten independent training replicates this is 250 training cells.
+localized burst, persistent shift, and OOD-period regimes. With seven learned
+policies and ten independent training replicates this is 350 training cells.
 Scheduler placement is dynamic across the allowed CPU-node pool; no experiment
 cell is hard-bound to a host.
 
 Confirmatory execution is mechanically coupled to the nested-validation
-freeze. A final freeze is valid only if all five policies cover the five
+freeze. A final freeze is valid only if all seven policies cover the five
 preregistered stress regimes, use at least five independent training
 replicates, compare at least two candidates per policy, pass the learning gate,
 and never load held-out test seeds. The freeze also records
-`learned_baselines_v4_full_raw_window_2026_08_03`; a stale implementation
+`learned_baselines_v5_causal_gru_controls_2026_08_03`; a stale implementation
 version or changed candidate parameters invalidates it. The scheduleurm formal
 submitter requires this JSON, injects selected parameters separately for each
 policy, and records a canonical JSON SHA-256 in every row and checkpoint.

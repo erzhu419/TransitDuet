@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from torch import nn
 
+from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
 from .dual_actor_critic import GaussianActor, ValueNet
 
 
@@ -17,6 +18,9 @@ class JointPPOConfig:
     state_dim: int
     action_dim: int
     hidden_dim: int = 128
+    state_encoder: str = "mlp"
+    raw_history_window: int = 0
+    raw_feature_dim: int = 0
     learning_rate: float = 3e-4
     gamma: float = 0.995
     gae_lambda: float = 0.95
@@ -97,13 +101,33 @@ class JointActorCriticPPO:
     def __init__(self, config: JointPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
-        self.actor = GaussianActor(
-            config.state_dim,
-            config.action_dim,
-            config.hidden_dim,
-            config.init_log_std,
-        ).to(self.device)
-        self.value = ValueNet(config.state_dim, config.hidden_dim).to(self.device)
+        if str(config.state_encoder) == "mlp":
+            self.actor = GaussianActor(
+                config.state_dim,
+                config.action_dim,
+                config.hidden_dim,
+                config.init_log_std,
+            ).to(self.device)
+            self.value = ValueNet(
+                config.state_dim, config.hidden_dim
+            ).to(self.device)
+        elif str(config.state_encoder) == "causal_gru":
+            self.actor = CausalGRUGaussianActor(
+                state_dim=config.state_dim,
+                action_dim=config.action_dim,
+                history_window=config.raw_history_window,
+                raw_feature_dim=config.raw_feature_dim,
+                hidden_dim=config.hidden_dim,
+                init_log_std=config.init_log_std,
+            ).to(self.device)
+            self.value = CausalGRUValueNet(
+                state_dim=config.state_dim,
+                history_window=config.raw_history_window,
+                raw_feature_dim=config.raw_feature_dim,
+                hidden_dim=config.hidden_dim,
+            ).to(self.device)
+        else:
+            raise ValueError(f"unknown state_encoder: {config.state_encoder}")
         self.actor_optimizer = torch.optim.Adam(
             self.actor.parameters(), lr=float(config.learning_rate)
         )

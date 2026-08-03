@@ -16,6 +16,7 @@ from freq_hrl.experiments.trading.ppo_actor_critic import (
     train_ppo_actor_critic,
 )
 from freq_hrl.rl import (
+    CausalGRUStateEncoder,
     JointActorCriticPPO,
     JointPPOConfig,
     JointTrajectoryBatch,
@@ -129,6 +130,53 @@ class JointActorCriticPPOTest(unittest.TestCase):
         self.assertLess(hidden, reference.hidden_dim)
         self.assertLessEqual(abs(ratio - 1.0), 0.05)
 
+    def test_causal_gru_analytic_counts_match_trainable_parameters(self):
+        joint_config = JointPPOConfig(
+            state_dim=raw_lower_state_dim(3, 20),
+            action_dim=6,
+            hidden_dim=12,
+            state_encoder="causal_gru",
+            raw_history_window=20,
+            raw_feature_dim=3,
+        )
+        joint_model = JointActorCriticPPO(joint_config)
+        self.assertEqual(
+            joint_parameter_count(joint_config),
+            sum(
+                parameter.numel()
+                for parameter in joint_model.parameters()
+                if parameter.requires_grad
+            ),
+        )
+
+        smdp_config = SMDPPPOConfig(
+            upper_state_dim=raw_upper_state_dim(3, 20),
+            lower_state_dim=raw_lower_state_dim(3, 20),
+            upper_action_dim=3,
+            lower_action_dim=3,
+            hidden_dim=12,
+            state_encoder="causal_gru",
+            raw_history_window=20,
+            raw_feature_dim=3,
+        )
+        smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
+        modules = (
+            smdp_model.upper_actor,
+            smdp_model.lower_actor,
+            smdp_model.upper_value,
+            smdp_model.lower_value,
+            smdp_model.lower_cost_value,
+        )
+        self.assertEqual(
+            smdp_parameter_count(smdp_config),
+            sum(
+                parameter.numel()
+                for module in modules
+                for parameter in module.parameters()
+                if parameter.requires_grad
+            ),
+        )
+
     def test_flat_runner_reports_canonical_joint_contract(self):
         payload, rows, model = train_ppo_actor_critic(
             train_seeds=[42],
@@ -151,7 +199,9 @@ class JointActorCriticPPOTest(unittest.TestCase):
         self.assertEqual(payload["raw_history_window"], 120)
         self.assertEqual(payload["trajectory_contract"]["critic"], "one state-value function")
         self.assertEqual(rows[0]["upper_decision_count"], 24)
-        self.assertEqual(rows[0]["routing_contract"], "causal_raw_full_history")
+        self.assertEqual(
+            rows[0]["routing_contract"], "causal_raw_contiguous_window"
+        )
 
     def test_legacy_smdp_flat_path_is_forbidden(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
@@ -172,8 +222,65 @@ class JointActorCriticPPOTest(unittest.TestCase):
                 policy_mode="flat_ppo",
             )
 
+    def test_causal_gru_flat_and_hierarchical_runners(self):
+        for mode, model_type in (
+            ("flat_gru_ppo", JointActorCriticPPO),
+            ("generic_hrl_gru_ppo", FrequencySeparatedActorCriticPPO),
+        ):
+            with self.subTest(mode=mode):
+                payload, rows, model = train_ppo_actor_critic(
+                    train_seeds=[42],
+                    validation_seeds=[57721],
+                    eval_seeds=[123],
+                    steps=16,
+                    assets=2,
+                    scenario="persistent_shift",
+                    iterations=1,
+                    seed=7,
+                    hidden_dim=64,
+                    ppo_epochs=1,
+                    minibatch_size=32,
+                    policy_mode=mode,
+                )
+                self.assertIsInstance(model, model_type)
+                self.assertEqual(model.config.state_encoder, "causal_gru")
+                self.assertEqual(model.config.raw_history_window, 16)
+                self.assertLessEqual(
+                    abs(float(payload["capacity_ratio"]) - 1.0), 0.05
+                )
+                self.assertEqual(rows[0]["baseline"], mode)
+                self.assertEqual(
+                    rows[0]["routing_contract"], "causal_raw_full_episode_gru"
+                )
+                self.assertEqual(payload["raw_history_sampling"],
+                                 "complete_contiguous_oldest_to_newest")
+
 
 class CausalRawHistoryTest(unittest.TestCase):
+    def test_causal_gru_is_invariant_to_left_padding_values(self):
+        torch.manual_seed(5)
+        encoder = CausalGRUStateEncoder(
+            state_dim=4 * 2 + 1,
+            history_window=4,
+            raw_feature_dim=2,
+            hidden_dim=8,
+        )
+        observed = np.asarray([[0.1, -0.2], [0.3, 0.4]], dtype=np.float32)
+        first = np.concatenate([
+            np.full((2, 2), -9.0, dtype=np.float32).reshape(-1),
+            observed.reshape(-1),
+            np.asarray([0.5], dtype=np.float32),
+        ])
+        second = np.concatenate([
+            np.full((2, 2), 17.0, dtype=np.float32).reshape(-1),
+            observed.reshape(-1),
+            np.asarray([0.5], dtype=np.float32),
+        ])
+        with torch.no_grad():
+            first_encoded = encoder(torch.as_tensor(first).view(1, -1))
+            second_encoded = encoder(torch.as_tensor(second).view(1, -1))
+        torch.testing.assert_close(first_encoded, second_encoded)
+
     def test_full_window_contains_every_causal_sample_and_left_padding(self):
         history = np.arange(12, dtype=np.float64).reshape(6, 2)
         observed = causal_raw_history_window(

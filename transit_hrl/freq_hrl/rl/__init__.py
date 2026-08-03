@@ -5,6 +5,14 @@ from .dual_actor_critic import (
     DualPPOConfig,
     TrajectoryBatch,
 )
+from .causal_sequence import (
+    CausalGRUGaussianActor,
+    CausalGRUStateEncoder,
+    CausalGRUValueNet,
+    causal_gru_actor_parameter_count,
+    causal_gru_encoder_parameter_count,
+    causal_gru_value_parameter_count,
+)
 from .plan_actions import LearnedPlanActionMapper, PlanActionResult
 from .joint_actor_critic import (
     JointActorCriticPPO,
@@ -40,6 +48,9 @@ from .offpolicy_actor_critic import (
 __all__ = [
     "DualActorCriticPPO",
     "DualPPOConfig",
+    "CausalGRUGaussianActor",
+    "CausalGRUStateEncoder",
+    "CausalGRUValueNet",
     "FrequencySeparatedActorCriticPPO",
     "HierarchicalRolloutBuilder",
     "HierarchicalTrajectoryBatch",
@@ -55,6 +66,9 @@ __all__ = [
     "apply_replay_updates",
     "apply_smdp_updates",
     "concat_batches",
+    "causal_gru_actor_parameter_count",
+    "causal_gru_encoder_parameter_count",
+    "causal_gru_value_parameter_count",
     "concat_hierarchical_batches",
     "concat_joint_batches",
     "concat_level_batches",

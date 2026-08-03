@@ -45,6 +45,7 @@ from .offpolicy_baseline_validation import (
     train_flat_offpolicy_baseline,
 )
 from .ppo_actor_critic import (
+    FLAT_PPO_MODES,
     LEARNED_BASELINE_IMPLEMENTATION_VERSION,
     POLICY_MODES,
     train_ppo_actor_critic,
@@ -61,7 +62,9 @@ DEFAULT_SCENARIOS = (
 DEFAULT_POLICY_MODES = (
     "freq_hrl",
     "flat_ppo",
+    "flat_gru_ppo",
     "generic_hrl_ppo",
+    "generic_hrl_gru_ppo",
     "flat_sac",
     "flat_td3",
 )
@@ -220,14 +223,17 @@ def _parameter_budget_row(
         "shard_index": int(shard_index),
         "num_shards": int(num_shards),
     }
-    if mode == "flat_ppo":
+    if mode in FLAT_PPO_MODES:
         return {
             **common,
             "requested_hidden_dim": int(
                 training_payload.get("requested_hidden_dim", config.hidden_dim)
             ),
             "effective_hidden_dim": int(config.hidden_dim),
-            "algorithm_family": "on_policy_joint_flat_ppo",
+            "algorithm_family": (
+                "on_policy_joint_flat_gru_ppo"
+                if mode == "flat_gru_ppo" else "on_policy_joint_flat_ppo"
+            ),
             "state_dim": int(config.state_dim),
             "action_dim": int(config.action_dim),
             "upper_state_dim": "",
@@ -235,10 +241,14 @@ def _parameter_budget_row(
             "upper_action_dim": "",
             "lower_action_dim": "",
             "capacity_ratio": float(training_payload.get("capacity_ratio", 1.0)),
-            "matched_budget_group": "trading_capacity_matched_ppo_v4",
+            "capacity_match_status": str(
+                training_payload.get("capacity_match_status", "unknown")
+            ),
+            "matched_budget_group": "trading_capacity_matched_ppo_v5",
             "capacity_contract": (
                 "active parameter count within 5% and equal HPO search budget; "
-                "canonical single-value joint-action PPO"
+                "canonical single-value joint-action PPO with the registered "
+                "raw-history encoder"
             ),
         }
     if mode in POLICY_MODES:
@@ -256,7 +266,10 @@ def _parameter_budget_row(
             "upper_action_dim": int(config.upper_action_dim),
             "lower_action_dim": int(config.lower_action_dim),
             "capacity_ratio": float(training_payload.get("capacity_ratio", 1.0)),
-            "matched_budget_group": "trading_capacity_matched_ppo_v4",
+            "capacity_match_status": str(
+                training_payload.get("capacity_match_status", "unknown")
+            ),
+            "matched_budget_group": "trading_capacity_matched_ppo_v5",
             "capacity_contract": (
                 "active parameter count within 5% of Freq-HRL and equal HPO "
                 "search budget; raw generic HRL uses the complete causal window"
@@ -948,6 +961,16 @@ def run_strong_learned_baseline_validation(
                 resample_training_paths=True,
                 reward_scale=float(training_reward_scale),
             )
+        if (
+            confirmatory
+            and mode in POLICY_MODES
+            and str(payload.get("capacity_match_status", ""))
+            != "matched_within_5pct"
+        ):
+            raise ValueError(
+                f"confirmatory PPO capacity mismatch for {mode}: "
+                f"ratio={payload.get('capacity_ratio', 'missing')}"
+            )
         payload["confirmatory"] = bool(confirmatory)
         payload["hyperparameter_source"] = str(hyperparameter_source)
         payload["hyperparameter_protocol_status"] = hyperparameter_protocol_status
@@ -1168,8 +1191,11 @@ def run_strong_learned_baseline_validation(
                 payload.get("temperature_optimizer_steps_train", 0)
             ),
             "algorithm_family": (
-                "on_policy_smdp_ppo" if mode in POLICY_MODES
-                else f"off_policy_{model.config.algorithm}"
+                "on_policy_joint_flat_ppo"
+                if mode in FLAT_PPO_MODES else (
+                    "on_policy_smdp_ppo" if mode in POLICY_MODES
+                    else f"off_policy_{model.config.algorithm}"
+                )
             ),
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),

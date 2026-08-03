@@ -60,7 +60,9 @@ class OffPolicyBaselineValidationTest(unittest.TestCase):
                     payload["raw_history_sampling"],
                     "complete_contiguous_oldest_to_newest",
                 )
-                self.assertEqual(rows[0]["routing_contract"], "causal_raw_full_history")
+                self.assertEqual(
+                    rows[0]["routing_contract"], "causal_raw_contiguous_window"
+                )
                 self.assertEqual(
                     payload["gradient_updates_train"],
                     payload["actor_optimizer_steps_train"]

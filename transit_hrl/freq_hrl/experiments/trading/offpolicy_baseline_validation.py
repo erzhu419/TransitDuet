@@ -223,7 +223,7 @@ def run_offpolicy_episode(
         "RawLowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
         "FocusScore": float(diag["FocusScore"]),
         "protocol_valid": 1.0,
-        "routing_contract": "causal_raw_full_history",
+        "routing_contract": "causal_raw_contiguous_window",
         "temporal_contract": "single_level_flat_joint_action",
         "replay_size": int(replay.size) if replay is not None else 0,
         "gradient_updates": int(len(updates)),
