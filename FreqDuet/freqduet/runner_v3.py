@@ -2160,6 +2160,14 @@ class TransitDuetV2Runner:
         # planning credit while the high-frequency share shapes lower holding.
         attr_cfg = config.get('reward_attribution', {})
         self.freq_wait_enable = bool(attr_cfg.get('enable', False))
+        self.freq_wait_assignment_mode = str(
+            attr_cfg.get('assignment_mode', 'snapshot_legacy')
+        ).strip().lower()
+        if self.freq_wait_assignment_mode not in {
+                'snapshot_legacy', 'frozen_passenger'}:
+            raise ValueError(
+                "reward_attribution.assignment_mode must be "
+                "'snapshot_legacy' or 'frozen_passenger'")
         self.freq_wait_upper_weight = float(
             attr_cfg.get('upper_wait_weight', 0.0))
         self.freq_wait_lower_weight = float(
@@ -5299,7 +5307,9 @@ class TransitDuetV2Runner:
             self, *, key, raw_state, raw_next_state, action, reward, cost,
             previous_action, transition_done, learned_training, bus=None,
             trip_id=None, direction=None, station_id=None,
-            board_wait_sum_s=None, board_count=None,
+            board_wait_sum_s=None, board_lf_wait_sum_s=None,
+            board_hf_wait_sum_s=None, board_lf_mass=None,
+            board_hf_mass=None, board_count=None,
             record_holding_action=True):
         """Shape, diagnose, and optionally replay one physical lower transition."""
         raw_state = np.asarray(raw_state, dtype=np.float32)
@@ -5388,6 +5398,22 @@ class TransitDuetV2Runner:
             board_count = int(getattr(
                 context_bus, 'last_board_count', 0)
                 if context_bus is not None else 0)
+        if board_lf_wait_sum_s is None:
+            board_lf_wait_sum_s = float(getattr(
+                context_bus, 'last_board_lf_wait_sum_s', 0.0)
+                if context_bus is not None else 0.0)
+        if board_hf_wait_sum_s is None:
+            board_hf_wait_sum_s = float(getattr(
+                context_bus, 'last_board_hf_wait_sum_s', 0.0)
+                if context_bus is not None else 0.0)
+        if board_lf_mass is None:
+            board_lf_mass = float(getattr(
+                context_bus, 'last_board_lf_mass', 0.0)
+                if context_bus is not None else 0.0)
+        if board_hf_mass is None:
+            board_hf_mass = float(getattr(
+                context_bus, 'last_board_hf_mass', 0.0)
+                if context_bus is not None else 0.0)
         wait_penalty = self._record_frequency_wait_credit(
             cur_tid,
             float(board_wait_sum_s),
@@ -5396,6 +5422,10 @@ class TransitDuetV2Runner:
             credit_high,
             local_low,
             freq_summary,
+            lf_wait_sum_s=float(board_lf_wait_sum_s),
+            hf_wait_sum_s=float(board_hf_wait_sum_s),
+            lf_mass=float(board_lf_mass),
+            hf_mass=float(board_hf_mass),
         )
         self._record_frequency_hold_feedback(
             cur_dir,
@@ -6317,31 +6347,60 @@ class TransitDuetV2Runner:
 
     def _record_frequency_wait_credit(
             self, trip_id, wait_sum_s, boarded_count, low_demand, local_high,
-            lower_low_demand=None, freq_summary=None):
+            lower_low_demand=None, freq_summary=None, lf_wait_sum_s=None,
+            hf_wait_sum_s=None, lf_mass=None, hf_mass=None):
         """Return lower net high-frequency wait shaping and store upper credit."""
         if not self.freq_wait_enable or boarded_count <= 0:
             return 0.0
 
-        wait_mean_s = float(wait_sum_s) / max(int(boarded_count), 1)
+        boarded_count = int(boarded_count)
+        wait_sum_s = float(wait_sum_s)
+        wait_mean_s = wait_sum_s / max(boarded_count, 1)
         wait_norm = wait_mean_s / self.freq_wait_norm_s
         if self.freq_wait_clip > 0.0:
             wait_norm = min(wait_norm, self.freq_wait_clip)
 
-        high_share = self._freq_wait_high_share(low_demand, local_high)
-        lower_low_ref = low_demand
-        if self.freq_wait_lower_share_source in {'local', 'local_low'}:
-            lower_low_ref = (
-                low_demand if lower_low_demand is None else lower_low_demand)
-        lower_high_share = self._freq_wait_high_share(
-            lower_low_ref, local_high,
-            positive_only=self.freq_wait_lower_positive_high_only)
-        if self.freq_wait_lower_high_share_cap >= 0.0:
-            lower_high_share = min(
-                lower_high_share, self.freq_wait_lower_high_share_cap)
-        low_share = 1.0 - high_share
-        lower_penalty = (
-            self.freq_wait_lower_weight * lower_high_share * wait_norm)
-        boarded_norm = int(boarded_count) / self.freq_wait_lower_board_norm
+        if self.freq_wait_assignment_mode == 'frozen_passenger':
+            lf_wait_sum_s = float(lf_wait_sum_s or 0.0)
+            hf_wait_sum_s = float(hf_wait_sum_s or 0.0)
+            lf_mass = float(lf_mass or 0.0)
+            hf_mass = float(hf_mass or 0.0)
+            wait_error = abs(lf_wait_sum_s + hf_wait_sum_s - wait_sum_s)
+            mass_error = abs(lf_mass + hf_mass - boarded_count)
+            if wait_error > 1e-6 * max(1.0, abs(wait_sum_s)):
+                raise AssertionError('frozen LF/HF wait credit does not conserve')
+            if mass_error > 1e-6 * max(1.0, boarded_count):
+                raise AssertionError('frozen LF/HF passenger mass does not conserve')
+            clip_scale = 1.0
+            unscaled_wait_norm = wait_mean_s / self.freq_wait_norm_s
+            if self.freq_wait_clip > 0.0 and unscaled_wait_norm > 0.0:
+                clip_scale = min(1.0, self.freq_wait_clip / unscaled_wait_norm)
+            upper_wait_norm_sum = (
+                lf_wait_sum_s / self.freq_wait_norm_s * clip_scale)
+            lower_wait_norm = (
+                hf_wait_sum_s / max(boarded_count, 1)
+                / self.freq_wait_norm_s * clip_scale)
+            low_share = lf_mass / max(boarded_count, 1)
+            lower_high_share = hf_mass / max(boarded_count, 1)
+            lower_penalty = self.freq_wait_lower_weight * lower_wait_norm
+            boarded_norm = hf_mass / self.freq_wait_lower_board_norm
+        else:
+            high_share = self._freq_wait_high_share(low_demand, local_high)
+            lower_low_ref = low_demand
+            if self.freq_wait_lower_share_source in {'local', 'local_low'}:
+                lower_low_ref = (
+                    low_demand if lower_low_demand is None else lower_low_demand)
+            lower_high_share = self._freq_wait_high_share(
+                lower_low_ref, local_high,
+                positive_only=self.freq_wait_lower_positive_high_only)
+            if self.freq_wait_lower_high_share_cap >= 0.0:
+                lower_high_share = min(
+                    lower_high_share, self.freq_wait_lower_high_share_cap)
+            low_share = 1.0 - high_share
+            lower_penalty = (
+                self.freq_wait_lower_weight * lower_high_share * wait_norm)
+            boarded_norm = boarded_count / self.freq_wait_lower_board_norm
+            upper_wait_norm_sum = low_share * wait_norm * boarded_count
         if self.freq_wait_lower_board_clip > 0.0:
             boarded_norm = min(boarded_norm, self.freq_wait_lower_board_clip)
         board_credit_gate = self._lower_board_credit_gate(freq_summary)
@@ -6352,9 +6411,9 @@ class TransitDuetV2Runner:
             * boarded_norm)
 
         stats = self._ep_trip_wait_stats[int(trip_id)]
-        stats['pax'] += int(boarded_count)
-        stats['wait_s'] += float(wait_sum_s)
-        stats['upper_wait_norm_sum'] += low_share * wait_norm * int(boarded_count)
+        stats['pax'] += boarded_count
+        stats['wait_s'] += wait_sum_s
+        stats['upper_wait_norm_sum'] += upper_wait_norm_sum
         stats['low_share_sum'] += low_share
         stats['events'] += 1
 
@@ -6365,7 +6424,7 @@ class TransitDuetV2Runner:
             float(lower_board_credit - lower_penalty))
         self._ep_freq_wait_low_shares.append(float(low_share))
         self._ep_freq_wait_lower_high_shares.append(float(lower_high_share))
-        self._ep_freq_wait_boarded_pax += int(boarded_count)
+        self._ep_freq_wait_boarded_pax += boarded_count
         return float(lower_penalty - lower_board_credit)
 
     def _upper_frequency_wait_credits(self, transitions):
@@ -7324,6 +7383,12 @@ class TransitDuetV2Runner:
                                 direction=event.direction,
                                 station_id=event.last_board_station_id,
                                 board_wait_sum_s=event.last_board_wait_sum_s,
+                                board_lf_wait_sum_s=(
+                                    event.last_board_lf_wait_sum_s),
+                                board_hf_wait_sum_s=(
+                                    event.last_board_hf_wait_sum_s),
+                                board_lf_mass=event.last_board_lf_mass,
+                                board_hf_mass=event.last_board_hf_mass,
                                 board_count=event.last_board_count,
                                 record_holding_action=(
                                     not event.feedback_finalized),

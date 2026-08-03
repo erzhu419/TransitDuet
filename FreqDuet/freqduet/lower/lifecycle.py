@@ -20,6 +20,10 @@ class CompletedTripEvent:
     terminal_reward: float | None
     terminal_cost: float | None
     last_board_wait_sum_s: float
+    last_board_lf_wait_sum_s: float
+    last_board_hf_wait_sum_s: float
+    last_board_lf_mass: float
+    last_board_hf_mass: float
     last_board_count: int
     last_board_station_id: int
     forward_headway: float
@@ -141,6 +145,14 @@ class LowerEpisodeLifecycle:
                 terminal_cost=optional_float("last_completed_cost"),
                 last_board_wait_sum_s=float(getattr(
                     bus, "last_completed_board_wait_sum_s", 0.0)),
+                last_board_lf_wait_sum_s=float(getattr(
+                    bus, "last_completed_board_lf_wait_sum_s", 0.0)),
+                last_board_hf_wait_sum_s=float(getattr(
+                    bus, "last_completed_board_hf_wait_sum_s", 0.0)),
+                last_board_lf_mass=float(getattr(
+                    bus, "last_completed_board_lf_mass", 0.0)),
+                last_board_hf_mass=float(getattr(
+                    bus, "last_completed_board_hf_mass", 0.0)),
                 last_board_count=int(getattr(
                     bus, "last_completed_board_count", 0)),
                 last_board_station_id=int(completed_station_id),
