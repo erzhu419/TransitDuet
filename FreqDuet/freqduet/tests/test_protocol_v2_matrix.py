@@ -117,6 +117,7 @@ class ProtocolV2MatrixTest(unittest.TestCase):
         self.assertEqual(len(first["sha256"]), 64)
         paths = {entry["path"] for entry in first["files"]}
         self.assertIn("runner_v3.py", paths)
+        self.assertIn("randomness.py", paths)
         self.assertIn("upper/interval_credit.py", paths)
         self.assertIn("env/data/passenger_OD.xlsx", paths)
         self.assertEqual(first["file_count"], len(first["files"]))

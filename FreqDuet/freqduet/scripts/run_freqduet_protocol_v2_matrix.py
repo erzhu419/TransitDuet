@@ -99,6 +99,7 @@ RUN_MANIFEST_NAME = "protocol_run_manifest.json"
 SOURCE_PACKAGE_DIRS = ["env", "frequency", "lower", "upper", "coupling"]
 SOURCE_FIXED_FILES = [
     "runner_v3.py",
+    "randomness.py",
     "scripts/run_freqduet_protocol_v2_matrix.py",
     "env/config.json",
     "env/data/passenger_OD.xlsx",

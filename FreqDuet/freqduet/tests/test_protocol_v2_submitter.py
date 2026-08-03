@@ -77,6 +77,9 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         captured = {}
 
         def fake_run(command, **kwargs):
+            if command[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(
+                    command, 0, stdout="a" * 40 + "\n", stderr="")
             self.assertIn("submit-jsonl", command)
             specs = json.loads(kwargs["input"])
             captured["command"] = command

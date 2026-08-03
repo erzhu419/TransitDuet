@@ -14,7 +14,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
-REMOTE_ROOT = Path("/home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet")
+LOCAL_WORKSPACE_ROOT = Path("/home/erzhu419/mine_code")
+REMOTE_WORKSPACE_ROOT = Path("/home/zhengliang01/scheduleurm_work")
+try:
+    REMOTE_ROOT = REMOTE_WORKSPACE_ROOT / ROOT.relative_to(LOCAL_WORKSPACE_ROOT)
+except ValueError:
+    REMOTE_ROOT = Path(
+        "/home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet")
 REMOTE_PYTHON = Path("/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python")
 DEFAULT_CONFIGS = [
     "F_freqduet_protocol_v2_main_hiro",
@@ -88,6 +94,52 @@ def execute(
     return output
 
 
+def git_output(*args: str) -> str:
+    process = subprocess.run(
+        ["git", *args], cwd=ROOT, text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if process.returncode != 0:
+        raise RuntimeError(process.stderr.strip() or "git command failed")
+    return process.stdout.strip()
+
+
+def preflight_source(
+    configs: list[str], protocol: str, require_clean: bool,
+    expected_commit: str | None,
+) -> str:
+    commit = git_output("rev-parse", "HEAD")
+    if expected_commit and commit != str(expected_commit).strip():
+        raise RuntimeError(
+            f"source commit {commit} does not match {expected_commit}")
+    if require_clean:
+        status = git_output("status", "--porcelain")
+        if status:
+            raise RuntimeError(
+                "submission source is dirty; use an immutable worktree snapshot")
+    if protocol == "protocol-v4":
+        names = [
+            name if str(name).endswith(".yaml") else f"{name}.yaml"
+            for name in configs
+        ]
+        process = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "scripts/validate_freqduet_protocol_v4_configs.py"),
+                *names,
+            ],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        if process.returncode != 0:
+            raise RuntimeError(
+                "v4 config preflight failed:\n" + (process.stdout or ""))
+        if process.stdout.strip():
+            print(process.stdout.strip())
+    return commit
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--configs", default=",".join(DEFAULT_CONFIGS))
@@ -105,6 +157,9 @@ def main() -> None:
     parser.add_argument("--cpu", type=int, default=4)
     parser.add_argument("--ram-mb", type=int, default=32768)
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
+    parser.add_argument("--remote-root", default=str(REMOTE_ROOT))
+    parser.add_argument("--require-clean-source", action="store_true")
+    parser.add_argument("--expected-commit", default=None)
     parser.add_argument("--priority", choices=["low", "normal", "high"], default="normal")
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument(
@@ -128,9 +183,17 @@ def main() -> None:
     shards = ranges(total, args.shard_size)
     result_base = f"results_freqduet/{args.run_name}"
     protocol = protocol_label(configs)
+    remote_root = Path(args.remote_root)
+    try:
+        commit = preflight_source(
+            configs, protocol, args.require_clean_source,
+            args.expected_commit)
+    except RuntimeError as exc:
+        parser.error(str(exc))
     print(
         f"{protocol} run={args.run_name} jobs={total} shards={len(shards)} "
         f"train_episodes={args.train_episodes} eval_seeds={len(eval_seeds)}")
+    print(f"source_commit={commit} local_root={ROOT} remote_root={remote_root}")
 
     submitted_task_ids: list[str] = []
     bulk_specs: list[dict[str, object]] = []
@@ -180,7 +243,7 @@ def main() -> None:
             "--cpu", str(args.cpu),
             "--priority", args.priority,
             "--require-node", node,
-            "--result-dir", str(REMOTE_ROOT / logs_dir),
+            "--result-dir", str(remote_root / logs_dir),
             "--local-result-dir", str(ROOT / logs_dir),
             "--allow-cpu-training",
             "--cpu-training-justification", CPU_JUSTIFICATION,
@@ -206,7 +269,7 @@ def main() -> None:
             "cpu": int(args.cpu),
             "priority": args.priority,
             "require_node": node,
-            "result_dir": str(REMOTE_ROOT / logs_dir),
+            "result_dir": str(remote_root / logs_dir),
             "local_result_dir": str(ROOT / logs_dir),
             "skip_resume_scan": True,
             "allow_cpu_training": True,
