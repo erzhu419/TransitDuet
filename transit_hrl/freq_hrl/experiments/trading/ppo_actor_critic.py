@@ -527,6 +527,9 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
             count += _value_parameter_count(
                 config.promotion_state_dim, config.hidden_dim
             )
+        if int(config.hf_state_dim) > 0:
+            count += actor(config.hf_state_dim, config.hf_action_dim)
+            count += value(config.hf_state_dim)
         return int(count)
     if str(config.state_encoder) != "mlp":
         raise ValueError(f"unknown state_encoder: {config.state_encoder}")
@@ -547,6 +550,11 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
         count += _value_parameter_count(
             config.promotion_state_dim, config.hidden_dim
         )
+    if int(config.hf_state_dim) > 0:
+        count += _actor_parameter_count(
+            config.hf_state_dim, config.hf_action_dim, config.hidden_dim
+        )
+        count += _value_parameter_count(config.hf_state_dim, config.hidden_dim)
     return int(count)
 
 
@@ -630,6 +638,8 @@ def capacity_matched_smdp_hidden_dim(
     raw_history_window: int = 0,
     raw_feature_dim: int = 0,
     promotion_state_dim: int = 0,
+    hf_state_dim: int = 0,
+    hf_action_dim: int = 0,
 ) -> tuple[int, int, float]:
     """Match a full-window generic HRL to the active Freq-HRL capacity."""
 
@@ -645,6 +655,8 @@ def capacity_matched_smdp_hidden_dim(
             raw_history_window=int(raw_history_window),
             raw_feature_dim=int(raw_feature_dim),
             promotion_state_dim=int(promotion_state_dim),
+            hf_state_dim=int(hf_state_dim),
+            hf_action_dim=int(hf_action_dim),
         )
         count = smdp_parameter_count(config)
         return 0, count, float(count / max(int(target_parameter_count), 1))
@@ -661,6 +673,8 @@ def capacity_matched_smdp_hidden_dim(
             raw_history_window=int(raw_history_window),
             raw_feature_dim=int(raw_feature_dim),
             promotion_state_dim=int(promotion_state_dim),
+            hf_state_dim=int(hf_state_dim),
+            hf_action_dim=int(hf_action_dim),
         )
         count = smdp_parameter_count(config)
         candidates.append((abs(count - int(target_parameter_count)), hidden, count))

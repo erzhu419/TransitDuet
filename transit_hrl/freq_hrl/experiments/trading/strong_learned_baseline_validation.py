@@ -200,6 +200,8 @@ def count_parameters(model: Any) -> int:
             "upper_value",
             "lower_value",
             "lower_cost_value",
+            "hf_actor",
+            "hf_value",
             "promotion_actor",
             "promotion_value",
         )

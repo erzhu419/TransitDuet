@@ -370,6 +370,18 @@ def train_frequency_separated_ppo(
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
+    has_hf_stream = int(getattr(model.config, "hf_state_dim", 0)) > 0
+    has_promotion_stream = int(getattr(model.config, "promotion_state_dim", 0)) > 0
+    if has_hf_stream and has_promotion_stream:
+        policy_ratio_contract = (
+            "independent upper, lower, HF tactical, and promotion PPO ratios"
+        )
+    elif has_hf_stream:
+        policy_ratio_contract = "independent upper, lower, and HF tactical PPO ratios"
+    elif has_promotion_stream:
+        policy_ratio_contract = "independent upper, lower, and promotion PPO ratios"
+    else:
+        policy_ratio_contract = "independent upper and lower PPO ratios"
     selection_seed_list = list(selection_seeds or train_seeds)
     best_state = copy.deepcopy(model.state_dict())
     initial_rows = [
@@ -395,6 +407,9 @@ def train_frequency_separated_ppo(
         "lower_actor_optimizer_steps": 0.0,
         "lower_value_optimizer_steps": 0.0,
         "lower_cost_value_optimizer_steps": 0.0,
+        "hf_actor_optimizer_steps": 0.0,
+        "hf_value_optimizer_steps": 0.0,
+        "hf_cost_value_optimizer_steps": 0.0,
         "promotion_actor_optimizer_steps": 0.0,
         "promotion_value_optimizer_steps": 0.0,
         "promotion_cost_value_optimizer_steps": 0.0,
@@ -436,6 +451,7 @@ def train_frequency_separated_ppo(
     actor_optimizer_steps = int(sum(
         float(row.get("upper_actor_optimizer_steps", 0.0))
         + float(row.get("lower_actor_optimizer_steps", 0.0))
+        + float(row.get("hf_actor_optimizer_steps", 0.0))
         + float(row.get("promotion_actor_optimizer_steps", 0.0))
         for row in history
     ))
@@ -444,6 +460,8 @@ def train_frequency_separated_ppo(
         + float(row.get("lower_value_optimizer_steps", 0.0))
         + float(row.get("upper_cost_value_optimizer_steps", 0.0))
         + float(row.get("lower_cost_value_optimizer_steps", 0.0))
+        + float(row.get("hf_value_optimizer_steps", 0.0))
+        + float(row.get("hf_cost_value_optimizer_steps", 0.0))
         + float(row.get("promotion_value_optimizer_steps", 0.0))
         for row in history
     ))
@@ -470,6 +488,12 @@ def train_frequency_separated_ppo(
         "trajectory_contract": {
             "upper": "one transition per macro action with gamma^duration bootstrap",
             "lower": "one transition per primitive control action",
+            "hf": (
+                "one independent tactical transition per primitive step with "
+                "a dedicated marginal HF reward"
+                if int(getattr(model.config, "hf_state_dim", 0)) > 0
+                else "disabled"
+            ),
             "promotion": (
                 "one sparse Bernoulli transition per eligible replan probe; "
                 "reward and gamma duration extend until the next gate decision"
@@ -477,9 +501,7 @@ def train_frequency_separated_ppo(
                 else "disabled"
             ),
             "policy_ratios": (
-                "independent upper, lower, and promotion PPO ratios"
-                if int(getattr(model.config, "promotion_state_dim", 0)) > 0
-                else "independent upper and lower PPO ratios"
+                policy_ratio_contract
             ),
         },
         **metadata,

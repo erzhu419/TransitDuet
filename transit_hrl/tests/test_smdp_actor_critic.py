@@ -12,7 +12,13 @@ from freq_hrl.rl import (
     TemporalDecisionScheduler,
     concat_hierarchical_batches,
 )
-from freq_hrl.experiments.trading.ppo_actor_critic import frequency_separated_feature_vectors
+from freq_hrl.experiments.trading.ppo_actor_critic import (
+    frequency_separated_feature_vectors,
+    smdp_parameter_count,
+)
+from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
+    count_parameters,
+)
 
 
 class TemporalDecisionSchedulerTest(unittest.TestCase):
@@ -173,6 +179,84 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("upper_policy_loss", metrics)
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
+
+    def test_hf_tactical_policy_has_an_independent_ppo_stream(self):
+        rng = np.random.default_rng(17)
+        builder = HierarchicalRolloutBuilder(gamma=0.99)
+        builder.begin_upper(
+            state=rng.normal(size=3).astype(np.float32),
+            action=rng.normal(size=1).astype(np.float32),
+            logp=-0.5,
+            value=0.1,
+        )
+        for step in range(3):
+            builder.add_lower(
+                state=rng.normal(size=2).astype(np.float32),
+                action=rng.normal(size=1).astype(np.float32),
+                logp=-0.4,
+                value=0.2,
+                reward=0.1,
+                cost=0.01,
+                hf_state=rng.normal(size=4).astype(np.float32),
+                hf_action=rng.normal(size=2).astype(np.float32),
+                hf_logp=-0.3,
+                hf_value=0.05,
+                hf_reward=(-0.02 if step == 0 else 0.03),
+                done=step == 2,
+            )
+        batch = builder.build()
+        self.assertIsNotNone(batch.hf)
+        self.assertEqual(batch.hf.size, batch.lower.size)
+
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hf_state_dim=4,
+            hf_action_dim=2,
+            epochs=1,
+            minibatch_size=8,
+        ))
+        action = model.act_hf(np.zeros(4, dtype=np.float32), sample=False)
+        self.assertEqual(np.asarray(action["action"]).shape, (2,))
+        metrics = model.update(batch)
+        self.assertEqual(metrics["hf_transitions"], 3.0)
+        self.assertGreater(metrics["hf_actor_optimizer_steps"], 0.0)
+        self.assertGreater(metrics["hf_value_optimizer_steps"], 0.0)
+        self.assertIn("hf_actor", model.state_dict())
+        self.assertEqual(count_parameters(model), smdp_parameter_count(model.config))
+
+    def test_hf_trajectory_presence_cannot_change_mid_episode(self):
+        builder = HierarchicalRolloutBuilder(gamma=0.99)
+        builder.begin_upper(
+            state=np.zeros(3, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+        )
+        builder.add_lower(
+            state=np.zeros(2, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+            reward=0.0,
+            hf_state=np.zeros(2, dtype=np.float32),
+            hf_action=np.zeros(1, dtype=np.float32),
+            hf_logp=0.0,
+            hf_value=0.0,
+            hf_reward=0.0,
+            done=False,
+        )
+        with self.assertRaisesRegex(ValueError, "consistent"):
+            builder.add_lower(
+                state=np.zeros(2, dtype=np.float32),
+                action=np.zeros(1, dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+            )
 
     def test_learned_promotion_gate_has_independent_ppo_stream(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

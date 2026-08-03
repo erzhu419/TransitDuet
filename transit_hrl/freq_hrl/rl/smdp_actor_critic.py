@@ -26,6 +26,8 @@ class SMDPPPOConfig:
     lower_state_dim: int
     upper_action_dim: int
     lower_action_dim: int
+    hf_state_dim: int = 0
+    hf_action_dim: int = 0
     promotion_state_dim: int = 0
     hidden_dim: int = 0
     state_encoder: str = "mlp"
@@ -33,6 +35,7 @@ class SMDPPPOConfig:
     raw_feature_dim: int = 0
     upper_learning_rate: float = 3e-3
     lower_learning_rate: float = 3e-3
+    hf_learning_rate: float = 0.0
     promotion_learning_rate: float = 0.0
     gamma: float = 0.995
     gae_lambda: float = 0.95
@@ -103,6 +106,7 @@ class LevelTrajectoryBatch:
 class HierarchicalTrajectoryBatch:
     upper: LevelTrajectoryBatch
     lower: LevelTrajectoryBatch
+    hf: LevelTrajectoryBatch | None = None
     promotion: LevelTrajectoryBatch | None = None
 
 
@@ -154,7 +158,11 @@ class HierarchicalRolloutBuilder:
         self._lower: dict[str, list[Any]] = {
             key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
         }
+        self._hf: dict[str, list[Any]] = {
+            key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
+        }
         self._pending_upper: dict[str, Any] | None = None
+        self._hf_enabled: bool | None = None
 
     @property
     def has_pending_upper(self) -> bool:
@@ -191,9 +199,24 @@ class HierarchicalRolloutBuilder:
         cost: float = 0.0,
         upper_reward: float | None = None,
         upper_cost: float | None = None,
+        hf_state: np.ndarray | None = None,
+        hf_action: np.ndarray | None = None,
+        hf_logp: float | None = None,
+        hf_value: float | None = None,
+        hf_reward: float | None = None,
+        hf_cost: float = 0.0,
     ) -> None:
         if self._pending_upper is None:
             raise RuntimeError("begin_upper must be called before add_lower")
+        hf_fields = (hf_state, hf_action, hf_logp, hf_value, hf_reward)
+        hf_enabled = any(item is not None for item in hf_fields)
+        if hf_enabled and not all(item is not None for item in hf_fields):
+            raise ValueError(
+                "hf_state, hf_action, hf_logp, hf_value, and hf_reward must "
+                "be provided together"
+            )
+        if self._hf_enabled is not None and self._hf_enabled != hf_enabled:
+            raise ValueError("HF trajectory presence must be consistent within an episode")
         self._lower["state"].append(np.asarray(state, dtype=np.float32).copy())
         self._lower["action"].append(np.asarray(action, dtype=np.float32).copy())
         self._lower["reward"].append(float(reward))
@@ -202,6 +225,17 @@ class HierarchicalRolloutBuilder:
         self._lower["old_logp"].append(float(logp))
         self._lower["old_value"].append(float(value))
         self._lower["cost"].append(float(cost))
+        if self._hf_enabled is None:
+            self._hf_enabled = hf_enabled
+        if hf_enabled:
+            self._hf["state"].append(np.asarray(hf_state, dtype=np.float32).copy())
+            self._hf["action"].append(np.asarray(hf_action, dtype=np.float32).copy())
+            self._hf["reward"].append(float(hf_reward))
+            self._hf["duration"].append(1)
+            self._hf["done"].append(float(bool(done)))
+            self._hf["old_logp"].append(float(hf_logp))
+            self._hf["old_value"].append(float(hf_value))
+            self._hf["cost"].append(float(hf_cost))
         self._pending_upper["rewards"].append(float(reward if upper_reward is None else upper_reward))
         self._pending_upper["costs"].append(float(cost if upper_cost is None else upper_cost))
         if done:
@@ -212,6 +246,8 @@ class HierarchicalRolloutBuilder:
             self._close_upper(done=bool(terminal))
         if self._lower["done"] and terminal:
             self._lower["done"][-1] = 1.0
+        if self._hf["done"] and terminal:
+            self._hf["done"][-1] = 1.0
 
     def _close_upper(self, *, done: bool) -> None:
         pending = self._pending_upper
@@ -253,6 +289,7 @@ class HierarchicalRolloutBuilder:
         return HierarchicalTrajectoryBatch(
             upper=self._level(self._upper),
             lower=self._level(self._lower),
+            hf=(self._level(self._hf) if self._hf["reward"] else None),
         )
 
 
@@ -370,6 +407,11 @@ def concat_hierarchical_batches(
     if not items:
         raise ValueError("at least one hierarchical batch is required")
     promotion_batches = [item.promotion for item in items]
+    hf_batches = [item.hf for item in items]
+    if any(item is None for item in hf_batches) and not all(
+        item is None for item in hf_batches
+    ):
+        raise ValueError("HF trajectories must be present for every batch or none")
     if any(item is None for item in promotion_batches) and not all(
         item is None for item in promotion_batches
     ):
@@ -379,6 +421,11 @@ def concat_hierarchical_batches(
     return HierarchicalTrajectoryBatch(
         upper=concat_level_batches(item.upper for item in items),
         lower=concat_level_batches(item.lower for item in items),
+        hf=(
+            None
+            if all(item is None for item in hf_batches)
+            else concat_level_batches(item for item in hf_batches if item is not None)
+        ),
         promotion=(
             None
             if all(item is None for item in promotion_batches)
@@ -395,6 +442,12 @@ class FrequencySeparatedActorCriticPPO:
     def __init__(self, config: SMDPPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
+        if (int(config.hf_state_dim) > 0) != (int(config.hf_action_dim) > 0):
+            raise ValueError(
+                "hf_state_dim and hf_action_dim must either both be positive or both be zero"
+            )
+        self.hf_actor: nn.Module | None = None
+        self.hf_value: nn.Module | None = None
         if str(config.state_encoder) == "mlp":
             self.upper_actor = GaussianActor(
                 config.upper_state_dim,
@@ -417,6 +470,16 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_cost_value = ValueNet(
                 config.lower_state_dim, config.hidden_dim
             ).to(self.device)
+            if int(config.hf_state_dim) > 0:
+                self.hf_actor = GaussianActor(
+                    config.hf_state_dim,
+                    config.hf_action_dim,
+                    config.hidden_dim,
+                    config.init_log_std,
+                ).to(self.device)
+                self.hf_value = ValueNet(
+                    config.hf_state_dim, config.hidden_dim
+                ).to(self.device)
         elif str(config.state_encoder) == "causal_gru":
             actor_kwargs = {
                 "history_window": config.raw_history_window,
@@ -448,6 +511,15 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_cost_value = CausalGRUValueNet(
                 state_dim=config.lower_state_dim, **value_kwargs
             ).to(self.device)
+            if int(config.hf_state_dim) > 0:
+                self.hf_actor = CausalGRUGaussianActor(
+                    state_dim=config.hf_state_dim,
+                    action_dim=config.hf_action_dim,
+                    **actor_kwargs,
+                ).to(self.device)
+                self.hf_value = CausalGRUValueNet(
+                    state_dim=config.hf_state_dim, **value_kwargs
+                ).to(self.device)
         else:
             raise ValueError(f"unknown state_encoder: {config.state_encoder}")
         self.promotion_actor: BernoulliActor | None = None
@@ -494,6 +566,20 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_cost_value.parameters(),
             lr=float(config.lower_learning_rate),
         )
+        self.hf_actor_optimizer: torch.optim.Optimizer | None = None
+        self.hf_value_optimizer: torch.optim.Optimizer | None = None
+        if self.hf_actor is not None and self.hf_value is not None:
+            hf_lr = (
+                float(config.hf_learning_rate)
+                if float(config.hf_learning_rate) > 0.0
+                else float(config.lower_learning_rate)
+            )
+            self.hf_actor_optimizer = torch.optim.Adam(
+                self.hf_actor.parameters(), lr=hf_lr
+            )
+            self.hf_value_optimizer = torch.optim.Adam(
+                self.hf_value.parameters(), lr=hf_lr
+            )
         self.constraint_lambda = float(config.lower_lambda_init)
 
     def state_dict(self) -> dict[str, Any]:
@@ -518,6 +604,13 @@ class FrequencySeparatedActorCriticPPO:
                 "promotion_actor_optimizer": self.promotion_actor_optimizer.state_dict(),
                 "promotion_value_optimizer": self.promotion_value_optimizer.state_dict(),
             })
+        if self.hf_actor is not None and self.hf_value is not None:
+            payload.update({
+                "hf_actor": self.hf_actor.state_dict(),
+                "hf_value": self.hf_value.state_dict(),
+                "hf_actor_optimizer": self.hf_actor_optimizer.state_dict(),
+                "hf_value_optimizer": self.hf_value_optimizer.state_dict(),
+            })
         return payload
 
     def load_state_dict(self, payload: dict[str, Any]) -> None:
@@ -526,6 +619,13 @@ class FrequencySeparatedActorCriticPPO:
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
         self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
+        if self.hf_actor is not None and self.hf_value is not None:
+            if "hf_actor" not in payload or "hf_value" not in payload:
+                raise ValueError(
+                    "checkpoint is missing the configured HF tactical policy"
+                )
+            self.hf_actor.load_state_dict(payload["hf_actor"])
+            self.hf_value.load_state_dict(payload["hf_value"])
         if self.promotion_actor is not None and self.promotion_value is not None:
             if "promotion_actor" not in payload or "promotion_value" not in payload:
                 raise ValueError(
@@ -539,6 +639,8 @@ class FrequencySeparatedActorCriticPPO:
             "lower_actor_optimizer",
             "lower_value_optimizer",
             "lower_cost_value_optimizer",
+            "hf_actor_optimizer",
+            "hf_value_optimizer",
             "promotion_actor_optimizer",
             "promotion_value_optimizer",
         ):
@@ -572,6 +674,23 @@ class FrequencySeparatedActorCriticPPO:
             "logp": float(logp.item()),
             "value": float(value.item()),
             "cost_value": float(cost_value.item()),
+        }
+
+    @torch.no_grad()
+    def act_hf(
+        self,
+        state: np.ndarray,
+        sample: bool = True,
+    ) -> dict[str, np.ndarray | float]:
+        if self.hf_actor is None or self.hf_value is None:
+            raise RuntimeError("HF tactical policy is not configured")
+        tensor = self._state_tensor(state)
+        action, logp = self.hf_actor(tensor, sample=sample)
+        value = self.hf_value(tensor)
+        return {
+            "action": action.cpu().numpy().reshape(-1),
+            "logp": float(logp.item()),
+            "value": float(value.item()),
         }
 
     @torch.no_grad()
@@ -642,6 +761,9 @@ class FrequencySeparatedActorCriticPPO:
         elif level == "lower":
             state_dim = cfg.lower_state_dim
             action_dim = cfg.lower_action_dim
+        elif level == "hf":
+            state_dim = cfg.hf_state_dim
+            action_dim = cfg.hf_action_dim
         elif level == "promotion":
             state_dim = cfg.promotion_state_dim
             action_dim = 1
@@ -774,6 +896,32 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.lower_value_optimizer,
             cost_value_optimizer=self.lower_cost_value_optimizer,
         )
+        hf_metrics: dict[str, float] = {}
+        if batch.hf is not None:
+            if (
+                self.hf_actor is None
+                or self.hf_value is None
+                or self.hf_actor_optimizer is None
+                or self.hf_value_optimizer is None
+            ):
+                raise ValueError(
+                    "HF trajectory provided to a model without a tactical policy"
+                )
+            hf_metrics = self._update_level(
+                level="hf",
+                batch=batch.hf,
+                actor=self.hf_actor,
+                value_net=self.hf_value,
+                actor_optimizer=self.hf_actor_optimizer,
+                value_optimizer=self.hf_value_optimizer,
+            )
+        elif self.hf_actor is not None:
+            hf_metrics = {
+                "hf_transitions": 0.0,
+                "hf_actor_optimizer_steps": 0.0,
+                "hf_value_optimizer_steps": 0.0,
+                "hf_cost_value_optimizer_steps": 0.0,
+            }
         promotion_metrics: dict[str, float] = {}
         if batch.promotion is not None:
             if (
@@ -809,6 +957,7 @@ class FrequencySeparatedActorCriticPPO:
         return {
             **upper_metrics,
             **lower_metrics,
+            **hf_metrics,
             **promotion_metrics,
             "constraint_mean": cost_mean,
             "constraint_lambda": float(self.constraint_lambda),
