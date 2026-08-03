@@ -15,6 +15,12 @@ from typing import Iterable
 import numpy as np
 
 
+_TERMINAL_SCHEDULE_MODES = {
+    "bounded_shift_legacy",
+    "exact_headway_curve",
+}
+
+
 @dataclass
 class TimetableCurvePlanner:
     """Map upper action coefficients to a causal rolling headway plan."""
@@ -29,6 +35,22 @@ class TimetableCurvePlanner:
     plan_all_directions: bool = False
     terminal_shift_min_s: float = -180.0
     terminal_shift_max_s: float = 120.0
+    terminal_schedule_mode: str = "bounded_shift_legacy"
+
+    def __post_init__(self) -> None:
+        mode = str(self.terminal_schedule_mode).strip().lower()
+        if mode not in _TERMINAL_SCHEDULE_MODES:
+            raise ValueError(
+                "terminal_schedule_mode must be one of "
+                f"{sorted(_TERMINAL_SCHEDULE_MODES)}"
+            )
+        if self.basis_per_direction < 1:
+            raise ValueError("basis_per_direction must be positive")
+        if self.min_headway_s <= 0.0:
+            raise ValueError("min_headway_s must be positive")
+        if self.max_headway_s < self.min_headway_s:
+            raise ValueError("max_headway_s must not be below min_headway_s")
+        self.terminal_schedule_mode = mode
 
     @classmethod
     def from_config(cls, cfg, delta_max_s=120.0):
@@ -44,6 +66,9 @@ class TimetableCurvePlanner:
             plan_all_directions=bool(cfg.get("plan_all_directions", False)),
             terminal_shift_min_s=float(cfg.get("terminal_shift_min_s", -180.0)),
             terminal_shift_max_s=float(cfg.get("terminal_shift_max_s", 120.0)),
+            terminal_schedule_mode=str(
+                cfg.get("terminal_schedule_mode", "bounded_shift_legacy")
+            ),
         )
 
     @property
@@ -98,11 +123,195 @@ class TimetableCurvePlanner:
                 getattr(tt, "target_headway", fallback))
         return float(tt._freqduet_base_target_headway)
 
+    @staticmethod
+    def _base_launch(tt) -> float:
+        if not hasattr(tt, "_freqduet_base_launch"):
+            tt._freqduet_base_launch = float(tt.launch_time)
+        return float(tt._freqduet_base_launch)
+
+    @staticmethod
+    def _effective_launch(tt) -> float:
+        actual = getattr(tt, "_freqduet_actual_launch", None)
+        if actual is not None:
+            return float(actual)
+        scheduled = getattr(tt, "_freqduet_scheduled_launch", None)
+        if scheduled is not None:
+            return float(scheduled)
+        return TimetableCurvePlanner._base_launch(tt)
+
+    def _apply_exact_headway_curve(
+        self,
+        timetables,
+        current_trip,
+        action,
+        origin_launch_s,
+        terminal_headway_floor_ratio,
+        terminal_headway_floor_min_s,
+        terminal_shift_bias_s,
+        plan_owner,
+    ):
+        """Project a headway curve without independently clipping trip phases."""
+        if abs(float(terminal_shift_bias_s or 0.0)) > 1e-9:
+            raise ValueError(
+                "exact_headway_curve does not permit an independent terminal "
+                "shift bias; encode the intervention in the headway curve"
+            )
+
+        current_direction = bool(current_trip.direction)
+        directions = (
+            [True, False] if self.plan_all_directions else [current_direction]
+        )
+        planned_targets = []
+        scheduled_launches = []
+        phase_displacements = []
+        headway_floors = []
+        current_target = None
+
+        for direction in directions:
+            all_direction_trips = sorted(
+                (tt for tt in timetables if bool(tt.direction) == direction),
+                key=self._base_launch,
+            )
+            candidates = [
+                tt
+                for tt in all_direction_trips
+                if not getattr(tt, "launched", False)
+                and -1e-6
+                <= self._base_launch(tt) - float(origin_launch_s)
+                <= self.horizon_s
+            ]
+            if not candidates:
+                continue
+
+            anchor = candidates[0]
+            anchor_index = all_direction_trips.index(anchor)
+            predecessor = (
+                all_direction_trips[anchor_index - 1]
+                if anchor_index > 0
+                else None
+            )
+            predecessor_launch = (
+                self._effective_launch(predecessor)
+                if predecessor is not None
+                else None
+            )
+            anchor_launch = self._effective_launch(anchor)
+            anchor_base = self._base_headway(anchor)
+            if predecessor_launch is None:
+                anchor_target = anchor_base
+            else:
+                anchor_target = max(anchor_launch - predecessor_launch, 1e-9)
+
+            anchor._freqduet_desired_headway_s = float(anchor_target)
+            anchor._freqduet_scheduled_launch = float(anchor_launch)
+            anchor._freqduet_predecessor_scheduled_launch = predecessor_launch
+            anchor._freqduet_projected_target_headway = float(anchor_target)
+            anchor._freqduet_phase_displacement_s = float(
+                anchor_launch - self._base_launch(anchor)
+            )
+            anchor._freqduet_projection_mode = "exact_headway_curve"
+            anchor._freqduet_plan_offset_s = float(
+                self._base_launch(anchor) - float(origin_launch_s)
+            )
+            anchor._freqduet_terminal_dispatch = True
+            if not hasattr(anchor, "_freqduet_planned_by"):
+                # The anchor is intentionally unaffected by the new plan.
+                anchor._freqduet_planned_by = int(anchor.launch_turn)
+            anchor.target_headway = float(anchor_target)
+
+            planned_targets.append(float(anchor_target))
+            scheduled_launches.append(float(anchor_launch))
+            phase_displacements.append(
+                float(anchor._freqduet_phase_displacement_s)
+            )
+            if anchor is current_trip:
+                current_target = float(anchor_target)
+
+            previous_launch = float(anchor_launch)
+            for tt in candidates[1:]:
+                offset = self._base_launch(tt) - float(origin_launch_s)
+                base = self._base_headway(tt)
+                desired = self.target_headway(base, action, direction, offset)
+                floor = 0.0
+                ratio = float(terminal_headway_floor_ratio or 0.0)
+                if ratio > 0.0:
+                    floor = max(floor, base * ratio)
+                floor_min = float(terminal_headway_floor_min_s or 0.0)
+                if floor_min > 0.0:
+                    floor = max(floor, floor_min)
+                if floor > 0.0:
+                    desired = max(desired, floor)
+                    headway_floors.append(float(floor))
+                    tt._freqduet_min_dispatch_headway = float(floor)
+
+                projected_launch = previous_launch + float(desired)
+                projected_target = projected_launch - previous_launch
+                if projected_target <= 0.0:
+                    raise AssertionError(
+                        "exact timetable projection produced a non-positive headway"
+                    )
+
+                tt._freqduet_desired_headway_s = float(desired)
+                tt._freqduet_scheduled_launch = float(projected_launch)
+                tt._freqduet_predecessor_scheduled_launch = float(previous_launch)
+                tt._freqduet_projected_target_headway = float(projected_target)
+                tt._freqduet_phase_displacement_s = float(
+                    projected_launch - self._base_launch(tt)
+                )
+                tt._freqduet_projection_mode = "exact_headway_curve"
+                tt._freqduet_planned_by = int(plan_owner)
+                tt._freqduet_plan_offset_s = float(offset)
+                tt._freqduet_terminal_dispatch = True
+                tt.target_headway = float(projected_target)
+
+                planned_targets.append(float(projected_target))
+                scheduled_launches.append(float(projected_launch))
+                phase_displacements.append(
+                    float(tt._freqduet_phase_displacement_s)
+                )
+                if tt is current_trip:
+                    current_target = float(projected_target)
+                previous_launch = float(projected_launch)
+
+        if current_target is None:
+            raise ValueError(
+                "current trip is outside the exact headway projection horizon"
+            )
+
+        targets = np.asarray(planned_targets, dtype=np.float64)
+        scheduled = np.asarray(scheduled_launches, dtype=np.float64)
+        phases = np.asarray(phase_displacements, dtype=np.float64)
+        floors = np.asarray(headway_floors, dtype=np.float64)
+        base_current = self._base_headway(current_trip)
+        return {
+            "target_headway": float(current_target),
+            "effective_delta": float(current_target - base_current),
+            "base_headway": float(base_current),
+            "planned_n": int(targets.size),
+            "planned_mean": float(targets.mean()),
+            "planned_std": float(targets.std()),
+            "scheduled_n": int(scheduled.size),
+            "scheduled_mean": float(scheduled.mean()),
+            "scheduled_std": float(scheduled.std()),
+            "terminal_shift_min_s": float("nan"),
+            "terminal_shift_max_s": float("nan"),
+            "terminal_shift_bias_s": 0.0,
+            "terminal_headway_floor_n": int(floors.size),
+            "terminal_headway_floor_mean": (
+                float(floors.mean()) if floors.size else 0.0
+            ),
+            "phase_displacement_mean_s": float(phases.mean()),
+            "phase_displacement_max_abs_s": float(np.max(np.abs(phases))),
+            "projection_mode": "exact_headway_curve",
+            "plan_id": int(plan_owner),
+        }
+
     def apply(self, timetables, current_trip, action, origin_launch_s=None,
               write_scheduled_launch=False, terminal_shift_min_s=None,
               terminal_shift_max_s=None, terminal_shift_bias_s=0.0,
               terminal_headway_floor_ratio=0.0,
-              terminal_headway_floor_min_s=0.0, plan_id=None):
+              terminal_headway_floor_min_s=0.0, plan_id=None,
+              terminal_schedule_mode=None):
         """Write target headways for current and future trips.
 
         Returns:
@@ -113,6 +322,31 @@ class TimetableCurvePlanner:
         current_direction = bool(current_trip.direction)
         plan_owner = int(
             current_trip.launch_turn if plan_id is None else plan_id)
+        schedule_mode = str(
+            self.terminal_schedule_mode
+            if terminal_schedule_mode is None
+            else terminal_schedule_mode
+        ).strip().lower()
+        if schedule_mode not in _TERMINAL_SCHEDULE_MODES:
+            raise ValueError(
+                "terminal_schedule_mode must be one of "
+                f"{sorted(_TERMINAL_SCHEDULE_MODES)}"
+            )
+        if schedule_mode == "exact_headway_curve":
+            if not write_scheduled_launch:
+                raise ValueError(
+                    "exact_headway_curve requires executable terminal dispatch"
+                )
+            return self._apply_exact_headway_curve(
+                timetables=timetables,
+                current_trip=current_trip,
+                action=action,
+                origin_launch_s=origin_launch,
+                terminal_headway_floor_ratio=terminal_headway_floor_ratio,
+                terminal_headway_floor_min_s=terminal_headway_floor_min_s,
+                terminal_shift_bias_s=terminal_shift_bias_s,
+                plan_owner=plan_owner,
+            )
         terminal_shift_min = (
             self.terminal_shift_min_s if terminal_shift_min_s is None
             else float(terminal_shift_min_s))

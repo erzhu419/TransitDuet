@@ -69,6 +69,89 @@ class TimetablePlanCreditTest(unittest.TestCase):
         self.assertAlmostEqual(credits[0], -2.0)
         self.assertAlmostEqual(credits[3], -1.0)
 
+    def test_exact_curve_matches_every_projected_schedule_gap(self):
+        trips = self._trips()
+        planner = TimetableCurvePlanner(
+            horizon_s=1200.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            terminal_schedule_mode="exact_headway_curve",
+        )
+
+        summary = planner.apply(
+            trips,
+            trips[0],
+            [-30.0, -30.0],
+            write_scheduled_launch=True,
+            plan_id=17,
+        )
+
+        scheduled = [trip._freqduet_scheduled_launch for trip in trips]
+        self.assertEqual(scheduled, [0.0, 270.0, 540.0, 810.0, 1080.0])
+        self.assertEqual(summary["projection_mode"], "exact_headway_curve")
+        self.assertEqual(trips[0]._freqduet_planned_by, 0)
+        for index, trip in enumerate(trips[1:], start=1):
+            self.assertAlmostEqual(
+                trip.target_headway,
+                scheduled[index] - scheduled[index - 1],
+            )
+            self.assertAlmostEqual(trip.target_headway, 270.0)
+            self.assertEqual(trip._freqduet_planned_by, 17)
+            self.assertAlmostEqual(
+                trip._freqduet_phase_displacement_s,
+                -30.0 * index,
+            )
+
+    def test_exact_curve_keeps_existing_anchor_and_replans_only_future_trips(self):
+        trips = self._trips()
+        trips[0].launched = True
+        trips[0]._freqduet_actual_launch = 10.0
+        trips[1]._freqduet_scheduled_launch = 280.0
+        trips[1]._freqduet_planned_by = 3
+        planner = TimetableCurvePlanner(
+            horizon_s=900.0,
+            basis_per_direction=1,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            terminal_schedule_mode="exact_headway_curve",
+        )
+
+        planner.apply(
+            trips,
+            trips[1],
+            [60.0],
+            origin_launch_s=300.0,
+            write_scheduled_launch=True,
+            plan_id=9,
+        )
+
+        self.assertEqual(trips[1]._freqduet_scheduled_launch, 280.0)
+        self.assertEqual(trips[1].target_headway, 270.0)
+        self.assertEqual(trips[1]._freqduet_planned_by, 3)
+        self.assertEqual(trips[2]._freqduet_scheduled_launch, 640.0)
+        self.assertEqual(trips[3]._freqduet_scheduled_launch, 1000.0)
+        self.assertEqual(trips[4]._freqduet_scheduled_launch, 1360.0)
+        self.assertEqual(trips[2]._freqduet_planned_by, 9)
+
+    def test_exact_curve_rejects_independent_terminal_bias(self):
+        trips = self._trips()
+        planner = TimetableCurvePlanner(
+            basis_per_direction=1,
+            shared_directions=True,
+            terminal_schedule_mode="exact_headway_curve",
+        )
+        with self.assertRaisesRegex(ValueError, "independent terminal shift"):
+            planner.apply(
+                trips,
+                trips[0],
+                [0.0],
+                write_scheduled_launch=True,
+                terminal_shift_bias_s=5.0,
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
