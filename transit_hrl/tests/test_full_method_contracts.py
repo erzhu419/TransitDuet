@@ -8,6 +8,7 @@ from freq_hrl.domains.trading import (
     TradingCreditAssigner,
 )
 from freq_hrl.experiments.trading.ppo_actor_critic import (
+    decode_hf_tactical_action,
     decode_hierarchical_lower_action,
     evaluate_hf_lower_intervention,
     make_plan_mapper,
@@ -38,6 +39,22 @@ class FullMethodContractTest(unittest.TestCase):
                 }
                 self.assertEqual(changed, expected)
 
+    def test_v5_ablation_contracts_change_only_the_registered_mechanism(self):
+        full = resolve_method_contract("full_freq_hrl_v5")
+        expected_changes = {
+            "ablate_promotion_v5": {"learned_promotion_gate"},
+            "ablate_hf_lower_v5": {"lower_hf_overlay"},
+            "ablate_leakage_v5": {"constrain_raw_lower_effect"},
+        }
+        for contract, expected in expected_changes.items():
+            with self.subTest(contract=contract):
+                ablated = resolve_method_contract(contract)
+                changed = {
+                    key for key in full if full[key] != ablated[key]
+                }
+                self.assertEqual(changed, expected)
+                self.assertTrue(ablated["separate_hf_tactical"])
+
     def test_hf_lower_action_is_bounded_and_separate_from_tracking_speed(self):
         speed, overlay = decode_hierarchical_lower_action(
             np.asarray([-10.0, 10.0, 10.0, -10.0]),
@@ -47,6 +64,14 @@ class FullMethodContractTest(unittest.TestCase):
         )
         self.assertGreaterEqual(float(speed.min()), 0.05)
         self.assertLessEqual(float(speed.max()), 1.0)
+        np.testing.assert_allclose(overlay, [0.025, -0.025], atol=1e-9)
+
+    def test_independent_hf_tactical_action_is_bounded(self):
+        overlay = decode_hf_tactical_action(
+            np.asarray([10.0, -10.0]),
+            assets=2,
+            hf_order_scale=0.025,
+        )
         np.testing.assert_allclose(overlay, [0.025, -0.025], atol=1e-9)
 
     def test_learned_gate_features_do_not_include_heuristic_gate_decision(self):
@@ -191,6 +216,106 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertTrue(intervention["paired_exogenous_path_identity"])
         self.assertGreaterEqual(intervention["lower_hf_action_sensitivity"], 0.0)
         self.assertTrue(np.isfinite(intervention["total_return_delta"]))
+
+    def test_v5_trains_independent_tracking_and_hf_tactical_streams(self):
+        payload, rows, model = train_ppo_actor_critic(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=36,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            seed=7,
+            leakage_scale=0.1,
+            plan_basis_dim=3,
+            plan_horizon_s=600.0,
+            lower_lf_constraint_coef=0.01,
+            lower_lf_constraint_target=0.0,
+            lower_lf_dual_lr=0.01,
+            upper_period=12,
+            min_upper_duration=3,
+            execution_timeline_contract="causal_post_trade_v3",
+            method_contract="full_freq_hrl_v5",
+            volume_impact_bps=10.0,
+            plan_smoothness_weight=0.01,
+            promotion_replan_cost=0.001,
+            upper_learning_rate=3e-4,
+            lower_learning_rate=2e-4,
+            hf_learning_rate=1e-4,
+            promotion_learning_rate=5e-5,
+        )
+        self.assertEqual(payload["method_contract"], "full_freq_hrl_v5")
+        self.assertEqual(payload["config"]["lower_action_dim"], 2)
+        self.assertEqual(payload["config"]["hf_state_dim"], 17)
+        self.assertEqual(payload["config"]["hf_action_dim"], 2)
+        self.assertTrue(payload["hf_tactical_stream_enabled"])
+        self.assertTrue(payload["exact_three_way_credit"])
+        self.assertEqual(
+            payload["trajectory_contract"]["hf"],
+            "one independent tactical transition per primitive step with "
+            "a dedicated marginal HF reward",
+        )
+        self.assertEqual(
+            count_parameters(model), payload["capacity_actual_parameter_count"]
+        )
+        self.assertGreater(
+            payload["history"][-1]["hf_actor_optimizer_steps"], 0.0
+        )
+        self.assertGreater(
+            payload["history"][-1]["hf_value_optimizer_steps"], 0.0
+        )
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["hf_tactical_transition_count"], 36)
+        self.assertEqual(row["hf_tactical_stream_enabled"], 1.0)
+        self.assertEqual(row["exact_three_way_credit"], 1.0)
+        self.assertLessEqual(
+            row["task_credit_reconstruction_max_abs_error"], 1e-10
+        )
+        self.assertAlmostEqual(
+            row["total_lower_credit_mean"],
+            row["lower_credit_mean"] + row["hf_tactical_credit_mean"],
+        )
+        intervention_rows = evaluate_hf_lower_intervention(
+            model,
+            eval_seeds=[123],
+            rollout_kwargs={
+                "steps": 36,
+                "assets": 2,
+                "scenario": "persistent_shift",
+                "leakage_scale": 0.0,
+                "plan_mapper": make_plan_mapper(
+                    assets=2,
+                    plan_basis_dim=3,
+                    plan_horizon_s=600.0,
+                    plan_eval_offset_s=300.0,
+                    plan_coefficient_scale=0.75,
+                    anchor_first_coefficient=True,
+                ),
+                "upper_period": 12,
+                "min_upper_duration": 3,
+                "policy_mode": "freq_hrl",
+                "mark_to_market_timing": "post_trade",
+                "volume_impact_bps": 10.0,
+                "execute_plan_curve": True,
+                "use_additive_frequency_credit": True,
+                "constrain_raw_lower_effect": True,
+                "plan_smoothness_weight": 0.01,
+                "learned_promotion_gate": True,
+                "heuristic_promotion_gate": False,
+                "promotion_replan_cost": 0.001,
+                "enable_hf_lower": True,
+                "separate_hf_tactical": True,
+                "lower_hf_order_scale": 0.025,
+                "execution_timeline_contract": "causal_post_trade_v3",
+                "method_contract": "full_freq_hrl_v5",
+            },
+        )
+        self.assertEqual(len(intervention_rows), 1)
+        self.assertGreaterEqual(
+            intervention_rows[0]["lower_hf_overlay_sensitivity"], 0.0
+        )
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
         common = dict(

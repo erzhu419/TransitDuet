@@ -70,6 +70,9 @@ LEARNED_BASELINE_IMPLEMENTATION_VERSION = (
 FULL_METHOD_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v4_learned_promotion_credit_plan_leakage_2026_08_03"
 )
+FULL_METHOD_V5_IMPLEMENTATION_VERSION = (
+    "freq_hrl_full_v5_independent_hf_tactical_credit_2026_08_03"
+)
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
 )
@@ -85,6 +88,10 @@ METHOD_CONTRACTS = (
     "ablate_promotion_v4",
     "ablate_hf_lower_v4",
     "ablate_leakage_v4",
+    "full_freq_hrl_v5",
+    "ablate_promotion_v5",
+    "ablate_hf_lower_v5",
+    "ablate_leakage_v5",
 )
 LOWER_OBSERVATION_INTERVENTIONS = (
     "none",
@@ -108,11 +115,17 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v4",
             "ablate_promotion_v4",
             "ablate_hf_lower_v4",
+            "full_freq_hrl_v5",
+            "ablate_promotion_v5",
+            "ablate_hf_lower_v5",
         },
         "learned_promotion_gate": contract in {
             "full_freq_hrl_v4",
             "ablate_hf_lower_v4",
             "ablate_leakage_v4",
+            "full_freq_hrl_v5",
+            "ablate_hf_lower_v5",
+            "ablate_leakage_v5",
         },
         "heuristic_promotion_gate": contract in {
             "routing_core_v2",
@@ -123,12 +136,28 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v4",
             "ablate_promotion_v4",
             "ablate_leakage_v4",
+            "full_freq_hrl_v5",
+            "ablate_promotion_v5",
+            "ablate_leakage_v5",
+        },
+        "separate_hf_tactical": contract in {
+            "full_freq_hrl_v5",
+            "ablate_promotion_v5",
+            "ablate_hf_lower_v5",
+            "ablate_leakage_v5",
         },
     }
     return flags
 
 
 def full_method_implementation_version(method_contract: str) -> str:
+    if str(method_contract) in {
+        "full_freq_hrl_v5",
+        "ablate_promotion_v5",
+        "ablate_hf_lower_v5",
+        "ablate_leakage_v5",
+    }:
+        return FULL_METHOD_V5_IMPLEMENTATION_VERSION
     if str(method_contract) in {
         "full_freq_hrl_v4",
         "ablate_promotion_v4",
@@ -775,6 +804,20 @@ def decode_hierarchical_lower_action(
     return speed, residual_order
 
 
+def decode_hf_tactical_action(
+    latent_action: np.ndarray,
+    *,
+    assets: int,
+    hf_order_scale: float,
+) -> np.ndarray:
+    latent = np.asarray(latent_action, dtype=np.float64).reshape(-1)
+    if latent.size != int(assets):
+        raise ValueError(
+            f"expected {int(assets)} HF tactical actions, got {latent.size}"
+        )
+    return np.tanh(latent) * max(float(hf_order_scale), 0.0)
+
+
 def intervene_lower_observation(
     lower_state: np.ndarray,
     *,
@@ -1061,6 +1104,7 @@ def smdp_rollout(
     heuristic_promotion_gate: bool = True,
     promotion_replan_cost: float = 0.0,
     enable_hf_lower: bool = False,
+    separate_hf_tactical: bool = False,
     lower_hf_order_scale: float = 0.025,
     lower_observation_intervention: str = "none",
     compute_hf_action_sensitivity: bool = False,
@@ -1098,11 +1142,29 @@ def smdp_rollout(
         raise ValueError(
             "lower frequency interventions require policy_mode='freq_hrl'"
         )
-    expected_lower_action_dim = int(assets) * (2 if enable_hf_lower else 1)
+    use_separate_hf = bool(separate_hf_tactical and enable_hf_lower)
+    expected_lower_action_dim = int(assets) * (
+        2 if enable_hf_lower and not use_separate_hf else 1
+    )
     if int(model.config.lower_action_dim) != expected_lower_action_dim:
         raise ValueError(
             "lower action dim mismatch: "
             f"expected {expected_lower_action_dim}, got {model.config.lower_action_dim}"
+        )
+    expected_hf_state_dim = 8 * int(assets) + 1 if use_separate_hf else 0
+    expected_hf_action_dim = int(assets) if use_separate_hf else 0
+    if (
+        int(model.config.hf_state_dim) != expected_hf_state_dim
+        or int(model.config.hf_action_dim) != expected_hf_action_dim
+    ):
+        raise ValueError(
+            "HF tactical dimensions mismatch: "
+            f"expected state/action {expected_hf_state_dim}/{expected_hf_action_dim}, "
+            f"got {model.config.hf_state_dim}/{model.config.hf_action_dim}"
+        )
+    if separate_hf_tactical and policy_mode != "freq_hrl":
+        raise ValueError(
+            "separate HF tactical credit requires policy_mode='freq_hrl'"
         )
     if learned_promotion_gate:
         if policy_mode != "freq_hrl":
@@ -1140,6 +1202,16 @@ def smdp_rollout(
         reward_penalty_scale=leakage_scale,
         enabled=leakage_scale > 0.0,
     )
+    tracking_leakage = CausalLeakageRewardShaper(
+        regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
+        reward_penalty_scale=leakage_scale,
+        enabled=leakage_scale > 0.0,
+    )
+    hf_leakage = CausalLeakageRewardShaper(
+        regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
+        reward_penalty_scale=leakage_scale,
+        enabled=leakage_scale > 0.0,
+    )
     lower_effect_projector = (
         CausalLowFrequencyEffectProjector(
             window=int(lower_lf_effect_filter_window),
@@ -1169,18 +1241,23 @@ def smdp_rollout(
     targets: list[np.ndarray] = []
     lower_effects: list[np.ndarray] = []
     raw_lower_effects: list[np.ndarray] = []
+    raw_tracking_lower_effects: list[np.ndarray] = []
+    hf_overlay_effects: list[np.ndarray] = []
     raw_recenter_boosts: list[np.ndarray] = []
     plan_smoothness: list[float] = []
     plan_coeff_abs: list[float] = []
     upper_credits: list[float] = []
     lower_credits: list[float] = []
+    hf_tactical_credits: list[float] = []
     upper_task_credits: list[float] = []
     lower_task_credits: list[float] = []
+    hf_tactical_task_credits: list[float] = []
     plan_returns: list[float] = []
     execution_deviation_returns: list[float] = []
     credit_reconstruction_errors: list[float] = []
     upper_leakage_costs: list[float] = []
     lower_leakage_costs: list[float] = []
+    hf_leakage_costs: list[float] = []
     decision_reasons: list[str] = []
     promotion_signals = 0
     learned_gate_probabilities: list[float] = []
@@ -1342,37 +1419,81 @@ def smdp_rollout(
         )
         factual_lower_state = np.asarray(lower_state, dtype=np.float32).copy()
         if compute_hf_action_sensitivity:
-            factual_out = model.act_lower(factual_lower_state, sample=False)
             ablated_state = intervene_lower_observation(
                 factual_lower_state,
                 assets=assets,
                 policy_mode=policy_mode,
                 intervention="zero_residual_frequency",
             )
-            ablated_out = model.act_lower(ablated_state, sample=False)
-            action_delta = np.asarray(
-                factual_out["action"], dtype=np.float64
-            ) - np.asarray(ablated_out["action"], dtype=np.float64)
+            if use_separate_hf:
+                factual_out = model.act_hf(factual_lower_state, sample=False)
+                ablated_out = model.act_hf(ablated_state, sample=False)
+            else:
+                factual_out = model.act_lower(factual_lower_state, sample=False)
+                ablated_out = model.act_lower(ablated_state, sample=False)
+            factual_action = np.asarray(factual_out["action"], dtype=np.float64)
+            ablated_action = np.asarray(ablated_out["action"], dtype=np.float64)
+            action_delta = factual_action - ablated_action
             lower_hf_action_sensitivities.append(
                 float(np.mean(np.abs(action_delta)))
             )
-            lower_hf_overlay_sensitivities.append(float(
-                np.mean(np.abs(action_delta[assets:]))
-                if enable_hf_lower else 0.0
-            ))
-        lower_state = intervene_lower_observation(
-            factual_lower_state,
-            assets=assets,
-            policy_mode=policy_mode,
-            intervention=lower_observation_intervention,
-        )
-        lower_out = model.act_lower(lower_state, sample=sample)
-        speed, residual_order = decode_hierarchical_lower_action(
-            np.asarray(lower_out["action"], dtype=np.float64),
-            assets=assets,
-            enable_hf_overlay=bool(enable_hf_lower),
-            hf_order_scale=float(lower_hf_order_scale),
-        )
+            if use_separate_hf:
+                factual_overlay = decode_hf_tactical_action(
+                    factual_action,
+                    assets=assets,
+                    hf_order_scale=lower_hf_order_scale,
+                )
+                ablated_overlay = decode_hf_tactical_action(
+                    ablated_action,
+                    assets=assets,
+                    hf_order_scale=lower_hf_order_scale,
+                )
+                overlay_delta = factual_overlay - ablated_overlay
+            else:
+                overlay_delta = (
+                    action_delta[assets:]
+                    if enable_hf_lower else np.zeros(assets, dtype=np.float64)
+                )
+            lower_hf_overlay_sensitivities.append(
+                float(np.mean(np.abs(overlay_delta)))
+            )
+        hf_state: np.ndarray | None = None
+        hf_out: dict[str, np.ndarray | float] | None = None
+        if use_separate_hf:
+            lower_state = factual_lower_state
+            hf_state = intervene_lower_observation(
+                factual_lower_state,
+                assets=assets,
+                policy_mode=policy_mode,
+                intervention=lower_observation_intervention,
+            )
+            lower_out = model.act_lower(lower_state, sample=sample)
+            hf_out = model.act_hf(hf_state, sample=sample)
+            speed, _ = decode_hierarchical_lower_action(
+                np.asarray(lower_out["action"], dtype=np.float64),
+                assets=assets,
+                enable_hf_overlay=False,
+                hf_order_scale=float(lower_hf_order_scale),
+            )
+            residual_order = decode_hf_tactical_action(
+                np.asarray(hf_out["action"], dtype=np.float64),
+                assets=assets,
+                hf_order_scale=float(lower_hf_order_scale),
+            )
+        else:
+            lower_state = intervene_lower_observation(
+                factual_lower_state,
+                assets=assets,
+                policy_mode=policy_mode,
+                intervention=lower_observation_intervention,
+            )
+            lower_out = model.act_lower(lower_state, sample=sample)
+            speed, residual_order = decode_hierarchical_lower_action(
+                np.asarray(lower_out["action"], dtype=np.float64),
+                assets=assets,
+                enable_hf_overlay=bool(enable_hf_lower),
+                hf_order_scale=float(lower_hf_order_scale),
+            )
         pre_gap = np.asarray(current_target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -1387,10 +1508,25 @@ def smdp_rollout(
         raw_lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(
             info["target"], dtype=np.float64
         )
-        lower_effect = (
-            lower_effect_projector.transform(raw_lower_effect)
-            if lower_effect_projector is not None else raw_lower_effect
+        raw_tracking_lower_effect = np.asarray(
+            info["tracking_only_position"], dtype=np.float64
+        ) - np.asarray(info["target"], dtype=np.float64)
+        hf_overlay_effect = np.asarray(
+            info["hf_overlay_position_effect"], dtype=np.float64
         )
+        if separate_hf_tactical:
+            tracking_lower_effect = (
+                lower_effect_projector.transform(raw_tracking_lower_effect)
+                if lower_effect_projector is not None
+                else raw_tracking_lower_effect
+            )
+            lower_effect = tracking_lower_effect + hf_overlay_effect
+        else:
+            tracking_lower_effect = raw_tracking_lower_effect
+            lower_effect = (
+                lower_effect_projector.transform(raw_lower_effect)
+                if lower_effect_projector is not None else raw_lower_effect
+            )
         diagnostics.log_step(
             t=float(t * 60.0),
             states={
@@ -1407,6 +1543,17 @@ def smdp_rollout(
             lower_effect=(raw_lower_effect if constrain_raw_lower_effect else lower_effect),
             reward=float(reward),
         )
+        tracking_leak_info = tracking_leakage.update(
+            upper_effect=current_target,
+            lower_effect=(
+                raw_tracking_lower_effect
+                if constrain_raw_lower_effect else tracking_lower_effect
+            ),
+        )
+        hf_leak_info = hf_leakage.update(
+            upper_effect=np.zeros_like(current_target),
+            lower_effect=hf_overlay_effect,
+        )
         shaped_reward = float(
             leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward
         )
@@ -1415,29 +1562,65 @@ def smdp_rollout(
             upper_leakage_cost = max(float(leakage_scale), 0.0) * float(
                 leak_info.get("upper_hf_penalty", 0.0)
             )
-            lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
-                leak_info.get("lower_lf_penalty", 0.0)
-            )
-            credit = credit_assigner.assign(
-                info,
-                active_plan=current_target,
-                upper_leakage_cost=upper_leakage_cost,
-                lower_leakage_cost=lower_leakage_cost,
-                plan_smoothness_cost=pending_plan_smoothness_cost,
-            )
-            upper_credit = float(credit.upper_training_credit)
-            lower_credit = float(credit.lower_training_credit)
-            upper_task_credit = float(credit.upper_task_credit)
-            lower_task_credit = float(credit.lower_task_credit)
-            plan_return = float(credit.plan_return)
-            execution_deviation_return = float(
-                credit.execution_deviation_return
-            )
-            reconstruction_error = float(credit.task_reconstruction_error)
+            if separate_hf_tactical:
+                lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
+                    tracking_leak_info.get("lower_lf_penalty", 0.0)
+                )
+                hf_leakage_cost = max(float(leakage_scale), 0.0) * float(
+                    hf_leak_info.get("lower_lf_penalty", 0.0)
+                )
+                tactical_credit = credit_assigner.assign_tactical(
+                    info,
+                    active_plan=current_target,
+                    upper_leakage_cost=upper_leakage_cost,
+                    tracking_leakage_cost=lower_leakage_cost,
+                    hf_leakage_cost=hf_leakage_cost,
+                    plan_smoothness_cost=pending_plan_smoothness_cost,
+                )
+                upper_credit = float(tactical_credit.upper_training_credit)
+                lower_credit = float(tactical_credit.tracking_training_credit)
+                hf_tactical_credit = float(tactical_credit.hf_training_credit)
+                upper_task_credit = float(tactical_credit.upper_task_credit)
+                lower_task_credit = float(tactical_credit.tracking_task_credit)
+                hf_tactical_task_credit = float(
+                    tactical_credit.hf_task_credit
+                )
+                plan_return = float(tactical_credit.plan_return)
+                execution_deviation_return = float(
+                    tactical_credit.tracking_deviation_return
+                    + tactical_credit.hf_overlay_return
+                )
+                reconstruction_error = float(
+                    tactical_credit.task_reconstruction_error
+                )
+            else:
+                lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
+                    leak_info.get("lower_lf_penalty", 0.0)
+                )
+                hf_leakage_cost = 0.0
+                credit = credit_assigner.assign(
+                    info,
+                    active_plan=current_target,
+                    upper_leakage_cost=upper_leakage_cost,
+                    lower_leakage_cost=lower_leakage_cost,
+                    plan_smoothness_cost=pending_plan_smoothness_cost,
+                )
+                upper_credit = float(credit.upper_training_credit)
+                lower_credit = float(credit.lower_training_credit)
+                hf_tactical_credit = 0.0
+                upper_task_credit = float(credit.upper_task_credit)
+                lower_task_credit = float(credit.lower_task_credit)
+                hf_tactical_task_credit = 0.0
+                plan_return = float(credit.plan_return)
+                execution_deviation_return = float(
+                    credit.execution_deviation_return
+                )
+                reconstruction_error = float(credit.task_reconstruction_error)
             pending_plan_smoothness_cost = 0.0
         else:
             upper_leakage_cost = 0.0
             lower_leakage_cost = leakage_reward_penalty
+            hf_leakage_cost = 0.0
             upper_credit = float(info["portfolio_return"]) - float(
                 info.get("drawdown_cost", 0.0)
             )
@@ -1446,12 +1629,31 @@ def smdp_rollout(
                 - float(info.get("inventory_drift_cost", 0.0))
                 - leakage_reward_penalty
             )
+            hf_tactical_credit = 0.0
             upper_task_credit = upper_credit
             lower_task_credit = lower_credit + leakage_reward_penalty
+            hf_tactical_task_credit = 0.0
             plan_return = float(info["portfolio_return"])
             execution_deviation_return = 0.0
             reconstruction_error = float("nan")
         latest_leakage_feedback = float(leak_info.get("lower_lf_penalty", 0.0))
+        lower_constraint_feedback = float(
+            tracking_leak_info.get("lower_lf_penalty", 0.0)
+            if separate_hf_tactical
+            else latest_leakage_feedback
+        )
+        hf_builder_fields: dict[str, Any] = {}
+        if use_separate_hf:
+            if hf_state is None or hf_out is None:
+                raise RuntimeError("HF tactical action was not sampled")
+            hf_builder_fields = {
+                "hf_state": hf_state,
+                "hf_action": np.asarray(hf_out["action"], dtype=np.float32),
+                "hf_logp": float(hf_out["logp"]),
+                "hf_value": float(hf_out["value"]),
+                "hf_reward": float(reward_scale) * hf_tactical_credit,
+                "hf_cost": float(hf_leak_info.get("lower_lf_penalty", 0.0)),
+            }
         builder.add_lower(
             state=lower_state,
             action=np.asarray(lower_out["action"], dtype=np.float32),
@@ -1459,9 +1661,10 @@ def smdp_rollout(
             value=float(lower_out["value"]),
             reward=float(reward_scale) * lower_credit,
             upper_reward=float(reward_scale) * upper_credit,
-            cost=latest_leakage_feedback,
+            cost=lower_constraint_feedback,
             upper_cost=0.0,
             done=bool(done),
+            **hf_builder_fields,
         )
         if promotion_builder is not None:
             promotion_builder.add_reward(
@@ -1475,13 +1678,16 @@ def smdp_rollout(
 
         upper_credits.append(upper_credit)
         lower_credits.append(lower_credit)
+        hf_tactical_credits.append(hf_tactical_credit)
         upper_task_credits.append(upper_task_credit)
         lower_task_credits.append(lower_task_credit)
+        hf_tactical_task_credits.append(hf_tactical_task_credit)
         plan_returns.append(plan_return)
         execution_deviation_returns.append(execution_deviation_return)
         credit_reconstruction_errors.append(reconstruction_error)
         upper_leakage_costs.append(upper_leakage_cost)
         lower_leakage_costs.append(lower_leakage_cost)
+        hf_leakage_costs.append(hf_leakage_cost)
         hf_order_l1.append(float(np.sum(np.abs(residual_order))))
         hf_overlay_position_l1.append(float(np.sum(np.abs(
             np.asarray(info["hf_overlay_position_effect"], dtype=np.float64)
@@ -1490,6 +1696,7 @@ def smdp_rollout(
         hf_overlay_incremental_costs.append(float(
             info["hf_overlay_incremental_transaction_cost"]
             + info["hf_overlay_incremental_inventory_drift_cost"]
+            + info["hf_overlay_incremental_drawdown_cost"]
         ))
         hf_overlay_task_effects.append(float(info["hf_overlay_task_effect"]))
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
@@ -1498,6 +1705,8 @@ def smdp_rollout(
         targets.append(np.asarray(info["target"], dtype=np.float64).copy())
         lower_effects.append(lower_effect.copy())
         raw_lower_effects.append(raw_lower_effect.copy())
+        raw_tracking_lower_effects.append(raw_tracking_lower_effect.copy())
+        hf_overlay_effects.append(hf_overlay_effect.copy())
         raw_recenter_boosts.append(np.asarray(raw_recenter_boost, dtype=np.float64).copy())
         if done:
             break
@@ -1512,6 +1721,12 @@ def smdp_rollout(
     reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
     leak = reg.compute(np.asarray(targets), np.asarray(lower_effects))
     raw_leak = reg.compute(np.asarray(targets), np.asarray(raw_lower_effects))
+    tracking_raw_leak = reg.compute(
+        np.asarray(targets), np.asarray(raw_tracking_lower_effects)
+    )
+    hf_overlay_leak = reg.compute(
+        np.zeros_like(np.asarray(targets)), np.asarray(hf_overlay_effects)
+    )
     reported_leak = raw_leak if constrain_raw_lower_effect else leak
     finite_reconstruction_errors = np.asarray([
         value for value in credit_reconstruction_errors if np.isfinite(value)
@@ -1574,6 +1789,9 @@ def smdp_rollout(
         "hf_overlay_task_effect_total": float(
             np.sum(hf_overlay_task_effects)
         ) if hf_overlay_task_effects else 0.0,
+        "hf_tactical_transition_count": int(
+            trajectory.hf.size if trajectory.hf is not None else 0
+        ),
         "lower_hf_action_sensitivity": float(
             np.mean(lower_hf_action_sensitivities)
         ) if lower_hf_action_sensitivities else 0.0,
@@ -1592,6 +1810,14 @@ def smdp_rollout(
         "ProjectedLowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
         "RawLowerLFDriftAbs": float(raw_leak["LowerLFDriftAbs"]),
+        "TrackingRawLowerLFDrift": float(
+            tracking_raw_leak["LowerLFDrift"]
+        ),
+        "TrackingRawLowerLFDriftAbs": float(
+            tracking_raw_leak["LowerLFDriftAbs"]
+        ),
+        "HFOverlayLFDrift": float(hf_overlay_leak["LowerLFDrift"]),
+        "HFOverlayLFDriftAbs": float(hf_overlay_leak["LowerLFDriftAbs"]),
         "FocusScore": float(diag["FocusScore"]),
         "upper_low_mi": float(diag.get("upper_low_mi", 0.0)),
         "upper_high_mi": float(diag.get("upper_high_mi", 0.0)),
@@ -1599,14 +1825,26 @@ def smdp_rollout(
         "lower_low_mi": float(diag.get("lower_low_mi", 0.0)),
         "upper_credit_mean": float(np.mean(upper_credits)) if upper_credits else 0.0,
         "lower_credit_mean": float(np.mean(lower_credits)) if lower_credits else 0.0,
+        "hf_tactical_credit_mean": float(
+            np.mean(hf_tactical_credits)
+        ) if hf_tactical_credits else 0.0,
+        "total_lower_credit_mean": float(
+            np.mean(np.asarray(lower_credits) + np.asarray(hf_tactical_credits))
+        ) if lower_credits else 0.0,
         "upper_task_credit_mean": float(np.mean(upper_task_credits)) if upper_task_credits else 0.0,
         "lower_task_credit_mean": float(np.mean(lower_task_credits)) if lower_task_credits else 0.0,
+        "hf_tactical_task_credit_mean": float(
+            np.mean(hf_tactical_task_credits)
+        ) if hf_tactical_task_credits else 0.0,
         "plan_return_mean": float(np.mean(plan_returns)) if plan_returns else 0.0,
         "execution_deviation_return_mean": float(
             np.mean(execution_deviation_returns)
         ) if execution_deviation_returns else 0.0,
         "upper_leakage_cost_mean": float(np.mean(upper_leakage_costs)) if upper_leakage_costs else 0.0,
         "lower_leakage_cost_mean": float(np.mean(lower_leakage_costs)) if lower_leakage_costs else 0.0,
+        "hf_leakage_cost_mean": float(
+            np.mean(hf_leakage_costs)
+        ) if hf_leakage_costs else 0.0,
         "task_credit_reconstruction_max_abs_error": float(
             np.max(np.abs(finite_reconstruction_errors))
         ) if finite_reconstruction_errors.size else float("nan"),
@@ -1635,6 +1873,8 @@ def smdp_rollout(
         "heuristic_promotion_gate": float(bool(heuristic_promotion_gate)),
         "promotion_replan_cost": float(promotion_replan_cost),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
+        "hf_tactical_stream_enabled": float(bool(use_separate_hf)),
+        "exact_three_way_credit": float(bool(separate_hf_tactical)),
         "lower_hf_order_scale": float(lower_hf_order_scale),
         "lower_observation_intervention": lower_observation_intervention,
         "hf_action_sensitivity_computed": float(
@@ -1786,6 +2026,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "hf_overlay_return_total",
         "hf_overlay_incremental_cost_total",
         "hf_overlay_task_effect_total",
+        "hf_tactical_transition_count",
         "lower_hf_action_sensitivity",
         "lower_hf_overlay_sensitivity",
         "upper_decision_count",
@@ -1800,6 +2041,10 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "ProjectedLowerLFDriftAbs",
         "RawLowerLFDrift",
         "RawLowerLFDriftAbs",
+        "TrackingRawLowerLFDrift",
+        "TrackingRawLowerLFDriftAbs",
+        "HFOverlayLFDrift",
+        "HFOverlayLFDriftAbs",
         "FocusScore",
         "upper_low_mi",
         "upper_high_mi",
@@ -1807,12 +2052,16 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "lower_low_mi",
         "upper_credit_mean",
         "lower_credit_mean",
+        "hf_tactical_credit_mean",
+        "total_lower_credit_mean",
         "upper_task_credit_mean",
         "lower_task_credit_mean",
+        "hf_tactical_task_credit_mean",
         "plan_return_mean",
         "execution_deviation_return_mean",
         "upper_leakage_cost_mean",
         "lower_leakage_cost_mean",
+        "hf_leakage_cost_mean",
         "task_credit_reconstruction_max_abs_error",
         "plan_smoothness",
         "plan_coeff_abs",
@@ -1829,6 +2078,8 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "heuristic_promotion_gate",
         "promotion_replan_cost",
         "hf_lower_overlay_enabled",
+        "hf_tactical_stream_enabled",
+        "exact_three_way_credit",
         "lower_hf_order_scale",
         "hf_action_sensitivity_computed",
         "volume_impact_bps",
@@ -1849,6 +2100,10 @@ def train_ppo_actor_critic(
     validation_seeds: list[int] | None = None,
     hidden_dim: int = 64,
     learning_rate: float = 3e-4,
+    upper_learning_rate: float | None = None,
+    lower_learning_rate: float | None = None,
+    hf_learning_rate: float | None = None,
+    promotion_learning_rate: float | None = None,
     ppo_epochs: int = 4,
     minibatch_size: int = 512,
     init_log_std: float = -1.0,
@@ -1928,6 +2183,22 @@ def train_ppo_actor_critic(
             raise ValueError(f"{name} must be finite and non-negative")
     if not np.isfinite(float(promotion_init_logit)):
         raise ValueError("promotion_init_logit must be finite")
+    resolved_learning_rates = {
+        "upper": float(
+            learning_rate if upper_learning_rate is None else upper_learning_rate
+        ),
+        "lower": float(
+            learning_rate if lower_learning_rate is None else lower_learning_rate
+        ),
+        "hf": float(learning_rate if hf_learning_rate is None else hf_learning_rate),
+        "promotion": float(
+            learning_rate
+            if promotion_learning_rate is None else promotion_learning_rate
+        ),
+    }
+    for level, value in resolved_learning_rates.items():
+        if not np.isfinite(value) or value <= 0.0:
+            raise ValueError(f"{level}_learning_rate must be positive and finite")
     if method_contract != "routing_core_v2":
         if policy_mode in FLAT_PPO_MODES:
             raise ValueError(
@@ -1956,13 +2227,20 @@ def train_ppo_actor_critic(
         "ablate_promotion_v4",
         "ablate_hf_lower_v4",
         "ablate_leakage_v4",
+        "full_freq_hrl_v5",
+        "ablate_promotion_v5",
+        "ablate_hf_lower_v5",
+        "ablate_leakage_v5",
     }
     if method_contract in frequency_method_contracts:
         if policy_mode != "freq_hrl":
             raise ValueError(
                 f"{method_contract} requires policy_mode='freq_hrl'"
             )
-        if method_contract != "ablate_leakage_v4" and not (
+        if method_contract not in {
+            "ablate_leakage_v4",
+            "ablate_leakage_v5",
+        } and not (
             float(leakage_scale) > 0.0
             or float(lower_lf_constraint_coef) > 0.0
             or float(lower_lf_dual_lr) > 0.0
@@ -1970,7 +2248,7 @@ def train_ppo_actor_critic(
             raise ValueError(
                 f"{method_contract} requires an active raw leakage penalty or constraint"
             )
-    if method_contract == "ablate_leakage_v4" and any(
+    if method_contract in {"ablate_leakage_v4", "ablate_leakage_v5"} and any(
         float(value) != 0.0
         for value in (
             leakage_scale,
@@ -1980,15 +2258,15 @@ def train_ppo_actor_critic(
         )
     ):
         raise ValueError(
-            "ablate_leakage_v4 requires all leakage training weights to be zero"
+            f"{method_contract} requires all leakage training weights to be zero"
         )
     if not method_flags["learned_promotion_gate"] and float(promotion_replan_cost) > 0.0:
         raise ValueError(
-            "promotion_replan_cost is only valid for full_freq_hrl_v4"
+            "promotion_replan_cost requires a learned promotion contract"
         )
     if method_contract != "routing_core_v2" and use_handcrafted_frequency_prior:
         raise ValueError(
-            "handcrafted frequency priors are forbidden for v3/v4 method contracts"
+            "handcrafted frequency priors are forbidden for v3/v4/v5 method contracts"
         )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
@@ -2020,16 +2298,32 @@ def train_ppo_actor_critic(
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=(
-            2 * assets if method_flags["lower_hf_overlay"] else assets
+            2 * assets
+            if method_flags["lower_hf_overlay"]
+            and not method_flags["separate_hf_tactical"]
+            else assets
+        ),
+        hf_state_dim=(
+            8 * assets + 1
+            if method_flags["lower_hf_overlay"]
+            and method_flags["separate_hf_tactical"]
+            else 0
+        ),
+        hf_action_dim=(
+            assets
+            if method_flags["lower_hf_overlay"]
+            and method_flags["separate_hf_tactical"]
+            else 0
         ),
         promotion_state_dim=(
             promotion_gate_state_dim(assets)
             if method_flags["learned_promotion_gate"] else 0
         ),
         hidden_dim=int(hidden_dim),
-        upper_learning_rate=float(learning_rate),
-        lower_learning_rate=float(learning_rate),
-        promotion_learning_rate=float(learning_rate),
+        upper_learning_rate=resolved_learning_rates["upper"],
+        lower_learning_rate=resolved_learning_rates["lower"],
+        hf_learning_rate=resolved_learning_rates["hf"],
+        promotion_learning_rate=resolved_learning_rates["promotion"],
         epochs=int(ppo_epochs),
         minibatch_size=int(minibatch_size),
         init_log_std=float(init_log_std),
@@ -2043,7 +2337,21 @@ def train_ppo_actor_critic(
         policy_smdp_config,
         lower_action_dim=(
             2 * assets
-            if capacity_reference_flags["lower_hf_overlay"] else assets
+            if capacity_reference_flags["lower_hf_overlay"]
+            and not capacity_reference_flags["separate_hf_tactical"]
+            else assets
+        ),
+        hf_state_dim=(
+            8 * assets + 1
+            if capacity_reference_flags["lower_hf_overlay"]
+            and capacity_reference_flags["separate_hf_tactical"]
+            else 0
+        ),
+        hf_action_dim=(
+            assets
+            if capacity_reference_flags["lower_hf_overlay"]
+            and capacity_reference_flags["separate_hf_tactical"]
+            else 0
         ),
         promotion_state_dim=(
             promotion_gate_state_dim(assets)
@@ -2242,6 +2550,8 @@ def train_ppo_actor_critic(
                 raw_history_window=raw_history_window,
                 raw_feature_dim=assets,
                 promotion_state_dim=policy_smdp_config.promotion_state_dim,
+                hf_state_dim=policy_smdp_config.hf_state_dim,
+                hf_action_dim=policy_smdp_config.hf_action_dim,
             )
         )
         smdp_config = replace(
@@ -2266,6 +2576,8 @@ def train_ppo_actor_critic(
                 raw_history_window=policy_smdp_config.raw_history_window,
                 raw_feature_dim=policy_smdp_config.raw_feature_dim,
                 promotion_state_dim=policy_smdp_config.promotion_state_dim,
+                hf_state_dim=policy_smdp_config.hf_state_dim,
+                hf_action_dim=policy_smdp_config.hf_action_dim,
             )
         )
         smdp_config = replace(
@@ -2298,6 +2610,11 @@ def train_ppo_actor_critic(
         credit_contract = (
             "exact task-reward conservation: upper plan return; lower execution "
             "deviation return and execution/tracking costs; regularizers separate"
+        )
+    if method_flags["separate_hf_tactical"]:
+        credit_contract = (
+            "exact three-way task-reward conservation: upper plan, tracking "
+            "execution, and counterfactual marginal HF tactical credit"
         )
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
@@ -2346,6 +2663,7 @@ def train_ppo_actor_critic(
             ],
             promotion_replan_cost=float(promotion_replan_cost),
             enable_hf_lower=method_flags["lower_hf_overlay"],
+            separate_hf_tactical=method_flags["separate_hf_tactical"],
             lower_hf_order_scale=float(lower_hf_order_scale),
             execution_timeline_contract=execution_timeline_contract,
             method_contract=method_contract,
@@ -2446,12 +2764,31 @@ def train_ppo_actor_critic(
             "capacity_reference_lower_action_dim": int(
                 reference_smdp_config.lower_action_dim
             ),
+            "hf_state_dim": int(smdp_config.hf_state_dim),
+            "hf_action_dim": int(smdp_config.hf_action_dim),
+            "capacity_reference_hf_state_dim": int(
+                reference_smdp_config.hf_state_dim
+            ),
+            "capacity_reference_hf_action_dim": int(
+                reference_smdp_config.hf_action_dim
+            ),
             "promotion_replan_cost": float(promotion_replan_cost),
             "promotion_init_logit": float(promotion_init_logit),
             "hf_lower_overlay_enabled": bool(
                 method_flags["lower_hf_overlay"]
             ),
+            "hf_tactical_stream_enabled": bool(
+                method_flags["lower_hf_overlay"]
+                and method_flags["separate_hf_tactical"]
+            ),
+            "exact_three_way_credit": bool(
+                method_flags["separate_hf_tactical"]
+            ),
             "lower_hf_order_scale": float(lower_hf_order_scale),
+            "upper_learning_rate": resolved_learning_rates["upper"],
+            "lower_learning_rate": resolved_learning_rates["lower"],
+            "hf_learning_rate": resolved_learning_rates["hf"],
+            "promotion_learning_rate": resolved_learning_rates["promotion"],
             "plan_smoothness_weight": float(plan_smoothness_weight),
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
