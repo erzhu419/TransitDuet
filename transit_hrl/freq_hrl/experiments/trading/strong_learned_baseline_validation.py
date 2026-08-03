@@ -50,6 +50,18 @@ DEFAULT_POLICY_MODES = (
     "flat_sac",
     "flat_td3",
 )
+DEFAULT_OPTIMIZER_SEEDS = (
+    2026,
+    2039,
+    2053,
+    2063,
+    2081,
+    2089,
+    2099,
+    2111,
+    2129,
+    2141,
+)
 ALL_POLICY_MODES = POLICY_MODES + OFFPOLICY_MODES
 MAIN_METRICS = (
     ("total_return", False),
@@ -89,6 +101,8 @@ def _parameter_budget_row(
     *,
     scenario: str,
     mode: str,
+    training_replicate_seed: int,
+    optimizer_seed: int,
     parameter_count: int,
     shard_index: int,
     num_shards: int,
@@ -97,6 +111,8 @@ def _parameter_budget_row(
     common = {
         "scenario": scenario,
         "policy_mode": mode,
+        "training_replicate_seed": int(training_replicate_seed),
+        "optimizer_seed": int(optimizer_seed),
         "parameter_count": int(parameter_count),
         "hidden_dim": int(config.hidden_dim),
         "shard_index": int(shard_index),
@@ -167,6 +183,83 @@ def selected_scenario_policy_pairs(
     return [pair for idx, pair in enumerate(pairs) if idx % shards == index]
 
 
+def selected_experiment_cells(
+    scenarios: list[str],
+    policy_modes: list[str],
+    optimizer_seeds: list[int],
+    *,
+    shard_index: int = 0,
+    num_shards: int = 1,
+) -> list[tuple[str, str, int]]:
+    if len(set(int(seed) for seed in optimizer_seeds)) != len(optimizer_seeds):
+        raise ValueError("optimizer_seeds must contain unique training replicates")
+    cells = [
+        (scenario, mode, int(seed))
+        for scenario in scenarios
+        for mode in policy_modes
+        for seed in optimizer_seeds
+    ]
+    shards = max(1, int(num_shards))
+    index = int(shard_index)
+    if index < 0 or index >= shards:
+        raise ValueError(f"shard_index must be in [0, {shards - 1}], got {index}")
+    return [cell for cell_index, cell in enumerate(cells) if cell_index % shards == index]
+
+
+def scenario_optimizer_seed(training_replicate_seed: int, scenario: str) -> int:
+    scenario_names = list(SCENARIOS)
+    if scenario not in scenario_names:
+        raise ValueError(f"unknown scenario: {scenario}")
+    return int(training_replicate_seed) + 1009 * scenario_names.index(scenario)
+
+
+def _experiment_matrix_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Audit the observed scenario/policy/replicate/evaluation Cartesian grid."""
+
+    if not rows:
+        return {
+            "matrix_coverage_status": "not_run",
+            "expected_evaluation_row_count": 0,
+            "observed_evaluation_row_count": 0,
+            "missing_evaluation_row_count": 0,
+            "duplicate_evaluation_row_count": 0,
+        }
+    keys: list[tuple[str, str, str, str]] = []
+    invalid_rows = 0
+    for row in rows:
+        key = (
+            str(row.get("scenario", "")).strip(),
+            str(row.get("policy_mode", row.get("baseline", ""))).strip(),
+            str(row.get("training_replicate_seed", "")).strip(),
+            str(row.get("seed", "")).strip(),
+        )
+        if not all(key):
+            invalid_rows += 1
+            continue
+        keys.append(key)
+    unique_keys = set(keys)
+    scenarios = {key[0] for key in unique_keys}
+    modes = {key[1] for key in unique_keys}
+    replicates = {key[2] for key in unique_keys}
+    eval_seeds = {key[3] for key in unique_keys}
+    expected = len(scenarios) * len(modes) * len(replicates) * len(eval_seeds)
+    missing = max(0, expected - len(unique_keys))
+    duplicates = max(0, len(keys) - len(unique_keys))
+    status = (
+        "complete"
+        if invalid_rows == 0 and missing == 0 and duplicates == 0
+        else "incomplete"
+    )
+    return {
+        "matrix_coverage_status": status,
+        "expected_evaluation_row_count": int(expected),
+        "observed_evaluation_row_count": int(len(unique_keys)),
+        "missing_evaluation_row_count": int(missing),
+        "duplicate_evaluation_row_count": int(duplicates),
+        "invalid_evaluation_row_count": int(invalid_rows),
+    }
+
+
 def _policy_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for scenario in sorted({str(row.get("scenario", "")) for row in rows}):
@@ -209,6 +302,12 @@ def build_paired_checks(
     ),
     min_pairs: int = 10,
 ) -> list[dict[str, Any]]:
+    if rows and any("training_replicate_seed" not in row for row in rows):
+        raise ValueError(
+            "strong learned-baseline rows must identify independent "
+            "training_replicate_seed values; legacy eval-seed-only artifacts "
+            "must be regenerated"
+        )
     checks: list[dict[str, Any]] = []
     for control in controls:
         for metric, lower_is_better in MAIN_METRICS:
@@ -228,11 +327,12 @@ def build_paired_checks(
             stats = paired_delta_stats(
                 rows,
                 variant_key="baseline",
-                pair_keys=("scenario", "seed"),
+                pair_keys=("scenario", "training_replicate_seed", "seed"),
                 metric=metric,
                 treatment="freq_hrl",
                 control=control,
                 lower_is_better=lower_is_better,
+                cluster_keys=("training_replicate_seed",),
             )
             checks.append({
                 "check": f"freq_hrl_vs_{control}_{metric}",
@@ -269,7 +369,7 @@ def build_paired_checks(
             status = "inconclusive"
         row["status"] = status
         row["confirmatory_gate"] = (
-            "min independent seeds + positive cluster-bootstrap CI + "
+            "min independent training replicates + positive cluster-bootstrap CI + "
             "Holm-adjusted two-sided sign test"
         )
     return corrected
@@ -312,6 +412,8 @@ def build_experiment_manifest(
     assets: int,
     iterations: int,
     optimizer_seed: int = 2026,
+    optimizer_seeds: list[int] | None = None,
+    min_pairs: int = 10,
     offpolicy_hidden_dim: int = 64,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
@@ -321,35 +423,29 @@ def build_experiment_manifest(
     num_shards: int = 1,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    pairs = selected_scenario_policy_pairs(
+    replicate_seeds = list(optimizer_seeds or [int(optimizer_seed)])
+    cells = selected_experiment_cells(
         scenarios,
         policy_modes,
+        replicate_seeds,
         shard_index=int(shard_index),
         num_shards=int(num_shards),
     )
-    scenario_rank = {scenario: idx for idx, scenario in enumerate(scenarios)}
-    for scenario, mode in pairs:
-        run_seed = int(optimizer_seed) + 1009 * int(scenario_rank[scenario])
+    for scenario, mode, replicate_seed in cells:
+        run_seed = scenario_optimizer_seed(replicate_seed, scenario)
         if mode in POLICY_MODES:
             trainer = "frequency_separated_smdp_ppo_v2"
-            module = "freq_hrl.experiments.trading.ppo_actor_critic"
-            mode_arg = f"--policy-mode {mode}"
-            extra_args = ""
         else:
             algorithm = "sac" if mode == "flat_sac" else "td3"
             trainer = f"flat_{algorithm}_twin_q_v1"
-            module = "freq_hrl.experiments.trading.offpolicy_baseline_validation"
-            mode_arg = f"--policy-mode {mode}"
-            extra_args = (
-                f" --hidden-dim {int(offpolicy_hidden_dim)}"
-                f" --replay-capacity {int(offpolicy_replay_capacity)}"
-                f" --warmup-steps {int(offpolicy_warmup_steps)}"
-                f" --batch-size {int(offpolicy_batch_size)}"
-                f" --updates-per-step {int(offpolicy_updates_per_step)}"
-            )
+        output_dir = (
+            "transit_hrl/results/strong_learned_baseline_validation_v2_cells/"
+            f"{scenario}/{mode}/replicate_{int(replicate_seed)}"
+        )
         rows.append({
             "scenario": scenario,
             "policy_mode": mode,
+            "training_replicate_seed": int(replicate_seed),
             "train_seeds": " ".join(str(seed) for seed in train_seeds),
             "eval_seeds": " ".join(str(seed) for seed in eval_seeds),
             "steps": int(steps),
@@ -357,19 +453,26 @@ def build_experiment_manifest(
             "iterations": int(iterations),
             "trainer": trainer,
             "optimizer_seed": run_seed,
+            "independent_unit": "training_replicate_seed",
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
             "command": (
                 "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m "
-                f"{module} "
-                f"--scenario {scenario} {mode_arg} "
+                "freq_hrl.experiments.trading.strong_learned_baseline_validation "
+                f"--scenarios {scenario} --policy-modes {mode} "
                 f"--steps {int(steps)} --assets {int(assets)} --iterations {int(iterations)} "
-                f"--optimizer-seed {run_seed} "
+                f"--optimizer-seeds {int(replicate_seed)} "
+                f"--min-pairs {int(min_pairs)} "
                 "--train-seeds "
                 + " ".join(str(seed) for seed in train_seeds)
                 + " --eval-seeds "
                 + " ".join(str(seed) for seed in eval_seeds)
-                + extra_args
+                + f" --offpolicy-hidden-dim {int(offpolicy_hidden_dim)}"
+                + f" --offpolicy-replay-capacity {int(offpolicy_replay_capacity)}"
+                + f" --offpolicy-warmup-steps {int(offpolicy_warmup_steps)}"
+                + f" --offpolicy-batch-size {int(offpolicy_batch_size)}"
+                + f" --offpolicy-updates-per-step {int(offpolicy_updates_per_step)}"
+                + f" --output-dir {output_dir}"
             ),
         })
     return rows
@@ -468,6 +571,7 @@ def run_strong_learned_baseline_validation(
     iterations: int,
     optimizer_seed: int,
     min_pairs: int,
+    optimizer_seeds: list[int] | None = None,
     offpolicy_hidden_dim: int = 64,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
@@ -480,20 +584,25 @@ def run_strong_learned_baseline_validation(
     run_rows: list[dict[str, Any]] = []
     parameter_budget: list[dict[str, Any]] = []
     sample_efficiency: list[dict[str, Any]] = []
-    pairs = selected_scenario_policy_pairs(
+    if len(set(int(seed) for seed in train_seeds)) != len(train_seeds):
+        raise ValueError("train_seeds must be unique")
+    if len(set(int(seed) for seed in eval_seeds)) != len(eval_seeds):
+        raise ValueError("eval_seeds must be unique")
+    replicate_seeds = list(optimizer_seeds or [int(optimizer_seed)])
+    cells = selected_experiment_cells(
         scenarios,
         policy_modes,
+        replicate_seeds,
         shard_index=int(shard_index),
         num_shards=int(num_shards),
     )
-    scenario_rank = {scenario: idx for idx, scenario in enumerate(scenarios)}
-    for scenario, mode in pairs:
+    for scenario, mode, replicate_seed in cells:
         if scenario not in SCENARIOS:
             raise ValueError(f"unknown scenario: {scenario}")
         if mode not in ALL_POLICY_MODES:
             raise ValueError(f"unknown policy_mode: {mode}")
         start = time.perf_counter()
-        run_seed = int(optimizer_seed) + 1009 * int(scenario_rank[scenario])
+        run_seed = scenario_optimizer_seed(replicate_seed, scenario)
         if mode in POLICY_MODES:
             payload, heldout_rows, model = train_ppo_actor_critic(
                 train_seeds=train_seeds,
@@ -529,6 +638,9 @@ def run_strong_learned_baseline_validation(
             item["scenario"] = scenario
             item["baseline"] = mode
             item["policy_mode"] = mode
+            item["training_replicate_seed"] = int(replicate_seed)
+            item["optimizer_seed"] = int(run_seed)
+            item["independent_unit"] = "training_replicate_seed"
             item["trainer"] = payload["trainer"]
             item["source_artifact"] = "strong_learned_baseline_validation"
             item["shard_index"] = int(shard_index)
@@ -537,6 +649,7 @@ def run_strong_learned_baseline_validation(
         run_rows.append({
             "scenario": scenario,
             "policy_mode": mode,
+            "training_replicate_seed": int(replicate_seed),
             "elapsed_sec": elapsed,
             "train_seed_count": len(train_seeds),
             "eval_seed_count": len(eval_seeds),
@@ -566,6 +679,8 @@ def run_strong_learned_baseline_validation(
             model,
             scenario=scenario,
             mode=mode,
+            training_replicate_seed=int(replicate_seed),
+            optimizer_seed=int(run_seed),
             parameter_count=params,
             shard_index=int(shard_index),
             num_shards=int(num_shards),
@@ -577,6 +692,8 @@ def run_strong_learned_baseline_validation(
         sample_efficiency.append({
             "scenario": scenario,
             "policy_mode": mode,
+            "training_replicate_seed": int(replicate_seed),
+            "optimizer_seed": int(run_seed),
             "environment_steps_train": train_steps,
             "environment_steps_eval": int(len(eval_seeds) * steps),
             "iterations": int(iterations),
@@ -629,6 +746,7 @@ def run_strong_learned_baseline_validation(
         metrics=("FocusScore", "LowerLFDrift"),
     )
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
+    coverage = _experiment_matrix_coverage(rows)
     ppo_modes_run = {
         str(row.get("policy_mode", "")) for row in rows
         if str(row.get("policy_mode", "")) in POLICY_MODES
@@ -656,6 +774,8 @@ def run_strong_learned_baseline_validation(
             assets=int(assets),
             iterations=int(iterations),
             optimizer_seed=int(optimizer_seed),
+            optimizer_seeds=replicate_seeds,
+            min_pairs=int(min_pairs),
             offpolicy_hidden_dim=int(offpolicy_hidden_dim),
             offpolicy_replay_capacity=int(offpolicy_replay_capacity),
             offpolicy_warmup_steps=int(offpolicy_warmup_steps),
@@ -667,11 +787,18 @@ def run_strong_learned_baseline_validation(
         "summary": {
             "rows": len(rows),
             "scenario_count": len(set(scenarios)),
-            "selected_scenario_count": len({scenario for scenario, _ in pairs}),
-            "selected_pair_count": len(pairs),
+            "selected_scenario_count": len({scenario for scenario, _, _ in cells}),
+            "selected_pair_count": len({(scenario, mode) for scenario, mode, _ in cells}),
+            "selected_cell_count": len(cells),
             "policy_modes": list(policy_modes),
+            # Kept as a compatibility alias; these are rollout paths, not
+            # independent statistical replications.
             "train_seed_count": len(train_seeds),
+            "rollout_train_seed_count": len(train_seeds),
             "eval_seed_count": len(eval_seeds),
+            "training_replicate_count": len(set(replicate_seeds)),
+            "selected_training_replicate_count": len({seed for _, _, seed in cells}),
+            "independent_unit": "training_replicate_seed",
             "steps": int(steps),
             "assets": int(assets),
             "iterations": int(iterations),
@@ -681,6 +808,7 @@ def run_strong_learned_baseline_validation(
             "strong_learned_baseline_evidence_status": all_metric_status,
             "risk_adjusted_evidence_status": risk_adjusted_status,
             "responsibility_evidence_status": responsibility_status,
+            **coverage,
             **budgets,
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
@@ -694,7 +822,9 @@ def run_strong_learned_baseline_validation(
             "target/execution action. Cross-algorithm fairness is enforced by "
             "paired held-out seeds, equal environment-step budgets, the same "
             "environment/costs, and trading_metrics_v2; parameter equality is "
-            "claimed only inside the PPO family."
+            "claimed only inside the PPO family. Statistical uncertainty is "
+            "clustered by independently initialized training replicate; held-out "
+            "environment seeds are repeated measures inside that cluster."
         ),
     }
 
@@ -743,6 +873,7 @@ def merge_strong_learned_baseline_shards(
     scenarios = sorted({str(row.get("scenario", "")) for row in rows if str(row.get("scenario", ""))})
     policy_modes = sorted({str(row.get("policy_mode", row.get("baseline", ""))) for row in rows if str(row.get("policy_mode", row.get("baseline", "")))})
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
+    coverage = _experiment_matrix_coverage(rows)
     ppo_modes_run = {
         mode for mode in policy_modes if mode in POLICY_MODES
     }
@@ -757,6 +888,33 @@ def merge_strong_learned_baseline_shards(
         str(row.get("seed", "")) for row in rows
         if str(row.get("seed", "")).strip()
     }
+    training_replicates = {
+        str(row.get("training_replicate_seed", "")) for row in rows
+        if str(row.get("training_replicate_seed", "")).strip()
+    }
+    selected_cells = {
+        (
+            str(row.get("scenario", "")),
+            str(row.get("policy_mode", row.get("baseline", ""))),
+            str(row.get("training_replicate_seed", "")),
+        )
+        for row in rows
+        if str(row.get("training_replicate_seed", "")).strip()
+    }
+    rollout_train_seed_counts = {
+        int(float(row["train_seed_count"]))
+        for row in run_rows
+        if str(row.get("train_seed_count", "")).strip()
+    }
+    rollout_train_seed_count = (
+        next(iter(rollout_train_seed_counts))
+        if len(rollout_train_seed_counts) == 1 else 0
+    )
+    if coverage["matrix_coverage_status"] != "complete":
+        all_metric_status = "incomplete_matrix"
+        risk_adjusted_status = "incomplete_matrix"
+        responsibility_status = "incomplete_matrix"
+        ppo_baseline_status = "partial_run_or_budget_mismatch"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -770,15 +928,22 @@ def merge_strong_learned_baseline_shards(
             "scenario_count": len(scenarios),
             "selected_scenario_count": len(scenarios),
             "selected_pair_count": len({(row.get("scenario"), row.get("policy_mode")) for row in rows}),
+            "selected_cell_count": len(selected_cells),
             "policy_modes": policy_modes,
             "shard_count": len(input_dirs),
+            "train_seed_count": int(rollout_train_seed_count),
+            "rollout_train_seed_count": int(rollout_train_seed_count),
             "eval_seed_count": len(eval_seeds),
+            "training_replicate_count": len(training_replicates),
+            "selected_training_replicate_count": len(training_replicates),
+            "independent_unit": "training_replicate_seed",
             "ppo_strong_baseline_status": ppo_baseline_status,
             "ppo_metric_status": metric_status,
             "offpolicy_metric_status": offpolicy_metric_status,
             "strong_learned_baseline_evidence_status": all_metric_status,
             "risk_adjusted_evidence_status": risk_adjusted_status,
             "responsibility_evidence_status": responsibility_status,
+            **coverage,
             **budgets,
             "merge_status": "merged",
         },
@@ -786,7 +951,9 @@ def merge_strong_learned_baseline_shards(
             "Merged learned-baseline shards. PPO comparisons are exact-capacity "
             "matched. SAC/TD3 use their native twin-Q architectures under the "
             "same paired evaluation and environment-step budget; cross-family "
-            "parameter equality is not claimed."
+            "parameter equality is not claimed. Statistical uncertainty is "
+            "clustered by independently initialized training replicate; held-out "
+            "environment seeds remain repeated measures within each replicate."
         ),
     }
 
@@ -819,10 +986,15 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         f"- environment-step budget: "
         f"`{payload['summary']['environment_step_budget_status']}`",
         f"- scenarios: `{payload['summary']['scenario_count']}`",
+        f"- independent training replicates: "
+        f"`{payload['summary']['training_replicate_count']}`",
+        f"- rollout train seeds per replicate: "
+        f"`{payload['summary']['rollout_train_seed_count']}`",
         f"- eval seeds: `{payload['summary']['eval_seed_count']}`",
+        f"- matrix coverage: `{payload['summary']['matrix_coverage_status']}`",
         "",
-        "| check | status | metric | n | delta | CI95 low | CI95 high | win rate | Holm p |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|",
+        "| check | status | metric | paired rows | train reps | delta | CI95 low | CI95 high | win rate | Holm p |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["paired_checks"]:
         delta = float(row["delta_mean"])
@@ -832,7 +1004,7 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         holm_p = float(row["holm_adjusted_p_value"])
         lines.append(
             f"| {row['check']} | {row['status']} | {row['metric']} "
-            f"| {row['n_common']} | {delta:+.4f} "
+            f"| {row['n_common']} | {row['n_independent']} | {delta:+.4f} "
             f"| {ci_low:+.4f} | {ci_high:+.4f} "
             f"| {win_rate:.2f} | {holm_p:.4f} |"
         )
@@ -853,7 +1025,19 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=240)
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--iterations", type=int, default=6)
-    parser.add_argument("--optimizer-seed", type=int, default=2026)
+    parser.add_argument(
+        "--optimizer-seed",
+        type=int,
+        default=None,
+        help="Deprecated single-replicate override for smoke tests.",
+    )
+    parser.add_argument(
+        "--optimizer-seeds",
+        type=int,
+        nargs="+",
+        default=list(DEFAULT_OPTIMIZER_SEEDS),
+        help="Independent policy-training initialization seeds.",
+    )
     parser.add_argument("--min-pairs", type=int, default=10)
     parser.add_argument("--offpolicy-hidden-dim", type=int, default=64)
     parser.add_argument("--offpolicy-replay-capacity", type=int, default=100_000)
@@ -876,6 +1060,11 @@ def main() -> None:
             min_pairs=int(args.min_pairs),
         )
     else:
+        replicate_seeds = (
+            [int(args.optimizer_seed)]
+            if args.optimizer_seed is not None
+            else [int(seed) for seed in args.optimizer_seeds]
+        )
         payload = run_strong_learned_baseline_validation(
             scenarios=list(args.scenarios),
             policy_modes=list(args.policy_modes),
@@ -884,7 +1073,8 @@ def main() -> None:
             steps=int(args.steps),
             assets=int(args.assets),
             iterations=int(args.iterations),
-            optimizer_seed=int(args.optimizer_seed),
+            optimizer_seed=int(replicate_seeds[0]),
+            optimizer_seeds=replicate_seeds,
             min_pairs=int(args.min_pairs),
             offpolicy_hidden_dim=int(args.offpolicy_hidden_dim),
             offpolicy_replay_capacity=int(args.offpolicy_replay_capacity),

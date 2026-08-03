@@ -3,8 +3,10 @@ import unittest
 from pathlib import Path
 
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
+    build_paired_checks,
     merge_strong_learned_baseline_shards,
     run_strong_learned_baseline_validation,
+    selected_experiment_cells,
     selected_scenario_policy_pairs,
     write_outputs,
 )
@@ -21,6 +23,19 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
         self.assertEqual(pairs, [
             ("persistent_shift", "flat_ppo"),
             ("localized_burst", "flat_ppo"),
+        ])
+
+    def test_selected_cells_shard_independent_training_replicates(self):
+        cells = selected_experiment_cells(
+            ["persistent_shift"],
+            ["freq_hrl", "flat_ppo"],
+            [7, 11],
+            shard_index=1,
+            num_shards=2,
+        )
+        self.assertEqual(cells, [
+            ("persistent_shift", "freq_hrl", 11),
+            ("persistent_shift", "flat_ppo", 11),
         ])
 
     def test_runner_emits_learned_rows_and_budget_tables(self):
@@ -90,9 +105,47 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             {40},
         )
         commands = {row["policy_mode"]: row["command"] for row in payload["experiment_manifest"]}
-        self.assertIn("offpolicy_baseline_validation", commands["flat_sac"])
-        self.assertIn("--optimizer-seed 7 --train-seeds", commands["flat_td3"])
+        self.assertIn("strong_learned_baseline_validation", commands["flat_sac"])
+        self.assertIn("--optimizer-seeds 7 --min-pairs 1", commands["flat_td3"])
         self.assertTrue(all("holm_adjusted_p_value" in row for row in payload["paired_checks"]))
+
+    def test_paired_checks_cluster_eval_paths_by_training_replicate(self):
+        rows = []
+        for replicate in (7, 11):
+            for seed in (123, 456):
+                for baseline, offset in (("freq_hrl", 1.0), ("flat_ppo", 0.0)):
+                    rows.append({
+                        "scenario": "persistent_shift",
+                        "training_replicate_seed": replicate,
+                        "seed": seed,
+                        "baseline": baseline,
+                        "metric_contract_version": "trading_metrics_v2",
+                        "total_return": offset,
+                        "episode_information_ratio": offset,
+                        "FocusScore": offset,
+                        "LowerLFDrift": 1.0 - offset,
+                    })
+        checks = build_paired_checks(
+            rows,
+            controls=("flat_ppo",),
+            min_pairs=2,
+        )
+        self.assertEqual(len(checks), 4)
+        self.assertTrue(all(row["n_common"] == 4 for row in checks))
+        self.assertTrue(all(row["n_independent"] == 2 for row in checks))
+        self.assertTrue(all(
+            row["cluster_keys"] == ["training_replicate_seed"]
+            for row in checks
+        ))
+
+    def test_paired_checks_reject_legacy_eval_seed_only_rows(self):
+        with self.assertRaisesRegex(ValueError, "legacy eval-seed-only"):
+            build_paired_checks([{
+                "scenario": "persistent_shift",
+                "seed": 123,
+                "baseline": "freq_hrl",
+                "total_return": 1.0,
+            }])
 
     def test_write_outputs_creates_main_artifacts(self):
         payload = run_strong_learned_baseline_validation(
@@ -128,7 +181,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
                     steps=20,
                     assets=2,
                     iterations=1,
-                    optimizer_seed=7 + idx,
+                    optimizer_seed=7,
                     min_pairs=1,
                 )
                 out = root / f"shard_{idx}"
@@ -138,6 +191,8 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             self.assertEqual(merged["summary"]["merge_status"], "merged")
             self.assertEqual(merged["summary"]["rows"], 3)
             self.assertEqual(len(merged["paired_checks"]), 16)
+            self.assertEqual(merged["summary"]["training_replicate_count"], 1)
+            self.assertEqual(merged["summary"]["matrix_coverage_status"], "complete")
 
 
 if __name__ == "__main__":

@@ -177,7 +177,10 @@ A one-seed bootstrap produces a degenerate zero-width interval and must never
 be treated as confirmatory evidence. Strong learned-baseline checks now require
 all of the following:
 
-1. At least 10 independent held-out seeds by default.
+1. At least 10 independently initialized policy-training replicates by default.
+   Held-out environment seeds are repeated measurements within a training
+   replicate; they increase evaluation precision but do not increase the
+   independent sample size.
 2. A positive independently clustered bootstrap confidence interval.
 3. Rejection by a two-sided paired sign test after Holm correction across the
    complete learned-baseline endpoint family.
@@ -195,3 +198,10 @@ Failing the significance gate with a positive point estimate is reported as
 must be regenerated under this gate before citation in a manuscript main table.
 SAC/TD3 implementation coverage is now complete; their comparative performance
 claim remains pending a sufficiently powered confirmatory run.
+
+The formal matrix is sharded by `(scenario, policy, training_replicate_seed)`.
+Pairing occurs on scenario, training replicate, and held-out environment seed;
+bootstrap intervals and sign tests operate on the per-replicate mean paired
+delta. Merge-time Cartesian coverage checks block incomplete or duplicated
+cells. Artifacts that vary only evaluation seeds under one trained policy are
+classified as pseudoreplicated and are ineligible for confirmatory claims.
