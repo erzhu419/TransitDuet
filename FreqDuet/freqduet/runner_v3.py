@@ -7,7 +7,8 @@ result in the current paper pipeline (Tables I/II + every figure); the legacy
 ``runner_v2.py`` is retained only as a frozen reference of the channels-mode
 v2 baseline and is not used by any active script (see ``scripts/README.md``).
 
-Coupling modes (all share the same lower-level RE-SAC Lagrangian holding
+Coupling modes (all share the same lower-level pessimistic ensemble SAC
+Lagrangian holding
 controller; they differ only in how the upper output δ_t is consumed):
   hiro      The upper output is a per-dispatch target-headway shift; the
             lower's Lagrangian cost penalises deviation from
@@ -85,6 +86,7 @@ from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
+from randomness import RandomnessContract
 
 
 def _deep_merge(base, override):
@@ -118,6 +120,16 @@ def load_config(path):
         parent = load_config(parent_full)
         cfg = _deep_merge(parent, cfg)
     return cfg
+
+
+def config_fingerprint(config):
+    """Hash the resolved training semantics while ignoring artifact location."""
+    payload = copy.deepcopy(dict(config))
+    payload.pop('logging', None)
+    canonical = json.dumps(
+        payload, sort_keys=True, separators=(',', ':'), default=str
+    ).encode('utf-8')
+    return hashlib.sha256(canonical).hexdigest()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -202,7 +214,9 @@ class DiagnosticLog:
     HEADER = [
         'ep', 'stage', 'wall_env_s', 'wall_train_s',
         # env
-        'protocol_version',
+        'protocol_version', 'config_fingerprint_sha256',
+        'randomness_contract',
+        'randomness_fingerprint_sha256',
         'avg_wait_min', 'avg_wait_observed_min',
         'restricted_wait_horizon_min',
         'passengers_generated', 'passengers_unserved',
@@ -214,7 +228,15 @@ class DiagnosticLog:
         'headway_state_arrival_event_rate',
         'trips_completed', 'trips_incomplete', 'trip_completion_rate',
         'simulation_end_time_s', 'done_reason', 'scenario_tape_id',
-        'peak_fleet', 'headway_cv',
+        'peak_fleet', 'fleet_inventory_mode', 'physical_vehicle_count',
+        'fleet_capacity', 'fleet_ready_up', 'fleet_ready_down',
+        'fleet_denied_dispatch_events', 'fleet_denied_trips',
+        'fleet_readiness_delay_mean_s', 'fleet_readiness_delay_max_s',
+        'holding_vehicle_seconds', 'holding_passenger_seconds',
+        'invalid_headway_decisions_masked',
+        'lower_observation_contract', 'headway_reward_mode',
+        'frequency_observation_source', 'lower_observation_ledger_hash',
+        'headway_cv',
         'service_cost', 'service_cost_wait_metric',
         'service_cost_observed', 'service_cost_restricted',
         'ep_reward', 'ep_cost',
@@ -346,6 +368,7 @@ class DiagnosticLog:
         'upper_plan_penalty_mean', 'upper_plan_penalty_max',
         'upper_plan_target_mean', 'upper_plan_target_std',
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
+        'upper_plan_projection_mode', 'upper_interval_wait_ownership',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
         'terminal_shift_cap_mean', 'terminal_shift_cap_max',
         'terminal_shift_min_mean', 'terminal_shift_min_min',
@@ -522,10 +545,44 @@ class TransitDuetV2Runner:
             (config.get('protocol', {}) or {}).get(
                 'version', 'freqduet-eval-v2'))
         self.base_seed = int(config.get('seed', 0))
-        self.fleet_rng = np.random.RandomState(self.base_seed)
+        self.config_fingerprint_sha256 = config_fingerprint(config)
         training_cfg = config.get('training', {}) or {}
+        randomness_cfg = config.get('randomness', {}) or {}
+        self.randomness = RandomnessContract(
+            self.base_seed,
+            randomness_cfg.get('mode', 'global_legacy'))
+        self._random_stream_names = (
+            'fleet', 'upper_init', 'upper_policy', 'upper_replay',
+            'lower_init', 'lower_policy', 'lower_replay',
+            'upper_residual_selector', 'headway_value_selector',
+            'terminal_value_selector', 'fixed_expert_selector',
+            'tpc_mixture', 'reachability_init', 'reachability_replay')
+        self.randomness_manifest = self.randomness.manifest(
+            self._random_stream_names)
+        self.fleet_rng = self.randomness.numpy('fleet')
+        self._upper_residual_selector_rng = self.randomness.numpy(
+            'upper_residual_selector')
+        self._headway_value_selector_rng = self.randomness.numpy(
+            'headway_value_selector')
+        self._terminal_value_selector_rng = self.randomness.numpy(
+            'terminal_value_selector')
+        self._fixed_expert_selector_rng = self.randomness.numpy(
+            'fixed_expert_selector')
+        self._tpc_rng = self.randomness.numpy('tpc_mixture')
+        self._reachability_rng = self.randomness.numpy('reachability_replay')
         self.decouple_init_seeds = bool(
             training_cfg.get('decouple_init_seeds', False))
+        self.checkpoint_contract = str(training_cfg.get(
+            'checkpoint_contract', 'deployment_only_legacy')).strip().lower()
+        if self.checkpoint_contract not in {
+                'deployment_only_legacy', 'exact_training_state_v4'}:
+            raise ValueError(
+                'training.checkpoint_contract must be '
+                'deployment_only_legacy or exact_training_state_v4')
+        if (self.checkpoint_contract == 'exact_training_state_v4'
+                and not self.randomness.isolated):
+            raise ValueError(
+                'exact_training_state_v4 requires isolated_streams_v4')
         stability_cfg = training_cfg.get('longtrain_stability', {}) or {}
 
         def _optional_freeze_ep(name):
@@ -1705,32 +1762,46 @@ class TransitDuetV2Runner:
         self.fleet_noharm_lower_value_soft_cost_gate = self._parse_fleet_noharm_gate(
             lower_value_soft_cfg.get('gate', {}))
 
-        if self.decouple_init_seeds:
+        if self.decouple_init_seeds and not self.randomness.isolated:
             torch.manual_seed(self.base_seed + 1001)
-        self.upper_trainer = RESACUpperTrainer(
-            state_dim=self.upper_state_dim, action_dim=self.upper_action_dim,
-            hidden_dim=upper_cfg.get('hidden_dim', 64),
-            action_low=self.upper_action_low.tolist(),
-            action_high=self.upper_action_high.tolist(),
-            action_candidates=(
-                self.upper_action_candidates.tolist()
-                if self.upper_action_candidates is not None else None),
-            discrete_critic=upper_cfg.get(
-                'discrete_critic', 'continuous_action'),
-            ensemble_size=upper_cfg.get('ensemble_size', 10),
-            beta=upper_cfg.get('resac_beta', -2.0),
-            beta_ood=upper_cfg.get('beta_ood', 0.01),
-            weight_reg=upper_cfg.get('weight_reg', 0.01),
-            weight_reg_mode=upper_cfg.get('weight_reg_mode', 'sum'),
-            lr=upper_cfg.get('lr', 3e-4),
-            gamma=upper_cfg.get('gamma', 0.95),
-            maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
-            replay_capacity=upper_cfg.get('replay_capacity', 50000),
-            device=device)
+        with self.randomness.torch_initialization('upper_init'):
+            self.upper_trainer = RESACUpperTrainer(
+                state_dim=self.upper_state_dim, action_dim=self.upper_action_dim,
+                hidden_dim=upper_cfg.get('hidden_dim', 64),
+                action_low=self.upper_action_low.tolist(),
+                action_high=self.upper_action_high.tolist(),
+                action_candidates=(
+                    self.upper_action_candidates.tolist()
+                    if self.upper_action_candidates is not None else None),
+                discrete_critic=upper_cfg.get(
+                    'discrete_critic', 'continuous_action'),
+                ensemble_size=upper_cfg.get('ensemble_size', 10),
+                beta=upper_cfg.get('resac_beta', -2.0),
+                beta_ood=upper_cfg.get('beta_ood', 0.01),
+                weight_reg=upper_cfg.get('weight_reg', 0.01),
+                weight_reg_mode=upper_cfg.get('weight_reg_mode', 'sum'),
+                lr=upper_cfg.get('lr', 3e-4),
+                gamma=upper_cfg.get('gamma', 0.95),
+                maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
+                initial_alpha=upper_cfg.get('initial_alpha', 0.1),
+                minimum_alpha=upper_cfg.get('minimum_alpha', 1e-5),
+                temperature_contract=upper_cfg.get(
+                    'temperature_contract', 'legacy_capped_scalar'),
+                policy_sample_seed=(
+                    self.randomness.seed('upper_policy')
+                    if self.randomness.isolated else None),
+                replay_seed=(
+                    self.randomness.seed('upper_replay')
+                    if self.randomness.isolated else None),
+                replay_capacity=upper_cfg.get('replay_capacity', 50000),
+                device=device)
 
         # ── Lower policy ──
         lower_cfg = config['lower']
-        self.replay_buffer = CostReplayBuffer(config['training']['replay_buffer_size'])
+        self.replay_buffer = CostReplayBuffer(
+            config['training']['replay_buffer_size'],
+            seed=(self.randomness.seed('lower_replay')
+                  if self.randomness.isolated else None))
         self.lower_action_bins = None
         bins = lower_cfg.get('action_bins', None)
         if bins:
@@ -1873,24 +1944,36 @@ class TransitDuetV2Runner:
         lower_state_dim = state_dim + (1 if self.lower_use_last_action_feature else 0)
         lower_trainer_action_bins = (
             None if self.lower_action_bins_gate_enabled else self.lower_action_bins)
-        if self.decouple_init_seeds:
+        if self.decouple_init_seeds and not self.randomness.isolated:
             torch.manual_seed(self.base_seed + 2001)
-        self.lower_trainer = RESACLagrangianTrainer(
-            state_dim=lower_state_dim, action_dim=1,
-            hidden_dim=lower_cfg['hidden_dim'],
-            action_range=lower_cfg['action_range'],
-            cost_limit=lower_cfg['cost_limit'],
-            ensemble_size=lower_cfg.get('ensemble_size', 10),
-            beta=lower_cfg.get('resac_beta', -2.0),
-            beta_ood=lower_cfg.get('beta_ood', 0.01),
-            weight_reg=lower_cfg.get('weight_reg', 0.01),
-            weight_reg_mode=lower_cfg.get('weight_reg_mode', 'sum'),
-            lr=lower_cfg['lr'], lambda_lr=lower_cfg['lambda_lr'],
-            gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
-            auto_entropy=lower_cfg['auto_entropy'],
-            maximum_alpha=lower_cfg['maximum_alpha'],
-            action_bins=lower_trainer_action_bins,
-            device=device)
+        with self.randomness.torch_initialization('lower_init'):
+            self.lower_trainer = RESACLagrangianTrainer(
+                state_dim=lower_state_dim, action_dim=1,
+                hidden_dim=lower_cfg['hidden_dim'],
+                action_range=lower_cfg['action_range'],
+                cost_limit=lower_cfg['cost_limit'],
+                ensemble_size=lower_cfg.get('ensemble_size', 10),
+                beta=lower_cfg.get('resac_beta', -2.0),
+                beta_ood=lower_cfg.get('beta_ood', 0.01),
+                weight_reg=lower_cfg.get('weight_reg', 0.01),
+                weight_reg_mode=lower_cfg.get('weight_reg_mode', 'sum'),
+                lr=lower_cfg['lr'], lambda_lr=lower_cfg['lambda_lr'],
+                gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
+                auto_entropy=lower_cfg['auto_entropy'],
+                maximum_alpha=lower_cfg['maximum_alpha'],
+                initial_alpha=lower_cfg.get('initial_alpha', 0.1),
+                minimum_alpha=lower_cfg.get('minimum_alpha', 1e-5),
+                temperature_contract=lower_cfg.get(
+                    'temperature_contract', 'legacy_capped_scalar'),
+                entropy_action_coordinates=lower_cfg.get(
+                    'entropy_action_coordinates', 'physical_legacy'),
+                cost_limit_semantics=lower_cfg.get(
+                    'cost_limit_semantics', 'per_decision_rate'),
+                policy_sample_seed=(
+                    self.randomness.seed('lower_policy')
+                    if self.randomness.isolated else None),
+                action_bins=lower_trainer_action_bins,
+                device=device)
         self.lower_state_dim = lower_state_dim
 
         # ── Coupling ──
@@ -2320,6 +2403,18 @@ class TransitDuetV2Runner:
                 "upper action library")
         self.tpc_eps = float(tpc.get('eps_explore', 0.25))
         self.tpc_sigma_tgt = float(tpc.get('sigma_tgt', 20.0))
+        self.tpc_target_distribution = str(tpc.get(
+            'target_distribution',
+            'legacy_clipped_physical_gaussian')).strip().lower()
+        if self.tpc_target_distribution not in {
+                'legacy_clipped_physical_gaussian',
+                'bounded_logistic_normal_v4'}:
+            raise ValueError(
+                'coupling.tpc.target_distribution must be '
+                'legacy_clipped_physical_gaussian or '
+                'bounded_logistic_normal_v4')
+        self.tpc_latent_sigma = max(float(
+            tpc.get('latent_sigma', 0.25)), 1e-6)
         self.tpc_w_max = float(tpc.get('w_max', 5.0))
         self.tpc_ema_tau = float(tpc.get('ema_tau', 0.005))
         self.tpc_warmstart_lower_from = tpc.get('warmstart_lower_from', None)
@@ -2504,7 +2599,8 @@ class TransitDuetV2Runner:
                 ds = np.stack(ds).astype(np.float32)
                 log_mus = np.array(log_mus, dtype=np.float32)
                 # Batched log_prob under EMA target upper policy
-                log_p_target = target_pi.log_prob(zs, ds)
+                log_p_target = target_pi.log_prob(
+                    zs, ds, coordinates='normalized_unit_interval')
                 if np.isscalar(log_p_target):
                     log_p_target = np.array([float(log_p_target)])
                 log_w = log_p_target - log_mus
@@ -4200,9 +4296,11 @@ class TransitDuetV2Runner:
 
         random_probe = (
             self.upper_residual_selector_epsilon > 0.0
-            and np.random.random() < self.upper_residual_selector_epsilon)
+            and self._upper_residual_selector_rng.random()
+            < self.upper_residual_selector_epsilon)
         if random_probe and len(scored) > 1:
-            chosen = scored[int(np.random.randint(len(scored)))]
+            chosen = scored[int(
+                self._upper_residual_selector_rng.randint(len(scored)))]
         else:
             chosen = min(scored, key=lambda item: item[0])
             actor_score = actor_pred
@@ -4829,10 +4927,11 @@ class TransitDuetV2Runner:
 
         random_probe = (
             self.timetable_headway_value_planner_epsilon > 0.0
-            and np.random.random()
+            and self._headway_value_selector_rng.random()
             < self.timetable_headway_value_planner_epsilon)
         if random_probe and len(scored) > 1:
-            chosen = scored[int(np.random.randint(len(scored)))]
+            chosen = scored[int(
+                self._headway_value_selector_rng.randint(len(scored)))]
         else:
             chosen = min(scored, key=lambda item: item[0])
             actor_score = (
@@ -5543,8 +5642,8 @@ class TransitDuetV2Runner:
                 return False
             return True
         if self.fixed_selector_epsilon > 0.0:
-            if np.random.random() < self.fixed_selector_epsilon:
-                return bool(np.random.random() < 0.5)
+            if self._fixed_expert_selector_rng.random() < self.fixed_selector_epsilon:
+                return bool(self._fixed_expert_selector_rng.random() < 0.5)
         learned_cost = self.fixed_selector_cost_ema.get('learned')
         fixed_cost = self.fixed_selector_cost_ema.get('fixed')
         if learned_cost is None or fixed_cost is None:
@@ -5731,8 +5830,8 @@ class TransitDuetV2Runner:
                 return False
             return True
         if self.fixed_selector_epsilon > 0.0:
-            if np.random.random() < self.fixed_selector_epsilon:
-                return bool(np.random.random() < 0.5)
+            if self._fixed_expert_selector_rng.random() < self.fixed_selector_epsilon:
+                return bool(self._fixed_expert_selector_rng.random() < 0.5)
         return bool(fixed_pred <= learned_pred + self.fixed_selector_margin)
 
     def _fixed_selector_update_start_ep(self):
@@ -6230,10 +6329,11 @@ class TransitDuetV2Runner:
 
         random_probe = (
             self.timetable_terminal_value_selector_epsilon > 0.0
-            and np.random.random()
+            and self._terminal_value_selector_rng.random()
             < self.timetable_terminal_value_selector_epsilon)
         if random_probe and len(scored) > 1:
-            chosen = scored[int(np.random.randint(len(scored)))]
+            chosen = scored[int(
+                self._terminal_value_selector_rng.randint(len(scored)))]
         else:
             chosen = min(scored, key=lambda item: item[0])
             actor_score = (
@@ -6508,7 +6608,9 @@ class TransitDuetV2Runner:
     def _ensure_reach_net(self):
         if self.reach_net is None and self.coupling_mode == 'haar' \
                 and self.haar_use_reach_gate:
-            self.reach_net = ReachabilityMLP(self.upper_state_dim).to(self.device)
+            with self.randomness.torch_initialization('reachability_init'):
+                self.reach_net = ReachabilityMLP(
+                    self.upper_state_dim).to(self.device)
             self.reach_optimizer = torch.optim.Adam(
                 self.reach_net.parameters(), lr=self.haar_reach_lr)
 
@@ -6584,7 +6686,8 @@ class TransitDuetV2Runner:
         bs = min(len(self._reach_buffer), 128)
         if bs < 8:
             return
-        idx = np.random.choice(len(self._reach_buffer), bs, replace=False)
+        idx = self._reachability_rng.choice(
+            len(self._reach_buffer), bs, replace=False)
         xs = np.stack([self._reach_buffer[i]['x'] for i in idx])
         ys = np.array([self._reach_buffer[i]['label'] for i in idx], dtype=np.float32)
         x_t = torch.FloatTensor(xs).to(self.device)
@@ -6690,26 +6793,59 @@ class TransitDuetV2Runner:
                 self.target_upper_trainer.policy_net.get_action(
                     s_upper, deterministic=True),
                 dtype=np.float32).reshape(-1)
-            if np.random.random() < self.tpc_eps:
+            if self._tpc_rng.random() < self.tpc_eps:
                 # exploratory: sample from current π_U
                 action_vec = np.asarray(
                     self.upper_trainer.policy_net.get_action(
                         s_upper, deterministic=False),
                     dtype=np.float32).reshape(-1)
+            elif self.tpc_target_distribution == 'bounded_logistic_normal_v4':
+                target_u = self.upper_trainer.policy_net.normalized_action(
+                    target_mean_arr)
+                target_z = np.log(target_u / (1.0 - target_u))
+                sampled_z = (
+                    target_z
+                    + self._tpc_rng.randn(self.upper_action_dim)
+                    * self.tpc_latent_sigma)
+                sampled_u = 1.0 / (1.0 + np.exp(-sampled_z))
+                action_vec = (
+                    self.upper_action_low
+                    + sampled_u * (
+                        self.upper_action_high - self.upper_action_low)
+                ).astype(np.float32)
             else:
                 # target: independent N(target_mean, σ_tgt), clipped to range
                 action_vec = np.clip(
                     target_mean_arr
-                    + np.random.randn(self.upper_action_dim) * self.tpc_sigma_tgt,
+                    + self._tpc_rng.randn(self.upper_action_dim)
+                    * self.tpc_sigma_tgt,
                     self.upper_action_low, self.upper_action_high).astype(np.float32)
             # Mixture log-prob log_mu = log( ε π_U + (1-ε) N(target_mean, σ_tgt) )
             log_p_explore = float(self.upper_trainer.policy_net.log_prob(
-                s_upper, action_vec))
-            z = (action_vec - target_mean_arr) / max(self.tpc_sigma_tgt, 1e-6)
-            log_p_target = float(
-                -0.5 * np.dot(z, z)
-                - action_vec.size * np.log(
-                    max(self.tpc_sigma_tgt, 1e-6) * np.sqrt(2 * np.pi)))
+                s_upper, action_vec,
+                coordinates='normalized_unit_interval'))
+            if self.tpc_target_distribution == 'bounded_logistic_normal_v4':
+                action_u = self.upper_trainer.policy_net.normalized_action(
+                    action_vec)
+                action_z = np.log(action_u / (1.0 - action_u))
+                target_u = self.upper_trainer.policy_net.normalized_action(
+                    target_mean_arr)
+                target_z = np.log(target_u / (1.0 - target_u))
+                standardized = (
+                    (action_z - target_z) / self.tpc_latent_sigma)
+                log_p_target = float(
+                    -0.5 * np.dot(standardized, standardized)
+                    - action_vec.size * np.log(
+                        self.tpc_latent_sigma * np.sqrt(2 * np.pi))
+                    - np.log(action_u * (1.0 - action_u)).sum())
+            else:
+                z = ((action_vec - target_mean_arr)
+                     / max(self.tpc_sigma_tgt, 1e-6))
+                log_p_target = float(
+                    -0.5 * np.dot(z, z)
+                    - action_vec.size * np.log(
+                        max(self.tpc_sigma_tgt, 1e-6)
+                        * np.sqrt(2 * np.pi)))
             log_mu = float(np.logaddexp(
                 np.log(self.tpc_eps + 1e-12) + log_p_explore,
                 np.log(1.0 - self.tpc_eps + 1e-12) + log_p_target))
@@ -6835,6 +6971,12 @@ class TransitDuetV2Runner:
         plan_summary = None
         plan_penalty = 0.0
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            exact_headway_curve = (
+                self.timetable_planner.terminal_schedule_mode
+                == 'exact_headway_curve')
+            if exact_headway_curve and not snapshot_write_terminal_dispatch:
+                raise RuntimeError(
+                    'exact_headway_curve cannot disable executable dispatch')
             if plan_id is None:
                 plan_id = int(trip.launch_turn)
             current_plan_delta = self.timetable_planner.delta_at(
@@ -6859,7 +7001,9 @@ class TransitDuetV2Runner:
             if snapshot_terminal_bias_s > 0.0:
                 terminal_shift_bias_s = max(
                     float(terminal_shift_bias_s), snapshot_terminal_bias_s)
-            if (snapshot_write_terminal_dispatch and upper_decision_taken
+            if (not exact_headway_curve
+                    and snapshot_write_terminal_dispatch
+                    and upper_decision_taken
                     and not self.upper_action_override_disable_value_selectors):
                 terminal_shift_bias_s, terminal_selector_x = (
                     self._select_terminal_value_bias(
@@ -6867,14 +7011,20 @@ class TransitDuetV2Runner:
                         action_vec=action_vec,
                         plan_origin_launch=plan_origin_launch,
                         base_bias_s=terminal_shift_bias_s))
+            if exact_headway_curve:
+                terminal_shift_min_s = None
+                terminal_shift_max_s = None
+                terminal_shift_bias_s = 0.0
             terminal_floor_ratio = (
                 self.timetable_terminal_headway_floor_ratio
-                if (snapshot_write_terminal_dispatch
+                if (not exact_headway_curve
+                    and snapshot_write_terminal_dispatch
                     and self.timetable_terminal_headway_floor_enable)
                 else 0.0)
             terminal_floor_min_s = (
                 self.timetable_terminal_headway_floor_min_s
-                if (snapshot_write_terminal_dispatch
+                if (not exact_headway_curve
+                    and snapshot_write_terminal_dispatch
                     and self.timetable_terminal_headway_floor_enable)
                 else 0.0)
             plan_summary = self.timetable_planner.apply(
@@ -7708,6 +7858,7 @@ class TransitDuetV2Runner:
         if (self.tpc_enable and upper_training_active
                 and self.target_upper_trainer is None):
             self.target_upper_trainer = copy.deepcopy(self.upper_trainer)
+            self.target_upper_trainer.replay_buffer.buffer.clear()
             print(f"  [TPC] initialised EMA target upper at ep {ep}")
 
         # Build per-sample IS weight function for lower SAC
@@ -8068,6 +8219,10 @@ class TransitDuetV2Runner:
             'wall_train_s': round(train_time, 1),
             # env
             'protocol_version': self.protocol_version,
+            'config_fingerprint_sha256': self.config_fingerprint_sha256,
+            'randomness_contract': self.randomness.mode,
+            'randomness_fingerprint_sha256': self.randomness_manifest[
+                'fingerprint_sha256'],
             'avg_wait_min': round(z[0], 3),
             'avg_wait_observed_min': round(
                 float(env_details['avg_wait_observed_min']), 3),
@@ -8124,6 +8279,10 @@ class TransitDuetV2Runner:
                 env_details.get('fleet_inventory_mode', 'elastic_legacy')),
             'physical_vehicle_count': int(
                 env_details.get('physical_vehicle_count', len(self.env.bus_all))),
+            'fleet_capacity': int(env_details.get(
+                'fleet_capacity', self.env._fleet_capacity())),
+            'fleet_ready_up': int(env_details.get('fleet_ready_up', 0)),
+            'fleet_ready_down': int(env_details.get('fleet_ready_down', 0)),
             'fleet_denied_dispatch_events': int(
                 env_details.get('fleet_denied_dispatch_events', 0)),
             'fleet_denied_trips': int(
@@ -8430,6 +8589,12 @@ class TransitDuetV2Runner:
             'upper_plan_target_std': upper_plan_target_stat['std'],
             'upper_plan_decisions': self._ep_upper_plan_decisions,
             'upper_plan_reuse_ratio': plan_reuse_ratio,
+            'upper_plan_projection_mode': (
+                self.timetable_planner.terminal_schedule_mode
+                if self.timetable_planner is not None else 'disabled'),
+            'upper_interval_wait_ownership': (
+                self.upper_interval_credit.wait_ownership
+                if self.upper_interval_credit.enabled else 'disabled'),
             'terminal_launch_shift_mean': terminal_launch_shift_stat['mean'],
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
             'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],
@@ -8873,6 +9038,21 @@ class TransitDuetV2Runner:
         ckpt_dir = os.path.join(self.log_dir, 'checkpoints')
         if not os.path.isdir(ckpt_dir):
             return 0
+        if self.checkpoint_contract == 'exact_training_state_v4':
+            training_path = os.path.join(ckpt_dir, 'training_latest.pt')
+            if not os.path.exists(training_path):
+                if any(name.startswith('lower_ep')
+                       for name in os.listdir(ckpt_dir)):
+                    raise RuntimeError(
+                        'v4 checkpoint directory contains deployment weights '
+                        'but no exact training state')
+                return 0
+            last_ep = self._load_training_state(training_path)
+            self.resume_from_ep = last_ep + 1
+            print(
+                f"  [Exact resume] Loaded ep{last_ep}. "
+                f"Resuming from ep{self.resume_from_ep}.")
+            return self.resume_from_ep
         import re
         eps = []
         for fn in os.listdir(ckpt_dir):
@@ -8910,6 +9090,8 @@ class TransitDuetV2Runner:
         }
         return {
             'protocol_version': self.protocol_version,
+            'config_fingerprint_sha256': self.config_fingerprint_sha256,
+            'randomness': copy.deepcopy(self.randomness_manifest),
             'episode': int(ep),
             'measurement_theta': self.measurement_proj.theta.copy(),
             'measurement_iter': int(self.measurement_proj._iter),
@@ -8944,8 +9126,15 @@ class TransitDuetV2Runner:
             'adaptive_selectors': adaptive,
         }
 
-    def _load_deployment_state(self, path):
-        state = torch.load(path, map_location='cpu', weights_only=False)
+    def _restore_deployment_state(self, state):
+        saved_randomness = state.get('randomness')
+        if self.randomness.isolated:
+            if saved_randomness is None:
+                raise ValueError(
+                    'isolated_streams_v4 requires randomness checkpoint metadata')
+            if (saved_randomness.get('fingerprint_sha256')
+                    != self.randomness_manifest['fingerprint_sha256']):
+                raise ValueError('checkpoint randomness contract mismatch')
         self.measurement_proj.theta = np.asarray(
             state.get('measurement_theta', self.measurement_proj.theta),
             dtype=np.float64)
@@ -8986,6 +9175,117 @@ class TransitDuetV2Runner:
         self.loaded_checkpoint_protocol = str(
             state.get('protocol_version', 'legacy'))
         self._deployment_state_loaded = True
+
+    def _load_deployment_state(self, path):
+        state = torch.load(path, map_location='cpu', weights_only=False)
+        self._restore_deployment_state(state)
+
+    def _runtime_numpy_streams(self):
+        return {
+            'fleet': self.fleet_rng,
+            'upper_residual_selector': self._upper_residual_selector_rng,
+            'headway_value_selector': self._headway_value_selector_rng,
+            'terminal_value_selector': self._terminal_value_selector_rng,
+            'fixed_expert_selector': self._fixed_expert_selector_rng,
+            'tpc_mixture': self._tpc_rng,
+            'reachability_replay': self._reachability_rng,
+        }
+
+    def _training_state_dict(self, ep):
+        target_upper = None
+        if self.target_upper_trainer is not None:
+            target_upper = {
+                'policy': copy.deepcopy(
+                    self.target_upper_trainer.policy_net.state_dict()),
+                'policy_sampling_state': (
+                    self.target_upper_trainer.policy_net.sampling_state()),
+            }
+        reachability = None
+        if self.reach_net is not None:
+            reachability = {
+                'network': self.reach_net.state_dict(),
+                'optimizer': self.reach_optimizer.state_dict(),
+                'buffer': copy.deepcopy(self._reach_buffer),
+            }
+        return {
+            'format': 'freqduet-exact-training-state-v4',
+            'protocol_version': self.protocol_version,
+            'config_fingerprint_sha256': self.config_fingerprint_sha256,
+            'episode': int(ep),
+            'randomness': copy.deepcopy(self.randomness_manifest),
+            'deployment': self._deployment_state_dict(ep),
+            'lower_trainer': self.lower_trainer.training_state_dict(),
+            'upper_trainer': self.upper_trainer.training_state_dict(),
+            'lower_replay_buffer': self.replay_buffer.state_dict(),
+            'numpy_stream_states': {
+                name: rng.get_state()
+                for name, rng in self._runtime_numpy_streams().items()
+            },
+            'global_random_state': random.getstate(),
+            'global_numpy_state': np.random.get_state(),
+            'global_torch_state': torch.random.get_rng_state(),
+            'history': copy.deepcopy(dict(self.history)),
+            'dispatch_meta': copy.deepcopy(self.dispatch_meta),
+            'target_upper': target_upper,
+            'reachability': reachability,
+            'current_N_fleet': int(self._current_N_fleet),
+        }
+
+    def _load_training_state(self, path):
+        state = torch.load(path, map_location='cpu', weights_only=False)
+        if state.get('format') != 'freqduet-exact-training-state-v4':
+            raise ValueError('not a FreqDuet exact v4 training checkpoint')
+        if state.get('protocol_version') != self.protocol_version:
+            raise ValueError('training checkpoint protocol mismatch')
+        if (state.get('config_fingerprint_sha256')
+                != self.config_fingerprint_sha256):
+            raise ValueError('training checkpoint resolved-config mismatch')
+        saved_randomness = state.get('randomness', {})
+        if (saved_randomness.get('fingerprint_sha256')
+                != self.randomness_manifest['fingerprint_sha256']):
+            raise ValueError('training checkpoint randomness mismatch')
+
+        self.lower_trainer.load_training_state_dict(state['lower_trainer'])
+        self.upper_trainer.load_training_state_dict(state['upper_trainer'])
+        self.replay_buffer.load_state_dict(state['lower_replay_buffer'])
+        self._restore_deployment_state(state['deployment'])
+        for name, rng in self._runtime_numpy_streams().items():
+            rng.set_state(state['numpy_stream_states'][name])
+        random.setstate(state['global_random_state'])
+        np.random.set_state(state['global_numpy_state'])
+        torch.random.set_rng_state(state['global_torch_state'])
+        self.history = defaultdict(list, copy.deepcopy(state.get('history', {})))
+        self.dispatch_meta = copy.deepcopy(state.get('dispatch_meta', {}))
+        self._current_N_fleet = int(state.get(
+            'current_N_fleet', self.N_fleet_default))
+
+        target_upper = state.get('target_upper')
+        if target_upper is None:
+            self.target_upper_trainer = None
+        else:
+            self.target_upper_trainer = copy.deepcopy(self.upper_trainer)
+            self.target_upper_trainer.replay_buffer.buffer.clear()
+            self.target_upper_trainer.policy_net.load_state_dict(
+                target_upper['policy'])
+            self.target_upper_trainer.policy_net.set_sampling_state(
+                target_upper.get('policy_sampling_state'))
+
+        reachability = state.get('reachability')
+        if reachability is None:
+            self.reach_net = None
+            self.reach_optimizer = None
+            self._reach_buffer = []
+        else:
+            with self.randomness.torch_initialization('reachability_init'):
+                self.reach_net = ReachabilityMLP(
+                    self.upper_state_dim).to(self.device)
+            self.reach_optimizer = torch.optim.Adam(
+                self.reach_net.parameters(), lr=self.haar_reach_lr)
+            self.reach_net.load_state_dict(reachability['network'])
+            self.reach_optimizer.load_state_dict(reachability['optimizer'])
+            self._reach_buffer = copy.deepcopy(reachability['buffer'])
+        self.loaded_checkpoint_ep = int(state['episode'])
+        return self.loaded_checkpoint_ep
 
     def load_checkpoint(self, checkpoint_dir=None, ep=None,
                         require_deployment_state=False):
@@ -9094,6 +9394,7 @@ class TransitDuetV2Runner:
         with (destination / 'evaluation_manifest.json').open('w') as f:
             json.dump({
                 'protocol_version': self.protocol_version,
+                'config_fingerprint_sha256': self.config_fingerprint_sha256,
                 'config_name': self.exp_name,
                 'training_seed': self.base_seed,
                 'checkpoint_ep': int(
@@ -9102,6 +9403,7 @@ class TransitDuetV2Runner:
                 'scenario_seeds': seeds,
                 'policy_digest': before,
                 'n_episodes': len(rows),
+                'randomness': self.randomness_manifest,
             }, f, indent=2)
         return rows, destination
 
@@ -9218,13 +9520,21 @@ class TransitDuetV2Runner:
             self._deployment_state_dict(ep),
             os.path.join(ckpt_dir, f'runner_ep{ep}.pt'),
         )
+        if self.checkpoint_contract == 'exact_training_state_v4':
+            training_path = os.path.join(ckpt_dir, 'training_latest.pt')
+            temporary_path = training_path + '.tmp'
+            torch.save(self._training_state_dict(ep), temporary_path)
+            os.replace(temporary_path, training_path)
         self.loaded_checkpoint_ep = int(ep)
         with open(os.path.join(ckpt_dir, 'checkpoint_meta.json'), 'w') as f:
             json.dump({
                 'protocol_version': self.protocol_version,
+                'config_fingerprint_sha256': self.config_fingerprint_sha256,
                 'latest_episode': int(ep),
                 'config_name': self.exp_name,
                 'seed': self.base_seed,
+                'randomness': self.randomness_manifest,
+                'checkpoint_contract': self.checkpoint_contract,
             }, f, indent=2)
         print(f"  [Checkpoint ep {ep}]")
 

@@ -63,6 +63,25 @@ class ProtocolV4PhysicalContractsTest(unittest.TestCase):
 
         self.assertAlmostEqual(float(state[2]), 0.5)
 
+    def test_v4_upper_state_exposes_terminal_readiness(self):
+        env = self._env(upper_fleet_state_mode="fixed_pool_readiness_v4")
+        env._initialize_fixed_pool()
+        trip = env.timetables[0]
+        state = env._build_upper_state_v2(trip)
+
+        self.assertEqual(len(state), env.upper_state_dim)
+        self.assertAlmostEqual(float(state[-4]), 0.5)
+        self.assertAlmostEqual(float(state[-3]), 0.5)
+        self.assertAlmostEqual(float(state[-2]), 0.0)
+        self.assertGreaterEqual(float(state[-1]), 0.0)
+
+    def test_v4_readiness_state_requires_fixed_inventory(self):
+        with self.assertRaisesRegex(ValueError, "requires fleet_inventory_mode"):
+            self._env(
+                fleet_inventory_mode="elastic_legacy",
+                upper_fleet_state_mode="fixed_pool_readiness_v4",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

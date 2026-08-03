@@ -1,7 +1,12 @@
 """
 lower/resac_lagrangian.py
 =========================
-RE-SAC (Robust Ensemble SAC) with Lagrangian cost constraint.
+Pessimistic ensemble SAC with a Lagrangian cost constraint.
+
+The historical module and class names are retained for checkpoint compatibility.
+This implementation is not claimed to reproduce a named RE-SAC paper exactly.
+Its explicit algorithm identifier is
+``pessimistic_ensemble_sac_lagrangian_v4``.
 
 Key differences from vanilla SAC (dsac_lagrangian.py):
   - Ensemble Q-networks (K=10) instead of twin-Q
@@ -11,7 +16,8 @@ Key differences from vanilla SAC (dsac_lagrangian.py):
   - L1 weight regularization on critic
   - Lagrangian cost constraint (same as before)
 
-Based on RE-SAC paper and /home/erzhu419/mine_code/RE-SAC/ implementation.
+The v4 paper describes these equations directly and includes a standard
+constrained-SAC ablation instead of relying on a method-name equivalence claim.
 """
 
 import torch
@@ -27,9 +33,23 @@ import numpy as np
 class GaussianPolicy(nn.Module):
     """Gaussian policy for holding time in [0, action_range]."""
 
-    def __init__(self, num_inputs, hidden_dim=64, action_range=60.0, init_w=3e-3):
+    def __init__(self, num_inputs, hidden_dim=64, action_range=60.0,
+                 init_w=3e-3, entropy_action_coordinates="physical_legacy",
+                 sample_seed=None, device="cpu"):
         super().__init__()
         self.action_range = action_range
+        self.entropy_action_coordinates = str(
+            entropy_action_coordinates).strip().lower()
+        if self.entropy_action_coordinates not in {
+                "physical_legacy", "normalized_unit_interval"}:
+            raise ValueError(
+                "entropy_action_coordinates must be physical_legacy or "
+                "normalized_unit_interval")
+        self._sample_generator = None
+        if sample_seed is not None:
+            self._sample_generator = torch.Generator(
+                device=torch.device(device).type)
+            self._sample_generator.manual_seed(int(sample_seed))
         self.fc1 = nn.Linear(num_inputs, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.mean = nn.Linear(hidden_dim, 1)
@@ -50,34 +70,63 @@ class GaussianPolicy(nn.Module):
         mean, log_std = self.forward(state)
         std = log_std.exp()
         dist = Normal(mean, std)
-        z = dist.rsample()
+        if self._sample_generator is None:
+            z = dist.rsample()
+        else:
+            noise = torch.randn(
+                mean.shape, dtype=mean.dtype, device=mean.device,
+                generator=self._sample_generator)
+            z = mean + std * noise
         squashed = torch.tanh(z)
         action = (squashed + 1.0) * 0.5 * self.action_range
-        # da/dz = action_range/2 * (1 - tanh(z)^2)
-        log_det = torch.log(
-            0.5 * self.action_range * (1 - squashed.pow(2)) + epsilon)
+        scale = (self.action_range if
+                 self.entropy_action_coordinates == "physical_legacy" else 1.0)
+        # Entropy is defined either in physical seconds (legacy) or in the
+        # dimensionless unit interval used by the v4 optimization contract.
+        log_det = torch.log(0.5 * scale * (1 - squashed.pow(2)) + epsilon)
         log_prob = dist.log_prob(z) - log_det
         log_prob = log_prob.sum(-1, keepdim=True)
         return action, log_prob, z, mean, log_std
 
     def get_action(self, state, deterministic=False):
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
         if state.dim() == 1:
             state = state.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
         mean, log_std = self.forward(state)
         if deterministic:
             action = (torch.tanh(mean) + 1.0) * 0.5 * self.action_range
         else:
             std = log_std.exp()
             dist = Normal(mean, std)
-            z = dist.sample()
+            if self._sample_generator is None:
+                z = dist.sample()
+            else:
+                noise = torch.randn(
+                    mean.shape, dtype=mean.dtype, device=mean.device,
+                    generator=self._sample_generator)
+                z = mean + std * noise
             action = (torch.tanh(z) + 1.0) * 0.5 * self.action_range
         return action.detach().squeeze().cpu().numpy()
+
+    def sampling_state(self):
+        if self._sample_generator is None:
+            return None
+        return self._sample_generator.get_state()
+
+    def set_sampling_state(self, state):
+        if state is not None:
+            if self._sample_generator is None:
+                raise ValueError("policy has no isolated sampling generator")
+            self._sample_generator.set_state(state)
 
 
 class CategoricalPolicy(nn.Module):
     """Categorical policy over a configured holding-time alphabet."""
 
-    def __init__(self, num_inputs, action_bins, hidden_dim=64, init_w=3e-3):
+    def __init__(self, num_inputs, action_bins, hidden_dim=64, init_w=3e-3,
+                 sample_seed=None, device="cpu"):
         super().__init__()
         bins = torch.as_tensor(action_bins, dtype=torch.float32).view(-1, 1)
         if bins.numel() < 2:
@@ -88,6 +137,11 @@ class CategoricalPolicy(nn.Module):
         self.logits = nn.Linear(hidden_dim, bins.shape[0])
         self.logits.weight.data.uniform_(-init_w, init_w)
         self.logits.bias.data.uniform_(-init_w, init_w)
+        self._sample_generator = None
+        if sample_seed is not None:
+            self._sample_generator = torch.Generator(
+                device=torch.device(device).type)
+            self._sample_generator.manual_seed(int(sample_seed))
 
     def forward(self, state):
         x = F.relu(self.fc1(state))
@@ -102,23 +156,43 @@ class CategoricalPolicy(nn.Module):
 
     def evaluate(self, state, epsilon=1e-8):
         probs, log_probs, logits = self.dist_info(state, epsilon=epsilon)
-        dist = torch.distributions.Categorical(probs=probs)
-        idx = dist.sample()
+        if self._sample_generator is None:
+            idx = torch.distributions.Categorical(probs=probs).sample()
+        else:
+            idx = torch.multinomial(
+                probs, 1, generator=self._sample_generator).squeeze(-1)
         action = self.action_bins[idx]
         log_prob = log_probs.gather(1, idx.view(-1, 1))
         return action, log_prob, idx.view(-1, 1).float(), logits, probs
 
     def get_action(self, state, deterministic=False):
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
         if state.dim() == 1:
             state = state.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
         probs, _, _ = self.dist_info(state)
         if deterministic:
             idx = probs.argmax(dim=-1)
         else:
-            dist = torch.distributions.Categorical(probs=probs)
-            idx = dist.sample()
+            if self._sample_generator is None:
+                idx = torch.distributions.Categorical(probs=probs).sample()
+            else:
+                idx = torch.multinomial(
+                    probs, 1, generator=self._sample_generator).squeeze(-1)
         action = self.action_bins[idx]
         return action.detach().squeeze().cpu().numpy()
+
+    def sampling_state(self):
+        if self._sample_generator is None:
+            return None
+        return self._sample_generator.get_state()
+
+    def set_sampling_state(self, state):
+        if state is not None:
+            if self._sample_generator is None:
+                raise ValueError("policy has no isolated sampling generator")
+            self._sample_generator.set_state(state)
 
 
 class EnsembleQNetwork(nn.Module):
@@ -195,7 +269,7 @@ class CostQNetwork(nn.Module):
 
 class RESACLagrangianTrainer:
     """
-    RE-SAC trainer with Lagrangian cost constraint.
+    Pessimistic ensemble SAC trainer with Lagrangian cost constraint.
 
     Key RE-SAC features vs vanilla SAC:
       - Ensemble Q (K=10): independent targets, no min
@@ -212,11 +286,21 @@ class RESACLagrangianTrainer:
                  weight_reg_mode="sum",
                  lr=3e-4, lambda_lr=1e-3, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3, action_bins=None,
+                 initial_alpha=0.1, minimum_alpha=1e-5,
+                 temperature_contract="legacy_capped_scalar",
+                 entropy_action_coordinates="physical_legacy",
+                 cost_limit_semantics="per_decision_rate",
+                 policy_sample_seed=None,
                  device='cpu'):
         self.device = device
         self.gamma = gamma
         self.soft_tau = soft_tau
         self.cost_limit = cost_limit
+        self.cost_limit_semantics = str(cost_limit_semantics).strip().lower()
+        if self.cost_limit_semantics != "per_decision_rate":
+            raise ValueError(
+                "cost_limit_semantics currently supports only "
+                "per_decision_rate")
         self.auto_entropy = auto_entropy
         self.ensemble_size = ensemble_size
         self.beta = beta              # LCB coefficient (negative = pessimistic)
@@ -235,10 +319,13 @@ class RESACLagrangianTrainer:
             self.discrete_actions = torch.as_tensor(
                 bins, dtype=torch.float32, device=device).view(-1, 1)
             self.policy_net = CategoricalPolicy(
-                state_dim, bins, hidden_dim).to(device)
+                state_dim, bins, hidden_dim, sample_seed=policy_sample_seed,
+                device=device).to(device)
         else:
             self.policy_net = GaussianPolicy(
-                state_dim, hidden_dim, action_range).to(device)
+                state_dim, hidden_dim, action_range,
+                entropy_action_coordinates=entropy_action_coordinates,
+                sample_seed=policy_sample_seed, device=device).to(device)
 
         # Ensemble Q-networks
         self.q_net = EnsembleQNetwork(
@@ -258,16 +345,37 @@ class RESACLagrangianTrainer:
         self.cost_q_optimizer = optim.Adam(self.cost_q_net.parameters(), lr=lr)
 
         # Entropy temperature alpha
+        self.temperature_contract = str(temperature_contract).strip().lower()
+        if self.temperature_contract not in {
+                "legacy_capped_scalar", "bounded_log_parameter_v4"}:
+            raise ValueError(
+                "temperature_contract must be legacy_capped_scalar or "
+                "bounded_log_parameter_v4")
+        self.maximum_alpha = float(maximum_alpha)
+        self.minimum_alpha = float(minimum_alpha)
+        if not (0.0 < self.minimum_alpha <= self.maximum_alpha):
+            raise ValueError("require 0 < minimum_alpha <= maximum_alpha")
+        initial_alpha = float(initial_alpha)
         if auto_entropy:
-            self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
+            if self.temperature_contract == "bounded_log_parameter_v4":
+                initial_alpha = float(np.clip(
+                    initial_alpha, self.minimum_alpha, self.maximum_alpha))
+                initial_log_alpha = float(np.log(initial_alpha))
+            else:
+                initial_log_alpha = 0.0
+            self.log_alpha = torch.tensor(
+                [initial_log_alpha], dtype=torch.float32,
+                requires_grad=True, device=device)
             self.alpha_optimizer = optim.Adam([self.log_alpha], lr=lr)
             if self.discrete_actions is not None:
                 self.target_entropy = 0.98 * float(
                     np.log(max(int(self.discrete_actions.shape[0]), 2)))
             else:
                 self.target_entropy = -1.0 * action_dim
-        self.alpha = 0.1
-        self.maximum_alpha = maximum_alpha
+        self.alpha = (
+            initial_alpha
+            if self.temperature_contract == "bounded_log_parameter_v4"
+            else 0.1)
 
         # Lagrangian multiplier lambda
         self.log_lambda = torch.zeros(1, requires_grad=True, device=device)
@@ -488,10 +596,20 @@ class RESACLagrangianTrainer:
                 self.alpha_optimizer.zero_grad()
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
-                self.alpha = min(self.log_alpha.exp().item(), self.maximum_alpha)
+                if self.temperature_contract == "bounded_log_parameter_v4":
+                    self.log_alpha.data.clamp_(
+                        min=float(np.log(self.minimum_alpha)),
+                        max=float(np.log(self.maximum_alpha)))
+                    self.alpha = self.log_alpha.exp().item()
+                else:
+                    self.alpha = min(
+                        self.log_alpha.exp().item(), self.maximum_alpha)
 
             # ──── Lambda update ────
-            # Constraint:  E[cost] <= cost_limit. Standard primal-dual SGD form:
+            # Constraint: E_mu[c_t] <= cost_limit under the replay approximation
+            # to normalized discounted occupancy. The actor uses Q_c because that
+            # is the policy-gradient continuation value; the dual statistic and
+            # configured threshold both remain in per-decision cost units.
             #   loss = - λ · (cost - cost_limit)
             # so that ∂loss/∂(log λ) = -λ·(cost - clim);  Adam minimisation gives
             # log λ ← log λ + lr·λ·(cost - clim), i.e. λ INCREASES when violated
@@ -525,6 +643,55 @@ class RESACLagrangianTrainer:
 
         return metrics
 
+    def training_state_dict(self):
+        return {
+            'format': 'freqduet-lower-training-v4',
+            'policy': self.policy_net.state_dict(),
+            'q_net': self.q_net.state_dict(),
+            'target_q_net': self.target_q_net.state_dict(),
+            'cost_q_net': self.cost_q_net.state_dict(),
+            'target_cost_q_net': self.target_cost_q_net.state_dict(),
+            'policy_optimizer': self.policy_optimizer.state_dict(),
+            'q_optimizer': self.q_optimizer.state_dict(),
+            'cost_q_optimizer': self.cost_q_optimizer.state_dict(),
+            'log_lambda': self.log_lambda.detach().clone(),
+            'lambda_optimizer': self.lambda_optimizer.state_dict(),
+            'log_alpha': (
+                self.log_alpha.detach().clone() if self.auto_entropy else None),
+            'alpha_optimizer': (
+                self.alpha_optimizer.state_dict()
+                if self.auto_entropy else None),
+            'alpha': float(self.alpha),
+            'temperature_contract': self.temperature_contract,
+            'cost_limit_semantics': self.cost_limit_semantics,
+            'policy_sampling_state': self.policy_net.sampling_state(),
+        }
+
+    def load_training_state_dict(self, state):
+        if state.get('format') != 'freqduet-lower-training-v4':
+            raise ValueError('not a FreqDuet v4 lower training checkpoint')
+        if state.get('temperature_contract') != self.temperature_contract:
+            raise ValueError('lower temperature contract mismatch')
+        if state.get('cost_limit_semantics') != self.cost_limit_semantics:
+            raise ValueError('lower cost-limit semantics mismatch')
+        self.policy_net.load_state_dict(state['policy'])
+        self.q_net.load_state_dict(state['q_net'])
+        self.target_q_net.load_state_dict(state['target_q_net'])
+        self.cost_q_net.load_state_dict(state['cost_q_net'])
+        self.target_cost_q_net.load_state_dict(state['target_cost_q_net'])
+        self.policy_optimizer.load_state_dict(state['policy_optimizer'])
+        self.q_optimizer.load_state_dict(state['q_optimizer'])
+        self.cost_q_optimizer.load_state_dict(state['cost_q_optimizer'])
+        self.log_lambda.data.copy_(state['log_lambda'].to(self.device))
+        self.lambda_optimizer.load_state_dict(state['lambda_optimizer'])
+        if self.auto_entropy:
+            if state.get('log_alpha') is None:
+                raise ValueError('lower checkpoint is missing entropy state')
+            self.log_alpha.data.copy_(state['log_alpha'].to(self.device))
+            self.alpha_optimizer.load_state_dict(state['alpha_optimizer'])
+        self.alpha = float(state['alpha'])
+        self.policy_net.set_sampling_state(state.get('policy_sampling_state'))
+
     def save(self, path):
         torch.save({
             'policy': self.policy_net.state_dict(),
@@ -532,6 +699,10 @@ class RESACLagrangianTrainer:
             'cost_q_net': self.cost_q_net.state_dict(),
             'log_lambda': self.log_lambda.data,
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
+            'temperature_contract': self.temperature_contract,
+            'entropy_action_coordinates': getattr(
+                self.policy_net, 'entropy_action_coordinates', 'categorical'),
+            'policy_sampling_state': self.policy_net.sampling_state(),
         }, path)
 
     def load(self, path):
@@ -544,3 +715,13 @@ class RESACLagrangianTrainer:
         self.log_lambda.data = ckpt['log_lambda']
         if ckpt.get('log_alpha') is not None:
             self.log_alpha.data = ckpt['log_alpha']
+            if self.temperature_contract == "bounded_log_parameter_v4":
+                self.log_alpha.data.clamp_(
+                    min=float(np.log(self.minimum_alpha)),
+                    max=float(np.log(self.maximum_alpha)))
+                self.alpha = self.log_alpha.exp().item()
+            else:
+                self.alpha = min(
+                    self.log_alpha.exp().item(), self.maximum_alpha)
+        self.policy_net.set_sampling_state(
+            ckpt.get('policy_sampling_state'))

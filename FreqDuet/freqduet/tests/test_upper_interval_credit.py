@@ -103,6 +103,41 @@ class UpperIntervalOutcomeTrackerTest(unittest.TestCase):
         outcome = tracker.close(True, 1.0)
         self.assertEqual(outcome["headway_sample_count"], 0)
 
+    def test_v4_wait_credit_owns_only_frozen_low_frequency_mass(self):
+        tracker = UpperIntervalOutcomeTracker(
+            enabled=True,
+            wait_ownership="frozen_low_frequency",
+        )
+        tracker.begin(True, 0.0)
+        tracker.record_step(
+            dt_s=10.0,
+            waiting_by_direction={True: 10.0, False: 0.0},
+            waiting_low_by_direction={True: 6.5, False: 0.0},
+            fleet_by_direction={True: 0.0, False: 0.0},
+            n_fleet_target=12.0,
+            headway_events=[],
+        )
+        outcome = tracker.close(True, 10.0)
+
+        self.assertEqual(outcome["wait_ownership"], "frozen_low_frequency")
+        self.assertAlmostEqual(outcome["waiting_exposure_s"], 65.0)
+        self.assertAlmostEqual(outcome["waiting_total_exposure_s"], 100.0)
+
+    def test_v4_wait_credit_rejects_missing_frequency_ownership(self):
+        tracker = UpperIntervalOutcomeTracker(
+            enabled=True,
+            wait_ownership="frozen_low_frequency",
+        )
+        tracker.begin(True, 0.0)
+        with self.assertRaisesRegex(ValueError, "requires frozen LF"):
+            tracker.record_step(
+                dt_s=1.0,
+                waiting_by_direction={True: 1.0, False: 0.0},
+                fleet_by_direction={True: 0.0, False: 0.0},
+                n_fleet_target=12.0,
+                headway_events=[],
+            )
+
     def test_duplicate_stream_open_fails_fast(self):
         tracker = UpperIntervalOutcomeTracker(enabled=True)
         tracker.begin(True, 0.0)

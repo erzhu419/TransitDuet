@@ -1,9 +1,11 @@
 """
 upper/resac_upper.py
 ====================
-RE-SAC for the adaptive target-headway upper policy.
+Pessimistic ensemble SAC for the adaptive target-headway upper policy.
 
-Same ensemble Q + epistemic penalty as the lower RE-SAC, but:
+The historical module/class name is retained for checkpoint compatibility; the
+v4 manuscript describes the implemented equations directly rather than
+claiming exact equivalence to a named RE-SAC paper. Compared with the lower:
   - No Lagrangian cost constraint (fleet constraint via θ-OGD instead).
   - Action dim is 1 in the main HIRO configuration (per-dispatch
     target-headway shift δ_t ∈ [-120, +120] s); the constructor still accepts
@@ -29,8 +31,9 @@ import random
 class UpperReplayBuffer:
     """Simple replay buffer for (s, a, r, s') dispatch transitions."""
 
-    def __init__(self, capacity=50000):
+    def __init__(self, capacity=50000, seed=None):
         self.buffer = deque(maxlen=int(capacity))
+        self._rng = random if seed is None else random.Random(int(seed))
 
     def push(
         self, state, action, reward, next_state, done, duration_steps=1.0
@@ -48,7 +51,7 @@ class UpperReplayBuffer:
         ))
 
     def sample(self, batch_size):
-        batch = random.sample(self.buffer, batch_size)
+        batch = self._rng.sample(self.buffer, batch_size)
         s, a, r, ns, d, duration = zip(*batch)
         return (np.array(s), np.array(a),
                 np.array(r).reshape(-1, 1),
@@ -58,6 +61,29 @@ class UpperReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
+    def rng_state(self):
+        return None if self._rng is random else self._rng.getstate()
+
+    def set_rng_state(self, state):
+        if state is not None:
+            if self._rng is random:
+                raise ValueError("cannot restore an isolated state into global RNG")
+            self._rng.setstate(state)
+
+    def state_dict(self):
+        return {
+            "capacity": int(self.buffer.maxlen),
+            "buffer": list(self.buffer),
+            "rng_state": self.rng_state(),
+        }
+
+    def load_state_dict(self, state):
+        capacity = int(state["capacity"])
+        if capacity != int(self.buffer.maxlen):
+            raise ValueError("upper replay capacity does not match checkpoint")
+        self.buffer = deque(state["buffer"], maxlen=capacity)
+        self.set_rng_state(state.get("rng_state"))
+
 
 # ──────────────────── Networks ────────────────────
 
@@ -65,7 +91,8 @@ class BoundedGaussianPolicy(nn.Module):
     """Gaussian policy with action mapped to [action_low, action_high] via sigmoid."""
 
     def __init__(self, state_dim, action_dim, hidden_dim=64,
-                 action_low=None, action_high=None):
+                 action_low=None, action_high=None, sample_seed=None,
+                 device="cpu"):
         super().__init__()
         self.action_dim = action_dim
 
@@ -85,6 +112,11 @@ class BoundedGaussianPolicy(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.mean = nn.Linear(hidden_dim, action_dim)
         self.log_std = nn.Linear(hidden_dim, action_dim)
+        self._sample_generator = None
+        if sample_seed is not None:
+            self._sample_generator = torch.Generator(
+                device=torch.device(device).type)
+            self._sample_generator.manual_seed(int(sample_seed))
 
         # Init near sigmoid(0) = 0.5 → mid-range
         nn.init.zeros_(self.mean.bias)
@@ -102,7 +134,13 @@ class BoundedGaussianPolicy(nn.Module):
         mean, log_std = self.forward(state)
         std = log_std.exp()
         dist = Normal(mean, std)
-        z = dist.rsample()
+        if self._sample_generator is None:
+            z = dist.rsample()
+        else:
+            noise = torch.randn(
+                mean.shape, dtype=mean.dtype, device=mean.device,
+                generator=self._sample_generator)
+            z = mean + std * noise
         # Sigmoid squashing → [0, 1] → scale to [low, high]
         u = torch.sigmoid(z)
         action = self.action_low + u * self.action_range
@@ -126,14 +164,26 @@ class BoundedGaussianPolicy(nn.Module):
                 u = torch.sigmoid(mean)
             else:
                 std = log_std.exp()
-                z = Normal(mean, std).sample()
+                if self._sample_generator is None:
+                    z = Normal(mean, std).sample()
+                else:
+                    noise = torch.randn(
+                        mean.shape, dtype=mean.dtype, device=mean.device,
+                        generator=self._sample_generator)
+                    z = mean + std * noise
                 u = torch.sigmoid(z)
             action = self.action_low + u * self.action_range
         return action.squeeze(0).cpu().numpy()
 
-    def log_prob(self, state, action, epsilon=1e-6):
+    def log_prob(self, state, action, epsilon=1e-6,
+                 coordinates="normalized_unit_interval"):
         """Compute log-prob of a given action under the current policy.
         Used by TPC-Lower for importance-weighted lower training."""
+        coordinates = str(coordinates).strip().lower()
+        if coordinates not in {
+                "normalized_unit_interval", "physical"}:
+            raise ValueError(
+                "coordinates must be normalized_unit_interval or physical")
         if isinstance(state, np.ndarray):
             state = torch.from_numpy(state).float()
         if isinstance(action, np.ndarray):
@@ -152,15 +202,34 @@ class BoundedGaussianPolicy(nn.Module):
             z = torch.log(u / (1.0 - u))
             dist = Normal(mean, std)
             lp = dist.log_prob(z) - torch.log(u * (1.0 - u) + epsilon)
+            if coordinates == "physical":
+                lp = lp - torch.log(self.action_range)
             lp = lp.sum(-1)
         return lp.cpu().numpy().squeeze()
+
+    def normalized_action(self, action, epsilon=1e-6):
+        action = np.asarray(action, dtype=np.float64)
+        low = self.action_low.detach().cpu().numpy()
+        span = self.action_range.detach().cpu().numpy()
+        return np.clip((action - low) / span, epsilon, 1.0 - epsilon)
+
+    def sampling_state(self):
+        if self._sample_generator is None:
+            return None
+        return self._sample_generator.get_state()
+
+    def set_sampling_state(self, state):
+        if state is not None:
+            if self._sample_generator is None:
+                raise ValueError("policy has no isolated sampling generator")
+            self._sample_generator.set_state(state)
 
 
 class CategoricalPlanPolicy(nn.Module):
     """Categorical policy over a finite library of timetable curves."""
 
     def __init__(self, state_dim, action_candidates, hidden_dim=64,
-                 init_w=3e-3):
+                 init_w=3e-3, sample_seed=None, device="cpu"):
         super().__init__()
         candidates = torch.as_tensor(
             action_candidates, dtype=torch.float32)
@@ -174,6 +243,11 @@ class CategoricalPlanPolicy(nn.Module):
         self.logits = nn.Linear(hidden_dim, candidates.shape[0])
         self.logits.weight.data.uniform_(-init_w, init_w)
         self.logits.bias.data.uniform_(-init_w, init_w)
+        self._sample_generator = None
+        if sample_seed is not None:
+            self._sample_generator = torch.Generator(
+                device=torch.device(device).type)
+            self._sample_generator.manual_seed(int(sample_seed))
 
     def forward(self, state):
         x = F.relu(self.fc1(state))
@@ -188,7 +262,11 @@ class CategoricalPlanPolicy(nn.Module):
 
     def evaluate(self, state):
         probs, log_probs, logits = self.dist_info(state)
-        idx = torch.distributions.Categorical(probs=probs).sample()
+        if self._sample_generator is None:
+            idx = torch.distributions.Categorical(probs=probs).sample()
+        else:
+            idx = torch.multinomial(
+                probs, 1, generator=self._sample_generator).squeeze(-1)
         action = self.action_candidates[idx]
         log_prob = log_probs.gather(1, idx.view(-1, 1))
         return action, log_prob, idx.view(-1, 1).float(), logits, probs
@@ -204,7 +282,11 @@ class CategoricalPlanPolicy(nn.Module):
             if deterministic:
                 idx = probs.argmax(dim=-1)
             else:
-                idx = torch.distributions.Categorical(probs=probs).sample()
+                if self._sample_generator is None:
+                    idx = torch.distributions.Categorical(probs=probs).sample()
+                else:
+                    idx = torch.multinomial(
+                        probs, 1, generator=self._sample_generator).squeeze(-1)
             action = self.action_candidates[idx]
         return action.squeeze(0).cpu().numpy()
 
@@ -232,6 +314,17 @@ class CategoricalPlanPolicy(nn.Module):
                     "categorical policy received an action outside its library")
             result = log_probs.gather(1, idx).squeeze(-1)
         return result.cpu().numpy().squeeze()
+
+    def sampling_state(self):
+        if self._sample_generator is None:
+            return None
+        return self._sample_generator.get_state()
+
+    def set_sampling_state(self, state):
+        if state is not None:
+            if self._sample_generator is None:
+                raise ValueError("policy has no isolated sampling generator")
+            self._sample_generator.set_state(state)
 
 
 class EnsembleQNetwork(nn.Module):
@@ -343,7 +436,7 @@ class IndexedDiscreteEnsembleQNetwork(nn.Module):
 
 class RESACUpperTrainer:
     """
-    RE-SAC for upper-level timetable policy (no Lagrangian).
+    Pessimistic ensemble SAC for the upper timetable policy (no Lagrangian).
     Fleet constraint handled externally by θ-OGD reward modulation.
     """
 
@@ -356,6 +449,9 @@ class RESACUpperTrainer:
                  weight_reg_mode="sum",
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3,
+                 initial_alpha=0.1, minimum_alpha=1e-5,
+                 temperature_contract="legacy_capped_scalar",
+                 policy_sample_seed=None, replay_seed=None,
                  replay_capacity=50000, device='cpu'):
         self.device = device
         self.gamma = gamma
@@ -374,7 +470,8 @@ class RESACUpperTrainer:
                 "discrete_critic must be 'continuous_action' or 'indexed'")
 
         # Replay buffer for dispatch transitions
-        self.replay_buffer = UpperReplayBuffer(replay_capacity)
+        self.replay_buffer = UpperReplayBuffer(
+            replay_capacity, seed=replay_seed)
 
         self.discrete_actions = None
         if action_candidates is not None:
@@ -389,12 +486,14 @@ class RESACUpperTrainer:
             if np.unique(candidates, axis=0).shape[0] != candidates.shape[0]:
                 raise ValueError("action_candidates contains duplicate rows")
             self.policy_net = CategoricalPlanPolicy(
-                state_dim, candidates, hidden_dim).to(device)
+                state_dim, candidates, hidden_dim,
+                sample_seed=policy_sample_seed, device=device).to(device)
             self.discrete_actions = self.policy_net.action_candidates
         else:
             self.policy_net = BoundedGaussianPolicy(
                 state_dim, action_dim, hidden_dim,
-                action_low, action_high).to(device)
+                action_low, action_high, sample_seed=policy_sample_seed,
+                device=device).to(device)
 
         if self.discrete_actions is None and self.discrete_critic != "continuous_action":
             raise ValueError(
@@ -420,16 +519,37 @@ class RESACUpperTrainer:
         self.q_optimizer = optim.Adam(self.q_net.parameters(), lr=lr)
 
         # Entropy
+        self.temperature_contract = str(temperature_contract).strip().lower()
+        if self.temperature_contract not in {
+                "legacy_capped_scalar", "bounded_log_parameter_v4"}:
+            raise ValueError(
+                "temperature_contract must be legacy_capped_scalar or "
+                "bounded_log_parameter_v4")
+        self.maximum_alpha = float(maximum_alpha)
+        self.minimum_alpha = float(minimum_alpha)
+        if not (0.0 < self.minimum_alpha <= self.maximum_alpha):
+            raise ValueError("require 0 < minimum_alpha <= maximum_alpha")
+        initial_alpha = float(initial_alpha)
         if auto_entropy:
-            self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
+            if self.temperature_contract == "bounded_log_parameter_v4":
+                initial_alpha = float(np.clip(
+                    initial_alpha, self.minimum_alpha, self.maximum_alpha))
+                initial_log_alpha = float(np.log(initial_alpha))
+            else:
+                initial_log_alpha = 0.0
+            self.log_alpha = torch.tensor(
+                [initial_log_alpha], dtype=torch.float32,
+                requires_grad=True, device=device)
             self.alpha_optimizer = optim.Adam([self.log_alpha], lr=lr)
             if self.discrete_actions is not None:
                 self.target_entropy = 0.98 * float(np.log(
                     max(int(self.discrete_actions.shape[0]), 2)))
             else:
                 self.target_entropy = -float(action_dim)
-        self.alpha = 0.1
-        self.maximum_alpha = maximum_alpha
+        self.alpha = (
+            initial_alpha
+            if self.temperature_contract == "bounded_log_parameter_v4"
+            else 0.1)
 
     def _discrete_q_values(self, q_net, state):
         candidates = self.discrete_actions
@@ -546,7 +666,14 @@ class RESACUpperTrainer:
             self.alpha_optimizer.zero_grad()
             alpha_loss.backward()
             self.alpha_optimizer.step()
-            self.alpha = min(self.log_alpha.exp().item(), self.maximum_alpha)
+            if self.temperature_contract == "bounded_log_parameter_v4":
+                self.log_alpha.data.clamp_(
+                    min=float(np.log(self.minimum_alpha)),
+                    max=float(np.log(self.maximum_alpha)))
+                self.alpha = self.log_alpha.exp().item()
+            else:
+                self.alpha = min(
+                    self.log_alpha.exp().item(), self.maximum_alpha)
 
         # ── Soft target update ──
         for tp, p in zip(self.target_q_net.parameters(), self.q_net.parameters()):
@@ -571,12 +698,53 @@ class RESACUpperTrainer:
             'upper_duration_steps_mean': duration_steps.mean().item(),
         }
 
+    def training_state_dict(self):
+        return {
+            'format': 'freqduet-upper-training-v4',
+            'policy': self.policy_net.state_dict(),
+            'q_net': self.q_net.state_dict(),
+            'target_q_net': self.target_q_net.state_dict(),
+            'policy_optimizer': self.policy_optimizer.state_dict(),
+            'q_optimizer': self.q_optimizer.state_dict(),
+            'log_alpha': (
+                self.log_alpha.detach().clone() if self.auto_entropy else None),
+            'alpha_optimizer': (
+                self.alpha_optimizer.state_dict()
+                if self.auto_entropy else None),
+            'alpha': float(self.alpha),
+            'temperature_contract': self.temperature_contract,
+            'policy_sampling_state': self.policy_net.sampling_state(),
+            'replay_buffer': self.replay_buffer.state_dict(),
+        }
+
+    def load_training_state_dict(self, state):
+        if state.get('format') != 'freqduet-upper-training-v4':
+            raise ValueError('not a FreqDuet v4 upper training checkpoint')
+        if state.get('temperature_contract') != self.temperature_contract:
+            raise ValueError('upper temperature contract mismatch')
+        self.policy_net.load_state_dict(state['policy'])
+        self.q_net.load_state_dict(state['q_net'])
+        self.target_q_net.load_state_dict(state['target_q_net'])
+        self.policy_optimizer.load_state_dict(state['policy_optimizer'])
+        self.q_optimizer.load_state_dict(state['q_optimizer'])
+        if self.auto_entropy:
+            if state.get('log_alpha') is None:
+                raise ValueError('upper checkpoint is missing entropy state')
+            self.log_alpha.data.copy_(state['log_alpha'].to(self.device))
+            self.alpha_optimizer.load_state_dict(state['alpha_optimizer'])
+        self.alpha = float(state['alpha'])
+        self.policy_net.set_sampling_state(state.get('policy_sampling_state'))
+        self.replay_buffer.load_state_dict(state['replay_buffer'])
+
     def save(self, path):
         torch.save({
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
             'discrete_critic': self.discrete_critic,
+            'temperature_contract': self.temperature_contract,
+            'policy_sampling_state': self.policy_net.sampling_state(),
+            'replay_sampling_state': self.replay_buffer.rng_state(),
         }, path)
 
     def load(self, path):
@@ -606,3 +774,15 @@ class RESACUpperTrainer:
         self.target_q_net.load_state_dict(ckpt['q_net'])
         if ckpt.get('log_alpha') is not None:
             self.log_alpha.data = ckpt['log_alpha']
+            if self.temperature_contract == "bounded_log_parameter_v4":
+                self.log_alpha.data.clamp_(
+                    min=float(np.log(self.minimum_alpha)),
+                    max=float(np.log(self.maximum_alpha)))
+                self.alpha = self.log_alpha.exp().item()
+            else:
+                self.alpha = min(
+                    self.log_alpha.exp().item(), self.maximum_alpha)
+        self.policy_net.set_sampling_state(
+            ckpt.get('policy_sampling_state'))
+        self.replay_buffer.set_rng_state(
+            ckpt.get('replay_sampling_state'))

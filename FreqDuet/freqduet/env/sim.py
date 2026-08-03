@@ -62,6 +62,17 @@ class env_bus(object):
         self.fixed_pool_initial_up = (
             None if initial_up is None else int(initial_up)
         )
+        self.upper_fleet_state_mode = str(self.env_config.get(
+            'upper_fleet_state_mode', 'legacy_none')).strip().lower()
+        if self.upper_fleet_state_mode not in {
+                'legacy_none', 'fixed_pool_readiness_v4'}:
+            raise ValueError(
+                'env.upper_fleet_state_mode must be legacy_none or '
+                'fixed_pool_readiness_v4')
+        if (self.upper_fleet_state_mode == 'fixed_pool_readiness_v4'
+                and self.fleet_inventory_mode != 'fixed_pool'):
+            raise ValueError(
+                'fixed_pool_readiness_v4 requires fleet_inventory_mode=fixed_pool')
         self.headway_state_mode = 'arrival_event'
         self.lower_state_input_schema = 'legacy_headway_deviation'
         self.lower_observation_contract = str(self.env_config.get(
@@ -133,7 +144,9 @@ class env_bus(object):
 
         self._base_state_dim = 8 + len(self.routes)//2  # +1 for headway_dev
         self.state_dim = self._base_state_dim
-        self.upper_state_dim = 11
+        self.upper_state_dim = (
+            11 + (4 if self.upper_fleet_state_mode
+                  == 'fixed_pool_readiness_v4' else 0))
 
         # FreqDuet: optional causal frequency-separated demand features.
         self.frequency_enabled = False
@@ -537,6 +550,33 @@ class env_bus(object):
             buses = [bus for bus in buses if bus.direction == bool(direction)]
         return len(buses)
 
+    def _upper_fleet_readiness_features(self, trip):
+        if self.upper_fleet_state_mode != 'fixed_pool_readiness_v4':
+            return []
+        direction = bool(trip.direction)
+        capacity = float(self._fleet_capacity())
+        ready_same = self._ready_vehicle_count(direction) / capacity
+        ready_other = self._ready_vehicle_count(not direction) / capacity
+        # A vehicle currently operating in the opposite direction will finish
+        # at the terminal required by this dispatch and then flip direction.
+        inbound_same = sum(
+            1 for bus in self.bus_all
+            if bus.on_route and bool(bus.direction) != direction
+        ) / capacity
+        overdue = [
+            max(0.0, float(self.current_time) - float(getattr(
+                candidate, '_freqduet_scheduled_launch',
+                candidate.launch_time)))
+            for candidate in self.timetables
+            if (not candidate.launched
+                and bool(candidate.direction) == direction
+                and float(getattr(
+                    candidate, '_freqduet_scheduled_launch',
+                    candidate.launch_time)) <= float(self.current_time))
+        ]
+        overdue_pressure = min(max(overdue, default=0.0) / 600.0, 3.0)
+        return [ready_same, ready_other, inbound_same, overdue_pressure]
+
     def launch_bus(self, trip, actual_launch=None):
         # Trip set(self.timetable) contain both direction trips. So we have to make sure the direction and launch time
         # is satisfied before the trip launched.
@@ -574,6 +614,7 @@ class env_bus(object):
         # Enumerate trips in timetables, if current_time<=launch_time of the trip, then launch it.
         # E.X. timetables = [6:00/launched, 6:05, 6:10], current time is 6:05, then iteration will judge from first trip [6:00]
         # But [6:00] is launched, so next is [6:05]
+        self._initialize_fixed_pool()
         for i, trip in enumerate(self.timetables):
             eligible_launch = getattr(
                 trip, '_freqduet_scheduled_launch', trip.launch_time)
@@ -866,6 +907,16 @@ class env_bus(object):
                 )
                 for direction in (True, False)
             }
+            waiting_low_by_direction = {
+                direction: sum(
+                    float(getattr(
+                        passenger, 'frequency_low_share', 1.0))
+                    for station in self.stations
+                    if bool(station.direction) == direction
+                    for passenger in station.waiting_passengers
+                )
+                for direction in (True, False)
+            }
             fleet_by_direction = {
                 direction: sum(
                     1 for bus in self.bus_all
@@ -876,6 +927,7 @@ class env_bus(object):
             self._upper_interval_outcome_tracker.record_step(
                 dt_s=self.time_step,
                 waiting_by_direction=waiting_by_direction,
+                waiting_low_by_direction=waiting_low_by_direction,
                 fleet_by_direction=fleet_by_direction,
                 n_fleet_target=getattr(self, '_n_fleet_target', 12),
                 headway_events=self.headway_events.events,
@@ -1024,11 +1076,16 @@ class env_bus(object):
                     self.frequency_tracker.upper_feature_dim - 1
                     if self.frequency_replace_upper_demand
                     else self.frequency_tracker.upper_feature_dim)
-            self.upper_state_dim = 11 + upper_extra
+            self.upper_state_dim = (
+                11 + upper_extra
+                + (4 if self.upper_fleet_state_mode
+                   == 'fixed_pool_readiness_v4' else 0))
         else:
             self.frequency_tracker = None
             self.state_dim = self._base_state_dim + self.lower_context_dim
-            self.upper_state_dim = 11
+            self.upper_state_dim = (
+                11 + (4 if self.upper_fleet_state_mode
+                      == 'fixed_pool_readiness_v4' else 0))
         log_output_dir = self.frequency_logger_cfg.get('output_dir', None)
         if log_output_dir:
             self.configure_frequency_logging(log_output_dir)
@@ -1546,6 +1603,7 @@ class env_bus(object):
             n_fleet_norm,                                  # [10] v2k: fleet budget
         ]
         state.extend(freq_extra)
+        state.extend(self._upper_fleet_readiness_features(trip))
         return np.array(state, dtype=np.float32)
 
     def set_timetable_from_planner(self, headway_params):

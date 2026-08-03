@@ -1,0 +1,61 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v4_main_hiro
+
+protocol:
+  version: freqduet-eval-v4
+  role: physical_causal_frequency_owned_main
+
+randomness:
+  mode: isolated_streams_v4
+
+env:
+  fleet_inventory_mode: fixed_pool
+  upper_fleet_state_mode: fixed_pool_readiness_v4
+  observation_contract: deployable_apc_avl_v4
+  headway_reward_mode: forward_event_only
+
+upper:
+  algorithm_id: pessimistic_ensemble_sac_v4
+  initial_alpha: 0.02
+  minimum_alpha: 0.0001
+  temperature_contract: bounded_log_parameter_v4
+  timetable_planner:
+    terminal_schedule_mode: exact_headway_curve
+    terminal_dispatch: true
+    terminal_headway_floor:
+      enable: false
+      ratio: 0.0
+      min_s: 0.0
+  interval_credit:
+    wait_ownership: frozen_low_frequency
+
+lower:
+  algorithm_id: pessimistic_ensemble_sac_lagrangian_v4
+  observation_contract: deployable_apc_avl_v4
+  headway_reward_mode: forward_event_only
+  unobserved_action_mode: zero
+  initial_alpha: 0.05
+  minimum_alpha: 0.0001
+  temperature_contract: bounded_log_parameter_v4
+  entropy_action_coordinates: normalized_unit_interval
+  cost_limit_semantics: per_decision_rate
+  state_encoder:
+    input_schema: causal_forward_v4
+
+frequency:
+  forecast_mode: causal
+  observation_source: apc_boardings
+
+reward_attribution:
+  assignment_mode: frozen_passenger
+  # LF queue exposure is owned by upper.interval_credit in v4.
+  upper_wait_weight: 0.0
+
+coupling:
+  tpc:
+    target_distribution: bounded_logistic_normal_v4
+    latent_sigma: 0.25
+
+training:
+  decouple_init_seeds: true
+  checkpoint_contract: exact_training_state_v4

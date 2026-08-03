@@ -9,6 +9,7 @@ import numpy as np
 
 
 _ASSIGNMENT_MODES = {"additive", "local_mean"}
+_WAIT_OWNERSHIP_MODES = {"all_wait_legacy", "frozen_low_frequency"}
 
 
 @dataclass
@@ -17,6 +18,7 @@ class _IntervalAccumulator:
     direction: bool | None
     sampled_duration_s: float = 0.0
     waiting_exposure_s: float = 0.0
+    waiting_total_exposure_s: float = 0.0
     fleet_excess_exposure_bus_s: float = 0.0
     headway_abs_deviation_sum: float = 0.0
     headway_sample_count: int = 0
@@ -44,6 +46,7 @@ class UpperIntervalOutcomeTracker:
         headway_reference: float = 1.0,
         fleet_reference: float = 1.0,
         component_clip: float = 4.0,
+        wait_ownership: str = "all_wait_legacy",
     ) -> None:
         self.enabled = bool(enabled)
         self.assignment_mode = str(assignment_mode).strip().lower()
@@ -66,6 +69,11 @@ class UpperIntervalOutcomeTracker:
             fleet_reference, "fleet_reference")
         self.component_clip = self._positive(
             component_clip, "component_clip")
+        self.wait_ownership = str(wait_ownership).strip().lower()
+        if self.wait_ownership not in _WAIT_OWNERSHIP_MODES:
+            raise ValueError(
+                "upper.interval_credit.wait_ownership must be "
+                "all_wait_legacy or frozen_low_frequency")
         self.reset()
 
     @staticmethod
@@ -102,6 +110,8 @@ class UpperIntervalOutcomeTracker:
             headway_reference=cfg.get("headway_reference", 1.0),
             fleet_reference=cfg.get("fleet_reference", 1.0),
             component_clip=cfg.get("component_clip", 4.0),
+            wait_ownership=cfg.get(
+                "wait_ownership", "all_wait_legacy"),
         )
 
     def reset(self) -> None:
@@ -130,6 +140,7 @@ class UpperIntervalOutcomeTracker:
         *,
         dt_s: float,
         waiting_by_direction: Mapping[bool, float],
+        waiting_low_by_direction: Mapping[bool, float] | None = None,
         fleet_by_direction: Mapping[bool, float],
         n_fleet_target: float,
         headway_events: Sequence[Mapping[str, Any]],
@@ -143,19 +154,33 @@ class UpperIntervalOutcomeTracker:
             return
 
         target_global = max(float(n_fleet_target), 1.0)
+        if (self.wait_ownership == "frozen_low_frequency"
+                and waiting_low_by_direction is None):
+            raise ValueError(
+                "frozen_low_frequency interval credit requires frozen LF "
+                "queue mass")
         for accumulator in self._active.values():
             direction = accumulator.direction
             if direction is None:
                 waiting = sum(float(v) for v in waiting_by_direction.values())
+                waiting_low = sum(
+                    float(v) for v in (waiting_low_by_direction or {}).values())
                 fleet = sum(float(v) for v in fleet_by_direction.values())
                 fleet_target = target_global
             else:
                 waiting = float(waiting_by_direction.get(direction, 0.0))
+                waiting_low = float(
+                    (waiting_low_by_direction or {}).get(direction, 0.0))
                 fleet = float(fleet_by_direction.get(direction, 0.0))
                 fleet_target = max(target_global / 2.0, 1.0)
 
             accumulator.sampled_duration_s += dt_s
-            accumulator.waiting_exposure_s += max(waiting, 0.0) * dt_s
+            accumulator.waiting_total_exposure_s += max(waiting, 0.0) * dt_s
+            owned_waiting = (
+                waiting_low
+                if self.wait_ownership == "frozen_low_frequency"
+                else waiting)
+            accumulator.waiting_exposure_s += max(owned_waiting, 0.0) * dt_s
             accumulator.fleet_excess_exposure_bus_s += (
                 max(0.0, fleet - fleet_target) * dt_s)
 
@@ -197,6 +222,9 @@ class UpperIntervalOutcomeTracker:
             "sampled_duration_s": accumulator.sampled_duration_s,
             "coverage": float(np.clip(coverage, 0.0, 1.0)),
             "waiting_exposure_s": accumulator.waiting_exposure_s,
+            "waiting_total_exposure_s": (
+                accumulator.waiting_total_exposure_s),
+            "wait_ownership": self.wait_ownership,
             "fleet_excess_exposure_bus_s": (
                 accumulator.fleet_excess_exposure_bus_s),
             "headway_abs_deviation_sum": (

@@ -1,5 +1,16 @@
 # FreqDuet Submission Re-audit and Protocol v4 Rebuild
 
+## 2026-08-04 implementation update
+
+The bottom-up v4 contract is now implemented and machine-validated. See
+`md/protocol_v4_method_contract_2026-08-04.md` and
+`configs_freqduet/F_freqduet_protocol_v4_main_hiro.yaml`. The implementation
+includes exact executable headway curves, a conserved vehicle pool, terminal
+readiness state, deployable APC/AVL sensing, immutable passenger LF/HF credit,
+non-overlapping upper/lower wait ownership, bounded entropy units, named random
+streams, and exact training resume. These changes invalidate numerical reuse
+from v3; fresh v4 selection and untouched-seed confirmation remain mandatory.
+
 Date: 2026-08-03
 
 ## Decision

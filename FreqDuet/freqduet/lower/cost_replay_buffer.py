@@ -19,10 +19,11 @@ class CostReplayBuffer:
     Stores transitions with cost and trip_id for TAP integration.
     """
 
-    def __init__(self, capacity=1_000_000):
+    def __init__(self, capacity=1_000_000, seed=None):
         self.capacity = int(capacity)
         self.buffer = deque(maxlen=self.capacity)
         self.last_episode_step = 0
+        self._rng = random if seed is None else random.Random(int(seed))
 
     def push(self, state, action, reward, cost, next_state, done, trip_id=0):
         """
@@ -60,7 +61,7 @@ class CostReplayBuffer:
             done:       np.array (batch, 1)
             trip_id:    np.array (batch,) int
         """
-        batch = random.sample(self.buffer, batch_size)
+        batch = self._rng.sample(self.buffer, batch_size)
         states, actions, rewards, costs, next_states, dones, trip_ids = zip(*batch)
         return (
             np.array(states),
@@ -74,3 +75,27 @@ class CostReplayBuffer:
 
     def __len__(self):
         return len(self.buffer)
+
+    def rng_state(self):
+        return None if self._rng is random else self._rng.getstate()
+
+    def set_rng_state(self, state):
+        if state is not None:
+            if self._rng is random:
+                raise ValueError("cannot restore an isolated state into global RNG")
+            self._rng.setstate(state)
+
+    def state_dict(self):
+        return {
+            "capacity": self.capacity,
+            "buffer": list(self.buffer),
+            "last_episode_step": int(self.last_episode_step),
+            "rng_state": self.rng_state(),
+        }
+
+    def load_state_dict(self, state):
+        if int(state["capacity"]) != self.capacity:
+            raise ValueError("lower replay capacity does not match checkpoint")
+        self.buffer = deque(state["buffer"], maxlen=self.capacity)
+        self.last_episode_step = int(state.get("last_episode_step", 0))
+        self.set_rng_state(state.get("rng_state"))
