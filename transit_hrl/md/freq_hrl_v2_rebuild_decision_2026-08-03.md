@@ -361,3 +361,69 @@ Because this audit changes the registered source manifest, it will not be used
 as the final freeze. The final HPO will rerun the complete equal-budget candidate
 space on the hardened revision across all five stress regimes before any
 held-out test seed is loaded.
+
+## Bottom-up algorithm audit after the hardened HPO launch
+
+The 1,400-cell HPO launched from revision
+`11512773e315757cddcb408373ec32b0832da579` is a valid, immutable evaluation of
+the routing and asynchronous-SMDP core. It is not a validation of the complete
+method described in `freq_hrl_dev_manual.md`. The HPO entry point deliberately
+uses direct upper targets and disables the plan curve, leakage penalty,
+primal-dual leakage update, raw-drift recentering, and handcrafted actor prior.
+Its results therefore remain useful as a strong learned core comparison and as
+an ablation, but they cannot be labelled "full Freq-HRL" in a main claim.
+
+The static audit identified three algorithmic gaps that must be closed before a
+new full-method freeze.
+
+1. The trading lower reward currently contains transaction cost, target-tracking
+   error, and leakage cost, but no marginal task term whose value depends on the
+   routed high-frequency observation. With constant transaction-cost mechanics,
+   the lower policy can learn a generic speed-versus-tracking compromise without
+   using HF information. This is insufficient evidence for an HF lower
+   controller. The rebuilt credit contract must expose an additive, auditable
+   lower contribution such as the realized return of the execution deviation
+   from the active plan, plus volume-dependent impact, short-horizon inventory
+   risk, and leakage. Upper and lower credits must reconstruct the observed task
+   reward within numerical tolerance.
+2. `LearnedPlanActionMapper` currently evaluates Bernstein coefficients at one
+   fixed offset and returns a single target. The rollout then holds that target
+   until the next upper decision. This is a coefficient-parameterized target,
+   not an executed plan curve. The full method must retain the active
+   coefficients and causal origin, evaluate the curve at every primitive step,
+   rebase continuously on promotion, and charge smoothness in the upper reward.
+3. A projected lower effect may be used for diagnostics, but it must not replace
+   the raw physical action effect in the constraint. Subtracting a rolling
+   baseline before computing lower LF drift can suppress the measured violation
+   without changing the actual inventory or timetable drift. The full method
+   must train its cost critic and dual variable on raw action-effect leakage;
+   projected metrics remain explicitly labelled sensitivity diagnostics.
+
+The audit also found a one-step timing ambiguity in trading credit assignment.
+The environment marks return on the pre-trade position while a newly selected
+upper target begins accumulating reward in the same macro interval. This mixes
+the previous plan's first-bar return into the new upper transition and is most
+material for short promotion intervals. The rebuilt environment contract must
+declare the observation, execution, and mark-to-market order and test macro
+credit against an exact hand-computed trajectory.
+
+### Required v3 gates
+
+1. A lower-action intervention test must show that changing only causal HF input
+   changes the learned lower action while LF state and plan are fixed.
+2. A reward-conservation test must verify that upper credit, lower credit, and
+   separately reported penalties reconstruct every primitive task reward.
+3. A plan-execution test must verify multiple distinct values along one learned
+   curve and continuity across scheduled and promotion-triggered replans.
+4. A raw-effect leakage test must fail when physical LF drift is large even if a
+   projected diagnostic is small.
+5. A timeline test must verify that no return or demand outcome observed after an
+   action enters that action's state, and that every outcome is credited to the
+   action that could causally affect it.
+6. Full-method HPO and held-out confirmation must be separate from the current
+   routing-core HPO. Both artifacts remain reportable, with immutable source and
+   protocol identities.
+
+Until these gates pass, the project stays in algorithm-rebuild mode. Manuscript
+closeout would preserve an attractive implementation but leave the central
+frequency-responsibility claim underidentified.
