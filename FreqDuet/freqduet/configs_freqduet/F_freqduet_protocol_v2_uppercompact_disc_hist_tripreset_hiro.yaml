@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_hist_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_hist_tripreset_hiro
+
+protocol:
+  role: structural_candidate_trip_boundary_reset
+
+lower:
+  trip_boundary_mode: reset

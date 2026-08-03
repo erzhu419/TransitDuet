@@ -77,6 +77,7 @@ from upper.counterfactual_action_selector import (
 )
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
+from lower.lifecycle import LowerEpisodeLifecycle
 from lower.state_encoder import PhysicalLowerStateEncoder
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
@@ -218,6 +219,9 @@ class DiagnosticLog:
         'lower_policy_loss', 'lower_pi_grad_norm', 'lower_q_grad_norm',
         'lower_alpha', 'lower_lambda',
         'lower_replay_size',
+        'lower_trip_boundary_resets',
+        'lower_pending_states_dropped',
+        'lower_pending_actions_dropped',
         'lower_policy_frozen', 'lower_critic_frozen',
         # upper policy (only after warmup)
         'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
@@ -230,6 +234,7 @@ class DiagnosticLog:
         'upper_policy_frozen',
         # coupling
         'hold_fb_mean', 'hold_fb_std', 'hold_fb_n_trips',
+        'hold_fb_trip_finalizations',
         'hold_fb_dir0_mean', 'hold_fb_dir1_mean',
         'hold_penalty_mean',
         'freq_holdfb_same_hold', 'freq_holdfb_same_wait',
@@ -1752,6 +1757,11 @@ class TransitDuetV2Runner:
 
         self.holding_feedback = HoldingFeedback(
             window_size=coupling_cfg.get('feedback_window', 10))
+        self.lower_lifecycle = LowerEpisodeLifecycle(
+            boundary_mode=lower_cfg.get('trip_boundary_mode', 'legacy'),
+            feedback_mode=coupling_cfg.get(
+                'holding_feedback_finalize_mode', 'episode_end'),
+        )
         self.measurement_proj = MeasurementProjection(
             N_fleet=upper_cfg['N_fleet'],
             lr=coupling_cfg.get('measurement_lr', 0.01))
@@ -6633,6 +6643,7 @@ class TransitDuetV2Runner:
             record_diagnostics = bool(training)
         self.env.reset()
         self.holding_feedback.clear()
+        self.lower_lifecycle.reset_episode()
         self._current_ep = ep
         self._episode_upper_transitions = []
         self._prev_upper_state = None
@@ -6642,6 +6653,10 @@ class TransitDuetV2Runner:
         self._ep_lower_context_gate_values = []
         self._ep_lower_action_bins_gate_values = []
         self._ep_lower_rewards = []
+        self._ep_lower_trip_boundary_resets = 0
+        self._ep_lower_pending_states_dropped = 0
+        self._ep_lower_pending_actions_dropped = 0
+        self._ep_hold_feedback_trip_finalizations = 0
         self._ep_upper_deltas = []
         self._ep_upper_rewards = []
         self._ep_lower_actions_by_dir = {True: [], False: []}
@@ -6934,13 +6949,32 @@ class TransitDuetV2Runner:
 
             state_dict, reward_dict, cost_dict, done = self.env.step(
                 action_dict, render=False)
+            completed_events = self.lower_lifecycle.process(
+                self.env.bus_all,
+                state_dict,
+                action_dict,
+                lower_last_action,
+                self.holding_feedback,
+            )
+            for event in completed_events:
+                if self.lower_lifecycle.boundary_mode == 'reset':
+                    self._ep_lower_trip_boundary_resets += 1
+                    self._ep_lower_pending_states_dropped += int(
+                        event.pending_states_dropped)
+                    self._ep_lower_pending_actions_dropped += int(
+                        event.pending_action_dropped)
+                self._ep_hold_feedback_trip_finalizations += int(
+                    event.feedback_finalized)
 
         env_time = time.time() - t0
 
         # ── Finalize trip holdings ──
-        for bus in self.env.bus_all:
-            if not bus.on_route and hasattr(bus, 'applied_actions') and bus.applied_actions:
-                self.holding_feedback.finalize_trip(bus.trip_id, bus.direction)
+        if self.lower_lifecycle.feedback_mode == 'episode_end':
+            for bus in self.env.bus_all:
+                if (not bus.on_route and hasattr(bus, 'applied_actions')
+                        and bus.applied_actions):
+                    self.holding_feedback.finalize_trip(
+                        bus.trip_id, bus.direction)
 
         # ── Finalize last upper transition ──
         if self._prev_upper_state is not None:
@@ -7563,6 +7597,12 @@ class TransitDuetV2Runner:
             'lower_alpha': lower_m.get('alpha', 0.),
             'lower_lambda': lower_m.get('lambda', self.lower_trainer.lambda_param),
             'lower_replay_size': len(self.replay_buffer),
+            'lower_trip_boundary_resets':
+                self._ep_lower_trip_boundary_resets,
+            'lower_pending_states_dropped':
+                self._ep_lower_pending_states_dropped,
+            'lower_pending_actions_dropped':
+                self._ep_lower_pending_actions_dropped,
             'lower_policy_frozen': lower_m.get('lower_policy_frozen', 0.),
             'lower_critic_frozen': lower_m.get('lower_critic_frozen', 0.),
             # upper policy
@@ -7588,6 +7628,8 @@ class TransitDuetV2Runner:
             'hold_fb_mean': hold_summary.get('mean', 0.),
             'hold_fb_std': hold_summary.get('std', 0.),
             'hold_fb_n_trips': hold_summary.get('n_trips', 0),
+            'hold_fb_trip_finalizations':
+                self._ep_hold_feedback_trip_finalizations,
             'hold_fb_dir0_mean': hold_dir0['rolling_mean'],
             'hold_fb_dir1_mean': hold_dir1['rolling_mean'],
             'hold_penalty_mean': hp_stat['mean'],

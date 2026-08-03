@@ -64,6 +64,8 @@ class Bus(object):
         self.last_action_time = None
         self.last_action_station_id = int(self.last_station.station_id)
         self.back_to_terminal_time = None
+        self.last_completed_trip_id = None
+        self.last_completed_direction = None
 
         self.acceleration = 3 # 加速度
         self.deceleration = 5 # 刹车加速度
@@ -502,6 +504,8 @@ class Bus(object):
         # station_type == 0, means the next_station is terminal, then put this bus to terminal_bus rather than on_route
         # then change the direction of the bus.
         if self.next_station.station_type == 0 and self.on_route:
+            self.last_completed_trip_id = int(self.trip_id)
+            self.last_completed_direction = bool(self.direction)
             self.on_route = False
             self.back_to_terminal_time = current_time
             self.last_station = self.effective_station[-1]
@@ -538,6 +542,8 @@ class Bus(object):
         self.current_speed = 0.
         self.holding_time = 0.
         self.back_to_terminal_time = None
+        self.last_completed_trip_id = None
+        self.last_completed_direction = None
         self.board_num = 0.
         self.alight_num = 0.
         self.last_board_wait_sum_s = 0.0

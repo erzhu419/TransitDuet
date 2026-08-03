@@ -47,10 +47,12 @@ class HoldingFeedback:
         # Cross-episode persistence: EMA of mean holding per direction
         self._ema_holding = {True: 0.0, False: 0.0}
         self._ema_alpha = 0.3  # EMA decay
+        self._finalized_trips = set()
 
     def clear(self):
         """Reset per-episode data. Keep cross-episode EMA."""
         self._trip_actions.clear()
+        self._finalized_trips.clear()
 
     def record_action(self, trip_id, action):
         """
@@ -71,9 +73,13 @@ class HoldingFeedback:
             trip_id: int
             direction: bool (True=上行, False=下行)
         """
+        trip_id = int(trip_id)
+        if trip_id in self._finalized_trips:
+            return False
         actions = self._trip_actions.get(trip_id, [])
         if not actions:
-            return
+            self._finalized_trips.add(trip_id)
+            return False
 
         mean_hold = np.mean(actions)
         std_hold = np.std(actions)
@@ -93,6 +99,12 @@ class HoldingFeedback:
             self._ema_alpha * mean_hold +
             (1 - self._ema_alpha) * self._ema_holding[direction]
         )
+        self._finalized_trips.add(trip_id)
+        return True
+
+    @property
+    def finalized_trip_count(self):
+        return len(self._finalized_trips)
 
     def get_trip_stats(self, trip_id):
         """

@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_hist_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_hist_lifecycle_hiro
+
+protocol:
+  role: structural_candidate_correct_trip_lifecycle
+
+lower:
+  trip_boundary_mode: reset
+
+coupling:
+  holding_feedback_finalize_mode: trip_end
