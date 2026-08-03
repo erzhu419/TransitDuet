@@ -56,6 +56,9 @@ POLICY_MODES = (
     "flat_ppo",
     "generic_hrl_ppo",
 )
+LEARNED_BASELINE_IMPLEMENTATION_VERSION = (
+    "learned_baselines_v3_joint_raw_history_2026_08_03"
+)
 
 RAW_UPPER_LAGS = (0, 8, 32, 119)
 RAW_LOWER_LAGS = (0, 1, 8, 32, 119)
@@ -1059,6 +1062,9 @@ def train_ppo_actor_critic(
             metadata={
                 "policy_mode": "flat_ppo",
                 "baseline": "flat_ppo",
+                "learned_baseline_implementation_version": (
+                    LEARNED_BASELINE_IMPLEMENTATION_VERSION
+                ),
                 "scenario": scenario,
                 "steps": int(steps),
                 "assets": int(assets),
@@ -1190,6 +1196,9 @@ def train_ppo_actor_critic(
         metadata={
             "policy_mode": policy_mode,
             "baseline": policy_mode,
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
+            ),
             "scenario": scenario,
             "steps": int(steps),
             "assets": int(assets),

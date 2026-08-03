@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -43,7 +44,11 @@ from .offpolicy_baseline_validation import (
     OFFPOLICY_MODES,
     train_flat_offpolicy_baseline,
 )
-from .ppo_actor_critic import POLICY_MODES, train_ppo_actor_critic
+from .ppo_actor_critic import (
+    LEARNED_BASELINE_IMPLEMENTATION_VERSION,
+    POLICY_MODES,
+    train_ppo_actor_critic,
+)
 
 
 DEFAULT_SCENARIOS = (
@@ -98,6 +103,74 @@ CONFIRMATORY_FAMILY = "strong_learned_all_baselines_endpoints"
 TRAINING_PATH_PROTOCOL = "fresh_deterministic_path_per_root_and_iteration_v2"
 SELECTION_PROTOCOL = "disjoint_validation_paths"
 LEARNING_GATE_MIN_FRACTION = 0.80
+
+
+def validate_confirmatory_hyperparameter_metadata(
+    *,
+    confirmatory: bool,
+    hyperparameter_source: str,
+    frozen_config_sha256: str,
+    selected_candidate_id: str,
+    frozen_candidate_parameters_sha256: str,
+) -> str:
+    if not confirmatory:
+        return "exploratory_unfrozen"
+    digest = str(frozen_config_sha256).lower()
+    if hyperparameter_source != "frozen_nested_validation":
+        raise ValueError("confirmatory runs require frozen_nested_validation")
+    if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+        raise ValueError("confirmatory runs require a valid frozen config SHA-256")
+    if not str(selected_candidate_id).strip():
+        raise ValueError("confirmatory runs require a selected HPO candidate")
+    parameter_digest = str(frozen_candidate_parameters_sha256).lower()
+    if len(parameter_digest) != 64 or any(
+        char not in "0123456789abcdef" for char in parameter_digest
+    ):
+        raise ValueError("confirmatory runs require a frozen candidate parameter hash")
+    return "frozen_validation_only"
+
+
+def canonical_hyperparameter_sha256(parameters: dict[str, Any]) -> str:
+    canonical = json.dumps(
+        parameters, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def policy_hyperparameters(
+    mode: str,
+    *,
+    ppo_hidden_dim: int,
+    ppo_learning_rate: float,
+    ppo_epochs: int,
+    ppo_minibatch_size: int,
+    ppo_init_log_std: float,
+    training_reward_scale: float,
+    offpolicy_hidden_dim: int,
+    offpolicy_learning_rate: float,
+    offpolicy_replay_capacity: int,
+    offpolicy_warmup_steps: int,
+    offpolicy_batch_size: int,
+    offpolicy_updates_per_step: int,
+) -> dict[str, Any]:
+    if mode in POLICY_MODES:
+        return {
+            "hidden_dim": int(ppo_hidden_dim),
+            "learning_rate": float(ppo_learning_rate),
+            "epochs": int(ppo_epochs),
+            "minibatch_size": int(ppo_minibatch_size),
+            "init_log_std": float(ppo_init_log_std),
+            "reward_scale": float(training_reward_scale),
+        }
+    return {
+        "hidden_dim": int(offpolicy_hidden_dim),
+        "learning_rate": float(offpolicy_learning_rate),
+        "replay_capacity": int(offpolicy_replay_capacity),
+        "warmup_steps": int(offpolicy_warmup_steps),
+        "batch_size": int(offpolicy_batch_size),
+        "updates_per_step": int(offpolicy_updates_per_step),
+        "reward_scale": float(training_reward_scale),
+    }
 
 
 def count_parameters(model: Any) -> int:
@@ -539,6 +612,11 @@ def build_experiment_manifest(
     offpolicy_warmup_steps: int = 256,
     offpolicy_batch_size: int = 64,
     offpolicy_updates_per_step: int = 1,
+    confirmatory: bool = False,
+    hyperparameter_source: str = "exploratory_unfrozen",
+    frozen_config_sha256: str = "",
+    selected_candidate_id: str = "",
+    frozen_candidate_parameters_sha256: str = "",
     shard_index: int = 0,
     num_shards: int = 1,
 ) -> list[dict[str, Any]]:
@@ -553,7 +631,9 @@ def build_experiment_manifest(
     )
     for scenario, mode, replicate_seed in cells:
         run_seed = scenario_optimizer_seed(replicate_seed, scenario)
-        if mode in POLICY_MODES:
+        if mode == "flat_ppo":
+            trainer = "canonical_joint_flat_ppo_v1"
+        elif mode in POLICY_MODES:
             trainer = "frequency_separated_smdp_ppo_v2"
         else:
             algorithm = "sac" if mode == "flat_sac" else "td3"
@@ -573,6 +653,13 @@ def build_experiment_manifest(
             "assets": int(assets),
             "iterations": int(iterations),
             "trainer": trainer,
+            "confirmatory": bool(confirmatory),
+            "hyperparameter_source": str(hyperparameter_source),
+            "frozen_config_sha256": str(frozen_config_sha256),
+            "selected_candidate_id": str(selected_candidate_id),
+            "frozen_candidate_parameters_sha256": str(
+                frozen_candidate_parameters_sha256
+            ),
             "optimizer_seed": run_seed,
             "independent_unit": "training_replicate_seed",
             "shard_index": int(shard_index),
@@ -602,6 +689,12 @@ def build_experiment_manifest(
                 + f" --offpolicy-warmup-steps {int(offpolicy_warmup_steps)}"
                 + f" --offpolicy-batch-size {int(offpolicy_batch_size)}"
                 + f" --offpolicy-updates-per-step {int(offpolicy_updates_per_step)}"
+                + (" --confirmatory" if confirmatory else "")
+                + f" --hyperparameter-source {hyperparameter_source}"
+                + f" --frozen-config-sha256 {frozen_config_sha256 or 'none'}"
+                + f" --selected-candidate-id {selected_candidate_id or 'none'}"
+                + " --frozen-candidate-parameters-sha256 "
+                + (frozen_candidate_parameters_sha256 or "none")
                 + f" --output-dir {output_dir}"
             ),
         })
@@ -736,9 +829,27 @@ def run_strong_learned_baseline_validation(
     offpolicy_warmup_steps: int = 256,
     offpolicy_batch_size: int = 64,
     offpolicy_updates_per_step: int = 1,
+    confirmatory: bool = False,
+    hyperparameter_source: str = "exploratory_unfrozen",
+    frozen_config_sha256: str = "",
+    selected_candidate_id: str = "",
+    frozen_candidate_parameters_sha256: str = "",
     shard_index: int = 0,
     num_shards: int = 1,
 ) -> dict[str, Any]:
+    hyperparameter_protocol_status = validate_confirmatory_hyperparameter_metadata(
+        confirmatory=bool(confirmatory),
+        hyperparameter_source=str(hyperparameter_source),
+        frozen_config_sha256=str(frozen_config_sha256),
+        selected_candidate_id=str(selected_candidate_id),
+        frozen_candidate_parameters_sha256=str(
+            frozen_candidate_parameters_sha256
+        ),
+    )
+    if confirmatory and len(policy_modes) != 1:
+        raise ValueError(
+            "confirmatory cells must contain exactly one policy-specific frozen candidate"
+        )
     rows: list[dict[str, Any]] = []
     run_rows: list[dict[str, Any]] = []
     parameter_budget: list[dict[str, Any]] = []
@@ -767,6 +878,30 @@ def run_strong_learned_baseline_validation(
             raise ValueError(f"unknown scenario: {scenario}")
         if mode not in ALL_POLICY_MODES:
             raise ValueError(f"unknown policy_mode: {mode}")
+        actual_hyperparameters = policy_hyperparameters(
+            mode,
+            ppo_hidden_dim=int(ppo_hidden_dim),
+            ppo_learning_rate=float(ppo_learning_rate),
+            ppo_epochs=int(ppo_epochs),
+            ppo_minibatch_size=int(ppo_minibatch_size),
+            ppo_init_log_std=float(ppo_init_log_std),
+            training_reward_scale=float(training_reward_scale),
+            offpolicy_hidden_dim=int(offpolicy_hidden_dim),
+            offpolicy_learning_rate=float(offpolicy_learning_rate),
+            offpolicy_replay_capacity=int(offpolicy_replay_capacity),
+            offpolicy_warmup_steps=int(offpolicy_warmup_steps),
+            offpolicy_batch_size=int(offpolicy_batch_size),
+            offpolicy_updates_per_step=int(offpolicy_updates_per_step),
+        )
+        actual_hyperparameter_sha256 = canonical_hyperparameter_sha256(
+            actual_hyperparameters
+        )
+        if confirmatory and actual_hyperparameter_sha256 != str(
+            frozen_candidate_parameters_sha256
+        ).lower():
+            raise ValueError(
+                "actual training parameters do not match the frozen candidate"
+            )
         start = time.perf_counter()
         run_seed = scenario_optimizer_seed(replicate_seed, scenario)
         if mode in POLICY_MODES:
@@ -809,6 +944,16 @@ def run_strong_learned_baseline_validation(
                 resample_training_paths=True,
                 reward_scale=float(training_reward_scale),
             )
+        payload["confirmatory"] = bool(confirmatory)
+        payload["hyperparameter_source"] = str(hyperparameter_source)
+        payload["hyperparameter_protocol_status"] = hyperparameter_protocol_status
+        payload["frozen_config_sha256"] = str(frozen_config_sha256)
+        payload["selected_candidate_id"] = str(selected_candidate_id)
+        payload["actual_hyperparameters"] = dict(actual_hyperparameters)
+        payload["actual_hyperparameter_sha256"] = actual_hyperparameter_sha256
+        payload["learned_baseline_implementation_version"] = (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        )
         elapsed = float(time.perf_counter() - start)
         params = count_parameters(model)
         checkpoint_file = (
@@ -829,6 +974,15 @@ def run_strong_learned_baseline_validation(
                 "heldout_test_seeds": list(heldout_test_seeds),
                 "metric_contract_version": METRIC_CONTRACT_VERSION,
                 "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+                "hyperparameter_source": str(hyperparameter_source),
+                "hyperparameter_protocol_status": hyperparameter_protocol_status,
+                "frozen_config_sha256": str(frozen_config_sha256),
+                "selected_candidate_id": str(selected_candidate_id),
+                "actual_hyperparameters": dict(actual_hyperparameters),
+                "actual_hyperparameter_sha256": actual_hyperparameter_sha256,
+                "learned_baseline_implementation_version": (
+                    LEARNED_BASELINE_IMPLEMENTATION_VERSION
+                ),
                 "selected_checkpoint_iteration": int(
                     payload.get("selected_checkpoint_iteration", -1)
                 ),
@@ -857,6 +1011,18 @@ def run_strong_learned_baseline_validation(
             )
             item["selection_objective_version"] = str(
                 payload.get("selection_objective_version", "missing")
+            )
+            item["confirmatory"] = bool(confirmatory)
+            item["hyperparameter_source"] = str(hyperparameter_source)
+            item["hyperparameter_protocol_status"] = hyperparameter_protocol_status
+            item["frozen_config_sha256"] = str(frozen_config_sha256)
+            item["selected_candidate_id"] = str(selected_candidate_id)
+            item["actual_hyperparameters_json"] = json.dumps(
+                actual_hyperparameters, sort_keys=True, separators=(",", ":")
+            )
+            item["actual_hyperparameter_sha256"] = actual_hyperparameter_sha256
+            item["learned_baseline_implementation_version"] = (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
             )
             item["rollout_seed_roots"] = " ".join(
                 str(seed) for seed in rollout_seed_roots
@@ -887,6 +1053,18 @@ def run_strong_learned_baseline_validation(
             ),
             "selection_objective_version": str(
                 payload.get("selection_objective_version", "")
+            ),
+            "confirmatory": bool(confirmatory),
+            "hyperparameter_source": str(hyperparameter_source),
+            "hyperparameter_protocol_status": hyperparameter_protocol_status,
+            "frozen_config_sha256": str(frozen_config_sha256),
+            "selected_candidate_id": str(selected_candidate_id),
+            "actual_hyperparameters_json": json.dumps(
+                actual_hyperparameters, sort_keys=True, separators=(",", ":")
+            ),
+            "actual_hyperparameter_sha256": actual_hyperparameter_sha256,
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
             "optimizer_seed": run_seed,
             "gradient_updates_train": int(payload.get("gradient_updates_train", 0)),
@@ -963,6 +1141,18 @@ def run_strong_learned_baseline_validation(
             ])) if heldout_rows else 0.0,
             "elapsed_sec": elapsed,
             "selection_metric": SELECTION_OBJECTIVE_VERSION,
+            "confirmatory": bool(confirmatory),
+            "hyperparameter_source": str(hyperparameter_source),
+            "hyperparameter_protocol_status": hyperparameter_protocol_status,
+            "frozen_config_sha256": str(frozen_config_sha256),
+            "selected_candidate_id": str(selected_candidate_id),
+            "actual_hyperparameters_json": json.dumps(
+                actual_hyperparameters, sort_keys=True, separators=(",", ":")
+            ),
+            "actual_hyperparameter_sha256": actual_hyperparameter_sha256,
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
+            ),
             "training_path_protocol": str(payload.get("training_path_protocol", "")),
             "checkpoint_selection_protocol": str(
                 payload.get("checkpoint_selection_protocol", "")
@@ -1027,6 +1217,11 @@ def run_strong_learned_baseline_validation(
         risk_adjusted_status = "training_not_demonstrated"
         responsibility_status = "training_not_demonstrated"
         ppo_baseline_status = "training_not_demonstrated"
+    if hyperparameter_protocol_status != "frozen_validation_only":
+        all_metric_status = "exploratory_unfrozen_hyperparameters"
+        risk_adjusted_status = "exploratory_unfrozen_hyperparameters"
+        responsibility_status = "exploratory_unfrozen_hyperparameters"
+        ppo_baseline_status = "exploratory_unfrozen_hyperparameters"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -1058,6 +1253,13 @@ def run_strong_learned_baseline_validation(
             offpolicy_warmup_steps=int(offpolicy_warmup_steps),
             offpolicy_batch_size=int(offpolicy_batch_size),
             offpolicy_updates_per_step=int(offpolicy_updates_per_step),
+            confirmatory=bool(confirmatory),
+            hyperparameter_source=str(hyperparameter_source),
+            frozen_config_sha256=str(frozen_config_sha256),
+            selected_candidate_id=str(selected_candidate_id),
+            frozen_candidate_parameters_sha256=str(
+                frozen_candidate_parameters_sha256
+            ),
             shard_index=int(shard_index),
             num_shards=int(num_shards),
         ),
@@ -1082,6 +1284,17 @@ def run_strong_learned_baseline_validation(
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "training_reward_scale": float(training_reward_scale),
             "training_protocol_status": "valid",
+            "confirmatory": bool(confirmatory),
+            "hyperparameter_source": str(hyperparameter_source),
+            "hyperparameter_protocol_status": hyperparameter_protocol_status,
+            "frozen_config_sha256": str(frozen_config_sha256),
+            "selected_candidate_id": str(selected_candidate_id),
+            "frozen_candidate_parameters_sha256": str(
+                frozen_candidate_parameters_sha256
+            ),
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
+            ),
             "steps": int(steps),
             "assets": int(assets),
             "iterations": int(iterations),
@@ -1229,6 +1442,57 @@ def merge_strong_learned_baseline_shards(
         and selection_objectives == {SELECTION_OBJECTIVE_VERSION}
         else "invalid_or_mixed"
     )
+    hyperparameter_sources = {
+        str(row.get("hyperparameter_source", "")) for row in rows
+        if str(row.get("hyperparameter_source", "")).strip()
+    }
+    frozen_hashes = {
+        str(row.get("frozen_config_sha256", "")).lower() for row in rows
+        if str(row.get("frozen_config_sha256", "")).strip()
+    }
+    implementation_versions = {
+        str(row.get("learned_baseline_implementation_version", ""))
+        for row in rows
+        if str(row.get("learned_baseline_implementation_version", "")).strip()
+    }
+    selected_candidates_present = all(
+        str(row.get("selected_candidate_id", "")).strip() for row in rows
+    )
+    candidate_parameter_rows_valid = bool(rows)
+    for row in rows:
+        try:
+            parameters = json.loads(str(row.get("actual_hyperparameters_json", "")))
+            recorded_hash = str(
+                row.get("actual_hyperparameter_sha256", "")
+            ).lower()
+            if (
+                not isinstance(parameters, dict)
+                or canonical_hyperparameter_sha256(parameters) != recorded_hash
+            ):
+                candidate_parameter_rows_valid = False
+                break
+        except (TypeError, ValueError, json.JSONDecodeError):
+            candidate_parameter_rows_valid = False
+            break
+    valid_digest = (
+        len(frozen_hashes) == 1
+        and len(next(iter(frozen_hashes))) == 64
+        and all(
+            char in "0123456789abcdef" for char in next(iter(frozen_hashes))
+        )
+    )
+    if (
+        hyperparameter_sources == {"frozen_nested_validation"}
+        and valid_digest
+        and implementation_versions == {LEARNED_BASELINE_IMPLEMENTATION_VERSION}
+        and selected_candidates_present
+        and candidate_parameter_rows_valid
+    ):
+        hyperparameter_protocol_status = "frozen_validation_only"
+    elif hyperparameter_sources in (set(), {"exploratory_unfrozen"}):
+        hyperparameter_protocol_status = "exploratory_unfrozen"
+    else:
+        hyperparameter_protocol_status = "invalid_or_mixed"
     if coverage["matrix_coverage_status"] != "complete":
         all_metric_status = "incomplete_matrix"
         risk_adjusted_status = "incomplete_matrix"
@@ -1248,6 +1512,11 @@ def merge_strong_learned_baseline_shards(
         risk_adjusted_status = "training_not_demonstrated"
         responsibility_status = "training_not_demonstrated"
         ppo_baseline_status = "training_not_demonstrated"
+    if hyperparameter_protocol_status != "frozen_validation_only":
+        all_metric_status = "exploratory_unfrozen_hyperparameters"
+        risk_adjusted_status = "exploratory_unfrozen_hyperparameters"
+        responsibility_status = "exploratory_unfrozen_hyperparameters"
+        ppo_baseline_status = "exploratory_unfrozen_hyperparameters"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -1272,6 +1541,19 @@ def merge_strong_learned_baseline_shards(
             "selected_training_replicate_count": len(training_replicates),
             "independent_unit": "training_replicate_seed",
             "training_protocol_status": training_protocol_status,
+            "hyperparameter_protocol_status": hyperparameter_protocol_status,
+            "hyperparameter_source": (
+                next(iter(hyperparameter_sources))
+                if len(hyperparameter_sources) == 1 else "mixed_or_missing"
+            ),
+            "frozen_config_sha256": (
+                next(iter(frozen_hashes))
+                if len(frozen_hashes) == 1 else "mixed_or_missing"
+            ),
+            "learned_baseline_implementation_version": (
+                next(iter(implementation_versions))
+                if len(implementation_versions) == 1 else "mixed_or_missing"
+            ),
             "training_path_protocol": (
                 next(iter(training_protocols))
                 if len(training_protocols) == 1 else "mixed_or_missing"
@@ -1419,6 +1701,15 @@ def main() -> None:
     parser.add_argument("--offpolicy-warmup-steps", type=int, default=2048)
     parser.add_argument("--offpolicy-batch-size", type=int, default=64)
     parser.add_argument("--offpolicy-updates-per-step", type=int, default=1)
+    parser.add_argument("--confirmatory", action="store_true")
+    parser.add_argument(
+        "--hyperparameter-source",
+        choices=("exploratory_unfrozen", "frozen_nested_validation"),
+        default="exploratory_unfrozen",
+    )
+    parser.add_argument("--frozen-config-sha256", default="")
+    parser.add_argument("--selected-candidate-id", default="")
+    parser.add_argument("--frozen-candidate-parameters-sha256", default="")
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=1)
     parser.add_argument("--merge-inputs", nargs="*", type=Path, default=[])
@@ -1464,6 +1755,13 @@ def main() -> None:
             offpolicy_warmup_steps=int(args.offpolicy_warmup_steps),
             offpolicy_batch_size=int(args.offpolicy_batch_size),
             offpolicy_updates_per_step=int(args.offpolicy_updates_per_step),
+            confirmatory=bool(args.confirmatory),
+            hyperparameter_source=str(args.hyperparameter_source),
+            frozen_config_sha256=str(args.frozen_config_sha256),
+            selected_candidate_id=str(args.selected_candidate_id),
+            frozen_candidate_parameters_sha256=str(
+                args.frozen_candidate_parameters_sha256
+            ),
             shard_index=int(args.shard_index),
             num_shards=int(args.num_shards),
         )

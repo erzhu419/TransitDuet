@@ -4,6 +4,7 @@ from pathlib import Path
 
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     build_paired_checks,
+    canonical_hyperparameter_sha256,
     learning_dynamics_summary,
     merge_strong_learned_baseline_shards,
     run_strong_learned_baseline_validation,
@@ -14,6 +15,49 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
 
 
 class StrongLearnedBaselineValidationTest(unittest.TestCase):
+    def test_confirmatory_run_requires_frozen_config_identity(self):
+        with self.assertRaisesRegex(ValueError, "frozen_nested_validation"):
+            run_strong_learned_baseline_validation(
+                scenarios=["persistent_shift"],
+                policy_modes=["freq_hrl"],
+                train_seeds=[42],
+                eval_seeds=[123],
+                steps=8,
+                assets=2,
+                iterations=1,
+                optimizer_seed=7,
+                min_pairs=1,
+                confirmatory=True,
+            )
+        payload = run_strong_learned_baseline_validation(
+            scenarios=["persistent_shift"],
+            policy_modes=["freq_hrl"],
+            train_seeds=[42],
+            eval_seeds=[123],
+            steps=8,
+            assets=2,
+            iterations=1,
+            optimizer_seed=7,
+            min_pairs=1,
+            confirmatory=True,
+            hyperparameter_source="frozen_nested_validation",
+            frozen_config_sha256="a" * 64,
+            selected_candidate_id="ppo_lr1e4_std15",
+            frozen_candidate_parameters_sha256=canonical_hyperparameter_sha256({
+                "hidden_dim": 64,
+                "learning_rate": 3e-4,
+                "epochs": 4,
+                "minibatch_size": 512,
+                "init_log_std": -1.0,
+                "reward_scale": 100.0,
+            }),
+        )
+        self.assertEqual(
+            payload["summary"]["hyperparameter_protocol_status"],
+            "frozen_validation_only",
+        )
+        self.assertEqual(payload["per_seed"][0]["frozen_config_sha256"], "a" * 64)
+
     def test_learning_gate_rejects_random_initialization_as_learned_policy(self):
         unsupported = learning_dynamics_summary([{
             "policy_mode": "freq_hrl",

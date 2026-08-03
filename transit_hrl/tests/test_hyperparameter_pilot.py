@@ -5,16 +5,77 @@ import unittest
 from pathlib import Path
 
 from freq_hrl.experiments.trading.hyperparameter_pilot import (
+    ALL_POLICY_MODES,
     CANDIDATES_BY_ID,
     TUNING_PROTOCOL_VERSION,
     candidate_ids_for_mode,
+    frozen_config_sha256,
     merge_hpo_cells,
     run_hpo_cell,
+    validate_frozen_config,
 )
 from freq_hrl.experiments.trading.metrics import SELECTION_OBJECTIVE_VERSION
+from freq_hrl.experiments.trading.ppo_actor_critic import (
+    LEARNED_BASELINE_IMPLEMENTATION_VERSION,
+)
+from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
+    DEFAULT_SCENARIOS,
+)
 
 
 class HyperparameterPilotTest(unittest.TestCase):
+    @staticmethod
+    def _valid_freeze():
+        selected = {}
+        for mode in ALL_POLICY_MODES:
+            candidate_id = candidate_ids_for_mode(mode)[0]
+            candidate = CANDIDATES_BY_ID[candidate_id]
+            selected[mode] = {
+                "candidate_id": candidate_id,
+                "candidate_family": candidate.family,
+                "parameters": candidate.parameters,
+                "learning_gate_status": "eligible",
+                "trained_checkpoint_fraction": 1.0,
+                "validation_learning_gain_mean": 0.01,
+            }
+        return {
+            "status": "frozen_from_validation_only",
+            "stage": "final",
+            "final_design_complete": True,
+            "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
+            "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
+            ),
+            "heldout_test_access_status": "not_loaded",
+            "heldout_test_seeds": [],
+            "checkpoint_validation_seeds": [57721],
+            "tuning_validation_seeds": [68207],
+            "scenarios": list(DEFAULT_SCENARIOS),
+            "training_replicate_seeds": [7, 11, 13, 17, 19],
+            "search_budget_candidates_per_policy": {
+                mode: 8 for mode in ALL_POLICY_MODES
+            },
+            "selected": selected,
+        }
+
+    def test_frozen_config_validator_rejects_drift_and_test_access(self):
+        payload = self._valid_freeze()
+        audit = validate_frozen_config(payload)
+        self.assertEqual(audit["status"], "valid")
+        self.assertEqual(audit["sha256"], frozen_config_sha256(payload))
+        self.assertEqual(len(audit["sha256"]), 64)
+
+        contaminated = json.loads(json.dumps(payload))
+        contaminated["heldout_test_seeds"] = [31415]
+        with self.assertRaisesRegex(ValueError, "held-out"):
+            validate_frozen_config(contaminated)
+
+        drifted = json.loads(json.dumps(payload))
+        drifted["selected"]["freq_hrl"]["parameters"]["learning_rate"] = 9.9
+        with self.assertRaisesRegex(ValueError, "drifted"):
+            validate_frozen_config(drifted)
+
     def test_equal_candidate_search_budget_by_algorithm_family(self):
         self.assertEqual(len(candidate_ids_for_mode("freq_hrl")), 8)
         self.assertEqual(len(candidate_ids_for_mode("flat_ppo")), 8)
@@ -82,6 +143,9 @@ class HyperparameterPilotTest(unittest.TestCase):
                         "cell_status": "valid",
                         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
                         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+                        "learned_baseline_implementation_version": (
+                            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+                        ),
                         "selected_checkpoint_iteration": 0,
                         "validation_learning_gain": 0.01,
                     }
@@ -120,7 +184,11 @@ class HyperparameterPilotTest(unittest.TestCase):
             merged["frozen_config"]["selected"]["freq_hrl"]["candidate_id"],
             candidates[0],
         )
-        self.assertEqual(merged["frozen_config"]["status"], "frozen_from_validation_only")
+        self.assertEqual(
+            merged["frozen_config"]["status"],
+            "not_freezable_incomplete_final_design",
+        )
+        self.assertFalse(merged["frozen_config"]["final_design_complete"])
 
 
 if __name__ == "__main__":

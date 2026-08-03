@@ -64,6 +64,38 @@ class ScheduleurmStrongBaselineSubmitTest(unittest.TestCase):
         self.assertIn("--optimizer-seeds 7", command)
         self.assertIn("OMP_NUM_THREADS=1", command)
 
+    def test_confirmatory_command_uses_policy_specific_frozen_parameters(self):
+        args = args_fixture()
+        args.confirmatory = True
+        args.frozen_config_sha256 = "b" * 64
+        args.frozen_selected = {
+            "freq_hrl": {
+                "candidate_id": "ppo_unit",
+                "parameters": {
+                    "hidden_dim": 64,
+                    "learning_rate": 0.0001,
+                    "epochs": 4,
+                    "minibatch_size": 512,
+                    "init_log_std": -1.5,
+                    "reward_scale": 100.0,
+                },
+            }
+        }
+        command = build_training_command(
+            args,
+            scenario="persistent_shift",
+            mode="freq_hrl",
+            replicate_seed=7,
+            output_dir=cell_relative_dir(
+                "unit", "persistent_shift", "freq_hrl", 7
+            ),
+        )
+        self.assertIn("--ppo-learning-rate 0.0001", command)
+        self.assertIn("--ppo-init-log-std -1.5", command)
+        self.assertIn("--selected-candidate-id ppo_unit", command)
+        self.assertIn("--frozen-config-sha256 " + "b" * 64, command)
+        self.assertIn("--confirmatory", command)
+
     def test_scheduler_uses_dynamic_allowed_nodes_without_hard_pin(self):
         command = build_scheduler_command(
             args_fixture(),

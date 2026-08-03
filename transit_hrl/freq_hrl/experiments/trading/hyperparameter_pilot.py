@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import time
 from dataclasses import dataclass
@@ -36,10 +37,15 @@ from .offpolicy_baseline_validation import (
     train_flat_offpolicy_baseline,
 )
 from .performance_validation import SCENARIOS
-from .ppo_actor_critic import POLICY_MODES, train_ppo_actor_critic
+from .ppo_actor_critic import (
+    LEARNED_BASELINE_IMPLEMENTATION_VERSION,
+    POLICY_MODES,
+    train_ppo_actor_critic,
+)
 from .strong_learned_baseline_validation import (
     DEFAULT_OPTIMIZER_SEEDS,
     DEFAULT_ROLLOUT_SEED_ROOTS,
+    DEFAULT_SCENARIOS,
     DEFAULT_VALIDATION_SEEDS,
     count_parameters,
     scenario_optimizer_seed,
@@ -125,6 +131,96 @@ TUNING_CANDIDATES = (
     _offpolicy_candidate("off_lr1e3_w4096_b64", 1e-3, 4096, 64),
 )
 CANDIDATES_BY_ID = {candidate.candidate_id: candidate for candidate in TUNING_CANDIDATES}
+
+
+def frozen_config_sha256(payload: dict[str, Any]) -> str:
+    canonical = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def validate_frozen_config(
+    payload: dict[str, Any],
+    *,
+    required_policy_modes: Iterable[str] = ALL_POLICY_MODES,
+) -> dict[str, Any]:
+    """Reject incomplete, stale, or test-contaminated HPO freezes."""
+
+    required_modes = list(required_policy_modes)
+    if payload.get("status") != "frozen_from_validation_only":
+        raise ValueError("frozen config status must be frozen_from_validation_only")
+    if payload.get("stage") != "final" or not bool(payload.get("final_design_complete")):
+        raise ValueError("frozen config must come from a complete final HPO design")
+    if payload.get("tuning_protocol_version") != TUNING_PROTOCOL_VERSION:
+        raise ValueError("frozen config tuning protocol version mismatch")
+    if payload.get("selection_objective_version") != SELECTION_OBJECTIVE_VERSION:
+        raise ValueError("frozen config selection objective version mismatch")
+    if payload.get("learned_baseline_implementation_version") != (
+        LEARNED_BASELINE_IMPLEMENTATION_VERSION
+    ):
+        raise ValueError("frozen config implementation version mismatch")
+    if payload.get("heldout_test_access_status") != "not_loaded":
+        raise ValueError("frozen config must not access held-out test data")
+    if payload.get("heldout_test_seeds"):
+        raise ValueError("frozen config contains held-out test seeds")
+    checkpoint_seeds = {
+        int(seed) for seed in payload.get("checkpoint_validation_seeds", [])
+    }
+    tuning_seeds = {
+        int(seed) for seed in payload.get("tuning_validation_seeds", [])
+    }
+    if not checkpoint_seeds or not tuning_seeds or checkpoint_seeds & tuning_seeds:
+        raise ValueError("frozen config validation splits must be non-empty and disjoint")
+    if set(payload.get("scenarios", [])) != set(DEFAULT_SCENARIOS):
+        raise ValueError("frozen config must cover the preregistered five scenarios")
+    replicate_seeds = [
+        int(seed) for seed in payload.get("training_replicate_seeds", [])
+    ]
+    if len(set(replicate_seeds)) < 5:
+        raise ValueError("frozen config requires at least five training replicates")
+
+    selected = payload.get("selected")
+    if not isinstance(selected, dict):
+        raise ValueError("frozen config selected policies are missing")
+    search_budget = payload.get("search_budget_candidates_per_policy", {})
+    for mode in required_modes:
+        if mode not in ALL_POLICY_MODES:
+            raise ValueError(f"unknown required policy mode: {mode}")
+        entry = selected.get(mode)
+        if not isinstance(entry, dict):
+            raise ValueError(f"frozen config is missing policy mode: {mode}")
+        if entry.get("learning_gate_status") != "eligible":
+            raise ValueError(f"frozen policy failed learning gate: {mode}")
+        candidate_id = str(entry.get("candidate_id", ""))
+        candidate = CANDIDATES_BY_ID.get(candidate_id)
+        if candidate is None or not candidate.applies_to(mode):
+            raise ValueError(f"invalid frozen candidate for {mode}: {candidate_id}")
+        if entry.get("candidate_family") != candidate.family:
+            raise ValueError(f"frozen candidate family mismatch for {mode}")
+        if entry.get("parameters") != candidate.parameters:
+            raise ValueError(f"frozen candidate parameters drifted for {mode}")
+        if int(search_budget.get(mode, 0)) < 2:
+            raise ValueError(f"frozen search budget is too small for {mode}")
+    return {
+        "status": "valid",
+        "sha256": frozen_config_sha256(payload),
+        "selected": {mode: selected[mode] for mode in required_modes},
+        "implementation_version": LEARNED_BASELINE_IMPLEMENTATION_VERSION,
+    }
+
+
+def load_frozen_config(
+    path: Path,
+    *,
+    required_policy_modes: Iterable[str] = ALL_POLICY_MODES,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("frozen config must be a JSON object")
+    return payload, validate_frozen_config(
+        payload, required_policy_modes=required_policy_modes
+    )
 
 
 def candidate_ids_for_mode(policy_mode: str) -> list[str]:
@@ -252,6 +348,9 @@ def run_hpo_cell(
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "selection_utility": float(utility),
             "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
+            "learned_baseline_implementation_version": (
+                LEARNED_BASELINE_IMPLEMENTATION_VERSION
+            ),
         })
     if not utilities or not np.all(np.isfinite(utilities)):
         raise RuntimeError("HPO tuning utilities must be finite and non-empty")
@@ -271,6 +370,9 @@ def run_hpo_cell(
         "heldout_test_access_status": "not_loaded",
         "evaluation_role": "tuning_validation",
         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
+        "learned_baseline_implementation_version": (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ),
         "metric_contract_version": METRIC_CONTRACT_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
         "training_path_protocol": str(model_payload.get("training_path_protocol", "")),
@@ -317,6 +419,9 @@ def run_hpo_cell(
         "tuning_validation_seeds": list(tuning_seeds),
         "heldout_test_seeds": [],
         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
+        "learned_baseline_implementation_version": (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ),
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
     }
     return {"tuning_rows": annotated_rows, "cell_summary": summary, "checkpoint": checkpoint}
@@ -391,6 +496,10 @@ def merge_hpo_cells(
             raise ValueError(f"HPO protocol mismatch: {key}")
         if summary.get("selection_objective_version") != SELECTION_OBJECTIVE_VERSION:
             raise ValueError(f"HPO selection objective mismatch: {key}")
+        if summary.get("learned_baseline_implementation_version") != (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ):
+            raise ValueError(f"HPO implementation version mismatch: {key}")
         cell_summaries.append(summary)
         tuning_rows.extend(_read_csv(base / "tuning_rows.csv"))
 
@@ -526,17 +635,29 @@ def merge_hpo_cells(
     all_modes_eligible = all(
         row["learning_gate_status"] == "eligible" for row in selected.values()
     )
+    final_design_complete = (
+        set(policy_modes) == set(ALL_POLICY_MODES)
+        and set(scenarios) == set(DEFAULT_SCENARIOS)
+        and len(replicates) >= 5
+        and candidate_counts
+        and min(candidate_counts.values()) >= 2
+    )
+    if str(stage) == "final" and all_modes_eligible and final_design_complete:
+        freeze_status = "frozen_from_validation_only"
+    elif not all_modes_eligible:
+        freeze_status = "not_freezable_learning_gate"
+    elif str(stage) == "final":
+        freeze_status = "not_freezable_incomplete_final_design"
+    else:
+        freeze_status = "provisional_validation_only"
     freeze = {
-        "status": (
-            "frozen_from_validation_only"
-            if str(stage) == "final" and all_modes_eligible
-            else "provisional_validation_only"
-            if all_modes_eligible
-            else "not_freezable_learning_gate"
-        ),
+        "status": freeze_status,
         "stage": str(stage),
         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+        "learned_baseline_implementation_version": (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ),
         "heldout_test_access_status": "not_loaded",
         "checkpoint_validation_seeds": sorted({
             int(seed)
@@ -552,6 +673,7 @@ def merge_hpo_cells(
         "scenarios": scenarios,
         "training_replicate_seeds": [int(seed) for seed in replicates],
         "search_budget_candidates_per_policy": candidate_counts,
+        "final_design_complete": bool(final_design_complete),
         "selected": selected,
         "top_candidates": top_candidates,
     }
@@ -572,6 +694,9 @@ def merge_hpo_cells(
             "tuning_protocol_status": "valid",
             "learning_gate_status": (
                 "supported" if all_modes_eligible else "not_supported"
+            ),
+            "final_design_status": (
+                "complete" if final_design_complete else "incomplete"
             ),
         },
     }

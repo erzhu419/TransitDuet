@@ -26,6 +26,10 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  #
     merge_strong_learned_baseline_shards,
     write_outputs,
 )
+from freq_hrl.experiments.trading.hyperparameter_pilot import (  # noqa: E402
+    frozen_config_sha256,
+    load_frozen_config,
+)
 
 
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
@@ -76,6 +80,34 @@ def cell_relative_dir(
     )
 
 
+def resolved_hyperparameters(
+    args: argparse.Namespace,
+    mode: str,
+) -> tuple[dict[str, object], str]:
+    selected = getattr(args, "frozen_selected", {}) or {}
+    if mode in selected:
+        entry = selected[mode]
+        return dict(entry["parameters"]), str(entry["candidate_id"])
+    if mode in {"freq_hrl", "flat_ppo", "generic_hrl_ppo"}:
+        return {
+            "hidden_dim": int(args.ppo_hidden_dim),
+            "learning_rate": float(args.ppo_learning_rate),
+            "epochs": int(args.ppo_epochs),
+            "minibatch_size": int(args.ppo_minibatch_size),
+            "init_log_std": float(args.ppo_init_log_std),
+            "reward_scale": float(args.training_reward_scale),
+        }, "exploratory_manual"
+    return {
+        "hidden_dim": int(args.offpolicy_hidden_dim),
+        "learning_rate": float(args.offpolicy_learning_rate),
+        "replay_capacity": int(args.offpolicy_replay_capacity),
+        "warmup_steps": int(args.offpolicy_warmup_steps),
+        "batch_size": int(args.offpolicy_batch_size),
+        "updates_per_step": int(args.offpolicy_updates_per_step),
+        "reward_scale": float(args.training_reward_scale),
+    }, "exploratory_manual"
+
+
 def build_training_command(
     args: argparse.Namespace,
     *,
@@ -84,6 +116,24 @@ def build_training_command(
     replicate_seed: int,
     output_dir: Path,
 ) -> str:
+    parameters, candidate_id = resolved_hyperparameters(args, mode)
+    candidate_parameters_sha256 = frozen_config_sha256(parameters)
+    is_ppo = mode in {"freq_hrl", "flat_ppo", "generic_hrl_ppo"}
+    ppo_parameters = parameters if is_ppo else {
+        "hidden_dim": args.ppo_hidden_dim,
+        "learning_rate": args.ppo_learning_rate,
+        "epochs": args.ppo_epochs,
+        "minibatch_size": args.ppo_minibatch_size,
+        "init_log_std": args.ppo_init_log_std,
+    }
+    offpolicy_parameters = parameters if not is_ppo else {
+        "hidden_dim": args.offpolicy_hidden_dim,
+        "learning_rate": args.offpolicy_learning_rate,
+        "replay_capacity": args.offpolicy_replay_capacity,
+        "warmup_steps": args.offpolicy_warmup_steps,
+        "batch_size": args.offpolicy_batch_size,
+        "updates_per_step": args.offpolicy_updates_per_step,
+    }
     command = [
         "python3",
         "-u",
@@ -110,32 +160,46 @@ def build_training_command(
         "--min-pairs",
         str(args.min_pairs),
         "--ppo-hidden-dim",
-        str(args.ppo_hidden_dim),
+        str(ppo_parameters["hidden_dim"]),
         "--ppo-learning-rate",
-        str(args.ppo_learning_rate),
+        str(ppo_parameters["learning_rate"]),
         "--ppo-epochs",
-        str(args.ppo_epochs),
+        str(ppo_parameters["epochs"]),
         "--ppo-minibatch-size",
-        str(args.ppo_minibatch_size),
+        str(ppo_parameters["minibatch_size"]),
         "--ppo-init-log-std",
-        str(args.ppo_init_log_std),
+        str(ppo_parameters["init_log_std"]),
         "--training-reward-scale",
-        str(args.training_reward_scale),
+        str(parameters.get("reward_scale", args.training_reward_scale)),
         "--offpolicy-hidden-dim",
-        str(args.offpolicy_hidden_dim),
+        str(offpolicy_parameters["hidden_dim"]),
         "--offpolicy-learning-rate",
-        str(args.offpolicy_learning_rate),
+        str(offpolicy_parameters["learning_rate"]),
         "--offpolicy-replay-capacity",
-        str(args.offpolicy_replay_capacity),
+        str(offpolicy_parameters["replay_capacity"]),
         "--offpolicy-warmup-steps",
-        str(args.offpolicy_warmup_steps),
+        str(offpolicy_parameters["warmup_steps"]),
         "--offpolicy-batch-size",
-        str(args.offpolicy_batch_size),
+        str(offpolicy_parameters["batch_size"]),
         "--offpolicy-updates-per-step",
-        str(args.offpolicy_updates_per_step),
+        str(offpolicy_parameters["updates_per_step"]),
+        "--hyperparameter-source",
+        (
+            "frozen_nested_validation"
+            if getattr(args, "confirmatory", False)
+            else "exploratory_unfrozen"
+        ),
+        "--frozen-config-sha256",
+        str(getattr(args, "frozen_config_sha256", "")),
+        "--selected-candidate-id",
+        candidate_id,
+        "--frozen-candidate-parameters-sha256",
+        candidate_parameters_sha256,
         "--output-dir",
         str(output_dir),
     ]
+    if getattr(args, "confirmatory", False):
+        command.append("--confirmatory")
     env = [
         "PYTHONDONTWRITEBYTECODE=1",
         "PYTHONPATH=.",
@@ -166,7 +230,7 @@ def build_scheduler_command(
         "--project",
         "Freq-HRL",
         "--description",
-        f"Freq-HRL strong v2 {scenario} {mode} replicate {replicate_seed}",
+        f"Freq-HRL strong v3 {scenario} {mode} replicate {replicate_seed}",
         "--cmd",
         build_training_command(
             args,
@@ -178,9 +242,13 @@ def build_scheduler_command(
         "--cwd",
         str(ROOT),
         "--signature",
-        f"Freq-HRL/strong-v2/{args.run_name}/{scenario}/{mode}/rep-{replicate_seed}",
+        (
+            f"Freq-HRL/strong-v3/{args.run_name}/"
+            f"{getattr(args, 'frozen_config_sha256', 'exploratory')[:12] or 'exploratory'}/"
+            f"{scenario}/{mode}/rep-{replicate_seed}"
+        ),
         "--resource-family",
-        "Freq-HRL/strong-v2/single-cell",
+        "Freq-HRL/strong-v3/single-cell",
         "--vram",
         "0",
         "--ram-mb",
@@ -286,6 +354,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offpolicy-warmup-steps", type=int, default=2048)
     parser.add_argument("--offpolicy-batch-size", type=int, default=64)
     parser.add_argument("--offpolicy-updates-per-step", type=int, default=1)
+    parser.add_argument(
+        "--frozen-config",
+        type=Path,
+        help="Final nested-validation frozen_config.json; required outside smoke mode.",
+    )
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
     parser.add_argument("--cpu", type=int, default=1)
     parser.add_argument("--ram-mb", type=int, default=2048)
@@ -328,6 +401,31 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.steps = min(int(args.steps), 32)
         args.iterations = 1
         args.min_pairs = 1
+        args.confirmatory = False
+        args.frozen_selected = {}
+        args.frozen_config_sha256 = ""
+    elif not args.merge_only:
+        if args.frozen_config is None:
+            raise SystemExit(
+                "confirmatory submission requires --frozen-config from final nested HPO"
+            )
+        path = Path(args.frozen_config).expanduser()
+        if not path.is_absolute():
+            path = path.resolve() if path.exists() else (ROOT / path).resolve()
+        try:
+            _, audit = load_frozen_config(
+                path, required_policy_modes=args.policy_modes
+            )
+        except (OSError, ValueError) as exc:
+            raise SystemExit(f"invalid frozen config: {exc}") from exc
+        args.confirmatory = True
+        args.frozen_selected = audit["selected"]
+        args.frozen_config_sha256 = str(audit["sha256"])
+        args.frozen_config = path
+    else:
+        args.confirmatory = False
+        args.frozen_selected = {}
+        args.frozen_config_sha256 = ""
     return args
 
 
@@ -343,7 +441,8 @@ def main() -> None:
         cells = cells[: int(args.max_cells)]
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)} "
-        f"iterations={args.iterations} steps={args.steps}",
+        f"iterations={args.iterations} steps={args.steps} "
+        f"frozen={args.frozen_config_sha256[:12] or 'exploratory'}",
         flush=True,
     )
     for scenario, mode, seed in cells:

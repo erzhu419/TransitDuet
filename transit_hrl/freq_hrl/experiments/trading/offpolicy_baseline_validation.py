@@ -31,6 +31,7 @@ from .metrics import (
 )
 from .performance_validation import make_synthetic_market
 from .ppo_actor_critic import (
+    LEARNED_BASELINE_IMPLEMENTATION_VERSION,
     RAW_LOWER_LAGS,
     bounded_speed,
     flat_joint_feature_vector,
@@ -199,6 +200,9 @@ def run_offpolicy_episode(
     diag = diagnostics.summarize_episode()
     row = {
         "baseline": policy_mode,
+        "learned_baseline_implementation_version": (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ),
         "policy_mode": policy_mode,
         "seed": int(seed),
         "scenario": str(scenario),

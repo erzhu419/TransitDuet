@@ -287,3 +287,15 @@ localized burst, persistent shift, and OOD-period regimes. With five learned
 policies and ten independent training replicates this is 250 training cells.
 Scheduler placement is dynamic across the allowed CPU-node pool; no experiment
 cell is hard-bound to a host.
+
+Confirmatory execution is mechanically coupled to the nested-validation
+freeze. A final freeze is valid only if all five policies cover the five
+preregistered stress regimes, use at least five independent training
+replicates, compare at least two candidates per policy, pass the learning gate,
+and never load held-out test seeds. The freeze also records
+`learned_baselines_v3_joint_raw_history_2026_08_03`; a stale implementation
+version or changed candidate parameters invalidates it. The scheduleurm formal
+submitter requires this JSON, injects selected parameters separately for each
+policy, and records a canonical JSON SHA-256 in every row and checkpoint.
+Exploratory smoke runs remain available, but their headline evidence status is
+forced to `exploratory_unfrozen_hyperparameters`.
