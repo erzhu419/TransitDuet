@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_forecastlegacy_hiro
+
+protocol:
+  role: historical_ablation_seconds_scaled_linear_forecast
+
+frequency:
+  forecast_mode: legacy_seconds_linear

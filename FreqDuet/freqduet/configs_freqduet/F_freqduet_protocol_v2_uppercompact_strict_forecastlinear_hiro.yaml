@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_forecastlinear_hiro
+
+protocol:
+  role: structural_ablation_correct_horizon_linear_forecast
+
+frequency:
+  forecast_mode: linear_bins

@@ -1716,9 +1716,43 @@ class TransitDuetV2Runner:
             lower_cfg.get('use_last_action_feature', False))
         self.lower_terminal_action_mode = str(
             lower_cfg.get('terminal_action_mode', 'legacy')).strip().lower()
-        if self.lower_terminal_action_mode not in {'legacy', 'mask'}:
+        if self.lower_terminal_action_mode not in {
+                'legacy', 'mask', 'transition'}:
             raise ValueError(
-                "lower.terminal_action_mode must be legacy or mask")
+                "lower.terminal_action_mode must be legacy, mask, or transition")
+        self.lower_trip_boundary_mode = str(
+            lower_cfg.get('trip_boundary_mode', 'legacy')).strip().lower()
+        self.lower_holding_action_trace_mode = str(lower_cfg.get(
+            'holding_action_trace_mode', 'positive_only')).strip().lower()
+        if self.lower_holding_action_trace_mode not in {
+                'positive_only', 'all_decisions'}:
+            raise ValueError(
+                "lower.holding_action_trace_mode must be positive_only or "
+                "all_decisions")
+        self.lower_unobserved_action_mode = str(lower_cfg.get(
+            'unobserved_action_mode', 'legacy_stale')).strip().lower()
+        if self.lower_unobserved_action_mode not in {
+                'legacy_stale', 'zero'}:
+            raise ValueError(
+                "lower.unobserved_action_mode must be legacy_stale or zero")
+        if (self.lower_terminal_action_mode == 'transition'
+                and self.lower_trip_boundary_mode != 'reset'):
+            raise ValueError(
+                "lower.terminal_action_mode=transition requires "
+                "lower.trip_boundary_mode=reset")
+        if (self.lower_terminal_action_mode == 'transition'
+                and self.lower_holding_action_trace_mode != 'all_decisions'):
+            raise ValueError(
+                "lower.terminal_action_mode=transition requires "
+                "lower.holding_action_trace_mode=all_decisions")
+        if (self.lower_terminal_action_mode == 'transition'
+                and self.lower_unobserved_action_mode != 'zero'):
+            raise ValueError(
+                "lower.terminal_action_mode=transition requires "
+                "lower.unobserved_action_mode=zero")
+        self.env.holding_action_trace_mode = (
+            self.lower_holding_action_trace_mode)
+        self.env.unobserved_action_mode = self.lower_unobserved_action_mode
         lower_state_encoder_cfg = lower_cfg.get('state_encoder', {}) or {}
         self.lower_state_encoder = None
         if bool(lower_state_encoder_cfg.get('enable', False)):
@@ -1794,7 +1828,7 @@ class TransitDuetV2Runner:
         self.holding_feedback = HoldingFeedback(
             window_size=coupling_cfg.get('feedback_window', 10))
         self.lower_lifecycle = LowerEpisodeLifecycle(
-            boundary_mode=lower_cfg.get('trip_boundary_mode', 'legacy'),
+            boundary_mode=self.lower_trip_boundary_mode,
             feedback_mode=coupling_cfg.get(
                 'holding_feedback_finalize_mode', 'episode_end'),
         )
@@ -5133,6 +5167,152 @@ class TransitDuetV2Runner:
             obs, last_action=last_action, deterministic=deterministic)
         return self._apply_lower_fleet_noharm(action, bus)
 
+    def _record_lower_transition(
+            self, *, key, raw_state, raw_next_state, action, reward, cost,
+            previous_action, transition_done, learned_training, bus=None,
+            trip_id=None, direction=None, station_id=None,
+            board_wait_sum_s=None, board_count=None,
+            record_holding_action=True):
+        """Shape, diagnose, and optionally replay one physical lower transition."""
+        raw_state = np.asarray(raw_state, dtype=np.float32)
+        act_val = (
+            self._lower_action_scalar(action) if action is not None else 0.0)
+        state = self._augment_lower_state(raw_state, previous_action)
+        if raw_next_state is None:
+            next_state = np.zeros_like(state, dtype=np.float32)
+        else:
+            next_state = self._augment_lower_state(
+                np.asarray(raw_next_state, dtype=np.float32), act_val)
+
+        context_bus = bus
+        if context_bus is None:
+            context_bus = self._bus_for_agent(int(raw_state[0]))
+        cur_tid = int(trip_id) if trip_id is not None else -1
+        cur_dir = bool(direction) if direction is not None else True
+        if context_bus is not None:
+            if trip_id is None:
+                cur_tid = int(getattr(context_bus, 'trip_id', -1))
+            if direction is None:
+                cur_dir = bool(getattr(context_bus, 'direction', True))
+
+        self._ep_lower_terminal_transitions += int(transition_done)
+        drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
+        drift_cost = self._lower_drift_cost(cur_dir)
+        lower_value_soft_cost = self._lower_value_soft_cost(
+            context_bus, act_val)
+        total_cost = float(cost) + drift_cost + lower_value_soft_cost
+
+        low_demand = 0.0
+        local_high = 0.0
+        credit_high = 0.0
+        hold_credit_high = 0.0
+        local_low = None
+        station_id_value = -1 if station_id is None else int(station_id)
+        freq_summary = None
+        tracker = getattr(self.env, 'frequency_tracker', None)
+        if tracker is not None:
+            freq_summary = tracker.summary()
+            low_demand = float(freq_summary.get('freq_low_demand', 0.0))
+            if context_bus is not None:
+                if station_id is None:
+                    station_id_value = int(getattr(
+                        context_bus, 'last_board_station_id',
+                        getattr(getattr(context_bus, 'last_station', None),
+                                'station_id', 0)))
+                local_high = tracker.local_high_value(
+                    station_id_value, cur_dir)
+                raw_high = None
+                if hasattr(tracker, 'local_high_raw_value'):
+                    raw_high = tracker.local_high_raw_value(
+                        station_id_value, cur_dir)
+                credit_high, raw_weight = self._select_lower_high_credit(
+                    local_high,
+                    raw_high,
+                    freq_summary,
+                    self.freq_wait_lower_high_source,
+                )
+                hold_credit_high, _ = self._select_lower_high_credit(
+                    local_high,
+                    raw_high,
+                    freq_summary,
+                    self.freq_wait_lower_hold_high_source,
+                )
+                self._ep_freq_wait_lower_raw_credit_weights.append(raw_weight)
+                local_low = tracker.local_low_value(
+                    station_id_value, cur_dir)
+
+        high_hold_penalty = self._lower_high_hold_penalty(
+            hold_credit_high,
+            low_demand if local_low is None else local_low,
+            act_val,
+        )
+        if board_wait_sum_s is None:
+            board_wait_sum_s = float(getattr(
+                context_bus, 'last_board_wait_sum_s', 0.0)
+                if context_bus is not None else 0.0)
+        if board_count is None:
+            board_count = int(getattr(
+                context_bus, 'last_board_count', 0)
+                if context_bus is not None else 0)
+        wait_penalty = self._record_frequency_wait_credit(
+            cur_tid,
+            float(board_wait_sum_s),
+            int(board_count),
+            low_demand,
+            credit_high,
+            local_low,
+            freq_summary,
+        )
+        self._record_frequency_hold_feedback(
+            cur_dir,
+            credit_high,
+            act_val,
+            float(board_wait_sum_s),
+            int(board_count),
+        )
+        shaped_reward = (
+            float(reward)
+            - drift_penalty
+            - wait_penalty
+            - high_hold_penalty
+        )
+
+        self._ep_lower_actions.append(act_val)
+        self._ep_lower_actions_by_dir[cur_dir].append(act_val)
+        self._ep_lower_rewards.append(shaped_reward)
+        self._ep_lower_drift_penalties.append(drift_penalty)
+        self._ep_lower_drift_costs.append(drift_cost)
+        if cur_tid >= 0 and record_holding_action:
+            self.holding_feedback.record_action(cur_tid, act_val)
+        if tracker is not None:
+            self._ep_lower_demand_action.append((
+                low_demand,
+                credit_high,
+                act_val,
+            ))
+            self._ep_shock_response_events.append({
+                'time_s': float(getattr(self.env, 'current_time', 0.0)),
+                'station_id': station_id_value,
+                'direction': bool(cur_dir),
+                'high': credit_high,
+                'action_s': act_val,
+            })
+
+        if learned_training:
+            global_tid = (
+                self._current_ep * 1000 + cur_tid
+                if cur_tid >= 0 else int(raw_state[0]))
+            self.replay_buffer.push(
+                state,
+                action,
+                shaped_reward,
+                total_cost,
+                next_state,
+                transition_done,
+                global_tid,
+            )
+        return shaped_reward, total_cost, act_val
+
     def _fixed_headway_callback(self, s_upper_v1, trip):
         if self.fixed_selector_strict_headway_s is not None:
             headway = float(self.fixed_selector_strict_headway_s)
@@ -6778,8 +6958,11 @@ class TransitDuetV2Runner:
         self._ep_lower_trip_boundary_resets = 0
         self._ep_lower_pending_states_dropped = 0
         self._ep_lower_pending_actions_dropped = 0
+        self._ep_lower_pending_states_consumed = 0
+        self._ep_lower_pending_actions_consumed = 0
         self._ep_lower_terminal_action_masks = 0
         self._ep_lower_terminal_transitions = 0
+        self._ep_lower_terminal_outcomes_missing = 0
         self._ep_hold_feedback_trip_finalizations = 0
         self._ep_upper_deltas = []
         self._ep_upper_rewards = []
@@ -6926,137 +7109,25 @@ class TransitDuetV2Runner:
                     if state_dict[key][0][1] != state_dict[key][1][1]:
                         raw_state = np.array(state_dict[key][0], dtype=np.float32)
                         raw_next_state = np.array(state_dict[key][1], dtype=np.float32)
-                        act_val = (
-                            self._lower_action_scalar(action_dict[key])
-                            if action_dict[key] is not None else 0.0)
-                        state = self._augment_lower_state(
-                            raw_state, lower_last_action.get(key, 0.0))
-                        next_state = self._augment_lower_state(raw_next_state, act_val)
-                        reward = reward_dict[key]
-                        cost = self.env.cost.get(key, 0.0)
-
-                        # Track for diagnostics
-                        bus_id_key = int(raw_state[0])
-                        cur_tid = -1
-                        cur_dir = True
-                        cur_bus = self._bus_for_agent(bus_id_key)
-                        if cur_bus is not None:
-                            cur_tid = int(getattr(cur_bus, 'trip_id', -1))
-                            cur_dir = bool(getattr(cur_bus, 'direction', True))
+                        cur_bus = self._bus_for_agent(int(raw_state[0]))
                         transition_done = self._lower_terminal_action_masked(
                             cur_bus)
-                        self._ep_lower_terminal_transitions += int(
-                            transition_done)
-                        drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
-                        drift_cost = self._lower_drift_cost(cur_dir)
-                        lower_value_soft_cost = self._lower_value_soft_cost(
-                            cur_bus, act_val)
-                        cost = float(cost) + drift_cost + lower_value_soft_cost
-                        low_demand = 0.0
-                        local_high = 0.0
-                        credit_high = 0.0
-                        hold_credit_high = 0.0
-                        local_low = None
-                        station_id = -1
-                        if getattr(self.env, 'frequency_tracker', None) is not None:
-                            freq_summary = self.env.frequency_tracker.summary()
-                            low_demand = float(
-                                freq_summary.get('freq_low_demand', 0.0))
-                            if cur_bus is not None:
-                                station_id = int(getattr(
-                                    cur_bus, 'last_board_station_id',
-                                    getattr(cur_bus.last_station, 'station_id', 0)))
-                                local_high = self.env.frequency_tracker.local_high_value(
-                                    station_id, cur_dir)
-                                raw_high = None
-                                if hasattr(
-                                        self.env.frequency_tracker,
-                                        'local_high_raw_value'):
-                                    raw_high = self.env.frequency_tracker.local_high_raw_value(
-                                        station_id, cur_dir)
-                                credit_high, raw_weight = (
-                                    self._select_lower_high_credit(
-                                        local_high,
-                                        raw_high,
-                                        freq_summary,
-                                        self.freq_wait_lower_high_source))
-                                hold_credit_high, _ = (
-                                    self._select_lower_high_credit(
-                                        local_high,
-                                        raw_high,
-                                        freq_summary,
-                                        self.freq_wait_lower_hold_high_source))
-                                self._ep_freq_wait_lower_raw_credit_weights.append(
-                                    raw_weight)
-                                local_low = self.env.frequency_tracker.local_low_value(
-                                    station_id, cur_dir)
-                        wait_penalty = 0.0
-                        high_hold_penalty = self._lower_high_hold_penalty(
-                            hold_credit_high,
-                            low_demand if local_low is None else local_low,
-                            act_val)
-                        board_wait_sum_s = 0.0
-                        board_count = 0
-                        if cur_bus is not None:
-                            board_wait_sum_s = float(getattr(
-                                cur_bus, 'last_board_wait_sum_s', 0.0))
-                            board_count = int(getattr(
-                                cur_bus, 'last_board_count', 0))
-                            wait_penalty = self._record_frequency_wait_credit(
-                                cur_tid,
-                                board_wait_sum_s,
-                                board_count,
-                                low_demand,
-                                credit_high,
-                                local_low,
-                                freq_summary if getattr(
-                                    self.env, 'frequency_tracker', None) is not None
-                                else None)
-                        self._record_frequency_hold_feedback(
-                            cur_dir, credit_high, act_val,
-                            board_wait_sum_s, board_count)
-                        shaped_reward = (
-                            float(reward)
-                            - drift_penalty
-                            - wait_penalty
-                            - high_hold_penalty)
-                        self._ep_lower_actions.append(act_val)
-                        self._ep_lower_actions_by_dir[cur_dir].append(act_val)
-                        self._ep_lower_rewards.append(shaped_reward)
-                        self._ep_lower_drift_penalties.append(drift_penalty)
-                        self._ep_lower_drift_costs.append(drift_cost)
-                        if cur_tid >= 0:
-                            # Keep feedback observable during both training and
-                            # frozen evaluation. Trip-end lifecycle finalization
-                            # replaces this incremental view with the complete
-                            # physical action trace when that mode is enabled.
-                            self.holding_feedback.record_action(
-                                cur_tid, act_val)
-                        if getattr(self.env, 'frequency_tracker', None) is not None:
-                            self._ep_lower_demand_action.append((
-                                low_demand,
-                                credit_high,
-                                act_val,
-                            ))
-                            self._ep_shock_response_events.append({
-                                'time_s': float(getattr(self.env, 'current_time', 0.0)),
-                                'station_id': station_id,
-                                'direction': bool(cur_dir),
-                                'high': credit_high,
-                                'action_s': act_val,
-                            })
-
-                        if learned_training:
-                            # Look up the bus's current trip_id (launch_turn) so
-                            # downstream TPC IS-weight lookup can match dispatch_meta.
-                            global_tid = (self._current_ep * 1000 + cur_tid
-                                          if cur_tid >= 0 else int(state[0]))
-                            self.replay_buffer.push(
-                                state, action_dict[key], shaped_reward, cost,
-                                next_state, transition_done, global_tid)
-
+                        shaped_reward, transition_cost, act_val = (
+                            self._record_lower_transition(
+                                key=key,
+                                raw_state=raw_state,
+                                raw_next_state=raw_next_state,
+                                action=action_dict[key],
+                                reward=reward_dict[key],
+                                cost=self.env.cost.get(key, 0.0),
+                                previous_action=lower_last_action.get(key, 0.0),
+                                transition_done=transition_done,
+                                learned_training=learned_training,
+                                bus=cur_bus,
+                            )
+                        )
                         episode_reward += shaped_reward
-                        episode_cost += cost
+                        episode_cost += transition_cost
                         episode_steps += 1
                         lower_last_action[key] = act_val
 
@@ -7077,14 +7148,56 @@ class TransitDuetV2Runner:
                 self.holding_feedback,
             )
             for event in completed_events:
-                if self.lower_lifecycle.boundary_mode == 'reset':
-                    self._ep_lower_trip_boundary_resets += 1
-                    self._ep_lower_pending_states_dropped += int(
-                        event.pending_states_dropped)
-                    self._ep_lower_pending_actions_dropped += int(
-                        event.pending_action_dropped)
                 self._ep_hold_feedback_trip_finalizations += int(
                     event.feedback_finalized)
+                terminal_transition_recorded = False
+                if self.lower_terminal_action_mode == 'transition':
+                    has_pending = (
+                        event.pending_state is not None
+                        and event.pending_action is not None)
+                    has_outcome = (
+                        event.terminal_reward is not None
+                        and event.terminal_cost is not None)
+                    if has_pending and has_outcome:
+                        terminal_reward, terminal_cost, _ = (
+                            self._record_lower_transition(
+                                key=event.bus_id,
+                                raw_state=event.pending_state,
+                                raw_next_state=None,
+                                action=event.pending_action,
+                                reward=event.terminal_reward,
+                                cost=event.terminal_cost,
+                                previous_action=event.previous_action_s,
+                                transition_done=True,
+                                learned_training=learned_training,
+                                bus=event,
+                                trip_id=event.trip_id,
+                                direction=event.direction,
+                                station_id=event.last_board_station_id,
+                                board_wait_sum_s=event.last_board_wait_sum_s,
+                                board_count=event.last_board_count,
+                                record_holding_action=(
+                                    not event.feedback_finalized),
+                            )
+                        )
+                        episode_reward += terminal_reward
+                        episode_cost += terminal_cost
+                        episode_steps += 1
+                        terminal_transition_recorded = True
+                    elif event.pending_state is not None or event.pending_action is not None:
+                        self._ep_lower_terminal_outcomes_missing += 1
+                if self.lower_lifecycle.boundary_mode == 'reset':
+                    self._ep_lower_trip_boundary_resets += 1
+                    if terminal_transition_recorded:
+                        self._ep_lower_pending_states_consumed += int(
+                            event.pending_states_dropped)
+                        self._ep_lower_pending_actions_consumed += int(
+                            event.pending_action_dropped)
+                    else:
+                        self._ep_lower_pending_states_dropped += int(
+                            event.pending_states_dropped)
+                        self._ep_lower_pending_actions_dropped += int(
+                            event.pending_action_dropped)
 
         env_time = time.time() - t0
 
@@ -7729,10 +7842,16 @@ class TransitDuetV2Runner:
                 self._ep_lower_pending_states_dropped,
             'lower_pending_actions_dropped':
                 self._ep_lower_pending_actions_dropped,
+            'lower_pending_states_consumed':
+                self._ep_lower_pending_states_consumed,
+            'lower_pending_actions_consumed':
+                self._ep_lower_pending_actions_consumed,
             'lower_terminal_action_masks':
                 self._ep_lower_terminal_action_masks,
             'lower_terminal_transitions':
                 self._ep_lower_terminal_transitions,
+            'lower_terminal_outcomes_missing':
+                self._ep_lower_terminal_outcomes_missing,
             'lower_policy_frozen': lower_m.get('lower_policy_frozen', 0.),
             'lower_critic_frozen': lower_m.get('lower_critic_frozen', 0.),
             # upper policy

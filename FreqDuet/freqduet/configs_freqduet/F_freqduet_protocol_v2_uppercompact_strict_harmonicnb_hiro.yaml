@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_harmonicnb_hiro
+
+protocol:
+  role: structural_candidate_prior_initialized_count_harmonic
+
+frequency:
+  method: harmonic_nb
+  harmonic_nb_dispersion: 20.0
+  harmonic_process_var: 0.00001
+  harmonic_innovation_clip: 3.0
+  harmonic_observation_var_floor: 0.001

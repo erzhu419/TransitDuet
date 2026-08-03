@@ -63,6 +63,30 @@ class SimulationProtocolIntegrationTest(unittest.TestCase):
         self.assertGreater(env.effective_trip_num, 264)
         self.assertEqual(env.effective_trip_num, env.total_timetable_rows)
 
+    def test_count_harmonic_alias_receives_historical_od_prior(self):
+        env = env_bus(
+            self.env_path,
+            env_config={
+                "effective_trip_num": 4,
+                "service_start_hour": 6,
+                "service_end_hour": 19,
+            },
+        )
+        env.configure_frequency_features({
+            "enable": True,
+            "method": "harmonic_nb",
+            "bin_sec": 60,
+            "use_historical_prior": True,
+            "harmonic_period_s": 50400.0,
+            "fourier_K": 4,
+            "upper_enable": True,
+            "lower_enable": True,
+        })
+        prior = env.frequency_tracker.harmonic_prior
+        self.assertIn("global", prior)
+        self.assertGreater(len(prior["local"]), 0)
+        self.assertTrue((env.frequency_tracker.global_state.theta != 0).any())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -139,6 +139,8 @@ class env_bus(object):
         self.lower_context_gate_max_freq_od_entropy = None
         self.lower_context_gate_min_freq_od_high_energy = None
         self.lower_context_gate_min_freq_promotion_absorbed = None
+        self.holding_action_trace_mode = 'positive_only'
+        self.unobserved_action_mode = 'legacy_stale'
 
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
@@ -595,6 +597,8 @@ class env_bus(object):
                 bus.reward = None
                 bus.obs = []
                 bus.cost = None
+                bus.holding_action_trace_mode = self.holding_action_trace_mode
+                bus.unobserved_action_mode = self.unobserved_action_mode
                 target_hw = self._get_target_headway_for_bus(bus)
                 bus.drive(self.current_time, action[bus.bus_id], self.bus_all,
                           debug=debug, target_headway=target_hw,
@@ -783,8 +787,9 @@ class env_bus(object):
 
         if self.frequency_enabled:
             method = str(cfg.get('method', '')).lower()
-            if method in {'harmonic', 'dynamic_harmonic', 'harmonic_rls',
-                          'dynamic_harmonic_nb'}:
+            if method in {
+                    'harmonic', 'dynamic_harmonic', 'harmonic_rls',
+                    'harmonic_nb', 'dynamic_harmonic_nb', 'count_harmonic'}:
                 if cfg.get('use_historical_prior', True) and not isinstance(
                         cfg.get('harmonic_prior'), dict):
                     cfg['harmonic_prior'] = self._build_harmonic_prior(cfg)

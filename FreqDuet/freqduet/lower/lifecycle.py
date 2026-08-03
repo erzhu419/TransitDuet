@@ -14,6 +14,22 @@ class CompletedTripEvent:
     pending_states_dropped: int
     pending_action_dropped: bool
     feedback_finalized: bool
+    pending_state: Any | None
+    pending_action: Any | None
+    previous_action_s: float
+    terminal_reward: float | None
+    terminal_cost: float | None
+    last_board_wait_sum_s: float
+    last_board_count: int
+    last_board_station_id: int
+    forward_headway: float
+    backward_headway: float
+    target_headway: float
+
+    @property
+    def _target_headway(self) -> float:
+        """Expose the bus-compatible name used by lower value diagnostics."""
+        return self.target_headway
 
 
 class LowerEpisodeLifecycle:
@@ -81,15 +97,35 @@ class LowerEpisodeLifecycle:
                     actions=list(getattr(bus, "applied_actions", []) or []),
                 ))
 
+            states = state_dict.setdefault(bus_id, [])
+            pending_state = None
+            if states:
+                candidate = states[-1]
+                pending_state = (
+                    candidate.copy() if hasattr(candidate, "copy") else candidate)
+            action_candidate = action_dict.get(bus_id)
+            pending_action_value = (
+                action_candidate.copy()
+                if hasattr(action_candidate, "copy") else action_candidate)
+            previous_action_s = float(last_action.get(bus_id, 0.0))
+
             pending_states = 0
             pending_action = False
             if self.boundary_mode == "reset":
-                states = state_dict.setdefault(bus_id, [])
                 pending_states = len(states)
                 states.clear()
-                pending_action = action_dict.get(bus_id) is not None
+                pending_action = action_candidate is not None
                 action_dict[bus_id] = None
                 last_action[bus_id] = 0.0
+
+            def optional_float(name: str) -> float | None:
+                value = getattr(bus, name, None)
+                return None if value is None else float(value)
+
+            completed_station_id = getattr(
+                bus, "last_completed_station_id", None)
+            if completed_station_id is None:
+                completed_station_id = -1
 
             events.append(CompletedTripEvent(
                 bus_id=bus_id,
@@ -98,5 +134,20 @@ class LowerEpisodeLifecycle:
                 pending_states_dropped=pending_states,
                 pending_action_dropped=pending_action,
                 feedback_finalized=feedback_finalized,
+                pending_state=pending_state,
+                pending_action=pending_action_value,
+                previous_action_s=previous_action_s,
+                terminal_reward=optional_float("last_completed_reward"),
+                terminal_cost=optional_float("last_completed_cost"),
+                last_board_wait_sum_s=float(getattr(
+                    bus, "last_completed_board_wait_sum_s", 0.0)),
+                last_board_count=int(getattr(
+                    bus, "last_completed_board_count", 0)),
+                last_board_station_id=int(completed_station_id),
+                forward_headway=float(getattr(bus, "forward_headway", 360.0)),
+                backward_headway=float(getattr(
+                    bus, "backward_headway", 360.0)),
+                target_headway=float(getattr(
+                    bus, "last_completed_target_headway", 360.0) or 360.0),
             ))
         return events

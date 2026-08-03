@@ -107,6 +107,7 @@ class CausalHarmonicBandState:
         self._raw_high = 0.0
         self.uncertainty = 1.0
         self.n = 0
+        self._last_feature_step = 0
 
     def _features(self, step):
         return harmonic_features(
@@ -123,6 +124,7 @@ class CausalHarmonicBandState:
     def update(self, value, step=None):
         value = max(float(value), 0.0)
         feature_step = self.n if step is None else int(step)
+        self._last_feature_step = feature_step
         phi = self._features(feature_step)
         pred_log_before = float(phi @ self.theta)
         pred_rate_before = self._rate_from_log(pred_log_before)
@@ -178,6 +180,13 @@ class CausalHarmonicBandState:
         self.uncertainty = float(math.sqrt(max(float(phi @ cov_phi), 0.0)))
         self.n += 1
 
+    def forecast(self, steps_ahead):
+        """Evaluate the fitted causal harmonic state at a future bin."""
+        horizon = max(0, int(round(float(steps_ahead))))
+        future_step = int(self._last_feature_step) + horizon
+        return self._rate_from_log(
+            float(self._features(future_step) @ self.theta))
+
     def promote_residual(self, strength=1.0, gain=0.10):
         """Absorb part of a persistent innovation into the low-frequency state.
 
@@ -196,7 +205,7 @@ class CausalHarmonicBandState:
         if strength <= 0.0 or gain <= 0.0:
             return 0.0
 
-        feature_step = max(0, self.n - 1)
+        feature_step = int(self._last_feature_step)
         phi = self._features(feature_step)
         low_before = max(float(self.low), 0.0)
         target_low = max(0.0, low_before + gain * strength * residual)
@@ -272,6 +281,7 @@ class CausalNegativeBinomialHarmonicBandState(CausalHarmonicBandState):
     def update(self, value, step=None):
         value = max(float(value), 0.0)
         feature_step = self.n if step is None else int(step)
+        self._last_feature_step = feature_step
         phi = self._features(feature_step)
 
         if self.n == 0 and not np.any(np.abs(self.theta) > 1e-12):

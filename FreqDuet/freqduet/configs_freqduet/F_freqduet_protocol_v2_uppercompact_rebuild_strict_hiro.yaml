@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro
+
+protocol:
+  role: structural_candidate_full_strict_contract
+
+lower:
+  holding_action_trace_mode: all_decisions
+  terminal_action_mode: transition
+  unobserved_action_mode: zero
+
+frequency:
+  forecast_mode: causal

@@ -66,6 +66,12 @@ class Bus(object):
         self.back_to_terminal_time = None
         self.last_completed_trip_id = None
         self.last_completed_direction = None
+        self.last_completed_reward = None
+        self.last_completed_cost = None
+        self.last_completed_station_id = None
+        self.last_completed_target_headway = None
+        self.last_completed_board_wait_sum_s = 0.0
+        self.last_completed_board_count = 0
 
         self.acceleration = 3 # 加速度
         self.deceleration = 5 # 刹车加速度
@@ -78,6 +84,8 @@ class Bus(object):
 
         self.headway_dif = []
         self.applied_actions = []  # v2: track holding actions per trip for feedback
+        self.holding_action_trace_mode = "positive_only"
+        self.unobserved_action_mode = "legacy_stale"
 
         # record of stop intervals [station_name, start_time, end_time]
         self.stop_records = []
@@ -255,7 +263,11 @@ class Bus(object):
         self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
 
-        if self.next_station in self.effective_station[2:] and (len(self.forward_bus) != 0 or len(self.backward_bus) != 0):
+        action_requested = (
+            self.next_station in self.effective_station[2:]
+            and (len(self.forward_bus) != 0 or len(self.backward_bus) != 0)
+        )
+        if action_requested:
             target_hw = self._target_headway
             headway_dev = (self.forward_headway - target_hw) / max(target_hw, 1.0)
 
@@ -379,34 +391,32 @@ class Bus(object):
                         station_id, self.direction).tolist()
                 )
 
-            # Normalized reward in [-1, 0]: deviation / target_hw, clamped
-            def headway_reward(headway):
-                return -min(abs(headway - target_hw) / target_hw, 1.0)
+            self.reward, self.cost = self._headway_reward_cost(target_hw)
 
-            forward_reward = headway_reward(self.forward_headway) if len(self.forward_bus) != 0 else None
-            backward_reward = headway_reward(self.backward_headway) if len(self.backward_bus) != 0 else None
-            if forward_reward is not None and backward_reward is not None:
-                fwd_dev = abs(self.forward_headway - target_hw)
-                bwd_dev = abs(self.backward_headway - target_hw)
-                weight = fwd_dev / (fwd_dev + bwd_dev + 1e-6)
-                similarity_bonus = -min(abs(self.forward_headway - self.backward_headway) / target_hw, 1.0) * 0.3
-                self.reward = forward_reward * weight + backward_reward * (1 - weight) + similarity_bonus
-            elif forward_reward is not None:
-                self.reward = forward_reward
-            elif backward_reward is not None:
-                self.reward = backward_reward
-            else:
-                self.reward = -1.0
-
-            # Lagrangian cost: headway deviation squared, clamped to [0,1]
-            self.cost = min(headway_dev ** 2, 1.0)
-
-        self.state = BusState.WAITING_ACTION
+        if action_requested or self.unobserved_action_mode == "legacy_stale":
+            self.state = BusState.WAITING_ACTION
+        else:
+            # No policy observation was emitted, so there is no action to
+            # execute. Reusing the previous station's action would create a
+            # physical hold with no corresponding replay transition.
+            self.dwelling_time = 0.0
+            self.state = BusState.DWELLING
 
     def _start_dwelling(self, action, current_time=None):
         dwell_time = self._normalize_action(action)
         if dwell_time is not None:
             dwell_time = max(0.0, dwell_time)
+
+        should_record = (
+            dwell_time is not None
+            and not (self.trip_id in [0, 1] and action is None)
+            and (
+                dwell_time > 0.0
+                or self.holding_action_trace_mode == "all_decisions"
+            )
+        )
+        if should_record:
+            self.applied_actions.append(float(dwell_time))
 
         if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
@@ -416,13 +426,48 @@ class Bus(object):
                 self.last_action_station_id = int(self.last_station.station_id)
         else:
             self.dwelling_time = dwell_time
-            # v2: record applied holding action for feedback to upper level
-            self.applied_actions.append(float(dwell_time))
             self.last_action_s = float(dwell_time)
             self.last_action_time = current_time
             self.last_action_station_id = int(self.last_station.station_id)
 
         self.state = BusState.DWELLING
+
+    def _headway_reward_cost(self, target_headway):
+        """Return the common station-arrival reward and constraint signal."""
+        target_hw = max(float(target_headway), 1.0)
+
+        def headway_reward(headway):
+            return -min(abs(float(headway) - target_hw) / target_hw, 1.0)
+
+        has_forward = bool(self.forward_bus)
+        has_backward = bool(self.backward_bus)
+        forward_reward = (
+            headway_reward(self.forward_headway) if has_forward else None)
+        backward_reward = (
+            headway_reward(self.backward_headway) if has_backward else None)
+        if forward_reward is not None and backward_reward is not None:
+            fwd_dev = abs(float(self.forward_headway) - target_hw)
+            bwd_dev = abs(float(self.backward_headway) - target_hw)
+            weight = fwd_dev / (fwd_dev + bwd_dev + 1e-6)
+            similarity_bonus = -min(
+                abs(float(self.forward_headway) - float(self.backward_headway))
+                / target_hw,
+                1.0,
+            ) * 0.3
+            reward = (
+                forward_reward * weight
+                + backward_reward * (1.0 - weight)
+                + similarity_bonus
+            )
+        elif forward_reward is not None:
+            reward = forward_reward
+        elif backward_reward is not None:
+            reward = backward_reward
+        else:
+            reward = -1.0
+
+        headway_dev = (float(self.forward_headway) - target_hw) / target_hw
+        return float(reward), float(min(headway_dev ** 2, 1.0))
 
     def _process_dwelling(self, current_time):
         if self.dwelling_time is None or self.dwelling_time <= 1:
@@ -506,6 +551,14 @@ class Bus(object):
         if self.next_station.station_type == 0 and self.on_route:
             self.last_completed_trip_id = int(self.trip_id)
             self.last_completed_direction = bool(self.direction)
+            self.last_completed_reward, self.last_completed_cost = (
+                self._headway_reward_cost(self._target_headway)
+            )
+            self.last_completed_station_id = int(self.next_station.station_id)
+            self.last_completed_target_headway = float(self._target_headway)
+            self.last_completed_board_wait_sum_s = float(
+                self.last_board_wait_sum_s)
+            self.last_completed_board_count = int(self.last_board_count)
             self.on_route = False
             self.back_to_terminal_time = current_time
             self.last_station = self.effective_station[-1]
@@ -544,6 +597,12 @@ class Bus(object):
         self.back_to_terminal_time = None
         self.last_completed_trip_id = None
         self.last_completed_direction = None
+        self.last_completed_reward = None
+        self.last_completed_cost = None
+        self.last_completed_station_id = None
+        self.last_completed_target_headway = None
+        self.last_completed_board_wait_sum_s = 0.0
+        self.last_completed_board_count = 0
         self.board_num = 0.
         self.alight_num = 0.
         self.last_board_wait_sum_s = 0.0

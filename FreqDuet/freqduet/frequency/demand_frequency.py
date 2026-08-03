@@ -213,6 +213,7 @@ class DemandFrequencyTracker:
         slope_norm=5.0,
         method="haar",
         forecast_horizon_s=1800.0,
+        forecast_mode="causal",
         upper_history_bins=6,
         lower_history_bins=6,
         od_features=False,
@@ -259,8 +260,6 @@ class DemandFrequencyTracker:
         self.upper_mode = str(upper_mode or "low").lower()
         self.lower_mode = str(lower_mode or "high").lower()
         self.od_features_enabled = bool(od_features)
-        self.forecast_steps = max(
-            float(forecast_horizon_s) / max(self.update_interval_s, 1e-6), 1.0)
         self.upper_history_bins = max(1, int(upper_history_bins))
         self.lower_history_bins = max(1, int(lower_history_bins))
         self.history_aux_enabled = bool(history_aux_enable)
@@ -280,6 +279,19 @@ class DemandFrequencyTracker:
         self.bin_sec = float(bin_sec) if bin_sec else self.update_interval_s
         self.bin_steps = max(1, int(round(self.bin_sec / self.update_interval_s)))
         self.bin_interval_s = self.bin_steps * self.update_interval_s
+        self.forecast_mode = str(forecast_mode or "causal").strip().lower()
+        if self.forecast_mode not in {
+                "causal", "linear_bins", "legacy_seconds_linear"}:
+            raise ValueError(
+                "forecast_mode must be causal, linear_bins, or "
+                "legacy_seconds_linear")
+        forecast_interval_s = (
+            self.update_interval_s
+            if self.forecast_mode == "legacy_seconds_linear"
+            else self.bin_interval_s
+        )
+        self.forecast_steps = max(
+            float(forecast_horizon_s) / max(forecast_interval_s, 1e-6), 1.0)
         energy_alpha = _alpha_from_period(self.bin_interval_s, energy_period_s)
         middle_alpha = _alpha_from_period(self.bin_interval_s, middle_period_s)
         residual_alpha = _alpha_from_period(
@@ -422,6 +434,7 @@ class DemandFrequencyTracker:
             slope_norm=cfg.get("slope_norm", 5.0),
             method=cfg.get("method", "haar"),
             forecast_horizon_s=cfg.get("forecast_horizon_s", 1800.0),
+            forecast_mode=cfg.get("forecast_mode", "causal"),
             upper_history_bins=cfg.get("upper_history_bins", 6),
             lower_history_bins=cfg.get("lower_history_bins", 6),
             od_features=cfg.get("od_features", False),
@@ -642,6 +655,8 @@ class DemandFrequencyTracker:
         return absorbed
 
     def _forecast_value(self, state):
+        if self.forecast_mode == "causal" and hasattr(state, "forecast"):
+            return max(0.0, float(state.forecast(self.forecast_steps)))
         return max(0.0, state.low + state.low_slope * self.forecast_steps)
 
     def _high_noise_floor(self, state):
