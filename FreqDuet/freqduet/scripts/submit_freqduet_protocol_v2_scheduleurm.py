@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shlex
 import subprocess
@@ -63,11 +64,20 @@ def protocol_label(configs: list[str]) -> str:
     return "mixed-protocol"
 
 
-def execute(command: list[str], dry_run: bool) -> str:
+def execute(
+    command: list[str],
+    dry_run: bool,
+    input_text: str | None = None,
+) -> str:
     print(shlex.join(command))
     if dry_run:
         return ""
-    process = subprocess.run(command, text=True, capture_output=True)
+    process = subprocess.run(
+        command,
+        text=True,
+        input=input_text,
+        capture_output=True,
+    )
     output = (process.stdout or "") + (process.stderr or "")
     if process.returncode != 0:
         if "duplicate" not in output.lower() and "already queued" not in output.lower():
@@ -97,6 +107,11 @@ def main() -> None:
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
     parser.add_argument("--priority", choices=["low", "normal", "high"], default="normal")
     parser.add_argument("--dispatch", action="store_true")
+    parser.add_argument(
+        "--serial-submit",
+        action="store_true",
+        help="Use one scheduler lock per shard instead of submit-jsonl.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
     args = parser.parse_args()
@@ -118,6 +133,7 @@ def main() -> None:
         f"train_episodes={args.train_episodes} eval_seeds={len(eval_seeds)}")
 
     submitted_task_ids: list[str] = []
+    bulk_specs: list[dict[str, object]] = []
     for index, (start, end) in enumerate(shards):
         shard_id = f"{start:04d}_{end:04d}"
         logs_dir = f"{result_base}/logs_shards/shard_{shard_id}"
@@ -176,8 +192,63 @@ def main() -> None:
         ]
         if args.allow_duplicate:
             command.append("--allow-duplicate")
-        output = execute(command, args.dry_run)
-        submitted_task_ids.extend(SUBMITTED_TASK_RE.findall(output))
+        bulk_specs.append({
+            "project": "FreqDuet",
+            "description": (
+                f"FreqDuet {protocol} {args.run_name} "
+                f"shard {index + 1}/{len(shards)}"
+            ),
+            "cmd": " ".join(inner),
+            "cwd": str(ROOT),
+            "signature": f"FreqDuet/{args.run_name}/shard_{shard_id}",
+            "vram": 0,
+            "ram_mb": int(args.ram_mb),
+            "cpu": int(args.cpu),
+            "priority": args.priority,
+            "require_node": node,
+            "result_dir": str(REMOTE_ROOT / logs_dir),
+            "local_result_dir": str(ROOT / logs_dir),
+            "skip_resume_scan": True,
+            "allow_cpu_training": True,
+            "cpu_training_justification": CPU_JUSTIFICATION,
+            "allow_remote_large_data": True,
+            "reroute_on_node_down": True,
+            "node_down_requeue_s": 900,
+            "allow_duplicate": bool(args.allow_duplicate),
+        })
+        if args.dry_run or args.serial_submit:
+            output = execute(command, args.dry_run)
+            submitted_task_ids.extend(SUBMITTED_TASK_RE.findall(output))
+
+    if not args.dry_run and not args.serial_submit:
+        output = execute(
+            [
+                sys.executable,
+                str(SCHEDULER),
+                "submit-jsonl",
+                "--stdin",
+                "--trusted",
+                "--json",
+                "--lock-timeout", "600",
+                "--intent-label", f"FreqDuet/{args.run_name}",
+            ],
+            False,
+            input_text=json.dumps(bulk_specs),
+        )
+        try:
+            payload = json.loads(output)
+            submitted_task_ids = [
+                str(item["id"]) for item in payload.get("submitted", [])
+            ]
+        except (json.JSONDecodeError, KeyError, TypeError) as exc:
+            raise RuntimeError(
+                "scheduler submit-jsonl did not return a valid task-id payload"
+            ) from exc
+        if len(submitted_task_ids) != len(bulk_specs):
+            raise RuntimeError(
+                "scheduler submit-jsonl count mismatch: "
+                f"expected {len(bulk_specs)}, got {len(submitted_task_ids)}"
+            )
 
     print("\nAggregate after scheduler sync:")
     print(
