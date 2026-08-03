@@ -1,10 +1,15 @@
 import argparse
+import json
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from scripts.submit_hyperparameter_pilot_scheduleurm import (
     build_scheduler_command,
+    build_scheduler_spec,
     build_training_command,
     cell_relative_dir,
+    execute_bulk,
     experiment_cells,
 )
 
@@ -62,8 +67,9 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertIn("--source-manifest-sha256 " + "b" * 64, command)
 
     def test_scheduler_uses_dynamic_cpu_nodes_without_hard_pin(self):
+        args = args_fixture()
         command = build_scheduler_command(
-            args_fixture(),
+            args,
             policy_mode="freq_hrl",
             candidate_id="ppo_lr1e4_std15",
             scenario="persistent_shift",
@@ -77,6 +83,38 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         ]
         self.assertEqual(allowed, ["jtl110cpu", "jtl110cpu2"])
         self.assertEqual(command[command.index("--cpu") + 1], "1")
+        spec = build_scheduler_spec(
+            args,
+            policy_mode="freq_hrl",
+            candidate_id="ppo_lr1e4_std15",
+            scenario="persistent_shift",
+            replicate_seed=7,
+        )
+        self.assertEqual(spec["allowed_nodes"], ["jtl110cpu", "jtl110cpu2"])
+        self.assertIsNone(spec.get("require_node"))
+        self.assertEqual(spec["cpu"], 1)
+        self.assertTrue(spec["allow_cpu_training"])
+
+    def test_bulk_submission_uses_one_atomic_scheduler_call(self):
+        specs = [{"signature": "unit/1"}, {"signature": "unit/2"}]
+        completed = SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps({
+                "count": 2,
+                "submitted": [{"id": "t1"}, {"id": "t2"}],
+            }),
+            stderr="",
+        )
+        with patch(
+            "scripts.submit_hyperparameter_pilot_scheduleurm.subprocess.run",
+            return_value=completed,
+        ) as run:
+            execute_bulk(specs, dry_run=False, intent_label="unit")
+        run.assert_called_once()
+        command = run.call_args.args[0]
+        self.assertIn("submit-jsonl", command)
+        self.assertIn("--trusted", command)
+        self.assertEqual(json.loads(run.call_args.kwargs["input"]), specs)
 
 
 if __name__ == "__main__":

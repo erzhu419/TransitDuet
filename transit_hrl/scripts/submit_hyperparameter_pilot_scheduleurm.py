@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
 import subprocess
 import sys
@@ -152,6 +153,72 @@ def build_scheduler_command(
     scenario: str,
     replicate_seed: int,
 ) -> list[str]:
+    spec = build_scheduler_spec(
+        args,
+        policy_mode=policy_mode,
+        candidate_id=candidate_id,
+        scenario=scenario,
+        replicate_seed=replicate_seed,
+    )
+    command = [
+        sys.executable,
+        str(SCHEDULER),
+        "submit",
+        "--project",
+        str(spec["project"]),
+        "--description",
+        str(spec["description"]),
+        "--cmd",
+        str(spec["cmd"]),
+        "--cwd",
+        str(spec["cwd"]),
+        "--signature",
+        str(spec["signature"]),
+        "--resource-family",
+        str(spec["resource_family"]),
+        "--vram",
+        str(spec["vram"]),
+        "--ram-mb",
+        str(spec["ram_mb"]),
+        "--cpu",
+        str(spec["cpu"]),
+        "--priority",
+        str(spec["priority"]),
+        "--ckpt-dir",
+        str(spec["ckpt_dir"]),
+        "--ckpt-glob",
+        str(spec["ckpt_glob"]),
+        "--result-dir",
+        str(spec["result_dir"]),
+        "--local-result-dir",
+        str(spec["local_result_dir"]),
+        "--allow-cpu-training",
+        "--cpu-training-justification",
+        str(spec["cpu_training_justification"]),
+        "--allow-no-resume",
+        "--reroute-on-node-down",
+        "--node-down-requeue-s",
+        str(spec["node_down_requeue_s"]),
+    ]
+    for node in spec["allowed_nodes"]:
+        command.extend(["--allowed-node", str(node)])
+    for excluded in spec["stage_excludes"]:
+        command.extend(["--stage-exclude", str(excluded)])
+    if spec["skip_launch_staging"]:
+        command.append("--skip-launch-staging")
+    if spec["allow_duplicate"]:
+        command.append("--allow-duplicate")
+    return command
+
+
+def build_scheduler_spec(
+    args: argparse.Namespace,
+    *,
+    policy_mode: str,
+    candidate_id: str,
+    scenario: str,
+    replicate_seed: int,
+) -> dict[str, object]:
     relative_dir = cell_relative_dir(
         args.run_name,
         policy_mode,
@@ -160,16 +227,13 @@ def build_scheduler_command(
         replicate_seed,
     )
     absolute_dir = ROOT / relative_dir
-    command = [
-        sys.executable,
-        str(SCHEDULER),
-        "submit",
-        "--project",
-        "Freq-HRL",
-        "--description",
-        f"Freq-HRL nested HPO {policy_mode} {candidate_id} {scenario} replicate {replicate_seed}",
-        "--cmd",
-        build_training_command(
+    return {
+        "project": "Freq-HRL",
+        "description": (
+            f"Freq-HRL nested HPO {policy_mode} {candidate_id} "
+            f"{scenario} replicate {replicate_seed}"
+        ),
+        "cmd": build_training_command(
             args,
             policy_mode=policy_mode,
             candidate_id=candidate_id,
@@ -177,48 +241,29 @@ def build_scheduler_command(
             replicate_seed=replicate_seed,
             output_dir=relative_dir,
         ),
-        "--cwd",
-        str(ROOT),
-        "--signature",
-        (
+        "cwd": str(ROOT),
+        "signature": (
             f"Freq-HRL/hpo-v1/{args.run_name}/{policy_mode}/{candidate_id}/"
             f"{scenario}/rep-{replicate_seed}"
         ),
-        "--resource-family",
-        "Freq-HRL/hpo-v1/single-cell",
-        "--vram",
-        "0",
-        "--ram-mb",
-        str(args.ram_mb),
-        "--cpu",
-        str(args.cpu),
-        "--priority",
-        args.priority,
-        "--ckpt-dir",
-        str(absolute_dir),
-        "--ckpt-glob",
-        "checkpoint.pt",
-        "--result-dir",
-        str(absolute_dir),
-        "--local-result-dir",
-        str(absolute_dir),
-        "--allow-cpu-training",
-        "--cpu-training-justification",
-        CPU_JUSTIFICATION,
-        "--allow-no-resume",
-        "--reroute-on-node-down",
-        "--node-down-requeue-s",
-        "600",
-    ]
-    for node in args.nodes:
-        command.extend(["--allowed-node", node])
-    for excluded in STAGE_EXCLUDES:
-        command.extend(["--stage-exclude", excluded])
-    if args.skip_launch_staging:
-        command.append("--skip-launch-staging")
-    if args.allow_duplicate:
-        command.append("--allow-duplicate")
-    return command
+        "resource_family": "Freq-HRL/hpo-v1/single-cell",
+        "vram": 0,
+        "ram_mb": int(args.ram_mb),
+        "cpu": int(args.cpu),
+        "priority": str(args.priority),
+        "ckpt_dir": str(absolute_dir),
+        "ckpt_glob": "checkpoint.pt",
+        "result_dir": str(absolute_dir),
+        "local_result_dir": str(absolute_dir),
+        "allow_cpu_training": True,
+        "cpu_training_justification": CPU_JUSTIFICATION,
+        "reroute_on_node_down": True,
+        "node_down_requeue_s": 600,
+        "allowed_nodes": list(args.nodes),
+        "stage_excludes": list(STAGE_EXCLUDES),
+        "skip_launch_staging": bool(args.skip_launch_staging),
+        "allow_duplicate": bool(args.allow_duplicate),
+    }
 
 
 def execute(command: list[str], *, dry_run: bool) -> None:
@@ -235,6 +280,52 @@ def execute(command: list[str], *, dry_run: bool) -> None:
             process.check_returncode()
     if output.strip():
         print(output.strip(), flush=True)
+
+
+def execute_bulk(
+    specs: list[dict[str, object]],
+    *,
+    dry_run: bool,
+    intent_label: str,
+) -> None:
+    if dry_run:
+        print(
+            f"dry-run bulk submit: {len(specs)} tasks; "
+            f"first={specs[0]['signature'] if specs else 'none'}",
+            flush=True,
+        )
+        return
+    command = [
+        sys.executable,
+        str(SCHEDULER),
+        "submit-jsonl",
+        "--stdin",
+        "--trusted",
+        "--json",
+        "--intent-label",
+        str(intent_label),
+    ]
+    process = subprocess.run(
+        command,
+        input=json.dumps(specs, ensure_ascii=True, separators=(",", ":")),
+        text=True,
+        capture_output=True,
+    )
+    if process.returncode != 0:
+        if process.stdout.strip():
+            print(process.stdout.strip(), file=sys.stderr)
+        if process.stderr.strip():
+            print(process.stderr.strip(), file=sys.stderr)
+        process.check_returncode()
+    payload = json.loads(process.stdout)
+    submitted = list(payload.get("submitted", []))
+    first_id = submitted[0]["id"] if submitted else "none"
+    last_id = submitted[-1]["id"] if submitted else "none"
+    print(
+        f"bulk submitted {payload.get('count', 0)} tasks "
+        f"ids={first_id}..{last_id}",
+        flush=True,
+    )
 
 
 def expected_cell_dirs(args: argparse.Namespace) -> list[Path]:
@@ -369,17 +460,21 @@ def main() -> None:
         f"nodes={','.join(args.nodes)} iterations={args.iterations} steps={args.steps}",
         flush=True,
     )
-    for mode, candidate, scenario, seed in cells:
-        execute(
-            build_scheduler_command(
-                args,
-                policy_mode=mode,
-                candidate_id=candidate,
-                scenario=scenario,
-                replicate_seed=seed,
-            ),
-            dry_run=bool(args.dry_run),
+    specs = [
+        build_scheduler_spec(
+            args,
+            policy_mode=mode,
+            candidate_id=candidate,
+            scenario=scenario,
+            replicate_seed=seed,
         )
+        for mode, candidate, scenario, seed in cells
+    ]
+    execute_bulk(
+        specs,
+        dry_run=bool(args.dry_run),
+        intent_label=f"Freq-HRL HPO {args.run_name}",
+    )
     if args.dispatch and not args.dry_run:
         execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
     print(
