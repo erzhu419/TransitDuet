@@ -51,6 +51,7 @@ POOL_CPU_CAPACITY = NODE_CPU_CAPACITY * len(DEFAULT_NODES)
 HPO_MODULE = "freq_hrl.experiments.trading.full_method_hpo"
 HPO_SIGNATURE_VERSION = "full-hpo-v2"
 SMOKE_FULL_VARIANT = "freq_hrl_full_v4"
+SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 CPU_JUSTIFICATION = (
     "Full-method nested-validation cells are independent, CPU-bound, and "
     "explicitly single-threaded. scheduleurm dynamically packs them across "
@@ -564,7 +565,7 @@ def main() -> None:
         "merge after all result summaries are synced: "
         + shlex.join([
             sys.executable,
-            str(Path(__file__).resolve()),
+            str(SUBMIT_SCRIPT_PATH),
             "--run-name",
             args.run_name,
             "--stage",

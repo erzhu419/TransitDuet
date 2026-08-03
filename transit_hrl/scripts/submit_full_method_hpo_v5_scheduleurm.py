@@ -30,6 +30,7 @@ def configure_base() -> None:
     base.HPO_MODULE = "freq_hrl.experiments.trading.full_method_hpo_v5"
     base.HPO_SIGNATURE_VERSION = "full-hpo-v3"
     base.SMOKE_FULL_VARIANT = hpo.ABLATION_PARENT_VARIANT
+    base.SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
 if __name__ == "__main__":
