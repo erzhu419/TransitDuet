@@ -1,4 +1,4 @@
-"""Small statistical checks for experiment claim gates."""
+"""Statistical primitives for paired, independently clustered claim gates."""
 
 from __future__ import annotations
 
@@ -64,6 +64,53 @@ def _row_key(row: dict[str, Any], key_fields: tuple[str, ...]) -> tuple[Any, ...
     return tuple(row.get(field) for field in key_fields)
 
 
+def holm_adjusted_p_values(values: Iterable[Any]) -> np.ndarray:
+    """Return Holm-Bonferroni adjusted p-values in the original order."""
+
+    arr = finite_array(values).reshape(-1)
+    if arr.size == 0:
+        return arr
+    arr = np.clip(arr, 0.0, 1.0)
+    order = np.argsort(arr, kind="stable")
+    adjusted = np.empty(arr.size, dtype=np.float64)
+    running = 0.0
+    m = int(arr.size)
+    for rank, index in enumerate(order):
+        running = max(running, float((m - rank) * arr[index]))
+        adjusted[index] = min(running, 1.0)
+    return adjusted
+
+
+def apply_holm_correction(
+    rows: list[dict[str, Any]],
+    *,
+    family_key: str = "multiplicity_family",
+    p_key: str = "sign_p_value",
+    alpha: float = 0.05,
+) -> list[dict[str, Any]]:
+    """Annotate checks with family-wise Holm-Bonferroni decisions."""
+
+    out = [dict(row) for row in rows]
+    families: dict[str, list[int]] = {}
+    for index, row in enumerate(out):
+        family = str(row.get(family_key) or row.get("claim") or "global")
+        row[family_key] = family
+        if finite_float(row.get(p_key)) is not None:
+            families.setdefault(family, []).append(index)
+    for family, indices in families.items():
+        adjusted = holm_adjusted_p_values(out[index].get(p_key) for index in indices)
+        family_size = len(indices)
+        for index, value in zip(indices, adjusted):
+            out[index]["holm_adjusted_p_value"] = float(value)
+            out[index]["multiplicity_family_size"] = int(family_size)
+            out[index]["holm_reject"] = bool(float(value) <= float(alpha))
+    for row in out:
+        row.setdefault("holm_adjusted_p_value", float("nan"))
+        row.setdefault("multiplicity_family_size", 0)
+        row.setdefault("holm_reject", False)
+    return out
+
+
 def paired_delta_stats(
     rows: list[dict[str, Any]],
     variant_key: str,
@@ -72,6 +119,7 @@ def paired_delta_stats(
     treatment: str,
     control: str,
     lower_is_better: bool = False,
+    cluster_keys: tuple[str, ...] | None = None,
     n_boot: int = 2000,
     seed: int = 0,
 ) -> dict[str, Any]:
@@ -82,12 +130,23 @@ def paired_delta_stats(
     """
 
     indexed: dict[tuple[str, tuple[Any, ...]], dict[str, Any]] = {}
+    duplicate_keys: list[tuple[str, tuple[Any, ...]]] = []
     for row in rows:
         variant = row.get(variant_key)
         value = finite_float(row.get(metric))
         if variant is None or value is None:
             continue
-        indexed[(str(variant), _row_key(row, pair_keys))] = row
+        index_key = (str(variant), _row_key(row, pair_keys))
+        if index_key in indexed:
+            duplicate_keys.append(index_key)
+            continue
+        indexed[index_key] = row
+    if duplicate_keys:
+        preview = ", ".join(repr(key) for key in duplicate_keys[:3])
+        raise ValueError(
+            "paired_delta_stats requires one row per variant/pair key; "
+            f"found {len(duplicate_keys)} duplicate rows, including {preview}"
+        )
 
     treatment_keys = {
         pair for (variant, pair) in indexed
@@ -98,32 +157,90 @@ def paired_delta_stats(
         if variant == str(control)
     }
     common = sorted(treatment_keys & control_keys, key=repr)
+    # Reusing the same RNG seed across sources/scenarios creates repeated
+    # measures, not new independent replications. Callers can override this
+    # convention for studies with a different registered sampling unit.
+    if cluster_keys is None and "seed" in pair_keys:
+        cluster_fields = ("seed",)
+    else:
+        cluster_fields = tuple(pair_keys if cluster_keys is None else cluster_keys)
     deltas = []
+    cluster_deltas: dict[tuple[Any, ...], list[float]] = {}
     for pair in common:
-        t_val = finite_float(indexed[(str(treatment), pair)].get(metric))
-        c_val = finite_float(indexed[(str(control), pair)].get(metric))
+        treatment_row = indexed[(str(treatment), pair)]
+        control_row = indexed[(str(control), pair)]
+        t_val = finite_float(treatment_row.get(metric))
+        c_val = finite_float(control_row.get(metric))
         if t_val is None or c_val is None:
             continue
-        deltas.append(t_val - c_val)
-    delta_arr = finite_array(deltas)
-    improvements = -delta_arr if lower_is_better else delta_arr
-    ci_low, ci_high = bootstrap_mean_ci(delta_arr, n_boot=n_boot, seed=seed)
-    imp_low, imp_high = bootstrap_mean_ci(improvements, n_boot=n_boot, seed=seed + 7919)
+        treatment_cluster = _row_key(treatment_row, cluster_fields)
+        control_cluster = _row_key(control_row, cluster_fields)
+        if treatment_cluster != control_cluster:
+            raise ValueError(
+                "treatment and control rows disagree on independent cluster: "
+                f"{treatment_cluster!r} != {control_cluster!r}"
+            )
+        delta = float(t_val - c_val)
+        deltas.append(delta)
+        cluster_deltas.setdefault(treatment_cluster, []).append(delta)
+    pair_delta_arr = finite_array(deltas)
+    cluster_delta_arr = finite_array(
+        np.mean(values) for values in cluster_deltas.values()
+    )
+    improvements = -cluster_delta_arr if lower_is_better else cluster_delta_arr
+    ci_low, ci_high = bootstrap_mean_ci(cluster_delta_arr, n_boot=n_boot, seed=seed)
+    if lower_is_better:
+        imp_low, imp_high = -ci_high, -ci_low
+    else:
+        imp_low, imp_high = ci_low, ci_high
+    delta_mean = (
+        float(cluster_delta_arr.mean()) if cluster_delta_arr.size else float("nan")
+    )
+    improvement_mean = -delta_mean if lower_is_better else delta_mean
+    sample_std = (
+        float(cluster_delta_arr.std(ddof=1)) if cluster_delta_arr.size > 1 else float("nan")
+    )
+    standard_error = (
+        sample_std / float(np.sqrt(cluster_delta_arr.size))
+        if cluster_delta_arr.size > 1 else float("nan")
+    )
+    effect_size = (
+        improvement_mean / sample_std
+        if np.isfinite(sample_std) and sample_std > 1e-12 else float("nan")
+    )
+    cluster_sizes = [len(values) for values in cluster_deltas.values()]
     return {
         "metric": metric,
         "treatment": treatment,
         "control": control,
         "direction": "decrease" if lower_is_better else "increase",
-        "n_common": int(delta_arr.size),
-        "delta_mean": float(delta_arr.mean()) if delta_arr.size else float("nan"),
+        "pair_keys": list(pair_keys),
+        "cluster_keys": list(cluster_fields),
+        "estimand": "equal_weight_mean_of_independent_cluster_deltas",
+        "n_common": int(pair_delta_arr.size),
+        "n_independent": int(cluster_delta_arr.size),
+        "n_clusters": int(cluster_delta_arr.size),
+        "cluster_size_min": int(min(cluster_sizes)) if cluster_sizes else 0,
+        "cluster_size_max": int(max(cluster_sizes)) if cluster_sizes else 0,
+        "delta_mean": delta_mean,
+        "pair_weighted_delta_mean": (
+            float(pair_delta_arr.mean()) if pair_delta_arr.size else float("nan")
+        ),
         "delta_ci95_low": ci_low,
         "delta_ci95_high": ci_high,
-        "improvement_mean": float(improvements.mean()) if improvements.size else float("nan"),
+        "delta_standard_error": standard_error,
+        "improvement_mean": improvement_mean,
         "improvement_ci95_low": imp_low,
         "improvement_ci95_high": imp_high,
+        "paired_effect_size_dz": effect_size,
         "win_rate": float(np.mean(improvements > 0.0)) if improvements.size else float("nan"),
         "sign_p_value": sign_test_p_value(improvements),
+        "statistical_contract": "paired_cluster_bootstrap_v2",
     }
+
+
+def _independent_count(stats: dict[str, Any]) -> int:
+    return int(stats.get("n_independent", stats.get("n_clusters", stats.get("n_common", 0))) or 0)
 
 
 def claim_status(
@@ -132,8 +249,7 @@ def claim_status(
     min_pairs: int = 3,
     require_ci: bool = False,
 ) -> str:
-    n_common = int(stats.get("n_common", 0) or 0)
-    if n_common < int(min_pairs):
+    if _independent_count(stats) < int(min_pairs):
         return "underpowered"
     low = finite_float(stats.get("improvement_ci95_low"))
     mean = finite_float(stats.get("improvement_mean"))
@@ -153,8 +269,7 @@ def noninferiority_status(
     max_loss: float = 0.0,
     min_pairs: int = 3,
 ) -> str:
-    n_common = int(stats.get("n_common", 0) or 0)
-    if n_common < int(min_pairs):
+    if _independent_count(stats) < int(min_pairs):
         return "underpowered"
     low = finite_float(stats.get("improvement_ci95_low"))
     high = finite_float(stats.get("improvement_ci95_high"))

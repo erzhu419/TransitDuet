@@ -101,3 +101,20 @@ source-level shared-core migration gate is therefore supported; this is an
 implementation result, not performance evidence. Legacy
 joint-optimizer v2 checkpoints are not optimizer-state compatible with this
 stage and must not be mixed into confirmatory runs.
+
+## Statistical contract
+
+All v2 treatment effects are paired before uncertainty estimation. Duplicate
+rows for the same variant and pair key are fatal rather than silently
+overwritten. When a seed is reused across sources, scenarios, or stress
+conditions, that seed is the default independent cluster: within-seed effects
+are averaged first and the cluster means are bootstrapped. Reports expose both
+the number of paired rows and the number of independent clusters. Improvement
+intervals are exact sign transforms of the treatment-minus-control interval.
+
+Headline multiplicity is controlled within each registered claim family using
+Holm-Bonferroni correction of the paired sign-test p-values. A large nominal
+sample count cannot bypass this gate. Existing v1 reports that counted repeated
+source/scenario rows as independent or used an unadjusted p-value are
+exploratory artifacts and must be regenerated before they can support a v2
+paper claim.

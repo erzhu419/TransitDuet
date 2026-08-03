@@ -1466,6 +1466,9 @@ def write_statistical_checks(path: Path, rows: list[dict[str, Any]]) -> None:
         "control",
         "direction",
         "n_common",
+        "n_independent",
+        "cluster_keys",
+        "statistical_contract",
         "delta_mean",
         "delta_ci95_low",
         "delta_ci95_high",
@@ -1523,10 +1526,10 @@ def write_report(
         "",
         "## Statistical Claim Gates",
         "",
-        "Deltas are `treatment - control`; `direction=decrease` means negative raw delta is the desired effect. Bootstrap intervals are paired by seed where possible.",
+        "Deltas are `treatment - control`; `direction=decrease` means negative raw delta is the desired effect. V2 intervals bootstrap independent cluster means after pairing; a seed reused across sources/scenarios is one independent cluster by default.",
         "No-tradeoff gates use small noninferiority margins: 0.01 total-return for trading, 0.005 reward-mean for Transit, 0.10 minutes for native boarded wait, and 0.1% of interval alighted throughput for native real-demand alighting.",
         "",
-        "| check | status | metric | n | delta CI95 | margin | win rate | sign p |",
+        "| check | status | metric | pairs / independent | delta CI95 | margin | win rate | sign p |",
         "|---|---|---|---:|---:|---:|---:|---:|",
     ])
     for row in checks:
@@ -1534,7 +1537,7 @@ def write_report(
             f"| {row['check']} "
             f"| {row['status']} "
             f"| {row['metric']} "
-            f"| {row['n_common']} "
+            f"| {row['n_common']} / {row.get('n_independent', row['n_common'])} "
             f"| {format_ci(row)} "
             f"| {_fmt(row.get('noninferiority_margin'), 4)} "
             f"| {_fmt(row.get('win_rate'), 2)} "

@@ -111,6 +111,7 @@ def paired_checks(rows: list[dict[str, Any]], *, baseline: str, min_pairs: int) 
                 rows,
                 variant_key="freq_method",
                 pair_keys=("dataset", "stress"),
+                cluster_keys=("dataset",),
                 metric=metric,
                 treatment=treatment,
                 control=baseline,

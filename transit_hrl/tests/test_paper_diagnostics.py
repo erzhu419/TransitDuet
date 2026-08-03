@@ -9,6 +9,7 @@ from freq_hrl.experiments.paper_diagnostics import (
     write_report,
 )
 from freq_hrl.experiments.statistics import (
+    apply_holm_correction,
     claim_status,
     noninferiority_status,
     paired_delta_stats,
@@ -44,12 +45,64 @@ class PaperDiagnosticsTest(unittest.TestCase):
             seed=7,
         )
         self.assertEqual(stats["n_common"], 4)
+        self.assertEqual(stats["n_independent"], 4)
         self.assertAlmostEqual(stats["delta_mean"], -1.0)
         self.assertEqual(stats["win_rate"], 1.0)
         self.assertIn(claim_status(stats, min_pairs=4), {"supported", "positive_mixed"})
         self.assertLess(sign_test_p_value([1.0, 1.0, 1.0, 1.0]), 0.2)
         self.assertLess(sign_test_p_value([1.0] * 1024), 1e-250)
         self.assertEqual(sign_test_p_value([1.0] * 512 + [-1.0] * 512), 1.0)
+
+    def test_paired_statistics_cluster_repeated_sources_by_seed(self):
+        rows = []
+        for seed, effects in [(1, (1.0, 3.0)), (2, (2.0, 4.0))]:
+            for source, effect in zip(("afc", "apc"), effects):
+                rows.append({"variant": "base", "source": source, "seed": seed, "x": 0.0})
+                rows.append({"variant": "freq", "source": source, "seed": seed, "x": effect})
+        stats = paired_delta_stats(
+            rows,
+            variant_key="variant",
+            pair_keys=("source", "seed"),
+            metric="x",
+            treatment="freq",
+            control="base",
+            n_boot=100,
+            seed=3,
+        )
+        self.assertEqual(stats["n_common"], 4)
+        self.assertEqual(stats["n_independent"], 2)
+        self.assertEqual(stats["cluster_size_min"], 2)
+        self.assertAlmostEqual(stats["delta_mean"], 2.5)
+        self.assertAlmostEqual(
+            stats["improvement_ci95_low"],
+            stats["delta_ci95_low"],
+        )
+
+    def test_paired_statistics_reject_duplicate_pair_rows(self):
+        rows = [
+            {"variant": "base", "seed": 1, "x": 0.0},
+            {"variant": "base", "seed": 1, "x": 1.0},
+            {"variant": "freq", "seed": 1, "x": 2.0},
+        ]
+        with self.assertRaisesRegex(ValueError, "duplicate rows"):
+            paired_delta_stats(
+                rows,
+                variant_key="variant",
+                pair_keys=("seed",),
+                metric="x",
+                treatment="freq",
+                control="base",
+            )
+
+    def test_holm_correction_is_family_wise(self):
+        corrected = apply_holm_correction([
+            {"claim": "c1", "sign_p_value": 0.01},
+            {"claim": "c1", "sign_p_value": 0.04},
+            {"claim": "c2", "sign_p_value": 0.04},
+        ])
+        self.assertAlmostEqual(corrected[0]["holm_adjusted_p_value"], 0.02)
+        self.assertAlmostEqual(corrected[1]["holm_adjusted_p_value"], 0.04)
+        self.assertAlmostEqual(corrected[2]["holm_adjusted_p_value"], 0.04)
 
     def test_noninferiority_status_uses_loss_margin(self):
         stats = {
