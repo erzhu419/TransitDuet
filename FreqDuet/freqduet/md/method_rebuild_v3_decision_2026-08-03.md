@@ -205,3 +205,38 @@ Only one selected configuration proceeds to the independent confirmation set:
 Selection seeds may not be reused for confirmatory claims.  Multi-domain and
 external-baseline comparisons use the locked winner and confirmation seeds;
 any later tuning creates a new method version and a new untouched seed set.
+
+## Static Audit Blockers After Protocol v3 Dispatch
+
+The v3 matrix remains a valid measurement of the repairs that were locked at
+dispatch, but it is not yet the final submission protocol.  Static review while
+the matrix runs identified one additional lower-control contract that must be
+fixed in a separately versioned protocol before paper freeze.
+
+At a bus arrival, `forward_headway` is now the exact causal interval since the
+preceding bus arrived at the same stop.  In contrast, `backward_headway` is
+copied from the following bus's most recently computed forward headway.  That
+value can come from another stop and an earlier time.  It is therefore a stale
+causal proxy, not the time until the following bus reaches the current stop.
+The proxy currently enters the lower observation and the symmetric headway
+reward, and it is also available to optional balance/value features.  Protocol
+v4 must give this quantity an explicit source contract: either a causal
+AVL-style follower ETA based on current position and speed, or a forward-only
+reward/state with the ETA supplied as a named optional feature.  The legacy
+stale proxy must remain only as an ablation.  Source counts and estimation-error
+diagnostics are required before the replacement can be promoted.
+
+The passenger-wait audit did not find a look-ahead error.  A lower action is
+settled at the next controlled arrival using the waiting time of passengers
+who actually board there, so the credit is delayed but causal.  Restricted
+waiting time also uses the configured fixed `evaluation_end_time_s` as its
+censoring time even when a policy clears service early; policies therefore do
+not receive an artificially shorter censoring horizon.  The explicit unserved
+and incomplete-service components remain necessary and must continue to be
+reported separately.
+
+No fingerprinted Python source may be changed until all v3 selection shards
+are terminal.  Queued shards stage the shared source tree at launch, so an
+in-place repair before completion would create a mixed-source matrix despite
+identical run naming.  The v3 source hash is locked in every shard manifest;
+the v4 repair starts only after strict v3 aggregation.
