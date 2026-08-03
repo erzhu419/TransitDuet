@@ -7,6 +7,7 @@ from .leakage import (
     CausalLowFrequencyEffectProjector,
     CumulativeActionEffectOperator,
     LeakageRegularizer,
+    evaluate_rms_leakage_budget,
 )
 from .phase0 import (
     PHASE0_REQUIRED_FIELDS,
@@ -53,6 +54,7 @@ __all__ = [
     "audit_shared_training_core",
     "binned_mutual_information",
     "default_spec",
+    "evaluate_rms_leakage_budget",
     "load_phase0_records",
     "validate_claim_freeze",
     "validate_frequency_features",

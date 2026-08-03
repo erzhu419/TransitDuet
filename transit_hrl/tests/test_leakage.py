@@ -7,6 +7,7 @@ from freq_hrl.core import (
     CausalLowFrequencyEffectProjector,
     CumulativeActionEffectOperator,
     LeakageRegularizer,
+    evaluate_rms_leakage_budget,
 )
 
 
@@ -80,6 +81,18 @@ class LeakageTest(unittest.TestCase):
         projector = CausalLowFrequencyEffectProjector(window=4, gain=1.0)
         projected = projector.transform_sequence(np.array([1.0, -1.0] * 8))
         self.assertGreater(float(np.mean(np.abs(projected))), 0.4)
+
+    def test_fixed_rms_budget_preserves_action_effect_scale(self):
+        large = evaluate_rms_leakage_budget(4e-6, rms_budget=1e-3)
+        small = evaluate_rms_leakage_budget(4e-10, rms_budget=1e-3)
+        self.assertAlmostEqual(float(large["budget_ratio"]), 2.0)
+        self.assertAlmostEqual(float(small["budget_ratio"]), 0.02)
+        self.assertTrue(bool(large["budget_violated"]))
+        self.assertFalse(bool(small["budget_violated"]))
+
+    def test_fixed_rms_budget_rejects_data_dependent_zero_budget(self):
+        with self.assertRaises(ValueError):
+            evaluate_rms_leakage_budget(0.0, rms_budget=0.0)
 
 
 if __name__ == "__main__":

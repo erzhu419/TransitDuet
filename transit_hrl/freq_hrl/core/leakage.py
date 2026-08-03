@@ -35,6 +35,37 @@ def high_pass(values: Any, window: int) -> np.ndarray:
     return arr - causal_rolling_mean(arr, window)
 
 
+def evaluate_rms_leakage_budget(
+    low_frequency_power: float,
+    rms_budget: float,
+) -> dict[str, float | bool]:
+    """Evaluate absolute LF action-effect energy against a fixed budget.
+
+    Unlike a power ratio normalized by the action effect itself, this measure
+    preserves economic scale: a negligible action effect remains negligible.
+    The excess is dimensionless and can be used by a primal-dual constraint;
+    the original spectral ratio remains useful as a separate diagnostic.
+    """
+
+    power = float(low_frequency_power)
+    budget = float(rms_budget)
+    if not np.isfinite(power) or power < 0.0:
+        raise ValueError("low_frequency_power must be finite and non-negative")
+    if not np.isfinite(budget) or budget <= 0.0:
+        raise ValueError("rms_budget must be positive and finite")
+    rms = float(np.sqrt(power))
+    ratio = float(rms / budget)
+    excess = float(max(ratio - 1.0, 0.0))
+    return {
+        "rms": rms,
+        "budget": budget,
+        "budget_ratio": ratio,
+        "budget_excess": excess,
+        "budget_excess_squared": float(excess * excess),
+        "budget_violated": bool(excess > 0.0),
+    }
+
+
 @dataclass
 class CausalLowFrequencyEffectProjector:
     """Causally remove the lower controller's slow baseline effect.
