@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_gen_odshift_main_hiro
+
+protocol:
+  role: robustness_odshift_training
+
+env:
+  od_noise: 0.35
+  od_noise_clip:
+    - 0.4
+    - 1.8

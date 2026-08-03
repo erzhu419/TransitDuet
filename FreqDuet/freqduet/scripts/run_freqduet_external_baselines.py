@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from env.sim import env_bus
+from env.evaluation import composite_service_cost
 from runner_v3 import load_config
 from run_baseline_rule import hour_to_slot, mpc_plan, rule_holding_action
 
@@ -227,6 +228,7 @@ def make_env_from_config(config_name: str):
     env = env_bus(
         str(resolve_under_root(env_path)),
         route_sigma=env_cfg.get("route_sigma", cfg.get("env", {}).get("route_sigma", 1.5)),
+        env_config=env_cfg,
     )
     env.enable_plot = False
     env._n_fleet_target = upper_cfg.get("N_fleet", 12)
@@ -242,8 +244,23 @@ def make_env_from_config(config_name: str):
     return env, cfg
 
 
-def composite(wait: float, cv: float, overshoot: float, n_fleet: int) -> float:
-    return float(wait / 10.0 + (overshoot ** 2) / max(int(n_fleet), 1) + cv)
+def composite(
+    wait: float,
+    cv: float,
+    peak_fleet: float,
+    n_fleet: int,
+    passenger_unserved_rate: float = 0.0,
+    trip_completion_rate: float = 1.0,
+) -> float:
+    value, _ = composite_service_cost(
+        avg_wait_min=wait,
+        peak_fleet=peak_fleet,
+        headway_cv=cv,
+        n_fleet=n_fleet,
+        passenger_unserved_rate=passenger_unserved_rate,
+        trip_completion_rate=trip_completion_rate,
+    )
+    return value
 
 
 def mpc_candidates() -> list[tuple[float, float, float]]:
@@ -314,6 +331,7 @@ def run_episode_external(
         state_dict, reward_dict, cost_dict, done = env.step(action_dict, render=False)
 
     z = env.measurement_vector
+    details = env.measurement_details
     wait = float(z[0])
     peak_fleet = float(z[1])
     cv = float(z[2])
@@ -322,9 +340,31 @@ def run_episode_external(
         "avg_wait_min": wait,
         "peak_fleet": peak_fleet,
         "headway_cv": cv,
+        "avg_wait_observed_min": float(details["avg_wait_observed_min"]),
+        "restricted_wait_horizon_min": float(
+            details["restricted_wait_horizon_min"]),
+        "passengers_generated": int(details["passengers_generated"]),
+        "passengers_unserved": int(details["passengers_unserved"]),
+        "passenger_unserved_rate": float(details["passenger_unserved_rate"]),
+        "headway_sample_count": int(details["headway_sample_count"]),
+        "trips_unlaunched": int(details["trips_unlaunched"]),
+        "trip_launch_rate": float(details["trip_launch_rate"]),
+        "trips_completed": int(details["trips_completed"]),
+        "trips_incomplete": int(details["trips_incomplete"]),
+        "trip_completion_rate": float(details["trip_completion_rate"]),
+        "done_reason": str(details["done_reason"]),
+        "scenario_tape_id": str(details["scenario_tape_id"]),
         "N_fleet": int(n_fleet),
         "fleet_overshoot": overshoot,
-        "composite": composite(wait, cv, overshoot, n_fleet),
+        "composite": composite(
+            float(details["avg_wait_observed_min"]),
+            cv,
+            peak_fleet,
+            n_fleet,
+            passenger_unserved_rate=float(
+                details["passenger_unserved_rate"]),
+            trip_completion_rate=float(details["trip_completion_rate"]),
+        ),
         "target_peak": chosen_triple[0],
         "target_offpeak": chosen_triple[1],
         "target_transition": chosen_triple[2],
@@ -362,6 +402,7 @@ def run_one(
     rows = []
     t_start = time.time()
     for ep in range(int(episodes)):
+        env.scenario_seed = int(seed) * 1000003 + int(ep)
         if upper_cfg.get("fleet_mode", "fixed") == "elastic":
             n_fleet = int(rng.randint(int(upper_cfg.get("fleet_min", 8)), int(upper_cfg.get("fleet_max", 16)) + 1))
         else:

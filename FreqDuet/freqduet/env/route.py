@@ -1,5 +1,3 @@
-import math
-import random
 import numpy as np
 
 class Route(object):
@@ -18,8 +16,19 @@ class Route(object):
         self.end_stop = end_stop
         self.distance = route_length
 
-    def route_update(self, current_time, effective_period):
+    def route_update(self, current_time, effective_period, scenario_tape=None):
         current_hour = effective_period[min(current_time//3600, len(effective_period) -1)]
-        v = np.clip(math.log(random.lognormvariate(self.speed_history.loc[current_hour], self.sigma)), 2, 15)
-        # v = math.log(random.lognormvariate(self.speed_history.loc[current_hour], self.sigma))
+        mean_log_speed = float(self.speed_history.loc[current_hour])
+        if scenario_tape is None:
+            sampled_log_speed = float(np.random.normal(mean_log_speed, self.sigma))
+        else:
+            sampled_log_speed = scenario_tape.normal_stream(
+                mean_log_speed,
+                self.sigma,
+                "route_speed",
+                int(self.route_id),
+                str(self.start_stop),
+                str(self.end_stop),
+            )
+        v = np.clip(sampled_log_speed, 2, 15)
         self.speed_limit = min(self.route_max_speed, max(int(v), 0))

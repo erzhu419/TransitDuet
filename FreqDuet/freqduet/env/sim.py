@@ -17,7 +17,13 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from env.timetable import Timetable
 from env.bus import Bus
+from env.evaluation import (
+    EpisodeProtocol,
+    HeadwayEventRecorder,
+    compute_wait_metrics,
+)
 from env.route import Route
+from env.scenario import ScenarioTape
 from env.station import Station
 from env.visualize import visualize
 from frequency import DemandEventLogger, DemandFrequencyTracker, fit_harmonic_prior
@@ -27,15 +33,23 @@ from gym.spaces import MultiDiscrete
 
 class env_bus(object):
 
-    def __init__(self, path, debug=False, render=False, route_sigma=1.5):
+    def __init__(self, path, debug=False, render=False, route_sigma=1.5,
+                 env_config=None):
         self.path = path
         self.route_sigma = route_sigma
+        self.env_config = dict(env_config or {})
         sys.path.append(os.path.abspath(os.path.join(os.getcwd())))
         config_path = os.path.join(path, 'config.json')
         with open(config_path, 'r') as f:
             args = json.load(f)
         self.args = args
-        self.effective_trip_num = 264
+        self.service_start_hour = int(
+            self.env_config.get('service_start_hour', 6))
+        self.service_end_hour = int(
+            self.env_config.get('service_end_hour', 19))
+        self.scenario_seed = int(self.env_config.get('scenario_seed', 0))
+        self.include_terminal_headways = bool(
+            self.env_config.get('include_terminal_headways', False))
         
         self.time_step = args["time_step"]
         self.passenger_update_freq = args["passenger_state_update_freq"]
@@ -55,11 +69,24 @@ class env_bus(object):
         if rename_map:
             self.routes_set = self.routes_set.rename(columns=rename_map)
         self.timetable_set = pd.read_excel(os.path.join(path, "data/time_table.xlsx"))
-        # Truncate the original timetable by first 50 trips to reduce the calculation pressure
-        self.timetable_set = self.timetable_set.sort_values(by=['launch_time', 'direction'])[:self.effective_trip_num].reset_index(drop=True)
+        self.timetable_set = self.timetable_set.sort_values(
+            by=['launch_time', 'direction']).reset_index(drop=True)
+        self.total_timetable_rows = int(self.timetable_set.shape[0])
+        trip_limit = self.env_config.get(
+            'effective_trip_num', args.get('effective_trip_num'))
+        if trip_limit is None or str(trip_limit).strip().lower() in {
+                '', 'all', 'full', 'none'}:
+            self.effective_trip_num = self.total_timetable_rows
+        else:
+            self.effective_trip_num = max(
+                1, min(int(trip_limit), self.total_timetable_rows))
+        self.timetable_set = self.timetable_set.iloc[
+            :self.effective_trip_num].reset_index(drop=True)
         # add index for timetable
         self.timetable_set['launch_turn'] = range(self.timetable_set.shape[0])
-        self.max_agent_num = 25
+        configured_agents = int(self.env_config.get('max_agent_num', 30))
+        self.max_agent_num = max(
+            30, configured_agents, int(self.effective_trip_num))
 
         self.visualizer = visualize(self)
         # Allow disabling automatic plotting when simulation ends
@@ -116,6 +143,10 @@ class env_bus(object):
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
         self._peak_concurrent = 0
+        self.protocol = None
+        self.scenario_tape = None
+        self.headway_events = HeadwayEventRecorder()
+        self._measurement_details = {}
 
     def _period_hour(self, value):
         if hasattr(value, 'hour'):
@@ -141,11 +172,15 @@ class env_bus(object):
                 by_hour[hour] = period
         if not by_hour:
             return periods
+        available_hours = sorted(by_hour)
         shifted = []
-        last = periods[-1]
         for hour in range(int(service_start_hour), int(service_end_hour) + 1):
-            last = by_hour.get(hour, last)
-            shifted.append(last)
+            lookup_hour = hour
+            if lookup_hour not in by_hour:
+                earlier = [candidate for candidate in available_hours
+                           if candidate <= lookup_hour]
+                lookup_hour = earlier[-1] if earlier else available_hours[0]
+            shifted.append(by_hour[lookup_hour])
         return shifted or periods
 
     @property
@@ -205,6 +240,32 @@ class env_bus(object):
         self.routes = self.set_routes()
         self.timetables = self.set_timetables()
 
+        default_start_hour = 6
+        default_end_hour = (
+            default_start_hour + max(len(self.effective_period), 1) - 1)
+        self._service_start_hour = int(getattr(
+            self, 'service_start_hour', default_start_hour))
+        self._service_end_hour = int(getattr(
+            self, 'service_end_hour', default_end_hour))
+        protocol_cfg = dict(self.env_config)
+        protocol_cfg.update({
+            'service_start_hour': self._service_start_hour,
+            'service_end_hour': self._service_end_hour,
+        })
+        self.protocol = EpisodeProtocol.from_config(
+            protocol_cfg,
+            self.args,
+            max((float(tt.launch_time) for tt in self.timetables), default=0.0),
+        )
+        self.scenario_tape = ScenarioTape(
+            int(getattr(self, 'scenario_seed', 0)))
+        self.headway_events = HeadwayEventRecorder()
+        self._completed_trip_ids = set()
+        self._measurement_details = {}
+        self._done_reason = None
+        service_hours = range(
+            self._service_start_hour, self._service_end_hour + 1)
+
         # Episode-level demand stochasticity:
         # - Per-hour multiplier: demand intensity varies by hour.
         # - Peak-hour lookup shift: held-out rush-pattern tests can set this
@@ -212,10 +273,14 @@ class env_bus(object):
         # Stored on env so station_update can use it.
         demand_noise = getattr(self, 'demand_noise', 0.0)
         if demand_noise > 0:
-            # Per-hour demand multipliers (14 hours: 6:00-19:00)
             self._demand_multipliers = {
-                h: np.clip(np.random.normal(1.0, demand_noise), 0.3, 2.0)
-                for h in range(6, 20)
+                h: np.clip(
+                    self.scenario_tape.normal(
+                        1.0, demand_noise, 'demand_hour_multiplier', h),
+                    0.3,
+                    2.0,
+                )
+                for h in service_hours
             }
         else:
             self._demand_multipliers = None
@@ -224,7 +289,7 @@ class env_bus(object):
             self, 'demand_hourly_multipliers', None)
         if demand_hourly_multipliers is not None:
             profile = {}
-            for h in range(6, 20):
+            for h in service_hours:
                 value = 1.0
                 for key in (h, str(h), f"{h:02d}", f"{h:02d}:00:00"):
                     if key in demand_hourly_multipliers:
@@ -237,7 +302,7 @@ class env_bus(object):
                 self._demand_multipliers = {
                     h: float(self._demand_multipliers.get(h, 1.0))
                     * float(profile.get(h, 1.0))
-                    for h in range(6, 20)
+                    for h in service_hours
                 }
 
         peak_shift_choices = getattr(self, 'peak_shift_choices', None)
@@ -260,29 +325,29 @@ class env_bus(object):
                             probs = probs_arr / total
                     except Exception:
                         probs = None
-                self._peak_shift = int(np.random.choice(choices, p=probs))
+                self._peak_shift = int(self.scenario_tape.choice(
+                    choices.tolist(),
+                    'peak_shift',
+                    probabilities=None if probs is None else probs.tolist(),
+                ))
             else:
                 self._peak_shift = 0
         elif demand_noise > 0:
             # Historical generalization default: shift peak demand pattern by
             # one hour sometimes, while usually keeping the original profile.
-            self._peak_shift = int(np.random.choice([-1, 0, 0, 0, 1]))
+            self._peak_shift = int(self.scenario_tape.choice(
+                [-1, 0, 0, 0, 1], 'peak_shift_default'))
         else:
             self._peak_shift = 0
         self._demand_scale = max(
             0.0, float(getattr(self, 'demand_scale', 1.0)))
-        default_start_hour = 6
-        default_end_hour = default_start_hour + max(len(self.effective_period), 1) - 1
-        self._service_start_hour = int(getattr(
-            self, 'service_start_hour', default_start_hour))
-        self._service_end_hour = int(getattr(
-            self, 'service_end_hour', default_end_hour))
         self._route_effective_period = self._build_route_effective_period(
             self._service_start_hour, self._service_end_hour)
         self._od_multipliers = self._sample_od_multipliers()
 
         if self.frequency_tracker is not None:
-            self._update_lower_context_gate_history()
+            if bool(getattr(self, '_freqduet_training', True)):
+                self._update_lower_context_gate_history()
             self.frequency_tracker.reset()
         self.lower_context_gate_value = (
             0.0 if self.lower_context_gate_enabled else 1.0)
@@ -309,6 +374,17 @@ class env_bus(object):
         self._last_dispatch_time = {True: -9999, False: -9999}  # direction → time
 
         self.action_dict = {key: None for key in list(range(self.max_agent_num))}
+
+    def _ensure_agent_slot(self, bus_id, action=None):
+        bus_id = int(bus_id)
+        if bus_id >= self.max_agent_num:
+            self.max_agent_num = bus_id + 1
+        self.state.setdefault(bus_id, [])
+        self.reward.setdefault(bus_id, 0)
+        self.cost.setdefault(bus_id, 0.0)
+        self.action_dict.setdefault(bus_id, None)
+        if action is not None and bus_id not in action:
+            action[bus_id] = self.action_dict[bus_id]
 
     def _sample_od_multipliers(self):
         """Episode-level OD pair demand multipliers for generalization tests."""
@@ -339,7 +415,16 @@ class env_bus(object):
                         str(destination_name),
                     )
                     if key not in multipliers:
-                        sample = np.random.lognormal(mean=mean, sigma=od_noise)
+                        if self.scenario_tape is None:
+                            sample = np.random.lognormal(
+                                mean=mean, sigma=od_noise)
+                        else:
+                            sample = self.scenario_tape.lognormal(
+                                mean,
+                                od_noise,
+                                'od_multiplier',
+                                key,
+                            )
                         multipliers[key] = float(np.clip(sample, lo, hi))
         return multipliers
 
@@ -347,7 +432,8 @@ class env_bus(object):
         def count_non_empty_sublist(lst):
             return sum(1 for sublist in lst if sublist)
 
-        while count_non_empty_sublist(list(self.state.values())) == 0:
+        while (count_non_empty_sublist(list(self.state.values())) == 0
+               and not self.done):
             self.state, self.reward, self.cost, _ = self.step(self.action_dict, render=render)
 
         return self.state, self.reward, self.done
@@ -371,6 +457,7 @@ class env_bus(object):
             # in drive() function, we set bus.on_route = False when it finished a trip. Here we set it to True because
             # the iteration in drive(), we just update the state of those bus which on routes
             bus.on_route = True
+        self._ensure_agent_slot(bus.bus_id)
         bus._freqduet_dispatch_target_headway = dispatch_target_headway
 
     def step(self, action, debug=False, render=False, episode = 0):
@@ -433,12 +520,17 @@ class env_bus(object):
         # update route speed limit by freq
         if self.current_time % self.args['route_state_update_freq'] == 0:
             for route in self.routes:
-                route.route_update(self.current_time, self._route_effective_period)
+                route.route_update(
+                    self.current_time,
+                    self._route_effective_period,
+                    scenario_tape=self.scenario_tape,
+                )
                 route_state.append(route.speed_limit)
             self.route_state = route_state
         # update waiting passengers of every station every second
         # station_state = []
-        if self.current_time % self.passenger_update_freq == 0:
+        if (self.protocol.demand_active(self.current_time)
+                and self.current_time % self.passenger_update_freq == 0):
             freq_arrivals = {}
             freq_od_arrivals = {}
             collect_od_frequency = (
@@ -456,7 +548,8 @@ class env_bus(object):
                         peak_shift=self._peak_shift,
                         service_start_hour=self._service_start_hour,
                         service_end_hour=self._service_end_hour,
-                        return_details=True)
+                        return_details=True,
+                        scenario_tape=self.scenario_tape)
                 else:
                     new_count = station.station_update(
                         self.current_time, self.stations, self.passenger_update_freq,
@@ -466,7 +559,8 @@ class env_bus(object):
                         peak_shift=self._peak_shift,
                         service_start_hour=self._service_start_hour,
                         service_end_hour=self._service_end_hour,
-                        return_details=False)
+                        return_details=False,
+                        scenario_tape=self.scenario_tape)
                     od_counts = {}
                 if self.frequency_enabled and new_count:
                     key = (int(station.station_id), bool(station.direction))
@@ -492,6 +586,12 @@ class env_bus(object):
         # update bus state
         for bus in self.bus_all:
             if bus.on_route:
+                self._ensure_agent_slot(bus.bus_id, action)
+                was_on_route = bool(bus.on_route)
+                previous_board_time = bus.last_board_time
+                arrival_station = bus.next_station
+                arrival_direction = bool(bus.direction)
+                arrival_trip_id = int(bus.trip_id)
                 bus.reward = None
                 bus.obs = []
                 bus.cost = None
@@ -504,6 +604,18 @@ class env_bus(object):
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features,
                           lower_context_gate_value=self.lower_context_gate_value)
+                if was_on_route and not bus.on_route:
+                    self._completed_trip_ids.add(arrival_trip_id)
+                if (bus.last_board_time == self.current_time
+                        and previous_board_time != bus.last_board_time
+                        and (self.include_terminal_headways
+                             or int(arrival_station.station_type) != 0)):
+                    self.headway_events.record(
+                        station_id=int(arrival_station.station_id),
+                        direction=arrival_direction,
+                        arrival_time_s=float(self.current_time),
+                        trip_id=arrival_trip_id,
+                    )
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
         self.reward_list = reward_list = list(filter(lambda x: x.reward is not None, self.bus_all))
@@ -511,6 +623,7 @@ class env_bus(object):
         if len(state_bus_list) != 0:
             # state_bus_list = sorted(state_bus_list, key=lambda x: x.bus_id)
             for i in range(len(state_bus_list)):
+                self._ensure_agent_slot(state_bus_list[i].bus_id)
                 # print('return state is ', state_bus_list[i].obs, ' for bus: ', state_bus_list[i].bus_id, 'at time:', self.current_time)
                 # if len(self.state[state_bus_list[i].bus_id]) < 2:
                 self.state[state_bus_list[i].bus_id].append(state_bus_list[i].obs)
@@ -533,6 +646,7 @@ class env_bus(object):
         if len(reward_list) != 0:
             # reward_list = sorted(reward_list, key=lambda x: x.bus_id)
             for i in range(len(reward_list)):
+                self._ensure_agent_slot(reward_list[i].bus_id)
                 # if reward_list[i].bus_id == 0:
                 #     print('return reward is: ', reward_list[i].reward, ' for bus: ', reward_list[i].bus_id, ' at time:', self.current_time)
                 # if (reward_list[i].last_station.station_id != 22 and reward_list[i].direction != 0) and \
@@ -544,16 +658,22 @@ class env_bus(object):
         # TransitDuet: collect cost
         self.cost_list = [bus for bus in self.bus_all if bus.cost is not None]
         for bus in self.cost_list:
+            self._ensure_agent_slot(bus.bus_id)
             self.cost[bus.bus_id] = bus.cost
 
         # Track peak concurrent vehicles for measurement_vector
         concurrent = sum(1 for bus in self.bus_all if bus.on_route)
         self._peak_concurrent = max(self._peak_concurrent, concurrent)
 
-
         self.current_time += self.time_step
-        if sum([trip.launched for trip in self.timetables]) == len(self.timetables) and sum([bus.on_route for bus in self.bus_all]) == 0:
-            self.done = True
+        all_trips_launched = all(trip.launched for trip in self.timetables)
+        any_bus_on_route = any(bus.on_route for bus in self.bus_all)
+        self.done, self._done_reason = self.protocol.should_terminate(
+            self.current_time,
+            all_trips_launched=all_trips_launched,
+            any_bus_on_route=any_bus_on_route,
+        )
+        if self.done:
             # Cache measurement_vector BEFORE clearing data
             self._cached_measurement = self._compute_measurement_vector()
             if self.frequency_logger is not None:
@@ -567,9 +687,6 @@ class env_bus(object):
                 for station in self.stations:
                     station.waiting_passengers = np.array([])
                     station.total_passenger.clear()
-        else:
-            self.done = False
-
         if self.done and debug:
             self.summary_data = self.summary_data.sort_values(['bus_id', 'time'])
 
@@ -799,7 +916,11 @@ class env_bus(object):
         noise and stochastic arrivals.
         """
         bin_interval_s = float(cfg.get('bin_sec', self.passenger_update_freq))
-        period_s = float(cfg.get('harmonic_period_s', 14 * 3600.0))
+        service_start_hour = int(getattr(self, 'service_start_hour', 6))
+        service_end_hour = int(getattr(self, 'service_end_hour', 19))
+        service_span_s = (
+            max(service_end_hour - service_start_hour + 1, 1) * 3600.0)
+        period_s = float(cfg.get('harmonic_period_s', service_span_s))
         fourier_k = int(cfg.get('fourier_K', cfg.get('fourier_k', 4)))
         ridge = float(cfg.get('harmonic_ridge', 1e-2))
         n_bins = max(1, int(round(period_s / max(bin_interval_s, 1e-6))))
@@ -819,8 +940,9 @@ class env_bus(object):
             local_arr = local_rates.setdefault(
                 local_key, np.zeros(n_bins, dtype=np.float64))
             for i in range(n_bins):
-                hour = 6 + int((i * bin_interval_s) // 3600)
-                hour = max(6, min(19, hour))
+                hour = service_start_hour + int(
+                    (i * bin_interval_s) // 3600)
+                hour = max(service_start_hour, min(service_end_hour, hour))
                 period_key = f"{hour:02}:00:00"
                 period_od = station.od.get(period_key, {})
                 if not isinstance(period_od, dict):
@@ -951,10 +1073,14 @@ class env_bus(object):
         Returns: np.array of shape (5,)
             [hour_norm, demand_norm, fleet_norm, prev_headway_norm, unhealthy_rate]
         """
-        hour = 6 + self.current_time // 3600
+        hour = self._service_start_hour + self.current_time // 3600
+        hour = max(
+            self._service_start_hour,
+            min(self._service_end_hour, int(hour)),
+        )
 
         # Aggregate current-period passenger demand across all stations
-        effective_period_str = f"{min(int(hour), 19):02}:00:00"
+        effective_period_str = f"{int(hour):02}:00:00"
         total_demand = 0.0
         for s in self.stations:
             if s.od is not None:
@@ -992,28 +1118,44 @@ class env_bus(object):
         Compute measurement z(π) from live data. Must be called BEFORE cleanup.
         Returns: np.array [avg_wait_min, peak_fleet, headway_cv]
         """
-        # z[0]: average passenger wait time (minutes)
-        total_wait, pax_count = 0.0, 0
-        for s in self.stations:
-            for p in s.total_passenger:
-                if hasattr(p, 'boarding_time') and p.boarding_time is not None:
-                    total_wait += (p.boarding_time - p.appear_time)
-                    pax_count += 1
-        avg_wait = (total_wait / max(pax_count, 1)) / 60.0
-
-        # z[1]: peak concurrent fleet size
-        peak_fleet = self._peak_concurrent
-
-        # z[2]: headway coefficient of variation (replaces bunching_rate)
-        headways = [bus.forward_headway for bus in self.bus_all
-                    if hasattr(bus, 'forward_headway') and bus.forward_headway > 0]
-        if len(headways) >= 2:
-            hw_arr = np.array(headways)
-            headway_cv = float(hw_arr.std() / max(hw_arr.mean(), 1.0))
-        else:
-            headway_cv = 0.0
-
-        return np.array([avg_wait, peak_fleet, headway_cv])
+        wait_metrics = compute_wait_metrics(
+            self.stations,
+            censor_time_s=self.protocol.evaluation_end_time_s,
+        )
+        headway_metrics = self.headway_events.summary()
+        launched = sum(1 for trip in self.timetables if trip.launched)
+        total_trips = len(self.timetables)
+        completed = len(self._completed_trip_ids.intersection(
+            range(total_trips)))
+        unfinished_buses = sum(1 for bus in self.bus_all if bus.on_route)
+        onboard_at_end = sum(len(bus.passengers) for bus in self.bus_all)
+        self._measurement_details = {
+            **wait_metrics,
+            **headway_metrics,
+            'peak_fleet': int(self._peak_concurrent),
+            'timetable_trips_available': int(self.total_timetable_rows),
+            'timetable_trips_evaluated': int(total_trips),
+            'trips_launched': int(launched),
+            'trips_unlaunched': int(total_trips - launched),
+            'trip_launch_rate': launched / max(total_trips, 1),
+            'trips_completed': int(completed),
+            'trips_incomplete': int(total_trips - completed),
+            'trip_completion_rate': completed / max(total_trips, 1),
+            'unfinished_buses': int(unfinished_buses),
+            'passengers_onboard_at_end': int(onboard_at_end),
+            'simulation_end_time_s': int(self.current_time),
+            'demand_end_time_s': int(self.protocol.demand_end_time_s),
+            'evaluation_end_time_s': int(
+                self.protocol.evaluation_end_time_s),
+            'done_reason': self._done_reason,
+            'scenario_seed': int(self.scenario_tape.seed),
+            'scenario_tape_id': self.scenario_tape.identifier,
+        }
+        return np.array([
+            float(wait_metrics['avg_wait_censored_min']),
+            float(self._peak_concurrent),
+            float(headway_metrics['headway_cv']),
+        ])
 
     @property
     def measurement_vector(self):
@@ -1024,6 +1166,12 @@ class env_bus(object):
         if hasattr(self, '_cached_measurement') and self._cached_measurement is not None:
             return self._cached_measurement
         return self._compute_measurement_vector()
+
+    @property
+    def measurement_details(self):
+        if not self._measurement_details:
+            self._compute_measurement_vector()
+        return dict(self._measurement_details)
 
     # ---- v2: per-trip holding feedback support ----
 

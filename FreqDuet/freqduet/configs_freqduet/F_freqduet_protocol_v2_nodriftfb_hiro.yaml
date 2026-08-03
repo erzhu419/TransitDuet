@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_nodriftfb_hiro
+
+protocol:
+  role: ablation_no_drift_feedback
+
+frequency:
+  drift_feedback:
+    enable: false

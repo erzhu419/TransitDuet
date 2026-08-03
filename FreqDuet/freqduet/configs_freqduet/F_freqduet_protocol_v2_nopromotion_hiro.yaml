@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_nopromotion_hiro
+
+protocol:
+  role: ablation_no_promotion
+
+frequency:
+  promotion:
+    enable: false

@@ -1,0 +1,97 @@
+_extends: F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml
+_name: F_freqduet_protocol_v2_main_hiro
+
+protocol:
+  version: freqduet-eval-v2
+  role: learned_upper_main
+
+env:
+  effective_trip_num: all
+  service_start_hour: 6
+  service_end_hour: 19
+  clearance_time_s: 14400
+  include_terminal_headways: false
+
+upper:
+  action_override:
+    enable: false
+    disable_value_selectors: false
+  counterfactual_action_selector:
+    enable: false
+  snapshot_value_selector:
+    enable: false
+  snapshot_action_value_selector:
+    enable: false
+  residual_value_selector:
+    enable: false
+  timetable_planner:
+    terminal_dispatch: true
+    terminal_shift_min_s: -45.0
+    terminal_shift_max_s: 45.0
+    terminal_headway_floor:
+      enable: true
+      ratio: 0.5
+      min_s: 120.0
+
+fixed_expert_selector:
+  enable: false
+  context:
+    enable: false
+  rule:
+    enable: false
+
+frequency:
+  upper_mode: low
+  lower_mode: high
+  promotion:
+    enable: true
+    adapt_local: false
+    adapt_gain: 0.05
+    adapt_strength_min: 0.20
+    adapt_active_only: true
+    adapt_requires_persistent: true
+  drift_feedback:
+    enable: true
+    norm_s: 180.0
+    clip: 2.0
+
+reward_attribution:
+  lower_hold_high_source: raw
+  lower_hold_positive_high_only: true
+  lower_hold_penalty_weight: 0.06
+  lower_hold_norm_s: 45.0
+  lower_hold_clip: 2.0
+  lower_high_source: adaptive_raw
+  lower_raw_gate_middle_energy_max: 0.030
+  lower_raw_gate_width: 0.010
+  lower_raw_gate_min_weight: 0.0
+  lower_raw_gate_middle_value_max: 0.004
+  lower_raw_gate_middle_value_width: 0.003
+  lower_raw_gate_high_energy_max: 0.065
+  lower_raw_gate_high_energy_width: 0.015
+  lower_raw_gate_absorbed_min: 0.10
+  lower_raw_gate_absorbed_width: 0.10
+
+leakage:
+  enable: true
+  lower_drift_cost_weight: 0.25
+  lower_drift_cost_mode: excess
+  lower_drift_cost_cap: 1.0
+
+objective:
+  weights:
+    wait: 1.0
+    fleet: 1.0
+    headway: 1.0
+    unserved: 5.0
+    incomplete_service: 5.0
+
+training:
+  total_episodes: 200
+  save_checkpoints: true
+  checkpoint_freq: 25
+  trip_dump_freq: 0
+  longtrain_stability:
+    freeze_lower_policy_after_ep: -1
+    freeze_lower_critic_after_ep: -1
+    freeze_upper_after_ep: -1

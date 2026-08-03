@@ -195,7 +195,16 @@ def run_jobs(configs, seeds, episodes, logs_dir, workers, gpu=False,
 
 
 def composite_row(df):
-    wait = df["avg_wait_min"].astype(float)
+    wait = (
+        df["avg_wait_observed_min"].astype(float)
+        if "avg_wait_observed_min" in df.columns
+        else df["avg_wait_min"].astype(float)
+    )
+    restricted_wait = (
+        df["restricted_wait_horizon_min"].astype(float)
+        if "restricted_wait_horizon_min" in df.columns
+        else df["avg_wait_min"].astype(float)
+    )
     cv = df["headway_cv"].astype(float)
     overshoot = (
         df["fleet_overshoot"].astype(float)
@@ -207,9 +216,25 @@ def composite_row(df):
         if "N_fleet" in df.columns
         else pd.Series(12.0, index=df.index)
     )
-    composite = wait / 10.0 + (overshoot ** 2) / n_fleet + cv
+    if "service_cost" in df.columns:
+        composite = df["service_cost"].astype(float)
+    else:
+        composite = wait / 10.0 + (overshoot ** 2) / n_fleet + cv
     return {
         "wait": float(wait.mean()),
+        "restricted_wait": float(restricted_wait.mean()),
+        "unserved_rate": float(
+            df["passenger_unserved_rate"].astype(float).mean()
+            if "passenger_unserved_rate" in df.columns else 0.0),
+        "trip_completion_rate": float(
+            df["trip_completion_rate"].astype(float).mean()
+            if "trip_completion_rate" in df.columns else 1.0),
+        "trip_launch_rate": float(
+            df["trip_launch_rate"].astype(float).mean()
+            if "trip_launch_rate" in df.columns else 1.0),
+        "headway_sample_count": float(
+            df["headway_sample_count"].astype(float).mean()
+            if "headway_sample_count" in df.columns else 0.0),
         "cv": float(cv.mean()),
         "overshoot": float(overshoot.mean()),
         "composite": float(composite.mean()),
@@ -226,6 +251,17 @@ def summarize_seed(csv_path, last_k):
     tail = df.iloc[-min(int(last_k), len(df)):]
     row = composite_row(tail)
     for col in [
+        "service_cost",
+        "avg_wait_observed_min",
+        "restricted_wait_horizon_min",
+        "passenger_unserved_rate",
+        "headway_sample_count",
+        "trips_unlaunched",
+        "trip_launch_rate",
+        "trips_completed",
+        "trips_incomplete",
+        "trip_completion_rate",
+        "simulation_end_time_s",
         "upper_hf_power_ratio",
         "lower_lf_drift_ratio",
         "demand_attr_score",
@@ -477,6 +513,11 @@ def aggregate(configs, seeds, last_k, logs_dirs, out_dir):
 
     metrics = [
         "wait",
+        "restricted_wait",
+        "unserved_rate",
+        "trip_launch_rate",
+        "trip_completion_rate",
+        "headway_sample_count",
         "cv",
         "overshoot",
         "composite",

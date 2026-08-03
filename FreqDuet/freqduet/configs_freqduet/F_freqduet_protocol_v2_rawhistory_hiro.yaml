@@ -1,0 +1,20 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_rawhistory_hiro
+
+protocol:
+  role: ablation_raw_causal_history
+
+frequency:
+  method: raw_history
+  upper_features: true
+  lower_features: true
+  upper_history_bins: 6
+  lower_history_bins: 6
+  od_features: false
+  promotion:
+    enable: false
+  drift_feedback:
+    enable: false
+
+reward_attribution:
+  enable: false

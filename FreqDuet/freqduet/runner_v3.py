@@ -36,7 +36,9 @@ import os
 import sys
 import argparse
 import csv
+import hashlib
 import json
+import pickle
 import random
 import time
 import yaml
@@ -61,6 +63,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from env.sim import env_bus
+from env.evaluation import composite_service_cost
 from frequency.diagnostics import (
     demand_attribution_mi,
     shock_response_metrics,
@@ -193,7 +196,15 @@ class DiagnosticLog:
     HEADER = [
         'ep', 'stage', 'wall_env_s', 'wall_train_s',
         # env
-        'avg_wait_min', 'peak_fleet', 'headway_cv', 'ep_reward', 'ep_cost',
+        'protocol_version',
+        'avg_wait_min', 'avg_wait_observed_min',
+        'restricted_wait_horizon_min',
+        'passengers_generated', 'passengers_unserved',
+        'passenger_unserved_rate',
+        'headway_sample_count', 'trips_unlaunched', 'trip_launch_rate',
+        'trips_completed', 'trips_incomplete', 'trip_completion_rate',
+        'simulation_end_time_s', 'done_reason', 'scenario_tape_id',
+        'peak_fleet', 'headway_cv', 'service_cost', 'ep_reward', 'ep_cost',
         'ep_steps', 'n_dispatches',
         # lower policy
         'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
@@ -394,7 +405,14 @@ class DiagnosticLog:
         self.json_path = os.path.join(log_dir, 'diagnostics.json')
         self._rows = []
         # Write CSV header only if not resuming or CSV missing
-        if not (resume and os.path.exists(self.csv_path)):
+        if resume and os.path.exists(self.csv_path):
+            with open(self.csv_path, 'r', newline='') as f:
+                existing_header = next(csv.reader(f), [])
+            if existing_header != self.HEADER:
+                raise RuntimeError(
+                    "diagnostics schema changed; start a new protocol-v2 run "
+                    "instead of resuming this legacy directory")
+        else:
             with open(self.csv_path, 'w', newline='') as f:
                 csv.writer(f).writerow(self.HEADER)
 
@@ -482,14 +500,22 @@ class TransitDuetV2Runner:
             'freeze_lower_critic_after_ep')
         self.freeze_upper_after_ep = _optional_freeze_ep(
             'freeze_upper_after_ep')
+        self.objective_weights = dict(
+            (config.get('objective', {}) or {}).get('weights', {}) or {})
 
         # Environment
+        env_cfg = config.get('env', {})
         env_path = os.path.join(str(SCRIPT_DIR), config['env']['path'])
-        self.env = env_bus(env_path, route_sigma=config['env']['route_sigma'])
+        self.env = env_bus(
+            env_path,
+            route_sigma=config['env']['route_sigma'],
+            env_config=env_cfg,
+        )
+        self.env.scenario_seed = int(
+            env_cfg.get('scenario_seed', self.base_seed))
         self.env.configure_frequency_features(config.get('frequency', {}))
         self.env.enable_plot = False
         self.env._n_fleet_target = config['upper']['N_fleet']
-        env_cfg = config.get('env', {})
         self.env.demand_noise = env_cfg.get('demand_noise', 0.0)
         self.env.demand_scale = env_cfg.get('demand_scale', 1.0)
         self.env.demand_hourly_multipliers = env_cfg.get(
@@ -2087,6 +2113,7 @@ class TransitDuetV2Runner:
         self.env.configure_frequency_logging(self.log_dir)
         self.history = defaultdict(list)
         self.resume_from_ep = 0  # set by maybe_resume() before train()
+        self._deployment_state_loaded = False
         self.diag = None  # created after resume decision in train()
 
     # ────────────────── Upper callback ──────────────────
@@ -6045,7 +6072,7 @@ class TransitDuetV2Runner:
                     upper_decision_taken = False
                     self._ep_upper_plan_reuses += 1
 
-        if (upper_decision_taken and self.tpc_enable
+        if (upper_decision_taken and self._episode_training and self.tpc_enable
                 and self.target_upper_trainer is not None):
             target_mean_arr = np.asarray(
                 self.target_upper_trainer.policy_net.get_action(
@@ -6077,7 +6104,7 @@ class TransitDuetV2Runner:
         elif upper_decision_taken:
             action_vec = np.asarray(
                 self.upper_trainer.policy_net.get_action(
-                    s_upper, deterministic=False),
+                    s_upper, deterministic=not self._episode_training),
                 dtype=np.float32).reshape(-1)
 
         if upper_decision_taken and self.upper_action_override_enable:
@@ -6505,9 +6532,19 @@ class TransitDuetV2Runner:
 
     # ────────────────── Episode ──────────────────
 
-    def run_episode(self, ep, training=True, N_fleet_override=None):
+    def run_episode(self, ep, training=True, N_fleet_override=None,
+                    scenario_seed=None, record_diagnostics=None):
         t0 = time.time()
+        self._episode_training = bool(training)
+        self.env._freqduet_training = bool(training)
         self.env._freqduet_episode = int(ep)
+        if scenario_seed is None:
+            scenario_seed_base = int(
+                self.cfg.get('env', {}).get('scenario_seed', self.base_seed))
+            scenario_seed = scenario_seed_base * 1000003 + int(ep)
+        self.env.scenario_seed = int(scenario_seed)
+        if record_diagnostics is None:
+            record_diagnostics = bool(training)
         self.env.reset()
         self.holding_feedback.clear()
         self._current_ep = ep
@@ -6632,7 +6669,9 @@ class TransitDuetV2Runner:
         self.env._n_fleet_target = self._current_N_fleet
 
         learned_training = training and not self._fixed_expert_active
-        upper_active = ep >= self.upper_warmup and learned_training
+        upper_active = (
+            ep >= self.upper_warmup and not self._fixed_expert_active)
+        upper_training_active = upper_active and training
         if self._fixed_expert_active:
             self.env._upper_policy_callback = self._fixed_headway_callback
         else:
@@ -6843,12 +6882,21 @@ class TransitDuetV2Runner:
         # New: credit based on dispatch gap uniformity → directly causal
         #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
         z = self.env.measurement_vector
+        env_details = self.env.measurement_details
         N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
         episode_overshoot = max(0.0, float(z[1]) - float(N_fleet))
-        episode_composite_cost = (
-            float(z[0]) / 10.0
-            + (episode_overshoot ** 2) / max(float(N_fleet), 1.0)
-            + float(z[2]))
+        episode_composite_cost, service_cost_components = (
+            composite_service_cost(
+                avg_wait_min=float(env_details['avg_wait_observed_min']),
+                peak_fleet=float(z[1]),
+                headway_cv=float(z[2]),
+                n_fleet=float(N_fleet),
+                passenger_unserved_rate=float(
+                    env_details['passenger_unserved_rate']),
+                trip_completion_rate=float(
+                    env_details['trip_completion_rate']),
+                weights=self.objective_weights,
+            ))
         # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
         sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
         self._last_adj_weights = adj_w
@@ -6934,17 +6982,17 @@ class TransitDuetV2Runner:
                     episode_composite_cost,
                     transition_reward=r,
                     local_credit_cost=upper_local_credit_cost))
-            if int(self._current_ep) >= int(
-                    self.upper_residual_selector_learn_start_ep):
+            if (training and int(self._current_ep) >= int(
+                    self.upper_residual_selector_learn_start_ep)):
                 self._update_upper_residual_selector(
                     trans.get('upper_residual_selector_x'), r)
-            if int(self._current_ep) >= int(
-                    self.timetable_terminal_value_selector_learn_start_ep):
+            if (training and int(self._current_ep) >= int(
+                    self.timetable_terminal_value_selector_learn_start_ep)):
                 self._update_terminal_value_selector(
                     trans.get('terminal_value_selector_x'),
                     terminal_value_target_cost)
-            if int(self._current_ep) >= int(
-                    self.timetable_headway_value_planner_learn_start_ep):
+            if (training and int(self._current_ep) >= int(
+                    self.timetable_headway_value_planner_learn_start_ep)):
                 self._update_headway_value_planner(
                     trans.get('headway_value_planner_x'),
                     headway_value_target_cost)
@@ -6985,7 +7033,7 @@ class TransitDuetV2Runner:
         ep_delta_mean = (np.mean(self._ep_upper_deltas)
                          if self._ep_upper_deltas else 0.0)
 
-        if self._fixed_expert_active:
+        if self._fixed_expert_active or not training:
             surprise = 0.0
         else:
             surprise = self.surprise_computer.compute(
@@ -6998,7 +7046,8 @@ class TransitDuetV2Runner:
             base_alpha, max_boost=self.belief_alpha_boost_max)
         # Temporarily set alpha for this episode's training
         # (auto-entropy will correct it over time, this just gives a nudge)
-        if not self.ablate_csbapr and surprise > 0.5 and upper_active:
+        if (not self.ablate_csbapr and surprise > 0.5
+                and upper_training_active):
             self.lower_trainer.alpha = min(boosted_alpha,
                                            self.lower_trainer.maximum_alpha)
 
@@ -7011,7 +7060,7 @@ class TransitDuetV2Runner:
         # We snapshot the current upper at end of warmup; subsequent Polyak
         # averaging keeps this "deployment" copy as a slow-moving anchor for
         # importance reweighting on the lower SAC.
-        if (self.tpc_enable and upper_active
+        if (self.tpc_enable and upper_training_active
                 and self.target_upper_trainer is None):
             self.target_upper_trainer = copy.deepcopy(self.upper_trainer)
             print(f"  [TPC] initialised EMA target upper at ep {ep}")
@@ -7023,7 +7072,7 @@ class TransitDuetV2Runner:
         # Each completed trip k gets a per-trip bonus β · clip(A_U(s_k, δ_k), -c, c) · f_k
         # where A_U is the upper advantage and f_k is the reachability gate.
         haar_tap_signal = None
-        if self.coupling_mode == 'haar' and upper_active:
+        if self.coupling_mode == 'haar' and upper_training_active:
             haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
 
         # Lower
@@ -7050,11 +7099,11 @@ class TransitDuetV2Runner:
 
         # Train reachability classifier (HAAR mode only)
         if (self.coupling_mode == 'haar' and self.haar_use_reach_gate
-                and upper_active and self.reach_net is not None):
+                and upper_training_active and self.reach_net is not None):
             self._train_reach_classifier(trip_gap_devs)
 
         # Upper
-        if upper_active:
+        if upper_training_active:
             for trans in self._episode_upper_transitions:
                 self.upper_trainer.replay_buffer.push(
                     trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
@@ -7352,9 +7401,34 @@ class TransitDuetV2Runner:
             'wall_env_s': round(env_time, 1),
             'wall_train_s': round(train_time, 1),
             # env
+            'protocol_version': 'freqduet-eval-v2',
             'avg_wait_min': round(z[0], 3),
+            'avg_wait_observed_min': round(
+                float(env_details['avg_wait_observed_min']), 3),
+            'restricted_wait_horizon_min': round(
+                float(env_details['restricted_wait_horizon_min']), 3),
+            'passengers_generated': int(
+                env_details['passengers_generated']),
+            'passengers_unserved': int(
+                env_details['passengers_unserved']),
+            'passenger_unserved_rate': round(
+                float(env_details['passenger_unserved_rate']), 6),
+            'headway_sample_count': int(
+                env_details['headway_sample_count']),
+            'trips_unlaunched': int(env_details['trips_unlaunched']),
+            'trip_launch_rate': round(
+                float(env_details['trip_launch_rate']), 6),
+            'trips_completed': int(env_details['trips_completed']),
+            'trips_incomplete': int(env_details['trips_incomplete']),
+            'trip_completion_rate': round(
+                float(env_details['trip_completion_rate']), 6),
+            'simulation_end_time_s': int(
+                env_details['simulation_end_time_s']),
+            'done_reason': str(env_details['done_reason']),
+            'scenario_tape_id': str(env_details['scenario_tape_id']),
             'peak_fleet': int(z[1]),
             'headway_cv': round(z[2], 4),
+            'service_cost': round(episode_composite_cost, 6),
             'ep_reward': round(episode_reward, 3),
             'ep_cost': round(episode_cost, 3),
             'ep_steps': episode_steps,
@@ -7743,12 +7817,9 @@ class TransitDuetV2Runner:
             'fleet_noharm_lower_value_soft_violation_mean':
                 fleet_noharm_lower_value_soft_violation_stat['mean'],
         }
-        composite_cost = (
-            float(row['avg_wait_min']) / 10.0
-            + (float(row['fleet_overshoot']) ** 2)
-            / max(float(row['N_fleet']), 1.0)
-            + float(row['headway_cv']))
-        if int(ep) >= int(self._fixed_selector_update_start_ep()):
+        composite_cost = episode_composite_cost
+        if (training
+                and int(ep) >= int(self._fixed_selector_update_start_ep())):
             self._update_fixed_expert_selector(
                 self._fixed_expert_active, composite_cost)
         row['fixed_selector_fixed_active'] = (
@@ -7774,11 +7845,14 @@ class TransitDuetV2Runner:
         context = self._fixed_selector_current_context
         row['fixed_selector_context_feature_norm'] = (
             float(np.linalg.norm(context)) if context is not None else 0.0)
-        self._fixed_selector_prev_diag = dict(row)
-        self.diag.append(row)
+        if training:
+            self._fixed_selector_prev_diag = dict(row)
+        if record_diagnostics and self.diag is not None:
+            self.diag.append(row)
 
         # Also keep lightweight history for quick plotting
-        for k in ['avg_wait_min', 'peak_fleet', 'headway_cv',
+        if record_diagnostics:
+            for k in ['avg_wait_min', 'peak_fleet', 'headway_cv',
                    'lower_lambda', 'lower_alpha', 'lower_q_mean', 'lower_q_std',
                    'upper_delta_mean', 'upper_q_mean',
                    'hold_fb_mean', 'hold_penalty_mean',
@@ -7812,8 +7886,8 @@ class TransitDuetV2Runner:
                    'freq_promotion_flag', 'freq_promotion_strength',
                    'freq_promotion_active', 'freq_promotion_persistent',
                    'freq_promotion_ratio',
-                   'freq_promotion_absorbed']:
-            self.history[k].append(row[k])
+                    'freq_promotion_absorbed']:
+                self.history[k].append(row[k])
 
         return row
 
@@ -8020,14 +8094,227 @@ class TransitDuetV2Runner:
             return 0
         last_ep = max(eps)
         try:
-            self.lower_trainer.load(os.path.join(ckpt_dir, f'lower_ep{last_ep}.pt'))
-            self.upper_trainer.load(os.path.join(ckpt_dir, f'upper_ep{last_ep}.pt'))
+            self.load_checkpoint(ckpt_dir, ep=last_ep)
         except Exception as e:
             print(f"  [Resume] Failed to load ep{last_ep} checkpoint: {e}. Starting fresh.")
             return 0
         self.resume_from_ep = last_ep + 1
         print(f"  [Resume] Loaded checkpoint ep{last_ep}. Resuming from ep{self.resume_from_ep}.")
         return self.resume_from_ep
+
+    def _deployment_state_dict(self, ep):
+        adaptive_names = [
+            'upper_residual_selector_A',
+            'upper_residual_selector_b',
+            'upper_residual_selector_updates',
+            'timetable_terminal_value_selector_A',
+            'timetable_terminal_value_selector_b',
+            'timetable_terminal_value_selector_updates',
+            'timetable_headway_value_planner_A',
+            'timetable_headway_value_planner_b',
+            'timetable_headway_value_planner_updates',
+        ]
+        adaptive = {
+            name: copy.deepcopy(getattr(self, name))
+            for name in adaptive_names
+            if hasattr(self, name)
+        }
+        return {
+            'protocol_version': 'freqduet-eval-v2',
+            'episode': int(ep),
+            'measurement_theta': self.measurement_proj.theta.copy(),
+            'measurement_iter': int(self.measurement_proj._iter),
+            'belief': self.belief_tracker.belief.copy(),
+            'surprise': {
+                'ema_surprise': float(self.surprise_computer.ema_surprise),
+                'reward_history': list(self.surprise_computer.reward_history),
+                'reward_ema': float(self.surprise_computer.reward_ema),
+                'reward_var_ema': float(self.surprise_computer.reward_var_ema),
+                'prev_q_std': self.surprise_computer.prev_q_std,
+                'prev_delta_mean': float(
+                    self.surprise_computer.prev_delta_mean),
+            },
+            'fixed_selector_cost_ema': copy.deepcopy(
+                self.fixed_selector_cost_ema),
+            'fixed_selector_counts': copy.deepcopy(
+                self.fixed_selector_counts),
+            'fixed_selector_context_A': copy.deepcopy(
+                self.fixed_selector_context_A),
+            'fixed_selector_context_b': copy.deepcopy(
+                self.fixed_selector_context_b),
+            'fixed_selector_prev_diag': copy.deepcopy(
+                self._fixed_selector_prev_diag),
+            'lower_context_gate': {
+                'history_count': int(
+                    self.env.lower_context_gate_history_count),
+                'history_last_episode': (
+                    self.env.lower_context_gate_history_last_episode),
+                'history_summary': copy.deepcopy(
+                    self.env.lower_context_gate_history_summary),
+            },
+            'adaptive_selectors': adaptive,
+        }
+
+    def _load_deployment_state(self, path):
+        state = torch.load(path, map_location='cpu', weights_only=False)
+        self.measurement_proj.theta = np.asarray(
+            state.get('measurement_theta', self.measurement_proj.theta),
+            dtype=np.float64)
+        self.measurement_proj._iter = int(
+            state.get('measurement_iter', self.measurement_proj._iter))
+        belief = state.get('belief')
+        if belief is not None:
+            self.belief_tracker.belief = np.asarray(
+                belief, dtype=np.float64)
+        surprise = state.get('surprise', {}) or {}
+        for name in [
+                'ema_surprise', 'reward_ema', 'reward_var_ema',
+                'prev_q_std', 'prev_delta_mean']:
+            if name in surprise:
+                setattr(self.surprise_computer, name, surprise[name])
+        if 'reward_history' in surprise:
+            self.surprise_computer.reward_history.clear()
+            self.surprise_computer.reward_history.extend(
+                surprise['reward_history'])
+        for name in [
+                'fixed_selector_cost_ema', 'fixed_selector_counts',
+                'fixed_selector_context_A', 'fixed_selector_context_b']:
+            if name in state:
+                setattr(self, name, copy.deepcopy(state[name]))
+        self._fixed_selector_prev_diag = copy.deepcopy(
+            state.get('fixed_selector_prev_diag'))
+        gate = state.get('lower_context_gate', {}) or {}
+        self.env.lower_context_gate_history_count = int(
+            gate.get('history_count', 0))
+        self.env.lower_context_gate_history_last_episode = gate.get(
+            'history_last_episode')
+        self.env.lower_context_gate_history_summary = copy.deepcopy(
+            gate.get('history_summary', {}))
+        for name, value in (state.get('adaptive_selectors', {}) or {}).items():
+            if hasattr(self, name):
+                setattr(self, name, copy.deepcopy(value))
+        self.loaded_checkpoint_ep = int(state.get('episode', -1))
+        self.loaded_checkpoint_protocol = str(
+            state.get('protocol_version', 'legacy'))
+        self._deployment_state_loaded = True
+
+    def load_checkpoint(self, checkpoint_dir=None, ep=None,
+                        require_deployment_state=False):
+        ckpt_dir = Path(checkpoint_dir or (Path(self.log_dir) / 'checkpoints'))
+        if ckpt_dir.name != 'checkpoints' and (ckpt_dir / 'checkpoints').is_dir():
+            ckpt_dir = ckpt_dir / 'checkpoints'
+        if ep is None:
+            eps = []
+            for path in ckpt_dir.glob('lower_ep*.pt'):
+                try:
+                    candidate = int(path.stem.replace('lower_ep', ''))
+                except ValueError:
+                    continue
+                if (ckpt_dir / f'upper_ep{candidate}.pt').exists():
+                    eps.append(candidate)
+            if not eps:
+                raise FileNotFoundError(f'no paired checkpoints in {ckpt_dir}')
+            ep = max(eps)
+        self.lower_trainer.load(str(ckpt_dir / f'lower_ep{int(ep)}.pt'))
+        self.upper_trainer.load(str(ckpt_dir / f'upper_ep{int(ep)}.pt'))
+        state_path = ckpt_dir / f'runner_ep{int(ep)}.pt'
+        if state_path.exists():
+            self._load_deployment_state(state_path)
+        else:
+            if require_deployment_state:
+                raise FileNotFoundError(
+                    f'missing deployment checkpoint {state_path}')
+            self.loaded_checkpoint_ep = int(ep)
+            self.loaded_checkpoint_protocol = 'legacy'
+            self._deployment_state_loaded = False
+        if (require_deployment_state
+                and self.loaded_checkpoint_protocol != 'freqduet-eval-v2'):
+            raise ValueError(
+                'checkpoint deployment state is not freqduet-eval-v2: '
+                f'{self.loaded_checkpoint_protocol}')
+        return int(ep)
+
+    def _policy_digest(self):
+        digest = hashlib.sha256()
+        modules = [
+            self.lower_trainer.policy_net,
+            self.lower_trainer.q_net,
+            self.lower_trainer.target_q_net,
+            self.lower_trainer.cost_q_net,
+            self.lower_trainer.target_cost_q_net,
+            self.upper_trainer.policy_net,
+            self.upper_trainer.q_net,
+            self.upper_trainer.target_q_net,
+        ]
+        for module in modules:
+            for name, tensor in sorted(module.state_dict().items()):
+                digest.update(name.encode('utf-8'))
+                digest.update(
+                    tensor.detach().cpu().contiguous().numpy().tobytes())
+        deployment_state = self._deployment_state_dict(
+            int(getattr(self, 'loaded_checkpoint_ep', -1)))
+        deployment_state.pop('episode', None)
+        # Hash fields independently so semantically irrelevant aliasing between
+        # objects before and after torch deserialisation cannot change the
+        # deployment digest.
+        for name, value in sorted(deployment_state.items()):
+            digest.update(name.encode('utf-8'))
+            digest.update(pickle.dumps(value, protocol=5))
+        return digest.hexdigest()
+
+    def evaluate(self, scenario_seeds, output_dir=None, policy_ep=None):
+        seeds = [int(seed) for seed in scenario_seeds]
+        if not seeds:
+            raise ValueError('evaluate requires at least one scenario seed')
+        if policy_ep is None:
+            policy_ep = max(
+                int(getattr(self, 'loaded_checkpoint_ep', self._current_ep)),
+                int(self.upper_warmup),
+            )
+        before = self._policy_digest()
+        rows = []
+        for seed in seeds:
+            row = self.run_episode(
+                ep=int(policy_ep),
+                training=False,
+                scenario_seed=seed,
+                record_diagnostics=False,
+            )
+            row = dict(row)
+            row['eval_seed'] = seed
+            row['checkpoint_ep'] = int(
+                getattr(self, 'loaded_checkpoint_ep', policy_ep))
+            row['policy_digest'] = before
+            rows.append(row)
+            after_seed = self._policy_digest()
+            if after_seed != before:
+                raise RuntimeError(
+                    'frozen evaluation mutated deployment policy state '
+                    f'on scenario seed {seed}')
+
+        destination = Path(
+            output_dir
+            or (Path(self.log_dir) / 'frozen_evaluation'
+                / f'checkpoint_ep{int(getattr(self, "loaded_checkpoint_ep", policy_ep))}'))
+        destination.mkdir(parents=True, exist_ok=True)
+        fieldnames = list(rows[0].keys())
+        with (destination / 'evaluation.csv').open('w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        with (destination / 'evaluation_manifest.json').open('w') as f:
+            json.dump({
+                'protocol_version': 'freqduet-eval-v2',
+                'config_name': self.exp_name,
+                'training_seed': self.base_seed,
+                'checkpoint_ep': int(
+                    getattr(self, 'loaded_checkpoint_ep', policy_ep)),
+                'policy_episode': int(policy_ep),
+                'scenario_seeds': seeds,
+                'policy_digest': before,
+                'n_episodes': len(rows),
+            }, f, indent=2)
+        return rows, destination
 
     def train(self, total_episodes=300):
         training_cfg = self.cfg.get('training', {})
@@ -8040,7 +8327,8 @@ class TransitDuetV2Runner:
         ).strip().lower() in ('1', 'true', 'yes', 'on')
         if suppress_heavy_artifacts:
             trip_dump_freq = 0
-            save_checkpoints = False
+            checkpoint_freq = 0
+            save_checkpoints = True
         # Init diag now (after resume decision so CSV header handled correctly)
         if self.diag is None:
             self.diag = DiagnosticLog(self.log_dir, resume=(self.resume_from_ep > 0))
@@ -8077,7 +8365,7 @@ class TransitDuetV2Runner:
         if freeze_notes:
             print(f"  Longtrain stability freeze: {', '.join(freeze_notes)}")
         if suppress_heavy_artifacts:
-            print("  Heavy artifacts suppressed: no trip_details.csv, no checkpoints")
+            print("  Heavy artifacts suppressed: no trip details; final deployment checkpoint retained")
         print(f"  Diag CSV: {self.diag.csv_path}")
         print("=" * 90)
         if self.fixed_selector_reset_env_rng:
@@ -8125,6 +8413,18 @@ class TransitDuetV2Runner:
         os.makedirs(ckpt_dir, exist_ok=True)
         self.lower_trainer.save(os.path.join(ckpt_dir, f'lower_ep{ep}.pt'))
         self.upper_trainer.save(os.path.join(ckpt_dir, f'upper_ep{ep}.pt'))
+        torch.save(
+            self._deployment_state_dict(ep),
+            os.path.join(ckpt_dir, f'runner_ep{ep}.pt'),
+        )
+        self.loaded_checkpoint_ep = int(ep)
+        with open(os.path.join(ckpt_dir, 'checkpoint_meta.json'), 'w') as f:
+            json.dump({
+                'protocol_version': 'freqduet-eval-v2',
+                'latest_episode': int(ep),
+                'config_name': self.exp_name,
+                'seed': self.base_seed,
+            }, f, indent=2)
         print(f"  [Checkpoint ep {ep}]")
 
     def _save_history(self):
@@ -8139,28 +8439,50 @@ class TransitDuetV2Runner:
             json.dump(results, f)
 
 
-def eval_pareto_frontier(runner, n_eval=10, fleet_values=None):
+def eval_pareto_frontier(runner, n_eval=10, fleet_values=None,
+                         scenario_seeds=None):
     """v2k: Sweep N_fleet values and record (fleet, wait, cv) Pareto points."""
     if fleet_values is None:
         fleet_values = list(range(8, 17))
+    if scenario_seeds is None:
+        start = 20000000 + int(runner.base_seed) * 1000
+        scenario_seeds = list(range(start, start + int(n_eval)))
+    else:
+        scenario_seeds = [int(seed) for seed in scenario_seeds]
+    policy_ep = max(
+        int(getattr(runner, 'loaded_checkpoint_ep', runner._current_ep)),
+        int(runner.upper_warmup),
+    )
+    policy_digest = runner._policy_digest()
     results = []
     for N in fleet_values:
-        waits, cvs, overshoots = [], [], []
-        for i in range(n_eval):
-            row = runner.run_episode(ep=9999, training=False, N_fleet_override=N)
-            waits.append(row['avg_wait_min'])
+        waits, restricted_waits, cvs, overshoots = [], [], [], []
+        for seed in scenario_seeds:
+            row = runner.run_episode(
+                ep=policy_ep,
+                training=False,
+                N_fleet_override=N,
+                scenario_seed=seed,
+                record_diagnostics=False,
+            )
+            waits.append(row['avg_wait_observed_min'])
+            restricted_waits.append(row['restricted_wait_horizon_min'])
             cvs.append(row['headway_cv'])
             overshoots.append(row.get('fleet_overshoot', 0))
         results.append({
             'N_fleet': N,
             'wait_mean': float(np.mean(waits)),
             'wait_std': float(np.std(waits)),
+            'restricted_wait_mean': float(np.mean(restricted_waits)),
+            'restricted_wait_std': float(np.std(restricted_waits)),
             'cv_mean': float(np.mean(cvs)),
             'cv_std': float(np.std(cvs)),
             'overshoot_mean': float(np.mean(overshoots)),
         })
         print(f"  N_fleet={N:2d}: wait={np.mean(waits):4.1f}±{np.std(waits):.1f}m  "
               f"cv={np.mean(cvs):.2f}  overshoot={np.mean(overshoots):.1f}")
+    if runner._policy_digest() != policy_digest:
+        raise RuntimeError('Pareto evaluation mutated deployment policy state')
     return results
 
 
@@ -8174,6 +8496,16 @@ def main():
     parser.add_argument('--eval_pareto', action='store_true',
                         help='After training, evaluate Pareto frontier over N_fleet ∈ [8,16]')
     parser.add_argument('--n_eval', type=int, default=5, help='eps per N_fleet for eval')
+    parser.add_argument('--eval-only', action='store_true',
+                        help='Load a checkpoint and run frozen deterministic evaluation')
+    parser.add_argument('--checkpoint-dir', type=str, default=None,
+                        help='Run directory or checkpoints directory for --eval-only')
+    parser.add_argument('--checkpoint-ep', type=int, default=None,
+                        help='Checkpoint episode; defaults to latest paired checkpoint')
+    parser.add_argument('--eval-seeds', type=str, default=None,
+                        help='Comma-separated independent scenario seeds')
+    parser.add_argument('--eval-output-dir', type=str, default=None,
+                        help='Output directory for frozen evaluation')
     parser.add_argument('--resume', dest='resume', action='store_true', default=True,
                         help='Resume from latest checkpoint if found (default: on)')
     parser.add_argument('--no-resume', dest='resume', action='store_false',
@@ -8201,6 +8533,30 @@ def main():
         device = 'cuda:0'
 
     runner = TransitDuetV2Runner(config, device=device)
+    if args.eval_only:
+        checkpoint_ep = runner.load_checkpoint(
+            checkpoint_dir=args.checkpoint_dir,
+            ep=args.checkpoint_ep,
+            require_deployment_state=True,
+        )
+        if args.eval_seeds:
+            eval_seeds = [
+                int(value.strip())
+                for value in args.eval_seeds.split(',')
+                if value.strip()
+            ]
+        else:
+            start = 10000000 + int(args.seed) * 1000
+            eval_seeds = list(range(start, start + int(args.n_eval)))
+        rows, destination = runner.evaluate(
+            eval_seeds,
+            output_dir=args.eval_output_dir,
+            policy_ep=max(checkpoint_ep, runner.upper_warmup),
+        )
+        print(
+            f"Frozen evaluation complete: {len(rows)} episodes -> "
+            f"{destination}")
+        return
     if args.resume:
         runner.maybe_resume()
     runner.train(total_episodes=args.episodes)

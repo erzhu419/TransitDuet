@@ -52,7 +52,7 @@ class Station(object):
                         demand_multipliers=None, demand_scale=1.0,
                         od_multipliers=None, peak_shift=0,
                         service_start_hour=6, service_end_hour=19,
-                        return_details=False):
+                        return_details=False, scenario_tape=None):
         """
         每秒更新一次，减少不必要的泊松分布计算
         demand_multipliers: dict {hour: float} episode-level demand noise
@@ -71,7 +71,7 @@ class Station(object):
                 min(service_end_hour, hour + int(peak_shift)),
             )
             effective_period_str = f"{lookup_hour:02}:00:00"
-            period_od = self.od[effective_period_str]
+            period_od = self.od.get(effective_period_str, {})
 
             # Episode-level demand multiplier
             demand_mult = 1.0
@@ -91,7 +91,17 @@ class Station(object):
                         od_mult = float(od_multipliers.get(od_key, 1.0))
                     demand_per_second = demand * demand_mult * od_mult / 3600.0
 
-                    destination_demand_num = np.random.poisson(demand_per_second * passenger_update_interval)
+                    arrival_rate = demand_per_second * passenger_update_interval
+                    if scenario_tape is None:
+                        destination_demand_num = int(np.random.poisson(arrival_rate))
+                    else:
+                        destination_demand_num = scenario_tape.poisson_stream(
+                            arrival_rate,
+                            "passenger_arrival",
+                            int(self.station_id),
+                            bool(self.direction),
+                            str(destination_name),
+                        )
 
                     if destination_demand_num > 0:
                         destination = next(

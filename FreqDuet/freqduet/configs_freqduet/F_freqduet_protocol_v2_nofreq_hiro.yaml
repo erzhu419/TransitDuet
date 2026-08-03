@@ -1,0 +1,24 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_nofreq_hiro
+
+protocol:
+  role: ablation_no_frequency_system
+
+upper:
+  state_dim: 11
+
+frequency:
+  enable: false
+  use_historical_prior: false
+  upper_features: false
+  lower_features: false
+  promotion:
+    enable: false
+  drift_feedback:
+    enable: false
+
+reward_attribution:
+  enable: false
+
+leakage:
+  enable: false
