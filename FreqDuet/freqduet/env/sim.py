@@ -50,6 +50,18 @@ class env_bus(object):
         self.scenario_seed = int(self.env_config.get('scenario_seed', 0))
         self.include_terminal_headways = bool(
             self.env_config.get('include_terminal_headways', False))
+        self.fleet_inventory_mode = str(
+            self.env_config.get('fleet_inventory_mode', 'elastic_legacy')
+        ).strip().lower()
+        if self.fleet_inventory_mode not in {'elastic_legacy', 'fixed_pool'}:
+            raise ValueError(
+                "env.fleet_inventory_mode must be 'elastic_legacy' or "
+                "'fixed_pool'"
+            )
+        initial_up = self.env_config.get('fixed_pool_initial_up')
+        self.fixed_pool_initial_up = (
+            None if initial_up is None else int(initial_up)
+        )
         self.headway_state_mode = 'arrival_event'
         self.lower_state_input_schema = 'legacy_headway_deviation'
         
@@ -87,8 +99,7 @@ class env_bus(object):
         # add index for timetable
         self.timetable_set['launch_turn'] = range(self.timetable_set.shape[0])
         configured_agents = int(self.env_config.get('max_agent_num', 30))
-        self.max_agent_num = max(
-            30, configured_agents, int(self.effective_trip_num))
+        self.max_agent_num = max(30, configured_agents)
 
         self.visualizer = visualize(self)
         # Allow disabling automatic plotting when simulation ends
@@ -375,6 +386,10 @@ class env_bus(object):
         # initial list of bus on route
         self.bus_id = 0
         self.bus_all = []
+        self._fixed_pool_initialized = False
+        self._fleet_denied_dispatch_events = 0
+        self._fleet_denied_trip_ids = set()
+        self._fleet_readiness_delays_s = []
         self.route_state = []
 
         # self.state is combine with route_state, which contains the route.speed_limit of each route, station_state, which
@@ -455,13 +470,77 @@ class env_bus(object):
 
         return self.state, self.reward, self.done
 
-    def launch_bus(self, trip):
+    def _fleet_capacity(self):
+        return max(int(getattr(self, '_n_fleet_target', 12)), 1)
+
+    def _initialize_fixed_pool(self):
+        if self.fleet_inventory_mode != 'fixed_pool':
+            return
+        if self._fixed_pool_initialized:
+            return
+        if self.bus_all:
+            raise RuntimeError(
+                'fixed vehicle inventory must be initialized before any bus exists')
+
+        fleet_size = self._fleet_capacity()
+        if self.fixed_pool_initial_up is None:
+            initial_up = fleet_size // 2
+            if fleet_size % 2:
+                first_direction = bool(min(
+                    self.timetables,
+                    key=lambda tt: (float(tt.launch_time), int(tt.launch_turn)),
+                ).direction)
+                initial_up += int(first_direction)
+        else:
+            initial_up = int(self.fixed_pool_initial_up)
+        if not 0 <= initial_up <= fleet_size:
+            raise ValueError(
+                'fixed_pool_initial_up must be between zero and N_fleet')
+
+        directions = [True] * initial_up + [False] * (fleet_size - initial_up)
+        for direction in directions:
+            bus = Bus(
+                self.bus_id,
+                -1,
+                0.0,
+                direction,
+                self.routes,
+                self.stations,
+            )
+            bus.trip_id = -1
+            bus.trip_id_list = []
+            bus.trip_turn = 0
+            bus.on_route = False
+            bus.in_station = True
+            bus.back_to_terminal_time = float('-inf')
+            self.bus_all.append(bus)
+            self._ensure_agent_slot(bus.bus_id)
+            self.bus_id += 1
+        self._fixed_pool_initialized = True
+
+    def _ready_vehicle_count(self, direction=None):
+        buses = self.bus_in_terminal
+        if direction is not None:
+            buses = [bus for bus in buses if bus.direction == bool(direction)]
+        return len(buses)
+
+    def launch_bus(self, trip, actual_launch=None):
         # Trip set(self.timetable) contain both direction trips. So we have to make sure the direction and launch time
         # is satisfied before the trip launched.
         # If there is no more appropriate bus in terminal, create a new bus, then add it to all_bus list.
         dispatch_target_headway = float(getattr(trip, 'target_headway', 360.0))
-        actual_launch = getattr(trip, '_actual_launch_time', trip.launch_time)
-        if len(list(filter(lambda i: i.direction == trip.direction, self.bus_in_terminal))) == 0:
+        if actual_launch is None:
+            actual_launch = getattr(trip, '_actual_launch_time', trip.launch_time)
+        actual_launch = float(actual_launch)
+        if self.fleet_inventory_mode == 'fixed_pool':
+            self._initialize_fixed_pool()
+        ready = [
+            bus for bus in self.bus_in_terminal
+            if bus.direction == bool(trip.direction)
+        ]
+        if not ready and self.fleet_inventory_mode == 'fixed_pool':
+            return None
+        if not ready:
             # cause bus.next_station， current_route and effective station & routes is defined by @property, so no initialize here
             bus = Bus(self.bus_id, trip.launch_turn, actual_launch, trip.direction, self.routes, self.stations)
             self.bus_all.append(bus)
@@ -469,13 +548,14 @@ class env_bus(object):
         else:
             # if there is bus in terminal and also the direction is satisfied, then we reuse the bus to relaunch one of
             # them, which has the earliest arrived time to terminal.
-            bus = sorted(list(filter(lambda i: i.direction == trip.direction, self.bus_in_terminal)), key=lambda bus: bus.back_to_terminal_time)[0]
+            bus = sorted(ready, key=lambda item: item.back_to_terminal_time)[0]
             bus.reset_bus(trip.launch_turn, actual_launch)
             # in drive() function, we set bus.on_route = False when it finished a trip. Here we set it to True because
             # the iteration in drive(), we just update the state of those bus which on routes
             bus.on_route = True
         self._ensure_agent_slot(bus.bus_id)
         bus._freqduet_dispatch_target_headway = dispatch_target_headway
+        return bus
 
     def step(self, action, debug=False, render=False, episode = 0):
         # Enumerate trips in timetables, if current_time<=launch_time of the trip, then launch it.
@@ -519,18 +599,35 @@ class env_bus(object):
                         if actual_gap < trip.target_headway:
                             continue
 
-                # Soft fleet constraint: buffer of 3 over target allows overshoot
-                # but hard cap prevents unbounded fleet growth
-                n_fleet = getattr(self, '_n_fleet_target', 25)
-                buffer = getattr(self, '_fleet_buffer', 3)
-                concurrent = sum(1 for bus in self.bus_all if bus.on_route)
-                if concurrent >= n_fleet + buffer:
-                    continue  # hard cap — only prevents catastrophic overshoot
+                if self.fleet_inventory_mode == 'elastic_legacy':
+                    # Legacy experiments treated N as a soft concurrency target.
+                    n_fleet = getattr(self, '_n_fleet_target', 25)
+                    buffer = getattr(self, '_fleet_buffer', 3)
+                    concurrent = sum(1 for bus in self.bus_all if bus.on_route)
+                    if concurrent >= n_fleet + buffer:
+                        continue
 
-                # Launch
+                if not hasattr(trip, '_freqduet_first_eligible_time'):
+                    trip._freqduet_first_eligible_time = float(self.current_time)
+                bus = self.launch_bus(trip, actual_launch=self.current_time)
+                if bus is None:
+                    self._fleet_denied_dispatch_events += 1
+                    self._fleet_denied_trip_ids.add(int(trip.launch_turn))
+                    continue
+
                 trip.launched = True
-                trip._actual_launch_time = self.current_time  # v2g: record real launch
-                self.launch_bus(trip)
+                trip._actual_launch_time = float(self.current_time)
+                trip._freqduet_actual_launch = float(self.current_time)
+                readiness_delay = max(
+                    0.0,
+                    float(self.current_time)
+                    - float(trip._freqduet_first_eligible_time),
+                )
+                trip._freqduet_fleet_readiness_delay_s = readiness_delay
+                trip._freqduet_actual_phase_displacement_s = (
+                    float(self.current_time) - float(trip.launch_time)
+                )
+                self._fleet_readiness_delays_s.append(readiness_delay)
                 self._last_dispatch_time[trip.direction] = self.current_time
         # route
         route_state = []
@@ -1164,7 +1261,7 @@ class env_bus(object):
         return np.array([
             hour / 24.0,
             total_demand / 1000.0,
-            fleet_on_route / self.max_agent_num,
+            fleet_on_route / self._fleet_capacity(),
             prev_actual_headway / 600.0,
             holding_ratio,
         ], dtype=np.float32)
@@ -1202,6 +1299,22 @@ class env_bus(object):
             'headway_state_mode': str(self.headway_state_mode),
             'lower_state_input_schema': str(self.lower_state_input_schema),
             'peak_fleet': int(self._peak_concurrent),
+            'fleet_inventory_mode': str(self.fleet_inventory_mode),
+            'physical_vehicle_count': int(len(self.bus_all)),
+            'fleet_capacity': int(self._fleet_capacity()),
+            'fleet_ready_up': int(self._ready_vehicle_count(True)),
+            'fleet_ready_down': int(self._ready_vehicle_count(False)),
+            'fleet_denied_dispatch_events': int(
+                self._fleet_denied_dispatch_events),
+            'fleet_denied_trips': int(len(self._fleet_denied_trip_ids)),
+            'fleet_readiness_delay_mean_s': (
+                float(np.mean(self._fleet_readiness_delays_s))
+                if self._fleet_readiness_delays_s else 0.0
+            ),
+            'fleet_readiness_delay_max_s': (
+                float(np.max(self._fleet_readiness_delays_s))
+                if self._fleet_readiness_delays_s else 0.0
+            ),
             'timetable_trips_available': int(self.total_timetable_rows),
             'timetable_trips_evaluated': int(total_trips),
             'trips_launched': int(launched),
@@ -1335,7 +1448,7 @@ class env_bus(object):
         state = [
             hour / 24.0,                                   # [0] time of day
             demand_norm,                                   # [1] raw or low-frequency demand
-            fleet_on_route / self.max_agent_num,           # [2] fleet utilization
+            fleet_on_route / self._fleet_capacity(),       # [2] fleet utilization
             actual_gap / 600.0,                            # [3] gap to prev dispatch
             holding_ratio,                                 # [4] fraction of fleet holding
             same_dir_stats['rolling_mean'] / 60.0,         # [5] mean holding, same dir
