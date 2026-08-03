@@ -1,0 +1,24 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro
+
+protocol:
+  role: causal_additive_interval_credit
+
+upper:
+  credit_assignment:
+    system_reward_mode: none
+    gap_credit_mode: none
+    reliability_reward_mode: uniform
+    reliability_reward_weight: 5.0
+  interval_credit:
+    enable: true
+    assignment_mode: additive
+    reward_scale: 1.0
+    wait_reference_min: 10.0
+    headway_reference: 1.0
+    fleet_reference: 1.0
+    component_clip: 4.0
+    weights:
+      wait: 1.0
+      headway: 1.0
+      fleet: 1.0

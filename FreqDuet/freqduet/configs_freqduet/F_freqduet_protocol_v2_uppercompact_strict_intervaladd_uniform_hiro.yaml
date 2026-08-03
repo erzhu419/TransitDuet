@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_uniform_hiro
+
+protocol:
+  role: causal_additive_interval_plus_uniform_global_ablation
+
+upper:
+  credit_assignment:
+    system_reward_mode: uniform
+    system_reward_weight: 1.0

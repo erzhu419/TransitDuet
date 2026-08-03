@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_gap_hiro
+
+protocol:
+  role: causal_additive_interval_plus_plan_gap_ablation
+
+upper:
+  credit_assignment:
+    gap_credit_mode: absolute
+    gap_credit_weight: 0.15
+    gap_credit_clip: 4.0

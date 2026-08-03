@@ -4,6 +4,9 @@ _name: F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro
 protocol:
   role: structural_candidate_full_strict_contract
 
+upper:
+  transition_stream_mode: planner_key
+
 lower:
   holding_action_trace_mode: all_decisions
   terminal_action_mode: transition

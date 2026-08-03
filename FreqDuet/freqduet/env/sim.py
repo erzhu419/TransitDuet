@@ -144,6 +144,7 @@ class env_bus(object):
 
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
+        self._upper_interval_outcome_tracker = None
         self._peak_concurrent = 0
         self.protocol = None
         self.scenario_tape = None
@@ -262,6 +263,8 @@ class env_bus(object):
         self.scenario_tape = ScenarioTape(
             int(getattr(self, 'scenario_seed', 0)))
         self.headway_events = HeadwayEventRecorder()
+        if self._upper_interval_outcome_tracker is not None:
+            self._upper_interval_outcome_tracker.reset()
         self._completed_trip_ids = set()
         self._measurement_details = {}
         self._done_reason = None
@@ -619,6 +622,7 @@ class env_bus(object):
                         direction=arrival_direction,
                         arrival_time_s=float(self.current_time),
                         trip_id=arrival_trip_id,
+                        target_headway_s=float(target_hw),
                     )
 
         self.state_bus_list = state_bus_list = list(filter(lambda x: len(x.obs) != 0, self.bus_all))
@@ -668,6 +672,30 @@ class env_bus(object):
         # Track peak concurrent vehicles for measurement_vector
         concurrent = sum(1 for bus in self.bus_all if bus.on_route)
         self._peak_concurrent = max(self._peak_concurrent, concurrent)
+
+        if self._upper_interval_outcome_tracker is not None:
+            waiting_by_direction = {
+                direction: sum(
+                    len(station.waiting_passengers)
+                    for station in self.stations
+                    if bool(station.direction) == direction
+                )
+                for direction in (True, False)
+            }
+            fleet_by_direction = {
+                direction: sum(
+                    1 for bus in self.bus_all
+                    if bus.on_route and bool(bus.direction) == direction
+                )
+                for direction in (True, False)
+            }
+            self._upper_interval_outcome_tracker.record_step(
+                dt_s=self.time_step,
+                waiting_by_direction=waiting_by_direction,
+                fleet_by_direction=fleet_by_direction,
+                n_fleet_target=getattr(self, '_n_fleet_target', 12),
+                headway_events=self.headway_events.events,
+            )
 
         self.current_time += self.time_step
         all_trips_launched = all(trip.launched for trip in self.timetables)

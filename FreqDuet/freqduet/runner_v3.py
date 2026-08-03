@@ -70,6 +70,7 @@ from frequency.diagnostics import (
 )
 from upper.resac_upper import RESACUpperTrainer
 from upper.credit_assignment import UpperCreditAssignment
+from upper.interval_credit import UpperIntervalOutcomeTracker
 from upper.measurement_proj import MeasurementProjection
 from upper.plan_execution import UpperPlanExecutionContract
 from upper.timetable_planner import TimetableCurvePlanner
@@ -225,17 +226,27 @@ class DiagnosticLog:
         'lower_trip_boundary_resets',
         'lower_pending_states_dropped',
         'lower_pending_actions_dropped',
+        'lower_pending_states_consumed',
+        'lower_pending_actions_consumed',
         'lower_terminal_action_masks', 'lower_terminal_transitions',
+        'lower_terminal_outcomes_missing',
         'lower_policy_frozen', 'lower_critic_frozen',
         # upper policy (only after warmup)
         'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
         'upper_reward_mean', 'upper_reward_std',
         'upper_system_reward_mean', 'upper_system_reward_sum',
+        'upper_reliability_reward_sum',
         'upper_gap_credit_mean', 'upper_gap_credit_std',
+        'upper_interval_reward_mean', 'upper_interval_reward_sum',
+        'upper_interval_wait_cost_sum',
+        'upper_interval_headway_cost_sum',
+        'upper_interval_fleet_cost_sum',
+        'upper_interval_coverage_mean',
         # upper training
         'upper_q_mean', 'upper_q_std', 'upper_q_loss', 'upper_q_mse',
         'upper_ood_loss', 'upper_q_l1', 'upper_q_l1_penalty',
         'upper_duration_steps_mean', 'upper_transition_duration_steps_mean',
+        'upper_transition_stream_count', 'upper_transition_short_ratio',
         'upper_policy_loss',
         'upper_pi_grad_norm', 'upper_q_grad_norm',
         'upper_alpha', 'upper_replay_size',
@@ -547,6 +558,19 @@ class TransitDuetV2Runner:
         upper_cfg = config['upper']
         self.upper_credit_assignment = UpperCreditAssignment.from_config(
             upper_cfg.get('credit_assignment', {}))
+        self.upper_interval_credit = UpperIntervalOutcomeTracker.from_config(
+            upper_cfg.get('interval_credit', {}))
+        self.env._upper_interval_outcome_tracker = (
+            self.upper_interval_credit
+            if self.upper_interval_credit.enabled else None
+        )
+        self.upper_transition_stream_mode = str(upper_cfg.get(
+            'transition_stream_mode', 'legacy_global')).strip().lower()
+        if self.upper_transition_stream_mode not in {
+                'legacy_global', 'planner_key'}:
+            raise ValueError(
+                "upper.transition_stream_mode must be legacy_global or "
+                "planner_key")
         holding_state_cfg = upper_cfg.get('holding_state', {}) or {}
         self.upper_holding_state_source = str(
             holding_state_cfg.get('source', 'env_legacy')).strip().lower()
@@ -2228,7 +2252,7 @@ class TransitDuetV2Runner:
 
         # Episode bookkeeping
         self._episode_upper_transitions = []
-        self._prev_upper_state = None
+        self._prev_upper_states = {}
         self._ep_lower_actions = []     # all lower actions this episode
         self._ep_lower_context_gate_values = []
         self._ep_lower_action_bins_gate_values = []
@@ -2239,6 +2263,12 @@ class TransitDuetV2Runner:
         self._ep_upper_rewards = []     # all upper rewards this episode
         self._ep_upper_system_rewards = []
         self._ep_upper_gap_credits = []
+        self._ep_upper_reliability_rewards = []
+        self._ep_upper_interval_rewards = []
+        self._ep_upper_interval_wait_costs = []
+        self._ep_upper_interval_headway_costs = []
+        self._ep_upper_interval_fleet_costs = []
+        self._ep_upper_interval_coverages = []
         self._current_ep = 0
 
         # Logging
@@ -2589,11 +2619,18 @@ class TransitDuetV2Runner:
             return
         self._upper_state_history.append(row)
 
-    def _close_previous_upper_transition(
-            self, next_state, done, decision_time_s):
-        prev = self._prev_upper_state
+    def _upper_transition_stream_key(self, planner_key):
+        if self.upper_transition_stream_mode == 'legacy_global':
+            return '__legacy_global__'
+        return planner_key
+
+    def _close_upper_transition_stream(
+            self, stream_key, next_state, done, decision_time_s):
+        prev = self._prev_upper_states.get(stream_key)
         if prev is None:
             return
+        interval_outcome = self.upper_interval_credit.close(
+            stream_key, end_time_s=decision_time_s)
         elapsed_s = max(
             0.0, float(decision_time_s) - float(prev['decision_time_s']))
         self._episode_upper_transitions.append({
@@ -2613,7 +2650,21 @@ class TransitDuetV2Runner:
             'upper_residual_selector_x': prev['upper_residual_selector_x'],
             'terminal_value_selector_x': prev['terminal_value_selector_x'],
             'headway_value_planner_x': prev['headway_value_planner_x'],
+            'transition_stream_key': stream_key,
+            'interval_outcome': interval_outcome,
         })
+        if done:
+            del self._prev_upper_states[stream_key]
+
+    def _close_previous_upper_transition(
+            self, next_state, done, decision_time_s, planner_key):
+        stream_key = self._upper_transition_stream_key(planner_key)
+        self._close_upper_transition_stream(
+            stream_key,
+            next_state=next_state,
+            done=done,
+            decision_time_s=decision_time_s,
+        )
 
     @staticmethod
     def _pressure_strength(pressure, start, full):
@@ -6753,12 +6804,17 @@ class TransitDuetV2Runner:
         # executions of the previous low-frequency plan, not new policy actions.
         if upper_decision_taken:
             self._close_previous_upper_transition(
-                s_upper, done=False, decision_time_s=decision_time_s)
+                s_upper,
+                done=False,
+                decision_time_s=decision_time_s,
+                planner_key=planner_key,
+            )
 
             value_cost, value_active = self._upper_residual_value_cost(delta_t)
             replay_action = self.upper_plan_execution.replay_action(
                 policy_command_vec, action_vec)
-            self._prev_upper_state = {
+            stream_key = self._upper_transition_stream_key(planner_key)
+            self._prev_upper_states[stream_key] = {
                 's': s_upper.copy(),
                 'a': replay_action,
                 'tid': int(trip.launch_turn),
@@ -6772,6 +6828,8 @@ class TransitDuetV2Runner:
                 'headway_value_planner_x': headway_selector_x,
                 'decision_time_s': decision_time_s,
             }
+            self.upper_interval_credit.begin(
+                stream_key, start_time_s=decision_time_s)
 
         # Record dispatch info (actual launch time captured post-episode from env).
         # Terminal-dispatch mode uses the planner's executable launch schedule.
@@ -6948,7 +7006,7 @@ class TransitDuetV2Runner:
         self.lower_lifecycle.reset_episode()
         self._current_ep = ep
         self._episode_upper_transitions = []
-        self._prev_upper_state = None
+        self._prev_upper_states = {}
         self._upper_state_history = deque(
             maxlen=max(1, self.upper_state_history_len))
         self._ep_lower_actions = []
@@ -6968,6 +7026,12 @@ class TransitDuetV2Runner:
         self._ep_upper_rewards = []
         self._ep_upper_system_rewards = []
         self._ep_upper_gap_credits = []
+        self._ep_upper_reliability_rewards = []
+        self._ep_upper_interval_rewards = []
+        self._ep_upper_interval_wait_costs = []
+        self._ep_upper_interval_headway_costs = []
+        self._ep_upper_interval_fleet_costs = []
+        self._ep_upper_interval_coverages = []
         self._ep_lower_actions_by_dir = {True: [], False: []}
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
@@ -7210,13 +7274,13 @@ class TransitDuetV2Runner:
                         bus.trip_id, bus.direction)
 
         # ── Finalize last upper transition ──
-        if self._prev_upper_state is not None:
-            self._close_previous_upper_transition(
-                self._prev_upper_state['s'],
+        episode_end_time_s = float(getattr(self.env, 'current_time', 0.0))
+        for stream_key, prev in list(self._prev_upper_states.items()):
+            self._close_upper_transition_stream(
+                stream_key,
+                next_state=prev['s'],
                 done=True,
-                decision_time_s=float(getattr(
-                    self.env, 'current_time',
-                    self._prev_upper_state['decision_time_s'])),
+                decision_time_s=episode_end_time_s,
             )
 
         # ── Hindsight Credit Assignment (v2g: gap-based, not holding-based) ──
@@ -7299,8 +7363,16 @@ class TransitDuetV2Runner:
             gap_credits = {tid: 0.0 for tid in transition_ids}
         system_rewards = self.upper_credit_assignment.system_rewards(
             sys_r, len(self._episode_upper_transitions))
-        for trans, system_reward in zip(
-                self._episode_upper_transitions, system_rewards):
+        reliability_rewards = self.upper_credit_assignment.reliability_rewards(
+            unserved_rate=float(env_details['passenger_unserved_rate']),
+            incomplete_rate=(
+                1.0 - float(env_details['trip_completion_rate'])),
+            count=len(self._episode_upper_transitions),
+        )
+        for trans, system_reward, reliability_reward in zip(
+                self._episode_upper_transitions,
+                system_rewards,
+                reliability_rewards):
             tid = trans['tid']
             credit = float(gap_credits.get(int(tid), 0.0))
             a_u = float(trans.get(
@@ -7316,12 +7388,30 @@ class TransitDuetV2Runner:
                 upper_value_active)
             wait_credit = float(upper_wait_credits.get(int(tid), 0.0))
             self._ep_upper_wait_credits.append(wait_credit)
+            interval_score = self.upper_interval_credit.score(
+                trans.get('interval_outcome'),
+                passengers_generated=int(env_details['passengers_generated']),
+                episode_headway_samples=int(
+                    env_details['headway_sample_count']),
+                episode_duration_s=float(
+                    env_details['simulation_end_time_s']),
+                n_fleet_target=float(N_fleet),
+            )
+            interval_reward = float(interval_score['reward'])
+            interval_wait_cost = float(interval_score['wait_cost'])
+            interval_headway_cost = float(interval_score['headway_cost'])
+            interval_fleet_cost = float(interval_score['fleet_cost'])
+            interval_coverage = float(
+                (trans.get('interval_outcome') or {}).get('coverage', 0.0))
             r = (
-                float(system_reward) + credit + wait_credit
+                float(system_reward) + float(reliability_reward)
+                + credit + wait_credit + interval_reward
                 - upper_hf_pen - plan_pen - upper_value_cost)
             upper_local_credit_cost = (
                 -float(credit)
                 - wait_credit
+                - interval_reward
+                - float(reliability_reward)
                 + upper_hf_pen
                 + plan_pen
                 + upper_value_cost)
@@ -7356,11 +7446,27 @@ class TransitDuetV2Runner:
                 'duration_steps': trans.get('duration_steps', 1.0),
                 'duration_s': trans.get('duration_s', 0.0),
                 'system_reward': float(system_reward),
+                'reliability_reward': float(reliability_reward),
                 'gap_credit': credit,
+                'transition_stream_key': trans.get(
+                    'transition_stream_key', '__legacy_global__'),
+                'interval_reward': interval_reward,
+                'interval_wait_cost': interval_wait_cost,
+                'interval_headway_cost': interval_headway_cost,
+                'interval_fleet_cost': interval_fleet_cost,
+                'interval_coverage': interval_coverage,
             })
             self._ep_upper_rewards.append(r)
             self._ep_upper_system_rewards.append(float(system_reward))
             self._ep_upper_gap_credits.append(credit)
+            self._ep_upper_reliability_rewards.append(
+                float(reliability_reward))
+            self._ep_upper_interval_rewards.append(interval_reward)
+            self._ep_upper_interval_wait_costs.append(interval_wait_cost)
+            self._ep_upper_interval_headway_costs.append(
+                interval_headway_cost)
+            self._ep_upper_interval_fleet_costs.append(interval_fleet_cost)
+            self._ep_upper_interval_coverages.append(interval_coverage)
         self._episode_upper_transitions = backfilled
 
         # ── Enrich per-trip records with holding + gap deviation ──
@@ -7520,10 +7626,22 @@ class TransitDuetV2Runner:
         ur_stat = _stat(self._ep_upper_rewards)
         upper_system_reward_stat = _stat(self._ep_upper_system_rewards)
         upper_gap_credit_stat = _stat(self._ep_upper_gap_credits)
+        upper_interval_reward_stat = _stat(
+            self._ep_upper_interval_rewards)
+        upper_interval_coverage_stat = _stat(
+            self._ep_upper_interval_coverages)
         upper_transition_duration_stat = _stat([
             float(trans.get('duration_steps', 1.0))
             for trans in self._episode_upper_transitions
         ])
+        upper_transition_stream_count = len({
+            str(trans.get('transition_stream_key', '__legacy_global__'))
+            for trans in self._episode_upper_transitions
+        })
+        upper_transition_short_ratio = float(np.mean([
+            float(trans.get('duration_steps', 1.0)) <= 0.250001
+            for trans in self._episode_upper_transitions
+        ])) if self._episode_upper_transitions else 0.0
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
@@ -7865,10 +7983,24 @@ class TransitDuetV2Runner:
                 upper_system_reward_stat['mean'], 4),
             'upper_system_reward_sum': round(
                 float(sum(self._ep_upper_system_rewards)), 4),
+            'upper_reliability_reward_sum': round(
+                float(sum(self._ep_upper_reliability_rewards)), 6),
             'upper_gap_credit_mean': round(
                 upper_gap_credit_stat['mean'], 4),
             'upper_gap_credit_std': round(
                 upper_gap_credit_stat['std'], 4),
+            'upper_interval_reward_mean': round(
+                upper_interval_reward_stat['mean'], 6),
+            'upper_interval_reward_sum': round(
+                float(sum(self._ep_upper_interval_rewards)), 6),
+            'upper_interval_wait_cost_sum': round(
+                float(sum(self._ep_upper_interval_wait_costs)), 6),
+            'upper_interval_headway_cost_sum': round(
+                float(sum(self._ep_upper_interval_headway_costs)), 6),
+            'upper_interval_fleet_cost_sum': round(
+                float(sum(self._ep_upper_interval_fleet_costs)), 6),
+            'upper_interval_coverage_mean': round(
+                upper_interval_coverage_stat['mean'], 6),
             # upper training
             'upper_q_mean': upper_m.get('upper_q_mean', 0.),
             'upper_q_std': upper_m.get('upper_q_std', 0.),
@@ -7882,6 +8014,10 @@ class TransitDuetV2Runner:
                 'upper_duration_steps_mean', 0.),
             'upper_transition_duration_steps_mean':
                 upper_transition_duration_stat['mean'],
+            'upper_transition_stream_count':
+                upper_transition_stream_count,
+            'upper_transition_short_ratio':
+                upper_transition_short_ratio,
             'upper_policy_loss': upper_m.get('upper_policy_loss', 0.),
             'upper_pi_grad_norm': upper_m.get('upper_pi_grad_norm', 0.),
             'upper_q_grad_norm': upper_m.get('upper_q_grad_norm', 0.),
@@ -8769,7 +8905,9 @@ class TransitDuetV2Runner:
         print(
             "    upper_credit="
             f"{self.upper_credit_assignment.system_reward_mode}/"
-            f"{self.upper_credit_assignment.gap_credit_mode}")
+            f"{self.upper_credit_assignment.gap_credit_mode}  "
+            f"stream={self.upper_transition_stream_mode}  "
+            f"interval={self.upper_interval_credit.assignment_mode if self.upper_interval_credit.enabled else 'off'}")
         freeze_notes = []
         if self.freeze_lower_policy_after_ep is not None:
             freeze_notes.append(

@@ -27,6 +27,27 @@ class UpperCreditAssignmentTest(unittest.TestCase):
         self.assertAlmostEqual(terminal.system_rewards(-2.0, 4).sum(), -2.0)
         self.assertAlmostEqual(uniform.system_rewards(-2.0, 4).sum(), -2.0)
 
+    def test_system_reward_weight_scales_without_changing_ownership(self):
+        assigner = UpperCreditAssignment(
+            system_reward_mode="uniform", system_reward_weight=0.25)
+        self.assertTrue(np.allclose(
+            assigner.system_rewards(-2.0, 4), [-0.125] * 4))
+
+    def test_reliability_penalty_is_budgeted_once(self):
+        uniform = UpperCreditAssignment(
+            reliability_reward_mode="uniform",
+            reliability_reward_weight=5.0,
+        )
+        terminal = UpperCreditAssignment(
+            reliability_reward_mode="terminal",
+            reliability_reward_weight=5.0,
+        )
+
+        uniform_rewards = uniform.reliability_rewards(0.1, 0.2, 3)
+        terminal_rewards = terminal.reliability_rewards(0.1, 0.2, 3)
+        self.assertAlmostEqual(uniform_rewards.sum(), -1.5)
+        self.assertTrue(np.allclose(terminal_rewards, [0.0, 0.0, -1.5]))
+
     def test_absolute_gap_credit_is_local_nonpositive_cost(self):
         assigner = UpperCreditAssignment(
             gap_credit_mode="absolute",
@@ -44,6 +65,8 @@ class UpperCreditAssignmentTest(unittest.TestCase):
             UpperCreditAssignment(system_reward_mode="mystery")
         with self.assertRaisesRegex(ValueError, "gap_credit_mode"):
             UpperCreditAssignment(gap_credit_mode="mystery")
+        with self.assertRaisesRegex(ValueError, "reliability_reward_mode"):
+            UpperCreditAssignment(reliability_reward_mode="mystery")
 
 
 if __name__ == "__main__":

@@ -95,6 +95,7 @@ class HeadwayEventRecorder:
         direction: bool,
         arrival_time_s: float,
         trip_id: int,
+        target_headway_s: float | None = None,
     ) -> None:
         key = (int(station_id), bool(direction))
         time_s = float(arrival_time_s)
@@ -110,6 +111,10 @@ class HeadwayEventRecorder:
             "arrival_time_s": time_s,
             "trip_id": int(trip_id),
             "headway_s": headway_s,
+            "target_headway_s": (
+                None if target_headway_s is None
+                else float(target_headway_s)
+            ),
         })
 
     def summary(self) -> dict[str, float | int]:

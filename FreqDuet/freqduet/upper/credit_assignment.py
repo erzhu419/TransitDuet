@@ -10,6 +10,7 @@ import numpy as np
 
 _SYSTEM_REWARD_MODES = {"repeated", "uniform", "terminal", "none"}
 _GAP_CREDIT_MODES = {"centered", "absolute", "none"}
+_RELIABILITY_REWARD_MODES = {"uniform", "terminal", "none"}
 
 
 @dataclass(frozen=True)
@@ -22,13 +23,17 @@ class UpperCreditAssignment:
     """
 
     system_reward_mode: str = "repeated"
+    system_reward_weight: float = 1.0
     gap_credit_mode: str = "centered"
     gap_credit_weight: float = 0.5
     gap_credit_clip: float = 4.0
+    reliability_reward_mode: str = "none"
+    reliability_reward_weight: float = 0.0
 
     def __post_init__(self) -> None:
         system_mode = str(self.system_reward_mode).lower()
         gap_mode = str(self.gap_credit_mode).lower()
+        reliability_mode = str(self.reliability_reward_mode).lower()
         if system_mode not in _SYSTEM_REWARD_MODES:
             raise ValueError(
                 "upper.credit_assignment.system_reward_mode must be one of "
@@ -37,21 +42,39 @@ class UpperCreditAssignment:
             raise ValueError(
                 "upper.credit_assignment.gap_credit_mode must be one of "
                 f"{sorted(_GAP_CREDIT_MODES)}")
+        if reliability_mode not in _RELIABILITY_REWARD_MODES:
+            raise ValueError(
+                "upper.credit_assignment.reliability_reward_mode must be "
+                f"one of {sorted(_RELIABILITY_REWARD_MODES)}")
+        if (not np.isfinite(self.system_reward_weight)
+                or self.system_reward_weight < 0):
+            raise ValueError(
+                "system_reward_weight must be finite and non-negative")
         if not np.isfinite(self.gap_credit_weight) or self.gap_credit_weight < 0:
             raise ValueError("gap_credit_weight must be finite and non-negative")
         if not np.isfinite(self.gap_credit_clip) or self.gap_credit_clip <= 0:
             raise ValueError("gap_credit_clip must be finite and positive")
+        if (not np.isfinite(self.reliability_reward_weight)
+                or self.reliability_reward_weight < 0):
+            raise ValueError(
+                "reliability_reward_weight must be finite and non-negative")
         object.__setattr__(self, "system_reward_mode", system_mode)
         object.__setattr__(self, "gap_credit_mode", gap_mode)
+        object.__setattr__(self, "reliability_reward_mode", reliability_mode)
 
     @classmethod
     def from_config(cls, config: Mapping | None) -> "UpperCreditAssignment":
         cfg = dict(config or {})
         return cls(
             system_reward_mode=cfg.get("system_reward_mode", "repeated"),
+            system_reward_weight=float(cfg.get("system_reward_weight", 1.0)),
             gap_credit_mode=cfg.get("gap_credit_mode", "centered"),
             gap_credit_weight=float(cfg.get("gap_credit_weight", 0.5)),
             gap_credit_clip=float(cfg.get("gap_credit_clip", 4.0)),
+            reliability_reward_mode=cfg.get(
+                "reliability_reward_mode", "none"),
+            reliability_reward_weight=float(cfg.get(
+                "reliability_reward_weight", 0.0)),
         )
 
     def system_rewards(self, system_reward: float, count: int) -> np.ndarray:
@@ -61,7 +84,7 @@ class UpperCreditAssignment:
             raise ValueError("transition count must be non-negative")
         if count == 0:
             return np.empty(0, dtype=np.float64)
-        reward = float(system_reward)
+        reward = float(system_reward) * self.system_reward_weight
         if not np.isfinite(reward):
             raise ValueError("system reward must be finite")
         if self.system_reward_mode == "repeated":
@@ -71,6 +94,29 @@ class UpperCreditAssignment:
         result = np.zeros(count, dtype=np.float64)
         if self.system_reward_mode == "terminal":
             result[-1] = reward
+        return result
+
+    def reliability_rewards(
+        self, unserved_rate: float, incomplete_rate: float, count: int
+    ) -> np.ndarray:
+        """Assign endpoint service-failure cost without repeating it."""
+        count = int(count)
+        if count < 0:
+            raise ValueError("transition count must be non-negative")
+        if count == 0:
+            return np.empty(0, dtype=np.float64)
+        values = np.asarray(
+            [unserved_rate, incomplete_rate], dtype=np.float64)
+        if not np.all(np.isfinite(values)) or np.any(values < 0.0):
+            raise ValueError(
+                "unserved_rate and incomplete_rate must be finite and "
+                "non-negative")
+        penalty = -self.reliability_reward_weight * float(values.sum())
+        if self.reliability_reward_mode == "uniform":
+            return np.full(count, penalty / count, dtype=np.float64)
+        result = np.zeros(count, dtype=np.float64)
+        if self.reliability_reward_mode == "terminal":
+            result[-1] = penalty
         return result
 
     def gap_credits(

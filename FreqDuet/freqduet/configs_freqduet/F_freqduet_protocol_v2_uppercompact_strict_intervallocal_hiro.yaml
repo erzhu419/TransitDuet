@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_strict_intervallocal_hiro
+
+protocol:
+  role: causal_local_mean_interval_credit
+
+upper:
+  interval_credit:
+    assignment_mode: local_mean
+    local_wait_queue_norm: 100.0
