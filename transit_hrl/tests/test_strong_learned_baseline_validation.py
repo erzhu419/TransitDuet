@@ -71,8 +71,14 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             num_shards=1,
         )
         self.assertEqual(payload["summary"]["rows"], 3)
-        self.assertEqual(payload["summary"]["parameter_budget_status"], "matched")
-        self.assertEqual(payload["summary"]["trainer_budget_status"], "matched")
+        self.assertEqual(
+            payload["summary"]["parameter_budget_status"],
+            "matched_within_5pct",
+        )
+        self.assertEqual(
+            payload["summary"]["trainer_budget_status"],
+            "controlled_by_ppo_family",
+        )
         self.assertTrue(any(
             row["trainer"] == "frequency_separated_smdp_ppo_v2"
             for row in payload["per_seed"]
@@ -81,10 +87,10 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
         self.assertEqual(len(payload["paired_checks"]), 16)
         self.assertTrue(any(row["baseline"] == "flat_ppo" for row in payload["per_seed"]))
         self.assertTrue(any(row["policy_mode"] == "generic_hrl_ppo" for row in payload["parameter_budget"]))
-        self.assertEqual(
-            {row["parameter_count"] for row in payload["parameter_budget"]},
-            {payload["parameter_budget"][0]["parameter_count"]},
-        )
+        parameter_counts = [
+            row["parameter_count"] for row in payload["parameter_budget"]
+        ]
+        self.assertLessEqual(max(parameter_counts) / min(parameter_counts), 1.05)
         by_mode = {row["baseline"]: row for row in payload["per_seed"]}
         self.assertEqual(by_mode["flat_ppo"]["upper_decision_count"], 24)
         self.assertLess(by_mode["generic_hrl_ppo"]["upper_decision_count"], 24)

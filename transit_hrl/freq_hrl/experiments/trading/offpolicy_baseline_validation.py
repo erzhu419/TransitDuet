@@ -30,36 +30,33 @@ from .metrics import (
     summarize_pnl_series,
 )
 from .performance_validation import make_synthetic_market
-from .ppo_actor_critic import bounded_speed, gross_cap, make_tracker, objective, summarize
+from .ppo_actor_critic import (
+    RAW_LOWER_LAGS,
+    bounded_speed,
+    flat_joint_feature_vector,
+    gross_cap,
+    make_tracker,
+    objective,
+    summarize,
+)
 
 
 OFFPOLICY_MODES = ("flat_sac", "flat_td3")
 
 
 def flat_state(
-    raw_signal: np.ndarray,
+    raw_history: np.ndarray,
     position: np.ndarray,
     target: np.ndarray,
     *,
     progress: float,
 ) -> np.ndarray:
-    position_arr = np.asarray(position, dtype=np.float64).reshape(-1)
-    target_arr = np.asarray(target, dtype=np.float64).reshape(-1)
-    raw = np.asarray(raw_signal, dtype=np.float64).reshape(-1) / 0.0014
-    if raw.size != position_arr.size:
-        raw = np.resize(raw, position_arr.size)
-    if target_arr.size != position_arr.size:
-        target_arr = np.resize(target_arr, position_arr.size)
-    return np.concatenate([
-        raw,
-        np.tanh(raw),
-        np.tanh(np.abs(raw)),
-        raw * position_arr,
-        position_arr,
-        target_arr,
-        target_arr - position_arr,
-        np.asarray([float(np.clip(progress, 0.0, 1.0))]),
-    ]).astype(np.float32)
+    return flat_joint_feature_vector(
+        np.asarray(raw_history, dtype=np.float64),
+        np.asarray(position, dtype=np.float64),
+        np.asarray(target, dtype=np.float64),
+        progress=progress,
+    )
 
 
 def decode_flat_action(action: np.ndarray, assets: int) -> tuple[np.ndarray, np.ndarray]:
@@ -114,12 +111,14 @@ def run_offpolicy_episode(
     lower_effects: list[np.ndarray] = []
     updates: list[dict[str, float]] = []
     current_target = np.zeros(assets, dtype=np.float64)
+    raw_history: list[np.ndarray] = []
     env.reset()
     for t in range(int(steps)):
         raw_signal = np.asarray(data["predictor"][t], dtype=np.float64)
+        raw_history.append(raw_signal.copy())
         freq = tracker.update_bar(raw_signal, t=float(t * 60.0))
         state = flat_state(
-            raw_signal,
+            np.asarray(raw_history, dtype=np.float64),
             env.position.copy(),
             current_target,
             progress=t / max(int(steps) - 1, 1),
@@ -136,8 +135,13 @@ def run_offpolicy_episode(
         })
         current_target = np.asarray(info["target"], dtype=np.float64).copy()
         next_index = min(t + 1, int(steps) - 1)
+        next_history = list(raw_history)
+        if next_index > t:
+            next_history.append(
+                np.asarray(data["predictor"][next_index], dtype=np.float64).copy()
+            )
         next_state = flat_state(
-            np.asarray(data["predictor"][next_index], dtype=np.float64),
+            np.asarray(next_history, dtype=np.float64),
             env.position.copy(),
             current_target,
             progress=(t + 1) / max(int(steps) - 1, 1),
@@ -214,7 +218,7 @@ def run_offpolicy_episode(
         "RawLowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
         "FocusScore": float(diag["FocusScore"]),
         "protocol_valid": 1.0,
-        "routing_contract": "raw_history",
+        "routing_contract": "causal_raw_lag_history",
         "temporal_contract": "single_level_flat_joint_action",
         "replay_size": int(replay.size) if replay is not None else 0,
         "gradient_updates": int(len(updates)),
@@ -301,7 +305,7 @@ def train_flat_offpolicy_baseline(
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
     replay_rng = np.random.default_rng(int(seed) + 104729)
-    state_dim = 7 * int(assets) + 1
+    state_dim = 8 * int(assets) + 1
     action_dim = 2 * int(assets)
     config = OffPolicyConfig(
         state_dim=state_dim,
@@ -479,9 +483,10 @@ def train_flat_offpolicy_baseline(
             + temperature_optimizer_steps
         ),
         "observation_contract": (
-            "raw signal, tanh/absolute transforms, raw-position interaction, "
-            "position, target, gap, and progress"
+            "direct causal raw observations at lags 0, 1, 8, 32, and 119; "
+            "position, previous target, gap, and progress"
         ),
+        "raw_history_lags": list(RAW_LOWER_LAGS),
         "action_contract": "joint target weights and execution speeds every primitive step",
         "metric_contract_version": METRIC_CONTRACT_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,

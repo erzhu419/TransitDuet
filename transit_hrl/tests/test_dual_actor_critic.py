@@ -146,7 +146,12 @@ class DualActorCriticTest(unittest.TestCase):
                     policy_mode=mode,
                 )
                 self.assertEqual(payload["policy_mode"], mode)
-                self.assertEqual(payload["trainer"], "frequency_separated_smdp_ppo_v2")
+                expected_trainer = (
+                    "canonical_joint_flat_ppo_v1"
+                    if mode == "flat_ppo"
+                    else "frequency_separated_smdp_ppo_v2"
+                )
+                self.assertEqual(payload["trainer"], expected_trainer)
                 self.assertFalse(payload["frequency_routing_enabled"])
                 self.assertEqual(rows[0]["baseline"], mode)
                 if mode == "flat_ppo":

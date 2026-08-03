@@ -139,18 +139,17 @@ are ineligible for baseline headline claims and must be rerun.
 
 ## Capacity-matched learned baselines
 
-The PPO-family comparison no longer mixes the v2 SMDP trainer with the legacy
-joint-timestep PPO. `freq_hrl`, `generic_hrl_ppo`, and `flat_ppo` use identical
-model dimensions, actor/critic parameter counts, optimizer settings, epoch and
-minibatch budgets, train/evaluation seeds, and financial metric contracts.
-Freq-HRL alone receives frequency-responsibility observations and promotion.
-Generic HRL uses raw-signal transforms at both levels with the same macro
-clock. The flat baseline removes temporal abstraction by replanning both
-factorized action heads at every primitive step and gives both heads the task
-reward. It is therefore reported precisely as a capacity-matched factorized
-joint-action flat PPO baseline, not as a single-actor implementation. The
-default comparison disables the handcrafted Freq-HRL actor prior; prior-enabled
-results belong in a separate ablation.
+The PPO-family comparison uses two explicit algorithm contracts. `freq_hrl` and
+`generic_hrl_ppo` use the asynchronous SMDP trainer with identical dimensions,
+while `flat_ppo` is a canonical primitive-rate PPO with one joint
+target/execution action, one joint probability ratio, and one value critic. Its
+hidden width is chosen to keep its active parameter count within 5% of the
+hierarchical core; inactive padding parameters are forbidden. Epoch,
+environment-step, HPO-search, train/validation/test seed, and metric budgets are
+matched. Freq-HRL alone receives frequency-responsibility observations and
+promotion. Generic HRL and flat PPO receive direct causal raw lags over the same
+119-bar history span. The default comparison disables the handcrafted Freq-HRL
+actor prior; prior-enabled results belong in a separate ablation.
 
 ## Complete off-policy learned baselines
 
@@ -162,14 +161,14 @@ held-out evaluation. SAC includes a squashed Gaussian actor and learned entropy
 temperature; TD3 includes target-policy smoothing and delayed actor updates.
 
 All five policies use the same market paths, transaction costs, held-out seeds,
-primitive environment-step budget, and `trading_metrics_v2`. The raw baselines
-receive the same underlying raw signal transforms, position, active target,
-target gap, and episode progress. Flat PPO, SAC, and TD3 also share the same
-bounded target and execution-speed action semantics. Exact parameter equality
-is claimed only for the PPO family because standard SAC/TD3 necessarily use
-twin critics and different actor parameterizations. Their trainable parameter
-counts and actor, critic, temperature, and total optimizer-step counts are
-reported explicitly.
+primitive environment-step budget, and `trading_metrics_v2`. Generic HRL, flat
+PPO, SAC, and TD3 receive the same direct raw observations at lags 0, 1, 8, 32,
+and 119, plus position, active or previous target, target gap, and episode
+progress. Flat PPO, SAC, and TD3 also share the same bounded target and
+execution-speed action semantics. Near-equal active capacity is claimed only
+inside the PPO family because standard SAC/TD3 necessarily use twin critics and
+different actor parameterizations. All trainable parameter counts and actor,
+critic, temperature, and total optimizer-step counts are reported explicitly.
 
 ## Confirmatory strong-baseline gate
 
@@ -270,6 +269,18 @@ all environment returns, costs, drawdowns, and reported endpoints remain in
 their original units. PPO actor/value networks use zero-bias orthogonal
 initialization with small output gains so initial critic values do not dominate
 the approximately milliscale financial rewards.
+
+The learned-baseline contract was also rebuilt after a representation audit.
+The old `flat_ppo` path used two independently updated SMDP actors and therefore
+was not a canonical flat PPO. It has been replaced by one primitive-rate policy
+over a joint target/execution action, one joint Gaussian probability ratio, one
+task-return GAE, and one state-value critic. Its hidden width is selected
+analytically to match the active Freq-HRL parameter count within 5%; no unused
+padding parameters are counted. Both this policy and generic HRL receive direct
+causal raw observations at lags 0, 1, 8, 32, and 119, so their observable
+history span matches the 120-bar frequency tracker. This closes the previous
+information asymmetry in which Freq-HRL had stateful history while learned raw
+baselines effectively saw only the current predictor.
 
 The full stress matrix contains stationary low-noise, stationary high-noise,
 localized burst, persistent shift, and OOD-period regimes. With five learned

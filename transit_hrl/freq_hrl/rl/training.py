@@ -8,6 +8,11 @@ from typing import Any, Callable, Iterable
 import numpy as np
 
 from .dual_actor_critic import DualActorCriticPPO, TrajectoryBatch
+from .joint_actor_critic import (
+    JointActorCriticPPO,
+    JointTrajectoryBatch,
+    concat_joint_batches,
+)
 from .smdp_actor_critic import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalTrajectoryBatch,
@@ -22,6 +27,10 @@ SMDPRolloutFn = Callable[
     tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]],
 ]
 TrainingSeedFn = Callable[[int, int], int]
+JointRolloutFn = Callable[
+    [JointActorCriticPPO, int, bool],
+    tuple[JointTrajectoryBatch | None, dict[str, Any]],
+]
 
 
 def _iteration_rollout_seeds(
@@ -202,6 +211,117 @@ def train_dual_ppo(
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
+        **metadata,
+    }
+    return payload, heldout_rows, model
+
+
+def train_joint_ppo(
+    model: JointActorCriticPPO,
+    train_seeds: list[int],
+    eval_seeds: list[int],
+    iterations: int,
+    rollout_fn: JointRolloutFn,
+    objective_fn: ObjectiveFn,
+    summary_fn: SummaryFn = summarize_numeric_rows,
+    *,
+    selection_seeds: list[int] | None = None,
+    training_seed_fn: TrainingSeedFn | None = None,
+    policy: str = "flat_ppo",
+    domain: str = "generic",
+    metadata: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]], JointActorCriticPPO]:
+    """Train a standard flat PPO with one joint action and one task return."""
+
+    metadata = dict(metadata or {})
+    selection_seed_list = list(selection_seeds or train_seeds)
+    best_state = copy.deepcopy(model.state_dict())
+    initial_rows = [
+        rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+    ]
+    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
+    initial_validation_score = float(best_score)
+    selected_checkpoint_iteration = -1
+    history: list[dict[str, Any]] = [{
+        "iteration": -1,
+        "score": best_score,
+        "sampled_objective": 0.0,
+        **summary_fn(initial_rows),
+        "loss": 0.0,
+        "policy_loss": 0.0,
+        "value_loss": 0.0,
+        "entropy": 0.0,
+        "approx_kl": 0.0,
+        "clip_fraction": 0.0,
+        "actor_optimizer_steps": 0.0,
+        "value_optimizer_steps": 0.0,
+    }]
+
+    for iteration in range(max(1, int(iterations))):
+        batches: list[JointTrajectoryBatch] = []
+        sampled_rows: list[dict[str, Any]] = []
+        rollout_seeds = _iteration_rollout_seeds(
+            train_seeds, iteration, training_seed_fn
+        )
+        for seed in rollout_seeds:
+            batch, row = rollout_fn(model, int(seed), True)
+            if batch is not None:
+                batches.append(batch)
+            sampled_rows.append(row)
+        if not batches:
+            raise RuntimeError("sampled rollouts did not produce a joint trajectory")
+        metrics = model.update(concat_joint_batches(batches))
+        eval_rows = [
+            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+        ]
+        score = float(np.mean([objective_fn(row) for row in eval_rows]))
+        if score > best_score:
+            best_score = score
+            best_state = copy.deepcopy(model.state_dict())
+            selected_checkpoint_iteration = int(iteration)
+        history.append({
+            "iteration": int(iteration),
+            "training_rollout_seeds": rollout_seeds,
+            "score": score,
+            **_sampled_summary(sampled_rows, objective_fn),
+            **summary_fn(eval_rows),
+            **metrics,
+        })
+
+    model.load_state_dict(best_state)
+    heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
+    actor_optimizer_steps = int(sum(
+        float(row.get("actor_optimizer_steps", 0.0)) for row in history
+    ))
+    critic_optimizer_steps = int(sum(
+        float(row.get("value_optimizer_steps", 0.0)) for row in history
+    ))
+    payload = {
+        "policy": policy,
+        "trainer": "canonical_joint_flat_ppo_v1",
+        "domain": domain,
+        "train_seeds": list(train_seeds),
+        "rollout_seed_roots": list(train_seeds),
+        "selection_seeds": selection_seed_list,
+        "eval_seeds": list(eval_seeds),
+        "iterations": int(iterations),
+        "best_score": float(best_score),
+        "initial_validation_score": initial_validation_score,
+        "validation_learning_gain": float(best_score - initial_validation_score),
+        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
+        "config": model.config.__dict__,
+        "history": history,
+        "summary": summary_fn(heldout_rows),
+        "actor_optimizer_steps_train": actor_optimizer_steps,
+        "critic_optimizer_steps_train": critic_optimizer_steps,
+        "temperature_optimizer_steps_train": 0,
+        "gradient_updates_train": actor_optimizer_steps + critic_optimizer_steps,
+        "trajectory_contract": {
+            "decision_rate": "one joint action per primitive environment step",
+            "policy_ratio": "one joint diagonal-Gaussian PPO ratio",
+            "credit": "one task-return GAE shared by all action coordinates",
+            "critic": "one state-value function",
+        },
         **metadata,
     }
     return payload, heldout_rows, model

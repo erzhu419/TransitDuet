@@ -133,8 +133,10 @@ def _parameter_budget_row(
     parameter_count: int,
     shard_index: int,
     num_shards: int,
+    training_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     config = model.config
+    training_payload = dict(training_payload or {})
     common = {
         "scenario": scenario,
         "policy_mode": mode,
@@ -145,9 +147,30 @@ def _parameter_budget_row(
         "shard_index": int(shard_index),
         "num_shards": int(num_shards),
     }
+    if mode == "flat_ppo":
+        return {
+            **common,
+            "requested_hidden_dim": int(
+                training_payload.get("requested_hidden_dim", config.hidden_dim)
+            ),
+            "algorithm_family": "on_policy_joint_flat_ppo",
+            "state_dim": int(config.state_dim),
+            "action_dim": int(config.action_dim),
+            "upper_state_dim": "",
+            "lower_state_dim": "",
+            "upper_action_dim": "",
+            "lower_action_dim": "",
+            "capacity_ratio": float(training_payload.get("capacity_ratio", 1.0)),
+            "matched_budget_group": "trading_capacity_matched_ppo_v3",
+            "capacity_contract": (
+                "active parameter count within 5% and equal HPO search budget; "
+                "canonical single-value joint-action PPO"
+            ),
+        }
     if mode in POLICY_MODES:
         return {
             **common,
+            "requested_hidden_dim": int(config.hidden_dim),
             "algorithm_family": "on_policy_smdp_ppo",
             "state_dim": "",
             "action_dim": "",
@@ -155,10 +178,11 @@ def _parameter_budget_row(
             "lower_state_dim": int(config.lower_state_dim),
             "upper_action_dim": int(config.upper_action_dim),
             "lower_action_dim": int(config.lower_action_dim),
-            "matched_budget_group": "trading_capacity_matched_smdp_ppo_v2",
+            "capacity_ratio": 1.0,
+            "matched_budget_group": "trading_capacity_matched_ppo_v3",
             "capacity_contract": (
-                "exact trainable-parameter match and equal HPO search budget "
-                "within PPO family"
+                "exact dimensions within hierarchical policies; active parameter "
+                "count within 5% and equal HPO search budget versus joint flat PPO"
             ),
         }
     return {
@@ -588,7 +612,7 @@ def _budget_statuses(
     rows: list[dict[str, Any]],
     parameter_budget: list[dict[str, Any]],
     sample_efficiency: list[dict[str, Any]],
-) -> dict[str, str]:
+) -> dict[str, Any]:
     modes = {
         str(row.get("policy_mode", row.get("baseline", "")))
         for row in rows
@@ -605,12 +629,20 @@ def _budget_statuses(
         ppo_counts_by_scenario.setdefault(str(row.get("scenario", "")), set()).add(
             int(float(value))
         )
+    ppo_capacity_ratios = [
+        max(values) / max(min(values), 1)
+        for values in ppo_counts_by_scenario.values()
+        if values
+    ]
+    max_ppo_capacity_ratio = max(ppo_capacity_ratios, default=1.0)
     if not ppo_modes:
         ppo_parameter_status = "not_run"
     elif ppo_counts_by_scenario and all(
         len(values) == 1 for values in ppo_counts_by_scenario.values()
     ):
-        ppo_parameter_status = "matched"
+        ppo_parameter_status = "matched_exact"
+    elif ppo_counts_by_scenario and max_ppo_capacity_ratio <= 1.05:
+        ppo_parameter_status = "matched_within_5pct"
     else:
         ppo_parameter_status = "mismatch"
 
@@ -620,10 +652,18 @@ def _budget_statuses(
         if str(row.get("policy_mode", row.get("baseline", ""))) in POLICY_MODES
         and str(row.get("trainer", "")).strip()
     }
-    ppo_trainer_status = (
-        "not_run" if not ppo_modes
-        else ("matched" if len(ppo_trainers) == 1 else "mismatch")
-    )
+    valid_ppo_trainers = {
+        "canonical_joint_flat_ppo_v1",
+        "frequency_separated_smdp_ppo_v2",
+    }
+    if not ppo_modes:
+        ppo_trainer_status = "not_run"
+    elif len(ppo_trainers) == 1:
+        ppo_trainer_status = "matched_exact"
+    elif ppo_trainers and ppo_trainers <= valid_ppo_trainers:
+        ppo_trainer_status = "controlled_by_ppo_family"
+    else:
+        ppo_trainer_status = "mismatch"
 
     train_steps_by_scenario: dict[str, set[int]] = {}
     for row in sample_efficiency:
@@ -648,16 +688,21 @@ def _budget_statuses(
     mixed_algorithms = bool(ppo_modes and offpolicy_modes)
     parameter_status = (
         "controlled_by_algorithm_family"
-        if mixed_algorithms and ppo_parameter_status == "matched"
+        if mixed_algorithms and ppo_parameter_status in {
+            "matched_exact", "matched_within_5pct"
+        }
         else ppo_parameter_status
     )
     trainer_status = (
         "controlled_by_algorithm_family"
-        if mixed_algorithms and ppo_trainer_status == "matched"
+        if mixed_algorithms and ppo_trainer_status in {
+            "matched_exact", "controlled_by_ppo_family"
+        }
         else ppo_trainer_status
     )
     return {
         "ppo_parameter_budget_status": ppo_parameter_status,
+        "ppo_max_parameter_ratio": float(max_ppo_capacity_ratio),
         "ppo_trainer_budget_status": ppo_trainer_status,
         "environment_step_budget_status": environment_step_status,
         "sac_td3_status": offpolicy_status,
@@ -886,6 +931,7 @@ def run_strong_learned_baseline_validation(
             parameter_count=params,
             shard_index=int(shard_index),
             num_shards=int(num_shards),
+            training_payload=payload,
         ))
         train_steps = int(payload.get(
             "environment_steps_train",
@@ -968,8 +1014,12 @@ def run_strong_learned_baseline_validation(
     ppo_baseline_status = (
         metric_status
         if set(POLICY_MODES) <= ppo_modes_run
-        and budgets["ppo_parameter_budget_status"] == "matched"
-        and budgets["ppo_trainer_budget_status"] == "matched"
+        and budgets["ppo_parameter_budget_status"] in {
+            "matched_exact", "matched_within_5pct"
+        }
+        and budgets["ppo_trainer_budget_status"] in {
+            "matched_exact", "controlled_by_ppo_family"
+        }
         else "partial_run_or_budget_mismatch"
     )
     if learning_dynamics["learning_dynamics_status"] != "supported":
@@ -1049,16 +1099,16 @@ def run_strong_learned_baseline_validation(
         },
         "_checkpoint_payloads": checkpoint_payloads,
         "boundary": (
-            "PPO-family baselines use identical SMDP model dimensions, "
-            "initialization seeds, environment-step budgets, and equal-size HPO "
-            "search spaces; selected optimizer settings are reported per policy. "
-            "Factorized flat PPO removes temporal abstraction and frequency "
-            "routing; generic HRL retains temporal abstraction but uses raw "
-            "features. Flat SAC/TD3 use raw observations and a single joint "
+            "PPO-family baselines match active capacity within 5%, initialization "
+            "seeds, environment-step budgets, and equal-size HPO search spaces; "
+            "selected optimizer settings are reported per policy. Canonical flat "
+            "PPO uses one primitive-rate joint action and one critic; generic HRL "
+            "retains temporal abstraction. All raw baselines receive the same "
+            "causal lag span. Flat SAC/TD3 use a single joint "
             "target/execution action. Cross-algorithm fairness is enforced by "
             "paired held-out seeds, equal environment-step budgets, the same "
-            "environment/costs, and trading_metrics_v2; parameter equality is "
-            "claimed only inside the PPO family. Statistical uncertainty is "
+            "environment/costs, and trading_metrics_v2; near-equal active capacity "
+            "is claimed only inside the PPO family. Statistical uncertainty is "
             "clustered by independently initialized training replicate; held-out "
             "environment seeds are repeated measures inside that cluster."
         ),
@@ -1117,8 +1167,12 @@ def merge_strong_learned_baseline_shards(
     ppo_baseline_status = (
         metric_status
         if set(POLICY_MODES) <= ppo_modes_run
-        and budgets["ppo_parameter_budget_status"] == "matched"
-        and budgets["ppo_trainer_budget_status"] == "matched"
+        and budgets["ppo_parameter_budget_status"] in {
+            "matched_exact", "matched_within_5pct"
+        }
+        and budgets["ppo_trainer_budget_status"] in {
+            "matched_exact", "controlled_by_ppo_family"
+        }
         else "partial_run_or_budget_mismatch"
     )
     eval_seeds = {

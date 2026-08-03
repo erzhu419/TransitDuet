@@ -6,6 +6,12 @@ from .dual_actor_critic import (
     TrajectoryBatch,
 )
 from .plan_actions import LearnedPlanActionMapper, PlanActionResult
+from .joint_actor_critic import (
+    JointActorCriticPPO,
+    JointPPOConfig,
+    JointTrajectoryBatch,
+    concat_joint_batches,
+)
 from .smdp_actor_critic import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
@@ -23,6 +29,7 @@ from .training import (
     summarize_numeric_rows,
     train_dual_ppo,
     train_frequency_separated_ppo,
+    train_joint_ppo,
 )
 from .offpolicy_actor_critic import (
     FlatOffPolicyActorCritic,
@@ -37,6 +44,9 @@ __all__ = [
     "HierarchicalRolloutBuilder",
     "HierarchicalTrajectoryBatch",
     "LearnedPlanActionMapper",
+    "JointActorCriticPPO",
+    "JointPPOConfig",
+    "JointTrajectoryBatch",
     "LevelTrajectoryBatch",
     "PlanActionResult",
     "SMDPPPOConfig",
@@ -46,10 +56,12 @@ __all__ = [
     "apply_smdp_updates",
     "concat_batches",
     "concat_hierarchical_batches",
+    "concat_joint_batches",
     "concat_level_batches",
     "summarize_numeric_rows",
     "train_dual_ppo",
     "train_frequency_separated_ppo",
+    "train_joint_ppo",
     "FlatOffPolicyActorCritic",
     "OffPolicyConfig",
     "ReplayBuffer",

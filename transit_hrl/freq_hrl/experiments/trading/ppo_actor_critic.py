@@ -27,18 +27,18 @@ from freq_hrl.experiments.reproducibility import (
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import (
-    DualActorCriticPPO,
-    DualPPOConfig,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
+    JointActorCriticPPO,
+    JointPPOConfig,
+    JointTrajectoryBatch,
     LearnedPlanActionMapper,
     SMDPPPOConfig,
     TemporalDecisionScheduler,
-    TrajectoryBatch,
     summarize_numeric_rows,
-    train_dual_ppo,
     train_frequency_separated_ppo,
+    train_joint_ppo,
 )
 
 from .metrics import (
@@ -56,6 +56,9 @@ POLICY_MODES = (
     "flat_ppo",
     "generic_hrl_ppo",
 )
+
+RAW_UPPER_LAGS = (0, 8, 32, 119)
+RAW_LOWER_LAGS = (0, 1, 8, 32, 119)
 
 
 def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
@@ -93,78 +96,6 @@ def make_tracker(assets: int) -> TradingFrequencyTracker:
         promotion_adapt_low=True,
         promotion_adapt_gain=0.05,
     )
-
-
-def feature_vectors(
-    freq: dict[str, Any],
-    position: np.ndarray,
-    target: np.ndarray | None = None,
-    policy_mode: str = "freq_hrl",
-) -> tuple[np.ndarray, np.ndarray]:
-    dim = int(position.size)
-    scale = 0.0014
-    x_low = resize(freq.get("x_low", np.zeros(dim)), dim) / scale
-    x_mid = resize(freq.get("x_mid", np.zeros(dim)), dim) / scale
-    x_high = resize(freq.get("x_high", np.zeros(dim)), dim) / scale
-    raw = x_low + x_mid + x_high
-    promotion = dict(freq.get("promotion", {}) or {})
-    strength = float(promotion.get("promotion_strength", 0.0)) if promotion.get("promote", False) else 0.0
-    if target is None:
-        target = np.zeros(dim, dtype=np.float64)
-    gap = np.asarray(target, dtype=np.float64) - np.asarray(position, dtype=np.float64)
-    energy = np.sqrt(np.maximum(resize(freq.get("x_high_energy", np.zeros(dim)), dim), 0.0)) / scale
-    mode = str(policy_mode or "freq_hrl")
-    if mode == "freq_hrl":
-        upper_state = np.concatenate([
-            x_low,
-            x_mid,
-            x_high,
-            strength * x_mid,
-            np.asarray(position, dtype=np.float64),
-            np.ones(1, dtype=np.float64),
-        ])
-        align = np.tanh(np.sign(gap) * x_high)
-        lower_state = np.concatenate([
-            gap,
-            align,
-            np.tanh(energy),
-            np.ones(1, dtype=np.float64),
-        ])
-    elif mode == "flat_ppo":
-        upper_state = np.concatenate([
-            raw,
-            x_low,
-            x_mid,
-            x_high,
-            np.asarray(position, dtype=np.float64),
-            np.ones(1, dtype=np.float64),
-        ])
-        lower_state = np.concatenate([
-            gap,
-            np.zeros(dim, dtype=np.float64),
-            np.zeros(dim, dtype=np.float64),
-            np.ones(1, dtype=np.float64),
-        ])
-    elif mode == "generic_hrl_ppo":
-        raw_tanh = np.tanh(raw)
-        raw_abs = np.tanh(np.abs(raw))
-        upper_state = np.concatenate([
-            raw,
-            raw_tanh,
-            raw_abs,
-            np.asarray(position, dtype=np.float64),
-            raw * np.asarray(position, dtype=np.float64),
-            np.ones(1, dtype=np.float64),
-        ])
-        lower_state = np.concatenate([
-            gap,
-            raw,
-            np.asarray(position, dtype=np.float64),
-            np.ones(1, dtype=np.float64),
-        ])
-    else:
-        raise ValueError(f"unknown policy_mode: {policy_mode}")
-    return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
 def frequency_separated_feature_vectors(
@@ -233,8 +164,31 @@ def frequency_separated_feature_vectors(
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
+def causal_raw_lag_stack(
+    raw_history: np.ndarray,
+    *,
+    assets: int,
+    lags: tuple[int, ...],
+) -> np.ndarray:
+    """Return direct causal observations at fixed lags without filtering."""
+
+    history = np.asarray(raw_history, dtype=np.float64)
+    if history.ndim == 1:
+        history = history.reshape(1, -1)
+    if history.ndim != 2 or history.shape[1] != int(assets):
+        raise ValueError(
+            f"raw_history must have shape (time, {assets}), got {history.shape}"
+        )
+    if history.shape[0] == 0:
+        raise ValueError("raw_history must contain at least one causal observation")
+    return np.concatenate([
+        history[max(0, history.shape[0] - 1 - int(lag))]
+        for lag in lags
+    ])
+
+
 def raw_hierarchical_feature_vectors(
-    raw_signal: np.ndarray,
+    raw_history: np.ndarray,
     position: np.ndarray,
     target: np.ndarray | None = None,
     *,
@@ -244,36 +198,39 @@ def raw_hierarchical_feature_vectors(
 
     position_arr = np.asarray(position, dtype=np.float64).reshape(-1)
     dim = int(position_arr.size)
-    raw = resize(raw_signal, dim) / 0.0014
+    upper_raw = causal_raw_lag_stack(
+        raw_history, assets=dim, lags=RAW_UPPER_LAGS
+    ) / 0.0014
+    lower_raw = causal_raw_lag_stack(
+        raw_history, assets=dim, lags=RAW_LOWER_LAGS
+    ) / 0.0014
     current_target = (
         np.zeros(dim, dtype=np.float64)
         if target is None else resize(target, dim)
     )
     gap = current_target - position_arr
+    history_coverage = min(
+        float(np.asarray(raw_history).reshape(-1, dim).shape[0])
+        / float(max(RAW_UPPER_LAGS) + 1),
+        1.0,
+    )
     upper_state = np.concatenate([
-        raw,
-        np.tanh(raw),
-        np.tanh(np.abs(raw)),
-        raw * position_arr,
+        upper_raw,
         position_arr,
         current_target,
         np.asarray([
             0.0,
             0.0,
             0.0,
-            0.0,
+            history_coverage,
             float(np.clip(progress, 0.0, 1.0)),
         ], dtype=np.float64),
     ])
     lower_state = np.concatenate([
+        lower_raw,
         current_target,
         position_arr,
         gap,
-        raw,
-        np.tanh(raw),
-        np.tanh(np.abs(raw)),
-        raw * gap,
-        raw * position_arr,
         np.asarray([float(np.clip(progress, 0.0, 1.0))], dtype=np.float64),
     ])
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
@@ -283,7 +240,7 @@ def smdp_policy_feature_vectors(
     *,
     policy_mode: str,
     freq: dict[str, Any],
-    raw_signal: np.ndarray,
+    raw_history: np.ndarray,
     position: np.ndarray,
     target: np.ndarray | None,
     leakage_feedback: float,
@@ -298,37 +255,99 @@ def smdp_policy_feature_vectors(
             progress=progress,
         )
     return raw_hierarchical_feature_vectors(
-        raw_signal,
+        raw_history,
         position,
         target=target,
         progress=progress,
     )
 
 
-def initialize_frequency_prior(model: DualActorCriticPPO, assets: int, plan_basis_dim: int = 0) -> None:
-    """Initialize the linear actors near the existing frequency-routing prior."""
-    if model.config.hidden_dim != 0:
-        return
-    with torch.no_grad():
-        upper_linear = model.upper_actor.net[0]
-        lower_linear = model.lower_actor.net[0]
-        upper_linear.weight.zero_()
-        upper_linear.bias.zero_()
-        lower_linear.weight.zero_()
-        lower_linear.bias.zero_()
-        for i in range(assets):
-            upper_rows = [i] if int(plan_basis_dim) <= 0 else [
-                i * int(plan_basis_dim) + k for k in range(int(plan_basis_dim))
-            ]
-            for k, row in enumerate(upper_rows):
-                ramp = float(k + 1) / max(float(len(upper_rows)), 1.0)
-                upper_linear.weight[row, i] = 0.75 * ramp
-                upper_linear.weight[row, assets + i] = 0.18 * ramp
-                upper_linear.weight[row, 3 * assets + i] = 0.32 * ramp
-                upper_linear.weight[row, 4 * assets + i] = -0.10 * ramp
-            lower_linear.weight[i, assets + i] = 0.20
-            lower_linear.weight[i, 2 * assets + i] = 0.02
-            lower_linear.bias[i] = 0.20
+def flat_joint_feature_vector(
+    raw_history: np.ndarray,
+    position: np.ndarray,
+    previous_target: np.ndarray | None,
+    *,
+    progress: float,
+) -> np.ndarray:
+    """Observation for standard flat PPO with the same causal history span."""
+
+    _, lower = raw_hierarchical_feature_vectors(
+        raw_history,
+        position,
+        target=previous_target,
+        progress=progress,
+    )
+    return lower
+
+
+def _actor_parameter_count(state_dim: int, action_dim: int, hidden_dim: int) -> int:
+    hidden = int(hidden_dim)
+    if hidden <= 0:
+        return int(state_dim * action_dim + 2 * action_dim)
+    return int(
+        hidden * hidden
+        + hidden * (int(state_dim) + int(action_dim) + 2)
+        + 2 * int(action_dim)
+    )
+
+
+def _value_parameter_count(state_dim: int, hidden_dim: int) -> int:
+    hidden = int(hidden_dim)
+    if hidden <= 0:
+        return int(state_dim + 1)
+    return int(hidden * hidden + hidden * (int(state_dim) + 3) + 1)
+
+
+def smdp_parameter_count(config: SMDPPPOConfig) -> int:
+    """Analytic active-parameter count for the two-level PPO core."""
+
+    return int(
+        _actor_parameter_count(
+            config.upper_state_dim, config.upper_action_dim, config.hidden_dim
+        )
+        + _actor_parameter_count(
+            config.lower_state_dim, config.lower_action_dim, config.hidden_dim
+        )
+        + _value_parameter_count(config.upper_state_dim, config.hidden_dim)
+        + 2 * _value_parameter_count(config.lower_state_dim, config.hidden_dim)
+    )
+
+
+def joint_parameter_count(config: JointPPOConfig) -> int:
+    """Analytic active-parameter count for canonical flat PPO."""
+
+    return int(
+        _actor_parameter_count(config.state_dim, config.action_dim, config.hidden_dim)
+        + _value_parameter_count(config.state_dim, config.hidden_dim)
+    )
+
+
+def capacity_matched_joint_hidden_dim(
+    *,
+    target_parameter_count: int,
+    state_dim: int,
+    action_dim: int,
+    requested_hidden_dim: int,
+) -> tuple[int, int, float]:
+    """Choose the closest active flat-PPO capacity without dummy parameters."""
+
+    requested = int(requested_hidden_dim)
+    if requested <= 0:
+        config = JointPPOConfig(
+            state_dim=int(state_dim), action_dim=int(action_dim), hidden_dim=0
+        )
+        count = joint_parameter_count(config)
+        return 0, count, float(count / max(int(target_parameter_count), 1))
+    upper = max(32, 4 * requested)
+    candidates = []
+    for hidden in range(1, upper + 1):
+        config = JointPPOConfig(
+            state_dim=int(state_dim), action_dim=int(action_dim), hidden_dim=hidden
+        )
+        count = joint_parameter_count(config)
+        candidates.append((abs(count - int(target_parameter_count)), hidden, count))
+    _, hidden, count = min(candidates)
+    return hidden, count, float(count / max(int(target_parameter_count), 1))
 
 
 def initialize_smdp_frequency_prior(
@@ -404,22 +423,20 @@ def flat_latent_speed(latent: np.ndarray) -> np.ndarray:
     return bounded_speed(np.tanh(np.asarray(latent, dtype=np.float64)))
 
 
-def rollout(
-    model: DualActorCriticPPO,
+def joint_flat_rollout(
+    model: JointActorCriticPPO,
     seed: int,
     steps: int,
     assets: int,
     scenario: str,
     sample: bool,
     leakage_scale: float = 0.0,
-    plan_mapper: LearnedPlanActionMapper | None = None,
     lower_lf_effect_filter_window: int = 0,
     lower_lf_effect_filter_gain: float = 1.0,
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_scale: float = 0.10,
-    policy_mode: str = "freq_hrl",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
-) -> tuple[TrajectoryBatch | None, dict[str, float]]:
+) -> tuple[JointTrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
         data["returns"],
@@ -446,15 +463,10 @@ def rollout(
         if int(lower_lf_effect_filter_window) > 0 else None
     )
     diagnostics = FrequencyDiagnostics(mi_bins=8)
-    upper_states: list[np.ndarray] = []
-    lower_states: list[np.ndarray] = []
-    upper_actions: list[np.ndarray] = []
-    lower_actions: list[np.ndarray] = []
-    old_upper_logp: list[float] = []
-    old_lower_logp: list[float] = []
-    old_upper_value: list[float] = []
-    old_lower_value: list[float] = []
-    constraints: list[float] = []
+    states: list[np.ndarray] = []
+    actions: list[np.ndarray] = []
+    old_logp: list[float] = []
+    old_value: list[float] = []
     rewards: list[float] = []
     dones: list[float] = []
     pnl_returns: list[float] = []
@@ -464,39 +476,31 @@ def rollout(
     lower_effects: list[np.ndarray] = []
     raw_lower_effects: list[np.ndarray] = []
     raw_recenter_boosts: list[np.ndarray] = []
-    plan_smoothness: list[float] = []
-    plan_coeff_abs: list[float] = []
+    task_credits: list[float] = []
     promotions = 0
+    raw_history: list[np.ndarray] = []
+    previous_target = np.zeros(assets, dtype=np.float64)
     env.reset()
     for t in range(steps):
+        raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
         if bool(dict(freq.get("promotion", {}) or {}).get("promote", False)):
             promotions += 1
-        upper_state, lower_state_probe = feature_vectors(
-            dict(freq),
+        state = flat_joint_feature_vector(
+            np.asarray(raw_history, dtype=np.float64),
             env.position.copy(),
-            policy_mode=policy_mode,
+            previous_target,
+            progress=t / max(int(steps) - 1, 1),
         )
-        upper_out = model.act_upper(upper_state, sample=sample)
-        if plan_mapper is None:
-            target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
-        else:
-            plan = plan_mapper.target(env.position.copy(), np.asarray(upper_out["action"], dtype=np.float64))
-            target = gross_cap(plan.target)
-            plan_smoothness.append(float(plan.smoothness_penalty))
-            plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
-        _, lower_state = feature_vectors(
-            dict(freq),
-            env.position.copy(),
-            target=target,
-            policy_mode=policy_mode,
-        )
-        lower_out = model.act_lower(lower_state, sample=sample)
-        speed = (
-            flat_latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
-            if policy_mode == "flat_ppo"
-            else latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
-        )
+        policy_out = model.act(state, sample=sample)
+        latent = np.asarray(policy_out["action"], dtype=np.float64)
+        if latent.size != 2 * int(assets):
+            raise RuntimeError(
+                f"flat PPO action must have {2 * int(assets)} coordinates, "
+                f"got {latent.size}"
+            )
+        target = latent_target(latent[:assets])
+        speed = flat_latent_speed(latent[assets:])
         pre_gap = np.asarray(target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -532,16 +536,12 @@ def rollout(
         )
         leak_info = leakage.update(upper_effect=target, lower_effect=lower_effect, reward=float(reward))
         step_reward = float(leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward)
-        upper_states.append(upper_state)
-        lower_states.append(lower_state)
-        upper_actions.append(np.asarray(upper_out["action"], dtype=np.float32))
-        lower_actions.append(np.asarray(lower_out["action"], dtype=np.float32))
-        old_upper_logp.append(float(upper_out["logp"]))
-        old_lower_logp.append(float(lower_out["logp"]))
-        old_upper_value.append(float(upper_out["value"]))
-        old_lower_value.append(float(lower_out["value"]))
-        constraints.append(float(leak_info.get("lower_lf_penalty", 0.0)))
+        states.append(state)
+        actions.append(latent.astype(np.float32))
+        old_logp.append(float(policy_out["logp"]))
+        old_value.append(float(policy_out["value"]))
         rewards.append(float(reward_scale) * step_reward)
+        task_credits.append(step_reward)
         dones.append(float(done))
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
@@ -550,6 +550,7 @@ def rollout(
         lower_effects.append(lower_effect.copy())
         raw_lower_effects.append(raw_lower_effect.copy())
         raw_recenter_boosts.append(np.asarray(raw_recenter_boost, dtype=np.float64).copy())
+        previous_target = target.copy()
         if done:
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
@@ -572,13 +573,19 @@ def rollout(
         periods_per_year=periods_per_year_from_bar_seconds(60.0),
     )
     row = {
-        "baseline": str(policy_mode),
-        "policy_mode": str(policy_mode),
+        "baseline": "flat_ppo",
+        "policy_mode": "flat_ppo",
         "seed": int(seed),
         "scenario": scenario,
         **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotions),
+        "promotion_replan_count": 0,
+        "scheduled_replan_count": 0,
+        "upper_decision_count": int(len(targets)),
+        "lower_decision_count": int(len(targets)),
+        "upper_mean_duration": 1.0,
+        "upper_to_lower_ratio": 1.0,
         "leakage_penalty": float(leak["leakage_penalty"]),
         "UpperHFPower": float(leak["UpperHFPower"]),
         "LowerLFDrift": float(leak["LowerLFDrift"]),
@@ -590,27 +597,27 @@ def rollout(
         "upper_high_mi": float(diag.get("upper_high_mi", 0.0)),
         "lower_high_mi": float(diag.get("lower_high_mi", 0.0)),
         "lower_low_mi": float(diag.get("lower_low_mi", 0.0)),
-        "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
-        "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
+        "upper_credit_mean": float(np.mean(task_credits)) if task_credits else 0.0,
+        "lower_credit_mean": float(np.mean(task_credits)) if task_credits else 0.0,
+        "plan_smoothness": 0.0,
+        "plan_coeff_abs": 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
+        "protocol_valid": 1.0,
+        "routing_contract": "causal_raw_lag_history",
+        "temporal_contract": "primitive_joint_action",
     }
     if not sample:
         return None, row
-    batch = TrajectoryBatch(
-        upper_state=np.asarray(upper_states, dtype=np.float32),
-        lower_state=np.asarray(lower_states, dtype=np.float32),
-        upper_action=np.asarray(upper_actions, dtype=np.float32),
-        lower_action=np.asarray(lower_actions, dtype=np.float32),
+    batch = JointTrajectoryBatch(
+        state=np.asarray(states, dtype=np.float32),
+        action=np.asarray(actions, dtype=np.float32),
         reward=np.asarray(rewards, dtype=np.float32),
         done=np.asarray(dones, dtype=np.float32),
-        old_upper_logp=np.asarray(old_upper_logp, dtype=np.float32),
-        old_lower_logp=np.asarray(old_lower_logp, dtype=np.float32),
-        old_upper_value=np.asarray(old_upper_value, dtype=np.float32),
-        old_lower_value=np.asarray(old_lower_value, dtype=np.float32),
-        constraint=np.asarray(constraints, dtype=np.float32),
+        old_logp=np.asarray(old_logp, dtype=np.float32),
+        old_value=np.asarray(old_value, dtype=np.float32),
     )
     return batch, row
 
@@ -633,10 +640,14 @@ def smdp_rollout(
     policy_mode: str = "freq_hrl",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
-    """Roll out capacity-matched flat, generic-HRL, or Freq-HRL policies."""
+    """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
     if policy_mode not in POLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
+    if policy_mode == "flat_ppo":
+        raise ValueError(
+            "flat_ppo must use joint_flat_rollout; the SMDP flat path is forbidden"
+        )
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env_config = PortfolioExecutionConfig(
         transaction_cost_bps=50.0,
@@ -660,8 +671,8 @@ def smdp_rollout(
         if int(lower_lf_effect_filter_window) > 0 else None
     )
     scheduler = TemporalDecisionScheduler(
-        upper_period=1 if policy_mode == "flat_ppo" else int(upper_period),
-        min_upper_duration=1 if policy_mode == "flat_ppo" else int(min_upper_duration),
+        upper_period=int(upper_period),
+        min_upper_duration=int(min_upper_duration),
     )
     builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
     diagnostics = FrequencyDiagnostics(mi_bins=8)
@@ -681,9 +692,11 @@ def smdp_rollout(
     promotion_signals = 0
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
+    raw_history: list[np.ndarray] = []
 
     env.reset()
     for t in range(steps):
+        raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
         promotion = dict(freq.get("promotion", {}) or {})
         promote = bool(promotion.get("promote", False))
@@ -697,7 +710,7 @@ def smdp_rollout(
             upper_state, _ = smdp_policy_feature_vectors(
                 policy_mode=policy_mode,
                 freq=dict(freq),
-                raw_signal=data["predictor"][t],
+                raw_history=np.asarray(raw_history, dtype=np.float64),
                 position=env.position.copy(),
                 target=current_target,
                 leakage_feedback=latest_leakage_feedback,
@@ -727,18 +740,14 @@ def smdp_rollout(
         _, lower_state = smdp_policy_feature_vectors(
             policy_mode=policy_mode,
             freq=dict(freq),
-            raw_signal=data["predictor"][t],
+            raw_history=np.asarray(raw_history, dtype=np.float64),
             position=env.position.copy(),
             target=current_target,
             leakage_feedback=latest_leakage_feedback,
             progress=t / max(int(steps) - 1, 1),
         )
         lower_out = model.act_lower(lower_state, sample=sample)
-        speed = (
-            flat_latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
-            if policy_mode == "flat_ppo"
-            else latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
-        )
+        speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
         pre_gap = np.asarray(current_target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -783,9 +792,6 @@ def smdp_rollout(
             - env_config.inventory_drift_penalty * float(info["inventory_drift"])
             - leakage_reward_penalty
         )
-        if policy_mode == "flat_ppo":
-            upper_credit = shaped_reward
-            lower_credit = shaped_reward
         latest_leakage_feedback = float(leak_info.get("lower_lf_penalty", 0.0))
         builder.add_lower(
             state=lower_state,
@@ -863,8 +869,7 @@ def smdp_rollout(
             if policy_mode == "freq_hrl" else "raw_history"
         ),
         "temporal_contract": (
-            "primitive_joint_action"
-            if policy_mode == "flat_ppo" else "asynchronous_hierarchy"
+            "asynchronous_hierarchy"
         ),
     }
     return (trajectory if sample else None), row
@@ -949,7 +954,7 @@ def train_ppo_actor_critic(
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
-    DualActorCriticPPO | FrequencySeparatedActorCriticPPO,
+    FrequencySeparatedActorCriticPPO | JointActorCriticPPO,
 ]:
     policy_mode = str(policy_mode or "freq_hrl")
     if policy_mode not in POLICY_MODES:
@@ -999,30 +1004,151 @@ def train_ppo_actor_critic(
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
         lower_max_lambda=20.0,
     )
+    if policy_mode == "flat_ppo":
+        target_parameter_count = smdp_parameter_count(smdp_config)
+        joint_hidden_dim, joint_count, capacity_ratio = (
+            capacity_matched_joint_hidden_dim(
+                target_parameter_count=target_parameter_count,
+                state_dim=8 * assets + 1,
+                action_dim=2 * assets,
+                requested_hidden_dim=int(hidden_dim),
+            )
+        )
+        joint_config = JointPPOConfig(
+            state_dim=8 * assets + 1,
+            action_dim=2 * assets,
+            hidden_dim=int(joint_hidden_dim),
+            learning_rate=float(learning_rate),
+            epochs=int(ppo_epochs),
+            minibatch_size=int(minibatch_size),
+            init_log_std=float(init_log_std),
+        )
+        torch.manual_seed(int(seed))
+        np.random.seed(int(seed))
+        joint_model = JointActorCriticPPO(joint_config)
+        payload, heldout_rows, joint_model = train_joint_ppo(
+            model=joint_model,
+            train_seeds=rollout_seed_roots,
+            eval_seeds=evaluation_seeds,
+            iterations=iterations,
+            selection_seeds=validation_seed_list,
+            training_seed_fn=(
+                (
+                    lambda root, iteration: training_rollout_seed(
+                        int(seed), root, iteration, domain=f"trading:{scenario}"
+                    )
+                )
+                if resample_training_paths else None
+            ),
+            rollout_fn=lambda ppo_model, rollout_seed, sample: joint_flat_rollout(
+                ppo_model,
+                seed=rollout_seed,
+                steps=steps,
+                assets=assets,
+                scenario=scenario,
+                sample=sample,
+                leakage_scale=0.0,
+                lower_lf_effect_filter_window=0,
+                lower_lf_raw_recenter_gain=0.0,
+                reward_scale=float(reward_scale),
+            ),
+            objective_fn=objective,
+            summary_fn=summarize,
+            policy="flat_ppo_canonical_joint_action",
+            domain="trading",
+            metadata={
+                "policy_mode": "flat_ppo",
+                "baseline": "flat_ppo",
+                "scenario": scenario,
+                "steps": int(steps),
+                "assets": int(assets),
+                "leakage_scale": 0.0,
+                "upper_period": 1,
+                "min_upper_duration": 1,
+                "upper_observation_contract": "not_applicable_single_flat_state",
+                "lower_observation_contract": (
+                    "direct causal raw lags through 119 bars + position + previous action"
+                ),
+                "credit_contract": "single task-return GAE for one joint action",
+                "frequency_routing_enabled": False,
+                "promotion_replanning_enabled": False,
+                "handcrafted_frequency_prior": False,
+                "capacity_match_contract": (
+                    "active parameter count matched to hierarchical PPO within 5%; "
+                    "no inactive padding parameters"
+                ),
+                "capacity_target_parameter_count": int(target_parameter_count),
+                "capacity_actual_parameter_count": int(joint_count),
+                "capacity_ratio": float(capacity_ratio),
+                "requested_hidden_dim": int(hidden_dim),
+                "effective_hidden_dim": int(joint_hidden_dim),
+                "raw_history_lags": list(RAW_LOWER_LAGS),
+                "training_replicate_seed": int(seed),
+                "rollout_seed_roots": list(rollout_seed_roots),
+                "validation_seeds": list(validation_seed_list),
+                "evaluation_role": evaluation_role,
+                "tuning_validation_seeds": (
+                    list(evaluation_seeds)
+                    if evaluation_role == "tuning_validation" else []
+                ),
+                "heldout_test_seeds": (
+                    list(evaluation_seeds)
+                    if evaluation_role == "heldout_test" else []
+                ),
+                "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+                "training_reward_scale": float(reward_scale),
+                "training_path_protocol": (
+                    "fresh_deterministic_path_per_root_and_iteration_v2"
+                    if resample_training_paths else "fixed_path_reuse_legacy"
+                ),
+                "checkpoint_selection_protocol": "disjoint_validation_paths",
+                "plan_mode": "primitive_joint_target_execution",
+                "plan_basis_dim": 0,
+                "plan_horizon_s": 0.0,
+                "plan_eval_offset_s": 0.0,
+                "plan_coefficient_scale": 0.0,
+                "plan_action_dim": int(2 * assets),
+                "lower_lf_constraint_coef": 0.0,
+                "lower_lf_constraint_target": 0.0,
+                "lower_lf_dual_lr": 0.0,
+                "lower_lf_objective_weight": 0.0,
+                "lower_lf_effect_filter_window": 0,
+                "lower_lf_effect_filter_gain": 0.0,
+                "lower_lf_raw_recenter_gain": 0.0,
+                "lower_lf_raw_recenter_scale": 0.0,
+            },
+        )
+        payload["environment_steps_train"] = int(
+            len(rollout_seed_roots) * int(steps) * max(1, int(iterations))
+        )
+        payload["environment_steps_validation"] = int(
+            len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+        )
+        payload["environment_steps_eval"] = int(
+            len(evaluation_seeds) * int(steps)
+        )
+        payload["unique_training_path_count"] = int(
+            len(rollout_seed_roots)
+            * (max(1, int(iterations)) if resample_training_paths else 1)
+        )
+        return payload, heldout_rows, joint_model
+
     smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
     if policy_mode == "freq_hrl" and bool(use_handcrafted_frequency_prior):
         initialize_smdp_frequency_prior(smdp_model, assets, plan_basis_dim=plan_basis_dim)
-    actual_upper_period = 1 if policy_mode == "flat_ppo" else int(upper_period)
-    actual_min_upper_duration = 1 if policy_mode == "flat_ppo" else int(min_upper_duration)
+    actual_upper_period = int(upper_period)
+    actual_min_upper_duration = int(min_upper_duration)
     observation_contract = {
         "freq_hrl": (
             "LF + forecast + uncertainty + compressed HF summaries",
             "current plan + local HF/MF residual context",
         ),
         "generic_hrl_ppo": (
-            "raw signal transforms + position + active plan",
-            "active plan + position + raw signal transforms",
-        ),
-        "flat_ppo": (
-            "raw signal transforms + position + active plan at every primitive step",
-            "raw signal transforms + joint target/execution context at every primitive step",
+            "direct causal raw lags through 119 bars + position + active plan",
+            "active plan + position + direct causal raw lags through 119 bars",
         ),
     }[policy_mode]
-    credit_contract = (
-        "joint task reward for both factorized action heads"
-        if policy_mode == "flat_ppo"
-        else "upper strategic PnL; lower execution cost, tracking, and leakage"
-    )
+    credit_contract = "upper strategic PnL; lower execution cost, tracking, and leakage"
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
         train_seeds=rollout_seed_roots,
@@ -1146,7 +1272,7 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 def write_report(path: Path, payload: dict[str, Any]) -> None:
     summary = payload["summary"]
     lines = [
-        "# Capacity-Matched SMDP PPO Trading Validation",
+        "# Capacity-Controlled PPO Trading Validation",
         "",
         f"- trainer: `{payload['trainer']}`",
         f"- policy mode: `{payload.get('policy_mode', payload.get('baseline', 'freq_hrl'))}`",
