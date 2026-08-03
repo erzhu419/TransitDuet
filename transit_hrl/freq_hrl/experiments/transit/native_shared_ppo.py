@@ -21,10 +21,11 @@ from typing import Any
 import numpy as np
 
 from freq_hrl.rl import (
-    DualActorCriticPPO,
-    DualPPOConfig,
-    TrajectoryBatch,
-    apply_replay_updates,
+    FrequencySeparatedActorCriticPPO,
+    HierarchicalTrajectoryBatch,
+    LevelTrajectoryBatch,
+    SMDPPPOConfig,
+    apply_smdp_updates,
 )
 
 
@@ -873,7 +874,7 @@ class NativeTransitContract:
     promotion_replan: bool
     upper_hold_feedback_dim: int = 0
     learned_promotion_gate: bool = False
-    shared_core: str = "freq_hrl.rl.DualActorCriticPPO"
+    shared_core: str = "freq_hrl.rl.FrequencySeparatedActorCriticPPO"
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -902,11 +903,15 @@ class NativeTransitPPOBridge:
     def __init__(
         self,
         contract: NativeTransitContract,
-        model: DualActorCriticPPO | None = None,
+        model: FrequencySeparatedActorCriticPPO | None = None,
         *,
         hidden_dim: int = 0,
         init_log_std: float = -2.0,
         learning_rate: float = 3e-4,
+        lower_cost_target: float = 0.0,
+        lower_dual_lr: float = 0.0,
+        lower_lambda_init: float = 0.0,
+        lower_max_lambda: float = 20.0,
         device: str = "cpu",
         initialize_gate_prior: bool = True,
         native_policy_init_seed: int | None = None,
@@ -921,14 +926,19 @@ class NativeTransitPPOBridge:
         self.lower_action_bins = _array(contract.lower_action_bins, dtype=np.float64)
         if model is None and native_policy_init_seed is not None:
             _set_reproducible_seed(int(native_policy_init_seed))
-        self.model = model or DualActorCriticPPO(DualPPOConfig(
+        self.model = model or FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=int(contract.upper_state_dim),
             lower_state_dim=int(contract.lower_state_dim),
             upper_action_dim=int(contract.upper_model_action_dim),
             lower_action_dim=int(contract.lower_action_dim),
             hidden_dim=int(hidden_dim),
             init_log_std=float(init_log_std),
-            learning_rate=float(learning_rate),
+            upper_learning_rate=float(learning_rate),
+            lower_learning_rate=float(learning_rate),
+            lower_cost_target=float(lower_cost_target),
+            lower_dual_lr=float(lower_dual_lr),
+            lower_lambda_init=max(float(lower_lambda_init), 0.0),
+            lower_max_lambda=max(float(lower_max_lambda), 0.0),
             device=str(device),
         ))
         if (native_policy_init_seed is not None
@@ -952,6 +962,10 @@ class NativeTransitPPOBridge:
         hidden_dim: int = 0,
         init_log_std: float = -2.0,
         learning_rate: float = 3e-4,
+        lower_cost_target: float = 0.0,
+        lower_dual_lr: float = 0.0,
+        lower_lambda_init: float = 0.0,
+        lower_max_lambda: float = 20.0,
         device: str = "cpu",
         learned_promotion_gate: bool = False,
         initialize_gate_prior: bool = True,
@@ -991,6 +1005,10 @@ class NativeTransitPPOBridge:
             hidden_dim=hidden_dim,
             init_log_std=init_log_std,
             learning_rate=learning_rate,
+            lower_cost_target=lower_cost_target,
+            lower_dual_lr=lower_dual_lr,
+            lower_lambda_init=lower_lambda_init,
+            lower_max_lambda=lower_max_lambda,
             device=device,
             initialize_gate_prior=initialize_gate_prior,
             native_policy_init_seed=native_policy_init_seed,
@@ -1012,14 +1030,15 @@ class NativeTransitPPOBridge:
             int(self.contract.upper_state_dim)
             - max(int(self.contract.upper_hold_feedback_dim), 0),
         )
-        baseline = DualActorCriticPPO(DualPPOConfig(
+        baseline = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=int(reference_upper_state_dim),
             lower_state_dim=int(self.contract.lower_state_dim),
             upper_action_dim=int(self.contract.upper_action_dim),
             lower_action_dim=int(self.contract.lower_action_dim),
             hidden_dim=int(hidden_dim),
             init_log_std=float(init_log_std),
-            learning_rate=float(learning_rate),
+            upper_learning_rate=float(learning_rate),
+            lower_learning_rate=float(learning_rate),
             device=str(device),
         ))
         try:
@@ -1145,6 +1164,15 @@ class NativeTransitPPOBridge:
         value = float(np.clip(value, 0.0, float(self.contract.lower_action_range_s)))
         return np.asarray([value], dtype=np.float32)
 
+    def lower_native_to_latent(self, native_action: Any) -> np.ndarray:
+        native = _array(native_action, dtype=np.float64)
+        if native.size < 1:
+            raise ValueError("lower native action must have at least one dimension")
+        action_range = max(float(self.contract.lower_action_range_s), 1e-9)
+        probability = float(np.clip(native[0] / action_range, 1e-6, 1.0 - 1e-6))
+        latent = np.log(probability / (1.0 - probability))
+        return np.asarray([latent], dtype=np.float32)
+
     def act_upper_native(self, upper_state: Any, sample: bool = False) -> dict[str, Any]:
         if bool(self.contract.learned_promotion_gate):
             import torch
@@ -1163,7 +1191,12 @@ class NativeTransitPPOBridge:
                 else:
                     native_latent = native_mean
                 if mean.shape[-1] > native_dim:
-                    gate_latent = mean[:, native_dim:native_dim + 1]
+                    gate_mean = mean[:, native_dim:native_dim + 1]
+                    gate_std = std[:, native_dim:native_dim + 1]
+                    gate_latent = (
+                        gate_mean + torch.randn_like(gate_mean) * gate_std
+                        if sample else gate_mean
+                    )
                     latent_t = torch.cat([native_latent, gate_latent], dim=-1)
                 else:
                     latent_t = native_latent
@@ -1182,6 +1215,8 @@ class NativeTransitPPOBridge:
             "promotion_gate_value": self.promotion_gate_value(latent),
             "logp": float(out["logp"]),
             "value": float(out["value"]),
+            "behavior_transform": "actor_native_map",
+            "policy_action_blend": 1.0,
         }
 
     def act_lower_native(self, lower_state: Any, sample: bool = False) -> dict[str, Any]:
@@ -1193,6 +1228,8 @@ class NativeTransitPPOBridge:
             "latent_action": latent.astype(np.float32),
             "logp": float(out["logp"]),
             "value": float(out["value"]),
+            "behavior_transform": str(out.get("behavior_transform", "actor_native_map")),
+            "policy_action_blend": float(out.get("policy_action_blend", 1.0)),
         }
 
     def contract_dict(self) -> dict[str, Any]:
@@ -1271,6 +1308,8 @@ class _SharedPPOPolicyProxy:
         self.wait_replan_actor_base_used: list[float] = []
 
     def _remember(self, state: np.ndarray, info: dict[str, Any]) -> None:
+        info = dict(info)
+        info["decision_id"] = int(self.decisions + 1)
         key = _state_key(state)
         self.pending.setdefault(key, []).append(info)
         if self.level == "upper":
@@ -1299,6 +1338,8 @@ class _SharedPPOPolicyProxy:
             "promotion_gate_value": float(out.get("promotion_gate_value", 0.0)),
             "logp": float(out["logp"]),
             "value": float(out["value"]),
+            "behavior_transform": str(out.get("behavior_transform", "actor_native_map")),
+            "policy_action_blend": float(out.get("policy_action_blend", 1.0)),
         }
 
     def evaluate_promotion_gate(
@@ -1342,6 +1383,8 @@ class _SharedPPOPolicyProxy:
                     info = dict(info)
                     info["native_action"] = native.astype(np.float32)
                     info["latent_action"] = self.bridge.upper_native_to_latent(native, gate_latent=gate_latent)
+                    info["behavior_transform"] = "promotion_native_override_blend"
+                    info["policy_action_blend"] = float(blend)
                 key = _state_key(state_arr)
                 self.preselected.setdefault(key, []).append(info)
                 if preselect_metadata is not None:
@@ -1470,6 +1513,29 @@ class _SharedPPOPolicyProxy:
         return 0.0
 
 
+def _behavior_logp_value(
+    bridge: NativeTransitPPOBridge,
+    *,
+    level: str,
+    state: np.ndarray,
+    latent_action: np.ndarray,
+) -> tuple[float, float]:
+    import torch
+
+    state_t = bridge.model._state_tensor(_array(state))
+    action_t = torch.as_tensor(
+        _array(latent_action),
+        dtype=torch.float32,
+        device=bridge.model.device,
+    ).view(1, -1)
+    actor = bridge.model.upper_actor if level == "upper" else bridge.model.lower_actor
+    value_net = bridge.model.upper_value if level == "upper" else bridge.model.lower_value
+    with torch.no_grad():
+        logp, _ = actor.log_prob_entropy(state_t, action_t)
+        value = value_net(state_t)
+    return float(logp.item()), float(value.item())
+
+
 class _NativeUpperReplayCollector:
     def __init__(self, upper_proxy: _SharedPPOPolicyProxy) -> None:
         self.upper_proxy = upper_proxy
@@ -1477,19 +1543,36 @@ class _NativeUpperReplayCollector:
 
     def push(self, state: Any, action: Any, reward: float, next_state: Any, done: bool) -> None:
         info = self.upper_proxy.pop(state)
+        native_action = _array(action).astype(np.float32)
+        if info is None:
+            gate_latent = 0.0
+            latent_action = self.upper_proxy.bridge.upper_native_to_latent(
+                native_action,
+                gate_latent=gate_latent,
+            )
+        else:
+            latent_action = _array(info["latent_action"]).astype(np.float32)
+        logp, value = _behavior_logp_value(
+            self.upper_proxy.bridge,
+            level="upper",
+            state=_array(state).astype(np.float32),
+            latent_action=latent_action,
+        )
         self.rows.append({
             "state": _array(state).astype(np.float32),
-            "native_action": _array(action).astype(np.float32),
-            "latent_action": (
-                _array(info["latent_action"]).astype(np.float32)
-                if info is not None else np.zeros(
-                    int(self.upper_proxy.bridge.contract.upper_model_action_dim),
-                    dtype=np.float32,
-                )
-            ),
+            "native_action": native_action,
+            "latent_action": latent_action,
             "reward": float(reward),
             "next_state": _array(next_state).astype(np.float32),
             "done": float(done),
+            "old_logp": float(logp),
+            "old_value": float(value),
+            "behavior_info_present": bool(info is not None),
+            "behavior_transform": str(
+                (info or {}).get("behavior_transform", "reconstructed_native_action")
+            ),
+            "policy_action_blend": float((info or {}).get("policy_action_blend", 0.0)),
+            "decision_id": int((info or {}).get("decision_id", -1)),
         })
 
     def __len__(self) -> int:
@@ -1507,6 +1590,7 @@ class _NativeLowerReplayCollector:
         self.upper_proxy = upper_proxy
         self.contract = contract
         self.rows: list[dict[str, Any]] = []
+        self.last_build_info: dict[str, Any] = {}
 
     def push(
         self,
@@ -1521,53 +1605,167 @@ class _NativeLowerReplayCollector:
         lower_info = self.lower_proxy.pop(state)
         upper_info = self.upper_proxy.last_upper
         if lower_info is None:
-            lower_info = {
-                "state": _array(state).astype(np.float32),
-                "latent_action": np.zeros(int(self.contract.lower_action_dim), dtype=np.float32),
-                "logp": 0.0,
-                "value": 0.0,
-            }
-        if upper_info is None:
-            upper_info = {
-                "state": np.zeros(int(self.contract.upper_state_dim), dtype=np.float32),
-                "latent_action": np.zeros(int(self.contract.upper_model_action_dim), dtype=np.float32),
-                "logp": 0.0,
-                "value": 0.0,
-            }
+            latent_action = self.lower_proxy.bridge.lower_native_to_latent(action)
+        else:
+            latent_action = _array(lower_info["latent_action"]).astype(np.float32)
+        logp, value = _behavior_logp_value(
+            self.lower_proxy.bridge,
+            level="lower",
+            state=_array(state).astype(np.float32),
+            latent_action=latent_action,
+        )
         self.rows.append({
-            "upper_state": _array(upper_info["state"]).astype(np.float32),
             "lower_state": _array(state).astype(np.float32),
-            "upper_action": _array(upper_info["latent_action"]).astype(np.float32),
-            "lower_action": _array(lower_info["latent_action"]).astype(np.float32),
+            "lower_action": latent_action,
             "reward": float(reward),
             "done": float(done),
-            "old_upper_logp": float(upper_info["logp"]),
-            "old_lower_logp": float(lower_info["logp"]),
-            "old_upper_value": float(upper_info["value"]),
-            "old_lower_value": float(lower_info["value"]),
+            "old_lower_logp": float(logp),
+            "old_lower_value": float(value),
             "constraint": float(cost),
             "trip_id": int(trip_id),
+            "behavior_info_present": bool(lower_info is not None),
+            "upper_decision_id": int((upper_info or {}).get("decision_id", -1)),
         })
 
     def __len__(self) -> int:
         return len(self.rows)
 
-    def to_batch(self) -> TrajectoryBatch | None:
-        if not self.rows:
+    def to_hierarchical_batch(
+        self,
+        upper_collector: _NativeUpperReplayCollector,
+        upper_transitions: list[dict[str, Any]],
+        *,
+        episode: int,
+    ) -> HierarchicalTrajectoryBatch | None:
+        if not self.rows or not upper_collector.rows:
             return None
-        return TrajectoryBatch(
-            upper_state=np.asarray([row["upper_state"] for row in self.rows], dtype=np.float32),
-            lower_state=np.asarray([row["lower_state"] for row in self.rows], dtype=np.float32),
-            upper_action=np.asarray([row["upper_action"] for row in self.rows], dtype=np.float32),
-            lower_action=np.asarray([row["lower_action"] for row in self.rows], dtype=np.float32),
-            reward=np.asarray([row["reward"] for row in self.rows], dtype=np.float32),
-            done=np.asarray([row["done"] for row in self.rows], dtype=np.float32),
-            old_upper_logp=np.asarray([row["old_upper_logp"] for row in self.rows], dtype=np.float32),
-            old_lower_logp=np.asarray([row["old_lower_logp"] for row in self.rows], dtype=np.float32),
-            old_upper_value=np.asarray([row["old_upper_value"] for row in self.rows], dtype=np.float32),
-            old_lower_value=np.asarray([row["old_lower_value"] for row in self.rows], dtype=np.float32),
-            constraint=np.asarray([row["constraint"] for row in self.rows], dtype=np.float32),
+        if len(upper_collector.rows) != len(upper_transitions):
+            raise RuntimeError(
+                "native upper replay rows do not align with runner upper transitions: "
+                f"{len(upper_collector.rows)} != {len(upper_transitions)}"
+            )
+        missing_behavior = sum(
+            not bool(row.get("behavior_info_present", False))
+            for row in [*upper_collector.rows, *self.rows]
         )
+        if missing_behavior:
+            raise RuntimeError(
+                f"native SMDP collection lost behavior-policy metadata for {missing_behavior} transitions"
+            )
+
+        upper_trip_ids = [int(trans.get("tid", -1)) for trans in upper_transitions]
+        global_trip_ids = [int(episode) * 1000 + trip_id for trip_id in upper_trip_ids]
+        trip_to_upper = {
+            trip_id: index for index, trip_id in enumerate(global_trip_ids)
+        }
+        decision_to_upper = {
+            int(row.get("decision_id", -1)): index
+            for index, row in enumerate(upper_collector.rows)
+            if int(row.get("decision_id", -1)) >= 0
+        }
+        upper_lower_counts = np.zeros(len(upper_collector.rows), dtype=np.int64)
+        exact_trip_matches = 0
+        decision_fallback_matches = 0
+        unmatched_lower = 0
+        for row in self.rows:
+            upper_index = trip_to_upper.get(int(row["trip_id"]))
+            if upper_index is not None:
+                exact_trip_matches += 1
+            else:
+                upper_index = decision_to_upper.get(int(row.get("upper_decision_id", -1)))
+                if upper_index is not None:
+                    decision_fallback_matches += 1
+            if upper_index is None:
+                unmatched_lower += 1
+                continue
+            upper_lower_counts[int(upper_index)] += 1
+        durations = np.asarray(
+            np.maximum(upper_lower_counts, 1),
+            dtype=np.int64,
+        )
+        upper_done = np.asarray(
+            [row["done"] for row in upper_collector.rows], dtype=np.float32
+        )
+        upper_done[-1] = 1.0
+        lower_groups: dict[int, list[dict[str, Any]]] = {}
+        for row in self.rows:
+            lower_groups.setdefault(int(row["trip_id"]), []).append(row)
+        ordered_lower_rows = [
+            row
+            for group in lower_groups.values()
+            for row in group
+        ]
+        lower_done = np.zeros(len(ordered_lower_rows), dtype=np.float32)
+        offset = 0
+        for group in lower_groups.values():
+            group_size = len(group)
+            for index, row in enumerate(group):
+                lower_done[offset + index] = float(bool(row["done"]))
+            lower_done[offset + group_size - 1] = 1.0
+            offset += group_size
+        upper = LevelTrajectoryBatch(
+            state=np.asarray([row["state"] for row in upper_collector.rows], dtype=np.float32),
+            action=np.asarray(
+                [row["latent_action"] for row in upper_collector.rows], dtype=np.float32
+            ),
+            reward=np.asarray(
+                [row["reward"] for row in upper_collector.rows], dtype=np.float32
+            ),
+            duration=durations,
+            done=upper_done,
+            old_logp=np.asarray(
+                [row["old_logp"] for row in upper_collector.rows], dtype=np.float32
+            ),
+            old_value=np.asarray(
+                [row["old_value"] for row in upper_collector.rows], dtype=np.float32
+            ),
+            cost=np.zeros(len(upper_collector.rows), dtype=np.float32),
+        )
+        lower = LevelTrajectoryBatch(
+            state=np.asarray(
+                [row["lower_state"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+            action=np.asarray(
+                [row["lower_action"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+            reward=np.asarray(
+                [row["reward"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+            duration=np.ones(len(ordered_lower_rows), dtype=np.int64),
+            done=lower_done,
+            old_logp=np.asarray(
+                [row["old_lower_logp"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+            old_value=np.asarray(
+                [row["old_lower_value"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+            cost=np.asarray(
+                [row["constraint"] for row in ordered_lower_rows], dtype=np.float32
+            ),
+        )
+        matched_lower = int(exact_trip_matches + decision_fallback_matches)
+        self.last_build_info = {
+            "upper_transitions": int(upper.size),
+            "lower_transitions": int(lower.size),
+            "matched_lower_transitions": matched_lower,
+            "exact_trip_matched_lower_transitions": int(exact_trip_matches),
+            "decision_fallback_matched_lower_transitions": int(decision_fallback_matches),
+            "unmatched_lower_transitions": int(unmatched_lower),
+            "upper_duration_mean": float(np.mean(durations)),
+            "lower_trajectory_count": int(len(lower_groups)),
+            "upper_zero_lower_matches": int(sum(
+                count == 0 for count in upper_lower_counts
+            )),
+            "upper_policy_override_rows": int(sum(
+                str(row.get("behavior_transform", "")) != "actor_native_map"
+                for row in upper_collector.rows
+            )),
+            "upper_zero_policy_blend_rows": int(sum(
+                float(row.get("policy_action_blend", 1.0)) <= 0.0
+                for row in upper_collector.rows
+            )),
+        }
+        return HierarchicalTrajectoryBatch(upper=upper, lower=lower)
 
 
 def _native_row_score(row: dict[str, Any]) -> float:
@@ -2490,6 +2688,21 @@ def _native_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "lower_lf_drift_ratio",
         "upper_hf_power_ratio",
         "freq_promotion_strength",
+        "shared_ppo_upper_samples",
+        "shared_ppo_lower_samples",
+        "shared_ppo_lower_trajectory_count",
+        "shared_ppo_upper_duration_mean",
+        "shared_ppo_exact_trip_matched_lower_samples",
+        "shared_ppo_decision_fallback_matched_lower_samples",
+        "shared_ppo_unmatched_lower_samples",
+        "shared_ppo_upper_zero_lower_matches",
+        "shared_ppo_upper_policy_override_rows",
+        "shared_ppo_upper_zero_policy_blend_rows",
+        "shared_ppo_on_policy_valid",
+        "shared_ppo_upper_policy_loss",
+        "shared_ppo_lower_policy_loss",
+        "shared_ppo_lower_cost_value_loss",
+        "shared_ppo_constraint_lambda",
         "shared_ppo_gate_evaluations",
         "shared_ppo_gate_replans",
         "shared_ppo_target_headway_guard_rejects",
@@ -2567,6 +2780,9 @@ def run_native_shared_ppo_episode_loop(
     hidden_dim: int = 0,
     init_log_std: float = -2.0,
     learning_rate: float = 3e-4,
+    lower_lf_constraint_coef: float = 0.0,
+    lower_lf_constraint_target: float = 0.0,
+    lower_lf_dual_lr: float = 0.0,
     keep_native_log_dir: bool = False,
     config_overrides: dict[str, Any] | None = None,
     learned_promotion_gate: bool = False,
@@ -2691,6 +2907,9 @@ def run_native_shared_ppo_episode_loop(
         hidden_dim=hidden_dim,
         init_log_std=init_log_std,
         learning_rate=learning_rate,
+        lower_cost_target=float(lower_lf_constraint_target),
+        lower_dual_lr=float(lower_lf_dual_lr),
+        lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
         device=device,
         learned_promotion_gate=bool(learned_promotion_gate),
         native_policy_init_seed=int(seed),
@@ -2814,20 +3033,68 @@ def run_native_shared_ppo_episode_loop(
     replay_updates = max(1, int(offpolicy_replay_updates))
     for ep in range(max(1, int(episodes))):
         collector: _NativeLowerReplayCollector = installed["lower_collector"]
+        upper_collector: _NativeUpperReplayCollector = installed["upper_collector"]
         collector.rows.clear()
+        collector.last_build_info.clear()
+        upper_collector.rows.clear()
+        installed["upper_proxy"].pending.clear()
+        installed["upper_proxy"].last_upper = None
+        installed["lower_proxy"].pending.clear()
         row = runner.run_episode(ep, training=True)
-        batch = collector.to_batch()
-        update_metrics = apply_replay_updates(
+        upper_transitions = [
+            dict(trans)
+            for trans in getattr(runner, "_episode_upper_transitions", [])
+            if isinstance(trans, dict)
+        ]
+        batch = collector.to_hierarchical_batch(
+            upper_collector,
+            upper_transitions,
+            episode=int(ep),
+        )
+        update_metrics = apply_smdp_updates(
             bridge.model,
             batch,
             updates,
             episode=int(ep),
             replay_updates=replay_updates,
+            metadata={"domain": "transit_native"},
         )
+        build_info = dict(collector.last_build_info)
         row = dict(row)
         row.update({
             "native_shared_ppo": True,
-            "shared_ppo_lower_samples": 0 if batch is None else int(batch.reward.size),
+            "shared_ppo_upper_samples": 0 if batch is None else int(batch.upper.size),
+            "shared_ppo_lower_samples": 0 if batch is None else int(batch.lower.size),
+            "shared_ppo_lower_trajectory_count": int(
+                build_info.get("lower_trajectory_count", 0)
+            ),
+            "shared_ppo_upper_duration_mean": float(
+                build_info.get("upper_duration_mean", 0.0)
+            ),
+            "shared_ppo_unmatched_lower_samples": int(
+                build_info.get("unmatched_lower_transitions", 0)
+            ),
+            "shared_ppo_exact_trip_matched_lower_samples": int(
+                build_info.get("exact_trip_matched_lower_transitions", 0)
+            ),
+            "shared_ppo_decision_fallback_matched_lower_samples": int(
+                build_info.get("decision_fallback_matched_lower_transitions", 0)
+            ),
+            "shared_ppo_upper_zero_lower_matches": int(
+                build_info.get("upper_zero_lower_matches", 0)
+            ),
+            "shared_ppo_upper_policy_override_rows": int(
+                build_info.get("upper_policy_override_rows", 0)
+            ),
+            "shared_ppo_upper_zero_policy_blend_rows": int(
+                build_info.get("upper_zero_policy_blend_rows", 0)
+            ),
+            "shared_ppo_on_policy_valid": bool(
+                batch is not None
+                and int(build_info.get("upper_zero_policy_blend_rows", 0)) == 0
+                and int(build_info.get("unmatched_lower_transitions", 0)) == 0
+                and int(build_info.get("upper_zero_lower_matches", 0)) == 0
+            ),
             "shared_ppo_replay_updates": int(replay_updates if batch is not None else 0),
             "shared_ppo_upper_decisions": int(installed["upper_proxy"].decisions),
             "shared_ppo_lower_decisions": int(installed["lower_proxy"].decisions),
@@ -3105,15 +3372,36 @@ def run_native_shared_ppo_episode_loop(
                 "freq_hrl_promotion_wait_credit_events",
                 0,
             )),
-            "shared_ppo_loss": float(update_metrics.get("loss", 0.0)),
-            "shared_ppo_policy_loss": float(update_metrics.get("policy_loss", 0.0)),
-            "shared_ppo_value_loss": float(update_metrics.get("value_loss", 0.0)),
+            "shared_ppo_loss": float(
+                update_metrics.get("upper_loss", 0.0)
+                + update_metrics.get("lower_loss", 0.0)
+            ),
+            "shared_ppo_policy_loss": float(
+                update_metrics.get("upper_policy_loss", 0.0)
+                + update_metrics.get("lower_policy_loss", 0.0)
+            ),
+            "shared_ppo_value_loss": float(
+                update_metrics.get("upper_value_loss", 0.0)
+                + update_metrics.get("lower_value_loss", 0.0)
+            ),
+            "shared_ppo_upper_policy_loss": float(
+                update_metrics.get("upper_policy_loss", 0.0)
+            ),
+            "shared_ppo_lower_policy_loss": float(
+                update_metrics.get("lower_policy_loss", 0.0)
+            ),
+            "shared_ppo_lower_cost_value_loss": float(
+                update_metrics.get("lower_cost_value_loss", 0.0)
+            ),
+            "shared_ppo_constraint_lambda": float(
+                update_metrics.get("constraint_lambda", bridge.model.constraint_lambda)
+            ),
         })
         rows.append(row)
     summary = _native_summary(rows)
     payload = {
-        "policy": "shared_dual_actor_critic_ppo",
-        "trainer": "native_transit_episode_loop_shared_ppo",
+        "policy": "freq_hrl_smdp_ppo",
+        "trainer": "native_transit_episode_loop_smdp_ppo_v2",
         "domain": "transit_native",
         "seed": int(seed),
         "episodes": int(max(1, int(episodes))),
@@ -3222,13 +3510,30 @@ def run_native_shared_ppo_episode_loop(
             lower_hf_wait_boarding_rescue_load_max),
         "adaptive_lower_drift_penalty_gain": float(adaptive_lower_drift_penalty_gain),
         "adaptive_lower_drift_penalty_min_scale": float(adaptive_lower_drift_penalty_min_scale),
+        "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
+        "lower_lf_constraint_target": float(lower_lf_constraint_target),
+        "lower_lf_dual_lr": float(lower_lf_dual_lr),
         "offpolicy_replay_updates": int(replay_updates),
+        "trajectory_contract": {
+            "upper": "native dispatch/timetable macro transitions with trip-matched durations",
+            "lower": (
+                "native holding transitions grouped into independent per-trip "
+                "trajectories with terminal bootstrap boundaries"
+            ),
+            "policy_ratios": "independent upper and lower PPO ratios",
+            "behavior_gate": "zero policy-action blend rows are flagged as not on-policy",
+        },
         "rows": rows,
         "updates": updates,
         "summary": summary,
         "status": (
-            "supported_native_episode_loop"
-            if rows and rows[-1].get("shared_ppo_lower_samples", 0) > 0
+            "supported_native_smdp_episode_loop"
+            if (
+                rows
+                and rows[-1].get("shared_ppo_upper_samples", 0) > 0
+                and rows[-1].get("shared_ppo_lower_samples", 0) > 0
+                and rows[-1].get("shared_ppo_on_policy_valid", False)
+            )
             else "failed_native_episode_loop"
         ),
     }
@@ -3250,7 +3555,7 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
             writer.writerows(rows)
     summary = payload.get("summary", {})
     lines = [
-        "# Native Transit Shared-PPO Episode Loop",
+        "# Native Transit Freq-HRL SMDP Episode Loop",
         "",
         f"- status: {payload.get('status', 'missing')}",
         f"- episodes: {payload.get('episodes', 0)}",
@@ -3270,7 +3575,13 @@ def write_native_loop_outputs(output_dir: Path, payload: dict[str, Any]) -> None
         f"- lower HF wait action prior: gain_s={payload.get('lower_hf_wait_action_gain_s', 0.0)} offset={payload.get('lower_hf_wait_feature_offset', 0)} context_dim={payload.get('lower_hf_wait_context_dim', 0)} min_scale={payload.get('lower_hf_wait_min_scale', 0.0)} max_scale={payload.get('lower_hf_wait_max_scale', 1.0)}",
         f"- lower HF boarding rescue: gain_s={payload.get('lower_hf_wait_boarding_rescue_gain_s', 0.0)} max_s={payload.get('lower_hf_wait_boarding_rescue_max_s', 0.0)} queue_min={payload.get('lower_hf_wait_boarding_rescue_queue_min', 0.0)} load_max={payload.get('lower_hf_wait_boarding_rescue_load_max', 0.0)}",
         f"- adaptive lower drift penalty: gain={payload.get('adaptive_lower_drift_penalty_gain', 0.0)} min_scale={payload.get('adaptive_lower_drift_penalty_min_scale', 0.0)}",
-        f"- off-policy replay updates per native batch: {payload.get('offpolicy_replay_updates', 1)}",
+        f"- lower LF primal-dual constraint: init={payload.get('lower_lf_constraint_coef', 0.0)} target={payload.get('lower_lf_constraint_target', 0.0)} dual_lr={payload.get('lower_lf_dual_lr', 0.0)}",
+        f"- PPO batch updates per native trajectory: {payload.get('offpolicy_replay_updates', 1)}",
+        f"- mean upper/lower samples: {summary.get('shared_ppo_upper_samples_mean', 0.0):.2f} / {summary.get('shared_ppo_lower_samples_mean', 0.0):.2f}",
+        f"- mean independent lower trajectories: {summary.get('shared_ppo_lower_trajectory_count_mean', 0.0):.2f}",
+        f"- mean upper duration: {summary.get('shared_ppo_upper_duration_mean_mean', 0.0):.2f}",
+        f"- unmatched lower samples: {summary.get('shared_ppo_unmatched_lower_samples_mean', 0.0):.2f}",
+        f"- on-policy valid rate: {summary.get('shared_ppo_on_policy_valid_mean', 0.0):.2f}",
         f"- mean wait: {summary.get('avg_wait_min_mean', 0.0):.4f}",
         f"- mean headway CV: {summary.get('headway_cv_mean', 0.0):.4f}",
         f"- mean shared-PPO score: {summary.get('score_mean', 0.0):.4f}",
@@ -3338,7 +3649,7 @@ def run_native_shared_ppo_audit(
     contract = bridge.contract_dict()
     checks = {
         "native_runner_instantiated": True,
-        "uses_shared_core": isinstance(bridge.model, DualActorCriticPPO),
+        "uses_shared_core": isinstance(bridge.model, FrequencySeparatedActorCriticPPO),
         "upper_action_dim_matches_native": (
             int(upper["native_action"].size) == int(contract["upper_action_dim"])
         ),
@@ -3383,7 +3694,7 @@ def write_outputs(output_dir: Path, summary: dict[str, Any]) -> None:
         writer.writeheader()
         writer.writerow(row)
     lines = [
-        "# Native Transit Shared-PPO Interface Audit",
+        "# Native Transit Freq-HRL SMDP Interface Audit",
         "",
         f"- status: {summary['status']}",
         f"- config: `{summary['config_path']}`",
@@ -3487,6 +3798,9 @@ def main() -> None:
     parser.add_argument("--lower-hf-wait-boarding-rescue-load-max", type=float, default=0.0)
     parser.add_argument("--adaptive-lower-drift-penalty-gain", type=float, default=0.0)
     parser.add_argument("--adaptive-lower-drift-penalty-min-scale", type=float, default=0.25)
+    parser.add_argument("--lower-lf-constraint-coef", type=float, default=0.0)
+    parser.add_argument("--lower-lf-constraint-target", type=float, default=0.0)
+    parser.add_argument("--lower-lf-dual-lr", type=float, default=0.0)
     parser.add_argument("--offpolicy-replay-updates", type=int, default=1)
     args = parser.parse_args()
     if args.episode_loop:
@@ -3496,6 +3810,9 @@ def main() -> None:
             seed=int(args.seed),
             episodes=int(args.episodes),
             device=str(args.device),
+            lower_lf_constraint_coef=float(args.lower_lf_constraint_coef),
+            lower_lf_constraint_target=float(args.lower_lf_constraint_target),
+            lower_lf_dual_lr=float(args.lower_lf_dual_lr),
             keep_native_log_dir=bool(args.keep_native_log_dir),
             learned_promotion_gate=bool(args.learned_promotion_gate),
             promotion_gate_threshold=float(args.promotion_gate_threshold),

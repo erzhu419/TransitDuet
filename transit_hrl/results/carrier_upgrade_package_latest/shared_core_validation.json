@@ -1,5 +1,5 @@
 {
-  "status": "partial",
+  "status": "supported",
   "core_boundary": {
     "status": "supported",
     "checked_files": 25,
@@ -24,19 +24,19 @@
     },
     {
       "adapter": "transit_native_replay_update",
-      "status": "failed",
+      "status": "supported",
       "path": "transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py",
       "required_symbol": "apply_smdp_updates",
       "role": "Native Transit must update separate upper and lower SMDP trajectories.",
-      "evidence": "`apply_smdp_updates` is not both imported and called"
+      "evidence": "`apply_smdp_updates` is imported and called"
     },
     {
       "adapter": "transit_native_actor_core",
-      "status": "failed",
+      "status": "supported",
       "path": "transit_hrl/freq_hrl/experiments/transit/native_shared_ppo.py",
       "required_symbol": "FrequencySeparatedActorCriticPPO",
       "role": "Native Transit bridge must instantiate the v2 frequency-separated actor-critic.",
-      "evidence": "`FrequencySeparatedActorCriticPPO` is not both imported and called"
+      "evidence": "`FrequencySeparatedActorCriticPPO` is imported and called"
     }
   ],
   "boundary_statement": "Core/encoder/RL modules stay domain-agnostic; Quant and Transit adapters must collect separate upper/lower trajectories and delegate learning to FrequencySeparatedActorCriticPPO v2. Legacy joint-PPO entries do not satisfy this audit."

@@ -80,9 +80,24 @@ required numerical invariant: macro reward scale may change critic loss but
 must not suppress the PPO actor step through shared global gradient clipping.
 The corresponding scale-invariance regression test is mandatory.
 
-Native Transit remains on the legacy bridge until
-`native_shared_ppo.py` instantiates `FrequencySeparatedActorCriticPPO` and
-calls `apply_smdp_updates` with separately collected transition streams. The
-shared-core claim therefore remains partial. Legacy joint-optimizer v2
-checkpoints are not optimizer-state compatible with this stage and must not be
-mixed into confirmatory runs.
+Native Transit now instantiates `FrequencySeparatedActorCriticPPO` and calls
+`apply_smdp_updates` with native upper/lower streams. Upper transitions use the
+runner's backfilled dispatch/timetable reward and a duration equal to the
+number of causally assigned lower holding events. Trip-ID matching is used
+first; a unique behavior decision ID handles native fallback trip keys. A
+trajectory is valid only if every lower transition is assigned, every upper
+transition has positive duration, behavior metadata is present, and no
+zero-policy-blend heuristic override enters an on-policy claim. Lower events
+are grouped by native trip before GAE construction, and every trip boundary is
+terminal for bootstrap purposes; interleaved buses therefore cannot leak value
+targets into one another.
+
+The post-migration real copied-runner smoke (seed 9) produced 94 upper
+transitions and 4,971 lower transitions across 262 independent trip
+trajectories. All lower events were causally assigned (1,779 exact trip-ID
+matches and 3,192 decision-ID fallback matches), every upper transition had a
+positive duration, and separate upper/lower PPO updates were finite. The
+source-level shared-core migration gate is therefore supported; this is an
+implementation result, not performance evidence. Legacy
+joint-optimizer v2 checkpoints are not optimizer-state compatible with this
+stage and must not be mixed into confirmatory runs.

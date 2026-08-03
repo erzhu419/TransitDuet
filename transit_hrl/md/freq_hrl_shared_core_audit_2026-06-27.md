@@ -20,7 +20,7 @@ Machine-checkable audits: `transit_hrl/results/carrier_upgrade_package_latest/sp
 
 ## Source Boundary Audit
 
-- status: `partial`
+- status: `supported`
 - checked core files: `25`
 - boundary violations: `0`
 
@@ -28,9 +28,9 @@ Machine-checkable audits: `transit_hrl/results/carrier_upgrade_package_latest/sp
 | --- | --- | --- | --- | --- |
 | trading_ppo | supported | train_frequency_separated_ppo | Trading Freq-HRL calls the asynchronous SMDP training loop. | `train_frequency_separated_ppo` is imported and called |
 | transit_surrogate_ppo | supported | train_frequency_separated_ppo | Transit surrogate must migrate to the asynchronous SMDP loop. | `train_frequency_separated_ppo` is imported and called |
-| transit_native_replay_update | failed | apply_smdp_updates | Native Transit must update separate upper and lower SMDP trajectories. | `apply_smdp_updates` is not both imported and called |
-| transit_native_actor_core | failed | FrequencySeparatedActorCriticPPO | Native Transit bridge must instantiate the v2 frequency-separated actor-critic. | `FrequencySeparatedActorCriticPPO` is not both imported and called |
+| transit_native_replay_update | supported | apply_smdp_updates | Native Transit must update separate upper and lower SMDP trajectories. | `apply_smdp_updates` is imported and called |
+| transit_native_actor_core | supported | FrequencySeparatedActorCriticPPO | Native Transit bridge must instantiate the v2 frequency-separated actor-critic. | `FrequencySeparatedActorCriticPPO` is imported and called |
 
 ## Reviewer-Facing Boundary
 
-The v2 shared-core migration is incomplete: trading uses the asynchronous SMDP kernel, while Transit surrogate/native adapters still use legacy joint-PPO entries. This is a paper blocker, not a supported shared-core claim.
+The v2 shared-core claim is supported.

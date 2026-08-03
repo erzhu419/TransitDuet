@@ -59,11 +59,11 @@ class CarrierUpgradePackageTest(unittest.TestCase):
             shared_core_validation = json.loads(
                 (out / "shared_core_validation.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(shared_core_validation["status"], "partial")
+            self.assertEqual(shared_core_validation["status"], "supported")
             self.assertEqual(shared_core_validation["core_boundary"]["violations"], [])
             self.assertEqual(
                 payload["shared_core_validation"]["status"],
-                "partial",
+                "supported",
             )
             self.assertNotIn("shared_core_supported", payload)
             with (out / "claim_freeze.csv").open(encoding="utf-8") as f:

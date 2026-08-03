@@ -6,6 +6,7 @@ import numpy as np
 from freq_hrl.experiments.transit.native_shared_ppo import (
     NativeTransitPPOBridge,
     _NativeLowerReplayCollector,
+    _NativeUpperReplayCollector,
     _SharedPPOPolicyProxy,
     _promotion_reward_floor_score,
     _promotion_wait_credit_from_metadata,
@@ -54,7 +55,13 @@ class _FakeLowerContextRunner(_FakeNativeRunner):
 
 class NativeTransitPPOBridgeTest(unittest.TestCase):
     def test_bridge_maps_shared_latents_to_native_bounds(self):
-        bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
+        bridge = NativeTransitPPOBridge.from_runner(
+            _FakeNativeRunner(),
+            hidden_dim=0,
+            lower_cost_target=0.05,
+            lower_dual_lr=0.1,
+            lower_lambda_init=0.2,
+        )
         upper = bridge.upper_latent_to_native(np.asarray([-100.0, 0.0, 100.0, 1.0]))
         self.assertEqual(upper.shape, (4,))
         self.assertTrue(np.all(upper >= _FakeNativeRunner.upper_action_low - 1e-5))
@@ -64,6 +71,9 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertIn(float(lower[0]), set(_FakeNativeRunner.lower_action_bins.tolist()))
         self.assertGreaterEqual(float(lower[0]), 0.0)
         self.assertLessEqual(float(lower[0]), 30.0)
+        self.assertAlmostEqual(bridge.model.config.lower_cost_target, 0.05)
+        self.assertAlmostEqual(bridge.model.config.lower_dual_lr, 0.1)
+        self.assertAlmostEqual(bridge.model.constraint_lambda, 0.2)
 
     def test_bridge_act_methods_return_native_actions(self):
         bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
@@ -72,7 +82,10 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertEqual(upper["native_action"].shape, (4,))
         self.assertEqual(lower["native_action"].shape, (1,))
         contract = bridge.contract_dict()
-        self.assertEqual(contract["shared_core"], "freq_hrl.rl.DualActorCriticPPO")
+        self.assertEqual(
+            contract["shared_core"],
+            "freq_hrl.rl.FrequencySeparatedActorCriticPPO",
+        )
         self.assertTrue(contract["terminal_dispatch"])
         self.assertTrue(contract["promotion_replan"])
 
@@ -156,8 +169,11 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         torch.manual_seed(99)
         action4 = bridge4.act_upper_native(state, sample=True)["native_action"]
         torch.manual_seed(99)
-        action5 = bridge5.act_upper_native(state, sample=True)["native_action"]
-        self.assertTrue(np.allclose(action4, action5, atol=1e-6))
+        sampled5 = bridge5.act_upper_native(state, sample=True)
+        self.assertTrue(np.allclose(action4, sampled5["native_action"], atol=1e-6))
+        torch.manual_seed(100)
+        other_gate = bridge5.act_upper_native(state, sample=True)["promotion_gate_value"]
+        self.assertNotAlmostEqual(sampled5["promotion_gate_value"], other_gate, places=6)
 
     def test_learned_gate_prior_skips_hold_feedback_tail(self):
         bridge = NativeTransitPPOBridge.from_runner(
@@ -1065,31 +1081,81 @@ class NativeTransitPPOBridgeTest(unittest.TestCase):
         self.assertFalse(hook(freq_summary=valid, **other_key))
         self.assertEqual(installed["upper_proxy"].gate_replans, 1)
 
-    def test_native_episode_collector_builds_shared_ppo_batch(self):
+    def test_native_episode_collector_builds_separate_smdp_batch(self):
         bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
         upper_proxy = _SharedPPOPolicyProxy(bridge, "upper")
         lower_proxy = _SharedPPOPolicyProxy(bridge, "lower")
         collector = _NativeLowerReplayCollector(lower_proxy, upper_proxy, bridge.contract)
+        upper_collector = _NativeUpperReplayCollector(upper_proxy)
         upper_state = np.arange(5, dtype=np.float32)
         lower_state = np.arange(3, dtype=np.float32)
-        upper_proxy.get_action(upper_state, deterministic=True)
-        lower_proxy.get_action(lower_state, deterministic=True)
+        upper_action = upper_proxy.get_action(upper_state, deterministic=True)
+        lower_action = lower_proxy.get_action(lower_state, deterministic=True)
         collector.push(
             lower_state,
-            np.asarray([10.0], dtype=np.float32),
+            lower_action,
             reward=-1.0,
             cost=0.25,
             next_state=lower_state + 1.0,
             done=False,
             trip_id=3,
         )
-        batch = collector.to_batch()
+        second_lower_state = lower_state + 0.5
+        second_lower_action = lower_proxy.get_action(second_lower_state, deterministic=True)
+        collector.push(
+            second_lower_state,
+            second_lower_action,
+            reward=-0.5,
+            cost=0.10,
+            next_state=second_lower_state + 1.0,
+            done=False,
+            trip_id=99,
+        )
+        third_lower_state = lower_state + 1.5
+        third_lower_action = lower_proxy.get_action(third_lower_state, deterministic=True)
+        collector.push(
+            third_lower_state,
+            third_lower_action,
+            reward=-0.25,
+            cost=0.05,
+            next_state=third_lower_state + 1.0,
+            done=False,
+            trip_id=3,
+        )
+        upper_collector.push(
+            upper_state,
+            upper_action,
+            reward=-2.0,
+            next_state=upper_state + 1.0,
+            done=True,
+        )
+        batch = collector.to_hierarchical_batch(
+            upper_collector,
+            [{"tid": 3}],
+            episode=0,
+        )
         self.assertIsNotNone(batch)
-        self.assertEqual(batch.upper_state.shape, (1, 5))
-        self.assertEqual(batch.lower_state.shape, (1, 3))
-        self.assertEqual(batch.upper_action.shape, (1, 4))
-        self.assertEqual(batch.lower_action.shape, (1, 1))
-        self.assertAlmostEqual(float(batch.constraint[0]), 0.25)
+        self.assertEqual(batch.upper.state.shape, (1, 5))
+        self.assertEqual(batch.lower.state.shape, (3, 3))
+        self.assertEqual(batch.upper.action.shape, (1, 4))
+        self.assertEqual(batch.lower.action.shape, (3, 1))
+        self.assertEqual(int(batch.upper.duration[0]), 3)
+        self.assertAlmostEqual(float(batch.lower.cost[0]), 0.25)
+        self.assertTrue(np.allclose(
+            batch.lower.state,
+            np.asarray([lower_state, third_lower_state, second_lower_state]),
+        ))
+        self.assertTrue(np.array_equal(
+            batch.lower.done,
+            np.asarray([0.0, 1.0, 1.0], dtype=np.float32),
+        ))
+        self.assertEqual(collector.last_build_info["lower_trajectory_count"], 2)
+        self.assertEqual(collector.last_build_info["exact_trip_matched_lower_transitions"], 2)
+        self.assertEqual(
+            collector.last_build_info["decision_fallback_matched_lower_transitions"],
+            1,
+        )
+        self.assertEqual(collector.last_build_info["unmatched_lower_transitions"], 0)
 
     def test_lower_hf_wait_action_prior_reduces_holding(self):
         bridge = NativeTransitPPOBridge.from_runner(_FakeNativeRunner(), hidden_dim=0)
