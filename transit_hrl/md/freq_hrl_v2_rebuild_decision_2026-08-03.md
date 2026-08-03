@@ -325,3 +325,39 @@ merging rejects mixed or missing source identities. This makes code staging,
 not only hyperparameter selection, part of the confirmatory evidence contract.
 Exploratory smoke runs remain available, but their headline evidence status is
 forced to `exploratory_unfrozen_hyperparameters`.
+
+## Confirmatory analysis hardening
+
+The pre-final audit found that the original paired-check default omitted
+`flat_gru_ppo` and `generic_hrl_gru_ppo`, even though both policies were part of
+the registered seven-policy matrix. This made a complete matrix incapable of
+closing its all-baseline claim. The v3 analysis contract now includes all six
+controls by construction and regression-tests the control family.
+
+The final analysis reports both an equal-weight pooled effect over the five
+registered stress regimes and separate stress-stratum effects. Held-out paths
+remain repeated measurements within an independently trained policy replicate.
+Multiplicity is controlled by Holm correction within the registered pooled or
+stress-stratum endpoint family.
+
+Statistical significance alone is insufficient. Before held-out evaluation,
+the following smallest effects of practical interest were fixed from the
+nested-validation scale: `0.005` absolute episode return, `0.25` episode
+information ratio, `0.02` FocusScore, and `0.05` LowerLFDrift reduction. A
+positive confidence interval that does not clear the corresponding threshold
+is reported as statistically supported but practically too small, not as a
+supported headline result.
+
+Merge-time coverage now checks the explicitly registered
+`scenario x policy x training-replicate x held-out-seed` Cartesian product.
+Inferring the expected grid from observed rows is not permitted for a formal
+merge because it cannot detect a seed or policy missing everywhere. The merge
+also reloads the validated frozen configuration and verifies every row's
+candidate ID, canonical parameter JSON hash, code revision, and source manifest.
+
+The 504-cell pilot launched from revision
+`8d228c2fac012acb41cad7aa9b3a8ec035b1e687` remains a tuning-scale diagnostic.
+Because this audit changes the registered source manifest, it will not be used
+as the final freeze. The final HPO will rerun the complete equal-budget candidate
+space on the hardened revision across all five stress regimes before any
+held-out test seed is loaded.

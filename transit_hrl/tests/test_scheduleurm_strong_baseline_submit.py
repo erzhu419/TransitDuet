@@ -144,11 +144,15 @@ class ScheduleurmStrongBaselineSubmitTest(unittest.TestCase):
         self.assertEqual(command[command.index("--cpu") + 1], "1")
 
     def test_linux_pool_uses_shared_interpreter_and_dynamic_six_node_placement(self):
-        args = normalize_args(build_parser().parse_args([
-            "--run-name",
-            "unit_linux",
-            "--smoke",
-        ]))
+        with patch(
+            "scripts.submit_strong_learned_baselines_scheduleurm.source_identity",
+            return_value=("a" * 40, "b" * 64),
+        ):
+            args = normalize_args(build_parser().parse_args([
+                "--run-name",
+                "unit_linux",
+                "--smoke",
+            ]))
         self.assertEqual(args.nodes, list(LINUX_CPU_NODES))
         self.assertEqual(args.python_executable, DEFAULT_LINUX_PYTHON)
         args.code_revision = "a" * 40

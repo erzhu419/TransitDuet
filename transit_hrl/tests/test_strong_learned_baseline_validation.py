@@ -1,8 +1,12 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
+    CONFIRMATORY_CONTROLS,
+    PRACTICAL_EFFECT_THRESHOLDS,
+    _experiment_matrix_coverage,
     build_paired_checks,
     canonical_hyperparameter_sha256,
     learning_dynamics_summary,
@@ -10,6 +14,7 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     run_strong_learned_baseline_validation,
     selected_experiment_cells,
     selected_scenario_policy_pairs,
+    validate_frozen_result_binding,
     write_outputs,
 )
 from freq_hrl.experiments.reproducibility import (
@@ -157,7 +162,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             for row in payload["per_seed"]
             if row["baseline"] == "freq_hrl"
         ))
-        self.assertEqual(len(payload["paired_checks"]), 16)
+        self.assertEqual(len(payload["paired_checks"]), 24)
         self.assertTrue(any(row["baseline"] == "flat_ppo" for row in payload["per_seed"]))
         self.assertTrue(any(row["policy_mode"] == "generic_hrl_ppo" for row in payload["parameter_budget"]))
         parameter_counts = [
@@ -237,6 +242,148 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             for row in checks
         ))
 
+    def test_complete_control_family_includes_both_gru_controls(self):
+        self.assertIn("flat_gru_ppo", CONFIRMATORY_CONTROLS)
+        self.assertIn("generic_hrl_gru_ppo", CONFIRMATORY_CONTROLS)
+        checks = build_paired_checks([], min_pairs=10)
+        controls = {row["control"] for row in checks}
+        self.assertEqual(controls, set(CONFIRMATORY_CONTROLS))
+
+    def test_multi_stress_checks_include_pooled_and_scenario_strata(self):
+        rows = []
+        for scenario in ("stationary_low_noise", "persistent_shift"):
+            for replicate in (7, 11):
+                for baseline, offset in (("freq_hrl", 1.0), ("flat_ppo", 0.0)):
+                    rows.append({
+                        "scenario": scenario,
+                        "training_replicate_seed": replicate,
+                        "seed": 123,
+                        "baseline": baseline,
+                        "metric_contract_version": "trading_metrics_v2",
+                        "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+                        "checkpoint_selection_protocol": "disjoint_validation_paths",
+                        "selection_objective_version": "log_growth_drawdown_utility_v3",
+                        "total_return": offset,
+                        "episode_information_ratio": offset,
+                        "FocusScore": offset,
+                        "LowerLFDrift": 1.0 - offset,
+                    })
+        checks = build_paired_checks(
+            rows,
+            controls=("flat_ppo",),
+            min_pairs=2,
+        )
+        self.assertEqual(len(checks), 12)
+        self.assertEqual(
+            {row["inference_scope"] for row in checks},
+            {"pooled_preregistered_stress", "scenario_stratum"},
+        )
+        self.assertEqual(
+            {row["scenario_stratum"] for row in checks if row["inference_scope"] == "scenario_stratum"},
+            {"stationary_low_noise", "persistent_shift"},
+        )
+
+    def test_statistical_support_below_practical_threshold_is_not_supported(self):
+        rows = []
+        for replicate in range(20):
+            for baseline, value in (("freq_hrl", 0.003), ("flat_ppo", 0.0)):
+                rows.append({
+                    "scenario": "persistent_shift",
+                    "training_replicate_seed": replicate,
+                    "seed": 123,
+                    "baseline": baseline,
+                    "metric_contract_version": "trading_metrics_v2",
+                    "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+                    "checkpoint_selection_protocol": "disjoint_validation_paths",
+                    "selection_objective_version": "log_growth_drawdown_utility_v3",
+                    "total_return": value,
+                    "episode_information_ratio": value,
+                    "FocusScore": value,
+                    "LowerLFDrift": 1.0 - value,
+                })
+        checks = build_paired_checks(
+            rows,
+            controls=("flat_ppo",),
+            min_pairs=10,
+        )
+        total_return = next(row for row in checks if row["metric"] == "total_return")
+        self.assertEqual(
+            total_return["practical_effect_threshold"],
+            PRACTICAL_EFFECT_THRESHOLDS["total_return"],
+        )
+        self.assertEqual(
+            total_return["status"],
+            "statistically_supported_below_practical_threshold",
+        )
+
+    def test_preregistered_coverage_detects_globally_missing_eval_seed(self):
+        rows = [{
+            "scenario": "persistent_shift",
+            "policy_mode": "freq_hrl",
+            "training_replicate_seed": 7,
+            "seed": 123,
+        }]
+        coverage = _experiment_matrix_coverage(
+            rows,
+            expected_scenarios=["persistent_shift"],
+            expected_policy_modes=["freq_hrl"],
+            expected_replicate_seeds=[7],
+            expected_eval_seeds=[123, 456],
+        )
+        self.assertEqual(coverage["matrix_coverage_status"], "incomplete")
+        self.assertEqual(coverage["missing_evaluation_row_count"], 1)
+        self.assertEqual(
+            coverage["coverage_design_source"], "preregistered_expected_grid"
+        )
+
+    def test_frozen_result_binding_rejects_candidate_drift(self):
+        parameters = {
+            "hidden_dim": 64,
+            "learning_rate": 0.001,
+            "epochs": 4,
+            "minibatch_size": 512,
+            "init_log_std": -1.0,
+            "reward_scale": 100.0,
+        }
+        digest = "a" * 64
+        revision = "b" * 40
+        manifest = "c" * 64
+        row = {
+            "hyperparameter_source": "frozen_nested_validation",
+            "policy_mode": "freq_hrl",
+            "frozen_config_sha256": digest,
+            "selected_candidate_id": "ppo_lr1e3_std10",
+            "actual_hyperparameters_json": json.dumps(
+                parameters, sort_keys=True, separators=(",", ":")
+            ),
+            "actual_hyperparameter_sha256": canonical_hyperparameter_sha256(parameters),
+            "code_revision": revision,
+            "source_manifest_sha256": manifest,
+        }
+        selected = {
+            "freq_hrl": {
+                "candidate_id": "ppo_lr1e3_std10",
+                "parameters": parameters,
+            }
+        }
+        audit = validate_frozen_result_binding(
+            [row],
+            expected_frozen_config_sha256=digest,
+            expected_selected=selected,
+            expected_code_revision=revision,
+            expected_source_manifest_sha256=manifest,
+        )
+        self.assertEqual(audit["status"], "verified")
+        drifted = dict(row, selected_candidate_id="ppo_lr1e3_std15")
+        with self.assertRaisesRegex(ValueError, "selected_candidate_id"):
+            validate_frozen_result_binding(
+                [drifted],
+                expected_frozen_config_sha256=digest,
+                expected_selected=selected,
+                expected_code_revision=revision,
+                expected_source_manifest_sha256=manifest,
+            )
+
     def test_paired_checks_reject_legacy_eval_seed_only_rows(self):
         with self.assertRaisesRegex(ValueError, "legacy eval-seed-only"):
             build_paired_checks([{
@@ -291,7 +438,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             merged = merge_strong_learned_baseline_shards(shard_dirs, min_pairs=1)
             self.assertEqual(merged["summary"]["merge_status"], "merged")
             self.assertEqual(merged["summary"]["rows"], 3)
-            self.assertEqual(len(merged["paired_checks"]), 16)
+            self.assertEqual(len(merged["paired_checks"]), 24)
             self.assertEqual(merged["summary"]["training_replicate_count"], 1)
             self.assertEqual(merged["summary"]["matrix_coverage_status"], "complete")
             self.assertEqual(merged["summary"]["training_protocol_status"], "valid")

@@ -460,7 +460,16 @@ def merge_results(args: argparse.Namespace) -> None:
             f"cannot merge: {len(missing)} expected cells are missing\n{preview}"
         )
     payload = merge_strong_learned_baseline_shards(
-        directories, min_pairs=int(args.min_pairs)
+        directories,
+        min_pairs=int(args.min_pairs),
+        expected_scenarios=list(args.scenarios),
+        expected_policy_modes=list(args.policy_modes),
+        expected_replicate_seeds=list(args.optimizer_seeds),
+        expected_eval_seeds=list(args.eval_seeds),
+        expected_frozen_config_sha256=str(args.frozen_config_sha256),
+        expected_selected=dict(args.frozen_selected),
+        expected_code_revision=str(args.code_revision),
+        expected_source_manifest_sha256=str(args.source_manifest_sha256),
     )
     output_dir = ROOT / "results" / args.run_name / "merged"
     write_outputs(output_dir, payload)
@@ -619,6 +628,22 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.frozen_config_sha256 = ""
         args.code_revision = ""
         args.source_manifest_sha256 = ""
+        if args.frozen_config is not None:
+            path = Path(args.frozen_config).expanduser()
+            if not path.is_absolute():
+                path = path.resolve() if path.exists() else (ROOT / path).resolve()
+            try:
+                _, audit = load_frozen_config(
+                    path, required_policy_modes=args.policy_modes
+                )
+            except (OSError, ValueError) as exc:
+                raise SystemExit(f"invalid frozen config for merge: {exc}") from exc
+            args.confirmatory = True
+            args.frozen_selected = audit["selected"]
+            args.frozen_config_sha256 = str(audit["sha256"])
+            args.code_revision = str(audit["code_revision"])
+            args.source_manifest_sha256 = str(audit["source_manifest_sha256"])
+            args.frozen_config = path
     return args
 
 
@@ -679,6 +704,15 @@ def main() -> None:
             ",".join(args.policy_modes),
             "--optimizer-seeds",
             ",".join(map(str, args.optimizer_seeds)),
+            "--eval-seeds",
+            ",".join(map(str, args.eval_seeds)),
+            "--min-pairs",
+            str(args.min_pairs),
+            *(
+                ["--frozen-config", str(args.frozen_config)]
+                if args.confirmatory and args.frozen_config is not None
+                else []
+            ),
             "--merge-only",
         ])
     )

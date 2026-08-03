@@ -70,6 +70,9 @@ DEFAULT_POLICY_MODES = (
     "flat_sac",
     "flat_td3",
 )
+CONFIRMATORY_CONTROLS = tuple(
+    mode for mode in DEFAULT_POLICY_MODES if mode != "freq_hrl"
+)
 DEFAULT_OPTIMIZER_SEEDS = (
     2026,
     2039,
@@ -104,7 +107,16 @@ MAIN_METRICS = (
     ("LowerLFDrift", True),
 )
 CONTRACT_GATED_METRICS = {"episode_information_ratio", "total_return"}
-CONFIRMATORY_FAMILY = "strong_learned_all_baselines_endpoints"
+CONFIRMATORY_ANALYSIS_VERSION = "strong_learned_confirmatory_analysis_v3"
+PRACTICAL_EFFECT_THRESHOLDS = {
+    "total_return": 0.005,
+    "episode_information_ratio": 0.25,
+    "FocusScore": 0.02,
+    "LowerLFDrift": 0.05,
+}
+PRACTICAL_EFFECT_THRESHOLD_SOURCE = (
+    "scale_calibrated_on_nested_validation_before_heldout_v1"
+)
 TRAINING_PATH_PROTOCOL = "fresh_deterministic_path_per_root_and_iteration_v2"
 SELECTION_PROTOCOL = "disjoint_validation_paths"
 LEARNING_GATE_MIN_FRACTION = 0.80
@@ -359,10 +371,26 @@ def scenario_optimizer_seed(training_replicate_seed: int, scenario: str) -> int:
     return int(training_replicate_seed) + 1009 * scenario_names.index(scenario)
 
 
-def _experiment_matrix_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def _experiment_matrix_coverage(
+    rows: list[dict[str, Any]],
+    *,
+    expected_scenarios: list[str] | None = None,
+    expected_policy_modes: list[str] | None = None,
+    expected_replicate_seeds: list[int] | None = None,
+    expected_eval_seeds: list[int] | None = None,
+) -> dict[str, Any]:
     """Audit the observed scenario/policy/replicate/evaluation Cartesian grid."""
 
-    if not rows:
+    expected_dimensions_declared = any(
+        value is not None
+        for value in (
+            expected_scenarios,
+            expected_policy_modes,
+            expected_replicate_seeds,
+            expected_eval_seeds,
+        )
+    )
+    if not rows and not expected_dimensions_declared:
         return {
             "matrix_coverage_status": "not_run",
             "expected_evaluation_row_count": 0,
@@ -384,16 +412,44 @@ def _experiment_matrix_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
             continue
         keys.append(key)
     unique_keys = set(keys)
-    scenarios = {key[0] for key in unique_keys}
-    modes = {key[1] for key in unique_keys}
-    replicates = {key[2] for key in unique_keys}
-    eval_seeds = {key[3] for key in unique_keys}
-    expected = len(scenarios) * len(modes) * len(replicates) * len(eval_seeds)
-    missing = max(0, expected - len(unique_keys))
+    scenarios = (
+        {str(value) for value in expected_scenarios}
+        if expected_scenarios is not None
+        else {key[0] for key in unique_keys}
+    )
+    modes = (
+        {str(value) for value in expected_policy_modes}
+        if expected_policy_modes is not None
+        else {key[1] for key in unique_keys}
+    )
+    replicates = (
+        {str(int(value)) for value in expected_replicate_seeds}
+        if expected_replicate_seeds is not None
+        else {key[2] for key in unique_keys}
+    )
+    eval_seeds = (
+        {str(int(value)) for value in expected_eval_seeds}
+        if expected_eval_seeds is not None
+        else {key[3] for key in unique_keys}
+    )
+    expected_keys = {
+        (scenario, mode, replicate, seed)
+        for scenario in scenarios
+        for mode in modes
+        for replicate in replicates
+        for seed in eval_seeds
+    }
+    missing_keys = expected_keys - unique_keys
+    unexpected_keys = unique_keys - expected_keys
+    expected = len(expected_keys)
+    missing = len(missing_keys)
     duplicates = max(0, len(keys) - len(unique_keys))
     status = (
         "complete"
-        if invalid_rows == 0 and missing == 0 and duplicates == 0
+        if invalid_rows == 0
+        and missing == 0
+        and not unexpected_keys
+        and duplicates == 0
         else "incomplete"
     )
     return {
@@ -401,8 +457,13 @@ def _experiment_matrix_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "expected_evaluation_row_count": int(expected),
         "observed_evaluation_row_count": int(len(unique_keys)),
         "missing_evaluation_row_count": int(missing),
+        "unexpected_evaluation_row_count": int(len(unexpected_keys)),
         "duplicate_evaluation_row_count": int(duplicates),
         "invalid_evaluation_row_count": int(invalid_rows),
+        "coverage_design_source": (
+            "preregistered_expected_grid"
+            if expected_dimensions_declared else "inferred_observed_grid"
+        ),
     }
 
 
@@ -480,13 +541,9 @@ def learning_dynamics_summary(run_rows: list[dict[str, Any]]) -> dict[str, Any]:
 def build_paired_checks(
     rows: list[dict[str, Any]],
     *,
-    controls: tuple[str, ...] = (
-        "flat_ppo",
-        "generic_hrl_ppo",
-        "flat_sac",
-        "flat_td3",
-    ),
+    controls: tuple[str, ...] = CONFIRMATORY_CONTROLS,
     min_pairs: int = 10,
+    include_scenario_strata: bool = True,
 ) -> list[dict[str, Any]]:
     if rows and any("training_replicate_seed" not in row for row in rows):
         raise ValueError(
@@ -494,59 +551,100 @@ def build_paired_checks(
             "training_replicate_seed values; legacy eval-seed-only artifacts "
             "must be regenerated"
         )
+    scenarios = sorted({
+        str(row.get("scenario", ""))
+        for row in rows
+        if str(row.get("scenario", ""))
+    })
+    scopes: list[tuple[str, str, list[dict[str, Any]]]] = [
+        ("pooled_preregistered_stress", "all_preregistered", rows)
+    ]
+    if include_scenario_strata and len(scenarios) > 1:
+        scopes.extend(
+            (
+                "scenario_stratum",
+                scenario,
+                [row for row in rows if str(row.get("scenario", "")) == scenario],
+            )
+            for scenario in scenarios
+        )
+
     checks: list[dict[str, Any]] = []
-    for control in controls:
-        for metric, lower_is_better in MAIN_METRICS:
-            relevant = [
-                row for row in rows
-                if str(row.get("baseline", "")) in {"freq_hrl", control}
-                and metric in row
-            ]
-            contracts = sorted({
-                str(row.get("metric_contract_version", "missing"))
-                for row in relevant
-            })
-            contract_valid = bool(
-                metric not in CONTRACT_GATED_METRICS
-                or (relevant and contracts == [METRIC_CONTRACT_VERSION])
-            )
-            training_protocol_valid = bool(
-                relevant
-                and {
-                    str(row.get("training_path_protocol", "missing"))
+    for inference_scope, scenario_label, scope_rows in scopes:
+        for control in controls:
+            for metric, lower_is_better in MAIN_METRICS:
+                relevant = [
+                    row for row in scope_rows
+                    if str(row.get("baseline", "")) in {"freq_hrl", control}
+                    and metric in row
+                ]
+                contracts = sorted({
+                    str(row.get("metric_contract_version", "missing"))
                     for row in relevant
-                } == {TRAINING_PATH_PROTOCOL}
-                and {
-                    str(row.get("checkpoint_selection_protocol", "missing"))
-                    for row in relevant
-                } == {SELECTION_PROTOCOL}
-                and {
-                    str(row.get("selection_objective_version", "missing"))
-                    for row in relevant
-                } == {SELECTION_OBJECTIVE_VERSION}
-            )
-            stats = paired_delta_stats(
-                rows,
-                variant_key="baseline",
-                pair_keys=("scenario", "training_replicate_seed", "seed"),
-                metric=metric,
-                treatment="freq_hrl",
-                control=control,
-                lower_is_better=lower_is_better,
-                cluster_keys=("training_replicate_seed",),
-            )
-            checks.append({
-                "check": f"freq_hrl_vs_{control}_{metric}",
-                **stats,
-                "metric_contract_valid": contract_valid,
-                "metric_contract_versions": contracts,
-                "training_protocol_valid": training_protocol_valid,
-                "multiplicity_family": CONFIRMATORY_FAMILY,
-                "baseline_class": (
-                    "strong_learned_ppo"
-                    if control in POLICY_MODES else "strong_learned_offpolicy"
-                ),
-            })
+                })
+                contract_valid = bool(
+                    metric not in CONTRACT_GATED_METRICS
+                    or (relevant and contracts == [METRIC_CONTRACT_VERSION])
+                )
+                training_protocol_valid = bool(
+                    relevant
+                    and {
+                        str(row.get("training_path_protocol", "missing"))
+                        for row in relevant
+                    } == {TRAINING_PATH_PROTOCOL}
+                    and {
+                        str(row.get("checkpoint_selection_protocol", "missing"))
+                        for row in relevant
+                    } == {SELECTION_PROTOCOL}
+                    and {
+                        str(row.get("selection_objective_version", "missing"))
+                        for row in relevant
+                    } == {SELECTION_OBJECTIVE_VERSION}
+                )
+                stats = paired_delta_stats(
+                    scope_rows,
+                    variant_key="baseline",
+                    pair_keys=("scenario", "training_replicate_seed", "seed"),
+                    metric=metric,
+                    treatment="freq_hrl",
+                    control=control,
+                    lower_is_better=lower_is_better,
+                    cluster_keys=("training_replicate_seed",),
+                )
+                endpoint_class = (
+                    "task_performance"
+                    if metric == "total_return"
+                    else "risk_adjusted"
+                    if metric == "episode_information_ratio"
+                    else "responsibility_separation"
+                )
+                checks.append({
+                    "check": (
+                        f"freq_hrl_vs_{control}_{metric}"
+                        if inference_scope == "pooled_preregistered_stress"
+                        else f"{scenario_label}__freq_hrl_vs_{control}_{metric}"
+                    ),
+                    **stats,
+                    "inference_scope": inference_scope,
+                    "scenario_stratum": scenario_label,
+                    "metric_contract_valid": contract_valid,
+                    "metric_contract_versions": contracts,
+                    "training_protocol_valid": training_protocol_valid,
+                    "practical_effect_threshold": float(
+                        PRACTICAL_EFFECT_THRESHOLDS[metric]
+                    ),
+                    "practical_effect_threshold_source": (
+                        PRACTICAL_EFFECT_THRESHOLD_SOURCE
+                    ),
+                    "multiplicity_family": (
+                        f"strong_learned_{inference_scope}_{endpoint_class}"
+                    ),
+                    "baseline_class": (
+                        "strong_learned_ppo"
+                        if control in POLICY_MODES else "strong_learned_offpolicy"
+                    ),
+                    "confirmatory_analysis_version": CONFIRMATORY_ANALYSIS_VERSION,
+                })
     corrected = apply_holm_correction(
         checks,
         family_key="multiplicity_family",
@@ -557,24 +655,37 @@ def build_paired_checks(
         n_independent = int(row.get("n_independent", 0) or 0)
         improvement = finite_float(row.get("improvement_mean"))
         ci_low = finite_float(row.get("improvement_ci95_low"))
+        threshold = float(row.get("practical_effect_threshold", 0.0))
         if not bool(row.get("metric_contract_valid", False)):
             status = "invalid_legacy_metric_contract"
         elif not bool(row.get("training_protocol_valid", False)):
             status = "invalid_training_protocol"
         elif n_independent < int(min_pairs):
             status = "underpowered"
-        elif ci_low is not None and ci_low > 0.0 and bool(row.get("holm_reject", False)):
+        elif (
+            ci_low is not None
+            and ci_low > threshold
+            and bool(row.get("holm_reject", False))
+        ):
             status = "supported"
-        elif improvement is not None and improvement > 0.0:
+        elif (
+            ci_low is not None
+            and ci_low > 0.0
+            and bool(row.get("holm_reject", False))
+        ):
+            status = "statistically_supported_below_practical_threshold"
+        elif improvement is not None and improvement > threshold:
             status = "positive_mixed"
+        elif improvement is not None and improvement > 0.0:
+            status = "positive_below_practical_threshold"
         elif improvement is not None and improvement <= 0.0:
             status = "not_supported"
         else:
             status = "inconclusive"
         row["status"] = status
         row["confirmatory_gate"] = (
-            "min independent training replicates + positive cluster-bootstrap CI + "
-            "Holm-adjusted two-sided sign test"
+            "min independent training replicates + cluster-bootstrap CI above "
+            "the preregistered practical threshold + Holm-adjusted two-sided sign test"
         )
     return corrected
 
@@ -584,11 +695,20 @@ def _metric_evidence_status(
     controls: tuple[str, ...],
     *,
     metrics: tuple[str, ...],
+    inference_scope: str = "pooled_preregistered_stress",
+    scenario_stratum: str | None = None,
 ) -> str:
     if not controls:
         return "not_run"
     evidence: dict[tuple[str, str], str] = {}
     for row in checks:
+        if str(row.get("inference_scope", "")) != str(inference_scope):
+            continue
+        if (
+            scenario_stratum is not None
+            and str(row.get("scenario_stratum", "")) != str(scenario_stratum)
+        ):
+            continue
         control = str(row.get("control", ""))
         metric = str(row.get("metric", ""))
         if control in controls and metric in metrics:
@@ -604,6 +724,100 @@ def _metric_evidence_status(
     if any(status in {"supported", "positive_mixed"} for status in statuses):
         return "partial"
     return "not_supported"
+
+
+def stress_stratum_evidence(
+    checks: list[dict[str, Any]],
+    controls: tuple[str, ...],
+    *,
+    metrics: tuple[str, ...] = ("total_return",),
+) -> dict[str, str]:
+    scenarios = sorted({
+        str(row.get("scenario_stratum", ""))
+        for row in checks
+        if str(row.get("inference_scope", "")) == "scenario_stratum"
+        and str(row.get("scenario_stratum", ""))
+    })
+    return {
+        scenario: _metric_evidence_status(
+            checks,
+            controls,
+            metrics=metrics,
+            inference_scope="scenario_stratum",
+            scenario_stratum=scenario,
+        )
+        for scenario in scenarios
+    }
+
+
+def validate_frozen_result_binding(
+    rows: list[dict[str, Any]],
+    *,
+    expected_frozen_config_sha256: str = "",
+    expected_selected: dict[str, dict[str, Any]] | None = None,
+    expected_code_revision: str = "",
+    expected_source_manifest_sha256: str = "",
+) -> dict[str, Any]:
+    """Bind merged confirmatory rows back to the validated frozen config."""
+
+    frozen_rows = [
+        row for row in rows
+        if str(row.get("hyperparameter_source", "")) == "frozen_nested_validation"
+    ]
+    if not frozen_rows:
+        return {"status": "not_applicable_exploratory", "verified_row_count": 0}
+    selected = expected_selected or {}
+    digest = str(expected_frozen_config_sha256).strip().lower()
+    revision = str(expected_code_revision).strip().lower()
+    manifest = str(expected_source_manifest_sha256).strip().lower()
+    if (
+        not is_hex_digest(digest, length=64)
+        or not selected
+        or not is_hex_digest(revision, length=40)
+        or not is_hex_digest(manifest, length=64)
+    ):
+        return {
+            "status": "unverified_missing_frozen_config",
+            "verified_row_count": 0,
+        }
+
+    for row in frozen_rows:
+        mode = str(row.get("policy_mode", row.get("baseline", "")))
+        entry = selected.get(mode)
+        if not isinstance(entry, dict):
+            raise ValueError(f"frozen config has no selected entry for {mode}")
+        parameters = entry.get("parameters")
+        if not isinstance(parameters, dict):
+            raise ValueError(f"frozen config has invalid parameters for {mode}")
+        parameter_hash = canonical_hyperparameter_sha256(parameters)
+        try:
+            actual_parameters = json.loads(
+                str(row.get("actual_hyperparameters_json", ""))
+            )
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"invalid merged hyperparameters for {mode}") from exc
+        expected_values = {
+            "frozen_config_sha256": digest,
+            "selected_candidate_id": str(entry.get("candidate_id", "")),
+            "actual_hyperparameter_sha256": parameter_hash,
+            "code_revision": revision,
+            "source_manifest_sha256": manifest,
+        }
+        for field, expected in expected_values.items():
+            actual = str(row.get(field, "")).strip().lower()
+            if actual != str(expected).strip().lower():
+                raise ValueError(
+                    f"merged row disagrees with frozen config for {mode}: {field}"
+                )
+        if actual_parameters != parameters:
+            raise ValueError(
+                f"merged row parameters disagree with frozen config for {mode}"
+            )
+    return {
+        "status": "verified",
+        "verified_row_count": len(frozen_rows),
+        "frozen_config_sha256": digest,
+    }
 
 
 def build_experiment_manifest(
@@ -1259,6 +1473,11 @@ def run_strong_learned_baseline_validation(
         ppo_controls + offpolicy_controls,
         metrics=("FocusScore", "LowerLFDrift"),
     )
+    stress_evidence = stress_stratum_evidence(
+        checks,
+        ppo_controls + offpolicy_controls,
+        metrics=("total_return",),
+    )
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
     learning_dynamics = learning_dynamics_summary(run_rows)
     coverage = _experiment_matrix_coverage(rows)
@@ -1350,6 +1569,12 @@ def run_strong_learned_baseline_validation(
             "training_path_protocol": TRAINING_PATH_PROTOCOL,
             "checkpoint_selection_protocol": SELECTION_PROTOCOL,
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+            "confirmatory_analysis_version": CONFIRMATORY_ANALYSIS_VERSION,
+            "practical_effect_thresholds": dict(PRACTICAL_EFFECT_THRESHOLDS),
+            "practical_effect_threshold_source": (
+                PRACTICAL_EFFECT_THRESHOLD_SOURCE
+            ),
+            "stress_stratum_total_return_status": stress_evidence,
             "training_reward_scale": float(training_reward_scale),
             "training_protocol_status": "valid",
             "confirmatory": bool(confirmatory),
@@ -1403,6 +1628,14 @@ def merge_strong_learned_baseline_shards(
     input_dirs: list[Path],
     *,
     min_pairs: int,
+    expected_scenarios: list[str] | None = None,
+    expected_policy_modes: list[str] | None = None,
+    expected_replicate_seeds: list[int] | None = None,
+    expected_eval_seeds: list[int] | None = None,
+    expected_frozen_config_sha256: str = "",
+    expected_selected: dict[str, dict[str, Any]] | None = None,
+    expected_code_revision: str = "",
+    expected_source_manifest_sha256: str = "",
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     run_rows: list[dict[str, Any]] = []
@@ -1444,7 +1677,13 @@ def merge_strong_learned_baseline_shards(
     policy_modes = sorted({str(row.get("policy_mode", row.get("baseline", ""))) for row in rows if str(row.get("policy_mode", row.get("baseline", "")))})
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
     learning_dynamics = learning_dynamics_summary(run_rows)
-    coverage = _experiment_matrix_coverage(rows)
+    coverage = _experiment_matrix_coverage(
+        rows,
+        expected_scenarios=expected_scenarios,
+        expected_policy_modes=expected_policy_modes,
+        expected_replicate_seeds=expected_replicate_seeds,
+        expected_eval_seeds=expected_eval_seeds,
+    )
     ppo_modes_run = {
         mode for mode in policy_modes if mode in POLICY_MODES
     }
@@ -1572,6 +1811,13 @@ def merge_strong_learned_baseline_shards(
         except (TypeError, ValueError, json.JSONDecodeError):
             candidate_parameter_rows_valid = False
             break
+    freeze_binding = validate_frozen_result_binding(
+        rows,
+        expected_frozen_config_sha256=expected_frozen_config_sha256,
+        expected_selected=expected_selected,
+        expected_code_revision=expected_code_revision,
+        expected_source_manifest_sha256=expected_source_manifest_sha256,
+    )
     valid_digest = (
         len(frozen_hashes) == 1
         and len(next(iter(frozen_hashes))) == 64
@@ -1586,6 +1832,7 @@ def merge_strong_learned_baseline_shards(
         and selected_candidates_present
         and candidate_parameter_rows_valid
         and source_identity_status == "verified"
+        and freeze_binding["status"] == "verified"
     ):
         hyperparameter_protocol_status = "frozen_validation_only"
     elif hyperparameter_sources in (set(), {"exploratory_unfrozen"}):
@@ -1624,6 +1871,11 @@ def merge_strong_learned_baseline_shards(
         risk_adjusted_status = "exploratory_unfrozen_hyperparameters"
         responsibility_status = "exploratory_unfrozen_hyperparameters"
         ppo_baseline_status = "exploratory_unfrozen_hyperparameters"
+    stress_evidence = stress_stratum_evidence(
+        checks,
+        ppo_controls + offpolicy_controls,
+        metrics=("total_return",),
+    )
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -1682,6 +1934,16 @@ def merge_strong_learned_baseline_shards(
                 next(iter(selection_objectives))
                 if len(selection_objectives) == 1 else "mixed_or_missing"
             ),
+            "confirmatory_analysis_version": CONFIRMATORY_ANALYSIS_VERSION,
+            "practical_effect_thresholds": dict(PRACTICAL_EFFECT_THRESHOLDS),
+            "practical_effect_threshold_source": (
+                PRACTICAL_EFFECT_THRESHOLD_SOURCE
+            ),
+            "frozen_result_binding_status": freeze_binding["status"],
+            "frozen_result_binding_verified_rows": int(
+                freeze_binding["verified_row_count"]
+            ),
+            "stress_stratum_total_return_status": stress_evidence,
             "ppo_strong_baseline_status": ppo_baseline_status,
             "ppo_metric_status": metric_status,
             "offpolicy_metric_status": offpolicy_metric_status,
@@ -1748,8 +2010,8 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         f"- eval seeds: `{payload['summary']['eval_seed_count']}`",
         f"- matrix coverage: `{payload['summary']['matrix_coverage_status']}`",
         "",
-        "| check | status | metric | paired rows | train reps | delta | CI95 low | CI95 high | win rate | Holm p |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| check | scope | stratum | status | metric | threshold | paired rows | train reps | delta | CI95 low | CI95 high | win rate | Holm p |",
+        "|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in payload["paired_checks"]:
         delta = float(row["delta_mean"])
@@ -1758,7 +2020,9 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         win_rate = float(row["win_rate"])
         holm_p = float(row["holm_adjusted_p_value"])
         lines.append(
-            f"| {row['check']} | {row['status']} | {row['metric']} "
+            f"| {row['check']} | {row.get('inference_scope', 'missing')} "
+            f"| {row.get('scenario_stratum', 'missing')} | {row['status']} "
+            f"| {row['metric']} | {float(row.get('practical_effect_threshold', 0.0)):.4f} "
             f"| {row['n_common']} | {row['n_independent']} | {delta:+.4f} "
             f"| {ci_low:+.4f} | {ci_high:+.4f} "
             f"| {win_rate:.2f} | {holm_p:.4f} |"
