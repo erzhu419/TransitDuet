@@ -1,6 +1,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+import json
 import unittest
 
 import pandas as pd
@@ -117,6 +118,20 @@ class ExternalBaselineProtocolV4Test(unittest.TestCase):
             out_dir = root / "out"
             pd.DataFrame(learned_rows).to_csv(learned_path, index=False)
             pd.DataFrame(baseline_rows).to_csv(baseline_path, index=False)
+            source_sha = "a" * 64
+            (root / "matrix_manifest.json").write_text(json.dumps({
+                "protocol_version": "freqduet-eval-v4",
+                "strict_complete": True,
+                "common_random_numbers_verified": True,
+                "run_manifests_verified": True,
+                "run_source_fingerprint": {"sha256": source_sha},
+            }))
+            (root / "external_baselines_summary.json").write_text(json.dumps({
+                "direct_scenario_seeds": True,
+                "run_manifests_verified": True,
+                "core_source_sha256": source_sha,
+                "evaluator_source_sha256": "b" * 64,
+            }))
 
             compare(
                 learned_path,
@@ -139,6 +154,45 @@ class ExternalBaselineProtocolV4Test(unittest.TestCase):
                     learned_path,
                     baseline_path,
                     root / "broken",
+                    learned_config="main",
+                )
+
+    def test_external_comparison_rejects_core_source_mismatch(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            learned_path = root / "learned.csv"
+            baseline_path = root / "baseline.csv"
+            pd.DataFrame([{
+                "config": "main", "train_seed": 1, "eval_seed": 11,
+                "scenario_tape_id": "tape-11",
+                "protocol_version": "freqduet-eval-v4",
+                **{metric: 1.0 for metric in METRICS},
+            }]).to_csv(learned_path, index=False)
+            pd.DataFrame([{
+                "config": "main", "method": "fixed_headway",
+                "eval_seed": 11, "scenario_tape_id": "tape-11",
+                "protocol_version": "freqduet-eval-v4",
+                **{metric: 1.0 for metric in METRICS},
+            }]).to_csv(baseline_path, index=False)
+            (root / "matrix_manifest.json").write_text(json.dumps({
+                "protocol_version": "freqduet-eval-v4",
+                "strict_complete": True,
+                "common_random_numbers_verified": True,
+                "run_manifests_verified": True,
+                "run_source_fingerprint": {"sha256": "a" * 64},
+            }))
+            (root / "external_baselines_summary.json").write_text(json.dumps({
+                "direct_scenario_seeds": True,
+                "run_manifests_verified": True,
+                "core_source_sha256": "c" * 64,
+                "evaluator_source_sha256": "b" * 64,
+            }))
+
+            with self.assertRaisesRegex(ValueError, "fingerprints differ"):
+                compare(
+                    learned_path,
+                    baseline_path,
+                    root / "out",
                     learned_config="main",
                 )
 

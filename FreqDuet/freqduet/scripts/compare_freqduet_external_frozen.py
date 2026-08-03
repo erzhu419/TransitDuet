@@ -75,6 +75,63 @@ def _validate_tapes(
             f"{learned_map.index[mismatch].tolist()}")
 
 
+def _load_and_validate_manifests(
+    learned_path: Path,
+    baseline_path: Path,
+    learned_manifest_path: Path | None,
+    baseline_manifest_path: Path | None,
+) -> dict[str, object]:
+    learned_manifest_path = (
+        learned_manifest_path or learned_path.with_name("matrix_manifest.json"))
+    baseline_manifest_path = (
+        baseline_manifest_path
+        or baseline_path.with_name("external_baselines_summary.json"))
+    if not learned_manifest_path.exists():
+        raise ValueError(f"missing learned matrix manifest {learned_manifest_path}")
+    if not baseline_manifest_path.exists():
+        raise ValueError(
+            f"missing external baseline manifest {baseline_manifest_path}")
+    learned = json.loads(learned_manifest_path.read_text())
+    baseline = json.loads(baseline_manifest_path.read_text())
+    required_learned = {
+        "protocol_version": "freqduet-eval-v4",
+        "strict_complete": True,
+        "common_random_numbers_verified": True,
+        "run_manifests_verified": True,
+    }
+    for key, expected in required_learned.items():
+        if learned.get(key) != expected:
+            raise ValueError(
+                f"learned matrix manifest {key}={learned.get(key)!r}, "
+                f"expected {expected!r}")
+    required_baseline = {
+        "direct_scenario_seeds": True,
+        "run_manifests_verified": True,
+    }
+    for key, expected in required_baseline.items():
+        if baseline.get(key) != expected:
+            raise ValueError(
+                f"external manifest {key}={baseline.get(key)!r}, "
+                f"expected {expected!r}")
+    learned_source = learned.get("run_source_fingerprint") or {}
+    learned_sha = str(learned_source.get("sha256", ""))
+    baseline_sha = str(baseline.get("core_source_sha256", ""))
+    evaluator_sha = str(baseline.get("evaluator_source_sha256", ""))
+    if len(learned_sha) != 64 or len(baseline_sha) != 64:
+        raise ValueError("comparison manifests contain invalid core source hashes")
+    if learned_sha != baseline_sha:
+        raise ValueError(
+            "learned and external baseline core source fingerprints differ")
+    if len(evaluator_sha) != 64:
+        raise ValueError("external evaluator fingerprint is missing or invalid")
+    return {
+        "learned_manifest": str(learned_manifest_path),
+        "baseline_manifest": str(baseline_manifest_path),
+        "core_source_sha256": learned_sha,
+        "external_evaluator_sha256": evaluator_sha,
+    }
+
+
 def compare(
     learned_path: Path,
     baseline_path: Path,
@@ -82,7 +139,15 @@ def compare(
     learned_config: str,
     baseline_config: str | None = None,
     methods: list[str] | None = None,
+    learned_manifest_path: Path | None = None,
+    baseline_manifest_path: Path | None = None,
 ) -> None:
+    provenance = _load_and_validate_manifests(
+        learned_path,
+        baseline_path,
+        learned_manifest_path,
+        baseline_manifest_path,
+    )
     learned_all = pd.read_csv(learned_path)
     baseline_all = pd.read_csv(baseline_path)
     required_common = {"config", "eval_seed", "scenario_tape_id", *METRICS}
@@ -211,6 +276,7 @@ def compare(
         "paired_test": "two-sided sign-flip over train-seed mean deltas",
         "multiple_testing": "Holm correction across external methods per metric",
         "common_random_numbers_verified": True,
+        "source_provenance": provenance,
     }, indent=2) + "\n")
 
 
@@ -221,6 +287,8 @@ def main() -> None:
     parser.add_argument("--learned-config", required=True)
     parser.add_argument("--baseline-config", default=None)
     parser.add_argument("--methods", default=None)
+    parser.add_argument("--learned-manifest", default=None)
+    parser.add_argument("--baseline-manifest", default=None)
     parser.add_argument("--out-dir", required=True)
     args = parser.parse_args()
     methods = (
@@ -234,6 +302,10 @@ def main() -> None:
         learned_config=args.learned_config,
         baseline_config=args.baseline_config,
         methods=methods,
+        learned_manifest_path=(
+            Path(args.learned_manifest) if args.learned_manifest else None),
+        baseline_manifest_path=(
+            Path(args.baseline_manifest) if args.baseline_manifest else None),
     )
 
 
