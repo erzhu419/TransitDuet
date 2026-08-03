@@ -295,7 +295,9 @@ def run_episode_external(
         nonlocal chosen_triple
         trip._upper_queried = True
         if variant == "rule_mpc":
-            hour = int(6 + trip.launch_time // 3600)
+            hour = int(
+                getattr(env, "_service_start_hour", 6)
+                + trip.launch_time // 3600)
             chosen_triple = mpc_plan(
                 current_hour=hour,
                 last_dispatch_time_per_dir=None,
@@ -401,9 +403,13 @@ def run_one(
         )
     rows = []
     t_start = time.time()
+    protocol_v2 = (
+        (cfg.get("protocol", {}) or {}).get("version")
+        == "freqduet-eval-v2")
     for ep in range(int(episodes)):
         env.scenario_seed = int(seed) * 1000003 + int(ep)
-        if upper_cfg.get("fleet_mode", "fixed") == "elastic":
+        if (upper_cfg.get("fleet_mode", "fixed") == "elastic"
+                and not protocol_v2):
             n_fleet = int(rng.randint(int(upper_cfg.get("fleet_min", 8)), int(upper_cfg.get("fleet_max", 16)) + 1))
         else:
             n_fleet = int(upper_cfg.get("N_fleet", 12))
@@ -422,6 +428,8 @@ def run_one(
             "config": config,
             "domain": infer_domain(config),
             "seed": int(seed),
+            "protocol_version": (
+                "freqduet-eval-v2" if protocol_v2 else "legacy"),
             "wall_s": round(time.time() - t0, 3),
         })
         rows.append(row)

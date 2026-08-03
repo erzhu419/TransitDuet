@@ -300,12 +300,28 @@ def hierarchical_bootstrap(
 ) -> np.ndarray:
     rng = np.random.RandomState(20260803)
     train_seeds = frame["train_seed"].drop_duplicates().to_numpy()
+    blocks = [
+        frame[frame["train_seed"].eq(seed)][metric].to_numpy(dtype=float)
+        for seed in train_seeds
+    ]
+    block_sizes = {len(block) for block in blocks}
+    if len(block_sizes) == 1:
+        values = np.stack(blocks)
+        n_train, n_eval = values.shape
+        sampled_train = rng.randint(
+            0, n_train, size=(int(draws), n_train))
+        sampled_eval = rng.randint(
+            0, n_eval, size=(int(draws), n_train, n_eval))
+        sampled = values[sampled_train[:, :, None], sampled_eval]
+        return sampled.mean(axis=(1, 2))
+
     estimates = []
     for _ in range(int(draws)):
         sampled_train = rng.choice(train_seeds, size=len(train_seeds), replace=True)
         train_means = []
         for seed in sampled_train:
-            block = frame[frame["train_seed"].eq(seed)][metric].to_numpy(dtype=float)
+            block = frame[
+                frame["train_seed"].eq(seed)][metric].to_numpy(dtype=float)
             sampled_eval = rng.choice(block, size=len(block), replace=True)
             train_means.append(float(sampled_eval.mean()))
         estimates.append(float(np.mean(train_means)))

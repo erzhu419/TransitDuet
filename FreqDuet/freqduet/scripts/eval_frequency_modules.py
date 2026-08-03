@@ -91,14 +91,21 @@ def _f1(pred, truth):
     return precision, recall, f1
 
 
-def eval_method(method, low, high, burst_flag, station_stream, od_stream, args):
-    tracker_method = "harmonic" if method == "harmonic_prior" else method
+def eval_method(
+    method, low, high, burst_flag, station_stream, od_stream, args,
+    prior_low=None,
+):
+    tracker_method = {
+        "harmonic_prior": "harmonic",
+        "harmonic_nb_prior": "harmonic_nb",
+    }.get(method, method)
     harmonic_prior = None
     harmonic_prior_var = 100.0
-    if method == "harmonic_prior":
+    if method in {"harmonic_prior", "harmonic_nb_prior"}:
+        prior_low = low if prior_low is None else prior_low
         harmonic_prior = {
             "global": fit_harmonic_prior(
-                low,
+                prior_low,
                 update_interval_s=60.0,
                 period_s=args.minutes * 60.0,
                 fourier_k=args.fourier_k,
@@ -109,7 +116,10 @@ def eval_method(method, low, high, burst_flag, station_stream, od_stream, args):
     tr = DemandFrequencyTracker(
         method=tracker_method,
         update_interval_s=60.0,
-        bin_sec=args.bin_sec if tracker_method == "harmonic" else None,
+        bin_sec=(
+            args.bin_sec
+            if tracker_method in {"harmonic", "harmonic_nb"}
+            else None),
         low_period_s=args.low_period_min * 60.0,
         fast_period_s=args.fast_period_min * 60.0,
         energy_period_s=args.energy_period_min * 60.0,
@@ -124,6 +134,9 @@ def eval_method(method, low, high, burst_flag, station_stream, od_stream, args):
         harmonic_forgetting=args.harmonic_forgetting,
         harmonic_prior_var=harmonic_prior_var,
         harmonic_prior=harmonic_prior,
+        harmonic_nb_dispersion=args.harmonic_nb_dispersion,
+        harmonic_process_var=args.harmonic_process_var,
+        harmonic_innovation_clip=args.harmonic_innovation_clip,
     )
     pred_low = []
     pred_high = []
@@ -161,6 +174,49 @@ def eval_method(method, low, high, burst_flag, station_stream, od_stream, args):
         "final_low": float(pred_low[-1]),
         "final_hf_energy": float(pred_energy[-1]),
     }
+
+
+def make_prior_mismatch_suite(minutes=14 * 60, seed=7):
+    """Create held-out days whose trend differs from the historical prior."""
+    base_low, high, burst_flag, _, _ = make_synthetic_stream(
+        minutes=minutes, seed=seed)
+    t = np.arange(minutes, dtype=np.float64)
+    domains = {
+        "nominal": base_low,
+        "scale125": 1.25 * base_low,
+        "rush_plus45": np.interp(
+            t - 45.0,
+            t,
+            base_low,
+            left=float(base_low[0]),
+            right=float(base_low[-1]),
+        ),
+        "persistent_step": base_low + 8.0 * (t >= minutes // 2),
+    }
+    suite = []
+    for index, (domain, low) in enumerate(domains.items()):
+        rng = np.random.default_rng(100000 + seed * 101 + index)
+        observed = rng.poisson(np.clip(low + high, 0.1, None))
+        station_stream = []
+        od_stream = []
+        for value in observed:
+            first = int(rng.binomial(int(value), 0.55)) if value > 0 else 0
+            second = int(value) - first
+            station_stream.append({(1, True): first, (2, False): second})
+            od_stream.append({
+                (1, 5, True): first,
+                (2, 8, False): second,
+            })
+        suite.append({
+            "domain": domain,
+            "low": np.asarray(low, dtype=np.float64),
+            "prior_low": np.asarray(base_low, dtype=np.float64),
+            "high": np.asarray(high, dtype=np.float64),
+            "burst_flag": np.asarray(burst_flag, dtype=bool),
+            "station_stream": station_stream,
+            "od_stream": od_stream,
+        })
+    return suite
 
 
 def check_feature_modes():
@@ -245,6 +301,17 @@ def aggregate_rows(per_seed_rows):
     return agg
 
 
+def aggregate_domain_rows(per_seed_rows):
+    rows = []
+    domains = sorted({row["domain"] for row in per_seed_rows})
+    for domain in domains:
+        subset = [row for row in per_seed_rows if row["domain"] == domain]
+        for row in aggregate_rows(subset):
+            row["domain"] = domain
+            rows.append(row)
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=7)
@@ -260,20 +327,56 @@ def main():
     ap.add_argument("--harmonic-forgetting", type=float, default=0.9995)
     ap.add_argument("--harmonic-prior-var", type=float, default=0.01)
     ap.add_argument("--harmonic-ridge", type=float, default=1e-2)
+    ap.add_argument("--harmonic-nb-dispersion", type=float, default=20.0)
+    ap.add_argument("--harmonic-process-var", type=float, default=1e-5)
+    ap.add_argument("--harmonic-innovation-clip", type=float, default=3.0)
+    ap.add_argument("--heldout-prior-suite", action="store_true")
     ap.add_argument("--out", default="results_freqduet/frequency_module_eval.json")
     args = ap.parse_args()
 
-    methods = ["harmonic", "harmonic_prior", "haar", "ema", "raw_history"]
+    methods = [
+        "harmonic",
+        "harmonic_prior",
+        "harmonic_nb",
+        "harmonic_nb_prior",
+        "haar",
+        "ema",
+        "raw_history",
+    ]
     per_seed_rows = []
     for seed in range(args.seed, args.seed + args.n_seeds):
-        low, high, burst_flag, station_stream, od_stream = make_synthetic_stream(
-            minutes=args.minutes, seed=seed)
-        for method in methods:
-            row = eval_method(
-                method, low, high, burst_flag, station_stream, od_stream, args)
-            row["seed"] = seed
-            per_seed_rows.append(row)
+        if args.heldout_prior_suite:
+            streams = make_prior_mismatch_suite(
+                minutes=args.minutes, seed=seed)
+        else:
+            low, high, burst_flag, station_stream, od_stream = (
+                make_synthetic_stream(minutes=args.minutes, seed=seed))
+            streams = [{
+                "domain": "nominal",
+                "low": low,
+                "prior_low": low,
+                "high": high,
+                "burst_flag": burst_flag,
+                "station_stream": station_stream,
+                "od_stream": od_stream,
+            }]
+        for stream in streams:
+            for method in methods:
+                row = eval_method(
+                    method,
+                    stream["low"],
+                    stream["high"],
+                    stream["burst_flag"],
+                    stream["station_stream"],
+                    stream["od_stream"],
+                    args,
+                    prior_low=stream["prior_low"],
+                )
+                row["seed"] = seed
+                row["domain"] = stream["domain"]
+                per_seed_rows.append(row)
     rows = aggregate_rows(per_seed_rows)
+    domain_rows = aggregate_domain_rows(per_seed_rows)
     mode_rows = check_feature_modes()
 
     print_table(rows)
@@ -290,6 +393,7 @@ def main():
             "args": vars(args),
             "decomposer_metrics": rows,
             "per_seed_decomposer_metrics": per_seed_rows,
+            "per_domain_decomposer_metrics": domain_rows,
             "feature_mode_checks": mode_rows,
         }, f, indent=2)
     print(f"Wrote {out}")

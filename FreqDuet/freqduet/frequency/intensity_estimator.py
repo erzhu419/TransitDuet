@@ -234,3 +234,137 @@ class CausalHarmonicBandState:
     @property
     def middle_slope(self):
         return self.middle - self.prev_middle if self.n > 1 else 0.0
+
+
+class CausalNegativeBinomialHarmonicBandState(CausalHarmonicBandState):
+    """Count-aware dynamic harmonic filter with a negative-binomial EKF.
+
+    The latent harmonic coefficients follow a random walk. The observation
+    update uses a log-linked count mean and variance ``mu + mu**2 / phi``;
+    ``phi -> infinity`` recovers a Poisson observation model. Innovations are
+    clipped in predictive-standard-deviation units so an isolated burst stays
+    in the high-frequency residual instead of immediately bending the trend.
+    """
+
+    def __init__(
+        self,
+        *args,
+        nb_dispersion=20.0,
+        process_var=1e-5,
+        innovation_clip=3.0,
+        observation_var_floor=1e-3,
+        **kwargs,
+    ):
+        self.nb_dispersion = max(float(nb_dispersion), 1e-6)
+        self.process_var = max(float(process_var), 0.0)
+        self.innovation_clip = max(float(innovation_clip), 0.0)
+        self.observation_var_floor = max(
+            float(observation_var_floor), 1e-9)
+        self.standardized_innovation = 0.0
+        self.observation_variance = self.observation_var_floor
+        super().__init__(*args, **kwargs)
+
+    def reset(self):
+        super().reset()
+        self.standardized_innovation = 0.0
+        self.observation_variance = self.observation_var_floor
+
+    def update(self, value, step=None):
+        value = max(float(value), 0.0)
+        feature_step = self.n if step is None else int(step)
+        phi = self._features(feature_step)
+
+        if self.n == 0 and not np.any(np.abs(self.theta) > 1e-12):
+            # A zero log-rate prior has zero count variance and gives an
+            # ill-conditioned first count update. Initialise only the
+            # intercept from the first causal observation when no historical
+            # prior was supplied.
+            self.theta[0] = math.log1p(value)
+
+        # Random-walk prediction. Covariance inflation preserves the existing
+        # forgetting-factor interpretation while process_var controls absolute
+        # adaptation when a tight historical prior is supplied.
+        self.cov *= self._inv_forgetting_factor
+        diagonal = np.diag_indices(self.dim)
+        self.cov[diagonal] += self.process_var
+
+        pred_log_before = float(phi @ self.theta)
+        pred_rate_before = self._rate_from_log(pred_log_before)
+        cov_jacobian = self._cov_phi
+        np.dot(self.cov, phi, out=cov_jacobian)
+
+        count_variance = max(
+            pred_rate_before
+            + pred_rate_before ** 2 / self.nb_dispersion,
+            0.0,
+        )
+        # Delta-method variance of log1p(Y). This keeps the observation update
+        # linear in the harmonic coefficients while retaining the
+        # mean-dependent Negative-Binomial noise model.
+        transformed_observation_var = max(
+            count_variance / max((pred_rate_before + 1.0) ** 2, 1e-9),
+            self.observation_var_floor,
+        )
+        innovation_var = max(
+            float(phi @ cov_jacobian) + transformed_observation_var,
+            1e-9,
+        )
+        raw_innovation = value - pred_rate_before
+        transformed_innovation = math.log1p(value) - pred_log_before
+        standardized = transformed_innovation / math.sqrt(innovation_var)
+        if self.innovation_clip > 0.0:
+            standardized_used = float(np.clip(
+                standardized,
+                -self.innovation_clip,
+                self.innovation_clip,
+            ))
+        else:
+            standardized_used = float(standardized)
+        innovation_used = standardized_used * math.sqrt(innovation_var)
+        self.theta += cov_jacobian * (innovation_used / innovation_var)
+
+        np.multiply(
+            cov_jacobian[:, None],
+            cov_jacobian[None, :],
+            out=self._outer_buf,
+        )
+        self._outer_buf *= 1.0 / innovation_var
+        self.cov -= self._outer_buf
+        self.cov[:] = 0.5 * (self.cov + self.cov.T)
+        self.cov[diagonal] = np.maximum(self.cov[diagonal], 1e-12)
+
+        pred_rate_after = self._rate_from_log(float(phi @ self.theta))
+        self.prev_low = self.low
+        self.prev_high = self.high
+        self.prev_middle = self.middle
+        self.low = pred_rate_after
+        self.fast = value
+        self._raw_high = raw_innovation
+        if self.n == 0:
+            self.middle = raw_innovation
+            self.high = raw_innovation
+            self.high_energy = 0.0
+            self.middle_energy = 0.0
+        else:
+            self.middle = (
+                (1.0 - self.middle_alpha) * self.middle
+                + self.middle_alpha * raw_innovation
+            )
+            self.high = (
+                (1.0 - self.residual_alpha) * self.high
+                + self.residual_alpha * raw_innovation
+            )
+            self.high_energy = (
+                (1.0 - self.energy_alpha) * self.high_energy
+                + self.energy_alpha * self.high ** 2
+            )
+            self.middle_energy = (
+                (1.0 - self.middle_alpha) * self.middle_energy
+                + self.middle_alpha * self.middle ** 2
+            )
+        np.dot(self.cov, phi, out=cov_jacobian)
+        self.uncertainty = float(math.sqrt(max(
+            float(phi @ cov_jacobian), 0.0)))
+        self.standardized_innovation = float(standardized)
+        self.observation_variance = float(count_variance)
+        self.n += 1

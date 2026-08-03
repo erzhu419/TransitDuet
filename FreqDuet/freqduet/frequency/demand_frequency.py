@@ -11,6 +11,8 @@ Four causal decomposers are available:
 * ``harmonic``: recursive least-squares dynamic harmonic smoother on
   ``log1p(arrival_rate)``. This is the current main non-wavelet intensity path:
   low frequency is the causal harmonic forecast, high frequency is innovation.
+* ``harmonic_nb``: count-aware dynamic harmonic state-space model with a
+  negative-binomial extended-Kalman update and robust innovations.
 * ``raw_history``: no frequency split; exposes trailing realized-demand bins as
   the RawHistory ablation required by `GPT.md`.
 
@@ -29,7 +31,10 @@ import math
 
 import numpy as np
 
-from .intensity_estimator import CausalHarmonicBandState
+from .intensity_estimator import (
+    CausalHarmonicBandState,
+    CausalNegativeBinomialHarmonicBandState,
+)
 from .promotion_gate import CausalPromotionGate
 
 
@@ -220,6 +225,10 @@ class DemandFrequencyTracker:
         harmonic_prior_var=100.0,
         harmonic_residual_period_s=None,
         harmonic_prior=None,
+        harmonic_nb_dispersion=20.0,
+        harmonic_process_var=1e-5,
+        harmonic_innovation_clip=3.0,
+        harmonic_observation_var_floor=1e-3,
         lower_high_noise_z=0.0,
         lower_high_noise_energy_min=0.0,
         promotion_enable=False,
@@ -317,7 +326,6 @@ class DemandFrequencyTracker:
                 energy_alpha=energy_alpha)
         elif self.method in {
             "harmonic", "dynamic_harmonic", "harmonic_rls",
-            "dynamic_harmonic_nb",
         }:
             self.method = "harmonic"
             self._state_factory = lambda prior_theta=None: CausalHarmonicBandState(
@@ -330,6 +338,29 @@ class DemandFrequencyTracker:
                 residual_alpha=residual_alpha,
                 middle_alpha=middle_alpha,
                 prior_theta=prior_theta)
+        elif self.method in {
+            "harmonic_nb", "dynamic_harmonic_nb", "count_harmonic",
+        }:
+            self.method = "harmonic_nb"
+            self._state_factory = (
+                lambda prior_theta=None:
+                CausalNegativeBinomialHarmonicBandState(
+                    update_interval_s=self.bin_interval_s,
+                    period_s=harmonic_period_s,
+                    fourier_k=fourier_k,
+                    forgetting_factor=harmonic_forgetting,
+                    prior_var=harmonic_prior_var,
+                    energy_alpha=energy_alpha,
+                    residual_alpha=residual_alpha,
+                    middle_alpha=middle_alpha,
+                    prior_theta=prior_theta,
+                    nb_dispersion=harmonic_nb_dispersion,
+                    process_var=harmonic_process_var,
+                    innovation_clip=harmonic_innovation_clip,
+                    observation_var_floor=(
+                        harmonic_observation_var_floor),
+                )
+            )
         elif self.method in {"raw_history", "history"}:
             self.method = "raw_history"
             self.od_features_enabled = False
@@ -405,6 +436,14 @@ class DemandFrequencyTracker:
                 "harmonic_residual_period_s",
                 cfg.get("fast_period_s", 300.0)),
             harmonic_prior=cfg.get("harmonic_prior", None),
+            harmonic_nb_dispersion=cfg.get(
+                "harmonic_nb_dispersion", 20.0),
+            harmonic_process_var=cfg.get(
+                "harmonic_process_var", 1e-5),
+            harmonic_innovation_clip=cfg.get(
+                "harmonic_innovation_clip", 3.0),
+            harmonic_observation_var_floor=cfg.get(
+                "harmonic_observation_var_floor", 1e-3),
             lower_high_noise_z=cfg.get("lower_high_noise_z", 0.0),
             lower_high_noise_energy_min=cfg.get(
                 "lower_high_noise_energy_min", 0.0),
@@ -459,7 +498,7 @@ class DemandFrequencyTracker:
         )
 
     def _new_state(self, prior_theta=None):
-        if self.method == "harmonic":
+        if self.method in {"harmonic", "harmonic_nb"}:
             return self._state_factory(prior_theta)
         return self._state_factory()
 
@@ -494,7 +533,7 @@ class DemandFrequencyTracker:
         return self.local_promotion_gates[key]
 
     def _update_state(self, state, value, step):
-        if self.method == "harmonic":
+        if self.method in {"harmonic", "harmonic_nb"}:
             state.update(value, step=step)
         else:
             state.update(value)
@@ -578,7 +617,7 @@ class DemandFrequencyTracker:
 
     def _maybe_promote_state(self, state, gate, demand_norm):
         if (not self.promotion_adapt_low
-                or self.method != "harmonic"
+                or self.method not in {"harmonic", "harmonic_nb"}
                 or gate is None
                 or not getattr(gate, "flag", 0.0)
                 or (self.promotion_adapt_active_only

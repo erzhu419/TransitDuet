@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_harmonicnb_hiro
+
+protocol:
+  role: structural_candidate_count_harmonic
+
+frequency:
+  method: harmonic_nb
+  harmonic_nb_dispersion: 0.25
+  harmonic_process_var: 0.0001
+  harmonic_innovation_clip: 3.0
+  harmonic_observation_var_floor: 0.001
