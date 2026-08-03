@@ -103,6 +103,33 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
         np.testing.assert_allclose(batch.reward, [2.8, 3.0])
         np.testing.assert_array_equal(batch.action.reshape(-1), [1.0, 0.0])
 
+    def test_promotion_gate_can_close_at_scheduled_upper_boundary(self):
+        builder = PromotionRolloutBuilder(gamma=0.9)
+        builder.begin(
+            state=np.asarray([1.0, 2.0], dtype=np.float32),
+            action=0.0,
+            logp=-0.2,
+            value=0.4,
+        )
+        builder.add_reward(1.0)
+        builder.add_reward(2.0)
+        builder.close(done=False)
+        builder.begin(
+            state=np.asarray([3.0, 4.0], dtype=np.float32),
+            action=1.0,
+            logp=-0.3,
+            value=0.5,
+        )
+        builder.add_reward(3.0)
+        builder.finish(terminal=True)
+
+        batch = builder.build()
+        self.assertIsNotNone(batch)
+        np.testing.assert_array_equal(batch.duration, [2, 1])
+        np.testing.assert_array_equal(batch.done, [0.0, 1.0])
+        self.assertAlmostEqual(float(batch.reward[0]), 1.0 + 0.9 * 2.0)
+        self.assertAlmostEqual(float(batch.reward[1]), 3.0)
+
 
 class FrequencySeparatedActorCriticTest(unittest.TestCase):
     @staticmethod

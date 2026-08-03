@@ -1173,6 +1173,7 @@ def smdp_rollout(
     learned_gate_actions: list[float] = []
     learned_promotion_absorbed_norm: list[float] = []
     learned_replan_cost_total = 0.0
+    promotion_scheduled_boundary_closes = 0
     hf_order_l1: list[float] = []
     hf_overlay_position_l1: list[float] = []
     hf_overlay_returns: list[float] = []
@@ -1194,6 +1195,13 @@ def smdp_rollout(
         learned_replan_cost_this_step = 0.0
         forced_reason = scheduler.decision_reason(t, promotion=False)
         if forced_reason is not None:
+            if (
+                forced_reason == "scheduled"
+                and promotion_builder is not None
+                and promotion_builder.has_pending
+            ):
+                promotion_builder.close(done=False)
+                promotion_scheduled_boundary_closes += 1
             reason = forced_reason
         elif learned_promotion_gate:
             if current_target is None or scheduler.last_upper_step is None:
@@ -1532,6 +1540,9 @@ def smdp_rollout(
             np.mean(learned_gate_actions)
         ) if learned_gate_actions else 0.0,
         "promotion_replan_cost_total": float(learned_replan_cost_total),
+        "promotion_scheduled_boundary_close_count": int(
+            promotion_scheduled_boundary_closes
+        ),
         "promotion_absorbed_norm_mean": float(
             np.mean(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
@@ -1753,6 +1764,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_gate_probability_mean",
         "promotion_gate_action_rate",
         "promotion_replan_cost_total",
+        "promotion_scheduled_boundary_close_count",
         "promotion_absorbed_norm_mean",
         "promotion_absorbed_norm_total",
         "hf_order_l1_mean",
