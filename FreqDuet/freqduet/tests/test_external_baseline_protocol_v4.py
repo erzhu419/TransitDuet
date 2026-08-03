@@ -105,6 +105,7 @@ class ExternalBaselineProtocolV4Test(unittest.TestCase):
                 "method": "fixed_headway",
                 "eval_seed": eval_seed,
                 "scenario_tape_id": f"tape-{eval_seed}",
+                "protocol_version": "freqduet-eval-v4",
             }
             row.update({metric: 1.0 for metric in METRICS})
             baseline_rows.append(row)

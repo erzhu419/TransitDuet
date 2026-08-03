@@ -29,6 +29,16 @@ METRICS = [
     "service_cost_observed",
     "restricted_wait_horizon_min",
     "avg_wait_observed_min",
+    "restricted_in_vehicle_horizon_min",
+    "avg_in_vehicle_observed_min",
+    "restricted_total_journey_horizon_min",
+    "avg_total_journey_observed_min",
+    "holding_vehicle_seconds",
+    "holding_passenger_seconds",
+    "fleet_denied_dispatch_events",
+    "fleet_denied_trips",
+    "fleet_readiness_delay_mean_s",
+    "fleet_readiness_delay_max_s",
     "passenger_unserved_rate",
     "headway_cv",
     "fleet_overshoot",
@@ -96,6 +106,10 @@ def compare(
         raise ValueError("learned matrix has duplicate train/eval pairs")
     if set(learned["protocol_version"].astype(str)) != {"freqduet-eval-v4"}:
         raise ValueError("learned input is not protocol v4")
+    if ("protocol_version" not in baselines
+            or set(baselines["protocol_version"].astype(str))
+            != {"freqduet-eval-v4"}):
+        raise ValueError("external baseline input is not protocol v4")
 
     selected_methods = methods or sorted(baselines["method"].astype(str).unique())
     pair_frames = []
@@ -190,7 +204,10 @@ def compare(
         "baseline_methods": selected_methods,
         "metrics": METRICS,
         "delta_definition": "learned minus external baseline",
-        "uncertainty": "paired hierarchical bootstrap over train and eval seed",
+        "uncertainty": (
+            "paired crossed bootstrap over train and eval seed; each draw "
+            "shares one evaluation-seed resample across training seeds"
+        ),
         "paired_test": "two-sided sign-flip over train-seed mean deltas",
         "multiple_testing": "Holm correction across external methods per metric",
         "common_random_numbers_verified": True,

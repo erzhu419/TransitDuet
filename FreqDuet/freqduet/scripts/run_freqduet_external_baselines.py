@@ -30,6 +30,7 @@ from env.evaluation import (
 from runner_v3 import load_config
 from run_baseline_rule import hour_to_slot, mpc_plan, rule_holding_action
 from scripts.run_freqduet_protocol_v2_matrix import (
+    V4_SAFETY_METRICS,
     config_fingerprint,
     source_fingerprint,
 )
@@ -492,6 +493,14 @@ def run_episode_external(
         "avg_wait_observed_min": float(details["avg_wait_observed_min"]),
         "restricted_wait_horizon_min": float(
             details["restricted_wait_horizon_min"]),
+        "avg_in_vehicle_observed_min": float(
+            details["avg_in_vehicle_observed_min"]),
+        "restricted_in_vehicle_horizon_min": float(
+            details["restricted_in_vehicle_horizon_min"]),
+        "avg_total_journey_observed_min": float(
+            details["avg_total_journey_observed_min"]),
+        "restricted_total_journey_horizon_min": float(
+            details["restricted_total_journey_horizon_min"]),
         "passengers_generated": int(details["passengers_generated"]),
         "passengers_unserved": int(details["passengers_unserved"]),
         "passenger_unserved_rate": float(details["passenger_unserved_rate"]),
@@ -511,6 +520,14 @@ def run_episode_external(
         "fleet_denied_dispatch_events": int(details.get(
             "fleet_denied_dispatch_events", 0)),
         "fleet_denied_trips": int(details.get("fleet_denied_trips", 0)),
+        "fleet_readiness_delay_mean_s": float(details.get(
+            "fleet_readiness_delay_mean_s", 0.0)),
+        "fleet_readiness_delay_max_s": float(details.get(
+            "fleet_readiness_delay_max_s", 0.0)),
+        "holding_vehicle_seconds": float(details.get(
+            "holding_vehicle_seconds", 0.0)),
+        "holding_passenger_seconds": float(details.get(
+            "holding_passenger_seconds", 0.0)),
         "fleet_overshoot": overshoot,
         "composite": selected_service_cost,
         "service_cost_wait_metric": wait_metric,
@@ -746,6 +763,14 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if manifest.get(
             "evaluator_source_fingerprint") != external_evaluator_fingerprint():
         raise ValueError(f"{manifest_path}: evaluator fingerprint mismatch")
+    missing_safety = sorted(set(V4_SAFETY_METRICS) - set(frame.columns))
+    if missing_safety:
+        raise ValueError(
+            f"{run_dir}: missing protocol-v4 safety metrics {missing_safety}")
+    for metric in V4_SAFETY_METRICS:
+        values = pd.to_numeric(frame[metric], errors="coerce").to_numpy()
+        if not np.isfinite(values).all():
+            raise ValueError(f"{run_dir}: non-finite safety metric {metric}")
     required_values = {
         "protocol_version": "freqduet-eval-v4",
         "fleet_inventory_mode": "fixed_pool",
@@ -803,6 +828,10 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         ("composite", "composite"),
         ("avg_wait_observed_min", "avg_wait_observed_min"),
         ("restricted_wait_horizon_min", "restricted_wait_horizon_min"),
+        ("avg_in_vehicle_observed_min", "avg_in_vehicle_observed_min"),
+        ("restricted_in_vehicle_horizon_min", "restricted_in_vehicle_horizon_min"),
+        ("avg_total_journey_observed_min", "avg_total_journey_observed_min"),
+        ("restricted_total_journey_horizon_min", "restricted_total_journey_horizon_min"),
         ("headway_cv", "headway_cv"),
         ("fleet_overshoot", "fleet_overshoot"),
         ("target_peak", "target_peak"),
@@ -814,6 +843,12 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         ("trip_launch_rate", "trip_launch_rate"),
         ("trip_completion_rate", "trip_completion_rate"),
         ("physical_vehicle_count", "physical_vehicle_count"),
+        ("fleet_denied_dispatch_events", "fleet_denied_dispatch_events"),
+        ("fleet_denied_trips", "fleet_denied_trips"),
+        ("fleet_readiness_delay_mean_s", "fleet_readiness_delay_mean_s"),
+        ("fleet_readiness_delay_max_s", "fleet_readiness_delay_max_s"),
+        ("holding_vehicle_seconds", "holding_vehicle_seconds"),
+        ("holding_passenger_seconds", "holding_passenger_seconds"),
     ]:
         row[out_col] = (
             float(pd.to_numeric(tail[src_col], errors="coerce").mean())
@@ -871,10 +906,17 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
         for metric in [
             "wait", "cv", "overshoot", "composite",
             "avg_wait_observed_min", "restricted_wait_horizon_min",
+            "avg_in_vehicle_observed_min",
+            "restricted_in_vehicle_horizon_min",
+            "avg_total_journey_observed_min",
+            "restricted_total_journey_horizon_min",
             "headway_cv", "fleet_overshoot",
             "service_cost_observed", "service_cost_restricted",
             "passenger_unserved_rate", "trip_launch_rate",
-            "trip_completion_rate",
+            "trip_completion_rate", "fleet_denied_dispatch_events",
+            "fleet_denied_trips", "fleet_readiness_delay_mean_s",
+            "fleet_readiness_delay_max_s", "holding_vehicle_seconds",
+            "holding_passenger_seconds",
         ]:
             vals = pd.to_numeric(group[metric], errors="coerce")
             row[f"{metric}_mean"] = float(vals.mean())

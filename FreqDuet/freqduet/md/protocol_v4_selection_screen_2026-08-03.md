@@ -57,6 +57,28 @@ a material regression in unserved-passenger rate, trip launch/completion rate,
 headway CV, or fleet overshoot. All physical, observation, source-hash,
 resolved-config-hash, and scenario-tape invariants must pass first.
 
+Before aggregate results were inspected, “material” was locked to the following
+paired two-sided 95% CI limits for candidate-minus-main deltas:
+
+| Endpoint | Required bound |
+| --- | --- |
+| Primary restricted service cost | mean <= -0.01 and CI upper < 0 |
+| Passenger unserved rate | CI upper <= +0.005 |
+| Trip launch rate | CI lower >= -0.005 |
+| Trip completion rate | CI lower >= -0.005 |
+| Headway CV | CI upper <= +0.02 |
+| Fleet overshoot | CI upper <= 0 |
+| Restricted in-vehicle time | CI upper <= +0.5 min/passenger |
+| Restricted total journey time | CI upper <= +0.5 min/passenger |
+| Distinct fleet-denied trips | CI upper <= +1 trip/day |
+| Mean fleet-readiness delay | CI upper <= +15 s |
+
+The uncertainty estimator is a crossed bootstrap: each draw resamples training
+seeds and evaluation seeds as separate axes, and one evaluation-seed resample
+is shared across all sampled policies. Evaluation scenarios are crossed with,
+not nested under, training seeds. The scenario-tape ID must be unique per eval
+seed globally across every configuration and training seed.
+
 Interpretation is fixed before results:
 
 - If `nofreq` or `rawhistory` is best, the frequency-separated efficacy claim
@@ -64,6 +86,7 @@ Interpretation is fixed before results:
 - If a mechanism ablation is better, remove or redesign that mechanism and use
   fresh confirmation seeds.
 - If standard constrained SAC matches or beats the ensemble, prefer the simpler
-  optimizer unless a later untouched confirmation reverses the result.
+  optimizer. “Matches” means its primary CI upper is at most +0.01 and every
+  no-harm bound above passes; this simplicity rule does not require superiority.
 - If no variant materially improves `main`, retain `main` and move to untouched
   100/200-episode confirmation and external baselines.

@@ -9,12 +9,15 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     METRICS,
     OPTIONAL_COST_METRICS,
     PROTOCOL_VERSION,
+    V4_SAFETY_METRICS,
     analysis_metrics_for_frame,
     config_fingerprint,
+    hierarchical_bootstrap,
     holm_adjusted_pvalues,
     paired_sign_flip_p,
     protocol_version_for_config,
     source_fingerprint,
+    validate_common_scenario_tapes,
     validate_evaluation_frame,
     validate_run_manifest,
 )
@@ -45,6 +48,17 @@ class ProtocolV2MatrixTest(unittest.TestCase):
             analysis_metrics_for_frame(frame),
             METRICS + OPTIONAL_COST_METRICS,
         )
+
+    def test_v4_analysis_requires_and_includes_safety_endpoints(self):
+        frame = evaluation_frame([101, 102])
+        frame["protocol_version"] = "freqduet-eval-v4"
+        with self.assertRaisesRegex(RuntimeError, "safety metrics"):
+            analysis_metrics_for_frame(frame)
+
+        for metric in V4_SAFETY_METRICS:
+            frame[metric] = 1.0
+        self.assertTrue(
+            set(V4_SAFETY_METRICS).issubset(analysis_metrics_for_frame(frame)))
 
     def test_analysis_metrics_reject_mixed_cost_contract(self):
         frame = evaluation_frame([101, 102])
@@ -87,6 +101,36 @@ class ProtocolV2MatrixTest(unittest.TestCase):
             paired_sign_flip_p(np.array([-1.0, -1.0, -1.0])),
             0.25,
         )
+
+    def test_crossed_bootstrap_shares_eval_resample_across_train_seeds(self):
+        frame = pd.DataFrame([
+            {"train_seed": train, "eval_seed": evaluation, "metric": value}
+            for train in (1, 2)
+            for evaluation, value in ((11, 0.0), (12, 10.0))
+        ])
+
+        estimates = hierarchical_bootstrap(frame, "metric", draws=256)
+
+        self.assertTrue(set(np.unique(estimates)).issubset({0.0, 5.0, 10.0}))
+
+    def test_crossed_bootstrap_rejects_incomplete_grid(self):
+        frame = pd.DataFrame([
+            {"train_seed": 1, "eval_seed": 11, "metric": 0.0},
+            {"train_seed": 1, "eval_seed": 12, "metric": 1.0},
+            {"train_seed": 2, "eval_seed": 11, "metric": 2.0},
+        ])
+
+        with self.assertRaisesRegex(ValueError, "complete"):
+            hierarchical_bootstrap(frame, "metric", draws=10)
+
+    def test_scenario_tape_is_common_across_training_seeds(self):
+        frame = pd.DataFrame([
+            {"train_seed": 1, "eval_seed": 11, "scenario_tape_id": "a"},
+            {"train_seed": 2, "eval_seed": 11, "scenario_tape_id": "b"},
+        ])
+
+        with self.assertRaisesRegex(RuntimeError, "common scenario tape"):
+            validate_common_scenario_tapes(frame)
 
     def test_holm_correction_controls_each_comparison_family(self):
         corrected = holm_adjusted_pvalues([0.01, 0.04, 0.03, float("nan")])

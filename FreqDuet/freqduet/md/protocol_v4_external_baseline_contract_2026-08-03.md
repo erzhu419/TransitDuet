@@ -30,10 +30,17 @@ directly, and v4 defines the upper action through an executable launch curve.
    schedules, non-conserved fleets, observation-contract drift, or LF/HF share
    errors.
 
-The comparison script reports learned-minus-baseline paired deltas, hierarchical
+The comparison script reports learned-minus-baseline paired deltas, crossed
 bootstrap confidence intervals over training and evaluation seeds, paired
 effect sizes, train-seed sign-flip tests, and Holm correction across external
 methods. Negative deltas are improvements for cost metrics.
+
+Passenger safety endpoints are mandatory rather than optional columns:
+observed/restricted in-vehicle time, observed/restricted total journey time,
+vehicle holding seconds, passenger holding seconds, distinct denied trips, and
+fleet-readiness delay. Each bootstrap draw shares one evaluation-seed resample
+across all sampled training seeds. Raw waiting-only comparison tables are not
+eligible for the paper package.
 
 ## Interpretation
 

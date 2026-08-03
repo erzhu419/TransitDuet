@@ -41,6 +41,18 @@ METRICS = [
     "upper_delta_mean",
     "lower_action_mean",
 ]
+V4_SAFETY_METRICS = [
+    "avg_in_vehicle_observed_min",
+    "restricted_in_vehicle_horizon_min",
+    "avg_total_journey_observed_min",
+    "restricted_total_journey_horizon_min",
+    "holding_vehicle_seconds",
+    "holding_passenger_seconds",
+    "fleet_denied_dispatch_events",
+    "fleet_denied_trips",
+    "fleet_readiness_delay_mean_s",
+    "fleet_readiness_delay_max_s",
+]
 OPTIONAL_COST_METRICS = [
     "service_cost_observed",
     "service_cost_restricted",
@@ -56,6 +68,16 @@ METRIC_DIRECTIONS = {
     "fleet_overshoot": "min",
     "trip_launch_rate": "max",
     "trip_completion_rate": "max",
+    "avg_in_vehicle_observed_min": "min",
+    "restricted_in_vehicle_horizon_min": "min",
+    "avg_total_journey_observed_min": "min",
+    "restricted_total_journey_horizon_min": "min",
+    "holding_vehicle_seconds": "min",
+    "holding_passenger_seconds": "min",
+    "fleet_denied_dispatch_events": "min",
+    "fleet_denied_trips": "min",
+    "fleet_readiness_delay_mean_s": "min",
+    "fleet_readiness_delay_max_s": "min",
 }
 
 
@@ -90,6 +112,23 @@ def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
         metric for metric in METRICS
         if metric != "service_cost" or not mixed_wait_basis
     ]
+    protocol_versions = set(frame.get(
+        "protocol_version", pd.Series(dtype=str)).astype(str))
+    if "freqduet-eval-v4" in protocol_versions:
+        missing = sorted(set(V4_SAFETY_METRICS) - set(frame.columns))
+        if missing:
+            raise RuntimeError(
+                "protocol v4 matrix is missing passenger/fleet safety metrics: "
+                f"{missing}")
+        incomplete = [
+            metric for metric in V4_SAFETY_METRICS
+            if not pd.to_numeric(frame[metric], errors="coerce").notna().all()
+        ]
+        if incomplete:
+            raise RuntimeError(
+                "protocol v4 matrix has incomplete safety metrics: "
+                f"{incomplete}")
+        metrics.extend(V4_SAFETY_METRICS)
     if all(optional_complete.values()):
         metrics.extend(OPTIONAL_COST_METRICS)
     return metrics
@@ -182,9 +221,12 @@ def validate_evaluation_frame(
     expected = [int(seed) for seed in eval_seeds]
     if len(expected) != len(set(expected)):
         raise ValueError("evaluation seeds must be unique")
+    required_metrics = list(METRICS)
+    if str(protocol_version) == "freqduet-eval-v4":
+        required_metrics.extend(V4_SAFETY_METRICS)
     required = {
         "protocol_version", "eval_seed", "checkpoint_ep", "policy_digest",
-        "scenario_tape_id", *METRICS,
+        "scenario_tape_id", *required_metrics,
     }
     missing = sorted(required - set(frame.columns))
     if missing:
@@ -207,7 +249,7 @@ def validate_evaluation_frame(
         raise ValueError(f"{source}: multiple checkpoint episodes")
     if checkpoint_ep is not None and checkpoint_values != {int(checkpoint_ep)}:
         raise ValueError(f"{source}: checkpoint episode mismatch")
-    for metric in METRICS:
+    for metric in required_metrics:
         values = pd.to_numeric(frame[metric], errors="coerce").to_numpy()
         if not np.isfinite(values).all():
             raise ValueError(f"{source}: non-finite metric {metric}")
@@ -397,34 +439,51 @@ def selected_jobs(
 def hierarchical_bootstrap(
     frame: pd.DataFrame, metric: str, draws: int = 5000
 ) -> np.ndarray:
-    rng = np.random.RandomState(20260803)
-    train_seeds = frame["train_seed"].drop_duplicates().to_numpy()
-    blocks = [
-        frame[frame["train_seed"].eq(seed)][metric].to_numpy(dtype=float)
-        for seed in train_seeds
-    ]
-    block_sizes = {len(block) for block in blocks}
-    if len(block_sizes) == 1:
-        values = np.stack(blocks)
-        n_train, n_eval = values.shape
-        sampled_train = rng.randint(
-            0, n_train, size=(int(draws), n_train))
-        sampled_eval = rng.randint(
-            0, n_eval, size=(int(draws), n_train, n_eval))
-        sampled = values[sampled_train[:, :, None], sampled_eval]
-        return sampled.mean(axis=(1, 2))
+    """Bootstrap a complete train-seed x evaluation-seed crossed design.
 
-    estimates = []
-    for _ in range(int(draws)):
-        sampled_train = rng.choice(train_seeds, size=len(train_seeds), replace=True)
-        train_means = []
-        for seed in sampled_train:
-            block = frame[
-                frame["train_seed"].eq(seed)][metric].to_numpy(dtype=float)
-            sampled_eval = rng.choice(block, size=len(block), replace=True)
-            train_means.append(float(sampled_eval.mean()))
-        estimates.append(float(np.mean(train_means)))
-    return np.asarray(estimates, dtype=np.float64)
+    Evaluation scenarios are shared across every training seed, so the same
+    resampled evaluation indices must be used for all resampled policies in a
+    draw. Treating evaluation seeds as nested independently under each policy
+    destroys that crossed dependence and understates common scenario effects.
+    """
+    required = {"train_seed", "eval_seed", metric}
+    missing = sorted(required - set(frame.columns))
+    if missing:
+        raise ValueError(f"crossed bootstrap missing columns: {missing}")
+    if frame.duplicated(["train_seed", "eval_seed"]).any():
+        raise ValueError("crossed bootstrap requires one row per train/eval pair")
+    table = frame.pivot(
+        index="train_seed", columns="eval_seed", values=metric).sort_index(
+            axis=0).sort_index(axis=1)
+    if table.empty or table.isna().any().any():
+        raise ValueError(
+            "crossed bootstrap requires a complete train-seed x eval-seed grid")
+    values = table.to_numpy(dtype=np.float64)
+    if not np.isfinite(values).all():
+        raise ValueError(f"crossed bootstrap metric {metric} is non-finite")
+    rng = np.random.RandomState(20260803)
+    n_train, n_eval = values.shape
+    sampled_train = rng.randint(0, n_train, size=(int(draws), n_train))
+    sampled_eval = rng.randint(0, n_eval, size=(int(draws), n_eval))
+    sampled = values[
+        sampled_train[:, :, None], sampled_eval[:, None, :]]
+    return sampled.mean(axis=(1, 2))
+
+
+def validate_common_scenario_tapes(per_eval: pd.DataFrame) -> None:
+    """Require one immutable scenario tape per evaluation seed globally."""
+    required = {"eval_seed", "scenario_tape_id"}
+    missing = sorted(required - set(per_eval.columns))
+    if missing:
+        raise ValueError(f"scenario-tape validation missing columns: {missing}")
+    if per_eval["scenario_tape_id"].isna().any():
+        raise ValueError("matrix contains missing scenario tape identifiers")
+    tape_counts = per_eval.groupby("eval_seed")["scenario_tape_id"].nunique()
+    if not tape_counts.eq(1).all():
+        bad = tape_counts[~tape_counts.eq(1)].index.astype(int).tolist()
+        raise RuntimeError(
+            "policies did not use one common scenario tape for eval seeds: "
+            f"{bad}")
 
 
 def hierarchical_interval(
@@ -719,11 +778,7 @@ def aggregate(
     if len(per_eval) != expected_rows:
         raise RuntimeError(
             f"matrix has {len(per_eval)} rows, expected {expected_rows}")
-    tape_counts = per_eval.groupby(
-        ["train_seed", "eval_seed"])["scenario_tape_id"].nunique()
-    if not tape_counts.eq(1).all():
-        raise RuntimeError(
-            "paired policies did not use identical scenario tapes")
+    validate_common_scenario_tapes(per_eval)
     analysis_metrics = analysis_metrics_for_frame(per_eval)
     summary_rows = []
     for name, frame in per_eval.groupby("config", sort=False):
@@ -813,7 +868,10 @@ def aggregate(
         "eval_seeds": [int(seed) for seed in eval_seeds],
         "reference": reference_name,
         "metrics": analysis_metrics,
-        "uncertainty": "hierarchical bootstrap over train seed and eval seed",
+        "uncertainty": (
+            "crossed bootstrap over training and evaluation seeds; one shared "
+            "evaluation-seed resample is used across policies within each draw"
+        ),
         "paired_test": "two-sided sign-flip test over train-seed mean deltas",
         "multiple_testing": (
             "Holm family-wise correction across candidate-reference "
