@@ -15,6 +15,9 @@ from freq_hrl.experiments.trading.ppo_actor_critic import (
     resolve_method_contract,
     train_ppo_actor_critic,
 )
+from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
+    count_parameters,
+)
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 
@@ -120,6 +123,9 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertTrue(payload["heuristic_promotion_disabled"])
         self.assertGreater(payload["promotion_gate_state_dim"], 0)
         self.assertTrue(payload["plan_anchor_first_coefficient"])
+        self.assertEqual(
+            count_parameters(model), payload["capacity_actual_parameter_count"]
+        )
         self.assertEqual(len(rows), 1)
         row = rows[0]
         self.assertLessEqual(

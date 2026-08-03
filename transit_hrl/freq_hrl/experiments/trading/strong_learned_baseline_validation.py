@@ -194,14 +194,20 @@ def count_parameters(model: Any) -> int:
     if hasattr(model, "parameters"):
         parameters = list(model.parameters())
     else:
+        module_names = (
+            "upper_actor",
+            "lower_actor",
+            "upper_value",
+            "lower_value",
+            "lower_cost_value",
+            "promotion_actor",
+            "promotion_value",
+        )
         modules = [
-            model.upper_actor,
-            model.lower_actor,
-            model.upper_value,
-            model.lower_value,
+            getattr(model, name)
+            for name in module_names
+            if getattr(model, name, None) is not None
         ]
-        if hasattr(model, "lower_cost_value"):
-            modules.append(model.lower_cost_value)
         parameters = [
             parameter for module in modules for parameter in module.parameters()
         ]
