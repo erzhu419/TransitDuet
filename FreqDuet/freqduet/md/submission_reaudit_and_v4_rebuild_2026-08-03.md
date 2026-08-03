@@ -35,11 +35,21 @@ Consequences:
 - the method cannot yet claim that the upper action is a smooth executable
   timetable/headway plan.
 
-Protocol v4 must use one physical action definition.  The preferred design is
-a bounded smooth launch-shift curve, with executable launch time
-`T_i = T_i^base + shift_i` and lower target equal to the resulting consecutive
-launch gap.  A constrained headway-curve projection is an admissible competing
-implementation only if projected targets and scheduled gaps agree exactly.
+Protocol v4 must use one physical action definition.  The selected design is
+the manual's smooth headway curve with an exact recursive executable schedule.
+It anchors the first unaffected departure, recursively forms future launches,
+applies only explicit headway/fleet feasibility constraints, and then derives
+every lower target from consecutive projected launches.  It does not clip each
+trip back to an independent narrow band around the base timetable.  Such a
+bounded absolute launch-shift curve was considered, but with the current
+constant base timetable it cannot sustain a low-frequency service-rate change
+during a peak; it can only move a small amount of service across time.
+
+Phase displacement relative to the base timetable is reported as a diagnostic,
+and the fixed evaluation horizon exposes any policy that exhausts trips too
+early or pushes them too late.  A launch-shift parameterization remains an
+ablation, but projected targets and scheduled gaps must agree exactly in every
+mode.
 
 ### 2. Backward headway has no valid measurement contract
 
@@ -163,16 +173,17 @@ and a follower's old forward headway are not admissible measurements.
 
 ### 9. Terminal actions need an auditable projection contract
 
-The v4 upper action is a bounded smooth launch-shift curve.  For every affected
-trip the simulator must retain the unmodified base launch, desired shift,
-projected scheduled launch, actual launch, predecessor scheduled launch and
-derived target headway.  The following invariants are submission gates:
+The v4 upper action is a smooth bounded headway curve that is recursively mapped
+to an executable launch schedule.  For every affected trip the simulator must
+retain the unmodified base launch, desired headway, projected scheduled launch,
+actual launch, predecessor scheduled launch, phase displacement and derived
+target headway.  The following invariants are submission gates:
 
 - scheduled launches are strictly ordered within direction;
 - target headway equals the difference of consecutive executable scheduled
   launches to numerical tolerance;
 - the action cannot silently revert to the base timetable inside its declared
-  horizon;
+  horizon through an undeclared per-trip shift clip;
 - any fleet-readiness delay is reported separately from planner projection;
 - lower goal reachability and projection saturation rates are reported.
 
@@ -217,8 +228,8 @@ departure time must still respect passenger-service and safety constraints.
 1. Add invariant tests for executable target/schedule agreement, fleet-state
    scaling, follower measurement sources, LF/HF wait conservation, passenger
    journey metrics, and fixed vehicle inventory.
-2. Replace the planner action with an executable bounded launch-shift curve and
-   derive the lower target from scheduled consecutive launches.
+2. Replace the clipped planner with an exact recursively executable headway
+   curve and derive every lower target from projected consecutive launches.
 3. Replace stale backward reward with forward-event reward plus optional causal
    AVL spacing context.
 4. Add per-passenger causal frequency attribution and non-overlapping LF/HF
