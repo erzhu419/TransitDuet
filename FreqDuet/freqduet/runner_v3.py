@@ -71,6 +71,7 @@ from frequency.diagnostics import (
 from upper.resac_upper import RESACUpperTrainer
 from upper.credit_assignment import UpperCreditAssignment
 from upper.measurement_proj import MeasurementProjection
+from upper.plan_execution import UpperPlanExecutionContract
 from upper.timetable_planner import TimetableCurvePlanner
 from upper.counterfactual_action_selector import (
     ACTION_SPECS,
@@ -216,13 +217,15 @@ class DiagnosticLog:
         'lower_reward_mean', 'lower_reward_std',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
-        'lower_ood_loss', 'lower_cost_q_mean', 'lower_cost_q_loss',
+        'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
+        'lower_cost_q_mean', 'lower_cost_q_loss',
         'lower_policy_loss', 'lower_pi_grad_norm', 'lower_q_grad_norm',
         'lower_alpha', 'lower_lambda',
         'lower_replay_size',
         'lower_trip_boundary_resets',
         'lower_pending_states_dropped',
         'lower_pending_actions_dropped',
+        'lower_terminal_action_masks', 'lower_terminal_transitions',
         'lower_policy_frozen', 'lower_critic_frozen',
         # upper policy (only after warmup)
         'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
@@ -231,7 +234,9 @@ class DiagnosticLog:
         'upper_gap_credit_mean', 'upper_gap_credit_std',
         # upper training
         'upper_q_mean', 'upper_q_std', 'upper_q_loss', 'upper_q_mse',
-        'upper_ood_loss', 'upper_policy_loss',
+        'upper_ood_loss', 'upper_q_l1', 'upper_q_l1_penalty',
+        'upper_duration_steps_mean', 'upper_transition_duration_steps_mean',
+        'upper_policy_loss',
         'upper_pi_grad_norm', 'upper_q_grad_norm',
         'upper_alpha', 'upper_replay_size',
         'upper_policy_frozen',
@@ -542,8 +547,20 @@ class TransitDuetV2Runner:
         upper_cfg = config['upper']
         self.upper_credit_assignment = UpperCreditAssignment.from_config(
             upper_cfg.get('credit_assignment', {}))
+        holding_state_cfg = upper_cfg.get('holding_state', {}) or {}
+        self.upper_holding_state_source = str(
+            holding_state_cfg.get('source', 'env_legacy')).strip().lower()
+        if self.upper_holding_state_source not in {
+                'env_legacy', 'trip_lifecycle'}:
+            raise ValueError(
+                "upper.holding_state.source must be env_legacy or "
+                "trip_lifecycle")
+        self.upper_holding_state_episode_local = bool(
+            holding_state_cfg.get('episode_local', True))
         self.delta_max = upper_cfg.get('delta_max', 120.0)
         planner_cfg = upper_cfg.get('timetable_planner', {})
+        self.upper_plan_execution = UpperPlanExecutionContract.from_config(
+            planner_cfg)
         self.timetable_planner = None
         self.upper_plan_penalty_weight = 0.0
         self.timetable_replan_interval_s = 0.0
@@ -1087,6 +1104,9 @@ class TransitDuetV2Runner:
         self.upper_action_dim = int(upper_cfg.get('action_dim', 1))
         if self.timetable_planner is not None:
             self.upper_action_dim = self.timetable_planner.action_dim
+        self.upper_plan_context_dim = self.upper_plan_execution.context_dim(
+            self.upper_action_dim)
+        self.upper_state_dim += self.upper_plan_context_dim
         action_low = upper_cfg.get('action_low', None)
         action_high = upper_cfg.get('action_high', None)
         if self.timetable_planner is not None:
@@ -1656,6 +1676,9 @@ class TransitDuetV2Runner:
                 'discrete_critic', 'continuous_action'),
             ensemble_size=upper_cfg.get('ensemble_size', 10),
             beta=upper_cfg.get('resac_beta', -2.0),
+            beta_ood=upper_cfg.get('beta_ood', 0.01),
+            weight_reg=upper_cfg.get('weight_reg', 0.01),
+            weight_reg_mode=upper_cfg.get('weight_reg_mode', 'sum'),
             lr=upper_cfg.get('lr', 3e-4),
             gamma=upper_cfg.get('gamma', 0.95),
             maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
@@ -1691,6 +1714,11 @@ class TransitDuetV2Runner:
                 "lower.action_bins_gate.source only supports lower_context_gate")
         self.lower_use_last_action_feature = bool(
             lower_cfg.get('use_last_action_feature', False))
+        self.lower_terminal_action_mode = str(
+            lower_cfg.get('terminal_action_mode', 'legacy')).strip().lower()
+        if self.lower_terminal_action_mode not in {'legacy', 'mask'}:
+            raise ValueError(
+                "lower.terminal_action_mode must be legacy or mask")
         lower_state_encoder_cfg = lower_cfg.get('state_encoder', {}) or {}
         self.lower_state_encoder = None
         if bool(lower_state_encoder_cfg.get('enable', False)):
@@ -1730,6 +1758,7 @@ class TransitDuetV2Runner:
             beta=lower_cfg.get('resac_beta', -2.0),
             beta_ood=lower_cfg.get('beta_ood', 0.01),
             weight_reg=lower_cfg.get('weight_reg', 0.01),
+            weight_reg_mode=lower_cfg.get('weight_reg_mode', 'sum'),
             lr=lower_cfg['lr'], lambda_lr=lower_cfg['lambda_lr'],
             gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
             auto_entropy=lower_cfg['auto_entropy'],
@@ -2420,6 +2449,28 @@ class TransitDuetV2Runner:
                          if getattr(bus, 'on_route', False))
         return float(concurrent), float(n_fleet), float(concurrent - n_fleet)
 
+    def _inject_lifecycle_holding_state(self, state, direction):
+        state = np.asarray(state, dtype=np.float32).reshape(-1).copy()
+        if self.upper_holding_state_source != 'trip_lifecycle':
+            return state
+        same = self.holding_feedback.get_direction_stats(bool(direction))
+        other = self.holding_feedback.get_direction_stats(not bool(direction))
+        state[5:8] = np.asarray([
+            float(same['rolling_mean']) / 60.0,
+            float(same['rolling_std']) / 60.0,
+            float(other['rolling_mean']) / 60.0,
+        ], dtype=np.float32)
+        return state
+
+    def _upper_plan_context(self, active_plan, decision_time_s):
+        return self.upper_plan_execution.plan_context(
+            active_plan,
+            decision_time_s=decision_time_s,
+            action_low=self.upper_action_low,
+            action_high=self.upper_action_high,
+            replan_interval_s=self.timetable_replan_interval_s,
+        )
+
     def _upper_state_history_vector(self):
         if self.upper_state_history_dim <= 0:
             return np.zeros(0, dtype=np.float32)
@@ -2503,6 +2554,32 @@ class TransitDuetV2Runner:
         if row.size != self.upper_state_history_step_dim:
             return
         self._upper_state_history.append(row)
+
+    def _close_previous_upper_transition(
+            self, next_state, done, decision_time_s):
+        prev = self._prev_upper_state
+        if prev is None:
+            return
+        elapsed_s = max(
+            0.0, float(decision_time_s) - float(prev['decision_time_s']))
+        self._episode_upper_transitions.append({
+            's': prev['s'],
+            'a': prev['a'],
+            'tid': prev['tid'],
+            'dir': prev['dir'],
+            'ns': np.asarray(next_state, dtype=np.float32).copy(),
+            'done': bool(done),
+            'duration_steps': self.upper_plan_execution.duration_steps(
+                elapsed_s),
+            'duration_s': elapsed_s,
+            'a_eff': prev['a_eff'],
+            'plan_penalty': prev['plan_penalty'],
+            'upper_value_cost': prev['upper_value_cost'],
+            'upper_value_active': prev['upper_value_active'],
+            'upper_residual_selector_x': prev['upper_residual_selector_x'],
+            'terminal_value_selector_x': prev['terminal_value_selector_x'],
+            'headway_value_planner_x': prev['headway_value_planner_x'],
+        })
 
     @staticmethod
     def _pressure_strength(pressure, start, full):
@@ -5032,6 +5109,30 @@ class TransitDuetV2Runner:
             deterministic=deterministic)
         return self._quantize_lower_action(action)
 
+    def _bus_for_agent(self, bus_id):
+        bus_id = int(bus_id)
+        return next(
+            (bus for bus in self.env.bus_all
+             if int(getattr(bus, 'bus_id', -1)) == bus_id),
+            None,
+        )
+
+    def _lower_terminal_action_masked(self, bus):
+        if self.lower_terminal_action_mode != 'mask' or bus is None:
+            return False
+        next_station = getattr(bus, 'next_station', None)
+        return int(getattr(next_station, 'station_type', 1)) == 0
+
+    def _lower_action_for_agent(
+            self, obs, bus_id, last_action=0.0, deterministic=False):
+        bus = self._bus_for_agent(bus_id)
+        if self._lower_terminal_action_masked(bus):
+            self._ep_lower_terminal_action_masks += 1
+            return np.asarray([0.0], dtype=np.float32)
+        action = self._lower_policy_action(
+            obs, last_action=last_action, deterministic=deterministic)
+        return self._apply_lower_fleet_noharm(action, bus)
+
     def _fixed_headway_callback(self, s_upper_v1, trip):
         if self.fixed_selector_strict_headway_s is not None:
             headway = float(self.fixed_selector_strict_headway_s)
@@ -6097,7 +6198,13 @@ class TransitDuetV2Runner:
     def _upper_callback_v2(self, s_upper_v1, trip):
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
         Reward is backfilled at episode end via hindsight credit assignment."""
-        s_upper = self.env._build_upper_state_v2(trip)
+        decision_time_s = float(getattr(self.env, 'current_time', trip.launch_time))
+        planner_dir = bool(trip.direction)
+        planner_key = (
+            "__all__" if self.timetable_plan_all_directions else planner_dir)
+        state_active_plan = self._active_timetable_plans.get(planner_key)
+        s_upper = self._inject_lifecycle_holding_state(
+            self.env._build_upper_state_v2(trip), planner_dir)
         if self.freq_holdfb_enable:
             s_upper = np.concatenate([
                 np.asarray(s_upper, dtype=np.float32),
@@ -6118,6 +6225,12 @@ class TransitDuetV2Runner:
             if self.freq_holdfb_enable:
                 s_upper[end - self.freq_holdfb_dim:end] = 0.0
 
+        if self.upper_plan_context_dim > 0:
+            s_upper = np.concatenate([
+                np.asarray(s_upper, dtype=np.float32),
+                self._upper_plan_context(state_active_plan, decision_time_s),
+            ]).astype(np.float32)
+
         s_upper = self._augment_upper_state_history(s_upper)
 
         # ─── TPC-Lower behaviour-policy sampling ───
@@ -6134,10 +6247,9 @@ class TransitDuetV2Runner:
         snapshot_selector_info = None
         cf_action_selector_info = None
         snapshot_write_terminal_dispatch = self.timetable_terminal_dispatch
-        planner_dir = bool(trip.direction)
-        planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
         plan_id = None
         promotion_replan = False
+        policy_command_vec = None
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
             active_plan = self._active_timetable_plans.get(planner_key)
             if active_plan is not None:
@@ -6210,6 +6322,10 @@ class TransitDuetV2Runner:
         if upper_decision_taken and self.upper_action_override_enable:
             action_vec = self.upper_action_override_values.copy()
             log_mu = None
+
+        if upper_decision_taken:
+            policy_command_vec = np.asarray(
+                action_vec, dtype=np.float32).reshape(-1).copy()
 
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
@@ -6442,7 +6558,8 @@ class TransitDuetV2Runner:
             global_tid = self._current_ep * 1000 + int(trip.launch_turn)
             self.dispatch_meta[global_tid] = {
                 'z': s_upper.astype(np.float32),
-                'delta': action_vec.astype(np.float32),
+                'delta': self.upper_plan_execution.replay_action(
+                    policy_command_vec, action_vec),
                 'log_mu': log_mu,
             }
             # Bound metadata size: drop oldest when over budget
@@ -6455,33 +6572,26 @@ class TransitDuetV2Runner:
         # Store only actual upper decisions. Cached timetable points are
         # executions of the previous low-frequency plan, not new policy actions.
         if upper_decision_taken:
-            if self._prev_upper_state is not None:
-                prev = self._prev_upper_state
-                prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
-                    prev[:6])
-                value_cost = float(prev[6]) if len(prev) > 6 else 0.0
-                value_active = float(prev[7]) if len(prev) > 7 else 0.0
-                residual_selector_x = prev[8] if len(prev) > 8 else None
-                terminal_value_selector_x = prev[9] if len(prev) > 9 else None
-                headway_value_planner_x = prev[10] if len(prev) > 10 else None
-                self._episode_upper_transitions.append({
-                    's': prev_s, 'a': prev_a, 'tid': prev_tid,
-                    'dir': prev_dir, 'ns': s_upper.copy(), 'done': False,
-                    'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
-                    'upper_value_cost': value_cost,
-                    'upper_value_active': value_active,
-                    'upper_residual_selector_x': residual_selector_x,
-                    'terminal_value_selector_x': terminal_value_selector_x,
-                    'headway_value_planner_x': headway_value_planner_x,
-                })
+            self._close_previous_upper_transition(
+                s_upper, done=False, decision_time_s=decision_time_s)
 
             value_cost, value_active = self._upper_residual_value_cost(delta_t)
-            self._prev_upper_state = (
-                s_upper.copy(),
-                action_vec.astype(np.float32),
-                trip.launch_turn, trip.direction, float(delta_t),
-                float(plan_penalty), float(value_cost), float(value_active),
-                selector_x, terminal_selector_x, headway_selector_x)
+            replay_action = self.upper_plan_execution.replay_action(
+                policy_command_vec, action_vec)
+            self._prev_upper_state = {
+                's': s_upper.copy(),
+                'a': replay_action,
+                'tid': int(trip.launch_turn),
+                'dir': bool(trip.direction),
+                'a_eff': float(delta_t),
+                'plan_penalty': float(plan_penalty),
+                'upper_value_cost': float(value_cost),
+                'upper_value_active': float(value_active),
+                'upper_residual_selector_x': selector_x,
+                'terminal_value_selector_x': terminal_selector_x,
+                'headway_value_planner_x': headway_selector_x,
+                'decision_time_s': decision_time_s,
+            }
 
         # Record dispatch info (actual launch time captured post-episode from env).
         # Terminal-dispatch mode uses the planner's executable launch schedule.
@@ -6651,7 +6761,10 @@ class TransitDuetV2Runner:
         if record_diagnostics is None:
             record_diagnostics = bool(training)
         self.env.reset()
-        self.holding_feedback.clear()
+        self.holding_feedback.clear(reset_history=(
+            self.upper_holding_state_source == 'trip_lifecycle'
+            and self.upper_holding_state_episode_local
+        ))
         self.lower_lifecycle.reset_episode()
         self._current_ep = ep
         self._episode_upper_transitions = []
@@ -6665,6 +6778,8 @@ class TransitDuetV2Runner:
         self._ep_lower_trip_boundary_resets = 0
         self._ep_lower_pending_states_dropped = 0
         self._ep_lower_pending_actions_dropped = 0
+        self._ep_lower_terminal_action_masks = 0
+        self._ep_lower_terminal_transitions = 0
         self._ep_hold_feedback_trip_finalizations = 0
         self._ep_upper_deltas = []
         self._ep_upper_rewards = []
@@ -6801,16 +6916,11 @@ class TransitDuetV2Runner:
             for key in state_dict:
                 if len(state_dict[key]) == 1:
                     if action_dict[key] is None:
-                        action_dict[key] = self._lower_policy_action(
+                        action_dict[key] = self._lower_action_for_agent(
                             state_dict[key][0],
+                            key,
                             last_action=lower_last_action.get(key, 0.0),
                             deterministic=not training)
-                        action_bus = next(
-                            (bus for bus in self.env.bus_all
-                             if int(getattr(bus, 'bus_id', -1)) == int(key)),
-                            None)
-                        action_dict[key] = self._apply_lower_fleet_noharm(
-                            action_dict[key], action_bus)
 
                 elif len(state_dict[key]) == 2:
                     if state_dict[key][0][1] != state_dict[key][1][1]:
@@ -6829,13 +6939,14 @@ class TransitDuetV2Runner:
                         bus_id_key = int(raw_state[0])
                         cur_tid = -1
                         cur_dir = True
-                        cur_bus = None
-                        for bus in self.env.bus_all:
-                            if bus.bus_id == bus_id_key:
-                                cur_bus = bus
-                                cur_tid = int(getattr(bus, 'trip_id', -1))
-                                cur_dir = bool(getattr(bus, 'direction', True))
-                                break
+                        cur_bus = self._bus_for_agent(bus_id_key)
+                        if cur_bus is not None:
+                            cur_tid = int(getattr(cur_bus, 'trip_id', -1))
+                            cur_dir = bool(getattr(cur_bus, 'direction', True))
+                        transition_done = self._lower_terminal_action_masked(
+                            cur_bus)
+                        self._ep_lower_terminal_transitions += int(
+                            transition_done)
                         drift_penalty = self._lower_drift_penalty(cur_dir, act_val)
                         drift_cost = self._lower_drift_cost(cur_dir)
                         lower_value_soft_cost = self._lower_value_soft_cost(
@@ -6914,6 +7025,13 @@ class TransitDuetV2Runner:
                         self._ep_lower_rewards.append(shaped_reward)
                         self._ep_lower_drift_penalties.append(drift_penalty)
                         self._ep_lower_drift_costs.append(drift_cost)
+                        if cur_tid >= 0:
+                            # Keep feedback observable during both training and
+                            # frozen evaluation. Trip-end lifecycle finalization
+                            # replaces this incremental view with the complete
+                            # physical action trace when that mode is enabled.
+                            self.holding_feedback.record_action(
+                                cur_tid, act_val)
                         if getattr(self.env, 'frequency_tracker', None) is not None:
                             self._ep_lower_demand_action.append((
                                 low_demand,
@@ -6935,11 +7053,7 @@ class TransitDuetV2Runner:
                                           if cur_tid >= 0 else int(state[0]))
                             self.replay_buffer.push(
                                 state, action_dict[key], shaped_reward, cost,
-                                next_state, False, global_tid)
-                            # v2: record holding action for feedback
-                            if cur_bus is not None:
-                                self.holding_feedback.record_action(
-                                    cur_bus.trip_id, act_val)
+                                next_state, transition_done, global_tid)
 
                         episode_reward += shaped_reward
                         episode_cost += cost
@@ -6947,16 +7061,11 @@ class TransitDuetV2Runner:
                         lower_last_action[key] = act_val
 
                     state_dict[key] = state_dict[key][1:]
-                    action_dict[key] = self._lower_policy_action(
+                    action_dict[key] = self._lower_action_for_agent(
                         state_dict[key][0],
+                        key,
                         last_action=lower_last_action.get(key, 0.0),
                         deterministic=not training)
-                    action_bus = next(
-                        (bus for bus in self.env.bus_all
-                         if int(getattr(bus, 'bus_id', -1)) == int(key)),
-                        None)
-                    action_dict[key] = self._apply_lower_fleet_noharm(
-                        action_dict[key], action_bus)
 
             state_dict, reward_dict, cost_dict, done = self.env.step(
                 action_dict, render=False)
@@ -6989,24 +7098,13 @@ class TransitDuetV2Runner:
 
         # ── Finalize last upper transition ──
         if self._prev_upper_state is not None:
-            prev = self._prev_upper_state
-            prev_s, prev_a, prev_tid, prev_dir, prev_eff, prev_plan_pen = (
-                prev[:6])
-            value_cost = float(prev[6]) if len(prev) > 6 else 0.0
-            value_active = float(prev[7]) if len(prev) > 7 else 0.0
-            residual_selector_x = prev[8] if len(prev) > 8 else None
-            terminal_value_selector_x = prev[9] if len(prev) > 9 else None
-            headway_value_planner_x = prev[10] if len(prev) > 10 else None
-            self._episode_upper_transitions.append({
-                's': prev_s, 'a': prev_a, 'tid': prev_tid,
-                'dir': prev_dir, 'ns': prev_s, 'done': True,
-                'a_eff': prev_eff, 'plan_penalty': prev_plan_pen,
-                'upper_value_cost': value_cost,
-                'upper_value_active': value_active,
-                'upper_residual_selector_x': residual_selector_x,
-                'terminal_value_selector_x': terminal_value_selector_x,
-                'headway_value_planner_x': headway_value_planner_x,
-            })
+            self._close_previous_upper_transition(
+                self._prev_upper_state['s'],
+                done=True,
+                decision_time_s=float(getattr(
+                    self.env, 'current_time',
+                    self._prev_upper_state['decision_time_s'])),
+            )
 
         # ── Hindsight Credit Assignment (v2g: gap-based, not holding-based) ──
         # Old: credit based on holding magnitude → corr(δ_t, hold)=0, BROKEN
@@ -7142,6 +7240,8 @@ class TransitDuetV2Runner:
                 's': trans['s'], 'a': trans['a'], 'r': r,
                 'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
                 'dir': trans.get('dir', True),
+                'duration_steps': trans.get('duration_steps', 1.0),
+                'duration_s': trans.get('duration_s', 0.0),
                 'system_reward': float(system_reward),
                 'gap_credit': credit,
             })
@@ -7257,7 +7357,9 @@ class TransitDuetV2Runner:
         if upper_training_active:
             for trans in self._episode_upper_transitions:
                 self.upper_trainer.replay_buffer.push(
-                    trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
+                    trans['s'], trans['a'], trans['r'], trans['ns'],
+                    trans['done'],
+                    duration_steps=trans.get('duration_steps', 1.0))
             if (not upper_policy_frozen
                     and len(self.upper_trainer.replay_buffer)
                     > self.upper_batch_size):
@@ -7305,6 +7407,10 @@ class TransitDuetV2Runner:
         ur_stat = _stat(self._ep_upper_rewards)
         upper_system_reward_stat = _stat(self._ep_upper_system_rewards)
         upper_gap_credit_stat = _stat(self._ep_upper_gap_credits)
+        upper_transition_duration_stat = _stat([
+            float(trans.get('duration_steps', 1.0))
+            for trans in self._episode_upper_transitions
+        ])
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
@@ -7607,6 +7713,8 @@ class TransitDuetV2Runner:
             'lower_q_loss': lower_m.get('q_loss', 0.),
             'lower_q_mse': lower_m.get('q_mse', 0.),
             'lower_ood_loss': lower_m.get('ood_loss', 0.),
+            'lower_q_l1': lower_m.get('q_l1', 0.),
+            'lower_q_l1_penalty': lower_m.get('q_l1_penalty', 0.),
             'lower_cost_q_mean': lower_m.get('cost_q_mean', 0.),
             'lower_cost_q_loss': lower_m.get('cost_q_loss', 0.),
             'lower_policy_loss': lower_m.get('policy_loss', 0.),
@@ -7621,6 +7729,10 @@ class TransitDuetV2Runner:
                 self._ep_lower_pending_states_dropped,
             'lower_pending_actions_dropped':
                 self._ep_lower_pending_actions_dropped,
+            'lower_terminal_action_masks':
+                self._ep_lower_terminal_action_masks,
+            'lower_terminal_transitions':
+                self._ep_lower_terminal_transitions,
             'lower_policy_frozen': lower_m.get('lower_policy_frozen', 0.),
             'lower_critic_frozen': lower_m.get('lower_critic_frozen', 0.),
             # upper policy
@@ -7644,6 +7756,13 @@ class TransitDuetV2Runner:
             'upper_q_loss': upper_m.get('upper_q_loss', 0.),
             'upper_q_mse': upper_m.get('upper_q_mse', 0.),
             'upper_ood_loss': upper_m.get('upper_ood_loss', 0.),
+            'upper_q_l1': upper_m.get('upper_q_l1', 0.),
+            'upper_q_l1_penalty': upper_m.get(
+                'upper_q_l1_penalty', 0.),
+            'upper_duration_steps_mean': upper_m.get(
+                'upper_duration_steps_mean', 0.),
+            'upper_transition_duration_steps_mean':
+                upper_transition_duration_stat['mean'],
             'upper_policy_loss': upper_m.get('upper_policy_loss', 0.),
             'upper_pi_grad_norm': upper_m.get('upper_pi_grad_norm', 0.),
             'upper_q_grad_norm': upper_m.get('upper_q_grad_norm', 0.),

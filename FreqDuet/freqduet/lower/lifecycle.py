@@ -76,7 +76,9 @@ class LowerEpisodeLifecycle:
             feedback_finalized = False
             if self.feedback_mode == "trip_end":
                 feedback_finalized = bool(holding_feedback.finalize_trip(
-                    trip_id, completed_direction
+                    trip_id,
+                    completed_direction,
+                    actions=list(getattr(bus, "applied_actions", []) or []),
                 ))
 
             pending_states = 0

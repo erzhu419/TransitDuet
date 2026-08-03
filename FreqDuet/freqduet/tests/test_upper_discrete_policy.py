@@ -52,6 +52,7 @@ class UpperDiscretePolicyTest(unittest.TestCase):
         metrics = trainer.update(batch_size=16)
         self.assertTrue(np.isfinite(metrics['upper_q_loss']))
         self.assertTrue(np.isfinite(metrics['upper_policy_loss']))
+        self.assertGreater(metrics['upper_duration_steps_mean'], 0.0)
 
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'upper.pt'
@@ -120,6 +121,28 @@ class UpperDiscretePolicyTest(unittest.TestCase):
             trainer.save(path)
             with self.assertRaisesRegex(ValueError, "discrete critic"):
                 self._trainer(discrete_critic="continuous_action").load(path)
+
+    def test_mean_l1_regularization_is_parameter_count_invariant(self):
+        trainer = self._trainer(discrete_critic="indexed")
+        summed = trainer.q_net.compute_l1_norm("sum")
+        averaged = trainer.q_net.compute_l1_norm("mean")
+        self.assertTrue(torch.all(summed > averaged))
+        self.assertTrue(torch.all(averaged >= 0.0))
+
+    def test_duration_aware_replay_accepts_fractional_steps(self):
+        trainer = self._trainer(discrete_critic="indexed")
+        rng = np.random.RandomState(29)
+        for i in range(40):
+            trainer.replay_buffer.push(
+                rng.normal(size=3).astype(np.float32),
+                self.candidates[i % len(self.candidates)],
+                -float(i % 3),
+                rng.normal(size=3).astype(np.float32),
+                False,
+                duration_steps=0.5 + (i % 4) * 0.5,
+            )
+        metrics = trainer.update(batch_size=16)
+        self.assertGreater(metrics["upper_duration_steps_mean"], 0.0)
 
 
 if __name__ == '__main__':

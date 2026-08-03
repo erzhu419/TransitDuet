@@ -162,11 +162,15 @@ class EnsembleQNetwork(nn.Module):
 
         return x.squeeze(-1)  # [K, B]
 
-    def compute_l1_norm(self):
+    def compute_l1_norm(self, mode="sum"):
         """L1 norm per ensemble member for regularization. Returns [K]."""
         total = torch.zeros(self.ensemble_size, device=self.weights[0].device)
+        count = 0
         for w, b in zip(self.weights, self.biases):
             total = total + w.abs().sum(dim=(1, 2)) + b.abs().sum(dim=(1, 2))
+            count += int(w.shape[1] * w.shape[2] + b.shape[1] * b.shape[2])
+        if mode == "mean":
+            total = total / max(count, 1)
         return total
 
 
@@ -205,6 +209,7 @@ class RESACLagrangianTrainer:
                  action_range=60.0, cost_limit=0.15,
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
+                 weight_reg_mode="sum",
                  lr=3e-4, lambda_lr=1e-3, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3, action_bins=None,
                  device='cpu'):
@@ -217,6 +222,9 @@ class RESACLagrangianTrainer:
         self.beta = beta              # LCB coefficient (negative = pessimistic)
         self.beta_ood = beta_ood      # OOD regularization weight
         self.weight_reg = weight_reg  # L1 regularization weight
+        self.weight_reg_mode = str(weight_reg_mode).strip().lower()
+        if self.weight_reg_mode not in {"sum", "mean"}:
+            raise ValueError("weight_reg_mode must be 'sum' or 'mean'")
 
         self.discrete_actions = None
         if action_bins is not None:
@@ -380,7 +388,8 @@ class RESACLagrangianTrainer:
         ood_loss = predicted_q.std(dim=0).mean()
 
         # L1 weight regularization
-        l1_norm = self.q_net.compute_l1_norm().mean()
+        l1_norm = self.q_net.compute_l1_norm(
+            mode=self.weight_reg_mode).mean()
 
         q_loss = q_mse_loss + self.beta_ood * ood_loss + self.weight_reg * l1_norm
 
@@ -418,6 +427,8 @@ class RESACLagrangianTrainer:
             'q_loss': q_loss.item(),
             'q_mse': q_mse_loss.item(),
             'ood_loss': ood_loss.item(),
+            'q_l1': l1_norm.item(),
+            'q_l1_penalty': (self.weight_reg * l1_norm).item(),
             'cost_q_loss': cost_q_loss.item(),
             'q_grad_norm': q_grad_norm.item() if isinstance(q_grad_norm, torch.Tensor) else float(q_grad_norm),
             'cq_grad_norm': cq_grad_norm.item() if isinstance(cq_grad_norm, torch.Tensor) else float(cq_grad_norm),

@@ -32,21 +32,28 @@ class UpperReplayBuffer:
     def __init__(self, capacity=50000):
         self.buffer = deque(maxlen=int(capacity))
 
-    def push(self, state, action, reward, next_state, done):
+    def push(
+        self, state, action, reward, next_state, done, duration_steps=1.0
+    ):
+        duration_steps = float(duration_steps)
+        if not np.isfinite(duration_steps) or duration_steps <= 0.0:
+            raise ValueError("duration_steps must be finite and positive")
         self.buffer.append((
             np.array(state, dtype=np.float32),
             np.array(action, dtype=np.float32),
             float(reward),
             np.array(next_state, dtype=np.float32),
             float(done),
+            duration_steps,
         ))
 
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
-        s, a, r, ns, d = zip(*batch)
+        s, a, r, ns, d, duration = zip(*batch)
         return (np.array(s), np.array(a),
                 np.array(r).reshape(-1, 1),
-                np.array(ns), np.array(d).reshape(-1, 1))
+                np.array(ns), np.array(d).reshape(-1, 1),
+                np.array(duration).reshape(-1, 1))
 
     def __len__(self):
         return len(self.buffer)
@@ -255,10 +262,14 @@ class EnsembleQNetwork(nn.Module):
                 x = F.relu(x)
         return x.squeeze(-1)  # [K, B]
 
-    def compute_l1_norm(self):
+    def compute_l1_norm(self, mode="sum"):
         total = torch.zeros(self.ensemble_size, device=self.weights[0].device)
+        count = 0
         for w, b in zip(self.weights, self.biases):
             total = total + w.abs().sum(dim=(1, 2)) + b.abs().sum(dim=(1, 2))
+            count += int(w.shape[1] * w.shape[2] + b.shape[1] * b.shape[2])
+        if mode == "mean":
+            total = total / max(count, 1)
         return total
 
 
@@ -312,13 +323,19 @@ class IndexedDiscreteEnsembleQNetwork(nn.Module):
             self.ensemble_size, -1, 1)
         return values.gather(dim=-1, index=gather_index).squeeze(-1)
 
-    def compute_l1_norm(self):
+    def compute_l1_norm(self, mode="sum"):
         total = torch.zeros(self.ensemble_size, device=self.weights[0].device)
+        count = 0
         for weight, bias in zip(self.weights, self.biases):
             total = (
                 total
                 + weight.abs().sum(dim=(1, 2))
                 + bias.abs().sum(dim=(1, 2)))
+            count += int(
+                weight.shape[1] * weight.shape[2]
+                + bias.shape[1] * bias.shape[2])
+        if mode == "mean":
+            total = total / max(count, 1)
         return total
 
 
@@ -336,6 +353,7 @@ class RESACUpperTrainer:
                  discrete_critic="continuous_action",
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
+                 weight_reg_mode="sum",
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3,
                  replay_capacity=50000, device='cpu'):
@@ -346,6 +364,9 @@ class RESACUpperTrainer:
         self.beta = beta
         self.beta_ood = beta_ood
         self.weight_reg = weight_reg
+        self.weight_reg_mode = str(weight_reg_mode).strip().lower()
+        if self.weight_reg_mode not in {"sum", "mean"}:
+            raise ValueError("weight_reg_mode must be 'sum' or 'mean'")
         self.auto_entropy = auto_entropy
         self.discrete_critic = str(discrete_critic).lower()
         if self.discrete_critic not in {"continuous_action", "indexed"}:
@@ -437,12 +458,14 @@ class RESACUpperTrainer:
         if len(self.replay_buffer) < batch_size:
             return {}
 
-        state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
+        state, action, reward, next_state, done, duration_steps = \
+            self.replay_buffer.sample(batch_size)
         state = torch.FloatTensor(state).to(self.device)
         action = torch.FloatTensor(action).to(self.device)
         reward = torch.FloatTensor(reward).to(self.device)
         next_state = torch.FloatTensor(next_state).to(self.device)
         done = torch.FloatTensor(done).to(self.device)
+        duration_steps = torch.FloatTensor(duration_steps).to(self.device)
 
         discrete_policy = self.discrete_actions is not None
 
@@ -468,7 +491,11 @@ class RESACUpperTrainer:
                     * next_log_prob.squeeze(-1))
             r = reward.squeeze(-1)
             d = done.squeeze(-1)
-            shared_target = r + (1.0 - d) * self.gamma * target_q_mean
+            discount = torch.pow(
+                torch.full_like(duration_steps.squeeze(-1), self.gamma),
+                duration_steps.squeeze(-1),
+            )
+            shared_target = r + (1.0 - d) * discount * target_q_mean
             shared_target = shared_target.clamp(-50.0, 50.0)
 
         predicted_q = self.q_net(state, action)
@@ -476,7 +503,8 @@ class RESACUpperTrainer:
             predicted_q.shape[0], -1)  # [K, B]
         q_mse = F.mse_loss(predicted_q, target_value)
         ood_loss = predicted_q.std(dim=0).mean()
-        l1_norm = self.q_net.compute_l1_norm().mean()
+        l1_norm = self.q_net.compute_l1_norm(
+            mode=self.weight_reg_mode).mean()
         q_loss = q_mse + self.beta_ood * ood_loss + self.weight_reg * l1_norm
 
         self.q_optimizer.zero_grad()
@@ -531,6 +559,8 @@ class RESACUpperTrainer:
             'upper_q_loss': q_loss.item(),
             'upper_q_mse': q_mse.item(),
             'upper_ood_loss': ood_loss.item(),
+            'upper_q_l1': l1_norm.item(),
+            'upper_q_l1_penalty': (self.weight_reg * l1_norm).item(),
             'upper_alpha': self.alpha,
             'upper_pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
             'upper_q_grad_norm': q_grad_norm.item() if isinstance(q_grad_norm, torch.Tensor) else float(q_grad_norm),
@@ -538,6 +568,7 @@ class RESACUpperTrainer:
             'upper_reward_batch_std': reward.std().item(),
             'upper_action_batch_mean': action.mean().item(),
             'upper_action_batch_std': action.std().item(),
+            'upper_duration_steps_mean': duration_steps.mean().item(),
         }
 
     def save(self, path):

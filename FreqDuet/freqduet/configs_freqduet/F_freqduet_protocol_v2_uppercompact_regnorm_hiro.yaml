@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_regnorm_hiro
+
+protocol:
+  role: structural_candidate_normalized_critic_regularization
+
+upper:
+  weight_reg_mode: mean
+
+lower:
+  weight_reg_mode: mean

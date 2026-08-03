@@ -1,0 +1,19 @@
+_extends: F_freqduet_protocol_v2_uppercompact_markov_smdp_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rebuild_nophys_hiro
+
+protocol:
+  role: structural_candidate_contract_lifecycle_regularization
+
+upper:
+  holding_state:
+    source: trip_lifecycle
+    episode_local: true
+  weight_reg_mode: mean
+
+lower:
+  trip_boundary_mode: reset
+  terminal_action_mode: mask
+  weight_reg_mode: mean
+
+coupling:
+  holding_feedback_finalize_mode: trip_end

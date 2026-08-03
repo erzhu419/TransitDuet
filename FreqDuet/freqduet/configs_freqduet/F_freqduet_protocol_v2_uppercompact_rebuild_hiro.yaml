@@ -1,0 +1,29 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rebuild_nophys_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rebuild_hiro
+
+protocol:
+  role: structural_candidate_full_contract_rebuild
+
+lower:
+  state_encoder:
+    enable: true
+    mode: physical_dimensionless_v1
+    headway_norm_s: 600.0
+    dwell_norm_s: 300.0
+    speed_norm_mps: 15.0
+    target_min_s: 120.0
+    target_max_s: 900.0
+    headway_ratio_clip: 3.0
+    tail_clip: 5.0
+
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack

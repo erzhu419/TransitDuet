@@ -14,6 +14,7 @@ class LowerLifecycleTest(unittest.TestCase):
             on_route=False,
             last_completed_trip_id=18,
             last_completed_direction=True,
+            applied_actions=[5.0, 15.0, 25.0],
         )
 
     def test_trip_end_closes_state_and_finalizes_feedback_once(self):
@@ -37,6 +38,8 @@ class LowerLifecycleTest(unittest.TestCase):
         self.assertEqual(last_actions[3], 0.0)
         self.assertEqual(feedback.finalized_trip_count, 1)
         self.assertEqual(feedback.get_direction_stats(True)["n_trips"], 1)
+        self.assertAlmostEqual(
+            feedback.get_direction_stats(True)["rolling_mean"], 15.0)
         self.assertEqual(feedback.get_direction_stats(False)["n_trips"], 0)
 
         duplicate = lifecycle.process(
@@ -70,6 +73,13 @@ class LowerLifecycleTest(unittest.TestCase):
         self.assertEqual(feedback.get_direction_stats(False)["n_trips"], 1)
         feedback.clear()
         self.assertEqual(feedback.finalized_trip_count, 0)
+
+    def test_episode_local_clear_removes_historical_state(self):
+        feedback = HoldingFeedback(window_size=10)
+        feedback.finalize_trip(4, False, actions=[12.0])
+        feedback.clear(reset_history=True)
+        self.assertEqual(feedback.get_direction_stats(False)["n_trips"], 0)
+        self.assertEqual(feedback.get_direction_stats(False)["ema"], 0.0)
 
 
 if __name__ == "__main__":

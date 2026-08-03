@@ -49,10 +49,14 @@ class HoldingFeedback:
         self._ema_alpha = 0.3  # EMA decay
         self._finalized_trips = set()
 
-    def clear(self):
-        """Reset per-episode data. Keep cross-episode EMA."""
+    def clear(self, reset_history=False):
+        """Reset per-episode data and optionally all cross-trip history."""
         self._trip_actions.clear()
         self._finalized_trips.clear()
+        if reset_history:
+            for history in self._history.values():
+                history.clear()
+            self._ema_holding = {True: 0.0, False: 0.0}
 
     def record_action(self, trip_id, action):
         """
@@ -64,7 +68,7 @@ class HoldingFeedback:
         """
         self._trip_actions[trip_id].append(float(action))
 
-    def finalize_trip(self, trip_id, direction):
+    def finalize_trip(self, trip_id, direction, actions=None):
         """
         Called when a trip completes. Computes summary stats and adds
         to rolling history.
@@ -76,7 +80,11 @@ class HoldingFeedback:
         trip_id = int(trip_id)
         if trip_id in self._finalized_trips:
             return False
-        actions = self._trip_actions.get(trip_id, [])
+        if actions is not None:
+            actions = [float(action) for action in actions]
+            self._trip_actions[trip_id] = list(actions)
+        else:
+            actions = self._trip_actions.get(trip_id, [])
         if not actions:
             self._finalized_trips.add(trip_id)
             return False

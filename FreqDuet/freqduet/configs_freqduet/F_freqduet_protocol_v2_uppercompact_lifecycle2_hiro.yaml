@@ -1,0 +1,17 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_lifecycle2_hiro
+
+protocol:
+  role: structural_candidate_complete_lower_lifecycle
+
+upper:
+  holding_state:
+    source: trip_lifecycle
+    episode_local: true
+
+lower:
+  trip_boundary_mode: reset
+  terminal_action_mode: mask
+
+coupling:
+  holding_feedback_finalize_mode: trip_end

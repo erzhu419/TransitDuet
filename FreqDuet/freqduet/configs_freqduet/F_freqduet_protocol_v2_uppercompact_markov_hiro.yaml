@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_markov_hiro
+
+protocol:
+  role: structural_candidate_markov_upper_execution
+
+upper:
+  timetable_planner:
+    execution_contract:
+      replay_action_source: policy_command
+      include_plan_context: true
+      duration_discount: false

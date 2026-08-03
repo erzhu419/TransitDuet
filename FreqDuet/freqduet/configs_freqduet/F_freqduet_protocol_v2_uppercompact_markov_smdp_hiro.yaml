@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v2_uppercompact_markov_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_markov_smdp_hiro
+
+protocol:
+  role: structural_candidate_markov_upper_smdp
+
+upper:
+  timetable_planner:
+    execution_contract:
+      duration_discount: true
+      duration_base_s: 900.0
+      duration_min_steps: 0.25
+      duration_max_steps: 4.0
