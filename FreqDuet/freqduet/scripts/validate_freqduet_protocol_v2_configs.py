@@ -61,6 +61,7 @@ STRUCTURAL = [
     "F_freqduet_protocol_v2_upperdisc_hiro.yaml",
     "F_freqduet_protocol_v2_upperhist_hiro.yaml",
     "F_freqduet_protocol_v2_upperdisc_hist_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_hiro.yaml",
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml",
 ]
 STRUCTURAL_ENABLED_ADDITIONS = {
@@ -71,6 +72,7 @@ STRUCTURAL_ENABLED_ADDITIONS = {
     "F_freqduet_protocol_v2_upperdisc_hist_hiro.yaml": {
         "upper.state_history.enable",
     },
+    "F_freqduet_protocol_v2_uppercompact_hiro.yaml": set(),
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml": set(),
 }
 DOMAINS = [

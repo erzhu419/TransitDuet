@@ -5879,10 +5879,26 @@ class TransitDuetV2Runner:
                 or not self._ep_trip_wait_stats):
             return {}
 
-        raw_by_tid = {}
+        owner_by_tid = {
+            int(tt.launch_turn): int(getattr(
+                tt, '_freqduet_planned_by', tt.launch_turn))
+            for tt in self.env.timetables
+        }
+        totals_by_owner = defaultdict(lambda: {
+            'pax': 0,
+            'upper_wait_norm_sum': 0.0,
+        })
         for tid, stats in self._ep_trip_wait_stats.items():
-            pax = max(int(stats.get('pax', 0)), 1)
-            raw_by_tid[int(tid)] = float(stats['upper_wait_norm_sum'] / pax)
+            owner = owner_by_tid.get(int(tid), int(tid))
+            totals_by_owner[owner]['pax'] += int(stats.get('pax', 0))
+            totals_by_owner[owner]['upper_wait_norm_sum'] += float(
+                stats.get('upper_wait_norm_sum', 0.0))
+
+        raw_by_tid = {}
+        for owner, stats in totals_by_owner.items():
+            pax = max(int(stats['pax']), 1)
+            raw_by_tid[int(owner)] = float(
+                stats['upper_wait_norm_sum'] / pax)
 
         values = []
         for trans in transitions:
@@ -6039,6 +6055,7 @@ class TransitDuetV2Runner:
         snapshot_write_terminal_dispatch = self.timetable_terminal_dispatch
         planner_dir = bool(trip.direction)
         planner_key = "__all__" if self.timetable_plan_all_directions else planner_dir
+        plan_id = None
         promotion_replan = False
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
             active_plan = self._active_timetable_plans.get(planner_key)
@@ -6065,6 +6082,8 @@ class TransitDuetV2Runner:
                     action_vec = np.asarray(
                         active_plan['action'], dtype=np.float32).reshape(-1)
                     plan_origin_launch = float(active_plan['origin'])
+                    plan_id = int(active_plan.get(
+                        'plan_id', trip.launch_turn))
                     snapshot_write_terminal_dispatch = bool(
                         active_plan.get(
                             'write_terminal_dispatch',
@@ -6114,6 +6133,7 @@ class TransitDuetV2Runner:
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
             plan_origin_launch = float(trip.launch_time)
+            plan_id = int(trip.launch_turn)
             prev_plan = self._active_timetable_plans.get(planner_key)
             if prev_plan is not None and self.timetable_action_ema_alpha < 1.0:
                 prev_action = np.asarray(
@@ -6200,6 +6220,7 @@ class TransitDuetV2Runner:
                             'terminal_dispatch', 0.0)) > 0.5)
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
+                'plan_id': int(plan_id),
                 'action': action_vec.astype(np.float32).copy(),
                 'write_terminal_dispatch': bool(
                     snapshot_write_terminal_dispatch),
@@ -6217,6 +6238,8 @@ class TransitDuetV2Runner:
         plan_summary = None
         plan_penalty = 0.0
         if self.timetable_planner is not None and self.coupling_mode == 'hiro':
+            if plan_id is None:
+                plan_id = int(trip.launch_turn)
             current_plan_delta = self.timetable_planner.delta_at(
                 action_vec, bool(trip.direction), 0.0)
             terminal_shift_min_s = (
@@ -6265,7 +6288,8 @@ class TransitDuetV2Runner:
                 terminal_shift_max_s=terminal_shift_max_s,
                 terminal_shift_bias_s=terminal_shift_bias_s,
                 terminal_headway_floor_ratio=terminal_floor_ratio,
-                terminal_headway_floor_min_s=terminal_floor_min_s)
+                terminal_headway_floor_min_s=terminal_floor_min_s,
+                plan_id=plan_id)
             delta_t = float(plan_summary['effective_delta'])
             base_hw = float(plan_summary['base_headway'])
             self._ep_terminal_shift_caps.append(
@@ -6930,9 +6954,24 @@ class TransitDuetV2Runner:
                     dev = abs(gaps[-1] - mean_gap) / std_gap
                 trip_gap_devs[tids[i]] = dev
 
+        owner_by_tid = {
+            int(tt.launch_turn): int(getattr(
+                tt, '_freqduet_planned_by', tt.launch_turn))
+            for tt in self.env.timetables
+        }
+        gap_values_by_owner = defaultdict(list)
+        for tid, gap_dev in trip_gap_devs.items():
+            gap_values_by_owner[owner_by_tid.get(int(tid), int(tid))].append(
+                float(gap_dev))
+        plan_gap_devs = {
+            int(owner): float(np.mean(values))
+            for owner, values in gap_values_by_owner.items()
+            if values
+        }
+
         # Normalize gap devs to zero-mean credit
-        if trip_gap_devs:
-            devs = np.array(list(trip_gap_devs.values()))
+        if plan_gap_devs:
+            devs = np.array(list(plan_gap_devs.values()))
             dev_mean = devs.mean()
             dev_std = max(devs.std(), 1e-6)
         else:
@@ -6948,7 +6987,7 @@ class TransitDuetV2Runner:
                 # Ablation: all transitions get same episode reward
                 credit = 0.0
             else:
-                gap_dev = trip_gap_devs.get(tid, dev_mean)
+                gap_dev = plan_gap_devs.get(tid, dev_mean)
                 credit = -(gap_dev - dev_mean) / dev_std * 0.5
             a_u = float(trans.get(
                 'a_eff', float(np.asarray(trans['a']).reshape(-1)[0])))

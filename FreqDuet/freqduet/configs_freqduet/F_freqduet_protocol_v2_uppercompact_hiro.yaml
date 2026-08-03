@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_main_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_hiro
+
+protocol:
+  role: structural_candidate_identifiable_directional_planner
+
+upper:
+  timetable_planner:
+    shared_directions: true
+    plan_all_directions: false

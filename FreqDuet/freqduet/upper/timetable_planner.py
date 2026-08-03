@@ -102,7 +102,7 @@ class TimetableCurvePlanner:
               write_scheduled_launch=False, terminal_shift_min_s=None,
               terminal_shift_max_s=None, terminal_shift_bias_s=0.0,
               terminal_headway_floor_ratio=0.0,
-              terminal_headway_floor_min_s=0.0):
+              terminal_headway_floor_min_s=0.0, plan_id=None):
         """Write target headways for current and future trips.
 
         Returns:
@@ -111,6 +111,8 @@ class TimetableCurvePlanner:
         current_launch = float(current_trip.launch_time)
         origin_launch = current_launch if origin_launch_s is None else float(origin_launch_s)
         current_direction = bool(current_trip.direction)
+        plan_owner = int(
+            current_trip.launch_turn if plan_id is None else plan_id)
         terminal_shift_min = (
             self.terminal_shift_min_s if terminal_shift_min_s is None
             else float(terminal_shift_min_s))
@@ -169,7 +171,7 @@ class TimetableCurvePlanner:
                 target, min_dispatch_headway = _apply_terminal_headway_floor(
                     tt, base, target)
                 tt.target_headway = target
-                tt._freqduet_planned_by = int(current_trip.launch_turn)
+                tt._freqduet_planned_by = plan_owner
                 tt._freqduet_plan_offset_s = offset
                 planned_targets.append(target)
                 if write_scheduled_launch:
@@ -256,6 +258,7 @@ class TimetableCurvePlanner:
             "terminal_headway_floor_n": int(floors.size),
             "terminal_headway_floor_mean": (
                 float(floors.mean()) if floors.size else 0.0),
+            "plan_id": plan_owner,
         }
 
     def smoothness_penalty(self, action) -> float:
