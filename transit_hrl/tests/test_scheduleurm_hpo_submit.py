@@ -1,5 +1,7 @@
 import argparse
 import json
+from pathlib import Path
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -12,6 +14,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (
     build_scheduler_spec,
     build_training_command,
     cell_relative_dir,
+    cells_without_local_summary,
     execute_bulk,
     experiment_cells,
     normalize_args,
@@ -139,6 +142,25 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         ) as committed_manifest:
             self.assertEqual(source_identity(frozen_revision), (frozen_revision, "a" * 64))
         committed_manifest.assert_called_once()
+
+    def test_missing_cell_filter_skips_only_materialized_summaries(self):
+        cells = [
+            ("freq_hrl", "ppo_lr1e4_std15", "persistent_shift", 7),
+            ("freq_hrl", "ppo_lr1e4_std15", "persistent_shift", 8),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            completed = root / cell_relative_dir("unit_hpo", *cells[0])
+            completed.mkdir(parents=True)
+            (completed / "cell_summary.json").write_text("{}", encoding="utf-8")
+            self.assertEqual(
+                cells_without_local_summary(
+                    cells,
+                    run_name="unit_hpo",
+                    root=root,
+                ),
+                [cells[1]],
+            )
 
     def test_bulk_submission_uses_one_atomic_scheduler_call(self):
         specs = [{"signature": "unit/1"}, {"signature": "unit/2"}]

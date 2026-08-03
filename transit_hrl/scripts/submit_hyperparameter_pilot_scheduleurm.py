@@ -383,6 +383,29 @@ def expected_cell_dirs(args: argparse.Namespace) -> list[Path]:
     ]
 
 
+def cells_without_local_summary(
+    cells: list[tuple[str, str, str, int]],
+    *,
+    run_name: str,
+    root: Path = ROOT,
+) -> list[tuple[str, str, str, int]]:
+    return [
+        cell
+        for cell in cells
+        if not (
+            Path(root)
+            / cell_relative_dir(
+                run_name,
+                cell[0],
+                cell[1],
+                cell[2],
+                cell[3],
+            )
+            / "cell_summary.json"
+        ).exists()
+    ]
+
+
 def merge_results(args: argparse.Namespace) -> None:
     directories = expected_cell_dirs(args)
     missing = [path for path in directories if not (path / "cell_summary.json").exists()]
@@ -439,6 +462,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
     parser.add_argument("--skip-launch-staging", action="store_true")
+    parser.add_argument("--skip-complete-cells", action="store_true")
     return parser
 
 
@@ -507,8 +531,18 @@ def main() -> None:
         args.scenarios,
         args.optimizer_seeds,
     )
+    if args.skip_complete_cells:
+        requested_count = len(cells)
+        cells = cells_without_local_summary(cells, run_name=args.run_name)
+        print(
+            f"skipped {requested_count - len(cells)} cells with local summaries",
+            flush=True,
+        )
     if int(args.max_cells) > 0:
         cells = cells[: int(args.max_cells)]
+    if not cells:
+        print("no HPO cells require submission", flush=True)
+        return
     print(
         f"run={args.run_name} stage={args.stage} cells={len(cells)} "
         f"nodes={','.join(args.nodes)} iterations={args.iterations} steps={args.steps}",
