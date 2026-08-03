@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
 import subprocess
 import sys
@@ -38,10 +39,18 @@ from freq_hrl.experiments.reproducibility import (  # noqa: E402
 
 
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
-DEFAULT_NODES = ("jtl110cpu", "jtl110cpu2")
+WINDOWS_CPU_NODES = ("jtl110cpu", "jtl110cpu2")
+LINUX_CPU_NODES = tuple(f"node{index:03d}" for index in range(1, 7))
+SUPPORTED_NODES = WINDOWS_CPU_NODES + LINUX_CPU_NODES
+DEFAULT_NODES = LINUX_CPU_NODES
+DEFAULT_LINUX_PYTHON = (
+    "/home/zhengliang01/scheduleurm_work/conda_envs/"
+    "csbapr-gpu-py310/bin/python"
+)
 CPU_JUSTIFICATION = (
-    "The synthetic trading environment and small actor-critic models are "
-    "CPU-bound; one independent training replicate runs single-threaded."
+    "Confirmatory actor-critic cells are independent, CPU-bound, and "
+    "single-threaded; scheduleurm dynamically places each cell across the "
+    "declared physical-core CPU pool."
 )
 STAGE_EXCLUDES = (
     "results",
@@ -58,6 +67,18 @@ def parse_csv(value: str, cast=str) -> list:
 
 def source_identity() -> tuple[str, str]:
     return registered_git_source_identity(ROOT, Path("freq_hrl"))
+
+
+def default_python_executable(nodes: list[str]) -> str:
+    selected = set(nodes)
+    if selected and selected <= set(LINUX_CPU_NODES):
+        return DEFAULT_LINUX_PYTHON
+    if selected and selected <= set(WINDOWS_CPU_NODES):
+        return "python3"
+    raise ValueError(
+        "mixed Linux/Windows node pools require an explicit portable "
+        "--python-executable"
+    )
 
 
 def experiment_cells(
@@ -144,7 +165,7 @@ def build_training_command(
         "updates_per_step": args.offpolicy_updates_per_step,
     }
     command = [
-        "python3",
+        str(args.python_executable),
         "-u",
         "-m",
         "freq_hrl.experiments.trading.strong_learned_baseline_validation",
@@ -221,8 +242,12 @@ def build_training_command(
         "OPENBLAS_NUM_THREADS=1",
         "NUMEXPR_NUM_THREADS=1",
         "TORCH_NUM_THREADS=1",
+        "CUDA_VISIBLE_DEVICES=",
     ]
-    return " ".join([*env, shlex.join(command)])
+    command_text = " ".join([*env, shlex.join(command)]) + " && echo DONE"
+    if str(args.launch_subdir) == "scripts":
+        return f"cd .. && {command_text}"
+    return command_text
 
 
 def build_scheduler_command(
@@ -232,67 +257,110 @@ def build_scheduler_command(
     mode: str,
     replicate_seed: int,
 ) -> list[str]:
-    relative_dir = cell_relative_dir(
-        args.run_name, scenario, mode, replicate_seed
+    spec = build_scheduler_spec(
+        args,
+        scenario=scenario,
+        mode=mode,
+        replicate_seed=replicate_seed,
     )
-    absolute_dir = ROOT / relative_dir
     command = [
         sys.executable,
         str(SCHEDULER),
         "submit",
         "--project",
-        "Freq-HRL",
+        str(spec["project"]),
         "--description",
-        f"Freq-HRL strong v3 {scenario} {mode} replicate {replicate_seed}",
+        str(spec["description"]),
         "--cmd",
-        build_training_command(
+        str(spec["cmd"]),
+        "--cwd",
+        str(spec["cwd"]),
+        "--signature",
+        str(spec["signature"]),
+        "--resource-family",
+        str(spec["resource_family"]),
+        "--vram",
+        str(spec["vram"]),
+        "--ram-mb",
+        str(spec["ram_mb"]),
+        "--cpu",
+        str(spec["cpu"]),
+        "--priority",
+        str(spec["priority"]),
+        "--ckpt-dir",
+        str(spec["ckpt_dir"]),
+        "--ckpt-glob",
+        str(spec["ckpt_glob"]),
+        "--result-dir",
+        str(spec["result_dir"]),
+        "--local-result-dir",
+        str(spec["local_result_dir"]),
+        "--allow-cpu-training",
+        "--cpu-training-justification",
+        str(spec["cpu_training_justification"]),
+        "--allow-no-resume",
+        "--reroute-on-node-down",
+        "--node-down-requeue-s",
+        str(spec["node_down_requeue_s"]),
+    ]
+    for node in spec["allowed_nodes"]:
+        command.extend(["--allowed-node", str(node)])
+    for excluded in spec["stage_excludes"]:
+        command.extend(["--stage-exclude", str(excluded)])
+    if spec["skip_launch_staging"]:
+        command.append("--skip-launch-staging")
+    if spec["allow_duplicate"]:
+        command.append("--allow-duplicate")
+    return command
+
+
+def build_scheduler_spec(
+    args: argparse.Namespace,
+    *,
+    scenario: str,
+    mode: str,
+    replicate_seed: int,
+) -> dict[str, object]:
+    relative_dir = cell_relative_dir(
+        args.run_name, scenario, mode, replicate_seed
+    )
+    absolute_dir = ROOT / relative_dir
+    return {
+        "project": str(args.project),
+        "description": (
+            f"Freq-HRL confirmatory {scenario} {mode} replicate {replicate_seed}"
+        ),
+        "cmd": build_training_command(
             args,
             scenario=scenario,
             mode=mode,
             replicate_seed=replicate_seed,
             output_dir=relative_dir,
         ),
-        "--cwd",
-        str(ROOT),
-        "--signature",
-        (
+        "cwd": str(ROOT / str(args.launch_subdir)),
+        "signature": (
             f"Freq-HRL/strong-v3/{args.run_name}/"
             f"{getattr(args, 'frozen_config_sha256', '')[:12] or getattr(args, 'source_manifest_sha256', '')[:12] or 'exploratory'}/"
             f"{scenario}/{mode}/rep-{replicate_seed}"
         ),
-        "--resource-family",
-        "Freq-HRL/strong-v3/single-cell",
-        "--vram",
-        "0",
-        "--ram-mb",
-        str(args.ram_mb),
-        "--cpu",
-        str(args.cpu),
-        "--priority",
-        args.priority,
-        "--ckpt-dir",
-        str(absolute_dir / "checkpoints"),
-        "--result-dir",
-        str(absolute_dir),
-        "--local-result-dir",
-        str(absolute_dir),
-        "--allow-cpu-training",
-        "--cpu-training-justification",
-        CPU_JUSTIFICATION,
-        "--allow-no-resume",
-        "--reroute-on-node-down",
-        "--node-down-requeue-s",
-        "600",
-    ]
-    for node in args.nodes:
-        command.extend(["--allowed-node", node])
-    for excluded in STAGE_EXCLUDES:
-        command.extend(["--stage-exclude", excluded])
-    if args.skip_launch_staging:
-        command.append("--skip-launch-staging")
-    if args.allow_duplicate:
-        command.append("--allow-duplicate")
-    return command
+        "resource_family": "Freq-HRL/strong-v3/single-cell",
+        "vram": 0,
+        "ram_mb": int(args.ram_mb),
+        "cpu": int(args.cpu),
+        "priority": str(args.priority),
+        "ckpt_dir": str(absolute_dir / "checkpoints"),
+        "ckpt_glob": "*.pt",
+        "result_dir": str(absolute_dir),
+        "local_result_dir": str(absolute_dir),
+        "allow_cpu_training": True,
+        "cpu_training_justification": CPU_JUSTIFICATION,
+        "reroute_on_node_down": True,
+        "node_down_requeue_s": 600,
+        "allowed_nodes": list(args.nodes),
+        "stage_excludes": list(STAGE_EXCLUDES),
+        "skip_launch_staging": bool(args.skip_launch_staging),
+        "allow_duplicate": bool(args.allow_duplicate),
+    }
 
 
 def execute(command: list[str], *, dry_run: bool) -> None:
@@ -311,12 +379,75 @@ def execute(command: list[str], *, dry_run: bool) -> None:
         print(output.strip(), flush=True)
 
 
+def execute_bulk(
+    specs: list[dict[str, object]],
+    *,
+    dry_run: bool,
+    intent_label: str,
+) -> None:
+    if dry_run:
+        print(
+            f"dry-run bulk submit: {len(specs)} tasks; "
+            f"first={specs[0]['signature'] if specs else 'none'}",
+            flush=True,
+        )
+        return
+    command = [
+        sys.executable,
+        str(SCHEDULER),
+        "submit-jsonl",
+        "--stdin",
+        "--trusted",
+        "--json",
+        "--intent-label",
+        str(intent_label),
+    ]
+    process = subprocess.run(
+        command,
+        input=json.dumps(specs, ensure_ascii=True, separators=(",", ":")),
+        text=True,
+        capture_output=True,
+    )
+    if process.returncode != 0:
+        if process.stdout.strip():
+            print(process.stdout.strip(), file=sys.stderr)
+        if process.stderr.strip():
+            print(process.stderr.strip(), file=sys.stderr)
+        process.check_returncode()
+    payload = json.loads(process.stdout)
+    submitted = list(payload.get("submitted", []))
+    first_id = submitted[0]["id"] if submitted else "none"
+    last_id = submitted[-1]["id"] if submitted else "none"
+    print(
+        f"bulk submitted {payload.get('count', 0)} tasks "
+        f"ids={first_id}..{last_id}",
+        flush=True,
+    )
+
+
 def expected_cell_dirs(args: argparse.Namespace) -> list[Path]:
     return [
         ROOT / cell_relative_dir(args.run_name, scenario, mode, seed)
         for scenario, mode, seed in experiment_cells(
             args.scenarios, args.policy_modes, args.optimizer_seeds
         )
+    ]
+
+
+def cells_without_local_results(
+    cells: list[tuple[str, str, int]],
+    *,
+    run_name: str,
+    root: Path = ROOT,
+) -> list[tuple[str, str, int]]:
+    return [
+        cell
+        for cell in cells
+        if not (
+            Path(root)
+            / cell_relative_dir(run_name, cell[0], cell[1], cell[2])
+            / "per_seed.csv"
+        ).exists()
     ]
 
 
@@ -373,6 +504,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Final nested-validation frozen_config.json; required outside smoke mode.",
     )
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
+    parser.add_argument("--python-executable", default="")
+    parser.add_argument("--launch-subdir", choices=(".", "scripts"), default="scripts")
+    parser.add_argument("--project", default="Freq-HRL-Confirmatory")
     parser.add_argument("--cpu", type=int, default=1)
     parser.add_argument("--ram-mb", type=int, default=2048)
     parser.add_argument(
@@ -385,6 +519,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
     parser.add_argument("--skip-launch-staging", action="store_true")
+    parser.add_argument("--skip-complete-cells", action="store_true")
     return parser
 
 
@@ -398,12 +533,17 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.nodes = parse_csv(args.nodes)
     unknown_modes = sorted(set(args.policy_modes) - set(ALL_POLICY_MODES))
     unknown_scenarios = sorted(set(args.scenarios) - set(SCENARIOS))
-    unknown_nodes = sorted(set(args.nodes) - set(DEFAULT_NODES))
+    unknown_nodes = sorted(set(args.nodes) - set(SUPPORTED_NODES))
     if unknown_modes or unknown_scenarios or unknown_nodes:
         raise SystemExit(
             "invalid matrix selection: "
             f"modes={unknown_modes}, scenarios={unknown_scenarios}, nodes={unknown_nodes}"
         )
+    if not str(args.python_executable).strip():
+        try:
+            args.python_executable = default_python_executable(args.nodes)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
     current_revision = ""
     current_manifest = ""
     if not args.merge_only:
@@ -490,24 +630,38 @@ def main() -> None:
     cells = experiment_cells(
         args.scenarios, args.policy_modes, args.optimizer_seeds
     )
+    if args.skip_complete_cells:
+        requested_count = len(cells)
+        cells = cells_without_local_results(cells, run_name=args.run_name)
+        print(
+            f"skipped {requested_count - len(cells)} cells with local results",
+            flush=True,
+        )
     if int(args.max_cells) > 0:
         cells = cells[: int(args.max_cells)]
+    if not cells:
+        print("no confirmatory cells require submission", flush=True)
+        return
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)} "
         f"iterations={args.iterations} steps={args.steps} "
         f"frozen={args.frozen_config_sha256[:12] or 'exploratory'}",
         flush=True,
     )
-    for scenario, mode, seed in cells:
-        execute(
-            build_scheduler_command(
-                args,
-                scenario=scenario,
-                mode=mode,
-                replicate_seed=seed,
-            ),
-            dry_run=bool(args.dry_run),
+    specs = [
+        build_scheduler_spec(
+            args,
+            scenario=scenario,
+            mode=mode,
+            replicate_seed=seed,
         )
+        for scenario, mode, seed in cells
+    ]
+    execute_bulk(
+        specs,
+        dry_run=bool(args.dry_run),
+        intent_label=f"Freq-HRL confirmatory {args.run_name}",
+    )
     if args.dispatch and not args.dry_run:
         execute(
             [sys.executable, str(SCHEDULER), "dispatch"], dry_run=False
