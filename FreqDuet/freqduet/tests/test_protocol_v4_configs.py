@@ -51,6 +51,24 @@ class ProtocolV4ConfigTest(unittest.TestCase):
 
         self.assertTrue(any("action_bins" in item for item in errors))
 
+    def test_load_weighted_holding_sweep_is_single_axis_and_valid(self):
+        configs = [
+            f"F_freqduet_protocol_v41_loadhold_w{weight}_hiro.yaml"
+            for weight in ("001", "003", "006", "010")
+        ]
+
+        self.assertEqual(validate_all(configs), [])
+
+    def test_load_weighted_holding_rejects_missing_apc_load(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v41_loadhold_w003_hiro.yaml")
+        config["frequency"]["lower_context"]["features"].remove("load")
+
+        errors = validate_config(config, name="broken")
+
+        self.assertTrue(any("APC load" in item for item in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

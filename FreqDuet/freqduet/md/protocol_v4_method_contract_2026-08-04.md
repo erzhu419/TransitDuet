@@ -55,6 +55,13 @@ seeds.
     SAC (with a Lagrangian lower constraint). Historical `RESAC*` Python class
     names remain for checkpoint compatibility, but the paper must not claim an
     equation-by-equation reproduction of a named RE-SAC publication.
+11. **Onboard holding externality.** A candidate lower controller may include a
+    causal APC occupancy-weighted action penalty. It reads the load ratio frozen
+    in the action-time observation and penalizes
+    `reward_weight * (holding_s / 45 s) * occupancy_ratio`. It never reads the
+    mutable bus load at transition completion. The no-penalty V4 screen remains
+    a valid ablation; a positive weight is promoted only through the locked
+    V4.1 sensitivity screen and journey-time no-harm gate.
 
 ## Machine-enforced configuration
 
@@ -107,6 +114,16 @@ same all-passenger wait quantity without a second reward-attribution term.
    holding, rule-MPC, and closest TransitDuet lineage baselines.
 5. Untouched-seed 200-episode confirmation, broad held-out domains, route/day
    profiles, mechanism audits, and negative-results appendix.
+
+## V4.1 onboard-externality extension
+
+The initial V4 screen records journey and holding outcomes but does not put
+occupancy-weighted holding directly in the lower reward. That screen is retained
+as the zero-weight reference. Four single-axis candidates use reward weights
+`0.01`, `0.03`, `0.06`, and `0.10`; all other resolved fields remain identical.
+The extension is screened on selection seeds only. It cannot consume untouched
+confirmation seeds and cannot be promoted merely because its scalar service
+cost is favorable.
 
 No paper table is updated until stages 2-4 establish that the rebuilt method is
 effective under the corrected physical and causal protocol.

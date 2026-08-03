@@ -88,6 +88,18 @@ ROLE_REQUIRED = {
         "frequency.drift_feedback.enable": True,
         "leakage.enable": True,
     },
+    "candidate_load_weighted_holding": {
+        "frequency.upper_mode": "low",
+        "frequency.lower_mode": "high",
+        "frequency.use_historical_prior": True,
+        "frequency.promotion.enable": True,
+        "frequency.drift_feedback.enable": True,
+        "leakage.enable": True,
+        "lower.load_weighted_holding.enable": True,
+        "lower.load_weighted_holding.source": "observation_load",
+        "lower.load_weighted_holding.action_norm_s": 45.0,
+        "lower.load_weighted_holding.load_clip": 1.0,
+    },
     "optimizer_ablation_standard_constrained_sac": {
         "frequency.upper_mode": "low",
         "frequency.lower_mode": "high",
@@ -114,6 +126,13 @@ ROLE_REQUIRED = {
 
 
 ROLE_ALLOWED_DIFFS = {
+    "candidate_load_weighted_holding": {
+        "lower.load_weighted_holding.enable",
+        "lower.load_weighted_holding.source",
+        "lower.load_weighted_holding.reward_weight",
+        "lower.load_weighted_holding.action_norm_s",
+        "lower.load_weighted_holding.load_clip",
+    },
     "optimizer_ablation_standard_constrained_sac": {
         "upper.algorithm_id", "upper.critic_aggregation",
         "upper.ensemble_size", "upper.resac_beta", "upper.beta_ood",
@@ -263,6 +282,18 @@ def validate_config(config, name="config"):
     else:
         errors.append(
             f"{name}: unsupported lower-context contract {context_contract!r}")
+    load_hold_enabled = bool(_get(
+        config, "lower.load_weighted_holding.enable"))
+    if load_hold_enabled:
+        reward_weight = float(_get(
+            config, "lower.load_weighted_holding.reward_weight") or 0.0)
+        if reward_weight <= 0.0:
+            errors.append(
+                f"{name}: enabled load-weighted holding needs positive weight")
+        if "load" not in (_get(
+                config, "frequency.lower_context.features") or []):
+            errors.append(
+                f"{name}: load-weighted holding needs causal APC load context")
     if _get(config, "coupling.tpc.enable") and _get(
             config, "coupling.tpc.target_distribution"
     ) != "bounded_logistic_normal_v4":

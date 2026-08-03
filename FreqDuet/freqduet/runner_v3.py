@@ -84,6 +84,7 @@ from lower.cost_replay_buffer import CostReplayBuffer
 from lower.lifecycle import LowerEpisodeLifecycle
 from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
+from lower.holding_externality import LoadWeightedHoldingPenalty
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
 from randomness import RandomnessContract
@@ -247,6 +248,8 @@ class DiagnosticLog:
         'lower_context_gate_enabled', 'lower_context_gate_active_mean',
         'lower_action_bins_gate_enabled', 'lower_action_bins_gate_active_mean',
         'lower_reward_mean', 'lower_reward_std',
+        'lower_load_hold_penalty_mean', 'lower_load_hold_penalty_max',
+        'lower_load_ratio_mean', 'lower_normalized_person_delay_mean',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
         'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
@@ -1917,6 +1920,13 @@ class TransitDuetV2Runner:
             unobserved_action_mode=self.lower_unobserved_action_mode,
             frequency_enabled=self.env.frequency_enabled,
             frequency_source=self.env.frequency_observation_source,
+            context_features=self.env.lower_context_features,
+        )
+        self.lower_load_holding_penalty = (
+            LoadWeightedHoldingPenalty.from_config(
+                lower_cfg.get('load_weighted_holding', {})))
+        self.lower_load_holding_penalty.validate_observation_contract(
+            observation_mode=self.lower_observation_contract,
             context_features=self.env.lower_context_features,
         )
         self.env.lower_observation_contract = self.lower_observation_contract
@@ -5521,6 +5531,14 @@ class TransitDuetV2Runner:
             low_demand if local_low is None else local_low,
             act_val,
         )
+        load_hold_penalty, load_ratio, normalized_person_delay = (
+            self.lower_load_holding_penalty.evaluate(
+                raw_state,
+                act_val,
+                base_state_dim=int(self.env._base_state_dim),
+                context_features=self.env.lower_context_features,
+            )
+        )
         if board_wait_sum_s is None:
             board_wait_sum_s = float(getattr(
                 context_bus, 'last_board_wait_sum_s', 0.0)
@@ -5570,6 +5588,7 @@ class TransitDuetV2Runner:
             - drift_penalty
             - wait_penalty
             - high_hold_penalty
+            - load_hold_penalty
         )
 
         self._ep_lower_actions.append(act_val)
@@ -5578,6 +5597,10 @@ class TransitDuetV2Runner:
         self._ep_lower_drift_penalties.append(drift_penalty)
         self._ep_lower_drift_costs.append(drift_cost)
         self._ep_lower_drift_loads.append(drift_load)
+        self._ep_lower_load_hold_penalties.append(load_hold_penalty)
+        self._ep_lower_load_ratios.append(load_ratio)
+        self._ep_lower_normalized_person_delays.append(
+            normalized_person_delay)
         if cur_tid >= 0 and record_holding_action:
             self.holding_feedback.record_action(cur_tid, act_val)
         if tracker is not None:
@@ -7358,6 +7381,9 @@ class TransitDuetV2Runner:
         self._ep_upper_interval_fleet_costs = []
         self._ep_upper_interval_coverages = []
         self._ep_lower_actions_by_dir = {True: [], False: []}
+        self._ep_lower_load_hold_penalties = []
+        self._ep_lower_load_ratios = []
+        self._ep_lower_normalized_person_delays = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -7978,6 +8004,11 @@ class TransitDuetV2Runner:
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
         lower_drift_load_stat = _stat(self._ep_lower_drift_loads)
+        lower_load_hold_penalty_stat = _stat(
+            self._ep_lower_load_hold_penalties)
+        lower_load_ratio_stat = _stat(self._ep_lower_load_ratios)
+        lower_normalized_person_delay_stat = _stat(
+            self._ep_lower_normalized_person_delays)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8340,6 +8371,14 @@ class TransitDuetV2Runner:
                 lower_action_bins_gate_stat['mean'], 4),
             'lower_reward_mean': round(lr_stat['mean'], 4),
             'lower_reward_std': round(lr_stat['std'], 4),
+            'lower_load_hold_penalty_mean': round(
+                lower_load_hold_penalty_stat['mean'], 6),
+            'lower_load_hold_penalty_max': round(
+                lower_load_hold_penalty_stat['max'], 6),
+            'lower_load_ratio_mean': round(
+                lower_load_ratio_stat['mean'], 6),
+            'lower_normalized_person_delay_mean': round(
+                lower_normalized_person_delay_stat['mean'], 6),
             # lower training
             'lower_q_mean': lower_m.get('q_mean', 0.),
             'lower_q_std': lower_m.get('q_std', 0.),

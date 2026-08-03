@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v4_main_hiro.yaml
+_name: F_freqduet_protocol_v41_loadhold_w010_hiro
+
+protocol:
+  role: candidate_load_weighted_holding
+
+lower:
+  load_weighted_holding:
+    enable: true
+    source: observation_load
+    reward_weight: 0.10
+    action_norm_s: 45.0
+    load_clip: 1.0
