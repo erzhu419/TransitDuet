@@ -12,6 +12,7 @@ from freq_hrl.experiments.trading.ppo_actor_critic import (
     evaluate_hf_lower_intervention,
     make_plan_mapper,
     promotion_gate_feature_vector,
+    resolve_method_contract,
     train_ppo_actor_critic,
 )
 from freq_hrl.policies import BernsteinPlanCurve
@@ -19,6 +20,21 @@ from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 
 
 class FullMethodContractTest(unittest.TestCase):
+    def test_v4_ablation_contracts_change_only_the_registered_mechanism(self):
+        full = resolve_method_contract("full_freq_hrl_v4")
+        expected_changes = {
+            "ablate_promotion_v4": {"learned_promotion_gate"},
+            "ablate_hf_lower_v4": {"lower_hf_overlay"},
+            "ablate_leakage_v4": {"constrain_raw_lower_effect"},
+        }
+        for contract, expected in expected_changes.items():
+            with self.subTest(contract=contract):
+                ablated = resolve_method_contract(contract)
+                changed = {
+                    key for key in full if full[key] != ablated[key]
+                }
+                self.assertEqual(changed, expected)
+
     def test_hf_lower_action_is_bounded_and_separate_from_tracking_speed(self):
         speed, overlay = decode_hierarchical_lower_action(
             np.asarray([-10.0, 10.0, 10.0, -10.0]),
@@ -155,6 +171,7 @@ class FullMethodContractTest(unittest.TestCase):
                 "constrain_raw_lower_effect": True,
                 "plan_smoothness_weight": 0.01,
                 "learned_promotion_gate": True,
+                "heuristic_promotion_gate": False,
                 "promotion_replan_cost": 0.001,
                 "enable_hf_lower": True,
                 "lower_hf_order_scale": 0.025,

@@ -82,6 +82,9 @@ METHOD_CONTRACTS = (
     "curve_credit_control_v3",
     "full_freq_hrl_v3",
     "full_freq_hrl_v4",
+    "ablate_promotion_v4",
+    "ablate_hf_lower_v4",
+    "ablate_leakage_v4",
 )
 LOWER_OBSERVATION_INTERVENTIONS = (
     "none",
@@ -97,20 +100,41 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
         raise ValueError(
             f"unknown method_contract: {contract}; expected one of {METHOD_CONTRACTS}"
         )
-    return {
+    flags = {
         "execute_plan_curve": contract != "routing_core_v2",
         "use_additive_frequency_credit": contract != "routing_core_v2",
         "constrain_raw_lower_effect": contract in {
             "full_freq_hrl_v3",
             "full_freq_hrl_v4",
+            "ablate_promotion_v4",
+            "ablate_hf_lower_v4",
         },
-        "learned_promotion_gate": contract == "full_freq_hrl_v4",
-        "lower_hf_overlay": contract == "full_freq_hrl_v4",
+        "learned_promotion_gate": contract in {
+            "full_freq_hrl_v4",
+            "ablate_hf_lower_v4",
+            "ablate_leakage_v4",
+        },
+        "heuristic_promotion_gate": contract in {
+            "routing_core_v2",
+            "curve_credit_control_v3",
+            "full_freq_hrl_v3",
+        },
+        "lower_hf_overlay": contract in {
+            "full_freq_hrl_v4",
+            "ablate_promotion_v4",
+            "ablate_leakage_v4",
+        },
     }
+    return flags
 
 
 def full_method_implementation_version(method_contract: str) -> str:
-    if str(method_contract) == "full_freq_hrl_v4":
+    if str(method_contract) in {
+        "full_freq_hrl_v4",
+        "ablate_promotion_v4",
+        "ablate_hf_lower_v4",
+        "ablate_leakage_v4",
+    }:
         return FULL_METHOD_IMPLEMENTATION_VERSION
     if str(method_contract) == "full_freq_hrl_v3":
         return FULL_METHOD_V3_IMPLEMENTATION_VERSION
@@ -1020,6 +1044,7 @@ def smdp_rollout(
     constrain_raw_lower_effect: bool = False,
     plan_smoothness_weight: float = 0.0,
     learned_promotion_gate: bool = False,
+    heuristic_promotion_gate: bool = True,
     promotion_replan_cost: float = 0.0,
     enable_hf_lower: bool = False,
     lower_hf_order_scale: float = 0.025,
@@ -1074,6 +1099,10 @@ def smdp_rollout(
                 "learned promotion state dim mismatch: "
                 f"expected {expected_gate_dim}, got {model.config.promotion_state_dim}"
             )
+    if learned_promotion_gate and heuristic_promotion_gate:
+        raise ValueError(
+            "learned and heuristic promotion gates cannot both control replanning"
+        )
     history_window = int(
         getattr(model.config, "raw_history_window", 0) or RAW_HISTORY_WINDOW
     )
@@ -1090,7 +1119,7 @@ def smdp_rollout(
     env = PortfolioExecutionEnv(data["returns"], volumes=data["volume"], config=env_config)
     tracker = make_tracker(
         assets,
-        heuristic_promotion=not bool(learned_promotion_gate),
+        heuristic_promotion=bool(heuristic_promotion_gate),
     )
     leakage = CausalLeakageRewardShaper(
         regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
@@ -1217,13 +1246,15 @@ def smdp_rollout(
                     reason = None
             else:
                 reason = None
-        else:
+        elif heuristic_promotion_gate:
             if promote:
                 promotion_signals += 1
             reason = scheduler.decision_reason(
                 t,
                 promotion=bool(promote and policy_mode == "freq_hrl"),
             )
+        else:
+            reason = None
         if reason is not None:
             upper_state, _ = smdp_policy_feature_vectors(
                 policy_mode=policy_mode,
@@ -1234,7 +1265,7 @@ def smdp_rollout(
                 leakage_feedback=latest_leakage_feedback,
                 progress=t / max(int(steps) - 1, 1),
                 history_window=history_window,
-                include_heuristic_promotion=not learned_promotion_gate,
+                include_heuristic_promotion=bool(heuristic_promotion_gate),
             )
             upper_out = model.act_upper(upper_state, sample=sample)
             if plan_mapper is None:
@@ -1285,7 +1316,7 @@ def smdp_rollout(
             leakage_feedback=latest_leakage_feedback,
             progress=t / max(int(steps) - 1, 1),
             history_window=history_window,
-            include_heuristic_promotion=not learned_promotion_gate,
+            include_heuristic_promotion=bool(heuristic_promotion_gate),
         )
         factual_lower_state = np.asarray(lower_state, dtype=np.float32).copy()
         if compute_hf_action_sensitivity:
@@ -1575,7 +1606,8 @@ def smdp_rollout(
         "additive_frequency_credit": float(bool(use_additive_frequency_credit)),
         "raw_lower_effect_constraint": float(bool(constrain_raw_lower_effect)),
         "learned_promotion_gate": float(bool(learned_promotion_gate)),
-        "heuristic_promotion_disabled": float(bool(learned_promotion_gate)),
+        "heuristic_promotion_disabled": float(not bool(heuristic_promotion_gate)),
+        "heuristic_promotion_gate": float(bool(heuristic_promotion_gate)),
         "promotion_replan_cost": float(promotion_replan_cost),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
         "lower_hf_order_scale": float(lower_hf_order_scale),
@@ -1768,6 +1800,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "raw_lower_effect_constraint",
         "learned_promotion_gate",
         "heuristic_promotion_disabled",
+        "heuristic_promotion_gate",
         "promotion_replan_cost",
         "hf_lower_overlay_enabled",
         "lower_hf_order_scale",
@@ -1891,12 +1924,19 @@ def train_ppo_actor_critic(
             raise ValueError(
                 "non-routing capacity reference requires plan_basis_dim >= 2"
             )
-    if method_contract in {"full_freq_hrl_v3", "full_freq_hrl_v4"}:
+    frequency_method_contracts = {
+        "full_freq_hrl_v3",
+        "full_freq_hrl_v4",
+        "ablate_promotion_v4",
+        "ablate_hf_lower_v4",
+        "ablate_leakage_v4",
+    }
+    if method_contract in frequency_method_contracts:
         if policy_mode != "freq_hrl":
             raise ValueError(
                 f"{method_contract} requires policy_mode='freq_hrl'"
             )
-        if not (
+        if method_contract != "ablate_leakage_v4" and not (
             float(leakage_scale) > 0.0
             or float(lower_lf_constraint_coef) > 0.0
             or float(lower_lf_dual_lr) > 0.0
@@ -1904,6 +1944,18 @@ def train_ppo_actor_critic(
             raise ValueError(
                 f"{method_contract} requires an active raw leakage penalty or constraint"
             )
+    if method_contract == "ablate_leakage_v4" and any(
+        float(value) != 0.0
+        for value in (
+            leakage_scale,
+            lower_lf_constraint_coef,
+            lower_lf_dual_lr,
+            lower_lf_objective_weight,
+        )
+    ):
+        raise ValueError(
+            "ablate_leakage_v4 requires all leakage training weights to be zero"
+        )
     if not method_flags["learned_promotion_gate"] and float(promotion_replan_cost) > 0.0:
         raise ValueError(
             "promotion_replan_cost is only valid for full_freq_hrl_v4"
@@ -2263,6 +2315,9 @@ def train_ppo_actor_critic(
             ],
             plan_smoothness_weight=float(plan_smoothness_weight),
             learned_promotion_gate=method_flags["learned_promotion_gate"],
+            heuristic_promotion_gate=method_flags[
+                "heuristic_promotion_gate"
+            ],
             promotion_replan_cost=float(promotion_replan_cost),
             enable_hf_lower=method_flags["lower_hf_overlay"],
             lower_hf_order_scale=float(lower_hf_order_scale),
@@ -2350,7 +2405,10 @@ def train_ppo_actor_critic(
                 method_flags["learned_promotion_gate"]
             ),
             "heuristic_promotion_disabled": bool(
-                method_flags["learned_promotion_gate"]
+                not method_flags["heuristic_promotion_gate"]
+            ),
+            "heuristic_promotion_gate": bool(
+                method_flags["heuristic_promotion_gate"]
             ),
             "promotion_gate_state_dim": int(
                 smdp_config.promotion_state_dim
