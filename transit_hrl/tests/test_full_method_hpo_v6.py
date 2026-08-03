@@ -1,0 +1,122 @@
+import unittest
+
+from freq_hrl.experiments.trading import full_method_hpo_v6 as v6
+
+
+class FullMethodHPOV6Test(unittest.TestCase):
+    def test_registry_tunes_only_full_method_and_baselines_with_equal_budgets(self):
+        self.assertEqual(len(v6.ALL_VARIANT_IDS), 10)
+        self.assertEqual(len(v6.HPO_VARIANT_IDS), 7)
+        self.assertEqual(
+            set(v6.ALL_VARIANT_IDS) - set(v6.HPO_VARIANT_IDS),
+            {
+                "freq_hrl_no_promotion_v6",
+                "freq_hrl_no_hf_lower_v6",
+                "freq_hrl_no_leakage_v6",
+            },
+        )
+        self.assertEqual({
+            len(v6.candidate_ids_for_variant(variant_id))
+            for variant_id in v6.ALL_VARIANT_IDS
+        }, {6})
+        self.assertEqual(v6.canonical_full_method_parameter_count(2), 50774)
+
+    def test_ablations_inherit_full_candidate_and_keep_v6_protocol_fields(self):
+        candidate_id = "v6_tracking"
+        full = v6.effective_parameters_for_variant(
+            "freq_hrl_full_v6", candidate_id
+        )
+        expected_changes = {
+            "freq_hrl_no_promotion_v6": {
+                "method_contract",
+                "promotion_replan_cost",
+            },
+            "freq_hrl_no_hf_lower_v6": {
+                "method_contract",
+                "lower_hf_order_scale",
+            },
+            "freq_hrl_no_leakage_v6": {
+                "method_contract",
+                "leakage_scale",
+                "lower_lf_constraint_coef",
+                "lower_lf_dual_lr",
+                "lower_lf_objective_weight",
+            },
+        }
+        for variant_id, expected in expected_changes.items():
+            with self.subTest(variant_id=variant_id):
+                ablated = v6.effective_parameters_for_variant(
+                    variant_id, candidate_id
+                )
+                changed = {
+                    key for key in full if full[key] != ablated[key]
+                }
+                self.assertEqual(changed, expected)
+                self.assertEqual(
+                    ablated["capacity_reference_method_contract"],
+                    "full_freq_hrl_v6",
+                )
+                self.assertEqual(
+                    ablated["promotion_credit_mode"],
+                    "incremental_plan_advantage",
+                )
+                self.assertEqual(
+                    ablated["leakage_cost_mode"], "fixed_rms_budget"
+                )
+                self.assertTrue(ablated["include_hf_predictability"])
+
+    def test_cell_trains_one_checkpoint_on_support_only_and_never_loads_ood(self):
+        payload = v6.run_hpo_cell(
+            candidate_id="v6_balanced",
+            variant_id="freq_hrl_full_v6",
+            training_replicate_seed=2026,
+            train_seeds=[42],
+            checkpoint_validation_seeds=[57721],
+            tuning_validation_seeds=[68207],
+            steps=24,
+            assets=2,
+            iterations=1,
+        )
+        summary = payload["cell_summary"]
+        self.assertEqual(summary["cell_status"], "valid")
+        self.assertEqual(summary["training_scenario"], "support_mixture")
+        self.assertEqual(summary["ood_period_access_status"], "not_loaded")
+        self.assertEqual(
+            summary["promotion_recovery_access_status"], "not_loaded"
+        )
+        self.assertEqual(summary["heldout_test_seeds"], [])
+        self.assertEqual(len(payload["tuning_rows"]), 4)
+        self.assertEqual(len(payload["hf_intervention_rows"]), 4)
+        self.assertEqual(
+            {row["scenario"] for row in payload["tuning_rows"]},
+            set(v6.SELECTION_SCENARIOS),
+        )
+        checkpoint_hashes = {
+            row["frozen_checkpoint_sha256"]
+            for row in payload["tuning_rows"]
+        }
+        self.assertEqual(
+            checkpoint_hashes, {summary["frozen_checkpoint_sha256"]}
+        )
+        self.assertEqual(
+            summary["capacity_actual_parameter_count"],
+            summary["capacity_target_parameter_count"],
+        )
+
+    def test_hpo_rejects_independently_tuned_ablation(self):
+        with self.assertRaisesRegex(ValueError, "non-ablation"):
+            v6.run_hpo_cell(
+                candidate_id="v6_balanced",
+                variant_id="freq_hrl_no_hf_lower_v6",
+                training_replicate_seed=2026,
+                train_seeds=[42],
+                checkpoint_validation_seeds=[57721],
+                tuning_validation_seeds=[68207],
+                steps=12,
+                assets=2,
+                iterations=1,
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
