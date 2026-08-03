@@ -197,7 +197,6 @@ def build_experiment_manifest(
             "iterations": int(iterations),
             "trainer": (
                 "frequency_separated_smdp_ppo_v2"
-                if mode == "freq_hrl" else "legacy_shared_dual_level_ppo"
             ),
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
@@ -239,7 +238,8 @@ def run_strong_learned_baseline_validation(
         shard_index=int(shard_index),
         num_shards=int(num_shards),
     )
-    for pair_idx, (scenario, mode) in enumerate(pairs):
+    scenario_rank = {scenario: idx for idx, scenario in enumerate(scenarios)}
+    for scenario, mode in pairs:
         if scenario not in SCENARIOS:
             raise ValueError(f"unknown scenario: {scenario}")
         if mode not in POLICY_MODES:
@@ -252,8 +252,9 @@ def run_strong_learned_baseline_validation(
             assets=int(assets),
             scenario=scenario,
             iterations=int(iterations),
-            seed=int(optimizer_seed) + 1009 * pair_idx + 7919 * int(shard_index),
+            seed=int(optimizer_seed) + 1009 * int(scenario_rank[scenario]),
             policy_mode=mode,
+            use_handcrafted_frequency_prior=False,
         )
         elapsed = float(time.perf_counter() - start)
         params = count_parameters(model)
@@ -293,7 +294,7 @@ def run_strong_learned_baseline_validation(
             "upper_action_dim": int(model.config.upper_action_dim),
             "lower_action_dim": int(model.config.lower_action_dim),
             "hidden_dim": int(model.config.hidden_dim),
-            "matched_budget_group": "trading_shared_dual_ppo_linear",
+            "matched_budget_group": "trading_capacity_matched_smdp_ppo_v2",
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
         })
@@ -381,9 +382,11 @@ def run_strong_learned_baseline_validation(
             "num_shards": int(num_shards),
         },
         "boundary": (
-            "This is a transitional v2 comparison. It is eligible for a strong "
-            "baseline claim only when trainer_budget_status and "
-            "parameter_budget_status are both matched. SAC/TD3 remain missing."
+            "PPO-family baselines use identical SMDP model dimensions, "
+            "optimizer settings, initialization seeds, and environment-step "
+            "budgets. Factorized flat PPO removes temporal abstraction and frequency "
+            "routing; generic HRL retains temporal abstraction but uses raw "
+            "features. SAC/TD3 remain missing."
         ),
     }
 

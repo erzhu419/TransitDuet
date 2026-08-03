@@ -38,7 +38,8 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             num_shards=1,
         )
         self.assertEqual(payload["summary"]["rows"], 3)
-        self.assertEqual(payload["summary"]["parameter_budget_status"], "mismatch")
+        self.assertEqual(payload["summary"]["parameter_budget_status"], "matched")
+        self.assertEqual(payload["summary"]["trainer_budget_status"], "matched")
         self.assertTrue(any(
             row["trainer"] == "frequency_separated_smdp_ppo_v2"
             for row in payload["per_seed"]
@@ -47,6 +48,13 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
         self.assertEqual(len(payload["paired_checks"]), 8)
         self.assertTrue(any(row["baseline"] == "flat_ppo" for row in payload["per_seed"]))
         self.assertTrue(any(row["policy_mode"] == "generic_hrl_ppo" for row in payload["parameter_budget"]))
+        self.assertEqual(
+            {row["parameter_count"] for row in payload["parameter_budget"]},
+            {payload["parameter_budget"][0]["parameter_count"]},
+        )
+        by_mode = {row["baseline"]: row for row in payload["per_seed"]}
+        self.assertEqual(by_mode["flat_ppo"]["upper_decision_count"], 24)
+        self.assertLess(by_mode["generic_hrl_ppo"]["upper_decision_count"], 24)
 
     def test_write_outputs_creates_main_artifacts(self):
         payload = run_strong_learned_baseline_validation(

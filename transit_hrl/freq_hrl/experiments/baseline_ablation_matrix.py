@@ -213,7 +213,7 @@ def _learned_baseline_manifest(checks: list[dict[str, Any]]) -> list[dict[str, A
         checks_by_control.setdefault(control, {})[metric] = row
 
     purpose = {
-        "flat_ppo": "strong flat on-policy learned policy baseline",
+        "flat_ppo": "capacity-matched factorized joint-action flat PPO baseline",
         "flat_sac": "strong off-policy entropy-regularized learned policy baseline",
         "flat_td3": "strong deterministic actor-critic learned policy baseline",
         "generic_hrl_ppo": "non-frequency learned HRL baseline with comparable hierarchy capacity",

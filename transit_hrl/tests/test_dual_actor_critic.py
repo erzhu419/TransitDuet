@@ -125,7 +125,15 @@ class DualActorCriticTest(unittest.TestCase):
                     policy_mode=mode,
                 )
                 self.assertEqual(payload["policy_mode"], mode)
+                self.assertEqual(payload["trainer"], "frequency_separated_smdp_ppo_v2")
+                self.assertFalse(payload["frequency_routing_enabled"])
                 self.assertEqual(rows[0]["baseline"], mode)
+                if mode == "flat_ppo":
+                    self.assertEqual(rows[0]["upper_decision_count"], 32)
+                    self.assertEqual(rows[0]["temporal_contract"], "primitive_joint_action")
+                else:
+                    self.assertLess(rows[0]["upper_decision_count"], 32)
+                    self.assertEqual(rows[0]["temporal_contract"], "asynchronous_hierarchy")
                 self.assertIn("FocusScore", rows[0])
                 self.assertIn("FocusScore_mean", payload["summary"])
 

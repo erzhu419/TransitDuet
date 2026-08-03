@@ -220,6 +220,63 @@ def frequency_separated_feature_vectors(
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
+def raw_hierarchical_feature_vectors(
+    raw_signal: np.ndarray,
+    position: np.ndarray,
+    target: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Capacity-matched raw-history features for non-frequency baselines."""
+
+    position_arr = np.asarray(position, dtype=np.float64).reshape(-1)
+    dim = int(position_arr.size)
+    raw = resize(raw_signal, dim) / 0.0014
+    current_target = (
+        np.zeros(dim, dtype=np.float64)
+        if target is None else resize(target, dim)
+    )
+    gap = current_target - position_arr
+    upper_state = np.concatenate([
+        raw,
+        np.tanh(raw),
+        np.tanh(np.abs(raw)),
+        raw * position_arr,
+        position_arr,
+        current_target,
+        np.asarray([0.0, 0.0, 0.0, 0.0, 1.0], dtype=np.float64),
+    ])
+    lower_state = np.concatenate([
+        current_target,
+        position_arr,
+        gap,
+        raw,
+        np.tanh(raw),
+        np.tanh(np.abs(raw)),
+        raw * gap,
+        raw * position_arr,
+        np.ones(1, dtype=np.float64),
+    ])
+    return upper_state.astype(np.float32), lower_state.astype(np.float32)
+
+
+def smdp_policy_feature_vectors(
+    *,
+    policy_mode: str,
+    freq: dict[str, Any],
+    raw_signal: np.ndarray,
+    position: np.ndarray,
+    target: np.ndarray | None,
+    leakage_feedback: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    if str(policy_mode) == "freq_hrl":
+        return frequency_separated_feature_vectors(
+            freq,
+            position,
+            target=target,
+            leakage_feedback=leakage_feedback,
+        )
+    return raw_hierarchical_feature_vectors(raw_signal, position, target=target)
+
+
 def initialize_frequency_prior(model: DualActorCriticPPO, assets: int, plan_basis_dim: int = 0) -> None:
     """Initialize the linear actors near the existing frequency-routing prior."""
     if model.config.hidden_dim != 0:
@@ -531,8 +588,12 @@ def smdp_rollout(
     lower_lf_raw_recenter_scale: float = 0.10,
     upper_period: int = 30,
     min_upper_duration: int = 5,
+    policy_mode: str = "freq_hrl",
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
-    """Roll out the protocol-compliant asynchronous Freq-HRL policy."""
+    """Roll out capacity-matched flat, generic-HRL, or Freq-HRL policies."""
+    policy_mode = str(policy_mode)
+    if policy_mode not in POLICY_MODES:
+        raise ValueError(f"unknown policy_mode: {policy_mode}")
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env_config = PortfolioExecutionConfig(
         transaction_cost_bps=50.0,
@@ -556,8 +617,8 @@ def smdp_rollout(
         if int(lower_lf_effect_filter_window) > 0 else None
     )
     scheduler = TemporalDecisionScheduler(
-        upper_period=int(upper_period),
-        min_upper_duration=int(min_upper_duration),
+        upper_period=1 if policy_mode == "flat_ppo" else int(upper_period),
+        min_upper_duration=1 if policy_mode == "flat_ppo" else int(min_upper_duration),
     )
     builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
     diagnostics = FrequencyDiagnostics(mi_bins=8)
@@ -585,11 +646,16 @@ def smdp_rollout(
         promote = bool(promotion.get("promote", False))
         if promote:
             promotion_signals += 1
-        reason = scheduler.decision_reason(t, promotion=promote)
+        reason = scheduler.decision_reason(
+            t,
+            promotion=bool(promote and policy_mode == "freq_hrl"),
+        )
         if reason is not None:
-            upper_state, _ = frequency_separated_feature_vectors(
-                dict(freq),
-                env.position.copy(),
+            upper_state, _ = smdp_policy_feature_vectors(
+                policy_mode=policy_mode,
+                freq=dict(freq),
+                raw_signal=data["predictor"][t],
+                position=env.position.copy(),
                 target=current_target,
                 leakage_feedback=latest_leakage_feedback,
             )
@@ -614,9 +680,11 @@ def smdp_rollout(
 
         if current_target is None:
             raise RuntimeError("upper scheduler did not create an initial target")
-        _, lower_state = frequency_separated_feature_vectors(
-            dict(freq),
-            env.position.copy(),
+        _, lower_state = smdp_policy_feature_vectors(
+            policy_mode=policy_mode,
+            freq=dict(freq),
+            raw_signal=data["predictor"][t],
+            position=env.position.copy(),
             target=current_target,
             leakage_feedback=latest_leakage_feedback,
         )
@@ -666,6 +734,9 @@ def smdp_rollout(
             - env_config.inventory_drift_penalty * float(info["inventory_drift"])
             - leakage_reward_penalty
         )
+        if policy_mode == "flat_ppo":
+            upper_credit = shaped_reward
+            lower_credit = shaped_reward
         latest_leakage_feedback = float(leak_info.get("lower_lf_penalty", 0.0))
         builder.add_lower(
             state=lower_state,
@@ -705,8 +776,8 @@ def smdp_rollout(
         periods_per_year=periods_per_year_from_bar_seconds(60.0),
     )
     row = {
-        "baseline": "freq_hrl",
-        "policy_mode": "freq_hrl",
+        "baseline": policy_mode,
+        "policy_mode": policy_mode,
         "seed": int(seed),
         "scenario": scenario,
         **financial,
@@ -738,6 +809,14 @@ def smdp_rollout(
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
         "protocol_valid": 1.0,
+        "routing_contract": (
+            "frequency_responsibility"
+            if policy_mode == "freq_hrl" else "raw_history"
+        ),
+        "temporal_contract": (
+            "primitive_joint_action"
+            if policy_mode == "flat_ppo" else "asynchronous_hierarchy"
+        ),
     }
     return (trajectory if sample else None), row
 
@@ -808,6 +887,7 @@ def train_ppo_actor_critic(
     policy_mode: str = "freq_hrl",
     upper_period: int = 30,
     min_upper_duration: int = 5,
+    use_handcrafted_frequency_prior: bool = False,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -825,112 +905,52 @@ def train_ppo_actor_critic(
         plan_eval_offset_s=plan_eval_offset_s,
         plan_coefficient_scale=plan_coefficient_scale,
     )
-    if policy_mode == "freq_hrl":
-        smdp_config = SMDPPPOConfig(
-            upper_state_dim=6 * assets + 5,
-            lower_state_dim=8 * assets + 1,
-            upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
-            lower_action_dim=assets,
-            hidden_dim=0,
-            upper_learning_rate=0.003,
-            lower_learning_rate=0.003,
-            epochs=4,
-            minibatch_size=512,
-            init_log_std=-2.5,
-            lower_cost_target=float(lower_lf_constraint_target),
-            lower_dual_lr=float(lower_lf_dual_lr),
-            lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
-            lower_max_lambda=20.0,
-        )
-        smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
-        initialize_smdp_frequency_prior(smdp_model, assets, plan_basis_dim=plan_basis_dim)
-        payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
-            model=smdp_model,
-            train_seeds=train_seeds,
-            eval_seeds=eval_seeds,
-            iterations=iterations,
-            rollout_fn=lambda ppo_model, rollout_seed, sample: smdp_rollout(
-                ppo_model,
-                seed=rollout_seed,
-                steps=steps,
-                assets=assets,
-                scenario=scenario,
-                sample=sample,
-                leakage_scale=leakage_scale if sample else 0.0,
-                plan_mapper=plan_mapper,
-                lower_lf_effect_filter_window=lower_lf_effect_filter_window,
-                lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
-                lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
-                lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
-                upper_period=upper_period,
-                min_upper_duration=min_upper_duration,
-            ),
-            objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(
-                row["LowerLFDrift"]
-            ),
-            summary_fn=summarize,
-            policy="freq_hrl_smdp_ppo",
-            domain="trading",
-            metadata={
-                "policy_mode": policy_mode,
-                "baseline": policy_mode,
-                "scenario": scenario,
-                "steps": int(steps),
-                "assets": int(assets),
-                "leakage_scale": float(leakage_scale),
-                "upper_period": int(upper_period),
-                "min_upper_duration": int(min_upper_duration),
-                "upper_observation_contract": "LF + forecast + uncertainty + compressed HF summaries",
-                "lower_observation_contract": "current plan + local HF/MF residual context",
-                "credit_contract": "upper strategic PnL; lower execution cost, tracking, and leakage",
-                "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
-                "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
-                "lower_lf_constraint_target": float(lower_lf_constraint_target),
-                "lower_lf_dual_lr": float(lower_lf_dual_lr),
-                "lower_lf_objective_weight": float(lower_lf_objective_weight),
-                "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
-                "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
-                "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
-                "lower_lf_raw_recenter_scale": float(lower_lf_raw_recenter_scale),
-                **(plan_mapper.to_metadata() if plan_mapper is not None else {
-                    "plan_basis_dim": 0,
-                    "plan_horizon_s": 0.0,
-                    "plan_eval_offset_s": 0.0,
-                    "plan_coefficient_scale": 0.0,
-                    "plan_action_dim": int(assets),
-                }),
-            },
-        )
-        for row in heldout_rows:
-            row["baseline"] = policy_mode
-            row["policy_mode"] = policy_mode
-        return payload, heldout_rows, smdp_model
-
-    config = DualPPOConfig(
-        upper_state_dim=5 * assets + 1,
-        lower_state_dim=3 * assets + 1,
+    smdp_config = SMDPPPOConfig(
+        upper_state_dim=6 * assets + 5,
+        lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=assets,
         hidden_dim=0,
-        learning_rate=0.003,
+        upper_learning_rate=0.003,
+        lower_learning_rate=0.003,
         epochs=4,
         minibatch_size=512,
         init_log_std=-2.5,
-        constraint_coef=float(lower_lf_constraint_coef),
-        constraint_target=float(lower_lf_constraint_target),
-        constraint_dual_lr=float(lower_lf_dual_lr),
-        constraint_lambda_init=0.0,
-        constraint_max_lambda=20.0,
+        lower_cost_target=float(lower_lf_constraint_target),
+        lower_dual_lr=float(lower_lf_dual_lr),
+        lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
+        lower_max_lambda=20.0,
     )
-    model = DualActorCriticPPO(config)
-    if policy_mode == "freq_hrl":
-        initialize_frequency_prior(model, assets, plan_basis_dim=plan_basis_dim)
-    payload, heldout_rows, model = train_dual_ppo(
-        model=model,
+    smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
+    if policy_mode == "freq_hrl" and bool(use_handcrafted_frequency_prior):
+        initialize_smdp_frequency_prior(smdp_model, assets, plan_basis_dim=plan_basis_dim)
+    actual_upper_period = 1 if policy_mode == "flat_ppo" else int(upper_period)
+    actual_min_upper_duration = 1 if policy_mode == "flat_ppo" else int(min_upper_duration)
+    observation_contract = {
+        "freq_hrl": (
+            "LF + forecast + uncertainty + compressed HF summaries",
+            "current plan + local HF/MF residual context",
+        ),
+        "generic_hrl_ppo": (
+            "raw signal transforms + position + active plan",
+            "active plan + position + raw signal transforms",
+        ),
+        "flat_ppo": (
+            "raw signal transforms + position + active plan at every primitive step",
+            "raw signal transforms + joint target/execution context at every primitive step",
+        ),
+    }[policy_mode]
+    credit_contract = (
+        "joint task reward for both factorized action heads"
+        if policy_mode == "flat_ppo"
+        else "upper strategic PnL; lower execution cost, tracking, and leakage"
+    )
+    payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
+        model=smdp_model,
         train_seeds=train_seeds,
         eval_seeds=eval_seeds,
         iterations=iterations,
-        rollout_fn=lambda ppo_model, rollout_seed, sample: rollout(
+        rollout_fn=lambda ppo_model, rollout_seed, sample: smdp_rollout(
             ppo_model,
             seed=rollout_seed,
             steps=steps,
@@ -944,11 +964,14 @@ def train_ppo_actor_critic(
             lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
             lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
             policy_mode=policy_mode,
+            upper_period=actual_upper_period,
+            min_upper_duration=actual_min_upper_duration,
         ),
-        objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
+        objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(
+            row["LowerLFDrift"]
+        ),
         summary_fn=summarize,
-        policy=f"{policy_mode}_shared_ppo",
-        trainer="shared_dual_level_ppo",
+        policy=f"{policy_mode}_capacity_matched_smdp_ppo",
         domain="trading",
         metadata={
             "policy_mode": policy_mode,
@@ -957,6 +980,17 @@ def train_ppo_actor_critic(
             "steps": int(steps),
             "assets": int(assets),
             "leakage_scale": float(leakage_scale),
+            "upper_period": int(actual_upper_period),
+            "min_upper_duration": int(actual_min_upper_duration),
+            "upper_observation_contract": observation_contract[0],
+            "lower_observation_contract": observation_contract[1],
+            "credit_contract": credit_contract,
+            "frequency_routing_enabled": bool(policy_mode == "freq_hrl"),
+            "promotion_replanning_enabled": bool(policy_mode == "freq_hrl"),
+            "handcrafted_frequency_prior": bool(
+                policy_mode == "freq_hrl" and use_handcrafted_frequency_prior
+            ),
+            "capacity_match_contract": "identical model dimensions, optimizer, epochs, and rollout seed budget",
             "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
             "lower_lf_constraint_target": float(lower_lf_constraint_target),
@@ -978,7 +1012,7 @@ def train_ppo_actor_critic(
     for row in heldout_rows:
         row["baseline"] = policy_mode
         row["policy_mode"] = policy_mode
-    return payload, heldout_rows, model
+    return payload, heldout_rows, smdp_model
 
 
 def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -994,10 +1028,12 @@ def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
 def write_report(path: Path, payload: dict[str, Any]) -> None:
     summary = payload["summary"]
     lines = [
-        "# PPO Dual Actor-Critic Trading Validation",
+        "# Capacity-Matched SMDP PPO Trading Validation",
         "",
         f"- trainer: `{payload['trainer']}`",
         f"- policy mode: `{payload.get('policy_mode', payload.get('baseline', 'freq_hrl'))}`",
+        f"- capacity contract: `{payload.get('capacity_match_contract', 'NA')}`",
+        f"- observation contract: upper=`{payload.get('upper_observation_contract', 'NA')}`, lower=`{payload.get('lower_observation_contract', 'NA')}`",
         f"- plan mode: `{payload['plan_mode']}`",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
         f"- lower LF effect projector: window={payload['lower_lf_effect_filter_window']}, gain={payload['lower_lf_effect_filter_gain']}",
@@ -1047,6 +1083,9 @@ def main() -> None:
     parser.add_argument("--lower-lf-raw-recenter-gain", type=float, default=0.0)
     parser.add_argument("--lower-lf-raw-recenter-scale", type=float, default=0.10)
     parser.add_argument("--policy-mode", choices=POLICY_MODES, default="freq_hrl")
+    parser.add_argument("--upper-period", type=int, default=30)
+    parser.add_argument("--min-upper-duration", type=int, default=5)
+    parser.add_argument("--use-handcrafted-frequency-prior", action="store_true")
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -1071,6 +1110,9 @@ def main() -> None:
         lower_lf_raw_recenter_gain=args.lower_lf_raw_recenter_gain,
         lower_lf_raw_recenter_scale=args.lower_lf_raw_recenter_scale,
         policy_mode=args.policy_mode,
+        upper_period=args.upper_period,
+        min_upper_duration=args.min_upper_duration,
+        use_handcrafted_frequency_prior=args.use_handcrafted_frequency_prior,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

@@ -136,3 +136,18 @@ includes the initial equity point. CAGR and Calmar are undefined for horizons
 shorter than 0.25 observation-years; short synthetic episodes report
 `episode_return_to_drawdown` instead. Legacy trading rows without this contract
 are ineligible for baseline headline claims and must be rerun.
+
+## Capacity-matched learned baselines
+
+The PPO-family comparison no longer mixes the v2 SMDP trainer with the legacy
+joint-timestep PPO. `freq_hrl`, `generic_hrl_ppo`, and `flat_ppo` use identical
+model dimensions, actor/critic parameter counts, optimizer settings, epoch and
+minibatch budgets, train/evaluation seeds, and financial metric contracts.
+Freq-HRL alone receives frequency-responsibility observations and promotion.
+Generic HRL uses raw-signal transforms at both levels with the same macro
+clock. The flat baseline removes temporal abstraction by replanning both
+factorized action heads at every primitive step and gives both heads the task
+reward. It is therefore reported precisely as a capacity-matched factorized
+joint-action flat PPO baseline, not as a single-actor implementation. The
+default comparison disables the handcrafted Freq-HRL actor prior; prior-enabled
+results belong in a separate ablation.
