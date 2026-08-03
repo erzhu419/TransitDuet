@@ -72,6 +72,10 @@ class Bus(object):
         self.alight_num = 0. # 下车人数
         self.board_num = 0. # 上车人数
         self.last_board_wait_sum_s = 0.0
+        self.last_board_lf_wait_sum_s = 0.0
+        self.last_board_hf_wait_sum_s = 0.0
+        self.last_board_lf_mass = 0.0
+        self.last_board_hf_mass = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
@@ -86,6 +90,10 @@ class Bus(object):
         self.last_completed_station_id = None
         self.last_completed_target_headway = None
         self.last_completed_board_wait_sum_s = 0.0
+        self.last_completed_board_lf_wait_sum_s = 0.0
+        self.last_completed_board_hf_wait_sum_s = 0.0
+        self.last_completed_board_lf_mass = 0.0
+        self.last_completed_board_hf_mass = 0.0
         self.last_completed_board_count = 0
 
         self.acceleration = 3 # 加速度
@@ -99,6 +107,9 @@ class Bus(object):
 
         self.headway_dif = []
         self.applied_actions = []  # v2: track holding actions per trip for feedback
+        self.applied_action_loads = []
+        self.episode_hold_vehicle_seconds = 0.0
+        self.episode_hold_person_seconds = 0.0
         self.holding_action_trace_mode = "positive_only"
         self.unobserved_action_mode = "legacy_stale"
 
@@ -157,6 +168,10 @@ class Bus(object):
         index_of_passenger_on_bus = []
         index_of_passenger_in_station = []
         self.last_board_wait_sum_s = 0.0
+        self.last_board_lf_wait_sum_s = 0.0
+        self.last_board_hf_wait_sum_s = 0.0
+        self.last_board_lf_mass = 0.0
+        self.last_board_hf_mass = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = current_time
@@ -176,8 +191,19 @@ class Bus(object):
                 passenger.boarded = True
                 passenger.boarding_time = current_time
                 passenger.travel_bus = self
-                self.last_board_wait_sum_s += max(
-                    0.0, float(current_time - passenger.appear_time))
+                wait_s = max(0.0, float(current_time - passenger.appear_time))
+                low_share = float(getattr(
+                    passenger, 'frequency_low_share', 1.0))
+                high_share = float(getattr(
+                    passenger, 'frequency_high_share', 0.0))
+                if abs(low_share + high_share - 1.0) > 1e-9:
+                    raise AssertionError(
+                        'passenger LF/HF shares no longer conserve unit mass')
+                self.last_board_wait_sum_s += wait_s
+                self.last_board_lf_wait_sum_s += low_share * wait_s
+                self.last_board_hf_wait_sum_s += high_share * wait_s
+                self.last_board_lf_mass += low_share
+                self.last_board_hf_mass += high_share
                 self.last_board_count += 1
                 self.passengers = np.append(self.passengers, passenger)
                 self.board_num += 1
@@ -441,6 +467,15 @@ class Bus(object):
         )
         if should_record:
             self.applied_actions.append(float(dwell_time))
+            load = int(len(getattr(self, 'passengers', ())))
+            if not hasattr(self, 'applied_action_loads'):
+                self.applied_action_loads = []
+            self.applied_action_loads.append(load)
+            self.episode_hold_vehicle_seconds = float(getattr(
+                self, 'episode_hold_vehicle_seconds', 0.0)) + float(dwell_time)
+            self.episode_hold_person_seconds = float(getattr(
+                self, 'episode_hold_person_seconds', 0.0)) + (
+                    float(dwell_time) * load)
 
         if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
@@ -606,6 +641,12 @@ class Bus(object):
             self.last_completed_target_headway = float(self._target_headway)
             self.last_completed_board_wait_sum_s = float(
                 self.last_board_wait_sum_s)
+            self.last_completed_board_lf_wait_sum_s = float(
+                self.last_board_lf_wait_sum_s)
+            self.last_completed_board_hf_wait_sum_s = float(
+                self.last_board_hf_wait_sum_s)
+            self.last_completed_board_lf_mass = float(self.last_board_lf_mass)
+            self.last_completed_board_hf_mass = float(self.last_board_hf_mass)
             self.last_completed_board_count = int(self.last_board_count)
             self.on_route = False
             self.back_to_terminal_time = current_time
@@ -650,10 +691,18 @@ class Bus(object):
         self.last_completed_station_id = None
         self.last_completed_target_headway = None
         self.last_completed_board_wait_sum_s = 0.0
+        self.last_completed_board_lf_wait_sum_s = 0.0
+        self.last_completed_board_hf_wait_sum_s = 0.0
+        self.last_completed_board_lf_mass = 0.0
+        self.last_completed_board_hf_mass = 0.0
         self.last_completed_board_count = 0
         self.board_num = 0.
         self.alight_num = 0.
         self.last_board_wait_sum_s = 0.0
+        self.last_board_lf_wait_sum_s = 0.0
+        self.last_board_hf_wait_sum_s = 0.0
+        self.last_board_lf_mass = 0.0
+        self.last_board_hf_mass = 0.0
         self.last_board_count = 0
         self.last_board_station_id = int(self.next_station.station_id)
         self.last_board_time = None
@@ -661,6 +710,7 @@ class Bus(object):
         self.last_action_time = None
         self.last_action_station_id = int(self.last_station.station_id)
         self.applied_actions = []  # v2: reset per-trip action tracking
+        self.applied_action_loads = []
         self.in_station = False
         self.forward_bus = None
         self.backward_bus = None

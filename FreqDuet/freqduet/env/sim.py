@@ -653,6 +653,7 @@ class env_bus(object):
                 and getattr(self.frequency_tracker, 'od_features_enabled', False)
             )
             for station in self.stations:
+                passenger_start = len(station.total_passenger)
                 if collect_od_frequency:
                     new_count, od_counts = station.station_update(
                         self.current_time, self.stations, self.passenger_update_freq,
@@ -676,6 +677,21 @@ class env_bus(object):
                         return_details=False,
                         scenario_tape=self.scenario_tape)
                     od_counts = {}
+                if self.frequency_enabled and new_count:
+                    low_share, high_share = (
+                        self.frequency_tracker.causal_arrival_band_shares(
+                            station.station_id,
+                            station.direction,
+                            new_count,
+                            observation_interval_s=self.passenger_update_freq,
+                        )
+                    )
+                    for passenger in station.total_passenger[passenger_start:]:
+                        passenger.set_frequency_shares(
+                            low_share,
+                            high_share,
+                            source='causal_preupdate_expected_excess',
+                        )
                 if self.frequency_enabled and new_count:
                     key = (int(station.station_id), bool(station.direction))
                     freq_arrivals[key] = freq_arrivals.get(key, 0) + int(new_count)
@@ -1325,6 +1341,14 @@ class env_bus(object):
             'trip_completion_rate': completed / max(total_trips, 1),
             'unfinished_buses': int(unfinished_buses),
             'passengers_onboard_at_end': int(onboard_at_end),
+            'holding_vehicle_seconds': float(sum(
+                getattr(bus, 'episode_hold_vehicle_seconds', 0.0)
+                for bus in self.bus_all
+            )),
+            'holding_passenger_seconds': float(sum(
+                getattr(bus, 'episode_hold_person_seconds', 0.0)
+                for bus in self.bus_all
+            )),
             'simulation_end_time_s': int(self.current_time),
             'demand_end_time_s': int(self.protocol.demand_end_time_s),
             'evaluation_end_time_s': int(

@@ -153,20 +153,62 @@ def compute_wait_metrics(
 
     observed_waits: list[float] = []
     adjusted_waits: list[float] = []
+    observed_lf_wait_sum_s = 0.0
+    observed_hf_wait_sum_s = 0.0
+    restricted_lf_wait_sum_s = 0.0
+    restricted_hf_wait_sum_s = 0.0
+    observed_in_vehicle_s: list[float] = []
+    observed_journey_s: list[float] = []
+    restricted_in_vehicle_sum_s = 0.0
+    restricted_journey_sum_s = 0.0
+    lf_mass = 0.0
+    hf_mass = 0.0
+    max_share_error = 0.0
     generated = 0
     boarded = 0
+    arrived = 0
     for station in stations:
         for passenger in station.total_passenger:
             generated += 1
             appear = float(passenger.appear_time)
+            low_share = float(getattr(passenger, "frequency_low_share", 1.0))
+            high_share = float(getattr(passenger, "frequency_high_share", 0.0))
+            max_share_error = max(
+                max_share_error, abs(low_share + high_share - 1.0))
+            if low_share < 0.0 or high_share < 0.0:
+                raise ValueError("passenger frequency shares must be non-negative")
+            lf_mass += low_share
+            hf_mass += high_share
             boarding = getattr(passenger, "boarding_time", None)
             if boarding is None:
-                adjusted_waits.append(max(0.0, float(censor_time_s) - appear))
+                wait_s = max(0.0, float(censor_time_s) - appear)
+                adjusted_waits.append(wait_s)
+                restricted_lf_wait_sum_s += low_share * wait_s
+                restricted_hf_wait_sum_s += high_share * wait_s
+                restricted_journey_sum_s += wait_s
                 continue
             wait_s = max(0.0, float(boarding) - appear)
             observed_waits.append(wait_s)
             adjusted_waits.append(wait_s)
+            observed_lf_wait_sum_s += low_share * wait_s
+            observed_hf_wait_sum_s += high_share * wait_s
+            restricted_lf_wait_sum_s += low_share * wait_s
+            restricted_hf_wait_sum_s += high_share * wait_s
             boarded += 1
+            arrive = getattr(passenger, "arrive_time", None)
+            if arrive is None:
+                in_vehicle_s = max(0.0, float(censor_time_s) - float(boarding))
+                restricted_in_vehicle_sum_s += in_vehicle_s
+                restricted_journey_sum_s += max(
+                    0.0, float(censor_time_s) - appear)
+                continue
+            in_vehicle_s = max(0.0, float(arrive) - float(boarding))
+            journey_s = max(0.0, float(arrive) - appear)
+            observed_in_vehicle_s.append(in_vehicle_s)
+            observed_journey_s.append(journey_s)
+            restricted_in_vehicle_sum_s += in_vehicle_s
+            restricted_journey_sum_s += journey_s
+            arrived += 1
 
     unserved = generated - boarded
     observed_mean = float(np.mean(observed_waits)) if observed_waits else 0.0
@@ -174,6 +216,7 @@ def compute_wait_metrics(
     return {
         "passengers_generated": generated,
         "passengers_boarded": boarded,
+        "passengers_arrived": arrived,
         "passengers_unserved": unserved,
         "passenger_unserved_rate": unserved / max(generated, 1),
         "avg_wait_observed_min": observed_mean / 60.0,
@@ -181,6 +224,35 @@ def compute_wait_metrics(
         # Compatibility alias for protocol-v2 scripts created before the
         # metric was given its precise restricted-wait name.
         "avg_wait_censored_min": adjusted_mean / 60.0,
+        "avg_wait_lf_observed_min": (
+            observed_lf_wait_sum_s / max(boarded, 1) / 60.0
+        ),
+        "avg_wait_hf_observed_min": (
+            observed_hf_wait_sum_s / max(boarded, 1) / 60.0
+        ),
+        "restricted_wait_lf_horizon_min": (
+            restricted_lf_wait_sum_s / max(generated, 1) / 60.0
+        ),
+        "restricted_wait_hf_horizon_min": (
+            restricted_hf_wait_sum_s / max(generated, 1) / 60.0
+        ),
+        "frequency_lf_passenger_mass": lf_mass,
+        "frequency_hf_passenger_mass": hf_mass,
+        "frequency_share_max_error": max_share_error,
+        "avg_in_vehicle_observed_min": (
+            float(np.mean(observed_in_vehicle_s)) / 60.0
+            if observed_in_vehicle_s else 0.0
+        ),
+        "restricted_in_vehicle_horizon_min": (
+            restricted_in_vehicle_sum_s / max(generated, 1) / 60.0
+        ),
+        "avg_total_journey_observed_min": (
+            float(np.mean(observed_journey_s)) / 60.0
+            if observed_journey_s else 0.0
+        ),
+        "restricted_total_journey_horizon_min": (
+            restricted_journey_sum_s / max(generated, 1) / 60.0
+        ),
     }
 
 

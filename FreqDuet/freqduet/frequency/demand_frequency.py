@@ -528,6 +528,36 @@ class DemandFrequencyTracker:
             self.local_states[key] = self._new_state(self._prior_for("local", key))
         return self.local_states[key]
 
+    def causal_arrival_band_shares(
+        self,
+        station_id,
+        direction,
+        observed_count,
+        observation_interval_s=None,
+    ):
+        """Partition a just-observed arrival batch using the pre-update prior.
+
+        The expected count under the current causal LF state is assigned to LF;
+        only positive excess count is assigned to HF. The filter state is not
+        updated by this method, so the returned labels cannot contain future
+        information or post-promotion relabelling.
+        """
+        count = max(float(observed_count), 0.0)
+        if count <= 0.0:
+            return 1.0, 0.0
+        key = (int(station_id), bool(direction))
+        state = self._get_local_state(key)
+        interval_s = (
+            self.update_interval_s
+            if observation_interval_s is None
+            else max(float(observation_interval_s), 0.0)
+        )
+        expected_count = max(float(state.low), 0.0) * interval_s / 60.0
+        low_mass = min(expected_count, count)
+        low_share = float(np.clip(low_mass / count, 0.0, 1.0))
+        high_share = 1.0 - low_share
+        return low_share, high_share
+
     def _get_od_state(self, key):
         if key not in self.od_states:
             self.od_states[key] = self._new_state(self._prior_for("od", key))
