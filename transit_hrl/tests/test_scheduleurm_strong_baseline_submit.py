@@ -52,6 +52,7 @@ def args_fixture() -> argparse.Namespace:
         cpu=1,
         priority="normal",
         skip_launch_staging=False,
+        stage_input_paths=[],
         allow_duplicate=False,
         code_revision="a" * 40,
         source_manifest_sha256="b" * 64,
@@ -152,6 +153,7 @@ class ScheduleurmStrongBaselineSubmitTest(unittest.TestCase):
                 "--run-name",
                 "unit_linux",
                 "--smoke",
+                "--skip-launch-staging",
             ]))
         self.assertEqual(args.nodes, list(LINUX_CPU_NODES))
         self.assertEqual(args.python_executable, DEFAULT_LINUX_PYTHON)
@@ -168,6 +170,10 @@ class ScheduleurmStrongBaselineSubmitTest(unittest.TestCase):
         self.assertTrue(str(spec["cmd"]).startswith("cd .. && "))
         self.assertIn(DEFAULT_LINUX_PYTHON + " -u -m", str(spec["cmd"]))
         self.assertNotIn("require_node", spec)
+        self.assertEqual(
+            spec["stage_input_paths"],
+            [str((Path(__file__).resolve().parents[1] / "freq_hrl").resolve())],
+        )
 
     def test_missing_cell_filter_skips_only_materialized_results(self):
         cells = [

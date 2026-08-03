@@ -247,6 +247,8 @@ def build_scheduler_command(
         command.extend(["--allowed-node", str(node)])
     for excluded in spec["stage_excludes"]:
         command.extend(["--stage-exclude", str(excluded)])
+    for input_path in spec["stage_input_paths"]:
+        command.extend(["--stage-input-path", str(input_path)])
     if spec["skip_launch_staging"]:
         command.append("--skip-launch-staging")
     if spec["allow_duplicate"]:
@@ -304,6 +306,7 @@ def build_scheduler_spec(
         "node_down_requeue_s": 600,
         "allowed_nodes": list(args.nodes),
         "stage_excludes": list(STAGE_EXCLUDES),
+        "stage_input_paths": list(args.stage_input_paths),
         "skip_launch_staging": bool(args.skip_launch_staging),
         "allow_duplicate": bool(args.allow_duplicate),
     }
@@ -462,6 +465,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
     parser.add_argument("--skip-launch-staging", action="store_true")
+    parser.add_argument("--stage-input-path", action="append", default=[])
     parser.add_argument("--skip-complete-cells", action="store_true")
     return parser
 
@@ -484,6 +488,24 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.checkpoint_validation_seeds = parse_csv(args.checkpoint_validation_seeds, int)
     args.tuning_validation_seeds = parse_csv(args.tuning_validation_seeds, int)
     args.nodes = parse_csv(args.nodes)
+    args.stage_input_paths = [
+        str(Path(path).expanduser().resolve())
+        for path in args.stage_input_path
+        if str(path).strip()
+    ]
+    if (
+        args.skip_launch_staging
+        and set(args.nodes) <= set(LINUX_CPU_NODES)
+        and not args.stage_input_paths
+    ):
+        args.stage_input_paths = [str((ROOT / "freq_hrl").resolve())]
+    missing_inputs = [
+        path for path in args.stage_input_paths if not Path(path).is_dir()
+    ]
+    if missing_inputs:
+        raise SystemExit(
+            "stage input directories do not exist: " + ",".join(missing_inputs)
+        )
     if args.iterations is None:
         args.iterations = 64 if args.stage == "final" else 16
     unknown_modes = sorted(set(args.policy_modes) - set(ALL_POLICY_MODES))

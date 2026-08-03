@@ -39,6 +39,7 @@ def args_fixture() -> argparse.Namespace:
         cpu=1,
         priority="normal",
         skip_launch_staging=False,
+        stage_input_paths=[],
         allow_duplicate=False,
         code_revision="a" * 40,
         source_manifest_sha256="b" * 64,
@@ -109,7 +110,11 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertTrue(spec["allow_cpu_training"])
 
     def test_linux_pool_uses_shared_interpreter_and_dynamic_six_node_placement(self):
-        args = normalize_args(build_parser().parse_args(["--run-name", "unit_linux"]))
+        args = normalize_args(build_parser().parse_args([
+            "--run-name",
+            "unit_linux",
+            "--skip-launch-staging",
+        ]))
         self.assertEqual(args.nodes, list(LINUX_CPU_NODES))
         self.assertEqual(args.python_executable, DEFAULT_LINUX_PYTHON)
         args.launch_subdir = "scripts"
@@ -128,6 +133,10 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertTrue(str(spec["cmd"]).startswith("cd .. && "))
         self.assertIn(DEFAULT_LINUX_PYTHON + " -u -m", str(spec["cmd"]))
         self.assertNotIn("require_node", spec)
+        self.assertEqual(
+            spec["stage_input_paths"],
+            [str((Path(__file__).resolve().parents[1] / "freq_hrl").resolve())],
+        )
 
     def test_source_revision_override_requires_the_same_source_manifest(self):
         frozen_revision = "8" * 40
