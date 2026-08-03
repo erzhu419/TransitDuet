@@ -31,15 +31,25 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  #
     DEFAULT_VALIDATION_SEEDS,
 )
 from freq_hrl.experiments.reproducibility import (  # noqa: E402
+    git_source_manifest_sha256,
+    is_hex_digest,
     registered_git_source_identity,
 )
 
 
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
-DEFAULT_NODES = ("jtl110cpu", "jtl110cpu2")
+WINDOWS_CPU_NODES = ("jtl110cpu", "jtl110cpu2")
+LINUX_CPU_NODES = tuple(f"node{index:03d}" for index in range(1, 7))
+SUPPORTED_NODES = WINDOWS_CPU_NODES + LINUX_CPU_NODES
+DEFAULT_NODES = LINUX_CPU_NODES
+DEFAULT_LINUX_PYTHON = (
+    "/home/zhengliang01/scheduleurm_work/conda_envs/"
+    "csbapr-gpu-py310/bin/python"
+)
 CPU_JUSTIFICATION = (
     "Nested-validation actor-critic HPO cells are independent, CPU-bound, and "
-    "single-threaded; scheduleurm may place each cell on either 128-core node."
+    "single-threaded; scheduleurm dynamically places each cell across the "
+    "declared physical-core CPU pool."
 )
 STAGE_EXCLUDES = (
     "results",
@@ -54,8 +64,37 @@ def parse_csv(value: str, cast=str) -> list:
     return [cast(item.strip()) for item in str(value).split(",") if item.strip()]
 
 
-def source_identity() -> tuple[str, str]:
-    return registered_git_source_identity(ROOT, Path("freq_hrl"))
+def source_identity(revision_override: str = "") -> tuple[str, str]:
+    current_revision, working_manifest = registered_git_source_identity(
+        ROOT, Path("freq_hrl")
+    )
+    requested_revision = str(revision_override).strip().lower()
+    if not requested_revision:
+        return current_revision, working_manifest
+    if not is_hex_digest(requested_revision, length=40):
+        raise ValueError("source code revision override must be a full Git SHA")
+    requested_manifest = git_source_manifest_sha256(
+        ROOT,
+        Path("freq_hrl"),
+        revision=requested_revision,
+    )
+    if requested_manifest != working_manifest:
+        raise RuntimeError(
+            "requested source revision does not contain the staged Freq-HRL source"
+        )
+    return requested_revision, working_manifest
+
+
+def default_python_executable(nodes: list[str]) -> str:
+    selected = set(nodes)
+    if selected and selected <= set(LINUX_CPU_NODES):
+        return DEFAULT_LINUX_PYTHON
+    if selected and selected <= set(WINDOWS_CPU_NODES):
+        return "python3"
+    raise ValueError(
+        "mixed Linux/Windows node pools require an explicit portable "
+        "--python-executable"
+    )
 
 
 def experiment_cells(
@@ -102,7 +141,7 @@ def build_training_command(
     output_dir: Path,
 ) -> str:
     command = [
-        "python3",
+        str(args.python_executable),
         "-u",
         "-m",
         "freq_hrl.experiments.trading.hyperparameter_pilot",
@@ -142,7 +181,10 @@ def build_training_command(
         "NUMEXPR_NUM_THREADS=1",
         "TORCH_NUM_THREADS=1",
     ]
-    return " ".join([*env, shlex.join(command)])
+    command_text = " ".join([*env, shlex.join(command)])
+    if str(args.launch_subdir) == "scripts":
+        return f"cd .. && {command_text}"
+    return command_text
 
 
 def build_scheduler_command(
@@ -228,7 +270,7 @@ def build_scheduler_spec(
     )
     absolute_dir = ROOT / relative_dir
     return {
-        "project": "Freq-HRL",
+        "project": str(args.project),
         "description": (
             f"Freq-HRL nested HPO {policy_mode} {candidate_id} "
             f"{scenario} replicate {replicate_seed}"
@@ -241,7 +283,7 @@ def build_scheduler_spec(
             replicate_seed=replicate_seed,
             output_dir=relative_dir,
         ),
-        "cwd": str(ROOT),
+        "cwd": str(ROOT / str(args.launch_subdir)),
         "signature": (
             f"Freq-HRL/hpo-v1/{args.run_name}/{policy_mode}/{candidate_id}/"
             f"{scenario}/rep-{replicate_seed}"
@@ -381,7 +423,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--iterations", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=3)
+    parser.add_argument("--project", default="Freq-HRL")
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
+    parser.add_argument("--python-executable", default="")
+    parser.add_argument("--launch-subdir", choices=(".", "scripts"), default=".")
+    parser.add_argument("--source-code-revision", default="")
     parser.add_argument("--cpu", type=int, default=1)
     parser.add_argument("--ram-mb", type=int, default=2048)
     parser.add_argument("--priority", choices=("low", "normal", "high"), default="normal")
@@ -418,13 +464,18 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     unknown_modes = sorted(set(args.policy_modes) - set(ALL_POLICY_MODES))
     unknown_candidates = sorted(set(args.candidate_ids) - set(CANDIDATES_BY_ID))
     unknown_scenarios = sorted(set(args.scenarios) - set(DEFAULT_SCENARIOS))
-    unknown_nodes = sorted(set(args.nodes) - set(DEFAULT_NODES))
+    unknown_nodes = sorted(set(args.nodes) - set(SUPPORTED_NODES))
     if unknown_modes or unknown_candidates or unknown_scenarios or unknown_nodes:
         raise SystemExit(
             "invalid HPO matrix selection: "
             f"modes={unknown_modes}, candidates={unknown_candidates}, "
             f"scenarios={unknown_scenarios}, nodes={unknown_nodes}"
         )
+    if not str(args.python_executable).strip():
+        try:
+            args.python_executable = default_python_executable(args.nodes)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from exc
     if args.smoke:
         args.policy_modes = ["freq_hrl"]
         args.candidate_ids = [candidate_ids_for_mode("freq_hrl")[0]]
@@ -444,7 +495,9 @@ def main() -> None:
         merge_results(args)
         return
     try:
-        args.code_revision, args.source_manifest_sha256 = source_identity()
+        args.code_revision, args.source_manifest_sha256 = source_identity(
+            args.source_code_revision
+        )
     except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
         raise SystemExit(f"cannot freeze HPO source identity: {exc}") from exc
     cells = experiment_cells(

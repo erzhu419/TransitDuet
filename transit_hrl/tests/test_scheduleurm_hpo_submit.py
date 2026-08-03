@@ -5,12 +5,17 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from scripts.submit_hyperparameter_pilot_scheduleurm import (
+    DEFAULT_LINUX_PYTHON,
+    LINUX_CPU_NODES,
+    build_parser,
     build_scheduler_command,
     build_scheduler_spec,
     build_training_command,
     cell_relative_dir,
     execute_bulk,
     experiment_cells,
+    normalize_args,
+    source_identity,
 )
 
 
@@ -24,6 +29,9 @@ def args_fixture() -> argparse.Namespace:
         assets=2,
         iterations=1,
         nodes=["jtl110cpu", "jtl110cpu2"],
+        python_executable="python3",
+        launch_subdir=".",
+        project="Freq-HRL",
         ram_mb=2048,
         cpu=1,
         priority="normal",
@@ -94,6 +102,41 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertIsNone(spec.get("require_node"))
         self.assertEqual(spec["cpu"], 1)
         self.assertTrue(spec["allow_cpu_training"])
+
+    def test_linux_pool_uses_shared_interpreter_and_dynamic_six_node_placement(self):
+        args = normalize_args(build_parser().parse_args(["--run-name", "unit_linux"]))
+        self.assertEqual(args.nodes, list(LINUX_CPU_NODES))
+        self.assertEqual(args.python_executable, DEFAULT_LINUX_PYTHON)
+        args.launch_subdir = "scripts"
+        args.project = "Freq-HRL-Linux"
+        args.code_revision = "a" * 40
+        args.source_manifest_sha256 = "b" * 64
+        spec = build_scheduler_spec(
+            args,
+            policy_mode="freq_hrl",
+            candidate_id="ppo_lr1e4_std15",
+            scenario="persistent_shift",
+            replicate_seed=7,
+        )
+        self.assertEqual(spec["allowed_nodes"], list(LINUX_CPU_NODES))
+        self.assertTrue(str(spec["cwd"]).endswith("/scripts"))
+        self.assertTrue(str(spec["cmd"]).startswith("cd .. && "))
+        self.assertIn(DEFAULT_LINUX_PYTHON + " -u -m", str(spec["cmd"]))
+        self.assertNotIn("require_node", spec)
+
+    def test_source_revision_override_requires_the_same_source_manifest(self):
+        frozen_revision = "8" * 40
+        with patch(
+            "scripts.submit_hyperparameter_pilot_scheduleurm."
+            "registered_git_source_identity",
+            return_value=("9" * 40, "a" * 64),
+        ), patch(
+            "scripts.submit_hyperparameter_pilot_scheduleurm."
+            "git_source_manifest_sha256",
+            return_value="a" * 64,
+        ) as committed_manifest:
+            self.assertEqual(source_identity(frozen_revision), (frozen_revision, "a" * 64))
+        committed_manifest.assert_called_once()
 
     def test_bulk_submission_uses_one_atomic_scheduler_call(self):
         specs = [{"signature": "unit/1"}, {"signature": "unit/2"}]
