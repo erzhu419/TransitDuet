@@ -126,13 +126,26 @@ class PortfolioExecutionEnv:
         if alpha.size != self.n_assets:
             alpha = np.resize(alpha, self.n_assets)
 
+        if not np.all(np.isfinite(residual_order)):
+            raise ValueError("residual_order must be finite")
+
+        def capped_position(value: np.ndarray) -> np.ndarray:
+            out = np.asarray(value, dtype=np.float64).copy()
+            gross_value = float(np.sum(np.abs(out)))
+            if gross_value > self.config.max_leverage and gross_value > 1e-12:
+                out *= self.config.max_leverage / gross_value
+            return out
+
         old_position = self.position.copy()
-        trade = alpha * (self.target - self.position) + residual_order
-        self.position = self.position + trade
-        gross = float(np.sum(np.abs(self.position)))
-        if gross > self.config.max_leverage and gross > 1e-12:
-            self.position *= self.config.max_leverage / gross
+        requested_tracking_trade = alpha * (self.target - old_position)
+        tracking_only_position = capped_position(
+            old_position + requested_tracking_trade
+        )
+        requested_trade = requested_tracking_trade + residual_order
+        self.position = capped_position(old_position + requested_trade)
         realized_trade = self.position - old_position
+        realized_tracking_trade = tracking_only_position - old_position
+        hf_overlay_position_effect = self.position - tracking_only_position
 
         ret = self.returns[self.t]
         market_position = (
@@ -162,9 +175,51 @@ class PortfolioExecutionEnv:
             * np.sum(np.square(realized_trade) / volume)
         )
         cost = float(linear_cost + impact_cost)
+        tracking_turnover = float(np.sum(np.abs(realized_tracking_trade)))
+        tracking_linear_cost = (
+            tracking_turnover
+            * (self.config.transaction_cost_bps + self.config.slippage_bps)
+            / 10000.0
+        )
+        tracking_impact_cost = float(
+            float(self.config.volume_impact_bps)
+            / 10000.0
+            * np.sum(np.square(realized_tracking_trade) / volume)
+        )
+        tracking_transaction_cost = float(
+            tracking_linear_cost + tracking_impact_cost
+        )
+        tracking_market_position = (
+            old_position
+            if self.config.mark_to_market_timing == "pre_trade"
+            else tracking_only_position
+        )
+        tracking_portfolio_return = float(
+            np.dot(tracking_market_position, ret)
+        )
         inventory_drift = float(np.mean((self.position - self.target) ** 2))
         inventory_drift_cost = float(
             self.config.inventory_drift_penalty * inventory_drift
+        )
+        tracking_inventory_drift = float(
+            np.mean((tracking_only_position - self.target) ** 2)
+        )
+        tracking_inventory_drift_cost = float(
+            self.config.inventory_drift_penalty * tracking_inventory_drift
+        )
+        hf_overlay_return = float(
+            portfolio_return - tracking_portfolio_return
+        )
+        hf_overlay_incremental_transaction_cost = float(
+            cost - tracking_transaction_cost
+        )
+        hf_overlay_incremental_inventory_drift_cost = float(
+            inventory_drift_cost - tracking_inventory_drift_cost
+        )
+        hf_overlay_task_effect = float(
+            hf_overlay_return
+            - hf_overlay_incremental_transaction_cost
+            - hf_overlay_incremental_inventory_drift_cost
         )
         self.equity *= max(0.0, 1.0 + portfolio_return - cost)
         self.peak_equity = max(self.peak_equity, self.equity)
@@ -186,6 +241,22 @@ class PortfolioExecutionEnv:
             "volume_impact_cost": float(impact_cost),
             "turnover": turnover,
             "trade": realized_trade.copy(),
+            "requested_tracking_trade": requested_tracking_trade.copy(),
+            "requested_residual_order": residual_order.copy(),
+            "tracking_only_position": tracking_only_position.copy(),
+            "realized_tracking_trade": realized_tracking_trade.copy(),
+            "hf_overlay_position_effect": hf_overlay_position_effect.copy(),
+            "tracking_portfolio_return": tracking_portfolio_return,
+            "tracking_transaction_cost": tracking_transaction_cost,
+            "tracking_inventory_drift_cost": tracking_inventory_drift_cost,
+            "hf_overlay_return": hf_overlay_return,
+            "hf_overlay_incremental_transaction_cost": (
+                hf_overlay_incremental_transaction_cost
+            ),
+            "hf_overlay_incremental_inventory_drift_cost": (
+                hf_overlay_incremental_inventory_drift_cost
+            ),
+            "hf_overlay_task_effect": hf_overlay_task_effect,
             "target": self.target.copy(),
             "position": self.position.copy(),
             "pre_trade_position": old_position.copy(),

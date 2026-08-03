@@ -8,6 +8,7 @@ from freq_hrl.domains.trading import (
     TradingCreditAssigner,
 )
 from freq_hrl.experiments.trading.ppo_actor_critic import (
+    decode_hierarchical_lower_action,
     promotion_gate_feature_vector,
     train_ppo_actor_critic,
 )
@@ -16,6 +17,17 @@ from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 
 
 class FullMethodContractTest(unittest.TestCase):
+    def test_hf_lower_action_is_bounded_and_separate_from_tracking_speed(self):
+        speed, overlay = decode_hierarchical_lower_action(
+            np.asarray([-10.0, 10.0, 10.0, -10.0]),
+            assets=2,
+            enable_hf_overlay=True,
+            hf_order_scale=0.025,
+        )
+        self.assertGreaterEqual(float(speed.min()), 0.05)
+        self.assertLessEqual(float(speed.max()), 1.0)
+        np.testing.assert_allclose(overlay, [0.025, -0.025], atol=1e-9)
+
     def test_learned_gate_features_do_not_include_heuristic_gate_decision(self):
         base = {
             key: np.asarray([0.1, -0.2], dtype=np.float64)
@@ -85,6 +97,8 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertTrue(payload["additive_frequency_credit"])
         self.assertTrue(payload["raw_lower_effect_constraint"])
         self.assertTrue(payload["learned_promotion_gate"])
+        self.assertTrue(payload["hf_lower_overlay_enabled"])
+        self.assertEqual(payload["config"]["lower_action_dim"], 4)
         self.assertTrue(payload["heuristic_promotion_disabled"])
         self.assertGreater(payload["promotion_gate_state_dim"], 0)
         self.assertTrue(payload["plan_anchor_first_coefficient"])
@@ -104,6 +118,12 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertGreaterEqual(row["promotion_gate_probability_mean"], 0.0)
         self.assertLessEqual(row["promotion_gate_probability_mean"], 1.0)
         self.assertEqual(row["heuristic_promotion_disabled"], 1.0)
+        self.assertEqual(row["hf_lower_overlay_enabled"], 1.0)
+        self.assertAlmostEqual(
+            row["hf_overlay_task_effect_total"],
+            row["hf_overlay_return_total"]
+            - row["hf_overlay_incremental_cost_total"],
+        )
         self.assertGreater(
             payload["history"][-1]["promotion_actor_optimizer_steps"], 0.0
         )
@@ -178,6 +198,29 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertAlmostEqual(info["volume_impact_cost"], 0.02)
         self.assertAlmostEqual(info["transaction_cost"], 0.021)
         self.assertAlmostEqual(reward, -0.021)
+
+    def test_hf_overlay_has_a_tracking_only_counterfactual(self):
+        env = PortfolioExecutionEnv(
+            np.asarray([[0.10]], dtype=np.float64),
+            config=PortfolioExecutionConfig(
+                transaction_cost_bps=0.0,
+                slippage_bps=0.0,
+                volume_impact_bps=0.0,
+                inventory_drift_penalty=0.0,
+                mark_to_market_timing="post_trade",
+            ),
+        )
+        env.set_target([0.0])
+        _, reward, _, info = env.lower_step({
+            "execution_speed": [1.0],
+            "residual_order": [0.2],
+        })
+        np.testing.assert_allclose(info["tracking_only_position"], [0.0])
+        np.testing.assert_allclose(info["hf_overlay_position_effect"], [0.2])
+        self.assertAlmostEqual(info["tracking_portfolio_return"], 0.0)
+        self.assertAlmostEqual(info["hf_overlay_return"], 0.02)
+        self.assertAlmostEqual(info["hf_overlay_task_effect"], 0.02)
+        self.assertAlmostEqual(reward, 0.02)
 
     def test_frequency_credit_exactly_reconstructs_observed_reward(self):
         env = PortfolioExecutionEnv(

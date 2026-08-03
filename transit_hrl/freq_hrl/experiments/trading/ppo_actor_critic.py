@@ -101,6 +101,7 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v4",
         },
         "learned_promotion_gate": contract == "full_freq_hrl_v4",
+        "lower_hf_overlay": contract == "full_freq_hrl_v4",
     }
 
 
@@ -651,9 +652,13 @@ def initialize_smdp_frequency_prior(
         upper_linear.bias.zero_()
         lower_linear.weight.zero_()
         lower_linear.bias.zero_()
+        if int(model.config.upper_action_dim) % int(assets) != 0:
+            raise ValueError("upper action dimension must be divisible by assets")
+        upper_actions_per_asset = int(model.config.upper_action_dim) // int(assets)
         for i in range(assets):
-            upper_rows = [i] if int(plan_basis_dim) <= 0 else [
-                i * int(plan_basis_dim) + k for k in range(int(plan_basis_dim))
+            upper_rows = [
+                i * upper_actions_per_asset + k
+                for k in range(upper_actions_per_asset)
             ]
             for k, row in enumerate(upper_rows):
                 ramp = float(k + 1) / max(float(len(upper_rows)), 1.0)
@@ -701,6 +706,28 @@ def make_plan_mapper(
 
 def latent_speed(latent: np.ndarray) -> np.ndarray:
     return np.clip(0.05 + 0.95 / (1.0 + np.exp(-np.asarray(latent, dtype=np.float64))), 0.05, 1.0)
+
+
+def decode_hierarchical_lower_action(
+    latent_action: np.ndarray,
+    *,
+    assets: int,
+    enable_hf_overlay: bool,
+    hf_order_scale: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    latent = np.asarray(latent_action, dtype=np.float64).reshape(-1)
+    expected = int(assets) * (2 if enable_hf_overlay else 1)
+    if latent.size != expected:
+        raise ValueError(
+            f"expected {expected} hierarchical lower actions, got {latent.size}"
+        )
+    speed = latent_speed(latent[:assets])
+    residual_order = np.zeros(int(assets), dtype=np.float64)
+    if enable_hf_overlay:
+        residual_order = (
+            np.tanh(latent[assets:]) * max(float(hf_order_scale), 0.0)
+        )
+    return speed, residual_order
 
 
 def bounded_speed(action: np.ndarray) -> np.ndarray:
@@ -958,6 +985,8 @@ def smdp_rollout(
     plan_smoothness_weight: float = 0.0,
     learned_promotion_gate: bool = False,
     promotion_replan_cost: float = 0.0,
+    enable_hf_lower: bool = False,
+    lower_hf_order_scale: float = 0.025,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     method_contract: str = "routing_core_v2",
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
@@ -977,6 +1006,14 @@ def smdp_rollout(
         )
     if not np.isfinite(float(promotion_replan_cost)) or float(promotion_replan_cost) < 0.0:
         raise ValueError("promotion_replan_cost must be finite and non-negative")
+    if not np.isfinite(float(lower_hf_order_scale)) or float(lower_hf_order_scale) < 0.0:
+        raise ValueError("lower_hf_order_scale must be finite and non-negative")
+    expected_lower_action_dim = int(assets) * (2 if enable_hf_lower else 1)
+    if int(model.config.lower_action_dim) != expected_lower_action_dim:
+        raise ValueError(
+            "lower action dim mismatch: "
+            f"expected {expected_lower_action_dim}, got {model.config.lower_action_dim}"
+        )
     if learned_promotion_gate:
         if policy_mode != "freq_hrl":
             raise ValueError("learned promotion gate requires policy_mode='freq_hrl'")
@@ -1056,6 +1093,11 @@ def smdp_rollout(
     learned_gate_actions: list[float] = []
     learned_promotion_absorbed_norm: list[float] = []
     learned_replan_cost_total = 0.0
+    hf_order_l1: list[float] = []
+    hf_overlay_position_l1: list[float] = []
+    hf_overlay_returns: list[float] = []
+    hf_overlay_incremental_costs: list[float] = []
+    hf_overlay_task_effects: list[float] = []
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
     raw_history: list[np.ndarray] = []
@@ -1193,7 +1235,12 @@ def smdp_rollout(
             include_heuristic_promotion=not learned_promotion_gate,
         )
         lower_out = model.act_lower(lower_state, sample=sample)
-        speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        speed, residual_order = decode_hierarchical_lower_action(
+            np.asarray(lower_out["action"], dtype=np.float64),
+            assets=assets,
+            enable_hf_overlay=bool(enable_hf_lower),
+            hf_order_scale=float(lower_hf_order_scale),
+        )
         pre_gap = np.asarray(current_target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -1203,7 +1250,7 @@ def smdp_rollout(
         env.set_target(current_target)
         _, reward, done, info = env.lower_step({
             "execution_speed": speed,
-            "residual_order": np.zeros(assets, dtype=np.float64),
+            "residual_order": residual_order,
         })
         raw_lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(
             info["target"], dtype=np.float64
@@ -1303,6 +1350,16 @@ def smdp_rollout(
         credit_reconstruction_errors.append(reconstruction_error)
         upper_leakage_costs.append(upper_leakage_cost)
         lower_leakage_costs.append(lower_leakage_cost)
+        hf_order_l1.append(float(np.sum(np.abs(residual_order))))
+        hf_overlay_position_l1.append(float(np.sum(np.abs(
+            np.asarray(info["hf_overlay_position_effect"], dtype=np.float64)
+        ))))
+        hf_overlay_returns.append(float(info["hf_overlay_return"]))
+        hf_overlay_incremental_costs.append(float(
+            info["hf_overlay_incremental_transaction_cost"]
+            + info["hf_overlay_incremental_inventory_drift_cost"]
+        ))
+        hf_overlay_task_effects.append(float(info["hf_overlay_task_effect"]))
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -1371,6 +1428,17 @@ def smdp_rollout(
         "promotion_absorbed_norm_total": float(
             np.sum(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
+        "hf_order_l1_mean": float(np.mean(hf_order_l1)) if hf_order_l1 else 0.0,
+        "hf_overlay_position_l1_mean": float(
+            np.mean(hf_overlay_position_l1)
+        ) if hf_overlay_position_l1 else 0.0,
+        "hf_overlay_return_total": float(np.sum(hf_overlay_returns)) if hf_overlay_returns else 0.0,
+        "hf_overlay_incremental_cost_total": float(
+            np.sum(hf_overlay_incremental_costs)
+        ) if hf_overlay_incremental_costs else 0.0,
+        "hf_overlay_task_effect_total": float(
+            np.sum(hf_overlay_task_effects)
+        ) if hf_overlay_task_effects else 0.0,
         "upper_decision_count": int(trajectory.upper.size),
         "lower_decision_count": int(trajectory.lower.size),
         "upper_mean_duration": float(np.mean(trajectory.upper.duration)),
@@ -1424,6 +1492,8 @@ def smdp_rollout(
         "learned_promotion_gate": float(bool(learned_promotion_gate)),
         "heuristic_promotion_disabled": float(bool(learned_promotion_gate)),
         "promotion_replan_cost": float(promotion_replan_cost),
+        "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
+        "lower_hf_order_scale": float(lower_hf_order_scale),
         "plan_smoothness_weight": float(plan_smoothness_weight),
         "routing_contract": (
             "frequency_responsibility"
@@ -1462,6 +1532,11 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_replan_cost_total",
         "promotion_absorbed_norm_mean",
         "promotion_absorbed_norm_total",
+        "hf_order_l1_mean",
+        "hf_overlay_position_l1_mean",
+        "hf_overlay_return_total",
+        "hf_overlay_incremental_cost_total",
+        "hf_overlay_task_effect_total",
         "upper_decision_count",
         "lower_decision_count",
         "upper_mean_duration",
@@ -1501,6 +1576,8 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "learned_promotion_gate",
         "heuristic_promotion_disabled",
         "promotion_replan_cost",
+        "hf_lower_overlay_enabled",
+        "lower_hf_order_scale",
         "volume_impact_bps",
         "plan_smoothness_weight",
         "protocol_valid",
@@ -1548,6 +1625,7 @@ def train_ppo_actor_critic(
     plan_smoothness_weight: float = 0.0,
     promotion_replan_cost: float = 0.0,
     promotion_init_logit: float = -2.0,
+    lower_hf_order_scale: float = 0.025,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -1582,6 +1660,7 @@ def train_ppo_actor_critic(
     for name, value in (
         ("plan_smoothness_weight", plan_smoothness_weight),
         ("promotion_replan_cost", promotion_replan_cost),
+        ("lower_hf_order_scale", lower_hf_order_scale),
     ):
         if not np.isfinite(float(value)) or float(value) < 0.0:
             raise ValueError(f"{name} must be finite and non-negative")
@@ -1617,6 +1696,10 @@ def train_ppo_actor_critic(
         raise ValueError(
             "promotion_replan_cost is only valid for full_freq_hrl_v4"
         )
+    if method_contract != "routing_core_v2" and use_handcrafted_frequency_prior:
+        raise ValueError(
+            "handcrafted frequency priors are forbidden for v3/v4 method contracts"
+        )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -1646,7 +1729,9 @@ def train_ppo_actor_critic(
         upper_state_dim=6 * assets + 5,
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
-        lower_action_dim=assets,
+        lower_action_dim=(
+            2 * assets if method_flags["lower_hf_overlay"] else assets
+        ),
         promotion_state_dim=(
             promotion_gate_state_dim(assets)
             if method_flags["learned_promotion_gate"] else 0
@@ -1926,6 +2011,8 @@ def train_ppo_actor_critic(
             plan_smoothness_weight=float(plan_smoothness_weight),
             learned_promotion_gate=method_flags["learned_promotion_gate"],
             promotion_replan_cost=float(promotion_replan_cost),
+            enable_hf_lower=method_flags["lower_hf_overlay"],
+            lower_hf_order_scale=float(lower_hf_order_scale),
             execution_timeline_contract=execution_timeline_contract,
             method_contract=method_contract,
         ),
@@ -2009,6 +2096,10 @@ def train_ppo_actor_critic(
             ),
             "promotion_replan_cost": float(promotion_replan_cost),
             "promotion_init_logit": float(promotion_init_logit),
+            "hf_lower_overlay_enabled": bool(
+                method_flags["lower_hf_overlay"]
+            ),
+            "lower_hf_order_scale": float(lower_hf_order_scale),
             "plan_smoothness_weight": float(plan_smoothness_weight),
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
@@ -2146,6 +2237,7 @@ def main() -> None:
     parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
     parser.add_argument("--promotion-init-logit", type=float, default=-2.0)
+    parser.add_argument("--lower-hf-order-scale", type=float, default=0.025)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -2189,6 +2281,7 @@ def main() -> None:
         plan_smoothness_weight=args.plan_smoothness_weight,
         promotion_replan_cost=args.promotion_replan_cost,
         promotion_init_logit=args.promotion_init_logit,
+        lower_hf_order_scale=args.lower_hf_order_scale,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)
