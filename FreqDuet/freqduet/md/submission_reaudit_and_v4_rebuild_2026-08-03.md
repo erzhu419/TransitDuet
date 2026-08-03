@@ -195,6 +195,23 @@ policy feature in the final configuration must name its source, timestamp and
 availability assumption; evaluation may still use latent passenger records for
 ground-truth outcomes and conserved LF/HF labels.
 
+### 11. Non-negative holding cannot literally be a zero-mean high-pass action
+
+Intermediate-stop holding can add delay but cannot command negative physical
+holding.  Consequently `cumsum(holding)` is monotone within a trip and its
+low-frequency component cannot be driven to zero except by never holding.  The
+legacy `LowerLFDrift` penalty is therefore a cumulative intervention budget,
+not proof that the physical lower action is high-pass.
+
+Protocol v4 reports two separate causal quantities: cumulative extra holding
+owned by the lower controller, and schedule drift relative to the executable
+upper plan.  It constrains persistent intervention, feeds sustained drift back
+to upper replanning, and allows short asymmetric corrections.  The manuscript
+must describe this as bounded low-frequency leakage under a one-sided actuator,
+not exact spectral orthogonality.  A signed correction relative to explicitly
+scheduled control slack may be tested as a separate design, but its absolute
+departure time must still respect passenger-service and safety constraints.
+
 ## Protocol-v4 Build Order
 
 1. Add invariant tests for executable target/schedule agreement, fleet-state
@@ -215,11 +232,13 @@ ground-truth outcomes and conserved LF/HF labels.
    waiting contribution.
 9. Add deployable APC/AVL and oracle-sensing observation modes, then verify that
    the deployable mode never reads latent arrivals or downstream true queues.
-10. Run small deterministic contract tests, then a multi-variant 20-seed screen
+10. Separate action-owned cumulative holding from executable schedule drift and
+    test any signed-slack controller against the same physical no-holding bound.
+11. Run small deterministic contract tests, then a multi-variant 20-seed screen
    on `node001-node006`.
-11. Select one method using a pre-registered restricted-wait gate with no-harm
+12. Select one method using a pre-registered restricted-wait gate with no-harm
    constraints on journey time, unserved rate, completion and fleet use.
-12. Run a fresh 200-episode multi-domain confirmation against fixed headway,
+13. Run a fresh 200-episode multi-domain confirmation against fixed headway,
     rule holding, MPC, the closest valid TransitDuet control, and standard SAC.
 
 ## Result Status
