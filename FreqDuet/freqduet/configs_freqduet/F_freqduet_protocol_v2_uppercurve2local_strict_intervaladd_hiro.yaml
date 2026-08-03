@@ -1,0 +1,16 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercurve2local_strict_intervaladd_hiro
+
+protocol:
+  role: causal_direction_local_two_coefficient_timetable
+
+upper:
+  timetable_planner:
+    # One direction-conditioned coefficient block is learned per planner
+    # stream. The shared flag keeps the action identifiable at two dimensions;
+    # the active plan itself remains separate for up and down directions.
+    basis_per_direction: 2
+    shared_directions: true
+    plan_all_directions: false
+    action_ema_alpha: 0.35
+    smooth_penalty: 0.04

@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercurve4local_strict_intervaladd_hiro
+
+protocol:
+  role: causal_direction_local_cubic_timetable
+
+upper:
+  timetable_planner:
+    basis_per_direction: 4
+    shared_directions: true
+    plan_all_directions: false
+    action_ema_alpha: 0.35
+    smooth_penalty: 0.04

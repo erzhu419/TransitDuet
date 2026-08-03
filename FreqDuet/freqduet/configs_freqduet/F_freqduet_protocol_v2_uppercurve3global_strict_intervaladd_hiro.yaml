@@ -1,0 +1,14 @@
+_extends: F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercurve3global_strict_intervaladd_hiro
+
+protocol:
+  role: causal_global_six_coefficient_timetable
+
+upper:
+  timetable_planner:
+    # One global 15-minute replan controls three coefficients per direction.
+    basis_per_direction: 3
+    shared_directions: false
+    plan_all_directions: true
+    action_ema_alpha: 0.35
+    smooth_penalty: 0.04

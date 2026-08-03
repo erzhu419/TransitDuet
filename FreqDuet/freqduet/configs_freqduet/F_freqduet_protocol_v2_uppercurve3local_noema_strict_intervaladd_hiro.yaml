@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v2_uppercurve3local_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercurve3local_noema_strict_intervaladd_hiro
+
+protocol:
+  role: causal_direction_local_three_coefficient_no_ema
+
+upper:
+  timetable_planner:
+    action_ema_alpha: 1.0

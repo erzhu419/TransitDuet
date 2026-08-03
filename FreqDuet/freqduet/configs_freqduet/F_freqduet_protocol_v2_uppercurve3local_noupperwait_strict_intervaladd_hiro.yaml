@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercurve3local_strict_intervaladd_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercurve3local_noupperwait_strict_intervaladd_hiro
+
+protocol:
+  role: causal_direction_local_three_coefficient_pure_interval_credit
+
+reward_attribution:
+  # The additive interval outcome already partitions passenger waiting.
+  # Disable the old episode-normalized hindsight wait term in this ablation.
+  upper_wait_weight: 0.0
