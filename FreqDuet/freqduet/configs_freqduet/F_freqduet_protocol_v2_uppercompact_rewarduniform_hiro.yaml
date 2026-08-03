@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rewarduniform_hiro
+
+protocol:
+  role: structural_candidate_single_episode_reward_uniform
+
+upper:
+  credit_assignment:
+    system_reward_mode: uniform
+    gap_credit_mode: centered

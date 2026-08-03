@@ -262,6 +262,66 @@ class EnsembleQNetwork(nn.Module):
         return total
 
 
+class IndexedDiscreteEnsembleQNetwork(nn.Module):
+    """Ensemble critic with one exact Q output per categorical action."""
+
+    def __init__(self, num_inputs, action_candidates, hidden_dim=64,
+                 ensemble_size=10, n_layers=3):
+        super().__init__()
+        candidates = torch.as_tensor(action_candidates, dtype=torch.float32)
+        if candidates.ndim != 2 or candidates.shape[0] < 2:
+            raise ValueError(
+                "action_candidates must have shape [n_candidates, action_dim]")
+        self.register_buffer("action_candidates", candidates)
+        self.ensemble_size = int(ensemble_size)
+        self.n_layers = int(n_layers)
+
+        dims = [num_inputs] + [hidden_dim] * n_layers + [candidates.shape[0]]
+        self.weights = nn.ParameterList()
+        self.biases = nn.ParameterList()
+        for i in range(len(dims) - 1):
+            stddev = 1.0 / np.sqrt(dims[i])
+            self.weights.append(nn.Parameter(
+                torch.randn(ensemble_size, dims[i], dims[i + 1]) * stddev))
+            self.biases.append(nn.Parameter(
+                torch.zeros(ensemble_size, 1, dims[i + 1])))
+
+    def all_values(self, state):
+        x = state.unsqueeze(0).expand(self.ensemble_size, -1, -1)
+        for i, (weight, bias) in enumerate(zip(self.weights, self.biases)):
+            x = torch.bmm(x, weight) + bias
+            if i < self.n_layers:
+                x = F.relu(x)
+        return x  # [K, B, A]
+
+    def action_indices(self, action):
+        distances = (
+            action.unsqueeze(1)
+            - self.action_candidates.unsqueeze(0)
+        ).pow(2).sum(dim=-1)
+        min_distance, indices = distances.min(dim=-1)
+        if torch.any(min_distance > 1e-6):
+            raise ValueError(
+                "indexed discrete critic received an action outside its library")
+        return indices
+
+    def forward(self, state, action):
+        values = self.all_values(state)
+        indices = self.action_indices(action)
+        gather_index = indices.view(1, -1, 1).expand(
+            self.ensemble_size, -1, 1)
+        return values.gather(dim=-1, index=gather_index).squeeze(-1)
+
+    def compute_l1_norm(self):
+        total = torch.zeros(self.ensemble_size, device=self.weights[0].device)
+        for weight, bias in zip(self.weights, self.biases):
+            total = (
+                total
+                + weight.abs().sum(dim=(1, 2))
+                + bias.abs().sum(dim=(1, 2)))
+        return total
+
+
 # ──────────────────── Trainer ────────────────────
 
 class RESACUpperTrainer:
@@ -273,6 +333,7 @@ class RESACUpperTrainer:
     def __init__(self, state_dim=5, action_dim=3, hidden_dim=64,
                  action_low=None, action_high=None,
                  action_candidates=None,
+                 discrete_critic="continuous_action",
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
@@ -286,6 +347,10 @@ class RESACUpperTrainer:
         self.beta_ood = beta_ood
         self.weight_reg = weight_reg
         self.auto_entropy = auto_entropy
+        self.discrete_critic = str(discrete_critic).lower()
+        if self.discrete_critic not in {"continuous_action", "indexed"}:
+            raise ValueError(
+                "discrete_critic must be 'continuous_action' or 'indexed'")
 
         # Replay buffer for dispatch transitions
         self.replay_buffer = UpperReplayBuffer(replay_capacity)
@@ -310,11 +375,23 @@ class RESACUpperTrainer:
                 state_dim, action_dim, hidden_dim,
                 action_low, action_high).to(device)
 
+        if self.discrete_actions is None and self.discrete_critic != "continuous_action":
+            raise ValueError(
+                "indexed discrete critic requires action_candidates")
+
         # Ensemble Q
-        self.q_net = EnsembleQNetwork(
-            state_dim, action_dim, hidden_dim, ensemble_size).to(device)
-        self.target_q_net = EnsembleQNetwork(
-            state_dim, action_dim, hidden_dim, ensemble_size).to(device)
+        if self.discrete_actions is not None and self.discrete_critic == "indexed":
+            self.q_net = IndexedDiscreteEnsembleQNetwork(
+                state_dim, self.discrete_actions, hidden_dim,
+                ensemble_size).to(device)
+            self.target_q_net = IndexedDiscreteEnsembleQNetwork(
+                state_dim, self.discrete_actions, hidden_dim,
+                ensemble_size).to(device)
+        else:
+            self.q_net = EnsembleQNetwork(
+                state_dim, action_dim, hidden_dim, ensemble_size).to(device)
+            self.target_q_net = EnsembleQNetwork(
+                state_dim, action_dim, hidden_dim, ensemble_size).to(device)
         self.target_q_net.load_state_dict(self.q_net.state_dict())
 
         # Optimizers
@@ -338,6 +415,8 @@ class RESACUpperTrainer:
         if candidates is None:
             raise RuntimeError(
                 "discrete Q values requested without action candidates")
+        if isinstance(q_net, IndexedDiscreteEnsembleQNetwork):
+            return q_net.all_values(state)
         batch = state.shape[0]
         n_actions, action_dim = candidates.shape
         state_rep = (
@@ -466,10 +545,17 @@ class RESACUpperTrainer:
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
+            'discrete_critic': self.discrete_critic,
         }, path)
 
     def load(self, path):
         ckpt = torch.load(path, weights_only=True)
+        saved_critic = str(
+            ckpt.get('discrete_critic', 'continuous_action')).lower()
+        if saved_critic != self.discrete_critic:
+            raise ValueError(
+                "checkpoint discrete critic does not match configured "
+                f"critic: saved={saved_critic}, configured={self.discrete_critic}")
         saved_candidates = ckpt['policy'].get('action_candidates')
         if self.discrete_actions is None and saved_candidates is not None:
             raise ValueError(

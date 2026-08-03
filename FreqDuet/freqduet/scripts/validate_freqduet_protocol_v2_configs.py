@@ -69,6 +69,13 @@ STRUCTURAL = [
     "F_freqduet_protocol_v2_uppercompact_disc_hist_tripreset_hiro.yaml",
     "F_freqduet_protocol_v2_uppercompact_disc_hist_holdfinal_hiro.yaml",
     "F_freqduet_protocol_v2_uppercompact_disc_hist_lifecycle_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_rewarduniform_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_rewardlocal_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_rewardterminal_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_rewardlocalonly_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_local_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_terminal_hiro.yaml",
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml",
 ]
 STRUCTURAL_ENABLED_ADDITIONS = {
@@ -102,6 +109,13 @@ STRUCTURAL_ENABLED_ADDITIONS = {
     "F_freqduet_protocol_v2_uppercompact_disc_hist_lifecycle_hiro.yaml": {
         "upper.state_history.enable",
     },
+    "F_freqduet_protocol_v2_uppercompact_rewarduniform_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_rewardlocal_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_rewardterminal_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_rewardlocalonly_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_local_hiro.yaml": set(),
+    "F_freqduet_protocol_v2_uppercompact_disc_indexed_terminal_hiro.yaml": set(),
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml": set(),
 }
 DOMAINS = [

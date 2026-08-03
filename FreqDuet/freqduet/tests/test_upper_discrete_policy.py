@@ -17,13 +17,14 @@ class UpperDiscretePolicyTest(unittest.TestCase):
             [10.0, 20.0],
         ], dtype=np.float32)
 
-    def _trainer(self):
+    def _trainer(self, discrete_critic="continuous_action"):
         return RESACUpperTrainer(
             state_dim=3,
             action_dim=2,
             action_low=[-60.0, -60.0],
             action_high=[20.0, 20.0],
             action_candidates=self.candidates,
+            discrete_critic=discrete_critic,
             ensemble_size=3,
             hidden_dim=16,
         )
@@ -81,6 +82,44 @@ class UpperDiscretePolicyTest(unittest.TestCase):
                 np.zeros(3, dtype=np.float32),
                 np.asarray([1.0, 1.0], dtype=np.float32),
             )
+
+    def test_indexed_critic_uses_exact_action_heads(self):
+        trainer = self._trainer(discrete_critic="indexed")
+        state = torch.tensor([
+            [0.1, 0.2, 0.3],
+            [0.4, 0.5, 0.6],
+        ], dtype=torch.float32)
+        actions = torch.from_numpy(np.asarray([
+            self.candidates[1],
+            self.candidates[3],
+        ], dtype=np.float32))
+
+        all_values = trainer.q_net.all_values(state)
+        selected = trainer.q_net(state, actions)
+        self.assertEqual(tuple(all_values.shape), (3, 2, 4))
+        self.assertTrue(torch.equal(selected[:, 0], all_values[:, 0, 1]))
+        self.assertTrue(torch.equal(selected[:, 1], all_values[:, 1, 3]))
+
+        rng = np.random.RandomState(11)
+        for i in range(40):
+            trainer.replay_buffer.push(
+                rng.normal(size=3).astype(np.float32),
+                self.candidates[i % len(self.candidates)],
+                -float(i % 7),
+                rng.normal(size=3).astype(np.float32),
+                i % 13 == 0,
+            )
+        metrics = trainer.update(batch_size=16)
+        self.assertTrue(np.isfinite(metrics['upper_q_loss']))
+        self.assertTrue(np.isfinite(metrics['upper_policy_loss']))
+
+    def test_checkpoint_rejects_different_discrete_critic(self):
+        trainer = self._trainer(discrete_critic="indexed")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'upper.pt'
+            trainer.save(path)
+            with self.assertRaisesRegex(ValueError, "discrete critic"):
+                self._trainer(discrete_critic="continuous_action").load(path)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_indexed_local_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_indexed_terminal_hiro
+
+protocol:
+  role: structural_candidate_indexed_discrete_terminal_global
+
+upper:
+  gamma: 0.995
+  credit_assignment:
+    system_reward_mode: terminal

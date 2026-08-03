@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v2_uppercompact_rewardlocal_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rewardterminal_hiro
+
+protocol:
+  role: structural_candidate_terminal_global_plan_local_credit
+
+upper:
+  gamma: 0.995
+  credit_assignment:
+    system_reward_mode: terminal

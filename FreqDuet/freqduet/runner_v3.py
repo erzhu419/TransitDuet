@@ -69,6 +69,7 @@ from frequency.diagnostics import (
     shock_response_metrics,
 )
 from upper.resac_upper import RESACUpperTrainer
+from upper.credit_assignment import UpperCreditAssignment
 from upper.measurement_proj import MeasurementProjection
 from upper.timetable_planner import TimetableCurvePlanner
 from upper.counterfactual_action_selector import (
@@ -226,6 +227,8 @@ class DiagnosticLog:
         # upper policy (only after warmup)
         'upper_delta_mean', 'upper_delta_std', 'upper_delta_min', 'upper_delta_max',
         'upper_reward_mean', 'upper_reward_std',
+        'upper_system_reward_mean', 'upper_system_reward_sum',
+        'upper_gap_credit_mean', 'upper_gap_credit_std',
         # upper training
         'upper_q_mean', 'upper_q_std', 'upper_q_loss', 'upper_q_mse',
         'upper_ood_loss', 'upper_policy_loss',
@@ -537,6 +540,8 @@ class TransitDuetV2Runner:
 
         # ── Upper policy ──
         upper_cfg = config['upper']
+        self.upper_credit_assignment = UpperCreditAssignment.from_config(
+            upper_cfg.get('credit_assignment', {}))
         self.delta_max = upper_cfg.get('delta_max', 120.0)
         planner_cfg = upper_cfg.get('timetable_planner', {})
         self.timetable_planner = None
@@ -1647,6 +1652,8 @@ class TransitDuetV2Runner:
             action_candidates=(
                 self.upper_action_candidates.tolist()
                 if self.upper_action_candidates is not None else None),
+            discrete_critic=upper_cfg.get(
+                'discrete_critic', 'continuous_action'),
             ensemble_size=upper_cfg.get('ensemble_size', 10),
             beta=upper_cfg.get('resac_beta', -2.0),
             lr=upper_cfg.get('lr', 3e-4),
@@ -2167,6 +2174,8 @@ class TransitDuetV2Runner:
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
         self._ep_upper_rewards = []     # all upper rewards this episode
+        self._ep_upper_system_rewards = []
+        self._ep_upper_gap_credits = []
         self._current_ep = 0
 
         # Logging
@@ -6659,6 +6668,8 @@ class TransitDuetV2Runner:
         self._ep_hold_feedback_trip_finalizations = 0
         self._ep_upper_deltas = []
         self._ep_upper_rewards = []
+        self._ep_upper_system_rewards = []
+        self._ep_upper_gap_credits = []
         self._ep_lower_actions_by_dir = {True: [], False: []}
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
@@ -7065,26 +7076,22 @@ class TransitDuetV2Runner:
             if values
         }
 
-        # Normalize gap devs to zero-mean credit
-        if plan_gap_devs:
-            devs = np.array(list(plan_gap_devs.values()))
-            dev_mean = devs.mean()
-            dev_std = max(devs.std(), 1e-6)
-        else:
-            dev_mean, dev_std = 0.0, 1.0
-
         backfilled = []
         prev_delta_by_dir = {}
         upper_wait_credits = self._upper_frequency_wait_credits(
             self._episode_upper_transitions)
-        for trans in self._episode_upper_transitions:
+        transition_ids = [
+            int(trans['tid']) for trans in self._episode_upper_transitions]
+        gap_credits = self.upper_credit_assignment.gap_credits(
+            plan_gap_devs, transition_ids)
+        if self.ablate_hindsight_credit:
+            gap_credits = {tid: 0.0 for tid in transition_ids}
+        system_rewards = self.upper_credit_assignment.system_rewards(
+            sys_r, len(self._episode_upper_transitions))
+        for trans, system_reward in zip(
+                self._episode_upper_transitions, system_rewards):
             tid = trans['tid']
-            if self.ablate_hindsight_credit:
-                # Ablation: all transitions get same episode reward
-                credit = 0.0
-            else:
-                gap_dev = plan_gap_devs.get(tid, dev_mean)
-                credit = -(gap_dev - dev_mean) / dev_std * 0.5
+            credit = float(gap_credits.get(int(tid), 0.0))
             a_u = float(trans.get(
                 'a_eff', float(np.asarray(trans['a']).reshape(-1)[0])))
             upper_hf_pen = self._upper_delta_hf_penalty(
@@ -7099,7 +7106,7 @@ class TransitDuetV2Runner:
             wait_credit = float(upper_wait_credits.get(int(tid), 0.0))
             self._ep_upper_wait_credits.append(wait_credit)
             r = (
-                sys_r + credit + wait_credit
+                float(system_reward) + credit + wait_credit
                 - upper_hf_pen - plan_pen - upper_value_cost)
             upper_local_credit_cost = (
                 -float(credit)
@@ -7135,11 +7142,19 @@ class TransitDuetV2Runner:
                 's': trans['s'], 'a': trans['a'], 'r': r,
                 'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
                 'dir': trans.get('dir', True),
+                'system_reward': float(system_reward),
+                'gap_credit': credit,
             })
             self._ep_upper_rewards.append(r)
+            self._ep_upper_system_rewards.append(float(system_reward))
+            self._ep_upper_gap_credits.append(credit)
         self._episode_upper_transitions = backfilled
 
         # ── Enrich per-trip records with holding + gap deviation ──
+        upper_reward_by_owner = {
+            int(trans['tid']): float(trans['r'])
+            for trans in self._episode_upper_transitions
+        }
         for rec in self._ep_trip_records:
             tid = rec['tid']
             stats = self.holding_feedback.get_trip_stats(tid)
@@ -7156,8 +7171,9 @@ class TransitDuetV2Runner:
             gap_dev = trip_gap_devs.get(tid, 0.0)
             rec['gap_dev'] = round(gap_dev, 3)
             rec['penalty'] = round(gap_dev, 3)  # now gap-based
-            credit = -(gap_dev - dev_mean) / dev_std * 0.5
-            rec['reward'] = round(sys_r + credit, 3)
+            owner = owner_by_tid.get(int(tid), int(tid))
+            rec['reward'] = round(
+                upper_reward_by_owner.get(int(owner), 0.0), 3)
 
         # ══════════════ CS-BAPR: Belief Update ══════════════
         # Detect non-stationarity from upper-level timetable changes
@@ -7287,6 +7303,8 @@ class TransitDuetV2Runner:
         lr_stat = _stat(self._ep_lower_rewards)
         ud_stat = _stat(self._ep_upper_deltas)
         ur_stat = _stat(self._ep_upper_rewards)
+        upper_system_reward_stat = _stat(self._ep_upper_system_rewards)
+        upper_gap_credit_stat = _stat(self._ep_upper_gap_credits)
         freq_summary = self.env.frequency_summary()
         lower_drift_stat = _stat(self._ep_lower_drift_penalties)
         lower_drift_cost_stat = _stat(self._ep_lower_drift_costs)
@@ -7612,6 +7630,14 @@ class TransitDuetV2Runner:
             'upper_delta_max': round(ud_stat['max'], 2),
             'upper_reward_mean': round(ur_stat['mean'], 4),
             'upper_reward_std': round(ur_stat['std'], 4),
+            'upper_system_reward_mean': round(
+                upper_system_reward_stat['mean'], 4),
+            'upper_system_reward_sum': round(
+                float(sum(self._ep_upper_system_rewards)), 4),
+            'upper_gap_credit_mean': round(
+                upper_gap_credit_stat['mean'], 4),
+            'upper_gap_credit_std': round(
+                upper_gap_credit_stat['std'], 4),
             # upper training
             'upper_q_mean': upper_m.get('upper_q_mean', 0.),
             'upper_q_std': upper_m.get('upper_q_std', 0.),
@@ -8501,7 +8527,11 @@ class TransitDuetV2Runner:
         if self.upper_action_candidates is not None:
             print(
                 f"    upper_action_library={len(self.upper_action_candidates)} "
-                f"curves")
+                f"curves  critic={self.upper_trainer.discrete_critic}")
+        print(
+            "    upper_credit="
+            f"{self.upper_credit_assignment.system_reward_mode}/"
+            f"{self.upper_credit_assignment.gap_credit_mode}")
         freeze_notes = []
         if self.freeze_lower_policy_after_ep is not None:
             freeze_notes.append(

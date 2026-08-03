@@ -1,0 +1,15 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_rewardlocal_hiro
+
+protocol:
+  role: structural_candidate_plan_local_absolute_credit
+
+upper:
+  credit_assignment:
+    system_reward_mode: uniform
+    gap_credit_mode: absolute
+    gap_credit_weight: 0.5
+    gap_credit_clip: 4.0
+
+reward_attribution:
+  normalize_upper_credit: false

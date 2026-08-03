@@ -1,0 +1,15 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_indexed_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_indexed_local_hiro
+
+protocol:
+  role: structural_candidate_indexed_discrete_plan_local_credit
+
+upper:
+  credit_assignment:
+    system_reward_mode: uniform
+    gap_credit_mode: absolute
+    gap_credit_weight: 0.5
+    gap_credit_clip: 4.0
+
+reward_attribution:
+  normalize_upper_credit: false
