@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
@@ -8,7 +10,9 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     PROTOCOL_VERSION,
     config_fingerprint,
     paired_sign_flip_p,
+    source_fingerprint,
     validate_evaluation_frame,
+    validate_run_manifest,
 )
 
 
@@ -53,6 +57,31 @@ class ProtocolV2MatrixTest(unittest.TestCase):
         self.assertTrue(
             result["lineage"][-1].endswith(
                 "F_freqduet_protocol_v2_upperdisc_hiro.yaml"))
+
+    def test_source_fingerprint_covers_code_and_base_environment_data(self):
+        first = source_fingerprint()
+        second = source_fingerprint()
+
+        self.assertEqual(first["sha256"], second["sha256"])
+        self.assertEqual(len(first["sha256"]), 64)
+        paths = {entry["path"] for entry in first["files"]}
+        self.assertIn("runner_v3.py", paths)
+        self.assertIn("upper/interval_credit.py", paths)
+        self.assertIn("env/data/passenger_OD.xlsx", paths)
+        self.assertEqual(first["file_count"], len(first["files"]))
+
+    def test_run_manifest_rejects_source_mismatch_on_resume(self):
+        expected = {
+            "manifest_version": "freqduet-run-manifest-v1",
+            "source_fingerprint": {"sha256": "a" * 64},
+        }
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "protocol_run_manifest.json"
+            path.write_text(
+                '{"manifest_version":"freqduet-run-manifest-v1",'
+                '"source_fingerprint":{"sha256":"' + "b" * 64 + '"}}')
+            with self.assertRaisesRegex(ValueError, "do not match"):
+                validate_run_manifest(path, expected=expected)
 
 
 if __name__ == "__main__":

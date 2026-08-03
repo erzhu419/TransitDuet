@@ -52,6 +52,18 @@ METRIC_DIRECTIONS = {
     "trip_completion_rate": "max",
 }
 PROTOCOL_VERSION = "freqduet-eval-v2"
+RUN_MANIFEST_VERSION = "freqduet-run-manifest-v1"
+RUN_MANIFEST_NAME = "protocol_run_manifest.json"
+SOURCE_PACKAGE_DIRS = ["env", "frequency", "lower", "upper", "coupling"]
+SOURCE_FIXED_FILES = [
+    "runner_v3.py",
+    "scripts/run_freqduet_protocol_v2_matrix.py",
+    "env/config.json",
+    "env/data/passenger_OD.xlsx",
+    "env/data/route_news.xlsx",
+    "env/data/stop_news.xlsx",
+    "env/data/time_table.xlsx",
+]
 
 
 def parse_csv(value, cast=str):
@@ -236,6 +248,25 @@ def run_job(
     path = run_dir(logs_dir, config, train_seed)
     if clean and path.exists():
         shutil.rmtree(path)
+    expected_manifest = run_manifest(
+        config=config,
+        train_seed=train_seed,
+        eval_seeds=eval_seeds,
+        train_episodes=train_episodes,
+    )
+    manifest_path = path / RUN_MANIFEST_NAME
+    existing_artifacts = (
+        (path / "diagnostics.csv").exists()
+        or (path / "frozen_evaluation/evaluation.csv").exists()
+    )
+    if skip_existing and existing_artifacts:
+        validate_run_manifest(
+            manifest_path,
+            expected=expected_manifest,
+            source=path,
+        )
+    path.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(expected_manifest, indent=2) + "\n")
     env = worker_env(worker_threads, suppress_heavy_artifacts)
     if not (skip_existing and training_complete(path, train_episodes)):
         train_command = [
@@ -404,6 +435,72 @@ def config_fingerprint(name: str) -> dict[str, object]:
     return {"sha256": digest.hexdigest(), "lineage": labels}
 
 
+def source_fingerprint() -> dict[str, object]:
+    paths = {ROOT / relative for relative in SOURCE_FIXED_FILES}
+    for package in SOURCE_PACKAGE_DIRS:
+        paths.update((ROOT / package).rglob("*.py"))
+    missing = sorted(str(path) for path in paths if not path.is_file())
+    if missing:
+        raise FileNotFoundError(f"source fingerprint inputs missing: {missing}")
+
+    digest = hashlib.sha256()
+    files = []
+    for path in sorted(paths):
+        label = str(path.relative_to(ROOT))
+        payload = path.read_bytes()
+        file_sha = hashlib.sha256(payload).hexdigest()
+        digest.update(label.encode("utf-8"))
+        digest.update(bytes.fromhex(file_sha))
+        files.append({
+            "path": label,
+            "sha256": file_sha,
+            "size_bytes": len(payload),
+        })
+    return {
+        "sha256": digest.hexdigest(),
+        "file_count": len(files),
+        "files": files,
+    }
+
+
+def run_manifest(
+    *, config: str, train_seed: int, eval_seeds: list[int],
+    train_episodes: int
+) -> dict[str, object]:
+    return {
+        "manifest_version": RUN_MANIFEST_VERSION,
+        "protocol_version": PROTOCOL_VERSION,
+        "config_name": config_name(config),
+        "config_fingerprint": config_fingerprint(config),
+        "source_fingerprint": source_fingerprint(),
+        "train_seed": int(train_seed),
+        "train_episodes": int(train_episodes),
+        "eval_seeds": [int(seed) for seed in eval_seeds],
+    }
+
+
+def validate_run_manifest(
+    path: Path,
+    *,
+    expected: dict[str, object] | None = None,
+    source: Path | str | None = None,
+) -> dict[str, object]:
+    label = source or path
+    if not path.exists():
+        raise ValueError(f"{label}: missing {RUN_MANIFEST_NAME}")
+    payload = json.loads(path.read_text())
+    if payload.get("manifest_version") != RUN_MANIFEST_VERSION:
+        raise ValueError(f"{label}: run manifest version mismatch")
+    if expected is not None and payload != expected:
+        raise ValueError(
+            f"{label}: existing artifacts do not match the current source, "
+            "config, seeds, or episode protocol")
+    source_payload = payload.get("source_fingerprint", {})
+    if len(str(source_payload.get("sha256", ""))) != 64:
+        raise ValueError(f"{label}: invalid source fingerprint")
+    return payload
+
+
 def git_provenance() -> dict[str, object]:
     def run(*args: str) -> str:
         process = subprocess.run(
@@ -425,6 +522,8 @@ def aggregate(
 ) -> None:
     records = []
     missing_runs = []
+    run_manifests = []
+    runs_without_manifest = []
     for config in configs:
         name = config_name(config)
         for train_seed in train_seeds:
@@ -451,6 +550,26 @@ def aggregate(
             )
             validate_evaluation_manifest(
                 result, frame, config, train_seed, eval_seeds)
+            run_manifest_path = result.parent.parent / RUN_MANIFEST_NAME
+            if run_manifest_path.exists():
+                manifest = validate_run_manifest(
+                    run_manifest_path, source=result.parent.parent)
+                expected_config = config_fingerprint(config)
+                expected_fields = {
+                    "protocol_version": PROTOCOL_VERSION,
+                    "config_name": name,
+                    "config_fingerprint": expected_config,
+                    "train_seed": int(train_seed),
+                    "eval_seeds": [int(seed) for seed in eval_seeds],
+                }
+                for key, expected_value in expected_fields.items():
+                    if manifest.get(key) != expected_value:
+                        raise ValueError(
+                            f"{run_manifest_path}: {key} does not match "
+                            "the aggregation protocol")
+                run_manifests.append(manifest)
+            else:
+                runs_without_manifest.append(str(result.parent.parent))
             frame["config"] = name
             frame["train_seed"] = int(train_seed)
             records.append(frame)
@@ -458,6 +577,18 @@ def aggregate(
         raise RuntimeError(f"missing frozen evaluations: {missing_runs}")
     if not records:
         raise RuntimeError("no frozen evaluation files found")
+    if run_manifests and runs_without_manifest:
+        raise RuntimeError(
+            "matrix mixes source-fingerprinted and legacy runs without a "
+            f"manifest: {runs_without_manifest}")
+    run_source_hashes = {
+        manifest["source_fingerprint"]["sha256"]
+        for manifest in run_manifests
+    }
+    if len(run_source_hashes) > 1:
+        raise RuntimeError(
+            "matrix mixes multiple source fingerprints: "
+            f"{sorted(run_source_hashes)}")
     per_eval = pd.concat(records, ignore_index=True)
     expected_rows = len(configs) * len(train_seeds) * len(eval_seeds)
     if len(per_eval) != expected_rows:
@@ -553,6 +684,11 @@ def aggregate(
         "strict_complete": True,
         "expected_rollouts": expected_rows,
         "common_random_numbers_verified": True,
+        "run_manifests_verified": bool(run_manifests),
+        "run_source_fingerprint": (
+            run_manifests[0]["source_fingerprint"]
+            if run_manifests else None
+        ),
         "git": git_provenance(),
         "config_fingerprints": {
             config_name(value): config_fingerprint(value)
