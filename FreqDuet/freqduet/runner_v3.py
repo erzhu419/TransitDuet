@@ -77,6 +77,7 @@ from upper.counterfactual_action_selector import (
 )
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
+from lower.state_encoder import PhysicalLowerStateEncoder
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
 
@@ -1678,6 +1679,31 @@ class TransitDuetV2Runner:
                 "lower.action_bins_gate.source only supports lower_context_gate")
         self.lower_use_last_action_feature = bool(
             lower_cfg.get('use_last_action_feature', False))
+        lower_state_encoder_cfg = lower_cfg.get('state_encoder', {}) or {}
+        self.lower_state_encoder = None
+        if bool(lower_state_encoder_cfg.get('enable', False)):
+            encoder_mode = str(lower_state_encoder_cfg.get(
+                'mode', 'physical_dimensionless_v1')).lower()
+            if encoder_mode not in {
+                    'physical_dimensionless_v1', 'physical_v1'}:
+                raise ValueError(
+                    "lower.state_encoder.mode must be "
+                    "physical_dimensionless_v1")
+            max_station_id = max(
+                (int(station.station_id) for station in self.env.stations),
+                default=1,
+            )
+            service_start = int(env_cfg.get('service_start_hour', 6))
+            service_end = int(env_cfg.get('service_end_hour', 19))
+            if service_end < service_start:
+                service_end += 24
+            self.lower_state_encoder = PhysicalLowerStateEncoder.from_config(
+                lower_state_encoder_cfg,
+                base_state_dim=int(self.env._base_state_dim),
+                max_station_id=max_station_id,
+                service_duration_h=float(service_end - service_start + 1),
+                action_range_s=float(lower_cfg['action_range']),
+            )
         lower_state_dim = state_dim + (1 if self.lower_use_last_action_feature else 0)
         lower_trainer_action_bins = (
             None if self.lower_action_bins_gate_enabled else self.lower_action_bins)
@@ -4967,10 +4993,16 @@ class TransitDuetV2Runner:
 
     def _augment_lower_state(self, obs, last_action=0.0):
         obs = np.asarray(obs, dtype=np.float32).reshape(-1)
+        if self.lower_state_encoder is not None:
+            obs = self.lower_state_encoder.encode(obs)
         if not self.lower_use_last_action_feature:
             return obs
+        action_feature = float(last_action)
+        if self.lower_state_encoder is not None:
+            action_feature = self.lower_state_encoder.encode_action(
+                action_feature)
         return np.concatenate(
-            [obs, np.asarray([float(last_action)], dtype=np.float32)])
+            [obs, np.asarray([action_feature], dtype=np.float32)])
 
     def _lower_policy_action(self, obs, last_action=0.0, deterministic=False):
         if getattr(self, '_fixed_expert_active', False):
@@ -8418,6 +8450,8 @@ class TransitDuetV2Runner:
         print(f"  Lower: state={self.lower_state_dim}  K={self.lower_trainer.ensemble_size}  "
               f"batch={self.batch_size}  updates/ep={self.updates_per_episode}"
               f"{bins_note}{last_note}")
+        if self.lower_state_encoder is not None:
+            print("    lower_state_encoder=physical_dimensionless_v1")
         print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
         if self.upper_action_bins is not None:

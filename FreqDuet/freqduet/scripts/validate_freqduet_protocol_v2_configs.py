@@ -64,6 +64,8 @@ STRUCTURAL = [
     "F_freqduet_protocol_v2_uppercompact_hiro.yaml",
     "F_freqduet_protocol_v2_uppercompact_disc_hiro.yaml",
     "F_freqduet_protocol_v2_uppercompact_disc_hist_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_disc_hist_physnorm_hiro.yaml",
+    "F_freqduet_protocol_v2_uppercompact_disc_hist_physctx_hiro.yaml",
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml",
 ]
 STRUCTURAL_ENABLED_ADDITIONS = {
@@ -78,6 +80,15 @@ STRUCTURAL_ENABLED_ADDITIONS = {
     "F_freqduet_protocol_v2_uppercompact_disc_hiro.yaml": set(),
     "F_freqduet_protocol_v2_uppercompact_disc_hist_hiro.yaml": {
         "upper.state_history.enable",
+    },
+    "F_freqduet_protocol_v2_uppercompact_disc_hist_physnorm_hiro.yaml": {
+        "upper.state_history.enable",
+        "lower.state_encoder.enable",
+    },
+    "F_freqduet_protocol_v2_uppercompact_disc_hist_physctx_hiro.yaml": {
+        "upper.state_history.enable",
+        "lower.state_encoder.enable",
+        "frequency.lower_context.enable",
     },
     "F_freqduet_protocol_v2_harmonicnb_hiro.yaml": set(),
 }

@@ -1,0 +1,17 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_hist_physnorm_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_hist_physctx_hiro
+
+protocol:
+  role: structural_candidate_discrete_history_complete_lower_state
+
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
