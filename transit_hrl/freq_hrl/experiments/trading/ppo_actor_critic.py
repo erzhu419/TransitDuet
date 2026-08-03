@@ -18,6 +18,7 @@ from freq_hrl.core import (
     FrequencyDiagnostics,
     FrequencyRouter,
     LeakageRegularizer,
+    evaluate_rms_leakage_budget,
 )
 from freq_hrl.experiments.reproducibility import (
     derive_seed,
@@ -58,7 +59,12 @@ from .metrics import (
     summarize_pnl_series,
     validation_utility,
 )
-from .performance_validation import SCENARIOS, make_synthetic_market
+from .performance_validation import (
+    SCENARIOS,
+    SUPPORT_MIXTURE_SCENARIO,
+    causal_hf_predictability,
+    make_synthetic_market,
+)
 
 
 FLAT_PPO_MODES = ("flat_ppo", "flat_gru_ppo")
@@ -72,6 +78,9 @@ FULL_METHOD_IMPLEMENTATION_VERSION = (
 )
 FULL_METHOD_V5_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v5_independent_hf_tactical_credit_2026_08_03"
+)
+FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
+    "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
@@ -92,7 +101,17 @@ METHOD_CONTRACTS = (
     "ablate_promotion_v5",
     "ablate_hf_lower_v5",
     "ablate_leakage_v5",
+    "full_freq_hrl_v6",
+    "ablate_promotion_v6",
+    "ablate_hf_lower_v6",
+    "ablate_leakage_v6",
 )
+V6_METHOD_CONTRACTS = {
+    "full_freq_hrl_v6",
+    "ablate_promotion_v6",
+    "ablate_hf_lower_v6",
+    "ablate_leakage_v6",
+}
 LOWER_OBSERVATION_INTERVENTIONS = (
     "none",
     "zero_residual_frequency",
@@ -118,6 +137,9 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v5",
             "ablate_promotion_v5",
             "ablate_hf_lower_v5",
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
         },
         "learned_promotion_gate": contract in {
             "full_freq_hrl_v4",
@@ -126,6 +148,9 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v5",
             "ablate_hf_lower_v5",
             "ablate_leakage_v5",
+            "full_freq_hrl_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
         },
         "heuristic_promotion_gate": contract in {
             "routing_core_v2",
@@ -139,18 +164,45 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v5",
             "ablate_promotion_v5",
             "ablate_leakage_v5",
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_leakage_v6",
         },
         "separate_hf_tactical": contract in {
             "full_freq_hrl_v5",
             "ablate_promotion_v5",
             "ablate_hf_lower_v5",
             "ablate_leakage_v5",
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
+        },
+        "promotion_plan_advantage_credit": contract in {
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
+        },
+        "fixed_rms_leakage_budget": contract in {
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
+        },
+        "hf_predictability_summary": contract in {
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
         },
     }
     return flags
 
 
 def full_method_implementation_version(method_contract: str) -> str:
+    if str(method_contract) in V6_METHOD_CONTRACTS:
+        return FULL_METHOD_V6_IMPLEMENTATION_VERSION
     if str(method_contract) in {
         "full_freq_hrl_v5",
         "ablate_promotion_v5",
@@ -219,6 +271,7 @@ def frequency_separated_feature_vectors(
     leakage_feedback: float = 0.0,
     progress: float = 0.0,
     include_heuristic_promotion: bool = True,
+    hf_predictability: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Build v2 policy vectors through the machine-checked router contract."""
     dim = int(position.size)
@@ -287,6 +340,11 @@ def frequency_separated_feature_vectors(
         np.tanh(resize(lower["shock_age"], dim) / 30.0),
         np.asarray([float(np.clip(progress, 0.0, 1.0))], dtype=np.float64),
     ])
+    if hf_predictability is not None:
+        predictability = np.clip(
+            resize(hf_predictability, dim), 0.0, 1.0
+        )
+        lower_state = np.concatenate([lower_state, predictability])
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
@@ -434,6 +492,7 @@ def smdp_policy_feature_vectors(
     progress: float = 0.0,
     history_window: int = RAW_HISTORY_WINDOW,
     include_heuristic_promotion: bool = True,
+    hf_predictability: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     if str(policy_mode) == "freq_hrl":
         return frequency_separated_feature_vectors(
@@ -443,6 +502,7 @@ def smdp_policy_feature_vectors(
             leakage_feedback=leakage_feedback,
             progress=progress,
             include_heuristic_promotion=include_heuristic_promotion,
+            hf_predictability=hf_predictability,
         )
     return raw_hierarchical_feature_vectors(
         raw_history,
@@ -837,13 +897,17 @@ def intervene_lower_observation(
         raise ValueError(
             "residual-frequency intervention is only defined for freq_hrl"
         )
-    expected = 8 * int(assets) + 1
-    if state.size != expected:
+    legacy_expected = 8 * int(assets) + 1
+    predictability_expected = 9 * int(assets) + 1
+    if state.size not in {legacy_expected, predictability_expected}:
         raise ValueError(
-            f"expected frequency lower state dim {expected}, got {state.size}"
+            "expected frequency lower state dim "
+            f"{legacy_expected} or {predictability_expected}, got {state.size}"
         )
     # Keep plan, position, and gap fixed; remove only MF/HF residual context.
     state[3 * int(assets):8 * int(assets)] = 0.0
+    if state.size == predictability_expected:
+        state[8 * int(assets) + 1:] = 0.0
     return state
 
 
@@ -1110,6 +1174,12 @@ def smdp_rollout(
     compute_hf_action_sensitivity: bool = False,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     method_contract: str = "routing_core_v2",
+    promotion_credit_mode: str = "auto",
+    leakage_cost_mode: str = "auto",
+    lower_lf_budget_rms: float = 0.0025,
+    hf_lf_budget_rms: float = 0.00025,
+    include_hf_predictability: bool | None = None,
+    allow_inactive_mechanism_modules: bool = False,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
@@ -1121,6 +1191,48 @@ def smdp_rollout(
         )
     if execute_plan_curve and plan_mapper is None:
         raise ValueError("execute_plan_curve requires a learned plan mapper")
+    method_flags = resolve_method_contract(str(method_contract))
+    if str(promotion_credit_mode) == "auto":
+        promotion_credit_mode = (
+            "incremental_plan_advantage"
+            if method_flags["promotion_plan_advantage_credit"]
+            else "task_return"
+        )
+    if str(promotion_credit_mode) not in {
+        "task_return",
+        "incremental_plan_advantage",
+    }:
+        raise ValueError("unknown promotion_credit_mode")
+    if str(leakage_cost_mode) == "auto":
+        leakage_cost_mode = (
+            "fixed_rms_budget"
+            if method_flags["fixed_rms_leakage_budget"]
+            else "spectral_ratio"
+        )
+    if str(leakage_cost_mode) not in {
+        "spectral_ratio",
+        "fixed_rms_budget",
+    }:
+        raise ValueError("unknown leakage_cost_mode")
+    include_hf_predictability = (
+        bool(method_flags["hf_predictability_summary"])
+        if include_hf_predictability is None
+        else bool(include_hf_predictability)
+    )
+    if str(leakage_cost_mode) == "fixed_rms_budget":
+        for name, value in (
+            ("lower_lf_budget_rms", lower_lf_budget_rms),
+            ("hf_lf_budget_rms", hf_lf_budget_rms),
+        ):
+            if not np.isfinite(float(value)) or float(value) <= 0.0:
+                raise ValueError(f"{name} must be positive and finite")
+    if (
+        str(promotion_credit_mode) == "incremental_plan_advantage"
+        and not execute_plan_curve
+    ):
+        raise ValueError(
+            "incremental promotion credit requires an executable plan curve"
+        )
     if use_additive_frequency_credit and str(mark_to_market_timing) != "post_trade":
         raise ValueError(
             "additive frequency credit requires post_trade mark-to-market timing"
@@ -1151,11 +1263,27 @@ def smdp_rollout(
             "lower action dim mismatch: "
             f"expected {expected_lower_action_dim}, got {model.config.lower_action_dim}"
         )
-    expected_hf_state_dim = 8 * int(assets) + 1 if use_separate_hf else 0
+    expected_lower_state_dim = (
+        (9 if include_hf_predictability else 8) * int(assets) + 1
+        if policy_mode == "freq_hrl"
+        else int(model.config.lower_state_dim)
+    )
+    if int(model.config.lower_state_dim) != expected_lower_state_dim:
+        raise ValueError(
+            "lower state dim mismatch: "
+            f"expected {expected_lower_state_dim}, got {model.config.lower_state_dim}"
+        )
+    expected_hf_state_dim = expected_lower_state_dim if use_separate_hf else 0
     expected_hf_action_dim = int(assets) if use_separate_hf else 0
-    if (
-        int(model.config.hf_state_dim) != expected_hf_state_dim
-        or int(model.config.hf_action_dim) != expected_hf_action_dim
+    configured_hf = (
+        int(model.config.hf_state_dim), int(model.config.hf_action_dim)
+    )
+    expected_hf = (expected_hf_state_dim, expected_hf_action_dim)
+    inactive_full_hf = (expected_lower_state_dim, int(assets))
+    if configured_hf != expected_hf and not (
+        bool(allow_inactive_mechanism_modules)
+        and not use_separate_hf
+        and configured_hf == inactive_full_hf
     ):
         raise ValueError(
             "HF tactical dimensions mismatch: "
@@ -1272,15 +1400,39 @@ def smdp_rollout(
     hf_overlay_task_effects: list[float] = []
     lower_hf_action_sensitivities: list[float] = []
     lower_hf_overlay_sensitivities: list[float] = []
+    promotion_plan_advantages: list[float] = []
+    tracking_leakage_budget_ratios: list[float] = []
+    hf_leakage_budget_ratios: list[float] = []
+    leakage_budget_violations: list[float] = []
+    hf_predictability_values: list[np.ndarray] = []
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
     raw_history: list[np.ndarray] = []
+    high_history: list[np.ndarray] = []
+    realized_return_history: list[np.ndarray] = []
+    promotion_counterfactual_plan: LearnedPlanCurveState | None = None
     pending_plan_smoothness_cost = 0.0
 
     env.reset()
     for t in range(steps):
         raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
+        # Estimate h_t -> r_{t+1} predictability using completed pairs only.
+        # The current h_t is appended after this estimate and r_t after execution.
+        hf_predictability = (
+            causal_hf_predictability(
+                high_history,
+                realized_return_history,
+                int(assets),
+            )
+            if include_hf_predictability
+            else None
+        )
+        if hf_predictability is not None:
+            hf_predictability_values.append(hf_predictability.copy())
+        high_history.append(
+            resize(freq.get("x_high", 0.0), int(assets)).copy()
+        )
         promotion = dict(freq.get("promotion", {}) or {})
         promote = bool(promotion.get("promote", False))
         learned_replan_cost_this_step = 0.0
@@ -1292,6 +1444,7 @@ def smdp_rollout(
                 and promotion_builder.has_pending
             ):
                 promotion_builder.close(done=False)
+                promotion_counterfactual_plan = None
                 promotion_scheduled_boundary_closes += 1
             reason = forced_reason
         elif learned_promotion_gate:
@@ -1318,11 +1471,18 @@ def smdp_rollout(
                     logp=float(gate_out["logp"]),
                     value=float(gate_out["value"]),
                 )
+                promotion_counterfactual_plan = None
                 learned_gate_probabilities.append(
                     float(gate_out["probability"])
                 )
                 learned_gate_actions.append(gate_action)
                 if gate_action >= 0.5:
+                    if str(promotion_credit_mode) == "incremental_plan_advantage":
+                        if plan_state is None or not plan_state.active:
+                            raise RuntimeError(
+                                "incremental promotion credit requires an active old plan"
+                            )
+                        promotion_counterfactual_plan = plan_state.snapshot()
                     promoted_freq = tracker.promote_residual(strength=1.0)
                     learned_info = dict(
                         promoted_freq.get("learned_promotion", {}) or {}
@@ -1365,6 +1525,7 @@ def smdp_rollout(
                 progress=t / max(int(steps) - 1, 1),
                 history_window=history_window,
                 include_heuristic_promotion=bool(heuristic_promotion_gate),
+                hf_predictability=hf_predictability,
             )
             upper_out = model.act_upper(upper_state, sample=sample)
             if plan_mapper is None:
@@ -1416,6 +1577,7 @@ def smdp_rollout(
             progress=t / max(int(steps) - 1, 1),
             history_window=history_window,
             include_heuristic_promotion=bool(heuristic_promotion_gate),
+            hf_predictability=hf_predictability,
         )
         factual_lower_state = np.asarray(lower_state, dtype=np.float32).copy()
         if compute_hf_action_sensitivity:
@@ -1514,7 +1676,7 @@ def smdp_rollout(
         hf_overlay_effect = np.asarray(
             info["hf_overlay_position_effect"], dtype=np.float64
         )
-        if separate_hf_tactical:
+        if use_separate_hf:
             tracking_lower_effect = (
                 lower_effect_projector.transform(raw_tracking_lower_effect)
                 if lower_effect_projector is not None
@@ -1554,6 +1716,64 @@ def smdp_rollout(
             upper_effect=np.zeros_like(current_target),
             lower_effect=hf_overlay_effect,
         )
+        if str(leakage_cost_mode) == "fixed_rms_budget":
+            tracking_budget_info = evaluate_rms_leakage_budget(
+                float(
+                    tracking_leak_info.get("LowerLFDriftAbs", 0.0)
+                    if use_separate_hf
+                    else leak_info.get("LowerLFDriftAbs", 0.0)
+                ),
+                float(lower_lf_budget_rms),
+            )
+            hf_budget_info = evaluate_rms_leakage_budget(
+                float(hf_leak_info.get("LowerLFDriftAbs", 0.0)),
+                float(hf_lf_budget_rms),
+            )
+            tracking_budget_ratio = float(
+                tracking_budget_info["budget_ratio"]
+            )
+            hf_budget_ratio = float(hf_budget_info["budget_ratio"])
+            tracking_budget_cost = float(
+                tracking_budget_info["budget_excess_squared"]
+            )
+            hf_budget_cost = float(hf_budget_info["budget_excess_squared"])
+            lower_constraint_feedback = max(
+                tracking_budget_ratio,
+                hf_budget_ratio if use_separate_hf else 0.0,
+            )
+            latest_leakage_feedback = max(
+                float(tracking_budget_info["budget_excess"]),
+                float(hf_budget_info["budget_excess"])
+                if use_separate_hf else 0.0,
+            )
+        else:
+            tracking_budget_ratio = float(
+                tracking_leak_info.get("lower_lf_penalty", 0.0)
+                if use_separate_hf
+                else leak_info.get("lower_lf_penalty", 0.0)
+            )
+            hf_budget_ratio = float(
+                hf_leak_info.get("lower_lf_penalty", 0.0)
+            )
+            tracking_budget_cost = tracking_budget_ratio
+            hf_budget_cost = hf_budget_ratio
+            latest_leakage_feedback = float(
+                leak_info.get("lower_lf_penalty", 0.0)
+            )
+            lower_constraint_feedback = tracking_budget_ratio
+        if str(method_contract) == "ablate_leakage_v6":
+            latest_leakage_feedback = 0.0
+            lower_constraint_feedback = 0.0
+        tracking_leakage_budget_ratios.append(tracking_budget_ratio)
+        hf_leakage_budget_ratios.append(hf_budget_ratio)
+        leakage_budget_violations.append(
+            float(max(
+                tracking_budget_ratio,
+                hf_budget_ratio if use_separate_hf else 0.0,
+            ) > 1.0)
+            if str(leakage_cost_mode) == "fixed_rms_budget"
+            else 0.0
+        )
         shaped_reward = float(
             leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward
         )
@@ -1562,12 +1782,12 @@ def smdp_rollout(
             upper_leakage_cost = max(float(leakage_scale), 0.0) * float(
                 leak_info.get("upper_hf_penalty", 0.0)
             )
-            if separate_hf_tactical:
+            if use_separate_hf:
                 lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
-                    tracking_leak_info.get("lower_lf_penalty", 0.0)
+                    tracking_budget_cost
                 )
                 hf_leakage_cost = max(float(leakage_scale), 0.0) * float(
-                    hf_leak_info.get("lower_lf_penalty", 0.0)
+                    hf_budget_cost
                 )
                 tactical_credit = credit_assigner.assign_tactical(
                     info,
@@ -1595,7 +1815,7 @@ def smdp_rollout(
                 )
             else:
                 lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
-                    leak_info.get("lower_lf_penalty", 0.0)
+                    tracking_budget_cost
                 )
                 hf_leakage_cost = 0.0
                 credit = credit_assigner.assign(
@@ -1636,12 +1856,6 @@ def smdp_rollout(
             plan_return = float(info["portfolio_return"])
             execution_deviation_return = 0.0
             reconstruction_error = float("nan")
-        latest_leakage_feedback = float(leak_info.get("lower_lf_penalty", 0.0))
-        lower_constraint_feedback = float(
-            tracking_leak_info.get("lower_lf_penalty", 0.0)
-            if separate_hf_tactical
-            else latest_leakage_feedback
-        )
         hf_builder_fields: dict[str, Any] = {}
         if use_separate_hf:
             if hf_state is None or hf_out is None:
@@ -1652,7 +1866,7 @@ def smdp_rollout(
                 "hf_logp": float(hf_out["logp"]),
                 "hf_value": float(hf_out["value"]),
                 "hf_reward": float(reward_scale) * hf_tactical_credit,
-                "hf_cost": float(hf_leak_info.get("lower_lf_penalty", 0.0)),
+                "hf_cost": float(hf_budget_ratio),
             }
         builder.add_lower(
             state=lower_state,
@@ -1667,12 +1881,25 @@ def smdp_rollout(
             **hf_builder_fields,
         )
         if promotion_builder is not None:
-            promotion_builder.add_reward(
-                float(reward_scale)
-                * (
+            if str(promotion_credit_mode) == "incremental_plan_advantage":
+                promotion_credit = 0.0
+                if promotion_counterfactual_plan is not None:
+                    old_target = gross_cap(
+                        promotion_counterfactual_plan.value_at(float(t * 60.0))
+                    )
+                    promotion_credit = float(np.dot(
+                        np.asarray(current_target, dtype=np.float64) - old_target,
+                        np.asarray(info["asset_returns"], dtype=np.float64),
+                    ))
+                promotion_credit -= float(learned_replan_cost_this_step)
+            else:
+                promotion_credit = (
                     float(info["task_reward"])
                     - learned_replan_cost_this_step
-                ),
+                )
+            promotion_plan_advantages.append(float(promotion_credit))
+            promotion_builder.add_reward(
+                float(reward_scale) * float(promotion_credit),
                 done=bool(done),
             )
 
@@ -1699,6 +1926,9 @@ def smdp_rollout(
             + info["hf_overlay_incremental_drawdown_cost"]
         ))
         hf_overlay_task_effects.append(float(info["hf_overlay_task_effect"]))
+        realized_return_history.append(
+            np.asarray(info["asset_returns"], dtype=np.float64).copy()
+        )
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -1778,6 +2008,19 @@ def smdp_rollout(
         "promotion_absorbed_norm_total": float(
             np.sum(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
+        "promotion_credit_mode": str(promotion_credit_mode),
+        "promotion_credit_total": float(
+            np.sum(promotion_plan_advantages)
+        ) if promotion_plan_advantages else 0.0,
+        "promotion_credit_mean": float(
+            np.mean(promotion_plan_advantages)
+        ) if promotion_plan_advantages else 0.0,
+        "promotion_plan_advantage_total": float(
+            np.sum(promotion_plan_advantages)
+        ) if (
+            promotion_plan_advantages
+            and str(promotion_credit_mode) == "incremental_plan_advantage"
+        ) else 0.0,
         "hf_order_l1_mean": float(np.mean(hf_order_l1)) if hf_order_l1 else 0.0,
         "hf_overlay_position_l1_mean": float(
             np.mean(hf_overlay_position_l1)
@@ -1818,6 +2061,28 @@ def smdp_rollout(
         ),
         "HFOverlayLFDrift": float(hf_overlay_leak["LowerLFDrift"]),
         "HFOverlayLFDriftAbs": float(hf_overlay_leak["LowerLFDriftAbs"]),
+        "leakage_cost_mode": str(leakage_cost_mode),
+        "lower_lf_budget_rms": float(lower_lf_budget_rms),
+        "hf_lf_budget_rms": float(hf_lf_budget_rms),
+        "tracking_leakage_budget_ratio_mean": float(
+            np.mean(tracking_leakage_budget_ratios)
+        ) if tracking_leakage_budget_ratios else 0.0,
+        "tracking_leakage_budget_ratio_max": float(
+            np.max(tracking_leakage_budget_ratios)
+        ) if tracking_leakage_budget_ratios else 0.0,
+        "hf_leakage_budget_ratio_mean": float(
+            np.mean(hf_leakage_budget_ratios)
+        ) if hf_leakage_budget_ratios else 0.0,
+        "hf_leakage_budget_ratio_max": float(
+            np.max(hf_leakage_budget_ratios)
+        ) if hf_leakage_budget_ratios else 0.0,
+        "leakage_budget_violation_rate": float(
+            np.mean(leakage_budget_violations)
+        ) if leakage_budget_violations else 0.0,
+        "hf_predictability_enabled": float(bool(include_hf_predictability)),
+        "hf_predictability_mean": float(np.mean(
+            np.asarray(hf_predictability_values, dtype=np.float64)
+        )) if hf_predictability_values else 0.0,
         "FocusScore": float(diag["FocusScore"]),
         "upper_low_mi": float(diag.get("upper_low_mi", 0.0)),
         "upper_high_mi": float(diag.get("upper_high_mi", 0.0)),
@@ -1874,7 +2139,10 @@ def smdp_rollout(
         "promotion_replan_cost": float(promotion_replan_cost),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
         "hf_tactical_stream_enabled": float(bool(use_separate_hf)),
-        "exact_three_way_credit": float(bool(separate_hf_tactical)),
+        "exact_three_way_credit": float(bool(use_separate_hf)),
+        "training_support_ood_excluded": float(
+            str(scenario) == SUPPORT_MIXTURE_SCENARIO
+        ),
         "lower_hf_order_scale": float(lower_hf_order_scale),
         "lower_observation_intervention": lower_observation_intervention,
         "hf_action_sensitivity_computed": float(
@@ -2021,6 +2289,9 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_scheduled_boundary_close_count",
         "promotion_absorbed_norm_mean",
         "promotion_absorbed_norm_total",
+        "promotion_credit_total",
+        "promotion_credit_mean",
+        "promotion_plan_advantage_total",
         "hf_order_l1_mean",
         "hf_overlay_position_l1_mean",
         "hf_overlay_return_total",
@@ -2045,6 +2316,13 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "TrackingRawLowerLFDriftAbs",
         "HFOverlayLFDrift",
         "HFOverlayLFDriftAbs",
+        "tracking_leakage_budget_ratio_mean",
+        "tracking_leakage_budget_ratio_max",
+        "hf_leakage_budget_ratio_mean",
+        "hf_leakage_budget_ratio_max",
+        "leakage_budget_violation_rate",
+        "hf_predictability_enabled",
+        "hf_predictability_mean",
         "FocusScore",
         "upper_low_mi",
         "upper_high_mi",
@@ -2080,6 +2358,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "hf_lower_overlay_enabled",
         "hf_tactical_stream_enabled",
         "exact_three_way_credit",
+        "training_support_ood_excluded",
         "lower_hf_order_scale",
         "hf_action_sensitivity_computed",
         "volume_impact_bps",
@@ -2135,6 +2414,11 @@ def train_ppo_actor_critic(
     promotion_replan_cost: float = 0.0,
     promotion_init_logit: float = -2.0,
     lower_hf_order_scale: float = 0.025,
+    promotion_credit_mode: str = "auto",
+    leakage_cost_mode: str = "auto",
+    lower_lf_budget_rms: float = 0.0025,
+    hf_lf_budget_rms: float = 0.00025,
+    include_hf_predictability: bool | None = None,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -2159,14 +2443,63 @@ def train_ppo_actor_critic(
         )
     method_contract = str(method_contract)
     method_flags = resolve_method_contract(method_contract)
+    fixed_ablation_architecture = method_contract in V6_METHOD_CONTRACTS
     capacity_reference_method_contract = str(
-        method_contract
+        (
+            "full_freq_hrl_v6"
+            if fixed_ablation_architecture else method_contract
+        )
         if capacity_reference_method_contract is None
         else capacity_reference_method_contract
     )
     capacity_reference_flags = resolve_method_contract(
         capacity_reference_method_contract
     )
+    if (
+        fixed_ablation_architecture
+        and capacity_reference_method_contract != "full_freq_hrl_v6"
+    ):
+        raise ValueError(
+            "v6 contracts require full_freq_hrl_v6 as the fixed architecture reference"
+        )
+    resolved_promotion_credit_mode = str(promotion_credit_mode)
+    if resolved_promotion_credit_mode == "auto":
+        resolved_promotion_credit_mode = (
+            "incremental_plan_advantage"
+            if method_flags["promotion_plan_advantage_credit"]
+            else "task_return"
+        )
+    if resolved_promotion_credit_mode not in {
+        "task_return",
+        "incremental_plan_advantage",
+    }:
+        raise ValueError("unknown promotion_credit_mode")
+    resolved_leakage_cost_mode = str(leakage_cost_mode)
+    if resolved_leakage_cost_mode == "auto":
+        resolved_leakage_cost_mode = (
+            "fixed_rms_budget"
+            if method_flags["fixed_rms_leakage_budget"]
+            else "spectral_ratio"
+        )
+    if resolved_leakage_cost_mode not in {
+        "spectral_ratio",
+        "fixed_rms_budget",
+    }:
+        raise ValueError("unknown leakage_cost_mode")
+    resolved_include_hf_predictability = (
+        bool(method_flags["hf_predictability_summary"])
+        if include_hf_predictability is None
+        else bool(include_hf_predictability)
+    )
+    if fixed_ablation_architecture and (
+        resolved_promotion_credit_mode != "incremental_plan_advantage"
+        or resolved_leakage_cost_mode != "fixed_rms_budget"
+        or not resolved_include_hf_predictability
+    ):
+        raise ValueError(
+            "v6 requires incremental promotion credit, fixed RMS leakage budgets, "
+            "and the causal HF predictability summary"
+        )
     mark_to_market_timing = (
         "post_trade"
         if execution_timeline_contract == "causal_post_trade_v3"
@@ -2183,6 +2516,13 @@ def train_ppo_actor_critic(
             raise ValueError(f"{name} must be finite and non-negative")
     if not np.isfinite(float(promotion_init_logit)):
         raise ValueError("promotion_init_logit must be finite")
+    if resolved_leakage_cost_mode == "fixed_rms_budget":
+        for name, value in (
+            ("lower_lf_budget_rms", lower_lf_budget_rms),
+            ("hf_lf_budget_rms", hf_lf_budget_rms),
+        ):
+            if not np.isfinite(float(value)) or float(value) <= 0.0:
+                raise ValueError(f"{name} must be positive and finite")
     resolved_learning_rates = {
         "upper": float(
             learning_rate if upper_learning_rate is None else upper_learning_rate
@@ -2231,6 +2571,7 @@ def train_ppo_actor_critic(
         "ablate_promotion_v5",
         "ablate_hf_lower_v5",
         "ablate_leakage_v5",
+        *V6_METHOD_CONTRACTS,
     }
     if method_contract in frequency_method_contracts:
         if policy_mode != "freq_hrl":
@@ -2240,6 +2581,7 @@ def train_ppo_actor_critic(
         if method_contract not in {
             "ablate_leakage_v4",
             "ablate_leakage_v5",
+            "ablate_leakage_v6",
         } and not (
             float(leakage_scale) > 0.0
             or float(lower_lf_constraint_coef) > 0.0
@@ -2248,7 +2590,11 @@ def train_ppo_actor_critic(
             raise ValueError(
                 f"{method_contract} requires an active raw leakage penalty or constraint"
             )
-    if method_contract in {"ablate_leakage_v4", "ablate_leakage_v5"} and any(
+    if method_contract in {
+        "ablate_leakage_v4",
+        "ablate_leakage_v5",
+        "ablate_leakage_v6",
+    } and any(
         float(value) != 0.0
         for value in (
             leakage_scale,
@@ -2266,7 +2612,7 @@ def train_ppo_actor_critic(
         )
     if method_contract != "routing_core_v2" and use_handcrafted_frequency_prior:
         raise ValueError(
-            "handcrafted frequency priors are forbidden for v3/v4/v5 method contracts"
+            "handcrafted frequency priors are forbidden for v3+ method contracts"
         )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
@@ -2293,31 +2639,43 @@ def train_ppo_actor_critic(
             execution_timeline_contract == "causal_post_trade_v3"
         ),
     )
+    architecture_flags = (
+        capacity_reference_flags
+        if fixed_ablation_architecture else method_flags
+    )
+    lower_state_dim = (
+        (9 if resolved_include_hf_predictability else 8) * assets + 1
+    )
+    effective_lower_cost_target = (
+        1.0
+        if resolved_leakage_cost_mode == "fixed_rms_budget"
+        else float(lower_lf_constraint_target)
+    )
     policy_smdp_config = SMDPPPOConfig(
         upper_state_dim=6 * assets + 5,
-        lower_state_dim=8 * assets + 1,
+        lower_state_dim=lower_state_dim,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=(
             2 * assets
-            if method_flags["lower_hf_overlay"]
-            and not method_flags["separate_hf_tactical"]
+            if architecture_flags["lower_hf_overlay"]
+            and not architecture_flags["separate_hf_tactical"]
             else assets
         ),
         hf_state_dim=(
-            8 * assets + 1
-            if method_flags["lower_hf_overlay"]
-            and method_flags["separate_hf_tactical"]
+            lower_state_dim
+            if architecture_flags["lower_hf_overlay"]
+            and architecture_flags["separate_hf_tactical"]
             else 0
         ),
         hf_action_dim=(
             assets
-            if method_flags["lower_hf_overlay"]
-            and method_flags["separate_hf_tactical"]
+            if architecture_flags["lower_hf_overlay"]
+            and architecture_flags["separate_hf_tactical"]
             else 0
         ),
         promotion_state_dim=(
             promotion_gate_state_dim(assets)
-            if method_flags["learned_promotion_gate"] else 0
+            if architecture_flags["learned_promotion_gate"] else 0
         ),
         hidden_dim=int(hidden_dim),
         upper_learning_rate=resolved_learning_rates["upper"],
@@ -2328,13 +2686,17 @@ def train_ppo_actor_critic(
         minibatch_size=int(minibatch_size),
         init_log_std=float(init_log_std),
         promotion_init_logit=float(promotion_init_logit),
-        lower_cost_target=float(lower_lf_constraint_target),
+        lower_cost_target=float(effective_lower_cost_target),
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
         lower_max_lambda=20.0,
     )
     reference_smdp_config = replace(
         policy_smdp_config,
+        lower_state_dim=(
+            (9 if capacity_reference_flags["hf_predictability_summary"] else 8)
+            * assets + 1
+        ),
         lower_action_dim=(
             2 * assets
             if capacity_reference_flags["lower_hf_overlay"]
@@ -2342,7 +2704,8 @@ def train_ppo_actor_critic(
             else assets
         ),
         hf_state_dim=(
-            8 * assets + 1
+            (9 if capacity_reference_flags["hf_predictability_summary"] else 8)
+            * assets + 1
             if capacity_reference_flags["lower_hf_overlay"]
             and capacity_reference_flags["separate_hf_tactical"]
             else 0
@@ -2592,7 +2955,11 @@ def train_ppo_actor_critic(
     observation_contract = {
         "freq_hrl": (
             "LF + forecast + uncertainty + compressed HF summaries",
-            "current plan + local HF/MF residual context",
+            "current plan + local HF/MF residual context"
+            + (
+                " + causal next-bar HF predictability summary"
+                if resolved_include_hf_predictability else ""
+            ),
         ),
         "generic_hrl_ppo": (
             "complete contiguous 120-bar causal raw window + position + active plan",
@@ -2611,7 +2978,10 @@ def train_ppo_actor_critic(
             "exact task-reward conservation: upper plan return; lower execution "
             "deviation return and execution/tracking costs; regularizers separate"
         )
-    if method_flags["separate_hf_tactical"]:
+    if (
+        method_flags["lower_hf_overlay"]
+        and method_flags["separate_hf_tactical"]
+    ):
         credit_contract = (
             "exact three-way task-reward conservation: upper plan, tracking "
             "execution, and counterfactual marginal HF tactical credit"
@@ -2667,9 +3037,19 @@ def train_ppo_actor_critic(
             lower_hf_order_scale=float(lower_hf_order_scale),
             execution_timeline_contract=execution_timeline_contract,
             method_contract=method_contract,
+            promotion_credit_mode=resolved_promotion_credit_mode,
+            leakage_cost_mode=resolved_leakage_cost_mode,
+            lower_lf_budget_rms=float(lower_lf_budget_rms),
+            hf_lf_budget_rms=float(hf_lf_budget_rms),
+            include_hf_predictability=resolved_include_hf_predictability,
+            allow_inactive_mechanism_modules=fixed_ablation_architecture,
         ),
-        objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(
-            row["LowerLFDrift"]
+        objective_fn=lambda row: objective(row) - max(
+            float(lower_lf_objective_weight), 0.0
+        ) * float(
+            row["tracking_leakage_budget_ratio_mean"]
+            if resolved_leakage_cost_mode == "fixed_rms_budget"
+            else row["LowerLFDrift"]
         ),
         summary_fn=summarize,
         policy=f"{policy_mode}_capacity_matched_smdp_ppo",
@@ -2690,14 +3070,20 @@ def train_ppo_actor_critic(
             "lower_observation_contract": observation_contract[1],
             "credit_contract": credit_contract,
             "frequency_routing_enabled": bool(policy_mode == "freq_hrl"),
-            "promotion_replanning_enabled": bool(policy_mode == "freq_hrl"),
+            "promotion_replanning_enabled": bool(
+                method_flags["learned_promotion_gate"]
+                or method_flags["heuristic_promotion_gate"]
+            ),
             "handcrafted_frequency_prior": bool(
                 policy_mode == "freq_hrl" and use_handcrafted_frequency_prior
             ),
             "capacity_match_contract": (
+                "identical full-v6 module architecture with inactive ablated modules"
+                if fixed_ablation_architecture else
                 "Freq-HRL reference or active parameter count matched to Freq-HRL "
                 "within 5%; equal optimizer, epochs, and rollout seed budget"
             ),
+            "fixed_ablation_architecture": bool(fixed_ablation_architecture),
             "capacity_target_parameter_count": int(target_parameter_count),
             "capacity_reference_method_contract": (
                 capacity_reference_method_contract
@@ -2782,7 +3168,27 @@ def train_ppo_actor_critic(
                 and method_flags["separate_hf_tactical"]
             ),
             "exact_three_way_credit": bool(
-                method_flags["separate_hf_tactical"]
+                method_flags["lower_hf_overlay"]
+                and method_flags["separate_hf_tactical"]
+            ),
+            "promotion_credit_mode": resolved_promotion_credit_mode,
+            "leakage_cost_mode": resolved_leakage_cost_mode,
+            "lower_lf_budget_rms": float(lower_lf_budget_rms),
+            "hf_lf_budget_rms": float(hf_lf_budget_rms),
+            "hf_predictability_summary": bool(
+                resolved_include_hf_predictability
+            ),
+            "training_support_components": (
+                [
+                    "stationary_low_noise",
+                    "stationary_high_noise",
+                    "localized_burst",
+                    "persistent_shift",
+                ]
+                if scenario == SUPPORT_MIXTURE_SCENARIO else [scenario]
+            ),
+            "training_support_ood_excluded": bool(
+                scenario == SUPPORT_MIXTURE_SCENARIO
             ),
             "lower_hf_order_scale": float(lower_hf_order_scale),
             "upper_learning_rate": resolved_learning_rates["upper"],
@@ -2791,13 +3197,20 @@ def train_ppo_actor_critic(
             "promotion_learning_rate": resolved_learning_rates["promotion"],
             "plan_smoothness_weight": float(plan_smoothness_weight),
             "training_path_protocol": (
+                "fresh_mixed_support_path_per_root_and_iteration_ood_excluded_v3"
+                if scenario == SUPPORT_MIXTURE_SCENARIO else
                 "fresh_deterministic_path_per_root_and_iteration_v2"
                 if resample_training_paths else "fixed_path_reuse_legacy"
             ),
             "checkpoint_selection_protocol": "disjoint_validation_paths",
             "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
-            "lower_lf_constraint_target": float(lower_lf_constraint_target),
+            "lower_lf_constraint_target": float(
+                effective_lower_cost_target
+            ),
+            "requested_lower_lf_constraint_target": float(
+                lower_lf_constraint_target
+            ),
             "lower_lf_dual_lr": float(lower_lf_dual_lr),
             "lower_lf_objective_weight": float(lower_lf_objective_weight),
             "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
@@ -2813,6 +3226,17 @@ def train_ppo_actor_critic(
             }),
         },
     )
+    if fixed_ablation_architecture:
+        payload["trajectory_contract"]["hf"] = (
+            payload["trajectory_contract"]["hf"]
+            if method_flags["lower_hf_overlay"]
+            else "full-v6 HF module retained but inactive; no HF transitions"
+        )
+        payload["trajectory_contract"]["promotion"] = (
+            payload["trajectory_contract"]["promotion"]
+            if method_flags["learned_promotion_gate"]
+            else "full-v6 promotion module retained but inactive; no gate transitions"
+        )
     for row in heldout_rows:
         row["baseline"] = policy_mode
         row["policy_mode"] = policy_mode
@@ -2883,7 +3307,11 @@ def main() -> None:
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=[31415, 27182, 16180])
     parser.add_argument("--steps", type=int, default=360)
     parser.add_argument("--assets", type=int, default=3)
-    parser.add_argument("--scenario", choices=SCENARIOS, default="persistent_shift")
+    parser.add_argument(
+        "--scenario",
+        choices=(*SCENARIOS, SUPPORT_MIXTURE_SCENARIO),
+        default="persistent_shift",
+    )
     parser.add_argument("--iterations", type=int, default=8)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
     parser.add_argument("--hidden-dim", type=int, default=64)
@@ -2932,6 +3360,23 @@ def main() -> None:
     parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
     parser.add_argument("--promotion-init-logit", type=float, default=-2.0)
     parser.add_argument("--lower-hf-order-scale", type=float, default=0.025)
+    parser.add_argument(
+        "--promotion-credit-mode",
+        choices=("auto", "task_return", "incremental_plan_advantage"),
+        default="auto",
+    )
+    parser.add_argument(
+        "--leakage-cost-mode",
+        choices=("auto", "spectral_ratio", "fixed_rms_budget"),
+        default="auto",
+    )
+    parser.add_argument("--lower-lf-budget-rms", type=float, default=0.0025)
+    parser.add_argument("--hf-lf-budget-rms", type=float, default=0.00025)
+    parser.add_argument(
+        "--include-hf-predictability",
+        action="store_true",
+        default=None,
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -2979,6 +3424,11 @@ def main() -> None:
         promotion_replan_cost=args.promotion_replan_cost,
         promotion_init_logit=args.promotion_init_logit,
         lower_hf_order_scale=args.lower_hf_order_scale,
+        promotion_credit_mode=args.promotion_credit_mode,
+        leakage_cost_mode=args.leakage_cost_mode,
+        lower_lf_budget_rms=args.lower_lf_budget_rms,
+        hf_lf_budget_rms=args.hf_lf_budget_rms,
+        include_hf_predictability=args.include_hf_predictability,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

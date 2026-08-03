@@ -55,6 +55,24 @@ class FullMethodContractTest(unittest.TestCase):
                 self.assertEqual(changed, expected)
                 self.assertTrue(ablated["separate_hf_tactical"])
 
+    def test_v6_ablation_contracts_change_only_the_registered_mechanism(self):
+        full = resolve_method_contract("full_freq_hrl_v6")
+        expected_changes = {
+            "ablate_promotion_v6": {"learned_promotion_gate"},
+            "ablate_hf_lower_v6": {"lower_hf_overlay"},
+            "ablate_leakage_v6": {"constrain_raw_lower_effect"},
+        }
+        for contract, expected in expected_changes.items():
+            with self.subTest(contract=contract):
+                ablated = resolve_method_contract(contract)
+                changed = {
+                    key for key in full if full[key] != ablated[key]
+                }
+                self.assertEqual(changed, expected)
+                self.assertTrue(ablated["promotion_plan_advantage_credit"])
+                self.assertTrue(ablated["fixed_rms_leakage_budget"])
+                self.assertTrue(ablated["hf_predictability_summary"])
+
     def test_hf_lower_action_is_bounded_and_separate_from_tracking_speed(self):
         speed, overlay = decode_hierarchical_lower_action(
             np.asarray([-10.0, 10.0, 10.0, -10.0]),
@@ -315,6 +333,77 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertEqual(len(intervention_rows), 1)
         self.assertGreaterEqual(
             intervention_rows[0]["lower_hf_overlay_sensitivity"], 0.0
+        )
+
+    def test_v6_uses_one_fixed_architecture_for_all_mechanism_ablations(self):
+        common = dict(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=28,
+            assets=2,
+            scenario="support_mixture",
+            iterations=1,
+            seed=7,
+            plan_basis_dim=3,
+            plan_horizon_s=600.0,
+            upper_period=12,
+            min_upper_duration=3,
+            execution_timeline_contract="causal_post_trade_v3",
+            volume_impact_bps=10.0,
+            plan_smoothness_weight=0.01,
+        )
+        models = {}
+        payloads = {}
+        rows = {}
+        for contract in (
+            "full_freq_hrl_v6",
+            "ablate_promotion_v6",
+            "ablate_hf_lower_v6",
+            "ablate_leakage_v6",
+        ):
+            leakage_enabled = contract != "ablate_leakage_v6"
+            promotion_enabled = contract != "ablate_promotion_v6"
+            payload, contract_rows, model = train_ppo_actor_critic(
+                **common,
+                method_contract=contract,
+                leakage_scale=0.01 if leakage_enabled else 0.0,
+                lower_lf_constraint_coef=0.01 if leakage_enabled else 0.0,
+                lower_lf_dual_lr=0.01 if leakage_enabled else 0.0,
+                promotion_replan_cost=0.001 if promotion_enabled else 0.0,
+            )
+            payloads[contract] = payload
+            rows[contract] = contract_rows[0]
+            models[contract] = model
+
+        parameter_counts = {count_parameters(model) for model in models.values()}
+        self.assertEqual(len(parameter_counts), 1)
+        for contract, payload in payloads.items():
+            with self.subTest(contract=contract):
+                self.assertTrue(payload["fixed_ablation_architecture"])
+                self.assertEqual(payload["capacity_ratio"], 1.0)
+                self.assertEqual(payload["config"]["lower_state_dim"], 19)
+                self.assertEqual(payload["config"]["hf_state_dim"], 19)
+                self.assertGreater(payload["config"]["promotion_state_dim"], 0)
+                self.assertEqual(
+                    payload["promotion_credit_mode"],
+                    "incremental_plan_advantage",
+                )
+                self.assertEqual(payload["leakage_cost_mode"], "fixed_rms_budget")
+                self.assertTrue(payload["hf_predictability_summary"])
+                self.assertTrue(payload["training_support_ood_excluded"])
+
+        full_row = rows["full_freq_hrl_v6"]
+        self.assertEqual(full_row["promotion_credit_mode"], "incremental_plan_advantage")
+        self.assertEqual(full_row["leakage_cost_mode"], "fixed_rms_budget")
+        self.assertEqual(full_row["hf_predictability_enabled"], 1.0)
+        self.assertEqual(full_row["training_support_ood_excluded"], 1.0)
+        self.assertEqual(
+            rows["ablate_hf_lower_v6"]["hf_tactical_transition_count"], 0
+        )
+        self.assertEqual(rows["ablate_hf_lower_v6"]["exact_three_way_credit"], 0.0)
+        self.assertEqual(
+            rows["ablate_promotion_v6"]["promotion_gate_transition_count"], 0
         )
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
