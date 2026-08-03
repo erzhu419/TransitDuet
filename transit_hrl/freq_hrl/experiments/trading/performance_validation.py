@@ -64,6 +64,91 @@ SCENARIOS = (
 )
 
 
+SUPPORT_MIXTURE_SCENARIO = "support_mixture"
+SUPPORT_MIXTURE_COMPONENTS = (
+    "stationary_low_noise",
+    "stationary_high_noise",
+    "localized_burst",
+    "persistent_shift",
+)
+
+
+def _make_support_mixture(
+    seed: int,
+    steps: int,
+    n_assets: int,
+) -> dict[str, np.ndarray]:
+    """Build one training episode from every declared support regime.
+
+    The component order and component seeds vary by episode, but OOD-period
+    dynamics are excluded by construction. Every mixed episode therefore
+    covers the complete support set without exposing a scenario identifier to
+    the policy.
+    """
+
+    if int(steps) < len(SUPPORT_MIXTURE_COMPONENTS):
+        raise ValueError(
+            "support_mixture requires at least one bar per support component"
+        )
+    rng = np.random.default_rng(int(seed))
+    order = [
+        SUPPORT_MIXTURE_COMPONENTS[int(index)]
+        for index in rng.permutation(len(SUPPORT_MIXTURE_COMPONENTS))
+    ]
+    sizes = np.full(len(order), int(steps) // len(order), dtype=np.int64)
+    sizes[: int(steps) % len(order)] += 1
+
+    pieces: list[dict[str, np.ndarray]] = []
+    for index, (component, size) in enumerate(zip(order, sizes)):
+        component_seed = int(
+            np.random.SeedSequence([int(seed), int(index), 0xF6A1]).generate_state(1)[0]
+        )
+        pieces.append(
+            make_synthetic_market(
+                seed=component_seed,
+                steps=int(size),
+                n_assets=int(n_assets),
+                scenario=component,
+            )
+        )
+
+    concat_keys = (
+        "returns",
+        "predictor",
+        "low_truth",
+        "high_truth",
+        "volume",
+        "shock_mask",
+    )
+    result = {
+        key: np.concatenate([piece[key] for piece in pieces], axis=0)
+        for key in concat_keys
+    }
+    component_at_t = np.concatenate([
+        np.full(int(size), component, dtype="<U32")
+        for component, size in zip(order, sizes)
+    ])
+    boundaries: list[int] = []
+    offset = 0
+    for index, (piece, size) in enumerate(zip(pieces, sizes)):
+        if index > 0:
+            boundaries.append(int(offset))
+        local_shift = int(np.asarray(piece["regime_shift_t"]).reshape(-1)[0])
+        if 0 <= local_shift < int(size):
+            boundaries.append(int(offset + local_shift))
+        offset += int(size)
+    if not boundaries:
+        boundaries = [max(1, int(steps) // 2)]
+    result.update({
+        "regime_shift_t": np.asarray(sorted(set(boundaries)), dtype=np.int64),
+        "scenario": np.asarray([SUPPORT_MIXTURE_SCENARIO]),
+        "support_components": np.asarray(order),
+        "support_component_at_t": component_at_t,
+        "ood_period_in_training_support": np.asarray([False]),
+    })
+    return result
+
+
 def make_synthetic_market(
     seed: int,
     steps: int = 720,
@@ -72,6 +157,8 @@ def make_synthetic_market(
 ) -> dict[str, np.ndarray]:
     """Create a market with controlled frequency/regime structure."""
     scenario = str(scenario or "persistent_shift").lower()
+    if scenario == SUPPORT_MIXTURE_SCENARIO:
+        return _make_support_mixture(seed, steps, n_assets)
     if scenario not in SCENARIOS:
         raise ValueError(f"unknown synthetic market scenario: {scenario}")
     rng = np.random.default_rng(seed)
@@ -250,7 +337,7 @@ def _bounded_hf_residual(
     return residual, energy_gate
 
 
-def _causal_hf_utility(
+def causal_hf_predictability(
     high_history: list[np.ndarray],
     return_history: list[np.ndarray],
     dim: int,
@@ -277,6 +364,10 @@ def _causal_hf_utility(
     hit = np.mean(np.sign(x) == np.sign(y), axis=0) - 0.5
     score = np.maximum(corr, 0.0) + 0.5 * np.maximum(hit, 0.0)
     return np.clip(score / 0.35, 0.0, 1.0)
+
+
+# Backward-compatible private name used by the original heuristic runner.
+_causal_hf_utility = causal_hf_predictability
 
 
 def policy_action(

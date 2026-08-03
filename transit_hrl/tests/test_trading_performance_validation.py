@@ -1,8 +1,13 @@
 import unittest
 
+import numpy as np
+
 from freq_hrl.experiments.trading.performance_validation import (
     BASELINES,
     SCENARIOS,
+    SUPPORT_MIXTURE_COMPONENTS,
+    SUPPORT_MIXTURE_SCENARIO,
+    causal_hf_predictability,
     make_synthetic_market,
     run_baseline,
 )
@@ -73,6 +78,45 @@ class TradingPerformanceValidationTest(unittest.TestCase):
                     scenario=scenario,
                 )
                 self.assertEqual(row["scenario"], scenario)
+
+    def test_training_support_mixture_covers_support_and_excludes_ood(self):
+        data = make_synthetic_market(
+            seed=3,
+            steps=101,
+            n_assets=2,
+            scenario=SUPPORT_MIXTURE_SCENARIO,
+        )
+        self.assertEqual(data["returns"].shape, (101, 2))
+        self.assertEqual(
+            set(data["support_components"].tolist()),
+            set(SUPPORT_MIXTURE_COMPONENTS),
+        )
+        self.assertNotIn("ood_period", data["support_component_at_t"].tolist())
+        self.assertFalse(bool(data["ood_period_in_training_support"][0]))
+
+    def test_hf_predictability_is_causal_and_detects_lagged_signal(self):
+        rng = np.random.default_rng(19)
+        high = rng.normal(size=(80, 2))
+        returns = np.vstack([np.zeros((1, 2)), high[:-1]])
+        factual = causal_hf_predictability(
+            [row for row in high],
+            [row for row in returns],
+            dim=2,
+        )
+        changed_future = returns.copy()
+        changed_future[-1] = 1000.0
+        prefix = causal_hf_predictability(
+            [row for row in high[:-1]],
+            [row for row in changed_future[:-1]],
+            dim=2,
+        )
+        original_prefix = causal_hf_predictability(
+            [row for row in high[:-1]],
+            [row for row in returns[:-1]],
+            dim=2,
+        )
+        self.assertGreater(float(np.mean(factual)), 0.8)
+        np.testing.assert_allclose(prefix, original_prefix)
 
     def test_freq_hrl_can_use_portfolio_plan_curve(self):
         row = run_baseline(
