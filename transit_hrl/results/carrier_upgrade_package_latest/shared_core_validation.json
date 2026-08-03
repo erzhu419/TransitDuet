@@ -16,11 +16,11 @@
     },
     {
       "adapter": "transit_surrogate_ppo",
-      "status": "failed",
+      "status": "supported",
       "path": "transit_hrl/freq_hrl/experiments/transit/ppo_surrogate.py",
       "required_symbol": "train_frequency_separated_ppo",
       "role": "Transit surrogate must migrate to the asynchronous SMDP loop.",
-      "evidence": "`train_frequency_separated_ppo` is not both imported and called"
+      "evidence": "`train_frequency_separated_ppo` is imported and called"
     },
     {
       "adapter": "transit_native_replay_update",

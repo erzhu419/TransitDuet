@@ -66,3 +66,23 @@ confirmatory evidence for v2 claims.
 Until all migration gates pass, the valid description is "Freq-HRL v2 research
 implementation under confirmatory validation." It must not be described as a
 fully validated domain-general algorithm or as a deployment-ready controller.
+
+## Implementation status
+
+As of commit stage 3, Quant/trading and Transit surrogate both call
+`train_frequency_separated_ppo` and emit separate upper/lower SMDP
+trajectories. Transit surrogate uses one upper transition per timetable macro
+interval, primitive lower transitions, responsibility-specific credits, and a
+continuous learned promotion blend between the active and candidate plans.
+
+Actor, reward-critic, and lower cost-critic optimizers are separate. This is a
+required numerical invariant: macro reward scale may change critic loss but
+must not suppress the PPO actor step through shared global gradient clipping.
+The corresponding scale-invariance regression test is mandatory.
+
+Native Transit remains on the legacy bridge until
+`native_shared_ppo.py` instantiates `FrequencySeparatedActorCriticPPO` and
+calls `apply_smdp_updates` with separately collected transition streams. The
+shared-core claim therefore remains partial. Legacy joint-optimizer v2
+checkpoints are not optimizer-state compatible with this stage and must not be
+mixed into confirmatory runs.

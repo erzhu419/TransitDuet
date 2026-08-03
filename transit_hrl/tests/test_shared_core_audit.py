@@ -15,7 +15,7 @@ class SharedCoreAuditTest(unittest.TestCase):
             for row in audit["adapter_evidence"]
         }
         self.assertEqual(adapters["trading_ppo"]["status"], "supported")
-        self.assertEqual(adapters["transit_surrogate_ppo"]["status"], "failed")
+        self.assertEqual(adapters["transit_surrogate_ppo"]["status"], "supported")
         self.assertEqual(adapters["transit_native_replay_update"]["status"], "failed")
         self.assertEqual(adapters["transit_native_actor_core"]["status"], "failed")
 

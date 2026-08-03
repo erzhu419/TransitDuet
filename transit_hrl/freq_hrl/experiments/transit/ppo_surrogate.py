@@ -1,4 +1,4 @@
-"""Transit-domain adapter for the shared dual PPO Freq-HRL trainer."""
+"""Transit-domain adapter for the asynchronous SMDP Freq-HRL trainer."""
 
 from __future__ import annotations
 
@@ -19,12 +19,13 @@ from freq_hrl.core import (
 from freq_hrl.domains.transit import TransitFrequencyTracker
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import (
-    DualActorCriticPPO,
-    DualPPOConfig,
+    FrequencySeparatedActorCriticPPO,
+    HierarchicalRolloutBuilder,
+    HierarchicalTrajectoryBatch,
     LearnedPlanActionMapper,
-    TrajectoryBatch,
+    SMDPPPOConfig,
     summarize_numeric_rows,
-    train_dual_ppo,
+    train_frequency_separated_ppo,
 )
 
 SCENARIOS = ("persistent_shift", "localized_burst", "stationary")
@@ -184,7 +185,7 @@ def split_upper_action(
 
 
 def initialize_transit_prior(
-    model: DualActorCriticPPO,
+    model: FrequencySeparatedActorCriticPPO,
     corridors: int,
     plan_basis_dim: int = 0,
     include_native_lower_context: bool = False,
@@ -225,7 +226,7 @@ def initialize_transit_prior(
 
 
 def rollout(
-    model: DualActorCriticPPO,
+    model: FrequencySeparatedActorCriticPPO,
     seed: int,
     steps: int,
     corridors: int,
@@ -244,7 +245,7 @@ def rollout(
     lower_lf_effect_filter_gain: float = 1.0,
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_alpha: float = 0.10,
-    upper_decision_interval: int = 1,
+    upper_decision_interval: int = 15,
     promotion_forced_replan: bool = False,
     promotion_learned_replan: bool = False,
     promotion_learned_gate_threshold: float = 0.55,
@@ -252,7 +253,7 @@ def rollout(
     promotion_replan_recovery_gain: float = 0.0,
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
-) -> tuple[TrajectoryBatch | None, dict[str, Any]]:
+) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
     if demand_trace is None:
         demand = make_synthetic_transit_demand(seed, steps, corridors, scenario)
         demand_source = "synthetic"
@@ -290,17 +291,10 @@ def rollout(
     service_gap = np.zeros(corridors, dtype=np.float64)
     cv_gap = np.zeros(corridors, dtype=np.float64)
     demand_ema = demand[0].copy()
-    upper_states: list[np.ndarray] = []
-    lower_states: list[np.ndarray] = []
-    upper_actions: list[np.ndarray] = []
-    lower_actions: list[np.ndarray] = []
-    old_upper_logp: list[float] = []
-    old_lower_logp: list[float] = []
-    old_upper_value: list[float] = []
-    old_lower_value: list[float] = []
-    constraints: list[float] = []
+    builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
     rewards: list[float] = []
-    dones: list[float] = []
+    upper_credits: list[float] = []
+    lower_credits: list[float] = []
     wait_proxy: list[float] = []
     cv_proxy: list[float] = []
     hold_trace: list[np.ndarray] = []
@@ -318,6 +312,7 @@ def rollout(
     promotion_gate_values: list[float] = []
     upper_decisions = 0
     promotion_replans = 0
+    promotion_candidates = 0
     promotions = 0
     current_plan_delta = np.zeros(corridors, dtype=np.float64)
     cached_upper_state: np.ndarray | None = None
@@ -337,47 +332,23 @@ def rollout(
         )
         if freq_summary["freq_promotion_flag"] > 0.0:
             promotions += 1
-        gate_upper_state: np.ndarray | None = None
-        gate_upper_out: dict[str, Any] | None = None
-        learned_gate_value = 0.0
-        learned_replan = False
-        if (
-            bool(promotion_learned_replan)
-            and cached_upper_out is not None
-            and promotion_active
-            and t - last_upper_decision_t < max(1, int(upper_decision_interval))
-        ):
-            gate_upper_state, _ = feature_vectors(tracker, service_gap)
-            gate_upper_out = model.act_upper(gate_upper_state, sample=sample)
-            _, learned_gate_value = split_upper_action(
-                np.asarray(gate_upper_out["action"], dtype=np.float64),
-                plan_mapper.action_dim if plan_mapper is not None else corridors,
-                promotion_learned_replan=True,
-            )
-            learned_replan = learned_gate_value >= float(promotion_learned_gate_threshold)
-            promotion_gate_values.append(learned_gate_value)
-        upper_due = (
-            cached_upper_out is None
-            or t - last_upper_decision_t >= max(1, int(upper_decision_interval))
-            or (bool(promotion_forced_replan) and promotion_active)
-            or learned_replan
+        elapsed = int(t - last_upper_decision_t)
+        scheduled_due = cached_upper_out is None or elapsed >= max(
+            1, int(upper_decision_interval)
         )
+        forced_event = bool(promotion_forced_replan) and promotion_active and not scheduled_due
+        learned_event = (
+            bool(promotion_learned_replan)
+            and promotion_active
+            and cached_upper_out is not None
+            and not scheduled_due
+            and elapsed >= max(1, int(upper_decision_interval) // 4)
+        )
+        upper_due = scheduled_due or forced_event or learned_event
         if upper_due:
-            if cached_upper_out is not None and (
-                (bool(promotion_forced_replan) and promotion_active) or learned_replan
-            ):
-                promotion_replans += 1
-                promotion_recovery_relief = max(
-                    promotion_recovery_relief,
-                    max(float(promotion_replan_recovery_gain), 0.0)
-                    * float(freq_summary.get("freq_promotion_strength", 0.0)),
-                )
-            if gate_upper_out is not None and learned_replan and gate_upper_state is not None:
-                upper_state = gate_upper_state
-                upper_out = gate_upper_out
-            else:
-                upper_state, _ = feature_vectors(tracker, service_gap)
-                upper_out = model.act_upper(upper_state, sample=sample)
+            previous_target = cached_target_delta.copy()
+            upper_state, _ = feature_vectors(tracker, service_gap)
+            upper_out = model.act_upper(upper_state, sample=sample)
             plan_action, gate_value = split_upper_action(
                 np.asarray(upper_out["action"], dtype=np.float64),
                 plan_mapper.action_dim if plan_mapper is not None else corridors,
@@ -386,18 +357,46 @@ def rollout(
             if bool(promotion_learned_replan):
                 promotion_gate_values.append(gate_value)
             if plan_mapper is None:
-                target_delta = latent_headway_delta(plan_action)
+                candidate_target = latent_headway_delta(plan_action)
             else:
                 plan = plan_mapper.target(current_plan_delta, plan_action)
-                target_delta = np.clip(plan.target, -30.0, 30.0)
-                current_plan_delta = target_delta.copy()
+                candidate_target = np.clip(plan.target, -30.0, 30.0)
                 plan_smoothness.append(float(plan.smoothness_penalty))
                 plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
+            if learned_event:
+                promotion_candidates += 1
+                target_delta = (
+                    (1.0 - float(gate_value)) * previous_target
+                    + float(gate_value) * candidate_target
+                )
+                if gate_value >= float(promotion_learned_gate_threshold):
+                    promotion_replans += 1
+                recovery_scale = float(gate_value)
+            else:
+                target_delta = candidate_target
+                recovery_scale = 1.0 if forced_event else 0.0
+                if forced_event:
+                    promotion_candidates += 1
+                    promotion_replans += 1
+            if forced_event or learned_event:
+                promotion_recovery_relief = max(
+                    promotion_recovery_relief,
+                    max(float(promotion_replan_recovery_gain), 0.0)
+                    * float(freq_summary.get("freq_promotion_strength", 0.0))
+                    * recovery_scale,
+                )
+            current_plan_delta = np.asarray(target_delta, dtype=np.float64).copy()
             cached_upper_state = upper_state.copy()
             cached_upper_out = dict(upper_out)
             cached_target_delta = target_delta.copy()
             last_upper_decision_t = int(t)
             upper_decisions += 1
+            builder.begin_upper(
+                state=upper_state,
+                action=np.asarray(upper_out["action"], dtype=np.float32),
+                logp=float(upper_out["logp"]),
+                value=float(upper_out["value"]),
+            )
         else:
             upper_state = np.asarray(cached_upper_state, dtype=np.float32)
             upper_out = dict(cached_upper_out)
@@ -519,18 +518,34 @@ def rollout(
             reward=reward,
         )
         step_reward = float(leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward)
+        leakage_reward_penalty = max(float(reward) - step_reward, 0.0)
+        upper_credit = -(
+            low_share * wait
+            + 3.0 * cv
+            + 0.18 * overshoot
+            + max(float(wait_upper_weight), 0.0) * low_share * wait
+        )
+        lower_credit = -(
+            high_share * wait
+            + 0.004 * float(np.mean(hold_s))
+            + max(float(wait_lower_weight), 0.0) * high_share * wait
+            + leakage_reward_penalty
+        ) + board_credit
         done = t == steps - 1
-        upper_states.append(upper_state)
-        lower_states.append(lower_state)
-        upper_actions.append(np.asarray(upper_out["action"], dtype=np.float32))
-        lower_actions.append(np.asarray(lower_out["action"], dtype=np.float32))
-        old_upper_logp.append(float(upper_out["logp"]))
-        old_lower_logp.append(float(lower_out["logp"]))
-        old_upper_value.append(float(upper_out["value"]))
-        old_lower_value.append(float(lower_out["value"]))
-        constraints.append(float(leak_info.get("lower_lf_penalty", 0.0)))
+        builder.add_lower(
+            state=lower_state,
+            action=np.asarray(lower_out["action"], dtype=np.float32),
+            logp=float(lower_out["logp"]),
+            value=float(lower_out["value"]),
+            reward=float(lower_credit),
+            upper_reward=float(upper_credit),
+            cost=float(leak_info.get("lower_lf_penalty", 0.0)),
+            upper_cost=float(leak_info.get("upper_hf_penalty", 0.0)),
+            done=bool(done),
+        )
         rewards.append(step_reward)
-        dones.append(float(done))
+        upper_credits.append(float(upper_credit))
+        lower_credits.append(float(lower_credit))
         wait_proxy.append(wait)
         cv_proxy.append(cv)
         hold_trace.append(np.asarray(lower_effect, dtype=np.float64).copy())
@@ -542,6 +557,8 @@ def rollout(
         wait_board_credits.append(board_credit)
         wait_credit_reliefs.append(wait_credit_relief)
         raw_recenter_reductions.append(np.asarray(raw_recenter_reduction, dtype=np.float64).copy())
+    builder.finish(terminal=True)
+    trajectory = builder.build()
     reg = LeakageRegularizer(upper_hf_window=5, lower_lf_window=20)
     leak = reg.compute(np.asarray(target_trace, dtype=np.float64), np.asarray(hold_trace, dtype=np.float64))
     raw_leak = reg.compute(
@@ -577,26 +594,23 @@ def rollout(
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_reduction_mean": float(np.mean(raw_recenter_reductions)) if raw_recenter_reductions else 0.0,
         "upper_decision_count": int(upper_decisions),
+        "upper_transition_count": int(trajectory.upper.size),
+        "lower_transition_count": int(trajectory.lower.size),
+        "upper_credit_mean": float(np.mean(upper_credits)) if upper_credits else 0.0,
+        "lower_credit_mean": float(np.mean(lower_credits)) if lower_credits else 0.0,
+        "protocol_valid": float(
+            trajectory.upper.size == int(upper_decisions)
+            and trajectory.lower.size == int(steps)
+            and trajectory.upper.size < trajectory.lower.size
+        ),
         "promotion_replan_count": int(promotion_replans),
+        "promotion_candidate_count": int(promotion_candidates),
         "real_demand_trace": bool(demand_trace is not None),
         "demand_source": demand_source,
     }
     if not sample:
         return None, row
-    batch = TrajectoryBatch(
-        upper_state=np.asarray(upper_states, dtype=np.float32),
-        lower_state=np.asarray(lower_states, dtype=np.float32),
-        upper_action=np.asarray(upper_actions, dtype=np.float32),
-        lower_action=np.asarray(lower_actions, dtype=np.float32),
-        reward=np.asarray(rewards, dtype=np.float32),
-        done=np.asarray(dones, dtype=np.float32),
-        old_upper_logp=np.asarray(old_upper_logp, dtype=np.float32),
-        old_lower_logp=np.asarray(old_lower_logp, dtype=np.float32),
-        old_upper_value=np.asarray(old_upper_value, dtype=np.float32),
-        old_lower_value=np.asarray(old_lower_value, dtype=np.float32),
-        constraint=np.asarray(constraints, dtype=np.float32),
-    )
-    return batch, row
+    return trajectory, row
 
 
 def objective(row: dict[str, Any]) -> float:
@@ -631,7 +645,13 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "lower_lf_raw_recenter_gain",
         "raw_recenter_reduction_mean",
         "upper_decision_count",
+        "upper_transition_count",
+        "lower_transition_count",
+        "upper_credit_mean",
+        "lower_credit_mean",
+        "protocol_valid",
         "promotion_replan_count",
+        "promotion_candidate_count",
     ]
     return summarize_numeric_rows(rows, keys=keys)
 
@@ -663,7 +683,7 @@ def train_transit_surrogate_ppo(
     lower_lf_effect_filter_gain: float = 1.0,
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_alpha: float = 0.10,
-    upper_decision_interval: int = 1,
+    upper_decision_interval: int = 15,
     promotion_forced_replan: bool = False,
     promotion_learned_replan: bool = False,
     promotion_learned_gate_threshold: float = 0.55,
@@ -672,7 +692,7 @@ def train_transit_surrogate_ppo(
     promotion_residual_threshold: float = 1.5,
     promotion_persistence_ratio: float = 0.35,
     demand_traces: dict[int, np.ndarray] | None = None,
-) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
+) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
     plan_mapper = make_plan_mapper(
@@ -692,22 +712,23 @@ def train_transit_surrogate_ppo(
         + 1
         + lower_context_dim
     )
-    config = DualPPOConfig(
+    config = SMDPPPOConfig(
         upper_state_dim=upper_dim,
         lower_state_dim=lower_dim,
         upper_action_dim=plan_action_dim + (1 if bool(promotion_learned_replan) else 0),
         lower_action_dim=corridors,
         hidden_dim=0,
-        learning_rate=0.002,
+        upper_learning_rate=0.002,
+        lower_learning_rate=0.002,
         epochs=3,
         minibatch_size=256,
         init_log_std=-2.0,
-        constraint_coef=float(lower_lf_constraint_coef),
-        constraint_target=float(lower_lf_constraint_target),
-        constraint_dual_lr=float(lower_lf_dual_lr),
-        constraint_max_lambda=20.0,
+        lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
+        lower_cost_target=float(lower_lf_constraint_target),
+        lower_dual_lr=float(lower_lf_dual_lr),
+        lower_max_lambda=20.0,
     )
-    model = DualActorCriticPPO(config)
+    model = FrequencySeparatedActorCriticPPO(config)
     initialize_transit_prior(
         model,
         corridors,
@@ -715,7 +736,7 @@ def train_transit_surrogate_ppo(
         include_native_lower_context=include_native_lower_context,
         promotion_learned_replan=promotion_learned_replan,
     )
-    return train_dual_ppo(
+    return train_frequency_separated_ppo(
         model=model,
         train_seeds=train_seeds,
         eval_seeds=eval_seeds,
@@ -751,8 +772,7 @@ def train_transit_surrogate_ppo(
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(row["LowerLFDrift"]),
         summary_fn=summarize,
-        policy="ppo_dual_actor_critic",
-        trainer="shared_dual_level_ppo",
+        policy="freq_hrl_smdp_ppo",
         domain="transit_surrogate",
         metadata={
             "scenario": scenario,
@@ -771,6 +791,9 @@ def train_transit_surrogate_ppo(
             "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
             "lower_lf_raw_recenter_alpha": float(lower_lf_raw_recenter_alpha),
             "upper_decision_interval": int(upper_decision_interval),
+            "upper_observation_contract": "LF/MF demand, promotion summaries, and slow service gap",
+            "lower_observation_contract": "active timetable plan plus local HF/MF demand and native context",
+            "credit_contract": "upper slow wait/headway/plan credit; lower HF wait/hold/leakage credit",
             "promotion_forced_replan": bool(promotion_forced_replan),
             "promotion_learned_replan": bool(promotion_learned_replan),
             "promotion_learned_gate_threshold": float(promotion_learned_gate_threshold),
@@ -842,9 +865,12 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- wait credit relief mean: {summary['wait_credit_relief_mean']:.4f}",
         f"- promotion recovery relief mean: {summary['promotion_recovery_relief_mean']:.4f}",
         f"- promotion learned gate mean: {summary['promotion_gate_value_mean']:.4f}",
+        f"- promotion candidate count mean: {summary['promotion_candidate_count_mean']:.2f}",
         f"- promotion replan count mean: {summary['promotion_replan_count_mean']:.2f}",
+        f"- upper/lower transitions: {summary['upper_transition_count_mean']:.2f} / {summary['lower_transition_count_mean']:.2f}",
+        f"- protocol valid: {summary['protocol_valid_mean']:.2f}",
         "",
-        "This uses the same `freq_hrl.rl.train_dual_ppo` loop as the trading PPO validation, with Transit frequency features and a transit-control surrogate adapter.",
+        "This uses the same `freq_hrl.rl.train_frequency_separated_ppo` SMDP loop as the trading Freq-HRL path. Upper actions are recorded once per macro interval; lower actions remain primitive-time transitions.",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -877,7 +903,7 @@ def main() -> None:
     parser.add_argument("--lower-lf-effect-filter-gain", type=float, default=1.0)
     parser.add_argument("--lower-lf-raw-recenter-gain", type=float, default=0.0)
     parser.add_argument("--lower-lf-raw-recenter-alpha", type=float, default=0.10)
-    parser.add_argument("--upper-decision-interval", type=int, default=1)
+    parser.add_argument("--upper-decision-interval", type=int, default=15)
     parser.add_argument("--promotion-forced-replan", action="store_true")
     parser.add_argument("--promotion-learned-replan", action="store_true")
     parser.add_argument("--promotion-learned-gate-threshold", type=float, default=0.55)

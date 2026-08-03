@@ -1,6 +1,8 @@
+import copy
 import unittest
 
 import numpy as np
+import torch
 
 from freq_hrl.rl import (
     FrequencySeparatedActorCriticPPO,
@@ -126,6 +128,38 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertEqual(batch.upper.size, 4)
         self.assertEqual(batch.lower.size, 8)
         self.assertEqual(int(np.sum(batch.upper.duration)), batch.lower.size)
+
+    def test_critic_reward_scale_does_not_suppress_actor_step(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            epochs=1,
+            minibatch_size=8,
+        )
+        torch.manual_seed(19)
+        reference = FrequencySeparatedActorCriticPPO(config)
+        small = FrequencySeparatedActorCriticPPO(config)
+        large = FrequencySeparatedActorCriticPPO(config)
+        state = copy.deepcopy(reference.state_dict())
+        small.load_state_dict(copy.deepcopy(state))
+        large.load_state_dict(copy.deepcopy(state))
+
+        small_batch = self._batch(9)
+        large_batch = copy.deepcopy(small_batch)
+        for level in (small_batch.upper, small_batch.lower, large_batch.upper, large_batch.lower):
+            level.old_value[:] = 0.0
+        large_batch.upper.reward *= 1000.0
+        large_batch.lower.reward *= 1000.0
+
+        np.random.seed(23)
+        small.update(small_batch)
+        np.random.seed(23)
+        large.update(large_batch)
+        small_actor = torch.cat([p.detach().reshape(-1) for p in small.upper_actor.parameters()])
+        large_actor = torch.cat([p.detach().reshape(-1) for p in large.upper_actor.parameters()])
+        torch.testing.assert_close(small_actor, large_actor, rtol=1e-5, atol=1e-6)
 
 
 class TradingRoutingContractTest(unittest.TestCase):

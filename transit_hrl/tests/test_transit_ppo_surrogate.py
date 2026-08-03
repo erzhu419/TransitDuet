@@ -10,7 +10,7 @@ from freq_hrl.experiments.transit.ppo_surrogate import (
     rollout,
     split_upper_action,
 )
-from freq_hrl.rl import DualActorCriticPPO, DualPPOConfig
+from freq_hrl.rl import FrequencySeparatedActorCriticPPO, SMDPPPOConfig
 
 
 class TransitPPOSurrogateTest(unittest.TestCase):
@@ -31,7 +31,7 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             plan_eval_offset_s=120.0,
             plan_coefficient_scale_s=12.0,
         )
-        model = DualActorCriticPPO(DualPPOConfig(
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=upper_dim,
             lower_state_dim=lower_dim,
             upper_action_dim=mapper.action_dim,
@@ -60,7 +60,9 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             promotion_replan_strength_min=0.0,
         )
         self.assertIsNotNone(batch)
-        self.assertEqual(batch.lower_state.shape[1], lower_dim)
+        self.assertEqual(batch.lower.state.shape[1], lower_dim)
+        self.assertLess(batch.upper.size, batch.lower.size)
+        self.assertTrue(np.any(batch.upper.duration > 1))
         self.assertGreater(row["wait_attr_penalty"], 0.0)
         self.assertGreaterEqual(row["wait_high_share"], 0.0)
         self.assertGreater(row["upper_decision_count"], 1)
@@ -83,7 +85,7 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             plan_eval_offset_s=120.0,
             plan_coefficient_scale_s=1.0,
         )
-        model = DualActorCriticPPO(DualPPOConfig(
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=upper_dim,
             lower_state_dim=lower_dim,
             upper_action_dim=mapper.action_dim + 1,
@@ -130,7 +132,8 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             lower_lf_raw_recenter_gain=1.0,
         )
         self.assertIsNotNone(batch)
-        self.assertEqual(batch.upper_action.shape[1], mapper.action_dim + 1)
+        self.assertEqual(batch.upper.action.shape[1], mapper.action_dim + 1)
+        self.assertEqual(batch.upper.size, row["upper_transition_count"])
         self.assertGreater(row["promotion_gate_value"], 0.0)
         self.assertGreater(row["promotion_replan_count"], 0)
         self.assertGreater(row["promotion_recovery_relief"], 0.0)
@@ -144,7 +147,7 @@ class TransitPPOSurrogateTest(unittest.TestCase):
             + 2 * corridors
             + 1
         )
-        model = DualActorCriticPPO(DualPPOConfig(
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=upper_dim,
             lower_state_dim=lower_dim,
             upper_action_dim=corridors,

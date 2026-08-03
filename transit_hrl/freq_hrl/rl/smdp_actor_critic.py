@@ -294,14 +294,24 @@ class FrequencySeparatedActorCriticPPO:
         self.upper_value = ValueNet(config.upper_state_dim, config.hidden_dim).to(self.device)
         self.lower_value = ValueNet(config.lower_state_dim, config.hidden_dim).to(self.device)
         self.lower_cost_value = ValueNet(config.lower_state_dim, config.hidden_dim).to(self.device)
-        self.upper_optimizer = torch.optim.Adam(
-            list(self.upper_actor.parameters()) + list(self.upper_value.parameters()),
+        self.upper_actor_optimizer = torch.optim.Adam(
+            self.upper_actor.parameters(),
             lr=float(config.upper_learning_rate),
         )
-        self.lower_optimizer = torch.optim.Adam(
-            list(self.lower_actor.parameters())
-            + list(self.lower_value.parameters())
-            + list(self.lower_cost_value.parameters()),
+        self.upper_value_optimizer = torch.optim.Adam(
+            self.upper_value.parameters(),
+            lr=float(config.upper_learning_rate),
+        )
+        self.lower_actor_optimizer = torch.optim.Adam(
+            self.lower_actor.parameters(),
+            lr=float(config.lower_learning_rate),
+        )
+        self.lower_value_optimizer = torch.optim.Adam(
+            self.lower_value.parameters(),
+            lr=float(config.lower_learning_rate),
+        )
+        self.lower_cost_value_optimizer = torch.optim.Adam(
+            self.lower_cost_value.parameters(),
             lr=float(config.lower_learning_rate),
         )
         self.constraint_lambda = float(config.lower_lambda_init)
@@ -314,8 +324,11 @@ class FrequencySeparatedActorCriticPPO:
             "upper_value": self.upper_value.state_dict(),
             "lower_value": self.lower_value.state_dict(),
             "lower_cost_value": self.lower_cost_value.state_dict(),
-            "upper_optimizer": self.upper_optimizer.state_dict(),
-            "lower_optimizer": self.lower_optimizer.state_dict(),
+            "upper_actor_optimizer": self.upper_actor_optimizer.state_dict(),
+            "upper_value_optimizer": self.upper_value_optimizer.state_dict(),
+            "lower_actor_optimizer": self.lower_actor_optimizer.state_dict(),
+            "lower_value_optimizer": self.lower_value_optimizer.state_dict(),
+            "lower_cost_value_optimizer": self.lower_cost_value_optimizer.state_dict(),
             "constraint_lambda": float(self.constraint_lambda),
         }
 
@@ -325,10 +338,15 @@ class FrequencySeparatedActorCriticPPO:
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
         self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
-        if "upper_optimizer" in payload:
-            self.upper_optimizer.load_state_dict(payload["upper_optimizer"])
-        if "lower_optimizer" in payload:
-            self.lower_optimizer.load_state_dict(payload["lower_optimizer"])
+        for name in (
+            "upper_actor_optimizer",
+            "upper_value_optimizer",
+            "lower_actor_optimizer",
+            "lower_value_optimizer",
+            "lower_cost_value_optimizer",
+        ):
+            if name in payload:
+                getattr(self, name).load_state_dict(payload[name])
         self.constraint_lambda = float(payload.get("constraint_lambda", self.constraint_lambda))
 
     def _state_tensor(self, state: np.ndarray) -> torch.Tensor:
@@ -395,8 +413,10 @@ class FrequencySeparatedActorCriticPPO:
         batch: LevelTrajectoryBatch,
         actor: GaussianActor,
         value_net: ValueNet,
-        optimizer: torch.optim.Optimizer,
+        actor_optimizer: torch.optim.Optimizer,
+        value_optimizer: torch.optim.Optimizer,
         cost_value_net: ValueNet | None = None,
+        cost_value_optimizer: torch.optim.Optimizer | None = None,
     ) -> dict[str, float]:
         cfg = self.config
         state_dim = cfg.upper_state_dim if level == "upper" else cfg.lower_state_dim
@@ -449,19 +469,33 @@ class FrequencySeparatedActorCriticPPO:
                 if cost_returns_t is not None and cost_value_net is not None:
                     cost_value_loss = torch.mean((cost_value_net(state[idx]) - cost_returns_t[idx]) ** 2)
                 entropy_mean = entropy.mean()
+                actor_loss = policy_loss - float(cfg.entropy_coef) * entropy_mean
+                actor_optimizer.zero_grad()
+                actor_loss.backward()
+                nn.utils.clip_grad_norm_(actor.parameters(), max_norm=float(cfg.max_grad_norm))
+                actor_optimizer.step()
+
+                value_optimizer.zero_grad()
+                (float(cfg.value_coef) * value_loss).backward()
+                nn.utils.clip_grad_norm_(value_net.parameters(), max_norm=float(cfg.max_grad_norm))
+                value_optimizer.step()
+
+                if (
+                    cost_returns_t is not None
+                    and cost_value_net is not None
+                    and cost_value_optimizer is not None
+                ):
+                    cost_value_optimizer.zero_grad()
+                    (float(cfg.cost_value_coef) * cost_value_loss).backward()
+                    nn.utils.clip_grad_norm_(
+                        cost_value_net.parameters(), max_norm=float(cfg.max_grad_norm)
+                    )
+                    cost_value_optimizer.step()
                 loss = (
-                    policy_loss
-                    + float(cfg.value_coef) * value_loss
-                    + float(cfg.cost_value_coef) * cost_value_loss
-                    - float(cfg.entropy_coef) * entropy_mean
+                    actor_loss.detach()
+                    + float(cfg.value_coef) * value_loss.detach()
+                    + float(cfg.cost_value_coef) * cost_value_loss.detach()
                 )
-                optimizer.zero_grad()
-                loss.backward()
-                params = list(actor.parameters()) + list(value_net.parameters())
-                if cost_value_net is not None:
-                    params += list(cost_value_net.parameters())
-                nn.utils.clip_grad_norm_(params, max_norm=float(cfg.max_grad_norm))
-                optimizer.step()
                 rows.append({
                     "loss": float(loss.detach().cpu().item()),
                     "policy_loss": float(policy_loss.detach().cpu().item()),
@@ -487,7 +521,8 @@ class FrequencySeparatedActorCriticPPO:
             batch=batch.upper,
             actor=self.upper_actor,
             value_net=self.upper_value,
-            optimizer=self.upper_optimizer,
+            actor_optimizer=self.upper_actor_optimizer,
+            value_optimizer=self.upper_value_optimizer,
         )
         lower_metrics = self._update_level(
             level="lower",
@@ -495,7 +530,9 @@ class FrequencySeparatedActorCriticPPO:
             actor=self.lower_actor,
             value_net=self.lower_value,
             cost_value_net=self.lower_cost_value,
-            optimizer=self.lower_optimizer,
+            actor_optimizer=self.lower_actor_optimizer,
+            value_optimizer=self.lower_value_optimizer,
+            cost_value_optimizer=self.lower_cost_value_optimizer,
         )
         cost_mean = float(np.mean(batch.lower.cost)) if batch.lower.cost is not None else 0.0
         if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:

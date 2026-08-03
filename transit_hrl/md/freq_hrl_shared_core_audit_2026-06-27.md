@@ -27,7 +27,7 @@ Machine-checkable audits: `transit_hrl/results/carrier_upgrade_package_latest/sp
 | adapter | status | required_symbol | role | evidence |
 | --- | --- | --- | --- | --- |
 | trading_ppo | supported | train_frequency_separated_ppo | Trading Freq-HRL calls the asynchronous SMDP training loop. | `train_frequency_separated_ppo` is imported and called |
-| transit_surrogate_ppo | failed | train_frequency_separated_ppo | Transit surrogate must migrate to the asynchronous SMDP loop. | `train_frequency_separated_ppo` is not both imported and called |
+| transit_surrogate_ppo | supported | train_frequency_separated_ppo | Transit surrogate must migrate to the asynchronous SMDP loop. | `train_frequency_separated_ppo` is imported and called |
 | transit_native_replay_update | failed | apply_smdp_updates | Native Transit must update separate upper and lower SMDP trajectories. | `apply_smdp_updates` is not both imported and called |
 | transit_native_actor_core | failed | FrequencySeparatedActorCriticPPO | Native Transit bridge must instantiate the v2 frequency-separated actor-critic. | `FrequencySeparatedActorCriticPPO` is not both imported and called |
 
