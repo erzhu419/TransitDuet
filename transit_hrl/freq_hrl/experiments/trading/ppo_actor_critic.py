@@ -83,6 +83,10 @@ METHOD_CONTRACTS = (
     "full_freq_hrl_v3",
     "full_freq_hrl_v4",
 )
+LOWER_OBSERVATION_INTERVENTIONS = (
+    "none",
+    "zero_residual_frequency",
+)
 
 RAW_HISTORY_WINDOW = 120
 
@@ -730,6 +734,35 @@ def decode_hierarchical_lower_action(
     return speed, residual_order
 
 
+def intervene_lower_observation(
+    lower_state: np.ndarray,
+    *,
+    assets: int,
+    policy_mode: str,
+    intervention: str,
+) -> np.ndarray:
+    intervention = str(intervention)
+    if intervention not in LOWER_OBSERVATION_INTERVENTIONS:
+        raise ValueError(
+            f"unknown lower observation intervention: {intervention}"
+        )
+    state = np.asarray(lower_state, dtype=np.float32).copy()
+    if intervention == "none":
+        return state
+    if str(policy_mode) != "freq_hrl":
+        raise ValueError(
+            "residual-frequency intervention is only defined for freq_hrl"
+        )
+    expected = 8 * int(assets) + 1
+    if state.size != expected:
+        raise ValueError(
+            f"expected frequency lower state dim {expected}, got {state.size}"
+        )
+    # Keep plan, position, and gap fixed; remove only MF/HF residual context.
+    state[3 * int(assets):8 * int(assets)] = 0.0
+    return state
+
+
 def bounded_speed(action: np.ndarray) -> np.ndarray:
     bounded = np.clip(np.asarray(action, dtype=np.float64), -1.0, 1.0)
     return np.clip(0.05 + 0.95 * (bounded + 1.0) / 2.0, 0.05, 1.0)
@@ -987,6 +1020,8 @@ def smdp_rollout(
     promotion_replan_cost: float = 0.0,
     enable_hf_lower: bool = False,
     lower_hf_order_scale: float = 0.025,
+    lower_observation_intervention: str = "none",
+    compute_hf_action_sensitivity: bool = False,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     method_contract: str = "routing_core_v2",
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
@@ -1008,6 +1043,19 @@ def smdp_rollout(
         raise ValueError("promotion_replan_cost must be finite and non-negative")
     if not np.isfinite(float(lower_hf_order_scale)) or float(lower_hf_order_scale) < 0.0:
         raise ValueError("lower_hf_order_scale must be finite and non-negative")
+    lower_observation_intervention = str(lower_observation_intervention)
+    if lower_observation_intervention not in LOWER_OBSERVATION_INTERVENTIONS:
+        raise ValueError(
+            "unknown lower_observation_intervention: "
+            f"{lower_observation_intervention}"
+        )
+    if (
+        lower_observation_intervention != "none"
+        or bool(compute_hf_action_sensitivity)
+    ) and policy_mode != "freq_hrl":
+        raise ValueError(
+            "lower frequency interventions require policy_mode='freq_hrl'"
+        )
     expected_lower_action_dim = int(assets) * (2 if enable_hf_lower else 1)
     if int(model.config.lower_action_dim) != expected_lower_action_dim:
         raise ValueError(
@@ -1098,6 +1146,8 @@ def smdp_rollout(
     hf_overlay_returns: list[float] = []
     hf_overlay_incremental_costs: list[float] = []
     hf_overlay_task_effects: list[float] = []
+    lower_hf_action_sensitivities: list[float] = []
+    lower_hf_overlay_sensitivities: list[float] = []
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
     raw_history: list[np.ndarray] = []
@@ -1233,6 +1283,32 @@ def smdp_rollout(
             progress=t / max(int(steps) - 1, 1),
             history_window=history_window,
             include_heuristic_promotion=not learned_promotion_gate,
+        )
+        factual_lower_state = np.asarray(lower_state, dtype=np.float32).copy()
+        if compute_hf_action_sensitivity:
+            factual_out = model.act_lower(factual_lower_state, sample=False)
+            ablated_state = intervene_lower_observation(
+                factual_lower_state,
+                assets=assets,
+                policy_mode=policy_mode,
+                intervention="zero_residual_frequency",
+            )
+            ablated_out = model.act_lower(ablated_state, sample=False)
+            action_delta = np.asarray(
+                factual_out["action"], dtype=np.float64
+            ) - np.asarray(ablated_out["action"], dtype=np.float64)
+            lower_hf_action_sensitivities.append(
+                float(np.mean(np.abs(action_delta)))
+            )
+            lower_hf_overlay_sensitivities.append(float(
+                np.mean(np.abs(action_delta[assets:]))
+                if enable_hf_lower else 0.0
+            ))
+        lower_state = intervene_lower_observation(
+            factual_lower_state,
+            assets=assets,
+            policy_mode=policy_mode,
+            intervention=lower_observation_intervention,
         )
         lower_out = model.act_lower(lower_state, sample=sample)
         speed, residual_order = decode_hierarchical_lower_action(
@@ -1439,6 +1515,12 @@ def smdp_rollout(
         "hf_overlay_task_effect_total": float(
             np.sum(hf_overlay_task_effects)
         ) if hf_overlay_task_effects else 0.0,
+        "lower_hf_action_sensitivity": float(
+            np.mean(lower_hf_action_sensitivities)
+        ) if lower_hf_action_sensitivities else 0.0,
+        "lower_hf_overlay_sensitivity": float(
+            np.mean(lower_hf_overlay_sensitivities)
+        ) if lower_hf_overlay_sensitivities else 0.0,
         "upper_decision_count": int(trajectory.upper.size),
         "lower_decision_count": int(trajectory.lower.size),
         "upper_mean_duration": float(np.mean(trajectory.upper.duration)),
@@ -1494,6 +1576,10 @@ def smdp_rollout(
         "promotion_replan_cost": float(promotion_replan_cost),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
         "lower_hf_order_scale": float(lower_hf_order_scale),
+        "lower_observation_intervention": lower_observation_intervention,
+        "hf_action_sensitivity_computed": float(
+            bool(compute_hf_action_sensitivity)
+        ),
         "plan_smoothness_weight": float(plan_smoothness_weight),
         "routing_contract": (
             "frequency_responsibility"
@@ -1508,6 +1594,108 @@ def smdp_rollout(
         ),
     }
     return (trajectory if sample else None), row
+
+
+def evaluate_hf_lower_intervention(
+    model: FrequencySeparatedActorCriticPPO,
+    *,
+    eval_seeds: list[int],
+    rollout_kwargs: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Paired deterministic evaluation with only lower MF/HF inputs removed.
+
+    Exogenous market paths are identical. Downstream positions and therefore
+    later upper/gate states may diverge; outcome deltas are the total system
+    effect. ``lower_hf_action_sensitivity`` isolates the immediate policy
+    response on the factual control states.
+    """
+
+    forbidden = {
+        "seed",
+        "sample",
+        "lower_observation_intervention",
+        "compute_hf_action_sensitivity",
+    }
+    overlap = forbidden.intersection(rollout_kwargs)
+    if overlap:
+        raise ValueError(
+            "rollout_kwargs contains evaluator-owned keys: "
+            f"{sorted(overlap)}"
+        )
+    if not bool(rollout_kwargs.get("enable_hf_lower", False)):
+        raise ValueError("HF-lower intervention requires enable_hf_lower=True")
+    if str(rollout_kwargs.get("policy_mode", "freq_hrl")) != "freq_hrl":
+        raise ValueError("HF-lower intervention requires policy_mode='freq_hrl'")
+
+    rows: list[dict[str, Any]] = []
+    for seed in validate_unique_seeds(eval_seeds, role="hf_intervention_eval_seeds"):
+        _, control = smdp_rollout(
+            model,
+            seed=int(seed),
+            sample=False,
+            lower_observation_intervention="none",
+            compute_hf_action_sensitivity=True,
+            **rollout_kwargs,
+        )
+        _, ablated = smdp_rollout(
+            model,
+            seed=int(seed),
+            sample=False,
+            lower_observation_intervention="zero_residual_frequency",
+            compute_hf_action_sensitivity=False,
+            **rollout_kwargs,
+        )
+        rows.append({
+            "seed": int(seed),
+            "scenario": str(control["scenario"]),
+            "control_intervention": "none",
+            "ablated_intervention": "zero_residual_frequency",
+            "control_total_return": float(control["total_return"]),
+            "ablated_total_return": float(ablated["total_return"]),
+            "total_return_delta": float(
+                control["total_return"] - ablated["total_return"]
+            ),
+            "control_sharpe": float(control["sharpe"]),
+            "ablated_sharpe": float(ablated["sharpe"]),
+            "sharpe_delta": float(control["sharpe"] - ablated["sharpe"]),
+            "control_max_drawdown": float(control["max_drawdown"]),
+            "ablated_max_drawdown": float(ablated["max_drawdown"]),
+            "max_drawdown_reduction": float(
+                ablated["max_drawdown"] - control["max_drawdown"]
+            ),
+            "control_turnover": float(control["turnover"]),
+            "ablated_turnover": float(ablated["turnover"]),
+            "turnover_delta": float(control["turnover"] - ablated["turnover"]),
+            "control_hf_overlay_task_effect": float(
+                control["hf_overlay_task_effect_total"]
+            ),
+            "ablated_hf_overlay_task_effect": float(
+                ablated["hf_overlay_task_effect_total"]
+            ),
+            "lower_hf_action_sensitivity": float(
+                control["lower_hf_action_sensitivity"]
+            ),
+            "lower_hf_overlay_sensitivity": float(
+                control["lower_hf_overlay_sensitivity"]
+            ),
+            "control_upper_decision_count": int(
+                control["upper_decision_count"]
+            ),
+            "ablated_upper_decision_count": int(
+                ablated["upper_decision_count"]
+            ),
+            "control_promotion_replan_count": int(
+                control["promotion_replan_count"]
+            ),
+            "ablated_promotion_replan_count": int(
+                ablated["promotion_replan_count"]
+            ),
+            "paired_exogenous_path_identity": bool(
+                int(control["seed"]) == int(ablated["seed"])
+                and str(control["scenario"]) == str(ablated["scenario"])
+            ),
+        })
+    return rows
 
 
 def objective(row: dict[str, float]) -> float:
@@ -1537,6 +1725,8 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "hf_overlay_return_total",
         "hf_overlay_incremental_cost_total",
         "hf_overlay_task_effect_total",
+        "lower_hf_action_sensitivity",
+        "lower_hf_overlay_sensitivity",
         "upper_decision_count",
         "lower_decision_count",
         "upper_mean_duration",
@@ -1578,6 +1768,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_replan_cost",
         "hf_lower_overlay_enabled",
         "lower_hf_order_scale",
+        "hf_action_sensitivity_computed",
         "volume_impact_bps",
         "plan_smoothness_weight",
         "protocol_valid",

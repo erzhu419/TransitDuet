@@ -9,6 +9,8 @@ from freq_hrl.domains.trading import (
 )
 from freq_hrl.experiments.trading.ppo_actor_critic import (
     decode_hierarchical_lower_action,
+    evaluate_hf_lower_intervention,
+    make_plan_mapper,
     promotion_gate_feature_vector,
     train_ppo_actor_critic,
 )
@@ -65,7 +67,7 @@ class FullMethodContractTest(unittest.TestCase):
         )
 
     def test_full_training_entrypoint_executes_all_v4_contracts(self):
-        payload, rows, _ = train_ppo_actor_critic(
+        payload, rows, model = train_ppo_actor_critic(
             train_seeds=[42],
             validation_seeds=[84],
             eval_seeds=[123],
@@ -127,6 +129,44 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertGreater(
             payload["history"][-1]["promotion_actor_optimizer_steps"], 0.0
         )
+        intervention_rows = evaluate_hf_lower_intervention(
+            model,
+            eval_seeds=[123],
+            rollout_kwargs={
+                "steps": 36,
+                "assets": 2,
+                "scenario": "persistent_shift",
+                "leakage_scale": 0.0,
+                "plan_mapper": make_plan_mapper(
+                    assets=2,
+                    plan_basis_dim=3,
+                    plan_horizon_s=600.0,
+                    plan_eval_offset_s=300.0,
+                    plan_coefficient_scale=0.75,
+                    anchor_first_coefficient=True,
+                ),
+                "upper_period": 12,
+                "min_upper_duration": 3,
+                "policy_mode": "freq_hrl",
+                "mark_to_market_timing": "post_trade",
+                "volume_impact_bps": 10.0,
+                "execute_plan_curve": True,
+                "use_additive_frequency_credit": True,
+                "constrain_raw_lower_effect": True,
+                "plan_smoothness_weight": 0.01,
+                "learned_promotion_gate": True,
+                "promotion_replan_cost": 0.001,
+                "enable_hf_lower": True,
+                "lower_hf_order_scale": 0.025,
+                "execution_timeline_contract": "causal_post_trade_v3",
+                "method_contract": "full_freq_hrl_v4",
+            },
+        )
+        self.assertEqual(len(intervention_rows), 1)
+        intervention = intervention_rows[0]
+        self.assertTrue(intervention["paired_exogenous_path_identity"])
+        self.assertGreaterEqual(intervention["lower_hf_action_sensitivity"], 0.0)
+        self.assertTrue(np.isfinite(intervention["total_return_delta"]))
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
         common = dict(
