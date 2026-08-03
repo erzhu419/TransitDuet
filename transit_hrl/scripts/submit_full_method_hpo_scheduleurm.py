@@ -48,6 +48,9 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 DEFAULT_NODES = LINUX_CPU_NODES
 NODE_CPU_CAPACITY = 192
 POOL_CPU_CAPACITY = NODE_CPU_CAPACITY * len(DEFAULT_NODES)
+HPO_MODULE = "freq_hrl.experiments.trading.full_method_hpo"
+HPO_SIGNATURE_VERSION = "full-hpo-v2"
+SMOKE_FULL_VARIANT = "freq_hrl_full_v4"
 CPU_JUSTIFICATION = (
     "Full-method nested-validation cells are independent, CPU-bound, and "
     "explicitly single-threaded. scheduleurm dynamically packs them across "
@@ -106,7 +109,7 @@ def build_training_command(
         str(args.python_executable),
         "-u",
         "-m",
-        "freq_hrl.experiments.trading.full_method_hpo",
+        HPO_MODULE,
         "--candidate-id",
         str(candidate_id),
         "--variant-id",
@@ -160,7 +163,7 @@ def build_preflight_command(
         "import json,os,platform;"
         "from pathlib import Path;"
         "import numpy,torch;"
-        "from freq_hrl.experiments.trading.full_method_hpo import "
+        f"from {HPO_MODULE} import "
         "FULL_METHOD_TUNING_PROTOCOL_VERSION;"
         f"p=Path({str(output_dir)!r});p.mkdir(parents=True,exist_ok=True);"
         "payload={'status':'ready','node':platform.node(),"
@@ -227,11 +230,12 @@ def build_scheduler_spec(
         ),
         "cwd": str(ROOT / str(args.launch_subdir)),
         "signature": (
-            f"Freq-HRL/full-hpo-v2/{args.run_name}/{variant_id}/"
+            f"Freq-HRL/{HPO_SIGNATURE_VERSION}/{args.run_name}/{variant_id}/"
             f"{candidate_id}/{scenario}/rep-{replicate_seed}"
         ),
         "resource_family": (
-            f"Freq-HRL/full-hpo-v2/{VARIANTS_BY_ID[variant_id].trainer_family}/cell"
+            f"Freq-HRL/{HPO_SIGNATURE_VERSION}/"
+            f"{VARIANTS_BY_ID[variant_id].trainer_family}/cell"
         ),
         "vram": 0,
         "ram_mb": _ram_mb(args, variant_id),
@@ -270,8 +274,12 @@ def build_preflight_spec(
             output_dir=relative_dir,
         ),
         "cwd": str(ROOT / str(args.launch_subdir)),
-        "signature": f"Freq-HRL/full-hpo-v2/{args.run_name}/preflight/{node}",
-        "resource_family": "Freq-HRL/full-hpo-v2/environment-preflight",
+        "signature": (
+            f"Freq-HRL/{HPO_SIGNATURE_VERSION}/{args.run_name}/preflight/{node}"
+        ),
+        "resource_family": (
+            f"Freq-HRL/{HPO_SIGNATURE_VERSION}/environment-preflight"
+        ),
         "vram": 0,
         "ram_mb": 512,
         "cpu": 1,
@@ -471,8 +479,8 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     if int(args.ppo_ram_mb) < 256 or int(args.offpolicy_ram_mb) < 512:
         raise SystemExit("RAM requests are below the safe full-method minimum")
     if args.smoke:
-        args.variant_ids = ["freq_hrl_full_v4"]
-        args.candidate_ids = [candidate_ids_for_variant("freq_hrl_full_v4")[0]]
+        args.variant_ids = [SMOKE_FULL_VARIANT]
+        args.candidate_ids = [candidate_ids_for_variant(SMOKE_FULL_VARIANT)[0]]
         args.scenarios = ["persistent_shift"]
         args.optimizer_seeds = [args.optimizer_seeds[0]]
         args.train_seeds = [args.train_seeds[0]]
