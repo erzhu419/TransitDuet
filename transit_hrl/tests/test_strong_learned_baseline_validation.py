@@ -120,6 +120,8 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
                         "seed": seed,
                         "baseline": baseline,
                         "metric_contract_version": "trading_metrics_v2",
+                        "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+                        "checkpoint_selection_protocol": "disjoint_validation_paths",
                         "total_return": offset,
                         "episode_information_ratio": offset,
                         "FocusScore": offset,
@@ -167,6 +169,8 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             self.assertTrue((out / "parameter_budget.csv").exists())
             self.assertTrue((out / "sample_efficiency.csv").exists())
             self.assertTrue((out / "summary.json").exists())
+            checkpoint_files = list((out / "checkpoints").glob("*.pt"))
+            self.assertEqual(len(checkpoint_files), 2)
 
     def test_merge_shards_recomputes_checks(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -193,6 +197,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             self.assertEqual(len(merged["paired_checks"]), 16)
             self.assertEqual(merged["summary"]["training_replicate_count"], 1)
             self.assertEqual(merged["summary"]["matrix_coverage_status"], "complete")
+            self.assertEqual(merged["summary"]["training_protocol_status"], "valid")
 
 
 if __name__ == "__main__":

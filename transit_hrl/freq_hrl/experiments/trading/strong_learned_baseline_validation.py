@@ -26,6 +26,10 @@ from freq_hrl.experiments.statistics import (
     finite_float,
     paired_delta_stats,
 )
+from freq_hrl.experiments.reproducibility import (
+    validate_evaluation_seed_roles,
+    validate_unique_seeds,
+)
 from freq_hrl.rl import summarize_numeric_rows
 
 from .performance_validation import SCENARIOS
@@ -38,6 +42,7 @@ from .ppo_actor_critic import POLICY_MODES, train_ppo_actor_critic
 
 
 DEFAULT_SCENARIOS = (
+    "stationary_low_noise",
     "persistent_shift",
     "stationary_high_noise",
     "localized_burst",
@@ -62,6 +67,20 @@ DEFAULT_OPTIMIZER_SEEDS = (
     2129,
     2141,
 )
+DEFAULT_ROLLOUT_SEED_ROOTS = (42, 123, 456, 789, 2026)
+DEFAULT_VALIDATION_SEEDS = (57721, 57727, 57731, 57737, 57751)
+DEFAULT_EVAL_SEEDS = (
+    31415,
+    27182,
+    16180,
+    14142,
+    17320,
+    22360,
+    24494,
+    26457,
+    28284,
+    31622,
+)
 ALL_POLICY_MODES = POLICY_MODES + OFFPOLICY_MODES
 MAIN_METRICS = (
     ("total_return", False),
@@ -71,6 +90,8 @@ MAIN_METRICS = (
 )
 CONTRACT_GATED_METRICS = {"episode_information_ratio", "total_return"}
 CONFIRMATORY_FAMILY = "strong_learned_all_baselines_endpoints"
+TRAINING_PATH_PROTOCOL = "fresh_deterministic_path_per_root_and_iteration_v2"
+SELECTION_PROTOCOL = "disjoint_validation_paths"
 
 
 def count_parameters(model: Any) -> int:
@@ -324,6 +345,17 @@ def build_paired_checks(
                 metric not in CONTRACT_GATED_METRICS
                 or (relevant and contracts == [METRIC_CONTRACT_VERSION])
             )
+            training_protocol_valid = bool(
+                relevant
+                and {
+                    str(row.get("training_path_protocol", "missing"))
+                    for row in relevant
+                } == {TRAINING_PATH_PROTOCOL}
+                and {
+                    str(row.get("checkpoint_selection_protocol", "missing"))
+                    for row in relevant
+                } == {SELECTION_PROTOCOL}
+            )
             stats = paired_delta_stats(
                 rows,
                 variant_key="baseline",
@@ -339,6 +371,7 @@ def build_paired_checks(
                 **stats,
                 "metric_contract_valid": contract_valid,
                 "metric_contract_versions": contracts,
+                "training_protocol_valid": training_protocol_valid,
                 "multiplicity_family": CONFIRMATORY_FAMILY,
                 "baseline_class": (
                     "strong_learned_ppo"
@@ -357,6 +390,8 @@ def build_paired_checks(
         ci_low = finite_float(row.get("improvement_ci95_low"))
         if not bool(row.get("metric_contract_valid", False)):
             status = "invalid_legacy_metric_contract"
+        elif not bool(row.get("training_protocol_valid", False)):
+            status = "invalid_training_protocol"
         elif n_independent < int(min_pairs):
             status = "underpowered"
         elif ci_low is not None and ci_low > 0.0 and bool(row.get("holm_reject", False)):
@@ -407,6 +442,7 @@ def build_experiment_manifest(
     scenarios: list[str],
     policy_modes: list[str],
     train_seeds: list[int],
+    validation_seeds: list[int],
     eval_seeds: list[int],
     steps: int,
     assets: int,
@@ -414,6 +450,11 @@ def build_experiment_manifest(
     optimizer_seed: int = 2026,
     optimizer_seeds: list[int] | None = None,
     min_pairs: int = 10,
+    ppo_hidden_dim: int = 64,
+    ppo_learning_rate: float = 3e-4,
+    ppo_epochs: int = 4,
+    ppo_minibatch_size: int = 512,
+    ppo_init_log_std: float = -1.0,
     offpolicy_hidden_dim: int = 64,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
@@ -447,6 +488,7 @@ def build_experiment_manifest(
             "policy_mode": mode,
             "training_replicate_seed": int(replicate_seed),
             "train_seeds": " ".join(str(seed) for seed in train_seeds),
+            "validation_seeds": " ".join(str(seed) for seed in validation_seeds),
             "eval_seeds": " ".join(str(seed) for seed in eval_seeds),
             "steps": int(steps),
             "assets": int(assets),
@@ -465,8 +507,15 @@ def build_experiment_manifest(
                 f"--min-pairs {int(min_pairs)} "
                 "--train-seeds "
                 + " ".join(str(seed) for seed in train_seeds)
+                + " --validation-seeds "
+                + " ".join(str(seed) for seed in validation_seeds)
                 + " --eval-seeds "
                 + " ".join(str(seed) for seed in eval_seeds)
+                + f" --ppo-hidden-dim {int(ppo_hidden_dim)}"
+                + f" --ppo-learning-rate {float(ppo_learning_rate)}"
+                + f" --ppo-epochs {int(ppo_epochs)}"
+                + f" --ppo-minibatch-size {int(ppo_minibatch_size)}"
+                + f" --ppo-init-log-std {float(ppo_init_log_std)}"
                 + f" --offpolicy-hidden-dim {int(offpolicy_hidden_dim)}"
                 + f" --offpolicy-replay-capacity {int(offpolicy_replay_capacity)}"
                 + f" --offpolicy-warmup-steps {int(offpolicy_warmup_steps)}"
@@ -572,6 +621,12 @@ def run_strong_learned_baseline_validation(
     optimizer_seed: int,
     min_pairs: int,
     optimizer_seeds: list[int] | None = None,
+    validation_seeds: list[int] | None = None,
+    ppo_hidden_dim: int = 64,
+    ppo_learning_rate: float = 3e-4,
+    ppo_epochs: int = 4,
+    ppo_minibatch_size: int = 512,
+    ppo_init_log_std: float = -1.0,
     offpolicy_hidden_dim: int = 64,
     offpolicy_replay_capacity: int = 100_000,
     offpolicy_warmup_steps: int = 256,
@@ -584,10 +639,17 @@ def run_strong_learned_baseline_validation(
     run_rows: list[dict[str, Any]] = []
     parameter_budget: list[dict[str, Any]] = []
     sample_efficiency: list[dict[str, Any]] = []
-    if len(set(int(seed) for seed in train_seeds)) != len(train_seeds):
-        raise ValueError("train_seeds must be unique")
-    if len(set(int(seed) for seed in eval_seeds)) != len(eval_seeds):
-        raise ValueError("eval_seeds must be unique")
+    checkpoint_payloads: list[dict[str, Any]] = []
+    rollout_seed_roots = validate_unique_seeds(
+        train_seeds, role="rollout_seed_roots"
+    )
+    validation_seed_list = validate_unique_seeds(
+        validation_seeds or DEFAULT_VALIDATION_SEEDS,
+        role="validation_seeds",
+    )
+    validation_seed_list, heldout_test_seeds = validate_evaluation_seed_roles(
+        validation_seed_list, eval_seeds
+    )
     replicate_seeds = list(optimizer_seeds or [int(optimizer_seed)])
     cells = selected_experiment_cells(
         scenarios,
@@ -606,12 +668,19 @@ def run_strong_learned_baseline_validation(
         if mode in POLICY_MODES:
             payload, heldout_rows, model = train_ppo_actor_critic(
                 train_seeds=train_seeds,
-                eval_seeds=eval_seeds,
+                validation_seeds=validation_seed_list,
+                eval_seeds=heldout_test_seeds,
                 steps=int(steps),
                 assets=int(assets),
                 scenario=scenario,
                 iterations=int(iterations),
                 seed=run_seed,
+                hidden_dim=int(ppo_hidden_dim),
+                learning_rate=float(ppo_learning_rate),
+                ppo_epochs=int(ppo_epochs),
+                minibatch_size=int(ppo_minibatch_size),
+                init_log_std=float(ppo_init_log_std),
+                resample_training_paths=True,
                 policy_mode=mode,
                 use_handcrafted_frequency_prior=False,
             )
@@ -619,7 +688,8 @@ def run_strong_learned_baseline_validation(
             payload, heldout_rows, model = train_flat_offpolicy_baseline(
                 policy_mode=mode,
                 train_seeds=train_seeds,
-                eval_seeds=eval_seeds,
+                validation_seeds=validation_seed_list,
+                eval_seeds=heldout_test_seeds,
                 steps=int(steps),
                 assets=int(assets),
                 scenario=scenario,
@@ -630,9 +700,29 @@ def run_strong_learned_baseline_validation(
                 warmup_steps=int(offpolicy_warmup_steps),
                 batch_size=int(offpolicy_batch_size),
                 updates_per_step=int(offpolicy_updates_per_step),
+                resample_training_paths=True,
             )
         elapsed = float(time.perf_counter() - start)
         params = count_parameters(model)
+        checkpoint_file = (
+            f"{scenario}__{mode}__replicate_{int(replicate_seed)}.pt"
+        )
+        checkpoint_payloads.append({
+            "checkpoint_file": checkpoint_file,
+            "payload": {
+                "model_state_dict": model.state_dict(),
+                "model_config": payload.get("config", {}),
+                "trainer": payload.get("trainer", ""),
+                "scenario": scenario,
+                "policy_mode": mode,
+                "training_replicate_seed": int(replicate_seed),
+                "optimizer_seed": int(run_seed),
+                "rollout_seed_roots": list(rollout_seed_roots),
+                "validation_seeds": list(validation_seed_list),
+                "heldout_test_seeds": list(heldout_test_seeds),
+                "metric_contract_version": METRIC_CONTRACT_VERSION,
+            },
+        })
         for row in heldout_rows:
             item = dict(row)
             item["scenario"] = scenario
@@ -642,9 +732,22 @@ def run_strong_learned_baseline_validation(
             item["optimizer_seed"] = int(run_seed)
             item["independent_unit"] = "training_replicate_seed"
             item["trainer"] = payload["trainer"]
+            item["training_path_protocol"] = str(
+                payload.get("training_path_protocol", "missing")
+            )
+            item["checkpoint_selection_protocol"] = str(
+                payload.get("checkpoint_selection_protocol", "missing")
+            )
+            item["rollout_seed_roots"] = " ".join(
+                str(seed) for seed in rollout_seed_roots
+            )
+            item["validation_seeds"] = " ".join(
+                str(seed) for seed in validation_seed_list
+            )
             item["source_artifact"] = "strong_learned_baseline_validation"
             item["shard_index"] = int(shard_index)
             item["num_shards"] = int(num_shards)
+            item["checkpoint_file"] = checkpoint_file
             rows.append(item)
         run_rows.append({
             "scenario": scenario,
@@ -652,13 +755,25 @@ def run_strong_learned_baseline_validation(
             "training_replicate_seed": int(replicate_seed),
             "elapsed_sec": elapsed,
             "train_seed_count": len(train_seeds),
-            "eval_seed_count": len(eval_seeds),
+            "validation_seed_count": len(validation_seed_list),
+            "eval_seed_count": len(heldout_test_seeds),
             "steps": int(steps),
             "iterations": int(iterations),
             "parameter_count": params,
             "trainer": payload["trainer"],
+            "training_path_protocol": str(payload.get("training_path_protocol", "")),
+            "checkpoint_selection_protocol": str(
+                payload.get("checkpoint_selection_protocol", "")
+            ),
             "optimizer_seed": run_seed,
             "gradient_updates_train": int(payload.get("gradient_updates_train", 0)),
+            "environment_steps_validation": int(
+                payload.get("environment_steps_validation", 0)
+            ),
+            "unique_training_path_count": int(
+                payload.get("unique_training_path_count", 0)
+            ),
+            "checkpoint_file": checkpoint_file,
             "actor_optimizer_steps_train": int(payload.get("actor_optimizer_steps_train", 0)),
             "critic_optimizer_steps_train": int(payload.get("critic_optimizer_steps_train", 0)),
             "temperature_optimizer_steps_train": int(
@@ -695,7 +810,10 @@ def run_strong_learned_baseline_validation(
             "training_replicate_seed": int(replicate_seed),
             "optimizer_seed": int(run_seed),
             "environment_steps_train": train_steps,
-            "environment_steps_eval": int(len(eval_seeds) * steps),
+            "environment_steps_validation": int(
+                payload.get("environment_steps_validation", 0)
+            ),
+            "environment_steps_eval": int(len(heldout_test_seeds) * steps),
             "iterations": int(iterations),
             "best_score": float(payload.get("best_score", 0.0)),
             "heldout_objective_proxy": float(np.mean([
@@ -708,6 +826,10 @@ def run_strong_learned_baseline_validation(
             ])) if heldout_rows else 0.0,
             "elapsed_sec": elapsed,
             "selection_metric": "episode_information_ratio",
+            "training_path_protocol": str(payload.get("training_path_protocol", "")),
+            "checkpoint_selection_protocol": str(
+                payload.get("checkpoint_selection_protocol", "")
+            ),
             "gradient_updates_train": int(payload.get("gradient_updates_train", 0)),
             "actor_optimizer_steps_train": int(payload.get("actor_optimizer_steps_train", 0)),
             "critic_optimizer_steps_train": int(payload.get("critic_optimizer_steps_train", 0)),
@@ -769,13 +891,19 @@ def run_strong_learned_baseline_validation(
             scenarios=scenarios,
             policy_modes=policy_modes,
             train_seeds=train_seeds,
-            eval_seeds=eval_seeds,
+            validation_seeds=validation_seed_list,
+            eval_seeds=heldout_test_seeds,
             steps=int(steps),
             assets=int(assets),
             iterations=int(iterations),
             optimizer_seed=int(optimizer_seed),
             optimizer_seeds=replicate_seeds,
             min_pairs=int(min_pairs),
+            ppo_hidden_dim=int(ppo_hidden_dim),
+            ppo_learning_rate=float(ppo_learning_rate),
+            ppo_epochs=int(ppo_epochs),
+            ppo_minibatch_size=int(ppo_minibatch_size),
+            ppo_init_log_std=float(ppo_init_log_std),
             offpolicy_hidden_dim=int(offpolicy_hidden_dim),
             offpolicy_replay_capacity=int(offpolicy_replay_capacity),
             offpolicy_warmup_steps=int(offpolicy_warmup_steps),
@@ -793,12 +921,16 @@ def run_strong_learned_baseline_validation(
             "policy_modes": list(policy_modes),
             # Kept as a compatibility alias; these are rollout paths, not
             # independent statistical replications.
-            "train_seed_count": len(train_seeds),
-            "rollout_train_seed_count": len(train_seeds),
-            "eval_seed_count": len(eval_seeds),
+            "train_seed_count": len(rollout_seed_roots),
+            "rollout_train_seed_count": len(rollout_seed_roots),
+            "validation_seed_count": len(validation_seed_list),
+            "eval_seed_count": len(heldout_test_seeds),
             "training_replicate_count": len(set(replicate_seeds)),
             "selected_training_replicate_count": len({seed for _, _, seed in cells}),
             "independent_unit": "training_replicate_seed",
+            "training_path_protocol": TRAINING_PATH_PROTOCOL,
+            "checkpoint_selection_protocol": SELECTION_PROTOCOL,
+            "training_protocol_status": "valid",
             "steps": int(steps),
             "assets": int(assets),
             "iterations": int(iterations),
@@ -813,6 +945,7 @@ def run_strong_learned_baseline_validation(
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
         },
+        "_checkpoint_payloads": checkpoint_payloads,
         "boundary": (
             "PPO-family baselines use identical SMDP model dimensions, "
             "optimizer settings, initialization seeds, and environment-step "
@@ -910,11 +1043,39 @@ def merge_strong_learned_baseline_shards(
         next(iter(rollout_train_seed_counts))
         if len(rollout_train_seed_counts) == 1 else 0
     )
+    validation_seed_counts = {
+        int(float(row["validation_seed_count"]))
+        for row in run_rows
+        if str(row.get("validation_seed_count", "")).strip()
+    }
+    validation_seed_count = (
+        next(iter(validation_seed_counts))
+        if len(validation_seed_counts) == 1 else 0
+    )
+    training_protocols = {
+        str(row.get("training_path_protocol", "")) for row in rows
+        if str(row.get("training_path_protocol", "")).strip()
+    }
+    selection_protocols = {
+        str(row.get("checkpoint_selection_protocol", "")) for row in rows
+        if str(row.get("checkpoint_selection_protocol", "")).strip()
+    }
+    training_protocol_status = (
+        "valid"
+        if training_protocols == {TRAINING_PATH_PROTOCOL}
+        and selection_protocols == {SELECTION_PROTOCOL}
+        else "invalid_or_mixed"
+    )
     if coverage["matrix_coverage_status"] != "complete":
         all_metric_status = "incomplete_matrix"
         risk_adjusted_status = "incomplete_matrix"
         responsibility_status = "incomplete_matrix"
         ppo_baseline_status = "partial_run_or_budget_mismatch"
+    if training_protocol_status != "valid":
+        all_metric_status = "invalid_training_protocol"
+        risk_adjusted_status = "invalid_training_protocol"
+        responsibility_status = "invalid_training_protocol"
+        ppo_baseline_status = "invalid_training_protocol"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -933,10 +1094,20 @@ def merge_strong_learned_baseline_shards(
             "shard_count": len(input_dirs),
             "train_seed_count": int(rollout_train_seed_count),
             "rollout_train_seed_count": int(rollout_train_seed_count),
+            "validation_seed_count": int(validation_seed_count),
             "eval_seed_count": len(eval_seeds),
             "training_replicate_count": len(training_replicates),
             "selected_training_replicate_count": len(training_replicates),
             "independent_unit": "training_replicate_seed",
+            "training_protocol_status": training_protocol_status,
+            "training_path_protocol": (
+                next(iter(training_protocols))
+                if len(training_protocols) == 1 else "mixed_or_missing"
+            ),
+            "checkpoint_selection_protocol": (
+                next(iter(selection_protocols))
+                if len(selection_protocols) == 1 else "mixed_or_missing"
+            ),
             "ppo_strong_baseline_status": ppo_baseline_status,
             "ppo_metric_status": metric_status,
             "offpolicy_metric_status": offpolicy_metric_status,
@@ -967,8 +1138,15 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
     _write_csv(output_dir / "parameter_budget.csv", payload["parameter_budget"])
     _write_csv(output_dir / "sample_efficiency.csv", payload["sample_efficiency"])
     _write_csv(output_dir / "experiment_manifest.csv", payload["experiment_manifest"])
+    checkpoint_dir = output_dir / "checkpoints"
+    for item in payload.get("_checkpoint_payloads", []):
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        torch.save(item["payload"], checkpoint_dir / item["checkpoint_file"])
+    serializable_payload = {
+        key: value for key, value in payload.items() if not key.startswith("_")
+    }
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2)
+        json.dump(serializable_payload, f, indent=2)
     lines = [
         "# Strong Learned Baseline Validation",
         "",
@@ -990,6 +1168,7 @@ def write_outputs(output_dir: Path, payload: dict[str, Any]) -> None:
         f"`{payload['summary']['training_replicate_count']}`",
         f"- rollout train seeds per replicate: "
         f"`{payload['summary']['rollout_train_seed_count']}`",
+        f"- validation seeds: `{payload['summary'].get('validation_seed_count', 0)}`",
         f"- eval seeds: `{payload['summary']['eval_seed_count']}`",
         f"- matrix coverage: `{payload['summary']['matrix_coverage_status']}`",
         "",
@@ -1015,16 +1194,23 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(DEFAULT_SCENARIOS))
     parser.add_argument("--policy-modes", nargs="+", choices=ALL_POLICY_MODES, default=list(DEFAULT_POLICY_MODES))
-    parser.add_argument("--train-seeds", type=int, nargs="+", default=[42, 123, 456])
+    parser.add_argument(
+        "--train-seeds", type=int, nargs="+",
+        default=list(DEFAULT_ROLLOUT_SEED_ROOTS),
+    )
+    parser.add_argument(
+        "--validation-seeds", type=int, nargs="+",
+        default=list(DEFAULT_VALIDATION_SEEDS),
+    )
     parser.add_argument(
         "--eval-seeds",
         type=int,
         nargs="+",
-        default=[31415, 27182, 16180, 14142, 17320, 22360, 24494, 26457, 28284, 31622],
+        default=list(DEFAULT_EVAL_SEEDS),
     )
     parser.add_argument("--steps", type=int, default=240)
     parser.add_argument("--assets", type=int, default=3)
-    parser.add_argument("--iterations", type=int, default=6)
+    parser.add_argument("--iterations", type=int, default=64)
     parser.add_argument(
         "--optimizer-seed",
         type=int,
@@ -1039,9 +1225,14 @@ def main() -> None:
         help="Independent policy-training initialization seeds.",
     )
     parser.add_argument("--min-pairs", type=int, default=10)
+    parser.add_argument("--ppo-hidden-dim", type=int, default=64)
+    parser.add_argument("--ppo-learning-rate", type=float, default=3e-4)
+    parser.add_argument("--ppo-epochs", type=int, default=4)
+    parser.add_argument("--ppo-minibatch-size", type=int, default=512)
+    parser.add_argument("--ppo-init-log-std", type=float, default=-1.0)
     parser.add_argument("--offpolicy-hidden-dim", type=int, default=64)
     parser.add_argument("--offpolicy-replay-capacity", type=int, default=100_000)
-    parser.add_argument("--offpolicy-warmup-steps", type=int, default=256)
+    parser.add_argument("--offpolicy-warmup-steps", type=int, default=2048)
     parser.add_argument("--offpolicy-batch-size", type=int, default=64)
     parser.add_argument("--offpolicy-updates-per-step", type=int, default=1)
     parser.add_argument("--shard-index", type=int, default=0)
@@ -1069,6 +1260,7 @@ def main() -> None:
             scenarios=list(args.scenarios),
             policy_modes=list(args.policy_modes),
             train_seeds=list(args.train_seeds),
+            validation_seeds=list(args.validation_seeds),
             eval_seeds=list(args.eval_seeds),
             steps=int(args.steps),
             assets=int(args.assets),
@@ -1076,6 +1268,11 @@ def main() -> None:
             optimizer_seed=int(replicate_seeds[0]),
             optimizer_seeds=replicate_seeds,
             min_pairs=int(args.min_pairs),
+            ppo_hidden_dim=int(args.ppo_hidden_dim),
+            ppo_learning_rate=float(args.ppo_learning_rate),
+            ppo_epochs=int(args.ppo_epochs),
+            ppo_minibatch_size=int(args.ppo_minibatch_size),
+            ppo_init_log_std=float(args.ppo_init_log_std),
             offpolicy_hidden_dim=int(args.offpolicy_hidden_dim),
             offpolicy_replay_capacity=int(args.offpolicy_replay_capacity),
             offpolicy_warmup_steps=int(args.offpolicy_warmup_steps),

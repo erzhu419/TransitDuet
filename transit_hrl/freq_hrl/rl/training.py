@@ -21,6 +21,17 @@ SMDPRolloutFn = Callable[
     [FrequencySeparatedActorCriticPPO, int, bool],
     tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]],
 ]
+TrainingSeedFn = Callable[[int, int], int]
+
+
+def _iteration_rollout_seeds(
+    seed_roots: list[int],
+    iteration: int,
+    training_seed_fn: TrainingSeedFn | None,
+) -> list[int]:
+    if training_seed_fn is None:
+        return [int(seed) for seed in seed_roots]
+    return [int(training_seed_fn(int(seed), int(iteration))) for seed in seed_roots]
 
 
 def concat_batches(batches: Iterable[TrajectoryBatch]) -> TrajectoryBatch:
@@ -113,6 +124,8 @@ def train_dual_ppo(
     objective_fn: ObjectiveFn,
     summary_fn: SummaryFn = summarize_numeric_rows,
     *,
+    selection_seeds: list[int] | None = None,
+    training_seed_fn: TrainingSeedFn | None = None,
     policy: str = "ppo_dual_actor_critic",
     trainer: str = "shared_dual_level_ppo",
     domain: str = "generic",
@@ -120,8 +133,11 @@ def train_dual_ppo(
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
     """Train a dual-level PPO model through a domain-supplied rollout adapter."""
     metadata = dict(metadata or {})
+    selection_seed_list = list(selection_seeds or train_seeds)
     best_state = copy.deepcopy(model.state_dict())
-    initial_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+    initial_rows = [
+        rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+    ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
     history: list[dict[str, Any]] = [{
         "iteration": -1,
@@ -140,19 +156,25 @@ def train_dual_ppo(
     for iteration in range(max(1, int(iterations))):
         batches = []
         sampled_rows = []
-        for seed in train_seeds:
+        rollout_seeds = _iteration_rollout_seeds(
+            train_seeds, iteration, training_seed_fn
+        )
+        for seed in rollout_seeds:
             batch, row = rollout_fn(model, int(seed), True)
             if batch is not None:
                 batches.append(batch)
             sampled_rows.append(row)
         metrics = model.update(concat_batches(batches))
-        eval_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+        eval_rows = [
+            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+        ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
         if score > best_score:
             best_score = score
             best_state = copy.deepcopy(model.state_dict())
         history.append({
             "iteration": int(iteration),
+            "training_rollout_seeds": rollout_seeds,
             "score": score,
             **_sampled_summary(sampled_rows, objective_fn),
             **summary_fn(eval_rows),
@@ -166,6 +188,8 @@ def train_dual_ppo(
         "trainer": trainer,
         "domain": domain,
         "train_seeds": list(train_seeds),
+        "rollout_seed_roots": list(train_seeds),
+        "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
         "best_score": float(best_score),
@@ -212,14 +236,19 @@ def train_frequency_separated_ppo(
     objective_fn: ObjectiveFn,
     summary_fn: SummaryFn = summarize_numeric_rows,
     *,
+    selection_seeds: list[int] | None = None,
+    training_seed_fn: TrainingSeedFn | None = None,
     policy: str = "freq_hrl_smdp_ppo",
     domain: str = "generic",
     metadata: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
+    selection_seed_list = list(selection_seeds or train_seeds)
     best_state = copy.deepcopy(model.state_dict())
-    initial_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+    initial_rows = [
+        rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+    ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
     history: list[dict[str, Any]] = [{
         "iteration": -1,
@@ -243,7 +272,10 @@ def train_frequency_separated_ppo(
     for iteration in range(max(1, int(iterations))):
         batches: list[HierarchicalTrajectoryBatch] = []
         sampled_rows = []
-        for seed in train_seeds:
+        rollout_seeds = _iteration_rollout_seeds(
+            train_seeds, iteration, training_seed_fn
+        )
+        for seed in rollout_seeds:
             batch, row = rollout_fn(model, int(seed), True)
             if batch is not None:
                 batches.append(batch)
@@ -251,13 +283,16 @@ def train_frequency_separated_ppo(
         if not batches:
             raise RuntimeError("sampled rollouts did not produce an SMDP trajectory")
         metrics = model.update(concat_hierarchical_batches(batches))
-        eval_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+        eval_rows = [
+            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
+        ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
         if score > best_score:
             best_score = score
             best_state = copy.deepcopy(model.state_dict())
         history.append({
             "iteration": int(iteration),
+            "training_rollout_seeds": rollout_seeds,
             "score": score,
             **_sampled_summary(sampled_rows, objective_fn),
             **summary_fn(eval_rows),
@@ -283,6 +318,8 @@ def train_frequency_separated_ppo(
         "trainer": "frequency_separated_smdp_ppo_v2",
         "domain": domain,
         "train_seeds": list(train_seeds),
+        "rollout_seed_roots": list(train_seeds),
+        "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
         "best_score": float(best_score),

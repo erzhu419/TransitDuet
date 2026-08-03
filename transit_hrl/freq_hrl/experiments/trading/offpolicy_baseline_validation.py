@@ -14,6 +14,12 @@ import torch
 
 from freq_hrl.core import FrequencyDiagnostics, LeakageRegularizer
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv
+from freq_hrl.experiments.reproducibility import (
+    derive_seed,
+    training_rollout_seed,
+    validate_evaluation_seed_roles,
+    validate_unique_seeds,
+)
 from freq_hrl.rl import FlatOffPolicyActorCritic, OffPolicyConfig, ReplayBuffer
 
 from .metrics import (
@@ -248,6 +254,8 @@ def train_flat_offpolicy_baseline(
     scenario: str,
     iterations: int,
     seed: int,
+    validation_seeds: list[int] | None = None,
+    resample_training_paths: bool = True,
     hidden_dim: int = 64,
     replay_capacity: int = 100_000,
     warmup_steps: int = 256,
@@ -257,6 +265,19 @@ def train_flat_offpolicy_baseline(
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
+    rollout_seed_roots = validate_unique_seeds(
+        train_seeds, role="rollout_seed_roots"
+    )
+    if validation_seeds is None:
+        validation_seed_list = [
+            derive_seed("freq_hrl_trading_validation_v2", scenario, root)
+            for root in rollout_seed_roots
+        ]
+    else:
+        validation_seed_list = list(validation_seeds)
+    validation_seed_list, heldout_test_seeds = validate_evaluation_seed_roles(
+        validation_seed_list, eval_seeds
+    )
     algorithm = "sac" if policy_mode == "flat_sac" else "td3"
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
@@ -285,7 +306,7 @@ def train_flat_offpolicy_baseline(
             policy_mode=policy_mode,
             training=False,
         )[0]
-        for eval_seed in train_seeds
+        for eval_seed in validation_seed_list
     ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
     best_state = copy.deepcopy(agent.state_dict())
@@ -304,7 +325,14 @@ def train_flat_offpolicy_baseline(
     temperature_optimizer_steps = 0
     for iteration in range(max(1, int(iterations))):
         iteration_updates: list[dict[str, float]] = []
-        for train_seed in train_seeds:
+        iteration_train_seeds = [
+            training_rollout_seed(
+                int(seed), root, iteration, domain=f"trading:{scenario}"
+            )
+            if resample_training_paths else int(root)
+            for root in rollout_seed_roots
+        ]
+        for train_seed in iteration_train_seeds:
             _, global_step, updates = run_offpolicy_episode(
                 agent,
                 seed=int(train_seed),
@@ -337,7 +365,7 @@ def train_flat_offpolicy_baseline(
                 policy_mode=policy_mode,
                 training=False,
             )[0]
-            for eval_seed in train_seeds
+            for eval_seed in validation_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
         if score > best_score:
@@ -345,6 +373,7 @@ def train_flat_offpolicy_baseline(
             best_state = copy.deepcopy(agent.state_dict())
         history.append({
             "iteration": int(iteration),
+            "training_rollout_seeds": iteration_train_seeds,
             "score": score,
             **summarize(eval_rows),
             **_mean_update_metrics(iteration_updates, algorithm=algorithm),
@@ -362,7 +391,7 @@ def train_flat_offpolicy_baseline(
             policy_mode=policy_mode,
             training=False,
         )[0]
-        for eval_seed in eval_seeds
+        for eval_seed in heldout_test_seeds
     ]
     payload = {
         "policy": policy_mode,
@@ -371,8 +400,12 @@ def train_flat_offpolicy_baseline(
         "policy_mode": policy_mode,
         "baseline": policy_mode,
         "scenario": scenario,
-        "train_seeds": list(train_seeds),
-        "eval_seeds": list(eval_seeds),
+        "train_seeds": list(rollout_seed_roots),
+        "rollout_seed_roots": list(rollout_seed_roots),
+        "validation_seeds": list(validation_seed_list),
+        "selection_seeds": list(validation_seed_list),
+        "eval_seeds": list(heldout_test_seeds),
+        "heldout_test_seeds": list(heldout_test_seeds),
         "steps": int(steps),
         "assets": int(assets),
         "iterations": int(iterations),
@@ -385,6 +418,20 @@ def train_flat_offpolicy_baseline(
         "batch_size": int(batch_size),
         "updates_per_step": int(updates_per_step),
         "environment_steps_train": int(global_step),
+        "environment_steps_validation": int(
+            len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+        ),
+        "environment_steps_eval": int(len(heldout_test_seeds) * int(steps)),
+        "unique_training_path_count": int(
+            len(rollout_seed_roots)
+            * (max(1, int(iterations)) if resample_training_paths else 1)
+        ),
+        "training_replicate_seed": int(seed),
+        "training_path_protocol": (
+            "fresh_deterministic_path_per_root_and_iteration_v2"
+            if resample_training_paths else "fixed_path_reuse_legacy"
+        ),
+        "checkpoint_selection_protocol": "disjoint_validation_paths",
         "actor_optimizer_steps_train": int(actor_optimizer_steps),
         "critic_optimizer_steps_train": int(critic_optimizer_steps),
         "temperature_optimizer_steps_train": int(temperature_optimizer_steps),
@@ -459,12 +506,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--policy-mode", choices=OFFPOLICY_MODES, default="flat_sac")
     parser.add_argument("--train-seeds", type=int, nargs="+", default=[42, 123, 456])
+    parser.add_argument("--validation-seeds", type=int, nargs="+", default=None)
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=[31415, 27182, 16180])
     parser.add_argument("--steps", type=int, default=360)
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--scenario", default="persistent_shift")
     parser.add_argument("--iterations", type=int, default=8)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
+    parser.add_argument("--reuse-fixed-training-paths", action="store_true")
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--replay-capacity", type=int, default=100_000)
     parser.add_argument("--warmup-steps", type=int, default=256)
@@ -486,6 +535,10 @@ def main() -> None:
         scenario=str(args.scenario),
         iterations=int(args.iterations),
         seed=int(args.optimizer_seed),
+        validation_seeds=(
+            None if args.validation_seeds is None else list(args.validation_seeds)
+        ),
+        resample_training_paths=not args.reuse_fixed_training_paths,
         hidden_dim=int(args.hidden_dim),
         replay_capacity=int(args.replay_capacity),
         warmup_steps=int(args.warmup_steps),

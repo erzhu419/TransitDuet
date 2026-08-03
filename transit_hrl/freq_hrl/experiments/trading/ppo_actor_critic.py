@@ -18,6 +18,12 @@ from freq_hrl.core import (
     FrequencyRouter,
     LeakageRegularizer,
 )
+from freq_hrl.experiments.reproducibility import (
+    derive_seed,
+    training_rollout_seed,
+    validate_evaluation_seed_roles,
+    validate_unique_seeds,
+)
 from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import (
@@ -907,6 +913,13 @@ def train_ppo_actor_critic(
     scenario: str,
     iterations: int,
     seed: int,
+    validation_seeds: list[int] | None = None,
+    hidden_dim: int = 64,
+    learning_rate: float = 3e-4,
+    ppo_epochs: int = 4,
+    minibatch_size: int = 512,
+    init_log_std: float = -1.0,
+    resample_training_paths: bool = True,
     leakage_scale: float = 0.0,
     plan_basis_dim: int = 0,
     plan_horizon_s: float = 1800.0,
@@ -932,6 +945,19 @@ def train_ppo_actor_critic(
     policy_mode = str(policy_mode or "freq_hrl")
     if policy_mode not in POLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
+    rollout_seed_roots = validate_unique_seeds(
+        train_seeds, role="rollout_seed_roots"
+    )
+    if validation_seeds is None:
+        validation_seed_list = [
+            derive_seed("freq_hrl_trading_validation_v2", scenario, root)
+            for root in rollout_seed_roots
+        ]
+    else:
+        validation_seed_list = list(validation_seeds)
+    validation_seed_list, heldout_test_seeds = validate_evaluation_seed_roles(
+        validation_seed_list, eval_seeds
+    )
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
     plan_mapper = make_plan_mapper(
@@ -946,12 +972,12 @@ def train_ppo_actor_critic(
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
         lower_action_dim=assets,
-        hidden_dim=0,
-        upper_learning_rate=0.003,
-        lower_learning_rate=0.003,
-        epochs=4,
-        minibatch_size=512,
-        init_log_std=-2.5,
+        hidden_dim=int(hidden_dim),
+        upper_learning_rate=float(learning_rate),
+        lower_learning_rate=float(learning_rate),
+        epochs=int(ppo_epochs),
+        minibatch_size=int(minibatch_size),
+        init_log_std=float(init_log_std),
         lower_cost_target=float(lower_lf_constraint_target),
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
@@ -983,9 +1009,18 @@ def train_ppo_actor_critic(
     )
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
-        train_seeds=train_seeds,
-        eval_seeds=eval_seeds,
+        train_seeds=rollout_seed_roots,
+        eval_seeds=heldout_test_seeds,
         iterations=iterations,
+        selection_seeds=validation_seed_list,
+        training_seed_fn=(
+            (
+                lambda root, iteration: training_rollout_seed(
+                    int(seed), root, iteration, domain=f"trading:{scenario}"
+                )
+            )
+            if resample_training_paths else None
+        ),
         rollout_fn=lambda ppo_model, rollout_seed, sample: smdp_rollout(
             ppo_model,
             seed=rollout_seed,
@@ -1027,6 +1062,15 @@ def train_ppo_actor_critic(
                 policy_mode == "freq_hrl" and use_handcrafted_frequency_prior
             ),
             "capacity_match_contract": "identical model dimensions, optimizer, epochs, and rollout seed budget",
+            "training_replicate_seed": int(seed),
+            "rollout_seed_roots": list(rollout_seed_roots),
+            "validation_seeds": list(validation_seed_list),
+            "heldout_test_seeds": list(heldout_test_seeds),
+            "training_path_protocol": (
+                "fresh_deterministic_path_per_root_and_iteration_v2"
+                if resample_training_paths else "fixed_path_reuse_legacy"
+            ),
+            "checkpoint_selection_protocol": "disjoint_validation_paths",
             "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
             "lower_lf_constraint_target": float(lower_lf_constraint_target),
@@ -1049,9 +1093,16 @@ def train_ppo_actor_critic(
         row["baseline"] = policy_mode
         row["policy_mode"] = policy_mode
     payload["environment_steps_train"] = int(
-        len(train_seeds) * int(steps) * max(1, int(iterations))
+        len(rollout_seed_roots) * int(steps) * max(1, int(iterations))
     )
-    payload["environment_steps_eval"] = int(len(eval_seeds) * int(steps))
+    payload["environment_steps_validation"] = int(
+        len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+    )
+    payload["environment_steps_eval"] = int(len(heldout_test_seeds) * int(steps))
+    payload["unique_training_path_count"] = int(
+        len(rollout_seed_roots)
+        * (max(1, int(iterations)) if resample_training_paths else 1)
+    )
     return payload, heldout_rows, smdp_model
 
 
@@ -1103,12 +1154,19 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-seeds", type=int, nargs="+", default=[42, 123, 456])
+    parser.add_argument("--validation-seeds", type=int, nargs="+", default=None)
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=[31415, 27182, 16180])
     parser.add_argument("--steps", type=int, default=360)
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--scenario", choices=SCENARIOS, default="persistent_shift")
     parser.add_argument("--iterations", type=int, default=8)
     parser.add_argument("--optimizer-seed", type=int, default=2026)
+    parser.add_argument("--hidden-dim", type=int, default=64)
+    parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--ppo-epochs", type=int, default=4)
+    parser.add_argument("--minibatch-size", type=int, default=512)
+    parser.add_argument("--init-log-std", type=float, default=-1.0)
+    parser.add_argument("--reuse-fixed-training-paths", action="store_true")
     parser.add_argument("--leakage-scale", type=float, default=0.0)
     parser.add_argument("--plan-basis-dim", type=int, default=0)
     parser.add_argument("--plan-horizon-s", type=float, default=1800.0)
@@ -1136,6 +1194,15 @@ def main() -> None:
         scenario=args.scenario,
         iterations=args.iterations,
         seed=args.optimizer_seed,
+        validation_seeds=(
+            None if args.validation_seeds is None else list(args.validation_seeds)
+        ),
+        hidden_dim=args.hidden_dim,
+        learning_rate=args.learning_rate,
+        ppo_epochs=args.ppo_epochs,
+        minibatch_size=args.minibatch_size,
+        init_log_std=args.init_log_std,
+        resample_training_paths=not args.reuse_fixed_training_paths,
         leakage_scale=args.leakage_scale,
         plan_basis_dim=args.plan_basis_dim,
         plan_horizon_s=args.plan_horizon_s,

@@ -205,3 +205,41 @@ bootstrap intervals and sign tests operate on the per-replicate mean paired
 delta. Merge-time Cartesian coverage checks block incomplete or duplicated
 cells. Artifacts that vary only evaluation seeds under one trained policy are
 classified as pseudoreplicated and are ineligible for confirmatory claims.
+
+## Confirmatory training protocol
+
+The earlier learned-policy runner was not suitable for a final experiment: its
+PPO actors were linear, the default six iterations provided only 4,320
+primitive training steps, every iteration replayed the same three exogenous
+market paths, and best-checkpoint selection reused those training paths. Those
+artifacts are now ineligible even if they carry a training-replicate label.
+
+The v2 confirmatory runner uses the following role-separated protocol:
+
+1. PPO-family policies use identical two-layer MLP actors and critics, optimizer
+   settings, update epochs, and environment-step budgets. The default hidden
+   width is 64; it remains subject to a validation-only pilot before the final
+   matrix is frozen.
+2. Every `(training replicate, rollout root, iteration)` deterministically
+   derives a fresh exogenous training path. Treatment and baselines receive the
+   same paths within a replicate, while different replicates vary both model
+   initialization and training data.
+3. Fixed validation paths select the checkpoint. Held-out test paths are
+   disjoint and are evaluated once after selection. Test outcomes never select
+   a model or hyperparameter.
+4. The default full budget is 64 iterations, five rollout roots, 240 primitive
+   steps per path, or 76,800 training environment steps per policy cell. PPO,
+   SAC, and TD3 receive the same primitive training-step budget.
+5. Every cell saves its selected checkpoint plus seed roles, optimizer seed,
+   parameter count, optimizer-step counts, training/validation/test environment
+   steps, and metric-contract version.
+6. Merge gates require both
+   `fresh_deterministic_path_per_root_and_iteration_v2` and
+   `disjoint_validation_paths`. Missing or mixed protocols invalidate the
+   headline evidence even when metric rows are otherwise complete.
+
+The full stress matrix contains stationary low-noise, stationary high-noise,
+localized burst, persistent shift, and OOD-period regimes. With five learned
+policies and ten independent training replicates this is 250 training cells.
+Scheduler placement is dynamic across the allowed CPU-node pool; no experiment
+cell is hard-bound to a host.
