@@ -151,3 +151,47 @@ reward. It is therefore reported precisely as a capacity-matched factorized
 joint-action flat PPO baseline, not as a single-actor implementation. The
 default comparison disables the handcrafted Freq-HRL actor prior; prior-enabled
 results belong in a separate ablation.
+
+## Complete off-policy learned baselines
+
+The strong learned-baseline matrix now runs local, auditable implementations
+of SAC and TD3 rather than registering them as missing external dependencies.
+Both are single-level flat policies with a joint target-weight/execution-speed
+action, persistent replay, twin Q critics, soft target updates, and deterministic
+held-out evaluation. SAC includes a squashed Gaussian actor and learned entropy
+temperature; TD3 includes target-policy smoothing and delayed actor updates.
+
+All five policies use the same market paths, transaction costs, held-out seeds,
+primitive environment-step budget, and `trading_metrics_v2`. The raw baselines
+receive the same underlying raw signal transforms, position, active target,
+target gap, and episode progress. Flat PPO, SAC, and TD3 also share the same
+bounded target and execution-speed action semantics. Exact parameter equality
+is claimed only for the PPO family because standard SAC/TD3 necessarily use
+twin critics and different actor parameterizations. Their trainable parameter
+counts and actor, critic, temperature, and total optimizer-step counts are
+reported explicitly.
+
+## Confirmatory strong-baseline gate
+
+A one-seed bootstrap produces a degenerate zero-width interval and must never
+be treated as confirmatory evidence. Strong learned-baseline checks now require
+all of the following:
+
+1. At least 10 independent held-out seeds by default.
+2. A positive independently clustered bootstrap confidence interval.
+3. Rejection by a two-sided paired sign test after Holm correction across the
+   complete learned-baseline endpoint family.
+4. A valid `trading_metrics_v2` contract for financial endpoints.
+
+`total_return` is the primary task-performance endpoint.
+`episode_information_ratio`, rather than an annualized Sharpe ratio over a
+short synthetic episode, is the risk-adjusted endpoint. `FocusScore` and
+`LowerLFDrift` are responsibility-separation endpoints. These three evidence
+classes are aggregated separately: a mechanism improvement cannot rescue a
+failed task-performance claim.
+
+Failing the significance gate with a positive point estimate is reported as
+`positive_mixed`, not `supported`. All earlier strong learned-baseline artifacts
+must be regenerated under this gate before citation in a manuscript main table.
+SAC/TD3 implementation coverage is now complete; their comparative performance
+claim remains pending a sufficiently powered confirmatory run.

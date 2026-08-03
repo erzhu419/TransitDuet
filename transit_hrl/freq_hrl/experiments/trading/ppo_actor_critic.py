@@ -161,6 +161,7 @@ def frequency_separated_feature_vectors(
     target: np.ndarray | None = None,
     *,
     leakage_feedback: float = 0.0,
+    progress: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Build v2 policy vectors through the machine-checked router contract."""
     dim = int(position.size)
@@ -201,7 +202,7 @@ def frequency_separated_feature_vectors(
             float(promotion.get("promotion_strength", 0.0)),
             float(promotion.get("shock_age", 0.0)) / 30.0,
             float(leakage_feedback),
-            1.0,
+            float(np.clip(progress, 0.0, 1.0)),
         ], dtype=np.float64),
     ])
 
@@ -215,7 +216,7 @@ def frequency_separated_feature_vectors(
         resize(freq.get("x_high_delta", 0.0), dim) / scale,
         np.tanh(lower_energy),
         np.tanh(resize(lower["shock_age"], dim) / 30.0),
-        np.ones(1, dtype=np.float64),
+        np.asarray([float(np.clip(progress, 0.0, 1.0))], dtype=np.float64),
     ])
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
@@ -224,6 +225,8 @@ def raw_hierarchical_feature_vectors(
     raw_signal: np.ndarray,
     position: np.ndarray,
     target: np.ndarray | None = None,
+    *,
+    progress: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Capacity-matched raw-history features for non-frequency baselines."""
 
@@ -242,7 +245,13 @@ def raw_hierarchical_feature_vectors(
         raw * position_arr,
         position_arr,
         current_target,
-        np.asarray([0.0, 0.0, 0.0, 0.0, 1.0], dtype=np.float64),
+        np.asarray([
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            float(np.clip(progress, 0.0, 1.0)),
+        ], dtype=np.float64),
     ])
     lower_state = np.concatenate([
         current_target,
@@ -253,7 +262,7 @@ def raw_hierarchical_feature_vectors(
         np.tanh(np.abs(raw)),
         raw * gap,
         raw * position_arr,
-        np.ones(1, dtype=np.float64),
+        np.asarray([float(np.clip(progress, 0.0, 1.0))], dtype=np.float64),
     ])
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
@@ -266,6 +275,7 @@ def smdp_policy_feature_vectors(
     position: np.ndarray,
     target: np.ndarray | None,
     leakage_feedback: float,
+    progress: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray]:
     if str(policy_mode) == "freq_hrl":
         return frequency_separated_feature_vectors(
@@ -273,8 +283,14 @@ def smdp_policy_feature_vectors(
             position,
             target=target,
             leakage_feedback=leakage_feedback,
+            progress=progress,
         )
-    return raw_hierarchical_feature_vectors(raw_signal, position, target=target)
+    return raw_hierarchical_feature_vectors(
+        raw_signal,
+        position,
+        target=target,
+        progress=progress,
+    )
 
 
 def initialize_frequency_prior(model: DualActorCriticPPO, assets: int, plan_basis_dim: int = 0) -> None:
@@ -367,6 +383,15 @@ def latent_speed(latent: np.ndarray) -> np.ndarray:
     return np.clip(0.05 + 0.95 / (1.0 + np.exp(-np.asarray(latent, dtype=np.float64))), 0.05, 1.0)
 
 
+def bounded_speed(action: np.ndarray) -> np.ndarray:
+    bounded = np.clip(np.asarray(action, dtype=np.float64), -1.0, 1.0)
+    return np.clip(0.05 + 0.95 * (bounded + 1.0) / 2.0, 0.05, 1.0)
+
+
+def flat_latent_speed(latent: np.ndarray) -> np.ndarray:
+    return bounded_speed(np.tanh(np.asarray(latent, dtype=np.float64)))
+
+
 def rollout(
     model: DualActorCriticPPO,
     seed: int,
@@ -454,7 +479,11 @@ def rollout(
             policy_mode=policy_mode,
         )
         lower_out = model.act_lower(lower_state, sample=sample)
-        speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        speed = (
+            flat_latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+            if policy_mode == "flat_ppo"
+            else latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        )
         pre_gap = np.asarray(target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -658,6 +687,7 @@ def smdp_rollout(
                 position=env.position.copy(),
                 target=current_target,
                 leakage_feedback=latest_leakage_feedback,
+                progress=t / max(int(steps) - 1, 1),
             )
             upper_out = model.act_upper(upper_state, sample=sample)
             if plan_mapper is None:
@@ -687,9 +717,14 @@ def smdp_rollout(
             position=env.position.copy(),
             target=current_target,
             leakage_feedback=latest_leakage_feedback,
+            progress=t / max(int(steps) - 1, 1),
         )
         lower_out = model.act_lower(lower_state, sample=sample)
-        speed = latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        speed = (
+            flat_latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+            if policy_mode == "flat_ppo"
+            else latent_speed(np.asarray(lower_out["action"], dtype=np.float64))
+        )
         pre_gap = np.asarray(current_target, dtype=np.float64) - env.position.copy()
         raw_recenter_boost = max(float(lower_lf_raw_recenter_gain), 0.0) * np.tanh(
             np.abs(pre_gap) / max(float(lower_lf_raw_recenter_scale), 1e-9)
@@ -830,6 +865,7 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
     keys = [
         "total_return",
         "sharpe",
+        "episode_information_ratio",
         "max_drawdown",
         "turnover",
         "promotion_count",
@@ -1012,6 +1048,10 @@ def train_ppo_actor_critic(
     for row in heldout_rows:
         row["baseline"] = policy_mode
         row["policy_mode"] = policy_mode
+    payload["environment_steps_train"] = int(
+        len(train_seeds) * int(steps) * max(1, int(iterations))
+    )
+    payload["environment_steps_eval"] = int(len(eval_seeds) * int(steps))
     return payload, heldout_rows, smdp_model
 
 

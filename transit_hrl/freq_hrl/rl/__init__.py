@@ -24,6 +24,11 @@ from .training import (
     train_dual_ppo,
     train_frequency_separated_ppo,
 )
+from .offpolicy_actor_critic import (
+    FlatOffPolicyActorCritic,
+    OffPolicyConfig,
+    ReplayBuffer,
+)
 
 __all__ = [
     "DualActorCriticPPO",
@@ -45,4 +50,7 @@ __all__ = [
     "summarize_numeric_rows",
     "train_dual_ppo",
     "train_frequency_separated_ppo",
+    "FlatOffPolicyActorCritic",
+    "OffPolicyConfig",
+    "ReplayBuffer",
 ]

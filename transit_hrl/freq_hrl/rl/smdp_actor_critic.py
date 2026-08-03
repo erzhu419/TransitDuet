@@ -423,7 +423,16 @@ class FrequencySeparatedActorCriticPPO:
         action_dim = cfg.upper_action_dim if level == "upper" else cfg.lower_action_dim
         batch.validate(state_dim=state_dim, action_dim=action_dim, level=level)
         if batch.size == 0:
-            return {f"{level}_{key}": 0.0 for key in ("loss", "policy_loss", "value_loss", "entropy")}
+            empty = {
+                f"{level}_{key}": 0.0
+                for key in ("loss", "policy_loss", "value_loss", "entropy")
+            }
+            return {
+                **empty,
+                f"{level}_actor_optimizer_steps": 0.0,
+                f"{level}_value_optimizer_steps": 0.0,
+                f"{level}_cost_value_optimizer_steps": 0.0,
+            }
 
         state = torch.as_tensor(batch.state, dtype=torch.float32, device=self.device)
         action = torch.as_tensor(batch.action, dtype=torch.float32, device=self.device)
@@ -511,6 +520,11 @@ class FrequencySeparatedActorCriticPPO:
         }
         out[f"{level}_transitions"] = float(batch.size)
         out[f"{level}_mean_duration"] = float(np.mean(batch.duration))
+        out[f"{level}_actor_optimizer_steps"] = float(len(rows))
+        out[f"{level}_value_optimizer_steps"] = float(len(rows))
+        out[f"{level}_cost_value_optimizer_steps"] = float(
+            len(rows) if cost_returns_t is not None and cost_value_optimizer is not None else 0
+        )
         if cost is not None:
             out[f"{level}_cost_mean"] = float(np.mean(cost))
         return out

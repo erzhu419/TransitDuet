@@ -45,7 +45,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             for row in payload["per_seed"]
             if row["baseline"] == "freq_hrl"
         ))
-        self.assertEqual(len(payload["paired_checks"]), 8)
+        self.assertEqual(len(payload["paired_checks"]), 16)
         self.assertTrue(any(row["baseline"] == "flat_ppo" for row in payload["per_seed"]))
         self.assertTrue(any(row["policy_mode"] == "generic_hrl_ppo" for row in payload["parameter_budget"]))
         self.assertEqual(
@@ -55,6 +55,44 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
         by_mode = {row["baseline"]: row for row in payload["per_seed"]}
         self.assertEqual(by_mode["flat_ppo"]["upper_decision_count"], 24)
         self.assertLess(by_mode["generic_hrl_ppo"]["upper_decision_count"], 24)
+
+    def test_runner_executes_real_sac_and_td3_under_shared_step_budget(self):
+        payload = run_strong_learned_baseline_validation(
+            scenarios=["persistent_shift"],
+            policy_modes=["freq_hrl", "flat_sac", "flat_td3"],
+            train_seeds=[42],
+            eval_seeds=[123],
+            steps=40,
+            assets=2,
+            iterations=1,
+            optimizer_seed=7,
+            min_pairs=1,
+            offpolicy_hidden_dim=16,
+            offpolicy_warmup_steps=8,
+            offpolicy_batch_size=8,
+        )
+        self.assertEqual(payload["summary"]["rows"], 3)
+        self.assertEqual(payload["summary"]["sac_td3_status"], "complete")
+        self.assertEqual(payload["summary"]["environment_step_budget_status"], "matched")
+        self.assertNotEqual(
+            payload["summary"]["strong_learned_baseline_evidence_status"],
+            "supported",
+        )
+        self.assertEqual(
+            payload["summary"]["parameter_budget_status"],
+            "controlled_by_algorithm_family",
+        )
+        by_mode = {row["policy_mode"]: row for row in payload["run_summary"]}
+        self.assertGreater(by_mode["flat_sac"]["gradient_updates_train"], 0)
+        self.assertGreater(by_mode["flat_td3"]["gradient_updates_train"], 0)
+        self.assertEqual(
+            {row["environment_steps_train"] for row in payload["sample_efficiency"]},
+            {40},
+        )
+        commands = {row["policy_mode"]: row["command"] for row in payload["experiment_manifest"]}
+        self.assertIn("offpolicy_baseline_validation", commands["flat_sac"])
+        self.assertIn("--optimizer-seed 7 --train-seeds", commands["flat_td3"])
+        self.assertTrue(all("holm_adjusted_p_value" in row for row in payload["paired_checks"]))
 
     def test_write_outputs_creates_main_artifacts(self):
         payload = run_strong_learned_baseline_validation(
@@ -99,7 +137,7 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             merged = merge_strong_learned_baseline_shards(shard_dirs, min_pairs=1)
             self.assertEqual(merged["summary"]["merge_status"], "merged")
             self.assertEqual(merged["summary"]["rows"], 3)
-            self.assertEqual(len(merged["paired_checks"]), 8)
+            self.assertEqual(len(merged["paired_checks"]), 16)
 
 
 if __name__ == "__main__":

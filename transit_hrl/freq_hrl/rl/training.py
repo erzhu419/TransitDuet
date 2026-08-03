@@ -232,6 +232,12 @@ def train_frequency_separated_ppo(
         "lower_value_loss": 0.0,
         "constraint_mean": 0.0,
         "constraint_lambda": float(model.constraint_lambda),
+        "upper_actor_optimizer_steps": 0.0,
+        "upper_value_optimizer_steps": 0.0,
+        "upper_cost_value_optimizer_steps": 0.0,
+        "lower_actor_optimizer_steps": 0.0,
+        "lower_value_optimizer_steps": 0.0,
+        "lower_cost_value_optimizer_steps": 0.0,
     }]
 
     for iteration in range(max(1, int(iterations))):
@@ -260,6 +266,18 @@ def train_frequency_separated_ppo(
 
     model.load_state_dict(best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
+    actor_optimizer_steps = int(sum(
+        float(row.get("upper_actor_optimizer_steps", 0.0))
+        + float(row.get("lower_actor_optimizer_steps", 0.0))
+        for row in history
+    ))
+    critic_optimizer_steps = int(sum(
+        float(row.get("upper_value_optimizer_steps", 0.0))
+        + float(row.get("lower_value_optimizer_steps", 0.0))
+        + float(row.get("upper_cost_value_optimizer_steps", 0.0))
+        + float(row.get("lower_cost_value_optimizer_steps", 0.0))
+        for row in history
+    ))
     payload = {
         "policy": policy,
         "trainer": "frequency_separated_smdp_ppo_v2",
@@ -271,6 +289,10 @@ def train_frequency_separated_ppo(
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
+        "actor_optimizer_steps_train": actor_optimizer_steps,
+        "critic_optimizer_steps_train": critic_optimizer_steps,
+        "temperature_optimizer_steps_train": 0,
+        "gradient_updates_train": actor_optimizer_steps + critic_optimizer_steps,
         "trajectory_contract": {
             "upper": "one transition per macro action with gamma^duration bootstrap",
             "lower": "one transition per primitive control action",
