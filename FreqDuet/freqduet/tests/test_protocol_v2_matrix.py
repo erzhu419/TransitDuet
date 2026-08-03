@@ -11,6 +11,7 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     PROTOCOL_VERSION,
     analysis_metrics_for_frame,
     config_fingerprint,
+    holm_adjusted_pvalues,
     paired_sign_flip_p,
     protocol_version_for_config,
     source_fingerprint,
@@ -86,6 +87,11 @@ class ProtocolV2MatrixTest(unittest.TestCase):
             paired_sign_flip_p(np.array([-1.0, -1.0, -1.0])),
             0.25,
         )
+
+    def test_holm_correction_controls_each_comparison_family(self):
+        corrected = holm_adjusted_pvalues([0.01, 0.04, 0.03, float("nan")])
+        np.testing.assert_allclose(corrected[:3], [0.03, 0.06, 0.06])
+        self.assertTrue(np.isnan(corrected[3]))
 
     def test_config_fingerprint_covers_inheritance_lineage(self):
         result = config_fingerprint(

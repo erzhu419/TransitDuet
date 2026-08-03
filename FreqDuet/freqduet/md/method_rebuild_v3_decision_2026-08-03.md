@@ -167,3 +167,41 @@ service cost, wait, headway CV, fleet overshoot, completion, action stability,
 and seed failures. Mean improvement alone is insufficient. The winning
 structure then receives multi-domain 200-episode confirmation against the
 external fixed-headway baseline.
+
+## Locked Selection And Confirmation Protocol
+
+The protocol-v3 structure-selection run is fixed before reading any v3 result:
+
+- run: `protocol_v3_physical_contract_selection_ep80_s20_v1`;
+- 80 training episodes;
+- train seeds: `7,11,17,23,31,37,42,53,61,71,83,97,101,113,127,139,149,157,167,179`;
+- frozen CRN evaluation seeds:
+  `20101,20107,20113,20117,20123,20129,20143,20149,20161,20173,20177,20183`;
+- primary endpoint: `service_cost_restricted`;
+- uncertainty unit: hierarchical bootstrap over training seeds and paired
+  evaluation seeds;
+- paired test: two-sided sign-flip test over per-training-seed mean deltas,
+  with Holm correction across candidate-reference comparisons for each metric.
+
+The deployable candidate set is compact b30, global-three b30, local-four b30,
+compact b15/b60/b90, and rolling-drift b30.  No-lower-drift, no-DriftFB,
+spatial-headway, inferred-target, observed-training, and legacy-credit rows are
+mechanism or contract controls and cannot become the main method from this
+screen.  A candidate is eligible only with complete finite runs and no paired
+95% interval showing degradation in unserved rate, fleet overshoot, or trip
+completion.  If no candidate has both a restricted-cost interval below zero
+and Holm-adjusted `p <= 0.05` versus compact b30, compact b30 is retained.  If
+several pass, the lowest restricted-cost mean is selected; differences below
+`0.005` retain the lower-dimensional planner.
+
+Only one selected configuration proceeds to the independent confirmation set:
+
+- 200 training episodes;
+- train seeds:
+  `211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317`;
+- frozen CRN evaluation seeds:
+  `30103,30109,30113,30119,30133,30137,30139,30161,30169,30181,30187,30197,30203,30211,30223,30241`.
+
+Selection seeds may not be reused for confirmatory claims.  Multi-domain and
+external-baseline comparisons use the locked winner and confirmation seeds;
+any later tuning creates a new method version and a new untouched seed set.

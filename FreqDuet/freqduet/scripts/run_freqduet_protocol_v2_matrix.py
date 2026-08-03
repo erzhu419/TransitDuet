@@ -457,6 +457,23 @@ def paired_sign_flip_p(values: np.ndarray, max_draws: int = 65536) -> float:
     return float((count + 1) / (len(null_means) + 1))
 
 
+def holm_adjusted_pvalues(values: list[float]) -> list[float]:
+    """Control family-wise error while preserving the original row order."""
+    raw = np.asarray(values, dtype=np.float64)
+    adjusted = np.full(raw.shape, np.nan, dtype=np.float64)
+    finite_indices = np.flatnonzero(np.isfinite(raw))
+    if finite_indices.size == 0:
+        return adjusted.tolist()
+    order = finite_indices[np.argsort(raw[finite_indices], kind="stable")]
+    family_size = len(order)
+    running_max = 0.0
+    for rank, index in enumerate(order):
+        corrected = min(1.0, float(raw[index]) * (family_size - rank))
+        running_max = max(running_max, corrected)
+        adjusted[index] = running_max
+    return adjusted.tolist()
+
+
 def _resolve_parent(path: Path, parent: str) -> Path:
     parent_path = Path(parent)
     if parent_path.is_absolute():
@@ -776,6 +793,14 @@ def aggregate(
             row[f"{delta_col}_signflip_p"] = paired_sign_flip_p(train_deltas)
         delta_rows.append(row)
 
+    for metric in analysis_metrics:
+        key = f"delta_{metric}_signflip_p"
+        corrected = holm_adjusted_pvalues([
+            float(row.get(key, float("nan"))) for row in delta_rows
+        ])
+        for row, value in zip(delta_rows, corrected):
+            row[f"{key}_holm"] = value
+
     out_dir.mkdir(parents=True, exist_ok=True)
     per_eval.to_csv(out_dir / "frozen_per_eval.csv", index=False)
     pd.DataFrame(summary_rows).to_csv(out_dir / "frozen_summary.csv", index=False)
@@ -789,6 +814,10 @@ def aggregate(
         "metrics": analysis_metrics,
         "uncertainty": "hierarchical bootstrap over train seed and eval seed",
         "paired_test": "two-sided sign-flip test over train-seed mean deltas",
+        "multiple_testing": (
+            "Holm family-wise correction across candidate-reference "
+            "comparisons, separately for each metric"
+        ),
         "strict_complete": True,
         "expected_rollouts": expected_rows,
         "common_random_numbers_verified": True,
