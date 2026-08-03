@@ -1088,6 +1088,7 @@ class TransitDuetV2Runner:
         self.upper_action_low = np.asarray(action_low, dtype=np.float32)
         self.upper_action_high = np.asarray(action_high, dtype=np.float32)
         self.upper_action_bins = None
+        self.upper_action_candidates = None
         self.upper_action_override_enable = False
         self.upper_action_override_values = None
         self.upper_action_override_disable_value_selectors = True
@@ -1102,6 +1103,28 @@ class TransitDuetV2Runner:
             if action_bins.size < 2:
                 raise ValueError("upper.action_bins must contain at least two values")
             self.upper_action_bins = action_bins
+        raw_candidates = upper_cfg.get('action_candidates', None)
+        if raw_candidates:
+            candidates = np.asarray(raw_candidates, dtype=np.float32)
+            if (candidates.ndim != 2
+                    or candidates.shape[1] != self.upper_action_dim
+                    or candidates.shape[0] < 2):
+                raise ValueError(
+                    "upper.action_candidates must have shape "
+                    f"[n_candidates, {self.upper_action_dim}] with at least "
+                    "two candidates")
+            if self.upper_action_bins is not None:
+                raise ValueError(
+                    "upper.action_bins and upper.action_candidates are mutually "
+                    "exclusive")
+            if (np.any(candidates < self.upper_action_low.reshape(1, -1))
+                    or np.any(candidates > self.upper_action_high.reshape(1, -1))):
+                raise ValueError(
+                    "upper.action_candidates must lie within planner bounds")
+            if np.unique(candidates, axis=0).shape[0] != candidates.shape[0]:
+                raise ValueError(
+                    "upper.action_candidates contains duplicate rows")
+            self.upper_action_candidates = candidates
 
         action_override_cfg = upper_cfg.get('action_override', {}) or {}
         self.upper_action_override_enable = bool(
@@ -1615,6 +1638,9 @@ class TransitDuetV2Runner:
             hidden_dim=upper_cfg.get('hidden_dim', 64),
             action_low=self.upper_action_low.tolist(),
             action_high=self.upper_action_high.tolist(),
+            action_candidates=(
+                self.upper_action_candidates.tolist()
+                if self.upper_action_candidates is not None else None),
             ensemble_size=upper_cfg.get('ensemble_size', 10),
             beta=upper_cfg.get('resac_beta', -2.0),
             lr=upper_cfg.get('lr', 3e-4),
@@ -2065,6 +2091,10 @@ class TransitDuetV2Runner:
         # to the Fixed baseline. Enabled via coupling.tpc_enable in config.
         tpc = coupling_cfg.get('tpc', {})
         self.tpc_enable = bool(tpc.get('enable', False))
+        if self.tpc_enable and self.upper_action_candidates is not None:
+            raise ValueError(
+                "TPC Gaussian behavior mixing is incompatible with a categorical "
+                "upper action library")
         self.tpc_eps = float(tpc.get('eps_explore', 0.25))
         self.tpc_sigma_tgt = float(tpc.get('sigma_tgt', 20.0))
         self.tpc_w_max = float(tpc.get('w_max', 5.0))
@@ -8392,6 +8422,10 @@ class TransitDuetV2Runner:
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
         if self.upper_action_bins is not None:
             print(f"    upper_bins={self.upper_action_bins.tolist()}")
+        if self.upper_action_candidates is not None:
+            print(
+                f"    upper_action_library={len(self.upper_action_candidates)} "
+                f"curves")
         freeze_notes = []
         if self.freeze_lower_policy_after_ep is not None:
             freeze_notes.append(

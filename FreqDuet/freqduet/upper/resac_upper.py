@@ -149,6 +149,84 @@ class BoundedGaussianPolicy(nn.Module):
         return lp.cpu().numpy().squeeze()
 
 
+class CategoricalPlanPolicy(nn.Module):
+    """Categorical policy over a finite library of timetable curves."""
+
+    def __init__(self, state_dim, action_candidates, hidden_dim=64,
+                 init_w=3e-3):
+        super().__init__()
+        candidates = torch.as_tensor(
+            action_candidates, dtype=torch.float32)
+        if candidates.ndim != 2 or candidates.shape[0] < 2:
+            raise ValueError(
+                "action_candidates must have shape [n_candidates, action_dim] "
+                "with at least two candidates")
+        self.register_buffer("action_candidates", candidates)
+        self.fc1 = nn.Linear(state_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.logits = nn.Linear(hidden_dim, candidates.shape[0])
+        self.logits.weight.data.uniform_(-init_w, init_w)
+        self.logits.bias.data.uniform_(-init_w, init_w)
+
+    def forward(self, state):
+        x = F.relu(self.fc1(state))
+        x = F.relu(self.fc2(x))
+        return self.logits(x)
+
+    def dist_info(self, state):
+        logits = self.forward(state)
+        log_probs = F.log_softmax(logits, dim=-1)
+        probs = log_probs.exp()
+        return probs, log_probs, logits
+
+    def evaluate(self, state):
+        probs, log_probs, logits = self.dist_info(state)
+        idx = torch.distributions.Categorical(probs=probs).sample()
+        action = self.action_candidates[idx]
+        log_prob = log_probs.gather(1, idx.view(-1, 1))
+        return action, log_prob, idx.view(-1, 1).float(), logits, probs
+
+    def get_action(self, state, deterministic=False):
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
+        with torch.no_grad():
+            probs, _, _ = self.dist_info(state)
+            if deterministic:
+                idx = probs.argmax(dim=-1)
+            else:
+                idx = torch.distributions.Categorical(probs=probs).sample()
+            action = self.action_candidates[idx]
+        return action.squeeze(0).cpu().numpy()
+
+    def log_prob(self, state, action):
+        """Return log probability for actions that belong to the library."""
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
+        if isinstance(action, np.ndarray):
+            action = torch.from_numpy(action).float()
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        if action.dim() == 1:
+            action = action.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
+        action = action.to(next(self.parameters()).device)
+        with torch.no_grad():
+            _, log_probs, _ = self.dist_info(state)
+            distances = (
+                action.unsqueeze(1)
+                - self.action_candidates.unsqueeze(0)
+            ).pow(2).sum(dim=-1)
+            min_distance, idx = distances.min(dim=-1, keepdim=True)
+            if torch.any(min_distance > 1e-6):
+                raise ValueError(
+                    "categorical policy received an action outside its library")
+            result = log_probs.gather(1, idx).squeeze(-1)
+        return result.cpu().numpy().squeeze()
+
+
 class EnsembleQNetwork(nn.Module):
     """Ensemble of K Q-networks (same as lower)."""
 
@@ -194,6 +272,7 @@ class RESACUpperTrainer:
 
     def __init__(self, state_dim=5, action_dim=3, hidden_dim=64,
                  action_low=None, action_high=None,
+                 action_candidates=None,
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
@@ -211,10 +290,25 @@ class RESACUpperTrainer:
         # Replay buffer for dispatch transitions
         self.replay_buffer = UpperReplayBuffer(replay_capacity)
 
-        # Policy
-        self.policy_net = BoundedGaussianPolicy(
-            state_dim, action_dim, hidden_dim,
-            action_low, action_high).to(device)
+        self.discrete_actions = None
+        if action_candidates is not None:
+            candidates = np.asarray(action_candidates, dtype=np.float32)
+            if candidates.ndim != 2 or candidates.shape[1] != action_dim:
+                raise ValueError(
+                    "action_candidates must have shape "
+                    f"[n_candidates, {action_dim}]")
+            if candidates.shape[0] < 2 or not np.all(np.isfinite(candidates)):
+                raise ValueError(
+                    "action_candidates must contain at least two finite rows")
+            if np.unique(candidates, axis=0).shape[0] != candidates.shape[0]:
+                raise ValueError("action_candidates contains duplicate rows")
+            self.policy_net = CategoricalPlanPolicy(
+                state_dim, candidates, hidden_dim).to(device)
+            self.discrete_actions = self.policy_net.action_candidates
+        else:
+            self.policy_net = BoundedGaussianPolicy(
+                state_dim, action_dim, hidden_dim,
+                action_low, action_high).to(device)
 
         # Ensemble Q
         self.q_net = EnsembleQNetwork(
@@ -231,9 +325,33 @@ class RESACUpperTrainer:
         if auto_entropy:
             self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
             self.alpha_optimizer = optim.Adam([self.log_alpha], lr=lr)
-            self.target_entropy = -float(action_dim)
+            if self.discrete_actions is not None:
+                self.target_entropy = 0.98 * float(np.log(
+                    max(int(self.discrete_actions.shape[0]), 2)))
+            else:
+                self.target_entropy = -float(action_dim)
         self.alpha = 0.1
         self.maximum_alpha = maximum_alpha
+
+    def _discrete_q_values(self, q_net, state):
+        candidates = self.discrete_actions
+        if candidates is None:
+            raise RuntimeError(
+                "discrete Q values requested without action candidates")
+        batch = state.shape[0]
+        n_actions, action_dim = candidates.shape
+        state_rep = (
+            state.unsqueeze(1)
+            .expand(batch, n_actions, state.shape[-1])
+            .reshape(batch * n_actions, state.shape[-1])
+        )
+        action_rep = (
+            candidates.unsqueeze(0)
+            .expand(batch, n_actions, action_dim)
+            .reshape(batch * n_actions, action_dim)
+        )
+        q_flat = q_net(state_rep, action_rep)
+        return q_flat.view(q_flat.shape[0], batch, n_actions)
 
     def update(self, batch_size=64):
         """One gradient step from replay buffer."""
@@ -247,13 +365,28 @@ class RESACUpperTrainer:
         next_state = torch.FloatTensor(next_state).to(self.device)
         done = torch.FloatTensor(done).to(self.device)
 
+        discrete_policy = self.discrete_actions is not None
+
         # ── Critic update ──
         with torch.no_grad():
-            next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
-            target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
-            # Shared mean target → prevents ensemble divergence
-            target_q_mean = target_q_all.mean(dim=0)  # [B]
-            target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)
+            if discrete_policy:
+                next_probs, next_log_probs, _ = self.policy_net.dist_info(
+                    next_state)
+                target_q_all = self._discrete_q_values(
+                    self.target_q_net, next_state)
+                target_q_mean = target_q_all.mean(dim=0)
+                target_q_mean = (next_probs * (
+                    target_q_mean
+                    - self.alpha * next_log_probs)).sum(dim=-1)
+            else:
+                next_action, next_log_prob, _, _, _ = (
+                    self.policy_net.evaluate(next_state))
+                target_q_all = self.target_q_net(
+                    next_state, next_action)
+                target_q_mean = target_q_all.mean(dim=0)
+                target_q_mean = (
+                    target_q_mean - self.alpha
+                    * next_log_prob.squeeze(-1))
             r = reward.squeeze(-1)
             d = done.squeeze(-1)
             shared_target = r + (1.0 - d) * self.gamma * target_q_mean
@@ -273,13 +406,25 @@ class RESACUpperTrainer:
         self.q_optimizer.step()
 
         # ── Policy update ──
-        new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
-        q_all = self.q_net(state, new_action)
-        q_mean = q_all.mean(dim=0)
-        q_std = q_all.std(dim=0)
-        q_lcb = q_mean + self.beta * q_std
-
-        policy_loss = (self.alpha * log_prob.squeeze(-1) - q_lcb).mean()
+        if discrete_policy:
+            probs, log_probs, _ = self.policy_net.dist_info(state)
+            q_all = self._discrete_q_values(self.q_net, state)
+            q_mean = q_all.mean(dim=0)
+            q_std = q_all.std(dim=0)
+            q_lcb = q_mean + self.beta * q_std
+            policy_loss = (probs * (
+                self.alpha * log_probs - q_lcb)).sum(dim=-1).mean()
+            entropy_log_prob = (
+                probs * log_probs).sum(dim=-1, keepdim=True)
+        else:
+            new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
+            q_all = self.q_net(state, new_action)
+            q_mean = q_all.mean(dim=0)
+            q_std = q_all.std(dim=0)
+            q_lcb = q_mean + self.beta * q_std
+            policy_loss = (
+                self.alpha * log_prob.squeeze(-1) - q_lcb).mean()
+            entropy_log_prob = log_prob
 
         self.policy_optimizer.zero_grad()
         policy_loss.backward()
@@ -289,7 +434,8 @@ class RESACUpperTrainer:
         # ── Alpha update ──
         if self.auto_entropy:
             alpha_loss = -(self.log_alpha *
-                           (log_prob + self.target_entropy).detach()).mean()
+                           (entropy_log_prob
+                            + self.target_entropy).detach()).mean()
             self.alpha_optimizer.zero_grad()
             alpha_loss.backward()
             self.alpha_optimizer.step()
@@ -324,6 +470,20 @@ class RESACUpperTrainer:
 
     def load(self, path):
         ckpt = torch.load(path, weights_only=True)
+        saved_candidates = ckpt['policy'].get('action_candidates')
+        if self.discrete_actions is None and saved_candidates is not None:
+            raise ValueError(
+                "cannot load a categorical checkpoint into a continuous policy")
+        if self.discrete_actions is not None:
+            if saved_candidates is None:
+                raise ValueError(
+                    "cannot load a continuous checkpoint into a categorical policy")
+            configured = self.discrete_actions.detach().cpu()
+            saved = saved_candidates.detach().cpu()
+            if configured.shape != saved.shape or not torch.equal(
+                    configured, saved):
+                raise ValueError(
+                    "checkpoint action library does not match the configured library")
         self.policy_net.load_state_dict(ckpt['policy'])
         self.q_net.load_state_dict(ckpt['q_net'])
         self.target_q_net.load_state_dict(ckpt['q_net'])

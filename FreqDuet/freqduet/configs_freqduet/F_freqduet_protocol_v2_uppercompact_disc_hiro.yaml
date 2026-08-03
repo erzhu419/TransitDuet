@@ -1,0 +1,24 @@
+_extends: F_freqduet_protocol_v2_uppercompact_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_hiro
+
+protocol:
+  role: structural_candidate_true_discrete_directional_planner
+
+upper:
+  action_candidates:
+    - [-45.0, -45.0]
+    - [-30.0, -30.0]
+    - [-15.0, -15.0]
+    - [0.0, 0.0]
+    - [10.0, 10.0]
+    - [20.0, 20.0]
+    - [-30.0, -15.0]
+    - [-15.0, 0.0]
+    - [0.0, 10.0]
+    - [10.0, 20.0]
+    - [-15.0, -30.0]
+    - [0.0, -15.0]
+    - [10.0, 0.0]
+    - [20.0, 10.0]
+  timetable_planner:
+    action_ema_alpha: 1.0

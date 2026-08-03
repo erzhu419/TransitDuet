@@ -1,0 +1,15 @@
+_extends: F_freqduet_protocol_v2_uppercompact_disc_hiro.yaml
+_name: F_freqduet_protocol_v2_uppercompact_disc_hist_hiro
+
+protocol:
+  role: structural_candidate_true_discrete_directional_planner_history
+
+upper:
+  state_history:
+    enable: true
+    length: 2
+    action_norm_s: 60.0
+    shift_norm_s: 45.0
+    wait_norm_min: 10.0
+    waiting_norm: 500.0
+    plan_penalty_norm: 5.0
