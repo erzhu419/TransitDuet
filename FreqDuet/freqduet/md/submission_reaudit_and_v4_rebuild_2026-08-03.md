@@ -80,6 +80,21 @@ then be partitioned without double counting:
 - promotion changes subsequent attribution through the causal LF state, not by
   relabeling past passengers.
 
+The current implementation computes the share at boarding time from the then
+current residual.  This is not a source-data attribution: a passenger who was
+generated before a promotion event can be relabeled after the event.  Protocol
+v4 therefore freezes `lf_share` and `hf_share` on each passenger at generation.
+For every passenger and every aggregate, tests must assert
+`lf_share + hf_share = 1` and `LF wait + HF wait = total wait`.
+
+Upper wait credit must also follow the executable plan that owns the service
+trip, not merely the wall-clock interval in which the eventual queue outcome is
+observed.  A new plan often starts before buses controlled by the preceding plan
+have reached downstream stops, so interval-only assignment shifts old-plan
+outcomes onto the new action.  Protocol v4 uses plan-owned LF passenger wait as
+the primary upper credit.  Wall-clock interval credit is retained only as a
+named ablation and may score headway/fleet terms without duplicating LF wait.
+
 ### 4. Upper fleet utilization is mis-scaled
 
 The upper state divides on-route buses by `env.max_agent_num`.  With the full
@@ -113,6 +128,13 @@ readiness/block circulation or rename the resource everywhere as concurrent
 service capacity.  A paper claim of executable terminal dispatch requires the
 fixed-pool version as the main environment.
 
+The mismatch is observable even under zero holding.  With a nominal fleet of
+12, the legacy simulator instantiated 14 vehicles with zero buffer and 15 with
+a buffer of one or three; peak concurrency was 12 or 13, respectively.  The v4
+main environment must never instantiate more than `N_fleet` physical vehicles.
+When no vehicle is ready at the requested terminal, dispatch must wait and log
+the readiness delay instead of creating another bus.
+
 ### 7. Algorithm and reproducibility contracts need tightening
 
 - Planner variants with different action dimensions consume different random
@@ -129,6 +151,31 @@ fixed-pool version as the main environment.
   is penalized by discounted cumulative cost Q.  The constraint unit and limit
   must be made consistent and tested on a synthetic constrained MDP.
 
+### 8. The lower observation must be causal by construction
+
+Removing the stale backward-headway term only from the reward is insufficient
+if it remains in the policy observation.  Protocol v4 replaces the legacy slot
+with an explicit validity indicator for the exact same-stop forward-arrival
+headway.  Decisions without a preceding arrival event are masked from the main
+controller.  If follower information is used, it must be a separately named
+same-time AVL spatial-gap feature with a source flag; scheduled-trip identity
+and a follower's old forward headway are not admissible measurements.
+
+### 9. Terminal actions need an auditable projection contract
+
+The v4 upper action is a bounded smooth launch-shift curve.  For every affected
+trip the simulator must retain the unmodified base launch, desired shift,
+projected scheduled launch, actual launch, predecessor scheduled launch and
+derived target headway.  The following invariants are submission gates:
+
+- scheduled launches are strictly ordered within direction;
+- target headway equals the difference of consecutive executable scheduled
+  launches to numerical tolerance;
+- the action cannot silently revert to the base timetable inside its declared
+  horizon;
+- any fleet-readiness delay is reported separately from planner projection;
+- lower goal reachability and projection saturation rates are reported.
+
 ## Protocol-v4 Build Order
 
 1. Add invariant tests for executable target/schedule agreement, fleet-state
@@ -144,11 +191,14 @@ fixed-pool version as the main environment.
 6. Enforce fixed-pool terminal circulation and expose denied/late dispatch
    diagnostics.
 7. Decouple RNG streams and formalize SAC entropy/Lagrangian units.
-8. Run small deterministic contract tests, then a multi-variant 20-seed screen
+8. Add plan-owner LF credit and retain interval assignment only as an explicit
+   ablation; verify that one episode's plan credits reconstruct its LF served
+   waiting contribution.
+9. Run small deterministic contract tests, then a multi-variant 20-seed screen
    on `node001-node006`.
-9. Select one method using a pre-registered restricted-wait gate with no-harm
+10. Select one method using a pre-registered restricted-wait gate with no-harm
    constraints on journey time, unserved rate, completion and fleet use.
-10. Run a fresh 200-episode multi-domain confirmation against fixed headway,
+11. Run a fresh 200-episode multi-domain confirmation against fixed headway,
     rule holding, MPC, the closest valid TransitDuet control, and standard SAC.
 
 ## Result Status
