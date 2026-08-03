@@ -3,17 +3,46 @@ import unittest
 import numpy as np
 
 from freq_hrl.experiments.trading.offpolicy_baseline_validation import (
+    capacity_matched_offpolicy_hidden_dim,
     decode_flat_action,
     flat_state,
+    offpolicy_trainable_parameter_count,
     train_flat_offpolicy_baseline,
 )
 from freq_hrl.experiments.trading.ppo_actor_critic import (
     flat_latent_speed,
     raw_lower_state_dim,
 )
+from freq_hrl.rl import FlatOffPolicyActorCritic, OffPolicyConfig
 
 
 class OffPolicyBaselineValidationTest(unittest.TestCase):
+    def test_offpolicy_capacity_count_and_matching_use_trainable_online_modules(self):
+        for algorithm in ("sac", "td3"):
+            with self.subTest(algorithm=algorithm):
+                hidden, count, ratio = capacity_matched_offpolicy_hidden_dim(
+                    target_parameter_count=39_445,
+                    state_dim=248,
+                    action_dim=4,
+                    algorithm=algorithm,
+                    requested_hidden_dim=64,
+                )
+                config = OffPolicyConfig(
+                    state_dim=248,
+                    action_dim=4,
+                    algorithm=algorithm,
+                    hidden_dim=hidden,
+                )
+                model = FlatOffPolicyActorCritic(config)
+                actual = sum(
+                    parameter.numel()
+                    for parameter in model.parameters()
+                    if parameter.requires_grad
+                )
+                self.assertEqual(count, offpolicy_trainable_parameter_count(config))
+                self.assertEqual(actual, count)
+                self.assertLessEqual(abs(ratio - 1.0), 0.05)
+
     def test_flat_state_and_action_contract(self):
         state = flat_state([0.001, -0.001], [0.1, -0.1], [0.2, 0.0], progress=0.5)
         self.assertEqual(state.shape, (raw_lower_state_dim(2),))

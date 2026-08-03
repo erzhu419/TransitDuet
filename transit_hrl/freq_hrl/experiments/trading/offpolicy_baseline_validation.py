@@ -47,6 +47,59 @@ from .ppo_actor_critic import (
 OFFPOLICY_MODES = ("flat_sac", "flat_td3")
 
 
+def offpolicy_trainable_parameter_count(config: OffPolicyConfig) -> int:
+    """Analytic online trainable capacity; frozen target networks are excluded."""
+
+    state = int(config.state_dim)
+    action = int(config.action_dim)
+    hidden = max(1, int(config.hidden_dim))
+    twin_critic = 2 * (
+        hidden * hidden
+        + hidden * (state + action + 3)
+        + 1
+    )
+    if str(config.algorithm) == "sac":
+        actor = (
+            hidden * hidden
+            + hidden * (state + 2 + 2 * action)
+            + 2 * action
+        )
+        return int(actor + twin_critic + 1)
+    actor = (
+        hidden * hidden
+        + hidden * (state + action + 2)
+        + action
+    )
+    return int(actor + twin_critic)
+
+
+def capacity_matched_offpolicy_hidden_dim(
+    *,
+    target_parameter_count: int,
+    state_dim: int,
+    action_dim: int,
+    algorithm: str,
+    requested_hidden_dim: int,
+) -> tuple[int, int, float]:
+    if int(target_parameter_count) <= 0:
+        raise ValueError("target_parameter_count must be positive")
+    upper = max(32, 4 * max(int(requested_hidden_dim), 1))
+    candidates: list[tuple[int, int, int]] = []
+    for hidden in range(1, upper + 1):
+        config = OffPolicyConfig(
+            state_dim=int(state_dim),
+            action_dim=int(action_dim),
+            algorithm=str(algorithm),
+            hidden_dim=int(hidden),
+        )
+        count = offpolicy_trainable_parameter_count(config)
+        candidates.append(
+            (abs(count - int(target_parameter_count)), hidden, count)
+        )
+    _, hidden, count = min(candidates)
+    return hidden, count, float(count / int(target_parameter_count))
+
+
 def flat_state(
     raw_history: np.ndarray,
     position: np.ndarray,
@@ -306,6 +359,8 @@ def train_flat_offpolicy_baseline(
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
     execution_timeline_contract: str = "legacy_pre_trade_v2",
     volume_impact_bps: float = 0.0,
+    capacity_target_parameter_count: int | None = None,
+    capacity_reference_method_contract: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
@@ -343,16 +398,37 @@ def train_flat_offpolicy_baseline(
     replay_rng = np.random.default_rng(int(seed) + 104729)
     state_dim = raw_lower_state_dim(assets)
     action_dim = 2 * int(assets)
+    effective_hidden_dim = int(hidden_dim)
+    capacity_target = (
+        None
+        if capacity_target_parameter_count is None
+        else int(capacity_target_parameter_count)
+    )
+    if capacity_target is not None:
+        if capacity_target <= 0:
+            raise ValueError("capacity_target_parameter_count must be positive")
+        effective_hidden_dim, _, _ = capacity_matched_offpolicy_hidden_dim(
+            target_parameter_count=capacity_target,
+            state_dim=state_dim,
+            action_dim=action_dim,
+            algorithm=algorithm,
+            requested_hidden_dim=int(hidden_dim),
+        )
     config = OffPolicyConfig(
         state_dim=state_dim,
         action_dim=action_dim,
         algorithm=algorithm,
-        hidden_dim=int(hidden_dim),
+        hidden_dim=int(effective_hidden_dim),
         actor_learning_rate=float(learning_rate),
         critic_learning_rate=float(learning_rate),
         alpha_learning_rate=float(learning_rate),
     )
     agent = FlatOffPolicyActorCritic(config)
+    actual_parameter_count = offpolicy_trainable_parameter_count(config)
+    capacity_ratio = (
+        float(actual_parameter_count / capacity_target)
+        if capacity_target is not None else 1.0
+    )
     replay = ReplayBuffer(
         capacity=int(replay_capacity),
         state_dim=state_dim,
@@ -506,6 +582,22 @@ def train_flat_offpolicy_baseline(
         "batch_size": int(batch_size),
         "updates_per_step": int(updates_per_step),
         "training_reward_scale": float(reward_scale),
+        "capacity_reference_method_contract": str(
+            capacity_reference_method_contract
+        ),
+        "capacity_target_parameter_count": int(
+            capacity_target
+            if capacity_target is not None else actual_parameter_count
+        ),
+        "capacity_actual_parameter_count": int(actual_parameter_count),
+        "capacity_ratio": float(capacity_ratio),
+        "capacity_match_status": (
+            "matched_within_5pct"
+            if abs(float(capacity_ratio) - 1.0) <= 0.05
+            else "closest_available_outside_5pct"
+        ),
+        "requested_hidden_dim": int(hidden_dim),
+        "effective_hidden_dim": int(effective_hidden_dim),
         "execution_timeline_contract": execution_timeline_contract,
         "mark_to_market_timing": (
             "post_trade"
@@ -629,6 +721,8 @@ def main() -> None:
         default="legacy_pre_trade_v2",
     )
     parser.add_argument("--volume-impact-bps", type=float, default=0.0)
+    parser.add_argument("--capacity-target-parameter-count", type=int, default=None)
+    parser.add_argument("--capacity-reference-method-contract", default="")
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -658,6 +752,10 @@ def main() -> None:
         updates_per_step=int(args.updates_per_step),
         execution_timeline_contract=args.execution_timeline_contract,
         volume_impact_bps=float(args.volume_impact_bps),
+        capacity_target_parameter_count=args.capacity_target_parameter_count,
+        capacity_reference_method_contract=(
+            args.capacity_reference_method_contract
+        ),
     )
     write_outputs(args.output_dir, payload, rows, agent)
     print(
