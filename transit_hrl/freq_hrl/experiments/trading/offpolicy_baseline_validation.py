@@ -32,12 +32,13 @@ from .metrics import (
 from .performance_validation import make_synthetic_market
 from .ppo_actor_critic import (
     LEARNED_BASELINE_IMPLEMENTATION_VERSION,
-    RAW_LOWER_LAGS,
+    RAW_HISTORY_WINDOW,
     bounded_speed,
     flat_joint_feature_vector,
     gross_cap,
     make_tracker,
     objective,
+    raw_lower_state_dim,
     summarize,
 )
 
@@ -222,7 +223,7 @@ def run_offpolicy_episode(
         "RawLowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
         "FocusScore": float(diag["FocusScore"]),
         "protocol_valid": 1.0,
-        "routing_contract": "causal_raw_lag_history",
+        "routing_contract": "causal_raw_full_history",
         "temporal_contract": "single_level_flat_joint_action",
         "replay_size": int(replay.size) if replay is not None else 0,
         "gradient_updates": int(len(updates)),
@@ -309,7 +310,7 @@ def train_flat_offpolicy_baseline(
     torch.manual_seed(int(seed))
     np.random.seed(int(seed))
     replay_rng = np.random.default_rng(int(seed) + 104729)
-    state_dim = 8 * int(assets) + 1
+    state_dim = raw_lower_state_dim(assets)
     action_dim = 2 * int(assets)
     config = OffPolicyConfig(
         state_dim=state_dim,
@@ -433,6 +434,9 @@ def train_flat_offpolicy_baseline(
         "domain": "trading",
         "policy_mode": policy_mode,
         "baseline": policy_mode,
+        "learned_baseline_implementation_version": (
+            LEARNED_BASELINE_IMPLEMENTATION_VERSION
+        ),
         "scenario": scenario,
         "train_seeds": list(rollout_seed_roots),
         "rollout_seed_roots": list(rollout_seed_roots),
@@ -487,10 +491,11 @@ def train_flat_offpolicy_baseline(
             + temperature_optimizer_steps
         ),
         "observation_contract": (
-            "direct causal raw observations at lags 0, 1, 8, 32, and 119; "
+            "complete contiguous 120-bar causal raw window; "
             "position, previous target, gap, and progress"
         ),
-        "raw_history_lags": list(RAW_LOWER_LAGS),
+        "raw_history_window": int(RAW_HISTORY_WINDOW),
+        "raw_history_sampling": "complete_contiguous_oldest_to_newest",
         "action_contract": "joint target weights and execution speeds every primitive step",
         "metric_contract_version": METRIC_CONTRACT_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,

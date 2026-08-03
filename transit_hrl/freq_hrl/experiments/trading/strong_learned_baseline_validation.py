@@ -226,6 +226,7 @@ def _parameter_budget_row(
             "requested_hidden_dim": int(
                 training_payload.get("requested_hidden_dim", config.hidden_dim)
             ),
+            "effective_hidden_dim": int(config.hidden_dim),
             "algorithm_family": "on_policy_joint_flat_ppo",
             "state_dim": int(config.state_dim),
             "action_dim": int(config.action_dim),
@@ -234,7 +235,7 @@ def _parameter_budget_row(
             "upper_action_dim": "",
             "lower_action_dim": "",
             "capacity_ratio": float(training_payload.get("capacity_ratio", 1.0)),
-            "matched_budget_group": "trading_capacity_matched_ppo_v3",
+            "matched_budget_group": "trading_capacity_matched_ppo_v4",
             "capacity_contract": (
                 "active parameter count within 5% and equal HPO search budget; "
                 "canonical single-value joint-action PPO"
@@ -243,7 +244,10 @@ def _parameter_budget_row(
     if mode in POLICY_MODES:
         return {
             **common,
-            "requested_hidden_dim": int(config.hidden_dim),
+            "requested_hidden_dim": int(
+                training_payload.get("requested_hidden_dim", config.hidden_dim)
+            ),
+            "effective_hidden_dim": int(config.hidden_dim),
             "algorithm_family": "on_policy_smdp_ppo",
             "state_dim": "",
             "action_dim": "",
@@ -251,11 +255,11 @@ def _parameter_budget_row(
             "lower_state_dim": int(config.lower_state_dim),
             "upper_action_dim": int(config.upper_action_dim),
             "lower_action_dim": int(config.lower_action_dim),
-            "capacity_ratio": 1.0,
-            "matched_budget_group": "trading_capacity_matched_ppo_v3",
+            "capacity_ratio": float(training_payload.get("capacity_ratio", 1.0)),
+            "matched_budget_group": "trading_capacity_matched_ppo_v4",
             "capacity_contract": (
-                "exact dimensions within hierarchical policies; active parameter "
-                "count within 5% and equal HPO search budget versus joint flat PPO"
+                "active parameter count within 5% of Freq-HRL and equal HPO "
+                "search budget; raw generic HRL uses the complete causal window"
             ),
         }
     return {

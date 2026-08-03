@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from dataclasses import replace
 import json
 from pathlib import Path
 from typing import Any
@@ -57,11 +58,10 @@ POLICY_MODES = (
     "generic_hrl_ppo",
 )
 LEARNED_BASELINE_IMPLEMENTATION_VERSION = (
-    "learned_baselines_v3_joint_raw_history_2026_08_03"
+    "learned_baselines_v4_full_raw_window_2026_08_03"
 )
 
-RAW_UPPER_LAGS = (0, 8, 32, 119)
-RAW_LOWER_LAGS = (0, 1, 8, 32, 119)
+RAW_HISTORY_WINDOW = 120
 
 
 def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
@@ -167,13 +167,13 @@ def frequency_separated_feature_vectors(
     return upper_state.astype(np.float32), lower_state.astype(np.float32)
 
 
-def causal_raw_lag_stack(
+def causal_raw_history_window(
     raw_history: np.ndarray,
     *,
     assets: int,
-    lags: tuple[int, ...],
+    window: int = RAW_HISTORY_WINDOW,
 ) -> np.ndarray:
-    """Return direct causal observations at fixed lags without filtering."""
+    """Return every causal sample in a fixed-size oldest-to-newest window."""
 
     history = np.asarray(raw_history, dtype=np.float64)
     if history.ndim == 1:
@@ -184,10 +184,16 @@ def causal_raw_lag_stack(
         )
     if history.shape[0] == 0:
         raise ValueError("raw_history must contain at least one causal observation")
-    return np.concatenate([
-        history[max(0, history.shape[0] - 1 - int(lag))]
-        for lag in lags
-    ])
+    size = int(window)
+    if size < 1:
+        raise ValueError("window must be positive")
+    observed = history[-size:]
+    if observed.shape[0] < size:
+        padding = np.repeat(
+            observed[:1], size - observed.shape[0], axis=0
+        )
+        observed = np.concatenate([padding, observed], axis=0)
+    return observed.reshape(-1)
 
 
 def raw_hierarchical_feature_vectors(
@@ -201,11 +207,8 @@ def raw_hierarchical_feature_vectors(
 
     position_arr = np.asarray(position, dtype=np.float64).reshape(-1)
     dim = int(position_arr.size)
-    upper_raw = causal_raw_lag_stack(
-        raw_history, assets=dim, lags=RAW_UPPER_LAGS
-    ) / 0.0014
-    lower_raw = causal_raw_lag_stack(
-        raw_history, assets=dim, lags=RAW_LOWER_LAGS
+    raw_window = causal_raw_history_window(
+        raw_history, assets=dim
     ) / 0.0014
     current_target = (
         np.zeros(dim, dtype=np.float64)
@@ -214,11 +217,11 @@ def raw_hierarchical_feature_vectors(
     gap = current_target - position_arr
     history_coverage = min(
         float(np.asarray(raw_history).reshape(-1, dim).shape[0])
-        / float(max(RAW_UPPER_LAGS) + 1),
+        / float(RAW_HISTORY_WINDOW),
         1.0,
     )
     upper_state = np.concatenate([
-        upper_raw,
+        raw_window,
         position_arr,
         current_target,
         np.asarray([
@@ -230,7 +233,7 @@ def raw_hierarchical_feature_vectors(
         ], dtype=np.float64),
     ])
     lower_state = np.concatenate([
-        lower_raw,
+        raw_window,
         current_target,
         position_arr,
         gap,
@@ -281,6 +284,14 @@ def flat_joint_feature_vector(
         progress=progress,
     )
     return lower
+
+
+def raw_upper_state_dim(assets: int) -> int:
+    return (RAW_HISTORY_WINDOW + 2) * int(assets) + 5
+
+
+def raw_lower_state_dim(assets: int) -> int:
+    return (RAW_HISTORY_WINDOW + 3) * int(assets) + 1
 
 
 def _actor_parameter_count(state_dim: int, action_dim: int, hidden_dim: int) -> int:
@@ -348,6 +359,44 @@ def capacity_matched_joint_hidden_dim(
             state_dim=int(state_dim), action_dim=int(action_dim), hidden_dim=hidden
         )
         count = joint_parameter_count(config)
+        candidates.append((abs(count - int(target_parameter_count)), hidden, count))
+    _, hidden, count = min(candidates)
+    return hidden, count, float(count / max(int(target_parameter_count), 1))
+
+
+def capacity_matched_smdp_hidden_dim(
+    *,
+    target_parameter_count: int,
+    upper_state_dim: int,
+    lower_state_dim: int,
+    upper_action_dim: int,
+    lower_action_dim: int,
+    requested_hidden_dim: int,
+) -> tuple[int, int, float]:
+    """Match a full-window generic HRL to the active Freq-HRL capacity."""
+
+    requested = int(requested_hidden_dim)
+    if requested <= 0:
+        config = SMDPPPOConfig(
+            upper_state_dim=int(upper_state_dim),
+            lower_state_dim=int(lower_state_dim),
+            upper_action_dim=int(upper_action_dim),
+            lower_action_dim=int(lower_action_dim),
+            hidden_dim=0,
+        )
+        count = smdp_parameter_count(config)
+        return 0, count, float(count / max(int(target_parameter_count), 1))
+    upper = max(32, 4 * max(requested, 1))
+    candidates = []
+    for hidden in range(1, upper + 1):
+        config = SMDPPPOConfig(
+            upper_state_dim=int(upper_state_dim),
+            lower_state_dim=int(lower_state_dim),
+            upper_action_dim=int(upper_action_dim),
+            lower_action_dim=int(lower_action_dim),
+            hidden_dim=hidden,
+        )
+        count = smdp_parameter_count(config)
         candidates.append((abs(count - int(target_parameter_count)), hidden, count))
     _, hidden, count = min(candidates)
     return hidden, count, float(count / max(int(target_parameter_count), 1))
@@ -609,7 +658,7 @@ def joint_flat_rollout(
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
         "protocol_valid": 1.0,
-        "routing_contract": "causal_raw_lag_history",
+        "routing_contract": "causal_raw_full_history",
         "temporal_contract": "primitive_joint_action",
     }
     if not sample:
@@ -991,7 +1040,7 @@ def train_ppo_actor_critic(
         plan_eval_offset_s=plan_eval_offset_s,
         plan_coefficient_scale=plan_coefficient_scale,
     )
-    smdp_config = SMDPPPOConfig(
+    reference_smdp_config = SMDPPPOConfig(
         upper_state_dim=6 * assets + 5,
         lower_state_dim=8 * assets + 1,
         upper_action_dim=plan_mapper.action_dim if plan_mapper is not None else assets,
@@ -1007,18 +1056,18 @@ def train_ppo_actor_critic(
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
         lower_max_lambda=20.0,
     )
+    target_parameter_count = smdp_parameter_count(reference_smdp_config)
     if policy_mode == "flat_ppo":
-        target_parameter_count = smdp_parameter_count(smdp_config)
         joint_hidden_dim, joint_count, capacity_ratio = (
             capacity_matched_joint_hidden_dim(
                 target_parameter_count=target_parameter_count,
-                state_dim=8 * assets + 1,
+                state_dim=raw_lower_state_dim(assets),
                 action_dim=2 * assets,
                 requested_hidden_dim=int(hidden_dim),
             )
         )
         joint_config = JointPPOConfig(
-            state_dim=8 * assets + 1,
+            state_dim=raw_lower_state_dim(assets),
             action_dim=2 * assets,
             hidden_dim=int(joint_hidden_dim),
             learning_rate=float(learning_rate),
@@ -1073,7 +1122,8 @@ def train_ppo_actor_critic(
                 "min_upper_duration": 1,
                 "upper_observation_contract": "not_applicable_single_flat_state",
                 "lower_observation_contract": (
-                    "direct causal raw lags through 119 bars + position + previous action"
+                    "complete contiguous 120-bar causal raw window + position + "
+                    "previous action"
                 ),
                 "credit_contract": "single task-return GAE for one joint action",
                 "frequency_routing_enabled": False,
@@ -1088,7 +1138,8 @@ def train_ppo_actor_critic(
                 "capacity_ratio": float(capacity_ratio),
                 "requested_hidden_dim": int(hidden_dim),
                 "effective_hidden_dim": int(joint_hidden_dim),
-                "raw_history_lags": list(RAW_LOWER_LAGS),
+                "raw_history_window": int(RAW_HISTORY_WINDOW),
+                "raw_history_sampling": "complete_contiguous_oldest_to_newest",
                 "training_replicate_seed": int(seed),
                 "rollout_seed_roots": list(rollout_seed_roots),
                 "validation_seeds": list(validation_seed_list),
@@ -1139,6 +1190,27 @@ def train_ppo_actor_critic(
         )
         return payload, heldout_rows, joint_model
 
+    smdp_capacity_count = int(target_parameter_count)
+    smdp_capacity_ratio = 1.0
+    effective_hidden_dim = int(hidden_dim)
+    smdp_config = reference_smdp_config
+    if policy_mode == "generic_hrl_ppo":
+        effective_hidden_dim, smdp_capacity_count, smdp_capacity_ratio = (
+            capacity_matched_smdp_hidden_dim(
+                target_parameter_count=target_parameter_count,
+                upper_state_dim=raw_upper_state_dim(assets),
+                lower_state_dim=raw_lower_state_dim(assets),
+                upper_action_dim=reference_smdp_config.upper_action_dim,
+                lower_action_dim=reference_smdp_config.lower_action_dim,
+                requested_hidden_dim=int(hidden_dim),
+            )
+        )
+        smdp_config = replace(
+            reference_smdp_config,
+            upper_state_dim=raw_upper_state_dim(assets),
+            lower_state_dim=raw_lower_state_dim(assets),
+            hidden_dim=int(effective_hidden_dim),
+        )
     smdp_model = FrequencySeparatedActorCriticPPO(smdp_config)
     if policy_mode == "freq_hrl" and bool(use_handcrafted_frequency_prior):
         initialize_smdp_frequency_prior(smdp_model, assets, plan_basis_dim=plan_basis_dim)
@@ -1150,8 +1222,8 @@ def train_ppo_actor_critic(
             "current plan + local HF/MF residual context",
         ),
         "generic_hrl_ppo": (
-            "direct causal raw lags through 119 bars + position + active plan",
-            "active plan + position + direct causal raw lags through 119 bars",
+            "complete contiguous 120-bar causal raw window + position + active plan",
+            "active plan + position + complete contiguous 120-bar causal raw window",
         ),
     }[policy_mode]
     credit_contract = "upper strategic PnL; lower execution cost, tracking, and leakage"
@@ -1213,7 +1285,19 @@ def train_ppo_actor_critic(
             "handcrafted_frequency_prior": bool(
                 policy_mode == "freq_hrl" and use_handcrafted_frequency_prior
             ),
-            "capacity_match_contract": "identical model dimensions, optimizer, epochs, and rollout seed budget",
+            "capacity_match_contract": (
+                "Freq-HRL reference or active parameter count matched to Freq-HRL "
+                "within 5%; equal optimizer, epochs, and rollout seed budget"
+            ),
+            "capacity_target_parameter_count": int(target_parameter_count),
+            "capacity_actual_parameter_count": int(smdp_capacity_count),
+            "capacity_ratio": float(smdp_capacity_ratio),
+            "requested_hidden_dim": int(hidden_dim),
+            "effective_hidden_dim": int(effective_hidden_dim),
+            **({
+                "raw_history_window": int(RAW_HISTORY_WINDOW),
+                "raw_history_sampling": "complete_contiguous_oldest_to_newest",
+            } if policy_mode == "generic_hrl_ppo" else {}),
             "training_replicate_seed": int(seed),
             "rollout_seed_roots": list(rollout_seed_roots),
             "validation_seeds": list(validation_seed_list),

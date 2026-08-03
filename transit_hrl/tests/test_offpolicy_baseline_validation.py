@@ -7,13 +7,16 @@ from freq_hrl.experiments.trading.offpolicy_baseline_validation import (
     flat_state,
     train_flat_offpolicy_baseline,
 )
-from freq_hrl.experiments.trading.ppo_actor_critic import flat_latent_speed
+from freq_hrl.experiments.trading.ppo_actor_critic import (
+    flat_latent_speed,
+    raw_lower_state_dim,
+)
 
 
 class OffPolicyBaselineValidationTest(unittest.TestCase):
     def test_flat_state_and_action_contract(self):
         state = flat_state([0.001, -0.001], [0.1, -0.1], [0.2, 0.0], progress=0.5)
-        self.assertEqual(state.shape, (17,))
+        self.assertEqual(state.shape, (raw_lower_state_dim(2),))
         target, speed = decode_flat_action([1.0, -1.0, -1.0, 1.0], assets=2)
         self.assertLessEqual(abs(target).sum(), 1.0)
         self.assertGreaterEqual(speed.min(), 0.05)
@@ -52,8 +55,12 @@ class OffPolicyBaselineValidationTest(unittest.TestCase):
                 self.assertIn("selected_checkpoint_iteration", payload)
                 self.assertIn("validation_learning_gain", payload)
                 self.assertEqual(payload["training_reward_scale"], 100.0)
-                self.assertEqual(payload["raw_history_lags"], [0, 1, 8, 32, 119])
-                self.assertEqual(rows[0]["routing_contract"], "causal_raw_lag_history")
+                self.assertEqual(payload["raw_history_window"], 120)
+                self.assertEqual(
+                    payload["raw_history_sampling"],
+                    "complete_contiguous_oldest_to_newest",
+                )
+                self.assertEqual(rows[0]["routing_contract"], "causal_raw_full_history")
                 self.assertEqual(
                     payload["gradient_updates_train"],
                     payload["actor_optimizer_steps_train"]

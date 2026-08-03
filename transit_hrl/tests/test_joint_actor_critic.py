@@ -6,8 +6,11 @@ import torch
 
 from freq_hrl.experiments.trading.ppo_actor_critic import (
     capacity_matched_joint_hidden_dim,
-    causal_raw_lag_stack,
+    capacity_matched_smdp_hidden_dim,
+    causal_raw_history_window,
     joint_parameter_count,
+    raw_lower_state_dim,
+    raw_upper_state_dim,
     smdp_rollout,
     smdp_parameter_count,
     train_ppo_actor_critic,
@@ -88,12 +91,42 @@ class JointActorCriticPPOTest(unittest.TestCase):
         target = smdp_parameter_count(smdp)
         hidden, actual, ratio = capacity_matched_joint_hidden_dim(
             target_parameter_count=target,
-            state_dim=25,
+            state_dim=raw_lower_state_dim(3),
             action_dim=6,
             requested_hidden_dim=64,
         )
-        joint = JointPPOConfig(state_dim=25, action_dim=6, hidden_dim=hidden)
+        joint = JointPPOConfig(
+            state_dim=raw_lower_state_dim(3), action_dim=6, hidden_dim=hidden
+        )
         self.assertEqual(actual, joint_parameter_count(joint))
+        self.assertLessEqual(abs(ratio - 1.0), 0.05)
+
+    def test_generic_hrl_matches_capacity_after_full_window_expansion(self):
+        reference = SMDPPPOConfig(
+            upper_state_dim=23,
+            lower_state_dim=25,
+            upper_action_dim=3,
+            lower_action_dim=3,
+            hidden_dim=64,
+        )
+        target = smdp_parameter_count(reference)
+        hidden, actual, ratio = capacity_matched_smdp_hidden_dim(
+            target_parameter_count=target,
+            upper_state_dim=raw_upper_state_dim(3),
+            lower_state_dim=raw_lower_state_dim(3),
+            upper_action_dim=3,
+            lower_action_dim=3,
+            requested_hidden_dim=64,
+        )
+        generic = SMDPPPOConfig(
+            upper_state_dim=raw_upper_state_dim(3),
+            lower_state_dim=raw_lower_state_dim(3),
+            upper_action_dim=3,
+            lower_action_dim=3,
+            hidden_dim=hidden,
+        )
+        self.assertEqual(actual, smdp_parameter_count(generic))
+        self.assertLess(hidden, reference.hidden_dim)
         self.assertLessEqual(abs(ratio - 1.0), 0.05)
 
     def test_flat_runner_reports_canonical_joint_contract(self):
@@ -106,7 +139,7 @@ class JointActorCriticPPOTest(unittest.TestCase):
             scenario="persistent_shift",
             iterations=1,
             seed=7,
-            hidden_dim=16,
+            hidden_dim=64,
             ppo_epochs=1,
             minibatch_size=32,
             policy_mode="flat_ppo",
@@ -114,9 +147,11 @@ class JointActorCriticPPOTest(unittest.TestCase):
         self.assertIsInstance(model, JointActorCriticPPO)
         self.assertEqual(payload["trainer"], "canonical_joint_flat_ppo_v1")
         self.assertLessEqual(abs(float(payload["capacity_ratio"]) - 1.0), 0.05)
+        self.assertEqual(model.config.state_dim, raw_lower_state_dim(2))
+        self.assertEqual(payload["raw_history_window"], 120)
         self.assertEqual(payload["trajectory_contract"]["critic"], "one state-value function")
         self.assertEqual(rows[0]["upper_decision_count"], 24)
-        self.assertEqual(rows[0]["routing_contract"], "causal_raw_lag_history")
+        self.assertEqual(rows[0]["routing_contract"], "causal_raw_full_history")
 
     def test_legacy_smdp_flat_path_is_forbidden(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
@@ -139,14 +174,21 @@ class JointActorCriticPPOTest(unittest.TestCase):
 
 
 class CausalRawHistoryTest(unittest.TestCase):
-    def test_lag_stack_contains_only_current_and_past_samples(self):
+    def test_full_window_contains_every_causal_sample_and_left_padding(self):
         history = np.arange(12, dtype=np.float64).reshape(6, 2)
-        observed = causal_raw_lag_stack(
-            history[:4], assets=2, lags=(0, 1, 3, 8)
-        )
-        expected = np.concatenate([history[3], history[2], history[0], history[0]])
+        observed = causal_raw_history_window(
+            history[:4], assets=2, window=6
+        ).reshape(6, 2)
+        expected = np.vstack([history[0], history[0], history[:4]])
         np.testing.assert_array_equal(observed, expected)
+        self.assertFalse(np.any(np.isin(observed, history[4:])))
 
+    def test_full_window_truncates_oldest_samples_without_subsampling(self):
+        history = np.arange(16, dtype=np.float64).reshape(8, 2)
+        observed = causal_raw_history_window(
+            history, assets=2, window=5
+        ).reshape(5, 2)
+        np.testing.assert_array_equal(observed, history[-5:])
 
 if __name__ == "__main__":
     unittest.main()
