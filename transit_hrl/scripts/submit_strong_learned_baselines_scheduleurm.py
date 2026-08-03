@@ -22,6 +22,7 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  #
     DEFAULT_ROLLOUT_SEED_ROOTS,
     DEFAULT_SCENARIOS,
     DEFAULT_VALIDATION_SEEDS,
+    POLICY_MODES,
     SCENARIOS,
     merge_strong_learned_baseline_shards,
     write_outputs,
@@ -29,6 +30,10 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  #
 from freq_hrl.experiments.trading.hyperparameter_pilot import (  # noqa: E402
     frozen_config_sha256,
     load_frozen_config,
+)
+from freq_hrl.experiments.reproducibility import (  # noqa: E402
+    git_source_manifest_sha256,
+    registered_git_source_identity,
 )
 
 
@@ -49,6 +54,10 @@ STAGE_EXCLUDES = (
 
 def parse_csv(value: str, cast=str) -> list:
     return [cast(item.strip()) for item in str(value).split(",") if item.strip()]
+
+
+def source_identity() -> tuple[str, str]:
+    return registered_git_source_identity(ROOT, Path("freq_hrl"))
 
 
 def experiment_cells(
@@ -88,7 +97,7 @@ def resolved_hyperparameters(
     if mode in selected:
         entry = selected[mode]
         return dict(entry["parameters"]), str(entry["candidate_id"])
-    if mode in {"freq_hrl", "flat_ppo", "generic_hrl_ppo"}:
+    if mode in POLICY_MODES:
         return {
             "hidden_dim": int(args.ppo_hidden_dim),
             "learning_rate": float(args.ppo_learning_rate),
@@ -118,7 +127,7 @@ def build_training_command(
 ) -> str:
     parameters, candidate_id = resolved_hyperparameters(args, mode)
     candidate_parameters_sha256 = frozen_config_sha256(parameters)
-    is_ppo = mode in {"freq_hrl", "flat_ppo", "generic_hrl_ppo"}
+    is_ppo = mode in POLICY_MODES
     ppo_parameters = parameters if is_ppo else {
         "hidden_dim": args.ppo_hidden_dim,
         "learning_rate": args.ppo_learning_rate,
@@ -195,6 +204,10 @@ def build_training_command(
         candidate_id,
         "--frozen-candidate-parameters-sha256",
         candidate_parameters_sha256,
+        "--code-revision",
+        str(getattr(args, "code_revision", "")),
+        "--source-manifest-sha256",
+        str(getattr(args, "source_manifest_sha256", "")),
         "--output-dir",
         str(output_dir),
     ]
@@ -244,7 +257,7 @@ def build_scheduler_command(
         "--signature",
         (
             f"Freq-HRL/strong-v3/{args.run_name}/"
-            f"{getattr(args, 'frozen_config_sha256', 'exploratory')[:12] or 'exploratory'}/"
+            f"{getattr(args, 'frozen_config_sha256', '')[:12] or getattr(args, 'source_manifest_sha256', '')[:12] or 'exploratory'}/"
             f"{scenario}/{mode}/rep-{replicate_seed}"
         ),
         "--resource-family",
@@ -391,6 +404,20 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
             "invalid matrix selection: "
             f"modes={unknown_modes}, scenarios={unknown_scenarios}, nodes={unknown_nodes}"
         )
+    current_revision = ""
+    current_manifest = ""
+    if not args.merge_only:
+        try:
+            current_revision, current_manifest = source_identity()
+        except (
+            OSError,
+            RuntimeError,
+            ValueError,
+            subprocess.CalledProcessError,
+        ) as exc:
+            raise SystemExit(
+                f"cannot register learned-baseline source identity: {exc}"
+            ) from exc
     if args.smoke:
         args.scenarios = ["persistent_shift"]
         args.policy_modes = ["freq_hrl"]
@@ -404,6 +431,8 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.confirmatory = False
         args.frozen_selected = {}
         args.frozen_config_sha256 = ""
+        args.code_revision = current_revision
+        args.source_manifest_sha256 = current_manifest
     elif not args.merge_only:
         if args.frozen_config is None:
             raise SystemExit(
@@ -421,11 +450,35 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.confirmatory = True
         args.frozen_selected = audit["selected"]
         args.frozen_config_sha256 = str(audit["sha256"])
+        frozen_revision = str(audit["code_revision"])
+        frozen_manifest = str(audit["source_manifest_sha256"])
+        try:
+            committed_manifest = git_source_manifest_sha256(
+                ROOT,
+                Path("freq_hrl"),
+                revision=frozen_revision,
+            )
+        except (OSError, subprocess.CalledProcessError, ValueError) as exc:
+            raise SystemExit(
+                f"frozen source revision is unavailable or invalid: {exc}"
+            ) from exc
+        if committed_manifest != frozen_manifest:
+            raise SystemExit(
+                "frozen source manifest does not match its registered Git revision"
+            )
+        if current_manifest != frozen_manifest:
+            raise SystemExit(
+                "current freq_hrl source bytes differ from the nested-HPO freeze"
+            )
+        args.code_revision = frozen_revision
+        args.source_manifest_sha256 = frozen_manifest
         args.frozen_config = path
     else:
         args.confirmatory = False
         args.frozen_selected = {}
         args.frozen_config_sha256 = ""
+        args.code_revision = ""
+        args.source_manifest_sha256 = ""
     return args
 
 

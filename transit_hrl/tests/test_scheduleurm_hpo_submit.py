@@ -24,6 +24,8 @@ def args_fixture() -> argparse.Namespace:
         priority="normal",
         skip_launch_staging=False,
         allow_duplicate=False,
+        code_revision="a" * 40,
+        source_manifest_sha256="b" * 64,
     )
 
 
@@ -56,6 +58,8 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertIn("--tuning-validation-seeds 68207", command)
         self.assertNotIn("--eval-seeds", command)
         self.assertNotIn("31415", command)
+        self.assertIn("--code-revision " + "a" * 40, command)
+        self.assertIn("--source-manifest-sha256 " + "b" * 64, command)
 
     def test_scheduler_uses_dynamic_cpu_nodes_without_hard_pin(self):
         command = build_scheduler_command(

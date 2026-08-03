@@ -22,8 +22,10 @@ import numpy as np
 import torch
 
 from freq_hrl.experiments.reproducibility import (
+    is_hex_digest,
     validate_evaluation_seed_roles,
     validate_unique_seeds,
+    verify_current_freq_hrl_source_identity,
 )
 
 from .metrics import (
@@ -160,6 +162,12 @@ def validate_frozen_config(
         LEARNED_BASELINE_IMPLEMENTATION_VERSION
     ):
         raise ValueError("frozen config implementation version mismatch")
+    if payload.get("source_identity_status") != "verified":
+        raise ValueError("frozen config source identity is not verified")
+    if not is_hex_digest(payload.get("code_revision"), length=40):
+        raise ValueError("frozen config requires a full Git revision")
+    if not is_hex_digest(payload.get("source_manifest_sha256"), length=64):
+        raise ValueError("frozen config requires a source manifest SHA-256")
     if payload.get("heldout_test_access_status") != "not_loaded":
         raise ValueError("frozen config must not access held-out test data")
     if payload.get("heldout_test_seeds"):
@@ -207,6 +215,8 @@ def validate_frozen_config(
         "sha256": frozen_config_sha256(payload),
         "selected": {mode: selected[mode] for mode in required_modes},
         "implementation_version": LEARNED_BASELINE_IMPLEMENTATION_VERSION,
+        "code_revision": str(payload["code_revision"]).lower(),
+        "source_manifest_sha256": str(payload["source_manifest_sha256"]).lower(),
     }
 
 
@@ -268,6 +278,8 @@ def run_hpo_cell(
     steps: int,
     assets: int,
     iterations: int,
+    code_revision: str = "",
+    expected_source_manifest_sha256: str = "",
 ) -> dict[str, Any]:
     if candidate_id not in CANDIDATES_BY_ID:
         raise ValueError(f"unknown candidate_id: {candidate_id}")
@@ -281,6 +293,13 @@ def run_hpo_cell(
         checkpoint_validation_seeds,
         tuning_validation_seeds,
     )
+    source_identity = verify_current_freq_hrl_source_identity(
+        code_revision=str(code_revision),
+        expected_source_manifest_sha256=str(expected_source_manifest_sha256),
+    )
+    revision = source_identity["code_revision"]
+    actual_source_manifest_sha256 = source_identity["source_manifest_sha256"]
+    source_identity_status = source_identity["source_identity_status"]
     run_seed = scenario_optimizer_seed(int(training_replicate_seed), scenario)
     started = time.perf_counter()
     params = candidate.parameters
@@ -351,6 +370,9 @@ def run_hpo_cell(
             "learned_baseline_implementation_version": (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
+            "code_revision": revision,
+            "source_manifest_sha256": actual_source_manifest_sha256,
+            "source_identity_status": source_identity_status,
         })
     if not utilities or not np.all(np.isfinite(utilities)):
         raise RuntimeError("HPO tuning utilities must be finite and non-empty")
@@ -373,6 +395,9 @@ def run_hpo_cell(
         "learned_baseline_implementation_version": (
             LEARNED_BASELINE_IMPLEMENTATION_VERSION
         ),
+        "code_revision": revision,
+        "source_manifest_sha256": actual_source_manifest_sha256,
+        "source_identity_status": source_identity_status,
         "metric_contract_version": METRIC_CONTRACT_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
         "training_path_protocol": str(model_payload.get("training_path_protocol", "")),
@@ -422,6 +447,9 @@ def run_hpo_cell(
         "learned_baseline_implementation_version": (
             LEARNED_BASELINE_IMPLEMENTATION_VERSION
         ),
+        "code_revision": revision,
+        "source_manifest_sha256": actual_source_manifest_sha256,
+        "source_identity_status": source_identity_status,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
     }
     return {"tuning_rows": annotated_rows, "cell_summary": summary, "checkpoint": checkpoint}
@@ -502,6 +530,34 @@ def merge_hpo_cells(
             raise ValueError(f"HPO implementation version mismatch: {key}")
         cell_summaries.append(summary)
         tuning_rows.extend(_read_csv(base / "tuning_rows.csv"))
+
+    code_revisions = {
+        str(summary.get("code_revision", "")).strip().lower()
+        for summary in cell_summaries
+        if str(summary.get("code_revision", "")).strip()
+    }
+    source_manifests = {
+        str(summary.get("source_manifest_sha256", "")).strip().lower()
+        for summary in cell_summaries
+        if str(summary.get("source_manifest_sha256", "")).strip()
+    }
+    source_statuses = {
+        str(summary.get("source_identity_status", "unregistered"))
+        for summary in cell_summaries
+    }
+    if len(code_revisions) > 1 or len(source_manifests) > 1:
+        raise ValueError("HPO matrix mixes code revisions or source manifests")
+    source_identity_status = (
+        "verified"
+        if source_statuses == {"verified"}
+        and len(code_revisions) == 1
+        and len(source_manifests) == 1
+        and is_hex_digest(next(iter(code_revisions)), length=40)
+        and is_hex_digest(next(iter(source_manifests)), length=64)
+        else "unregistered_or_incomplete"
+    )
+    code_revision = next(iter(code_revisions), "")
+    source_manifest = next(iter(source_manifests), "")
 
     policy_modes = list(expected_policy_modes or sorted({key[0] for key in seen_cells}))
     scenarios = list(expected_scenarios or sorted({key[2] for key in seen_cells}))
@@ -641,6 +697,7 @@ def merge_hpo_cells(
         and len(replicates) >= 5
         and candidate_counts
         and min(candidate_counts.values()) >= 2
+        and source_identity_status == "verified"
     )
     if str(stage) == "final" and all_modes_eligible and final_design_complete:
         freeze_status = "frozen_from_validation_only"
@@ -658,6 +715,9 @@ def merge_hpo_cells(
         "learned_baseline_implementation_version": (
             LEARNED_BASELINE_IMPLEMENTATION_VERSION
         ),
+        "source_identity_status": source_identity_status,
+        "code_revision": code_revision,
+        "source_manifest_sha256": source_manifest,
         "heldout_test_access_status": "not_loaded",
         "checkpoint_validation_seeds": sorted({
             int(seed)
@@ -692,6 +752,9 @@ def merge_hpo_cells(
             "training_replicate_count": len(replicates),
             "heldout_test_access_count": 0,
             "tuning_protocol_status": "valid",
+            "source_identity_status": source_identity_status,
+            "code_revision": code_revision,
+            "source_manifest_sha256": source_manifest,
             "learning_gate_status": (
                 "supported" if all_modes_eligible else "not_supported"
             ),
@@ -754,6 +817,8 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=240)
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--iterations", type=int, default=16)
+    parser.add_argument("--code-revision", default="")
+    parser.add_argument("--source-manifest-sha256", default="")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--merge-inputs", type=Path, nargs="*")
     parser.add_argument("--expected-policy-modes", nargs="*", choices=ALL_POLICY_MODES)
@@ -800,6 +865,8 @@ def main() -> None:
         steps=int(args.steps),
         assets=int(args.assets),
         iterations=int(args.iterations),
+        code_revision=str(args.code_revision),
+        expected_source_manifest_sha256=str(args.source_manifest_sha256),
     )
     write_hpo_cell(args.output_dir, payload)
     print(

@@ -316,5 +316,12 @@ and never load held-out test seeds. The freeze also records
 version or changed candidate parameters invalidates it. The scheduleurm formal
 submitter requires this JSON, injects selected parameters separately for each
 policy, and records a canonical JSON SHA-256 in every row and checkpoint.
+The freeze now also contains the full 40-character Git revision and a
+deterministic SHA-256 over every registered Python/configuration path and byte
+under `freq_hrl`. Before submission, the local package must match both the
+recorded Git tree and the frozen manifest. Every remote cell recomputes the
+manifest from its staged package and fails before training on any mismatch;
+merging rejects mixed or missing source identities. This makes code staging,
+not only hyperparameter selection, part of the confirmatory evidence contract.
 Exploratory smoke runs remain available, but their headline evidence status is
 forced to `exploratory_unfrozen_hyperparameters`.

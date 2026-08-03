@@ -47,6 +47,9 @@ class HyperparameterPilotTest(unittest.TestCase):
             "learned_baseline_implementation_version": (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
+            "source_identity_status": "verified",
+            "code_revision": "a" * 40,
+            "source_manifest_sha256": "b" * 64,
             "heldout_test_access_status": "not_loaded",
             "heldout_test_seeds": [],
             "checkpoint_validation_seeds": [57721],
@@ -65,6 +68,7 @@ class HyperparameterPilotTest(unittest.TestCase):
         self.assertEqual(audit["status"], "valid")
         self.assertEqual(audit["sha256"], frozen_config_sha256(payload))
         self.assertEqual(len(audit["sha256"]), 64)
+        self.assertEqual(audit["code_revision"], "a" * 40)
 
         contaminated = json.loads(json.dumps(payload))
         contaminated["heldout_test_seeds"] = [31415]
@@ -75,6 +79,11 @@ class HyperparameterPilotTest(unittest.TestCase):
         drifted["selected"]["freq_hrl"]["parameters"]["learning_rate"] = 9.9
         with self.assertRaisesRegex(ValueError, "drifted"):
             validate_frozen_config(drifted)
+
+        unregistered = json.loads(json.dumps(payload))
+        unregistered["source_identity_status"] = "unregistered_local"
+        with self.assertRaisesRegex(ValueError, "source identity"):
+            validate_frozen_config(unregistered)
 
     def test_equal_candidate_search_budget_by_algorithm_family(self):
         self.assertEqual(len(candidate_ids_for_mode("freq_hrl")), 8)
@@ -100,10 +109,28 @@ class HyperparameterPilotTest(unittest.TestCase):
         self.assertEqual(summary["heldout_test_access_status"], "not_loaded")
         self.assertEqual(summary["evaluation_role"], "tuning_validation")
         self.assertEqual(summary["selection_objective_version"], SELECTION_OBJECTIVE_VERSION)
+        self.assertEqual(summary["source_identity_status"], "unregistered_local")
         self.assertTrue(all(
             row["evaluation_role"] == "tuning_validation"
             for row in payload["tuning_rows"]
         ))
+
+    def test_cell_rejects_staged_source_manifest_drift(self):
+        with self.assertRaisesRegex(RuntimeError, "staged source manifest mismatch"):
+            run_hpo_cell(
+                candidate_id=candidate_ids_for_mode("freq_hrl")[0],
+                policy_mode="freq_hrl",
+                scenario="persistent_shift",
+                training_replicate_seed=7,
+                train_seeds=[42],
+                checkpoint_validation_seeds=[57721],
+                tuning_validation_seeds=[68207],
+                steps=8,
+                assets=2,
+                iterations=1,
+                code_revision="a" * 40,
+                expected_source_manifest_sha256="0" * 64,
+            )
 
     def test_cell_rejects_checkpoint_tuning_seed_overlap(self):
         with self.assertRaisesRegex(ValueError, "must be disjoint"):

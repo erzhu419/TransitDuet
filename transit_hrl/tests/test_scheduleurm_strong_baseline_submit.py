@@ -6,6 +6,7 @@ from scripts.submit_strong_learned_baselines_scheduleurm import (
     build_training_command,
     cell_relative_dir,
     experiment_cells,
+    resolved_hyperparameters,
 )
 
 
@@ -37,6 +38,8 @@ def args_fixture() -> argparse.Namespace:
         priority="normal",
         skip_launch_staging=False,
         allow_duplicate=False,
+        code_revision="a" * 40,
+        source_manifest_sha256="b" * 64,
     )
 
 
@@ -63,6 +66,17 @@ class ScheduleurmStrongBaselineSubmitTest(unittest.TestCase):
         self.assertIn("--eval-seeds 31415", command)
         self.assertIn("--optimizer-seeds 7", command)
         self.assertIn("OMP_NUM_THREADS=1", command)
+        self.assertIn("--code-revision " + "a" * 40, command)
+        self.assertIn("--source-manifest-sha256 " + "b" * 64, command)
+
+    def test_gru_controls_are_resolved_as_ppo_family(self):
+        parameters, candidate_id = resolved_hyperparameters(
+            args_fixture(), "generic_hrl_gru_ppo"
+        )
+        self.assertEqual(candidate_id, "exploratory_manual")
+        self.assertIn("epochs", parameters)
+        self.assertIn("init_log_std", parameters)
+        self.assertNotIn("replay_capacity", parameters)
 
     def test_confirmatory_command_uses_policy_specific_frozen_parameters(self):
         args = args_fixture()

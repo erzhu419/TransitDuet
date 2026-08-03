@@ -12,6 +12,9 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     selected_scenario_policy_pairs,
     write_outputs,
 )
+from freq_hrl.experiments.reproducibility import (
+    current_freq_hrl_source_manifest_sha256,
+)
 
 
 class StrongLearnedBaselineValidationTest(unittest.TestCase):
@@ -51,12 +54,38 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
                 "init_log_std": -1.0,
                 "reward_scale": 100.0,
             }),
+            code_revision="c" * 40,
+            expected_source_manifest_sha256=(
+                current_freq_hrl_source_manifest_sha256()
+            ),
         )
         self.assertEqual(
             payload["summary"]["hyperparameter_protocol_status"],
             "frozen_validation_only",
         )
         self.assertEqual(payload["per_seed"][0]["frozen_config_sha256"], "a" * 64)
+        self.assertEqual(payload["summary"]["source_identity_status"], "verified")
+
+    def test_confirmatory_run_rejects_staged_source_drift(self):
+        with self.assertRaisesRegex(RuntimeError, "staged source manifest mismatch"):
+            run_strong_learned_baseline_validation(
+                scenarios=["persistent_shift"],
+                policy_modes=["freq_hrl"],
+                train_seeds=[42],
+                eval_seeds=[123],
+                steps=8,
+                assets=2,
+                iterations=1,
+                optimizer_seed=7,
+                min_pairs=1,
+                confirmatory=True,
+                hyperparameter_source="frozen_nested_validation",
+                frozen_config_sha256="a" * 64,
+                selected_candidate_id="ppo_unit",
+                frozen_candidate_parameters_sha256="b" * 64,
+                code_revision="c" * 40,
+                expected_source_manifest_sha256="0" * 64,
+            )
 
     def test_learning_gate_rejects_random_initialization_as_learned_policy(self):
         unsupported = learning_dynamics_summary([{

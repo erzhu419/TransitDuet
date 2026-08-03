@@ -29,6 +29,9 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  #
     DEFAULT_SCENARIOS,
     DEFAULT_VALIDATION_SEEDS,
 )
+from freq_hrl.experiments.reproducibility import (  # noqa: E402
+    registered_git_source_identity,
+)
 
 
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
@@ -48,6 +51,10 @@ STAGE_EXCLUDES = (
 
 def parse_csv(value: str, cast=str) -> list:
     return [cast(item.strip()) for item in str(value).split(",") if item.strip()]
+
+
+def source_identity() -> tuple[str, str]:
+    return registered_git_source_identity(ROOT, Path("freq_hrl"))
 
 
 def experiment_cells(
@@ -118,6 +125,10 @@ def build_training_command(
         str(args.assets),
         "--iterations",
         str(args.iterations),
+        "--code-revision",
+        str(getattr(args, "code_revision", "")),
+        "--source-manifest-sha256",
+        str(getattr(args, "source_manifest_sha256", "")),
         "--output-dir",
         str(output_dir),
     ]
@@ -341,6 +352,10 @@ def main() -> None:
     if args.merge_only:
         merge_results(args)
         return
+    try:
+        args.code_revision, args.source_manifest_sha256 = source_identity()
+    except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(f"cannot freeze HPO source identity: {exc}") from exc
     cells = experiment_cells(
         args.policy_modes,
         args.candidate_ids,

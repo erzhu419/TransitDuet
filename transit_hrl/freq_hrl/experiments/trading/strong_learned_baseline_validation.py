@@ -28,8 +28,10 @@ from freq_hrl.experiments.statistics import (
     paired_delta_stats,
 )
 from freq_hrl.experiments.reproducibility import (
+    is_hex_digest,
     validate_evaluation_seed_roles,
     validate_unique_seeds,
+    verify_current_freq_hrl_source_identity,
 )
 from freq_hrl.rl import summarize_numeric_rows
 
@@ -634,6 +636,9 @@ def build_experiment_manifest(
     frozen_config_sha256: str = "",
     selected_candidate_id: str = "",
     frozen_candidate_parameters_sha256: str = "",
+    code_revision: str = "",
+    source_manifest_sha256: str = "",
+    source_identity_status: str = "unregistered_local",
     shard_index: int = 0,
     num_shards: int = 1,
 ) -> list[dict[str, Any]]:
@@ -648,7 +653,7 @@ def build_experiment_manifest(
     )
     for scenario, mode, replicate_seed in cells:
         run_seed = scenario_optimizer_seed(replicate_seed, scenario)
-        if mode == "flat_ppo":
+        if mode in FLAT_PPO_MODES:
             trainer = "canonical_joint_flat_ppo_v1"
         elif mode in POLICY_MODES:
             trainer = "frequency_separated_smdp_ppo_v2"
@@ -677,6 +682,9 @@ def build_experiment_manifest(
             "frozen_candidate_parameters_sha256": str(
                 frozen_candidate_parameters_sha256
             ),
+            "code_revision": str(code_revision),
+            "source_manifest_sha256": str(source_manifest_sha256),
+            "source_identity_status": str(source_identity_status),
             "optimizer_seed": run_seed,
             "independent_unit": "training_replicate_seed",
             "shard_index": int(shard_index),
@@ -712,6 +720,8 @@ def build_experiment_manifest(
                 + f" --selected-candidate-id {selected_candidate_id or 'none'}"
                 + " --frozen-candidate-parameters-sha256 "
                 + (frozen_candidate_parameters_sha256 or "none")
+                + f" --code-revision {code_revision or 'none'}"
+                + f" --source-manifest-sha256 {source_manifest_sha256 or 'none'}"
                 + f" --output-dir {output_dir}"
             ),
         })
@@ -851,6 +861,8 @@ def run_strong_learned_baseline_validation(
     frozen_config_sha256: str = "",
     selected_candidate_id: str = "",
     frozen_candidate_parameters_sha256: str = "",
+    code_revision: str = "",
+    expected_source_manifest_sha256: str = "",
     shard_index: int = 0,
     num_shards: int = 1,
 ) -> dict[str, Any]:
@@ -863,6 +875,14 @@ def run_strong_learned_baseline_validation(
             frozen_candidate_parameters_sha256
         ),
     )
+    source_identity = verify_current_freq_hrl_source_identity(
+        code_revision=str(code_revision),
+        expected_source_manifest_sha256=str(expected_source_manifest_sha256),
+        require_verified=bool(confirmatory),
+    )
+    source_revision = source_identity["code_revision"]
+    source_manifest = source_identity["source_manifest_sha256"]
+    source_identity_status = source_identity["source_identity_status"]
     if confirmatory and len(policy_modes) != 1:
         raise ValueError(
             "confirmatory cells must contain exactly one policy-specific frozen candidate"
@@ -981,6 +1001,9 @@ def run_strong_learned_baseline_validation(
         payload["learned_baseline_implementation_version"] = (
             LEARNED_BASELINE_IMPLEMENTATION_VERSION
         )
+        payload["code_revision"] = source_revision
+        payload["source_manifest_sha256"] = source_manifest
+        payload["source_identity_status"] = source_identity_status
         elapsed = float(time.perf_counter() - start)
         params = count_parameters(model)
         checkpoint_file = (
@@ -1010,6 +1033,9 @@ def run_strong_learned_baseline_validation(
                 "learned_baseline_implementation_version": (
                     LEARNED_BASELINE_IMPLEMENTATION_VERSION
                 ),
+                "code_revision": source_revision,
+                "source_manifest_sha256": source_manifest,
+                "source_identity_status": source_identity_status,
                 "selected_checkpoint_iteration": int(
                     payload.get("selected_checkpoint_iteration", -1)
                 ),
@@ -1051,6 +1077,9 @@ def run_strong_learned_baseline_validation(
             item["learned_baseline_implementation_version"] = (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             )
+            item["code_revision"] = source_revision
+            item["source_manifest_sha256"] = source_manifest
+            item["source_identity_status"] = source_identity_status
             item["rollout_seed_roots"] = " ".join(
                 str(seed) for seed in rollout_seed_roots
             )
@@ -1093,6 +1122,9 @@ def run_strong_learned_baseline_validation(
             "learned_baseline_implementation_version": (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
+            "code_revision": source_revision,
+            "source_manifest_sha256": source_manifest,
+            "source_identity_status": source_identity_status,
             "optimizer_seed": run_seed,
             "gradient_updates_train": int(payload.get("gradient_updates_train", 0)),
             "environment_steps_validation": int(
@@ -1180,6 +1212,9 @@ def run_strong_learned_baseline_validation(
             "learned_baseline_implementation_version": (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
+            "code_revision": source_revision,
+            "source_manifest_sha256": source_manifest,
+            "source_identity_status": source_identity_status,
             "training_path_protocol": str(payload.get("training_path_protocol", "")),
             "checkpoint_selection_protocol": str(
                 payload.get("checkpoint_selection_protocol", "")
@@ -1290,6 +1325,9 @@ def run_strong_learned_baseline_validation(
             frozen_candidate_parameters_sha256=str(
                 frozen_candidate_parameters_sha256
             ),
+            code_revision=source_revision,
+            source_manifest_sha256=source_manifest,
+            source_identity_status=source_identity_status,
             shard_index=int(shard_index),
             num_shards=int(num_shards),
         ),
@@ -1325,6 +1363,9 @@ def run_strong_learned_baseline_validation(
             "learned_baseline_implementation_version": (
                 LEARNED_BASELINE_IMPLEMENTATION_VERSION
             ),
+            "code_revision": source_revision,
+            "source_manifest_sha256": source_manifest,
+            "source_identity_status": source_identity_status,
             "steps": int(steps),
             "assets": int(assets),
             "iterations": int(iterations),
@@ -1485,6 +1526,33 @@ def merge_strong_learned_baseline_shards(
         for row in rows
         if str(row.get("learned_baseline_implementation_version", "")).strip()
     }
+    code_revisions = {
+        str(row.get("code_revision", "")).strip().lower()
+        for row in rows
+        if str(row.get("code_revision", "")).strip()
+    }
+    source_manifests = {
+        str(row.get("source_manifest_sha256", "")).strip().lower()
+        for row in rows
+        if str(row.get("source_manifest_sha256", "")).strip()
+    }
+    if len(code_revisions) > 1 or len(source_manifests) > 1:
+        raise ValueError(
+            "learned-baseline shards mix code revisions or source manifests"
+        )
+    source_rows_complete = bool(rows) and all(
+        str(row.get("source_identity_status", "")) == "verified"
+        and is_hex_digest(row.get("code_revision"), length=40)
+        and is_hex_digest(row.get("source_manifest_sha256"), length=64)
+        for row in rows
+    )
+    source_identity_status = (
+        "verified"
+        if source_rows_complete
+        and len(code_revisions) == 1
+        and len(source_manifests) == 1
+        else "unregistered_or_incomplete"
+    )
     selected_candidates_present = all(
         str(row.get("selected_candidate_id", "")).strip() for row in rows
     )
@@ -1517,6 +1585,7 @@ def merge_strong_learned_baseline_shards(
         and implementation_versions == {LEARNED_BASELINE_IMPLEMENTATION_VERSION}
         and selected_candidates_present
         and candidate_parameter_rows_valid
+        and source_identity_status == "verified"
     ):
         hyperparameter_protocol_status = "frozen_validation_only"
     elif hyperparameter_sources in (set(), {"exploratory_unfrozen"}):
@@ -1542,7 +1611,15 @@ def merge_strong_learned_baseline_shards(
         risk_adjusted_status = "training_not_demonstrated"
         responsibility_status = "training_not_demonstrated"
         ppo_baseline_status = "training_not_demonstrated"
-    if hyperparameter_protocol_status != "frozen_validation_only":
+    if (
+        hyperparameter_sources == {"frozen_nested_validation"}
+        and source_identity_status != "verified"
+    ):
+        all_metric_status = "unverified_source_identity"
+        risk_adjusted_status = "unverified_source_identity"
+        responsibility_status = "unverified_source_identity"
+        ppo_baseline_status = "unverified_source_identity"
+    elif hyperparameter_protocol_status != "frozen_validation_only":
         all_metric_status = "exploratory_unfrozen_hyperparameters"
         risk_adjusted_status = "exploratory_unfrozen_hyperparameters"
         responsibility_status = "exploratory_unfrozen_hyperparameters"
@@ -1579,6 +1656,15 @@ def merge_strong_learned_baseline_shards(
             "frozen_config_sha256": (
                 next(iter(frozen_hashes))
                 if len(frozen_hashes) == 1 else "mixed_or_missing"
+            ),
+            "source_identity_status": source_identity_status,
+            "code_revision": (
+                next(iter(code_revisions))
+                if len(code_revisions) == 1 else "mixed_or_missing"
+            ),
+            "source_manifest_sha256": (
+                next(iter(source_manifests))
+                if len(source_manifests) == 1 else "mixed_or_missing"
             ),
             "learned_baseline_implementation_version": (
                 next(iter(implementation_versions))
@@ -1740,6 +1826,8 @@ def main() -> None:
     parser.add_argument("--frozen-config-sha256", default="")
     parser.add_argument("--selected-candidate-id", default="")
     parser.add_argument("--frozen-candidate-parameters-sha256", default="")
+    parser.add_argument("--code-revision", default="")
+    parser.add_argument("--source-manifest-sha256", default="")
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=1)
     parser.add_argument("--merge-inputs", nargs="*", type=Path, default=[])
@@ -1791,6 +1879,10 @@ def main() -> None:
             selected_candidate_id=str(args.selected_candidate_id),
             frozen_candidate_parameters_sha256=str(
                 args.frozen_candidate_parameters_sha256
+            ),
+            code_revision=str(args.code_revision),
+            expected_source_manifest_sha256=str(
+                args.source_manifest_sha256
             ),
             shard_index=int(args.shard_index),
             num_shards=int(args.num_shards),
