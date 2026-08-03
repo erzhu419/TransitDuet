@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
+from freq_hrl.experiments.trading.metrics import METRIC_CONTRACT_VERSION
 
 
 DEFAULT_RESULT_PATHS = {
@@ -54,6 +55,7 @@ CORE_METRICS = (
 ACCEPTED_POSITIVE = {"supported", "positive_mixed"}
 PROMOTION_SUPPORT_METRICS = {"ep_reward", "avg_wait_min"}
 LEARNED_BASELINE_MAIN_METRICS = ("sharpe", "total_return", "FocusScore")
+CONTRACT_GATED_METRICS = {"sharpe", "total_return"}
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -123,6 +125,21 @@ def _paired_check(
     lower_is_better: bool,
     min_pairs: int,
 ) -> dict[str, Any]:
+    relevant = [
+        row for row in rows
+        if str(row.get("baseline", "")) in {"freq_hrl", str(baseline)}
+        and metric in row
+    ]
+    observed_contracts = sorted({
+        str(row.get("metric_contract_version", "missing")) for row in relevant
+    })
+    contract_valid = bool(
+        metric not in CONTRACT_GATED_METRICS
+        or (
+            relevant
+            and observed_contracts == [METRIC_CONTRACT_VERSION]
+        )
+    )
     stats = paired_delta_stats(
         rows,
         variant_key="baseline",
@@ -135,7 +152,12 @@ def _paired_check(
     return {
         "check": f"freq_hrl_vs_{baseline}_{metric}",
         **stats,
-        "status": claim_status(stats, min_pairs=int(min_pairs)),
+        "metric_contract_valid": contract_valid,
+        "metric_contract_versions": observed_contracts,
+        "status": (
+            claim_status(stats, min_pairs=int(min_pairs))
+            if contract_valid else "invalid_legacy_metric_contract"
+        ),
     }
 
 
@@ -143,7 +165,11 @@ def _scenario_winners(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     scenarios = sorted({str(row.get("scenario", "default")) for row in rows})
     out: list[dict[str, Any]] = []
     for scenario in scenarios:
-        group = [row for row in rows if str(row.get("scenario", "default")) == scenario]
+        group = [
+            row for row in rows
+            if str(row.get("scenario", "default")) == scenario
+            and str(row.get("metric_contract_version", "")) == METRIC_CONTRACT_VERSION
+        ]
         if not group:
             continue
         baselines = sorted({str(row.get("baseline", "")) for row in group})

@@ -23,6 +23,7 @@ from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
 from freq_hrl.rl import summarize_numeric_rows
 
 from .performance_validation import SCENARIOS
+from .metrics import METRIC_CONTRACT_VERSION
 from .ppo_actor_critic import POLICY_MODES, train_ppo_actor_critic
 
 
@@ -43,6 +44,7 @@ MAIN_METRICS = (
     ("FocusScore", False),
     ("LowerLFDrift", True),
 )
+CONTRACT_GATED_METRICS = {"sharpe", "total_return"}
 
 
 def count_parameters(model: Any) -> int:
@@ -129,6 +131,19 @@ def build_paired_checks(
     checks: list[dict[str, Any]] = []
     for control in controls:
         for metric, lower_is_better in MAIN_METRICS:
+            relevant = [
+                row for row in rows
+                if str(row.get("baseline", "")) in {"freq_hrl", control}
+                and metric in row
+            ]
+            contracts = sorted({
+                str(row.get("metric_contract_version", "missing"))
+                for row in relevant
+            })
+            contract_valid = bool(
+                metric not in CONTRACT_GATED_METRICS
+                or (relevant and contracts == [METRIC_CONTRACT_VERSION])
+            )
             stats = paired_delta_stats(
                 rows,
                 variant_key="baseline",
@@ -141,7 +156,12 @@ def build_paired_checks(
             checks.append({
                 "check": f"freq_hrl_vs_{control}_{metric}",
                 **stats,
-                "status": claim_status(stats, min_pairs=int(min_pairs)),
+                "metric_contract_valid": contract_valid,
+                "metric_contract_versions": contracts,
+                "status": (
+                    claim_status(stats, min_pairs=int(min_pairs))
+                    if contract_valid else "invalid_legacy_metric_contract"
+                ),
                 "baseline_class": "strong_learned_ppo",
             })
     return checks
@@ -287,10 +307,14 @@ def run_strong_learned_baseline_validation(
             "best_score": float(payload.get("best_score", 0.0)),
             "heldout_objective_proxy": float(np.mean([
                 float(row.get("total_return", 0.0))
-                + 0.01 * float(row.get("sharpe", 0.0))
+                + 0.01 * float(row.get(
+                    "episode_information_ratio",
+                    row.get("sharpe", 0.0),
+                ))
                 for row in heldout_rows
             ])) if heldout_rows else 0.0,
             "elapsed_sec": elapsed,
+            "selection_metric": "episode_information_ratio",
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
         })

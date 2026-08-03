@@ -118,3 +118,21 @@ sample count cannot bypass this gate. Existing v1 reports that counted repeated
 source/scenario rows as independent or used an unadjusted p-value are
 exploratory artifacts and must be regenerated before they can support a v2
 paper claim.
+
+## Trading metric contract
+
+Every v2 trading row carries `metric_contract_version=trading_metrics_v2`.
+Portfolio environments consume simple returns, never log returns masquerading
+as simple returns. Net bar return is gross portfolio return minus one observed
+transaction-cost charge, and the reported equity path must reconstruct from
+that series within numerical tolerance. Order-book replay uses fixed-notional
+normalized PnL increments and additive reconstruction.
+
+`sharpe` is now an alias for annualized Sharpe with an explicit
+`periods_per_year` and sample standard deviation (`ddof=1`). The old
+`sqrt(episode_length)` ratio is retained only as
+`episode_information_ratio`. Sortino uses downside semideviation. Drawdown
+includes the initial equity point. CAGR and Calmar are undefined for horizons
+shorter than 0.25 observation-years; short synthetic episodes report
+`episode_return_to_drawdown` instead. Legacy trading rows without this contract
+are ineligible for baseline headline claims and must be rerun.

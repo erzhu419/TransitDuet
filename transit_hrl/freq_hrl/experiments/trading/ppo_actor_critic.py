@@ -35,7 +35,8 @@ from freq_hrl.rl import (
     train_frequency_separated_ppo,
 )
 
-from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
+from .performance_validation import SCENARIOS, make_synthetic_market
 
 
 POLICY_MODES = (
@@ -466,14 +467,17 @@ def rollout(
         "LowerLFDriftAbs": 0.0,
     }
     diag = diagnostics.summarize_episode()
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
     row = {
         "baseline": str(policy_mode),
         "policy_mode": str(policy_mode),
         "seed": int(seed),
         "scenario": scenario,
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotions),
         "leakage_penalty": float(leak["leakage_penalty"]),
@@ -695,14 +699,17 @@ def smdp_rollout(
     leak = reg.compute(np.asarray(targets), np.asarray(lower_effects))
     raw_leak = reg.compute(np.asarray(targets), np.asarray(raw_lower_effects))
     diag = diagnostics.summarize_episode()
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
     row = {
         "baseline": "freq_hrl",
         "policy_mode": "freq_hrl",
         "seed": int(seed),
         "scenario": scenario,
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_signals),
         "promotion_replan_count": int(sum(reason == "promotion" for reason in decision_reasons)),
@@ -736,7 +743,8 @@ def smdp_rollout(
 
 
 def objective(row: dict[str, float]) -> float:
-    return float(row["total_return"]) + 0.01 * float(row["sharpe"]) - 0.25 * float(row["max_drawdown"]) - 0.0005 * float(row["turnover"])
+    risk_adjusted = float(row.get("episode_information_ratio", row["sharpe"]))
+    return float(row["total_return"]) + 0.01 * risk_adjusted - 0.25 * float(row["max_drawdown"]) - 0.0005 * float(row["turnover"])
 
 
 def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:

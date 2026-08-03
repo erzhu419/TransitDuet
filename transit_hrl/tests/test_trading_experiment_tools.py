@@ -25,10 +25,13 @@ class TradingExperimentToolsTest(unittest.TestCase):
         ]
         _, prices = align_prices(series)
         returns = price_returns(prices)
+        self.assertAlmostEqual(float(returns[0, 0]), 0.01)
         row = run_dataset_eval(returns)
         self.assertEqual(row["assets"], 2)
         self.assertEqual(row["freq_method"], "ema")
         self.assertIn("sharpe", row)
+        self.assertEqual(row["metric_contract_version"], "trading_metrics_v2")
+        self.assertLess(row["equity_reconstruction_max_abs_error"], 1e-10)
         state_row = run_dataset_eval(returns, freq_method="state_space")
         self.assertEqual(state_row["freq_method"], "state_space")
         minute_row = run_dataset_eval(returns, freq_method="adaptive_wavelet", bar_sec=300)

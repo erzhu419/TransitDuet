@@ -22,6 +22,8 @@ class OrderBookDataTest(unittest.TestCase):
             self.assertEqual(summary["freq_method"], "ema")
             self.assertEqual(summary["bars"], 48)
             self.assertIn("sharpe", summary)
+            self.assertEqual(summary["metric_contract_version"], "trading_metrics_v2")
+            self.assertLess(summary["equity_reconstruction_max_abs_error"], 1e-10)
             self.assertGreater(summary["avg_spread_bps"], 0.0)
 
 

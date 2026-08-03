@@ -13,7 +13,8 @@ import numpy as np
 from freq_hrl.domains.trading import TradingFrequencyTracker
 from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
 from freq_hrl.experiments.trading.order_book_data import ORDER_BOOK_ENCODERS
-from freq_hrl.experiments.trading.performance_validation import max_drawdown
+
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
 
 
 def _float(row: dict[str, Any], *names: str, default: float = 0.0) -> float:
@@ -337,6 +338,8 @@ def run_l3_replay_eval(
     position = 0.0
     cash = 0.0
     last_mid = book.snapshot()["mid"] or 100.0
+    initial_notional = max(abs(float(last_mid)) * float(max_position), 1e-9)
+    previous_equity = 0.0
     last_fill_idx = 0
     pnl_returns = []
     equity_curve = []
@@ -388,20 +391,24 @@ def run_l3_replay_eval(
         end_snap = book.snapshot()
         mid = end_snap["mid"] or snap["mid"]
         equity = cash + position * mid
-        prev_equity = cash + position * last_mid
-        pnl_returns.append((equity - prev_equity) / max(abs(last_mid) * max_position, 1e-9))
-        equity_curve.append(1.0 + equity / max(abs(last_mid) * max_position, 1e-9))
+        pnl_returns.append((equity - previous_equity) / initial_notional)
+        equity_curve.append(1.0 + equity / initial_notional)
+        previous_equity = equity
         last_mid = mid
     book.cancel_owner("agent")
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity_curve, dtype=np.float64)
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(1.0),
+        compounding="additive",
+    )
     return {
         "freq_method": str(freq_method),
         "events": int(len(events)),
         "bars": int(horizon),
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(252.0 * 6.5 * 3600.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "fill_rate": float(len(fill_abs) / max(horizon - 1, 1)),
         "avg_abs_fill": float(np.mean(fill_abs)) if fill_abs else 0.0,
         "avg_slippage_bps": float(np.mean(slippages)) if slippages else 0.0,

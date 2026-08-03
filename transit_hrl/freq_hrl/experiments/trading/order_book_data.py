@@ -15,8 +15,9 @@ from freq_hrl.domains.trading import (
     PortfolioExecutionEnv,
     TradingFrequencyTracker,
 )
-from freq_hrl.experiments.trading.performance_validation import max_drawdown
 from freq_hrl.policies import FrequencyTradingController, FrequencyTradingPlanner
+
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
 
 
 ORDER_BOOK_ENCODERS = ("ema", "state_space", "adaptive_wavelet", "neural_state_space")
@@ -112,7 +113,8 @@ def order_book_arrays(rows: list[dict[str, float]]) -> dict[str, np.ndarray]:
     spread = (ask - bid) / np.maximum(mid, 1e-12)
     imbalance = (bid_size - ask_size) / np.maximum(bid_size + ask_size, 1e-12)
     depth = bid_size + ask_size
-    returns = np.diff(np.log(np.maximum(micro, 1e-12)))
+    safe_micro = np.maximum(micro, 1e-12)
+    returns = safe_micro[1:] / safe_micro[:-1] - 1.0
     signal = np.zeros_like(returns)
     if returns.size > 1:
         signal[1:] = returns[:-1]
@@ -184,12 +186,15 @@ def run_order_book_eval(rows: list[dict[str, float]], freq_method: str, steps: i
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(1.0),
+    )
     return {
         "freq_method": str(freq_method),
         "bars": int(returns.shape[0]),
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(252.0 * 6.5 * 3600.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotions),
         "avg_spread_bps": float(np.mean(spread) * 1e4),

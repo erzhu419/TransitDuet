@@ -46,6 +46,8 @@ class BaselineAblationMatrixTest(unittest.TestCase):
                         "LowerLFDrift": 0.30,
                     },
                 ])
+        for row in rows:
+            row["metric_contract_version"] = "trading_metrics_v2"
         payload = build_baseline_ablation_matrix(
             {"inline": Path("missing.json")},
             min_pairs=3,
@@ -113,6 +115,8 @@ class BaselineAblationMatrixTest(unittest.TestCase):
                         "LowerLFDrift": 0.1,
                     },
                 ])
+            for row in pressure_rows:
+                row["metric_contract_version"] = "trading_metrics_v2"
             pressure_path = root / "pressure" / "summary.json"
             pressure_path.parent.mkdir(parents=True)
             pressure_path.write_text(
@@ -182,6 +186,8 @@ class BaselineAblationMatrixTest(unittest.TestCase):
                     "LowerLFDrift": 0.20,
                 },
             ])
+        for row in rows:
+            row["metric_contract_version"] = "trading_metrics_v2"
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             path = root / "learned" / "summary.json"
@@ -195,6 +201,24 @@ class BaselineAblationMatrixTest(unittest.TestCase):
             self.assertEqual(learned["flat_ppo"]["evidence_status"], "supported")
             self.assertEqual(learned["flat_sac"]["evidence_status"], "registered_missing")
             self.assertEqual(built["summary"]["strong_learned_baseline_status"], "partial")
+
+    def test_legacy_sharpe_rows_are_not_headline_eligible(self):
+        rows = []
+        for seed in (1, 2, 3):
+            rows.extend([
+                {"scenario": "x", "seed": seed, "baseline": "freq_hrl", "sharpe": 2.0},
+                {"scenario": "x", "seed": seed, "baseline": "swapped", "sharpe": 1.0},
+            ])
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "legacy.json"
+            path.write_text(json.dumps({"per_seed": rows}), encoding="utf-8")
+            built = build_baseline_ablation_matrix({"legacy": path}, min_pairs=3)
+            check = next(
+                row for row in built["paired_checks"]
+                if row["check"] == "freq_hrl_vs_swapped_sharpe"
+            )
+            self.assertEqual(check["status"], "invalid_legacy_metric_contract")
+            self.assertFalse(check["metric_contract_valid"])
 
 
 if __name__ == "__main__":

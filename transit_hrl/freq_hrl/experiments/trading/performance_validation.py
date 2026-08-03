@@ -32,6 +32,12 @@ from freq_hrl.domains.trading import (
 )
 from freq_hrl.policies import BernsteinPlanCurve, CausalPlanCurveState
 
+from .metrics import (
+    max_drawdown,
+    periods_per_year_from_bar_seconds,
+    summarize_pnl_series,
+)
+
 
 BASELINES = (
     "vanilla_rl",
@@ -466,14 +472,6 @@ def policy_action(
     return target, lower_action, diag_features
 
 
-def max_drawdown(equity: np.ndarray) -> float:
-    if equity.size == 0:
-        return 0.0
-    peaks = np.maximum.accumulate(equity)
-    dd = 1.0 - equity / np.maximum(peaks, 1e-12)
-    return float(np.max(dd))
-
-
 def summarize_run(
     baseline: str,
     seed: int,
@@ -500,12 +498,16 @@ def summarize_run(
     raw_rewards_arr = np.asarray(raw_rewards, dtype=np.float64)
     leakage_penalty_arr = np.asarray(leakage_reward_penalties, dtype=np.float64)
     equity = np.asarray(equity_curve, dtype=np.float64)
-    total_return = float(equity[-1] - 1.0) if equity.size else 0.0
-    sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
-    downside = pnl[pnl < 0.0]
-    sortino = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (downside.std() + 1e-12)) if downside.size else sharpe
-    mdd = max_drawdown(equity)
-    calmar = float(total_return / max(mdd, 1e-9))
+    financial = summarize_pnl_series(
+        pnl,
+        equity,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
+    total_return = float(financial["total_return"])
+    sharpe = float(financial["sharpe"])
+    sortino = float(financial["sortino"])
+    mdd = float(financial["max_drawdown"])
+    calmar = float(financial["calmar"])
 
     op = TradingActionEffectOperator(target_history=targets)
     reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
@@ -570,6 +572,7 @@ def summarize_run(
         "LowerLFDrift": float(leakage["LowerLFDrift"]),
         "FocusScore": float(diag["FocusScore"]),
     }
+    row.update(financial)
     row.update({key: float(value) for key, value in reward_attribution.items()})
     return row
 

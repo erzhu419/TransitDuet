@@ -13,7 +13,8 @@ import numpy as np
 from freq_hrl.domains.trading import TradingFrequencyTracker
 from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
 from freq_hrl.experiments.trading.order_book_data import ORDER_BOOK_ENCODERS
-from freq_hrl.experiments.trading.performance_validation import max_drawdown
+
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
 
 
 def _float(row: dict[str, Any], *names: str, default: float = 0.0) -> float:
@@ -307,7 +308,8 @@ def run_matching_eval(
     queue_depletion = []
     promotions = 0
     delay = max(0, int(latency_bins))
-    prev_mid = mids[0]
+    initial_notional = max(abs(float(mids[0])) * float(max_position), 1e-9)
+    previous_equity = 0.0
     for t in range(1, len(books) - 1):
         signal_book = books[max(0, t - delay)]
         signal = returns[t - 1] + 0.00035 * _book_imbalance(signal_book)
@@ -340,24 +342,27 @@ def run_matching_eval(
             position += filled
         mid = mids[t]
         equity = cash + position * mid
-        prev_equity = cash + position * prev_mid
-        pnl_returns.append((equity - prev_equity) / max(abs(prev_mid) * max_position, 1e-9))
-        equity_curve.append(1.0 + equity / max(abs(mids[0]) * max_position, 1e-9))
+        pnl_returns.append((equity - previous_equity) / initial_notional)
+        equity_curve.append(1.0 + equity / initial_notional)
         slippages.append(float(fill["slippage_bps"]))
         fill_abs.append(abs(filled))
         levels.append(float(fill["levels_used"]))
         queue_ahead.append(float(fill.get("queue_ahead", 0.0)))
         queue_depletion.append(float(fill.get("queue_depletion", 0.0)))
-        prev_mid = mid
+        previous_equity = equity
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity_curve, dtype=np.float64)
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(1.0),
+        compounding="additive",
+    )
     return {
         "freq_method": str(freq_method),
         "execution_mode": str(execution_mode),
         "bars": int(len(books)),
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(252.0 * 6.5 * 3600.0) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "avg_slippage_bps": float(np.mean(slippages)) if slippages else 0.0,
         "avg_abs_fill": float(np.mean(fill_abs)) if fill_abs else 0.0,
         "partial_fill_rate": float(partials / max(len(fill_abs), 1)),

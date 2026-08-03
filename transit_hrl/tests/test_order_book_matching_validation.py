@@ -57,6 +57,11 @@ class OrderBookMatchingValidationTest(unittest.TestCase):
             )
             self.assertTrue(payload["paired_checks"])
             self.assertIn("passive_queue", {row["execution_mode"] for row in payload["summary"]})
+            self.assertTrue(all(
+                row["metric_contract_version"] == "trading_metrics_v2"
+                and row["equity_reconstruction_max_abs_error"] < 1e-10
+                for row in payload["summary"]
+            ))
             self.assertTrue((Path(tmp) / "out" / "summary.json").exists())
 
     def test_matching_validation_reads_l2_csv(self):

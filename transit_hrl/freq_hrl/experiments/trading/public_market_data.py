@@ -23,7 +23,7 @@ from freq_hrl.domains.trading import (
 )
 from freq_hrl.policies import FrequencyTradingController, FrequencyTradingPlanner
 
-from .performance_validation import max_drawdown
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
 
 
 def _read_price_csv(path: Path, close_col: str = "Close") -> list[dict[str, Any]]:
@@ -150,8 +150,8 @@ def align_prices(series: list[tuple[str, list[dict[str, Any]]]]) -> tuple[list[s
 
 
 def price_returns(prices: np.ndarray) -> np.ndarray:
-    logp = np.log(np.maximum(prices, 1e-12))
-    return np.diff(logp, axis=0)
+    prices = np.maximum(np.asarray(prices, dtype=np.float64), 1e-12)
+    return prices[1:] / prices[:-1] - 1.0
 
 
 def run_dataset_eval(
@@ -169,7 +169,7 @@ def run_dataset_eval(
     predictor[1:] = returns[:-1]
     volume_proxy = 1.0 + 100.0 * np.abs(returns)
     bar_sec = max(float(bar_sec), 1.0)
-    periods_per_year = 252.0 if bar_sec >= 12 * 3600.0 else 252.0 * 6.5 * 3600.0 / bar_sec
+    periods_per_year = periods_per_year_from_bar_seconds(bar_sec)
     env = PortfolioExecutionEnv(
         returns,
         volumes=volume_proxy,
@@ -220,14 +220,17 @@ def run_dataset_eval(
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year,
+    )
     return {
         "bars": int(returns.shape[0]),
         "assets": int(assets),
         "bar_sec": float(bar_sec),
         "freq_method": str(freq_method),
-        "total_return": float(eq[-1] - 1.0) if eq.size else 0.0,
-        "sharpe": float(np.sqrt(periods_per_year) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotions),
     }

@@ -52,6 +52,11 @@ class OrderBookL3ReplayValidationTest(unittest.TestCase):
                 csv_files=[csv_path],
             )
             self.assertTrue(payload["paired_checks"])
+            self.assertTrue(all(
+                row["metric_contract_version"] == "trading_metrics_v2"
+                and row["equity_reconstruction_max_abs_error"] < 1e-10
+                for row in payload["summary"]
+            ))
             self.assertTrue((Path(tmp) / "out" / "summary.json").exists())
 
     def test_synthetic_l3_validation_writes_outputs(self):

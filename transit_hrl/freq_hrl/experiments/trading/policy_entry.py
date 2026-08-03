@@ -32,7 +32,8 @@ from freq_hrl.policies import (
     PolicyGradientTradingPlanner,
 )
 
-from .performance_validation import SCENARIOS, make_synthetic_market, max_drawdown
+from .metrics import periods_per_year_from_bar_seconds, summarize_pnl_series
+from .performance_validation import SCENARIOS, make_synthetic_market
 
 
 def make_policy(
@@ -135,8 +136,11 @@ def run_eval(
             break
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
-    total_return = float(eq[-1] - 1.0) if eq.size else 0.0
-    sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
     leakage = LeakageRegularizer(
         upper_hf_window=6,
         lower_lf_window=24,
@@ -153,9 +157,7 @@ def run_eval(
     return {
         "seed": int(seed),
         "scenario": scenario,
-        "total_return": total_return,
-        "sharpe": sharpe,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_count),
         "leakage_penalty": float(leakage["leakage_penalty"]),
@@ -185,7 +187,7 @@ def objective(
     )
     return (
         float(row["total_return"])
-        + 0.01 * float(row["sharpe"])
+        + 0.01 * float(row.get("episode_information_ratio", row["sharpe"]))
         - 0.25 * float(row["max_drawdown"])
         - 0.0005 * float(row["turnover"])
         - leakage_penalty
@@ -403,14 +405,15 @@ def run_pg_episode(
         grad_estimate = np.zeros_like(params.to_vector())
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
-    total_return = float(eq[-1] - 1.0) if eq.size else 0.0
-    sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
     row = {
         "seed": int(seed),
         "scenario": scenario,
-        "total_return": total_return,
-        "sharpe": sharpe,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_count),
         "policy_loss_leakage_penalty": float(np.mean(leakage_loss_penalties)) if leakage_loss_penalties else 0.0,
@@ -577,14 +580,15 @@ def run_actor_critic_episode(
 
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
-    total_return = float(eq[-1] - 1.0) if eq.size else 0.0
-    sharpe = float(np.sqrt(max(pnl.size, 1)) * pnl.mean() / (pnl.std() + 1e-12)) if pnl.size else 0.0
+    financial = summarize_pnl_series(
+        pnl,
+        eq,
+        periods_per_year=periods_per_year_from_bar_seconds(60.0),
+    )
     row = {
         "seed": int(seed),
         "scenario": scenario,
-        "total_return": total_return,
-        "sharpe": sharpe,
-        "max_drawdown": max_drawdown(eq),
+        **financial,
         "turnover": float(np.sum(turnover)),
         "promotion_count": int(promotion_count),
         "td_error_mean": float(np.mean(td_errors)) if td_errors.size else 0.0,
@@ -781,6 +785,7 @@ def train_policy_gradient(
             "deterministic_objective": score,
             "deterministic_task_objective": float(np.mean([objective(row) for row in eval_rows])),
             "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
+            "selection_metric": "episode_information_ratio",
             "grad_norm": float(np.linalg.norm(grad_mean)),
             "policy_loss_leakage_penalty": float(np.mean([
                 row.get("policy_loss_leakage_penalty", 0.0)
@@ -946,6 +951,7 @@ def train_actor_critic(
             "deterministic_objective": score,
             "deterministic_task_objective": float(np.mean([objective(row) for row in eval_rows])),
             "deterministic_sharpe": float(np.mean([row["sharpe"] for row in eval_rows])),
+            "selection_metric": "episode_information_ratio",
             "td_error_abs_mean": float(np.mean([row["td_error_abs_mean"] for row in sampled_rows])),
             "critic_value_loss": float(np.mean([row["critic_value_loss"] for row in sampled_rows])),
             "actor_grad_norm": float(np.linalg.norm(actor_grad_mean)),
