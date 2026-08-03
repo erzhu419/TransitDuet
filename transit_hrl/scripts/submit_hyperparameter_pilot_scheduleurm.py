@@ -180,6 +180,7 @@ def build_training_command(
         "OPENBLAS_NUM_THREADS=1",
         "NUMEXPR_NUM_THREADS=1",
         "TORCH_NUM_THREADS=1",
+        "CUDA_VISIBLE_DEVICES=",
     ]
     command_text = " ".join([*env, shlex.join(command)])
     if str(args.launch_subdir) == "scripts":

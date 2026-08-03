@@ -73,6 +73,7 @@ class ScheduleurmHpoSubmitTest(unittest.TestCase):
         self.assertNotIn("31415", command)
         self.assertIn("--code-revision " + "a" * 40, command)
         self.assertIn("--source-manifest-sha256 " + "b" * 64, command)
+        self.assertIn("CUDA_VISIBLE_DEVICES=", command)
 
     def test_scheduler_uses_dynamic_cpu_nodes_without_hard_pin(self):
         args = args_fixture()
