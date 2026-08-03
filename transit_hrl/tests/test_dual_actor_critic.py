@@ -15,6 +15,24 @@ from freq_hrl.rl import (
 
 
 class DualActorCriticTest(unittest.TestCase):
+    def test_orthogonal_initialization_is_centered_at_zero_state(self):
+        model = DualActorCriticPPO(DualPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=16,
+        ))
+        output = model.act(
+            np.zeros(3, dtype=np.float32),
+            np.zeros(2, dtype=np.float32),
+            sample=False,
+        )
+        np.testing.assert_allclose(output["upper_action"], 0.0, atol=1e-8)
+        np.testing.assert_allclose(output["lower_action"], 0.0, atol=1e-8)
+        self.assertAlmostEqual(float(output["upper_value"]), 0.0, places=8)
+        self.assertAlmostEqual(float(output["lower_value"]), 0.0, places=8)
+
     def test_dual_ppo_update_runs(self):
         cfg = DualPPOConfig(
             upper_state_dim=3,
@@ -108,6 +126,9 @@ class DualActorCriticTest(unittest.TestCase):
         self.assertEqual(payload["trajectory_contract"]["policy_ratios"], "independent upper and lower PPO ratios")
         self.assertEqual(len(rows), 1)
         self.assertIn("sharpe_mean", payload["summary"])
+        self.assertIn("selected_checkpoint_iteration", payload)
+        self.assertIn("validation_learning_gain", payload)
+        self.assertEqual(payload["training_reward_scale"], 100.0)
         self.assertLess(rows[0]["upper_decision_count"], rows[0]["lower_decision_count"])
         self.assertEqual(rows[0]["protocol_valid"], 1.0)
 

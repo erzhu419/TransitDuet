@@ -119,6 +119,8 @@ def build_training_command(
         str(args.ppo_minibatch_size),
         "--ppo-init-log-std",
         str(args.ppo_init_log_std),
+        "--training-reward-scale",
+        str(args.training_reward_scale),
         "--offpolicy-hidden-dim",
         str(args.offpolicy_hidden_dim),
         "--offpolicy-learning-rate",
@@ -277,6 +279,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ppo-epochs", type=int, default=4)
     parser.add_argument("--ppo-minibatch-size", type=int, default=512)
     parser.add_argument("--ppo-init-log-std", type=float, default=-1.0)
+    parser.add_argument("--training-reward-scale", type=float, default=100.0)
     parser.add_argument("--offpolicy-hidden-dim", type=int, default=64)
     parser.add_argument("--offpolicy-learning-rate", type=float, default=3e-4)
     parser.add_argument("--offpolicy-replay-capacity", type=int, default=100_000)

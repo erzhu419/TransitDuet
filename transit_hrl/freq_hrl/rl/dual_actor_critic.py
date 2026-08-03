@@ -50,22 +50,36 @@ class TrajectoryBatch:
     constraint: np.ndarray | None = None
 
 
-def _mlp(in_dim: int, out_dim: int, hidden_dim: int) -> nn.Sequential:
+def _initialize_linear(layer: nn.Linear, *, gain: float) -> nn.Linear:
+    nn.init.orthogonal_(layer.weight, gain=float(gain))
+    nn.init.zeros_(layer.bias)
+    return layer
+
+
+def _mlp(
+    in_dim: int,
+    out_dim: int,
+    hidden_dim: int,
+    *,
+    output_gain: float,
+) -> nn.Sequential:
     if int(hidden_dim) <= 0:
-        return nn.Sequential(nn.Linear(in_dim, out_dim))
+        return nn.Sequential(
+            _initialize_linear(nn.Linear(in_dim, out_dim), gain=output_gain)
+        )
     return nn.Sequential(
-        nn.Linear(in_dim, hidden_dim),
+        _initialize_linear(nn.Linear(in_dim, hidden_dim), gain=np.sqrt(2.0)),
         nn.Tanh(),
-        nn.Linear(hidden_dim, hidden_dim),
+        _initialize_linear(nn.Linear(hidden_dim, hidden_dim), gain=np.sqrt(2.0)),
         nn.Tanh(),
-        nn.Linear(hidden_dim, out_dim),
+        _initialize_linear(nn.Linear(hidden_dim, out_dim), gain=output_gain),
     )
 
 
 class GaussianActor(nn.Module):
     def __init__(self, state_dim: int, action_dim: int, hidden_dim: int, init_log_std: float) -> None:
         super().__init__()
-        self.net = _mlp(state_dim, action_dim, hidden_dim)
+        self.net = _mlp(state_dim, action_dim, hidden_dim, output_gain=0.01)
         self.log_std = nn.Parameter(torch.ones(action_dim, dtype=torch.float32) * float(init_log_std))
 
     def distribution(self, state: torch.Tensor) -> torch.distributions.Normal:
@@ -87,7 +101,7 @@ class GaussianActor(nn.Module):
 class ValueNet(nn.Module):
     def __init__(self, state_dim: int, hidden_dim: int) -> None:
         super().__init__()
-        self.net = _mlp(state_dim, 1, hidden_dim)
+        self.net = _mlp(state_dim, 1, hidden_dim, output_gain=0.1)
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         return self.net(state).squeeze(-1)

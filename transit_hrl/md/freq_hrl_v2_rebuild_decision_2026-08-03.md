@@ -259,6 +259,18 @@ this rule. Candidate ranking averages tuning paths within each scenario, then
 clusters uncertainty by independent training replicate and ranks by the lower
 95% bootstrap bound.
 
+Two additional learning-validity controls are mandatory. First, every trainer
+records the initial validation score, selected checkpoint iteration, and
+validation gain. A random initialization selected at iteration `-1` is not
+silently counted as a learned policy. A policy passes the matrix-level learning
+gate only when at least 80% of its independent cells select a post-update
+checkpoint and its mean validation gain is positive. Second, trading rewards
+are multiplied by 100 only inside gradient updates to condition critic targets;
+all environment returns, costs, drawdowns, and reported endpoints remain in
+their original units. PPO actor/value networks use zero-bias orthogonal
+initialization with small output gains so initial critic values do not dominate
+the approximately milliscale financial rewards.
+
 The full stress matrix contains stationary low-noise, stationary high-noise,
 localized burst, persistent shift, and OOD-period regimes. With five learned
 policies and ten independent training replicates this is 250 training cells.

@@ -26,6 +26,7 @@ from freq_hrl.experiments.reproducibility import (
 )
 
 from .metrics import (
+    DEFAULT_TRAINING_REWARD_SCALE,
     METRIC_CONTRACT_VERSION,
     SELECTION_OBJECTIVE_VERSION,
     validation_utility,
@@ -79,6 +80,7 @@ def _ppo_candidate(candidate_id: str, learning_rate: float, init_log_std: float)
             "epochs": 4,
             "minibatch_size": 512,
             "init_log_std": float(init_log_std),
+            "reward_scale": DEFAULT_TRAINING_REWARD_SCALE,
         },
     )
 
@@ -99,6 +101,7 @@ def _offpolicy_candidate(
             "warmup_steps": int(warmup_steps),
             "batch_size": int(batch_size),
             "updates_per_step": 1,
+            "reward_scale": DEFAULT_TRAINING_REWARD_SCALE,
         },
     )
 
@@ -204,6 +207,7 @@ def run_hpo_cell(
             policy_mode=policy_mode,
             use_handcrafted_frequency_prior=False,
             evaluation_role="tuning_validation",
+            reward_scale=float(params["reward_scale"]),
         )
     else:
         model_payload, tuning_rows, model = train_flat_offpolicy_baseline(
@@ -224,6 +228,7 @@ def run_hpo_cell(
             updates_per_step=int(params["updates_per_step"]),
             resample_training_paths=True,
             evaluation_role="tuning_validation",
+            reward_scale=float(params["reward_scale"]),
         )
     if model_payload.get("evaluation_role") != "tuning_validation":
         raise RuntimeError("trainer exposed the wrong evaluation role during HPO")
@@ -288,6 +293,15 @@ def run_hpo_cell(
         "selection_utility_min": float(np.min(utilities)),
         "selection_utility_std": float(np.std(utilities, ddof=1)) if len(utilities) > 1 else 0.0,
         "best_checkpoint_inner_validation_score": float(model_payload.get("best_score", 0.0)),
+        "initial_checkpoint_validation_score": float(
+            model_payload.get("initial_validation_score", 0.0)
+        ),
+        "validation_learning_gain": float(
+            model_payload.get("validation_learning_gain", 0.0)
+        ),
+        "selected_checkpoint_iteration": int(
+            model_payload.get("selected_checkpoint_iteration", -1)
+        ),
         "elapsed_sec": elapsed,
         "cell_status": "valid",
     }
@@ -447,9 +461,34 @@ def merge_hpo_cells(
                 "tuning_utility_ci95_high": ci_high,
                 "robust_selection_score": ci_low,
             }
+            matching_summaries = [
+                summary for summary in cell_summaries
+                if str(summary["policy_mode"]) == mode
+                and str(summary["candidate_id"]) == candidate_id
+            ]
+            selected_iterations = [
+                int(summary.get("selected_checkpoint_iteration", -1))
+                for summary in matching_summaries
+            ]
+            learning_gains = [
+                float(summary.get("validation_learning_gain", 0.0))
+                for summary in matching_summaries
+            ]
+            trained_fraction = float(np.mean([
+                iteration >= 0 for iteration in selected_iterations
+            ])) if selected_iterations else 0.0
+            learning_gain_mean = float(np.mean(learning_gains)) if learning_gains else 0.0
+            row["trained_checkpoint_fraction"] = trained_fraction
+            row["validation_learning_gain_mean"] = learning_gain_mean
+            row["learning_gate_status"] = (
+                "eligible"
+                if trained_fraction >= 0.80 and learning_gain_mean > 0.0
+                else "ineligible"
+            )
             mode_rows.append(row)
         mode_rows.sort(
             key=lambda row: (
+                0 if row["learning_gate_status"] == "eligible" else 1,
                 -float(row["robust_selection_score"]),
                 -float(row["tuning_utility_mean"]),
                 str(row["candidate_id"]),
@@ -458,7 +497,11 @@ def merge_hpo_cells(
         for rank, row in enumerate(mode_rows, start=1):
             row["rank"] = rank
         leaderboard.extend(mode_rows)
-        winners = mode_rows[: max(1, min(int(top_k), len(mode_rows)))]
+        eligible_rows = [
+            row for row in mode_rows if row["learning_gate_status"] == "eligible"
+        ]
+        selection_pool = eligible_rows if eligible_rows else mode_rows[:1]
+        winners = selection_pool[: max(1, min(int(top_k), len(selection_pool)))]
         top_candidates[mode] = [str(row["candidate_id"]) for row in winners]
         winner_id = str(winners[0]["candidate_id"])
         selected[mode] = {
@@ -467,14 +510,30 @@ def merge_hpo_cells(
             "parameters": dict(CANDIDATES_BY_ID[winner_id].parameters),
             "robust_selection_score": float(winners[0]["robust_selection_score"]),
             "tuning_utility_mean": float(winners[0]["tuning_utility_mean"]),
+            "learning_gate_status": str(winners[0]["learning_gate_status"]),
+            "trained_checkpoint_fraction": float(
+                winners[0]["trained_checkpoint_fraction"]
+            ),
+            "validation_learning_gain_mean": float(
+                winners[0]["validation_learning_gain_mean"]
+            ),
         }
 
     candidate_counts = {
         mode: len([row for row in leaderboard if row["policy_mode"] == mode])
         for mode in policy_modes
     }
+    all_modes_eligible = all(
+        row["learning_gate_status"] == "eligible" for row in selected.values()
+    )
     freeze = {
-        "status": "frozen_from_validation_only" if str(stage) == "final" else "provisional_validation_only",
+        "status": (
+            "frozen_from_validation_only"
+            if str(stage) == "final" and all_modes_eligible
+            else "provisional_validation_only"
+            if all_modes_eligible
+            else "not_freezable_learning_gate"
+        ),
         "stage": str(stage),
         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
@@ -511,6 +570,9 @@ def merge_hpo_cells(
             "training_replicate_count": len(replicates),
             "heldout_test_access_count": 0,
             "tuning_protocol_status": "valid",
+            "learning_gate_status": (
+                "supported" if all_modes_eligible else "not_supported"
+            ),
         },
     }
 

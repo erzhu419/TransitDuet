@@ -42,6 +42,7 @@ from freq_hrl.rl import (
 )
 
 from .metrics import (
+    DEFAULT_TRAINING_REWARD_SCALE,
     SELECTION_OBJECTIVE_VERSION,
     periods_per_year_from_bar_seconds,
     summarize_pnl_series,
@@ -417,6 +418,7 @@ def rollout(
     lower_lf_raw_recenter_gain: float = 0.0,
     lower_lf_raw_recenter_scale: float = 0.10,
     policy_mode: str = "freq_hrl",
+    reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[TrajectoryBatch | None, dict[str, float]]:
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
@@ -539,7 +541,7 @@ def rollout(
         old_upper_value.append(float(upper_out["value"]))
         old_lower_value.append(float(lower_out["value"]))
         constraints.append(float(leak_info.get("lower_lf_penalty", 0.0)))
-        rewards.append(step_reward)
+        rewards.append(float(reward_scale) * step_reward)
         dones.append(float(done))
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
@@ -629,6 +631,7 @@ def smdp_rollout(
     upper_period: int = 30,
     min_upper_duration: int = 5,
     policy_mode: str = "freq_hrl",
+    reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out capacity-matched flat, generic-HRL, or Freq-HRL policies."""
     policy_mode = str(policy_mode)
@@ -789,8 +792,8 @@ def smdp_rollout(
             action=np.asarray(lower_out["action"], dtype=np.float32),
             logp=float(lower_out["logp"]),
             value=float(lower_out["value"]),
-            reward=lower_credit,
-            upper_reward=upper_credit,
+            reward=float(reward_scale) * lower_credit,
+            upper_reward=float(reward_scale) * upper_credit,
             cost=latest_leakage_feedback,
             upper_cost=0.0,
             done=bool(done),
@@ -942,6 +945,7 @@ def train_ppo_actor_critic(
     min_upper_duration: int = 5,
     use_handcrafted_frequency_prior: bool = False,
     evaluation_role: str = "heldout_test",
+    reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -955,6 +959,8 @@ def train_ppo_actor_critic(
         raise ValueError(
             "evaluation_role must be 'heldout_test' or 'tuning_validation'"
         )
+    if not np.isfinite(float(reward_scale)) or float(reward_scale) <= 0.0:
+        raise ValueError("reward_scale must be positive and finite")
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -1047,6 +1053,7 @@ def train_ppo_actor_critic(
             policy_mode=policy_mode,
             upper_period=actual_upper_period,
             min_upper_duration=actual_min_upper_duration,
+            reward_scale=float(reward_scale),
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(
             row["LowerLFDrift"]
@@ -1085,6 +1092,7 @@ def train_ppo_actor_critic(
                 if evaluation_role == "heldout_test" else []
             ),
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+            "training_reward_scale": float(reward_scale),
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
                 if resample_training_paths else "fixed_path_reuse_legacy"
@@ -1143,6 +1151,7 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
         f"- trainer: `{payload['trainer']}`",
         f"- policy mode: `{payload.get('policy_mode', payload.get('baseline', 'freq_hrl'))}`",
         f"- capacity contract: `{payload.get('capacity_match_contract', 'NA')}`",
+        f"- optimization reward scale: `{payload.get('training_reward_scale', 1.0)}`",
         f"- observation contract: upper=`{payload.get('upper_observation_contract', 'NA')}`, lower=`{payload.get('lower_observation_contract', 'NA')}`",
         f"- plan mode: `{payload['plan_mode']}`",
         f"- lower LF constraint: coef={payload['lower_lf_constraint_coef']}, target={payload['lower_lf_constraint_target']}, dual_lr={payload['lower_lf_dual_lr']}",
@@ -1185,6 +1194,9 @@ def main() -> None:
     parser.add_argument("--ppo-epochs", type=int, default=4)
     parser.add_argument("--minibatch-size", type=int, default=512)
     parser.add_argument("--init-log-std", type=float, default=-1.0)
+    parser.add_argument(
+        "--reward-scale", type=float, default=DEFAULT_TRAINING_REWARD_SCALE
+    )
     parser.add_argument("--reuse-fixed-training-paths", action="store_true")
     parser.add_argument("--leakage-scale", type=float, default=0.0)
     parser.add_argument("--plan-basis-dim", type=int, default=0)
@@ -1221,6 +1233,7 @@ def main() -> None:
         ppo_epochs=args.ppo_epochs,
         minibatch_size=args.minibatch_size,
         init_log_std=args.init_log_std,
+        reward_scale=args.reward_scale,
         resample_training_paths=not args.reuse_fixed_training_paths,
         leakage_scale=args.leakage_scale,
         plan_basis_dim=args.plan_basis_dim,

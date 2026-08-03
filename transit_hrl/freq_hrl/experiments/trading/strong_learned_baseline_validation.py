@@ -34,6 +34,7 @@ from freq_hrl.rl import summarize_numeric_rows
 
 from .performance_validation import SCENARIOS
 from .metrics import (
+    DEFAULT_TRAINING_REWARD_SCALE,
     METRIC_CONTRACT_VERSION,
     SELECTION_OBJECTIVE_VERSION,
     validation_utility,
@@ -96,6 +97,7 @@ CONTRACT_GATED_METRICS = {"episode_information_ratio", "total_return"}
 CONFIRMATORY_FAMILY = "strong_learned_all_baselines_endpoints"
 TRAINING_PATH_PROTOCOL = "fresh_deterministic_path_per_root_and_iteration_v2"
 SELECTION_PROTOCOL = "disjoint_validation_paths"
+LEARNING_GATE_MIN_FRACTION = 0.80
 
 
 def count_parameters(model: Any) -> int:
@@ -154,7 +156,10 @@ def _parameter_budget_row(
             "upper_action_dim": int(config.upper_action_dim),
             "lower_action_dim": int(config.lower_action_dim),
             "matched_budget_group": "trading_capacity_matched_smdp_ppo_v2",
-            "capacity_contract": "exact trainable-parameter and optimizer match within PPO family",
+            "capacity_contract": (
+                "exact trainable-parameter match and equal HPO search budget "
+                "within PPO family"
+            ),
         }
     return {
         **common,
@@ -316,6 +321,46 @@ def _policy_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def learning_dynamics_summary(run_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Audit whether selected checkpoints actually improved over initialization."""
+
+    modes = sorted({str(row.get("policy_mode", "")) for row in run_rows if row.get("policy_mode")})
+    by_mode: list[dict[str, Any]] = []
+    for mode in modes:
+        group = [row for row in run_rows if str(row.get("policy_mode", "")) == mode]
+        selected_iterations = [
+            int(float(row.get("selected_checkpoint_iteration", -1))) for row in group
+        ]
+        gains = [float(row.get("validation_learning_gain", 0.0)) for row in group]
+        trained_count = sum(iteration >= 0 for iteration in selected_iterations)
+        fraction = float(trained_count / len(group)) if group else 0.0
+        mean_gain = float(np.mean(gains)) if gains else 0.0
+        by_mode.append({
+            "policy_mode": mode,
+            "cell_count": len(group),
+            "trained_checkpoint_count": int(trained_count),
+            "trained_checkpoint_fraction": fraction,
+            "validation_learning_gain_mean": mean_gain,
+            "status": (
+                "supported"
+                if fraction >= LEARNING_GATE_MIN_FRACTION and mean_gain > 0.0
+                else "not_supported"
+            ),
+        })
+    status = (
+        "not_run"
+        if not by_mode
+        else "supported"
+        if all(row["status"] == "supported" for row in by_mode)
+        else "not_supported"
+    )
+    return {
+        "learning_dynamics_status": status,
+        "learning_gate_min_fraction": LEARNING_GATE_MIN_FRACTION,
+        "learning_dynamics_by_policy": by_mode,
+    }
+
+
 def build_paired_checks(
     rows: list[dict[str, Any]],
     *,
@@ -463,6 +508,7 @@ def build_experiment_manifest(
     ppo_epochs: int = 4,
     ppo_minibatch_size: int = 512,
     ppo_init_log_std: float = -1.0,
+    training_reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
     offpolicy_hidden_dim: int = 64,
     offpolicy_learning_rate: float = 3e-4,
     offpolicy_replay_capacity: int = 100_000,
@@ -525,6 +571,7 @@ def build_experiment_manifest(
                 + f" --ppo-epochs {int(ppo_epochs)}"
                 + f" --ppo-minibatch-size {int(ppo_minibatch_size)}"
                 + f" --ppo-init-log-std {float(ppo_init_log_std)}"
+                + f" --training-reward-scale {float(training_reward_scale)}"
                 + f" --offpolicy-hidden-dim {int(offpolicy_hidden_dim)}"
                 + f" --offpolicy-learning-rate {float(offpolicy_learning_rate)}"
                 + f" --offpolicy-replay-capacity {int(offpolicy_replay_capacity)}"
@@ -637,6 +684,7 @@ def run_strong_learned_baseline_validation(
     ppo_epochs: int = 4,
     ppo_minibatch_size: int = 512,
     ppo_init_log_std: float = -1.0,
+    training_reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
     offpolicy_hidden_dim: int = 64,
     offpolicy_learning_rate: float = 3e-4,
     offpolicy_replay_capacity: int = 100_000,
@@ -694,6 +742,7 @@ def run_strong_learned_baseline_validation(
                 resample_training_paths=True,
                 policy_mode=mode,
                 use_handcrafted_frequency_prior=False,
+                reward_scale=float(training_reward_scale),
             )
         else:
             payload, heldout_rows, model = train_flat_offpolicy_baseline(
@@ -713,6 +762,7 @@ def run_strong_learned_baseline_validation(
                 batch_size=int(offpolicy_batch_size),
                 updates_per_step=int(offpolicy_updates_per_step),
                 resample_training_paths=True,
+                reward_scale=float(training_reward_scale),
             )
         elapsed = float(time.perf_counter() - start)
         params = count_parameters(model)
@@ -734,6 +784,15 @@ def run_strong_learned_baseline_validation(
                 "heldout_test_seeds": list(heldout_test_seeds),
                 "metric_contract_version": METRIC_CONTRACT_VERSION,
                 "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+                "selected_checkpoint_iteration": int(
+                    payload.get("selected_checkpoint_iteration", -1)
+                ),
+                "initial_validation_score": float(
+                    payload.get("initial_validation_score", 0.0)
+                ),
+                "validation_learning_gain": float(
+                    payload.get("validation_learning_gain", 0.0)
+                ),
             },
         })
         for row in heldout_rows:
@@ -799,6 +858,15 @@ def run_strong_learned_baseline_validation(
                 payload.get("temperature_optimizer_steps_train", 0)
             ),
             "best_score": float(payload.get("best_score", 0.0)),
+            "initial_validation_score": float(
+                payload.get("initial_validation_score", 0.0)
+            ),
+            "validation_learning_gain": float(
+                payload.get("validation_learning_gain", 0.0)
+            ),
+            "selected_checkpoint_iteration": int(
+                payload.get("selected_checkpoint_iteration", -1)
+            ),
             "sharpe_mean": float(payload["summary"].get("sharpe_mean", 0.0)),
             "episode_information_ratio_mean": float(
                 payload["summary"].get("episode_information_ratio_mean", 0.0)
@@ -835,6 +903,15 @@ def run_strong_learned_baseline_validation(
             "environment_steps_eval": int(len(heldout_test_seeds) * steps),
             "iterations": int(iterations),
             "best_score": float(payload.get("best_score", 0.0)),
+            "initial_validation_score": float(
+                payload.get("initial_validation_score", 0.0)
+            ),
+            "validation_learning_gain": float(
+                payload.get("validation_learning_gain", 0.0)
+            ),
+            "selected_checkpoint_iteration": int(
+                payload.get("selected_checkpoint_iteration", -1)
+            ),
             "heldout_objective": float(np.mean([
                 validation_utility(row) for row in heldout_rows
             ])) if heldout_rows else 0.0,
@@ -882,6 +959,7 @@ def run_strong_learned_baseline_validation(
         metrics=("FocusScore", "LowerLFDrift"),
     )
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
+    learning_dynamics = learning_dynamics_summary(run_rows)
     coverage = _experiment_matrix_coverage(rows)
     ppo_modes_run = {
         str(row.get("policy_mode", "")) for row in rows
@@ -894,6 +972,11 @@ def run_strong_learned_baseline_validation(
         and budgets["ppo_trainer_budget_status"] == "matched"
         else "partial_run_or_budget_mismatch"
     )
+    if learning_dynamics["learning_dynamics_status"] != "supported":
+        all_metric_status = "training_not_demonstrated"
+        risk_adjusted_status = "training_not_demonstrated"
+        responsibility_status = "training_not_demonstrated"
+        ppo_baseline_status = "training_not_demonstrated"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -918,6 +1001,7 @@ def run_strong_learned_baseline_validation(
             ppo_epochs=int(ppo_epochs),
             ppo_minibatch_size=int(ppo_minibatch_size),
             ppo_init_log_std=float(ppo_init_log_std),
+            training_reward_scale=float(training_reward_scale),
             offpolicy_hidden_dim=int(offpolicy_hidden_dim),
             offpolicy_learning_rate=float(offpolicy_learning_rate),
             offpolicy_replay_capacity=int(offpolicy_replay_capacity),
@@ -946,6 +1030,7 @@ def run_strong_learned_baseline_validation(
             "training_path_protocol": TRAINING_PATH_PROTOCOL,
             "checkpoint_selection_protocol": SELECTION_PROTOCOL,
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+            "training_reward_scale": float(training_reward_scale),
             "training_protocol_status": "valid",
             "steps": int(steps),
             "assets": int(assets),
@@ -956,6 +1041,7 @@ def run_strong_learned_baseline_validation(
             "strong_learned_baseline_evidence_status": all_metric_status,
             "risk_adjusted_evidence_status": risk_adjusted_status,
             "responsibility_evidence_status": responsibility_status,
+            **learning_dynamics,
             **coverage,
             **budgets,
             "shard_index": int(shard_index),
@@ -964,8 +1050,9 @@ def run_strong_learned_baseline_validation(
         "_checkpoint_payloads": checkpoint_payloads,
         "boundary": (
             "PPO-family baselines use identical SMDP model dimensions, "
-            "optimizer settings, initialization seeds, and environment-step "
-            "budgets. Factorized flat PPO removes temporal abstraction and frequency "
+            "initialization seeds, environment-step budgets, and equal-size HPO "
+            "search spaces; selected optimizer settings are reported per policy. "
+            "Factorized flat PPO removes temporal abstraction and frequency "
             "routing; generic HRL retains temporal abstraction but uses raw "
             "features. Flat SAC/TD3 use raw observations and a single joint "
             "target/execution action. Cross-algorithm fairness is enforced by "
@@ -1022,6 +1109,7 @@ def merge_strong_learned_baseline_shards(
     scenarios = sorted({str(row.get("scenario", "")) for row in rows if str(row.get("scenario", ""))})
     policy_modes = sorted({str(row.get("policy_mode", row.get("baseline", ""))) for row in rows if str(row.get("policy_mode", row.get("baseline", "")))})
     budgets = _budget_statuses(rows, parameter_budget, sample_efficiency)
+    learning_dynamics = learning_dynamics_summary(run_rows)
     coverage = _experiment_matrix_coverage(rows)
     ppo_modes_run = {
         mode for mode in policy_modes if mode in POLICY_MODES
@@ -1097,6 +1185,15 @@ def merge_strong_learned_baseline_shards(
         risk_adjusted_status = "invalid_training_protocol"
         responsibility_status = "invalid_training_protocol"
         ppo_baseline_status = "invalid_training_protocol"
+    if (
+        learning_dynamics["learning_dynamics_status"] != "supported"
+        and coverage["matrix_coverage_status"] == "complete"
+        and training_protocol_status == "valid"
+    ):
+        all_metric_status = "training_not_demonstrated"
+        risk_adjusted_status = "training_not_demonstrated"
+        responsibility_status = "training_not_demonstrated"
+        ppo_baseline_status = "training_not_demonstrated"
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -1139,15 +1236,17 @@ def merge_strong_learned_baseline_shards(
             "strong_learned_baseline_evidence_status": all_metric_status,
             "risk_adjusted_evidence_status": risk_adjusted_status,
             "responsibility_evidence_status": responsibility_status,
+            **learning_dynamics,
             **coverage,
             **budgets,
             "merge_status": "merged",
         },
         "boundary": (
-            "Merged learned-baseline shards. PPO comparisons are exact-capacity "
-            "matched. SAC/TD3 use their native twin-Q architectures under the "
-            "same paired evaluation and environment-step budget; cross-family "
-            "parameter equality is not claimed. Statistical uncertainty is "
+            "Merged learned-baseline shards. PPO comparisons match trainable "
+            "capacity and HPO search budget; selected optimizer settings are "
+            "reported per policy. SAC/TD3 use their native twin-Q architectures "
+            "under the same paired evaluation and environment-step budget; "
+            "cross-family parameter equality is not claimed. Statistical uncertainty is "
             "clustered by independently initialized training replicate; held-out "
             "environment seeds remain repeated measures within each replicate."
         ),
@@ -1255,6 +1354,11 @@ def main() -> None:
     parser.add_argument("--ppo-epochs", type=int, default=4)
     parser.add_argument("--ppo-minibatch-size", type=int, default=512)
     parser.add_argument("--ppo-init-log-std", type=float, default=-1.0)
+    parser.add_argument(
+        "--training-reward-scale",
+        type=float,
+        default=DEFAULT_TRAINING_REWARD_SCALE,
+    )
     parser.add_argument("--offpolicy-hidden-dim", type=int, default=64)
     parser.add_argument("--offpolicy-learning-rate", type=float, default=3e-4)
     parser.add_argument("--offpolicy-replay-capacity", type=int, default=100_000)
@@ -1299,6 +1403,7 @@ def main() -> None:
             ppo_epochs=int(args.ppo_epochs),
             ppo_minibatch_size=int(args.ppo_minibatch_size),
             ppo_init_log_std=float(args.ppo_init_log_std),
+            training_reward_scale=float(args.training_reward_scale),
             offpolicy_hidden_dim=int(args.offpolicy_hidden_dim),
             offpolicy_learning_rate=float(args.offpolicy_learning_rate),
             offpolicy_replay_capacity=int(args.offpolicy_replay_capacity),

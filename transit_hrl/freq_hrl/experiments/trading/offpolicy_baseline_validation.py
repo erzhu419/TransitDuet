@@ -23,6 +23,7 @@ from freq_hrl.experiments.reproducibility import (
 from freq_hrl.rl import FlatOffPolicyActorCritic, OffPolicyConfig, ReplayBuffer
 
 from .metrics import (
+    DEFAULT_TRAINING_REWARD_SCALE,
     METRIC_CONTRACT_VERSION,
     SELECTION_OBJECTIVE_VERSION,
     periods_per_year_from_bar_seconds,
@@ -85,6 +86,7 @@ def run_offpolicy_episode(
     warmup_steps: int = 256,
     batch_size: int = 64,
     updates_per_step: int = 1,
+    reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[dict[str, Any], int, list[dict[str, float]]]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown off-policy mode: {policy_mode}")
@@ -141,7 +143,13 @@ def run_offpolicy_episode(
             progress=(t + 1) / max(int(steps) - 1, 1),
         )
         if training:
-            replay.add(state, action, float(reward), next_state, bool(done))  # type: ignore[union-attr]
+            replay.add(
+                state,
+                action,
+                float(reward_scale) * float(reward),
+                next_state,
+                bool(done),
+            )  # type: ignore[union-attr]
             global_step += 1
             if global_step >= int(warmup_steps) and replay.size >= int(batch_size):  # type: ignore[union-attr]
                 for _ in range(max(1, int(updates_per_step))):
@@ -265,6 +273,7 @@ def train_flat_offpolicy_baseline(
     updates_per_step: int = 1,
     objective_fn: Callable[[dict[str, Any]], float] = objective,
     evaluation_role: str = "heldout_test",
+    reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
@@ -273,6 +282,8 @@ def train_flat_offpolicy_baseline(
         raise ValueError(
             "evaluation_role must be 'heldout_test' or 'tuning_validation'"
         )
+    if not np.isfinite(float(reward_scale)) or float(reward_scale) <= 0.0:
+        raise ValueError("reward_scale must be positive and finite")
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -320,6 +331,8 @@ def train_flat_offpolicy_baseline(
         for eval_seed in validation_seed_list
     ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
+    initial_validation_score = float(best_score)
+    selected_checkpoint_iteration = -1
     best_state = copy.deepcopy(agent.state_dict())
     history = [{
         "iteration": -1,
@@ -358,6 +371,7 @@ def train_flat_offpolicy_baseline(
                 warmup_steps=int(warmup_steps),
                 batch_size=int(batch_size),
                 updates_per_step=int(updates_per_step),
+                reward_scale=float(reward_scale),
             )
             iteration_updates.extend(updates)
         actor_optimizer_steps += int(sum(
@@ -382,6 +396,7 @@ def train_flat_offpolicy_baseline(
         if score > best_score:
             best_score = score
             best_state = copy.deepcopy(agent.state_dict())
+            selected_checkpoint_iteration = int(iteration)
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": iteration_train_seeds,
@@ -429,6 +444,9 @@ def train_flat_offpolicy_baseline(
         "assets": int(assets),
         "iterations": int(iterations),
         "best_score": best_score,
+        "initial_validation_score": initial_validation_score,
+        "validation_learning_gain": float(best_score - initial_validation_score),
+        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
         "config": config.to_dict(),
         "history": history,
         "summary": summarize(evaluation_rows),
@@ -436,6 +454,7 @@ def train_flat_offpolicy_baseline(
         "warmup_steps": int(warmup_steps),
         "batch_size": int(batch_size),
         "updates_per_step": int(updates_per_step),
+        "training_reward_scale": float(reward_scale),
         "environment_steps_train": int(global_step),
         "environment_steps_validation": int(
             len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
@@ -510,6 +529,7 @@ def write_outputs(
         f"- policy mode: `{payload['policy_mode']}`",
         f"- scenario: `{payload['scenario']}`",
         f"- train environment steps: `{payload['environment_steps_train']}`",
+        f"- optimization reward scale: `{payload['training_reward_scale']}`",
         f"- gradient updates: `{payload['gradient_updates_train']}`",
         f"- metric contract: `{payload['metric_contract_version']}`",
         f"- return mean: `{summary.get('total_return_mean', float('nan')):.6f}`",
@@ -535,6 +555,10 @@ def main() -> None:
     parser.add_argument("--optimizer-seed", type=int, default=2026)
     parser.add_argument("--reuse-fixed-training-paths", action="store_true")
     parser.add_argument("--hidden-dim", type=int, default=64)
+    parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument(
+        "--reward-scale", type=float, default=DEFAULT_TRAINING_REWARD_SCALE
+    )
     parser.add_argument("--replay-capacity", type=int, default=100_000)
     parser.add_argument("--warmup-steps", type=int, default=256)
     parser.add_argument("--batch-size", type=int, default=64)
@@ -560,6 +584,8 @@ def main() -> None:
         ),
         resample_training_paths=not args.reuse_fixed_training_paths,
         hidden_dim=int(args.hidden_dim),
+        learning_rate=float(args.learning_rate),
+        reward_scale=float(args.reward_scale),
         replay_capacity=int(args.replay_capacity),
         warmup_steps=int(args.warmup_steps),
         batch_size=int(args.batch_size),

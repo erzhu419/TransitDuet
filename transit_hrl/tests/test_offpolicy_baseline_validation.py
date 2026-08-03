@@ -49,6 +49,9 @@ class OffPolicyBaselineValidationTest(unittest.TestCase):
                 self.assertEqual(rows[0]["metric_contract_version"], "trading_metrics_v2")
                 self.assertLess(rows[0]["equity_reconstruction_max_abs_error"], 1e-10)
                 self.assertGreater(payload["gradient_updates_train"], 0)
+                self.assertIn("selected_checkpoint_iteration", payload)
+                self.assertIn("validation_learning_gain", payload)
+                self.assertEqual(payload["training_reward_scale"], 100.0)
                 self.assertEqual(
                     payload["gradient_updates_train"],
                     payload["actor_optimizer_steps_train"]

@@ -139,6 +139,8 @@ def train_dual_ppo(
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
+    initial_validation_score = float(best_score)
+    selected_checkpoint_iteration = -1
     history: list[dict[str, Any]] = [{
         "iteration": -1,
         "score": best_score,
@@ -172,6 +174,7 @@ def train_dual_ppo(
         if score > best_score:
             best_score = score
             best_state = copy.deepcopy(model.state_dict())
+            selected_checkpoint_iteration = int(iteration)
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
@@ -193,6 +196,9 @@ def train_dual_ppo(
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
         "best_score": float(best_score),
+        "initial_validation_score": initial_validation_score,
+        "validation_learning_gain": float(best_score - initial_validation_score),
+        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
@@ -250,6 +256,8 @@ def train_frequency_separated_ppo(
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
+    initial_validation_score = float(best_score)
+    selected_checkpoint_iteration = -1
     history: list[dict[str, Any]] = [{
         "iteration": -1,
         "score": best_score,
@@ -290,6 +298,7 @@ def train_frequency_separated_ppo(
         if score > best_score:
             best_score = score
             best_state = copy.deepcopy(model.state_dict())
+            selected_checkpoint_iteration = int(iteration)
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
@@ -323,6 +332,9 @@ def train_frequency_separated_ppo(
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
         "best_score": float(best_score),
+        "initial_validation_score": initial_validation_score,
+        "validation_learning_gain": float(best_score - initial_validation_score),
+        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),

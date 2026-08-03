@@ -4,6 +4,7 @@ from pathlib import Path
 
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     build_paired_checks,
+    learning_dynamics_summary,
     merge_strong_learned_baseline_shards,
     run_strong_learned_baseline_validation,
     selected_experiment_cells,
@@ -13,6 +14,23 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
 
 
 class StrongLearnedBaselineValidationTest(unittest.TestCase):
+    def test_learning_gate_rejects_random_initialization_as_learned_policy(self):
+        unsupported = learning_dynamics_summary([{
+            "policy_mode": "freq_hrl",
+            "selected_checkpoint_iteration": -1,
+            "validation_learning_gain": 0.0,
+        }])
+        self.assertEqual(unsupported["learning_dynamics_status"], "not_supported")
+        supported = learning_dynamics_summary([
+            {
+                "policy_mode": "freq_hrl",
+                "selected_checkpoint_iteration": iteration,
+                "validation_learning_gain": 0.01,
+            }
+            for iteration in range(5)
+        ])
+        self.assertEqual(supported["learning_dynamics_status"], "supported")
+
     def test_selected_pairs_support_scheduler_sharding(self):
         pairs = selected_scenario_policy_pairs(
             ["persistent_shift", "localized_burst"],

@@ -82,6 +82,8 @@ class HyperparameterPilotTest(unittest.TestCase):
                         "cell_status": "valid",
                         "tuning_protocol_version": TUNING_PROTOCOL_VERSION,
                         "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
+                        "selected_checkpoint_iteration": 0,
+                        "validation_learning_gain": 0.01,
                     }
                     (directory / "cell_summary.json").write_text(json.dumps(summary))
                     with (directory / "tuning_rows.csv").open("w", newline="") as handle:
