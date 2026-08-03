@@ -35,6 +35,12 @@ bootstrap confidence intervals over training and evaluation seeds, paired
 effect sizes, train-seed sign-flip tests, and Holm correction across external
 methods. Negative deltas are improvements for cost metrics.
 
+The safety-evaluator revision additionally requires observed/restricted
+in-vehicle and total-journey time, vehicle/passenger holding seconds, denied
+trips, and fleet-readiness delay. This revision changes only the external
+evaluator fingerprint; the protocol-v4 core-source fingerprint remains equal
+to the frozen learned-policy selection snapshot.
+
 ## Interpretation
 
 `fixed_headway` is the strong operational baseline. `rule_holding` and
