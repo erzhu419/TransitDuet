@@ -168,6 +168,7 @@ def main() -> None:
             "--local-result-dir", str(ROOT / logs_dir),
             "--allow-cpu-training",
             "--cpu-training-justification", CPU_JUSTIFICATION,
+            "--allow-no-ckpt",
             "--allow-no-resume",
             "--allow-remote-large-data",
             "--reroute-on-node-down",

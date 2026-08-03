@@ -33,6 +33,8 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         result = self.run_submitter()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn(f"--reference {REFERENCE}", result.stdout)
+        self.assertIn("--allow-no-ckpt", result.stdout)
+        self.assertIn("--allow-no-resume", result.stdout)
 
     def test_reference_must_be_in_config_matrix(self):
         result = self.run_submitter("--reference", "missing_config")
