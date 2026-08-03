@@ -13,7 +13,11 @@ from .causal_sequence import (
     causal_gru_encoder_parameter_count,
     causal_gru_value_parameter_count,
 )
-from .plan_actions import LearnedPlanActionMapper, PlanActionResult
+from .plan_actions import (
+    LearnedPlanActionMapper,
+    LearnedPlanCurveState,
+    PlanActionResult,
+)
 from .joint_actor_critic import (
     JointActorCriticPPO,
     JointPPOConfig,
@@ -55,6 +59,7 @@ __all__ = [
     "HierarchicalRolloutBuilder",
     "HierarchicalTrajectoryBatch",
     "LearnedPlanActionMapper",
+    "LearnedPlanCurveState",
     "JointActorCriticPPO",
     "JointPPOConfig",
     "JointTrajectoryBatch",

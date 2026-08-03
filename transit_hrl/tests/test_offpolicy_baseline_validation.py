@@ -71,6 +71,30 @@ class OffPolicyBaselineValidationTest(unittest.TestCase):
                 )
                 self.assertGreater(sum(p.numel() for p in agent.parameters() if p.requires_grad), 0)
 
+    def test_offpolicy_baseline_can_share_causal_execution_environment(self):
+        payload, rows, _ = train_flat_offpolicy_baseline(
+            policy_mode="flat_sac",
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=24,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            seed=7,
+            hidden_dim=16,
+            warmup_steps=4,
+            batch_size=4,
+            execution_timeline_contract="causal_post_trade_v3",
+            volume_impact_bps=10.0,
+        )
+        self.assertEqual(
+            payload["execution_timeline_contract"], "causal_post_trade_v3"
+        )
+        self.assertEqual(payload["mark_to_market_timing"], "post_trade")
+        self.assertEqual(rows[0]["mark_to_market_timing"], "post_trade")
+        self.assertEqual(rows[0]["volume_impact_bps"], 10.0)
+
 
 if __name__ == "__main__":
     unittest.main()

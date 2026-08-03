@@ -17,9 +17,32 @@ import numpy as np
 class PortfolioExecutionConfig:
     transaction_cost_bps: float = 5.0
     slippage_bps: float = 1.0
+    volume_impact_bps: float = 0.0
+    volume_floor: float = 1e-6
     max_leverage: float = 1.0
     inventory_drift_penalty: float = 0.01
     drawdown_penalty: float = 0.0
+    mark_to_market_timing: str = "pre_trade"
+
+    def __post_init__(self) -> None:
+        if self.mark_to_market_timing not in {"pre_trade", "post_trade"}:
+            raise ValueError(
+                "mark_to_market_timing must be 'pre_trade' or 'post_trade'"
+            )
+        for name in (
+            "transaction_cost_bps",
+            "slippage_bps",
+            "volume_impact_bps",
+            "inventory_drift_penalty",
+            "drawdown_penalty",
+        ):
+            value = float(getattr(self, name))
+            if not np.isfinite(value) or value < 0.0:
+                raise ValueError(f"{name} must be finite and non-negative")
+        if not np.isfinite(float(self.volume_floor)) or float(self.volume_floor) <= 0.0:
+            raise ValueError("volume_floor must be positive and finite")
+        if not np.isfinite(float(self.max_leverage)) or float(self.max_leverage) < 0.0:
+            raise ValueError("max_leverage must be finite and non-negative")
 
 
 class PortfolioExecutionEnv:
@@ -112,19 +135,46 @@ class PortfolioExecutionEnv:
         realized_trade = self.position - old_position
 
         ret = self.returns[self.t]
-        portfolio_return = float(np.dot(old_position, ret))
+        market_position = (
+            old_position
+            if self.config.mark_to_market_timing == "pre_trade"
+            else self.position.copy()
+        )
+        portfolio_return = float(np.dot(market_position, ret))
         turnover = float(np.sum(np.abs(realized_trade)))
         self.turnover += turnover
-        cost = turnover * (self.config.transaction_cost_bps + self.config.slippage_bps) / 10000.0
+        linear_cost = (
+            turnover
+            * (self.config.transaction_cost_bps + self.config.slippage_bps)
+            / 10000.0
+        )
+        volume = (
+            np.ones(self.n_assets, dtype=np.float64)
+            if self.volumes is None
+            else np.maximum(
+                np.asarray(self.volumes[self.t], dtype=np.float64),
+                float(self.config.volume_floor),
+            )
+        )
+        impact_cost = float(
+            float(self.config.volume_impact_bps)
+            / 10000.0
+            * np.sum(np.square(realized_trade) / volume)
+        )
+        cost = float(linear_cost + impact_cost)
         inventory_drift = float(np.mean((self.position - self.target) ** 2))
+        inventory_drift_cost = float(
+            self.config.inventory_drift_penalty * inventory_drift
+        )
         self.equity *= max(0.0, 1.0 + portfolio_return - cost)
         self.peak_equity = max(self.peak_equity, self.equity)
         drawdown = 1.0 - self.equity / max(self.peak_equity, 1e-12)
+        drawdown_cost = float(self.config.drawdown_penalty * drawdown)
         reward = (
             portfolio_return
             - cost
-            - self.config.inventory_drift_penalty * inventory_drift
-            - self.config.drawdown_penalty * drawdown
+            - inventory_drift_cost
+            - drawdown_cost
         )
 
         self.t += 1
@@ -132,12 +182,22 @@ class PortfolioExecutionEnv:
         info = {
             "portfolio_return": portfolio_return,
             "transaction_cost": cost,
+            "linear_transaction_cost": float(linear_cost),
+            "volume_impact_cost": float(impact_cost),
             "turnover": turnover,
             "trade": realized_trade.copy(),
             "target": self.target.copy(),
             "position": self.position.copy(),
+            "pre_trade_position": old_position.copy(),
+            "market_position": market_position.copy(),
+            "asset_returns": ret.copy(),
+            "volume": volume.copy(),
             "inventory_drift": inventory_drift,
+            "inventory_drift_cost": inventory_drift_cost,
             "drawdown": drawdown,
+            "drawdown_cost": drawdown_cost,
+            "task_reward": float(reward),
+            "mark_to_market_timing": self.config.mark_to_market_timing,
             "equity": float(self.equity),
         }
         return self.state(), float(reward), self.done, info

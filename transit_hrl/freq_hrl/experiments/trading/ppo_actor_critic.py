@@ -25,7 +25,12 @@ from freq_hrl.experiments.reproducibility import (
     validate_evaluation_seed_roles,
     validate_unique_seeds,
 )
-from freq_hrl.domains.trading import PortfolioExecutionConfig, PortfolioExecutionEnv, TradingFrequencyTracker
+from freq_hrl.domains.trading import (
+    PortfolioExecutionConfig,
+    PortfolioExecutionEnv,
+    TradingCreditAssigner,
+    TradingFrequencyTracker,
+)
 from freq_hrl.policies import BernsteinPlanCurve
 from freq_hrl.rl import (
     FrequencySeparatedActorCriticPPO,
@@ -35,6 +40,7 @@ from freq_hrl.rl import (
     JointPPOConfig,
     JointTrajectoryBatch,
     LearnedPlanActionMapper,
+    LearnedPlanCurveState,
     SMDPPPOConfig,
     TemporalDecisionScheduler,
     causal_gru_actor_parameter_count,
@@ -60,8 +66,31 @@ POLICY_MODES = ("freq_hrl",) + FLAT_PPO_MODES + GENERIC_HRL_MODES
 LEARNED_BASELINE_IMPLEMENTATION_VERSION = (
     "learned_baselines_v5_causal_gru_controls_2026_08_03"
 )
+FULL_METHOD_IMPLEMENTATION_VERSION = "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
+EXECUTION_TIMELINE_CONTRACTS = (
+    "legacy_pre_trade_v2",
+    "causal_post_trade_v3",
+)
+METHOD_CONTRACTS = (
+    "routing_core_v2",
+    "curve_credit_control_v3",
+    "full_freq_hrl_v3",
+)
 
 RAW_HISTORY_WINDOW = 120
+
+
+def resolve_method_contract(method_contract: str) -> dict[str, bool]:
+    contract = str(method_contract)
+    if contract not in METHOD_CONTRACTS:
+        raise ValueError(
+            f"unknown method_contract: {contract}; expected one of {METHOD_CONTRACTS}"
+        )
+    return {
+        "execute_plan_curve": contract != "routing_core_v2",
+        "use_additive_frequency_credit": contract != "routing_core_v2",
+        "constrain_raw_lower_effect": contract == "full_freq_hrl_v3",
+    }
 
 
 def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
@@ -527,6 +556,8 @@ def make_plan_mapper(
     plan_horizon_s: float,
     plan_eval_offset_s: float,
     plan_coefficient_scale: float,
+    *,
+    anchor_first_coefficient: bool = False,
 ) -> LearnedPlanActionMapper | None:
     if int(plan_basis_dim) <= 0:
         return None
@@ -543,6 +574,7 @@ def make_plan_mapper(
         curve=curve,
         coefficient_scale=float(plan_coefficient_scale),
         eval_offset_s=float(plan_eval_offset_s),
+        anchor_first_coefficient=bool(anchor_first_coefficient),
     )
 
 
@@ -573,6 +605,10 @@ def joint_flat_rollout(
     lower_lf_raw_recenter_scale: float = 0.10,
     policy_mode: str = "flat_ppo",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
+    mark_to_market_timing: str = "pre_trade",
+    volume_impact_bps: float = 0.0,
+    execution_timeline_contract: str = "legacy_pre_trade_v2",
+    method_contract: str = "routing_core_v2",
 ) -> tuple[JointTrajectoryBatch | None, dict[str, float]]:
     policy_mode = str(policy_mode)
     if policy_mode not in FLAT_PPO_MODES:
@@ -587,9 +623,11 @@ def joint_flat_rollout(
         config=PortfolioExecutionConfig(
             transaction_cost_bps=50.0,
             slippage_bps=10.0,
+            volume_impact_bps=float(volume_impact_bps),
             max_leverage=1.0,
             inventory_drift_penalty=0.002,
             drawdown_penalty=0.0,
+            mark_to_market_timing=str(mark_to_market_timing),
         ),
     )
     tracker = make_tracker(assets)
@@ -750,6 +788,10 @@ def joint_flat_rollout(
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
         "protocol_valid": 1.0,
+        "mark_to_market_timing": str(mark_to_market_timing),
+        "volume_impact_bps": float(volume_impact_bps),
+        "execution_timeline_contract": str(execution_timeline_contract),
+        "method_contract": str(method_contract),
         "routing_contract": (
             "causal_raw_full_episode_gru"
             if policy_mode == "flat_gru_ppo"
@@ -787,6 +829,14 @@ def smdp_rollout(
     min_upper_duration: int = 5,
     policy_mode: str = "freq_hrl",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
+    mark_to_market_timing: str = "pre_trade",
+    volume_impact_bps: float = 0.0,
+    execute_plan_curve: bool = False,
+    use_additive_frequency_credit: bool = False,
+    constrain_raw_lower_effect: bool = False,
+    plan_smoothness_weight: float = 0.0,
+    execution_timeline_contract: str = "legacy_pre_trade_v2",
+    method_contract: str = "routing_core_v2",
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
@@ -796,6 +846,12 @@ def smdp_rollout(
         raise ValueError(
             f"{policy_mode} must use joint_flat_rollout; the SMDP flat path is forbidden"
         )
+    if execute_plan_curve and plan_mapper is None:
+        raise ValueError("execute_plan_curve requires a learned plan mapper")
+    if use_additive_frequency_credit and str(mark_to_market_timing) != "post_trade":
+        raise ValueError(
+            "additive frequency credit requires post_trade mark-to-market timing"
+        )
     history_window = int(
         getattr(model.config, "raw_history_window", 0) or RAW_HISTORY_WINDOW
     )
@@ -803,9 +859,11 @@ def smdp_rollout(
     env_config = PortfolioExecutionConfig(
         transaction_cost_bps=50.0,
         slippage_bps=10.0,
+        volume_impact_bps=float(volume_impact_bps),
         max_leverage=1.0,
         inventory_drift_penalty=0.002,
         drawdown_penalty=0.0,
+        mark_to_market_timing=str(mark_to_market_timing),
     )
     env = PortfolioExecutionEnv(data["returns"], volumes=data["volume"], config=env_config)
     tracker = make_tracker(assets)
@@ -827,6 +885,11 @@ def smdp_rollout(
     )
     builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
     diagnostics = FrequencyDiagnostics(mi_bins=8)
+    plan_state = (
+        LearnedPlanCurveState(mapper=plan_mapper, gross_cap=1.0)
+        if execute_plan_curve and plan_mapper is not None else None
+    )
+    credit_assigner = TradingCreditAssigner()
 
     pnl_returns: list[float] = []
     equity: list[float] = []
@@ -839,11 +902,19 @@ def smdp_rollout(
     plan_coeff_abs: list[float] = []
     upper_credits: list[float] = []
     lower_credits: list[float] = []
+    upper_task_credits: list[float] = []
+    lower_task_credits: list[float] = []
+    plan_returns: list[float] = []
+    execution_deviation_returns: list[float] = []
+    credit_reconstruction_errors: list[float] = []
+    upper_leakage_costs: list[float] = []
+    lower_leakage_costs: list[float] = []
     decision_reasons: list[str] = []
     promotion_signals = 0
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
     raw_history: list[np.ndarray] = []
+    pending_plan_smoothness_cost = 0.0
 
     env.reset()
     for t in range(steps):
@@ -871,6 +942,23 @@ def smdp_rollout(
             upper_out = model.act_upper(upper_state, sample=sample)
             if plan_mapper is None:
                 current_target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
+            elif plan_state is not None:
+                plan = plan_state.activate(
+                    now_s=float(t * 60.0),
+                    current_value=(
+                        env.position.copy()
+                        if current_target is None else current_target
+                    ),
+                    latent_action=np.asarray(
+                        upper_out["action"], dtype=np.float64
+                    ),
+                )
+                current_target = gross_cap(plan.target)
+                plan_smoothness.append(float(plan.smoothness_penalty))
+                plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
+                pending_plan_smoothness_cost = max(
+                    float(plan_smoothness_weight), 0.0
+                ) * float(plan.smoothness_penalty)
             else:
                 plan = plan_mapper.target(
                     env.position.copy(), np.asarray(upper_out["action"], dtype=np.float64)
@@ -887,6 +975,8 @@ def smdp_rollout(
             scheduler.mark_decision(t)
             decision_reasons.append(reason)
 
+        if plan_state is not None and plan_state.active:
+            current_target = gross_cap(plan_state.value_at(float(t * 60.0)))
         if current_target is None:
             raise RuntimeError("upper scheduler did not create an initial target")
         _, lower_state = smdp_policy_feature_vectors(
@@ -932,19 +1022,53 @@ def smdp_rollout(
         )
         leak_info = leakage.update(
             upper_effect=current_target,
-            lower_effect=lower_effect,
+            lower_effect=(raw_lower_effect if constrain_raw_lower_effect else lower_effect),
             reward=float(reward),
         )
         shaped_reward = float(
             leak_info["shaped_reward"] if leak_info["shaped_reward"] is not None else reward
         )
         leakage_reward_penalty = max(float(reward) - shaped_reward, 0.0)
-        upper_credit = float(info["portfolio_return"]) - env_config.drawdown_penalty * float(info["drawdown"])
-        lower_credit = (
-            -float(info["transaction_cost"])
-            - env_config.inventory_drift_penalty * float(info["inventory_drift"])
-            - leakage_reward_penalty
-        )
+        if use_additive_frequency_credit:
+            upper_leakage_cost = max(float(leakage_scale), 0.0) * float(
+                leak_info.get("upper_hf_penalty", 0.0)
+            )
+            lower_leakage_cost = max(float(leakage_scale), 0.0) * float(
+                leak_info.get("lower_lf_penalty", 0.0)
+            )
+            credit = credit_assigner.assign(
+                info,
+                active_plan=current_target,
+                upper_leakage_cost=upper_leakage_cost,
+                lower_leakage_cost=lower_leakage_cost,
+                plan_smoothness_cost=pending_plan_smoothness_cost,
+            )
+            upper_credit = float(credit.upper_training_credit)
+            lower_credit = float(credit.lower_training_credit)
+            upper_task_credit = float(credit.upper_task_credit)
+            lower_task_credit = float(credit.lower_task_credit)
+            plan_return = float(credit.plan_return)
+            execution_deviation_return = float(
+                credit.execution_deviation_return
+            )
+            reconstruction_error = float(credit.task_reconstruction_error)
+            pending_plan_smoothness_cost = 0.0
+        else:
+            upper_leakage_cost = 0.0
+            lower_leakage_cost = leakage_reward_penalty
+            upper_credit = float(info["portfolio_return"]) - float(
+                info.get("drawdown_cost", 0.0)
+            )
+            lower_credit = (
+                -float(info["transaction_cost"])
+                - float(info.get("inventory_drift_cost", 0.0))
+                - leakage_reward_penalty
+            )
+            upper_task_credit = upper_credit
+            lower_task_credit = lower_credit + leakage_reward_penalty
+            plan_return = float(info["portfolio_return"])
+            execution_deviation_return = 0.0
+            reconstruction_error = float("nan")
         latest_leakage_feedback = float(leak_info.get("lower_lf_penalty", 0.0))
         builder.add_lower(
             state=lower_state,
@@ -960,6 +1084,13 @@ def smdp_rollout(
 
         upper_credits.append(upper_credit)
         lower_credits.append(lower_credit)
+        upper_task_credits.append(upper_task_credit)
+        lower_task_credits.append(lower_task_credit)
+        plan_returns.append(plan_return)
+        execution_deviation_returns.append(execution_deviation_return)
+        credit_reconstruction_errors.append(reconstruction_error)
+        upper_leakage_costs.append(upper_leakage_cost)
+        lower_leakage_costs.append(lower_leakage_cost)
         pnl_returns.append(float(info["portfolio_return"] - info["transaction_cost"]))
         equity.append(float(info["equity"]))
         turnover.append(float(info["turnover"]))
@@ -977,6 +1108,14 @@ def smdp_rollout(
     reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
     leak = reg.compute(np.asarray(targets), np.asarray(lower_effects))
     raw_leak = reg.compute(np.asarray(targets), np.asarray(raw_lower_effects))
+    reported_leak = raw_leak if constrain_raw_lower_effect else leak
+    finite_reconstruction_errors = np.asarray([
+        value for value in credit_reconstruction_errors if np.isfinite(value)
+    ], dtype=np.float64)
+    target_steps = (
+        np.diff(np.asarray(targets, dtype=np.float64), axis=0)
+        if len(targets) > 1 else np.zeros((0, assets), dtype=np.float64)
+    )
     diag = diagnostics.summarize_episode()
     financial = summarize_pnl_series(
         pnl,
@@ -997,10 +1136,12 @@ def smdp_rollout(
         "lower_decision_count": int(trajectory.lower.size),
         "upper_mean_duration": float(np.mean(trajectory.upper.duration)),
         "upper_to_lower_ratio": float(trajectory.upper.size / max(trajectory.lower.size, 1)),
-        "leakage_penalty": float(leak["leakage_penalty"]),
-        "UpperHFPower": float(leak["UpperHFPower"]),
-        "LowerLFDrift": float(leak["LowerLFDrift"]),
-        "LowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
+        "leakage_penalty": float(reported_leak["leakage_penalty"]),
+        "UpperHFPower": float(reported_leak["UpperHFPower"]),
+        "LowerLFDrift": float(reported_leak["LowerLFDrift"]),
+        "LowerLFDriftAbs": float(reported_leak["LowerLFDriftAbs"]),
+        "ProjectedLowerLFDrift": float(leak["LowerLFDrift"]),
+        "ProjectedLowerLFDriftAbs": float(leak["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leak["LowerLFDrift"]),
         "RawLowerLFDriftAbs": float(raw_leak["LowerLFDriftAbs"]),
         "FocusScore": float(diag["FocusScore"]),
@@ -1010,13 +1151,39 @@ def smdp_rollout(
         "lower_low_mi": float(diag.get("lower_low_mi", 0.0)),
         "upper_credit_mean": float(np.mean(upper_credits)) if upper_credits else 0.0,
         "lower_credit_mean": float(np.mean(lower_credits)) if lower_credits else 0.0,
+        "upper_task_credit_mean": float(np.mean(upper_task_credits)) if upper_task_credits else 0.0,
+        "lower_task_credit_mean": float(np.mean(lower_task_credits)) if lower_task_credits else 0.0,
+        "plan_return_mean": float(np.mean(plan_returns)) if plan_returns else 0.0,
+        "execution_deviation_return_mean": float(
+            np.mean(execution_deviation_returns)
+        ) if execution_deviation_returns else 0.0,
+        "upper_leakage_cost_mean": float(np.mean(upper_leakage_costs)) if upper_leakage_costs else 0.0,
+        "lower_leakage_cost_mean": float(np.mean(lower_leakage_costs)) if lower_leakage_costs else 0.0,
+        "task_credit_reconstruction_max_abs_error": float(
+            np.max(np.abs(finite_reconstruction_errors))
+        ) if finite_reconstruction_errors.size else float("nan"),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
+        "plan_target_step_change_mean": float(
+            np.mean(np.abs(target_steps))
+        ) if target_steps.size else 0.0,
         "lower_lf_effect_filter_window": int(lower_lf_effect_filter_window),
         "lower_lf_effect_filter_gain": float(lower_lf_effect_filter_gain),
         "lower_lf_raw_recenter_gain": float(lower_lf_raw_recenter_gain),
         "raw_recenter_boost_mean": float(np.mean(raw_recenter_boosts)) if raw_recenter_boosts else 0.0,
         "protocol_valid": 1.0,
+        "full_method_implementation_version": (
+            FULL_METHOD_IMPLEMENTATION_VERSION
+            if method_contract == "full_freq_hrl_v3" else "not_applicable"
+        ),
+        "execution_timeline_contract": str(execution_timeline_contract),
+        "method_contract": str(method_contract),
+        "mark_to_market_timing": str(mark_to_market_timing),
+        "volume_impact_bps": float(volume_impact_bps),
+        "executed_plan_curve": float(bool(execute_plan_curve)),
+        "additive_frequency_credit": float(bool(use_additive_frequency_credit)),
+        "raw_lower_effect_constraint": float(bool(constrain_raw_lower_effect)),
+        "plan_smoothness_weight": float(plan_smoothness_weight),
         "routing_contract": (
             "frequency_responsibility"
             if policy_mode == "freq_hrl" else (
@@ -1054,6 +1221,8 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "UpperHFPower",
         "LowerLFDrift",
         "LowerLFDriftAbs",
+        "ProjectedLowerLFDrift",
+        "ProjectedLowerLFDriftAbs",
         "RawLowerLFDrift",
         "RawLowerLFDriftAbs",
         "FocusScore",
@@ -1063,12 +1232,25 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "lower_low_mi",
         "upper_credit_mean",
         "lower_credit_mean",
+        "upper_task_credit_mean",
+        "lower_task_credit_mean",
+        "plan_return_mean",
+        "execution_deviation_return_mean",
+        "upper_leakage_cost_mean",
+        "lower_leakage_cost_mean",
+        "task_credit_reconstruction_max_abs_error",
         "plan_smoothness",
         "plan_coeff_abs",
+        "plan_target_step_change_mean",
         "lower_lf_effect_filter_window",
         "lower_lf_effect_filter_gain",
         "lower_lf_raw_recenter_gain",
         "raw_recenter_boost_mean",
+        "executed_plan_curve",
+        "additive_frequency_credit",
+        "raw_lower_effect_constraint",
+        "volume_impact_bps",
+        "plan_smoothness_weight",
         "protocol_valid",
     ]
     return summarize_numeric_rows(rows, keys=keys)
@@ -1108,6 +1290,10 @@ def train_ppo_actor_critic(
     use_handcrafted_frequency_prior: bool = False,
     evaluation_role: str = "heldout_test",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
+    execution_timeline_contract: str = "legacy_pre_trade_v2",
+    method_contract: str = "routing_core_v2",
+    volume_impact_bps: float = 0.0,
+    plan_smoothness_weight: float = 0.0,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -1123,6 +1309,49 @@ def train_ppo_actor_critic(
         )
     if not np.isfinite(float(reward_scale)) or float(reward_scale) <= 0.0:
         raise ValueError("reward_scale must be positive and finite")
+    execution_timeline_contract = str(execution_timeline_contract)
+    if execution_timeline_contract not in EXECUTION_TIMELINE_CONTRACTS:
+        raise ValueError(
+            "unknown execution_timeline_contract: "
+            f"{execution_timeline_contract}; expected one of "
+            f"{EXECUTION_TIMELINE_CONTRACTS}"
+        )
+    method_contract = str(method_contract)
+    method_flags = resolve_method_contract(method_contract)
+    mark_to_market_timing = (
+        "post_trade"
+        if execution_timeline_contract == "causal_post_trade_v3"
+        else "pre_trade"
+    )
+    if not np.isfinite(float(volume_impact_bps)) or float(volume_impact_bps) < 0.0:
+        raise ValueError("volume_impact_bps must be finite and non-negative")
+    for name, value in (("plan_smoothness_weight", plan_smoothness_weight),):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(f"{name} must be finite and non-negative")
+    if method_contract != "routing_core_v2":
+        if policy_mode in FLAT_PPO_MODES:
+            raise ValueError(
+                f"{method_contract} is hierarchical and cannot be used by {policy_mode}"
+            )
+        if execution_timeline_contract != "causal_post_trade_v3":
+            raise ValueError(
+                f"{method_contract} requires causal_post_trade_v3 execution"
+            )
+        if int(plan_basis_dim) < 2:
+            raise ValueError(
+                f"{method_contract} requires plan_basis_dim >= 2"
+            )
+    if method_contract == "full_freq_hrl_v3":
+        if policy_mode != "freq_hrl":
+            raise ValueError("full_freq_hrl_v3 requires policy_mode='freq_hrl'")
+        if not (
+            float(leakage_scale) > 0.0
+            or float(lower_lf_constraint_coef) > 0.0
+            or float(lower_lf_dual_lr) > 0.0
+        ):
+            raise ValueError(
+                "full_freq_hrl_v3 requires an active raw leakage penalty or constraint"
+            )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -1144,6 +1373,9 @@ def train_ppo_actor_critic(
         plan_horizon_s=plan_horizon_s,
         plan_eval_offset_s=plan_eval_offset_s,
         plan_coefficient_scale=plan_coefficient_scale,
+        anchor_first_coefficient=(
+            execution_timeline_contract == "causal_post_trade_v3"
+        ),
     )
     reference_smdp_config = SMDPPPOConfig(
         upper_state_dim=6 * assets + 5,
@@ -1219,6 +1451,10 @@ def train_ppo_actor_critic(
                 lower_lf_raw_recenter_gain=0.0,
                 policy_mode=policy_mode,
                 reward_scale=float(reward_scale),
+                mark_to_market_timing=mark_to_market_timing,
+                volume_impact_bps=float(volume_impact_bps),
+                execution_timeline_contract=execution_timeline_contract,
+                method_contract=method_contract,
             ),
             objective_fn=objective,
             summary_fn=summarize,
@@ -1272,6 +1508,15 @@ def train_ppo_actor_critic(
                 ),
                 "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
                 "training_reward_scale": float(reward_scale),
+                "execution_timeline_contract": execution_timeline_contract,
+                "method_contract": method_contract,
+                "mark_to_market_timing": mark_to_market_timing,
+                "volume_impact_bps": float(volume_impact_bps),
+                "full_method_implementation_version": (
+                    FULL_METHOD_IMPLEMENTATION_VERSION
+                    if method_contract == "full_freq_hrl_v3"
+                    else "not_applicable"
+                ),
                 "training_path_protocol": (
                     "fresh_deterministic_path_per_root_and_iteration_v2"
                     if resample_training_paths else "fixed_path_reuse_legacy"
@@ -1364,6 +1609,11 @@ def train_ppo_actor_critic(
         ),
     }[policy_mode]
     credit_contract = "upper strategic PnL; lower execution cost, tracking, and leakage"
+    if method_flags["use_additive_frequency_credit"]:
+        credit_contract = (
+            "exact task-reward conservation: upper plan return; lower execution "
+            "deviation return and execution/tracking costs; regularizers separate"
+        )
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
         train_seeds=rollout_seed_roots,
@@ -1395,6 +1645,18 @@ def train_ppo_actor_critic(
             upper_period=actual_upper_period,
             min_upper_duration=actual_min_upper_duration,
             reward_scale=float(reward_scale),
+            mark_to_market_timing=mark_to_market_timing,
+            volume_impact_bps=float(volume_impact_bps),
+            execute_plan_curve=method_flags["execute_plan_curve"],
+            use_additive_frequency_credit=method_flags[
+                "use_additive_frequency_credit"
+            ],
+            constrain_raw_lower_effect=method_flags[
+                "constrain_raw_lower_effect"
+            ],
+            plan_smoothness_weight=float(plan_smoothness_weight),
+            execution_timeline_contract=execution_timeline_contract,
+            method_contract=method_contract,
         ),
         objective_fn=lambda row: objective(row) - max(float(lower_lf_objective_weight), 0.0) * float(
             row["LowerLFDrift"]
@@ -1451,6 +1713,23 @@ def train_ppo_actor_critic(
             ),
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "training_reward_scale": float(reward_scale),
+            "execution_timeline_contract": execution_timeline_contract,
+            "method_contract": method_contract,
+            "mark_to_market_timing": mark_to_market_timing,
+            "volume_impact_bps": float(volume_impact_bps),
+            "full_method_implementation_version": (
+                FULL_METHOD_IMPLEMENTATION_VERSION
+                if method_contract == "full_freq_hrl_v3"
+                else "not_applicable"
+            ),
+            "executed_plan_curve": bool(method_flags["execute_plan_curve"]),
+            "additive_frequency_credit": bool(
+                method_flags["use_additive_frequency_credit"]
+            ),
+            "raw_lower_effect_constraint": bool(
+                method_flags["constrain_raw_lower_effect"]
+            ),
+            "plan_smoothness_weight": float(plan_smoothness_weight),
             "training_path_protocol": (
                 "fresh_deterministic_path_per_root_and_iteration_v2"
                 if resample_training_paths else "fixed_path_reuse_legacy"
@@ -1573,6 +1852,18 @@ def main() -> None:
     parser.add_argument("--upper-period", type=int, default=30)
     parser.add_argument("--min-upper-duration", type=int, default=5)
     parser.add_argument("--use-handcrafted-frequency-prior", action="store_true")
+    parser.add_argument(
+        "--execution-timeline-contract",
+        choices=EXECUTION_TIMELINE_CONTRACTS,
+        default="legacy_pre_trade_v2",
+    )
+    parser.add_argument(
+        "--method-contract",
+        choices=METHOD_CONTRACTS,
+        default="routing_core_v2",
+    )
+    parser.add_argument("--volume-impact-bps", type=float, default=0.0)
+    parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
     parser.add_argument("--output-dir", type=Path, default=Path("transit_hrl/results/trading_ppo_actor_critic"))
     args = parser.parse_args()
     payload, rows, model = train_ppo_actor_critic(
@@ -1610,6 +1901,10 @@ def main() -> None:
         upper_period=args.upper_period,
         min_upper_duration=args.min_upper_duration,
         use_handcrafted_frequency_prior=args.use_handcrafted_frequency_prior,
+        execution_timeline_contract=args.execution_timeline_contract,
+        method_contract=args.method_contract,
+        volume_impact_bps=args.volume_impact_bps,
+        plan_smoothness_weight=args.plan_smoothness_weight,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

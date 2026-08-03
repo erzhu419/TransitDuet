@@ -31,6 +31,7 @@ from .metrics import (
 )
 from .performance_validation import make_synthetic_market
 from .ppo_actor_critic import (
+    EXECUTION_TIMELINE_CONTRACTS,
     LEARNED_BASELINE_IMPLEMENTATION_VERSION,
     RAW_HISTORY_WINDOW,
     bounded_speed,
@@ -86,11 +87,26 @@ def run_offpolicy_episode(
     batch_size: int = 64,
     updates_per_step: int = 1,
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
+    execution_timeline_contract: str = "legacy_pre_trade_v2",
+    volume_impact_bps: float = 0.0,
 ) -> tuple[dict[str, Any], int, list[dict[str, float]]]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown off-policy mode: {policy_mode}")
     if training and (replay is None or replay_rng is None):
         raise ValueError("training requires replay and replay_rng")
+    execution_timeline_contract = str(execution_timeline_contract)
+    if execution_timeline_contract not in EXECUTION_TIMELINE_CONTRACTS:
+        raise ValueError(
+            "unknown execution_timeline_contract: "
+            f"{execution_timeline_contract}"
+        )
+    if not np.isfinite(float(volume_impact_bps)) or float(volume_impact_bps) < 0.0:
+        raise ValueError("volume_impact_bps must be finite and non-negative")
+    mark_to_market_timing = (
+        "post_trade"
+        if execution_timeline_contract == "causal_post_trade_v3"
+        else "pre_trade"
+    )
     data = make_synthetic_market(seed=seed, steps=steps, n_assets=assets, scenario=scenario)
     env = PortfolioExecutionEnv(
         data["returns"],
@@ -98,9 +114,11 @@ def run_offpolicy_episode(
         config=PortfolioExecutionConfig(
             transaction_cost_bps=50.0,
             slippage_bps=10.0,
+            volume_impact_bps=float(volume_impact_bps),
             max_leverage=1.0,
             inventory_drift_penalty=0.002,
             drawdown_penalty=0.0,
+            mark_to_market_timing=mark_to_market_timing,
         ),
     )
     tracker = make_tracker(assets)
@@ -227,6 +245,9 @@ def run_offpolicy_episode(
         "temporal_contract": "single_level_flat_joint_action",
         "replay_size": int(replay.size) if replay is not None else 0,
         "gradient_updates": int(len(updates)),
+        "execution_timeline_contract": execution_timeline_contract,
+        "mark_to_market_timing": mark_to_market_timing,
+        "volume_impact_bps": float(volume_impact_bps),
     }
     return row, int(global_step), updates
 
@@ -283,6 +304,8 @@ def train_flat_offpolicy_baseline(
     objective_fn: Callable[[dict[str, Any]], float] = objective,
     evaluation_role: str = "heldout_test",
     reward_scale: float = DEFAULT_TRAINING_REWARD_SCALE,
+    execution_timeline_contract: str = "legacy_pre_trade_v2",
+    volume_impact_bps: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
@@ -293,6 +316,14 @@ def train_flat_offpolicy_baseline(
         )
     if not np.isfinite(float(reward_scale)) or float(reward_scale) <= 0.0:
         raise ValueError("reward_scale must be positive and finite")
+    execution_timeline_contract = str(execution_timeline_contract)
+    if execution_timeline_contract not in EXECUTION_TIMELINE_CONTRACTS:
+        raise ValueError(
+            "unknown execution_timeline_contract: "
+            f"{execution_timeline_contract}"
+        )
+    if not np.isfinite(float(volume_impact_bps)) or float(volume_impact_bps) < 0.0:
+        raise ValueError("volume_impact_bps must be finite and non-negative")
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -336,6 +367,8 @@ def train_flat_offpolicy_baseline(
             scenario=scenario,
             policy_mode=policy_mode,
             training=False,
+            execution_timeline_contract=execution_timeline_contract,
+            volume_impact_bps=float(volume_impact_bps),
         )[0]
         for eval_seed in validation_seed_list
     ]
@@ -381,6 +414,8 @@ def train_flat_offpolicy_baseline(
                 batch_size=int(batch_size),
                 updates_per_step=int(updates_per_step),
                 reward_scale=float(reward_scale),
+                execution_timeline_contract=execution_timeline_contract,
+                volume_impact_bps=float(volume_impact_bps),
             )
             iteration_updates.extend(updates)
         actor_optimizer_steps += int(sum(
@@ -398,6 +433,8 @@ def train_flat_offpolicy_baseline(
                 scenario=scenario,
                 policy_mode=policy_mode,
                 training=False,
+                execution_timeline_contract=execution_timeline_contract,
+                volume_impact_bps=float(volume_impact_bps),
             )[0]
             for eval_seed in validation_seed_list
         ]
@@ -425,6 +462,8 @@ def train_flat_offpolicy_baseline(
             scenario=scenario,
             policy_mode=policy_mode,
             training=False,
+            execution_timeline_contract=execution_timeline_contract,
+            volume_impact_bps=float(volume_impact_bps),
         )[0]
         for eval_seed in evaluation_seeds
     ]
@@ -467,6 +506,13 @@ def train_flat_offpolicy_baseline(
         "batch_size": int(batch_size),
         "updates_per_step": int(updates_per_step),
         "training_reward_scale": float(reward_scale),
+        "execution_timeline_contract": execution_timeline_contract,
+        "mark_to_market_timing": (
+            "post_trade"
+            if execution_timeline_contract == "causal_post_trade_v3"
+            else "pre_trade"
+        ),
+        "volume_impact_bps": float(volume_impact_bps),
         "environment_steps_train": int(global_step),
         "environment_steps_validation": int(
             len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
@@ -578,6 +624,12 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--updates-per-step", type=int, default=1)
     parser.add_argument(
+        "--execution-timeline-contract",
+        choices=EXECUTION_TIMELINE_CONTRACTS,
+        default="legacy_pre_trade_v2",
+    )
+    parser.add_argument("--volume-impact-bps", type=float, default=0.0)
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("transit_hrl/results/trading_offpolicy_baseline"),
@@ -604,6 +656,8 @@ def main() -> None:
         warmup_steps=int(args.warmup_steps),
         batch_size=int(args.batch_size),
         updates_per_step=int(args.updates_per_step),
+        execution_timeline_contract=args.execution_timeline_contract,
+        volume_impact_bps=float(args.volume_impact_bps),
     )
     write_outputs(args.output_dir, payload, rows, agent)
     print(
