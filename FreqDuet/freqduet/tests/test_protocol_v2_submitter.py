@@ -40,6 +40,27 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         self.assertIn(
             "reference config must be included in --configs", result.stderr)
 
+    def test_protocol_label_follows_submitted_configs(self):
+        config = "F_freqduet_protocol_v3_compact_b30_hiro"
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--configs", config,
+                "--train-seeds", "7",
+                "--eval-seeds", "10001",
+                "--run-name", "protocol_v3_submitter_test",
+                "--shard-size", "1",
+                "--dry-run",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("protocol-v3 run=protocol_v3_submitter_test", result.stdout)
+        self.assertIn("FreqDuet protocol-v3 protocol_v3_submitter_test", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Submit protocol-v2 train/frozen-evaluation jobs directly to CPU nodes."""
+"""Submit FreqDuet train/frozen-evaluation jobs directly to CPU nodes."""
 
 from __future__ import annotations
 
 import argparse
+import re
 import shlex
 import subprocess
 import sys
@@ -24,9 +25,10 @@ DEFAULT_TRAIN_SEEDS = [7, 17, 31, 42]
 DEFAULT_EVAL_SEEDS = [10001, 10007, 10009, 10037, 10039, 10061, 10067, 10069]
 DEFAULT_NODES = ["node001", "node002", "node003", "node004", "node005", "node006"]
 CPU_JUSTIFICATION = (
-    "FreqDuet protocol-v2 transit simulation and reinforcement learning are "
+    "FreqDuet transit simulation and reinforcement learning are "
     "CPU-only and run in the isolated freqduet-cpu-py310 environment."
 )
+SUBMITTED_TASK_RE = re.compile(r"\bsubmitted\s+(t\d+)\b", re.IGNORECASE)
 
 
 def parse_csv(value: str, cast=str) -> list:
@@ -50,10 +52,21 @@ def resolve_reference(configs: list[str], reference: str | None) -> str:
     raise ValueError("reference config must be included in --configs")
 
 
-def execute(command: list[str], dry_run: bool) -> None:
+def protocol_label(configs: list[str]) -> str:
+    versions = {
+        match.group(1)
+        for config in configs
+        if (match := re.search(r"protocol_v(\d+)", Path(config).stem))
+    }
+    if len(versions) == 1:
+        return f"protocol-v{versions.pop()}"
+    return "mixed-protocol"
+
+
+def execute(command: list[str], dry_run: bool) -> str:
     print(shlex.join(command))
     if dry_run:
-        return
+        return ""
     process = subprocess.run(command, text=True, capture_output=True)
     output = (process.stdout or "") + (process.stderr or "")
     if process.returncode != 0:
@@ -62,6 +75,7 @@ def execute(command: list[str], dry_run: bool) -> None:
             process.check_returncode()
     if output.strip():
         print(output.strip())
+    return output
 
 
 def main() -> None:
@@ -98,10 +112,12 @@ def main() -> None:
     total = len(configs) * len(train_seeds)
     shards = ranges(total, args.shard_size)
     result_base = f"results_freqduet/{args.run_name}"
+    protocol = protocol_label(configs)
     print(
-        f"protocol-v2 run={args.run_name} jobs={total} shards={len(shards)} "
+        f"{protocol} run={args.run_name} jobs={total} shards={len(shards)} "
         f"train_episodes={args.train_episodes} eval_seeds={len(eval_seeds)}")
 
+    submitted_task_ids: list[str] = []
     for index, (start, end) in enumerate(shards):
         shard_id = f"{start:04d}_{end:04d}"
         logs_dir = f"{result_base}/logs_shards/shard_{shard_id}"
@@ -139,7 +155,7 @@ def main() -> None:
             str(SCHEDULER),
             "submit",
             "--project", "FreqDuet",
-            "--description", f"FreqDuet protocol-v2 {args.run_name} shard {index + 1}/{len(shards)}",
+            "--description", f"FreqDuet {protocol} {args.run_name} shard {index + 1}/{len(shards)}",
             "--cmd", " ".join(inner),
             "--cwd", str(ROOT),
             "--signature", f"FreqDuet/{args.run_name}/shard_{shard_id}",
@@ -159,7 +175,8 @@ def main() -> None:
         ]
         if args.allow_duplicate:
             command.append("--allow-duplicate")
-        execute(command, args.dry_run)
+        output = execute(command, args.dry_run)
+        submitted_task_ids.extend(SUBMITTED_TASK_RE.findall(output))
 
     print("\nAggregate after scheduler sync:")
     print(
@@ -172,7 +189,19 @@ def main() -> None:
         f"--aggregate-logs-dirs \"$(find {result_base}/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)\" "
         f"--out-dir {result_base}/combined_summary")
     if args.dispatch and not args.dry_run:
-        execute([sys.executable, str(SCHEDULER), "dispatch"], False)
+        if not submitted_task_ids:
+            print("No newly submitted task IDs to dispatch; scheduler watch will handle active duplicates.")
+            return
+        dispatch = [
+            sys.executable,
+            str(SCHEDULER),
+            "dispatch",
+            "--lock-timeout", "600",
+            "--intent-label", f"FreqDuet/{args.run_name}",
+        ]
+        for task_id in submitted_task_ids:
+            dispatch.extend(["--task-id", task_id])
+        execute(dispatch, False)
 
 
 if __name__ == "__main__":
