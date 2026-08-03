@@ -27,6 +27,10 @@ class ManuscriptFiguresTest(unittest.TestCase):
                     self.assertGreater(path.stat().st_size, 1000, f"empty {path}")
             source_data = list((out / "source_data").glob("*.csv"))
             self.assertGreaterEqual(len(source_data), 5)
+            self.assertIn(
+                "encoder_evidence_available",
+                payload["figures"][-1],
+            )
 
 
 if __name__ == "__main__":

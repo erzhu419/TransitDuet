@@ -556,6 +556,18 @@ def fig5_orderbook_encoder(paths: dict[str, Path], output_dir: Path, source_dir:
     per_eval = _read_csv(paths["order_book_per_eval"])
     checks = _read_csv(paths["order_book_checks"])
     enc = _read_csv(paths["encoder_domains"])
+    encoder_columns = [
+        "domain",
+        "supported",
+        "positive_mixed",
+        "summary_only",
+        "not_supported",
+    ]
+    encoder_evidence_available = bool(
+        not enc.empty and set(encoder_columns).issubset(enc.columns)
+    )
+    if not encoder_evidence_available:
+        enc = pd.DataFrame(columns=encoder_columns)
     order_summary = _read_json(paths["order_book_summary"])
     per_eval.to_csv(source_dir / "fig5_order_book_per_eval_source.csv", index=False)
     checks.to_csv(source_dir / "fig5_order_book_checks_source.csv", index=False)
@@ -601,22 +613,53 @@ def fig5_orderbook_encoder(paths: dict[str, Path], output_dir: Path, source_dir:
 
     _panel(ax_c, "c")
     ax_c.set_title("Encoder evidence by domain", loc="left", fontsize=9)
-    enc_plot = enc.copy()
-    domains = enc_plot["domain"].str.replace("_", "\n")
-    left = np.zeros(len(enc_plot))
-    for col, color, label in [
-        ("supported", GREEN, "supported"),
-        ("positive_mixed", GOLD, "mixed"),
-        ("summary_only", NEUTRAL_LIGHT, "summary-only"),
-        ("not_supported", RED_SOFT, "not supported"),
-    ]:
-        vals = enc_plot[col].fillna(0).to_numpy()
-        ax_c.barh(domains, vals, left=left, color=color, edgecolor="white", label=label)
-        left += vals
-    ax_c.invert_yaxis()
-    ax_c.set_xlabel("checks", fontsize=7)
-    ax_c.tick_params(axis="y", labelsize=6.3)
-    ax_c.legend(fontsize=6.2, ncols=2, loc="lower right")
+    if encoder_evidence_available:
+        enc_plot = enc.copy()
+        domains = enc_plot["domain"].astype(str).str.replace("_", "\n")
+        left = np.zeros(len(enc_plot))
+        for col, color, label in [
+            ("supported", GREEN, "supported"),
+            ("positive_mixed", GOLD, "mixed"),
+            ("summary_only", NEUTRAL_LIGHT, "summary-only"),
+            ("not_supported", RED_SOFT, "not supported"),
+        ]:
+            vals = pd.to_numeric(enc_plot[col], errors="coerce").fillna(0).to_numpy()
+            ax_c.barh(
+                domains,
+                vals,
+                left=left,
+                color=color,
+                edgecolor="white",
+                label=label,
+            )
+            left += vals
+        ax_c.invert_yaxis()
+        ax_c.set_xlabel("checks", fontsize=7)
+        ax_c.tick_params(axis="y", labelsize=6.3)
+        ax_c.legend(fontsize=6.2, ncols=2, loc="lower right")
+    else:
+        ax_c.axis("off")
+        ax_c.text(
+            0.5,
+            0.52,
+            "No committed encoder-domain\nevidence artifact",
+            ha="center",
+            va="center",
+            color=RED,
+            fontsize=9,
+            fontweight="bold",
+            transform=ax_c.transAxes,
+        )
+        ax_c.text(
+            0.5,
+            0.28,
+            "Panel intentionally left without inferred values.",
+            ha="center",
+            va="center",
+            color=NEUTRAL_DARK,
+            fontsize=7,
+            transform=ax_c.transAxes,
+        )
 
     _panel(ax_d, "d")
     ax_d.set_title("Order-book check status", loc="left", fontsize=9)
@@ -640,7 +683,11 @@ def fig5_orderbook_encoder(paths: dict[str, Path], output_dir: Path, source_dir:
     ax_d.legend(fontsize=6.2, loc="lower right")
 
     _save(fig, output_dir, "fig5_orderbook_encoder_replay")
-    return {"figure": "fig5_orderbook_encoder_replay", "encoder_domains": int(len(enc))}
+    return {
+        "figure": "fig5_orderbook_encoder_replay",
+        "encoder_domains": int(len(enc)),
+        "encoder_evidence_available": encoder_evidence_available,
+    }
 
 
 def build_figures(results_root: Path, output_dir: Path) -> dict[str, Any]:
