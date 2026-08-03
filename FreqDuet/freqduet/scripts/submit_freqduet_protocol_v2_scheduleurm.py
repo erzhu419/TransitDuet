@@ -40,6 +40,16 @@ def ranges(total: int, size: int) -> list[tuple[int, int]]:
     ]
 
 
+def resolve_reference(configs: list[str], reference: str | None) -> str:
+    if not configs:
+        raise ValueError("at least one config is required")
+    requested = Path(reference or configs[0]).stem
+    for config in configs:
+        if Path(config).stem == requested:
+            return config
+    raise ValueError("reference config must be included in --configs")
+
+
 def execute(command: list[str], dry_run: bool) -> None:
     print(shlex.join(command))
     if dry_run:
@@ -57,6 +67,11 @@ def execute(command: list[str], dry_run: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--configs", default=",".join(DEFAULT_CONFIGS))
+    parser.add_argument(
+        "--reference",
+        default=None,
+        help="Reference config for paired aggregation; defaults to the first config.",
+    )
     parser.add_argument("--train-seeds", default=",".join(map(str, DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--eval-seeds", default=",".join(map(str, DEFAULT_EVAL_SEEDS)))
     parser.add_argument("--train-episodes", type=int, default=60)
@@ -73,6 +88,10 @@ def main() -> None:
     args = parser.parse_args()
 
     configs = parse_csv(args.configs)
+    try:
+        reference = resolve_reference(configs, args.reference)
+    except ValueError as exc:
+        parser.error(str(exc))
     train_seeds = parse_csv(args.train_seeds, int)
     eval_seeds = parse_csv(args.eval_seeds, int)
     nodes = parse_csv(args.nodes)
@@ -100,6 +119,7 @@ def main() -> None:
                 "-u",
                 "scripts/run_freqduet_protocol_v2_matrix.py",
                 "--configs", ",".join(configs),
+                "--reference", reference,
                 "--train-seeds", ",".join(map(str, train_seeds)),
                 "--eval-seeds", ",".join(map(str, eval_seeds)),
                 "--train-episodes", str(args.train_episodes),
@@ -145,6 +165,7 @@ def main() -> None:
     print(
         "python3 scripts/run_freqduet_protocol_v2_matrix.py --aggregate-only "
         f"--configs {shlex.quote(','.join(configs))} "
+        f"--reference {shlex.quote(reference)} "
         f"--train-seeds {shlex.quote(','.join(map(str, train_seeds)))} "
         f"--eval-seeds {shlex.quote(','.join(map(str, eval_seeds)))} "
         f"--logs-dir {result_base}/logs_shards/shard_0000_0000 "
