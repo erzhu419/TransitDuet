@@ -176,6 +176,25 @@ derived target headway.  The following invariants are submission gates:
 - any fleet-readiness delay is reported separately from planner projection;
 - lower goal reachability and projection saturation rates are reported.
 
+### 10. The controller currently uses undeclared privileged demand sensing
+
+The frequency tracker is updated from simulator passenger-generation events at
+every stop.  The lower `queue` feature reads the exact waiting queue at the next
+stop, while its frequency residual is taken from the current stop.  These
+signals are causal in simulation time, but they are not supplied by the
+MBTA/MTA AVL/APC sources used for the realism audit and they do not even refer to
+the same control location.  Treating them as ordinary deployable observations
+would overstate the method.
+
+Protocol v4 needs an explicit observation ledger.  Its deployable main mode
+uses historical demand priors plus causal APC boarding/left-behind evidence and
+AVL headways/speeds.  Exact latent arrival counts and downstream queues are an
+oracle-sensing ablation.  The current-stop service count, onboard load and
+left-behind count must be separated from any forecast for the next stop.  Every
+policy feature in the final configuration must name its source, timestamp and
+availability assumption; evaluation may still use latent passenger records for
+ground-truth outcomes and conserved LF/HF labels.
+
 ## Protocol-v4 Build Order
 
 1. Add invariant tests for executable target/schedule agreement, fleet-state
@@ -194,11 +213,13 @@ derived target headway.  The following invariants are submission gates:
 8. Add plan-owner LF credit and retain interval assignment only as an explicit
    ablation; verify that one episode's plan credits reconstruct its LF served
    waiting contribution.
-9. Run small deterministic contract tests, then a multi-variant 20-seed screen
+9. Add deployable APC/AVL and oracle-sensing observation modes, then verify that
+   the deployable mode never reads latent arrivals or downstream true queues.
+10. Run small deterministic contract tests, then a multi-variant 20-seed screen
    on `node001-node006`.
-10. Select one method using a pre-registered restricted-wait gate with no-harm
+11. Select one method using a pre-registered restricted-wait gate with no-harm
    constraints on journey time, unserved rate, completion and fleet use.
-11. Run a fresh 200-episode multi-domain confirmation against fixed headway,
+12. Run a fresh 200-episode multi-domain confirmation against fixed headway,
     rule holding, MPC, the closest valid TransitDuet control, and standard SAC.
 
 ## Result Status
