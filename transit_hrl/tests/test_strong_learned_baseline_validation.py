@@ -38,7 +38,12 @@ class StrongLearnedBaselineValidationTest(unittest.TestCase):
             num_shards=1,
         )
         self.assertEqual(payload["summary"]["rows"], 3)
-        self.assertEqual(payload["summary"]["parameter_budget_status"], "matched")
+        self.assertEqual(payload["summary"]["parameter_budget_status"], "mismatch")
+        self.assertTrue(any(
+            row["trainer"] == "frequency_separated_smdp_ppo_v2"
+            for row in payload["per_seed"]
+            if row["baseline"] == "freq_hrl"
+        ))
         self.assertEqual(len(payload["paired_checks"]), 8)
         self.assertTrue(any(row["baseline"] == "flat_ppo" for row in payload["per_seed"]))
         self.assertTrue(any(row["policy_mode"] == "generic_hrl_ppo" for row in payload["parameter_budget"]))

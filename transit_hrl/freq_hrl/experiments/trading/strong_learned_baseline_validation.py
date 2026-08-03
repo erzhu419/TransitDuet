@@ -1,10 +1,10 @@
 """Strong learned-baseline validation for Freq-HRL trading.
 
-This runner is intentionally separate from heuristic trading validation.  It
-compares Freq-HRL PPO against learned flat PPO and learned generic HRL PPO
-through the same shared actor-critic trainer and matched parameter budgets.
-SAC/TD3 are registered in the CS experiment matrix because they require a
-separate off-policy implementation rather than a mislabeled PPO surrogate.
+This runner is intentionally separate from heuristic trading validation.
+During the v2 migration it also reports whether trainer and parameter budgets
+are genuinely comparable. A mismatch blocks a strong-baseline claim instead
+of being hidden by the result summary. SAC/TD3 remain separately registered
+because they require real off-policy implementations.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import numpy as np
 import torch
 
 from freq_hrl.experiments.statistics import claim_status, paired_delta_stats
-from freq_hrl.rl import DualActorCriticPPO, summarize_numeric_rows
+from freq_hrl.rl import summarize_numeric_rows
 
 from .performance_validation import SCENARIOS
 from .ppo_actor_critic import POLICY_MODES, train_ppo_actor_critic
@@ -45,13 +45,11 @@ MAIN_METRICS = (
 )
 
 
-def count_parameters(model: DualActorCriticPPO) -> int:
-    return int(sum(param.numel() for param in (
-        list(model.upper_actor.parameters())
-        + list(model.lower_actor.parameters())
-        + list(model.upper_value.parameters())
-        + list(model.lower_value.parameters())
-    )))
+def count_parameters(model: Any) -> int:
+    modules = [model.upper_actor, model.lower_actor, model.upper_value, model.lower_value]
+    if hasattr(model, "lower_cost_value"):
+        modules.append(model.lower_cost_value)
+    return int(sum(param.numel() for module in modules for param in module.parameters()))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -177,7 +175,10 @@ def build_experiment_manifest(
             "steps": int(steps),
             "assets": int(assets),
             "iterations": int(iterations),
-            "trainer": "shared_dual_level_ppo",
+            "trainer": (
+                "frequency_separated_smdp_ppo_v2"
+                if mode == "freq_hrl" else "legacy_shared_dual_level_ppo"
+            ),
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
             "command": (
@@ -299,9 +300,24 @@ def run_strong_learned_baseline_validation(
         if row["metric"] in {"sharpe", "total_return", "FocusScore"}
         and row["status"] in {"supported", "positive_mixed"}
     }
-    ppo_baseline_status = (
+    metric_status = (
         "supported" if {"flat_ppo", "generic_hrl_ppo"} <= supported_or_mixed
         else ("partial" if supported_or_mixed else "not_supported")
+    )
+    parameter_budget_status = (
+        "matched"
+        if len({row["parameter_count"] for row in parameter_budget}) == 1
+        else "mismatch"
+    )
+    trainer_status = (
+        "matched"
+        if len({row["trainer"] for row in rows}) <= 1
+        else "mismatch"
+    )
+    ppo_baseline_status = (
+        metric_status
+        if parameter_budget_status == "matched" and trainer_status == "matched"
+        else "not_comparable_during_v2_migration"
     )
     return {
         "per_seed": rows,
@@ -333,19 +349,17 @@ def run_strong_learned_baseline_validation(
             "assets": int(assets),
             "iterations": int(iterations),
             "ppo_strong_baseline_status": ppo_baseline_status,
+            "ppo_metric_status": metric_status,
             "sac_td3_status": "registered_external_missing",
-            "parameter_budget_status": (
-                "matched"
-                if len({row["parameter_count"] for row in parameter_budget}) == 1
-                else "mismatch"
-            ),
+            "parameter_budget_status": parameter_budget_status,
+            "trainer_budget_status": trainer_status,
             "shard_index": int(shard_index),
             "num_shards": int(num_shards),
         },
         "boundary": (
-            "This artifact closes the PPO-family learned baseline path under a "
-            "matched shared-core parameter budget. It does not claim SAC/TD3 "
-            "coverage; those are registered as remaining off-policy baselines."
+            "This is a transitional v2 comparison. It is eligible for a strong "
+            "baseline claim only when trainer_budget_status and "
+            "parameter_budget_status are both matched. SAC/TD3 remain missing."
         ),
     }
 
@@ -373,7 +387,7 @@ def merge_strong_learned_baseline_shards(
         if row["metric"] in {"sharpe", "total_return", "FocusScore"}
         and row["status"] in {"supported", "positive_mixed"}
     }
-    ppo_baseline_status = (
+    metric_status = (
         "supported" if {"flat_ppo", "generic_hrl_ppo"} <= supported_or_mixed
         else ("partial" if supported_or_mixed else "not_supported")
     )
@@ -384,6 +398,16 @@ def merge_strong_learned_baseline_shards(
     }
     scenarios = sorted({str(row.get("scenario", "")) for row in rows if str(row.get("scenario", ""))})
     policy_modes = sorted({str(row.get("policy_mode", row.get("baseline", ""))) for row in rows if str(row.get("policy_mode", row.get("baseline", "")))})
+    trainers = {
+        str(row.get("trainer", "")) for row in rows if str(row.get("trainer", "")).strip()
+    }
+    parameter_budget_status = "matched" if len(param_counts) == 1 else "mismatch"
+    trainer_status = "matched" if len(trainers) <= 1 else "mismatch"
+    ppo_baseline_status = (
+        metric_status
+        if parameter_budget_status == "matched" and trainer_status == "matched"
+        else "not_comparable_during_v2_migration"
+    )
     return {
         "per_seed": rows,
         "run_summary": run_rows,
@@ -400,8 +424,10 @@ def merge_strong_learned_baseline_shards(
             "policy_modes": policy_modes,
             "shard_count": len(input_dirs),
             "ppo_strong_baseline_status": ppo_baseline_status,
+            "ppo_metric_status": metric_status,
             "sac_td3_status": "registered_external_missing",
-            "parameter_budget_status": "matched" if len(param_counts) == 1 else "mismatch",
+            "parameter_budget_status": parameter_budget_status,
+            "trainer_budget_status": trainer_status,
             "merge_status": "merged",
         },
         "boundary": (

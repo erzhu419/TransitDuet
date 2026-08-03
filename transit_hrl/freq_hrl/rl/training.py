@@ -8,10 +8,19 @@ from typing import Any, Callable, Iterable
 import numpy as np
 
 from .dual_actor_critic import DualActorCriticPPO, TrajectoryBatch
+from .smdp_actor_critic import (
+    FrequencySeparatedActorCriticPPO,
+    HierarchicalTrajectoryBatch,
+    concat_hierarchical_batches,
+)
 
 RolloutFn = Callable[[DualActorCriticPPO, int, bool], tuple[TrajectoryBatch | None, dict[str, Any]]]
 ObjectiveFn = Callable[[dict[str, Any]], float]
 SummaryFn = Callable[[list[dict[str, Any]]], dict[str, Any]]
+SMDPRolloutFn = Callable[
+    [FrequencySeparatedActorCriticPPO, int, bool],
+    tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]],
+]
 
 
 def concat_batches(batches: Iterable[TrajectoryBatch]) -> TrajectoryBatch:
@@ -163,6 +172,110 @@ def train_dual_ppo(
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
+        **metadata,
+    }
+    return payload, heldout_rows, model
+
+
+def apply_smdp_updates(
+    model: FrequencySeparatedActorCriticPPO,
+    batch: HierarchicalTrajectoryBatch | None,
+    updates: list[dict[str, Any]] | None = None,
+    *,
+    episode: int = 0,
+    replay_updates: int = 1,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Apply independent upper/lower PPO updates to an SMDP rollout."""
+    if batch is None:
+        return {}
+    row_metadata = dict(metadata or {})
+    latest: dict[str, Any] = {}
+    for replay_idx in range(max(1, int(replay_updates))):
+        latest = model.update(batch)
+        if updates is not None:
+            updates.append({
+                "episode": int(episode),
+                "replay_update": int(replay_idx),
+                **row_metadata,
+                **latest,
+            })
+    return latest
+
+
+def train_frequency_separated_ppo(
+    model: FrequencySeparatedActorCriticPPO,
+    train_seeds: list[int],
+    eval_seeds: list[int],
+    iterations: int,
+    rollout_fn: SMDPRolloutFn,
+    objective_fn: ObjectiveFn,
+    summary_fn: SummaryFn = summarize_numeric_rows,
+    *,
+    policy: str = "freq_hrl_smdp_ppo",
+    domain: str = "generic",
+    metadata: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
+    """Train Freq-HRL with one upper transition per macro interval."""
+    metadata = dict(metadata or {})
+    best_state = copy.deepcopy(model.state_dict())
+    initial_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
+    history: list[dict[str, Any]] = [{
+        "iteration": -1,
+        "score": best_score,
+        "sampled_objective": 0.0,
+        **summary_fn(initial_rows),
+        "upper_policy_loss": 0.0,
+        "upper_value_loss": 0.0,
+        "lower_policy_loss": 0.0,
+        "lower_value_loss": 0.0,
+        "constraint_mean": 0.0,
+        "constraint_lambda": float(model.constraint_lambda),
+    }]
+
+    for iteration in range(max(1, int(iterations))):
+        batches: list[HierarchicalTrajectoryBatch] = []
+        sampled_rows = []
+        for seed in train_seeds:
+            batch, row = rollout_fn(model, int(seed), True)
+            if batch is not None:
+                batches.append(batch)
+            sampled_rows.append(row)
+        if not batches:
+            raise RuntimeError("sampled rollouts did not produce an SMDP trajectory")
+        metrics = model.update(concat_hierarchical_batches(batches))
+        eval_rows = [rollout_fn(model, int(seed), False)[1] for seed in train_seeds]
+        score = float(np.mean([objective_fn(row) for row in eval_rows]))
+        if score > best_score:
+            best_score = score
+            best_state = copy.deepcopy(model.state_dict())
+        history.append({
+            "iteration": int(iteration),
+            "score": score,
+            **_sampled_summary(sampled_rows, objective_fn),
+            **summary_fn(eval_rows),
+            **metrics,
+        })
+
+    model.load_state_dict(best_state)
+    heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
+    payload = {
+        "policy": policy,
+        "trainer": "frequency_separated_smdp_ppo_v2",
+        "domain": domain,
+        "train_seeds": list(train_seeds),
+        "eval_seeds": list(eval_seeds),
+        "iterations": int(iterations),
+        "best_score": float(best_score),
+        "config": model.config.__dict__,
+        "history": history,
+        "summary": summary_fn(heldout_rows),
+        "trajectory_contract": {
+            "upper": "one transition per macro action with gamma^duration bootstrap",
+            "lower": "one transition per primitive control action",
+            "policy_ratios": "independent upper and lower PPO ratios",
+        },
         **metadata,
     }
     return payload, heldout_rows, model

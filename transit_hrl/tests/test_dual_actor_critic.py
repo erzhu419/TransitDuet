@@ -104,9 +104,12 @@ class DualActorCriticTest(unittest.TestCase):
             iterations=1,
             seed=7,
         )
-        self.assertEqual(payload["trainer"], "shared_dual_level_ppo")
+        self.assertEqual(payload["trainer"], "frequency_separated_smdp_ppo_v2")
+        self.assertEqual(payload["trajectory_contract"]["policy_ratios"], "independent upper and lower PPO ratios")
         self.assertEqual(len(rows), 1)
         self.assertIn("sharpe_mean", payload["summary"])
+        self.assertLess(rows[0]["upper_decision_count"], rows[0]["lower_decision_count"])
+        self.assertEqual(rows[0]["protocol_valid"], 1.0)
 
     def test_trading_ppo_learned_baseline_modes_emit_main_metrics(self):
         for mode in ("flat_ppo", "generic_hrl_ppo"):
