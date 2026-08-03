@@ -1,0 +1,17 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_legacycredit_b30_hiro
+
+protocol:
+  role: ablation_legacy_repeated_hindsight_credit
+
+upper:
+  credit_assignment:
+    system_reward_mode: repeated
+    system_reward_weight: 1.0
+    gap_credit_mode: centered
+    gap_credit_weight: 0.5
+    gap_credit_clip: 4.0
+    reliability_reward_mode: none
+    reliability_reward_weight: 0.0
+  interval_credit:
+    enable: false

@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_observedtrain_b30_hiro
+
+protocol:
+  role: ablation_boarded_only_training_objective
+
+objective:
+  wait_metric: observed

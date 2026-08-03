@@ -104,6 +104,16 @@ fallback.  Episode diagnostics expose event, spatial-fallback, and default
 counts plus the event-use rate; the integration test requires the event-state
 count to equal the evaluation headway sample count.
 
+The physical lower-state encoder also inferred the upper target as
+`forward_headway / (1 + deviation)`.  This is undefined for a zero same-stop
+headway and silently substituted `600 s`, violating the manual's requirement
+that the lower controller explicitly receive `H_U(t, dir)`.  Protocol v3 uses
+an `explicit_target_v2` input schema: the raw routing identifier remains
+available to the runner, while the policy encoder receives the exact target and
+computes deviation itself.  The inferred-target schema remains as a named
+ablation.  Event and guarded-spatial headway modes are also configurable, so
+the physical state repair can be tested rather than assumed.
+
 The audit also found that the environment measurement vector used restricted
 horizon wait while the scalar `service_cost` used boarded-only observed wait.
 Both scalar costs are now emitted explicitly.  Old configs retain `observed`
@@ -140,6 +150,15 @@ Protocol v3 must retrain from scratch with the event-headway state,
 `trip_cumulative` drift, and explicit restricted-wait objective.  It will carry
 both strict compact and global-three timetable variants until the new physical
 contract identifies a winner; v2 checkpoints cannot be evaluated as v3.
+
+The initial v3 selection matrix contains 13 source-identical configurations:
+compact/global-three/local-four planners; 15/30/60/90-second trip drift budgets;
+and isolated rolling-drift, no-lower-drift, no-DriftFB, spatial-headway,
+inferred-target, boarded-only-training, and legacy-credit ablations.  A config
+validator rejects any resolved difference outside each ablation's declared
+fields.  Mixed observed/restricted training objectives are never compared via
+the ambiguous generic `service_cost`; aggregation requires and reports both
+explicit cost views.
 
 ## Promotion Gate
 

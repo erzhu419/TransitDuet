@@ -62,6 +62,7 @@ class Bus(object):
         self._frequency_tracker = None
         self._headway_recorder = None
         self.forward_headway_source = "target_default"
+        self._lower_state_input_schema = "legacy_headway_deviation"
         self._lower_frequency_enabled = False
         self._lower_context_enabled = False
         self._lower_context_queue_norm = 50.0
@@ -205,10 +206,12 @@ class Bus(object):
               frequency_tracker=None, lower_frequency_enabled=False,
               lower_context_enabled=False, lower_context_queue_norm=50.0,
               lower_context_features=None, lower_context_gate_value=1.0,
-              headway_recorder=None):
+              headway_recorder=None,
+              lower_state_input_schema="legacy_headway_deviation"):
         self._target_headway = target_headway
         self._frequency_tracker = frequency_tracker
         self._headway_recorder = headway_recorder
+        self._lower_state_input_schema = str(lower_state_input_schema)
         self._lower_frequency_enabled = lower_frequency_enabled
         self._lower_context_enabled = lower_context_enabled
         self._lower_context_queue_norm = max(float(lower_context_queue_norm), 1e-6)
@@ -286,6 +289,11 @@ class Bus(object):
         if action_requested:
             target_hw = self._target_headway
             headway_dev = (self.forward_headway - target_hw) / max(target_hw, 1.0)
+            target_or_deviation = (
+                float(target_hw)
+                if self._lower_state_input_schema == "explicit_target_v2"
+                else float(headway_dev)
+            )
 
             self.obs = [
                 self.bus_id,
@@ -295,7 +303,7 @@ class Bus(object):
                 self.forward_headway,
                 self.backward_headway,
                 len(self.next_station.waiting_passengers) * 1.5 + self.current_route.distance / self.current_route.speed_limit,
-                headway_dev,  # NEW: normalized deviation from target
+                target_or_deviation,
             ]
             all_route = self.routes_list[:len(self.routes_list) // 2] if self.direction else self.routes_list[len(self.routes_list) // 2:]
             speed_list = [all_route[i].speed_limit for i in range(len(all_route))]

@@ -53,6 +53,23 @@ class ProtocolV2MatrixTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "incomplete explicit"):
             analysis_metrics_for_frame(frame)
 
+    def test_mixed_wait_objectives_use_only_explicit_cost_views(self):
+        frame = evaluation_frame([101, 102])
+        frame["service_cost_wait_metric"] = ["observed", "restricted"]
+        for metric in OPTIONAL_COST_METRICS:
+            frame[metric] = 1.0
+
+        metrics = analysis_metrics_for_frame(frame)
+        self.assertNotIn("service_cost", metrics)
+        self.assertTrue(set(OPTIONAL_COST_METRICS).issubset(metrics))
+
+    def test_mixed_wait_objectives_without_explicit_views_are_rejected(self):
+        frame = evaluation_frame([101, 102])
+        frame["service_cost_wait_metric"] = ["observed", "restricted"]
+
+        with self.assertRaisesRegex(RuntimeError, "mixes generic"):
+            analysis_metrics_for_frame(frame)
+
     def test_evaluation_frame_requires_exact_unique_seed_rows(self):
         frame = evaluation_frame([101, 101])
         with self.assertRaisesRegex(ValueError, "one row per"):

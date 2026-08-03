@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_inferredtarget_b30_hiro
+
+protocol:
+  role: ablation_inferred_upper_target
+
+lower:
+  state_encoder:
+    input_schema: legacy_headway_deviation

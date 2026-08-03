@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_spatial_b30_hiro
+
+protocol:
+  role: ablation_spatial_forward_headway
+
+lower:
+  headway_state_mode: spatial_fallback

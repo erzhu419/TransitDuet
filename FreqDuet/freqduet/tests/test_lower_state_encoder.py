@@ -50,6 +50,34 @@ class PhysicalLowerStateEncoderTest(unittest.TestCase):
         self.assertAlmostEqual(self.encoder.encode_action(90.0), 1.0)
         self.assertAlmostEqual(self.encoder.encode_action(-5.0), 0.0)
 
+    def test_explicit_target_schema_does_not_infer_target_from_headway(self):
+        encoder = PhysicalLowerStateEncoder(
+            base_state_dim=10,
+            max_station_id=22,
+            service_duration_h=14.0,
+            action_range_s=45.0,
+            input_schema="explicit_target_v2",
+        )
+        raw = np.asarray([
+            91.0, 5.0, 7.0, 1.0, 0.0, 300.0, 150.0, 420.0,
+            15.0, 7.5,
+        ], dtype=np.float32)
+        encoded = encoder.encode(raw)
+
+        self.assertAlmostEqual(encoded[0], 420.0 / 600.0)
+        self.assertAlmostEqual(encoded[4], 0.0)
+        self.assertAlmostEqual(encoded[7], -1.0)
+
+    def test_rejects_unknown_input_schema(self):
+        with self.assertRaisesRegex(ValueError, "input_schema"):
+            PhysicalLowerStateEncoder(
+                base_state_dim=10,
+                max_station_id=22,
+                service_duration_h=14.0,
+                action_range_s=45.0,
+                input_schema="unknown",
+            )
+
     def test_rejects_incompatible_schema(self):
         with self.assertRaisesRegex(ValueError, "shorter"):
             self.encoder.encode(np.zeros(9, dtype=np.float32))

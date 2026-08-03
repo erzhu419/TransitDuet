@@ -14,14 +14,16 @@ class PhysicalLowerStateEncoder:
 
     The encoded vector keeps the legacy dimensionality so frequency and local
     context tails remain compatible. The first legacy slot (``bus_id``) is
-    replaced by the upper planner's target headway, recovered from the forward
-    headway and its already-normalized deviation.
+    replaced by the upper planner's target headway. Protocol v3 receives that
+    target explicitly; the algebraic reconstruction remains only for legacy
+    protocol reproduction.
     """
 
     base_state_dim: int
     max_station_id: int
     service_duration_h: float
     action_range_s: float
+    input_schema: str = "legacy_headway_deviation"
     headway_norm_s: float = 600.0
     dwell_norm_s: float = 300.0
     speed_norm_mps: float = 15.0
@@ -32,6 +34,15 @@ class PhysicalLowerStateEncoder:
     speed_clip: float = 2.0
     deviation_clip: float = 3.0
     tail_clip: float = 5.0
+
+    def __post_init__(self) -> None:
+        if self.input_schema not in {
+            "legacy_headway_deviation",
+            "explicit_target_v2",
+        }:
+            raise ValueError(
+                "lower state input_schema must be legacy_headway_deviation "
+                "or explicit_target_v2")
 
     @classmethod
     def from_config(
@@ -53,6 +64,8 @@ class PhysicalLowerStateEncoder:
             max_station_id=max(int(max_station_id), 1),
             service_duration_h=max(float(service_duration_h), 1.0),
             action_range_s=max(float(action_range_s), 1e-6),
+            input_schema=str(values.get(
+                "input_schema", "legacy_headway_deviation")).strip().lower(),
             headway_norm_s=max(
                 float(values.get("headway_norm_s", 600.0)), 1e-6),
             dwell_norm_s=max(
@@ -98,8 +111,13 @@ class PhysicalLowerStateEncoder:
             if direction_up
             else (self.max_station_id - station) / self.max_station_id
         )
-        deviation = float(values[7])
-        target_s = self._target_headway(values[4], deviation)
+        if self.input_schema == "explicit_target_v2":
+            target_s = float(np.clip(
+                values[7], self.target_min_s, self.target_max_s))
+            deviation = (float(values[4]) - target_s) / max(target_s, 1.0)
+        else:
+            deviation = float(values[7])
+            target_s = self._target_headway(values[4], deviation)
 
         encoded = values.copy()
         encoded[0] = np.clip(target_s / self.headway_norm_s, 0.0, 2.0)

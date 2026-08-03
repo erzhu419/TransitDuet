@@ -74,7 +74,22 @@ def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
         raise RuntimeError(
             "matrix contains incomplete explicit service-cost views: "
             f"any={optional_any}, complete={optional_complete}")
-    metrics = list(METRICS)
+    wait_bases = set()
+    if "service_cost_wait_metric" in frame.columns:
+        wait_bases = {
+            str(value).strip().lower()
+            for value in frame["service_cost_wait_metric"].dropna().tolist()
+            if str(value).strip()
+        }
+    mixed_wait_basis = len(wait_bases) > 1
+    if mixed_wait_basis and not all(optional_complete.values()):
+        raise RuntimeError(
+            "matrix mixes generic service-cost wait bases without complete "
+            f"explicit cost views: {sorted(wait_bases)}")
+    metrics = [
+        metric for metric in METRICS
+        if metric != "service_cost" or not mixed_wait_basis
+    ]
     if all(optional_complete.values()):
         metrics.extend(OPTIONAL_COST_METRICS)
     return metrics

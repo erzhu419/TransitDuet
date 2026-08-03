@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_global3_b30_hiro
+
+protocol:
+  role: physical_causal_global_six_coefficient_timetable
+
+upper:
+  timetable_planner:
+    basis_per_direction: 3
+    shared_directions: false
+    plan_all_directions: true
+    action_ema_alpha: 0.35
+    smooth_penalty: 0.04

@@ -1,0 +1,8 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_b60_hiro
+
+protocol:
+  role: physical_trip_drift_budget_60s
+
+leakage:
+  lower_drift_budget_s: 60.0

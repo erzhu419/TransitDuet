@@ -220,6 +220,7 @@ class DiagnosticLog:
         'ep_steps', 'n_dispatches',
         # lower policy
         'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
+        'lower_headway_state_mode', 'lower_state_input_schema',
         'lower_context_gate_enabled', 'lower_context_gate_active_mean',
         'lower_action_bins_gate_enabled', 'lower_action_bins_gate_active_mean',
         'lower_reward_mean', 'lower_reward_std',
@@ -1791,10 +1792,34 @@ class TransitDuetV2Runner:
             raise ValueError(
                 "lower.terminal_action_mode=transition requires "
                 "lower.unobserved_action_mode=zero")
+        headway_mode_aliases = {
+            'event': 'arrival_event',
+            'causal_event': 'arrival_event',
+            'spatial': 'spatial_fallback',
+            'legacy_spatial': 'spatial_fallback',
+        }
+        self.lower_headway_state_mode = str(lower_cfg.get(
+            'headway_state_mode', 'arrival_event')).strip().lower()
+        self.lower_headway_state_mode = headway_mode_aliases.get(
+            self.lower_headway_state_mode, self.lower_headway_state_mode)
+        if self.lower_headway_state_mode not in {
+                'arrival_event', 'spatial_fallback'}:
+            raise ValueError(
+                "lower.headway_state_mode must be arrival_event or "
+                "spatial_fallback")
+        self.env.headway_state_mode = self.lower_headway_state_mode
         self.env.holding_action_trace_mode = (
             self.lower_holding_action_trace_mode)
         self.env.unobserved_action_mode = self.lower_unobserved_action_mode
         lower_state_encoder_cfg = lower_cfg.get('state_encoder', {}) or {}
+        self.lower_state_input_schema = str(lower_state_encoder_cfg.get(
+            'input_schema', 'legacy_headway_deviation')).strip().lower()
+        if self.lower_state_input_schema not in {
+                'legacy_headway_deviation', 'explicit_target_v2'}:
+            raise ValueError(
+                "lower.state_encoder.input_schema must be "
+                "legacy_headway_deviation or explicit_target_v2")
+        self.env.lower_state_input_schema = self.lower_state_input_schema
         self.lower_state_encoder = None
         if bool(lower_state_encoder_cfg.get('enable', False)):
             encoder_mode = str(lower_state_encoder_cfg.get(
@@ -7999,6 +8024,8 @@ class TransitDuetV2Runner:
             'lower_action_std': round(la_stat['std'], 2),
             'lower_action_min': round(la_stat['min'], 2),
             'lower_action_max': round(la_stat['max'], 2),
+            'lower_headway_state_mode': self.lower_headway_state_mode,
+            'lower_state_input_schema': self.lower_state_input_schema,
             'lower_context_gate_enabled': int(getattr(
                 self.env, 'lower_context_gate_enabled', False)),
             'lower_context_gate_active_mean': round(

@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v3_compact_b30_hiro.yaml
+_name: F_freqduet_protocol_v3_compact_nolowerdrift_b30_hiro
+
+protocol:
+  role: ablation_no_lower_drift_constraint
+
+leakage:
+  lower_drift_penalty: 0.0
+  lower_drift_cost_weight: 0.0

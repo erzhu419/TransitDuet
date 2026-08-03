@@ -50,6 +50,8 @@ class env_bus(object):
         self.scenario_seed = int(self.env_config.get('scenario_seed', 0))
         self.include_terminal_headways = bool(
             self.env_config.get('include_terminal_headways', False))
+        self.headway_state_mode = 'arrival_event'
+        self.lower_state_input_schema = 'legacy_headway_deviation'
         
         self.time_step = args["time_step"]
         self.passenger_update_freq = args["passenger_state_update_freq"]
@@ -621,7 +623,12 @@ class env_bus(object):
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features,
                           lower_context_gate_value=self.lower_context_gate_value,
-                          headway_recorder=self.headway_events)
+                          headway_recorder=(
+                              self.headway_events
+                              if self.headway_state_mode == 'arrival_event'
+                              else None),
+                          lower_state_input_schema=(
+                              self.lower_state_input_schema))
                 if was_on_route and not bus.on_route:
                     self._completed_trip_ids.add(arrival_trip_id)
                 if (bus.last_board_time == self.current_time
@@ -1192,6 +1199,8 @@ class env_bus(object):
                 self._headway_state_source_counts['target_default']),
             'headway_state_arrival_event_rate': (
                 headway_state_event_count / max(headway_state_total, 1)),
+            'headway_state_mode': str(self.headway_state_mode),
+            'lower_state_input_schema': str(self.lower_state_input_schema),
             'peak_fleet': int(self._peak_concurrent),
             'timetable_trips_available': int(self.total_timetable_rows),
             'timetable_trips_evaluated': int(total_trips),
