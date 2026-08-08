@@ -115,3 +115,18 @@ The legacy `jtl110cpu` scheduler records are excluded from this evidence path.
 Their remote process termination could not be confirmed after SSH handshake
 failure, so long-lived scheduler labels are not accepted as proof of active or
 completed computation.
+
+## v4 Outcome And v5 Supersession
+
+The completed v4 pilot passed its integrity audit but failed its performance
+gate: Freq-HRL did not consistently beat generic HRL and lost to flat PPO on
+HalfCheetah and Hopper. Protocol v4 is therefore frozen as negative development
+evidence and is not eligible for scale-up.
+
+Protocol v5 supersedes the MuJoCo adapter for new development runs. It keeps
+raw endogenous physical state visible at both levels, decomposes only an
+explicit causal exogenous actuation signal, trains across registered low/high/
+mixed conditions, restores full lower-controller authority, and uses a
+zero-start adaptive leakage dual with an inactive-constraint bypass. The full
+decision record and numerical v4 table are in
+`freq_hrl_mujoco_v4_pilot_and_v5_rebuild_2026-08-08.md`.

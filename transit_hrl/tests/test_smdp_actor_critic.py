@@ -217,6 +217,8 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             epochs=1,
             minibatch_size=8,
             lower_lambda_init=0.5,
+            lower_zero_init_cost_value=True,
+            lower_skip_inactive_cost_value_update=True,
         )
         torch.manual_seed(31)
         constrained = FrequencySeparatedActorCriticPPO(config)
@@ -246,6 +248,60 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         ])
         torch.testing.assert_close(constrained_actor, unconstrained_actor)
         self.assertEqual(constrained_metrics["lower_cost_actor_active"], 0.0)
+        self.assertEqual(
+            constrained_metrics["lower_cost_value_optimizer_steps"], 0.0
+        )
+        with torch.no_grad():
+            cost_prediction = constrained.lower_cost_value(
+                torch.randn(5, config.lower_state_dim)
+            )
+        torch.testing.assert_close(
+            cost_prediction, torch.zeros_like(cost_prediction)
+        )
+
+    def test_negligible_cost_stays_below_constraint_activation_threshold(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            lower_lambda_init=0.5,
+            lower_cost_activation_threshold=1e-5,
+            lower_zero_init_cost_value=True,
+            lower_skip_inactive_cost_value_update=True,
+        )
+        torch.manual_seed(43)
+        constrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained.load_state_dict(copy.deepcopy(constrained.state_dict()))
+        unconstrained.constraint_lambda = 0.0
+        batch = self._batch(47)
+        batch = replace(
+            batch,
+            lower=replace(
+                batch.lower,
+                cost=np.full(batch.lower.size, 1e-6, dtype=np.float32),
+            ),
+        )
+
+        np.random.seed(53)
+        metrics = constrained.update(copy.deepcopy(batch))
+        np.random.seed(53)
+        unconstrained.update(copy.deepcopy(batch))
+        constrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in constrained.lower_actor.parameters()
+        ])
+        unconstrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in unconstrained.lower_actor.parameters()
+        ])
+        torch.testing.assert_close(constrained_actor, unconstrained_actor)
+        self.assertEqual(metrics["lower_cost_actor_active"], 0.0)
+        self.assertEqual(metrics["lower_cost_value_optimizer_steps"], 0.0)
 
     def test_concatenation_preserves_explicit_cost_bootstrap(self):
         batches = []

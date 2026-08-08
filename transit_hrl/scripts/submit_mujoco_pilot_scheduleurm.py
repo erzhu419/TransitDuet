@@ -30,10 +30,10 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 )
 
 
-PILOT_OPTIMIZER_SEEDS = (35107, 35111, 35117)
-PREFLIGHT_OPTIMIZER_SEED = 35129
+PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
+PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v4"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v5"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -82,6 +82,7 @@ def build_training_command(
         "--method", str(method),
         "--env-id", str(environment),
         "--disturbance-mode", "standard",
+        "--training-disturbance-modes", *args.training_disturbance_modes,
         "--evaluation-disturbance-modes", *args.evaluation_disturbance_modes,
         "--train-seeds", *(str(seed) for seed in args.train_seeds),
         "--selection-seeds", *(str(seed) for seed in args.selection_seeds),
@@ -94,6 +95,8 @@ def build_training_command(
         "--hidden-dim", str(args.hidden_dim),
         "--learning-rate", str(args.learning_rate),
         "--lower-lf-rms-budget", str(args.lower_lf_rms_budget),
+        "--upper-action-scale", str(args.upper_action_scale),
+        "--lower-action-scale", str(args.lower_action_scale),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
         "--checkpoint-min-delta", str(args.checkpoint_min_delta),
         "--checkpoint-evaluation-interval",
@@ -266,6 +269,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--stage", choices=("preflight", "pilot"), default="preflight")
     parser.add_argument("--environments", default=",".join(validation.DEFAULT_ENV_IDS))
     parser.add_argument("--methods", default=",".join(validation.METHODS))
+    parser.add_argument(
+        "--training-disturbance-modes",
+        default=",".join(validation.DEFAULT_TRAINING_DISTURBANCE_MODES),
+    )
     parser.add_argument("--evaluation-disturbance-modes", default=",".join(DISTURBANCE_MODES))
     parser.add_argument("--train-seeds", default=",".join(map(str, validation.DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--selection-seeds", default=",".join(map(str, validation.DEFAULT_SELECTION_SEEDS)))
@@ -277,6 +284,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
+    parser.add_argument("--upper-action-scale", type=float, default=0.35)
+    parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
@@ -301,6 +310,9 @@ def build_parser() -> argparse.ArgumentParser:
 def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.environments = parse_csv(args.environments)
     args.methods = parse_csv(args.methods)
+    args.training_disturbance_modes = parse_csv(
+        args.training_disturbance_modes
+    )
     args.evaluation_disturbance_modes = parse_csv(
         args.evaluation_disturbance_modes
     )
@@ -318,7 +330,12 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         raise SystemExit("invalid MuJoCo environment registry")
     if not args.methods or not set(args.methods).issubset(validation.METHODS):
         raise SystemExit("invalid MuJoCo method registry")
-    if not set(args.evaluation_disturbance_modes).issubset(DISTURBANCE_MODES):
+    if (
+        not args.training_disturbance_modes
+        or not set(args.training_disturbance_modes).issubset(DISTURBANCE_MODES)
+        or not args.evaluation_disturbance_modes
+        or not set(args.evaluation_disturbance_modes).issubset(DISTURBANCE_MODES)
+    ):
         raise SystemExit("invalid MuJoCo disturbance registry")
     unknown_nodes = sorted(set(args.nodes) - set(LINUX_CPU_NODES))
     if unknown_nodes:
@@ -327,6 +344,7 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.steps = min(int(args.steps), 64)
         args.episode_horizon = min(int(args.episode_horizon), 64)
         args.iterations = min(int(args.iterations), 2)
+        args.training_disturbance_modes = ["standard"]
         args.evaluation_disturbance_modes = ["standard"]
         args.train_seeds = args.train_seeds[:1]
         args.selection_seeds = args.selection_seeds[:1]
@@ -338,6 +356,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.python_executable = default_python_executable(args.nodes)
     if float(args.lower_lf_rms_budget) <= 0.0:
         raise SystemExit("lower LF RMS budget must be positive")
+    if not 0.0 <= float(args.upper_action_scale) <= 1.0:
+        raise SystemExit("upper action scale must be in [0, 1]")
+    if not 0.0 < float(args.lower_action_scale) <= 1.0:
+        raise SystemExit("lower action scale must be in (0, 1]")
     return args
 
 

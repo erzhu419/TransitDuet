@@ -60,6 +60,9 @@ class SMDPPPOConfig:
     lower_dual_lr: float = 0.0
     lower_lambda_init: float = 0.0
     lower_max_lambda: float = 100.0
+    lower_cost_activation_threshold: float = 1e-12
+    lower_zero_init_cost_value: bool = False
+    lower_skip_inactive_cost_value_update: bool = False
     device: str = "cpu"
 
 
@@ -632,6 +635,13 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "hf_state_dim and hf_action_dim must either both be positive or both be zero"
             )
+        if (
+            not np.isfinite(float(config.lower_cost_activation_threshold))
+            or float(config.lower_cost_activation_threshold) < 0.0
+        ):
+            raise ValueError(
+                "lower_cost_activation_threshold must be finite and non-negative"
+            )
         self.hf_actor: nn.Module | None = None
         self.hf_value: nn.Module | None = None
         if str(config.state_encoder) == "mlp":
@@ -708,6 +718,17 @@ class FrequencySeparatedActorCriticPPO:
                 ).to(self.device)
         else:
             raise ValueError(f"unknown state_encoder: {config.state_encoder}")
+        if bool(config.lower_zero_init_cost_value):
+            linear_layers = [
+                module
+                for module in self.lower_cost_value.modules()
+                if isinstance(module, nn.Linear)
+            ]
+            if not linear_layers:
+                raise TypeError("lower cost critic must contain a linear output head")
+            nn.init.zeros_(linear_layers[-1].weight)
+            if linear_layers[-1].bias is not None:
+                nn.init.zeros_(linear_layers[-1].bias)
         self.promotion_actor: BernoulliActor | None = None
         self.promotion_value: ValueNet | None = None
         self.promotion_actor_optimizer: torch.optim.Optimizer | None = None
@@ -1185,10 +1206,13 @@ class FrequencySeparatedActorCriticPPO:
                 batch.next_cost_value,
                 batch.terminal if batch.next_cost_value is not None else None,
             )
-            cost_actor_active = bool(np.any(cost > 1e-12))
+            cost_actor_active = bool(
+                float(np.mean(cost))
+                > float(cfg.lower_cost_activation_threshold)
+            )
             if not cost_actor_active:
-                # A random cost critic must not create a policy gradient when
-                # the rollout contains no observed constraint violation.
+                # An inactive constraint must not create a policy gradient
+                # from critic noise or numerically negligible violations.
                 cost_adv = np.zeros_like(cost_adv)
             cost_adv_t = torch.as_tensor(self._normalize(cost_adv), dtype=torch.float32, device=self.device)
             cost_returns_t = torch.as_tensor(cost_returns, dtype=torch.float32, device=self.device)
@@ -1312,6 +1336,10 @@ class FrequencySeparatedActorCriticPPO:
                     cost_returns_t is not None
                     and cost_value_net is not None
                     and cost_value_optimizer is not None
+                    and (
+                        cost_actor_active
+                        or not bool(cfg.lower_skip_inactive_cost_value_update)
+                    )
                 ):
                     cost_value_optimizer.zero_grad()
                     (float(cfg.cost_value_coef) * cost_value_loss).backward()
@@ -1363,7 +1391,16 @@ class FrequencySeparatedActorCriticPPO:
         out[f"{level}_actor_optimizer_steps"] = float(len(rows))
         out[f"{level}_value_optimizer_steps"] = float(len(rows))
         out[f"{level}_cost_value_optimizer_steps"] = float(
-            len(rows) if cost_returns_t is not None and cost_value_optimizer is not None else 0
+            len(rows)
+            if (
+                cost_returns_t is not None
+                and cost_value_optimizer is not None
+                and (
+                    cost_actor_active
+                    or not bool(cfg.lower_skip_inactive_cost_value_update)
+                )
+            )
+            else 0
         )
         out[f"{level}_advantage_optimizer_steps"] = float(
             len(rows)
@@ -1374,7 +1411,7 @@ class FrequencySeparatedActorCriticPPO:
         if cost is not None:
             out[f"{level}_cost_mean"] = float(np.mean(cost))
             out[f"{level}_cost_violation_rate"] = float(
-                np.mean(cost > 1e-12)
+                np.mean(cost > float(cfg.lower_cost_activation_threshold))
             )
             out[f"{level}_cost_actor_active"] = float(cost_actor_active)
         return out

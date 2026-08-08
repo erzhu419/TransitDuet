@@ -41,7 +41,7 @@ from freq_hrl.rl import (
 )
 
 
-MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v4"
+MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v5"
 METHODS = (
     "freq_hrl",
     "freq_hrl_no_leakage",
@@ -49,9 +49,15 @@ METHODS = (
     "flat_ppo",
 )
 DEFAULT_ENV_IDS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
-DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033)
-DEFAULT_SELECTION_SEEDS = (32003, 32009, 32027)
+DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033, 31039)
+DEFAULT_SELECTION_SEEDS = (32003, 32009, 32027, 32029)
 DEFAULT_EVAL_SEEDS = (33013, 33023, 33029, 33037, 33049)
+DEFAULT_TRAINING_DISTURBANCE_MODES = (
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed",
+)
 
 
 def _gym() -> Any:
@@ -251,20 +257,29 @@ def capacity_matched_flat_hidden_dim(
     return hidden, actual, float(actual / int(target_parameter_count))
 
 
+def mujoco_policy_state_dim(observation_dim: int, action_dim: int) -> int:
+    if int(observation_dim) < 1 or int(action_dim) < 1:
+        raise ValueError("MuJoCo observation and action dimensions must be positive")
+    return int(observation_dim) + 3 * int(action_dim)
+
+
 def _feature_state(
+    observation: np.ndarray,
     bands: dict[str, np.ndarray],
     action_context: np.ndarray,
     *,
     frequency_routing: bool,
     level: str,
 ) -> np.ndarray:
+    endogenous = np.asarray(observation, dtype=np.float32).reshape(-1)
     context = np.asarray(action_context, dtype=np.float32).reshape(-1)
     if frequency_routing and level == "upper":
-        pieces = (bands["slow"], bands["mid"], context)
+        exogenous = (bands["slow"], bands["mid"])
     elif frequency_routing and level == "lower":
-        pieces = (bands["mid"], bands["high"], context)
+        exogenous = (bands["mid"], bands["high"])
     else:
-        pieces = (bands["raw"], bands["delta"], context)
+        exogenous = (bands["raw"], bands["delta"])
+    pieces = (endogenous, *exogenous, context)
     return np.concatenate(pieces).astype(np.float32, copy=False)
 
 
@@ -359,8 +374,8 @@ def rollout_hierarchical(
     frequency_routing: bool,
     leakage_constraint: bool,
     sample: bool,
-    upper_action_scale: float = 0.70,
-    lower_action_scale: float = 0.35,
+    upper_action_scale: float = 0.35,
+    lower_action_scale: float = 1.0,
     lower_lf_alpha: float = 0.04,
     lower_lf_rms_budget: float = 0.05,
     method: str = "freq_hrl",
@@ -372,7 +387,6 @@ def rollout_hierarchical(
         observation, _ = env.reset(seed=int(seed))
         model.reset_recurrent_inference()
         decomposer = CausalBandDecomposer()
-        bands = decomposer.reset(observation)
         action_dim = int(env.action_space.shape[0])
         previous_action = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
@@ -396,12 +410,29 @@ def rollout_hierarchical(
         lower_cost_values: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
+        episode_seed = int(seed)
+        episode_step = 0
+        reset_exogenous = True
         steps_since_upper = int(upper_period)
         require_upper = True
 
         for step in range(transition_budget):
+            disturbance = deterministic_actuation_disturbance(
+                mode=disturbance_mode,
+                step=episode_step,
+                action_dim=action_dim,
+                seed=episode_seed,
+                horizon=int(episode_horizon),
+            )
+            bands = (
+                decomposer.reset(disturbance)
+                if reset_exogenous
+                else decomposer.update(disturbance)
+            )
+            reset_exogenous = False
             if require_upper or steps_since_upper >= int(upper_period):
                 upper_state = _feature_state(
+                    observation,
                     bands,
                     previous_action,
                     frequency_routing=frequency_routing,
@@ -421,6 +452,7 @@ def rollout_hierarchical(
                 require_upper = False
 
             lower_state = _feature_state(
+                observation,
                 bands,
                 upper_anchor,
                 frequency_routing=frequency_routing,
@@ -431,13 +463,6 @@ def rollout_hierarchical(
             lower_cost_values.append(float(lower_out["cost_value"]))
             lower_residual = float(lower_action_scale) * np.tanh(lower_raw)
             nominal = np.clip(upper_anchor + lower_residual, -1.0, 1.0)
-            disturbance = deterministic_actuation_disturbance(
-                mode=disturbance_mode,
-                step=step,
-                action_dim=action_dim,
-                seed=int(seed),
-                horizon=int(episode_horizon),
-            )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
                 executed, env.action_space.low, env.action_space.high
@@ -486,8 +511,16 @@ def rollout_hierarchical(
                 lower_next_value = 0.0
                 lower_next_cost_value = 0.0
                 if sample and not bool(terminated):
-                    next_bands = decomposer.update(next_observation)
+                    next_disturbance = deterministic_actuation_disturbance(
+                        mode=disturbance_mode,
+                        step=episode_step + 1,
+                        action_dim=action_dim,
+                        seed=episode_seed,
+                        horizon=int(episode_horizon),
+                    )
+                    next_bands = decomposer.update(next_disturbance)
                     next_upper_state = _feature_state(
+                        next_observation,
                         next_bands,
                         executed,
                         frequency_routing=frequency_routing,
@@ -504,6 +537,7 @@ def rollout_hierarchical(
                             np.asarray(next_upper["action"], dtype=np.float32)
                         )
                     next_lower_state = _feature_state(
+                        next_observation,
                         next_bands,
                         next_upper_anchor,
                         frequency_routing=frequency_routing,
@@ -532,20 +566,23 @@ def rollout_hierarchical(
                 if not sample or budget_done:
                     break
                 episode_index += 1
-                observation, _ = env.reset(seed=derive_seed(
+                episode_seed = derive_seed(
                     "freq_hrl_mujoco_episode_reset_v1",
                     int(seed),
                     int(episode_index),
-                ))
+                )
+                observation, _ = env.reset(seed=episode_seed)
                 model.reset_recurrent_inference()
-                bands = decomposer.reset(observation)
                 previous_action = np.zeros(action_dim, dtype=np.float32)
                 upper_anchor = np.zeros(action_dim, dtype=np.float32)
                 lower_lf = np.zeros(action_dim, dtype=np.float64)
+                episode_step = 0
+                reset_exogenous = True
                 steps_since_upper = int(upper_period)
                 require_upper = True
             else:
-                bands = decomposer.update(next_observation)
+                observation = next_observation
+                episode_step += 1
 
         builder.finish(terminal=True)
         trajectory = builder.build()
@@ -612,7 +649,6 @@ def rollout_flat(
         observation, _ = env.reset(seed=int(seed))
         model.reset_recurrent_inference()
         decomposer = CausalBandDecomposer()
-        bands = decomposer.reset(observation)
         action_dim = int(env.action_space.shape[0])
         previous_action = np.zeros(action_dim, dtype=np.float32)
         data: dict[str, list[Any]] = {
@@ -632,9 +668,26 @@ def rollout_flat(
         lower_lf_budget_excesses: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
+        episode_seed = int(seed)
+        episode_step = 0
+        reset_exogenous = True
 
         for step in range(transition_budget):
+            disturbance = deterministic_actuation_disturbance(
+                mode=disturbance_mode,
+                step=episode_step,
+                action_dim=action_dim,
+                seed=episode_seed,
+                horizon=int(episode_horizon),
+            )
+            bands = (
+                decomposer.reset(disturbance)
+                if reset_exogenous
+                else decomposer.update(disturbance)
+            )
+            reset_exogenous = False
             state = _feature_state(
+                observation,
                 bands,
                 previous_action,
                 frequency_routing=False,
@@ -643,13 +696,6 @@ def rollout_flat(
             output = model.act(state, sample=sample)
             raw_action = np.asarray(output["action"], dtype=np.float32)
             nominal = np.tanh(raw_action)
-            disturbance = deterministic_actuation_disturbance(
-                mode=disturbance_mode,
-                step=step,
-                action_dim=action_dim,
-                seed=int(seed),
-                horizon=int(episode_horizon),
-            )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
                 executed, env.action_space.low, env.action_space.high
@@ -685,8 +731,16 @@ def rollout_flat(
                 terminal = float(bool(terminated))
                 next_value = 0.0
                 if sample and not bool(terminated):
-                    next_bands = decomposer.update(next_observation)
+                    next_disturbance = deterministic_actuation_disturbance(
+                        mode=disturbance_mode,
+                        step=episode_step + 1,
+                        action_dim=action_dim,
+                        seed=episode_seed,
+                        horizon=int(episode_horizon),
+                    )
+                    next_bands = decomposer.update(next_disturbance)
                     next_state = _feature_state(
+                        next_observation,
                         next_bands,
                         executed,
                         frequency_routing=False,
@@ -706,17 +760,20 @@ def rollout_flat(
                 if not sample or budget_done:
                     break
                 episode_index += 1
-                observation, _ = env.reset(seed=derive_seed(
+                episode_seed = derive_seed(
                     "freq_hrl_mujoco_episode_reset_v1",
                     int(seed),
                     int(episode_index),
-                ))
+                )
+                observation, _ = env.reset(seed=episode_seed)
                 model.reset_recurrent_inference()
-                bands = decomposer.reset(observation)
                 previous_action = np.zeros(action_dim, dtype=np.float32)
                 lower_lf = np.zeros(action_dim, dtype=np.float64)
+                episode_step = 0
+                reset_exogenous = True
             else:
-                bands = decomposer.update(next_observation)
+                observation = next_observation
+                episode_step += 1
 
         batch = JointTrajectoryBatch(
             state=np.asarray(data["state"], dtype=np.float32),
@@ -814,11 +871,35 @@ def _hierarchical_model(
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
-        lower_lambda_init=0.05 if leakage_constraint else 0.0,
+        lower_lambda_init=0.0,
         lower_cost_target=0.0,
-        lower_dual_lr=1e-3 if leakage_constraint else 0.0,
+        lower_dual_lr=0.1 if leakage_constraint else 0.0,
         lower_max_lambda=20.0,
+        lower_cost_activation_threshold=1e-6,
+        lower_zero_init_cost_value=True,
+        lower_skip_inactive_cost_value_update=True,
     ))
+
+
+def _validated_disturbance_modes(
+    modes: Iterable[str],
+    *,
+    role: str,
+) -> tuple[str, ...]:
+    values = tuple(dict.fromkeys(map(str, modes)))
+    if not values or not set(values).issubset(DISTURBANCE_MODES):
+        raise ValueError(f"MuJoCo {role} disturbance registry is invalid")
+    return values
+
+
+def _assign_seed_modes(
+    seeds: Iterable[int],
+    modes: tuple[str, ...],
+) -> dict[int, str]:
+    return {
+        int(seed): modes[index % len(modes)]
+        for index, seed in enumerate(seeds)
+    }
 
 
 def train_mujoco_method(
@@ -840,7 +921,10 @@ def train_mujoco_method(
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
     checkpoint_evaluation_interval: int = 4,
+    training_disturbance_modes: Iterable[str] | None = None,
     evaluation_disturbance_modes: Iterable[str] | None = None,
+    upper_action_scale: float = 0.35,
+    lower_action_scale: float = 1.0,
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -862,13 +946,64 @@ def train_mujoco_method(
     )
     if int(steps) < 1 or int(episode_horizon) < 1:
         raise ValueError("MuJoCo steps and episode_horizon must be positive")
+    if not 0.0 <= float(upper_action_scale) <= 1.0:
+        raise ValueError("MuJoCo upper_action_scale must be in [0, 1]")
+    if not 0.0 < float(lower_action_scale) <= 1.0:
+        raise ValueError("MuJoCo lower_action_scale must be in (0, 1]")
     observation_dim, action_dim = environment_dimensions(
         env_id,
         episode_horizon=episode_horizon,
     )
-    state_dim = 2 * observation_dim + action_dim
+    state_dim = mujoco_policy_state_dim(observation_dim, action_dim)
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
+
+    training_modes = _validated_disturbance_modes(
+        [str(disturbance_mode)]
+        if training_disturbance_modes is None
+        else training_disturbance_modes,
+        role="training",
+    )
+    if len(training_modes) > 1 and (
+        len(roots) < len(training_modes)
+        or len(selection) < len(training_modes)
+    ):
+        raise ValueError(
+            "multi-condition MuJoCo training requires at least one train and "
+            "selection seed per disturbance mode"
+        )
+    domain_seed_key = f"mujoco:{env_id}:multi_condition_v1"
+    seed_modes: dict[int, str] = {}
+    train_root_modes = _assign_seed_modes(roots, training_modes)
+    selection_seed_modes = _assign_seed_modes(selection, training_modes)
+    evaluation_seed_modes = _assign_seed_modes(evaluation, training_modes)
+
+    def register_seed_mode(seed: int, mode: str) -> None:
+        previous = seed_modes.get(int(seed))
+        if previous is not None and previous != str(mode):
+            raise ValueError(
+                f"MuJoCo seed {int(seed)} maps to conflicting conditions"
+            )
+        seed_modes[int(seed)] = str(mode)
+
+    for iteration in range(max(1, int(iterations))):
+        for root in roots:
+            derived = training_rollout_seed(
+                int(optimizer_seed), root, iteration, domain=domain_seed_key
+            )
+            register_seed_mode(derived, train_root_modes[int(root)])
+    for seed, mode in selection_seed_modes.items():
+        register_seed_mode(seed, mode)
+    for seed, mode in evaluation_seed_modes.items():
+        register_seed_mode(seed, mode)
+
+    def assigned_mode(seed: int) -> str:
+        try:
+            return seed_modes[int(seed)]
+        except KeyError as exc:
+            raise KeyError(
+                f"MuJoCo rollout seed {int(seed)} has no registered condition"
+            ) from exc
 
     reference = _hierarchical_model(
         state_dim=state_dim,
@@ -898,7 +1033,7 @@ def train_mujoco_method(
             policy,
             seed=seed,
             env_id=env_id,
-            disturbance_mode=disturbance_mode,
+            disturbance_mode=assigned_mode(seed),
             steps=steps,
             sample=sample,
             episode_horizon=episode_horizon,
@@ -912,7 +1047,7 @@ def train_mujoco_method(
             iterations=iterations,
             training_seed_fn=lambda root, iteration: training_rollout_seed(
                 int(optimizer_seed), root, iteration,
-                domain=f"mujoco:{env_id}:{disturbance_mode}",
+                domain=domain_seed_key,
             ),
             rollout_fn=rollout,
             objective_fn=lambda row: float(row["reward_mean"]),
@@ -938,12 +1073,14 @@ def train_mujoco_method(
             policy,
             seed=seed,
             env_id=env_id,
-            disturbance_mode=disturbance_mode,
+            disturbance_mode=assigned_mode(seed),
             steps=steps,
             upper_period=upper_period,
             frequency_routing=frequency_routing,
             leakage_constraint=leakage_constraint,
             lower_lf_rms_budget=lower_lf_rms_budget,
+            upper_action_scale=upper_action_scale,
+            lower_action_scale=lower_action_scale,
             sample=sample,
             method=name,
             episode_horizon=episode_horizon,
@@ -956,7 +1093,7 @@ def train_mujoco_method(
             iterations=iterations,
             training_seed_fn=lambda root, iteration: training_rollout_seed(
                 int(optimizer_seed), root, iteration,
-                domain=f"mujoco:{env_id}:{disturbance_mode}",
+                domain=domain_seed_key,
             ),
             rollout_fn=rollout,
             objective_fn=lambda row: float(row["reward_mean"]),
@@ -969,28 +1106,17 @@ def train_mujoco_method(
         )
 
     actual_parameters = _module_parameter_count(model)
-    evaluation_modes = tuple(dict.fromkeys(
+    evaluation_modes = _validated_disturbance_modes(
         [str(disturbance_mode)]
         if evaluation_disturbance_modes is None
-        else map(str, evaluation_disturbance_modes)
-    ))
-    if not evaluation_modes or not set(evaluation_modes).issubset(
-        DISTURBANCE_MODES
-    ):
-        raise ValueError("MuJoCo evaluation disturbance registry is invalid")
+        else evaluation_disturbance_modes,
+        role="evaluation",
+    )
     checkpoint_hash = _model_parameter_sha256(model)
-    primary_rows = {
-        int(row["seed"]): row for row in rows
-    }
     evaluation_rows: list[dict[str, Any]] = []
     for evaluation_mode in evaluation_modes:
         for evaluation_seed in evaluation:
-            if (
-                evaluation_mode == str(disturbance_mode)
-                and int(evaluation_seed) in primary_rows
-            ):
-                row = dict(primary_rows[int(evaluation_seed)])
-            elif name == "flat_ppo":
+            if name == "flat_ppo":
                 row = rollout_flat(
                     model,
                     seed=int(evaluation_seed),
@@ -1012,6 +1138,8 @@ def train_mujoco_method(
                     frequency_routing=name != "generic_hrl",
                     leakage_constraint=name == "freq_hrl",
                     lower_lf_rms_budget=lower_lf_rms_budget,
+                    upper_action_scale=upper_action_scale,
+                    lower_action_scale=lower_action_scale,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -1021,7 +1149,8 @@ def train_mujoco_method(
                 "evaluation_role": "heldout_test",
                 "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
                 "parameter_count": actual_parameters,
-                "training_disturbance_mode": str(disturbance_mode),
+                "training_disturbance_mode": "multi_condition",
+                "training_disturbance_modes": "|".join(training_modes),
             })
             evaluation_rows.append(row)
     if checkpoint_hash != _model_parameter_sha256(model):
@@ -1031,6 +1160,16 @@ def train_mujoco_method(
         "method": name,
         "environment": str(env_id),
         "disturbance_mode": str(disturbance_mode),
+        "training_disturbance_modes": list(training_modes),
+        "training_root_condition_assignment": {
+            str(seed): mode for seed, mode in train_root_modes.items()
+        },
+        "selection_seed_condition_assignment": {
+            str(seed): mode for seed, mode in selection_seed_modes.items()
+        },
+        "core_evaluation_seed_condition_assignment": {
+            str(seed): mode for seed, mode in evaluation_seed_modes.items()
+        },
         "evaluation_disturbance_modes": list(evaluation_modes),
         "evaluation_row_count": len(evaluation_rows),
         "steps": int(steps),
@@ -1045,6 +1184,12 @@ def train_mujoco_method(
         "leakage_constraint_enabled": name == "freq_hrl",
         "leakage_cost_contract": "causal_lf_rms_budget_excess_squared_v1",
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
+        "upper_action_scale": float(upper_action_scale),
+        "lower_action_scale": float(lower_action_scale),
+        "exogenous_observation_contract": (
+            "current_causal_actuation_disturbance_decomposed_separately_from_"
+            "raw_endogenous_state"
+        ),
         "temporal_hierarchy_enabled": name != "flat_ppo",
         "capacity_target_parameter_count": target_parameters,
         "capacity_actual_parameter_count": actual_parameters,
@@ -1123,6 +1268,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="standard",
     )
     parser.add_argument(
+        "--training-disturbance-modes",
+        nargs="+",
+        choices=DISTURBANCE_MODES,
+        default=list(DEFAULT_TRAINING_DISTURBANCE_MODES),
+    )
+    parser.add_argument(
         "--evaluation-disturbance-modes",
         nargs="+",
         choices=DISTURBANCE_MODES,
@@ -1139,6 +1290,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
+    parser.add_argument("--upper-action-scale", type=float, default=0.35)
+    parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
@@ -1168,7 +1321,10 @@ def main() -> None:
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
         checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
+        training_disturbance_modes=args.training_disturbance_modes,
         evaluation_disturbance_modes=args.evaluation_disturbance_modes,
+        upper_action_scale=args.upper_action_scale,
+        lower_action_scale=args.lower_action_scale,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
     )

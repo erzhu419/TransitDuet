@@ -16,6 +16,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     _with_explicit_bootstrap,
     capacity_matched_flat_hidden_dim,
     environment_dimensions,
+    mujoco_policy_state_dim,
     rollout_hierarchical,
     train_mujoco_method,
     write_cell,
@@ -145,7 +146,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "HalfCheetah-v5", episode_horizon=24
         )
         model = _hierarchical_model(
-            state_dim=2 * observation_dim + action_dim,
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
             action_dim=action_dim,
             hidden_dim=8,
             learning_rate=3e-4,
@@ -170,7 +171,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertIsNotNone(batch.upper.next_value)
         self.assertIsNotNone(batch.lower.next_value)
         self.assertIsNotNone(batch.lower.next_cost_value)
-        self.assertTrue(np.any(np.abs(batch.lower.next_cost_value[:-1]) > 0.0))
+        self.assertEqual(
+            batch.lower.next_cost_value.shape,
+            batch.lower.old_value.shape,
+        )
+        np.testing.assert_allclose(batch.lower.next_cost_value, 0.0)
         self.assertEqual(float(batch.upper.terminal[-1]), 0.0)
         self.assertEqual(float(batch.lower.terminal[-1]), 0.0)
         self.assertEqual(row["bootstrap_boundary_count"], 1)
@@ -180,7 +185,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "Hopper-v5", episode_horizon=1000
         )
         model = _hierarchical_model(
-            state_dim=2 * observation_dim + action_dim,
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
             action_dim=action_dim,
             hidden_dim=8,
             learning_rate=3e-4,
@@ -227,8 +232,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             evaluation_disturbance_modes=["standard", "ood_chirp"],
         )
         self.assertEqual(payload["domain"], "mujoco")
-        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v4")
+        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v5")
         self.assertTrue(payload["frequency_routing_enabled"])
+        self.assertEqual(payload["training_disturbance_modes"], ["standard"])
+        self.assertEqual(payload["upper_action_scale"], 0.35)
+        self.assertEqual(payload["lower_action_scale"], 1.0)
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
         self.assertEqual(len(rows), 2)
@@ -249,6 +257,40 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertIsNotNone(payload["history"][-1]["lower_cost_actor_active"])
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
+
+    def test_standard_condition_keeps_frequency_and_generic_inputs_equivalent(self):
+        common = dict(
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[61],
+            selection_seeds=[67],
+            eval_seeds=[71],
+            steps=16,
+            episode_horizon=16,
+            iterations=1,
+            optimizer_seed=73,
+            upper_period=4,
+            hidden_dim=8,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+        )
+        frequency, frequency_rows, _ = train_mujoco_method(
+            method="freq_hrl_no_leakage", **common
+        )
+        generic, generic_rows, _ = train_mujoco_method(
+            method="generic_hrl", **common
+        )
+        self.assertEqual(
+            frequency["frozen_parameter_sha256"],
+            generic["frozen_parameter_sha256"],
+        )
+        self.assertEqual(
+            frequency_rows[0]["episode_return"],
+            generic_rows[0]["episode_return"],
+        )
 
 
 if __name__ == "__main__":

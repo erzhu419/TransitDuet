@@ -18,6 +18,9 @@ def args_fixture() -> argparse.Namespace:
         stage="pilot",
         environments=["HalfCheetah-v5"],
         methods=["freq_hrl"],
+        training_disturbance_modes=[
+            "standard", "low_frequency", "high_frequency", "mixed"
+        ],
         evaluation_disturbance_modes=["standard", "ood_chirp"],
         train_seeds=[31013],
         selection_seeds=[32003],
@@ -29,6 +32,8 @@ def args_fixture() -> argparse.Namespace:
         hidden_dim=64,
         learning_rate=3e-4,
         lower_lf_rms_budget=0.05,
+        upper_action_scale=0.35,
+        lower_action_scale=1.0,
         checkpoint_smoothing_window=8,
         checkpoint_min_delta=1e-3,
         checkpoint_evaluation_interval=4,
@@ -65,6 +70,7 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         self.assertEqual(args.episode_horizon, 64)
         self.assertEqual(args.iterations, 2)
         self.assertEqual(len(args.train_seeds), 1)
+        self.assertEqual(args.training_disturbance_modes, ["standard"])
         self.assertEqual(args.evaluation_disturbance_modes, ["standard"])
 
     def test_command_is_headless_source_bound_and_multi_condition(self):
@@ -78,9 +84,16 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         )
         self.assertIn("MUJOCO_GL=egl", command)
         self.assertIn("--code-revision " + "a" * 40, command)
+        self.assertIn(
+            "--training-disturbance-modes standard low_frequency "
+            "high_frequency mixed",
+            command,
+        )
         self.assertIn("--evaluation-disturbance-modes standard ood_chirp", command)
         self.assertIn("--episode-horizon 1000", command)
         self.assertIn("--lower-lf-rms-budget 0.05", command)
+        self.assertIn("--upper-action-scale 0.35", command)
+        self.assertIn("--lower-action-scale 1.0", command)
         self.assertNotIn("jtl110cpu", command)
 
     def test_scheduler_uses_unpinned_linux_pool(self):
