@@ -275,6 +275,22 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertEqual(initial["action"], 0.0)
         self.assertLess(initial["probability"], 0.5)
 
+        calibrated = model.act_promotion(
+            np.zeros(4, dtype=np.float32),
+            sample=False,
+            deterministic_threshold=0.1,
+        )
+        self.assertEqual(calibrated["action"], 1.0)
+        self.assertAlmostEqual(
+            calibrated["probability"], initial["probability"]
+        )
+        with self.assertRaisesRegex(ValueError, "in \\(0, 1\\)"):
+            model.act_promotion(
+                np.zeros(4, dtype=np.float32),
+                sample=False,
+                deterministic_threshold=1.0,
+            )
+
         gate = PromotionRolloutBuilder(gamma=0.99)
         gate.begin(
             state=np.ones(4, dtype=np.float32),

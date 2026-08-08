@@ -698,13 +698,23 @@ class FrequencySeparatedActorCriticPPO:
         self,
         state: np.ndarray,
         sample: bool = True,
+        deterministic_threshold: float = 0.5,
     ) -> dict[str, float]:
         if self.promotion_actor is None or self.promotion_value is None:
             raise RuntimeError("learned promotion gate is not configured")
+        threshold = float(deterministic_threshold)
+        if not np.isfinite(threshold) or not 0.0 < threshold < 1.0:
+            raise ValueError("deterministic_threshold must be finite and in (0, 1)")
         tensor = self._state_tensor(state)
-        action, logp = self.promotion_actor(tensor, sample=sample)
+        distribution = self.promotion_actor.distribution(tensor)
+        action = (
+            distribution.sample()
+            if sample
+            else (distribution.probs >= threshold).to(tensor.dtype)
+        )
+        logp = distribution.log_prob(action).sum(dim=-1)
         value = self.promotion_value(tensor)
-        probability = self.promotion_actor.distribution(tensor).probs
+        probability = distribution.probs
         return {
             "action": float(action.item()),
             "probability": float(probability.item()),
