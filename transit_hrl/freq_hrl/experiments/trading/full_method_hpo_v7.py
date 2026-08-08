@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3.2 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.4 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -16,7 +16,7 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import numpy as np
 import torch
@@ -36,8 +36,8 @@ from .metrics import (
     SELECTION_OBJECTIVE_VERSION,
     validation_utility,
 )
-from . import full_method_budget_plan_v732 as budget_plan
-from . import full_method_confirmatory_plan_v732 as confirmatory_plan
+from . import full_method_budget_plan_v74 as budget_plan
+from . import full_method_confirmatory_plan_v74 as confirmatory_plan
 from .offpolicy_baseline_validation import (
     run_offpolicy_episode,
     train_flat_offpolicy_baseline,
@@ -64,12 +64,12 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3_2"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_4"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_null_rate_calibrated_promotion_v7_3_2_2026_08_08"
+    "full_method_hpo_robust_checkpoint_pathwise_promotion_v7_4_2026_08_08"
 )
 PROMOTION_CALIBRATION_PROTOCOL_VERSION = (
-    "paired_advantage_bias_null_quantile_calibration_v2"
+    "paired_advantage_bias_pathwise_null_quantile_calibration_v3"
 )
 FULL_METHOD_IMPLEMENTATION_VERSION = FULL_METHOD_V7_IMPLEMENTATION_VERSION
 EXECUTION_TIMELINE_CONTRACT = "causal_post_trade_v3"
@@ -83,7 +83,10 @@ DEFAULT_PLAN_HORIZON_S = 1800.0
 DEFAULT_PLAN_EVAL_OFFSET_S = 300.0
 DEFAULT_PLAN_COEFFICIENT_SCALE = 0.75
 DEFAULT_TRAIN_SEEDS = (170003, 170021, 170029)
-DEFAULT_PROMOTION_CALIBRATION_SEEDS = (180001, 180013, 180023)
+DEFAULT_PROMOTION_CALIBRATION_SEEDS = (
+    180001, 180013, 180023, 180043, 180049, 180071,
+    180077, 180089, 180091, 180103, 180119, 180131,
+)
 DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (190027, 190031, 190051)
 DEFAULT_TUNING_SEEDS = (200003, 200009, 200017, 200023, 200029)
 DEFAULT_PILOT_OPTIMIZER_SEEDS = (5003, 5009, 5011)
@@ -101,6 +104,9 @@ MIN_STRESS_LOW_PROBABILITY_LIFT = 1e-4
 MIN_STRESS_LOW_ADVANTAGE_LIFT = 1e-3
 MIN_ADVANTAGE_DECISION_ACCURACY = 0.55
 PROMOTION_CALIBRATION_NULL_RATE_CAP = 0.20
+CHECKPOINT_SELECTION_PROTOCOL = budget_plan.CHECKPOINT_SELECTION_PROTOCOL
+CHECKPOINT_SMOOTHING_WINDOW = budget_plan.CHECKPOINT_SMOOTHING_WINDOW
+CHECKPOINT_MIN_DELTA = budget_plan.CHECKPOINT_MIN_DELTA
 CHECKPOINT_BOUNDARY_WINDOW_FRACTION = 0.125
 MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION = 0.40
 
@@ -844,33 +850,49 @@ def _apply_low_noise_rate_calibration(
     *,
     predictions: Iterable[float],
     targets: Iterable[float],
-    low_noise_predictions: Iterable[float],
+    low_noise_predictions_by_path: Mapping[int | str, Iterable[float]],
     max_low_noise_rate: float,
 ) -> dict[str, Any]:
-    """Raise the decision threshold to a support-only null-rate quantile."""
+    """Cap the empirical null rate on every independent support path."""
 
     predicted = np.asarray(list(predictions), dtype=np.float64).reshape(-1)
     observed = np.asarray(list(targets), dtype=np.float64).reshape(-1)
-    low_noise = np.asarray(
-        list(low_noise_predictions), dtype=np.float64
-    ).reshape(-1)
+    low_noise_by_path = {
+        str(path): np.asarray(list(values), dtype=np.float64).reshape(-1)
+        for path, values in low_noise_predictions_by_path.items()
+    }
     rate = float(max_low_noise_rate)
     if (
         predicted.size == 0
         or predicted.shape != observed.shape
-        or low_noise.size == 0
+        or not low_noise_by_path
         or not np.all(np.isfinite(predicted))
         or not np.all(np.isfinite(observed))
-        or not np.all(np.isfinite(low_noise))
+        or any(
+            values.size == 0 or not np.all(np.isfinite(values))
+            for values in low_noise_by_path.values()
+        )
         or not 0.0 < rate < 1.0
     ):
         raise ValueError("null-rate calibration requires finite aligned samples")
-    allowed = int(np.floor(rate * low_noise.size))
-    ordered = np.sort(low_noise)
-    pivot = max(0, low_noise.size - allowed - 1)
-    null_threshold = float(np.nextafter(ordered[pivot], np.inf))
+    path_thresholds: dict[str, float] = {}
+    for path, values in low_noise_by_path.items():
+        allowed = int(np.floor(rate * values.size))
+        ordered = np.sort(values)
+        pivot = max(0, values.size - allowed - 1)
+        path_thresholds[path] = float(np.nextafter(ordered[pivot], np.inf))
+    null_threshold = max(path_thresholds.values())
     bias_threshold = float(calibration["calibrated_decision_threshold"])
     final_threshold = max(bias_threshold, null_threshold)
+    low_noise = np.concatenate(list(low_noise_by_path.values()))
+    path_rates_before = {
+        path: float(np.mean(values >= bias_threshold))
+        for path, values in low_noise_by_path.items()
+    }
+    path_rates_after = {
+        path: float(np.mean(values >= final_threshold))
+        for path, values in low_noise_by_path.items()
+    }
     target_threshold = float(calibration["target_threshold"])
     target_positive = observed >= target_threshold
     final_positive = predicted >= final_threshold
@@ -881,6 +903,21 @@ def _apply_low_noise_rate_calibration(
         "calibrated_decision_threshold": final_threshold,
         "low_noise_rate_ceiling": rate,
         "low_noise_sample_count": int(low_noise.size),
+        "low_noise_path_count": len(low_noise_by_path),
+        "low_noise_path_sample_counts": {
+            path: int(values.size)
+            for path, values in low_noise_by_path.items()
+        },
+        "low_noise_path_decision_thresholds": path_thresholds,
+        "low_noise_path_action_rates_before": path_rates_before,
+        "low_noise_path_action_rates_after": path_rates_after,
+        "low_noise_max_path_action_rate_before": max(
+            path_rates_before.values()
+        ),
+        "low_noise_max_path_action_rate_after": max(
+            path_rates_after.values()
+        ),
+        "null_rate_aggregation": "maximum_pathwise_empirical_quantile",
         "low_noise_action_rate_before": float(np.mean(
             low_noise >= bias_threshold
         )),
@@ -895,8 +932,10 @@ def _apply_low_noise_rate_calibration(
         )),
         "decision_positive_rate_after": float(np.mean(final_positive)),
     })
-    if result["low_noise_action_rate_after"] > rate + 1e-12:
-        raise RuntimeError("low-noise calibration failed its empirical rate cap")
+    if result["low_noise_max_path_action_rate_after"] > rate + 1e-12:
+        raise RuntimeError(
+            "low-noise calibration failed an independent-path rate cap"
+        )
     return result
 
 
@@ -920,7 +959,7 @@ def calibrate_promotion_advantage_threshold(
     target_threshold = float(params["promotion_advantage_target_threshold"])
     predictions: list[float] = []
     targets: list[float] = []
-    low_noise_predictions: list[float] = []
+    low_noise_predictions_by_path: dict[int, np.ndarray] = {}
     predictions_by_row: dict[tuple[str, int], np.ndarray] = {}
     rows: list[dict[str, Any]] = []
     for scenario in SELECTION_SCENARIOS:
@@ -975,7 +1014,7 @@ def calibrate_promotion_advantage_threshold(
             targets.extend(map(float, observed))
             predictions_by_row[(str(scenario), int(seed))] = predicted.copy()
             if str(scenario) == "stationary_low_noise":
-                low_noise_predictions.extend(map(float, predicted))
+                low_noise_predictions_by_path[int(seed)] = predicted.copy()
             rows.append({
                 "scenario": str(scenario),
                 "seed": int(seed),
@@ -1000,7 +1039,7 @@ def calibrate_promotion_advantage_threshold(
         calibration,
         predictions=predictions,
         targets=targets,
-        low_noise_predictions=low_noise_predictions,
+        low_noise_predictions_by_path=low_noise_predictions_by_path,
         max_low_noise_rate=min(
             float(params["promotion_rate_budget"]),
             PROMOTION_CALIBRATION_NULL_RATE_CAP,
@@ -1018,6 +1057,14 @@ def calibrate_promotion_advantage_threshold(
             float(np.mean(predicted >= calibrated_threshold))
             if predicted is not None else 0.0
         )
+        if str(row["scenario"]) == "stationary_low_noise":
+            row["pathwise_rate_cap"] = float(
+                calibration["low_noise_rate_ceiling"]
+            )
+            row["pathwise_rate_cap_satisfied"] = bool(
+                row["calibrated_action_rate"]
+                <= float(calibration["low_noise_rate_ceiling"]) + 1e-12
+            )
     calibration.update({
         "seed_count": len(seeds),
         "seeds": list(seeds),
@@ -1114,6 +1161,8 @@ def run_hpo_cell(
             training_scenarios=SELECTION_SCENARIOS,
             iterations=int(iterations), seed=int(optimizer_seed),
             resample_training_paths=True, evaluation_role="tuning_validation",
+            checkpoint_smoothing_window=CHECKPOINT_SMOOTHING_WINDOW,
+            checkpoint_min_delta=CHECKPOINT_MIN_DELTA,
             **_ppo_training_kwargs(params),
         )
     else:
@@ -1140,6 +1189,8 @@ def run_hpo_cell(
             capacity_target_parameter_count=int(capacity_target),
             capacity_reference_method_contract=CAPACITY_REFERENCE_METHOD_CONTRACT,
             training_scenarios=SELECTION_SCENARIOS,
+            checkpoint_smoothing_window=CHECKPOINT_SMOOTHING_WINDOW,
+            checkpoint_min_delta=CHECKPOINT_MIN_DELTA,
         )
     if model_payload.get("heldout_test_seeds"):
         raise RuntimeError("HPO loaded held-out seeds")
@@ -1175,6 +1226,14 @@ def run_hpo_cell(
         "decision_positive_rate_after": 0.0,
         "low_noise_rate_ceiling": 0.0,
         "low_noise_sample_count": 0,
+        "low_noise_path_count": 0,
+        "low_noise_path_sample_counts": {},
+        "low_noise_path_decision_thresholds": {},
+        "low_noise_path_action_rates_before": {},
+        "low_noise_path_action_rates_after": {},
+        "low_noise_max_path_action_rate_before": 0.0,
+        "low_noise_max_path_action_rate_after": 0.0,
+        "null_rate_aggregation": "not_applicable",
         "low_noise_action_rate_before": 0.0,
         "low_noise_action_rate_after": 0.0,
         "null_rate_constraint_active": False,
@@ -1342,6 +1401,30 @@ def run_hpo_cell(
         "best_checkpoint_inner_validation_score": float(model_payload.get("best_score", 0.0)),
         "validation_learning_gain": float(model_payload.get("validation_learning_gain", 0.0)),
         "selected_checkpoint_iteration": int(model_payload.get("selected_checkpoint_iteration", -1)),
+        "checkpoint_selection_protocol": str(
+            model_payload.get("checkpoint_selection_protocol", "")
+        ),
+        "checkpoint_smoothing_window": int(
+            model_payload.get("checkpoint_smoothing_window", 0)
+        ),
+        "checkpoint_min_delta": float(
+            model_payload.get("checkpoint_min_delta", 0.0)
+        ),
+        "checkpoint_selection_score": float(
+            model_payload.get("checkpoint_selection_score", 0.0)
+        ),
+        "selected_checkpoint_raw_score": float(
+            model_payload.get("selected_checkpoint_raw_score", 0.0)
+        ),
+        "last_material_improvement_iteration": int(
+            model_payload.get("last_material_improvement_iteration", -1)
+        ),
+        "checkpoint_plateau_tail_iterations": int(
+            model_payload.get("checkpoint_plateau_tail_iterations", 0)
+        ),
+        "checkpoint_validation_observation_count": int(
+            model_payload.get("checkpoint_validation_observation_count", 0)
+        ),
         "environment_steps_train": int(model_payload.get("environment_steps_train", 0)),
         "environment_steps_validation": int(
             model_payload.get("environment_steps_validation", 0)
@@ -1381,6 +1464,7 @@ def run_hpo_cell(
         "tuning_rows": annotated,
         "promotion_calibration_rows": promotion_calibration_rows,
         "hf_intervention_rows": hf_rows,
+        "training_history": list(model_payload.get("history", [])),
         "cell_summary": summary,
         "checkpoint": checkpoint,
     }
@@ -1417,6 +1501,10 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
         payload["promotion_calibration_rows"],
     )
     _write_csv(output_dir / "hf_intervention_rows.csv", payload["hf_intervention_rows"])
+    (output_dir / "training_history.json").write_text(
+        json.dumps(payload["training_history"], indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     (output_dir / "cell_summary.json").write_text(
         json.dumps(payload["cell_summary"], indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -1425,7 +1513,7 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7.3.2 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.4 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",
@@ -1824,6 +1912,38 @@ def _load_validated_hpo_cells(
             "independent_full_episode_support_batch_v1"
         ):
             raise ValueError(f"stitched support training is forbidden: {key}")
+        if (
+            summary.get("checkpoint_selection_protocol")
+            != CHECKPOINT_SELECTION_PROTOCOL
+            or int(summary.get("checkpoint_smoothing_window", 0))
+            != CHECKPOINT_SMOOTHING_WINDOW
+            or not np.isclose(
+                float(summary.get("checkpoint_min_delta", -1.0)),
+                CHECKPOINT_MIN_DELTA,
+            )
+        ):
+            raise ValueError(f"checkpoint selection protocol mismatch: {key}")
+        history_path = base / "training_history.json"
+        if not history_path.exists():
+            raise ValueError(f"checkpoint training history is missing: {key}")
+        history = json.loads(history_path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(history, list)
+            or len(history) != int(summary["iterations"]) + 1
+            or [int(row["iteration"]) for row in history]
+            != list(range(-1, int(summary["iterations"])))
+        ):
+            raise ValueError(f"checkpoint training history is incomplete: {key}")
+        selected_history = [
+            int(row["iteration"])
+            for row in history if bool(row.get("checkpoint_selected"))
+        ]
+        if (
+            not selected_history
+            or selected_history[-1]
+            != int(summary["selected_checkpoint_iteration"])
+        ):
+            raise ValueError(f"checkpoint history selection drifted: {key}")
         calibration = dict(summary.get("promotion_calibration", {}))
         calibration_rows = _read_csv(
             base / "promotion_calibration_rows.csv"
@@ -1895,6 +2015,8 @@ def _validate_common_hpo_fields(summaries: list[dict[str, Any]]) -> None:
         "promotion_calibration_seeds", "tuning_validation_seeds",
         "steps", "assets", "iterations",
         "training_episode_protocol",
+        "checkpoint_selection_protocol", "checkpoint_smoothing_window",
+        "checkpoint_min_delta",
         "training_budget_plan_sha256", "training_budget_decision_sha256",
         "training_budget_selected_iterations", "training_budget_binding_status",
     ):
@@ -1957,6 +2079,11 @@ def _candidate_leaderboard_row(
         int(summary["selected_checkpoint_iteration"]) >= checkpoint_boundary_start(
             int(summary["iterations"])
         )
+        for summary in matching
+    ]))
+    plateau_fraction = float(np.mean([
+        int(summary.get("checkpoint_plateau_tail_iterations", 0))
+        >= budget_plan.MIN_PLATEAU_TAIL_ITERATIONS
         for summary in matching
     ]))
     calibrations = [
@@ -2026,9 +2153,17 @@ def _candidate_leaderboard_row(
         ),
         "training_budget_status": (
             "sufficient"
-            if boundary_fraction <= MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION
-            else "boundary_limited"
+            if plateau_fraction >= budget_plan.MIN_PLATEAU_REPLICATE_FRACTION
+            else "unstable_training_tail"
         ),
+        "checkpoint_plateau_replicate_fraction": plateau_fraction,
+        "checkpoint_minimum_plateau_tail_iterations": (
+            budget_plan.MIN_PLATEAU_TAIL_ITERATIONS
+        ),
+        "checkpoint_plateau_tail_iterations_mean": float(np.mean([
+            int(summary.get("checkpoint_plateau_tail_iterations", 0))
+            for summary in matching
+        ])),
         "promotion_calibrated_replicate_fraction": float(
             len(calibrations) / max(len(matching), 1)
         ),

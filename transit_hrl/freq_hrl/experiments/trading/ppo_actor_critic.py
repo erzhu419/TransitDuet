@@ -85,7 +85,7 @@ FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
 FULL_METHOD_V7_IMPLEMENTATION_VERSION = (
-    "freq_hrl_full_v7_3_calibrated_advantage_promotion_2026_08_08"
+    "freq_hrl_full_v7_4_robust_checkpoint_pathwise_promotion_2026_08_08"
 )
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
@@ -3103,6 +3103,8 @@ def train_ppo_actor_critic(
     promotion_advantage_target_threshold: float | None = None,
     upper_residual_action_scale: float = 1.0,
     training_scenarios: Sequence[str] | None = None,
+    checkpoint_smoothing_window: int = 1,
+    checkpoint_min_delta: float = 0.0,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -3743,6 +3745,8 @@ def train_ppo_actor_critic(
             summary_fn=summarize,
             policy=f"{policy_mode}_canonical_joint_action",
             domain="trading",
+            checkpoint_smoothing_window=checkpoint_smoothing_window,
+            checkpoint_min_delta=checkpoint_min_delta,
             metadata={
                 "policy_mode": policy_mode,
                 "baseline": policy_mode,
@@ -4066,6 +4070,8 @@ def train_ppo_actor_critic(
         summary_fn=summarize,
         policy=f"{policy_mode}_capacity_matched_smdp_ppo",
         domain="trading",
+        checkpoint_smoothing_window=checkpoint_smoothing_window,
+        checkpoint_min_delta=checkpoint_min_delta,
         metadata={
             "policy_mode": policy_mode,
             "baseline": policy_mode,

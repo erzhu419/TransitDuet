@@ -35,7 +35,10 @@ class FullMethodHPOV7Test(unittest.TestCase):
             bias,
             predictions=predictions,
             targets=targets,
-            low_noise_predictions=[0.01, 0.02, 0.03, 0.04, 0.05],
+            low_noise_predictions_by_path={
+                101: [0.01, 0.02, 0.03, 0.04, 0.05],
+                103: [0.10, 0.11, 0.12, 0.13, 0.14],
+            },
             max_low_noise_rate=0.2,
         )
         self.assertLessEqual(
@@ -46,6 +49,14 @@ class FullMethodHPOV7Test(unittest.TestCase):
             calibration["bias_calibrated_decision_threshold"],
         )
         self.assertTrue(calibration["null_rate_constraint_active"])
+        self.assertEqual(calibration["low_noise_path_count"], 2)
+        self.assertLessEqual(
+            calibration["low_noise_max_path_action_rate_after"], 0.2
+        )
+        self.assertEqual(
+            calibration["null_rate_aggregation"],
+            "maximum_pathwise_empirical_quantile",
+        )
 
     def test_checkpoint_boundary_gate_uses_last_eighth_of_budget(self):
         self.assertEqual(v7.checkpoint_boundary_start(32), 28)

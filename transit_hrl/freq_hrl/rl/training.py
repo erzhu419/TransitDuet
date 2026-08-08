@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import copy
 from typing import Any, Callable, Iterable
 
 import numpy as np
 
 from .dual_actor_critic import DualActorCriticPPO, TrajectoryBatch
+from .checkpoint_selection import RobustValidationCheckpointSelector
 from .joint_actor_critic import (
     JointActorCriticPPO,
     JointTrajectoryBatch,
@@ -139,20 +139,28 @@ def train_dual_ppo(
     trainer: str = "shared_dual_level_ppo",
     domain: str = "generic",
     metadata: dict[str, Any] | None = None,
+    checkpoint_smoothing_window: int = 1,
+    checkpoint_min_delta: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
     """Train a dual-level PPO model through a domain-supplied rollout adapter."""
     metadata = dict(metadata or {})
     selection_seed_list = list(selection_seeds or train_seeds)
-    best_state = copy.deepcopy(model.state_dict())
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
-    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
-    initial_validation_score = float(best_score)
-    selected_checkpoint_iteration = -1
+    initial_validation_score = float(np.mean([
+        objective_fn(row) for row in initial_rows
+    ]))
+    selector = RobustValidationCheckpointSelector(
+        initial_score=initial_validation_score,
+        initial_state=model.state_dict(),
+        smoothing_window=checkpoint_smoothing_window,
+        min_delta=checkpoint_min_delta,
+    )
     history: list[dict[str, Any]] = [{
         "iteration": -1,
-        "score": best_score,
+        "score": initial_validation_score,
+        **selector.initial_history_fields(),
         "sampled_objective": 0.0,
         **summary_fn(initial_rows),
         "loss": 0.0,
@@ -180,20 +188,20 @@ def train_dual_ppo(
             rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        if score > best_score:
-            best_score = score
-            best_state = copy.deepcopy(model.state_dict())
-            selected_checkpoint_iteration = int(iteration)
+        checkpoint_fields = selector.consider(
+            score=score, state=model.state_dict(), iteration=iteration
+        )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
             **summary_fn(eval_rows),
             **metrics,
         })
 
-    model.load_state_dict(best_state)
+    model.load_state_dict(selector.best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     payload = {
         "policy": policy,
@@ -204,14 +212,17 @@ def train_dual_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
-        "best_score": float(best_score),
+        "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,
-        "validation_learning_gain": float(best_score - initial_validation_score),
-        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
+        "validation_learning_gain": float(
+            selector.best_score - initial_validation_score
+        ),
+        "selected_checkpoint_iteration": int(selector.selected_iteration),
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
         **metadata,
+        **selector.metadata(total_iterations=max(1, int(iterations))),
     }
     return payload, heldout_rows, model
 
@@ -230,21 +241,29 @@ def train_joint_ppo(
     policy: str = "flat_ppo",
     domain: str = "generic",
     metadata: dict[str, Any] | None = None,
+    checkpoint_smoothing_window: int = 1,
+    checkpoint_min_delta: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], JointActorCriticPPO]:
     """Train a standard flat PPO with one joint action and one task return."""
 
     metadata = dict(metadata or {})
     selection_seed_list = list(selection_seeds or train_seeds)
-    best_state = copy.deepcopy(model.state_dict())
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
-    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
-    initial_validation_score = float(best_score)
-    selected_checkpoint_iteration = -1
+    initial_validation_score = float(np.mean([
+        objective_fn(row) for row in initial_rows
+    ]))
+    selector = RobustValidationCheckpointSelector(
+        initial_score=initial_validation_score,
+        initial_state=model.state_dict(),
+        smoothing_window=checkpoint_smoothing_window,
+        min_delta=checkpoint_min_delta,
+    )
     history: list[dict[str, Any]] = [{
         "iteration": -1,
-        "score": best_score,
+        "score": initial_validation_score,
+        **selector.initial_history_fields(),
         "sampled_objective": 0.0,
         **summary_fn(initial_rows),
         "loss": 0.0,
@@ -275,20 +294,20 @@ def train_joint_ppo(
             rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        if score > best_score:
-            best_score = score
-            best_state = copy.deepcopy(model.state_dict())
-            selected_checkpoint_iteration = int(iteration)
+        checkpoint_fields = selector.consider(
+            score=score, state=model.state_dict(), iteration=iteration
+        )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
             **summary_fn(eval_rows),
             **metrics,
         })
 
-    model.load_state_dict(best_state)
+    model.load_state_dict(selector.best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     actor_optimizer_steps = int(sum(
         float(row.get("actor_optimizer_steps", 0.0)) for row in history
@@ -305,10 +324,12 @@ def train_joint_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
-        "best_score": float(best_score),
+        "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,
-        "validation_learning_gain": float(best_score - initial_validation_score),
-        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
+        "validation_learning_gain": float(
+            selector.best_score - initial_validation_score
+        ),
+        "selected_checkpoint_iteration": int(selector.selected_iteration),
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
@@ -323,6 +344,7 @@ def train_joint_ppo(
             "critic": "one state-value function",
         },
         **metadata,
+        **selector.metadata(total_iterations=max(1, int(iterations))),
     }
     return payload, heldout_rows, model
 
@@ -367,6 +389,8 @@ def train_frequency_separated_ppo(
     policy: str = "freq_hrl_smdp_ppo",
     domain: str = "generic",
     metadata: dict[str, Any] | None = None,
+    checkpoint_smoothing_window: int = 1,
+    checkpoint_min_delta: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -383,16 +407,22 @@ def train_frequency_separated_ppo(
     else:
         policy_ratio_contract = "independent upper and lower PPO ratios"
     selection_seed_list = list(selection_seeds or train_seeds)
-    best_state = copy.deepcopy(model.state_dict())
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
-    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
-    initial_validation_score = float(best_score)
-    selected_checkpoint_iteration = -1
+    initial_validation_score = float(np.mean([
+        objective_fn(row) for row in initial_rows
+    ]))
+    selector = RobustValidationCheckpointSelector(
+        initial_score=initial_validation_score,
+        initial_state=model.state_dict(),
+        smoothing_window=checkpoint_smoothing_window,
+        min_delta=checkpoint_min_delta,
+    )
     history: list[dict[str, Any]] = [{
         "iteration": -1,
-        "score": best_score,
+        "score": initial_validation_score,
+        **selector.initial_history_fields(),
         "sampled_objective": 0.0,
         **summary_fn(initial_rows),
         "upper_policy_loss": 0.0,
@@ -433,20 +463,20 @@ def train_frequency_separated_ppo(
             rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        if score > best_score:
-            best_score = score
-            best_state = copy.deepcopy(model.state_dict())
-            selected_checkpoint_iteration = int(iteration)
+        checkpoint_fields = selector.consider(
+            score=score, state=model.state_dict(), iteration=iteration
+        )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
             **summary_fn(eval_rows),
             **metrics,
         })
 
-    model.load_state_dict(best_state)
+    model.load_state_dict(selector.best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     actor_optimizer_steps = int(sum(
         float(row.get("upper_actor_optimizer_steps", 0.0))
@@ -474,10 +504,12 @@ def train_frequency_separated_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
-        "best_score": float(best_score),
+        "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,
-        "validation_learning_gain": float(best_score - initial_validation_score),
-        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
+        "validation_learning_gain": float(
+            selector.best_score - initial_validation_score
+        ),
+        "selected_checkpoint_iteration": int(selector.selected_iteration),
         "config": model.config.__dict__,
         "history": history,
         "summary": summary_fn(heldout_rows),
@@ -505,5 +537,6 @@ def train_frequency_separated_ppo(
             ),
         },
         **metadata,
+        **selector.metadata(total_iterations=max(1, int(iterations))),
     }
     return payload, heldout_rows, model

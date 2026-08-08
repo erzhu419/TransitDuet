@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import copy
 import csv
 import json
 from pathlib import Path
@@ -20,7 +19,12 @@ from freq_hrl.experiments.reproducibility import (
     validate_evaluation_seed_roles,
     validate_unique_seeds,
 )
-from freq_hrl.rl import FlatOffPolicyActorCritic, OffPolicyConfig, ReplayBuffer
+from freq_hrl.rl import (
+    FlatOffPolicyActorCritic,
+    OffPolicyConfig,
+    ReplayBuffer,
+    RobustValidationCheckpointSelector,
+)
 
 from .metrics import (
     DEFAULT_TRAINING_REWARD_SCALE,
@@ -364,6 +368,8 @@ def train_flat_offpolicy_baseline(
     capacity_target_parameter_count: int | None = None,
     capacity_reference_method_contract: str = "",
     training_scenarios: Sequence[str] | None = None,
+    checkpoint_smoothing_window: int = 1,
+    checkpoint_min_delta: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
@@ -494,13 +500,19 @@ def train_flat_offpolicy_baseline(
         evaluation_row(int(eval_seed))
         for eval_seed in validation_seed_list
     ]
-    best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
-    initial_validation_score = float(best_score)
-    selected_checkpoint_iteration = -1
-    best_state = copy.deepcopy(agent.state_dict())
+    initial_validation_score = float(np.mean([
+        objective_fn(row) for row in initial_rows
+    ]))
+    selector = RobustValidationCheckpointSelector(
+        initial_score=initial_validation_score,
+        initial_state=agent.state_dict(),
+        smoothing_window=checkpoint_smoothing_window,
+        min_delta=checkpoint_min_delta,
+    )
     history = [{
         "iteration": -1,
-        "score": best_score,
+        "score": initial_validation_score,
+        **selector.initial_history_fields(),
         **summarize(initial_rows),
         "critic_loss": 0.0,
         "actor_loss": 0.0,
@@ -567,21 +579,21 @@ def train_flat_offpolicy_baseline(
             for eval_seed in validation_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        if score > best_score:
-            best_score = score
-            best_state = copy.deepcopy(agent.state_dict())
-            selected_checkpoint_iteration = int(iteration)
+        checkpoint_fields = selector.consider(
+            score=score, state=agent.state_dict(), iteration=iteration
+        )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": iteration_train_seeds,
             "training_episode_seeds": iteration_episode_seeds,
             "score": score,
+            **checkpoint_fields,
             **summarize(eval_rows),
             **_mean_update_metrics(iteration_updates, algorithm=algorithm),
             "replay_size": int(replay.size),
             "environment_steps": int(global_step),
         })
-    agent.load_state_dict(best_state)
+    agent.load_state_dict(selector.best_state)
     evaluation_rows = [
         evaluation_row(int(eval_seed))
         for eval_seed in evaluation_seeds
@@ -613,10 +625,12 @@ def train_flat_offpolicy_baseline(
         "steps": int(steps),
         "assets": int(assets),
         "iterations": int(iterations),
-        "best_score": best_score,
+        "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,
-        "validation_learning_gain": float(best_score - initial_validation_score),
-        "selected_checkpoint_iteration": int(selected_checkpoint_iteration),
+        "validation_learning_gain": float(
+            selector.best_score - initial_validation_score
+        ),
+        "selected_checkpoint_iteration": int(selector.selected_iteration),
         "config": config.to_dict(),
         "history": history,
         "summary": summarize(evaluation_rows),
@@ -624,6 +638,7 @@ def train_flat_offpolicy_baseline(
         "warmup_steps": int(warmup_steps),
         "batch_size": int(batch_size),
         "updates_per_step": int(updates_per_step),
+        **selector.metadata(total_iterations=max(1, int(iterations))),
         "training_reward_scale": float(reward_scale),
         "capacity_reference_method_contract": str(
             capacity_reference_method_contract
@@ -672,7 +687,9 @@ def train_flat_offpolicy_baseline(
             independent_training_scenarios or ()
         ),
         "training_episode_count_per_root": int(episode_multiplier),
-        "checkpoint_selection_protocol": "disjoint_validation_paths",
+        "checkpoint_selection_protocol": (
+            selector.protocol_version
+        ),
         "actor_optimizer_steps_train": int(actor_optimizer_steps),
         "critic_optimizer_steps_train": int(critic_optimizer_steps),
         "temperature_optimizer_steps_train": int(temperature_optimizer_steps),
