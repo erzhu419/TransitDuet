@@ -118,6 +118,33 @@ class JointActorCriticPPOTest(unittest.TestCase):
         self.assertFalse(hasattr(model, "upper_actor"))
         self.assertFalse(hasattr(model, "lower_actor"))
 
+    def test_truncation_bootstraps_without_crossing_trace_boundary(self):
+        model = JointActorCriticPPO(JointPPOConfig(
+            state_dim=1,
+            action_dim=1,
+            hidden_dim=4,
+            gamma=0.9,
+            gae_lambda=0.95,
+        ))
+        advantage, returns = model._gae(
+            reward=np.asarray([1.0, 100.0], dtype=np.float32),
+            done=np.asarray([1.0, 1.0], dtype=np.float32),
+            values=np.asarray([2.0, 0.0], dtype=np.float32),
+            next_value=np.asarray([5.0, 0.0], dtype=np.float32),
+            terminal=np.asarray([0.0, 1.0], dtype=np.float32),
+        )
+        self.assertAlmostEqual(float(advantage[0]), 3.5, places=6)
+        self.assertAlmostEqual(float(returns[0]), 5.5, places=6)
+        self.assertAlmostEqual(float(advantage[1]), 100.0, places=6)
+
+        legacy_advantage, legacy_returns = model._gae(
+            reward=np.asarray([1.0], dtype=np.float32),
+            done=np.asarray([1.0], dtype=np.float32),
+            values=np.asarray([2.0], dtype=np.float32),
+        )
+        self.assertAlmostEqual(float(legacy_advantage[0]), -1.0, places=6)
+        self.assertAlmostEqual(float(legacy_returns[0]), 1.0, places=6)
+
     def test_reward_scale_does_not_change_normalized_actor_direction(self):
         config = JointPPOConfig(
             state_dim=5,

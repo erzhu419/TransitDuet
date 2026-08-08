@@ -81,6 +81,8 @@ class LevelTrajectoryBatch:
     old_value: np.ndarray
     cost: np.ndarray | None = None
     counterfactual_advantage: np.ndarray | None = None
+    next_value: np.ndarray | None = None
+    terminal: np.ndarray | None = None
 
     def validate(self, *, state_dim: int, action_dim: int, level: str) -> None:
         state = np.asarray(self.state)
@@ -111,6 +113,23 @@ class LevelTrajectoryBatch:
                 raise ValueError(
                     f"{level} counterfactual_advantage must contain {n} finite values"
                 )
+        if (self.next_value is None) != (self.terminal is None):
+            raise ValueError(
+                f"{level} next_value and terminal must be provided together"
+            )
+        for name in ("next_value", "terminal"):
+            optional = getattr(self, name)
+            if optional is None:
+                continue
+            values = np.asarray(optional).reshape(-1)
+            if values.size != n or not np.all(np.isfinite(values)):
+                raise ValueError(
+                    f"{level} {name} must contain {n} finite values"
+                )
+        if self.terminal is not None:
+            terminal = np.asarray(self.terminal, dtype=np.float32).reshape(-1)
+            if np.any((terminal < 0.0) | (terminal > 1.0)):
+                raise ValueError(f"{level} terminal must be in [0, 1]")
 
     @property
     def size(self) -> int:
@@ -444,6 +463,14 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         raise ValueError(
             "counterfactual advantages must be present for every batch or none"
         )
+    explicit_bootstrap = [
+        item.next_value is not None and item.terminal is not None
+        for item in items
+    ]
+    if any(explicit_bootstrap) and not all(explicit_bootstrap):
+        raise ValueError(
+            "explicit bootstrap fields must be present for every level batch"
+        )
     return LevelTrajectoryBatch(
         state=np.concatenate([np.asarray(item.state) for item in items], axis=0),
         action=np.concatenate([np.asarray(item.action) for item in items], axis=0),
@@ -463,6 +490,18 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
                 np.asarray(item).reshape(-1)
                 for item in counterfactual_batches if item is not None
             ], axis=0)
+        ),
+        next_value=(
+            np.concatenate([
+                np.asarray(item.next_value).reshape(-1) for item in items
+            ], axis=0)
+            if all(explicit_bootstrap) else None
+        ),
+        terminal=(
+            np.concatenate([
+                np.asarray(item.terminal).reshape(-1) for item in items
+            ], axis=0)
+            if all(explicit_bootstrap) else None
         ),
     )
 
@@ -968,20 +1007,51 @@ class FrequencySeparatedActorCriticPPO:
         done: np.ndarray,
         duration: np.ndarray,
         values: np.ndarray,
+        next_value: np.ndarray | None = None,
+        terminal: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         signal = np.asarray(signal, dtype=np.float32).reshape(-1)
         done = np.asarray(done, dtype=np.float32).reshape(-1)
         duration = np.asarray(duration, dtype=np.float32).reshape(-1)
         values = np.asarray(values, dtype=np.float32).reshape(-1)
+        explicit = next_value is not None or terminal is not None
+        if explicit and (next_value is None or terminal is None):
+            raise ValueError(
+                "next_value and terminal must be provided together"
+            )
+        next_values = (
+            np.asarray(next_value, dtype=np.float32).reshape(-1)
+            if explicit else None
+        )
+        terminals = (
+            np.asarray(terminal, dtype=np.float32).reshape(-1)
+            if explicit else None
+        )
+        if explicit and (
+            next_values.size != signal.size or terminals.size != signal.size
+        ):
+            raise ValueError("explicit bootstrap arrays must match signal")
         advantage = np.zeros_like(signal)
         last = 0.0
         for index in range(signal.size - 1, -1, -1):
-            nonterminal = 1.0 - done[index]
-            next_value = 0.0 if index == signal.size - 1 else float(values[index + 1])
+            trace_continue = 1.0 - done[index]
+            if explicit:
+                bootstrap_continue = 1.0 - terminals[index]
+                successor_value = float(next_values[index])
+            else:
+                bootstrap_continue = trace_continue
+                successor_value = (
+                    0.0 if index == signal.size - 1
+                    else float(values[index + 1])
+                )
             discount = float(self.config.gamma) ** float(duration[index])
             trace_discount = discount * (float(self.config.gae_lambda) ** float(duration[index]))
-            delta = float(signal[index]) + discount * next_value * nonterminal - float(values[index])
-            last = delta + trace_discount * nonterminal * last
+            delta = (
+                float(signal[index])
+                + discount * successor_value * bootstrap_continue
+                - float(values[index])
+            )
+            last = delta + trace_discount * trace_continue * last
             advantage[index] = last
         return advantage, advantage + values
 
@@ -1036,7 +1106,14 @@ class FrequencySeparatedActorCriticPPO:
         state = torch.as_tensor(batch.state, dtype=torch.float32, device=self.device)
         action = torch.as_tensor(batch.action, dtype=torch.float32, device=self.device)
         old_logp = torch.as_tensor(batch.old_logp, dtype=torch.float32, device=self.device)
-        reward_adv, returns = self._gae(batch.reward, batch.done, batch.duration, batch.old_value)
+        reward_adv, returns = self._gae(
+            batch.reward,
+            batch.done,
+            batch.duration,
+            batch.old_value,
+            batch.next_value,
+            batch.terminal,
+        )
         reward_adv_t = torch.as_tensor(self._normalize(reward_adv), dtype=torch.float32, device=self.device)
         returns_t = torch.as_tensor(returns, dtype=torch.float32, device=self.device)
         counterfactual_adv_t = None

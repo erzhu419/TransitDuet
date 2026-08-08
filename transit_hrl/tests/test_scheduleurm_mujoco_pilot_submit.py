@@ -22,7 +22,7 @@ def args_fixture() -> argparse.Namespace:
         train_seeds=[31013],
         selection_seeds=[32003],
         eval_seeds=[33013],
-        steps=500,
+        steps=512,
         episode_horizon=1000,
         iterations=64,
         upper_period=16,

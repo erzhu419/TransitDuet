@@ -125,6 +125,9 @@ def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> d
         "episode_length",
         "rollout_segment_count",
         "natural_episode_count",
+        "trace_boundary_count",
+        "mdp_terminal_count",
+        "bootstrap_boundary_count",
         "transition_budget_exact",
     ):
         if rows and key in rows[0]:

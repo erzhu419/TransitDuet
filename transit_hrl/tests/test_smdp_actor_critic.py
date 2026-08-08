@@ -185,6 +185,27 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
 
+    def test_smdp_truncation_uses_duration_aware_bootstrap(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            gamma=0.9,
+            gae_lambda=0.95,
+        ))
+        advantage, returns = model._gae(
+            signal=np.asarray([1.0], dtype=np.float32),
+            done=np.asarray([1.0], dtype=np.float32),
+            duration=np.asarray([2], dtype=np.int64),
+            values=np.asarray([2.0], dtype=np.float32),
+            next_value=np.asarray([5.0], dtype=np.float32),
+            terminal=np.asarray([0.0], dtype=np.float32),
+        )
+        self.assertAlmostEqual(float(advantage[0]), 3.05, places=6)
+        self.assertAlmostEqual(float(returns[0]), 5.05, places=6)
+
     def test_hf_tactical_policy_has_an_independent_ppo_stream(self):
         rng = np.random.default_rng(17)
         builder = HierarchicalRolloutBuilder(gamma=0.99)

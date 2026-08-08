@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
@@ -40,7 +41,7 @@ from freq_hrl.rl import (
 )
 
 
-MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v2"
+MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v3"
 METHODS = (
     "freq_hrl",
     "freq_hrl_no_leakage",
@@ -124,6 +125,53 @@ def _model_parameter_sha256(model: Any) -> str:
     return digest.hexdigest()
 
 
+@torch.no_grad()
+def _value_prediction(
+    value_net: torch.nn.Module,
+    state: np.ndarray,
+    *,
+    device: torch.device,
+) -> float:
+    tensor = torch.as_tensor(
+        state,
+        dtype=torch.float32,
+        device=device,
+    ).view(1, -1)
+    return float(value_net(tensor).item())
+
+
+def _with_explicit_bootstrap(
+    level: Any,
+    *,
+    boundary_next_values: list[float],
+    boundary_terminals: list[float],
+) -> Any:
+    done = np.asarray(level.done, dtype=np.float32).reshape(-1)
+    values = np.asarray(level.old_value, dtype=np.float32).reshape(-1)
+    boundary_indices = np.flatnonzero(done > 0.5)
+    if (
+        boundary_indices.size != len(boundary_next_values)
+        or boundary_indices.size != len(boundary_terminals)
+    ):
+        raise RuntimeError("MuJoCo bootstrap boundaries do not match trajectory")
+    next_values = np.zeros_like(values)
+    if values.size > 1:
+        next_values[:-1] = values[1:]
+    terminals = np.zeros_like(values)
+    for index, next_value, terminal in zip(
+        boundary_indices,
+        boundary_next_values,
+        boundary_terminals,
+    ):
+        next_values[int(index)] = float(next_value)
+        terminals[int(index)] = float(terminal)
+    return replace(
+        level,
+        next_value=next_values,
+        terminal=terminals,
+    )
+
+
 def _mlp_count(in_dim: int, out_dim: int, hidden_dim: int) -> int:
     hidden = int(hidden_dim)
     if hidden <= 0:
@@ -204,6 +252,7 @@ def _episode_row(
     method: str,
     segment_returns: list[float],
     natural_episode_returns: list[float],
+    boundary_terminals: list[float],
     transition_budget: int,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
@@ -229,6 +278,11 @@ def _episode_row(
         "rollout_segment_return_mean": float(np.mean(segment_returns)),
         "natural_episode_count": len(natural_episode_returns),
         "natural_episode_return_sum": float(np.sum(natural_episode_returns)),
+        "trace_boundary_count": len(boundary_terminals),
+        "mdp_terminal_count": int(np.sum(boundary_terminals)),
+        "bootstrap_boundary_count": int(
+            len(boundary_terminals) - np.sum(boundary_terminals)
+        ),
         "transition_budget_exact": float(len(rewards) == int(transition_budget)),
         "forward_reward_sum": float(np.sum(forward_rewards)),
         "control_reward_sum": float(np.sum(control_rewards)),
@@ -291,6 +345,9 @@ def rollout_hierarchical(
         upper_decisions = 0
         segment_returns: list[float] = []
         natural_episode_returns: list[float] = []
+        boundary_upper_next_values: list[float] = []
+        boundary_lower_next_values: list[float] = []
+        boundary_terminals: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
         steps_since_upper = int(upper_period)
@@ -371,6 +428,41 @@ def rollout_hierarchical(
             previous_action = executed.astype(np.float32, copy=True)
             steps_since_upper += 1
             if done:
+                terminal = float(bool(terminated))
+                upper_next_value = 0.0
+                lower_next_value = 0.0
+                if sample and not bool(terminated):
+                    next_bands = decomposer.update(next_observation)
+                    next_upper_state = _feature_state(
+                        next_bands,
+                        executed,
+                        frequency_routing=frequency_routing,
+                        level="upper",
+                    )
+                    next_upper = model.act_upper(
+                        next_upper_state,
+                        sample=False,
+                    )
+                    upper_next_value = float(next_upper["value"])
+                    next_upper_anchor = upper_anchor
+                    if steps_since_upper >= int(upper_period):
+                        next_upper_anchor = float(upper_action_scale) * np.tanh(
+                            np.asarray(next_upper["action"], dtype=np.float32)
+                        )
+                    next_lower_state = _feature_state(
+                        next_bands,
+                        next_upper_anchor,
+                        frequency_routing=frequency_routing,
+                        level="lower",
+                    )
+                    lower_next_value = _value_prediction(
+                        model.lower_value,
+                        next_lower_state,
+                        device=model.device,
+                    )
+                boundary_upper_next_values.append(upper_next_value)
+                boundary_lower_next_values.append(lower_next_value)
+                boundary_terminals.append(terminal)
                 segment_returns.append(current_episode_return)
                 if natural_done:
                     natural_episode_returns.append(current_episode_return)
@@ -395,6 +487,20 @@ def rollout_hierarchical(
 
         builder.finish(terminal=True)
         trajectory = builder.build()
+        if sample:
+            trajectory = replace(
+                trajectory,
+                upper=_with_explicit_bootstrap(
+                    trajectory.upper,
+                    boundary_next_values=boundary_upper_next_values,
+                    boundary_terminals=boundary_terminals,
+                ),
+                lower=_with_explicit_bootstrap(
+                    trajectory.lower,
+                    boundary_next_values=boundary_lower_next_values,
+                    boundary_terminals=boundary_terminals,
+                ),
+            )
         row = _episode_row(
             seed=seed,
             env_id=env_id,
@@ -411,6 +517,7 @@ def rollout_hierarchical(
             method=method,
             segment_returns=segment_returns,
             natural_episode_returns=natural_episode_returns,
+            boundary_terminals=boundary_terminals,
             transition_budget=transition_budget,
         )
         return (trajectory if sample else None), row
@@ -447,6 +554,8 @@ def rollout_flat(
         control_rewards: list[float] = []
         segment_returns: list[float] = []
         natural_episode_returns: list[float] = []
+        boundary_next_values: list[float] = []
+        boundary_terminals: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
 
@@ -490,6 +599,23 @@ def rollout_flat(
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
             if done:
+                terminal = float(bool(terminated))
+                next_value = 0.0
+                if sample and not bool(terminated):
+                    next_bands = decomposer.update(next_observation)
+                    next_state = _feature_state(
+                        next_bands,
+                        executed,
+                        frequency_routing=False,
+                        level="lower",
+                    )
+                    next_value = _value_prediction(
+                        model.value,
+                        next_state,
+                        device=model.device,
+                    )
+                boundary_next_values.append(next_value)
+                boundary_terminals.append(terminal)
                 segment_returns.append(current_episode_return)
                 if natural_done:
                     natural_episode_returns.append(current_episode_return)
@@ -516,6 +642,12 @@ def rollout_flat(
             old_logp=np.asarray(data["old_logp"], dtype=np.float32),
             old_value=np.asarray(data["old_value"], dtype=np.float32),
         )
+        if sample:
+            batch = _with_explicit_bootstrap(
+                batch,
+                boundary_next_values=boundary_next_values,
+                boundary_terminals=boundary_terminals,
+            )
         zeros = [np.zeros(action_dim, dtype=np.float32) for _ in rewards]
         row = _episode_row(
             seed=seed,
@@ -533,6 +665,7 @@ def rollout_flat(
             method="flat_ppo",
             segment_returns=segment_returns,
             natural_episode_returns=natural_episode_returns,
+            boundary_terminals=boundary_terminals,
             transition_budget=transition_budget,
         )
         return (batch if sample else None), row
@@ -548,6 +681,9 @@ SUMMARY_KEYS = [
     "rollout_segment_return_mean",
     "natural_episode_count",
     "natural_episode_return_sum",
+    "trace_boundary_count",
+    "mdp_terminal_count",
+    "bootstrap_boundary_count",
     "transition_budget_exact",
     "forward_reward_sum",
     "control_reward_sum",
@@ -804,6 +940,9 @@ def train_mujoco_method(
         "steps": int(steps),
         "training_transition_budget_per_path": int(steps),
         "evaluation_episode_horizon": int(episode_horizon),
+        "bootstrap_contract": (
+            "explicit_next_value_with_separate_trace_boundary_and_mdp_terminal"
+        ),
         "upper_period": int(upper_period),
         "frequency_routing_enabled": name.startswith("freq_hrl"),
         "leakage_constraint_enabled": name == "freq_hrl",

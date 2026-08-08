@@ -71,7 +71,7 @@ The scheduler pilot is deliberately separate from confirmatory evidence:
 - preflight: one environment, four methods, one development optimizer seed,
   two updates, and a 64-transition horizon;
 - pilot: three environments, four methods, and three development optimizer
-  seeds, using 64 updates and 500 training transitions per path;
+  seeds, using 64 updates and 512 training transitions per path;
 - placement: one core and 2 GiB per cell, dynamically assigned across
   `node001` through `node006` with no required-node pin;
 - evaluation: the standard task is primary and all four deterministic
@@ -80,6 +80,15 @@ The scheduler pilot is deliberately separate from confirmatory evidence:
 Pilot optimizer seeds are development-only and cannot be reused in a formal
 comparison. Pilot results may choose a training budget or reveal a broken
 method, but they cannot support a paper performance claim.
+
+Protocol v3 separates a trajectory trace boundary from an actual MDP
+termination. Early environment termination receives zero bootstrap; Gymnasium
+TimeLimit truncation and a fixed collection-budget boundary use an explicit
+next-state critic value while still stopping GAE propagation across the reset.
+The 512-transition training budget is divisible by the 16-step upper period,
+so a collection boundary cannot silently cut one method at a different point
+inside its macro action. Protocol v2 pilot results remain development evidence
+only and cannot be mixed with v3 confirmation.
 
 ## Current Evidence Boundary
 

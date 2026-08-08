@@ -117,6 +117,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(batch.upper.size, 4)
         self.assertEqual(row["protocol_valid"], 1.0)
         self.assertTrue(np.isfinite(row["episode_return"]))
+        self.assertIsNotNone(batch.upper.next_value)
+        self.assertIsNotNone(batch.lower.next_value)
+        self.assertEqual(float(batch.upper.terminal[-1]), 0.0)
+        self.assertEqual(float(batch.lower.terminal[-1]), 0.0)
+        self.assertEqual(row["bootstrap_boundary_count"], 1)
 
     def test_training_budget_continues_across_hopper_terminations(self):
         observation_dim, action_dim = environment_dimensions(
@@ -144,6 +149,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(batch.lower.size, 128)
         self.assertGreater(row["natural_episode_count"], 0)
         self.assertEqual(row["transition_budget_exact"], 1.0)
+        self.assertGreater(row["mdp_terminal_count"], 0)
+        self.assertEqual(
+            batch.lower.next_value.shape,
+            batch.lower.old_value.shape,
+        )
 
     def test_shared_training_core_smoke(self):
         payload, rows, _ = train_mujoco_method(
@@ -165,7 +175,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             evaluation_disturbance_modes=["standard", "ood_chirp"],
         )
         self.assertEqual(payload["domain"], "mujoco")
-        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v2")
+        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v3")
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
@@ -180,6 +190,10 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             1.0,
         )
         self.assertEqual(payload["evaluation_episode_horizon"], 32)
+        self.assertEqual(
+            payload["bootstrap_contract"],
+            "explicit_next_value_with_separate_trace_boundary_and_mdp_terminal",
+        )
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
 
 

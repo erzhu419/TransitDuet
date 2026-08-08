@@ -42,6 +42,8 @@ class JointTrajectoryBatch:
     done: np.ndarray
     old_logp: np.ndarray
     old_value: np.ndarray
+    next_value: np.ndarray | None = None
+    terminal: np.ndarray | None = None
 
     @property
     def size(self) -> int:
@@ -66,6 +68,23 @@ class JointTrajectoryBatch:
                 raise ValueError(f"joint {name} length must be {n}, got {values.size}")
             if not np.all(np.isfinite(values)):
                 raise ValueError(f"joint {name} must be finite")
+        if (self.next_value is None) != (self.terminal is None):
+            raise ValueError(
+                "joint next_value and terminal must be provided together"
+            )
+        for name in ("next_value", "terminal"):
+            optional = getattr(self, name)
+            if optional is None:
+                continue
+            values = np.asarray(optional).reshape(-1)
+            if values.size != n or not np.all(np.isfinite(values)):
+                raise ValueError(
+                    f"joint {name} must contain {n} finite values"
+                )
+        if self.terminal is not None:
+            terminal = np.asarray(self.terminal, dtype=np.float32).reshape(-1)
+            if np.any((terminal < 0.0) | (terminal > 1.0)):
+                raise ValueError("joint terminal must be in [0, 1]")
 
 
 def concat_joint_batches(
@@ -74,6 +93,14 @@ def concat_joint_batches(
     items = list(batches)
     if not items:
         raise ValueError("at least one joint trajectory batch is required")
+    explicit_bootstrap = [
+        item.next_value is not None and item.terminal is not None
+        for item in items
+    ]
+    if any(explicit_bootstrap) and not all(explicit_bootstrap):
+        raise ValueError(
+            "joint explicit bootstrap fields must be present for every batch"
+        )
     return JointTrajectoryBatch(
         state=np.concatenate([np.asarray(item.state) for item in items], axis=0),
         action=np.concatenate([np.asarray(item.action) for item in items], axis=0),
@@ -87,6 +114,18 @@ def concat_joint_batches(
         old_value=np.concatenate([
             np.asarray(item.old_value).reshape(-1) for item in items
         ]),
+        next_value=(
+            np.concatenate([
+                np.asarray(item.next_value).reshape(-1) for item in items
+            ])
+            if all(explicit_bootstrap) else None
+        ),
+        terminal=(
+            np.concatenate([
+                np.asarray(item.terminal).reshape(-1) for item in items
+            ])
+            if all(explicit_bootstrap) else None
+        ),
     )
 
 
@@ -191,24 +230,53 @@ class JointActorCriticPPO:
         reward: np.ndarray,
         done: np.ndarray,
         values: np.ndarray,
+        next_value: np.ndarray | None = None,
+        terminal: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         reward = np.asarray(reward, dtype=np.float32).reshape(-1)
         done = np.asarray(done, dtype=np.float32).reshape(-1)
         values = np.asarray(values, dtype=np.float32).reshape(-1)
+        explicit = next_value is not None or terminal is not None
+        if explicit and (next_value is None or terminal is None):
+            raise ValueError(
+                "next_value and terminal must be provided together"
+            )
+        next_values = (
+            np.asarray(next_value, dtype=np.float32).reshape(-1)
+            if explicit else None
+        )
+        terminals = (
+            np.asarray(terminal, dtype=np.float32).reshape(-1)
+            if explicit else None
+        )
+        if explicit and (
+            next_values.size != reward.size or terminals.size != reward.size
+        ):
+            raise ValueError("explicit bootstrap arrays must match reward")
         advantage = np.zeros_like(reward)
         last = 0.0
         for index in range(reward.size - 1, -1, -1):
-            nonterminal = 1.0 - float(done[index])
-            next_value = 0.0 if index == reward.size - 1 else float(values[index + 1])
+            trace_continue = 1.0 - float(done[index])
+            if explicit:
+                bootstrap_continue = 1.0 - float(terminals[index])
+                successor_value = float(next_values[index])
+            else:
+                bootstrap_continue = trace_continue
+                successor_value = (
+                    0.0 if index == reward.size - 1
+                    else float(values[index + 1])
+                )
             delta = (
                 float(reward[index])
-                + float(self.config.gamma) * next_value * nonterminal
+                + float(self.config.gamma)
+                * successor_value
+                * bootstrap_continue
                 - float(values[index])
             )
             last = delta + (
                 float(self.config.gamma)
                 * float(self.config.gae_lambda)
-                * nonterminal
+                * trace_continue
                 * last
             )
             advantage[index] = last
@@ -234,7 +302,13 @@ class JointActorCriticPPO:
         old_logp = torch.as_tensor(
             batch.old_logp, dtype=torch.float32, device=self.device
         ).reshape(-1)
-        advantage, returns = self._gae(batch.reward, batch.done, batch.old_value)
+        advantage, returns = self._gae(
+            batch.reward,
+            batch.done,
+            batch.old_value,
+            batch.next_value,
+            batch.terminal,
+        )
         if advantage.size > 1:
             advantage = (
                 advantage - float(np.mean(advantage))

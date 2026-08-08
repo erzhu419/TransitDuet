@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35023, 35027, 35051)
 PREFLIGHT_OPTIMIZER_SEED = 35059
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v2"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v3"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -269,7 +269,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-seeds", default=",".join(map(str, validation.DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--selection-seeds", default=",".join(map(str, validation.DEFAULT_SELECTION_SEEDS)))
     parser.add_argument("--eval-seeds", default=",".join(map(str, validation.DEFAULT_EVAL_SEEDS)))
-    parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--iterations", type=int, default=64)
     parser.add_argument("--upper-period", type=int, default=16)
