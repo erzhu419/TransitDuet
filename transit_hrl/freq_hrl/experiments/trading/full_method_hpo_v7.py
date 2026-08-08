@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.1 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.2 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -62,9 +62,9 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_1"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_2"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_selective_paired_promotion_v7_1_2026_08_08"
+    "full_method_hpo_advantage_critic_promotion_v7_2_2026_08_08"
 )
 FULL_METHOD_IMPLEMENTATION_VERSION = FULL_METHOD_V7_IMPLEMENTATION_VERSION
 EXECUTION_TIMELINE_CONTRACT = "causal_post_trade_v3"
@@ -77,9 +77,11 @@ DEFAULT_PLAN_BASIS_DIM = 3
 DEFAULT_PLAN_HORIZON_S = 1800.0
 DEFAULT_PLAN_EVAL_OFFSET_S = 300.0
 DEFAULT_PLAN_COEFFICIENT_SCALE = 0.75
-DEFAULT_TRAIN_SEEDS = (42, 123, 456)
-DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (57721, 57727, 57731)
-DEFAULT_TUNING_SEEDS = (68207, 68209, 68213, 68219, 68227)
+DEFAULT_TRAIN_SEEDS = (104729, 104743, 104759)
+DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (130003, 130021, 130027)
+DEFAULT_TUNING_SEEDS = (150001, 150011, 150013, 150019, 150041)
+DEFAULT_PILOT_OPTIMIZER_SEEDS = (3001, 3011, 3023)
+DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS = (4001, 4003, 4007, 4013, 4019)
 ABLATION_PARENT_VARIANT = "freq_hrl_full_v7"
 MIN_MECHANISM_REPLICATE_FRACTION = 0.8
 MIN_HF_ACTION_SENSITIVITY = 1e-8
@@ -90,6 +92,8 @@ MAX_STRESS_PROMOTION_RATE = 0.90
 MIN_STRESS_PROMOTION_RATE = 0.02
 MIN_STRESS_LOW_RATE_LIFT = 0.02
 MIN_STRESS_LOW_PROBABILITY_LIFT = 1e-4
+MIN_STRESS_LOW_ADVANTAGE_LIFT = 1e-3
+MIN_ADVANTAGE_DECISION_ACCURACY = 0.55
 
 
 @dataclass(frozen=True)
@@ -115,12 +119,12 @@ class Candidate:
 
 
 VARIANTS = (
-    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
-    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
+    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
     Variant("flat_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_ppo", "routing_core_v2", "capacity_matched_flat_baseline"),
     Variant("flat_gru_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_gru_ppo", "routing_core_v2", "capacity_matched_flat_recurrent_baseline"),
     Variant("generic_hrl_ppo_matched_v7", "ppo", "baseline_ppo_v7", "generic_hrl_ppo", "curve_credit_control_v3", "capacity_matched_nonfrequency_hrl_baseline"),
@@ -177,8 +181,12 @@ def _frequency_candidate(
     promotion_rate_coef: float = 0.10,
     promotion_counterfactual_coef: float = 1.0,
     promotion_credit_scale: float = 500.0,
+    promotion_advantage_learning_rate: float = 1e-3,
+    promotion_advantage_coef: float = 1.0,
+    promotion_advantage_huber_delta: float = 0.05,
+    promotion_advantage_threshold: float = 0.0,
 ) -> Candidate:
-    return Candidate(candidate_id, "frequency_ppo_v7_1", {
+    return Candidate(candidate_id, "frequency_ppo_v7_2", {
         **_optimizer_parameters(lower_lr, init_log_std),
         "upper_learning_rate": float(upper_lr),
         "lower_learning_rate": float(lower_lr),
@@ -203,6 +211,13 @@ def _frequency_candidate(
         "promotion_counterfactual_coef": float(
             promotion_counterfactual_coef
         ),
+        "promotion_advantage_learning_rate": float(
+            promotion_advantage_learning_rate
+        ),
+        "promotion_advantage_coef": float(promotion_advantage_coef),
+        "promotion_advantage_huber_delta": float(
+            promotion_advantage_huber_delta
+        ),
         "promotion_replan_cost": float(promotion_replan_cost),
         "lower_hf_order_scale": float(lower_hf_order_scale),
         "upper_period": int(upper_period),
@@ -219,6 +234,10 @@ def _frequency_candidate(
         "promotion_adapt_gain": float(promotion_adapt_gain),
         "promotion_cooldown_steps": int(promotion_cooldown_steps),
         "promotion_gate_interval_steps": int(promotion_gate_interval_steps),
+        "promotion_deterministic_mode": "counterfactual_advantage",
+        "promotion_advantage_threshold": float(
+            promotion_advantage_threshold
+        ),
         "upper_residual_action_scale": 1.0,
     })
 
@@ -249,12 +268,90 @@ def _offpolicy_candidate(
 
 
 FREQUENCY_CANDIDATES = (
-    _frequency_candidate("v71_sparse", upper_lr=1e-4, lower_lr=3e-4, hf_lr=3e-5, promotion_lr=1e-4, init_log_std=-1.5, leakage_scale=2.5e-4, constraint_init=0.02, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0035, hf_budget=0.00050, promotion_init_logit=-2.6, promotion_replan_cost=1e-5, lower_hf_order_scale=0.0050, upper_period=45, min_upper_duration=12, reference_gain=0.75, forecast_blend=0.0, promotion_threshold=0.075, promotion_adapt_gain=0.10, promotion_cooldown_steps=15, promotion_gate_interval_steps=15, promotion_entropy_coef=2e-5, promotion_rate_budget=0.10, promotion_rate_coef=0.20),
-    _frequency_candidate("v71_conservative", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025, hf_budget=0.00075, promotion_init_logit=-2.3, promotion_replan_cost=2e-5, lower_hf_order_scale=0.0075, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.0, promotion_threshold=0.10, promotion_adapt_gain=0.20, promotion_cooldown_steps=12, promotion_gate_interval_steps=12, promotion_entropy_coef=3e-5, promotion_rate_budget=0.14, promotion_rate_coef=0.15),
-    _frequency_candidate("v71_balanced", upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4, init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025, hf_budget=0.00150, promotion_init_logit=-2.0, promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0100, upper_period=30, min_upper_duration=8, reference_gain=1.25, forecast_blend=0.0, promotion_threshold=0.13, promotion_adapt_gain=0.30, promotion_cooldown_steps=10, promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5, promotion_rate_budget=0.18, promotion_rate_coef=0.10),
-    _frequency_candidate("v71_forecast", upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=-1.9, promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0075, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.14, promotion_adapt_gain=0.20, promotion_cooldown_steps=10, promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5, promotion_rate_budget=0.20, promotion_rate_coef=0.10),
-    _frequency_candidate("v71_tactical", upper_lr=3e-4, lower_lr=1e-4, hf_lr=3e-4, promotion_lr=5e-4, init_log_std=-0.75, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=2e-3, objective_weight=2.5e-5, lower_budget=0.0030, hf_budget=0.00200, promotion_init_logit=-1.7, promotion_replan_cost=5e-5, lower_hf_order_scale=0.0125, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.17, promotion_adapt_gain=0.30, promotion_cooldown_steps=8, promotion_gate_interval_steps=8, promotion_entropy_coef=5e-5, promotion_rate_budget=0.22, promotion_rate_coef=0.08, promotion_credit_scale=750.0),
-    _frequency_candidate("v71_responsive", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=5e-4, init_log_std=-0.75, leakage_scale=1e-3, constraint_init=0.10, dual_lr=2e-3, objective_weight=5e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=-1.5, promotion_replan_cost=7.5e-5, lower_hf_order_scale=0.0100, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.20, promotion_adapt_gain=0.35, promotion_cooldown_steps=8, promotion_gate_interval_steps=8, promotion_entropy_coef=7.5e-5, promotion_rate_budget=0.25, promotion_rate_coef=0.05, promotion_credit_scale=1000.0),
+    _frequency_candidate(
+        "v72_conservative_zero",
+        upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4,
+        init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
+        dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025,
+        hf_budget=0.00075, promotion_init_logit=-2.3,
+        promotion_replan_cost=2e-5, lower_hf_order_scale=0.0075,
+        upper_period=45, min_upper_duration=10, reference_gain=1.0,
+        forecast_blend=0.0, promotion_threshold=0.10,
+        promotion_adapt_gain=0.20, promotion_cooldown_steps=12,
+        promotion_gate_interval_steps=12, promotion_entropy_coef=3e-5,
+        promotion_rate_budget=0.14, promotion_rate_coef=0.15,
+        promotion_advantage_threshold=0.0,
+    ),
+    _frequency_candidate(
+        "v72_conservative_margin",
+        upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4,
+        init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
+        dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025,
+        hf_budget=0.00075, promotion_init_logit=-2.3,
+        promotion_replan_cost=2e-5, lower_hf_order_scale=0.0075,
+        upper_period=45, min_upper_duration=10, reference_gain=1.0,
+        forecast_blend=0.0, promotion_threshold=0.10,
+        promotion_adapt_gain=0.20, promotion_cooldown_steps=12,
+        promotion_gate_interval_steps=12, promotion_entropy_coef=3e-5,
+        promotion_rate_budget=0.14, promotion_rate_coef=0.15,
+        promotion_advantage_threshold=0.01,
+    ),
+    _frequency_candidate(
+        "v72_forecast_small_margin",
+        upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
+        init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
+        dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020,
+        hf_budget=0.00100, promotion_init_logit=-1.9,
+        promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0075,
+        upper_period=30, min_upper_duration=8, reference_gain=1.0,
+        forecast_blend=0.25, promotion_threshold=0.14,
+        promotion_adapt_gain=0.20, promotion_cooldown_steps=10,
+        promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5,
+        promotion_rate_budget=0.20, promotion_rate_coef=0.10,
+        promotion_advantage_threshold=0.005,
+    ),
+    _frequency_candidate(
+        "v72_forecast_margin",
+        upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
+        init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
+        dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020,
+        hf_budget=0.00100, promotion_init_logit=-1.9,
+        promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0075,
+        upper_period=30, min_upper_duration=8, reference_gain=1.0,
+        forecast_blend=0.25, promotion_threshold=0.14,
+        promotion_adapt_gain=0.20, promotion_cooldown_steps=10,
+        promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5,
+        promotion_rate_budget=0.20, promotion_rate_coef=0.10,
+        promotion_advantage_threshold=0.015,
+    ),
+    _frequency_candidate(
+        "v72_balanced_margin",
+        upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
+        init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10,
+        dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025,
+        hf_budget=0.00150, promotion_init_logit=-2.0,
+        promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0100,
+        upper_period=30, min_upper_duration=8, reference_gain=1.25,
+        forecast_blend=0.0, promotion_threshold=0.13,
+        promotion_adapt_gain=0.30, promotion_cooldown_steps=10,
+        promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5,
+        promotion_rate_budget=0.18, promotion_rate_coef=0.10,
+        promotion_advantage_threshold=0.015,
+    ),
+    _frequency_candidate(
+        "v72_balanced_strict",
+        upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
+        init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10,
+        dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025,
+        hf_budget=0.00150, promotion_init_logit=-2.0,
+        promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0100,
+        upper_period=30, min_upper_duration=8, reference_gain=1.25,
+        forecast_blend=0.0, promotion_threshold=0.13,
+        promotion_adapt_gain=0.30, promotion_cooldown_steps=10,
+        promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5,
+        promotion_rate_budget=0.18, promotion_rate_coef=0.10,
+        promotion_advantage_threshold=0.03,
+    ),
 )
 BASELINE_CANDIDATES = (
     _baseline_candidate("ppo_lr1e4_std15", 1e-4, -1.5),
@@ -304,6 +401,7 @@ def canonical_full_method_parameter_count(
         hf_state_dim=lower_dim,
         hf_action_dim=assets,
         promotion_state_dim=promotion_gate_state_dim(assets),
+        promotion_advantage_coef=1.0,
         hidden_dim=int(hidden_dim),
     ))
 
@@ -350,6 +448,11 @@ def effective_parameters_for_variant(variant_id: str, candidate_id: str) -> dict
             "promotion_rate_budget": 1.0,
             "promotion_rate_coef": 0.0,
             "promotion_counterfactual_coef": 0.0,
+            "promotion_advantage_learning_rate": float(
+                params["learning_rate"]
+            ),
+            "promotion_advantage_coef": 0.0,
+            "promotion_advantage_huber_delta": 0.1,
             "promotion_replan_cost": 0.0,
             "lower_hf_order_scale": 0.0,
             "promotion_credit_mode": "auto",
@@ -366,6 +469,8 @@ def effective_parameters_for_variant(variant_id: str, candidate_id: str) -> dict
             "promotion_adapt_gain": 0.05,
             "promotion_cooldown_steps": 0,
             "promotion_gate_interval_steps": 1,
+            "promotion_deterministic_mode": "actor_probability",
+            "promotion_advantage_threshold": 0.0,
             "upper_residual_action_scale": 1.0,
         })
     elif variant.method_contract == "ablate_promotion_v7":
@@ -405,6 +510,8 @@ def _ppo_training_kwargs(params: dict[str, Any]) -> dict[str, Any]:
         "promotion_replan_cost", "promotion_init_logit",
         "promotion_entropy_coef", "promotion_rate_budget",
         "promotion_rate_coef", "promotion_counterfactual_coef",
+        "promotion_advantage_learning_rate", "promotion_advantage_coef",
+        "promotion_advantage_huber_delta",
         "lower_hf_order_scale", "promotion_credit_mode",
         "promotion_credit_scale",
         "leakage_cost_mode", "lower_lf_budget_rms", "hf_lf_budget_rms",
@@ -413,6 +520,7 @@ def _ppo_training_kwargs(params: dict[str, Any]) -> dict[str, Any]:
         "hard_hf_budget_projection", "promotion_deterministic_threshold",
         "promotion_adapt_gain", "promotion_cooldown_steps",
         "promotion_gate_interval_steps",
+        "promotion_deterministic_mode", "promotion_advantage_threshold",
         "upper_residual_action_scale",
     )
     result = {key: params[key] for key in keys}
@@ -555,6 +663,12 @@ def _evaluate_ppo(
                     promotion_gate_interval_steps=int(
                         params["promotion_gate_interval_steps"]
                     ),
+                    promotion_deterministic_mode=str(
+                        params["promotion_deterministic_mode"]
+                    ),
+                    promotion_advantage_threshold=float(
+                        params["promotion_advantage_threshold"]
+                    ),
                     upper_residual_action_scale=float(
                         params["upper_residual_action_scale"]
                     ),
@@ -640,6 +754,12 @@ def _hf_intervention_kwargs(
         "promotion_cooldown_steps": int(params["promotion_cooldown_steps"]),
         "promotion_gate_interval_steps": int(
             params["promotion_gate_interval_steps"]
+        ),
+        "promotion_deterministic_mode": str(
+            params["promotion_deterministic_mode"]
+        ),
+        "promotion_advantage_threshold": float(
+            params["promotion_advantage_threshold"]
         ),
         "upper_residual_action_scale": float(
             params["upper_residual_action_scale"]
@@ -908,7 +1028,7 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7.1 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.2 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",
@@ -937,6 +1057,144 @@ def frozen_config_sha256(payload: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _promotion_replicate_diagnostics(
+    candidate_rows: Iterable[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows = list(candidate_rows)
+    diagnostics = []
+    for replicate in sorted({
+        int(float(row["training_replicate_seed"])) for row in rows
+    }):
+        replicate_rows = [
+            row for row in rows
+            if int(float(row["training_replicate_seed"])) == replicate
+        ]
+        low_rows = [
+            row for row in replicate_rows
+            if str(row.get("scenario", "")) == "stationary_low_noise"
+        ]
+        stress_rows = [
+            row for row in replicate_rows
+            if str(row.get("scenario", "")) in {
+                "localized_burst", "persistent_shift"
+            }
+        ]
+
+        def mean(field: str, subset: list[dict[str, Any]]) -> float:
+            return float(np.mean([
+                float(row.get(field, 0.0) or 0.0) for row in subset
+            ] or [0.0]))
+
+        executed = float(np.sum([
+            float(row.get("promotion_count", 0.0) or 0.0)
+            for row in replicate_rows
+        ]))
+        replans = float(np.sum([
+            float(row.get("promotion_replan_count", 0.0) or 0.0)
+            for row in replicate_rows
+        ]))
+        low_rate = mean("promotion_gate_action_rate", low_rows)
+        stress_rate = mean("promotion_gate_action_rate", stress_rows)
+        probability_lift = (
+            mean("promotion_gate_probability_mean", stress_rows)
+            - mean("promotion_gate_probability_mean", low_rows)
+        )
+        advantage_lift = (
+            mean("promotion_gate_advantage_mean", stress_rows)
+            - mean("promotion_gate_advantage_mean", low_rows)
+        )
+        modes = {
+            str(row.get(
+                "promotion_deterministic_mode", "actor_probability"
+            ))
+            for row in replicate_rows
+        }
+        decision_mode = next(iter(modes)) if len(modes) == 1 else "mixed"
+        decision_score_lift = (
+            advantage_lift
+            if decision_mode == "counterfactual_advantage"
+            else probability_lift
+        )
+        minimum_score_lift = (
+            MIN_STRESS_LOW_ADVANTAGE_LIFT
+            if decision_mode == "counterfactual_advantage"
+            else MIN_STRESS_LOW_PROBABILITY_LIFT
+        )
+        advantage_mode = decision_mode == "counterfactual_advantage"
+        advantage_head_enabled = bool(replicate_rows) and all(
+            float(row.get(
+                "promotion_gate_advantage_head_enabled", 0.0
+            ) or 0.0) == 1.0
+            for row in replicate_rows
+        )
+        advantage_alignment_valid = bool(replicate_rows) and all(
+            float(row.get(
+                "promotion_gate_advantage_alignment_valid", 0.0
+            ) or 0.0) == 1.0
+            for row in replicate_rows
+        )
+        advantage_decision_accuracy = mean(
+            "promotion_gate_advantage_sign_accuracy", replicate_rows
+        )
+        advantage_target_correlation = mean(
+            "promotion_gate_advantage_target_correlation", replicate_rows
+        )
+        checks = {
+            "complete_scenario_support": bool(low_rows) and bool(stress_rows),
+            "promotion_executed": executed > 0.0 and replans > 0.0,
+            "low_noise_rate_within_limit": (
+                low_rate <= MAX_LOW_NOISE_PROMOTION_RATE
+            ),
+            "stress_rate_above_minimum": (
+                stress_rate >= MIN_STRESS_PROMOTION_RATE
+            ),
+            "stress_rate_within_limit": (
+                stress_rate <= MAX_STRESS_PROMOTION_RATE
+            ),
+            "stress_low_rate_lift_supported": (
+                stress_rate - low_rate >= MIN_STRESS_LOW_RATE_LIFT
+            ),
+            "stress_low_decision_score_lift_supported": (
+                decision_score_lift >= minimum_score_lift
+            ),
+            "decision_mode_consistent": decision_mode != "mixed",
+            "advantage_head_enabled": (
+                not advantage_mode or advantage_head_enabled
+            ),
+            "advantage_targets_aligned": (
+                not advantage_mode or advantage_alignment_valid
+            ),
+            "advantage_decision_accuracy_supported": (
+                not advantage_mode
+                or advantage_decision_accuracy
+                >= MIN_ADVANTAGE_DECISION_ACCURACY
+            ),
+        }
+        diagnostics.append({
+            "variant_id": str(replicate_rows[0].get("variant_id", "")),
+            "candidate_id": str(replicate_rows[0].get("candidate_id", "")),
+            "training_replicate_seed": replicate,
+            "promotion_deterministic_mode": decision_mode,
+            "promotion_execution_count": executed,
+            "promotion_replan_count": replans,
+            "low_noise_promotion_rate": low_rate,
+            "stress_promotion_rate": stress_rate,
+            "stress_low_promotion_rate_lift": stress_rate - low_rate,
+            "stress_low_promotion_probability_lift": probability_lift,
+            "stress_low_promotion_advantage_lift": advantage_lift,
+            "stress_low_promotion_decision_score_lift": decision_score_lift,
+            "minimum_decision_score_lift": minimum_score_lift,
+            "advantage_decision_accuracy": advantage_decision_accuracy,
+            "advantage_target_correlation": advantage_target_correlation,
+            **checks,
+            "selective": all(checks.values()),
+            "failure_codes": ";".join(
+                key for key, passed in checks.items() if not passed
+            ),
+        })
+    return diagnostics
+
+
 def _mechanism_activity_summary(
     candidate_rows: Iterable[dict[str, Any]],
     hf_rows: Iterable[dict[str, Any]],
@@ -959,6 +1217,10 @@ def _mechanism_activity_summary(
             "stress_promotion_rate_mean": 0.0,
             "stress_low_promotion_rate_lift_mean": 0.0,
             "stress_low_promotion_probability_lift_mean": 0.0,
+            "stress_low_promotion_advantage_lift_mean": 0.0,
+            "stress_low_promotion_decision_score_lift_mean": 0.0,
+            "advantage_decision_accuracy_mean": 0.0,
+            "advantage_target_correlation_mean": 0.0,
             "hf_action_sensitivity_mean": 0.0,
             "hf_active_replicate_fraction": 0.0,
             "reference_active_replicate_fraction": 0.0,
@@ -972,66 +1234,54 @@ def _mechanism_activity_summary(
     stress_rates = []
     stress_low_rate_lifts = []
     stress_low_probability_lifts = []
+    stress_low_advantage_lifts = []
+    stress_low_decision_score_lifts = []
+    advantage_decision_accuracies = []
+    advantage_target_correlations = []
     hf_active = []
     reference_active = []
     residual_active = []
     hard_budget_compliant = []
+    promotion_diagnostics = {
+        int(row["training_replicate_seed"]): row
+        for row in _promotion_replicate_diagnostics(candidate_rows)
+    }
     for replicate in replicate_ids:
         replicate_rows = [
             row for row in candidate_rows
             if int(float(row["training_replicate_seed"])) == replicate
         ]
-        executed = float(np.sum([
-            float(row.get("promotion_count", 0.0) or 0.0)
-            for row in replicate_rows
-        ]))
-        replans = float(np.sum([
-            float(row.get("promotion_replan_count", 0.0) or 0.0)
-            for row in replicate_rows
-        ]))
-        promotion_active.append(executed > 0.0 and replans > 0.0)
-        low_rows = [
-            row for row in replicate_rows
-            if str(row.get("scenario", "")) == "stationary_low_noise"
-        ]
-        stress_rows = [
-            row for row in replicate_rows
-            if str(row.get("scenario", "")) in {
-                "localized_burst", "persistent_shift"
-            }
-        ]
-        low_rate = float(np.mean([
-            float(row.get("promotion_gate_action_rate", 0.0) or 0.0)
-            for row in low_rows
-        ] or [0.0]))
-        stress_rate = float(np.mean([
-            float(row.get("promotion_gate_action_rate", 0.0) or 0.0)
-            for row in stress_rows
-        ] or [0.0]))
-        low_probability = float(np.mean([
-            float(row.get("promotion_gate_probability_mean", 0.0) or 0.0)
-            for row in low_rows
-        ] or [0.0]))
-        stress_probability = float(np.mean([
-            float(row.get("promotion_gate_probability_mean", 0.0) or 0.0)
-            for row in stress_rows
-        ] or [0.0]))
-        rate_lift = stress_rate - low_rate
-        probability_lift = stress_probability - low_probability
-        low_noise_rates.append(low_rate)
-        stress_rates.append(stress_rate)
-        stress_low_rate_lifts.append(rate_lift)
-        stress_low_probability_lifts.append(probability_lift)
-        promotion_selective.append(
-            bool(low_rows)
-            and bool(stress_rows)
-            and executed > 0.0
-            and replans > 0.0
-            and low_rate <= MAX_LOW_NOISE_PROMOTION_RATE
-            and MIN_STRESS_PROMOTION_RATE <= stress_rate <= MAX_STRESS_PROMOTION_RATE
-            and rate_lift >= MIN_STRESS_LOW_RATE_LIFT
-            and probability_lift >= MIN_STRESS_LOW_PROBABILITY_LIFT
-        )
+        promotion_diagnostic = promotion_diagnostics[replicate]
+        promotion_active.append(bool(
+            promotion_diagnostic["promotion_executed"]
+        ))
+        promotion_selective.append(bool(promotion_diagnostic["selective"]))
+        low_noise_rates.append(float(
+            promotion_diagnostic["low_noise_promotion_rate"]
+        ))
+        stress_rates.append(float(
+            promotion_diagnostic["stress_promotion_rate"]
+        ))
+        stress_low_rate_lifts.append(float(
+            promotion_diagnostic["stress_low_promotion_rate_lift"]
+        ))
+        stress_low_probability_lifts.append(float(
+            promotion_diagnostic["stress_low_promotion_probability_lift"]
+        ))
+        stress_low_advantage_lifts.append(float(
+            promotion_diagnostic["stress_low_promotion_advantage_lift"]
+        ))
+        stress_low_decision_score_lifts.append(float(
+            promotion_diagnostic[
+                "stress_low_promotion_decision_score_lift"
+            ]
+        ))
+        advantage_decision_accuracies.append(float(
+            promotion_diagnostic["advantage_decision_accuracy"]
+        ))
+        advantage_target_correlations.append(float(
+            promotion_diagnostic["advantage_target_correlation"]
+        ))
 
         replicate_hf = [
             row for row in hf_rows
@@ -1118,6 +1368,18 @@ def _mechanism_activity_summary(
         "stress_low_promotion_probability_lift_mean": float(np.mean(
             stress_low_probability_lifts
         )),
+        "stress_low_promotion_advantage_lift_mean": float(np.mean(
+            stress_low_advantage_lifts
+        )),
+        "stress_low_promotion_decision_score_lift_mean": float(np.mean(
+            stress_low_decision_score_lifts
+        )),
+        "advantage_decision_accuracy_mean": float(np.mean(
+            advantage_decision_accuracies
+        )),
+        "advantage_target_correlation_mean": float(np.mean(
+            advantage_target_correlations
+        )),
         "hf_action_sensitivity_mean": hf_action_sensitivity,
         "hf_active_replicate_fraction": hf_fraction,
         "reference_active_replicate_fraction": reference_fraction,
@@ -1126,22 +1388,25 @@ def _mechanism_activity_summary(
     }
 
 
-def merge_hpo_cells(
-    input_dirs: list[Path],
-    *,
-    expected_variant_ids: list[str],
-    expected_candidate_ids: list[str],
-    expected_replicate_seeds: list[int],
-    top_k: int = 3,
-    stage: str = "pilot",
-) -> dict[str, Any]:
+def _load_validated_hpo_cells(
+    input_dirs: Iterable[Path],
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, str]],
+    list[dict[str, str]],
+    set[tuple[str, str, int]],
+]:
+    """Load cells under the support-only protocol and reject mixed evidence."""
+
     summaries: list[dict[str, Any]] = []
     rows: list[dict[str, str]] = []
     hf_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, int]] = set()
     for directory in input_dirs:
         base = Path(directory)
-        summary = json.loads((base / "cell_summary.json").read_text(encoding="utf-8"))
+        summary = json.loads(
+            (base / "cell_summary.json").read_text(encoding="utf-8")
+        )
         key = (
             str(summary["variant_id"]), str(summary["candidate_id"]),
             int(summary["training_replicate_seed"]),
@@ -1165,7 +1430,8 @@ def merge_hpo_cells(
             for seed in summary["tuning_validation_seeds"]
         }
         observed = {
-            (str(row["scenario"]), int(float(row["seed"]))) for row in cell_rows
+            (str(row["scenario"]), int(float(row["seed"])))
+            for row in cell_rows
         }
         if observed != expected_coverage:
             raise ValueError(f"incomplete support coverage: {key}")
@@ -1176,6 +1442,180 @@ def merge_hpo_cells(
         summaries.append(summary)
         rows.extend(cell_rows)
         hf_rows.extend(_read_csv(base / "hf_intervention_rows.csv"))
+    return summaries, rows, hf_rows, seen
+
+
+def _validate_common_hpo_fields(summaries: list[dict[str, Any]]) -> None:
+    if not summaries:
+        raise ValueError("HPO merge requires at least one cell")
+    for field in (
+        "rollout_seed_roots", "checkpoint_validation_seeds",
+        "tuning_validation_seeds", "steps", "assets", "iterations",
+        "training_episode_protocol",
+    ):
+        values = {json.dumps(summary[field], sort_keys=True) for summary in summaries}
+        if len(values) != 1:
+            raise ValueError(f"HPO matrix mixes {field}")
+
+
+def _candidate_leaderboard_row(
+    *,
+    variant_id: str,
+    candidate_id: str,
+    replicates: list[int],
+    summaries: list[dict[str, Any]],
+    rows: list[dict[str, str]],
+    hf_rows: list[dict[str, str]],
+) -> dict[str, Any]:
+    replicate_scores = []
+    for replicate in replicates:
+        values = [
+            float(row["selection_utility"])
+            for row in rows
+            if row["variant_id"] == variant_id
+            and row["candidate_id"] == candidate_id
+            and int(float(row["training_replicate_seed"])) == replicate
+        ]
+        if not values:
+            raise ValueError(
+                "missing candidate support rows: "
+                f"{(variant_id, candidate_id, replicate)}"
+            )
+        replicate_scores.append(float(np.mean(values)))
+    ci_low, ci_high = _bootstrap_mean_ci(
+        replicate_scores,
+        seed=derive_seed("freq_hrl_v7_hpo_bootstrap", variant_id, candidate_id),
+    )
+    matching = [
+        summary for summary in summaries
+        if summary["variant_id"] == variant_id
+        and summary["candidate_id"] == candidate_id
+    ]
+    trained_fraction = float(np.mean([
+        int(summary["selected_checkpoint_iteration"]) >= 0
+        for summary in matching
+    ]))
+    gain_mean = float(np.mean([
+        float(summary["validation_learning_gain"]) for summary in matching
+    ]))
+    mechanism_evidence = {
+        "status": "not_applicable",
+        "promotion_execution_count": 0.0,
+        "promotion_replan_count": 0.0,
+        "promotion_active_replicate_fraction": 0.0,
+        "promotion_selective_replicate_fraction": 0.0,
+        "low_noise_promotion_rate_mean": 0.0,
+        "stress_promotion_rate_mean": 0.0,
+        "stress_low_promotion_rate_lift_mean": 0.0,
+        "stress_low_promotion_probability_lift_mean": 0.0,
+        "stress_low_promotion_advantage_lift_mean": 0.0,
+        "stress_low_promotion_decision_score_lift_mean": 0.0,
+        "advantage_decision_accuracy_mean": 0.0,
+        "advantage_target_correlation_mean": 0.0,
+        "hf_action_sensitivity_mean": 0.0,
+        "hf_active_replicate_fraction": 0.0,
+        "reference_active_replicate_fraction": 0.0,
+        "upper_residual_active_replicate_fraction": 0.0,
+        "hard_budget_compliant_replicate_fraction": 0.0,
+    }
+    if variant_id == ABLATION_PARENT_VARIANT:
+        candidate_rows = [
+            row for row in rows
+            if row["variant_id"] == variant_id
+            and row["candidate_id"] == candidate_id
+        ]
+        candidate_hf_rows = [
+            row for row in hf_rows
+            if row["variant_id"] == variant_id
+            and row["candidate_id"] == candidate_id
+        ]
+        mechanism_evidence = _mechanism_activity_summary(
+            candidate_rows, candidate_hf_rows
+        )
+    return {
+        "variant_id": variant_id,
+        "candidate_id": candidate_id,
+        "independent_training_replicates": len(replicates),
+        "support_scenario_count": len(SELECTION_SCENARIOS),
+        "tuning_utility_mean": float(np.mean(replicate_scores)),
+        "tuning_utility_std_across_replicates": (
+            float(np.std(replicate_scores, ddof=1))
+            if len(replicate_scores) > 1 else 0.0
+        ),
+        "tuning_utility_ci95_low": ci_low,
+        "tuning_utility_ci95_high": ci_high,
+        "robust_selection_score": ci_low,
+        "trained_checkpoint_fraction": trained_fraction,
+        "validation_learning_gain_mean": gain_mean,
+        "learning_gate_status": (
+            "eligible"
+            if trained_fraction >= 0.8 and gain_mean > 0.0 else "ineligible"
+        ),
+        "mechanism_activity_status": mechanism_evidence["status"],
+        "promotion_execution_count": mechanism_evidence[
+            "promotion_execution_count"
+        ],
+        "promotion_replan_count": mechanism_evidence[
+            "promotion_replan_count"
+        ],
+        "promotion_active_replicate_fraction": mechanism_evidence[
+            "promotion_active_replicate_fraction"
+        ],
+        "promotion_selective_replicate_fraction": mechanism_evidence[
+            "promotion_selective_replicate_fraction"
+        ],
+        "low_noise_promotion_rate_mean": mechanism_evidence[
+            "low_noise_promotion_rate_mean"
+        ],
+        "stress_promotion_rate_mean": mechanism_evidence[
+            "stress_promotion_rate_mean"
+        ],
+        "stress_low_promotion_rate_lift_mean": mechanism_evidence[
+            "stress_low_promotion_rate_lift_mean"
+        ],
+        "stress_low_promotion_probability_lift_mean": mechanism_evidence[
+            "stress_low_promotion_probability_lift_mean"
+        ],
+        "stress_low_promotion_advantage_lift_mean": mechanism_evidence[
+            "stress_low_promotion_advantage_lift_mean"
+        ],
+        "stress_low_promotion_decision_score_lift_mean": mechanism_evidence[
+            "stress_low_promotion_decision_score_lift_mean"
+        ],
+        "advantage_decision_accuracy_mean": mechanism_evidence[
+            "advantage_decision_accuracy_mean"
+        ],
+        "advantage_target_correlation_mean": mechanism_evidence[
+            "advantage_target_correlation_mean"
+        ],
+        "hf_action_sensitivity_mean": mechanism_evidence[
+            "hf_action_sensitivity_mean"
+        ],
+        "hf_active_replicate_fraction": mechanism_evidence[
+            "hf_active_replicate_fraction"
+        ],
+        "reference_active_replicate_fraction": mechanism_evidence[
+            "reference_active_replicate_fraction"
+        ],
+        "upper_residual_active_replicate_fraction": mechanism_evidence[
+            "upper_residual_active_replicate_fraction"
+        ],
+        "hard_budget_compliant_replicate_fraction": mechanism_evidence[
+            "hard_budget_compliant_replicate_fraction"
+        ],
+    }
+
+
+def merge_hpo_cells(
+    input_dirs: list[Path],
+    *,
+    expected_variant_ids: list[str],
+    expected_candidate_ids: list[str],
+    expected_replicate_seeds: list[int],
+    top_k: int = 3,
+    stage: str = "pilot",
+) -> dict[str, Any]:
+    summaries, rows, hf_rows, seen = _load_validated_hpo_cells(input_dirs)
 
     variants = list(expected_variant_ids)
     candidates = list(expected_candidate_ids)
@@ -1193,129 +1633,22 @@ def merge_hpo_cells(
         missing = sorted(expected - seen)
         unexpected = sorted(seen - expected)
         raise ValueError(f"incomplete HPO matrix: {(missing + unexpected)[:6]}")
-    for field in (
-        "rollout_seed_roots", "checkpoint_validation_seeds",
-        "tuning_validation_seeds", "steps", "assets", "iterations",
-        "training_episode_protocol",
-    ):
-        if len({json.dumps(summary[field], sort_keys=True) for summary in summaries}) != 1:
-            raise ValueError(f"HPO matrix mixes {field}")
+    _validate_common_hpo_fields(summaries)
 
     leaderboard: list[dict[str, Any]] = []
     ranked_by_variant: dict[str, list[dict[str, Any]]] = {}
     for variant_id in variants:
-        ranked: list[dict[str, Any]] = []
-        for candidate_id in candidate_ids_for_variant(variant_id):
-            replicate_scores = []
-            for replicate in replicates:
-                values = [
-                    float(row["selection_utility"])
-                    for row in rows
-                    if row["variant_id"] == variant_id
-                    and row["candidate_id"] == candidate_id
-                    and int(float(row["training_replicate_seed"])) == replicate
-                ]
-                replicate_scores.append(float(np.mean(values)))
-            ci_low, ci_high = _bootstrap_mean_ci(
-                replicate_scores,
-                seed=derive_seed("freq_hrl_v7_hpo_bootstrap", variant_id, candidate_id),
+        ranked = [
+            _candidate_leaderboard_row(
+                variant_id=variant_id,
+                candidate_id=candidate_id,
+                replicates=replicates,
+                summaries=summaries,
+                rows=rows,
+                hf_rows=hf_rows,
             )
-            matching = [
-                summary for summary in summaries
-                if summary["variant_id"] == variant_id
-                and summary["candidate_id"] == candidate_id
-            ]
-            trained_fraction = float(np.mean([
-                int(summary["selected_checkpoint_iteration"]) >= 0
-                for summary in matching
-            ]))
-            gain_mean = float(np.mean([
-                float(summary["validation_learning_gain"]) for summary in matching
-            ]))
-            mechanism_evidence = {
-                "status": "not_applicable",
-                "promotion_execution_count": 0.0,
-                "promotion_replan_count": 0.0,
-                "promotion_active_replicate_fraction": 0.0,
-                "promotion_selective_replicate_fraction": 0.0,
-                "low_noise_promotion_rate_mean": 0.0,
-                "stress_promotion_rate_mean": 0.0,
-                "stress_low_promotion_rate_lift_mean": 0.0,
-                "stress_low_promotion_probability_lift_mean": 0.0,
-                "hf_action_sensitivity_mean": 0.0,
-                "hf_active_replicate_fraction": 0.0,
-                "reference_active_replicate_fraction": 0.0,
-                "upper_residual_active_replicate_fraction": 0.0,
-                "hard_budget_compliant_replicate_fraction": 0.0,
-            }
-            if variant_id == ABLATION_PARENT_VARIANT:
-                candidate_rows = [
-                    row for row in rows
-                    if row["variant_id"] == variant_id
-                    and row["candidate_id"] == candidate_id
-                ]
-                candidate_hf_rows = [
-                    row for row in hf_rows
-                    if row["variant_id"] == variant_id
-                    and row["candidate_id"] == candidate_id
-                ]
-                mechanism_evidence = _mechanism_activity_summary(
-                    candidate_rows, candidate_hf_rows
-                )
-            ranked.append({
-                "variant_id": variant_id,
-                "candidate_id": candidate_id,
-                "independent_training_replicates": len(replicates),
-                "support_scenario_count": len(SELECTION_SCENARIOS),
-                "tuning_utility_mean": float(np.mean(replicate_scores)),
-                "tuning_utility_std_across_replicates": float(np.std(replicate_scores, ddof=1)) if len(replicate_scores) > 1 else 0.0,
-                "tuning_utility_ci95_low": ci_low,
-                "tuning_utility_ci95_high": ci_high,
-                "robust_selection_score": ci_low,
-                "trained_checkpoint_fraction": trained_fraction,
-                "validation_learning_gain_mean": gain_mean,
-                "learning_gate_status": "eligible" if trained_fraction >= 0.8 and gain_mean > 0.0 else "ineligible",
-                "mechanism_activity_status": mechanism_evidence["status"],
-                "promotion_execution_count": mechanism_evidence[
-                    "promotion_execution_count"
-                ],
-                "promotion_replan_count": mechanism_evidence[
-                    "promotion_replan_count"
-                ],
-                "promotion_active_replicate_fraction": mechanism_evidence[
-                    "promotion_active_replicate_fraction"
-                ],
-                "promotion_selective_replicate_fraction": mechanism_evidence[
-                    "promotion_selective_replicate_fraction"
-                ],
-                "low_noise_promotion_rate_mean": mechanism_evidence[
-                    "low_noise_promotion_rate_mean"
-                ],
-                "stress_promotion_rate_mean": mechanism_evidence[
-                    "stress_promotion_rate_mean"
-                ],
-                "stress_low_promotion_rate_lift_mean": mechanism_evidence[
-                    "stress_low_promotion_rate_lift_mean"
-                ],
-                "stress_low_promotion_probability_lift_mean": mechanism_evidence[
-                    "stress_low_promotion_probability_lift_mean"
-                ],
-                "hf_action_sensitivity_mean": mechanism_evidence[
-                    "hf_action_sensitivity_mean"
-                ],
-                "hf_active_replicate_fraction": mechanism_evidence[
-                    "hf_active_replicate_fraction"
-                ],
-                "reference_active_replicate_fraction": mechanism_evidence[
-                    "reference_active_replicate_fraction"
-                ],
-                "upper_residual_active_replicate_fraction": mechanism_evidence[
-                    "upper_residual_active_replicate_fraction"
-                ],
-                "hard_budget_compliant_replicate_fraction": mechanism_evidence[
-                    "hard_budget_compliant_replicate_fraction"
-                ],
-            })
+            for candidate_id in candidate_ids_for_variant(variant_id)
+        ]
         ranked.sort(key=lambda row: (
             0 if row["learning_gate_status"] == "eligible" else 1,
             0 if row["mechanism_activity_status"] in {"eligible", "not_applicable"} else 1,
@@ -1377,7 +1710,8 @@ def merge_hpo_cells(
     )
     final_design_complete = (
         set(variants) == set(HPO_VARIANT_IDS)
-        and len(set(replicates)) >= 5
+        and set(DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS).issubset(replicates)
+        and not set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(replicates)
         and source_verified
     )
     all_learning_eligible = all(
@@ -1415,6 +1749,9 @@ def merge_hpo_cells(
         "checkpoint_validation_seeds": first["checkpoint_validation_seeds"],
         "tuning_validation_seeds": first["tuning_validation_seeds"],
         "training_replicate_seeds": sorted(set(replicates)),
+        "pilot_optimizer_seed_overlap": sorted(
+            set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(replicates)
+        ),
         "steps": int(first["steps"]), "assets": int(first["assets"]),
         "iterations": int(first["iterations"]),
         "execution_timeline_contract": EXECUTION_TIMELINE_CONTRACT,
@@ -1441,6 +1778,162 @@ def merge_hpo_cells(
     }
 
 
+def summarize_selective_promotion_pilot(
+    input_dirs: list[Path],
+    *,
+    expected_candidate_ids: list[str],
+    expected_replicate_seeds: list[int],
+) -> dict[str, Any]:
+    """Diagnose promotion candidates without creating a frozen HPO config."""
+
+    candidates = list(expected_candidate_ids)
+    replicates = list(map(int, expected_replicate_seeds))
+    if not candidates or len(candidates) != len(set(candidates)):
+        raise ValueError("promotion pilot candidates must be non-empty and unique")
+    if not replicates or len(replicates) != len(set(replicates)):
+        raise ValueError("promotion pilot replicates must be non-empty and unique")
+    allowed = set(candidate_ids_for_variant(ABLATION_PARENT_VARIANT))
+    if not set(candidates).issubset(allowed):
+        raise ValueError("promotion pilot accepts only full-method candidates")
+
+    summaries, rows, hf_rows, seen = _load_validated_hpo_cells(input_dirs)
+    expected = {
+        (ABLATION_PARENT_VARIANT, candidate_id, replicate)
+        for candidate_id in candidates
+        for replicate in replicates
+    }
+    if seen != expected:
+        missing = sorted(expected - seen)
+        unexpected = sorted(seen - expected)
+        raise ValueError(
+            "incomplete promotion pilot matrix: "
+            f"{(missing + unexpected)[:6]}"
+        )
+    _validate_common_hpo_fields(summaries)
+
+    leaderboard = [
+        _candidate_leaderboard_row(
+            variant_id=ABLATION_PARENT_VARIANT,
+            candidate_id=candidate_id,
+            replicates=replicates,
+            summaries=summaries,
+            rows=rows,
+            hf_rows=hf_rows,
+        )
+        for candidate_id in candidates
+    ]
+    for row in leaderboard:
+        params = CANDIDATES_BY_ID[str(row["candidate_id"])].parameters
+        row.update({
+            "promotion_initial_probability": float(
+                1.0 / (1.0 + np.exp(-float(params["promotion_init_logit"])))
+            ),
+            "promotion_deterministic_threshold": float(
+                params["promotion_deterministic_threshold"]
+            ),
+            "promotion_gate_interval_steps": int(
+                params["promotion_gate_interval_steps"]
+            ),
+            "promotion_rate_budget": float(params["promotion_rate_budget"]),
+            "promotion_replan_cost": float(params["promotion_replan_cost"]),
+            "promotion_deterministic_mode": str(
+                params["promotion_deterministic_mode"]
+            ),
+            "promotion_advantage_threshold": float(
+                params["promotion_advantage_threshold"]
+            ),
+            "promotion_advantage_learning_rate": float(
+                params["promotion_advantage_learning_rate"]
+            ),
+            "promotion_advantage_coef": float(
+                params["promotion_advantage_coef"]
+            ),
+        })
+    leaderboard.sort(key=lambda row: (
+        0 if row["learning_gate_status"] == "eligible" else 1,
+        0 if row["mechanism_activity_status"] == "eligible" else 1,
+        -float(row["robust_selection_score"]),
+        -float(row["tuning_utility_mean"]),
+    ))
+    for rank, row in enumerate(leaderboard, start=1):
+        row["rank"] = rank
+
+    jointly_eligible = [
+        str(row["candidate_id"])
+        for row in leaderboard
+        if row["learning_gate_status"] == "eligible"
+        and row["mechanism_activity_status"] == "eligible"
+    ]
+    revisions = {str(summary["code_revision"]).lower() for summary in summaries}
+    manifests = {
+        str(summary["source_manifest_sha256"]).lower() for summary in summaries
+    }
+    source_statuses = {
+        str(summary["source_identity_status"]) for summary in summaries
+    }
+    source_verified = (
+        len(revisions) == 1
+        and len(manifests) == 1
+        and source_statuses == {"verified"}
+        and is_hex_digest(next(iter(revisions)), length=40)
+        and is_hex_digest(next(iter(manifests)), length=64)
+    )
+    if not source_verified:
+        status = "invalid_source_identity"
+    elif jointly_eligible:
+        status = "selective_candidate_found"
+    else:
+        status = "no_selective_candidate"
+    first = summaries[0]
+    replicate_diagnostics = []
+    for candidate_id in candidates:
+        replicate_diagnostics.extend(_promotion_replicate_diagnostics([
+            row for row in rows
+            if row["variant_id"] == ABLATION_PARENT_VARIANT
+            and row["candidate_id"] == candidate_id
+        ]))
+    return {
+        "summary": {
+            "status": status,
+            "diagnostic_only": True,
+            "frozen_config_created": False,
+            "tuning_protocol_version": FULL_METHOD_TUNING_PROTOCOL_VERSION,
+            "hpo_implementation_version": FULL_METHOD_HPO_IMPLEMENTATION_VERSION,
+            "variant_id": ABLATION_PARENT_VARIANT,
+            "candidate_count": len(candidates),
+            "cell_count": len(summaries),
+            "training_replicate_count": len(replicates),
+            "training_replicate_seeds": sorted(replicates),
+            "support_scenarios": list(SELECTION_SCENARIOS),
+            "ood_period_access_status": "not_loaded",
+            "promotion_recovery_access_status": "not_loaded",
+            "learning_eligible_candidate_count": sum(
+                row["learning_gate_status"] == "eligible" for row in leaderboard
+            ),
+            "mechanism_eligible_candidate_count": sum(
+                row["mechanism_activity_status"] == "eligible"
+                for row in leaderboard
+            ),
+            "jointly_eligible_candidate_ids": jointly_eligible,
+            "best_diagnostic_candidate_id": str(
+                leaderboard[0]["candidate_id"]
+            ),
+            "steps": int(first["steps"]),
+            "assets": int(first["assets"]),
+            "iterations": int(first["iterations"]),
+            "source_identity_status": (
+                "verified" if source_verified else "unregistered_or_incomplete"
+            ),
+            "code_revision": next(iter(revisions)) if len(revisions) == 1 else "",
+            "source_manifest_sha256": (
+                next(iter(manifests)) if len(manifests) == 1 else ""
+            ),
+        },
+        "leaderboard": leaderboard,
+        "replicate_diagnostics": replicate_diagnostics,
+    }
+
+
 def write_hpo_merge(output_dir: Path, payload: dict[str, Any]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(output_dir / "leaderboard.csv", payload["leaderboard"])
@@ -1450,6 +1943,21 @@ def write_hpo_merge(output_dir: Path, payload: dict[str, Any]) -> None:
     )
     (output_dir / "frozen_config.json").write_text(
         json.dumps(payload["frozen_config"], indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def write_selective_promotion_pilot(
+    output_dir: Path, payload: dict[str, Any]
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_csv(output_dir / "leaderboard.csv", payload["leaderboard"])
+    _write_csv(
+        output_dir / "replicate_diagnostics.csv",
+        payload["replicate_diagnostics"],
+    )
+    (output_dir / "summary.json").write_text(
+        json.dumps(payload["summary"], indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 
@@ -1481,6 +1989,11 @@ def validate_frozen_config(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("v7 frozen source hashes are invalid")
     if len(set(map(int, payload.get("training_replicate_seeds", [])))) < 5:
         raise ValueError("v7 final HPO requires at least five training replicates")
+    final_replicates = set(map(int, payload["training_replicate_seeds"]))
+    if not set(DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS).issubset(final_replicates):
+        raise ValueError("v7 final HPO is missing registered optimizer seeds")
+    if set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(final_replicates):
+        raise ValueError("v7 final HPO reused pilot optimizer seeds")
     if set(payload.get("selected", {})) != set(ALL_VARIANT_IDS):
         raise ValueError("v7 frozen config is missing variants")
     parent = payload["selected"][ABLATION_PARENT_VARIANT]["candidate_id"]

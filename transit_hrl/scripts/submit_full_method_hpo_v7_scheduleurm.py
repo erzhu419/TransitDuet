@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit or merge support-only Freq-HRL v7.1 HPO through scheduleurm."""
+"""Submit or merge support-only Freq-HRL v7.2 HPO through scheduleurm."""
 
 from __future__ import annotations
 
@@ -16,9 +16,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from freq_hrl.experiments.trading import full_method_hpo_v7 as hpo  # noqa: E402
-from freq_hrl.experiments.trading.strong_learned_baseline_validation import (  # noqa: E402
-    DEFAULT_OPTIMIZER_SEEDS,
-)
 from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
     DEFAULT_LINUX_PYTHON,
     LINUX_CPU_NODES,
@@ -36,10 +33,10 @@ DEFAULT_NODES = LINUX_CPU_NODES
 NODE_CPU_CAPACITY = 192
 POOL_CPU_CAPACITY = NODE_CPU_CAPACITY * len(DEFAULT_NODES)
 HPO_MODULE = "freq_hrl.experiments.trading.full_method_hpo_v7"
-HPO_SIGNATURE_VERSION = "full-hpo-v7-1-support-only"
+HPO_SIGNATURE_VERSION = "full-hpo-v7-2-support-only"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 CPU_JUSTIFICATION = (
-    "Each v7.1 HPO cell trains one frozen checkpoint and is explicitly "
+    "Each v7.2 HPO cell trains one frozen checkpoint and is explicitly "
     "single-threaded. scheduleurm dynamically packs independent cells across "
     "the six-node 1152-physical-core Linux pool."
 )
@@ -157,7 +154,7 @@ def build_scheduler_spec(
     return {
         "project": str(args.project),
         "description": (
-            f"Freq-HRL v7.1 support HPO {variant_id} {candidate_id} "
+            f"Freq-HRL v7.2 support HPO {variant_id} {candidate_id} "
             f"replicate {replicate_seed}"
         ),
         "cmd": build_training_command(
@@ -199,7 +196,7 @@ def build_preflight_spec(args: argparse.Namespace, *, node: str) -> dict[str, ob
     absolute = ROOT / relative
     return {
         "project": str(args.project),
-        "description": f"Freq-HRL v7.1 environment preflight on {node}",
+        "description": f"Freq-HRL v7.2 environment preflight on {node}",
         "cmd": build_preflight_command(args, node=node, output_dir=relative),
         "cwd": str(ROOT / str(args.launch_subdir)),
         "signature": f"Freq-HRL/{HPO_SIGNATURE_VERSION}/{args.run_name}/preflight/{node}",
@@ -278,7 +275,34 @@ def merge_results(args: argparse.Namespace) -> None:
     )
     output = ROOT / "results" / args.run_name / "merged"
     hpo.write_hpo_merge(output, payload)
-    print(f"merged {len(directories)} v7.1 HPO cells into {output}")
+    print(f"merged {len(directories)} v7.2 HPO cells into {output}")
+
+
+def merge_promotion_pilot_results(args: argparse.Namespace) -> None:
+    if args.stage != "pilot":
+        raise SystemExit("promotion pilot diagnostics require --stage pilot")
+    if args.variant_ids != [hpo.ABLATION_PARENT_VARIANT]:
+        raise SystemExit(
+            "promotion pilot diagnostics accept only freq_hrl_full_v7"
+        )
+    directories = expected_cell_dirs(args)
+    missing = [path for path in directories if not (path / "cell_summary.json").exists()]
+    if missing:
+        raise SystemExit(
+            f"cannot diagnose promotion pilot: {len(missing)} cells missing; "
+            f"first={missing[0]}"
+        )
+    payload = hpo.summarize_selective_promotion_pilot(
+        directories,
+        expected_candidate_ids=args.candidate_ids,
+        expected_replicate_seeds=args.optimizer_seeds,
+    )
+    output = ROOT / "results" / args.run_name / "promotion_pilot"
+    hpo.write_selective_promotion_pilot(output, payload)
+    print(
+        f"diagnosed {len(directories)} v7.2 promotion cells into {output}; "
+        f"status={payload['summary']['status']}"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -295,7 +319,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--iterations", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=2)
-    parser.add_argument("--project", default="Freq-HRL-v7.1")
+    parser.add_argument("--project", default="Freq-HRL-v7.2")
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
     parser.add_argument("--python-executable", default="")
     parser.add_argument("--launch-subdir", choices=(".", "scripts"), default=".")
@@ -308,6 +332,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--environment-preflight", action="store_true")
     parser.add_argument("--validate-preflight", action="store_true")
     parser.add_argument("--merge-only", action="store_true")
+    parser.add_argument("--merge-promotion-pilot", action="store_true")
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
@@ -321,8 +346,8 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.variant_ids = parse_csv(args.variant_ids)
     args.candidate_ids = parse_csv(args.candidate_ids)
     default_replicates = (
-        DEFAULT_OPTIMIZER_SEEDS[:5]
-        if args.stage == "final" else DEFAULT_OPTIMIZER_SEEDS[:3]
+        hpo.DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS
+        if args.stage == "final" else hpo.DEFAULT_PILOT_OPTIMIZER_SEEDS
     )
     args.optimizer_seeds = parse_csv(
         args.optimizer_seeds or ",".join(map(str, default_replicates)), int
@@ -344,7 +369,7 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     unknown_nodes = sorted(set(args.nodes) - set(LINUX_CPU_NODES))
     if unknown_variants or unknown_candidates or unknown_nodes:
         raise SystemExit(
-            f"invalid v7.1 matrix: variants={unknown_variants}, "
+            f"invalid v7.2 matrix: variants={unknown_variants}, "
             f"candidates={unknown_candidates}, nodes={unknown_nodes}"
         )
     if not args.python_executable.strip():
@@ -363,6 +388,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
 
 def main() -> None:
     args = normalize_args(build_parser().parse_args())
+    if args.merge_only and args.merge_promotion_pilot:
+        raise SystemExit(
+            "--merge-only and --merge-promotion-pilot are mutually exclusive"
+        )
     if args.validate_preflight:
         payloads = validate_preflight_results(args)
         print(
@@ -373,17 +402,20 @@ def main() -> None:
     if args.merge_only:
         merge_results(args)
         return
+    if args.merge_promotion_pilot:
+        merge_promotion_pilot_results(args)
+        return
     try:
         args.code_revision, args.source_manifest_sha256 = source_identity(
             args.source_code_revision
         )
     except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
-        raise SystemExit(f"cannot freeze v7.1 HPO source identity: {exc}") from exc
+        raise SystemExit(f"cannot freeze v7.2 HPO source identity: {exc}") from exc
     if args.environment_preflight:
         execute_bulk(
             [build_preflight_spec(args, node=node) for node in args.nodes],
             dry_run=bool(args.dry_run),
-            intent_label=f"Freq-HRL v7.1 environment preflight {args.run_name}",
+            intent_label=f"Freq-HRL v7.2 environment preflight {args.run_name}",
         )
         if args.dispatch and not args.dry_run:
             execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
@@ -396,7 +428,7 @@ def main() -> None:
     if args.max_cells > 0:
         cells = cells[:args.max_cells]
     if not cells:
-        print("no v7.1 HPO cells require submission")
+        print("no v7.2 HPO cells require submission")
         return
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)} "
@@ -412,19 +444,23 @@ def main() -> None:
             for variant, candidate, seed in cells
         ],
         dry_run=bool(args.dry_run),
-        intent_label=f"Freq-HRL v7.1 support HPO {args.run_name}",
+        intent_label=f"Freq-HRL v7.2 support HPO {args.run_name}",
     )
     if args.dispatch and not args.dry_run:
         execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
-    print(
-        "merge after all summaries sync: " + shlex.join([
-            sys.executable, str(SUBMIT_SCRIPT_PATH), "--run-name", args.run_name,
-            "--stage", args.stage, "--variant-ids", ",".join(args.variant_ids),
-            "--candidate-ids", ",".join(args.candidate_ids),
-            "--optimizer-seeds", ",".join(map(str, args.optimizer_seeds)),
-            "--merge-only",
-        ])
+    merge_mode = (
+        "--merge-promotion-pilot"
+        if args.stage == "pilot"
+        and args.variant_ids == [hpo.ABLATION_PARENT_VARIANT]
+        else "--merge-only"
     )
+    print("merge after all summaries sync: " + shlex.join([
+        sys.executable, str(SUBMIT_SCRIPT_PATH), "--run-name", args.run_name,
+        "--stage", args.stage, "--variant-ids", ",".join(args.variant_ids),
+        "--candidate-ids", ",".join(args.candidate_ids),
+        "--optimizer-seeds", ",".join(map(str, args.optimizer_seeds)),
+        merge_mode,
+    ]))
 
 
 if __name__ == "__main__":

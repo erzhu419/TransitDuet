@@ -15,6 +15,7 @@ from typing import Any, Iterable
 import numpy as np
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
 from .dual_actor_critic import BernoulliActor, GaussianActor, ValueNet
@@ -47,6 +48,9 @@ class SMDPPPOConfig:
     promotion_rate_budget: float = 1.0
     promotion_rate_coef: float = 0.0
     promotion_counterfactual_coef: float = 0.0
+    promotion_advantage_learning_rate: float = 0.0
+    promotion_advantage_coef: float = 0.0
+    promotion_advantage_huber_delta: float = 0.1
     max_grad_norm: float = 1.0
     epochs: int = 4
     minibatch_size: int = 512
@@ -529,6 +533,34 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "promotion_counterfactual_coef must be finite and non-negative"
             )
+        if (
+            not np.isfinite(float(config.promotion_advantage_learning_rate))
+            or float(config.promotion_advantage_learning_rate) < 0.0
+        ):
+            raise ValueError(
+                "promotion_advantage_learning_rate must be finite and non-negative"
+            )
+        if (
+            not np.isfinite(float(config.promotion_advantage_coef))
+            or float(config.promotion_advantage_coef) < 0.0
+        ):
+            raise ValueError(
+                "promotion_advantage_coef must be finite and non-negative"
+            )
+        if (
+            not np.isfinite(float(config.promotion_advantage_huber_delta))
+            or float(config.promotion_advantage_huber_delta) <= 0.0
+        ):
+            raise ValueError(
+                "promotion_advantage_huber_delta must be positive and finite"
+            )
+        if (
+            float(config.promotion_advantage_coef) > 0.0
+            and int(config.promotion_state_dim) <= 0
+        ):
+            raise ValueError(
+                "promotion advantage learning requires a promotion state"
+            )
         if (int(config.hf_state_dim) > 0) != (int(config.hf_action_dim) > 0):
             raise ValueError(
                 "hf_state_dim and hf_action_dim must either both be positive or both be zero"
@@ -613,6 +645,8 @@ class FrequencySeparatedActorCriticPPO:
         self.promotion_value: ValueNet | None = None
         self.promotion_actor_optimizer: torch.optim.Optimizer | None = None
         self.promotion_value_optimizer: torch.optim.Optimizer | None = None
+        self.promotion_advantage: ValueNet | None = None
+        self.promotion_advantage_optimizer: torch.optim.Optimizer | None = None
         if int(config.promotion_state_dim) > 0:
             self.promotion_actor = BernoulliActor(
                 state_dim=int(config.promotion_state_dim),
@@ -633,6 +667,18 @@ class FrequencySeparatedActorCriticPPO:
             self.promotion_value_optimizer = torch.optim.Adam(
                 self.promotion_value.parameters(), lr=promotion_lr
             )
+            if float(config.promotion_advantage_coef) > 0.0:
+                self.promotion_advantage = ValueNet(
+                    int(config.promotion_state_dim), int(config.hidden_dim)
+                ).to(self.device)
+                advantage_lr = (
+                    float(config.promotion_advantage_learning_rate)
+                    if float(config.promotion_advantage_learning_rate) > 0.0
+                    else promotion_lr
+                )
+                self.promotion_advantage_optimizer = torch.optim.Adam(
+                    self.promotion_advantage.parameters(), lr=advantage_lr
+                )
         self.upper_actor_optimizer = torch.optim.Adam(
             self.upper_actor.parameters(),
             lr=float(config.upper_learning_rate),
@@ -691,6 +737,16 @@ class FrequencySeparatedActorCriticPPO:
                 "promotion_actor_optimizer": self.promotion_actor_optimizer.state_dict(),
                 "promotion_value_optimizer": self.promotion_value_optimizer.state_dict(),
             })
+        if (
+            self.promotion_advantage is not None
+            and self.promotion_advantage_optimizer is not None
+        ):
+            payload.update({
+                "promotion_advantage": self.promotion_advantage.state_dict(),
+                "promotion_advantage_optimizer": (
+                    self.promotion_advantage_optimizer.state_dict()
+                ),
+            })
         if self.hf_actor is not None and self.hf_value is not None:
             payload.update({
                 "hf_actor": self.hf_actor.state_dict(),
@@ -720,6 +776,14 @@ class FrequencySeparatedActorCriticPPO:
                 )
             self.promotion_actor.load_state_dict(payload["promotion_actor"])
             self.promotion_value.load_state_dict(payload["promotion_value"])
+        if self.promotion_advantage is not None:
+            if "promotion_advantage" not in payload:
+                raise ValueError(
+                    "checkpoint is missing the configured promotion advantage head"
+                )
+            self.promotion_advantage.load_state_dict(
+                payload["promotion_advantage"]
+            )
         for name in (
             "upper_actor_optimizer",
             "upper_value_optimizer",
@@ -730,6 +794,7 @@ class FrequencySeparatedActorCriticPPO:
             "hf_value_optimizer",
             "promotion_actor_optimizer",
             "promotion_value_optimizer",
+            "promotion_advantage_optimizer",
         ):
             optimizer = getattr(self, name, None)
             if name in payload and optimizer is not None:
@@ -786,18 +851,41 @@ class FrequencySeparatedActorCriticPPO:
         state: np.ndarray,
         sample: bool = True,
         deterministic_threshold: float = 0.5,
+        deterministic_mode: str = "actor_probability",
+        advantage_threshold: float = 0.0,
     ) -> dict[str, float]:
         if self.promotion_actor is None or self.promotion_value is None:
             raise RuntimeError("learned promotion gate is not configured")
         threshold = float(deterministic_threshold)
         if not np.isfinite(threshold) or not 0.0 < threshold < 1.0:
             raise ValueError("deterministic_threshold must be finite and in (0, 1)")
+        mode = str(deterministic_mode)
+        if mode not in {"actor_probability", "counterfactual_advantage"}:
+            raise ValueError("unknown deterministic promotion mode")
+        if not np.isfinite(float(advantage_threshold)):
+            raise ValueError("advantage_threshold must be finite")
+        if mode == "counterfactual_advantage" and self.promotion_advantage is None:
+            raise RuntimeError(
+                "counterfactual-advantage promotion requires its learned head"
+            )
         tensor = self._state_tensor(state)
         distribution = self.promotion_actor.distribution(tensor)
+        predicted_advantage = (
+            float(self.promotion_advantage(tensor).item())
+            if self.promotion_advantage is not None else 0.0
+        )
         action = (
             distribution.sample()
             if sample
-            else (distribution.probs >= threshold).to(tensor.dtype)
+            else (
+                (distribution.probs >= threshold).to(tensor.dtype)
+                if mode == "actor_probability"
+                else torch.as_tensor(
+                    [[float(predicted_advantage >= float(advantage_threshold))]],
+                    dtype=tensor.dtype,
+                    device=tensor.device,
+                )
+            )
         )
         logp = distribution.log_prob(action).sum(dim=-1)
         value = self.promotion_value(tensor)
@@ -807,6 +895,10 @@ class FrequencySeparatedActorCriticPPO:
             "probability": float(probability.item()),
             "logp": float(logp.item()),
             "value": float(value.item()),
+            "predicted_counterfactual_advantage": predicted_advantage,
+            "advantage_head_enabled": float(
+                self.promotion_advantage is not None
+            ),
         }
 
     def _gae(
@@ -877,6 +969,7 @@ class FrequencySeparatedActorCriticPPO:
                 f"{level}_actor_optimizer_steps": 0.0,
                 f"{level}_value_optimizer_steps": 0.0,
                 f"{level}_cost_value_optimizer_steps": 0.0,
+                f"{level}_advantage_optimizer_steps": 0.0,
             }
 
         state = torch.as_tensor(batch.state, dtype=torch.float32, device=self.device)
@@ -886,15 +979,29 @@ class FrequencySeparatedActorCriticPPO:
         reward_adv_t = torch.as_tensor(self._normalize(reward_adv), dtype=torch.float32, device=self.device)
         returns_t = torch.as_tensor(returns, dtype=torch.float32, device=self.device)
         counterfactual_adv_t = None
+        counterfactual_target_t = None
         if level == "promotion" and batch.counterfactual_advantage is not None:
             counterfactual_advantage = np.asarray(
                 batch.counterfactual_advantage, dtype=np.float32
             ).reshape(-1)
+            counterfactual_target_t = torch.as_tensor(
+                counterfactual_advantage,
+                dtype=torch.float32,
+                device=self.device,
+            )
             scale = float(np.mean(np.abs(counterfactual_advantage))) + 1e-8
             counterfactual_adv_t = torch.as_tensor(
                 np.clip(counterfactual_advantage / scale, -10.0, 10.0),
                 dtype=torch.float32,
                 device=self.device,
+            )
+        if (
+            level == "promotion"
+            and self.promotion_advantage is not None
+            and counterfactual_target_t is None
+        ):
+            raise ValueError(
+                "promotion advantage learning requires paired counterfactual targets"
             )
 
         cost = None
@@ -937,6 +1044,12 @@ class FrequencySeparatedActorCriticPPO:
                 promotion_counterfactual_surrogate = torch.zeros(
                     (), dtype=torch.float32, device=self.device
                 )
+                promotion_advantage_loss = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                promotion_advantage_prediction_mean = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
                 if level == "promotion":
                     distribution = actor.distribution(state[idx])
                     promotion_probability_mean = distribution.probs.mean()
@@ -952,6 +1065,21 @@ class FrequencySeparatedActorCriticPPO:
                     promotion_rate_loss = (
                         float(cfg.promotion_rate_coef) * rate_excess.square()
                     )
+                    if (
+                        self.promotion_advantage is not None
+                        and counterfactual_target_t is not None
+                    ):
+                        advantage_prediction = self.promotion_advantage(
+                            state[idx]
+                        )
+                        promotion_advantage_prediction_mean = (
+                            advantage_prediction.mean()
+                        )
+                        promotion_advantage_loss = F.smooth_l1_loss(
+                            advantage_prediction,
+                            counterfactual_target_t[idx],
+                            beta=float(cfg.promotion_advantage_huber_delta),
+                        )
                 policy_loss = (
                     -reward_surrogate
                     - float(cfg.promotion_counterfactual_coef)
@@ -981,6 +1109,22 @@ class FrequencySeparatedActorCriticPPO:
                 value_optimizer.step()
 
                 if (
+                    level == "promotion"
+                    and self.promotion_advantage is not None
+                    and self.promotion_advantage_optimizer is not None
+                ):
+                    self.promotion_advantage_optimizer.zero_grad()
+                    (
+                        float(cfg.promotion_advantage_coef)
+                        * promotion_advantage_loss
+                    ).backward()
+                    nn.utils.clip_grad_norm_(
+                        self.promotion_advantage.parameters(),
+                        max_norm=float(cfg.max_grad_norm),
+                    )
+                    self.promotion_advantage_optimizer.step()
+
+                if (
                     cost_returns_t is not None
                     and cost_value_net is not None
                     and cost_value_optimizer is not None
@@ -995,6 +1139,8 @@ class FrequencySeparatedActorCriticPPO:
                     actor_loss.detach()
                     + float(cfg.value_coef) * value_loss.detach()
                     + float(cfg.cost_value_coef) * cost_value_loss.detach()
+                    + float(cfg.promotion_advantage_coef)
+                    * promotion_advantage_loss.detach()
                 )
                 row = {
                     "loss": float(loss.detach().cpu().item()),
@@ -1015,6 +1161,12 @@ class FrequencySeparatedActorCriticPPO:
                         "counterfactual_surrogate": float(
                             promotion_counterfactual_surrogate.detach().cpu().item()
                         ),
+                        "advantage_loss": float(
+                            promotion_advantage_loss.detach().cpu().item()
+                        ),
+                        "advantage_prediction_mean": float(
+                            promotion_advantage_prediction_mean.detach().cpu().item()
+                        ),
                     })
                 rows.append(row)
 
@@ -1028,6 +1180,12 @@ class FrequencySeparatedActorCriticPPO:
         out[f"{level}_value_optimizer_steps"] = float(len(rows))
         out[f"{level}_cost_value_optimizer_steps"] = float(
             len(rows) if cost_returns_t is not None and cost_value_optimizer is not None else 0
+        )
+        out[f"{level}_advantage_optimizer_steps"] = float(
+            len(rows)
+            if level == "promotion"
+            and self.promotion_advantage_optimizer is not None
+            else 0
         )
         if cost is not None:
             out[f"{level}_cost_mean"] = float(np.mean(cost))
@@ -1077,6 +1235,7 @@ class FrequencySeparatedActorCriticPPO:
                 "hf_actor_optimizer_steps": 0.0,
                 "hf_value_optimizer_steps": 0.0,
                 "hf_cost_value_optimizer_steps": 0.0,
+                "hf_advantage_optimizer_steps": 0.0,
             }
         promotion_metrics: dict[str, float] = {}
         if batch.promotion is not None:
@@ -1103,6 +1262,7 @@ class FrequencySeparatedActorCriticPPO:
                 "promotion_actor_optimizer_steps": 0.0,
                 "promotion_value_optimizer_steps": 0.0,
                 "promotion_cost_value_optimizer_steps": 0.0,
+                "promotion_advantage_optimizer_steps": 0.0,
             }
         cost_mean = float(np.mean(batch.lower.cost)) if batch.lower.cost is not None else 0.0
         if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:

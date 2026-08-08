@@ -1,4 +1,6 @@
 import math
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
 from freq_hrl.experiments.trading import full_method_hpo_v7 as v7
@@ -63,6 +65,46 @@ class FullMethodHPOV7Test(unittest.TestCase):
         )
         self.assertGreater(evidence["stress_low_promotion_rate_lift_mean"], 0.0)
 
+        for row in rows:
+            row["promotion_deterministic_mode"] = (
+                "counterfactual_advantage"
+            )
+            row["promotion_gate_probability_mean"] = 0.1
+            row["promotion_gate_advantage_mean"] = (
+                -0.01
+                if row["scenario"] == "stationary_low_noise" else 0.02
+            )
+            row["promotion_gate_advantage_head_enabled"] = 1.0
+            row["promotion_gate_advantage_alignment_valid"] = 1.0
+            row["promotion_gate_advantage_sign_accuracy"] = 0.75
+            row["promotion_gate_advantage_target_correlation"] = 0.4
+        evidence = v7._mechanism_activity_summary(rows, hf_rows)
+        self.assertEqual(evidence["status"], "eligible")
+        self.assertEqual(
+            evidence["stress_low_promotion_probability_lift_mean"], 0.0
+        )
+        self.assertGreater(
+            evidence["stress_low_promotion_advantage_lift_mean"], 0.0
+        )
+        self.assertGreaterEqual(
+            evidence["advantage_decision_accuracy_mean"],
+            v7.MIN_ADVANTAGE_DECISION_ACCURACY,
+        )
+
+        for row in rows:
+            row["promotion_gate_advantage_mean"] = 0.0
+        evidence = v7._mechanism_activity_summary(rows, hf_rows)
+        self.assertEqual(evidence["status"], "ineligible")
+
+        for row in rows:
+            row["promotion_gate_advantage_mean"] = (
+                -0.01
+                if row["scenario"] == "stationary_low_noise" else 0.02
+            )
+            row["promotion_gate_advantage_sign_accuracy"] = 0.5
+        evidence = v7._mechanism_activity_summary(rows, hf_rows)
+        self.assertEqual(evidence["status"], "ineligible")
+
     def test_mechanism_gate_rejects_always_on_promotion(self):
         rows = []
         hf_rows = []
@@ -113,10 +155,10 @@ class FullMethodHPOV7Test(unittest.TestCase):
             len(v7.candidate_ids_for_variant(variant_id))
             for variant_id in v7.ALL_VARIANT_IDS
         }, {6})
-        self.assertEqual(v7.canonical_full_method_parameter_count(2), 50774)
+        self.assertEqual(v7.canonical_full_method_parameter_count(2), 56855)
 
     def test_ablations_inherit_full_candidate_and_keep_v7_protocol_fields(self):
-        candidate_id = "v71_forecast"
+        candidate_id = "v72_forecast_margin"
         full = v7.effective_parameters_for_variant(
             "freq_hrl_full_v7", candidate_id
         )
@@ -165,6 +207,13 @@ class FullMethodHPOV7Test(unittest.TestCase):
                     "paired_plan_advantage",
                 )
                 self.assertEqual(
+                    ablated["promotion_deterministic_mode"],
+                    "counterfactual_advantage",
+                )
+                self.assertGreater(
+                    ablated["promotion_advantage_coef"], 0.0
+                )
+                self.assertEqual(
                     ablated["leakage_cost_mode"], "fixed_rms_budget"
                 )
                 self.assertTrue(ablated["include_hf_predictability"])
@@ -183,7 +232,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
 
     def test_cell_trains_one_checkpoint_on_support_only_and_never_loads_ood(self):
         payload = v7.run_hpo_cell(
-            candidate_id="v71_balanced",
+            candidate_id="v72_balanced_margin",
             variant_id="freq_hrl_full_v7",
             training_replicate_seed=2026,
             train_seeds=[42],
@@ -215,8 +264,10 @@ class FullMethodHPOV7Test(unittest.TestCase):
         self.assertTrue(all(
             row["promotion_credit_mode"] == "paired_plan_advantage"
             and row["promotion_counterfactual_symmetric"] == 1.0
-            and row["promotion_gate_action_rate"] == 0.0
-            and row["promotion_continue_action_credit_mean"] > 0.0
+            and row["promotion_deterministic_mode"]
+            == "counterfactual_advantage"
+            and row["promotion_gate_advantage_head_enabled"] == 1.0
+            and row["promotion_gate_advantage_target_mae"] >= 0.0
             for row in payload["tuning_rows"]
         ))
         checkpoint_hashes = {
@@ -234,7 +285,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
     def test_hpo_rejects_independently_tuned_ablation(self):
         with self.assertRaisesRegex(ValueError, "non-ablation"):
             v7.run_hpo_cell(
-                candidate_id="v71_balanced",
+                candidate_id="v72_balanced_margin",
                 variant_id="freq_hrl_no_hf_lower_v7",
                 training_replicate_seed=2026,
                 train_seeds=[42],
@@ -244,6 +295,43 @@ class FullMethodHPOV7Test(unittest.TestCase):
                 assets=2,
                 iterations=1,
             )
+
+    def test_promotion_pilot_summary_is_diagnostic_only(self):
+        manifest = v7.verify_current_freq_hrl_source_identity()[
+            "source_manifest_sha256"
+        ]
+        payload = v7.run_hpo_cell(
+            candidate_id="v72_balanced_margin",
+            variant_id="freq_hrl_full_v7",
+            training_replicate_seed=2026,
+            train_seeds=[42],
+            checkpoint_validation_seeds=[57721],
+            tuning_validation_seeds=[68207],
+            steps=24,
+            assets=2,
+            iterations=1,
+            code_revision="a" * 40,
+            expected_source_manifest_sha256=manifest,
+        )
+        with TemporaryDirectory() as directory:
+            cell = Path(directory) / "cell"
+            v7.write_hpo_cell(cell, payload)
+            diagnostic = v7.summarize_selective_promotion_pilot(
+                [cell],
+                expected_candidate_ids=["v72_balanced_margin"],
+                expected_replicate_seeds=[2026],
+            )
+        self.assertNotIn("frozen_config", diagnostic)
+        self.assertTrue(diagnostic["summary"]["diagnostic_only"])
+        self.assertFalse(diagnostic["summary"]["frozen_config_created"])
+        self.assertEqual(
+            diagnostic["summary"]["source_identity_status"], "verified"
+        )
+        self.assertEqual(len(diagnostic["leaderboard"]), 1)
+        self.assertEqual(
+            diagnostic["leaderboard"][0]["candidate_id"],
+            "v72_balanced_margin",
+        )
 
 
 if __name__ == "__main__":

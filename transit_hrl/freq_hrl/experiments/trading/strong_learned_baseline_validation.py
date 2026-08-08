@@ -204,6 +204,7 @@ def count_parameters(model: Any) -> int:
             "hf_value",
             "promotion_actor",
             "promotion_value",
+            "promotion_advantage",
         )
         modules = [
             getattr(model, name)

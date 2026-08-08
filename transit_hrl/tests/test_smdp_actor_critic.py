@@ -275,6 +275,9 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             promotion_rate_budget=0.05,
             promotion_rate_coef=1.0,
             promotion_counterfactual_coef=1.0,
+            promotion_advantage_learning_rate=1e-2,
+            promotion_advantage_coef=1.0,
+            promotion_advantage_huber_delta=0.1,
             epochs=1,
             minibatch_size=8,
         ))
@@ -299,6 +302,30 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
                 sample=False,
                 deterministic_threshold=1.0,
             )
+        self.assertIsNotNone(model.promotion_advantage)
+        with torch.no_grad():
+            for parameter in model.promotion_advantage.parameters():
+                parameter.zero_()
+            model.promotion_advantage.net[-1].bias.fill_(0.2)
+        advantage_action = model.act_promotion(
+            np.zeros(4, dtype=np.float32),
+            sample=False,
+            deterministic_mode="counterfactual_advantage",
+            advantage_threshold=0.1,
+        )
+        self.assertEqual(advantage_action["action"], 1.0)
+        self.assertAlmostEqual(
+            advantage_action["predicted_counterfactual_advantage"], 0.2
+        )
+        with torch.no_grad():
+            model.promotion_advantage.net[-1].bias.fill_(-0.2)
+        advantage_action = model.act_promotion(
+            np.zeros(4, dtype=np.float32),
+            sample=False,
+            deterministic_mode="counterfactual_advantage",
+            advantage_threshold=0.1,
+        )
+        self.assertEqual(advantage_action["action"], 0.0)
 
         gate = PromotionRolloutBuilder(gamma=0.99)
         gate.begin(
@@ -323,11 +350,16 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertEqual(metrics["promotion_transitions"], 2.0)
         self.assertGreater(metrics["promotion_actor_optimizer_steps"], 0.0)
         self.assertGreater(metrics["promotion_value_optimizer_steps"], 0.0)
+        self.assertGreater(
+            metrics["promotion_advantage_optimizer_steps"], 0.0
+        )
+        self.assertGreater(metrics["promotion_advantage_loss"], 0.0)
         self.assertGreater(metrics["promotion_rate_loss"], 0.0)
         self.assertGreater(metrics["promotion_probability_mean"], 0.05)
         self.assertNotEqual(
             metrics["promotion_counterfactual_surrogate"], 0.0
         )
+        self.assertIn("promotion_advantage", model.state_dict())
 
     def test_concatenation_preserves_level_specific_counts(self):
         batch = concat_hierarchical_batches([self._batch(1), self._batch(2)])

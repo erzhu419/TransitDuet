@@ -85,7 +85,7 @@ FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
 FULL_METHOD_V7_IMPLEMENTATION_VERSION = (
-    "freq_hrl_full_v7_1_selective_paired_promotion_2026_08_08"
+    "freq_hrl_full_v7_2_advantage_critic_promotion_2026_08_08"
 )
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
@@ -786,6 +786,10 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
             count += _value_parameter_count(
                 config.promotion_state_dim, config.hidden_dim
             )
+            if float(config.promotion_advantage_coef) > 0.0:
+                count += _value_parameter_count(
+                    config.promotion_state_dim, config.hidden_dim
+                )
         if int(config.hf_state_dim) > 0:
             count += actor(config.hf_state_dim, config.hf_action_dim)
             count += value(config.hf_state_dim)
@@ -809,6 +813,10 @@ def smdp_parameter_count(config: SMDPPPOConfig) -> int:
         count += _value_parameter_count(
             config.promotion_state_dim, config.hidden_dim
         )
+        if float(config.promotion_advantage_coef) > 0.0:
+            count += _value_parameter_count(
+                config.promotion_state_dim, config.hidden_dim
+            )
     if int(config.hf_state_dim) > 0:
         count += _actor_parameter_count(
             config.hf_state_dim, config.hf_action_dim, config.hidden_dim
@@ -1358,6 +1366,8 @@ def smdp_rollout(
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
     promotion_gate_interval_steps: int = 1,
+    promotion_deterministic_mode: str = "actor_probability",
+    promotion_advantage_threshold: float = 0.0,
     promotion_credit_scale: float | None = None,
     upper_residual_action_scale: float = 1.0,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
@@ -1413,6 +1423,13 @@ def smdp_rollout(
         raise ValueError("promotion_cooldown_steps must be non-negative")
     if int(promotion_gate_interval_steps) < 1:
         raise ValueError("promotion_gate_interval_steps must be positive")
+    promotion_deterministic_mode = str(promotion_deterministic_mode)
+    if promotion_deterministic_mode not in {
+        "actor_probability", "counterfactual_advantage",
+    }:
+        raise ValueError("unknown deterministic promotion mode")
+    if not np.isfinite(float(promotion_advantage_threshold)):
+        raise ValueError("promotion_advantage_threshold must be finite")
     resolved_promotion_credit_scale = (
         float(reward_scale)
         if promotion_credit_scale is None else float(promotion_credit_scale)
@@ -1642,6 +1659,7 @@ def smdp_rollout(
     decision_reasons: list[str] = []
     promotion_signals = 0
     learned_gate_probabilities: list[float] = []
+    learned_gate_advantages: list[float] = []
     learned_gate_actions: list[float] = []
     learned_promotion_absorbed_norm: list[float] = []
     learned_replan_cost_total = 0.0
@@ -1751,6 +1769,10 @@ def smdp_rollout(
                     deterministic_threshold=float(
                         promotion_deterministic_threshold
                     ),
+                    deterministic_mode=promotion_deterministic_mode,
+                    advantage_threshold=float(
+                        promotion_advantage_threshold
+                    ),
                 )
                 gate_action = float(gate_out["action"])
                 if promotion_builder is None:
@@ -1767,6 +1789,10 @@ def smdp_rollout(
                 learned_gate_probabilities.append(
                     float(gate_out["probability"])
                 )
+                if bool(gate_out["advantage_head_enabled"]):
+                    learned_gate_advantages.append(float(
+                        gate_out["predicted_counterfactual_advantage"]
+                    ))
                 learned_gate_actions.append(gate_action)
                 if str(promotion_credit_mode) == "paired_plan_advantage":
                     if plan_state is None or not plan_state.active:
@@ -2412,6 +2438,52 @@ def smdp_rollout(
     if promotion_builder is not None:
         promotion_builder.finish(terminal=True)
         trajectory.promotion = promotion_builder.build()
+    promotion_advantage_targets = (
+        np.asarray(
+            trajectory.promotion.counterfactual_advantage,
+            dtype=np.float64,
+        ).reshape(-1)
+        if trajectory.promotion is not None
+        and trajectory.promotion.counterfactual_advantage is not None
+        else np.zeros(0, dtype=np.float64)
+    )
+    promotion_advantage_predictions = np.asarray(
+        learned_gate_advantages, dtype=np.float64
+    )
+    promotion_advantage_head_enabled = model.promotion_advantage is not None
+    promotion_advantage_alignment_valid = (
+        promotion_advantage_targets.size > 0
+        and promotion_advantage_predictions.size
+        == promotion_advantage_targets.size
+    )
+    promotion_advantage_mae = (
+        float(np.mean(np.abs(
+            promotion_advantage_predictions - promotion_advantage_targets
+        )))
+        if promotion_advantage_alignment_valid else 0.0
+    )
+    promotion_advantage_sign_accuracy = (
+        float(np.mean(
+            (promotion_advantage_predictions >= float(
+                promotion_advantage_threshold
+            ))
+            == (promotion_advantage_targets >= float(
+                promotion_advantage_threshold
+            ))
+        ))
+        if promotion_advantage_alignment_valid else 0.0
+    )
+    promotion_advantage_correlation = 0.0
+    if (
+        promotion_advantage_alignment_valid
+        and promotion_advantage_targets.size > 1
+        and float(np.std(promotion_advantage_targets)) > 1e-12
+        and float(np.std(promotion_advantage_predictions)) > 1e-12
+    ):
+        promotion_advantage_correlation = float(np.corrcoef(
+            promotion_advantage_predictions,
+            promotion_advantage_targets,
+        )[0, 1])
     pnl = np.asarray(pnl_returns, dtype=np.float64)
     eq = np.asarray(equity, dtype=np.float64)
     reg = LeakageRegularizer(upper_hf_window=6, lower_lf_window=24)
@@ -2473,6 +2545,47 @@ def smdp_rollout(
         "promotion_gate_action_rate": float(
             np.mean(learned_gate_actions)
         ) if learned_gate_actions else 0.0,
+        "promotion_deterministic_mode": promotion_deterministic_mode,
+        "promotion_advantage_threshold": float(
+            promotion_advantage_threshold
+        ),
+        "promotion_gate_advantage_head_enabled": float(
+            promotion_advantage_head_enabled
+        ),
+        "promotion_gate_advantage_alignment_valid": float(
+            promotion_advantage_alignment_valid
+        ),
+        "promotion_gate_advantage_prediction_count": int(
+            promotion_advantage_predictions.size
+        ),
+        "promotion_gate_advantage_target_count": int(
+            promotion_advantage_targets.size
+        ),
+        "promotion_gate_advantage_mean": float(
+            np.mean(promotion_advantage_predictions)
+        ) if promotion_advantage_predictions.size else 0.0,
+        "promotion_gate_advantage_std": float(
+            np.std(promotion_advantage_predictions)
+        ) if promotion_advantage_predictions.size else 0.0,
+        "promotion_gate_advantage_min": float(
+            np.min(promotion_advantage_predictions)
+        ) if promotion_advantage_predictions.size else 0.0,
+        "promotion_gate_advantage_max": float(
+            np.max(promotion_advantage_predictions)
+        ) if promotion_advantage_predictions.size else 0.0,
+        "promotion_gate_advantage_target_mean": float(
+            np.mean(promotion_advantage_targets)
+        ) if promotion_advantage_targets.size else 0.0,
+        "promotion_gate_advantage_target_std": float(
+            np.std(promotion_advantage_targets)
+        ) if promotion_advantage_targets.size else 0.0,
+        "promotion_gate_advantage_target_mae": promotion_advantage_mae,
+        "promotion_gate_advantage_sign_accuracy": (
+            promotion_advantage_sign_accuracy
+        ),
+        "promotion_gate_advantage_target_correlation": (
+            promotion_advantage_correlation
+        ),
         "promotion_replan_cost_total": float(learned_replan_cost_total),
         "promotion_scheduled_boundary_close_count": int(
             promotion_scheduled_boundary_closes
@@ -2953,6 +3066,9 @@ def train_ppo_actor_critic(
     promotion_rate_budget: float = 1.0,
     promotion_rate_coef: float = 0.0,
     promotion_counterfactual_coef: float | None = None,
+    promotion_advantage_learning_rate: float | None = None,
+    promotion_advantage_coef: float | None = None,
+    promotion_advantage_huber_delta: float = 0.1,
     lower_hf_order_scale: float = 0.025,
     promotion_credit_mode: str = "auto",
     promotion_credit_scale: float | None = None,
@@ -2968,6 +3084,8 @@ def train_ppo_actor_critic(
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
     promotion_gate_interval_steps: int = 1,
+    promotion_deterministic_mode: str = "auto",
+    promotion_advantage_threshold: float = 0.0,
     upper_residual_action_scale: float = 1.0,
     training_scenarios: Sequence[str] | None = None,
 ) -> tuple[
@@ -3034,6 +3152,13 @@ def train_ppo_actor_critic(
         raise ValueError("promotion_cooldown_steps must be non-negative")
     if int(promotion_gate_interval_steps) < 1:
         raise ValueError("promotion_gate_interval_steps must be positive")
+    promotion_deterministic_mode = str(promotion_deterministic_mode)
+    if promotion_deterministic_mode not in {
+        "auto", "actor_probability", "counterfactual_advantage",
+    }:
+        raise ValueError("unknown deterministic promotion mode")
+    if not np.isfinite(float(promotion_advantage_threshold)):
+        raise ValueError("promotion_advantage_threshold must be finite")
     resolved_promotion_entropy_coef = (
         0.001
         if promotion_entropy_coef is None else float(promotion_entropy_coef)
@@ -3151,6 +3276,43 @@ def train_ppo_actor_critic(
         raise ValueError(
             "promotion_counterfactual_coef requires paired_plan_advantage credit"
         )
+    resolved_promotion_advantage_coef = (
+        float(method_contract in V7_METHOD_CONTRACTS)
+        if promotion_advantage_coef is None
+        else float(promotion_advantage_coef)
+    )
+    if (
+        not np.isfinite(resolved_promotion_advantage_coef)
+        or resolved_promotion_advantage_coef < 0.0
+    ):
+        raise ValueError("promotion_advantage_coef must be finite and non-negative")
+    if (
+        not np.isfinite(float(promotion_advantage_huber_delta))
+        or float(promotion_advantage_huber_delta) <= 0.0
+    ):
+        raise ValueError(
+            "promotion_advantage_huber_delta must be positive and finite"
+        )
+    if (
+        resolved_promotion_advantage_coef > 0.0
+        and resolved_promotion_credit_mode != "paired_plan_advantage"
+    ):
+        raise ValueError(
+            "promotion advantage learning requires paired_plan_advantage credit"
+        )
+    if promotion_deterministic_mode == "auto":
+        promotion_deterministic_mode = (
+            "counterfactual_advantage"
+            if resolved_promotion_advantage_coef > 0.0
+            else "actor_probability"
+        )
+    if (
+        promotion_deterministic_mode == "counterfactual_advantage"
+        and resolved_promotion_advantage_coef <= 0.0
+    ):
+        raise ValueError(
+            "counterfactual-advantage decisions require a learned advantage head"
+        )
     resolved_leakage_cost_mode = str(leakage_cost_mode)
     if resolved_leakage_cost_mode == "auto":
         resolved_leakage_cost_mode = (
@@ -3252,6 +3414,15 @@ def train_ppo_actor_critic(
         "promotion": float(
             learning_rate
             if promotion_learning_rate is None else promotion_learning_rate
+        ),
+        "promotion_advantage": float(
+            (
+                learning_rate
+                if promotion_learning_rate is None
+                else promotion_learning_rate
+            )
+            if promotion_advantage_learning_rate is None
+            else promotion_advantage_learning_rate
         ),
     }
     for level, value in resolved_learning_rates.items():
@@ -3413,6 +3584,13 @@ def train_ppo_actor_critic(
         promotion_counterfactual_coef=float(
             resolved_promotion_counterfactual_coef
         ),
+        promotion_advantage_learning_rate=resolved_learning_rates[
+            "promotion_advantage"
+        ],
+        promotion_advantage_coef=resolved_promotion_advantage_coef,
+        promotion_advantage_huber_delta=float(
+            promotion_advantage_huber_delta
+        ),
         lower_cost_target=float(effective_lower_cost_target),
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
@@ -3446,6 +3624,11 @@ def train_ppo_actor_critic(
         promotion_state_dim=(
             promotion_gate_state_dim(assets)
             if capacity_reference_flags["learned_promotion_gate"] else 0
+        ),
+        promotion_advantage_coef=(
+            1.0
+            if capacity_reference_method_contract == "full_freq_hrl_v7"
+            else float(policy_smdp_config.promotion_advantage_coef)
         ),
     )
     target_parameter_count = smdp_parameter_count(reference_smdp_config)
@@ -3813,6 +3996,10 @@ def train_ppo_actor_critic(
                 promotion_gate_interval_steps=int(
                     promotion_gate_interval_steps
                 ),
+                promotion_deterministic_mode=promotion_deterministic_mode,
+                promotion_advantage_threshold=float(
+                    promotion_advantage_threshold
+                ),
                 upper_residual_action_scale=float(
                     upper_residual_action_scale
                 ),
@@ -3975,6 +4162,13 @@ def train_ppo_actor_critic(
             "promotion_counterfactual_coef": float(
                 resolved_promotion_counterfactual_coef
             ),
+            "promotion_advantage_learning_rate": resolved_learning_rates[
+                "promotion_advantage"
+            ],
+            "promotion_advantage_coef": resolved_promotion_advantage_coef,
+            "promotion_advantage_huber_delta": float(
+                promotion_advantage_huber_delta
+            ),
             "promotion_deterministic_threshold": float(
                 promotion_deterministic_threshold
             ),
@@ -3982,6 +4176,10 @@ def train_ppo_actor_critic(
             "promotion_cooldown_steps": int(promotion_cooldown_steps),
             "promotion_gate_interval_steps": int(
                 promotion_gate_interval_steps
+            ),
+            "promotion_deterministic_mode": promotion_deterministic_mode,
+            "promotion_advantage_threshold": float(
+                promotion_advantage_threshold
             ),
             "hf_lower_overlay_enabled": bool(
                 method_flags["lower_hf_overlay"]
