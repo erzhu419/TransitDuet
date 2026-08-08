@@ -2,6 +2,11 @@ from enum import Enum, auto
 import numbers
 import numpy as np
 
+from lower.causal_follower_eta import (
+    AVLVehicleSnapshot,
+    estimate_follower_departure_gap,
+)
+
 
 def _remove_indices_preserve_order(values, removed_indices):
     """Return an array without selected positions while retaining FIFO order."""
@@ -65,6 +70,12 @@ class Bus(object):
         self.forward_predecessor_trip_id = None
         self.pre_action_forward_headway = None
         self.pre_action_forward_headway_source = "unavailable"
+        self.pre_action_follower_departure_gap = None
+        self.pre_action_follower_eta = None
+        self.pre_action_follower_spatial_gap = None
+        self.pre_action_follower_speed = None
+        self.pre_action_follower_bus_id = None
+        self.pre_action_follower_source = "unavailable"
         self._lower_state_input_schema = "legacy_headway_deviation"
         self._lower_observation_contract = "latent_oracle_legacy"
         self._headway_reward_mode = "symmetric_legacy"
@@ -330,6 +341,7 @@ class Bus(object):
         self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
         self._update_pre_action_forward_headway(current_time)
+        self._update_pre_action_follower_eta(current_time, bus_all)
 
         controlled_stop = self.next_station in self.effective_station[2:]
         exact_forward_valid = (
@@ -435,6 +447,21 @@ class Bus(object):
                         float(guard_result.allowed_s) / guard_scale_s)
                 fwd_norm = self.forward_headway / target_hw_safe
                 bwd_norm = self.backward_headway / target_hw_safe
+                departure_gap_valid = (
+                    self.pre_action_forward_headway_source
+                    == 'matched_departure_event'
+                    and self.pre_action_forward_headway is not None)
+                departure_gap_norm = (
+                    float(self.pre_action_forward_headway) / target_hw_safe
+                    if departure_gap_valid else 1.0)
+                follower_gap_valid = (
+                    str(self.pre_action_follower_source).startswith(
+                        'same_time_avl_')
+                    and self.pre_action_follower_departure_gap is not None)
+                follower_gap_norm = (
+                    float(self.pre_action_follower_departure_gap)
+                    / target_hw_safe
+                    if follower_gap_valid else 1.0)
                 headway_balance = (
                     self.backward_headway - self.forward_headway
                 ) / target_hw_safe
@@ -494,6 +521,12 @@ class Bus(object):
                     'causal_hold_limit': float(np.clip(
                         causal_hold_limit, 0.0, 1.0)),
                     'fwd_headway_norm': float(np.clip(fwd_norm, 0.0, 3.0)),
+                    'departure_gap_norm': float(np.clip(
+                        departure_gap_norm, 0.0, 3.0)),
+                    'departure_gap_valid': float(departure_gap_valid),
+                    'avl_follower_gap_norm': float(np.clip(
+                        follower_gap_norm, 0.0, 3.0)),
+                    'avl_follower_gap_valid': float(follower_gap_valid),
                     'bwd_headway_norm': float(np.clip(bwd_norm, 0.0, 3.0)),
                     'headway_balance': float(np.clip(headway_balance, -3.0, 3.0)),
                     'hold_value_proxy': float(np.clip(hold_value_proxy, -1.0, 1.0)),
@@ -716,6 +749,50 @@ class Bus(object):
         self.pre_action_forward_headway = gap_s
         self.pre_action_forward_headway_source = "matched_departure_event"
 
+    def _update_pre_action_follower_eta(self, current_time, bus_all):
+        """Freeze a same-time AVL follower estimate before policy action."""
+        if not all(hasattr(self, name) for name in (
+                'bus_id', 'direction', 'absolute_distance')):
+            self.pre_action_follower_departure_gap = None
+            self.pre_action_follower_eta = None
+            self.pre_action_follower_spatial_gap = None
+            self.pre_action_follower_speed = None
+            self.pre_action_follower_bus_id = None
+            self.pre_action_follower_source = "current_avl_unavailable"
+            return
+        snapshots = []
+        for bus in bus_all:
+            try:
+                route_speed = float(bus.current_route.speed_limit)
+            except (AttributeError, KeyError, TypeError, ValueError):
+                route_speed = 0.0
+            snapshots.append(AVLVehicleSnapshot(
+                bus_id=int(getattr(bus, 'bus_id', -1)),
+                direction=bool(getattr(bus, 'direction', True)),
+                on_route=bool(getattr(bus, 'on_route', False)),
+                progress_m=float(getattr(bus, 'travel_distance', 0.0)),
+                launch_time_s=float(getattr(
+                    bus, 'launch_time', current_time)),
+                current_speed_mps=float(getattr(
+                    bus, 'current_speed', 0.0)),
+                route_speed_mps=route_speed,
+            ))
+        estimate = estimate_follower_departure_gap(
+            current_bus_id=int(self.bus_id),
+            current_direction=bool(self.direction),
+            current_progress_m=float(self.travel_distance),
+            current_time_s=float(current_time),
+            service_dwell_proxy_s=float(getattr(
+                self, 'last_service_dwell_s', 0.0)),
+            vehicles=snapshots,
+        )
+        self.pre_action_follower_departure_gap = estimate.departure_gap_s
+        self.pre_action_follower_eta = estimate.eta_s
+        self.pre_action_follower_spatial_gap = estimate.spatial_gap_m
+        self.pre_action_follower_speed = estimate.speed_mps
+        self.pre_action_follower_bus_id = estimate.follower_bus_id
+        self.pre_action_follower_source = estimate.source
+
     def arrive_station(self, current_time, bus_all, debug):
         # Because we have to use the self.holding_time later, so we exchange passenger first when arrived a station
         # self.exchange_passengers(current_time) # self.holding_time is set in this function
@@ -817,6 +894,12 @@ class Bus(object):
         self.forward_predecessor_trip_id = None
         self.pre_action_forward_headway = None
         self.pre_action_forward_headway_source = "unavailable"
+        self.pre_action_follower_departure_gap = None
+        self.pre_action_follower_eta = None
+        self.pre_action_follower_spatial_gap = None
+        self.pre_action_follower_speed = None
+        self.pre_action_follower_bus_id = None
+        self.pre_action_follower_source = "unavailable"
 
         self.last_station_dis = 0.
         self.next_station_dis = self.current_route.distance

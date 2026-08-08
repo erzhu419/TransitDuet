@@ -279,9 +279,15 @@ class DiagnosticLog:
         'lower_departure_regularity_enabled',
         'lower_departure_regularity_cost_mean',
         'lower_departure_regularity_cost_max',
+        'lower_departure_regularity_reward_mean',
+        'lower_departure_regularity_reward_min',
+        'lower_departure_regularity_reward_max',
         'lower_departure_regularity_deviation_mean',
         'lower_departure_regularity_overshoot_mean',
         'lower_departure_regularity_evidence_valid_mean',
+        'lower_departure_regularity_follower_valid_mean',
+        'lower_departure_regularity_baseline_loss_mean',
+        'lower_departure_regularity_post_loss_mean',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
         'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
@@ -2546,9 +2552,13 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_feasible_actions = []
         self._pending_lower_action_context = {}
         self._ep_lower_departure_regularity_costs = []
+        self._ep_lower_departure_regularity_rewards = []
         self._ep_lower_departure_regularity_deviations = []
         self._ep_lower_departure_regularity_overshoots = []
         self._ep_lower_departure_regularity_evidence_valid = []
+        self._ep_lower_departure_regularity_follower_valid = []
+        self._ep_lower_departure_regularity_baseline_losses = []
+        self._ep_lower_departure_regularity_post_losses = []
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
@@ -5555,6 +5565,12 @@ class TransitDuetV2Runner:
             evidence_source=(
                 getattr(bus, 'pre_action_forward_headway_source', None)
                 if bus is not None else None),
+            follower_departure_gap_s=(
+                getattr(bus, 'pre_action_follower_departure_gap', None)
+                if bus is not None else None),
+            follower_evidence_source=(
+                getattr(bus, 'pre_action_follower_source', None)
+                if bus is not None else None),
         )
         if not hasattr(self, '_pending_lower_action_context'):
             self._pending_lower_action_context = {}
@@ -5657,6 +5673,8 @@ class TransitDuetV2Runner:
         departure_regularity = self.lower_departure_regularity.evaluate(
             departure_context, act_val)
         departure_regularity_cost = float(departure_regularity.cost)
+        departure_regularity_reward = float(
+            departure_regularity.reward_adjustment)
         total_cost = (
             float(cost)
             + drift_cost
@@ -5762,6 +5780,7 @@ class TransitDuetV2Runner:
         )
         shaped_reward = (
             float(reward)
+            + departure_regularity_reward
             - drift_penalty
             - wait_penalty
             - high_hold_penalty
@@ -5781,13 +5800,32 @@ class TransitDuetV2Runner:
         if self.lower_departure_regularity.enabled:
             self._ep_lower_departure_regularity_costs.append(
                 departure_regularity_cost)
+            self._ep_lower_departure_regularity_rewards.append(
+                departure_regularity_reward)
             self._ep_lower_departure_regularity_evidence_valid.append(
                 1.0 if departure_regularity.evidence_valid else 0.0)
-            if departure_regularity.evidence_valid:
+            self._ep_lower_departure_regularity_follower_valid.append(
+                1.0 if departure_regularity.follower_evidence_valid else 0.0)
+            two_sided_mode = (
+                CausalDepartureRegularityCost
+                .AVL_TWO_SIDED_INCREMENTAL_REWARD)
+            regularity_objective_valid = (
+                departure_regularity.evidence_valid
+                and (
+                    self.lower_departure_regularity.objective_mode
+                    != two_sided_mode
+                    or departure_regularity.follower_evidence_valid
+                )
+            )
+            if regularity_objective_valid:
                 self._ep_lower_departure_regularity_deviations.append(
                     float(departure_regularity.normalized_deviation))
                 self._ep_lower_departure_regularity_overshoots.append(
                     float(departure_regularity.normalized_overshoot))
+                self._ep_lower_departure_regularity_baseline_losses.append(
+                    float(departure_regularity.baseline_loss))
+                self._ep_lower_departure_regularity_post_losses.append(
+                    float(departure_regularity.post_action_loss))
         if cur_tid >= 0 and record_holding_action:
             self.holding_feedback.record_action(cur_tid, act_val)
         if tracker is not None:
@@ -7590,9 +7628,13 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_feasible_actions = []
         self._pending_lower_action_context = {}
         self._ep_lower_departure_regularity_costs = []
+        self._ep_lower_departure_regularity_rewards = []
         self._ep_lower_departure_regularity_deviations = []
         self._ep_lower_departure_regularity_overshoots = []
         self._ep_lower_departure_regularity_evidence_valid = []
+        self._ep_lower_departure_regularity_follower_valid = []
+        self._ep_lower_departure_regularity_baseline_losses = []
+        self._ep_lower_departure_regularity_post_losses = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -8246,12 +8288,20 @@ class TransitDuetV2Runner:
             self._ep_lower_causal_guard_feasible_actions)
         lower_departure_regularity_cost_stat = _stat(
             self._ep_lower_departure_regularity_costs)
+        lower_departure_regularity_reward_stat = _stat(
+            self._ep_lower_departure_regularity_rewards)
         lower_departure_regularity_deviation_stat = _stat(
             self._ep_lower_departure_regularity_deviations)
         lower_departure_regularity_overshoot_stat = _stat(
             self._ep_lower_departure_regularity_overshoots)
         lower_departure_regularity_evidence_stat = _stat(
             self._ep_lower_departure_regularity_evidence_valid)
+        lower_departure_regularity_follower_stat = _stat(
+            self._ep_lower_departure_regularity_follower_valid)
+        lower_departure_regularity_baseline_loss_stat = _stat(
+            self._ep_lower_departure_regularity_baseline_losses)
+        lower_departure_regularity_post_loss_stat = _stat(
+            self._ep_lower_departure_regularity_post_losses)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8677,12 +8727,24 @@ class TransitDuetV2Runner:
                 lower_departure_regularity_cost_stat['mean'], 8),
             'lower_departure_regularity_cost_max': round(
                 lower_departure_regularity_cost_stat['max'], 8),
+            'lower_departure_regularity_reward_mean': round(
+                lower_departure_regularity_reward_stat['mean'], 8),
+            'lower_departure_regularity_reward_min': round(
+                lower_departure_regularity_reward_stat['min'], 8),
+            'lower_departure_regularity_reward_max': round(
+                lower_departure_regularity_reward_stat['max'], 8),
             'lower_departure_regularity_deviation_mean': round(
                 lower_departure_regularity_deviation_stat['mean'], 8),
             'lower_departure_regularity_overshoot_mean': round(
                 lower_departure_regularity_overshoot_stat['mean'], 8),
             'lower_departure_regularity_evidence_valid_mean': round(
                 lower_departure_regularity_evidence_stat['mean'], 8),
+            'lower_departure_regularity_follower_valid_mean': round(
+                lower_departure_regularity_follower_stat['mean'], 8),
+            'lower_departure_regularity_baseline_loss_mean': round(
+                lower_departure_regularity_baseline_loss_stat['mean'], 8),
+            'lower_departure_regularity_post_loss_mean': round(
+                lower_departure_regularity_post_loss_stat['mean'], 8),
             # lower training
             'lower_q_mean': lower_m.get('q_mean', 0.),
             'lower_q_std': lower_m.get('q_std', 0.),

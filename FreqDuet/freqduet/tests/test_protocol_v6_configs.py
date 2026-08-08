@@ -22,6 +22,15 @@ SOFT_CONFIGS = [
     for limit in ("035", "030")
     for rate in ("l3e4", "l1e3")
 ]
+INCREMENTAL_CONFIGS = [
+    "F_freqduet_protocol_v6_departctx_hiro",
+    "F_freqduet_protocol_v6_avlctx_hiro",
+    *[
+        f"F_freqduet_protocol_v6_{kind}_w{weight}_hiro"
+        for kind in ("fwdadv", "avlbal")
+        for weight in ("05", "1", "2", "4")
+    ],
+]
 
 
 class ProtocolV6ConfigTest(unittest.TestCase):
@@ -174,6 +183,42 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                     regularity["evidence_mode"],
                     "pre_action_departure_v6",
                 )
+            else:
+                self.assertFalse(regularity.get("enable", False))
+
+    def test_incremental_regularity_factorial_is_causal_and_opt_in(self):
+        configs = [
+            CONFIGS["main"], CONFIGS["noguard"], *INCREMENTAL_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"], sorted(INCREMENTAL_CONFIGS))
+
+        for name in INCREMENTAL_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            features = set(config["frequency"]["lower_context"]["features"])
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(lower["cost_limit"], 0.5)
+            self.assertEqual(lower["lambda_lr"], 0.0001)
+            self.assertTrue({
+                "departure_gap_norm", "departure_gap_valid"
+            }.issubset(features))
+            regularity = lower.get("causal_departure_regularity", {})
+            if "fwdadv" in name:
+                self.assertEqual(
+                    regularity["objective_mode"],
+                    "forward_incremental_reward",
+                )
+            elif "avlbal" in name:
+                self.assertEqual(
+                    regularity["objective_mode"],
+                    "avl_two_sided_incremental_reward",
+                )
+                self.assertTrue({
+                    "avl_follower_gap_norm", "avl_follower_gap_valid"
+                }.issubset(features))
             else:
                 self.assertFalse(regularity.get("enable", False))
 

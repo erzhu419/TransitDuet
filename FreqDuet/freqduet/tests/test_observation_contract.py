@@ -38,6 +38,23 @@ class LowerObservationContractTest(unittest.TestCase):
             self._deployable(context_features=[
                 "load", "bwd_headway_norm", "next_queue"])
 
+    def test_accepts_named_same_time_departure_and_follower_evidence(self):
+        contract = self._deployable(context_features=[
+            "departure_gap_norm",
+            "departure_gap_valid",
+            "avl_follower_gap_norm",
+            "avl_follower_gap_valid",
+        ])
+
+        rows = {row["feature"]: row for row in contract.ledger()}
+
+        self.assertTrue(rows["departure_gap_norm"]["deployable"])
+        self.assertTrue(rows["avl_follower_gap_norm"]["deployable"])
+        self.assertIn(
+            "same-time follower AVL",
+            rows["avl_follower_gap_norm"]["source"],
+        )
+
     def test_rejects_latent_frequency_observation(self):
         with self.assertRaisesRegex(ValueError, "APC frequency"):
             self._deployable(frequency_source="latent_arrivals")

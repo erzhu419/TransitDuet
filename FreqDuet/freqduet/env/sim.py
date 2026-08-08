@@ -1078,6 +1078,10 @@ class env_bus(object):
         requested_context = lower_context_cfg.get('features', default_context)
         allowed_context = set(default_context) | {
             'fwd_headway_norm',
+            'departure_gap_norm',
+            'departure_gap_valid',
+            'avl_follower_gap_norm',
+            'avl_follower_gap_valid',
             'bwd_headway_norm',
             'headway_balance',
             'hold_value_proxy',

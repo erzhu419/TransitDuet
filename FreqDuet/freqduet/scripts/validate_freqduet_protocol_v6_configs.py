@@ -38,6 +38,13 @@ EXPERIMENTAL_CONFIGS = [
         for limit in ("035", "030")
         for rate in ("l3e4", "l1e3")
     ],
+    "F_freqduet_protocol_v6_departctx_hiro",
+    "F_freqduet_protocol_v6_avlctx_hiro",
+    *[
+        f"F_freqduet_protocol_v6_{kind}_w{weight}_hiro"
+        for kind in ("fwdadv", "avlbal")
+        for weight in ("05", "1", "2", "4")
+    ],
 ]
 
 
@@ -67,6 +74,7 @@ def validate(
             "causal_holding_guard", {}) or {}
         regularity = (config.get("lower", {}) or {}).get(
             "causal_departure_regularity", {}) or {}
+        lower_context = (frequency.get("lower_context", {}) or {})
         required = {
             "protocol.version": (
                 protocol.get("version"), "freqduet-eval-v6"),
@@ -97,6 +105,25 @@ def validate(
                 != "pre_action_departure_v6"):
             raise ValueError(
                 f"{name}: soft regularity uses non-causal evidence")
+        objective_mode = str(
+            regularity.get("objective_mode", "cmdp_absolute"))
+        if bool(regularity.get("enable")) and objective_mode in {
+                "forward_incremental_reward",
+                "avl_two_sided_incremental_reward"}:
+            if bool(guard.get("enable")):
+                raise ValueError(
+                    f"{name}: incremental regularity must preserve noguard "
+                    "action semantics")
+            features = set(lower_context.get("features", []))
+            required_features = {
+                "departure_gap_norm", "departure_gap_valid"}
+            if objective_mode == "avl_two_sided_incremental_reward":
+                required_features.update({
+                    "avl_follower_gap_norm", "avl_follower_gap_valid"})
+            if not required_features.issubset(features):
+                raise ValueError(
+                    f"{name}: incremental regularity lacks causal state "
+                    f"features {sorted(required_features - features)}")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
     main = resolved["F_freqduet_protocol_v6_main_hiro"]

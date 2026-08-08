@@ -192,3 +192,71 @@ to disjoint-seed confirmation only if it satisfies all of these gates:
   zero action adjustment, 64.4% valid evidence, regularity-cost mean `0.0945`,
   replay batch-cost mean `0.7501` against limit `0.35`, and lambda `1.009`.
   This remains implementation evidence only.
+
+## Engineering-v4 outcome (2026-08-09)
+
+The matrix completed all 72 train shards and all 144 frozen rollouts. The
+strict aggregate verifies checkpoint 39, common random numbers, four train
+seeds, two disjoint evaluation seeds, one scenario contract, 72 run manifests,
+and clean source commit `9685558e1985d9c5fb25fe3803dd0f058c3de716`.
+All no-guard and soft variants have exactly zero execution adjustment. Enabled
+regularity variants report matched-departure evidence on at least 99.96% of
+their evaluation decisions.
+
+No candidate passes the preregistered efficacy gate:
+
+- `softreg_w05_c035_l1e3` has the best mean headway direction among enabled
+  regularity variants, but improves CV by only `0.01254`, below the required
+  `0.02`, while worsening restricted journey by `0.79557 min` with crossed
+  bootstrap 95% CI `[0.15762, 1.36735]`.
+- `softdual_c030_l3e4` is the closest joint tradeoff: journey changes by
+  `-0.02742 min`, headway CV by `-0.00964`, holding exposure by
+  `+0.01306 passenger-min/generated`, and denied-trip rate by `+0.00716`.
+  It misses the CV threshold by `0.01036` and does not enable the new
+  regularity term; its behavior comes from changing the shared cost limit and
+  dual learning rate.
+- The best journey row, `softdual_c035_l1e3`, changes journey by
+  `-0.18221 min` but worsens CV by `+0.02008`.
+
+Therefore engineering-v4 is a valid negative result. It is not promoted and
+does not justify a disjoint-seed confirmation. The complete 16-row screen and
+selection uncertainty remain part of the negative-results record.
+
+## Engineering-v5 causal incremental preregistration (2026-08-09)
+
+The v4 diagnosis identifies two structural confounds. First, its regularity
+cost uses a matched action-time departure gap that is not exposed to the
+policy state. Second, that cost is mixed with the existing safety cost under a
+single critic and Lagrange multiplier, so changing the limit changes more than
+regularity. Engineering-v5 leaves the same-source `noguard` cost limit and dual
+learning rate unchanged and makes regularity a separate incremental reward.
+
+The new state evidence is restricted to deployable, same-time observations:
+
+- exact matched predecessor departure gap and a validity flag;
+- for the two-sided arm only, the nearest physically active same-direction
+  follower's current AVL spatial gap, converted to an ETA with its observed
+  journey-average speed and causal speed fallbacks, plus a validity flag.
+
+The incremental objective compares the local regularity loss before and after
+the sampled action. Positive reward is assigned only when the sampled action
+reduces that loss; worsening actions receive negative reward. The two-sided
+loss predicts that holding increases the predecessor gap and decreases the
+follower gap. It never projects, clips, or replaces the policy action.
+
+The exploratory screen contains same-source `main` and `noguard`, context-only
+controls `departctx` and `avlctx`, and forward/two-sided reward weights
+`0.5, 1, 2, 4`. All use the existing discrete action set, previous-action
+feature, cost limit `0.5`, and dual learning rate `1e-4`.
+
+A candidate may advance only if:
+
+1. every requested shard is strict-complete and hash-homogeneous;
+2. execution adjustment is zero and all evidence coverage is reported;
+3. an AVL two-sided row has at least 50% valid follower evidence in every
+   rollout;
+4. restricted journey is no more than `0.15 min` worse than same-source
+   `noguard` and remains better than the old hard-guard main;
+5. headway CV improves over same-source `noguard` by at least `0.02`, without
+   reversing its holding and denied-dispatch gains by more than 10%; and
+6. only a later disjoint-seed confirmation can support an efficacy claim.

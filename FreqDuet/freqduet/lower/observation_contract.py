@@ -28,6 +28,22 @@ _CONTEXT_LEDGER = {
         "current pre-action departure event",
     ),
     "fwd_headway_norm": ("same-stop AVL arrival recorder", "current arrival event"),
+    "departure_gap_norm": (
+        "matched predecessor departure and current operations clock",
+        "current pre-action departure event",
+    ),
+    "departure_gap_valid": (
+        "matched predecessor departure availability",
+        "current pre-action departure event",
+    ),
+    "avl_follower_gap_norm": (
+        "same-time follower AVL position and causal speed estimate",
+        "current pre-action AVL snapshot",
+    ),
+    "avl_follower_gap_valid": (
+        "same-time physical follower AVL availability",
+        "current pre-action AVL snapshot",
+    ),
     "route_progress": ("AVL vehicle location", "current decision"),
     "station_phase": ("static stop sequence and AVL stop id", "current stop event"),
     "prev_launch_gap": ("actual terminal launch log", "latest prior launch"),

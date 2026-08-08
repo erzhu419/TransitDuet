@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v6_avlbal_w05_hiro.yaml
+_name: F_freqduet_protocol_v6_avlbal_w1_hiro
+
+protocol:
+  role: exploratory_avl_two_sided_regularity_w1_v6
+
+lower:
+  causal_departure_regularity:
+    reward_weight: 1.0

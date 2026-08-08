@@ -57,6 +57,71 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
         self.assertEqual(result.cost, 0.0)
         self.assertFalse(result.evidence_valid)
 
+    def test_forward_incremental_reward_credits_only_action_improvement(self):
+        regularity = CausalDepartureRegularityCost(
+            enabled=True,
+            objective_mode="forward_incremental_reward",
+            reward_weight=2.0,
+            cost_cap=1.0,
+        )
+        context = regularity.capture(
+            forward_headway_s=300.0,
+            target_headway_s=360.0,
+            evidence_source="matched_departure_event",
+        )
+
+        improving = regularity.evaluate(context, 30.0)
+        exact = regularity.evaluate(context, 60.0)
+        worsening = regularity.evaluate(context, 180.0)
+
+        self.assertGreater(exact.reward_adjustment, improving.reward_adjustment)
+        self.assertGreater(improving.reward_adjustment, 0.0)
+        self.assertLess(worsening.reward_adjustment, 0.0)
+        self.assertEqual(exact.cost, 0.0)
+
+    def test_two_sided_reward_favors_balancing_forward_and_follower_gaps(self):
+        regularity = CausalDepartureRegularityCost(
+            enabled=True,
+            objective_mode="avl_two_sided_incremental_reward",
+            reward_weight=1.0,
+        )
+        context = regularity.capture(
+            forward_headway_s=300.0,
+            target_headway_s=360.0,
+            evidence_source="matched_departure_event",
+            follower_departure_gap_s=420.0,
+            follower_evidence_source="same_time_avl_journey_speed_eta",
+        )
+
+        no_hold = regularity.evaluate(context, 0.0)
+        balanced = regularity.evaluate(context, 60.0)
+        too_long = regularity.evaluate(context, 120.0)
+
+        self.assertEqual(no_hold.reward_adjustment, 0.0)
+        self.assertGreater(balanced.reward_adjustment, 0.0)
+        self.assertLess(too_long.reward_adjustment, balanced.reward_adjustment)
+        self.assertEqual(balanced.predicted_headway_s, 360.0)
+        self.assertEqual(balanced.predicted_follower_gap_s, 360.0)
+
+    def test_two_sided_reward_fails_closed_without_same_time_avl(self):
+        regularity = CausalDepartureRegularityCost(
+            enabled=True,
+            objective_mode="avl_two_sided_incremental_reward",
+            reward_weight=1.0,
+        )
+        context = regularity.capture(
+            forward_headway_s=300.0,
+            target_headway_s=360.0,
+            evidence_source="matched_departure_event",
+            follower_departure_gap_s=420.0,
+            follower_evidence_source="legacy_backward_headway",
+        )
+
+        result = regularity.evaluate(context, 60.0)
+
+        self.assertEqual(result.reward_adjustment, 0.0)
+        self.assertFalse(result.follower_evidence_valid)
+
     def test_runner_consumes_frozen_action_time_context(self):
         runner = TransitDuetV2Runner.__new__(TransitDuetV2Runner)
         runner.lower_departure_regularity = CausalDepartureRegularityCost(
@@ -81,6 +146,13 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):
             CausalDepartureRegularityCost(enabled=True, cost_weight=0.0)
+
+    def test_incremental_reward_requires_positive_reward_weight(self):
+        with self.assertRaisesRegex(ValueError, "reward_weight > 0"):
+            CausalDepartureRegularityCost(
+                enabled=True,
+                objective_mode="forward_incremental_reward",
+            )
 
 
 if __name__ == "__main__":

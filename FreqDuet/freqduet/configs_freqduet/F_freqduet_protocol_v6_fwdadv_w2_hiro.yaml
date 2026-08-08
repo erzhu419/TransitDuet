@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v6_fwdadv_w05_hiro.yaml
+_name: F_freqduet_protocol_v6_fwdadv_w2_hiro
+
+protocol:
+  role: exploratory_forward_incremental_regularity_w2_v6
+
+lower:
+  causal_departure_regularity:
+    reward_weight: 2.0
