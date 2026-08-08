@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -14,10 +15,12 @@ import torch
 from freq_hrl.core import LeakageRegularizer
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
+    DISTURBANCE_MODES,
     action_from_unit_box,
     deterministic_actuation_disturbance,
 )
 from freq_hrl.experiments.reproducibility import (
+    derive_seed,
     training_rollout_seed,
     validate_evaluation_seed_roles,
     validate_unique_seeds,
@@ -37,7 +40,7 @@ from freq_hrl.rl import (
 )
 
 
-MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v1"
+MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v2"
 METHODS = (
     "freq_hrl",
     "freq_hrl_no_leakage",
@@ -60,8 +63,14 @@ def _gym() -> Any:
     return gym
 
 
-def _make_env(env_id: str, *, steps: int) -> Any:
-    env = _gym().make(str(env_id), render_mode=None, max_episode_steps=int(steps))
+def _make_env(env_id: str, *, episode_horizon: int) -> Any:
+    if int(episode_horizon) < 1:
+        raise ValueError("MuJoCo episode_horizon must be positive")
+    env = _gym().make(
+        str(env_id),
+        render_mode=None,
+        max_episode_steps=int(episode_horizon),
+    )
     if len(env.observation_space.shape or ()) != 1:
         env.close()
         raise ValueError("MuJoCo validation requires a vector observation space")
@@ -71,8 +80,12 @@ def _make_env(env_id: str, *, steps: int) -> Any:
     return env
 
 
-def environment_dimensions(env_id: str, *, steps: int) -> tuple[int, int]:
-    env = _make_env(env_id, steps=steps)
+def environment_dimensions(
+    env_id: str,
+    *,
+    episode_horizon: int = 1000,
+) -> tuple[int, int]:
+    env = _make_env(env_id, episode_horizon=episode_horizon)
     try:
         return int(env.observation_space.shape[0]), int(env.action_space.shape[0])
     finally:
@@ -88,6 +101,27 @@ def _module_parameter_count(model: Any) -> int:
     if not parameters:
         raise ValueError("model exposes no trainable torch modules")
     return int(sum(parameter.numel() for parameter in parameters.values()))
+
+
+def _model_parameter_sha256(model: Any) -> str:
+    digest = hashlib.sha256()
+    seen: set[int] = set()
+    for attribute, value in sorted(vars(model).items()):
+        if not isinstance(value, torch.nn.Module):
+            continue
+        for name, parameter in sorted(value.named_parameters()):
+            if id(parameter) in seen:
+                continue
+            seen.add(id(parameter))
+            array = parameter.detach().cpu().contiguous().numpy()
+            digest.update(str(attribute).encode("utf-8") + b"\0")
+            digest.update(str(name).encode("utf-8") + b"\0")
+            digest.update(str(array.dtype).encode("ascii") + b"\0")
+            digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
+            digest.update(array.tobytes())
+    if not seen:
+        raise ValueError("model exposes no parameters to hash")
+    return digest.hexdigest()
 
 
 def _mlp_count(in_dim: int, out_dim: int, hidden_dim: int) -> int:
@@ -168,6 +202,9 @@ def _episode_row(
     upper_transitions: int,
     lower_transitions: int,
     method: str,
+    segment_returns: list[float],
+    natural_episode_returns: list[float],
+    transition_budget: int,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
@@ -188,6 +225,11 @@ def _episode_row(
         "episode_return": float(np.sum(rewards)),
         "reward_mean": float(np.mean(rewards)),
         "episode_length": len(rewards),
+        "rollout_segment_count": len(segment_returns),
+        "rollout_segment_return_mean": float(np.mean(segment_returns)),
+        "natural_episode_count": len(natural_episode_returns),
+        "natural_episode_return_sum": float(np.sum(natural_episode_returns)),
+        "transition_budget_exact": float(len(rewards) == int(transition_budget)),
         "forward_reward_sum": float(np.sum(forward_rewards)),
         "control_reward_sum": float(np.sum(control_rewards)),
         "action_energy": float(np.mean(np.square(executed))),
@@ -226,8 +268,10 @@ def rollout_hierarchical(
     lower_lf_alpha: float = 0.04,
     lower_lf_budget: float = 0.015,
     method: str = "freq_hrl",
+    episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
-    env = _make_env(env_id, steps=steps)
+    transition_budget = int(steps) if sample else int(episode_horizon)
+    env = _make_env(env_id, episode_horizon=episode_horizon)
     try:
         observation, _ = env.reset(seed=int(seed))
         model.reset_recurrent_inference()
@@ -245,9 +289,15 @@ def rollout_hierarchical(
         forward_rewards: list[float] = []
         control_rewards: list[float] = []
         upper_decisions = 0
+        segment_returns: list[float] = []
+        natural_episode_returns: list[float] = []
+        current_episode_return = 0.0
+        episode_index = 0
+        steps_since_upper = int(upper_period)
+        require_upper = True
 
-        for step in range(int(steps)):
-            if step % int(upper_period) == 0:
+        for step in range(transition_budget):
+            if require_upper or steps_since_upper >= int(upper_period):
                 upper_state = _feature_state(
                     bands,
                     previous_action,
@@ -264,6 +314,8 @@ def rollout_hierarchical(
                     value=float(upper_out["value"]),
                 )
                 upper_decisions += 1
+                steps_since_upper = 0
+                require_upper = False
 
             lower_state = _feature_state(
                 bands,
@@ -280,7 +332,7 @@ def rollout_hierarchical(
                 step=step,
                 action_dim=action_dim,
                 seed=int(seed),
-                horizon=int(steps),
+                horizon=int(episode_horizon),
             )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
@@ -289,7 +341,9 @@ def rollout_hierarchical(
             next_observation, reward, terminated, truncated, info = env.step(
                 env_action
             )
-            done = bool(terminated or truncated or step == int(steps) - 1)
+            natural_done = bool(terminated or truncated)
+            budget_done = step == transition_budget - 1
+            done = bool(natural_done or budget_done)
             lower_lf += float(lower_lf_alpha) * (
                 np.asarray(lower_residual, dtype=np.float64) - lower_lf
             )
@@ -308,15 +362,36 @@ def rollout_hierarchical(
                 done=done,
             )
             rewards.append(float(reward))
+            current_episode_return += float(reward)
             executed_actions.append(executed.copy())
             upper_actions.append(upper_anchor.copy())
             lower_actions.append(lower_residual.copy())
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
+            steps_since_upper += 1
             if done:
-                break
-            bands = decomposer.update(next_observation)
+                segment_returns.append(current_episode_return)
+                if natural_done:
+                    natural_episode_returns.append(current_episode_return)
+                current_episode_return = 0.0
+                if not sample or budget_done:
+                    break
+                episode_index += 1
+                observation, _ = env.reset(seed=derive_seed(
+                    "freq_hrl_mujoco_episode_reset_v1",
+                    int(seed),
+                    int(episode_index),
+                ))
+                model.reset_recurrent_inference()
+                bands = decomposer.reset(observation)
+                previous_action = np.zeros(action_dim, dtype=np.float32)
+                upper_anchor = np.zeros(action_dim, dtype=np.float32)
+                lower_lf = np.zeros(action_dim, dtype=np.float64)
+                steps_since_upper = int(upper_period)
+                require_upper = True
+            else:
+                bands = decomposer.update(next_observation)
 
         builder.finish(terminal=True)
         trajectory = builder.build()
@@ -334,6 +409,9 @@ def rollout_hierarchical(
             upper_transitions=trajectory.upper.size,
             lower_transitions=trajectory.lower.size,
             method=method,
+            segment_returns=segment_returns,
+            natural_episode_returns=natural_episode_returns,
+            transition_budget=transition_budget,
         )
         return (trajectory if sample else None), row
     finally:
@@ -348,8 +426,10 @@ def rollout_flat(
     disturbance_mode: str,
     steps: int,
     sample: bool,
+    episode_horizon: int = 1000,
 ) -> tuple[JointTrajectoryBatch | None, dict[str, Any]]:
-    env = _make_env(env_id, steps=steps)
+    transition_budget = int(steps) if sample else int(episode_horizon)
+    env = _make_env(env_id, episode_horizon=episode_horizon)
     try:
         observation, _ = env.reset(seed=int(seed))
         model.reset_recurrent_inference()
@@ -365,8 +445,12 @@ def rollout_flat(
         executed_actions: list[np.ndarray] = []
         forward_rewards: list[float] = []
         control_rewards: list[float] = []
+        segment_returns: list[float] = []
+        natural_episode_returns: list[float] = []
+        current_episode_return = 0.0
+        episode_index = 0
 
-        for step in range(int(steps)):
+        for step in range(transition_budget):
             state = _feature_state(
                 bands,
                 previous_action,
@@ -381,7 +465,7 @@ def rollout_flat(
                 step=step,
                 action_dim=action_dim,
                 seed=int(seed),
-                horizon=int(steps),
+                horizon=int(episode_horizon),
             )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
@@ -390,7 +474,9 @@ def rollout_flat(
             next_observation, reward, terminated, truncated, info = env.step(
                 env_action
             )
-            done = bool(terminated or truncated or step == int(steps) - 1)
+            natural_done = bool(terminated or truncated)
+            budget_done = step == transition_budget - 1
+            done = bool(natural_done or budget_done)
             data["state"].append(state)
             data["action"].append(raw_action)
             data["reward"].append(float(reward))
@@ -398,13 +484,29 @@ def rollout_flat(
             data["old_logp"].append(float(output["logp"]))
             data["old_value"].append(float(output["value"]))
             rewards.append(float(reward))
+            current_episode_return += float(reward)
             executed_actions.append(executed.copy())
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
             if done:
-                break
-            bands = decomposer.update(next_observation)
+                segment_returns.append(current_episode_return)
+                if natural_done:
+                    natural_episode_returns.append(current_episode_return)
+                current_episode_return = 0.0
+                if not sample or budget_done:
+                    break
+                episode_index += 1
+                observation, _ = env.reset(seed=derive_seed(
+                    "freq_hrl_mujoco_episode_reset_v1",
+                    int(seed),
+                    int(episode_index),
+                ))
+                model.reset_recurrent_inference()
+                bands = decomposer.reset(observation)
+                previous_action = np.zeros(action_dim, dtype=np.float32)
+            else:
+                bands = decomposer.update(next_observation)
 
         batch = JointTrajectoryBatch(
             state=np.asarray(data["state"], dtype=np.float32),
@@ -429,6 +531,9 @@ def rollout_flat(
             upper_transitions=len(rewards),
             lower_transitions=len(rewards),
             method="flat_ppo",
+            segment_returns=segment_returns,
+            natural_episode_returns=natural_episode_returns,
+            transition_budget=transition_budget,
         )
         return (batch if sample else None), row
     finally:
@@ -439,6 +544,11 @@ SUMMARY_KEYS = [
     "episode_return",
     "reward_mean",
     "episode_length",
+    "rollout_segment_count",
+    "rollout_segment_return_mean",
+    "natural_episode_count",
+    "natural_episode_return_sum",
+    "transition_budget_exact",
     "forward_reward_sum",
     "control_reward_sum",
     "action_energy",
@@ -495,12 +605,14 @@ def train_mujoco_method(
     steps: int,
     iterations: int,
     optimizer_seed: int,
+    episode_horizon: int = 1000,
     upper_period: int = 16,
     hidden_dim: int = 64,
     learning_rate: float = 3e-4,
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
     checkpoint_evaluation_interval: int = 4,
+    evaluation_disturbance_modes: Iterable[str] | None = None,
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -520,7 +632,12 @@ def train_mujoco_method(
         code_revision=str(code_revision),
         expected_source_manifest_sha256=str(expected_source_manifest_sha256),
     )
-    observation_dim, action_dim = environment_dimensions(env_id, steps=steps)
+    if int(steps) < 1 or int(episode_horizon) < 1:
+        raise ValueError("MuJoCo steps and episode_horizon must be positive")
+    observation_dim, action_dim = environment_dimensions(
+        env_id,
+        episode_horizon=episode_horizon,
+    )
     state_dim = 2 * observation_dim + action_dim
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
@@ -556,6 +673,7 @@ def train_mujoco_method(
             disturbance_mode=disturbance_mode,
             steps=steps,
             sample=sample,
+            episode_horizon=episode_horizon,
         )
         payload, rows, model = train_joint_ppo(
             model=model,
@@ -598,6 +716,7 @@ def train_mujoco_method(
             leakage_constraint=leakage_constraint,
             sample=sample,
             method=name,
+            episode_horizon=episode_horizon,
         )
         payload, rows, model = train_frequency_separated_ppo(
             model=model,
@@ -620,12 +739,71 @@ def train_mujoco_method(
         )
 
     actual_parameters = _module_parameter_count(model)
+    evaluation_modes = tuple(dict.fromkeys(
+        [str(disturbance_mode)]
+        if evaluation_disturbance_modes is None
+        else map(str, evaluation_disturbance_modes)
+    ))
+    if not evaluation_modes or not set(evaluation_modes).issubset(
+        DISTURBANCE_MODES
+    ):
+        raise ValueError("MuJoCo evaluation disturbance registry is invalid")
+    checkpoint_hash = _model_parameter_sha256(model)
+    primary_rows = {
+        int(row["seed"]): row for row in rows
+    }
+    evaluation_rows: list[dict[str, Any]] = []
+    for evaluation_mode in evaluation_modes:
+        for evaluation_seed in evaluation:
+            if (
+                evaluation_mode == str(disturbance_mode)
+                and int(evaluation_seed) in primary_rows
+            ):
+                row = dict(primary_rows[int(evaluation_seed)])
+            elif name == "flat_ppo":
+                row = rollout_flat(
+                    model,
+                    seed=int(evaluation_seed),
+                    env_id=env_id,
+                    disturbance_mode=evaluation_mode,
+                    steps=steps,
+                    sample=False,
+                    episode_horizon=episode_horizon,
+                )[1]
+            else:
+                row = rollout_hierarchical(
+                    model,
+                    seed=int(evaluation_seed),
+                    env_id=env_id,
+                    disturbance_mode=evaluation_mode,
+                    steps=steps,
+                    upper_period=upper_period,
+                    frequency_routing=name != "generic_hrl",
+                    leakage_constraint=name == "freq_hrl",
+                    sample=False,
+                    method=name,
+                    episode_horizon=episode_horizon,
+                )[1]
+            row.update({
+                "training_replicate_seed": int(optimizer_seed),
+                "evaluation_role": "heldout_test",
+                "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+                "parameter_count": actual_parameters,
+                "training_disturbance_mode": str(disturbance_mode),
+            })
+            evaluation_rows.append(row)
+    if checkpoint_hash != _model_parameter_sha256(model):
+        raise RuntimeError("MuJoCo held-out evaluation mutated the checkpoint")
     payload.update({
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
         "method": name,
         "environment": str(env_id),
         "disturbance_mode": str(disturbance_mode),
+        "evaluation_disturbance_modes": list(evaluation_modes),
+        "evaluation_row_count": len(evaluation_rows),
         "steps": int(steps),
+        "training_transition_budget_per_path": int(steps),
+        "evaluation_episode_horizon": int(episode_horizon),
         "upper_period": int(upper_period),
         "frequency_routing_enabled": name.startswith("freq_hrl"),
         "leakage_constraint_enabled": name == "freq_hrl",
@@ -637,15 +815,16 @@ def train_mujoco_method(
         "code_revision": source_identity["code_revision"],
         "source_manifest_sha256": source_identity["source_manifest_sha256"],
         "heldout_test_access_status": "loaded_after_checkpoint_selection",
+        "frozen_checkpoint_sha256": checkpoint_hash,
+        "evaluation_summary_by_disturbance": {
+            mode: summarize([
+                row for row in evaluation_rows
+                if str(row["disturbance_mode"]) == mode
+            ])
+            for mode in evaluation_modes
+        },
     })
-    for row in rows:
-        row.update({
-            "training_replicate_seed": int(optimizer_seed),
-            "evaluation_role": "heldout_test",
-            "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
-            "parameter_count": actual_parameters,
-        })
-    return payload, rows, model
+    return payload, evaluation_rows, model
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -685,6 +864,7 @@ def write_cell(
         "method": payload["method"],
         "environment": payload["environment"],
         "disturbance_mode": payload["disturbance_mode"],
+        "frozen_checkpoint_sha256": payload["frozen_checkpoint_sha256"],
     }, output / "checkpoint.pt")
 
 
@@ -694,13 +874,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--env-id", choices=DEFAULT_ENV_IDS, required=True)
     parser.add_argument(
         "--disturbance-mode",
-        choices=("standard", "low_frequency", "high_frequency", "mixed", "ood_chirp"),
+        choices=DISTURBANCE_MODES,
         default="standard",
+    )
+    parser.add_argument(
+        "--evaluation-disturbance-modes",
+        nargs="+",
+        choices=DISTURBANCE_MODES,
+        default=list(DISTURBANCE_MODES),
     )
     parser.add_argument("--train-seeds", type=int, nargs="+", default=list(DEFAULT_TRAIN_SEEDS))
     parser.add_argument("--selection-seeds", type=int, nargs="+", default=list(DEFAULT_SELECTION_SEEDS))
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=list(DEFAULT_EVAL_SEEDS))
     parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--iterations", type=int, default=64)
     parser.add_argument("--optimizer-seed", type=int, required=True)
     parser.add_argument("--upper-period", type=int, default=16)
@@ -727,12 +914,14 @@ def main() -> None:
         steps=args.steps,
         iterations=args.iterations,
         optimizer_seed=args.optimizer_seed,
+        episode_horizon=args.episode_horizon,
         upper_period=args.upper_period,
         hidden_dim=args.hidden_dim,
         learning_rate=args.learning_rate,
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
         checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
+        evaluation_disturbance_modes=args.evaluation_disturbance_modes,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
     )

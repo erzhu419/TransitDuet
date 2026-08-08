@@ -92,7 +92,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 class MujocoControlIntegrationTest(unittest.TestCase):
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
         observation_dim, action_dim = environment_dimensions(
-            "HalfCheetah-v5", steps=24
+            "HalfCheetah-v5", episode_horizon=24
         )
         model = _hierarchical_model(
             state_dim=2 * observation_dim + action_dim,
@@ -118,6 +118,33 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(row["protocol_valid"], 1.0)
         self.assertTrue(np.isfinite(row["episode_return"]))
 
+    def test_training_budget_continues_across_hopper_terminations(self):
+        observation_dim, action_dim = environment_dimensions(
+            "Hopper-v5", episode_horizon=1000
+        )
+        model = _hierarchical_model(
+            state_dim=2 * observation_dim + action_dim,
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=True,
+        )
+        batch, row = rollout_hierarchical(
+            model,
+            seed=1,
+            env_id="Hopper-v5",
+            disturbance_mode="mixed",
+            steps=128,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=True,
+            sample=True,
+            episode_horizon=1000,
+        )
+        self.assertEqual(batch.lower.size, 128)
+        self.assertGreater(row["natural_episode_count"], 0)
+        self.assertEqual(row["transition_budget_exact"], 1.0)
+
     def test_shared_training_core_smoke(self):
         payload, rows, _ = train_mujoco_method(
             method="freq_hrl_no_leakage",
@@ -127,6 +154,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             selection_seeds=[43],
             eval_seeds=[47],
             steps=24,
+            episode_horizon=32,
             iterations=1,
             optimizer_seed=53,
             upper_period=6,
@@ -134,14 +162,25 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             checkpoint_smoothing_window=1,
             checkpoint_min_delta=0.0,
             checkpoint_evaluation_interval=4,
+            evaluation_disturbance_modes=["standard", "ood_chirp"],
         )
         self.assertEqual(payload["domain"], "mujoco")
-        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v1")
+        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v2")
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0]["protocol_valid"], 1.0)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(
+            {row["disturbance_mode"] for row in rows},
+            {"standard", "ood_chirp"},
+        )
+        self.assertTrue(all(row["protocol_valid"] == 1.0 for row in rows))
+        self.assertEqual(
+            payload["history"][-1]["sampled_transition_budget_exact_mean"],
+            1.0,
+        )
+        self.assertEqual(payload["evaluation_episode_horizon"], 32)
+        self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
 
 
 if __name__ == "__main__":

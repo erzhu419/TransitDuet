@@ -121,6 +121,16 @@ def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> d
         out["sampled_sharpe"] = float(np.mean([float(row["sharpe"]) for row in rows]))
     if rows and "reward_mean" in rows[0]:
         out["sampled_reward_mean"] = float(np.mean([float(row["reward_mean"]) for row in rows]))
+    for key in (
+        "episode_length",
+        "rollout_segment_count",
+        "natural_episode_count",
+        "transition_budget_exact",
+    ):
+        if rows and key in rows[0]:
+            out[f"sampled_{key}_mean"] = float(np.mean([
+                float(row[key]) for row in rows
+            ]))
     return out
 
 
