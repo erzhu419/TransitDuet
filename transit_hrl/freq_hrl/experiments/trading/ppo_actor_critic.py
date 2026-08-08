@@ -85,7 +85,7 @@ FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
 FULL_METHOD_V7_IMPLEMENTATION_VERSION = (
-    "freq_hrl_full_v7_2_advantage_critic_promotion_2026_08_08"
+    "freq_hrl_full_v7_3_calibrated_advantage_promotion_2026_08_08"
 )
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
@@ -1368,8 +1368,10 @@ def smdp_rollout(
     promotion_gate_interval_steps: int = 1,
     promotion_deterministic_mode: str = "actor_probability",
     promotion_advantage_threshold: float = 0.0,
+    promotion_advantage_target_threshold: float | None = None,
     promotion_credit_scale: float | None = None,
     upper_residual_action_scale: float = 1.0,
+    return_trajectory: bool = False,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
@@ -1430,6 +1432,13 @@ def smdp_rollout(
         raise ValueError("unknown deterministic promotion mode")
     if not np.isfinite(float(promotion_advantage_threshold)):
         raise ValueError("promotion_advantage_threshold must be finite")
+    resolved_promotion_advantage_target_threshold = (
+        float(promotion_advantage_threshold)
+        if promotion_advantage_target_threshold is None
+        else float(promotion_advantage_target_threshold)
+    )
+    if not np.isfinite(resolved_promotion_advantage_target_threshold):
+        raise ValueError("promotion_advantage_target_threshold must be finite")
     resolved_promotion_credit_scale = (
         float(reward_scale)
         if promotion_credit_scale is None else float(promotion_credit_scale)
@@ -2468,7 +2477,7 @@ def smdp_rollout(
                 promotion_advantage_threshold
             ))
             == (promotion_advantage_targets >= float(
-                promotion_advantage_threshold
+                resolved_promotion_advantage_target_threshold
             ))
         ))
         if promotion_advantage_alignment_valid else 0.0
@@ -2548,6 +2557,9 @@ def smdp_rollout(
         "promotion_deterministic_mode": promotion_deterministic_mode,
         "promotion_advantage_threshold": float(
             promotion_advantage_threshold
+        ),
+        "promotion_advantage_target_threshold": float(
+            resolved_promotion_advantage_target_threshold
         ),
         "promotion_gate_advantage_head_enabled": float(
             promotion_advantage_head_enabled
@@ -2803,7 +2815,7 @@ def smdp_rollout(
             "asynchronous_hierarchy"
         ),
     }
-    return (trajectory if sample else None), row
+    return (trajectory if sample or bool(return_trajectory) else None), row
 
 
 def evaluate_hf_lower_intervention(
@@ -3086,6 +3098,7 @@ def train_ppo_actor_critic(
     promotion_gate_interval_steps: int = 1,
     promotion_deterministic_mode: str = "auto",
     promotion_advantage_threshold: float = 0.0,
+    promotion_advantage_target_threshold: float | None = None,
     upper_residual_action_scale: float = 1.0,
     training_scenarios: Sequence[str] | None = None,
 ) -> tuple[
@@ -3159,6 +3172,13 @@ def train_ppo_actor_critic(
         raise ValueError("unknown deterministic promotion mode")
     if not np.isfinite(float(promotion_advantage_threshold)):
         raise ValueError("promotion_advantage_threshold must be finite")
+    resolved_promotion_advantage_target_threshold = (
+        float(promotion_advantage_threshold)
+        if promotion_advantage_target_threshold is None
+        else float(promotion_advantage_target_threshold)
+    )
+    if not np.isfinite(resolved_promotion_advantage_target_threshold):
+        raise ValueError("promotion_advantage_target_threshold must be finite")
     resolved_promotion_entropy_coef = (
         0.001
         if promotion_entropy_coef is None else float(promotion_entropy_coef)
@@ -4000,6 +4020,9 @@ def train_ppo_actor_critic(
                 promotion_advantage_threshold=float(
                     promotion_advantage_threshold
                 ),
+                promotion_advantage_target_threshold=float(
+                    resolved_promotion_advantage_target_threshold
+                ),
                 upper_residual_action_scale=float(
                     upper_residual_action_scale
                 ),
@@ -4180,6 +4203,9 @@ def train_ppo_actor_critic(
             "promotion_deterministic_mode": promotion_deterministic_mode,
             "promotion_advantage_threshold": float(
                 promotion_advantage_threshold
+            ),
+            "promotion_advantage_target_threshold": float(
+                resolved_promotion_advantage_target_threshold
             ),
             "hf_lower_overlay_enabled": bool(
                 method_flags["lower_hf_overlay"]

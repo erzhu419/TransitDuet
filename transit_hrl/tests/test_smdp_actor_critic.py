@@ -326,6 +326,11 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             advantage_threshold=0.1,
         )
         self.assertEqual(advantage_action["action"], 0.0)
+        predictions = model.predict_promotion_advantage(
+            np.zeros((3, 4), dtype=np.float32)
+        )
+        self.assertEqual(predictions.shape, (3,))
+        self.assertTrue(np.allclose(predictions, -0.2))
 
         gate = PromotionRolloutBuilder(gamma=0.99)
         gate.begin(

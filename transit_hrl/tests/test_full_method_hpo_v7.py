@@ -7,6 +7,24 @@ from freq_hrl.experiments.trading import full_method_hpo_v7 as v7
 
 
 class FullMethodHPOV7Test(unittest.TestCase):
+    def test_paired_advantage_bias_calibration_removes_intercept_drift(self):
+        target = [-0.02, 0.0, 0.02, 0.05]
+        predicted = [value + 0.04 for value in target]
+        calibration = v7._paired_advantage_bias_calibration(
+            predicted, target, target_threshold=0.01
+        )
+        self.assertAlmostEqual(
+            calibration["median_prediction_bias"], 0.04
+        )
+        self.assertAlmostEqual(
+            calibration["calibrated_decision_threshold"], 0.05
+        )
+        self.assertEqual(calibration["decision_accuracy_after"], 1.0)
+        self.assertLess(
+            calibration["prediction_target_mae_after"],
+            calibration["prediction_target_mae_before"],
+        )
+
     def test_mechanism_gate_requires_executed_promotion_across_replicates(self):
         rows = []
         hf_rows = []
@@ -158,7 +176,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
         self.assertEqual(v7.canonical_full_method_parameter_count(2), 56855)
 
     def test_ablations_inherit_full_candidate_and_keep_v7_protocol_fields(self):
-        candidate_id = "v72_forecast_margin"
+        candidate_id = "v73_forecast_margin"
         full = v7.effective_parameters_for_variant(
             "freq_hrl_full_v7", candidate_id
         )
@@ -232,13 +250,14 @@ class FullMethodHPOV7Test(unittest.TestCase):
 
     def test_cell_trains_one_checkpoint_on_support_only_and_never_loads_ood(self):
         payload = v7.run_hpo_cell(
-            candidate_id="v72_balanced_margin",
+            candidate_id="v73_balanced_margin",
             variant_id="freq_hrl_full_v7",
             training_replicate_seed=2026,
             train_seeds=[42],
+            promotion_calibration_seeds=[140001],
             checkpoint_validation_seeds=[57721],
             tuning_validation_seeds=[68207],
-            steps=24,
+            steps=120,
             assets=2,
             iterations=1,
         )
@@ -249,7 +268,14 @@ class FullMethodHPOV7Test(unittest.TestCase):
             summary["training_episode_protocol"],
             "independent_full_episode_support_batch_v1",
         )
-        self.assertEqual(summary["environment_steps_train"], 4 * 24)
+        self.assertEqual(summary["environment_steps_train"], 4 * 120)
+        self.assertEqual(
+            summary["environment_steps_promotion_calibration"], 4 * 120
+        )
+        self.assertEqual(
+            summary["promotion_calibration"]["status"], "calibrated"
+        )
+        self.assertEqual(len(payload["promotion_calibration_rows"]), 4)
         self.assertEqual(summary["ood_period_access_status"], "not_loaded")
         self.assertEqual(
             summary["promotion_recovery_access_status"], "not_loaded"
@@ -268,6 +294,8 @@ class FullMethodHPOV7Test(unittest.TestCase):
             == "counterfactual_advantage"
             and row["promotion_gate_advantage_head_enabled"] == 1.0
             and row["promotion_gate_advantage_target_mae"] >= 0.0
+            and row["promotion_calibration_status"] == "calibrated"
+            and row["promotion_calibration_sample_count"] > 0
             for row in payload["tuning_rows"]
         ))
         checkpoint_hashes = {
@@ -285,7 +313,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
     def test_hpo_rejects_independently_tuned_ablation(self):
         with self.assertRaisesRegex(ValueError, "non-ablation"):
             v7.run_hpo_cell(
-                candidate_id="v72_balanced_margin",
+                candidate_id="v73_balanced_margin",
                 variant_id="freq_hrl_no_hf_lower_v7",
                 training_replicate_seed=2026,
                 train_seeds=[42],
@@ -301,13 +329,14 @@ class FullMethodHPOV7Test(unittest.TestCase):
             "source_manifest_sha256"
         ]
         payload = v7.run_hpo_cell(
-            candidate_id="v72_balanced_margin",
+            candidate_id="v73_balanced_margin",
             variant_id="freq_hrl_full_v7",
             training_replicate_seed=2026,
             train_seeds=[42],
+            promotion_calibration_seeds=[140001],
             checkpoint_validation_seeds=[57721],
             tuning_validation_seeds=[68207],
-            steps=24,
+            steps=120,
             assets=2,
             iterations=1,
             code_revision="a" * 40,
@@ -318,7 +347,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
             v7.write_hpo_cell(cell, payload)
             diagnostic = v7.summarize_selective_promotion_pilot(
                 [cell],
-                expected_candidate_ids=["v72_balanced_margin"],
+                expected_candidate_ids=["v73_balanced_margin"],
                 expected_replicate_seeds=[2026],
             )
         self.assertNotIn("frozen_config", diagnostic)
@@ -330,7 +359,7 @@ class FullMethodHPOV7Test(unittest.TestCase):
         self.assertEqual(len(diagnostic["leaderboard"]), 1)
         self.assertEqual(
             diagnostic["leaderboard"][0]["candidate_id"],
-            "v72_balanced_margin",
+            "v73_balanced_margin",
         )
 
 

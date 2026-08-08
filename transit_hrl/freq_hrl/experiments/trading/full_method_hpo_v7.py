@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.2 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -62,9 +62,12 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_2"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_advantage_critic_promotion_v7_2_2026_08_08"
+    "full_method_hpo_calibrated_advantage_promotion_v7_3_2026_08_08"
+)
+PROMOTION_CALIBRATION_PROTOCOL_VERSION = (
+    "paired_advantage_median_bias_calibration_v1"
 )
 FULL_METHOD_IMPLEMENTATION_VERSION = FULL_METHOD_V7_IMPLEMENTATION_VERSION
 EXECUTION_TIMELINE_CONTRACT = "causal_post_trade_v3"
@@ -77,11 +80,12 @@ DEFAULT_PLAN_BASIS_DIM = 3
 DEFAULT_PLAN_HORIZON_S = 1800.0
 DEFAULT_PLAN_EVAL_OFFSET_S = 300.0
 DEFAULT_PLAN_COEFFICIENT_SCALE = 0.75
-DEFAULT_TRAIN_SEEDS = (104729, 104743, 104759)
-DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (130003, 130021, 130027)
-DEFAULT_TUNING_SEEDS = (150001, 150011, 150013, 150019, 150041)
-DEFAULT_PILOT_OPTIMIZER_SEEDS = (3001, 3011, 3023)
-DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS = (4001, 4003, 4007, 4013, 4019)
+DEFAULT_TRAIN_SEEDS = (170003, 170021, 170029)
+DEFAULT_PROMOTION_CALIBRATION_SEEDS = (180001, 180013, 180023)
+DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (190027, 190031, 190051)
+DEFAULT_TUNING_SEEDS = (200003, 200009, 200017, 200023, 200029)
+DEFAULT_PILOT_OPTIMIZER_SEEDS = (5003, 5009, 5011)
+DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS = (6007, 6011, 6029, 6037, 6043)
 ABLATION_PARENT_VARIANT = "freq_hrl_full_v7"
 MIN_MECHANISM_REPLICATE_FRACTION = 0.8
 MIN_HF_ACTION_SENSITIVITY = 1e-8
@@ -119,12 +123,12 @@ class Candidate:
 
 
 VARIANTS = (
-    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
-    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7_2", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
+    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7_3", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
     Variant("flat_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_ppo", "routing_core_v2", "capacity_matched_flat_baseline"),
     Variant("flat_gru_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_gru_ppo", "routing_core_v2", "capacity_matched_flat_recurrent_baseline"),
     Variant("generic_hrl_ppo_matched_v7", "ppo", "baseline_ppo_v7", "generic_hrl_ppo", "curve_credit_control_v3", "capacity_matched_nonfrequency_hrl_baseline"),
@@ -186,7 +190,7 @@ def _frequency_candidate(
     promotion_advantage_huber_delta: float = 0.05,
     promotion_advantage_threshold: float = 0.0,
 ) -> Candidate:
-    return Candidate(candidate_id, "frequency_ppo_v7_2", {
+    return Candidate(candidate_id, "frequency_ppo_v7_3", {
         **_optimizer_parameters(lower_lr, init_log_std),
         "upper_learning_rate": float(upper_lr),
         "lower_learning_rate": float(lower_lr),
@@ -238,6 +242,9 @@ def _frequency_candidate(
         "promotion_advantage_threshold": float(
             promotion_advantage_threshold
         ),
+        "promotion_advantage_target_threshold": float(
+            promotion_advantage_threshold
+        ),
         "upper_residual_action_scale": 1.0,
     })
 
@@ -269,7 +276,7 @@ def _offpolicy_candidate(
 
 FREQUENCY_CANDIDATES = (
     _frequency_candidate(
-        "v72_conservative_zero",
+        "v73_conservative_zero",
         upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4,
         init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
         dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025,
@@ -283,7 +290,7 @@ FREQUENCY_CANDIDATES = (
         promotion_advantage_threshold=0.0,
     ),
     _frequency_candidate(
-        "v72_conservative_margin",
+        "v73_conservative_margin",
         upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4,
         init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
         dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025,
@@ -297,7 +304,7 @@ FREQUENCY_CANDIDATES = (
         promotion_advantage_threshold=0.01,
     ),
     _frequency_candidate(
-        "v72_forecast_small_margin",
+        "v73_forecast_small_margin",
         upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
         init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
         dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020,
@@ -311,7 +318,7 @@ FREQUENCY_CANDIDATES = (
         promotion_advantage_threshold=0.005,
     ),
     _frequency_candidate(
-        "v72_forecast_margin",
+        "v73_forecast_margin",
         upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
         init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05,
         dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020,
@@ -325,7 +332,7 @@ FREQUENCY_CANDIDATES = (
         promotion_advantage_threshold=0.015,
     ),
     _frequency_candidate(
-        "v72_balanced_margin",
+        "v73_balanced_margin",
         upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
         init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10,
         dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025,
@@ -339,7 +346,7 @@ FREQUENCY_CANDIDATES = (
         promotion_advantage_threshold=0.015,
     ),
     _frequency_candidate(
-        "v72_balanced_strict",
+        "v73_balanced_strict",
         upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4,
         init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10,
         dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025,
@@ -471,6 +478,7 @@ def effective_parameters_for_variant(variant_id: str, candidate_id: str) -> dict
             "promotion_gate_interval_steps": 1,
             "promotion_deterministic_mode": "actor_probability",
             "promotion_advantage_threshold": 0.0,
+            "promotion_advantage_target_threshold": 0.0,
             "upper_residual_action_scale": 1.0,
         })
     elif variant.method_contract == "ablate_promotion_v7":
@@ -521,6 +529,7 @@ def _ppo_training_kwargs(params: dict[str, Any]) -> dict[str, Any]:
         "promotion_adapt_gain", "promotion_cooldown_steps",
         "promotion_gate_interval_steps",
         "promotion_deterministic_mode", "promotion_advantage_threshold",
+        "promotion_advantage_target_threshold",
         "upper_residual_action_scale",
     )
     result = {key: params[key] for key in keys}
@@ -669,6 +678,9 @@ def _evaluate_ppo(
                     promotion_advantage_threshold=float(
                         params["promotion_advantage_threshold"]
                     ),
+                    promotion_advantage_target_threshold=float(
+                        params["promotion_advantage_target_threshold"]
+                    ),
                     upper_residual_action_scale=float(
                         params["upper_residual_action_scale"]
                     ),
@@ -761,10 +773,168 @@ def _hf_intervention_kwargs(
         "promotion_advantage_threshold": float(
             params["promotion_advantage_threshold"]
         ),
+        "promotion_advantage_target_threshold": float(
+            params["promotion_advantage_target_threshold"]
+        ),
         "upper_residual_action_scale": float(
             params["upper_residual_action_scale"]
         ),
     }
+
+
+def _paired_advantage_bias_calibration(
+    predictions: Iterable[float],
+    targets: Iterable[float],
+    *,
+    target_threshold: float,
+) -> dict[str, Any]:
+    """Map an economic advantage margin through a critic's robust bias."""
+
+    predicted = np.asarray(list(predictions), dtype=np.float64).reshape(-1)
+    observed = np.asarray(list(targets), dtype=np.float64).reshape(-1)
+    if (
+        predicted.size == 0
+        or predicted.shape != observed.shape
+        or not np.all(np.isfinite(predicted))
+        or not np.all(np.isfinite(observed))
+        or not np.isfinite(float(target_threshold))
+    ):
+        raise ValueError("advantage calibration requires aligned finite samples")
+    residual = predicted - observed
+    median_bias = float(np.median(residual))
+    calibrated_threshold = float(target_threshold) + median_bias
+    target_positive = observed >= float(target_threshold)
+    uncalibrated_positive = predicted >= float(target_threshold)
+    calibrated_positive = predicted >= calibrated_threshold
+    return {
+        "status": "calibrated",
+        "protocol_version": PROMOTION_CALIBRATION_PROTOCOL_VERSION,
+        "sample_count": int(predicted.size),
+        "target_threshold": float(target_threshold),
+        "uncalibrated_decision_threshold": float(target_threshold),
+        "calibrated_decision_threshold": calibrated_threshold,
+        "median_prediction_bias": median_bias,
+        "prediction_target_mae_before": float(np.mean(np.abs(residual))),
+        "prediction_target_mae_after": float(np.mean(np.abs(
+            predicted - median_bias - observed
+        ))),
+        "decision_accuracy_before": float(np.mean(
+            uncalibrated_positive == target_positive
+        )),
+        "decision_accuracy_after": float(np.mean(
+            calibrated_positive == target_positive
+        )),
+        "target_positive_rate": float(np.mean(target_positive)),
+        "decision_positive_rate_before": float(np.mean(
+            uncalibrated_positive
+        )),
+        "decision_positive_rate_after": float(np.mean(
+            calibrated_positive
+        )),
+    }
+
+
+def calibrate_promotion_advantage_threshold(
+    model: Any,
+    *,
+    params: dict[str, Any],
+    calibration_seeds: Iterable[int],
+    steps: int,
+    assets: int,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Calibrate critic intercept on a role-separated support-path set."""
+
+    seeds = validate_unique_seeds(
+        calibration_seeds, role="promotion_calibration_seeds"
+    )
+    if str(params["promotion_deterministic_mode"]) != (
+        "counterfactual_advantage"
+    ):
+        raise ValueError("advantage calibration requires advantage decisions")
+    target_threshold = float(params["promotion_advantage_target_threshold"])
+    predictions: list[float] = []
+    targets: list[float] = []
+    rows: list[dict[str, Any]] = []
+    for scenario in SELECTION_SCENARIOS:
+        for seed in seeds:
+            trajectory, row = smdp_rollout(
+                model,
+                seed=int(seed),
+                sample=False,
+                return_trajectory=True,
+                **_hf_intervention_kwargs(
+                    params,
+                    steps=int(steps),
+                    assets=int(assets),
+                    scenario=str(scenario),
+                ),
+            )
+            if (
+                trajectory is None
+                or trajectory.promotion is None
+                or trajectory.promotion.counterfactual_advantage is None
+            ):
+                rows.append({
+                    "scenario": str(scenario),
+                    "seed": int(seed),
+                    "transition_count": 0,
+                    "prediction_mean": 0.0,
+                    "target_mean": 0.0,
+                    "prediction_bias_median": 0.0,
+                    "uncalibrated_action_rate": float(
+                        row["promotion_gate_action_rate"]
+                    ),
+                    "target_threshold": target_threshold,
+                    "calibration_status": "no_eligible_transition",
+                })
+                continue
+            state = np.asarray(trajectory.promotion.state, dtype=np.float32)
+            predicted = model.predict_promotion_advantage(state)
+            observed = np.asarray(
+                trajectory.promotion.counterfactual_advantage,
+                dtype=np.float64,
+            ).reshape(-1)
+            if predicted.shape != observed.shape or predicted.size == 0:
+                raise RuntimeError("promotion calibration labels are misaligned")
+            if not np.isclose(
+                float(np.mean(predicted)),
+                float(row["promotion_gate_advantage_mean"]),
+                atol=1e-7,
+                rtol=1e-6,
+            ):
+                raise RuntimeError("promotion calibration prediction trace drifted")
+            predictions.extend(map(float, predicted))
+            targets.extend(map(float, observed))
+            rows.append({
+                "scenario": str(scenario),
+                "seed": int(seed),
+                "transition_count": int(predicted.size),
+                "prediction_mean": float(np.mean(predicted)),
+                "target_mean": float(np.mean(observed)),
+                "prediction_bias_median": float(np.median(
+                    predicted - observed
+                )),
+                "uncalibrated_action_rate": float(
+                    row["promotion_gate_action_rate"]
+                ),
+                "target_threshold": target_threshold,
+                "calibration_status": "used",
+            })
+    if not predictions:
+        raise RuntimeError("promotion calibration produced no paired labels")
+    calibration = _paired_advantage_bias_calibration(
+        predictions, targets, target_threshold=target_threshold
+    )
+    calibration.update({
+        "seed_count": len(seeds),
+        "seeds": list(seeds),
+        "scenario_count": len(SELECTION_SCENARIOS),
+        "scenarios": list(SELECTION_SCENARIOS),
+        "evaluation_role": "promotion_calibration_support_only",
+        "ood_period_access_status": "not_loaded",
+        "promotion_recovery_access_status": "not_loaded",
+    })
+    return calibration, rows
 
 
 def run_hpo_cell(
@@ -773,6 +943,7 @@ def run_hpo_cell(
     variant_id: str,
     training_replicate_seed: int,
     train_seeds: list[int],
+    promotion_calibration_seeds: list[int] | None = None,
     checkpoint_validation_seeds: list[int],
     tuning_validation_seeds: list[int],
     steps: int,
@@ -788,9 +959,31 @@ def run_hpo_cell(
     if candidate is None or candidate.family != variant.candidate_family:
         raise ValueError(f"candidate {candidate_id} does not apply to {variant_id}")
     rollout_roots = validate_unique_seeds(train_seeds, role="rollout_seed_roots")
+    calibration_seeds = validate_unique_seeds(
+        (
+            DEFAULT_PROMOTION_CALIBRATION_SEEDS
+            if promotion_calibration_seeds is None
+            else promotion_calibration_seeds
+        ),
+        role="promotion_calibration_seeds",
+    )
     checkpoint_seeds, tuning_seeds = validate_evaluation_seed_roles(
         checkpoint_validation_seeds, tuning_validation_seeds
     )
+    seed_roles = {
+        "training": set(rollout_roots),
+        "promotion_calibration": set(calibration_seeds),
+        "checkpoint_validation": set(checkpoint_seeds),
+        "tuning_validation": set(tuning_seeds),
+    }
+    role_names = list(seed_roles)
+    for index, left in enumerate(role_names):
+        for right in role_names[index + 1:]:
+            overlap = seed_roles[left].intersection(seed_roles[right])
+            if overlap:
+                raise ValueError(
+                    f"seed roles {left} and {right} overlap: {sorted(overlap)}"
+                )
     source_identity = verify_current_freq_hrl_source_identity(
         code_revision=str(code_revision),
         expected_source_manifest_sha256=str(expected_source_manifest_sha256),
@@ -840,9 +1033,55 @@ def run_hpo_cell(
     if model_payload.get("heldout_test_seeds"):
         raise RuntimeError("HPO loaded held-out seeds")
     checkpoint_hash = _state_dict_sha256(model)
+    evaluation_params = dict(params)
+    promotion_calibration_rows: list[dict[str, Any]] = []
+    promotion_calibration = {
+        "status": "not_applicable",
+        "protocol_version": PROMOTION_CALIBRATION_PROTOCOL_VERSION,
+        "sample_count": 0,
+        "seed_count": 0,
+        "seeds": [],
+        "scenario_count": 0,
+        "scenarios": [],
+        "target_threshold": float(
+            params["promotion_advantage_target_threshold"]
+        ),
+        "uncalibrated_decision_threshold": float(
+            params["promotion_advantage_threshold"]
+        ),
+        "calibrated_decision_threshold": float(
+            params["promotion_advantage_threshold"]
+        ),
+        "median_prediction_bias": 0.0,
+        "prediction_target_mae_before": 0.0,
+        "prediction_target_mae_after": 0.0,
+        "decision_accuracy_before": 0.0,
+        "decision_accuracy_after": 0.0,
+        "target_positive_rate": 0.0,
+        "decision_positive_rate_before": 0.0,
+        "decision_positive_rate_after": 0.0,
+        "evaluation_role": "not_applicable",
+        "ood_period_access_status": "not_loaded",
+        "promotion_recovery_access_status": "not_loaded",
+    }
+    if variant.variant_id == ABLATION_PARENT_VARIANT:
+        promotion_calibration, promotion_calibration_rows = (
+            calibrate_promotion_advantage_threshold(
+                model,
+                params=params,
+                calibration_seeds=calibration_seeds,
+                steps=int(steps),
+                assets=int(assets),
+            )
+        )
+        evaluation_params["promotion_advantage_threshold"] = float(
+            promotion_calibration["calibrated_decision_threshold"]
+        )
+    if checkpoint_hash != _state_dict_sha256(model):
+        raise RuntimeError("promotion calibration mutated the checkpoint")
     tuning_rows = (
         _evaluate_ppo(
-            model, params=params, scenarios=SELECTION_SCENARIOS,
+            model, params=evaluation_params, scenarios=SELECTION_SCENARIOS,
             seeds=tuning_seeds, steps=int(steps), assets=int(assets),
         )
         if variant.trainer_family == "ppo" else
@@ -873,6 +1112,16 @@ def run_hpo_cell(
             "evaluation_role": "support_only_tuning_validation",
             "selection_objective_version": SELECTION_OBJECTIVE_VERSION,
             "tuning_protocol_version": FULL_METHOD_TUNING_PROTOCOL_VERSION,
+            "promotion_calibration_protocol_version": (
+                PROMOTION_CALIBRATION_PROTOCOL_VERSION
+            ),
+            "promotion_calibration_status": promotion_calibration["status"],
+            "promotion_calibration_sample_count": int(
+                promotion_calibration["sample_count"]
+            ),
+            "promotion_calibrated_bias": float(
+                promotion_calibration["median_prediction_bias"]
+            ),
             "frozen_checkpoint_sha256": checkpoint_hash,
             "selection_utility": utility,
         })
@@ -893,7 +1142,8 @@ def run_hpo_cell(
                 model,
                 eval_seeds=list(tuning_seeds),
                 rollout_kwargs=_hf_intervention_kwargs(
-                    params, steps=int(steps), assets=int(assets), scenario=scenario
+                    evaluation_params,
+                    steps=int(steps), assets=int(assets), scenario=scenario
                 ),
             )
             hf_rows.extend({
@@ -918,7 +1168,8 @@ def run_hpo_cell(
         "candidate_id": candidate.candidate_id,
         "candidate_family": candidate.family,
         "candidate_parameters": dict(candidate.parameters),
-        "effective_parameters": params,
+        "effective_parameters": evaluation_params,
+        "uncalibrated_effective_parameters": params,
         "trainer_family": variant.trainer_family,
         "policy_mode": variant.policy_mode,
         "method_contract": variant.method_contract,
@@ -933,6 +1184,11 @@ def run_hpo_cell(
         "training_replicate_seed": int(training_replicate_seed),
         "optimizer_seed": int(optimizer_seed),
         "rollout_seed_roots": list(rollout_roots),
+        "promotion_calibration_seeds": list(calibration_seeds),
+        "promotion_calibration_protocol_version": (
+            PROMOTION_CALIBRATION_PROTOCOL_VERSION
+        ),
+        "promotion_calibration": promotion_calibration,
         "checkpoint_validation_seeds": list(checkpoint_seeds),
         "tuning_validation_seeds": list(tuning_seeds),
         "heldout_test_seeds": [],
@@ -963,6 +1219,9 @@ def run_hpo_cell(
         "environment_steps_validation": int(
             model_payload.get("environment_steps_validation", 0)
         ),
+        "environment_steps_promotion_calibration": int(
+            len(promotion_calibration_rows) * int(steps)
+        ),
         "frozen_checkpoint_sha256": checkpoint_hash,
         "hf_intervention_pair_count": len(hf_rows),
         "hf_action_sensitivity_mean": float(np.mean([
@@ -979,7 +1238,8 @@ def run_hpo_cell(
         "model_config": model_payload.get("config", {}),
         "variant_id": variant.variant_id,
         "candidate_id": candidate.candidate_id,
-        "effective_parameters": params,
+        "effective_parameters": evaluation_params,
+        "promotion_calibration": promotion_calibration,
         "training_replicate_seed": int(training_replicate_seed),
         "frozen_checkpoint_sha256": checkpoint_hash,
         "tuning_protocol_version": FULL_METHOD_TUNING_PROTOCOL_VERSION,
@@ -987,6 +1247,7 @@ def run_hpo_cell(
     }
     return {
         "tuning_rows": annotated,
+        "promotion_calibration_rows": promotion_calibration_rows,
         "hf_intervention_rows": hf_rows,
         "cell_summary": summary,
         "checkpoint": checkpoint,
@@ -1019,6 +1280,10 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
 def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     _write_csv(output_dir / "tuning_rows.csv", payload["tuning_rows"])
+    _write_csv(
+        output_dir / "promotion_calibration_rows.csv",
+        payload["promotion_calibration_rows"],
+    )
     _write_csv(output_dir / "hf_intervention_rows.csv", payload["hf_intervention_rows"])
     (output_dir / "cell_summary.json").write_text(
         json.dumps(payload["cell_summary"], indent=2, sort_keys=True) + "\n",
@@ -1028,11 +1293,15 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7.2 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.3 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",
             f"- support utility: `{summary['selection_utility_mean']:.8f}`",
+            "- promotion calibration: "
+            f"`{summary['promotion_calibration']['status']}`",
+            "- promotion decision threshold: "
+            f"`{summary['promotion_calibration']['calibrated_decision_threshold']:.8f}`",
             "- OOD access: `not_loaded`",
         ]) + "\n",
         encoding="utf-8",
@@ -1423,7 +1692,48 @@ def _load_validated_hpo_cells(
             "independent_full_episode_support_batch_v1"
         ):
             raise ValueError(f"stitched support training is forbidden: {key}")
+        calibration = dict(summary.get("promotion_calibration", {}))
+        calibration_rows = _read_csv(
+            base / "promotion_calibration_rows.csv"
+        )
+        if str(summary["variant_id"]) == ABLATION_PARENT_VARIANT:
+            if (
+                summary.get("promotion_calibration_protocol_version")
+                != PROMOTION_CALIBRATION_PROTOCOL_VERSION
+                or calibration.get("status") != "calibrated"
+            ):
+                raise ValueError(f"promotion calibration mismatch: {key}")
+            expected_calibration_coverage = {
+                (scenario, int(seed))
+                for scenario in SELECTION_SCENARIOS
+                for seed in summary["promotion_calibration_seeds"]
+            }
+            observed_calibration_coverage = {
+                (str(row["scenario"]), int(float(row["seed"])))
+                for row in calibration_rows
+            }
+            if observed_calibration_coverage != expected_calibration_coverage:
+                raise ValueError(
+                    f"incomplete promotion calibration coverage: {key}"
+                )
+            if int(calibration.get("sample_count", 0)) <= 0:
+                raise ValueError(f"empty promotion calibration: {key}")
+        elif calibration_rows or calibration.get("status") != "not_applicable":
+            raise ValueError(f"unexpected baseline promotion calibration: {key}")
         cell_rows = _read_csv(base / "tuning_rows.csv")
+        expected_calibration_status = (
+            "calibrated"
+            if str(summary["variant_id"]) == ABLATION_PARENT_VARIANT
+            else "not_applicable"
+        )
+        if any(
+            row.get("promotion_calibration_protocol_version")
+            != PROMOTION_CALIBRATION_PROTOCOL_VERSION
+            or row.get("promotion_calibration_status")
+            != expected_calibration_status
+            for row in cell_rows
+        ):
+            raise ValueError(f"tuning calibration provenance mismatch: {key}")
         expected_coverage = {
             (scenario, int(seed))
             for scenario in SELECTION_SCENARIOS
@@ -1450,7 +1760,8 @@ def _validate_common_hpo_fields(summaries: list[dict[str, Any]]) -> None:
         raise ValueError("HPO merge requires at least one cell")
     for field in (
         "rollout_seed_roots", "checkpoint_validation_seeds",
-        "tuning_validation_seeds", "steps", "assets", "iterations",
+        "promotion_calibration_seeds", "tuning_validation_seeds",
+        "steps", "assets", "iterations",
         "training_episode_protocol",
     ):
         values = {json.dumps(summary[field], sort_keys=True) for summary in summaries}
@@ -1498,6 +1809,18 @@ def _candidate_leaderboard_row(
     gain_mean = float(np.mean([
         float(summary["validation_learning_gain"]) for summary in matching
     ]))
+    calibrations = [
+        dict(summary.get("promotion_calibration", {}))
+        for summary in matching
+        if summary.get("promotion_calibration", {}).get("status")
+        == "calibrated"
+    ]
+
+    def calibration_mean(field: str) -> float:
+        return float(np.mean([
+            float(calibration[field]) for calibration in calibrations
+        ] or [0.0]))
+
     mechanism_evidence = {
         "status": "not_applicable",
         "promotion_execution_count": 0.0,
@@ -1547,6 +1870,21 @@ def _candidate_leaderboard_row(
         "robust_selection_score": ci_low,
         "trained_checkpoint_fraction": trained_fraction,
         "validation_learning_gain_mean": gain_mean,
+        "promotion_calibrated_replicate_fraction": float(
+            len(calibrations) / max(len(matching), 1)
+        ),
+        "promotion_calibrated_threshold_mean": calibration_mean(
+            "calibrated_decision_threshold"
+        ),
+        "promotion_calibrated_bias_mean": calibration_mean(
+            "median_prediction_bias"
+        ),
+        "promotion_calibration_accuracy_before_mean": calibration_mean(
+            "decision_accuracy_before"
+        ),
+        "promotion_calibration_accuracy_after_mean": calibration_mean(
+            "decision_accuracy_after"
+        ),
         "learning_gate_status": (
             "eligible"
             if trained_fraction >= 0.8 and gain_mean > 0.0 else "ineligible"
@@ -1740,12 +2078,18 @@ def merge_hpo_cells(
         "training_scenario": TRAINING_SCENARIO,
         "training_support_components": list(SELECTION_SCENARIOS),
         "training_episode_protocol": "independent_full_episode_support_batch_v1",
+        "promotion_calibration_protocol_version": (
+            PROMOTION_CALIBRATION_PROTOCOL_VERSION
+        ),
         "selection_scenarios": list(SELECTION_SCENARIOS),
         "ood_period_access_status": "not_loaded",
         "promotion_recovery_access_status": "not_loaded",
         "heldout_test_access_status": "not_loaded",
         "heldout_test_seeds": [],
         "rollout_seed_roots": first["rollout_seed_roots"],
+        "promotion_calibration_seeds": first[
+            "promotion_calibration_seeds"
+        ],
         "checkpoint_validation_seeds": first["checkpoint_validation_seeds"],
         "tuning_validation_seeds": first["tuning_validation_seeds"],
         "training_replicate_seeds": sorted(set(replicates)),
@@ -1842,6 +2186,9 @@ def summarize_selective_promotion_pilot(
             "promotion_advantage_threshold": float(
                 params["promotion_advantage_threshold"]
             ),
+            "promotion_advantage_target_threshold": float(
+                params["promotion_advantage_target_threshold"]
+            ),
             "promotion_advantage_learning_rate": float(
                 params["promotion_advantage_learning_rate"]
             ),
@@ -1904,6 +2251,12 @@ def summarize_selective_promotion_pilot(
             "cell_count": len(summaries),
             "training_replicate_count": len(replicates),
             "training_replicate_seeds": sorted(replicates),
+            "promotion_calibration_protocol_version": (
+                PROMOTION_CALIBRATION_PROTOCOL_VERSION
+            ),
+            "promotion_calibration_seeds": first[
+                "promotion_calibration_seeds"
+            ],
             "support_scenarios": list(SELECTION_SCENARIOS),
             "ood_period_access_status": "not_loaded",
             "promotion_recovery_access_status": "not_loaded",
@@ -1975,6 +2328,33 @@ def validate_frozen_config(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("v7 HPO accessed OOD")
     if payload.get("promotion_recovery_access_status") != "not_loaded":
         raise ValueError("v7 HPO accessed confirmatory promotion recovery")
+    if payload.get("promotion_calibration_protocol_version") != (
+        PROMOTION_CALIBRATION_PROTOCOL_VERSION
+    ):
+        raise ValueError("v7 promotion calibration protocol mismatch")
+    validate_unique_seeds(
+        payload.get("promotion_calibration_seeds", []),
+        role="promotion_calibration_seeds",
+    )
+    role_seeds = {
+        "training": set(map(int, payload.get("rollout_seed_roots", []))),
+        "promotion_calibration": set(map(
+            int, payload.get("promotion_calibration_seeds", [])
+        )),
+        "checkpoint_validation": set(map(
+            int, payload.get("checkpoint_validation_seeds", [])
+        )),
+        "tuning_validation": set(map(
+            int, payload.get("tuning_validation_seeds", [])
+        )),
+    }
+    names = list(role_seeds)
+    if any(
+        role_seeds[left].intersection(role_seeds[right])
+        for index, left in enumerate(names)
+        for right in names[index + 1:]
+    ):
+        raise ValueError("v7 frozen seed roles overlap")
     if payload.get("heldout_test_access_status") != "not_loaded" or payload.get(
         "heldout_test_seeds"
     ):
@@ -2030,6 +2410,10 @@ def main() -> None:
     parser.add_argument("--variant-id", choices=HPO_VARIANT_IDS)
     parser.add_argument("--training-replicate-seed", type=int)
     parser.add_argument("--train-seeds", type=int, nargs="+", default=list(DEFAULT_TRAIN_SEEDS))
+    parser.add_argument(
+        "--promotion-calibration-seeds", type=int, nargs="+",
+        default=list(DEFAULT_PROMOTION_CALIBRATION_SEEDS),
+    )
     parser.add_argument("--checkpoint-validation-seeds", type=int, nargs="+", default=list(DEFAULT_CHECKPOINT_VALIDATION_SEEDS))
     parser.add_argument("--tuning-validation-seeds", type=int, nargs="+", default=list(DEFAULT_TUNING_SEEDS))
     parser.add_argument("--steps", type=int, default=240)
@@ -2064,6 +2448,7 @@ def main() -> None:
         candidate_id=str(args.candidate_id), variant_id=str(args.variant_id),
         training_replicate_seed=int(args.training_replicate_seed),
         train_seeds=list(args.train_seeds),
+        promotion_calibration_seeds=list(args.promotion_calibration_seeds),
         checkpoint_validation_seeds=list(args.checkpoint_validation_seeds),
         tuning_validation_seeds=list(args.tuning_validation_seeds),
         steps=int(args.steps), assets=int(args.assets), iterations=int(args.iterations),

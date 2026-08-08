@@ -901,6 +901,32 @@ class FrequencySeparatedActorCriticPPO:
             ),
         }
 
+    @torch.no_grad()
+    def predict_promotion_advantage(
+        self, states: np.ndarray
+    ) -> np.ndarray:
+        """Predict paired replan-minus-continue values for a state batch."""
+
+        if self.promotion_advantage is None:
+            raise RuntimeError("promotion advantage head is not configured")
+        array = np.asarray(states, dtype=np.float32)
+        if array.ndim == 1:
+            array = array.reshape(1, -1)
+        if (
+            array.ndim != 2
+            or array.shape[1] != int(self.config.promotion_state_dim)
+            or array.shape[0] == 0
+            or not np.all(np.isfinite(array))
+        ):
+            raise ValueError("promotion states must be a finite non-empty matrix")
+        tensor = torch.as_tensor(
+            array, dtype=torch.float32, device=self.device
+        )
+        return (
+            self.promotion_advantage(tensor)
+            .detach().cpu().numpy().astype(np.float64, copy=False)
+        )
+
     def _gae(
         self,
         signal: np.ndarray,
