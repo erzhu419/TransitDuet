@@ -127,6 +127,33 @@ class PlanCurveTest(unittest.TestCase):
         np.testing.assert_allclose(old_plan.value_at(5.0), old_value)
         self.assertFalse(np.allclose(state.value_at(10.0), old_plan.value_at(10.0)))
 
+    def test_zero_residual_policy_executes_causal_reference_plan(self):
+        mapper = LearnedPlanActionMapper(
+            curve=BernsteinPlanCurve(
+                horizon_s=10.0,
+                basis_dim=3,
+                n_entities=1,
+                delta_min=-1.0,
+                delta_max=1.0,
+            ),
+            coefficient_scale=0.5,
+            anchor_first_coefficient=True,
+        )
+        state = LearnedPlanCurveState(mapper=mapper, gross_cap=None)
+        result = state.activate(
+            now_s=0.0,
+            current_value=[0.2],
+            latent_action=[0.0, 0.0],
+            reference_target=[0.8],
+        )
+        np.testing.assert_allclose(
+            result.reference_coefficients, [0.0, 0.3, 0.6]
+        )
+        np.testing.assert_allclose(result.residual_coefficients, [0.0, 0.0, 0.0])
+        np.testing.assert_allclose(state.value_at(0.0), [0.2])
+        np.testing.assert_allclose(state.value_at(5.0), [0.5])
+        np.testing.assert_allclose(state.value_at(10.0), [0.8])
+
 
 if __name__ == "__main__":
     unittest.main()

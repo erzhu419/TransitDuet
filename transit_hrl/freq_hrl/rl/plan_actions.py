@@ -15,6 +15,8 @@ class PlanActionResult:
     target: np.ndarray
     coefficients: np.ndarray
     smoothness_penalty: float
+    reference_coefficients: np.ndarray | None = None
+    residual_coefficients: np.ndarray | None = None
 
 
 @dataclass
@@ -43,7 +45,9 @@ class LearnedPlanActionMapper:
             else per_entity * int(self.curve.n_entities)
         )
 
-    def coefficients(self, latent_action: Sequence[float]) -> np.ndarray:
+    def residual_coefficients(
+        self, latent_action: Sequence[float]
+    ) -> np.ndarray:
         latent = np.asarray(latent_action, dtype=np.float64).reshape(-1)
         if latent.size != self.action_dim:
             raise ValueError(f"expected latent action dim {self.action_dim}, got {latent.size}")
@@ -63,11 +67,84 @@ class LearnedPlanActionMapper:
         ]
         return np.concatenate(blocks)
 
-    def target(self, current_value: Sequence[float], latent_action: Sequence[float]) -> PlanActionResult:
+    def reference_coefficients(
+        self,
+        current_value: Sequence[float],
+        desired_value: Sequence[float],
+    ) -> np.ndarray:
+        """Fit a causal low-frequency reference curve from current to desired."""
+
+        current = np.asarray(current_value, dtype=np.float64).reshape(-1)
+        desired = np.asarray(desired_value, dtype=np.float64).reshape(-1)
+        if current.size != int(self.curve.n_entities):
+            current = np.resize(current, int(self.curve.n_entities))
+        if desired.size != int(self.curve.n_entities):
+            desired = np.resize(desired, int(self.curve.n_entities))
+        delta = desired - current
+        if self.curve.shared_entities:
+            coefficients = np.linspace(
+                0.0,
+                float(np.mean(delta)) if delta.size else 0.0,
+                int(self.curve.basis_dim),
+                dtype=np.float64,
+            )
+        else:
+            coefficients = np.concatenate([
+                np.linspace(
+                    0.0,
+                    float(value),
+                    int(self.curve.basis_dim),
+                    dtype=np.float64,
+                )
+                for value in delta
+            ])
+        return np.clip(
+            coefficients,
+            float(self.curve.delta_min),
+            float(self.curve.delta_max),
+        )
+
+    def coefficients(
+        self,
+        latent_action: Sequence[float],
+        *,
+        reference_coefficients: Sequence[float] | None = None,
+    ) -> np.ndarray:
+        residual = self.residual_coefficients(latent_action)
+        if reference_coefficients is None:
+            return residual
+        reference = np.asarray(
+            reference_coefficients, dtype=np.float64
+        ).reshape(-1)
+        if reference.size != int(self.curve.action_dim):
+            raise ValueError(
+                "reference coefficient dimension must match the plan curve"
+            )
+        return np.clip(
+            reference + residual,
+            float(self.curve.delta_min),
+            float(self.curve.delta_max),
+        )
+
+    def target(
+        self,
+        current_value: Sequence[float],
+        latent_action: Sequence[float],
+        *,
+        reference_target: Sequence[float] | None = None,
+    ) -> PlanActionResult:
         current = np.asarray(current_value, dtype=np.float64).reshape(-1)
         if current.size != self.curve.n_entities:
             current = np.resize(current, self.curve.n_entities)
-        coeffs = self.coefficients(latent_action)
+        reference = (
+            None
+            if reference_target is None
+            else self.reference_coefficients(current, reference_target)
+        )
+        residual = self.residual_coefficients(latent_action)
+        coeffs = self.coefficients(
+            latent_action, reference_coefficients=reference
+        )
         values = np.asarray([
             self.curve.value_at(
                 float(current[i]),
@@ -81,6 +158,10 @@ class LearnedPlanActionMapper:
             target=values,
             coefficients=coeffs,
             smoothness_penalty=float(self.curve.smoothness_penalty(coeffs)),
+            reference_coefficients=(
+                None if reference is None else reference.copy()
+            ),
+            residual_coefficients=residual.copy(),
         )
 
     def to_metadata(self) -> dict[str, Any]:
@@ -93,6 +174,7 @@ class LearnedPlanActionMapper:
             "plan_anchor_first_coefficient": bool(
                 self.anchor_first_coefficient
             ),
+            "plan_reference_residual_composition": True,
         }
 
 
@@ -177,12 +259,21 @@ class LearnedPlanCurveState:
         now_s: float,
         current_value: Sequence[float],
         latent_action: Sequence[float],
+        reference_target: Sequence[float] | None = None,
     ) -> PlanActionResult:
         current = np.asarray(current_value, dtype=np.float64).reshape(-1)
         if current.size != int(self.mapper.curve.n_entities):
             current = np.resize(current, int(self.mapper.curve.n_entities))
         base = self.value_at(now_s) if self.active else self._cap(current)
-        coefficients = self.mapper.coefficients(latent_action)
+        reference = (
+            None
+            if reference_target is None
+            else self.mapper.reference_coefficients(base, reference_target)
+        )
+        residual = self.mapper.residual_coefficients(latent_action)
+        coefficients = self.mapper.coefficients(
+            latent_action, reference_coefficients=reference
+        )
         self.origin_s = float(now_s)
         self.base_value = self._cap(base)
         self.coefficients = coefficients.copy()
@@ -194,4 +285,8 @@ class LearnedPlanCurveState:
             smoothness_penalty=float(
                 self.mapper.curve.smoothness_penalty(coefficients)
             ),
+            reference_coefficients=(
+                None if reference is None else reference.copy()
+            ),
+            residual_coefficients=residual.copy(),
         )
