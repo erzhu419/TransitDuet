@@ -7,7 +7,7 @@ import copy
 import csv
 import json
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 import numpy as np
 import torch
@@ -29,12 +29,14 @@ from .metrics import (
     periods_per_year_from_bar_seconds,
     summarize_pnl_series,
 )
-from .performance_validation import make_synthetic_market
+from .performance_validation import SCENARIOS, make_synthetic_market
 from .ppo_actor_critic import (
     EXECUTION_TIMELINE_CONTRACTS,
     LEARNED_BASELINE_IMPLEMENTATION_VERSION,
     RAW_HISTORY_WINDOW,
+    aggregate_episodic_rows,
     bounded_speed,
+    episodic_scenario_seed,
     flat_joint_feature_vector,
     gross_cap,
     make_tracker,
@@ -361,6 +363,7 @@ def train_flat_offpolicy_baseline(
     volume_impact_bps: float = 0.0,
     capacity_target_parameter_count: int | None = None,
     capacity_reference_method_contract: str = "",
+    training_scenarios: Sequence[str] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FlatOffPolicyActorCritic]:
     if policy_mode not in OFFPOLICY_MODES:
         raise ValueError(f"unknown policy_mode: {policy_mode}")
@@ -379,6 +382,25 @@ def train_flat_offpolicy_baseline(
         )
     if not np.isfinite(float(volume_impact_bps)) or float(volume_impact_bps) < 0.0:
         raise ValueError("volume_impact_bps must be finite and non-negative")
+    independent_training_scenarios = (
+        None
+        if training_scenarios is None
+        else tuple(str(value) for value in training_scenarios)
+    )
+    if independent_training_scenarios is not None:
+        if not independent_training_scenarios:
+            raise ValueError("training_scenarios cannot be empty")
+        if len(set(independent_training_scenarios)) != len(
+            independent_training_scenarios
+        ):
+            raise ValueError("training_scenarios must be unique")
+        unknown = sorted(set(independent_training_scenarios) - set(SCENARIOS))
+        if unknown:
+            raise ValueError(f"unknown independent training scenarios: {unknown}")
+    episode_multiplier = int(
+        len(independent_training_scenarios)
+        if independent_training_scenarios is not None else 1
+    )
     rollout_seed_roots = validate_unique_seeds(
         train_seeds, role="rollout_seed_roots"
     )
@@ -434,18 +456,42 @@ def train_flat_offpolicy_baseline(
         state_dim=state_dim,
         action_dim=action_dim,
     )
+
+    def evaluation_row(eval_seed: int) -> dict[str, Any]:
+        if independent_training_scenarios is None:
+            return run_offpolicy_episode(
+                agent,
+                seed=int(eval_seed),
+                steps=int(steps),
+                assets=int(assets),
+                scenario=scenario,
+                policy_mode=policy_mode,
+                training=False,
+                execution_timeline_contract=execution_timeline_contract,
+                volume_impact_bps=float(volume_impact_bps),
+            )[0]
+        rows = [
+            run_offpolicy_episode(
+                agent,
+                seed=episodic_scenario_seed(int(eval_seed), episode_scenario),
+                steps=int(steps),
+                assets=int(assets),
+                scenario=episode_scenario,
+                policy_mode=policy_mode,
+                training=False,
+                execution_timeline_contract=execution_timeline_contract,
+                volume_impact_bps=float(volume_impact_bps),
+            )[0]
+            for episode_scenario in independent_training_scenarios
+        ]
+        return aggregate_episodic_rows(
+            rows,
+            root_seed=int(eval_seed),
+            scenario_label=str(scenario),
+        )
+
     initial_rows = [
-        run_offpolicy_episode(
-            agent,
-            seed=int(eval_seed),
-            steps=int(steps),
-            assets=int(assets),
-            scenario=scenario,
-            policy_mode=policy_mode,
-            training=False,
-            execution_timeline_contract=execution_timeline_contract,
-            volume_impact_bps=float(volume_impact_bps),
-        )[0]
+        evaluation_row(int(eval_seed))
         for eval_seed in validation_seed_list
     ]
     best_score = float(np.mean([objective_fn(row) for row in initial_rows]))
@@ -474,26 +520,42 @@ def train_flat_offpolicy_baseline(
             if resample_training_paths else int(root)
             for root in rollout_seed_roots
         ]
+        iteration_episode_seeds: list[int] = []
         for train_seed in iteration_train_seeds:
-            _, global_step, updates = run_offpolicy_episode(
-                agent,
-                seed=int(train_seed),
-                steps=int(steps),
-                assets=int(assets),
-                scenario=scenario,
-                policy_mode=policy_mode,
-                training=True,
-                replay=replay,
-                replay_rng=replay_rng,
-                global_step=global_step,
-                warmup_steps=int(warmup_steps),
-                batch_size=int(batch_size),
-                updates_per_step=int(updates_per_step),
-                reward_scale=float(reward_scale),
-                execution_timeline_contract=execution_timeline_contract,
-                volume_impact_bps=float(volume_impact_bps),
+            episode_specs = (
+                [(int(train_seed), str(scenario))]
+                if independent_training_scenarios is None else
+                [
+                    (
+                        episodic_scenario_seed(
+                            int(train_seed), episode_scenario
+                        ),
+                        episode_scenario,
+                    )
+                    for episode_scenario in independent_training_scenarios
+                ]
             )
-            iteration_updates.extend(updates)
+            for episode_seed, episode_scenario in episode_specs:
+                iteration_episode_seeds.append(int(episode_seed))
+                _, global_step, updates = run_offpolicy_episode(
+                    agent,
+                    seed=int(episode_seed),
+                    steps=int(steps),
+                    assets=int(assets),
+                    scenario=str(episode_scenario),
+                    policy_mode=policy_mode,
+                    training=True,
+                    replay=replay,
+                    replay_rng=replay_rng,
+                    global_step=global_step,
+                    warmup_steps=int(warmup_steps),
+                    batch_size=int(batch_size),
+                    updates_per_step=int(updates_per_step),
+                    reward_scale=float(reward_scale),
+                    execution_timeline_contract=execution_timeline_contract,
+                    volume_impact_bps=float(volume_impact_bps),
+                )
+                iteration_updates.extend(updates)
         actor_optimizer_steps += int(sum(
             float(row["actor_updated"]) for row in iteration_updates
         ))
@@ -501,17 +563,7 @@ def train_flat_offpolicy_baseline(
         if algorithm == "sac":
             temperature_optimizer_steps += len(iteration_updates)
         eval_rows = [
-            run_offpolicy_episode(
-                agent,
-                seed=int(eval_seed),
-                steps=int(steps),
-                assets=int(assets),
-                scenario=scenario,
-                policy_mode=policy_mode,
-                training=False,
-                execution_timeline_contract=execution_timeline_contract,
-                volume_impact_bps=float(volume_impact_bps),
-            )[0]
+            evaluation_row(int(eval_seed))
             for eval_seed in validation_seed_list
         ]
         score = float(np.mean([objective_fn(row) for row in eval_rows]))
@@ -522,6 +574,7 @@ def train_flat_offpolicy_baseline(
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": iteration_train_seeds,
+            "training_episode_seeds": iteration_episode_seeds,
             "score": score,
             **summarize(eval_rows),
             **_mean_update_metrics(iteration_updates, algorithm=algorithm),
@@ -530,17 +583,7 @@ def train_flat_offpolicy_baseline(
         })
     agent.load_state_dict(best_state)
     evaluation_rows = [
-        run_offpolicy_episode(
-            agent,
-            seed=int(eval_seed),
-            steps=int(steps),
-            assets=int(assets),
-            scenario=scenario,
-            policy_mode=policy_mode,
-            training=False,
-            execution_timeline_contract=execution_timeline_contract,
-            volume_impact_bps=float(volume_impact_bps),
-        )[0]
+        evaluation_row(int(eval_seed))
         for eval_seed in evaluation_seeds
     ]
     payload = {
@@ -608,17 +651,27 @@ def train_flat_offpolicy_baseline(
         "environment_steps_train": int(global_step),
         "environment_steps_validation": int(
             len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+            * episode_multiplier
         ),
-        "environment_steps_eval": int(len(evaluation_seeds) * int(steps)),
+        "environment_steps_eval": int(
+            len(evaluation_seeds) * int(steps) * episode_multiplier
+        ),
         "unique_training_path_count": int(
             len(rollout_seed_roots)
             * (max(1, int(iterations)) if resample_training_paths else 1)
+            * episode_multiplier
         ),
         "training_replicate_seed": int(seed),
         "training_path_protocol": (
+            "independent_full_episode_support_batch_v1"
+            if independent_training_scenarios is not None else
             "fresh_deterministic_path_per_root_and_iteration_v2"
             if resample_training_paths else "fixed_path_reuse_legacy"
         ),
+        "training_episode_scenarios": list(
+            independent_training_scenarios or ()
+        ),
+        "training_episode_count_per_root": int(episode_multiplier),
         "checkpoint_selection_protocol": "disjoint_validation_paths",
         "actor_optimizer_steps_train": int(actor_optimizer_steps),
         "critic_optimizer_steps_train": int(critic_optimizer_steps),

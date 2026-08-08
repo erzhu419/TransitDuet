@@ -7,7 +7,7 @@ import csv
 from dataclasses import replace
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Sequence
 
 import numpy as np
 import torch
@@ -47,6 +47,8 @@ from freq_hrl.rl import (
     TemporalDecisionScheduler,
     causal_gru_actor_parameter_count,
     causal_gru_value_parameter_count,
+    concat_hierarchical_batches,
+    concat_joint_batches,
     summarize_numeric_rows,
     train_frequency_separated_ppo,
     train_joint_ppo,
@@ -269,6 +271,91 @@ def resize(value: Any, dim: int) -> np.ndarray:
     if arr.size != dim:
         arr = np.resize(arr, dim)
     return arr
+
+
+def episodic_scenario_seed(root_seed: int, scenario: str) -> int:
+    """Derive a stable, disjoint path seed for one reset episode."""
+
+    return derive_seed(
+        "freq_hrl_independent_support_episode_v1",
+        int(root_seed),
+        str(scenario),
+    )
+
+
+def aggregate_episodic_rows(
+    rows: Sequence[dict[str, Any]],
+    *,
+    root_seed: int,
+    scenario_label: str,
+) -> dict[str, Any]:
+    """Aggregate equally weighted reset episodes into one selection row."""
+
+    items = list(rows)
+    if not items:
+        raise ValueError("at least one episode row is required")
+    result: dict[str, Any] = {}
+    common_keys = set(items[0]).intersection(*(set(row) for row in items[1:]))
+    for key in items[0]:
+        if key not in common_keys or key in {"seed", "scenario"}:
+            continue
+        values = [row[key] for row in items]
+        if all(isinstance(value, (bool, int, float, np.number)) for value in values):
+            numeric = np.asarray(values, dtype=np.float64)
+            if not np.all(np.isfinite(numeric)):
+                continue
+            result[key] = float(
+                np.sum(numeric) if str(key).endswith("_count") else np.mean(numeric)
+            )
+        elif all(isinstance(value, str) for value in values) and all(
+            value == values[0] for value in values[1:]
+        ):
+            result[key] = values[0]
+    result.update({
+        "seed": int(root_seed),
+        "scenario": str(scenario_label),
+        "support_episode_count": int(len(items)),
+        "support_episode_scenarios": "|".join(
+            str(row["scenario"]) for row in items
+        ),
+        "training_support_ood_excluded": float(
+            all(str(row["scenario"]) != "ood_period" for row in items)
+        ),
+    })
+    return result
+
+
+def collect_independent_episode_rollouts(
+    *,
+    root_seed: int,
+    sample: bool,
+    scenarios: Sequence[str],
+    rollout_one: Callable[[int, str], tuple[Any | None, dict[str, Any]]],
+    concat_batches: Callable[[Sequence[Any]], Any],
+    scenario_label: str,
+) -> tuple[Any | None, dict[str, Any]]:
+    """Run full reset episodes and combine trajectories only after rollout."""
+
+    batches: list[Any] = []
+    rows: list[dict[str, Any]] = []
+    for episode_scenario in scenarios:
+        batch, row = rollout_one(
+            episodic_scenario_seed(int(root_seed), str(episode_scenario)),
+            str(episode_scenario),
+        )
+        if sample:
+            if batch is None:
+                raise RuntimeError("a sampled independent episode returned no batch")
+            batches.append(batch)
+        rows.append(row)
+    return (
+        concat_batches(batches) if sample else None,
+        aggregate_episodic_rows(
+            rows,
+            root_seed=int(root_seed),
+            scenario_label=str(scenario_label),
+        ),
+    )
 
 
 def make_tracker(
@@ -2619,6 +2706,7 @@ def train_ppo_actor_critic(
     promotion_deterministic_threshold: float = 0.5,
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
+    training_scenarios: Sequence[str] | None = None,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -2680,6 +2768,30 @@ def train_ppo_actor_critic(
         )
     if int(promotion_cooldown_steps) < 0:
         raise ValueError("promotion_cooldown_steps must be non-negative")
+    independent_training_scenarios = (
+        None
+        if training_scenarios is None
+        else tuple(str(value) for value in training_scenarios)
+    )
+    if independent_training_scenarios is not None:
+        if not independent_training_scenarios:
+            raise ValueError("training_scenarios cannot be empty")
+        if len(set(independent_training_scenarios)) != len(
+            independent_training_scenarios
+        ):
+            raise ValueError("training_scenarios must be unique")
+        unknown_training_scenarios = sorted(
+            set(independent_training_scenarios) - set(SCENARIOS)
+        )
+        if unknown_training_scenarios:
+            raise ValueError(
+                "unknown independent training scenarios: "
+                f"{unknown_training_scenarios}"
+            )
+    episode_multiplier = int(
+        len(independent_training_scenarios)
+        if independent_training_scenarios is not None else 1
+    )
     fixed_ablation_architecture = method_contract in V6_METHOD_CONTRACTS
     capacity_reference_method_contract = str(
         (
@@ -2997,6 +3109,45 @@ def train_ppo_actor_critic(
         torch.manual_seed(int(seed))
         np.random.seed(int(seed))
         joint_model = JointActorCriticPPO(joint_config)
+
+        def joint_protocol_rollout(
+            ppo_model: JointActorCriticPPO,
+            rollout_seed: int,
+            sample: bool,
+        ) -> tuple[JointTrajectoryBatch | None, dict[str, Any]]:
+            def rollout_one(
+                episode_seed: int,
+                episode_scenario: str,
+            ) -> tuple[JointTrajectoryBatch | None, dict[str, Any]]:
+                return joint_flat_rollout(
+                    ppo_model,
+                    seed=int(episode_seed),
+                    steps=steps,
+                    assets=assets,
+                    scenario=str(episode_scenario),
+                    sample=sample,
+                    leakage_scale=0.0,
+                    lower_lf_effect_filter_window=0,
+                    lower_lf_raw_recenter_gain=0.0,
+                    policy_mode=policy_mode,
+                    reward_scale=float(reward_scale),
+                    mark_to_market_timing=mark_to_market_timing,
+                    volume_impact_bps=float(volume_impact_bps),
+                    execution_timeline_contract=execution_timeline_contract,
+                    method_contract=method_contract,
+                )
+
+            if independent_training_scenarios is None:
+                return rollout_one(int(rollout_seed), str(scenario))
+            return collect_independent_episode_rollouts(
+                root_seed=int(rollout_seed),
+                sample=bool(sample),
+                scenarios=independent_training_scenarios,
+                rollout_one=rollout_one,
+                concat_batches=concat_joint_batches,
+                scenario_label=str(scenario),
+            )
+
         payload, heldout_rows, joint_model = train_joint_ppo(
             model=joint_model,
             train_seeds=rollout_seed_roots,
@@ -3011,23 +3162,7 @@ def train_ppo_actor_critic(
                 )
                 if resample_training_paths else None
             ),
-            rollout_fn=lambda ppo_model, rollout_seed, sample: joint_flat_rollout(
-                ppo_model,
-                seed=rollout_seed,
-                steps=steps,
-                assets=assets,
-                scenario=scenario,
-                sample=sample,
-                leakage_scale=0.0,
-                lower_lf_effect_filter_window=0,
-                lower_lf_raw_recenter_gain=0.0,
-                policy_mode=policy_mode,
-                reward_scale=float(reward_scale),
-                mark_to_market_timing=mark_to_market_timing,
-                volume_impact_bps=float(volume_impact_bps),
-                execution_timeline_contract=execution_timeline_contract,
-                method_contract=method_contract,
-            ),
+            rollout_fn=joint_protocol_rollout,
             objective_fn=objective,
             summary_fn=summarize,
             policy=f"{policy_mode}_canonical_joint_action",
@@ -3096,9 +3231,15 @@ def train_ppo_actor_critic(
                     full_method_implementation_version(method_contract)
                 ),
                 "training_path_protocol": (
+                    "independent_full_episode_support_batch_v1"
+                    if independent_training_scenarios is not None else
                     "fresh_deterministic_path_per_root_and_iteration_v2"
                     if resample_training_paths else "fixed_path_reuse_legacy"
                 ),
+                "training_episode_scenarios": list(
+                    independent_training_scenarios or ()
+                ),
+                "training_episode_count_per_root": int(episode_multiplier),
                 "checkpoint_selection_protocol": "disjoint_validation_paths",
                 "plan_mode": "primitive_joint_target_execution",
                 "plan_basis_dim": 0,
@@ -3118,16 +3259,19 @@ def train_ppo_actor_critic(
         )
         payload["environment_steps_train"] = int(
             len(rollout_seed_roots) * int(steps) * max(1, int(iterations))
+            * episode_multiplier
         )
         payload["environment_steps_validation"] = int(
             len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+            * episode_multiplier
         )
         payload["environment_steps_eval"] = int(
-            len(evaluation_seeds) * int(steps)
+            len(evaluation_seeds) * int(steps) * episode_multiplier
         )
         payload["unique_training_path_count"] = int(
             len(rollout_seed_roots)
             * (max(1, int(iterations)) if resample_training_paths else 1)
+            * episode_multiplier
         )
         return payload, heldout_rows, joint_model
 
@@ -3230,6 +3374,83 @@ def train_ppo_actor_critic(
             "exact three-way task-reward conservation: upper plan, tracking "
             "execution, and counterfactual marginal HF tactical credit"
         )
+
+    def smdp_protocol_rollout(
+        ppo_model: FrequencySeparatedActorCriticPPO,
+        rollout_seed: int,
+        sample: bool,
+    ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
+        def rollout_one(
+            episode_seed: int,
+            episode_scenario: str,
+        ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
+            return smdp_rollout(
+                ppo_model,
+                seed=int(episode_seed),
+                steps=steps,
+                assets=assets,
+                scenario=str(episode_scenario),
+                sample=sample,
+                leakage_scale=leakage_scale if sample else 0.0,
+                plan_mapper=plan_mapper,
+                lower_lf_effect_filter_window=lower_lf_effect_filter_window,
+                lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
+                lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
+                lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
+                policy_mode=policy_mode,
+                upper_period=actual_upper_period,
+                min_upper_duration=actual_min_upper_duration,
+                reward_scale=float(reward_scale),
+                mark_to_market_timing=mark_to_market_timing,
+                volume_impact_bps=float(volume_impact_bps),
+                execute_plan_curve=method_flags["execute_plan_curve"],
+                use_additive_frequency_credit=method_flags[
+                    "use_additive_frequency_credit"
+                ],
+                constrain_raw_lower_effect=method_flags[
+                    "constrain_raw_lower_effect"
+                ],
+                plan_smoothness_weight=float(plan_smoothness_weight),
+                learned_promotion_gate=method_flags["learned_promotion_gate"],
+                heuristic_promotion_gate=method_flags[
+                    "heuristic_promotion_gate"
+                ],
+                promotion_replan_cost=float(promotion_replan_cost),
+                enable_hf_lower=method_flags["lower_hf_overlay"],
+                separate_hf_tactical=method_flags["separate_hf_tactical"],
+                lower_hf_order_scale=float(lower_hf_order_scale),
+                execution_timeline_contract=execution_timeline_contract,
+                method_contract=method_contract,
+                promotion_credit_mode=resolved_promotion_credit_mode,
+                leakage_cost_mode=resolved_leakage_cost_mode,
+                lower_lf_budget_rms=float(lower_lf_budget_rms),
+                hf_lf_budget_rms=float(hf_lf_budget_rms),
+                include_hf_predictability=resolved_include_hf_predictability,
+                allow_inactive_mechanism_modules=fixed_ablation_architecture,
+                upper_plan_reference_mode=upper_plan_reference_mode,
+                upper_plan_reference_gain=float(upper_plan_reference_gain),
+                upper_plan_reference_forecast_blend=float(
+                    upper_plan_reference_forecast_blend
+                ),
+                hard_hf_budget_projection=bool(hard_hf_budget_projection),
+                promotion_deterministic_threshold=float(
+                    promotion_deterministic_threshold
+                ),
+                promotion_adapt_gain=float(promotion_adapt_gain),
+                promotion_cooldown_steps=int(promotion_cooldown_steps),
+            )
+
+        if independent_training_scenarios is None:
+            return rollout_one(int(rollout_seed), str(scenario))
+        return collect_independent_episode_rollouts(
+            root_seed=int(rollout_seed),
+            sample=bool(sample),
+            scenarios=independent_training_scenarios,
+            rollout_one=rollout_one,
+            concat_batches=concat_hierarchical_batches,
+            scenario_label=str(scenario),
+        )
+
     payload, heldout_rows, smdp_model = train_frequency_separated_ppo(
         model=smdp_model,
         train_seeds=rollout_seed_roots,
@@ -3244,61 +3465,7 @@ def train_ppo_actor_critic(
             )
             if resample_training_paths else None
         ),
-        rollout_fn=lambda ppo_model, rollout_seed, sample: smdp_rollout(
-            ppo_model,
-            seed=rollout_seed,
-            steps=steps,
-            assets=assets,
-            scenario=scenario,
-            sample=sample,
-            leakage_scale=leakage_scale if sample else 0.0,
-            plan_mapper=plan_mapper,
-            lower_lf_effect_filter_window=lower_lf_effect_filter_window,
-            lower_lf_effect_filter_gain=lower_lf_effect_filter_gain,
-            lower_lf_raw_recenter_gain=lower_lf_raw_recenter_gain,
-            lower_lf_raw_recenter_scale=lower_lf_raw_recenter_scale,
-            policy_mode=policy_mode,
-            upper_period=actual_upper_period,
-            min_upper_duration=actual_min_upper_duration,
-            reward_scale=float(reward_scale),
-            mark_to_market_timing=mark_to_market_timing,
-            volume_impact_bps=float(volume_impact_bps),
-            execute_plan_curve=method_flags["execute_plan_curve"],
-            use_additive_frequency_credit=method_flags[
-                "use_additive_frequency_credit"
-            ],
-            constrain_raw_lower_effect=method_flags[
-                "constrain_raw_lower_effect"
-            ],
-            plan_smoothness_weight=float(plan_smoothness_weight),
-            learned_promotion_gate=method_flags["learned_promotion_gate"],
-            heuristic_promotion_gate=method_flags[
-                "heuristic_promotion_gate"
-            ],
-            promotion_replan_cost=float(promotion_replan_cost),
-            enable_hf_lower=method_flags["lower_hf_overlay"],
-            separate_hf_tactical=method_flags["separate_hf_tactical"],
-            lower_hf_order_scale=float(lower_hf_order_scale),
-            execution_timeline_contract=execution_timeline_contract,
-            method_contract=method_contract,
-            promotion_credit_mode=resolved_promotion_credit_mode,
-            leakage_cost_mode=resolved_leakage_cost_mode,
-            lower_lf_budget_rms=float(lower_lf_budget_rms),
-            hf_lf_budget_rms=float(hf_lf_budget_rms),
-            include_hf_predictability=resolved_include_hf_predictability,
-            allow_inactive_mechanism_modules=fixed_ablation_architecture,
-            upper_plan_reference_mode=upper_plan_reference_mode,
-            upper_plan_reference_gain=float(upper_plan_reference_gain),
-            upper_plan_reference_forecast_blend=float(
-                upper_plan_reference_forecast_blend
-            ),
-            hard_hf_budget_projection=bool(hard_hf_budget_projection),
-            promotion_deterministic_threshold=float(
-                promotion_deterministic_threshold
-            ),
-            promotion_adapt_gain=float(promotion_adapt_gain),
-            promotion_cooldown_steps=int(promotion_cooldown_steps),
-        ),
+        rollout_fn=smdp_protocol_rollout,
         objective_fn=lambda row: objective(row) - max(
             float(lower_lf_objective_weight), 0.0
         ) * float(
@@ -3467,11 +3634,17 @@ def train_ppo_actor_critic(
                 upper_plan_reference_forecast_blend
             ),
             "training_path_protocol": (
+                "independent_full_episode_support_batch_v1"
+                if independent_training_scenarios is not None else
                 "fresh_mixed_support_path_per_root_and_iteration_ood_excluded_v3"
                 if scenario == SUPPORT_MIXTURE_SCENARIO else
                 "fresh_deterministic_path_per_root_and_iteration_v2"
                 if resample_training_paths else "fixed_path_reuse_legacy"
             ),
+            "training_episode_scenarios": list(
+                independent_training_scenarios or ()
+            ),
+            "training_episode_count_per_root": int(episode_multiplier),
             "checkpoint_selection_protocol": "disjoint_validation_paths",
             "plan_mode": "learned_bernstein" if plan_mapper is not None else "direct_target",
             "lower_lf_constraint_coef": float(lower_lf_constraint_coef),
@@ -3512,14 +3685,19 @@ def train_ppo_actor_critic(
         row["policy_mode"] = policy_mode
     payload["environment_steps_train"] = int(
         len(rollout_seed_roots) * int(steps) * max(1, int(iterations))
+        * episode_multiplier
     )
     payload["environment_steps_validation"] = int(
         len(validation_seed_list) * int(steps) * (max(1, int(iterations)) + 1)
+        * episode_multiplier
     )
-    payload["environment_steps_eval"] = int(len(evaluation_seeds) * int(steps))
+    payload["environment_steps_eval"] = int(
+        len(evaluation_seeds) * int(steps) * episode_multiplier
+    )
     payload["unique_training_path_count"] = int(
         len(rollout_seed_roots)
         * (max(1, int(iterations)) if resample_training_paths else 1)
+        * episode_multiplier
     )
     return payload, heldout_rows, smdp_model
 

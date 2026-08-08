@@ -18,6 +18,12 @@ from freq_hrl.experiments.trading.ppo_actor_critic import (
     resolve_method_contract,
     train_ppo_actor_critic,
 )
+from freq_hrl.experiments.trading.offpolicy_baseline_validation import (
+    train_flat_offpolicy_baseline,
+)
+from freq_hrl.experiments.trading.performance_validation import (
+    SUPPORT_MIXTURE_COMPONENTS,
+)
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     count_parameters,
 )
@@ -470,6 +476,97 @@ class FullMethodContractTest(unittest.TestCase):
             row["hf_overlay_rms_after_projection_max"], cap + 1e-12
         )
         self.assertLessEqual(row["hf_leakage_budget_ratio_max"], 1.0 + 1e-9)
+
+    def test_support_training_uses_full_reset_episodes_for_ppo(self):
+        steps = 16
+        payload, rows, _ = train_ppo_actor_critic(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=steps,
+            assets=2,
+            scenario="support_mixture",
+            training_scenarios=SUPPORT_MIXTURE_COMPONENTS,
+            iterations=1,
+            seed=7,
+            leakage_scale=0.01,
+            lower_lf_constraint_coef=0.01,
+            lower_lf_dual_lr=0.01,
+            plan_basis_dim=3,
+            plan_horizon_s=600.0,
+            upper_period=8,
+            min_upper_duration=2,
+            execution_timeline_contract="causal_post_trade_v3",
+            method_contract="full_freq_hrl_v6",
+        )
+        multiplier = len(SUPPORT_MIXTURE_COMPONENTS)
+        self.assertEqual(
+            payload["training_path_protocol"],
+            "independent_full_episode_support_batch_v1",
+        )
+        self.assertEqual(payload["training_episode_count_per_root"], multiplier)
+        self.assertEqual(payload["environment_steps_train"], steps * multiplier)
+        self.assertEqual(
+            payload["environment_steps_validation"], 2 * steps * multiplier
+        )
+        self.assertEqual(payload["environment_steps_eval"], steps * multiplier)
+        self.assertEqual(payload["unique_training_path_count"], multiplier)
+        self.assertEqual(rows[0]["support_episode_count"], multiplier)
+        self.assertEqual(rows[0]["lower_decision_count"], steps * multiplier)
+        self.assertEqual(
+            set(rows[0]["support_episode_scenarios"].split("|")),
+            set(SUPPORT_MIXTURE_COMPONENTS),
+        )
+
+    def test_support_training_uses_same_episode_budget_for_offpolicy(self):
+        steps = 8
+        payload, rows, _ = train_flat_offpolicy_baseline(
+            policy_mode="flat_td3",
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=steps,
+            assets=2,
+            scenario="support_mixture",
+            training_scenarios=SUPPORT_MIXTURE_COMPONENTS,
+            iterations=1,
+            seed=7,
+            warmup_steps=10_000,
+            batch_size=8,
+        )
+        multiplier = len(SUPPORT_MIXTURE_COMPONENTS)
+        self.assertEqual(
+            payload["training_path_protocol"],
+            "independent_full_episode_support_batch_v1",
+        )
+        self.assertEqual(payload["environment_steps_train"], steps * multiplier)
+        self.assertEqual(payload["environment_steps_eval"], steps * multiplier)
+        self.assertEqual(payload["unique_training_path_count"], multiplier)
+        self.assertEqual(rows[0]["support_episode_count"], multiplier)
+
+    def test_support_training_uses_same_episode_budget_for_flat_ppo(self):
+        steps = 8
+        payload, rows, _ = train_ppo_actor_critic(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=steps,
+            assets=2,
+            scenario="support_mixture",
+            training_scenarios=SUPPORT_MIXTURE_COMPONENTS,
+            iterations=1,
+            seed=7,
+            policy_mode="flat_ppo",
+        )
+        multiplier = len(SUPPORT_MIXTURE_COMPONENTS)
+        self.assertEqual(
+            payload["training_path_protocol"],
+            "independent_full_episode_support_batch_v1",
+        )
+        self.assertEqual(payload["environment_steps_train"], steps * multiplier)
+        self.assertEqual(payload["environment_steps_eval"], steps * multiplier)
+        self.assertEqual(payload["unique_training_path_count"], multiplier)
+        self.assertEqual(rows[0]["support_episode_count"], multiplier)
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
         common = dict(
