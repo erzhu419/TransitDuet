@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -19,6 +20,12 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.paper_submission_gate import require_submission_ready
+
+
 DEFAULT_MANIFEST = ROOT / "paper_manifest.yaml"
 DEFAULT_OUT = ROOT / "results_freqduet" / "paper_package" / "current"
 PACKAGE_CONFIG_EXPERIMENTS = {
@@ -628,15 +635,22 @@ def main() -> None:
         action="store_true",
         help="Append/update files in an existing package instead of rebuilding it.",
     )
+    parser.add_argument(
+        "--allow-historical",
+        action="store_true",
+        help="Explicitly reproduce a package whose manifest is on hold.",
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
     out_dir = Path(args.out_dir)
+    manifest = read_manifest(manifest_path)
+    require_submission_ready(
+        manifest, allow_historical=args.allow_historical)
     if out_dir.exists() and not args.no_clean:
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest = read_manifest(manifest_path)
     copied: list[dict] = []
     missing: list[str] = []
 

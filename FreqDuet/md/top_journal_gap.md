@@ -1,5 +1,12 @@
 # FreqDuet Top-Journal Gap Backlog
 
+> **2026-08-08 submission hold:** this backlog records the historical V1-V4
+> development path. The legacy composite-based paper package is not the active
+> submission result after the corrected V4 passenger-journey audit failed.
+> Protocol V5 in `protocol_v5_journey_feasible_contract_2026-08-08.md` is the
+> only active method/evidence track; old completed items remain provenance and
+> negative-result evidence, not proof that the V5 submission gap is closed.
+
 Last updated: 2026-06-26 CST
 
 This file records the remaining gap between the current FreqDuet implementation

@@ -11,13 +11,24 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import sys
 from pathlib import Path
 
 import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.paper_submission_gate import (
+    read_submission_manifest,
+    require_submission_ready,
+)
+
+
 DEFAULT_OUT = ROOT / "results_freqduet" / "paper_curation" / "current"
+DEFAULT_MANIFEST = ROOT / "paper_manifest.yaml"
 
 
 def first_existing(paths: list[Path]) -> Path | None:
@@ -265,8 +276,17 @@ def build_manifest(specs: list[dict[str, object]], out_dir: Path, missing: list[
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT))
+    parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
+    parser.add_argument(
+        "--allow-historical",
+        action="store_true",
+        help="Explicitly curate a package whose manifest is on hold.",
+    )
     args = parser.parse_args()
 
+    manifest = read_submission_manifest(args.manifest)
+    require_submission_ready(
+        manifest, allow_historical=args.allow_historical)
     out_dir = Path(args.out_dir)
     if out_dir.exists():
         shutil.rmtree(out_dir)

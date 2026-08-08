@@ -4,7 +4,25 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-26
+version: 2026-06-26-historical
+submission_status: hold_pending_protocol_v5
+active_protocol: freqduet-eval-v5
+active_source_commit: f2a5ae8e183c48ca2e15295e854913736ca88857
+active_contract: ../md/protocol_v5_journey_feasible_contract_2026-08-08.md
+active_metrics:
+  primary: restricted_total_journey_horizon_min
+  safety:
+    - restricted_wait_horizon_min
+    - restricted_in_vehicle_horizon_min
+    - holding_vehicle_seconds_per_launched_trip
+    - holding_passenger_min_per_generated
+    - fleet_denied_trip_rate
+    - fleet_readiness_delay_mean_s
+    - passenger_unserved_rate
+    - trip_launch_rate
+    - trip_completion_rate
+# Everything below remains the reproducibility manifest for the historical
+# June composite package until the V5 result paths are promoted explicitly.
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 

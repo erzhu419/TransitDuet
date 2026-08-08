@@ -1,80 +1,73 @@
 # FreqDuet Paper Effect Status
 
-Last updated: 2026-06-26 CST
+Last updated: 2026-08-08 CST
 
-## Bottom Line
+## Submission Status
 
-The current paper effect exists, but the claim must stay conservative. The
-defensible result is:
+**HOLD.** The June paper package is historical evidence from the legacy
+service-cost objective. It is not the active submission result.
 
-FreqDuet is statistically tied with a strong fixed-headway baseline, strongly
-beats weaker rule-holding and rule-MPC baselines, and has a clear leakage-control
-mechanism signal. It should not claim universal superiority over fixed-headway
-or every internal ablation.
+The corrected V4 crossed experiment showed that the old learned controller can
+look competitive under the service-cost composite while producing excessive
+holding, readiness delay, and denied trips. That protocol therefore failed the
+passenger-journey claim. The locked result and its evidence path are documented
+in `protocol_v4_selection_outcome_2026-08-08.md`.
 
-## Primary Evidence
+Protocol V5 is the only active candidate. Its primary endpoint is
+`restricted_total_journey_horizon_min`; fixed fleet, exact timetable execution,
+causal holding feasibility, passenger-weighted holding cost, and normalized
+safety endpoints are mandatory parts of the comparison.
 
-Artifacts are in
-`FreqDuet/freqduet/results_freqduet/paper_package/current/tables`.
+## Current Evidence State
 
-### External Classical Baselines
+### Historical evidence, not submission evidence
 
-From `paper_external_classical_v1_ep200_60seed_paired_deltas.csv`, lower
-composite is better and deltas are `main - baseline`.
+- The old paper-main was statistically close to fixed-headway under the legacy
+  composite and better than rule-holding/rule-MPC on that same composite.
+- The old mechanism and decomposer packages remain useful diagnostics.
+- The MBTA/MTA/Halifax caches remain valid external realism evidence within
+  their documented data boundaries.
 
-| Comparison | Scope | Composite delta | 95% CI | Win rate | Interpretation |
-| --- | --- | ---: | --- | ---: | --- |
-| fixed-headway | overall_shared, 240 paired runs | +0.0084 | [-0.0100, +0.0321] | 0.583 | statistically tied with the strong fixed policy |
-| rule-holding | overall_shared, 240 paired runs | -0.6010 | [-0.6243, -0.5742] | 1.000 | decisive improvement |
-| rule-MPC | overall_shared, 240 paired runs | -1.9865 | [-2.0480, -1.9254] | 1.000 | decisive improvement |
+These facts do not establish passenger-journey benefit under the corrected
+physical protocol.
 
-Wait-time against fixed-headway is not worse: wait delta is -0.0717 with 95% CI
-[-0.1820, +0.0585]. The fixed-headway tie is driven by CV and overshoot
-tradeoffs, not a wait-time failure.
+### Active V5 evidence
 
-### Internal Mechanism/Ablation
+- Source commit: `f2a5ae8e183c48ca2e15295e854913736ca88857`.
+- Frozen tag: `freqduet-v5-dev-screen-v1`.
+- Development screen: 11 configs x 8 training seeds x 4 frozen evaluation
+  seeds, 80 training episodes.
+- External comparator screen: fixed-headway, rule-holding, and rule-MPC on the
+  same four frozen scenario tapes.
+- Untouched confirmation seeds remain sealed until the preregistered V5
+  decision is made.
 
-From `paper_ablation_v1_ep200_60seed_paired_deltas.csv`, `noleakage` is the
-cleanest mechanism failure. In the terminal domain, main vs noleakage has
-composite delta -0.3326, 95% CI [-0.3995, -0.2664], win rate 0.983. The same
-direction holds across highnoise, odshift, and rushshift.
+No V5 effect claim is valid until the development matrix is complete, strictly
+aggregated, and passed through `decide_freqduet_protocol_v5_screen.py`.
 
-The other internal variants (`nofreq`, `rawhistory`, `allfreq`, `nopromotion`)
-are close controls in the final paper protocol. They are useful as mechanism
-context, but not as a claim that every module dominates every alternative.
+## Claim Gate
 
-## Data/Realism Evidence
+The paper can move off hold only if all of the following are true:
 
-The paper package now includes:
+1. The V5 source and scenario manifests pass strict provenance checks.
+2. The main policy satisfies the physical and safety invariants.
+3. The frequency controls and layer-allocation controls meet the locked effect
+   and confidence-interval rules, or the paper claim is narrowed accordingly.
+4. The selected policy is confirmed on untouched 200-episode seeds and the
+   held-out generalization matrix.
+5. Learned-versus-external comparisons use the same scenario tapes and the V5
+   passenger-journey endpoint.
 
-- public AFC/APC demand-profile evidence;
-- public MTA subway OD-estimate samples;
-- public MBTA bus board/alight/onboard-load calibration targets;
-- MBTA same-network APC-to-static-GTFS route/stop matching with Route 111 as a
-  route-level load calibration target;
-- local MBTA live GTFS-RT VehiclePositions/occupancy snapshots;
-- derived full-day MBTA SUMO APC/AVL replay snapshots from the H2Oplus/CFCMT
-  benchmark.
-- FreqDuet-only MTA Bus Time API offline cache with 378 routes, 13,585 stops,
-  22,730 route-stop sequence rows, and 144 route-filtered SIRI
-  VehicleMonitoring rows.
+## Currently Safe Wording
 
-The same-network audit now supports structural field-calibration readiness plus
-AVL realism evidence. It still is not a full field validation: exact same-day
-AFC/APC/AVL/OD calibration needs historical AVL and route-level OD for the same
-service days as the APC targets. The MTA Bus Time cache is route/stop/AVL
-geometry evidence only; it is not APC/onboard-load data and not FreqHRL result
-data.
+FreqDuet V5 is a preregistered, journey-feasible frequency-separated
+hierarchical controller under evaluation. Earlier composite-based results are
+reported as historical diagnostics and do not support a current performance
+claim.
 
-## Safe Claim
+## Currently Unsafe Wording
 
-FreqDuet provides a frequency-separated HRL policy with leakage control that is
-robust, mechanistically traceable, competitive with a strong fixed-headway
-baseline, and decisively better than weaker rule/MPC baselines in the current
-simulation evidence package.
-
-## Unsafe Claim
-
-Do not claim that FreqDuet robustly beats fixed-headway everywhere, has already
-been field-calibrated on exact same-network AFC/APC/AVL data, or has observed
-field wait-time improvements.
+Do not state that FreqDuet matches or exceeds fixed-headway under the corrected
+passenger-journey protocol, that every frequency module is effective, or that
+field benefit has been demonstrated. Those claims require the pending V5
+confirmation package.
