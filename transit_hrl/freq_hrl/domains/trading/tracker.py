@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any, Mapping, Sequence
 import math
 
@@ -331,6 +332,11 @@ class TradingFrequencyTracker:
                 "x_high_persistence": z,
                 "shock_age": z,
             }
+
+    def snapshot(self) -> "TradingFrequencyTracker":
+        """Return an independent causal copy for counterfactual promotion."""
+
+        return copy.deepcopy(self)
 
     def promote_residual(
         self,

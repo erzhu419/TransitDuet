@@ -85,7 +85,7 @@ FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
 FULL_METHOD_V7_IMPLEMENTATION_VERSION = (
-    "freq_hrl_full_v7_residual_reference_hard_budget_2026_08_08"
+    "freq_hrl_full_v7_1_selective_paired_promotion_2026_08_08"
 )
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
@@ -1357,6 +1357,8 @@ def smdp_rollout(
     promotion_deterministic_threshold: float = 0.5,
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
+    promotion_gate_interval_steps: int = 1,
+    promotion_credit_scale: float | None = None,
     upper_residual_action_scale: float = 1.0,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
@@ -1409,6 +1411,17 @@ def smdp_rollout(
         raise ValueError("promotion_adapt_gain must be finite and non-negative")
     if int(promotion_cooldown_steps) < 0:
         raise ValueError("promotion_cooldown_steps must be non-negative")
+    if int(promotion_gate_interval_steps) < 1:
+        raise ValueError("promotion_gate_interval_steps must be positive")
+    resolved_promotion_credit_scale = (
+        float(reward_scale)
+        if promotion_credit_scale is None else float(promotion_credit_scale)
+    )
+    if (
+        not np.isfinite(resolved_promotion_credit_scale)
+        or resolved_promotion_credit_scale <= 0.0
+    ):
+        raise ValueError("promotion_credit_scale must be positive and finite")
     if (
         not np.isfinite(float(upper_residual_action_scale))
         or float(upper_residual_action_scale) < 0.0
@@ -1418,14 +1431,16 @@ def smdp_rollout(
         )
     method_flags = resolve_method_contract(str(method_contract))
     if str(promotion_credit_mode) == "auto":
-        promotion_credit_mode = (
-            "incremental_plan_advantage"
-            if method_flags["promotion_plan_advantage_credit"]
-            else "task_return"
-        )
+        if str(method_contract) in V7_METHOD_CONTRACTS:
+            promotion_credit_mode = "paired_plan_advantage"
+        elif method_flags["promotion_plan_advantage_credit"]:
+            promotion_credit_mode = "incremental_plan_advantage"
+        else:
+            promotion_credit_mode = "task_return"
     if str(promotion_credit_mode) not in {
         "task_return",
         "incremental_plan_advantage",
+        "paired_plan_advantage",
     }:
         raise ValueError("unknown promotion_credit_mode")
     if str(leakage_cost_mode) == "auto":
@@ -1458,11 +1473,14 @@ def smdp_rollout(
             "hard HF budget projection requires fixed_rms_budget leakage accounting"
         )
     if (
-        str(promotion_credit_mode) == "incremental_plan_advantage"
+        str(promotion_credit_mode) in {
+            "incremental_plan_advantage",
+            "paired_plan_advantage",
+        }
         and not execute_plan_curve
     ):
         raise ValueError(
-            "incremental promotion credit requires an executable plan curve"
+            "plan-advantage promotion credit requires an executable plan curve"
         )
     if use_additive_frequency_credit and str(mark_to_market_timing) != "post_trade":
         raise ValueError(
@@ -1635,7 +1653,9 @@ def smdp_rollout(
     hf_overlay_task_effects: list[float] = []
     lower_hf_action_sensitivities: list[float] = []
     lower_hf_overlay_sensitivities: list[float] = []
+    promotion_credits: list[float] = []
     promotion_plan_advantages: list[float] = []
+    promotion_credit_actions: list[float] = []
     tracking_leakage_budget_ratios: list[float] = []
     hf_leakage_budget_ratios: list[float] = []
     leakage_budget_violations: list[float] = []
@@ -1650,14 +1670,19 @@ def smdp_rollout(
     high_history: list[np.ndarray] = []
     realized_return_history: list[np.ndarray] = []
     promotion_counterfactual_plan: LearnedPlanCurveState | None = None
+    promotion_selected_action: float | None = None
     pending_plan_smoothness_cost = 0.0
     last_learned_promotion_step: int | None = None
+    last_promotion_gate_step: int | None = None
     promotion_cooldown_blocks = 0
+    promotion_gate_interval_blocks = 0
 
     env.reset()
     for t in range(steps):
         raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
+        if plan_state is not None and plan_state.active:
+            current_target = gross_cap(plan_state.value_at(float(t * 60.0)))
         # Estimate h_t -> r_{t+1} predictability using completed pairs only.
         # The current h_t is appended after this estimate and r_t after execution.
         hf_predictability = (
@@ -1677,6 +1702,9 @@ def smdp_rollout(
         promotion = dict(freq.get("promotion", {}) or {})
         promote = bool(promotion.get("promote", False))
         learned_replan_cost_this_step = 0.0
+        paired_replan_cost_this_step = 0.0
+        promotion_candidate_upper_state: np.ndarray | None = None
+        promotion_candidate_upper_out: dict[str, np.ndarray | float] | None = None
         forced_reason = scheduler.decision_reason(t, promotion=False)
         if forced_reason is not None:
             if (
@@ -1686,6 +1714,7 @@ def smdp_rollout(
             ):
                 promotion_builder.close(done=False)
                 promotion_counterfactual_plan = None
+                promotion_selected_action = None
                 promotion_scheduled_boundary_closes += 1
             reason = forced_reason
         elif learned_promotion_gate:
@@ -1697,7 +1726,16 @@ def smdp_rollout(
                 or int(t - last_learned_promotion_step)
                 >= int(promotion_cooldown_steps)
             )
-            if elapsed >= int(min_upper_duration) and cooldown_ready:
+            gate_interval_ready = (
+                last_promotion_gate_step is None
+                or int(t - last_promotion_gate_step)
+                >= int(promotion_gate_interval_steps)
+            )
+            if (
+                elapsed >= int(min_upper_duration)
+                and cooldown_ready
+                and gate_interval_ready
+            ):
                 gate_state = promotion_gate_feature_vector(
                     dict(freq),
                     position=env.position.copy(),
@@ -1724,15 +1762,76 @@ def smdp_rollout(
                     value=float(gate_out["value"]),
                 )
                 promotion_counterfactual_plan = None
+                promotion_selected_action = gate_action
+                last_promotion_gate_step = int(t)
                 learned_gate_probabilities.append(
                     float(gate_out["probability"])
                 )
                 learned_gate_actions.append(gate_action)
+                if str(promotion_credit_mode) == "paired_plan_advantage":
+                    if plan_state is None or not plan_state.active:
+                        raise RuntimeError(
+                            "paired promotion credit requires an active old plan"
+                        )
+                    counterfactual_tracker = tracker.snapshot()
+                    promoted_candidate_freq = counterfactual_tracker.promote_residual(
+                        strength=1.0
+                    )
+                    promotion_candidate_upper_state, _ = smdp_policy_feature_vectors(
+                        policy_mode=policy_mode,
+                        freq=dict(promoted_candidate_freq),
+                        raw_history=np.asarray(raw_history, dtype=np.float64),
+                        position=env.position.copy(),
+                        target=current_target,
+                        leakage_feedback=latest_leakage_feedback,
+                        progress=t / max(int(steps) - 1, 1),
+                        history_window=history_window,
+                        include_heuristic_promotion=bool(heuristic_promotion_gate),
+                        hf_predictability=hf_predictability,
+                    )
+                    promotion_candidate_upper_out = model.act_upper(
+                        promotion_candidate_upper_state,
+                        sample=sample,
+                    )
+                    if gate_action < 0.5:
+                        shadow_plan = plan_state.snapshot()
+                        shadow_action = (
+                            np.asarray(
+                                promotion_candidate_upper_out["action"],
+                                dtype=np.float64,
+                            )
+                            * float(upper_residual_action_scale)
+                        )
+                        shadow_reference = (
+                            causal_lf_plan_reference(
+                                dict(promoted_candidate_freq),
+                                int(assets),
+                                gain=float(upper_plan_reference_gain),
+                                forecast_blend=float(
+                                    upper_plan_reference_forecast_blend
+                                ),
+                            )
+                            if upper_plan_reference_mode == "causal_lf"
+                            else None
+                        )
+                        shadow_plan.activate(
+                            now_s=float(t * 60.0),
+                            current_value=current_target,
+                            latent_action=shadow_action,
+                            reference_target=shadow_reference,
+                        )
+                        promotion_counterfactual_plan = shadow_plan
+                    paired_replan_cost_this_step = float(
+                        promotion_replan_cost
+                    )
                 if gate_action >= 0.5:
-                    if str(promotion_credit_mode) == "incremental_plan_advantage":
+                    if str(promotion_credit_mode) in {
+                        "incremental_plan_advantage",
+                        "paired_plan_advantage",
+                    }:
                         if plan_state is None or not plan_state.active:
                             raise RuntimeError(
-                                "incremental promotion credit requires an active old plan"
+                                "plan-advantage promotion credit requires an active old plan"
                             )
                         promotion_counterfactual_plan = plan_state.snapshot()
                     promoted_freq = tracker.promote_residual(strength=1.0)
@@ -1759,6 +1858,12 @@ def smdp_rollout(
             else:
                 if elapsed >= int(min_upper_duration) and not cooldown_ready:
                     promotion_cooldown_blocks += 1
+                if (
+                    elapsed >= int(min_upper_duration)
+                    and cooldown_ready
+                    and not gate_interval_ready
+                ):
+                    promotion_gate_interval_blocks += 1
                 reason = None
         elif heuristic_promotion_gate:
             if promote:
@@ -1770,19 +1875,27 @@ def smdp_rollout(
         else:
             reason = None
         if reason is not None:
-            upper_state, _ = smdp_policy_feature_vectors(
-                policy_mode=policy_mode,
-                freq=dict(freq),
-                raw_history=np.asarray(raw_history, dtype=np.float64),
-                position=env.position.copy(),
-                target=current_target,
-                leakage_feedback=latest_leakage_feedback,
-                progress=t / max(int(steps) - 1, 1),
-                history_window=history_window,
-                include_heuristic_promotion=bool(heuristic_promotion_gate),
-                hf_predictability=hf_predictability,
-            )
-            upper_out = model.act_upper(upper_state, sample=sample)
+            if (
+                reason == "promotion"
+                and promotion_candidate_upper_state is not None
+                and promotion_candidate_upper_out is not None
+            ):
+                upper_state = promotion_candidate_upper_state
+                upper_out = promotion_candidate_upper_out
+            else:
+                upper_state, _ = smdp_policy_feature_vectors(
+                    policy_mode=policy_mode,
+                    freq=dict(freq),
+                    raw_history=np.asarray(raw_history, dtype=np.float64),
+                    position=env.position.copy(),
+                    target=current_target,
+                    leakage_feedback=latest_leakage_feedback,
+                    progress=t / max(int(steps) - 1, 1),
+                    history_window=history_window,
+                    include_heuristic_promotion=bool(heuristic_promotion_gate),
+                    hf_predictability=hf_predictability,
+                )
+                upper_out = model.act_upper(upper_state, sample=sample)
             executed_upper_action = (
                 np.asarray(upper_out["action"], dtype=np.float64)
                 * float(upper_residual_action_scale)
@@ -2192,8 +2305,38 @@ def smdp_rollout(
             done=bool(done),
             **hf_builder_fields,
         )
-        if promotion_builder is not None:
-            if str(promotion_credit_mode) == "incremental_plan_advantage":
+        if promotion_builder is not None and promotion_builder.has_pending:
+            promotion_counterfactual_advantage = None
+            if str(promotion_credit_mode) == "paired_plan_advantage":
+                if (
+                    promotion_counterfactual_plan is None
+                    or promotion_selected_action is None
+                ):
+                    raise RuntimeError(
+                        "paired promotion credit is missing its alternative plan"
+                    )
+                alternative_target = gross_cap(
+                    promotion_counterfactual_plan.value_at(float(t * 60.0))
+                )
+                selected_target = np.asarray(current_target, dtype=np.float64)
+                if promotion_selected_action >= 0.5:
+                    promoted_target = selected_target
+                    continue_target = alternative_target
+                else:
+                    promoted_target = alternative_target
+                    continue_target = selected_target
+                net_replan_advantage = float(np.dot(
+                    promoted_target - continue_target,
+                    np.asarray(info["asset_returns"], dtype=np.float64),
+                )) - float(paired_replan_cost_this_step)
+                promotion_counterfactual_advantage = net_replan_advantage
+                promotion_credit = (
+                    net_replan_advantage
+                    if promotion_selected_action >= 0.5
+                    else -net_replan_advantage
+                )
+                promotion_plan_advantages.append(net_replan_advantage)
+            elif str(promotion_credit_mode) == "incremental_plan_advantage":
                 promotion_credit = 0.0
                 if promotion_counterfactual_plan is not None:
                     old_target = gross_cap(
@@ -2204,14 +2347,25 @@ def smdp_rollout(
                         np.asarray(info["asset_returns"], dtype=np.float64),
                     ))
                 promotion_credit -= float(learned_replan_cost_this_step)
+                promotion_plan_advantages.append(float(promotion_credit))
             else:
                 promotion_credit = (
                     float(info["task_reward"])
                     - learned_replan_cost_this_step
                 )
-            promotion_plan_advantages.append(float(promotion_credit))
+            promotion_credits.append(float(promotion_credit))
+            promotion_credit_actions.append(float(
+                promotion_selected_action
+                if promotion_selected_action is not None else 0.0
+            ))
             promotion_builder.add_reward(
-                float(reward_scale) * float(promotion_credit),
+                resolved_promotion_credit_scale * float(promotion_credit),
+                counterfactual_advantage=(
+                    None
+                    if promotion_counterfactual_advantage is None
+                    else resolved_promotion_credit_scale
+                    * float(promotion_counterfactual_advantage)
+                ),
                 done=bool(done),
             )
 
@@ -2307,6 +2461,15 @@ def smdp_rollout(
         "promotion_gate_probability_mean": float(
             np.mean(learned_gate_probabilities)
         ) if learned_gate_probabilities else 0.0,
+        "promotion_gate_probability_std": float(
+            np.std(learned_gate_probabilities)
+        ) if learned_gate_probabilities else 0.0,
+        "promotion_gate_probability_min": float(
+            np.min(learned_gate_probabilities)
+        ) if learned_gate_probabilities else 0.0,
+        "promotion_gate_probability_max": float(
+            np.max(learned_gate_probabilities)
+        ) if learned_gate_probabilities else 0.0,
         "promotion_gate_action_rate": float(
             np.mean(learned_gate_actions)
         ) if learned_gate_actions else 0.0,
@@ -2315,6 +2478,9 @@ def smdp_rollout(
             promotion_scheduled_boundary_closes
         ),
         "promotion_cooldown_block_count": int(promotion_cooldown_blocks),
+        "promotion_gate_interval_block_count": int(
+            promotion_gate_interval_blocks
+        ),
         "promotion_absorbed_norm_mean": float(
             np.mean(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
@@ -2322,18 +2488,38 @@ def smdp_rollout(
             np.sum(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
         "promotion_credit_mode": str(promotion_credit_mode),
+        "promotion_credit_scale": float(resolved_promotion_credit_scale),
+        "promotion_counterfactual_symmetric": float(
+            str(promotion_credit_mode) == "paired_plan_advantage"
+        ),
         "promotion_credit_total": float(
-            np.sum(promotion_plan_advantages)
-        ) if promotion_plan_advantages else 0.0,
+            np.sum(promotion_credits)
+        ) if promotion_credits else 0.0,
         "promotion_credit_mean": float(
-            np.mean(promotion_plan_advantages)
-        ) if promotion_plan_advantages else 0.0,
+            np.mean(promotion_credits)
+        ) if promotion_credits else 0.0,
+        "promotion_replan_action_credit_mean": float(np.mean([
+            credit for credit, action in zip(
+                promotion_credits, promotion_credit_actions
+            ) if action >= 0.5
+        ])) if any(action >= 0.5 for action in promotion_credit_actions) else 0.0,
+        "promotion_continue_action_credit_mean": float(np.mean([
+            credit for credit, action in zip(
+                promotion_credits, promotion_credit_actions
+            ) if action < 0.5
+        ])) if any(action < 0.5 for action in promotion_credit_actions) else 0.0,
         "promotion_plan_advantage_total": float(
             np.sum(promotion_plan_advantages)
         ) if (
             promotion_plan_advantages
-            and str(promotion_credit_mode) == "incremental_plan_advantage"
+            and str(promotion_credit_mode) in {
+                "incremental_plan_advantage",
+                "paired_plan_advantage",
+            }
         ) else 0.0,
+        "promotion_plan_advantage_mean": float(
+            np.mean(promotion_plan_advantages)
+        ) if promotion_plan_advantages else 0.0,
         "hf_order_l1_mean": float(np.mean(hf_order_l1)) if hf_order_l1 else 0.0,
         "hf_overlay_position_l1_mean": float(
             np.mean(hf_overlay_position_l1)
@@ -2479,6 +2665,7 @@ def smdp_rollout(
         ),
         "promotion_adapt_gain": float(promotion_adapt_gain),
         "promotion_cooldown_steps": int(promotion_cooldown_steps),
+        "promotion_gate_interval_steps": int(promotion_gate_interval_steps),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
         "hf_tactical_stream_enabled": float(bool(use_separate_hf)),
         "exact_three_way_credit": float(bool(use_separate_hf)),
@@ -2626,14 +2813,21 @@ def summarize(rows: list[dict[str, float]]) -> dict[str, Any]:
         "promotion_gate_owned_primitive_steps",
         "promotion_gate_mean_duration",
         "promotion_gate_probability_mean",
+        "promotion_gate_probability_std",
+        "promotion_gate_probability_min",
+        "promotion_gate_probability_max",
         "promotion_gate_action_rate",
         "promotion_replan_cost_total",
         "promotion_scheduled_boundary_close_count",
+        "promotion_gate_interval_block_count",
         "promotion_absorbed_norm_mean",
         "promotion_absorbed_norm_total",
         "promotion_credit_total",
         "promotion_credit_mean",
+        "promotion_replan_action_credit_mean",
+        "promotion_continue_action_credit_mean",
         "promotion_plan_advantage_total",
+        "promotion_plan_advantage_mean",
         "hf_order_l1_mean",
         "hf_overlay_position_l1_mean",
         "hf_overlay_return_total",
@@ -2755,8 +2949,13 @@ def train_ppo_actor_critic(
     plan_smoothness_weight: float = 0.0,
     promotion_replan_cost: float = 0.0,
     promotion_init_logit: float = -2.0,
+    promotion_entropy_coef: float | None = None,
+    promotion_rate_budget: float = 1.0,
+    promotion_rate_coef: float = 0.0,
+    promotion_counterfactual_coef: float | None = None,
     lower_hf_order_scale: float = 0.025,
     promotion_credit_mode: str = "auto",
+    promotion_credit_scale: float | None = None,
     leakage_cost_mode: str = "auto",
     lower_lf_budget_rms: float = 0.0025,
     hf_lf_budget_rms: float = 0.00025,
@@ -2768,6 +2967,7 @@ def train_ppo_actor_critic(
     promotion_deterministic_threshold: float = 0.5,
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
+    promotion_gate_interval_steps: int = 1,
     upper_residual_action_scale: float = 1.0,
     training_scenarios: Sequence[str] | None = None,
 ) -> tuple[
@@ -2832,6 +3032,36 @@ def train_ppo_actor_critic(
         )
     if int(promotion_cooldown_steps) < 0:
         raise ValueError("promotion_cooldown_steps must be non-negative")
+    if int(promotion_gate_interval_steps) < 1:
+        raise ValueError("promotion_gate_interval_steps must be positive")
+    resolved_promotion_entropy_coef = (
+        0.001
+        if promotion_entropy_coef is None else float(promotion_entropy_coef)
+    )
+    if (
+        not np.isfinite(resolved_promotion_entropy_coef)
+        or resolved_promotion_entropy_coef < 0.0
+    ):
+        raise ValueError("promotion_entropy_coef must be finite and non-negative")
+    if (
+        not np.isfinite(float(promotion_rate_budget))
+        or not 0.0 <= float(promotion_rate_budget) <= 1.0
+    ):
+        raise ValueError("promotion_rate_budget must be finite and in [0, 1]")
+    if (
+        not np.isfinite(float(promotion_rate_coef))
+        or float(promotion_rate_coef) < 0.0
+    ):
+        raise ValueError("promotion_rate_coef must be finite and non-negative")
+    resolved_promotion_credit_scale = (
+        float(reward_scale)
+        if promotion_credit_scale is None else float(promotion_credit_scale)
+    )
+    if (
+        not np.isfinite(resolved_promotion_credit_scale)
+        or resolved_promotion_credit_scale <= 0.0
+    ):
+        raise ValueError("promotion_credit_scale must be positive and finite")
     independent_training_scenarios = (
         None
         if training_scenarios is None
@@ -2887,16 +3117,40 @@ def train_ppo_actor_critic(
         )
     resolved_promotion_credit_mode = str(promotion_credit_mode)
     if resolved_promotion_credit_mode == "auto":
-        resolved_promotion_credit_mode = (
-            "incremental_plan_advantage"
-            if method_flags["promotion_plan_advantage_credit"]
-            else "task_return"
-        )
+        if method_contract in V7_METHOD_CONTRACTS:
+            resolved_promotion_credit_mode = "paired_plan_advantage"
+        elif method_flags["promotion_plan_advantage_credit"]:
+            resolved_promotion_credit_mode = "incremental_plan_advantage"
+        else:
+            resolved_promotion_credit_mode = "task_return"
     if resolved_promotion_credit_mode not in {
         "task_return",
         "incremental_plan_advantage",
+        "paired_plan_advantage",
     }:
         raise ValueError("unknown promotion_credit_mode")
+    if promotion_counterfactual_coef is None:
+        resolved_promotion_counterfactual_coef = float(
+            resolved_promotion_credit_mode == "paired_plan_advantage"
+        )
+    else:
+        resolved_promotion_counterfactual_coef = float(
+            promotion_counterfactual_coef
+        )
+    if (
+        not np.isfinite(resolved_promotion_counterfactual_coef)
+        or resolved_promotion_counterfactual_coef < 0.0
+    ):
+        raise ValueError(
+            "promotion_counterfactual_coef must be finite and non-negative"
+        )
+    if (
+        resolved_promotion_counterfactual_coef > 0.0
+        and resolved_promotion_credit_mode != "paired_plan_advantage"
+    ):
+        raise ValueError(
+            "promotion_counterfactual_coef requires paired_plan_advantage credit"
+        )
     resolved_leakage_cost_mode = str(leakage_cost_mode)
     if resolved_leakage_cost_mode == "auto":
         resolved_leakage_cost_mode = (
@@ -2921,13 +3175,18 @@ def train_ppo_actor_critic(
         if include_hf_predictability is None
         else bool(include_hf_predictability)
     )
+    expected_fixed_promotion_credit = (
+        "paired_plan_advantage"
+        if method_contract in V7_METHOD_CONTRACTS
+        else "incremental_plan_advantage"
+    )
     if fixed_ablation_architecture and (
-        resolved_promotion_credit_mode != "incremental_plan_advantage"
+        resolved_promotion_credit_mode != expected_fixed_promotion_credit
         or resolved_leakage_cost_mode != "fixed_rms_budget"
         or not resolved_include_hf_predictability
     ):
         raise ValueError(
-            "fixed-architecture contracts require incremental promotion credit, "
+            "fixed-architecture contracts require their versioned promotion credit, "
             "fixed RMS leakage budgets, "
             "and the causal HF predictability summary"
         )
@@ -3148,6 +3407,12 @@ def train_ppo_actor_critic(
         minibatch_size=int(minibatch_size),
         init_log_std=float(init_log_std),
         promotion_init_logit=float(promotion_init_logit),
+        promotion_entropy_coef=float(resolved_promotion_entropy_coef),
+        promotion_rate_budget=float(promotion_rate_budget),
+        promotion_rate_coef=float(promotion_rate_coef),
+        promotion_counterfactual_coef=float(
+            resolved_promotion_counterfactual_coef
+        ),
         lower_cost_target=float(effective_lower_cost_target),
         lower_dual_lr=float(lower_lf_dual_lr),
         lower_lambda_init=max(float(lower_lf_constraint_coef), 0.0),
@@ -3528,6 +3793,7 @@ def train_ppo_actor_critic(
                 execution_timeline_contract=execution_timeline_contract,
                 method_contract=method_contract,
                 promotion_credit_mode=resolved_promotion_credit_mode,
+                promotion_credit_scale=resolved_promotion_credit_scale,
                 leakage_cost_mode=resolved_leakage_cost_mode,
                 lower_lf_budget_rms=float(lower_lf_budget_rms),
                 hf_lf_budget_rms=float(hf_lf_budget_rms),
@@ -3544,6 +3810,9 @@ def train_ppo_actor_critic(
                 ),
                 promotion_adapt_gain=float(promotion_adapt_gain),
                 promotion_cooldown_steps=int(promotion_cooldown_steps),
+                promotion_gate_interval_steps=int(
+                    promotion_gate_interval_steps
+                ),
                 upper_residual_action_scale=float(
                     upper_residual_action_scale
                 ),
@@ -3698,11 +3967,22 @@ def train_ppo_actor_critic(
             ),
             "promotion_replan_cost": float(promotion_replan_cost),
             "promotion_init_logit": float(promotion_init_logit),
+            "promotion_entropy_coef": float(
+                resolved_promotion_entropy_coef
+            ),
+            "promotion_rate_budget": float(promotion_rate_budget),
+            "promotion_rate_coef": float(promotion_rate_coef),
+            "promotion_counterfactual_coef": float(
+                resolved_promotion_counterfactual_coef
+            ),
             "promotion_deterministic_threshold": float(
                 promotion_deterministic_threshold
             ),
             "promotion_adapt_gain": float(promotion_adapt_gain),
             "promotion_cooldown_steps": int(promotion_cooldown_steps),
+            "promotion_gate_interval_steps": int(
+                promotion_gate_interval_steps
+            ),
             "hf_lower_overlay_enabled": bool(
                 method_flags["lower_hf_overlay"]
             ),
@@ -3715,6 +3995,9 @@ def train_ppo_actor_critic(
                 and method_flags["separate_hf_tactical"]
             ),
             "promotion_credit_mode": resolved_promotion_credit_mode,
+            "promotion_credit_scale": float(
+                resolved_promotion_credit_scale
+            ),
             "leakage_cost_mode": resolved_leakage_cost_mode,
             "lower_lf_budget_rms": float(lower_lf_budget_rms),
             "hf_lf_budget_rms": float(hf_lf_budget_rms),
@@ -3931,17 +4214,28 @@ def main() -> None:
     parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
     parser.add_argument("--promotion-init-logit", type=float, default=-2.0)
+    parser.add_argument("--promotion-entropy-coef", type=float, default=None)
+    parser.add_argument("--promotion-rate-budget", type=float, default=1.0)
+    parser.add_argument("--promotion-rate-coef", type=float, default=0.0)
+    parser.add_argument("--promotion-counterfactual-coef", type=float, default=None)
     parser.add_argument(
         "--promotion-deterministic-threshold", type=float, default=0.5
     )
     parser.add_argument("--promotion-adapt-gain", type=float, default=0.05)
     parser.add_argument("--promotion-cooldown-steps", type=int, default=0)
+    parser.add_argument("--promotion-gate-interval-steps", type=int, default=1)
     parser.add_argument("--lower-hf-order-scale", type=float, default=0.025)
     parser.add_argument(
         "--promotion-credit-mode",
-        choices=("auto", "task_return", "incremental_plan_advantage"),
+        choices=(
+            "auto",
+            "task_return",
+            "incremental_plan_advantage",
+            "paired_plan_advantage",
+        ),
         default="auto",
     )
+    parser.add_argument("--promotion-credit-scale", type=float, default=None)
     parser.add_argument(
         "--leakage-cost-mode",
         choices=("auto", "spectral_ratio", "fixed_rms_budget"),
@@ -4013,13 +4307,19 @@ def main() -> None:
         plan_smoothness_weight=args.plan_smoothness_weight,
         promotion_replan_cost=args.promotion_replan_cost,
         promotion_init_logit=args.promotion_init_logit,
+        promotion_entropy_coef=args.promotion_entropy_coef,
+        promotion_rate_budget=args.promotion_rate_budget,
+        promotion_rate_coef=args.promotion_rate_coef,
+        promotion_counterfactual_coef=args.promotion_counterfactual_coef,
         promotion_deterministic_threshold=(
             args.promotion_deterministic_threshold
         ),
         promotion_adapt_gain=args.promotion_adapt_gain,
         promotion_cooldown_steps=args.promotion_cooldown_steps,
+        promotion_gate_interval_steps=args.promotion_gate_interval_steps,
         lower_hf_order_scale=args.lower_hf_order_scale,
         promotion_credit_mode=args.promotion_credit_mode,
+        promotion_credit_scale=args.promotion_credit_scale,
         leakage_cost_mode=args.leakage_cost_mode,
         lower_lf_budget_rms=args.lower_lf_budget_rms,
         hf_lf_budget_rms=args.hf_lf_budget_rms,

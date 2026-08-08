@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.1 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -62,9 +62,9 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_1"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_independent_support_episodes_v7_2026_08_08"
+    "full_method_hpo_selective_paired_promotion_v7_1_2026_08_08"
 )
 FULL_METHOD_IMPLEMENTATION_VERSION = FULL_METHOD_V7_IMPLEMENTATION_VERSION
 EXECUTION_TIMELINE_CONTRACT = "causal_post_trade_v3"
@@ -85,6 +85,11 @@ MIN_MECHANISM_REPLICATE_FRACTION = 0.8
 MIN_HF_ACTION_SENSITIVITY = 1e-8
 MIN_PLAN_ACTION_EFFECT = 1e-8
 MAX_HF_BUDGET_RATIO = 1.0 + 1e-8
+MAX_LOW_NOISE_PROMOTION_RATE = 0.25
+MAX_STRESS_PROMOTION_RATE = 0.90
+MIN_STRESS_PROMOTION_RATE = 0.02
+MIN_STRESS_LOW_RATE_LIFT = 0.02
+MIN_STRESS_LOW_PROBABILITY_LIFT = 1e-4
 
 
 @dataclass(frozen=True)
@@ -110,12 +115,12 @@ class Candidate:
 
 
 VARIANTS = (
-    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
-    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
-    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_full_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "full_freq_hrl_v7", "proposed_full_method"),
+    Variant("freq_hrl_no_promotion_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_promotion_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_hf_lower_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_hf_lower_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_leakage_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_leakage_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_no_lf_reference_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_lf_reference_v7", "one_factor_ablation", ABLATION_PARENT_VARIANT),
+    Variant("freq_hrl_anchor_only_v7", "ppo", "frequency_ppo_v7_1", "freq_hrl", "ablate_upper_residual_v7", "reference_only_control", ABLATION_PARENT_VARIANT),
     Variant("flat_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_ppo", "routing_core_v2", "capacity_matched_flat_baseline"),
     Variant("flat_gru_ppo_matched_v7", "ppo", "baseline_ppo_v7", "flat_gru_ppo", "routing_core_v2", "capacity_matched_flat_recurrent_baseline"),
     Variant("generic_hrl_ppo_matched_v7", "ppo", "baseline_ppo_v7", "generic_hrl_ppo", "curve_credit_control_v3", "capacity_matched_nonfrequency_hrl_baseline"),
@@ -166,8 +171,14 @@ def _frequency_candidate(
     promotion_threshold: float = 0.4,
     promotion_adapt_gain: float = 0.20,
     promotion_cooldown_steps: int = 15,
+    promotion_gate_interval_steps: int = 3,
+    promotion_entropy_coef: float = 5e-5,
+    promotion_rate_budget: float = 0.20,
+    promotion_rate_coef: float = 0.10,
+    promotion_counterfactual_coef: float = 1.0,
+    promotion_credit_scale: float = 500.0,
 ) -> Candidate:
-    return Candidate(candidate_id, "frequency_ppo_v7", {
+    return Candidate(candidate_id, "frequency_ppo_v7_1", {
         **_optimizer_parameters(lower_lr, init_log_std),
         "upper_learning_rate": float(upper_lr),
         "lower_learning_rate": float(lower_lr),
@@ -186,11 +197,18 @@ def _frequency_candidate(
         "lower_lf_raw_recenter_scale": 0.10,
         "plan_smoothness_weight": 1e-5,
         "promotion_init_logit": float(promotion_init_logit),
+        "promotion_entropy_coef": float(promotion_entropy_coef),
+        "promotion_rate_budget": float(promotion_rate_budget),
+        "promotion_rate_coef": float(promotion_rate_coef),
+        "promotion_counterfactual_coef": float(
+            promotion_counterfactual_coef
+        ),
         "promotion_replan_cost": float(promotion_replan_cost),
         "lower_hf_order_scale": float(lower_hf_order_scale),
         "upper_period": int(upper_period),
         "min_upper_duration": int(min_upper_duration),
-        "promotion_credit_mode": "incremental_plan_advantage",
+        "promotion_credit_mode": "paired_plan_advantage",
+        "promotion_credit_scale": float(promotion_credit_scale),
         "leakage_cost_mode": "fixed_rms_budget",
         "include_hf_predictability": True,
         "upper_plan_reference_mode": "causal_lf",
@@ -200,6 +218,7 @@ def _frequency_candidate(
         "promotion_deterministic_threshold": float(promotion_threshold),
         "promotion_adapt_gain": float(promotion_adapt_gain),
         "promotion_cooldown_steps": int(promotion_cooldown_steps),
+        "promotion_gate_interval_steps": int(promotion_gate_interval_steps),
         "upper_residual_action_scale": 1.0,
     })
 
@@ -230,12 +249,12 @@ def _offpolicy_candidate(
 
 
 FREQUENCY_CANDIDATES = (
-    _frequency_candidate("v7_stable", upper_lr=1e-4, lower_lr=3e-4, hf_lr=3e-5, promotion_lr=5e-5, init_log_std=-1.5, leakage_scale=2.5e-4, constraint_init=0.02, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0035, hf_budget=0.00050, promotion_init_logit=-0.5, promotion_replan_cost=5e-5, lower_hf_order_scale=0.0050, upper_period=45, min_upper_duration=12, reference_gain=0.75, forecast_blend=0.0, promotion_threshold=0.30, promotion_adapt_gain=0.10, promotion_cooldown_steps=18),
-    _frequency_candidate("v7_balanced", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=1e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025, hf_budget=0.00075, promotion_init_logit=-0.25, promotion_replan_cost=7.5e-5, lower_hf_order_scale=0.0075, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.0, promotion_threshold=0.40, promotion_adapt_gain=0.20, promotion_cooldown_steps=15),
-    _frequency_candidate("v7_forecast", upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=1e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=0.0, promotion_replan_cost=1e-4, lower_hf_order_scale=0.0075, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.45, promotion_adapt_gain=0.20, promotion_cooldown_steps=12),
-    _frequency_candidate("v7_macro", upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=1e-4, init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025, hf_budget=0.00150, promotion_init_logit=-0.25, promotion_replan_cost=1.5e-4, lower_hf_order_scale=0.0100, upper_period=30, min_upper_duration=8, reference_gain=1.25, forecast_blend=0.0, promotion_threshold=0.35, promotion_adapt_gain=0.30, promotion_cooldown_steps=12),
-    _frequency_candidate("v7_tactical", upper_lr=3e-4, lower_lr=1e-4, hf_lr=3e-4, promotion_lr=1e-4, init_log_std=-0.75, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=2e-3, objective_weight=2.5e-5, lower_budget=0.0030, hf_budget=0.00200, promotion_init_logit=0.0, promotion_replan_cost=2e-4, lower_hf_order_scale=0.0125, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.40, promotion_adapt_gain=0.30, promotion_cooldown_steps=10),
-    _frequency_candidate("v7_activegate", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=3e-4, init_log_std=-0.75, leakage_scale=1e-3, constraint_init=0.10, dual_lr=2e-3, objective_weight=5e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=0.25, promotion_replan_cost=2.5e-4, lower_hf_order_scale=0.0100, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.45, promotion_adapt_gain=0.35, promotion_cooldown_steps=15),
+    _frequency_candidate("v71_sparse", upper_lr=1e-4, lower_lr=3e-4, hf_lr=3e-5, promotion_lr=1e-4, init_log_std=-1.5, leakage_scale=2.5e-4, constraint_init=0.02, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0035, hf_budget=0.00050, promotion_init_logit=-2.6, promotion_replan_cost=1e-5, lower_hf_order_scale=0.0050, upper_period=45, min_upper_duration=12, reference_gain=0.75, forecast_blend=0.0, promotion_threshold=0.075, promotion_adapt_gain=0.10, promotion_cooldown_steps=15, promotion_gate_interval_steps=15, promotion_entropy_coef=2e-5, promotion_rate_budget=0.10, promotion_rate_coef=0.20),
+    _frequency_candidate("v71_conservative", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=2e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=5e-4, objective_weight=0.0, lower_budget=0.0025, hf_budget=0.00075, promotion_init_logit=-2.3, promotion_replan_cost=2e-5, lower_hf_order_scale=0.0075, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.0, promotion_threshold=0.10, promotion_adapt_gain=0.20, promotion_cooldown_steps=12, promotion_gate_interval_steps=12, promotion_entropy_coef=3e-5, promotion_rate_budget=0.14, promotion_rate_coef=0.15),
+    _frequency_candidate("v71_balanced", upper_lr=5e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4, init_log_std=-1.0, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=1e-3, objective_weight=2.5e-5, lower_budget=0.0025, hf_budget=0.00150, promotion_init_logit=-2.0, promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0100, upper_period=30, min_upper_duration=8, reference_gain=1.25, forecast_blend=0.0, promotion_threshold=0.13, promotion_adapt_gain=0.30, promotion_cooldown_steps=10, promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5, promotion_rate_budget=0.18, promotion_rate_coef=0.10),
+    _frequency_candidate("v71_forecast", upper_lr=3e-4, lower_lr=3e-4, hf_lr=5e-5, promotion_lr=3e-4, init_log_std=-1.0, leakage_scale=5e-4, constraint_init=0.05, dual_lr=1e-3, objective_weight=1e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=-1.9, promotion_replan_cost=2.5e-5, lower_hf_order_scale=0.0075, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.14, promotion_adapt_gain=0.20, promotion_cooldown_steps=10, promotion_gate_interval_steps=10, promotion_entropy_coef=5e-5, promotion_rate_budget=0.20, promotion_rate_coef=0.10),
+    _frequency_candidate("v71_tactical", upper_lr=3e-4, lower_lr=1e-4, hf_lr=3e-4, promotion_lr=5e-4, init_log_std=-0.75, leakage_scale=7.5e-4, constraint_init=0.10, dual_lr=2e-3, objective_weight=2.5e-5, lower_budget=0.0030, hf_budget=0.00200, promotion_init_logit=-1.7, promotion_replan_cost=5e-5, lower_hf_order_scale=0.0125, upper_period=30, min_upper_duration=8, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.17, promotion_adapt_gain=0.30, promotion_cooldown_steps=8, promotion_gate_interval_steps=8, promotion_entropy_coef=5e-5, promotion_rate_budget=0.22, promotion_rate_coef=0.08, promotion_credit_scale=750.0),
+    _frequency_candidate("v71_responsive", upper_lr=3e-4, lower_lr=3e-4, hf_lr=1e-4, promotion_lr=5e-4, init_log_std=-0.75, leakage_scale=1e-3, constraint_init=0.10, dual_lr=2e-3, objective_weight=5e-5, lower_budget=0.0020, hf_budget=0.00100, promotion_init_logit=-1.5, promotion_replan_cost=7.5e-5, lower_hf_order_scale=0.0100, upper_period=45, min_upper_duration=10, reference_gain=1.0, forecast_blend=0.25, promotion_threshold=0.20, promotion_adapt_gain=0.35, promotion_cooldown_steps=8, promotion_gate_interval_steps=8, promotion_entropy_coef=7.5e-5, promotion_rate_budget=0.25, promotion_rate_coef=0.05, promotion_credit_scale=1000.0),
 )
 BASELINE_CANDIDATES = (
     _baseline_candidate("ppo_lr1e4_std15", 1e-4, -1.5),
@@ -327,9 +346,14 @@ def effective_parameters_for_variant(variant_id: str, candidate_id: str) -> dict
             "lower_lf_raw_recenter_scale": 0.0,
             "plan_smoothness_weight": 0.0,
             "promotion_init_logit": -2.0,
+            "promotion_entropy_coef": 0.001,
+            "promotion_rate_budget": 1.0,
+            "promotion_rate_coef": 0.0,
+            "promotion_counterfactual_coef": 0.0,
             "promotion_replan_cost": 0.0,
             "lower_hf_order_scale": 0.0,
             "promotion_credit_mode": "auto",
+            "promotion_credit_scale": DEFAULT_TRAINING_REWARD_SCALE,
             "leakage_cost_mode": "auto",
             "lower_lf_budget_rms": 0.0025,
             "hf_lf_budget_rms": 0.00025,
@@ -341,6 +365,7 @@ def effective_parameters_for_variant(variant_id: str, candidate_id: str) -> dict
             "promotion_deterministic_threshold": 0.5,
             "promotion_adapt_gain": 0.05,
             "promotion_cooldown_steps": 0,
+            "promotion_gate_interval_steps": 1,
             "upper_residual_action_scale": 1.0,
         })
     elif variant.method_contract == "ablate_promotion_v7":
@@ -378,12 +403,16 @@ def _ppo_training_kwargs(params: dict[str, Any]) -> dict[str, Any]:
         "method_contract", "capacity_reference_method_contract",
         "volume_impact_bps", "plan_smoothness_weight",
         "promotion_replan_cost", "promotion_init_logit",
+        "promotion_entropy_coef", "promotion_rate_budget",
+        "promotion_rate_coef", "promotion_counterfactual_coef",
         "lower_hf_order_scale", "promotion_credit_mode",
+        "promotion_credit_scale",
         "leakage_cost_mode", "lower_lf_budget_rms", "hf_lf_budget_rms",
         "include_hf_predictability", "upper_plan_reference_mode",
         "upper_plan_reference_gain", "upper_plan_reference_forecast_blend",
         "hard_hf_budget_projection", "promotion_deterministic_threshold",
         "promotion_adapt_gain", "promotion_cooldown_steps",
+        "promotion_gate_interval_steps",
         "upper_residual_action_scale",
     )
     result = {key: params[key] for key in keys}
@@ -494,6 +523,9 @@ def _evaluate_ppo(
                     execution_timeline_contract=str(params["execution_timeline_contract"]),
                     method_contract=str(params["method_contract"]),
                     promotion_credit_mode=str(params["promotion_credit_mode"]),
+                    promotion_credit_scale=float(
+                        params["promotion_credit_scale"]
+                    ),
                     leakage_cost_mode=str(params["leakage_cost_mode"]),
                     lower_lf_budget_rms=float(params["lower_lf_budget_rms"]),
                     hf_lf_budget_rms=float(params["hf_lf_budget_rms"]),
@@ -519,6 +551,9 @@ def _evaluate_ppo(
                     promotion_adapt_gain=float(params["promotion_adapt_gain"]),
                     promotion_cooldown_steps=int(
                         params["promotion_cooldown_steps"]
+                    ),
+                    promotion_gate_interval_steps=int(
+                        params["promotion_gate_interval_steps"]
                     ),
                     upper_residual_action_scale=float(
                         params["upper_residual_action_scale"]
@@ -586,6 +621,7 @@ def _hf_intervention_kwargs(
         "execution_timeline_contract": str(params["execution_timeline_contract"]),
         "method_contract": str(params["method_contract"]),
         "promotion_credit_mode": str(params["promotion_credit_mode"]),
+        "promotion_credit_scale": float(params["promotion_credit_scale"]),
         "leakage_cost_mode": str(params["leakage_cost_mode"]),
         "lower_lf_budget_rms": float(params["lower_lf_budget_rms"]),
         "hf_lf_budget_rms": float(params["hf_lf_budget_rms"]),
@@ -602,6 +638,9 @@ def _hf_intervention_kwargs(
         ),
         "promotion_adapt_gain": float(params["promotion_adapt_gain"]),
         "promotion_cooldown_steps": int(params["promotion_cooldown_steps"]),
+        "promotion_gate_interval_steps": int(
+            params["promotion_gate_interval_steps"]
+        ),
         "upper_residual_action_scale": float(
             params["upper_residual_action_scale"]
         ),
@@ -869,7 +908,7 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.1 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",
@@ -915,6 +954,11 @@ def _mechanism_activity_summary(
             "promotion_execution_count": 0.0,
             "promotion_replan_count": 0.0,
             "promotion_active_replicate_fraction": 0.0,
+            "promotion_selective_replicate_fraction": 0.0,
+            "low_noise_promotion_rate_mean": 0.0,
+            "stress_promotion_rate_mean": 0.0,
+            "stress_low_promotion_rate_lift_mean": 0.0,
+            "stress_low_promotion_probability_lift_mean": 0.0,
             "hf_action_sensitivity_mean": 0.0,
             "hf_active_replicate_fraction": 0.0,
             "reference_active_replicate_fraction": 0.0,
@@ -923,6 +967,11 @@ def _mechanism_activity_summary(
         }
 
     promotion_active = []
+    promotion_selective = []
+    low_noise_rates = []
+    stress_rates = []
+    stress_low_rate_lifts = []
+    stress_low_probability_lifts = []
     hf_active = []
     reference_active = []
     residual_active = []
@@ -941,6 +990,48 @@ def _mechanism_activity_summary(
             for row in replicate_rows
         ]))
         promotion_active.append(executed > 0.0 and replans > 0.0)
+        low_rows = [
+            row for row in replicate_rows
+            if str(row.get("scenario", "")) == "stationary_low_noise"
+        ]
+        stress_rows = [
+            row for row in replicate_rows
+            if str(row.get("scenario", "")) in {
+                "localized_burst", "persistent_shift"
+            }
+        ]
+        low_rate = float(np.mean([
+            float(row.get("promotion_gate_action_rate", 0.0) or 0.0)
+            for row in low_rows
+        ] or [0.0]))
+        stress_rate = float(np.mean([
+            float(row.get("promotion_gate_action_rate", 0.0) or 0.0)
+            for row in stress_rows
+        ] or [0.0]))
+        low_probability = float(np.mean([
+            float(row.get("promotion_gate_probability_mean", 0.0) or 0.0)
+            for row in low_rows
+        ] or [0.0]))
+        stress_probability = float(np.mean([
+            float(row.get("promotion_gate_probability_mean", 0.0) or 0.0)
+            for row in stress_rows
+        ] or [0.0]))
+        rate_lift = stress_rate - low_rate
+        probability_lift = stress_probability - low_probability
+        low_noise_rates.append(low_rate)
+        stress_rates.append(stress_rate)
+        stress_low_rate_lifts.append(rate_lift)
+        stress_low_probability_lifts.append(probability_lift)
+        promotion_selective.append(
+            bool(low_rows)
+            and bool(stress_rows)
+            and executed > 0.0
+            and replans > 0.0
+            and low_rate <= MAX_LOW_NOISE_PROMOTION_RATE
+            and MIN_STRESS_PROMOTION_RATE <= stress_rate <= MAX_STRESS_PROMOTION_RATE
+            and rate_lift >= MIN_STRESS_LOW_RATE_LIFT
+            and probability_lift >= MIN_STRESS_LOW_PROBABILITY_LIFT
+        )
 
         replicate_hf = [
             row for row in hf_rows
@@ -998,12 +1089,14 @@ def _mechanism_activity_summary(
         for row in hf_rows
     ] or [0.0]))
     promotion_fraction = float(np.mean(promotion_active))
+    promotion_selective_fraction = float(np.mean(promotion_selective))
     hf_fraction = float(np.mean(hf_active))
     reference_fraction = float(np.mean(reference_active))
     residual_fraction = float(np.mean(residual_active))
     budget_fraction = float(np.mean(hard_budget_compliant))
     eligible = (
         promotion_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
+        and promotion_selective_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
         and hf_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
         and reference_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
         and residual_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
@@ -1014,6 +1107,17 @@ def _mechanism_activity_summary(
         "promotion_execution_count": promotion_execution_count,
         "promotion_replan_count": promotion_replan_count,
         "promotion_active_replicate_fraction": promotion_fraction,
+        "promotion_selective_replicate_fraction": (
+            promotion_selective_fraction
+        ),
+        "low_noise_promotion_rate_mean": float(np.mean(low_noise_rates)),
+        "stress_promotion_rate_mean": float(np.mean(stress_rates)),
+        "stress_low_promotion_rate_lift_mean": float(np.mean(
+            stress_low_rate_lifts
+        )),
+        "stress_low_promotion_probability_lift_mean": float(np.mean(
+            stress_low_probability_lifts
+        )),
         "hf_action_sensitivity_mean": hf_action_sensitivity,
         "hf_active_replicate_fraction": hf_fraction,
         "reference_active_replicate_fraction": reference_fraction,
@@ -1133,6 +1237,11 @@ def merge_hpo_cells(
                 "promotion_execution_count": 0.0,
                 "promotion_replan_count": 0.0,
                 "promotion_active_replicate_fraction": 0.0,
+                "promotion_selective_replicate_fraction": 0.0,
+                "low_noise_promotion_rate_mean": 0.0,
+                "stress_promotion_rate_mean": 0.0,
+                "stress_low_promotion_rate_lift_mean": 0.0,
+                "stress_low_promotion_probability_lift_mean": 0.0,
                 "hf_action_sensitivity_mean": 0.0,
                 "hf_active_replicate_fraction": 0.0,
                 "reference_active_replicate_fraction": 0.0,
@@ -1175,6 +1284,21 @@ def merge_hpo_cells(
                 ],
                 "promotion_active_replicate_fraction": mechanism_evidence[
                     "promotion_active_replicate_fraction"
+                ],
+                "promotion_selective_replicate_fraction": mechanism_evidence[
+                    "promotion_selective_replicate_fraction"
+                ],
+                "low_noise_promotion_rate_mean": mechanism_evidence[
+                    "low_noise_promotion_rate_mean"
+                ],
+                "stress_promotion_rate_mean": mechanism_evidence[
+                    "stress_promotion_rate_mean"
+                ],
+                "stress_low_promotion_rate_lift_mean": mechanism_evidence[
+                    "stress_low_promotion_rate_lift_mean"
+                ],
+                "stress_low_promotion_probability_lift_mean": mechanism_evidence[
+                    "stress_low_promotion_probability_lift_mean"
                 ],
                 "hf_action_sensitivity_mean": mechanism_evidence[
                     "hf_action_sensitivity_mean"

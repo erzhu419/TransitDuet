@@ -477,7 +477,7 @@ class FullMethodContractTest(unittest.TestCase):
             plan_basis_dim=3,
             plan_horizon_s=600.0,
             upper_period=12,
-            min_upper_duration=3,
+            min_upper_duration=1,
             execution_timeline_contract="causal_post_trade_v3",
             method_contract="full_freq_hrl_v7",
             upper_plan_reference_mode="causal_lf",
@@ -487,16 +487,23 @@ class FullMethodContractTest(unittest.TestCase):
             hf_lf_budget_rms=cap,
             promotion_deterministic_threshold=0.01,
             promotion_adapt_gain=0.25,
-            promotion_cooldown_steps=8,
+            promotion_cooldown_steps=2,
+            promotion_gate_interval_steps=3,
         )
         self.assertEqual(payload["upper_plan_reference_mode"], "causal_lf")
         self.assertTrue(payload["hard_hf_budget_projection"])
-        self.assertEqual(payload["promotion_cooldown_steps"], 8)
+        self.assertEqual(payload["promotion_cooldown_steps"], 2)
+        self.assertEqual(payload["promotion_gate_interval_steps"], 3)
+        self.assertEqual(
+            payload["promotion_credit_mode"], "paired_plan_advantage"
+        )
         row = rows[0]
         self.assertGreater(row["upper_plan_reference_target_abs"], 0.0)
         self.assertGreater(row["upper_plan_reference_coeff_abs"], 0.0)
         self.assertGreater(row["promotion_replan_count"], 0)
         self.assertGreater(row["promotion_cooldown_block_count"], 0)
+        self.assertGreater(row["promotion_gate_interval_block_count"], 0)
+        self.assertEqual(row["promotion_counterfactual_symmetric"], 1.0)
         self.assertEqual(row["hard_hf_budget_projection"], 1.0)
         self.assertLessEqual(
             row["hf_overlay_rms_after_projection_max"], cap + 1e-12

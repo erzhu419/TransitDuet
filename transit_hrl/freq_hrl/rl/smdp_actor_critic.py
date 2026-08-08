@@ -43,6 +43,10 @@ class SMDPPPOConfig:
     value_coef: float = 0.5
     cost_value_coef: float = 0.5
     entropy_coef: float = 0.001
+    promotion_entropy_coef: float | None = None
+    promotion_rate_budget: float = 1.0
+    promotion_rate_coef: float = 0.0
+    promotion_counterfactual_coef: float = 0.0
     max_grad_norm: float = 1.0
     epochs: int = 4
     minibatch_size: int = 512
@@ -72,6 +76,7 @@ class LevelTrajectoryBatch:
     old_logp: np.ndarray
     old_value: np.ndarray
     cost: np.ndarray | None = None
+    counterfactual_advantage: np.ndarray | None = None
 
     def validate(self, *, state_dim: int, action_dim: int, level: str) -> None:
         state = np.asarray(self.state)
@@ -96,6 +101,12 @@ class LevelTrajectoryBatch:
             cost = np.asarray(self.cost).reshape(-1)
             if cost.size != n or not np.all(np.isfinite(cost)):
                 raise ValueError(f"{level} cost must contain {n} finite values")
+        if self.counterfactual_advantage is not None:
+            advantage = np.asarray(self.counterfactual_advantage).reshape(-1)
+            if advantage.size != n or not np.all(np.isfinite(advantage)):
+                raise ValueError(
+                    f"{level} counterfactual_advantage must contain {n} finite values"
+                )
 
     @property
     def size(self) -> int:
@@ -279,6 +290,10 @@ class HierarchicalRolloutBuilder:
             old_logp=np.asarray(data["old_logp"], dtype=np.float32),
             old_value=np.asarray(data["old_value"], dtype=np.float32),
             cost=np.asarray(data["cost"], dtype=np.float32),
+            counterfactual_advantage=(
+                np.asarray(data["counterfactual_advantage"], dtype=np.float32)
+                if data.get("counterfactual_advantage") else None
+            ),
         )
 
     def build(self) -> HierarchicalTrajectoryBatch:
@@ -311,9 +326,11 @@ class PromotionRolloutBuilder:
                 "old_logp",
                 "old_value",
                 "cost",
+                "counterfactual_advantage",
             )
         }
         self._pending: dict[str, Any] | None = None
+        self._counterfactual_enabled: bool | None = None
 
     @property
     def has_pending(self) -> bool:
@@ -336,10 +353,27 @@ class PromotionRolloutBuilder:
             "rewards": [],
         }
 
-    def add_reward(self, reward: float, *, done: bool = False) -> None:
+    def add_reward(
+        self,
+        reward: float,
+        *,
+        counterfactual_advantage: float | None = None,
+        done: bool = False,
+    ) -> None:
         if self._pending is None:
             return
+        enabled = counterfactual_advantage is not None
+        if self._counterfactual_enabled is None:
+            self._counterfactual_enabled = enabled
+        elif self._counterfactual_enabled != enabled:
+            raise ValueError(
+                "counterfactual promotion advantages must be present for every reward or none"
+            )
         self._pending["rewards"].append(float(reward))
+        if enabled:
+            self._pending.setdefault("counterfactual_advantages", []).append(
+                float(counterfactual_advantage)
+            )
         if done:
             self.close(done=True)
 
@@ -366,6 +400,18 @@ class PromotionRolloutBuilder:
         self._data["old_logp"].append(float(pending["logp"]))
         self._data["old_value"].append(float(pending["value"]))
         self._data["cost"].append(0.0)
+        counterfactual_advantages = list(
+            pending.get("counterfactual_advantages", [])
+        )
+        if counterfactual_advantages:
+            if len(counterfactual_advantages) != len(rewards):
+                raise RuntimeError(
+                    "counterfactual promotion advantages must align with rewards"
+                )
+            self._data["counterfactual_advantage"].append(float(np.dot(
+                discounts,
+                np.asarray(counterfactual_advantages, dtype=np.float64),
+            )))
         self._pending = None
 
     def finish(self, *, terminal: bool = True) -> None:
@@ -385,6 +431,15 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
     items = list(batches)
     if not items:
         raise ValueError("at least one level batch is required")
+    counterfactual_batches = [
+        item.counterfactual_advantage for item in items
+    ]
+    if any(item is None for item in counterfactual_batches) and not all(
+        item is None for item in counterfactual_batches
+    ):
+        raise ValueError(
+            "counterfactual advantages must be present for every batch or none"
+        )
     return LevelTrajectoryBatch(
         state=np.concatenate([np.asarray(item.state) for item in items], axis=0),
         action=np.concatenate([np.asarray(item.action) for item in items], axis=0),
@@ -396,6 +451,14 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         cost=(
             np.concatenate([np.asarray(item.cost).reshape(-1) for item in items], axis=0)
             if all(item.cost is not None for item in items) else None
+        ),
+        counterfactual_advantage=(
+            None
+            if all(item is None for item in counterfactual_batches)
+            else np.concatenate([
+                np.asarray(item).reshape(-1)
+                for item in counterfactual_batches if item is not None
+            ], axis=0)
         ),
     )
 
@@ -442,6 +505,30 @@ class FrequencySeparatedActorCriticPPO:
     def __init__(self, config: SMDPPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
+        promotion_entropy_coef = (
+            float(config.entropy_coef)
+            if config.promotion_entropy_coef is None
+            else float(config.promotion_entropy_coef)
+        )
+        if not np.isfinite(promotion_entropy_coef) or promotion_entropy_coef < 0.0:
+            raise ValueError("promotion_entropy_coef must be finite and non-negative")
+        if (
+            not np.isfinite(float(config.promotion_rate_budget))
+            or not 0.0 <= float(config.promotion_rate_budget) <= 1.0
+        ):
+            raise ValueError("promotion_rate_budget must be finite and in [0, 1]")
+        if (
+            not np.isfinite(float(config.promotion_rate_coef))
+            or float(config.promotion_rate_coef) < 0.0
+        ):
+            raise ValueError("promotion_rate_coef must be finite and non-negative")
+        if (
+            not np.isfinite(float(config.promotion_counterfactual_coef))
+            or float(config.promotion_counterfactual_coef) < 0.0
+        ):
+            raise ValueError(
+                "promotion_counterfactual_coef must be finite and non-negative"
+            )
         if (int(config.hf_state_dim) > 0) != (int(config.hf_action_dim) > 0):
             raise ValueError(
                 "hf_state_dim and hf_action_dim must either both be positive or both be zero"
@@ -798,6 +885,17 @@ class FrequencySeparatedActorCriticPPO:
         reward_adv, returns = self._gae(batch.reward, batch.done, batch.duration, batch.old_value)
         reward_adv_t = torch.as_tensor(self._normalize(reward_adv), dtype=torch.float32, device=self.device)
         returns_t = torch.as_tensor(returns, dtype=torch.float32, device=self.device)
+        counterfactual_adv_t = None
+        if level == "promotion" and batch.counterfactual_advantage is not None:
+            counterfactual_advantage = np.asarray(
+                batch.counterfactual_advantage, dtype=np.float32
+            ).reshape(-1)
+            scale = float(np.mean(np.abs(counterfactual_advantage))) + 1e-8
+            counterfactual_adv_t = torch.as_tensor(
+                np.clip(counterfactual_advantage / scale, -10.0, 10.0),
+                dtype=torch.float32,
+                device=self.device,
+            )
 
         cost = None
         cost_adv_t = None
@@ -830,13 +928,48 @@ class FrequencySeparatedActorCriticPPO:
                         ratio * cost_adv_t[idx], clipped * cost_adv_t[idx]
                     ).mean()
                     constraint_loss = float(self.constraint_lambda) * cost_surrogate
-                policy_loss = -reward_surrogate + constraint_loss
+                promotion_rate_loss = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                promotion_probability_mean = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                promotion_counterfactual_surrogate = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                if level == "promotion":
+                    distribution = actor.distribution(state[idx])
+                    promotion_probability_mean = distribution.probs.mean()
+                    if counterfactual_adv_t is not None:
+                        promotion_counterfactual_surrogate = torch.mean(
+                            distribution.probs.reshape(-1)
+                            * counterfactual_adv_t[idx]
+                        )
+                    rate_excess = torch.relu(
+                        promotion_probability_mean
+                        - float(cfg.promotion_rate_budget)
+                    )
+                    promotion_rate_loss = (
+                        float(cfg.promotion_rate_coef) * rate_excess.square()
+                    )
+                policy_loss = (
+                    -reward_surrogate
+                    - float(cfg.promotion_counterfactual_coef)
+                    * promotion_counterfactual_surrogate
+                    + constraint_loss
+                    + promotion_rate_loss
+                )
                 value_loss = torch.mean((value_net(state[idx]) - returns_t[idx]) ** 2)
                 cost_value_loss = torch.zeros((), dtype=torch.float32, device=self.device)
                 if cost_returns_t is not None and cost_value_net is not None:
                     cost_value_loss = torch.mean((cost_value_net(state[idx]) - cost_returns_t[idx]) ** 2)
                 entropy_mean = entropy.mean()
-                actor_loss = policy_loss - float(cfg.entropy_coef) * entropy_mean
+                entropy_coef = (
+                    float(cfg.entropy_coef)
+                    if level != "promotion" or cfg.promotion_entropy_coef is None
+                    else float(cfg.promotion_entropy_coef)
+                )
+                actor_loss = policy_loss - entropy_coef * entropy_mean
                 actor_optimizer.zero_grad()
                 actor_loss.backward()
                 nn.utils.clip_grad_norm_(actor.parameters(), max_norm=float(cfg.max_grad_norm))
@@ -863,14 +996,27 @@ class FrequencySeparatedActorCriticPPO:
                     + float(cfg.value_coef) * value_loss.detach()
                     + float(cfg.cost_value_coef) * cost_value_loss.detach()
                 )
-                rows.append({
+                row = {
                     "loss": float(loss.detach().cpu().item()),
                     "policy_loss": float(policy_loss.detach().cpu().item()),
                     "value_loss": float(value_loss.detach().cpu().item()),
                     "cost_value_loss": float(cost_value_loss.detach().cpu().item()),
                     "entropy": float(entropy_mean.detach().cpu().item()),
                     "constraint_loss": float(constraint_loss.detach().cpu().item()),
-                })
+                }
+                if level == "promotion":
+                    row.update({
+                        "rate_loss": float(
+                            promotion_rate_loss.detach().cpu().item()
+                        ),
+                        "probability_mean": float(
+                            promotion_probability_mean.detach().cpu().item()
+                        ),
+                        "counterfactual_surrogate": float(
+                            promotion_counterfactual_surrogate.detach().cpu().item()
+                        ),
+                    })
+                rows.append(row)
 
         out = {
             f"{level}_{key}": float(np.mean([row[key] for row in rows]))

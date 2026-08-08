@@ -90,6 +90,25 @@ class TradingDomainTest(unittest.TestCase):
         self.assertFalse(np.allclose(promoted["x_low"], low_before))
         self.assertEqual(tracker.summary()["freq_promotion_absorptions"], 1)
 
+    def test_tracker_snapshot_supports_nonmutating_counterfactual_promotion(self):
+        tracker = TradingFrequencyTracker(
+            bar_sec=60,
+            method="ema",
+            feature_norm=[0.01],
+            promotion_enable=False,
+            promotion_adapt_gain=0.5,
+        )
+        tracker.update_bar([0.0])
+        tracker.update_bar([0.1])
+        factual_low = np.asarray(tracker.features()["x_low"]).copy()
+        shadow = tracker.snapshot()
+        promoted = shadow.promote_residual(strength=1.0)
+
+        np.testing.assert_array_equal(tracker.features()["x_low"], factual_low)
+        self.assertFalse(np.allclose(promoted["x_low"], factual_low))
+        self.assertEqual(tracker.summary()["freq_promotion_absorptions"], 0)
+        self.assertEqual(shadow.summary()["freq_promotion_absorptions"], 1)
+
     def test_trading_tracker_neural_state_space_runs(self):
         tracker = TradingFrequencyTracker(
             bar_sec=60,

@@ -94,19 +94,24 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
             logp=-0.2,
             value=0.1,
         )
-        builder.add_reward(1.0)
-        builder.add_reward(2.0)
+        builder.add_reward(1.0, counterfactual_advantage=0.5)
+        builder.add_reward(2.0, counterfactual_advantage=-0.25)
         builder.begin(
             state=np.asarray([0.0, 1.0], dtype=np.float32),
             action=0.0,
             logp=-0.3,
             value=0.2,
         )
-        builder.add_reward(3.0, done=True)
+        builder.add_reward(
+            3.0, counterfactual_advantage=0.75, done=True
+        )
         batch = builder.build()
         self.assertIsNotNone(batch)
         np.testing.assert_array_equal(batch.duration, [2, 1])
         np.testing.assert_allclose(batch.reward, [2.8, 3.0])
+        np.testing.assert_allclose(
+            batch.counterfactual_advantage, [0.275, 0.75]
+        )
         np.testing.assert_array_equal(batch.action.reshape(-1), [1.0, 0.0])
 
     def test_promotion_gate_can_close_at_scheduled_upper_boundary(self):
@@ -266,6 +271,10 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             lower_action_dim=1,
             promotion_state_dim=4,
             promotion_init_logit=-2.0,
+            promotion_entropy_coef=0.0,
+            promotion_rate_budget=0.05,
+            promotion_rate_coef=1.0,
+            promotion_counterfactual_coef=1.0,
             epochs=1,
             minibatch_size=8,
         ))
@@ -298,20 +307,27 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             logp=-2.0,
             value=0.0,
         )
-        gate.add_reward(1.0)
+        gate.add_reward(1.0, counterfactual_advantage=0.5)
         gate.begin(
             state=np.zeros(4, dtype=np.float32),
             action=0.0,
             logp=-0.2,
             value=0.0,
         )
-        gate.add_reward(0.2, done=True)
+        gate.add_reward(
+            0.2, counterfactual_advantage=-0.25, done=True
+        )
         batch = self._batch()
         batch.promotion = gate.build()
         metrics = model.update(batch)
         self.assertEqual(metrics["promotion_transitions"], 2.0)
         self.assertGreater(metrics["promotion_actor_optimizer_steps"], 0.0)
         self.assertGreater(metrics["promotion_value_optimizer_steps"], 0.0)
+        self.assertGreater(metrics["promotion_rate_loss"], 0.0)
+        self.assertGreater(metrics["promotion_probability_mean"], 0.05)
+        self.assertNotEqual(
+            metrics["promotion_counterfactual_surrogate"], 0.0
+        )
 
     def test_concatenation_preserves_level_specific_counts(self):
         batch = concat_hierarchical_batches([self._batch(1), self._batch(2)])

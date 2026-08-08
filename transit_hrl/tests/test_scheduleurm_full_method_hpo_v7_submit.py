@@ -56,12 +56,12 @@ class ScheduleurmFullMethodHPOV7SubmitTest(unittest.TestCase):
     def test_command_has_no_per_scenario_training_axis_or_heldout_seed(self):
         args = args_fixture()
         output = cell_relative_dir(
-            "unit_v7_hpo", "freq_hrl_full_v7", "v7_balanced", 2026
+            "unit_v7_hpo", "freq_hrl_full_v7", "v71_balanced", 2026
         )
         command = build_training_command(
             args,
             variant_id="freq_hrl_full_v7",
-            candidate_id="v7_balanced",
+            candidate_id="v71_balanced",
             replicate_seed=2026,
             output_dir=output,
         )
@@ -75,7 +75,7 @@ class ScheduleurmFullMethodHPOV7SubmitTest(unittest.TestCase):
     def test_cells_use_dynamic_six_node_pool_and_one_physical_core(self):
         args = args_fixture()
         for variant_id, candidate_id, expected_ram in (
-            ("freq_hrl_full_v7", "v7_balanced", 768),
+            ("freq_hrl_full_v7", "v71_balanced", 768),
             ("flat_sac_matched_v7", "off_lr1e4_w1024_b64", 1536),
         ):
             spec = build_scheduler_spec(
