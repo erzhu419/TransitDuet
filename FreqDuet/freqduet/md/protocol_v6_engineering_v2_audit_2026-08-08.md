@@ -128,3 +128,48 @@ four-evaluation-seed confirmation budget on it. The next algorithmic candidate
 must start from the coherent no-guard action semantics and recover regularity
 through the lower objective or a soft causal constraint, not by projecting or
 hard-masking the deployed action.
+
+## Engineering-v4 soft-regularity preregistration (2026-08-09)
+
+Engineering-v4 keeps the `noguard` execution semantics: every discrete action
+sampled by the policy is the action sent to the environment. It adds an
+optional CMDP cost computed from an immutable action-time tuple
+`(matched predecessor departure gap, target headway, action)`. The predicted
+post-hold departure headway is `gap + action`; squared normalized deviation
+outside a 2% tolerance is capped at one and scaled by the configured dose.
+Missing matched-departure evidence produces zero additional cost and is logged,
+not imputed from a later bus state. The module never clips, replaces, or masks
+an action.
+
+The same source also makes the Lagrange dual statistic use the TPC-weighted
+replay occupancy already used by the critics and actor. Consequently all
+references must be rerun from this source; old `noguard` outputs cannot be
+mixed into the new comparison.
+
+The exploratory screen is a dose-response design:
+
+- regularity cost weight: `0`, `0.25`, `0.5`, or `1.0`;
+- per-decision cost limit: `0.35` or `0.30`;
+- dual learning rate: `3e-4` or `1e-3`;
+- references: locked V6 `main` and same-source `noguard`;
+- budget: 40 training episodes, train seeds `503,521,541,557`, and frozen
+  common-random-number evaluation seeds `41011,41017`.
+
+The one-episode implementation smoke produced 5,200 lower transitions. It
+reported zero execution-guard adjustment, 65.7% valid matched-departure
+evidence, and an unscaled weight-one regularity-cost mean of about `0.356`.
+This smoke is a scale check only and is not efficacy evidence.
+
+No screened variant is promotable from this pilot alone. A variant may advance
+to disjoint-seed confirmation only if it satisfies all of these gates:
+
+1. Every requested shard and frozen rollout is complete and hash-homogeneous.
+2. Mean execution adjustment remains exactly zero and evidence validity is
+   reported for every rollout.
+3. Restricted passenger journey is no more than `0.15 min` worse than
+   same-source `noguard` and remains better than the old hard-guard main.
+4. Headway CV improves over same-source `noguard` by at least `0.02` in mean,
+   without reversing its holding and denied-dispatch gains by more than 10%.
+5. Selection uncertainty and all 16 screened variants are retained in the
+   negative-results appendix; only a later disjoint-seed run can support an
+   efficacy claim.

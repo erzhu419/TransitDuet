@@ -31,6 +31,13 @@ LOCKED_CONFIGS = [
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
+    *[
+        f"F_freqduet_protocol_v6_{kind}_c{limit}_{rate}_hiro"
+        for kind in (
+            "softdual", "softreg_w025", "softreg_w05", "softreg_w1")
+        for limit in ("035", "030")
+        for rate in ("l3e4", "l1e3")
+    ],
 ]
 
 
@@ -58,6 +65,8 @@ def validate(
             "timetable_planner", {}) or {}
         guard = (config.get("lower", {}) or {}).get(
             "causal_holding_guard", {}) or {}
+        regularity = (config.get("lower", {}) or {}).get(
+            "causal_departure_regularity", {}) or {}
         required = {
             "protocol.version": (
                 protocol.get("version"), "freqduet-eval-v6"),
@@ -83,6 +92,11 @@ def validate(
             raise ValueError(f"{name}: V6 contract mismatch {mismatches}")
         if not bool(timetable.get("terminal_dispatch")):
             raise ValueError(f"{name}: executable terminal dispatch is disabled")
+        if (bool(regularity.get("enable"))
+                and regularity.get("evidence_mode")
+                != "pre_action_departure_v6"):
+            raise ValueError(
+                f"{name}: soft regularity uses non-causal evidence")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
     main = resolved["F_freqduet_protocol_v6_main_hiro"]

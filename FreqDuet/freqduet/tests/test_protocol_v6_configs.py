@@ -15,6 +15,13 @@ CONFIGS = {
         "noloadcost", "waitonlycredit", "csac",
     )
 }
+SOFT_CONFIGS = [
+    f"F_freqduet_protocol_v6_{kind}_c{limit}_{rate}_hiro"
+    for kind in (
+        "softdual", "softreg_w025", "softreg_w05", "softreg_w1")
+    for limit in ("035", "030")
+    for rate in ("l3e4", "l1e3")
+]
 
 
 class ProtocolV6ConfigTest(unittest.TestCase):
@@ -139,6 +146,36 @@ class ProtocolV6ConfigTest(unittest.TestCase):
             result["experimental_configs"],
             ["F_freqduet_protocol_v6_maskguard_hiro"],
         )
+
+    def test_soft_regularity_factorial_requires_explicit_opt_in(self):
+        configs = [CONFIGS["main"], CONFIGS["noguard"], *SOFT_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(result["experimental_configs"], sorted(SOFT_CONFIGS))
+
+        for name in SOFT_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            regularity = lower.get("causal_departure_regularity", {})
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertIn(lower["cost_limit"], {0.30, 0.35})
+            self.assertIn(lower["lambda_lr"], {0.0003, 0.001})
+            if "softreg_" in name:
+                self.assertTrue(regularity["enable"])
+                expected_weight = (
+                    0.25 if "softreg_w025" in name
+                    else 0.5 if "softreg_w05" in name
+                    else 1.0
+                )
+                self.assertEqual(
+                    regularity["cost_weight"], expected_weight)
+                self.assertEqual(
+                    regularity["evidence_mode"],
+                    "pre_action_departure_v6",
+                )
+            else:
+                self.assertFalse(regularity.get("enable", False))
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

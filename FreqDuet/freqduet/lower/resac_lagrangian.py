@@ -688,7 +688,9 @@ class RESACLagrangianTrainer:
             # so that ∂loss/∂(log λ) = -λ·(cost - clim);  Adam minimisation gives
             # log λ ← log λ + lr·λ·(cost - clim), i.e. λ INCREASES when violated
             # and DECREASES when slack. (The previous form had this sign reversed.)
-            batch_cost_mean = cost.mean().detach()
+            weight_sum = w.sum().clamp_min(1e-8)
+            batch_cost_mean = (
+                cost.squeeze(-1) * w).sum().div(weight_sum).detach()
             lambda_loss = -self.log_lambda.exp() * (
                 batch_cost_mean - self.cost_limit)
             self.lambda_optimizer.zero_grad()

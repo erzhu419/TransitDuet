@@ -162,6 +162,32 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertGreater(updated_lambda(1.0), 1.0)
         self.assertLess(updated_lambda(0.0), 1.0)
 
+    def test_lagrange_dual_uses_tpc_weighted_cost_occupancy(self):
+        torch.manual_seed(41)
+        trainer = RESACLagrangianTrainer(
+            state_dim=2,
+            ensemble_size=2,
+            hidden_dim=8,
+            cost_limit=0.5,
+            cost_limit_semantics="per_decision_rate",
+            lambda_lr=1e-2,
+            auto_entropy=False,
+        )
+        replay = CostReplayBuffer(64, seed=43)
+        for idx in range(16):
+            state = np.array([idx / 16.0, 0.0], dtype=np.float32)
+            cost = 0.0 if idx < 8 else 1.0
+            replay.push(state, 0.0, 0.0, cost, state, True, idx)
+
+        def weight_fn(trip_ids):
+            return np.where(trip_ids < 8, 1.8, 0.2).astype(np.float32)
+
+        metrics = trainer.update(
+            replay, 16, reward_scale=1.0, weight_fn=weight_fn)
+
+        self.assertAlmostEqual(metrics["batch_cost_mean"], 0.1, places=6)
+        self.assertLess(trainer.lambda_param, 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

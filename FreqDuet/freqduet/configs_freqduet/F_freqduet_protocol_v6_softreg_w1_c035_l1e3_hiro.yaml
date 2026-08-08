@@ -1,0 +1,15 @@
+_extends: F_freqduet_protocol_v6_noguard_hiro.yaml
+_name: F_freqduet_protocol_v6_softreg_w1_c035_l1e3_hiro
+
+protocol:
+  role: exploratory_softreg_w1_c035_l1e3_v6
+
+lower:
+  cost_limit: 0.35
+  lambda_lr: 0.001
+  causal_departure_regularity:
+    enable: true
+    evidence_mode: pre_action_departure_v6
+    cost_weight: 1.0
+    tolerance_fraction: 0.02
+    cost_cap: 1.0

@@ -86,6 +86,10 @@ from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
 from lower.holding_externality import LoadWeightedHoldingPenalty
 from lower.causal_holding_guard import CausalHoldingActionGuard
+from lower.causal_departure_regularity import (
+    CausalDepartureRegularityCost,
+    DepartureRegularityContext,
+)
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
 from randomness import RandomnessContract
@@ -272,10 +276,17 @@ class DiagnosticLog:
         'lower_causal_guard_active_mean',
         'lower_causal_guard_limit_mean_s',
         'lower_causal_guard_adjustment_mean_s',
+        'lower_departure_regularity_enabled',
+        'lower_departure_regularity_cost_mean',
+        'lower_departure_regularity_cost_max',
+        'lower_departure_regularity_deviation_mean',
+        'lower_departure_regularity_overshoot_mean',
+        'lower_departure_regularity_evidence_valid_mean',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
         'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
-        'lower_cost_q_mean', 'lower_cost_q_loss',
+        'lower_cost_q_mean', 'lower_cost_q_loss', 'lower_batch_cost_mean',
+        'lower_cost_limit',
         'lower_policy_loss', 'lower_pi_grad_norm', 'lower_q_grad_norm',
         'lower_alpha', 'lower_lambda',
         'lower_replay_size',
@@ -1961,6 +1972,9 @@ class TransitDuetV2Runner:
         )
         self.lower_causal_holding_guard = CausalHoldingActionGuard.from_config(
             lower_cfg.get('causal_holding_guard', {}))
+        self.lower_departure_regularity = (
+            CausalDepartureRegularityCost.from_config(
+                lower_cfg.get('causal_departure_regularity', {})))
         guard_cfg = lower_cfg.get('causal_holding_guard', {}) or {}
         self.lower_causal_guard_policy_mask_enabled = bool(
             guard_cfg.get('policy_mask', False))
@@ -2530,6 +2544,11 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_limits = []
         self._ep_lower_causal_guard_adjustments = []
         self._ep_lower_causal_guard_feasible_actions = []
+        self._pending_lower_action_context = {}
+        self._ep_lower_departure_regularity_costs = []
+        self._ep_lower_departure_regularity_deviations = []
+        self._ep_lower_departure_regularity_overshoots = []
+        self._ep_lower_departure_regularity_evidence_valid = []
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
@@ -5516,11 +5535,39 @@ class TransitDuetV2Runner:
         bus = self._bus_for_agent(bus_id)
         if self._lower_terminal_action_masked(bus):
             self._ep_lower_terminal_action_masks += 1
-            return np.asarray([0.0], dtype=np.float32)
-        action = self._lower_policy_action(
-            obs, last_action=last_action, deterministic=deterministic)
-        action = self._apply_causal_holding_guard(action, bus)
-        return self._apply_lower_fleet_noharm(action, bus)
+            action = np.asarray([0.0], dtype=np.float32)
+        else:
+            action = self._lower_policy_action(
+                obs, last_action=last_action, deterministic=deterministic)
+            action = self._apply_causal_holding_guard(action, bus)
+            action = self._apply_lower_fleet_noharm(action, bus)
+        self._capture_lower_action_context(bus_id, bus)
+        return action
+
+    def _capture_lower_action_context(self, bus_id, bus):
+        context = self.lower_departure_regularity.capture(
+            forward_headway_s=(
+                getattr(bus, 'pre_action_forward_headway', None)
+                if bus is not None else None),
+            target_headway_s=(
+                getattr(bus, '_target_headway', None)
+                if bus is not None else None),
+            evidence_source=(
+                getattr(bus, 'pre_action_forward_headway_source', None)
+                if bus is not None else None),
+        )
+        if not hasattr(self, '_pending_lower_action_context'):
+            self._pending_lower_action_context = {}
+        self._pending_lower_action_context[int(bus_id)] = context
+
+    def _consume_lower_action_context(
+            self, key,
+            explicit_context=None) -> DepartureRegularityContext | None:
+        pending = getattr(self, '_pending_lower_action_context', {})
+        if explicit_context is not None:
+            pending.pop(int(key), None)
+            return explicit_context
+        return pending.pop(int(key), None)
 
     def _apply_causal_holding_guard(self, action, bus=None):
         requested = self._lower_action_scalar(action)
@@ -5571,7 +5618,7 @@ class TransitDuetV2Runner:
             board_wait_sum_s=None, board_lf_wait_sum_s=None,
             board_hf_wait_sum_s=None, board_lf_mass=None,
             board_hf_mass=None, board_count=None,
-            record_holding_action=True):
+            record_holding_action=True, action_context=None):
         """Shape, diagnose, and optionally replay one physical lower transition."""
         raw_state = np.asarray(raw_state, dtype=np.float32)
         act_val = (
@@ -5605,7 +5652,17 @@ class TransitDuetV2Runner:
         drift_cost = self._lower_drift_cost(drift_load)
         lower_value_soft_cost = self._lower_value_soft_cost(
             context_bus, act_val)
-        total_cost = float(cost) + drift_cost + lower_value_soft_cost
+        departure_context = self._consume_lower_action_context(
+            key, explicit_context=action_context)
+        departure_regularity = self.lower_departure_regularity.evaluate(
+            departure_context, act_val)
+        departure_regularity_cost = float(departure_regularity.cost)
+        total_cost = (
+            float(cost)
+            + drift_cost
+            + lower_value_soft_cost
+            + departure_regularity_cost
+        )
 
         low_demand = 0.0
         local_high = 0.0
@@ -5721,6 +5778,16 @@ class TransitDuetV2Runner:
         self._ep_lower_load_ratios.append(load_ratio)
         self._ep_lower_normalized_person_delays.append(
             normalized_person_delay)
+        if self.lower_departure_regularity.enabled:
+            self._ep_lower_departure_regularity_costs.append(
+                departure_regularity_cost)
+            self._ep_lower_departure_regularity_evidence_valid.append(
+                1.0 if departure_regularity.evidence_valid else 0.0)
+            if departure_regularity.evidence_valid:
+                self._ep_lower_departure_regularity_deviations.append(
+                    float(departure_regularity.normalized_deviation))
+                self._ep_lower_departure_regularity_overshoots.append(
+                    float(departure_regularity.normalized_overshoot))
         if cur_tid >= 0 and record_holding_action:
             self.holding_feedback.record_action(cur_tid, act_val)
         if tracker is not None:
@@ -7521,6 +7588,11 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_limits = []
         self._ep_lower_causal_guard_adjustments = []
         self._ep_lower_causal_guard_feasible_actions = []
+        self._pending_lower_action_context = {}
+        self._ep_lower_departure_regularity_costs = []
+        self._ep_lower_departure_regularity_deviations = []
+        self._ep_lower_departure_regularity_overshoots = []
+        self._ep_lower_departure_regularity_evidence_valid = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -7748,6 +7820,8 @@ class TransitDuetV2Runner:
                         terminal_transition_recorded = True
                     elif event.pending_state is not None or event.pending_action is not None:
                         self._ep_lower_terminal_outcomes_missing += 1
+                if not terminal_transition_recorded:
+                    self._consume_lower_action_context(event.bus_id)
                 if self.lower_lifecycle.boundary_mode == 'reset':
                     self._ep_lower_trip_boundary_resets += 1
                     if terminal_transition_recorded:
@@ -8170,6 +8244,14 @@ class TransitDuetV2Runner:
             self._ep_lower_causal_guard_adjustments)
         lower_causal_guard_feasible_action_stat = _stat(
             self._ep_lower_causal_guard_feasible_actions)
+        lower_departure_regularity_cost_stat = _stat(
+            self._ep_lower_departure_regularity_costs)
+        lower_departure_regularity_deviation_stat = _stat(
+            self._ep_lower_departure_regularity_deviations)
+        lower_departure_regularity_overshoot_stat = _stat(
+            self._ep_lower_departure_regularity_overshoots)
+        lower_departure_regularity_evidence_stat = _stat(
+            self._ep_lower_departure_regularity_evidence_valid)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8589,6 +8671,18 @@ class TransitDuetV2Runner:
                 lower_causal_guard_limit_stat['mean'], 6),
             'lower_causal_guard_adjustment_mean_s': round(
                 lower_causal_guard_adjustment_stat['mean'], 6),
+            'lower_departure_regularity_enabled': int(
+                self.lower_departure_regularity.enabled),
+            'lower_departure_regularity_cost_mean': round(
+                lower_departure_regularity_cost_stat['mean'], 8),
+            'lower_departure_regularity_cost_max': round(
+                lower_departure_regularity_cost_stat['max'], 8),
+            'lower_departure_regularity_deviation_mean': round(
+                lower_departure_regularity_deviation_stat['mean'], 8),
+            'lower_departure_regularity_overshoot_mean': round(
+                lower_departure_regularity_overshoot_stat['mean'], 8),
+            'lower_departure_regularity_evidence_valid_mean': round(
+                lower_departure_regularity_evidence_stat['mean'], 8),
             # lower training
             'lower_q_mean': lower_m.get('q_mean', 0.),
             'lower_q_std': lower_m.get('q_std', 0.),
@@ -8599,6 +8693,8 @@ class TransitDuetV2Runner:
             'lower_q_l1_penalty': lower_m.get('q_l1_penalty', 0.),
             'lower_cost_q_mean': lower_m.get('cost_q_mean', 0.),
             'lower_cost_q_loss': lower_m.get('cost_q_loss', 0.),
+            'lower_batch_cost_mean': lower_m.get('batch_cost_mean', 0.),
+            'lower_cost_limit': float(self.lower_trainer.cost_limit),
             'lower_policy_loss': lower_m.get('policy_loss', 0.),
             'lower_pi_grad_norm': lower_m.get('pi_grad_norm', 0.),
             'lower_q_grad_norm': lower_m.get('q_grad_norm', 0.),
