@@ -321,6 +321,36 @@ class JointActorCriticPPOTest(unittest.TestCase):
 
 
 class CausalRawHistoryTest(unittest.TestCase):
+    def test_incremental_gru_matches_full_recomputation(self):
+        torch.manual_seed(17)
+        window = 6
+        features = 2
+        encoder = CausalGRUStateEncoder(
+            state_dim=window * features + 3,
+            history_window=window,
+            raw_feature_dim=features,
+            hidden_dim=9,
+        )
+        history = np.random.default_rng(19).normal(size=(9, features))
+        encoder.reset_inference_state()
+        for step in range(history.shape[0]):
+            observed = causal_raw_history_window(
+                history[:step + 1], assets=features, window=window
+            )
+            state = np.concatenate([
+                observed,
+                np.asarray([
+                    min((step + 1) / window, 1.0),
+                    step / 10.0,
+                    -step / 20.0,
+                ]),
+            ]).astype(np.float32)
+            tensor = torch.as_tensor(state).view(1, -1)
+            with torch.no_grad():
+                expected = encoder(tensor)
+                actual = encoder.forward_incremental(tensor)
+            torch.testing.assert_close(actual, expected, atol=1e-6, rtol=1e-6)
+
     def test_causal_gru_is_invariant_to_left_padding_values(self):
         torch.manual_seed(5)
         encoder = CausalGRUStateEncoder(

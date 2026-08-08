@@ -1,6 +1,12 @@
 import argparse
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
+from freq_hrl.experiments.trading import (
+    full_method_budget_plan_v732 as budget_plan,
+)
 from freq_hrl.experiments.trading import full_method_hpo_v7 as hpo
 from scripts.submit_full_method_hpo_v7_scheduleurm import (
     DEFAULT_LINUX_PYTHON,
@@ -29,7 +35,7 @@ def args_fixture() -> argparse.Namespace:
         nodes=list(LINUX_CPU_NODES),
         python_executable=DEFAULT_LINUX_PYTHON,
         launch_subdir=".",
-        project="Freq-HRL-v7.3.1",
+        project="Freq-HRL-v7.3.2",
         ppo_ram_mb=768,
         offpolicy_ram_mb=1536,
         priority="normal",
@@ -38,6 +44,9 @@ def args_fixture() -> argparse.Namespace:
         allow_duplicate=False,
         code_revision="a" * 40,
         source_manifest_sha256="b" * 64,
+        budget_plan_sha256="",
+        budget_decision_sha256="",
+        budget_selected_iterations=0,
     )
 
 
@@ -54,7 +63,7 @@ class ScheduleurmFullMethodHPOV7SubmitTest(unittest.TestCase):
         self.assertEqual(POOL_CPU_CAPACITY, 1152)
         self.assertEqual(args.iterations, 12)
         self.assertEqual(args.steps, 120)
-        self.assertEqual(args.project, "Freq-HRL-v7.3.1")
+        self.assertEqual(args.project, "Freq-HRL-v7.3.2")
         self.assertEqual(
             tuple(args.optimizer_seeds), hpo.DEFAULT_PILOT_OPTIMIZER_SEEDS
         )
@@ -72,17 +81,45 @@ class ScheduleurmFullMethodHPOV7SubmitTest(unittest.TestCase):
         )
 
     def test_final_hpo_uses_optimizer_seeds_disjoint_from_pilot(self):
-        args = normalize_args(build_parser().parse_args([
-            "--run-name", "unit_v7_hpo_final", "--stage", "final",
-        ]))
+        with TemporaryDirectory() as directory:
+            decision = Path(directory) / "budget_decision.json"
+            decision.write_text(json.dumps({
+                "status": "budget_selected",
+                "protocol_version": (
+                    "freq_hrl_v7_3_2_source_bound_budget_validation_v1"
+                ),
+                "budget_plan_version": budget_plan.BUDGET_PLAN_VERSION,
+                "budget_plan_sha256": budget_plan.plan_sha256(),
+                "evaluated_budgets": [64, 96],
+                "mandatory_budgets_complete": True,
+                "selected_iterations": 96,
+                "budget_gate_by_iterations": {"64": "fail", "96": "pass"},
+                "source_identity_status": "verified",
+                "code_revision": "a" * 40,
+                "source_manifest_sha256": "b" * 64,
+            }), encoding="utf-8")
+            args = normalize_args(build_parser().parse_args([
+                "--run-name", "unit_v7_hpo_final", "--stage", "final",
+                "--budget-decision", str(decision),
+            ]))
         self.assertEqual(
             tuple(args.optimizer_seeds), hpo.DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS
         )
+        self.assertEqual(args.iterations, 96)
+        self.assertEqual(args.budget_plan_sha256, budget_plan.plan_sha256())
         self.assertFalse(
             set(args.optimizer_seeds).intersection(
                 hpo.DEFAULT_PILOT_OPTIMIZER_SEEDS
             )
         )
+
+    def test_final_hpo_rejects_manual_iterations_without_budget_decision(self):
+        with self.assertRaisesRegex(SystemExit, "budget-decision"):
+            normalize_args(build_parser().parse_args([
+                "--run-name", "unit_v7_unbound_final",
+                "--stage", "final",
+                "--iterations", "96",
+            ]))
 
     def test_seed_roles_must_be_disjoint_before_submission(self):
         with self.assertRaisesRegex(SystemExit, "seed roles"):

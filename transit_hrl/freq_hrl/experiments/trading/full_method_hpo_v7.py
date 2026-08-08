@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3.1 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3.2 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -36,6 +36,8 @@ from .metrics import (
     SELECTION_OBJECTIVE_VERSION,
     validation_utility,
 )
+from . import full_method_budget_plan_v732 as budget_plan
+from . import full_method_confirmatory_plan_v732 as confirmatory_plan
 from .offpolicy_baseline_validation import (
     run_offpolicy_episode,
     train_flat_offpolicy_baseline,
@@ -62,12 +64,12 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3_1"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3_2"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_calibrated_advantage_promotion_v7_3_1_2026_08_08"
+    "full_method_hpo_null_rate_calibrated_promotion_v7_3_2_2026_08_08"
 )
 PROMOTION_CALIBRATION_PROTOCOL_VERSION = (
-    "paired_advantage_median_bias_calibration_v1"
+    "paired_advantage_bias_null_quantile_calibration_v2"
 )
 FULL_METHOD_IMPLEMENTATION_VERSION = FULL_METHOD_V7_IMPLEMENTATION_VERSION
 EXECUTION_TIMELINE_CONTRACT = "causal_post_trade_v3"
@@ -98,6 +100,9 @@ MIN_STRESS_LOW_RATE_LIFT = 0.02
 MIN_STRESS_LOW_PROBABILITY_LIFT = 1e-4
 MIN_STRESS_LOW_ADVANTAGE_LIFT = 1e-3
 MIN_ADVANTAGE_DECISION_ACCURACY = 0.55
+PROMOTION_CALIBRATION_NULL_RATE_CAP = 0.20
+CHECKPOINT_BOUNDARY_WINDOW_FRACTION = 0.125
+MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION = 0.40
 
 
 @dataclass(frozen=True)
@@ -834,6 +839,67 @@ def _paired_advantage_bias_calibration(
     }
 
 
+def _apply_low_noise_rate_calibration(
+    calibration: dict[str, Any],
+    *,
+    predictions: Iterable[float],
+    targets: Iterable[float],
+    low_noise_predictions: Iterable[float],
+    max_low_noise_rate: float,
+) -> dict[str, Any]:
+    """Raise the decision threshold to a support-only null-rate quantile."""
+
+    predicted = np.asarray(list(predictions), dtype=np.float64).reshape(-1)
+    observed = np.asarray(list(targets), dtype=np.float64).reshape(-1)
+    low_noise = np.asarray(
+        list(low_noise_predictions), dtype=np.float64
+    ).reshape(-1)
+    rate = float(max_low_noise_rate)
+    if (
+        predicted.size == 0
+        or predicted.shape != observed.shape
+        or low_noise.size == 0
+        or not np.all(np.isfinite(predicted))
+        or not np.all(np.isfinite(observed))
+        or not np.all(np.isfinite(low_noise))
+        or not 0.0 < rate < 1.0
+    ):
+        raise ValueError("null-rate calibration requires finite aligned samples")
+    allowed = int(np.floor(rate * low_noise.size))
+    ordered = np.sort(low_noise)
+    pivot = max(0, low_noise.size - allowed - 1)
+    null_threshold = float(np.nextafter(ordered[pivot], np.inf))
+    bias_threshold = float(calibration["calibrated_decision_threshold"])
+    final_threshold = max(bias_threshold, null_threshold)
+    target_threshold = float(calibration["target_threshold"])
+    target_positive = observed >= target_threshold
+    final_positive = predicted >= final_threshold
+    result = dict(calibration)
+    result.update({
+        "bias_calibrated_decision_threshold": bias_threshold,
+        "null_rate_decision_threshold": null_threshold,
+        "calibrated_decision_threshold": final_threshold,
+        "low_noise_rate_ceiling": rate,
+        "low_noise_sample_count": int(low_noise.size),
+        "low_noise_action_rate_before": float(np.mean(
+            low_noise >= bias_threshold
+        )),
+        "low_noise_action_rate_after": float(np.mean(
+            low_noise >= final_threshold
+        )),
+        "null_rate_constraint_active": bool(
+            final_threshold > bias_threshold
+        ),
+        "decision_accuracy_after": float(np.mean(
+            final_positive == target_positive
+        )),
+        "decision_positive_rate_after": float(np.mean(final_positive)),
+    })
+    if result["low_noise_action_rate_after"] > rate + 1e-12:
+        raise RuntimeError("low-noise calibration failed its empirical rate cap")
+    return result
+
+
 def calibrate_promotion_advantage_threshold(
     model: Any,
     *,
@@ -854,6 +920,8 @@ def calibrate_promotion_advantage_threshold(
     target_threshold = float(params["promotion_advantage_target_threshold"])
     predictions: list[float] = []
     targets: list[float] = []
+    low_noise_predictions: list[float] = []
+    predictions_by_row: dict[tuple[str, int], np.ndarray] = {}
     rows: list[dict[str, Any]] = []
     for scenario in SELECTION_SCENARIOS:
         for seed in seeds:
@@ -905,6 +973,9 @@ def calibrate_promotion_advantage_threshold(
                 raise RuntimeError("promotion calibration prediction trace drifted")
             predictions.extend(map(float, predicted))
             targets.extend(map(float, observed))
+            predictions_by_row[(str(scenario), int(seed))] = predicted.copy()
+            if str(scenario) == "stationary_low_noise":
+                low_noise_predictions.extend(map(float, predicted))
             rows.append({
                 "scenario": str(scenario),
                 "seed": int(seed),
@@ -925,6 +996,28 @@ def calibrate_promotion_advantage_threshold(
     calibration = _paired_advantage_bias_calibration(
         predictions, targets, target_threshold=target_threshold
     )
+    calibration = _apply_low_noise_rate_calibration(
+        calibration,
+        predictions=predictions,
+        targets=targets,
+        low_noise_predictions=low_noise_predictions,
+        max_low_noise_rate=min(
+            float(params["promotion_rate_budget"]),
+            PROMOTION_CALIBRATION_NULL_RATE_CAP,
+        ),
+    )
+    calibrated_threshold = float(
+        calibration["calibrated_decision_threshold"]
+    )
+    for row in rows:
+        predicted = predictions_by_row.get(
+            (str(row["scenario"]), int(row["seed"]))
+        )
+        row["calibrated_decision_threshold"] = calibrated_threshold
+        row["calibrated_action_rate"] = (
+            float(np.mean(predicted >= calibrated_threshold))
+            if predicted is not None else 0.0
+        )
     calibration.update({
         "seed_count": len(seeds),
         "seeds": list(seeds),
@@ -951,6 +1044,9 @@ def run_hpo_cell(
     iterations: int,
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
+    training_budget_plan_sha256: str = "",
+    training_budget_decision_sha256: str = "",
+    training_budget_selected_iterations: int = 0,
 ) -> dict[str, Any]:
     variant = VARIANTS_BY_ID.get(str(variant_id))
     candidate = CANDIDATES_BY_ID.get(str(candidate_id))
@@ -988,6 +1084,21 @@ def run_hpo_cell(
         code_revision=str(code_revision),
         expected_source_manifest_sha256=str(expected_source_manifest_sha256),
     )
+    budget_plan_hash = str(training_budget_plan_sha256).strip().lower()
+    budget_decision_hash = str(training_budget_decision_sha256).strip().lower()
+    if bool(budget_plan_hash) != bool(budget_decision_hash):
+        raise ValueError("budget plan and decision hashes must be supplied together")
+    if budget_plan_hash:
+        if budget_plan_hash != budget_plan.plan_sha256():
+            raise ValueError("training-budget plan hash drifted")
+        if not is_hex_digest(budget_decision_hash, length=64):
+            raise ValueError("training-budget decision hash is invalid")
+        if int(iterations) < budget_plan.MIN_FINAL_ITERATIONS:
+            raise ValueError("final HPO budget is below the registered minimum")
+        if int(training_budget_selected_iterations) != int(iterations):
+            raise ValueError("HPO iterations differ from the budget decision")
+    elif int(training_budget_selected_iterations) != 0:
+        raise ValueError("unbound diagnostic cell cannot claim a selected budget")
     optimizer_seed = derive_seed(
         "freq_hrl_v7_support_only_optimizer",
         int(training_replicate_seed),
@@ -1051,6 +1162,8 @@ def run_hpo_cell(
         "scenarios": [],
         "target_threshold": promotion_target_threshold,
         "uncalibrated_decision_threshold": promotion_decision_threshold,
+        "bias_calibrated_decision_threshold": promotion_decision_threshold,
+        "null_rate_decision_threshold": promotion_decision_threshold,
         "calibrated_decision_threshold": promotion_decision_threshold,
         "median_prediction_bias": 0.0,
         "prediction_target_mae_before": 0.0,
@@ -1060,6 +1173,11 @@ def run_hpo_cell(
         "target_positive_rate": 0.0,
         "decision_positive_rate_before": 0.0,
         "decision_positive_rate_after": 0.0,
+        "low_noise_rate_ceiling": 0.0,
+        "low_noise_sample_count": 0,
+        "low_noise_action_rate_before": 0.0,
+        "low_noise_action_rate_after": 0.0,
+        "null_rate_constraint_active": False,
         "evaluation_role": "not_applicable",
         "ood_period_access_status": "not_loaded",
         "promotion_recovery_access_status": "not_loaded",
@@ -1208,6 +1326,15 @@ def run_hpo_cell(
         "capacity_ratio": float(actual_count / max(target_count, 1)),
         "parameter_count": int(parameter_count),
         "steps": int(steps), "assets": int(assets), "iterations": int(iterations),
+        "training_budget_plan_version": budget_plan.BUDGET_PLAN_VERSION,
+        "training_budget_plan_sha256": budget_plan_hash,
+        "training_budget_decision_sha256": budget_decision_hash,
+        "training_budget_selected_iterations": int(
+            training_budget_selected_iterations
+        ),
+        "training_budget_binding_status": (
+            "source_bound_decision" if budget_plan_hash else "diagnostic_unbound"
+        ),
         "selection_utility_mean": float(np.mean(utilities)),
         "selection_utility_min": float(np.min(utilities)),
         "selection_utility_std": float(np.std(utilities, ddof=1)) if len(utilities) > 1 else 0.0,
@@ -1243,6 +1370,11 @@ def run_hpo_cell(
         "training_replicate_seed": int(training_replicate_seed),
         "frozen_checkpoint_sha256": checkpoint_hash,
         "tuning_protocol_version": FULL_METHOD_TUNING_PROTOCOL_VERSION,
+        "training_budget_plan_sha256": budget_plan_hash,
+        "training_budget_decision_sha256": budget_decision_hash,
+        "training_budget_selected_iterations": int(
+            training_budget_selected_iterations
+        ),
         "heldout_test_seeds": [],
     }
     return {
@@ -1293,7 +1425,7 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7.3.1 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.3.2 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",
@@ -1763,10 +1895,22 @@ def _validate_common_hpo_fields(summaries: list[dict[str, Any]]) -> None:
         "promotion_calibration_seeds", "tuning_validation_seeds",
         "steps", "assets", "iterations",
         "training_episode_protocol",
+        "training_budget_plan_sha256", "training_budget_decision_sha256",
+        "training_budget_selected_iterations", "training_budget_binding_status",
     ):
         values = {json.dumps(summary[field], sort_keys=True) for summary in summaries}
         if len(values) != 1:
             raise ValueError(f"HPO matrix mixes {field}")
+
+
+def checkpoint_boundary_start(iterations: int) -> int:
+    count = int(iterations)
+    if count < 1:
+        raise ValueError("iterations must be positive")
+    window = max(2, int(np.ceil(
+        CHECKPOINT_BOUNDARY_WINDOW_FRACTION * count
+    )))
+    return max(0, count - window)
 
 
 def _candidate_leaderboard_row(
@@ -1808,6 +1952,12 @@ def _candidate_leaderboard_row(
     ]))
     gain_mean = float(np.mean([
         float(summary["validation_learning_gain"]) for summary in matching
+    ]))
+    boundary_fraction = float(np.mean([
+        int(summary["selected_checkpoint_iteration"]) >= checkpoint_boundary_start(
+            int(summary["iterations"])
+        )
+        for summary in matching
     ]))
     calibrations = [
         dict(summary.get("promotion_calibration", {}))
@@ -1870,6 +2020,15 @@ def _candidate_leaderboard_row(
         "robust_selection_score": ci_low,
         "trained_checkpoint_fraction": trained_fraction,
         "validation_learning_gain_mean": gain_mean,
+        "checkpoint_boundary_replicate_fraction": boundary_fraction,
+        "checkpoint_boundary_start_iteration": checkpoint_boundary_start(
+            int(matching[0]["iterations"])
+        ),
+        "training_budget_status": (
+            "sufficient"
+            if boundary_fraction <= MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION
+            else "boundary_limited"
+        ),
         "promotion_calibrated_replicate_fraction": float(
             len(calibrations) / max(len(matching), 1)
         ),
@@ -2021,6 +2180,10 @@ def merge_hpo_cells(
             "robust_selection_score": float(winner["robust_selection_score"]),
             "learning_gate_status": str(winner["learning_gate_status"]),
             "mechanism_activity_status": str(winner["mechanism_activity_status"]),
+            "training_budget_status": str(winner["training_budget_status"]),
+            "checkpoint_boundary_replicate_fraction": float(
+                winner["checkpoint_boundary_replicate_fraction"]
+            ),
         }
     parent_candidate = str(selected[ABLATION_PARENT_VARIANT]["candidate_id"])
     for variant in VARIANTS:
@@ -2036,6 +2199,12 @@ def merge_hpo_cells(
             "selection_rule": "inherit_full_candidate_disable_one_mechanism",
             "learning_gate_status": selected[ABLATION_PARENT_VARIANT]["learning_gate_status"],
             "mechanism_activity_status": "not_applicable",
+            "training_budget_status": selected[ABLATION_PARENT_VARIANT][
+                "training_budget_status"
+            ],
+            "checkpoint_boundary_replicate_fraction": selected[
+                ABLATION_PARENT_VARIANT
+            ]["checkpoint_boundary_replicate_fraction"],
         }
 
     revisions = {str(summary["code_revision"]).lower() for summary in summaries}
@@ -2046,11 +2215,23 @@ def merge_hpo_cells(
         and is_hex_digest(next(iter(revisions)), length=40)
         and is_hex_digest(next(iter(manifests)), length=64)
     )
+    first = summaries[0]
+    budget_binding_verified = (
+        first.get("training_budget_binding_status") == "source_bound_decision"
+        and first.get("training_budget_plan_sha256") == budget_plan.plan_sha256()
+        and is_hex_digest(
+            first.get("training_budget_decision_sha256"), length=64
+        )
+        and int(first.get("training_budget_selected_iterations", 0))
+        == int(first["iterations"])
+        and int(first["iterations"]) >= budget_plan.MIN_FINAL_ITERATIONS
+    )
     final_design_complete = (
         set(variants) == set(HPO_VARIANT_IDS)
         and set(DEFAULT_FINAL_HPO_OPTIMIZER_SEEDS).issubset(replicates)
         and not set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(replicates)
         and source_verified
+        and budget_binding_verified
     )
     all_learning_eligible = all(
         entry["learning_gate_status"] == "eligible"
@@ -2060,13 +2241,35 @@ def merge_hpo_cells(
     full_mechanism_eligible = (
         selected[ABLATION_PARENT_VARIANT]["mechanism_activity_status"] == "eligible"
     )
+    all_budget_sufficient = all(
+        entry["training_budget_status"] == "sufficient"
+        for variant_id, entry in selected.items()
+        if variant_id in HPO_VARIANT_IDS
+    )
     freeze_status = (
         "frozen_from_support_validation_only"
         if stage == "final" and final_design_complete
         and all_learning_eligible and full_mechanism_eligible
+        and all_budget_sufficient
         else "provisional_support_validation_only"
     )
-    first = summaries[0]
+    confirmatory_plan_audit = confirmatory_plan.validate_plan()
+    development_seeds = set(map(int, first["rollout_seed_roots"]))
+    development_seeds.update(map(
+        int, first["promotion_calibration_seeds"]
+    ))
+    development_seeds.update(map(
+        int, first["checkpoint_validation_seeds"]
+    ))
+    development_seeds.update(map(int, first["tuning_validation_seeds"]))
+    if development_seeds.intersection(
+        confirmatory_plan.DEFAULT_HELDOUT_SEEDS
+    ):
+        raise ValueError("confirmatory held-out seeds overlap HPO development")
+    if set(replicates).intersection(
+        confirmatory_plan.DEFAULT_CONFIRMATORY_REPLICATES
+    ):
+        raise ValueError("confirmatory training replicates overlap HPO")
     frozen = {
         "status": freeze_status,
         "stage": str(stage),
@@ -2086,6 +2289,17 @@ def merge_hpo_cells(
         "promotion_recovery_access_status": "not_loaded",
         "heldout_test_access_status": "not_loaded",
         "heldout_test_seeds": [],
+        "confirmatory_plan_version": confirmatory_plan.CONFIRMATORY_PLAN_VERSION,
+        "confirmatory_plan_sha256": confirmatory_plan_audit["sha256"],
+        "confirmatory_plan_commitment_status": (
+            "source_bound_before_heldout_access"
+        ),
+        "confirmatory_training_replicate_count": len(
+            confirmatory_plan.DEFAULT_CONFIRMATORY_REPLICATES
+        ),
+        "confirmatory_heldout_path_count": len(
+            confirmatory_plan.DEFAULT_HELDOUT_SEEDS
+        ),
         "rollout_seed_roots": first["rollout_seed_roots"],
         "promotion_calibration_seeds": first[
             "promotion_calibration_seeds"
@@ -2093,6 +2307,28 @@ def merge_hpo_cells(
         "checkpoint_validation_seeds": first["checkpoint_validation_seeds"],
         "tuning_validation_seeds": first["tuning_validation_seeds"],
         "training_replicate_seeds": sorted(set(replicates)),
+        "checkpoint_boundary_window_fraction": (
+            CHECKPOINT_BOUNDARY_WINDOW_FRACTION
+        ),
+        "max_checkpoint_boundary_replicate_fraction": (
+            MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION
+        ),
+        "training_budget_status": (
+            "sufficient" if all_budget_sufficient else "boundary_limited"
+        ),
+        "training_budget_plan_version": budget_plan.BUDGET_PLAN_VERSION,
+        "training_budget_plan_sha256": first[
+            "training_budget_plan_sha256"
+        ],
+        "training_budget_decision_sha256": first[
+            "training_budget_decision_sha256"
+        ],
+        "training_budget_selected_iterations": int(
+            first["training_budget_selected_iterations"]
+        ),
+        "training_budget_binding_status": first[
+            "training_budget_binding_status"
+        ],
         "pilot_optimizer_seed_overlap": sorted(
             set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(replicates)
         ),
@@ -2116,6 +2352,18 @@ def merge_hpo_cells(
             "ablation_variant_count": len(ALL_VARIANT_IDS) - len(HPO_VARIANT_IDS),
             "training_replicate_count": len(set(replicates)),
             "freeze_status": freeze_status,
+            "training_budget_status": (
+                "sufficient" if all_budget_sufficient else "boundary_limited"
+            ),
+            "training_budget_binding_status": (
+                "source_bound_decision"
+                if budget_binding_verified else "missing_or_invalid"
+            ),
+            "budget_sufficient_selected_count": sum(
+                entry["training_budget_status"] == "sufficient"
+                for variant_id, entry in selected.items()
+                if variant_id in HPO_VARIANT_IDS
+            ),
         },
         "leaderboard": leaderboard,
         "frozen_config": frozen,
@@ -2332,6 +2580,49 @@ def validate_frozen_config(payload: dict[str, Any]) -> dict[str, Any]:
         PROMOTION_CALIBRATION_PROTOCOL_VERSION
     ):
         raise ValueError("v7 promotion calibration protocol mismatch")
+    plan_audit = confirmatory_plan.validate_plan()
+    if (
+        payload.get("confirmatory_plan_version")
+        != confirmatory_plan.CONFIRMATORY_PLAN_VERSION
+        or payload.get("confirmatory_plan_sha256") != plan_audit["sha256"]
+        or payload.get("confirmatory_plan_commitment_status")
+        != "source_bound_before_heldout_access"
+    ):
+        raise ValueError("v7 confirmatory plan commitment drifted")
+    if int(payload.get("confirmatory_training_replicate_count", 0)) != len(
+        confirmatory_plan.DEFAULT_CONFIRMATORY_REPLICATES
+    ) or int(payload.get("confirmatory_heldout_path_count", 0)) != len(
+        confirmatory_plan.DEFAULT_HELDOUT_SEEDS
+    ):
+        raise ValueError("v7 confirmatory design count drifted")
+    if payload.get("training_budget_status") != "sufficient":
+        raise ValueError("v7 frozen config is checkpoint-boundary limited")
+    if (
+        payload.get("training_budget_plan_version")
+        != budget_plan.BUDGET_PLAN_VERSION
+        or payload.get("training_budget_plan_sha256")
+        != budget_plan.plan_sha256()
+        or payload.get("training_budget_binding_status")
+        != "source_bound_decision"
+        or not is_hex_digest(
+            payload.get("training_budget_decision_sha256"), length=64
+        )
+        or int(payload.get("training_budget_selected_iterations", 0))
+        != int(payload.get("iterations", -1))
+        or int(payload.get("iterations", 0))
+        < budget_plan.MIN_FINAL_ITERATIONS
+    ):
+        raise ValueError("v7 source-bound training-budget decision drifted")
+    if not np.isclose(
+        float(payload.get("checkpoint_boundary_window_fraction", -1.0)),
+        CHECKPOINT_BOUNDARY_WINDOW_FRACTION,
+    ) or not np.isclose(
+        float(payload.get(
+            "max_checkpoint_boundary_replicate_fraction", -1.0
+        )),
+        MAX_CHECKPOINT_BOUNDARY_REPLICATE_FRACTION,
+    ):
+        raise ValueError("v7 checkpoint-boundary contract drifted")
     validate_unique_seeds(
         payload.get("promotion_calibration_seeds", []),
         role="promotion_calibration_seeds",
@@ -2374,6 +2665,24 @@ def validate_frozen_config(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("v7 final HPO is missing registered optimizer seeds")
     if set(DEFAULT_PILOT_OPTIMIZER_SEEDS).intersection(final_replicates):
         raise ValueError("v7 final HPO reused pilot optimizer seeds")
+    if final_replicates.intersection(
+        confirmatory_plan.DEFAULT_CONFIRMATORY_REPLICATES
+    ):
+        raise ValueError("v7 confirmatory training replicates overlap HPO")
+    development_seeds = set(map(int, payload.get("rollout_seed_roots", [])))
+    development_seeds.update(map(
+        int, payload.get("promotion_calibration_seeds", [])
+    ))
+    development_seeds.update(map(
+        int, payload.get("checkpoint_validation_seeds", [])
+    ))
+    development_seeds.update(map(
+        int, payload.get("tuning_validation_seeds", [])
+    ))
+    if development_seeds.intersection(
+        confirmatory_plan.DEFAULT_HELDOUT_SEEDS
+    ):
+        raise ValueError("v7 confirmatory held-out seeds overlap development")
     if set(payload.get("selected", {})) != set(ALL_VARIANT_IDS):
         raise ValueError("v7 frozen config is missing variants")
     parent = payload["selected"][ABLATION_PARENT_VARIANT]["candidate_id"]
@@ -2388,6 +2697,11 @@ def validate_frozen_config(payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"v7 effective parameters drifted: {variant.variant_id}")
         if entry.get("learning_gate_status") != "eligible":
             raise ValueError(f"v7 selected model did not learn: {variant.variant_id}")
+        if entry.get("training_budget_status") != "sufficient":
+            raise ValueError(
+                f"v7 selected model is checkpoint-boundary limited: "
+                f"{variant.variant_id}"
+            )
         if variant.inherits_full_selection and entry.get(
             "selection_source_variant"
         ) != ABLATION_PARENT_VARIANT:
@@ -2421,6 +2735,9 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=16)
     parser.add_argument("--code-revision", default="")
     parser.add_argument("--source-manifest-sha256", default="")
+    parser.add_argument("--training-budget-plan-sha256", default="")
+    parser.add_argument("--training-budget-decision-sha256", default="")
+    parser.add_argument("--training-budget-selected-iterations", type=int, default=0)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--merge-inputs", type=Path, nargs="*")
     parser.add_argument("--expected-variant-ids", nargs="*", choices=HPO_VARIANT_IDS)
@@ -2454,6 +2771,13 @@ def main() -> None:
         steps=int(args.steps), assets=int(args.assets), iterations=int(args.iterations),
         code_revision=str(args.code_revision),
         expected_source_manifest_sha256=str(args.source_manifest_sha256),
+        training_budget_plan_sha256=str(args.training_budget_plan_sha256),
+        training_budget_decision_sha256=str(
+            args.training_budget_decision_sha256
+        ),
+        training_budget_selected_iterations=int(
+            args.training_budget_selected_iterations
+        ),
     )
     write_hpo_cell(args.output_dir, payload)
     print(f"full_method_hpo_v7_cell status=valid variant={args.variant_id} candidate={args.candidate_id} output={args.output_dir}")

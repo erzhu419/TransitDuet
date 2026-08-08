@@ -1169,6 +1169,7 @@ def joint_flat_rollout(
     raw_history: list[np.ndarray] = []
     previous_target = np.zeros(assets, dtype=np.float64)
     env.reset()
+    model.reset_recurrent_inference()
     for t in range(steps):
         raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))
@@ -1705,6 +1706,7 @@ def smdp_rollout(
     promotion_gate_interval_blocks = 0
 
     env.reset()
+    model.reset_recurrent_inference()
     for t in range(steps):
         raw_history.append(np.asarray(data["predictor"][t], dtype=np.float64).copy())
         freq = tracker.update_bar(data["predictor"][t], t=float(t * 60.0))

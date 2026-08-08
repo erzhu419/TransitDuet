@@ -25,6 +25,33 @@ class FullMethodHPOV7Test(unittest.TestCase):
             calibration["prediction_target_mae_before"],
         )
 
+    def test_low_noise_quantile_calibration_caps_false_promotions(self):
+        predictions = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06]
+        targets = [-0.02, -0.01, 0.0, 0.01, 0.02, 0.03]
+        bias = v7._paired_advantage_bias_calibration(
+            predictions, targets, target_threshold=0.0
+        )
+        calibration = v7._apply_low_noise_rate_calibration(
+            bias,
+            predictions=predictions,
+            targets=targets,
+            low_noise_predictions=[0.01, 0.02, 0.03, 0.04, 0.05],
+            max_low_noise_rate=0.2,
+        )
+        self.assertLessEqual(
+            calibration["low_noise_action_rate_after"], 0.2
+        )
+        self.assertGreaterEqual(
+            calibration["calibrated_decision_threshold"],
+            calibration["bias_calibrated_decision_threshold"],
+        )
+        self.assertTrue(calibration["null_rate_constraint_active"])
+
+    def test_checkpoint_boundary_gate_uses_last_eighth_of_budget(self):
+        self.assertEqual(v7.checkpoint_boundary_start(32), 28)
+        self.assertEqual(v7.checkpoint_boundary_start(64), 56)
+        self.assertEqual(v7.checkpoint_boundary_start(1), 0)
+
     def test_mechanism_gate_requires_executed_promotion_across_replicates(self):
         rows = []
         hf_rows = []

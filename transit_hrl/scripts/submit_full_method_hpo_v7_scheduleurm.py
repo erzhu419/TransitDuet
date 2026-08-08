@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Submit or merge support-only Freq-HRL v7.3.1 HPO through scheduleurm."""
+"""Submit or merge source-bound Freq-HRL v7.3.2 HPO through scheduleurm."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shlex
 import subprocess
@@ -16,6 +17,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from freq_hrl.experiments.trading import full_method_hpo_v7 as hpo  # noqa: E402
+from freq_hrl.experiments.trading import (  # noqa: E402
+    full_method_budget_plan_v732 as budget_plan,
+)
+from freq_hrl.experiments.trading import (  # noqa: E402
+    full_method_budget_validation_v732 as budget_validation,
+)
 from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
     DEFAULT_LINUX_PYTHON,
     LINUX_CPU_NODES,
@@ -33,10 +40,10 @@ DEFAULT_NODES = LINUX_CPU_NODES
 NODE_CPU_CAPACITY = 192
 POOL_CPU_CAPACITY = NODE_CPU_CAPACITY * len(DEFAULT_NODES)
 HPO_MODULE = "freq_hrl.experiments.trading.full_method_hpo_v7"
-HPO_SIGNATURE_VERSION = "full-hpo-v7-3-1-support-only"
+HPO_SIGNATURE_VERSION = "full-hpo-v7-3-2-source-bound"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 CPU_JUSTIFICATION = (
-    "Each v7.3.1 HPO cell trains one frozen checkpoint and is explicitly "
+    "Each v7.3.2 HPO cell trains one frozen checkpoint and is explicitly "
     "single-threaded. scheduleurm dynamically packs independent cells across "
     "the six-node 1152-physical-core Linux pool."
 )
@@ -98,6 +105,15 @@ def build_training_command(
         "--source-manifest-sha256", str(args.source_manifest_sha256),
         "--output-dir", str(output_dir),
     ]
+    if getattr(args, "budget_decision_sha256", ""):
+        command.extend([
+            "--training-budget-plan-sha256",
+            str(args.budget_plan_sha256),
+            "--training-budget-decision-sha256",
+            str(args.budget_decision_sha256),
+            "--training-budget-selected-iterations",
+            str(args.budget_selected_iterations),
+        ])
     env = [
         "PYTHONDONTWRITEBYTECODE=1", "PYTHONPATH=.",
         "OMP_NUM_THREADS=1", "MKL_NUM_THREADS=1", "OPENBLAS_NUM_THREADS=1",
@@ -156,7 +172,7 @@ def build_scheduler_spec(
     return {
         "project": str(args.project),
         "description": (
-            f"Freq-HRL v7.3.1 support HPO {variant_id} {candidate_id} "
+            f"Freq-HRL v7.3.2 support HPO {variant_id} {candidate_id} "
             f"replicate {replicate_seed}"
         ),
         "cmd": build_training_command(
@@ -198,7 +214,7 @@ def build_preflight_spec(args: argparse.Namespace, *, node: str) -> dict[str, ob
     absolute = ROOT / relative
     return {
         "project": str(args.project),
-        "description": f"Freq-HRL v7.3.1 environment preflight on {node}",
+        "description": f"Freq-HRL v7.3.2 environment preflight on {node}",
         "cmd": build_preflight_command(args, node=node, output_dir=relative),
         "cwd": str(ROOT / str(args.launch_subdir)),
         "signature": f"Freq-HRL/{HPO_SIGNATURE_VERSION}/{args.run_name}/preflight/{node}",
@@ -277,7 +293,7 @@ def merge_results(args: argparse.Namespace) -> None:
     )
     output = ROOT / "results" / args.run_name / "merged"
     hpo.write_hpo_merge(output, payload)
-    print(f"merged {len(directories)} v7.3.1 HPO cells into {output}")
+    print(f"merged {len(directories)} v7.3.2 HPO cells into {output}")
 
 
 def merge_promotion_pilot_results(args: argparse.Namespace) -> None:
@@ -302,7 +318,7 @@ def merge_promotion_pilot_results(args: argparse.Namespace) -> None:
     output = ROOT / "results" / args.run_name / "promotion_pilot"
     hpo.write_selective_promotion_pilot(output, payload)
     print(
-        f"diagnosed {len(directories)} v7.3.1 promotion cells into {output}; "
+        f"diagnosed {len(directories)} v7.3.2 promotion cells into {output}; "
         f"status={payload['summary']['status']}"
     )
 
@@ -325,11 +341,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assets", type=int, default=3)
     parser.add_argument("--iterations", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=2)
-    parser.add_argument("--project", default="Freq-HRL-v7.3.1")
+    parser.add_argument("--project", default="Freq-HRL-v7.3.2")
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
     parser.add_argument("--python-executable", default="")
     parser.add_argument("--launch-subdir", choices=(".", "scripts"), default=".")
     parser.add_argument("--source-code-revision", default="")
+    parser.add_argument("--budget-decision", type=Path)
     parser.add_argument("--ppo-ram-mb", type=int, default=768)
     parser.add_argument("--offpolicy-ram-mb", type=int, default=1536)
     parser.add_argument("--priority", choices=("low", "normal", "high"), default="normal")
@@ -386,19 +403,47 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     ]
     if args.skip_launch_staging and not args.stage_input_paths:
         args.stage_input_paths = [str((ROOT / "freq_hrl").resolve())]
-    if args.iterations is None:
-        args.iterations = 32 if args.stage == "final" else 12
+    args.budget_plan_sha256 = ""
+    args.budget_decision_sha256 = ""
+    args.budget_selected_iterations = 0
+    args.budget_decision_payload = None
+    if args.stage == "final":
+        if args.budget_decision is None:
+            raise SystemExit("final HPO requires --budget-decision")
+        decision_path = Path(args.budget_decision).expanduser().resolve()
+        try:
+            decision_bytes = decision_path.read_bytes()
+            decision = json.loads(decision_bytes)
+            audit = budget_validation.validate_budget_decision(decision)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"invalid v7.3.2 budget decision: {exc}") from exc
+        selected_iterations = int(audit["selected_iterations"])
+        if args.iterations is not None and int(args.iterations) != selected_iterations:
+            raise SystemExit("--iterations differs from the budget decision")
+        args.iterations = selected_iterations
+        args.budget_decision = decision_path
+        args.budget_decision_payload = decision
+        args.budget_plan_sha256 = budget_plan.plan_sha256()
+        args.budget_decision_sha256 = hashlib.sha256(decision_bytes).hexdigest()
+        args.budget_selected_iterations = selected_iterations
+    else:
+        if args.budget_decision is not None:
+            raise SystemExit("pilot HPO cannot consume a final budget decision")
+        if args.iterations is None:
+            args.iterations = 12
     unknown_variants = sorted(set(args.variant_ids) - set(hpo.HPO_VARIANT_IDS))
     unknown_candidates = sorted(set(args.candidate_ids) - set(hpo.CANDIDATES_BY_ID))
     unknown_nodes = sorted(set(args.nodes) - set(LINUX_CPU_NODES))
     if unknown_variants or unknown_candidates or unknown_nodes:
         raise SystemExit(
-            f"invalid v7.3.1 matrix: variants={unknown_variants}, "
+            f"invalid v7.3.2 matrix: variants={unknown_variants}, "
             f"candidates={unknown_candidates}, nodes={unknown_nodes}"
         )
     if not args.python_executable.strip():
         args.python_executable = default_python_executable(args.nodes)
     if args.smoke:
+        if args.stage == "final":
+            raise SystemExit("final HPO cannot use --smoke")
         args.variant_ids = [hpo.ABLATION_PARENT_VARIANT]
         args.candidate_ids = [hpo.candidate_ids_for_variant(hpo.ABLATION_PARENT_VARIANT)[0]]
         args.optimizer_seeds = [args.optimizer_seeds[0]]
@@ -437,12 +482,22 @@ def main() -> None:
             args.source_code_revision
         )
     except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
-        raise SystemExit(f"cannot freeze v7.3.1 HPO source identity: {exc}") from exc
+        raise SystemExit(f"cannot freeze v7.3.2 HPO source identity: {exc}") from exc
+    if args.stage == "final":
+        decision = dict(args.budget_decision_payload)
+        if (
+            decision.get("code_revision") != args.code_revision
+            or decision.get("source_manifest_sha256")
+            != args.source_manifest_sha256
+        ):
+            raise SystemExit(
+                "budget decision and final HPO source identities differ"
+            )
     if args.environment_preflight:
         execute_bulk(
             [build_preflight_spec(args, node=node) for node in args.nodes],
             dry_run=bool(args.dry_run),
-            intent_label=f"Freq-HRL v7.3.1 environment preflight {args.run_name}",
+            intent_label=f"Freq-HRL v7.3.2 environment preflight {args.run_name}",
         )
         if args.dispatch and not args.dry_run:
             execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
@@ -455,7 +510,7 @@ def main() -> None:
     if args.max_cells > 0:
         cells = cells[:args.max_cells]
     if not cells:
-        print("no v7.3.1 HPO cells require submission")
+        print("no v7.3.2 HPO cells require submission")
         return
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)} "
@@ -471,7 +526,7 @@ def main() -> None:
             for variant, candidate, seed in cells
         ],
         dry_run=bool(args.dry_run),
-        intent_label=f"Freq-HRL v7.3.1 support HPO {args.run_name}",
+        intent_label=f"Freq-HRL v7.3.2 support HPO {args.run_name}",
     )
     if args.dispatch and not args.dry_run:
         execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
@@ -481,16 +536,22 @@ def main() -> None:
         and args.variant_ids == [hpo.ABLATION_PARENT_VARIANT]
         else "--merge-only"
     )
-    print("merge after all summaries sync: " + shlex.join([
+    merge_command = [
         sys.executable, str(SUBMIT_SCRIPT_PATH), "--run-name", args.run_name,
         "--stage", args.stage, "--variant-ids", ",".join(args.variant_ids),
         "--candidate-ids", ",".join(args.candidate_ids),
         "--optimizer-seeds", ",".join(map(str, args.optimizer_seeds)),
+        "--iterations", str(args.iterations),
         "--promotion-calibration-seeds", ",".join(map(
             str, args.promotion_calibration_seeds
         )),
-        merge_mode,
-    ]))
+    ]
+    if args.stage == "final":
+        merge_command.extend([
+            "--budget-decision", str(args.budget_decision)
+        ])
+    merge_command.append(merge_mode)
+    print("merge after all summaries sync: " + shlex.join(merge_command))
 
 
 if __name__ == "__main__":

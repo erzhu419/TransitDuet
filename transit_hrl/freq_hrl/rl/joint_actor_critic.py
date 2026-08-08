@@ -155,6 +155,13 @@ class JointActorCriticPPO:
             self.actor_optimizer.load_state_dict(payload["actor_optimizer"])
         if "value_optimizer" in payload:
             self.value_optimizer.load_state_dict(payload["value_optimizer"])
+        self.reset_recurrent_inference()
+
+    def reset_recurrent_inference(self) -> None:
+        for module in (self.actor, self.value):
+            reset = getattr(module, "reset_inference_state", None)
+            if reset is not None:
+                reset()
 
     @torch.no_grad()
     def act(
@@ -165,8 +172,14 @@ class JointActorCriticPPO:
         tensor = torch.as_tensor(
             state, dtype=torch.float32, device=self.device
         ).view(1, -1)
-        action, logp = self.actor(tensor, sample=sample)
-        value = self.value(tensor)
+        if str(self.config.state_encoder) == "causal_gru":
+            action, logp = self.actor.forward_incremental(
+                tensor, sample=sample
+            )
+            value = self.value.forward_incremental(tensor)
+        else:
+            action, logp = self.actor(tensor, sample=sample)
+            value = self.value(tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),

@@ -800,6 +800,22 @@ class FrequencySeparatedActorCriticPPO:
             if name in payload and optimizer is not None:
                 optimizer.load_state_dict(payload[name])
         self.constraint_lambda = float(payload.get("constraint_lambda", self.constraint_lambda))
+        self.reset_recurrent_inference()
+
+    def reset_recurrent_inference(self) -> None:
+        modules = (
+            self.upper_actor,
+            self.lower_actor,
+            self.upper_value,
+            self.lower_value,
+            self.lower_cost_value,
+            self.hf_actor,
+            self.hf_value,
+        )
+        for module in modules:
+            reset = getattr(module, "reset_inference_state", None)
+            if reset is not None:
+                reset()
 
     def _state_tensor(self, state: np.ndarray) -> torch.Tensor:
         return torch.as_tensor(state, dtype=torch.float32, device=self.device).view(1, -1)
@@ -807,8 +823,14 @@ class FrequencySeparatedActorCriticPPO:
     @torch.no_grad()
     def act_upper(self, state: np.ndarray, sample: bool = True) -> dict[str, np.ndarray | float]:
         tensor = self._state_tensor(state)
-        action, logp = self.upper_actor(tensor, sample=sample)
-        value = self.upper_value(tensor)
+        if str(self.config.state_encoder) == "causal_gru":
+            action, logp = self.upper_actor.forward_incremental(
+                tensor, sample=sample
+            )
+            value = self.upper_value.forward_incremental(tensor)
+        else:
+            action, logp = self.upper_actor(tensor, sample=sample)
+            value = self.upper_value(tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
@@ -818,9 +840,16 @@ class FrequencySeparatedActorCriticPPO:
     @torch.no_grad()
     def act_lower(self, state: np.ndarray, sample: bool = True) -> dict[str, np.ndarray | float]:
         tensor = self._state_tensor(state)
-        action, logp = self.lower_actor(tensor, sample=sample)
-        value = self.lower_value(tensor)
-        cost_value = self.lower_cost_value(tensor)
+        if str(self.config.state_encoder) == "causal_gru":
+            action, logp = self.lower_actor.forward_incremental(
+                tensor, sample=sample
+            )
+            value = self.lower_value.forward_incremental(tensor)
+            cost_value = self.lower_cost_value.forward_incremental(tensor)
+        else:
+            action, logp = self.lower_actor(tensor, sample=sample)
+            value = self.lower_value(tensor)
+            cost_value = self.lower_cost_value(tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
@@ -837,8 +866,14 @@ class FrequencySeparatedActorCriticPPO:
         if self.hf_actor is None or self.hf_value is None:
             raise RuntimeError("HF tactical policy is not configured")
         tensor = self._state_tensor(state)
-        action, logp = self.hf_actor(tensor, sample=sample)
-        value = self.hf_value(tensor)
+        if str(self.config.state_encoder) == "causal_gru":
+            action, logp = self.hf_actor.forward_incremental(
+                tensor, sample=sample
+            )
+            value = self.hf_value.forward_incremental(tensor)
+        else:
+            action, logp = self.hf_actor(tensor, sample=sample)
+            value = self.hf_value(tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),

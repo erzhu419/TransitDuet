@@ -90,6 +90,9 @@ class CausalGRUStateEncoder(nn.Module):
         else:
             self.context_projection = None
             self.fusion = None
+        self._inference_hidden: torch.Tensor | None = None
+        self._inference_length = 0
+        self._inference_sequence: torch.Tensor | None = None
         self._initialize_gru()
 
     def _initialize_gru(self) -> None:
@@ -104,7 +107,9 @@ class CausalGRUStateEncoder(nn.Module):
                 elif "bias" in name:
                     nn.init.zeros_(parameter)
 
-    def forward(self, state: torch.Tensor) -> torch.Tensor:
+    def _ordered_sequence(
+        self, state: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, int]:
         if state.ndim != 2 or state.shape[1] != self.state_dim:
             raise ValueError(
                 f"causal GRU state must have shape (batch, {self.state_dim}), "
@@ -134,14 +139,15 @@ class CausalGRUStateEncoder(nn.Module):
                 -1, -1, self.raw_feature_dim
             ),
         )
-        packed = pack_padded_sequence(
-            ordered_sequence,
-            lengths=lengths.cpu(),
-            batch_first=True,
-            enforce_sorted=False,
-        )
-        _, hidden = self.gru(packed)
-        sequence_features = hidden[-1]
+        return ordered_sequence, lengths, sequence_size
+
+    def _fuse_context(
+        self,
+        sequence_features: torch.Tensor,
+        state: torch.Tensor,
+        *,
+        sequence_size: int,
+    ) -> torch.Tensor:
         if self.context_projection is None or self.fusion is None:
             return sequence_features
         context_features = torch.tanh(
@@ -149,6 +155,70 @@ class CausalGRUStateEncoder(nn.Module):
         )
         return torch.tanh(
             self.fusion(torch.cat([sequence_features, context_features], dim=-1))
+        )
+
+    def reset_inference_state(self) -> None:
+        """Reset the rollout-only recurrent cache without changing parameters."""
+
+        self._inference_hidden = None
+        self._inference_length = 0
+        self._inference_sequence = None
+
+    def forward_incremental(self, state: torch.Tensor) -> torch.Tensor:
+        """Encode a sequential single-episode state without replaying its prefix.
+
+        Training still uses :meth:`forward` over complete stored windows. This
+        path is only for no-grad rollout inference and is exact while coverage
+        grows; if a fixed-size window starts rolling, it safely recomputes.
+        """
+
+        ordered_sequence, lengths, sequence_size = self._ordered_sequence(state)
+        if state.shape[0] != 1:
+            raise ValueError("incremental causal GRU inference requires batch size one")
+        current_length = int(lengths.item())
+        current_sequence = ordered_sequence[:, :current_length].detach().clone()
+        cached_prefix_matches = (
+            self._inference_sequence is not None
+            and current_length >= self._inference_length
+            and torch.equal(
+                current_sequence[:, :self._inference_length],
+                self._inference_sequence,
+            )
+        )
+        must_restart = self._inference_hidden is None or not cached_prefix_matches
+        if must_restart:
+            recurrent_input = ordered_sequence[:, :current_length]
+            hidden_input = None
+        elif current_length > self._inference_length:
+            recurrent_input = ordered_sequence[
+                :, self._inference_length:current_length
+            ]
+            hidden_input = self._inference_hidden
+        else:
+            recurrent_input = None
+            hidden_input = self._inference_hidden
+        if recurrent_input is not None:
+            _, hidden = self.gru(recurrent_input, hidden_input)
+            self._inference_hidden = hidden.detach()
+        if self._inference_hidden is None:
+            raise RuntimeError("causal GRU incremental state was not initialized")
+        self._inference_length = current_length
+        self._inference_sequence = current_sequence
+        return self._fuse_context(
+            self._inference_hidden[-1], state, sequence_size=sequence_size
+        )
+
+    def forward(self, state: torch.Tensor) -> torch.Tensor:
+        ordered_sequence, lengths, sequence_size = self._ordered_sequence(state)
+        packed = pack_padded_sequence(
+            ordered_sequence,
+            lengths=lengths.cpu(),
+            batch_first=True,
+            enforce_sorted=False,
+        )
+        _, hidden = self.gru(packed)
+        return self._fuse_context(
+            hidden[-1], state, sequence_size=sequence_size
         )
 
 
@@ -189,6 +259,19 @@ class CausalGRUGaussianActor(nn.Module):
         action = distribution.rsample() if sample else distribution.mean
         return action, distribution.log_prob(action).sum(dim=-1)
 
+    def reset_inference_state(self) -> None:
+        self.encoder.reset_inference_state()
+
+    def forward_incremental(
+        self, state: torch.Tensor, sample: bool = True
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        features = self.encoder.forward_incremental(state)
+        mean = self.mean(features)
+        std = torch.exp(self.log_std).clamp(1e-4, 3.0)
+        distribution = torch.distributions.Normal(mean, std)
+        action = distribution.rsample() if sample else distribution.mean
+        return action, distribution.log_prob(action).sum(dim=-1)
+
     def log_prob_entropy(
         self, state: torch.Tensor, action: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -219,6 +302,12 @@ class CausalGRUValueNet(nn.Module):
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         return self.value(self.encoder(state)).squeeze(-1)
+
+    def reset_inference_state(self) -> None:
+        self.encoder.reset_inference_state()
+
+    def forward_incremental(self, state: torch.Tensor) -> torch.Tensor:
+        return self.value(self.encoder.forward_incremental(state)).squeeze(-1)
 
 
 def causal_gru_encoder_parameter_count(
