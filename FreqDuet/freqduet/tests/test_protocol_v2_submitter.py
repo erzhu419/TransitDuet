@@ -61,6 +61,36 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         self.assertIn("--stage confirmation", result.stdout)
         self.assertIn("--train-episodes 40", result.stdout)
 
+    def test_summary_result_sync_excludes_training_logs_and_checkpoints(self):
+        result = self.run_submitter("--result-sync", "summary")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            "--result-dir "
+            + str(SUBMITTER.REMOTE_ROOT)
+            + "/results_freqduet/protocol_v2_submitter_test/"
+            "shard_summaries/shard_0000_0001",
+            result.stdout,
+        )
+        submit_lines = [
+            line for line in result.stdout.splitlines()
+            if "scheduler.py submit" in line
+        ]
+        self.assertTrue(submit_lines)
+        self.assertTrue(all(
+            "/logs_shards/" not in line.split("--result-dir", 1)[-1]
+            for line in submit_lines
+        ))
+
+    def test_none_result_sync_omits_scheduler_pullback(self):
+        result = self.run_submitter("--result-sync", "none")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        submit_lines = [
+            line for line in result.stdout.splitlines()
+            if "scheduler.py submit" in line
+        ]
+        self.assertTrue(submit_lines)
+        self.assertTrue(all("--result-dir" not in line for line in submit_lines))
+
     def test_defaults_select_the_locked_v6_development_matrix(self):
         self.assertEqual(len(SUBMITTER.DEFAULT_CONFIGS), 12)
         self.assertEqual(
@@ -158,6 +188,54 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         )
         self.assertTrue(all(
             spec["skip_resume_scan"] for spec in captured["specs"]
+        ))
+
+    def test_bulk_summary_sync_targets_only_shard_summaries(self):
+        captured = {}
+
+        def fake_run(command, **kwargs):
+            if command[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(
+                    command, 0, stdout="b" * 40 + "\n", stderr="")
+            if command[:2] == ["git", "status"]:
+                return subprocess.CompletedProcess(
+                    command, 0, stdout="", stderr="")
+            specs = json.loads(kwargs["input"])
+            captured["specs"] = specs
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=json.dumps({
+                    "count": len(specs),
+                    "submitted": [
+                        {"id": f"t{index + 1}"}
+                        for index in range(len(specs))
+                    ],
+                }),
+                stderr="",
+            )
+
+        argv = [
+            str(SCRIPT),
+            "--configs", f"{REFERENCE},{CANDIDATE}",
+            "--train-seeds", "7",
+            "--eval-seeds", "10001",
+            "--run-name", "protocol_bulk_summary_test",
+            "--shard-size", "1",
+            "--result-sync", "summary",
+        ]
+        with patch.object(SUBMITTER.subprocess, "run", side_effect=fake_run):
+            with patch.object(sys, "argv", argv):
+                with redirect_stdout(io.StringIO()):
+                    SUBMITTER.main()
+
+        self.assertTrue(all(
+            "/shard_summaries/" in spec["result_dir"]
+            for spec in captured["specs"]
+        ))
+        self.assertTrue(all(
+            "/logs_shards/" not in spec["result_dir"]
+            for spec in captured["specs"]
         ))
 
 

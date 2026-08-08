@@ -176,6 +176,14 @@ def main() -> None:
     parser.add_argument("--ram-mb", type=int, default=32768)
     parser.add_argument("--nodes", default=",".join(DEFAULT_NODES))
     parser.add_argument("--remote-root", default=str(REMOTE_ROOT))
+    parser.add_argument(
+        "--result-sync",
+        choices=["logs", "summary", "none"],
+        default="logs",
+        help=(
+            "Scheduler pull-back scope. Use summary for large matrices so "
+            "final checkpoints remain on the compute nodes."),
+    )
     parser.add_argument("--require-clean-source", action="store_true")
     parser.add_argument("--expected-commit", default=None)
     parser.add_argument("--priority", choices=["low", "normal", "high"], default="normal")
@@ -301,8 +309,6 @@ def main() -> None:
             "--cpu", str(args.cpu),
             "--priority", args.priority,
             "--require-node", node,
-            "--result-dir", str(remote_root / logs_dir),
-            "--local-result-dir", str(ROOT / logs_dir),
             "--allow-cpu-training",
             "--cpu-training-justification", CPU_JUSTIFICATION,
             "--allow-no-ckpt",
@@ -311,9 +317,15 @@ def main() -> None:
             "--reroute-on-node-down",
             "--node-down-requeue-s", "900",
         ]
+        if args.result_sync != "none":
+            sync_dir = logs_dir if args.result_sync == "logs" else out_dir
+            command.extend([
+                "--result-dir", str(remote_root / sync_dir),
+                "--local-result-dir", str(ROOT / sync_dir),
+            ])
         if args.allow_duplicate:
             command.append("--allow-duplicate")
-        bulk_specs.append({
+        spec = {
             "project": "FreqDuet",
             "description": (
                 f"FreqDuet {protocol} {args.run_name} "
@@ -327,8 +339,6 @@ def main() -> None:
             "cpu": int(args.cpu),
             "priority": args.priority,
             "require_node": node,
-            "result_dir": str(remote_root / logs_dir),
-            "local_result_dir": str(ROOT / logs_dir),
             "skip_resume_scan": True,
             "allow_cpu_training": True,
             "cpu_training_justification": CPU_JUSTIFICATION,
@@ -336,7 +346,14 @@ def main() -> None:
             "reroute_on_node_down": True,
             "node_down_requeue_s": 900,
             "allow_duplicate": bool(args.allow_duplicate),
-        })
+        }
+        if args.result_sync != "none":
+            sync_dir = logs_dir if args.result_sync == "logs" else out_dir
+            spec.update({
+                "result_dir": str(remote_root / sync_dir),
+                "local_result_dir": str(ROOT / sync_dir),
+            })
+        bulk_specs.append(spec)
         if args.dry_run or args.serial_submit:
             output = execute(command, args.dry_run)
             submitted_task_ids.extend(SUBMITTED_TASK_RE.findall(output))
