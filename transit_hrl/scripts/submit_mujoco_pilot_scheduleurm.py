@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
 PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v5"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v6"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -97,6 +97,8 @@ def build_training_command(
         "--lower-lf-rms-budget", str(args.lower_lf_rms_budget),
         "--upper-action-scale", str(args.upper_action_scale),
         "--lower-action-scale", str(args.lower_action_scale),
+        "--lower-constraint-update-mode",
+        str(args.lower_constraint_update_mode),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
         "--checkpoint-min-delta", str(args.checkpoint_min_delta),
         "--checkpoint-evaluation-interval",
@@ -286,6 +288,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--upper-action-scale", type=float, default=0.35)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--lower-constraint-update-mode",
+        choices=("scalarized", "reward_guarded_projection"),
+        default="reward_guarded_projection",
+    )
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)

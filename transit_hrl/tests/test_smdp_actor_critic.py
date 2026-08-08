@@ -20,6 +20,10 @@ from freq_hrl.experiments.trading.ppo_actor_critic import (
 from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     count_parameters,
 )
+from freq_hrl.rl.smdp_actor_critic import (
+    _project_constraint_gradients,
+    _reward_guarded_constraint_step,
+)
 
 
 class TemporalDecisionSchedulerTest(unittest.TestCase):
@@ -302,6 +306,86 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         torch.testing.assert_close(constrained_actor, unconstrained_actor)
         self.assertEqual(metrics["lower_cost_actor_active"], 0.0)
         self.assertEqual(metrics["lower_cost_value_optimizer_steps"], 0.0)
+
+    def test_constraint_gradient_projection_removes_reward_conflict(self):
+        reward = [torch.tensor([-2.0, 0.0])]
+        constraint = [torch.tensor([2.0, -2.0])]
+        projected, diagnostics = _project_constraint_gradients(
+            reward, constraint
+        )
+        self.assertEqual(diagnostics["gradient_conflict"], 1.0)
+        self.assertLess(diagnostics["gradient_cosine"], 0.0)
+        self.assertIsNotNone(projected[0])
+        self.assertAlmostEqual(
+            float(torch.dot(reward[0], projected[0]).item()),
+            0.0,
+            places=6,
+        )
+        torch.testing.assert_close(
+            projected[0], torch.tensor([0.0, -2.0])
+        )
+
+    def test_reward_guard_accepts_only_non_regressing_cost_correction(self):
+        parameter = torch.nn.Parameter(torch.zeros(2))
+
+        def reward_loss():
+            return (parameter[0] - 1.0).square()
+
+        def constraint_loss():
+            return (
+                (parameter[0] + 1.0).square()
+                + (parameter[1] - 1.0).square()
+            )
+
+        reward_before = float(reward_loss().item())
+        constraint_before = float(constraint_loss().item())
+        diagnostics = _reward_guarded_constraint_step(
+            parameters=[parameter],
+            reward_loss_fn=reward_loss,
+            constraint_loss_fn=constraint_loss,
+            step_size=0.1,
+            max_grad_norm=10.0,
+            max_backtracks=4,
+            reward_tolerance=0.0,
+        )
+        self.assertEqual(diagnostics["gradient_conflict"], 1.0)
+        self.assertEqual(diagnostics["accepted"], 1.0)
+        self.assertLessEqual(float(reward_loss().item()), reward_before)
+        self.assertLess(float(constraint_loss().item()), constraint_before)
+        self.assertAlmostEqual(float(parameter[0].item()), 0.0, places=6)
+        self.assertGreater(float(parameter[1].item()), 0.0)
+
+    def test_reward_guarded_constraint_mode_runs_and_reports_diagnostics(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            lower_lambda_init=1.0,
+            lower_constraint_update_mode="reward_guarded_projection",
+            lower_constraint_max_backtracks=3,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        metrics = model.update(self._batch(59))
+        self.assertGreater(metrics["lower_constraint_guard_attempted"], 0.0)
+        self.assertIn("lower_constraint_guard_accepted", metrics)
+        self.assertIn("lower_constraint_gradient_conflict", metrics)
+        self.assertGreaterEqual(
+            metrics["lower_constraint_guard_backtracks"], 0.0
+        )
+
+    def test_unknown_constraint_update_mode_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "update_mode"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                lower_constraint_update_mode="unknown",
+            ))
 
     def test_concatenation_preserves_explicit_cost_bootstrap(self):
         batches = []

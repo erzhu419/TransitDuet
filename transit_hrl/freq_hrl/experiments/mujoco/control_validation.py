@@ -41,7 +41,9 @@ from freq_hrl.rl import (
 )
 
 
-MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v5"
+MUJOCO_CONTROL_PROTOCOL_VERSION = (
+    "freq_hrl_mujoco_shared_core_v6_reward_guarded_projection"
+)
 METHODS = (
     "freq_hrl",
     "freq_hrl_no_leakage",
@@ -859,6 +861,7 @@ def _hierarchical_model(
     hidden_dim: int,
     learning_rate: float,
     leakage_constraint: bool,
+    lower_constraint_update_mode: str = "reward_guarded_projection",
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -878,6 +881,10 @@ def _hierarchical_model(
         lower_cost_activation_threshold=1e-6,
         lower_zero_init_cost_value=True,
         lower_skip_inactive_cost_value_update=True,
+        lower_constraint_update_mode=str(lower_constraint_update_mode),
+        lower_constraint_step_scale=1.0,
+        lower_constraint_max_backtracks=8,
+        lower_constraint_reward_tolerance=1e-8,
     ))
 
 
@@ -925,6 +932,7 @@ def train_mujoco_method(
     evaluation_disturbance_modes: Iterable[str] | None = None,
     upper_action_scale: float = 0.35,
     lower_action_scale: float = 1.0,
+    lower_constraint_update_mode: str = "reward_guarded_projection",
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -950,6 +958,11 @@ def train_mujoco_method(
         raise ValueError("MuJoCo upper_action_scale must be in [0, 1]")
     if not 0.0 < float(lower_action_scale) <= 1.0:
         raise ValueError("MuJoCo lower_action_scale must be in (0, 1]")
+    if str(lower_constraint_update_mode) not in {
+        "scalarized",
+        "reward_guarded_projection",
+    }:
+        raise ValueError("unknown lower constraint update mode")
     observation_dim, action_dim = environment_dimensions(
         env_id,
         episode_horizon=episode_horizon,
@@ -1011,6 +1024,7 @@ def train_mujoco_method(
         hidden_dim=hidden_dim,
         learning_rate=learning_rate,
         leakage_constraint=True,
+        lower_constraint_update_mode=lower_constraint_update_mode,
     )
     target_parameters = _module_parameter_count(reference)
     if name == "flat_ppo":
@@ -1068,6 +1082,7 @@ def train_mujoco_method(
             hidden_dim=hidden_dim,
             learning_rate=learning_rate,
             leakage_constraint=leakage_constraint,
+            lower_constraint_update_mode=lower_constraint_update_mode,
         )
         rollout = lambda policy, seed, sample: rollout_hierarchical(
             policy,
@@ -1186,6 +1201,7 @@ def train_mujoco_method(
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
+        "lower_constraint_update_mode": str(lower_constraint_update_mode),
         "exogenous_observation_contract": (
             "current_causal_actuation_disturbance_decomposed_separately_from_"
             "raw_endogenous_state"
@@ -1292,6 +1308,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--upper-action-scale", type=float, default=0.35)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--lower-constraint-update-mode",
+        choices=("scalarized", "reward_guarded_projection"),
+        default="reward_guarded_projection",
+    )
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
@@ -1325,6 +1346,7 @@ def main() -> None:
         evaluation_disturbance_modes=args.evaluation_disturbance_modes,
         upper_action_scale=args.upper_action_scale,
         lower_action_scale=args.lower_action_scale,
+        lower_constraint_update_mode=args.lower_constraint_update_mode,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
     )
