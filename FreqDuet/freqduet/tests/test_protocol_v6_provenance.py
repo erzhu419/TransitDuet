@@ -1,7 +1,9 @@
 import json
+import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest import mock
 
 import pandas as pd
 
@@ -15,6 +17,7 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     V6_SAFETY_METRICS,
     aggregate,
     config_name,
+    git_provenance,
     run_dir,
     run_manifest,
 )
@@ -74,6 +77,22 @@ def _write_run(logs: Path, config: str, train_episodes: int = 3) -> None:
 
 
 class ProtocolV6ProvenanceTest(unittest.TestCase):
+    def test_git_provenance_falls_back_when_remote_has_no_git_binary(self):
+        environment = {
+            "FREQDUET_SOURCE_COMMIT": "a" * 40,
+            "FREQDUET_SOURCE_BRANCH": "HEAD",
+            "FREQDUET_SOURCE_TRACKED_DIRTY": "0",
+        }
+        with mock.patch.dict(os.environ, environment, clear=False):
+            with mock.patch(
+                    "scripts.run_freqduet_protocol_v2_matrix.subprocess.run",
+                    side_effect=FileNotFoundError("git")):
+                record = git_provenance()
+
+        self.assertEqual(record["commit"], "a" * 40)
+        self.assertEqual(record["branch"], "HEAD")
+        self.assertIs(record["tracked_dirty"], False)
+
     def test_aggregate_locks_checkpoint_source_scenario_and_csvs(self):
         with TemporaryDirectory() as tmp:
             root = Path(tmp)

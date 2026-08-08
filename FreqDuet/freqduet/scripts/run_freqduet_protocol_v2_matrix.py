@@ -854,9 +854,12 @@ def validate_run_manifest(
 
 def git_provenance() -> dict[str, object]:
     def run(*args: str) -> tuple[bool, str]:
-        process = subprocess.run(
-            ["git", *args], cwd=ROOT, text=True,
-            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            process = subprocess.run(
+                ["git", *args], cwd=ROOT, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        except OSError:
+            return False, ""
         return process.returncode == 0, process.stdout.strip()
 
     commit_ok, commit = run("rev-parse", "HEAD")
