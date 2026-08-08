@@ -30,10 +30,10 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 )
 
 
-PILOT_OPTIMIZER_SEEDS = (35023, 35027, 35051)
-PREFLIGHT_OPTIMIZER_SEED = 35059
+PILOT_OPTIMIZER_SEEDS = (35107, 35111, 35117)
+PREFLIGHT_OPTIMIZER_SEED = 35129
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v3"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v4"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -93,6 +93,7 @@ def build_training_command(
         "--upper-period", str(args.upper_period),
         "--hidden-dim", str(args.hidden_dim),
         "--learning-rate", str(args.learning_rate),
+        "--lower-lf-rms-budget", str(args.lower_lf_rms_budget),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
         "--checkpoint-min-delta", str(args.checkpoint_min_delta),
         "--checkpoint-evaluation-interval",
@@ -275,6 +276,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--upper-period", type=int, default=16)
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
@@ -334,6 +336,8 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.checkpoint_evaluation_interval = 1
     if not args.python_executable.strip():
         args.python_executable = default_python_executable(args.nodes)
+    if float(args.lower_lf_rms_budget) <= 0.0:
+        raise SystemExit("lower LF RMS budget must be positive")
     return args
 
 

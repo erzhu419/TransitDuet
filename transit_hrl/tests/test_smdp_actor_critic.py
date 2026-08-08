@@ -1,5 +1,6 @@
 import copy
 import unittest
+from dataclasses import replace
 
 import numpy as np
 import torch
@@ -205,6 +206,68 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         )
         self.assertAlmostEqual(float(advantage[0]), 3.05, places=6)
         self.assertAlmostEqual(float(returns[0]), 5.05, places=6)
+
+    def test_zero_cost_batch_cannot_inject_constraint_actor_gradient(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            lower_lambda_init=0.5,
+        )
+        torch.manual_seed(31)
+        constrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained.load_state_dict(copy.deepcopy(constrained.state_dict()))
+        unconstrained.constraint_lambda = 0.0
+        batch = self._batch(37)
+        batch = replace(
+            batch,
+            lower=replace(
+                batch.lower,
+                cost=np.zeros(batch.lower.size, dtype=np.float32),
+            ),
+        )
+
+        np.random.seed(41)
+        constrained_metrics = constrained.update(copy.deepcopy(batch))
+        np.random.seed(41)
+        unconstrained.update(copy.deepcopy(batch))
+        constrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in constrained.lower_actor.parameters()
+        ])
+        unconstrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in unconstrained.lower_actor.parameters()
+        ])
+        torch.testing.assert_close(constrained_actor, unconstrained_actor)
+        self.assertEqual(constrained_metrics["lower_cost_actor_active"], 0.0)
+
+    def test_concatenation_preserves_explicit_cost_bootstrap(self):
+        batches = []
+        for seed in (43, 47):
+            batch = self._batch(seed)
+            lower = batch.lower
+            batches.append(replace(
+                batch,
+                lower=replace(
+                    lower,
+                    next_value=np.zeros(lower.size, dtype=np.float32),
+                    terminal=np.asarray(
+                        [0.0] * (lower.size - 1) + [1.0], dtype=np.float32
+                    ),
+                    next_cost_value=np.full(
+                        lower.size, 0.25, dtype=np.float32
+                    ),
+                ),
+            ))
+        combined = concat_hierarchical_batches(batches)
+        self.assertIsNotNone(combined.lower.next_cost_value)
+        np.testing.assert_allclose(combined.lower.next_cost_value, 0.25)
 
     def test_hf_tactical_policy_has_an_independent_ppo_stream(self):
         rng = np.random.default_rng(17)

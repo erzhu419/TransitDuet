@@ -83,6 +83,7 @@ class LevelTrajectoryBatch:
     counterfactual_advantage: np.ndarray | None = None
     next_value: np.ndarray | None = None
     terminal: np.ndarray | None = None
+    next_cost_value: np.ndarray | None = None
 
     def validate(self, *, state_dim: int, action_dim: int, level: str) -> None:
         state = np.asarray(self.state)
@@ -130,6 +131,20 @@ class LevelTrajectoryBatch:
             terminal = np.asarray(self.terminal, dtype=np.float32).reshape(-1)
             if np.any((terminal < 0.0) | (terminal > 1.0)):
                 raise ValueError(f"{level} terminal must be in [0, 1]")
+        if self.next_cost_value is not None:
+            if self.cost is None or self.terminal is None:
+                raise ValueError(
+                    f"{level} next_cost_value requires cost and terminal"
+                )
+            next_cost_value = np.asarray(
+                self.next_cost_value, dtype=np.float32
+            ).reshape(-1)
+            if next_cost_value.size != n or not np.all(
+                np.isfinite(next_cost_value)
+            ):
+                raise ValueError(
+                    f"{level} next_cost_value must contain {n} finite values"
+                )
 
     @property
     def size(self) -> int:
@@ -471,6 +486,13 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         raise ValueError(
             "explicit bootstrap fields must be present for every level batch"
         )
+    explicit_cost_bootstrap = [
+        item.next_cost_value is not None for item in items
+    ]
+    if any(explicit_cost_bootstrap) and not all(explicit_cost_bootstrap):
+        raise ValueError(
+            "explicit cost bootstrap must be present for every level batch"
+        )
     return LevelTrajectoryBatch(
         state=np.concatenate([np.asarray(item.state) for item in items], axis=0),
         action=np.concatenate([np.asarray(item.action) for item in items], axis=0),
@@ -502,6 +524,12 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
                 np.asarray(item.terminal).reshape(-1) for item in items
             ], axis=0)
             if all(explicit_bootstrap) else None
+        ),
+        next_cost_value=(
+            np.concatenate([
+                np.asarray(item.next_cost_value).reshape(-1) for item in items
+            ], axis=0)
+            if all(explicit_cost_bootstrap) else None
         ),
     )
 
@@ -1149,9 +1177,23 @@ class FrequencySeparatedActorCriticPPO:
             cost = np.asarray(batch.cost, dtype=np.float32).reshape(-1)
             with torch.no_grad():
                 old_cost_value = cost_value_net(state).detach().cpu().numpy()
-            cost_adv, cost_returns = self._gae(cost, batch.done, batch.duration, old_cost_value)
+            cost_adv, cost_returns = self._gae(
+                cost,
+                batch.done,
+                batch.duration,
+                old_cost_value,
+                batch.next_cost_value,
+                batch.terminal if batch.next_cost_value is not None else None,
+            )
+            cost_actor_active = bool(np.any(cost > 1e-12))
+            if not cost_actor_active:
+                # A random cost critic must not create a policy gradient when
+                # the rollout contains no observed constraint violation.
+                cost_adv = np.zeros_like(cost_adv)
             cost_adv_t = torch.as_tensor(self._normalize(cost_adv), dtype=torch.float32, device=self.device)
             cost_returns_t = torch.as_tensor(cost_returns, dtype=torch.float32, device=self.device)
+        else:
+            cost_actor_active = False
 
         indices = np.arange(batch.size)
         minibatch = max(1, min(int(cfg.minibatch_size), batch.size))
@@ -1168,7 +1210,11 @@ class FrequencySeparatedActorCriticPPO:
                     ratio * reward_adv_t[idx], clipped * reward_adv_t[idx]
                 ).mean()
                 constraint_loss = torch.zeros((), dtype=torch.float32, device=self.device)
-                if cost_adv_t is not None and self.constraint_lambda > 0.0:
+                if (
+                    cost_adv_t is not None
+                    and cost_actor_active
+                    and self.constraint_lambda > 0.0
+                ):
                     cost_surrogate = torch.maximum(
                         ratio * cost_adv_t[idx], clipped * cost_adv_t[idx]
                     ).mean()
@@ -1327,6 +1373,10 @@ class FrequencySeparatedActorCriticPPO:
         )
         if cost is not None:
             out[f"{level}_cost_mean"] = float(np.mean(cost))
+            out[f"{level}_cost_violation_rate"] = float(
+                np.mean(cost > 1e-12)
+            )
+            out[f"{level}_cost_actor_active"] = float(cost_actor_active)
         return out
 
     def update(self, batch: HierarchicalTrajectoryBatch) -> dict[str, float]:

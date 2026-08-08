@@ -28,6 +28,7 @@ def args_fixture() -> argparse.Namespace:
         upper_period=16,
         hidden_dim=64,
         learning_rate=3e-4,
+        lower_lf_rms_budget=0.05,
         checkpoint_smoothing_window=8,
         checkpoint_min_delta=1e-3,
         checkpoint_evaluation_interval=4,
@@ -72,13 +73,14 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
             args,
             environment="HalfCheetah-v5",
             method="freq_hrl",
-            optimizer_seed=35023,
+            optimizer_seed=35107,
             output_dir="results/unit",
         )
         self.assertIn("MUJOCO_GL=egl", command)
         self.assertIn("--code-revision " + "a" * 40, command)
         self.assertIn("--evaluation-disturbance-modes standard ood_chirp", command)
         self.assertIn("--episode-horizon 1000", command)
+        self.assertIn("--lower-lf-rms-budget 0.05", command)
         self.assertNotIn("jtl110cpu", command)
 
     def test_scheduler_uses_unpinned_linux_pool(self):
@@ -87,7 +89,7 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
             args,
             environment="HalfCheetah-v5",
             method="freq_hrl",
-            optimizer_seed=35023,
+            optimizer_seed=35107,
         )
         self.assertEqual(spec["allowed_nodes"], list(LINUX_CPU_NODES))
         self.assertIsNone(spec["require_node"])

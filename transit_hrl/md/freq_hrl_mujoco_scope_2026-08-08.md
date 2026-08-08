@@ -81,24 +81,35 @@ Pilot optimizer seeds are development-only and cannot be reused in a formal
 comparison. Pilot results may choose a training budget or reveal a broken
 method, but they cannot support a paper performance claim.
 
-Protocol v3 separates a trajectory trace boundary from an actual MDP
+Protocol v4 separates a trajectory trace boundary from an actual MDP
 termination. Early environment termination receives zero bootstrap; Gymnasium
 TimeLimit truncation and a fixed collection-budget boundary use an explicit
 next-state critic value while still stopping GAE propagation across the reset.
 The 512-transition training budget is divisible by the 16-step upper period,
 so a collection boundary cannot silently cut one method at a different point
-inside its macro action. Protocol v2 pilot results remain development evidence
-only and cannot be mixed with v3 confirmation.
+inside its macro action. Cost GAE uses its own next-cost-value bootstrap, and a
+zero-violation rollout cannot inject a policy gradient from an uncalibrated
+cost critic. Lower-frequency costs are dimensionless squared excess over a
+registered causal RMS budget rather than an unscaled power difference.
+Protocol v2 pilot results remain development evidence only and cannot be mixed
+with v4 confirmation.
+
+Every v4 cell records two distinct integrity hashes: a model-parameter hash
+checked before and after evaluation, and a SHA-256 of the serialized checkpoint
+file. The legacy `frozen_checkpoint_sha256` field is retained as an alias for
+the parameter hash only; it must not be mistaken for a file hash.
 
 ## Current Evidence Boundary
 
-The implementation and a short `HalfCheetah-v5` artifact smoke are complete.
-That smoke verifies environment execution, causal routing, asynchronous
-transition counts, capacity matching, checkpoint/history output, and one real
-PPO update. It is not a performance result. Paper evidence requires a
-source-bound training-budget plan, independent HPO seeds, at least three
-standard MuJoCo tasks, multiple optimizer replicates, untouched held-out paths,
-and multiplicity-controlled paired comparisons.
+The source-bound v2 pilot completed all 36 development cells. Its integrity
+audit is valid, but its performance result is not sufficient: Freq-HRL beat
+flat PPO consistently only on Walker2d and lost consistently on HalfCheetah and
+Hopper. The pilot also exposed the truncated-trajectory and leakage-cost
+contracts repaired in v4. These data select the next protocol; they are not a
+paper performance result. Paper evidence requires a source-bound training-
+budget plan, fresh independent optimizer seeds, at least three standard MuJoCo
+tasks, untouched held-out paths, and multiplicity-controlled paired
+comparisons.
 
 The legacy `jtl110cpu` scheduler records are excluded from this evidence path.
 Their remote process termination could not be confirmed after SSH handshake

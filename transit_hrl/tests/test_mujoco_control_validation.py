@@ -1,6 +1,11 @@
+import hashlib
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
+import torch
 
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
@@ -12,6 +17,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     environment_dimensions,
     rollout_hierarchical,
     train_mujoco_method,
+    write_cell,
     _hierarchical_model,
 )
 
@@ -87,6 +93,31 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertGreater(actual, 0)
         self.assertLess(abs(ratio - 1.0), 0.03)
 
+    def test_written_checkpoint_has_independent_file_hash(self):
+        model = torch.nn.Linear(2, 1)
+        payload = {
+            "history": [{"iteration": 0}],
+            "method": "unit",
+            "environment": "unit",
+            "disturbance_mode": "standard",
+            "frozen_parameter_sha256": "a" * 64,
+            "frozen_checkpoint_sha256": "a" * 64,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            write_cell(output, payload, [{"metric": 1.0}], model)
+            summary = json.loads(
+                (output / "cell_summary.json").read_text(encoding="utf-8")
+            )
+            actual = hashlib.sha256(
+                (output / "checkpoint.pt").read_bytes()
+            ).hexdigest()
+            self.assertEqual(summary["checkpoint_file_sha256"], actual)
+            self.assertEqual(
+                summary["checkpoint_integrity_contract"],
+                "independent_parameter_and_serialized_file_sha256_v1",
+            )
+
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
 class MujocoControlIntegrationTest(unittest.TestCase):
@@ -119,6 +150,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertTrue(np.isfinite(row["episode_return"]))
         self.assertIsNotNone(batch.upper.next_value)
         self.assertIsNotNone(batch.lower.next_value)
+        self.assertIsNotNone(batch.lower.next_cost_value)
+        self.assertTrue(np.any(np.abs(batch.lower.next_cost_value[:-1]) > 0.0))
         self.assertEqual(float(batch.upper.terminal[-1]), 0.0)
         self.assertEqual(float(batch.lower.terminal[-1]), 0.0)
         self.assertEqual(row["bootstrap_boundary_count"], 1)
@@ -175,7 +208,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             evaluation_disturbance_modes=["standard", "ood_chirp"],
         )
         self.assertEqual(payload["domain"], "mujoco")
-        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v3")
+        self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v4")
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
@@ -192,8 +225,10 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["evaluation_episode_horizon"], 32)
         self.assertEqual(
             payload["bootstrap_contract"],
-            "explicit_next_value_with_separate_trace_boundary_and_mdp_terminal",
+            "explicit_reward_and_cost_next_value_with_separate_trace_boundary_"
+            "and_mdp_terminal",
         )
+        self.assertIsNotNone(payload["history"][-1]["lower_cost_actor_active"])
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
 
 

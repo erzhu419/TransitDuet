@@ -13,7 +13,7 @@ from typing import Any, Callable, Iterable
 import numpy as np
 import torch
 
-from freq_hrl.core import LeakageRegularizer
+from freq_hrl.core import LeakageRegularizer, evaluate_rms_leakage_budget
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
     DISTURBANCE_MODES,
@@ -41,7 +41,7 @@ from freq_hrl.rl import (
 )
 
 
-MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v3"
+MUJOCO_CONTROL_PROTOCOL_VERSION = "freq_hrl_mujoco_shared_core_v4"
 METHODS = (
     "freq_hrl",
     "freq_hrl_no_leakage",
@@ -125,6 +125,14 @@ def _model_parameter_sha256(model: Any) -> str:
     return digest.hexdigest()
 
 
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 @torch.no_grad()
 def _value_prediction(
     value_net: torch.nn.Module,
@@ -145,6 +153,8 @@ def _with_explicit_bootstrap(
     *,
     boundary_next_values: list[float],
     boundary_terminals: list[float],
+    boundary_next_cost_values: list[float] | None = None,
+    cost_values: list[float] | None = None,
 ) -> Any:
     done = np.asarray(level.done, dtype=np.float32).reshape(-1)
     values = np.asarray(level.old_value, dtype=np.float32).reshape(-1)
@@ -165,10 +175,30 @@ def _with_explicit_bootstrap(
     ):
         next_values[int(index)] = float(next_value)
         terminals[int(index)] = float(terminal)
+    next_cost_values = None
+    if boundary_next_cost_values is not None:
+        if (
+            cost_values is None
+            or len(cost_values) != values.size
+            or boundary_indices.size != len(boundary_next_cost_values)
+        ):
+            raise RuntimeError(
+                "MuJoCo cost bootstrap boundaries do not match trajectory"
+            )
+        next_cost_values = np.zeros_like(values)
+        if values.size > 1:
+            next_cost_values[:-1] = np.asarray(
+                cost_values[1:], dtype=np.float32
+            )
+        for index, next_cost_value in zip(
+            boundary_indices, boundary_next_cost_values
+        ):
+            next_cost_values[int(index)] = float(next_cost_value)
     return replace(
         level,
         next_value=next_values,
         terminal=terminals,
+        next_cost_value=next_cost_values,
     )
 
 
@@ -254,6 +284,9 @@ def _episode_row(
     natural_episode_returns: list[float],
     boundary_terminals: list[float],
     transition_budget: int,
+    lower_lf_rms_values: list[float],
+    lower_lf_budget_excesses: list[float],
+    lower_lf_rms_budget: float,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
@@ -292,6 +325,12 @@ def _episode_row(
         "UpperHFPowerAbs": float(leakage["UpperHFPowerAbs"]),
         "LowerLFDrift": float(leakage["LowerLFDrift"]),
         "LowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
+        "LowerLFRmsOnlineMean": float(np.mean(lower_lf_rms_values)),
+        "LowerLFBudgetExcessMean": float(np.mean(lower_lf_budget_excesses)),
+        "LowerLFBudgetViolationRate": float(np.mean(
+            np.asarray(lower_lf_budget_excesses, dtype=np.float64) > 0.0
+        )),
+        "LowerLFRmsBudget": float(lower_lf_rms_budget),
         "upper_decision_count": int(upper_decisions),
         "upper_transition_count": int(upper_transitions),
         "lower_transition_count": int(lower_transitions),
@@ -320,7 +359,7 @@ def rollout_hierarchical(
     upper_action_scale: float = 0.70,
     lower_action_scale: float = 0.35,
     lower_lf_alpha: float = 0.04,
-    lower_lf_budget: float = 0.015,
+    lower_lf_rms_budget: float = 0.05,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -347,7 +386,11 @@ def rollout_hierarchical(
         natural_episode_returns: list[float] = []
         boundary_upper_next_values: list[float] = []
         boundary_lower_next_values: list[float] = []
+        boundary_lower_next_cost_values: list[float] = []
         boundary_terminals: list[float] = []
+        lower_lf_rms_values: list[float] = []
+        lower_lf_budget_excesses: list[float] = []
+        lower_cost_values: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
         steps_since_upper = int(upper_period)
@@ -382,6 +425,7 @@ def rollout_hierarchical(
             )
             lower_out = model.act_lower(lower_state, sample=sample)
             lower_raw = np.asarray(lower_out["action"], dtype=np.float32)
+            lower_cost_values.append(float(lower_out["cost_value"]))
             lower_residual = float(lower_action_scale) * np.tanh(lower_raw)
             nominal = np.clip(upper_anchor + lower_residual, -1.0, 1.0)
             disturbance = deterministic_actuation_disturbance(
@@ -404,8 +448,14 @@ def rollout_hierarchical(
             lower_lf += float(lower_lf_alpha) * (
                 np.asarray(lower_residual, dtype=np.float64) - lower_lf
             )
+            lower_budget = evaluate_rms_leakage_budget(
+                float(np.mean(np.square(lower_lf))),
+                float(lower_lf_rms_budget),
+            )
+            lower_lf_rms_values.append(float(lower_budget["rms"]))
+            lower_lf_budget_excesses.append(float(lower_budget["budget_excess"]))
             lower_cost = (
-                max(float(np.mean(np.square(lower_lf))) - float(lower_lf_budget), 0.0)
+                float(lower_budget["budget_excess_squared"])
                 if leakage_constraint else 0.0
             )
             builder.add_lower(
@@ -431,6 +481,7 @@ def rollout_hierarchical(
                 terminal = float(bool(terminated))
                 upper_next_value = 0.0
                 lower_next_value = 0.0
+                lower_next_cost_value = 0.0
                 if sample and not bool(terminated):
                     next_bands = decomposer.update(next_observation)
                     next_upper_state = _feature_state(
@@ -460,8 +511,16 @@ def rollout_hierarchical(
                         next_lower_state,
                         device=model.device,
                     )
+                    lower_next_cost_value = _value_prediction(
+                        model.lower_cost_value,
+                        next_lower_state,
+                        device=model.device,
+                    )
                 boundary_upper_next_values.append(upper_next_value)
                 boundary_lower_next_values.append(lower_next_value)
+                boundary_lower_next_cost_values.append(
+                    lower_next_cost_value
+                )
                 boundary_terminals.append(terminal)
                 segment_returns.append(current_episode_return)
                 if natural_done:
@@ -499,6 +558,11 @@ def rollout_hierarchical(
                     trajectory.lower,
                     boundary_next_values=boundary_lower_next_values,
                     boundary_terminals=boundary_terminals,
+                    boundary_next_cost_values=(
+                        boundary_lower_next_cost_values
+                        if leakage_constraint else None
+                    ),
+                    cost_values=(lower_cost_values if leakage_constraint else None),
                 ),
             )
         row = _episode_row(
@@ -519,6 +583,9 @@ def rollout_hierarchical(
             natural_episode_returns=natural_episode_returns,
             boundary_terminals=boundary_terminals,
             transition_budget=transition_budget,
+            lower_lf_rms_values=lower_lf_rms_values,
+            lower_lf_budget_excesses=lower_lf_budget_excesses,
+            lower_lf_rms_budget=lower_lf_rms_budget,
         )
         return (trajectory if sample else None), row
     finally:
@@ -534,6 +601,7 @@ def rollout_flat(
     steps: int,
     sample: bool,
     episode_horizon: int = 1000,
+    lower_lf_rms_budget: float = 0.05,
 ) -> tuple[JointTrajectoryBatch | None, dict[str, Any]]:
     transition_budget = int(steps) if sample else int(episode_horizon)
     env = _make_env(env_id, episode_horizon=episode_horizon)
@@ -556,6 +624,9 @@ def rollout_flat(
         natural_episode_returns: list[float] = []
         boundary_next_values: list[float] = []
         boundary_terminals: list[float] = []
+        lower_lf = np.zeros(action_dim, dtype=np.float64)
+        lower_lf_rms_values: list[float] = []
+        lower_lf_budget_excesses: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
 
@@ -598,6 +669,15 @@ def rollout_flat(
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
+            lower_lf += 0.04 * (
+                np.asarray(executed, dtype=np.float64) - lower_lf
+            )
+            lower_budget = evaluate_rms_leakage_budget(
+                float(np.mean(np.square(lower_lf))),
+                float(lower_lf_rms_budget),
+            )
+            lower_lf_rms_values.append(float(lower_budget["rms"]))
+            lower_lf_budget_excesses.append(float(lower_budget["budget_excess"]))
             if done:
                 terminal = float(bool(terminated))
                 next_value = 0.0
@@ -631,6 +711,7 @@ def rollout_flat(
                 model.reset_recurrent_inference()
                 bands = decomposer.reset(observation)
                 previous_action = np.zeros(action_dim, dtype=np.float32)
+                lower_lf = np.zeros(action_dim, dtype=np.float64)
             else:
                 bands = decomposer.update(next_observation)
 
@@ -667,6 +748,9 @@ def rollout_flat(
             natural_episode_returns=natural_episode_returns,
             boundary_terminals=boundary_terminals,
             transition_budget=transition_budget,
+            lower_lf_rms_values=lower_lf_rms_values,
+            lower_lf_budget_excesses=lower_lf_budget_excesses,
+            lower_lf_rms_budget=lower_lf_rms_budget,
         )
         return (batch if sample else None), row
     finally:
@@ -693,6 +777,10 @@ SUMMARY_KEYS = [
     "UpperHFPowerAbs",
     "LowerLFDrift",
     "LowerLFDriftAbs",
+    "LowerLFRmsOnlineMean",
+    "LowerLFBudgetExcessMean",
+    "LowerLFBudgetViolationRate",
+    "LowerLFRmsBudget",
     "upper_decision_count",
     "upper_transition_count",
     "lower_transition_count",
@@ -745,6 +833,7 @@ def train_mujoco_method(
     upper_period: int = 16,
     hidden_dim: int = 64,
     learning_rate: float = 3e-4,
+    lower_lf_rms_budget: float = 0.05,
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
     checkpoint_evaluation_interval: int = 4,
@@ -810,6 +899,7 @@ def train_mujoco_method(
             steps=steps,
             sample=sample,
             episode_horizon=episode_horizon,
+            lower_lf_rms_budget=lower_lf_rms_budget,
         )
         payload, rows, model = train_joint_ppo(
             model=model,
@@ -850,6 +940,7 @@ def train_mujoco_method(
             upper_period=upper_period,
             frequency_routing=frequency_routing,
             leakage_constraint=leakage_constraint,
+            lower_lf_rms_budget=lower_lf_rms_budget,
             sample=sample,
             method=name,
             episode_horizon=episode_horizon,
@@ -905,6 +996,7 @@ def train_mujoco_method(
                     steps=steps,
                     sample=False,
                     episode_horizon=episode_horizon,
+                    lower_lf_rms_budget=lower_lf_rms_budget,
                 )[1]
             else:
                 row = rollout_hierarchical(
@@ -916,6 +1008,7 @@ def train_mujoco_method(
                     upper_period=upper_period,
                     frequency_routing=name != "generic_hrl",
                     leakage_constraint=name == "freq_hrl",
+                    lower_lf_rms_budget=lower_lf_rms_budget,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -941,11 +1034,14 @@ def train_mujoco_method(
         "training_transition_budget_per_path": int(steps),
         "evaluation_episode_horizon": int(episode_horizon),
         "bootstrap_contract": (
-            "explicit_next_value_with_separate_trace_boundary_and_mdp_terminal"
+            "explicit_reward_and_cost_next_value_with_separate_trace_boundary_"
+            "and_mdp_terminal"
         ),
         "upper_period": int(upper_period),
         "frequency_routing_enabled": name.startswith("freq_hrl"),
         "leakage_constraint_enabled": name == "freq_hrl",
+        "leakage_cost_contract": "causal_lf_rms_budget_excess_squared_v1",
+        "lower_lf_rms_budget": float(lower_lf_rms_budget),
         "temporal_hierarchy_enabled": name != "flat_ppo",
         "capacity_target_parameter_count": target_parameters,
         "capacity_actual_parameter_count": actual_parameters,
@@ -954,6 +1050,7 @@ def train_mujoco_method(
         "code_revision": source_identity["code_revision"],
         "source_manifest_sha256": source_identity["source_manifest_sha256"],
         "heldout_test_access_status": "loaded_after_checkpoint_selection",
+        "frozen_parameter_sha256": checkpoint_hash,
         "frozen_checkpoint_sha256": checkpoint_hash,
         "evaluation_summary_by_disturbance": {
             mode: summarize([
@@ -987,24 +1084,30 @@ def write_cell(
 ) -> None:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
-    summary = {key: value for key, value in payload.items() if key != "history"}
-    (output / "cell_summary.json").write_text(
-        json.dumps(summary, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    (output / "training_history.json").write_text(
-        json.dumps(payload["history"], indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    _write_csv(output / "evaluation_rows.csv", rows)
+    checkpoint_path = output / "checkpoint.pt"
     torch.save({
         "model_state_dict": model.state_dict(),
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
         "method": payload["method"],
         "environment": payload["environment"],
         "disturbance_mode": payload["disturbance_mode"],
+        "frozen_parameter_sha256": payload["frozen_parameter_sha256"],
         "frozen_checkpoint_sha256": payload["frozen_checkpoint_sha256"],
-    }, output / "checkpoint.pt")
+    }, checkpoint_path)
+    payload["checkpoint_file_sha256"] = _file_sha256(checkpoint_path)
+    payload["checkpoint_integrity_contract"] = (
+        "independent_parameter_and_serialized_file_sha256_v1"
+    )
+    (output / "training_history.json").write_text(
+        json.dumps(payload["history"], indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    _write_csv(output / "evaluation_rows.csv", rows)
+    summary = {key: value for key, value in payload.items() if key != "history"}
+    (output / "cell_summary.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1025,13 +1128,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-seeds", type=int, nargs="+", default=list(DEFAULT_TRAIN_SEEDS))
     parser.add_argument("--selection-seeds", type=int, nargs="+", default=list(DEFAULT_SELECTION_SEEDS))
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=list(DEFAULT_EVAL_SEEDS))
-    parser.add_argument("--steps", type=int, default=500)
+    parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--iterations", type=int, default=64)
     parser.add_argument("--optimizer-seed", type=int, required=True)
     parser.add_argument("--upper-period", type=int, default=16)
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
@@ -1057,6 +1161,7 @@ def main() -> None:
         upper_period=args.upper_period,
         hidden_dim=args.hidden_dim,
         learning_rate=args.learning_rate,
+        lower_lf_rms_budget=args.lower_lf_rms_budget,
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
         checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
