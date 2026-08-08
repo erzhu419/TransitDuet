@@ -5,6 +5,7 @@ import numpy as np
 from freq_hrl.core import (
     CausalLeakageRewardShaper,
     CausalLowFrequencyEffectProjector,
+    CausalRollingBandTracker,
     CumulativeActionEffectOperator,
     LeakageRegularizer,
     evaluate_rms_leakage_budget,
@@ -12,6 +13,32 @@ from freq_hrl.core import (
 
 
 class LeakageTest(unittest.TestCase):
+    def test_online_rolling_bands_match_batch_diagnostics(self):
+        values = np.asarray([
+            [1.0, -0.5],
+            [0.2, 0.7],
+            [-0.4, 0.3],
+            [0.9, -0.8],
+            [0.1, 0.2],
+        ])
+        tracker = CausalRollingBandTracker(window=3)
+        tracker.reset(2)
+        online = [tracker.update(row) for row in values]
+        regularizer = LeakageRegularizer(
+            upper_hf_window=3, lower_lf_window=3
+        )
+        metrics = regularizer.compute(values, values)
+        online_low = np.asarray([row["low"] for row in online])
+        online_high = np.asarray([row["high"] for row in online])
+        self.assertAlmostEqual(
+            float(np.mean(np.square(online_low))),
+            float(metrics["LowerLFDriftAbs"]),
+        )
+        self.assertAlmostEqual(
+            float(np.mean(np.square(online_high))),
+            float(metrics["UpperHFPowerAbs"]),
+        )
+
     def test_lower_drift_penalty_increases_with_cumulative_bias(self):
         op = CumulativeActionEffectOperator()
         reg = LeakageRegularizer(lower_lf_window=8)

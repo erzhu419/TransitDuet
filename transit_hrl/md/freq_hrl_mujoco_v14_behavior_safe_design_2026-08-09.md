@@ -21,11 +21,12 @@ The failure exposes two objective mismatches in the previous learner:
 ## v14 lower behavioral constraint
 
 Let `l_t` be the raw lower actor action, `r_t` its post-transfer lower
-responsibility, and let the two causal EMA states be
+responsibility, and let `LP_32` be the same 32-step causal rolling mean used by
+the reported leakage diagnostic:
 
 ```text
-z_raw,t  = (1 - alpha) z_raw,t-1  + alpha l_t
-z_resp,t = (1 - alpha) z_resp,t-1 + alpha r_t.
+z_raw,t  = LP_32(l_1:t)
+z_resp,t = LP_32(r_1:t).
 ```
 
 For an RMS budget `b_l`, define the dimensionless squared excess
@@ -51,25 +52,27 @@ ablation, not as the proposed behavior-safe method.
 
 ## v14 upper continuity objective
 
-At upper boundary `k`, let `u_k` be the assigned upper responsibility after the
-causal transfer and let `b_u` be a transition RMS budget. Define
+At primitive step `t`, let `u_t` be the currently assigned upper responsibility
+after the causal transfer. Define the same causal high-pass used by the
+reported diagnostic and its fixed RMS-budget excess:
 
 ```text
-q_k = max(RMS(u_k - u_k-1) / b_u - 1, 0)^2.
+h_t = u_t - LP_8(u_1:t)
+q_t = max(RMS(h_t) / b_u - 1, 0)^2.
 ```
 
-Only the first upper credit in macro transition `k` is changed:
+Each primitive reward contributes to the upper macro credit as
 
 ```text
-R_upper,k = discounted_environment_return_k - beta q_k.
+r_upper,t = r_environment,t - beta q_t.
 ```
 
 The lower reward and the reported episode return remain the unshaped
-environment reward. The first macro action of each natural episode has no
-transition penalty. The transform is causal because `u_k-1`, the current raw
-upper action, and the current transfer state are known at boundary `k`.
+environment reward. Both rolling filters reset at a natural MDP reset. The
+transform is causal and its mean high-pass power is numerically identical to
+`UpperHFPowerAbs` on a held-out episode.
 
-Development defaults are `b_u = 0.20` and `beta = 2.0`. They are not
+Development defaults are `b_u = 0.10` and `beta = 2.0`. They are not
 confirmatory thresholds and may be changed only during v14 development. Any
 selected value must be frozen before a fresh v15 held-out seed namespace is
 created.
@@ -84,8 +87,8 @@ seeds, and independent safety-selection paths. The v14 branch registry is:
 | `no_leakage` | disabled | disabled | disabled |
 | `responsibility_guarded_adam_projection` | responsibility | guarded projection | disabled |
 | `behavior_guarded_adam_projection` | joint behavior | guarded projection | disabled |
-| `behavior_guarded_upper_smooth` | joint behavior | guarded projection | enabled |
-| `behavior_scalarized_upper_smooth` | joint behavior | scalarized | enabled |
+| `behavior_guarded_upper_hf` | joint behavior | guarded projection | enabled |
+| `behavior_scalarized_upper_hf` | joint behavior | scalarized | enabled |
 
 A constrained branch is eligible only when clustered one-sided bootstrap bounds
 on independent safety seeds support all four conditions:
@@ -107,9 +110,9 @@ selection.
 - Upper shaping changes only upper training credit.
 - Lower reward and reported environment return are identical with shaping on or
   off for the same path.
-- Every cell reports raw and responsibility online budgets, constraint cost,
-  upper transition RMS, continuity penalty, source revision, and source
-  manifest.
+- Every cell reports raw and responsibility online powers, their endpoint
+  alignment, constraint cost, upper-HF online power, penalty, source revision,
+  and source manifest.
 - v12 and v13 results are analyzed only from their detached frozen worktrees.
 
 ## Development and confirmation sequence

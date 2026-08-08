@@ -35,6 +35,55 @@ def high_pass(values: Any, window: int) -> np.ndarray:
     return arr - causal_rolling_mean(arr, window)
 
 
+@dataclass
+class CausalRollingBandTracker:
+    """Online rolling low/high bands identical to the batch diagnostics."""
+
+    window: int
+
+    def __post_init__(self) -> None:
+        self.window = int(self.window)
+        if self.window < 1:
+            raise ValueError("causal rolling-band window must be positive")
+        self._dimension = 0
+        self._history: list[np.ndarray] = []
+        self._low = np.zeros(0, dtype=np.float64)
+
+    def reset(self, dimension: int) -> None:
+        if int(dimension) < 1:
+            raise ValueError("causal rolling-band dimension must be positive")
+        self._dimension = int(dimension)
+        self._history = []
+        self._low = np.zeros(self._dimension, dtype=np.float64)
+
+    @property
+    def low(self) -> np.ndarray:
+        self._require_reset()
+        return self._low.astype(np.float32, copy=True)
+
+    def update(self, value: Any) -> dict[str, np.ndarray]:
+        self._require_reset()
+        current = np.asarray(value, dtype=np.float64).reshape(-1)
+        if (
+            current.shape != (self._dimension,)
+            or not np.all(np.isfinite(current))
+        ):
+            raise ValueError("rolling-band value must be finite and aligned")
+        self._history.append(current.copy())
+        if len(self._history) > self.window:
+            self._history.pop(0)
+        self._low = np.mean(self._history, axis=0)
+        return {
+            "raw": current.astype(np.float32, copy=True),
+            "low": self._low.astype(np.float32, copy=True),
+            "high": (current - self._low).astype(np.float32, copy=True),
+        }
+
+    def _require_reset(self) -> None:
+        if self._dimension < 1:
+            raise RuntimeError("causal rolling-band tracker must be reset")
+
+
 def evaluate_rms_leakage_budget(
     low_frequency_power: float,
     rms_budget: float,

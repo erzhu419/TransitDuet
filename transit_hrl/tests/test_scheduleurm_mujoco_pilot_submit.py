@@ -37,8 +37,8 @@ def args_fixture() -> argparse.Namespace:
         lower_action_scale=1.0,
         responsibility_mode="causal_lf_transfer",
         leakage_constraint_scope="joint_behavior",
-        upper_transition_rms_budget=0.2,
-        upper_transition_penalty_coef=2.0,
+        upper_hf_rms_budget=0.1,
+        upper_hf_penalty_coef=2.0,
         lower_constraint_update_mode="reward_guarded_adam_projection",
         checkpoint_smoothing_window=8,
         checkpoint_min_delta=1e-3,
@@ -104,8 +104,8 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         self.assertIn("--lower-action-scale 1.0", command)
         self.assertIn("--responsibility-mode causal_lf_transfer", command)
         self.assertIn("--leakage-constraint-scope joint_behavior", command)
-        self.assertIn("--upper-transition-rms-budget 0.2", command)
-        self.assertIn("--upper-transition-penalty-coef 2.0", command)
+        self.assertIn("--upper-hf-rms-budget 0.1", command)
+        self.assertIn("--upper-hf-penalty-coef 2.0", command)
         self.assertIn(
             "--lower-constraint-update-mode reward_guarded_adam_projection",
             command,

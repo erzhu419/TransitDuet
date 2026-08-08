@@ -13,7 +13,11 @@ from typing import Any, Callable, Iterable
 import numpy as np
 import torch
 
-from freq_hrl.core import LeakageRegularizer, evaluate_rms_leakage_budget
+from freq_hrl.core import (
+    CausalRollingBandTracker,
+    LeakageRegularizer,
+    evaluate_rms_leakage_budget,
+)
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
     CausalResponsibilityTransfer,
@@ -44,7 +48,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_behavior_safe_training"
+    "freq_hrl_mujoco_shared_core_v14_endpoint_aligned_training"
 )
 METHODS = (
     "freq_hrl",
@@ -71,8 +75,8 @@ SAFE_SELECTOR_BRANCHES = (
     SAFE_SELECTOR_BASELINE_BRANCH,
     "responsibility_guarded_adam_projection",
     "behavior_guarded_adam_projection",
-    "behavior_guarded_upper_smooth",
-    "behavior_scalarized_upper_smooth",
+    "behavior_guarded_upper_hf",
+    "behavior_scalarized_upper_hf",
 )
 SAFE_SELECTOR_REWARD_MARGIN_FRACTION = 0.02
 SAFE_SELECTOR_MIN_DRIFT_REDUCTION_FRACTION = 0.10
@@ -82,8 +86,8 @@ SAFE_SELECTOR_CONFIDENCE = 0.90
 SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 RESPONSIBILITY_TRANSFER_ALPHA = 0.04
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
-DEFAULT_UPPER_TRANSITION_RMS_BUDGET = 0.20
-DEFAULT_UPPER_TRANSITION_PENALTY_COEF = 2.0
+DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
+DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
 
 
 def _gym() -> Any:
@@ -352,9 +356,11 @@ def _episode_row(
     lower_lf_rms_budget: float,
     leakage_constraint_scope: str,
     upper_transition_delta_rms_values: list[float],
-    upper_transition_penalties: list[float],
-    upper_transition_rms_budget: float,
-    upper_transition_penalty_coef: float,
+    upper_hf_rms_values: list[float],
+    upper_hf_budget_excesses: list[float],
+    upper_hf_penalties: list[float],
+    upper_hf_rms_budget: float,
+    upper_hf_penalty_coef: float,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
@@ -440,11 +446,17 @@ def _episode_row(
         ),
         "LowerContributionOutOfUnitRate": float(np.mean(np.abs(lower) > 1.0)),
         "LowerLFRmsOnlineMean": float(np.mean(lower_lf_rms_values)),
+        "LowerLFPowerOnlineMean": float(np.mean(np.square(
+            lower_lf_rms_values
+        ))),
         "LowerLFBudgetExcessMean": float(np.mean(lower_lf_budget_excesses)),
         "LowerLFBudgetViolationRate": float(np.mean(
             np.asarray(lower_lf_budget_excesses, dtype=np.float64) > 0.0
         )),
         "RawLowerLFRmsOnlineMean": float(np.mean(raw_lower_lf_rms_values)),
+        "RawLowerLFPowerOnlineMean": float(np.mean(np.square(
+            raw_lower_lf_rms_values
+        ))),
         "RawLowerLFBudgetExcessMean": float(np.mean(
             raw_lower_lf_budget_excesses
         )),
@@ -461,14 +473,24 @@ def _episode_row(
         "UpperTransitionDeltaRMSMax": float(np.max(
             upper_transition_delta_rms_values
         )),
-        "UpperContinuityPenaltyMean": float(np.mean(
-            upper_transition_penalties
+        "UpperHFRmsOnlineMean": float(np.mean(upper_hf_rms_values)),
+        "UpperHFPowerOnlineMean": float(np.mean(np.square(
+            upper_hf_rms_values
+        ))),
+        "UpperHFBudgetExcessMean": float(np.mean(
+            upper_hf_budget_excesses
         )),
-        "UpperContinuityPenaltyTotal": float(np.sum(
-            upper_transition_penalties
+        "UpperHFBudgetViolationRate": float(np.mean(
+            np.asarray(upper_hf_budget_excesses, dtype=np.float64) > 0.0
         )),
-        "UpperTransitionRMSBudget": float(upper_transition_rms_budget),
-        "UpperTransitionPenaltyCoef": float(upper_transition_penalty_coef),
+        "UpperHFPenaltyMean": float(np.mean(
+            upper_hf_penalties
+        )),
+        "UpperHFPenaltyTotal": float(np.sum(
+            upper_hf_penalties
+        )),
+        "UpperHFRMSBudget": float(upper_hf_rms_budget),
+        "UpperHFPenaltyCoef": float(upper_hf_penalty_coef),
         "upper_decision_count": int(upper_decisions),
         "upper_transition_count": int(upper_transitions),
         "lower_transition_count": int(lower_transitions),
@@ -499,8 +521,8 @@ def rollout_hierarchical(
     lower_lf_alpha: float = 0.04,
     lower_lf_rms_budget: float = 0.05,
     leakage_constraint_scope: str = "responsibility",
-    upper_transition_rms_budget: float = DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
-    upper_transition_penalty_coef: float = 0.0,
+    upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
+    upper_hf_penalty_coef: float = 0.0,
     responsibility_mode: str = "additive",
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
@@ -508,17 +530,15 @@ def rollout_hierarchical(
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
     if (
-        not np.isfinite(float(upper_transition_penalty_coef))
-        or float(upper_transition_penalty_coef) < 0.0
+        not np.isfinite(float(upper_hf_penalty_coef))
+        or float(upper_hf_penalty_coef) < 0.0
     ):
-        raise ValueError(
-            "upper transition penalty coefficient must be non-negative"
-        )
+        raise ValueError("upper-HF penalty coefficient must be non-negative")
     if (
-        not np.isfinite(float(upper_transition_rms_budget))
-        or float(upper_transition_rms_budget) <= 0.0
+        not np.isfinite(float(upper_hf_rms_budget))
+        or float(upper_hf_rms_budget) <= 0.0
     ):
-        raise ValueError("upper transition RMS budget must be positive")
+        raise ValueError("upper-HF RMS budget must be positive")
     transition_budget = int(steps) if sample else int(episode_horizon)
     env = _make_env(env_id, episode_horizon=episode_horizon)
     try:
@@ -532,13 +552,17 @@ def rollout_hierarchical(
         upper_policy_action = np.zeros(action_dim, dtype=np.float32)
         previous_upper_anchor = np.zeros(action_dim, dtype=np.float32)
         has_previous_upper_anchor = False
-        pending_upper_transition_penalty = 0.0
         current_requested_transfer = np.zeros(action_dim, dtype=np.float32)
         responsibility = CausalResponsibilityTransfer(
             mode=str(responsibility_mode), alpha=float(lower_lf_alpha)
         )
         responsibility.reset(action_dim)
-        executed_lower_lf = np.zeros(action_dim, dtype=np.float64)
+        responsibility_lf_tracker = CausalRollingBandTracker(window=32)
+        responsibility_lf_tracker.reset(action_dim)
+        raw_lower_lf_tracker = CausalRollingBandTracker(window=32)
+        raw_lower_lf_tracker.reset(action_dim)
+        upper_hf_tracker = CausalRollingBandTracker(window=8)
+        upper_hf_tracker.reset(action_dim)
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
@@ -565,7 +589,9 @@ def rollout_hierarchical(
         raw_lower_lf_budget_excesses: list[float] = []
         lower_constraint_costs: list[float] = []
         upper_transition_delta_rms_values: list[float] = []
-        upper_transition_penalties: list[float] = []
+        upper_hf_rms_values: list[float] = []
+        upper_hf_budget_excesses: list[float] = []
+        upper_hf_penalties: list[float] = []
         lower_cost_values: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
@@ -620,20 +646,9 @@ def rollout_hierarchical(
                     )))
                     if has_previous_upper_anchor else 0.0
                 )
-                upper_transition_budget = evaluate_rms_leakage_budget(
-                    upper_transition_power,
-                    float(upper_transition_rms_budget),
-                )
-                pending_upper_transition_penalty = (
-                    float(upper_transition_penalty_coef)
-                    * float(upper_transition_budget["budget_excess_squared"])
-                )
                 upper_transition_delta_rms_values.append(float(
-                    upper_transition_budget["rms"]
+                    np.sqrt(upper_transition_power)
                 ))
-                upper_transition_penalties.append(
-                    pending_upper_transition_penalty
-                )
                 previous_upper_anchor = upper_anchor.copy()
                 has_previous_upper_anchor = True
                 current_requested_transfer = np.asarray(
@@ -669,8 +684,8 @@ def rollout_hierarchical(
                 bands,
                 upper_anchor,
                 filter_contexts=(
-                    responsibility.raw_lower_lf,
-                    executed_lower_lf,
+                    raw_lower_lf_tracker.low,
+                    responsibility_lf_tracker.low,
                 ),
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -708,20 +723,26 @@ def rollout_hierarchical(
             natural_done = bool(terminated or truncated)
             budget_done = step == transition_budget - 1
             done = bool(natural_done or budget_done)
-            executed_lower_lf += float(lower_lf_alpha) * (
-                np.asarray(lower_residual, dtype=np.float64)
-                - executed_lower_lf
+            responsibility_bands = responsibility_lf_tracker.update(
+                lower_residual
             )
+            raw_lower_bands = raw_lower_lf_tracker.update(raw_lower_residual)
             lower_budget = evaluate_rms_leakage_budget(
-                float(np.mean(np.square(executed_lower_lf))),
+                float(np.mean(np.square(responsibility_bands["low"]))),
                 float(lower_lf_rms_budget),
             )
             raw_lower_budget = evaluate_rms_leakage_budget(
-                float(np.mean(np.square(np.asarray(
-                    responsibility_split["raw_lower_lf_after"],
-                    dtype=np.float64,
-                )))),
+                float(np.mean(np.square(raw_lower_bands["low"]))),
                 float(lower_lf_rms_budget),
+            )
+            upper_bands = upper_hf_tracker.update(upper_anchor)
+            upper_budget = evaluate_rms_leakage_budget(
+                float(np.mean(np.square(upper_bands["high"]))),
+                float(upper_hf_rms_budget),
+            )
+            upper_hf_penalty = (
+                float(upper_hf_penalty_coef)
+                * float(upper_budget["budget_excess_squared"])
             )
             lower_lf_rms_values.append(float(lower_budget["rms"]))
             lower_lf_budget_excesses.append(float(lower_budget["budget_excess"]))
@@ -743,20 +764,22 @@ def rollout_hierarchical(
                     else max(responsibility_cost, raw_behavior_cost)
                 )
             lower_constraint_costs.append(float(lower_cost))
+            upper_hf_rms_values.append(float(upper_budget["rms"]))
+            upper_hf_budget_excesses.append(float(
+                upper_budget["budget_excess"]
+            ))
+            upper_hf_penalties.append(float(upper_hf_penalty))
             builder.add_lower(
                 state=lower_state,
                 action=lower_raw,
                 logp=float(lower_out["logp"]),
                 value=float(lower_out["value"]),
                 reward=float(reward),
-                upper_reward=(
-                    float(reward) - pending_upper_transition_penalty
-                ),
+                upper_reward=float(reward) - upper_hf_penalty,
                 cost_state=lower_cost_state,
                 cost=float(lower_cost),
                 done=done,
             )
-            pending_upper_transition_penalty = 0.0
             rewards.append(float(reward))
             current_episode_return += float(reward)
             executed_actions.append(executed.copy())
@@ -843,8 +866,8 @@ def rollout_hierarchical(
                         next_bands,
                         next_upper_anchor,
                         filter_contexts=(
-                            responsibility.raw_lower_lf,
-                            executed_lower_lf,
+                            raw_lower_lf_tracker.low,
+                            responsibility_lf_tracker.low,
                         ),
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -884,12 +907,13 @@ def rollout_hierarchical(
                     action_dim, dtype=np.float32
                 )
                 has_previous_upper_anchor = False
-                pending_upper_transition_penalty = 0.0
                 current_requested_transfer = np.zeros(
                     action_dim, dtype=np.float32
                 )
                 responsibility.reset(action_dim)
-                executed_lower_lf = np.zeros(action_dim, dtype=np.float64)
+                responsibility_lf_tracker.reset(action_dim)
+                raw_lower_lf_tracker.reset(action_dim)
+                upper_hf_tracker.reset(action_dim)
                 episode_step = 0
                 reset_exogenous = True
                 steps_since_upper = int(upper_period)
@@ -956,9 +980,11 @@ def rollout_hierarchical(
             upper_transition_delta_rms_values=(
                 upper_transition_delta_rms_values
             ),
-            upper_transition_penalties=upper_transition_penalties,
-            upper_transition_rms_budget=upper_transition_rms_budget,
-            upper_transition_penalty_coef=upper_transition_penalty_coef,
+            upper_hf_rms_values=upper_hf_rms_values,
+            upper_hf_budget_excesses=upper_hf_budget_excesses,
+            upper_hf_penalties=upper_hf_penalties,
+            upper_hf_rms_budget=upper_hf_rms_budget,
+            upper_hf_penalty_coef=upper_hf_penalty_coef,
         )
         return (trajectory if sample else None), row
     finally:
@@ -1159,9 +1185,11 @@ def rollout_flat(
             lower_lf_rms_budget=lower_lf_rms_budget,
             leakage_constraint_scope="disabled",
             upper_transition_delta_rms_values=[0.0 for _ in rewards],
-            upper_transition_penalties=[0.0 for _ in rewards],
-            upper_transition_rms_budget=DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
-            upper_transition_penalty_coef=0.0,
+            upper_hf_rms_values=[0.0 for _ in rewards],
+            upper_hf_budget_excesses=[0.0 for _ in rewards],
+            upper_hf_penalties=[0.0 for _ in rewards],
+            upper_hf_rms_budget=DEFAULT_UPPER_HF_RMS_BUDGET,
+            upper_hf_penalty_coef=0.0,
         )
         return (batch if sample else None), row
     finally:
@@ -1204,9 +1232,11 @@ SUMMARY_KEYS = [
     "ResponsibilityReconstructionRMS",
     "LowerContributionOutOfUnitRate",
     "LowerLFRmsOnlineMean",
+    "LowerLFPowerOnlineMean",
     "LowerLFBudgetExcessMean",
     "LowerLFBudgetViolationRate",
     "RawLowerLFRmsOnlineMean",
+    "RawLowerLFPowerOnlineMean",
     "RawLowerLFBudgetExcessMean",
     "RawLowerLFBudgetViolationRate",
     "LowerConstraintCostMean",
@@ -1214,10 +1244,14 @@ SUMMARY_KEYS = [
     "LowerLFRmsBudget",
     "UpperTransitionDeltaRMSMean",
     "UpperTransitionDeltaRMSMax",
-    "UpperContinuityPenaltyMean",
-    "UpperContinuityPenaltyTotal",
-    "UpperTransitionRMSBudget",
-    "UpperTransitionPenaltyCoef",
+    "UpperHFRmsOnlineMean",
+    "UpperHFPowerOnlineMean",
+    "UpperHFBudgetExcessMean",
+    "UpperHFBudgetViolationRate",
+    "UpperHFPenaltyMean",
+    "UpperHFPenaltyTotal",
+    "UpperHFRMSBudget",
+    "UpperHFPenaltyCoef",
     "upper_decision_count",
     "upper_transition_count",
     "lower_transition_count",
@@ -1662,10 +1696,8 @@ def train_mujoco_method(
     lower_action_scale: float = 1.0,
     responsibility_mode: str = "additive",
     leakage_constraint_scope: str = "joint_behavior",
-    upper_transition_rms_budget: float = DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
-    upper_transition_penalty_coef: float = (
-        DEFAULT_UPPER_TRANSITION_PENALTY_COEF
-    ),
+    upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
+    upper_hf_penalty_coef: float = DEFAULT_UPPER_HF_PENALTY_COEF,
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
@@ -1716,15 +1748,15 @@ def train_mujoco_method(
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
     if (
-        not np.isfinite(float(upper_transition_rms_budget))
-        or float(upper_transition_rms_budget) <= 0.0
+        not np.isfinite(float(upper_hf_rms_budget))
+        or float(upper_hf_rms_budget) <= 0.0
     ):
-        raise ValueError("MuJoCo upper transition RMS budget must be positive")
+        raise ValueError("MuJoCo upper-HF RMS budget must be positive")
     if (
-        not np.isfinite(float(upper_transition_penalty_coef))
-        or float(upper_transition_penalty_coef) < 0.0
+        not np.isfinite(float(upper_hf_penalty_coef))
+        or float(upper_hf_penalty_coef) < 0.0
     ):
-        raise ValueError("MuJoCo upper transition penalty must be non-negative")
+        raise ValueError("MuJoCo upper-HF penalty must be non-negative")
     if name == "flat_ppo" and str(responsibility_mode) != "additive":
         raise ValueError("flat PPO cannot use hierarchical responsibility transfer")
     if str(lower_constraint_update_mode) not in {
@@ -1803,8 +1835,8 @@ def train_mujoco_method(
         str(leakage_constraint_scope)
         if selected_leakage_constraint else "disabled"
     )
-    selected_upper_transition_penalty_coef = (
-        float(upper_transition_penalty_coef)
+    selected_upper_hf_penalty_coef = (
+        float(upper_hf_penalty_coef)
         if selected_leakage_constraint else 0.0
     )
     if name == "freq_hrl_safe_selector":
@@ -1813,34 +1845,34 @@ def train_mujoco_method(
                 "leakage_constraint": False,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "responsibility",
-                "upper_transition_penalty_coef": 0.0,
+                "upper_hf_penalty_coef": 0.0,
             },
             "responsibility_guarded_adam_projection": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "responsibility",
-                "upper_transition_penalty_coef": 0.0,
+                "upper_hf_penalty_coef": 0.0,
             },
             "behavior_guarded_adam_projection": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "joint_behavior",
-                "upper_transition_penalty_coef": 0.0,
+                "upper_hf_penalty_coef": 0.0,
             },
-            "behavior_guarded_upper_smooth": {
+            "behavior_guarded_upper_hf": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "joint_behavior",
-                "upper_transition_penalty_coef": float(
-                    upper_transition_penalty_coef
+                "upper_hf_penalty_coef": float(
+                    upper_hf_penalty_coef
                 ),
             },
-            "behavior_scalarized_upper_smooth": {
+            "behavior_scalarized_upper_hf": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "scalarized",
                 "constraint_scope": "joint_behavior",
-                "upper_transition_penalty_coef": float(
-                    upper_transition_penalty_coef
+                "upper_hf_penalty_coef": float(
+                    upper_hf_penalty_coef
                 ),
             },
         }
@@ -1855,7 +1887,7 @@ def train_mujoco_method(
             branch_update_mode = str(spec["constraint_update_mode"])
             branch_constraint_scope = str(spec["constraint_scope"])
             branch_upper_penalty_coef = float(
-                spec["upper_transition_penalty_coef"]
+                spec["upper_hf_penalty_coef"]
             )
             torch.manual_seed(int(optimizer_seed))
             np.random.seed(int(optimizer_seed))
@@ -1889,8 +1921,8 @@ def train_mujoco_method(
                     leakage_constraint=leakage,
                     lower_lf_rms_budget=lower_lf_rms_budget,
                     leakage_constraint_scope=scope,
-                    upper_transition_rms_budget=upper_transition_rms_budget,
-                    upper_transition_penalty_coef=upper_penalty,
+                    upper_hf_rms_budget=upper_hf_rms_budget,
+                    upper_hf_penalty_coef=upper_penalty,
                     lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
@@ -1932,8 +1964,8 @@ def train_mujoco_method(
                         leakage_constraint=branch_leakage,
                         lower_lf_rms_budget=lower_lf_rms_budget,
                         leakage_constraint_scope=branch_constraint_scope,
-                        upper_transition_rms_budget=upper_transition_rms_budget,
-                        upper_transition_penalty_coef=(
+                        upper_hf_rms_budget=upper_hf_rms_budget,
+                        upper_hf_penalty_coef=(
                             branch_upper_penalty_coef
                         ),
                         lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
@@ -1956,7 +1988,7 @@ def train_mujoco_method(
                     branch_constraint_scope
                     if branch_leakage else "disabled"
                 ),
-                "upper_transition_penalty_coef": (
+                "upper_hf_penalty_coef": (
                     branch_upper_penalty_coef
                 ),
                 "initial_parameter_sha256": initial_hash,
@@ -2005,8 +2037,8 @@ def train_mujoco_method(
             str(selected_spec["constraint_scope"])
             if selected_leakage_constraint else "disabled"
         )
-        selected_upper_transition_penalty_coef = float(
-            selected_spec["upper_transition_penalty_coef"]
+        selected_upper_hf_penalty_coef = float(
+            selected_spec["upper_hf_penalty_coef"]
         )
         selected_actor_steps = int(payload["actor_optimizer_steps_train"])
         selected_critic_steps = int(payload["critic_optimizer_steps_train"])
@@ -2094,7 +2126,7 @@ def train_mujoco_method(
             if leakage_constraint else "responsibility"
         )
         method_upper_penalty_coef = (
-            float(upper_transition_penalty_coef)
+            float(upper_hf_penalty_coef)
             if leakage_constraint else 0.0
         )
         torch.manual_seed(int(optimizer_seed))
@@ -2117,8 +2149,8 @@ def train_mujoco_method(
             leakage_constraint=leakage_constraint,
             lower_lf_rms_budget=lower_lf_rms_budget,
             leakage_constraint_scope=method_constraint_scope,
-            upper_transition_rms_budget=upper_transition_rms_budget,
-            upper_transition_penalty_coef=method_upper_penalty_coef,
+            upper_hf_rms_budget=upper_hf_rms_budget,
+            upper_hf_penalty_coef=method_upper_penalty_coef,
             lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
             upper_action_scale=upper_action_scale,
             lower_action_scale=lower_action_scale,
@@ -2185,9 +2217,9 @@ def train_mujoco_method(
                         if selected_leakage_constraint
                         else "responsibility"
                     ),
-                    upper_transition_rms_budget=upper_transition_rms_budget,
-                    upper_transition_penalty_coef=(
-                        selected_upper_transition_penalty_coef
+                    upper_hf_rms_budget=upper_hf_rms_budget,
+                    upper_hf_penalty_coef=(
+                        selected_upper_hf_penalty_coef
                     ),
                     lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                     upper_action_scale=upper_action_scale,
@@ -2240,27 +2272,32 @@ def train_mujoco_method(
         "leakage_constraint_enabled": selected_leakage_constraint,
         "leakage_constraint_scope": selected_constraint_scope,
         "leakage_cost_contract": (
-            "max_causal_responsibility_and_raw_lower_lf_rms_budget_"
-            "excess_squared_v2"
+            "max_endpoint_aligned_32_step_causal_responsibility_and_raw_"
+            "lower_lf_rms_budget_excess_squared_v3"
             if selected_constraint_scope == "joint_behavior"
             else (
-                "causal_responsibility_lf_rms_budget_excess_squared_v1"
+                "endpoint_aligned_32_step_causal_responsibility_lf_rms_"
+                "budget_excess_squared_v2"
                 if selected_constraint_scope == "responsibility"
                 else "disabled"
             )
         ),
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
-        "upper_transition_rms_budget": float(upper_transition_rms_budget),
-        "upper_transition_penalty_coef": float(
-            selected_upper_transition_penalty_coef
+        "upper_hf_rms_budget": float(upper_hf_rms_budget),
+        "upper_hf_penalty_coef": float(
+            selected_upper_hf_penalty_coef
         ),
         "upper_objective_contract": (
-            "raw_environment_reward_minus_boundary_responsibility_action_"
-            "rate_budget_penalty_v1"
-            if selected_upper_transition_penalty_coef > 0.0
+            "raw_environment_reward_minus_endpoint_aligned_causal_upper_"
+            "high_pass_budget_penalty_v2"
+            if selected_upper_hf_penalty_coef > 0.0
             else "raw_environment_reward"
         ),
         "reported_return_contract": "unshaped_environment_return",
+        "diagnostic_alignment_contract": (
+            "online_32_step_lower_low_pass_and_8_step_upper_high_pass_"
+            "match_reported_LeakageRegularizer_windows_v1"
+        ),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
         "responsibility_mode": str(responsibility_mode),
@@ -2291,8 +2328,8 @@ def train_mujoco_method(
             "canonical_raw_lf_and_previous_raw_lower_actor_state_v1"
         ),
         "lower_cost_state_contract": (
-            "causal_responsibility_anchor_raw_lower_lf_and_"
-            "responsibility_lf_cost_critic_only_v2"
+            "causal_responsibility_anchor_32_step_raw_and_responsibility_"
+            "rolling_lf_cost_critic_only_v3"
         ),
         "lower_constraint_update_mode": selected_constraint_update_mode,
         "exogenous_observation_contract": (
@@ -2422,14 +2459,14 @@ def build_parser() -> argparse.ArgumentParser:
         default="joint_behavior",
     )
     parser.add_argument(
-        "--upper-transition-rms-budget",
+        "--upper-hf-rms-budget",
         type=float,
-        default=DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
+        default=DEFAULT_UPPER_HF_RMS_BUDGET,
     )
     parser.add_argument(
-        "--upper-transition-penalty-coef",
+        "--upper-hf-penalty-coef",
         type=float,
-        default=DEFAULT_UPPER_TRANSITION_PENALTY_COEF,
+        default=DEFAULT_UPPER_HF_PENALTY_COEF,
     )
     parser.add_argument(
         "--lower-constraint-update-mode",
@@ -2476,8 +2513,8 @@ def main() -> None:
         lower_action_scale=args.lower_action_scale,
         responsibility_mode=args.responsibility_mode,
         leakage_constraint_scope=args.leakage_constraint_scope,
-        upper_transition_rms_budget=args.upper_transition_rms_budget,
-        upper_transition_penalty_coef=args.upper_transition_penalty_coef,
+        upper_hf_rms_budget=args.upper_hf_rms_budget,
+        upper_hf_penalty_coef=args.upper_hf_penalty_coef,
         lower_constraint_update_mode=args.lower_constraint_update_mode,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,

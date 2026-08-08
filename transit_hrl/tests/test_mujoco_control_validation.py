@@ -72,10 +72,10 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "behavior_guarded_adam_projection": self._selector_rows(
                 80.0, 0.2, raw_drift=0.2
             ),
-            "behavior_guarded_upper_smooth": self._selector_rows(
+            "behavior_guarded_upper_hf": self._selector_rows(
                 80.0, 0.2, raw_drift=0.2
             ),
-            "behavior_scalarized_upper_smooth": self._selector_rows(
+            "behavior_scalarized_upper_hf": self._selector_rows(
                 80.0, 0.2, raw_drift=0.2
             ),
         }, bootstrap_seed=7, bootstrap_draws=200)
@@ -101,10 +101,10 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "behavior_guarded_adam_projection": self._selector_rows(
                 101.0, 0.95
             ),
-            "behavior_guarded_upper_smooth": self._selector_rows(
+            "behavior_guarded_upper_hf": self._selector_rows(
                 95.0, 0.5
             ),
-            "behavior_scalarized_upper_smooth": self._selector_rows(
+            "behavior_scalarized_upper_hf": self._selector_rows(
                 101.0, 0.95
             ),
         }, bootstrap_seed=11, bootstrap_draws=200)
@@ -124,10 +124,10 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "behavior_guarded_adam_projection": self._selector_rows(
                 100.0, 0.6, raw_drift=0.6
             ),
-            "behavior_guarded_upper_smooth": self._selector_rows(
+            "behavior_guarded_upper_hf": self._selector_rows(
                 100.0, 0.6, raw_drift=0.6, upper_hf_power=0.04
             ),
-            "behavior_scalarized_upper_smooth": self._selector_rows(
+            "behavior_scalarized_upper_hf": self._selector_rows(
                 80.0, 0.2, raw_drift=0.2
             ),
         }
@@ -141,7 +141,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "responsibility_guarded_adam_projection"
         ]["minimum_raw_drift_reduction_supported"])
         self.assertFalse(result["branch_diagnostics"][
-            "behavior_guarded_upper_smooth"
+            "behavior_guarded_upper_hf"
         ]["upper_hf_budget_supported"])
 
     def test_flat_batch_bootstrap_does_not_require_cost_fields(self):
@@ -418,8 +418,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         responsibility_batch, responsibility_row = rollout_hierarchical(
             model,
             leakage_constraint_scope="responsibility",
-            upper_transition_rms_budget=1e-4,
-            upper_transition_penalty_coef=0.0,
+            upper_hf_rms_budget=1e-4,
+            upper_hf_penalty_coef=0.0,
             **common,
         )
         torch.manual_seed(223)
@@ -427,8 +427,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         behavior_batch, behavior_row = rollout_hierarchical(
             model,
             leakage_constraint_scope="joint_behavior",
-            upper_transition_rms_budget=1e-4,
-            upper_transition_penalty_coef=1.0,
+            upper_hf_rms_budget=1e-4,
+            upper_hf_penalty_coef=1.0,
             **common,
         )
         np.testing.assert_array_equal(
@@ -444,7 +444,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             >= responsibility_batch.lower.cost
         ))
         self.assertGreater(
-            behavior_row["UpperContinuityPenaltyTotal"], 0.0
+            behavior_row["UpperHFPenaltyTotal"], 0.0
         )
         self.assertLess(
             float(np.sum(behavior_batch.upper.reward)),
@@ -506,7 +506,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_behavior_safe_training",
+            "freq_hrl_mujoco_shared_core_v14_endpoint_aligned_training",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -519,8 +519,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(
             payload["lower_cost_state_contract"],
-            "causal_responsibility_anchor_raw_lower_lf_and_"
-            "responsibility_lf_cost_critic_only_v2",
+            "causal_responsibility_anchor_32_step_raw_and_responsibility_"
+            "rolling_lf_cost_critic_only_v3",
         )
         self.assertEqual(payload["role_capacity_status"], "symmetric")
         self.assertEqual(payload["upper_to_lower_action_capacity_ratio"], 1.0)
@@ -548,14 +548,32 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "AdditiveActionClipRate",
             "RawLowerLFDriftAbs",
             "RawLowerLFRmsOnlineMean",
+            "LowerLFPowerOnlineMean",
+            "RawLowerLFPowerOnlineMean",
             "LowerConstraintCostMean",
             "UpperTransitionDeltaRMSMean",
-            "UpperContinuityPenaltyTotal",
+            "UpperHFPowerOnlineMean",
+            "UpperHFPenaltyTotal",
             "ResponsibilityTransferRMS",
             "ResponsibilityReconstructionRMS",
         ):
             self.assertIn(metric, rows[0])
             self.assertTrue(np.isfinite(rows[0][metric]))
+        self.assertAlmostEqual(
+            rows[0]["LowerLFPowerOnlineMean"],
+            rows[0]["LowerLFDriftAbs"],
+            places=10,
+        )
+        self.assertAlmostEqual(
+            rows[0]["RawLowerLFPowerOnlineMean"],
+            rows[0]["RawLowerLFDriftAbs"],
+            places=10,
+        )
+        self.assertAlmostEqual(
+            rows[0]["UpperHFPowerOnlineMean"],
+            rows[0]["UpperHFPowerAbs"],
+            places=10,
+        )
         self.assertLessEqual(rows[0]["ResponsibilityReconstructionRMS"], 1e-7)
         self.assertEqual(
             payload["bootstrap_contract"],

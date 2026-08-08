@@ -101,10 +101,8 @@ def build_training_command(
         "--lower-action-scale", str(args.lower_action_scale),
         "--responsibility-mode", str(args.responsibility_mode),
         "--leakage-constraint-scope", str(args.leakage_constraint_scope),
-        "--upper-transition-rms-budget",
-        str(args.upper_transition_rms_budget),
-        "--upper-transition-penalty-coef",
-        str(args.upper_transition_penalty_coef),
+        "--upper-hf-rms-budget", str(args.upper_hf_rms_budget),
+        "--upper-hf-penalty-coef", str(args.upper_hf_penalty_coef),
         "--lower-constraint-update-mode",
         str(args.lower_constraint_update_mode),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
@@ -312,14 +310,14 @@ def build_parser() -> argparse.ArgumentParser:
         default="joint_behavior",
     )
     parser.add_argument(
-        "--upper-transition-rms-budget",
+        "--upper-hf-rms-budget",
         type=float,
-        default=validation.DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
+        default=validation.DEFAULT_UPPER_HF_RMS_BUDGET,
     )
     parser.add_argument(
-        "--upper-transition-penalty-coef",
+        "--upper-hf-penalty-coef",
         type=float,
-        default=validation.DEFAULT_UPPER_TRANSITION_PENALTY_COEF,
+        default=validation.DEFAULT_UPPER_HF_PENALTY_COEF,
     )
     parser.add_argument(
         "--lower-constraint-update-mode",
@@ -411,10 +409,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         raise SystemExit("upper action scale must be in [0, 1]")
     if not 0.0 < float(args.lower_action_scale) <= 1.0:
         raise SystemExit("lower action scale must be in (0, 1]")
-    if float(args.upper_transition_rms_budget) <= 0.0:
-        raise SystemExit("upper transition RMS budget must be positive")
-    if float(args.upper_transition_penalty_coef) < 0.0:
-        raise SystemExit("upper transition penalty must be non-negative")
+    if float(args.upper_hf_rms_budget) <= 0.0:
+        raise SystemExit("upper-HF RMS budget must be positive")
+    if float(args.upper_hf_penalty_coef) < 0.0:
+        raise SystemExit("upper-HF penalty must be non-negative")
     return args
 
 
