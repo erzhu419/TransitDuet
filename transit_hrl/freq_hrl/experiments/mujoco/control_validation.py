@@ -44,7 +44,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v10_causal_responsibility_transfer"
+    "freq_hrl_mujoco_shared_core_v11_canonical_policy_state"
 )
 METHODS = (
     "freq_hrl",
@@ -471,6 +471,7 @@ def rollout_hierarchical(
         decomposer = CausalBandDecomposer()
         action_dim = int(env.action_space.shape[0])
         previous_action = np.zeros(action_dim, dtype=np.float32)
+        previous_raw_lower = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
         upper_policy_action = np.zeros(action_dim, dtype=np.float32)
         current_requested_transfer = np.zeros(action_dim, dtype=np.float32)
@@ -531,7 +532,7 @@ def rollout_hierarchical(
                     previous_action,
                     filter_contexts=(
                         responsibility.raw_lower_lf,
-                        executed_lower_lf,
+                        previous_raw_lower,
                     ),
                     frequency_routing=frequency_routing,
                     level="upper",
@@ -568,6 +569,17 @@ def rollout_hierarchical(
             lower_state = _feature_state(
                 observation,
                 bands,
+                upper_policy_action,
+                filter_contexts=(
+                    responsibility.raw_lower_lf,
+                    previous_raw_lower,
+                ),
+                frequency_routing=frequency_routing,
+                level="lower",
+            )
+            lower_cost_state = _feature_state(
+                observation,
+                bands,
                 upper_anchor,
                 filter_contexts=(
                     responsibility.raw_lower_lf,
@@ -576,7 +588,11 @@ def rollout_hierarchical(
                 frequency_routing=frequency_routing,
                 level="lower",
             )
-            lower_out = model.act_lower(lower_state, sample=sample)
+            lower_out = model.act_lower(
+                lower_state,
+                sample=sample,
+                cost_state=lower_cost_state,
+            )
             lower_raw = np.asarray(lower_out["action"], dtype=np.float32)
             lower_cost_values.append(float(lower_out["cost_value"]))
             raw_lower_residual = (
@@ -589,7 +605,12 @@ def rollout_hierarchical(
                 responsibility_split["lower_responsibility"],
                 dtype=np.float32,
             )
-            nominal = np.clip(upper_anchor + lower_residual, -1.0, 1.0)
+            # Execute the canonical raw sum once. Re-adding the two attributed
+            # float32 components can introduce mode-specific roundoff that is
+            # amplified by chaotic dynamics despite analytical reconstruction.
+            nominal = np.clip(
+                upper_policy_action + raw_lower_residual, -1.0, 1.0
+            )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
                 executed, env.action_space.low, env.action_space.high
@@ -621,6 +642,7 @@ def rollout_hierarchical(
                 value=float(lower_out["value"]),
                 reward=float(reward),
                 upper_reward=float(reward),
+                cost_state=lower_cost_state,
                 cost=float(lower_cost),
                 done=done,
             )
@@ -642,6 +664,9 @@ def rollout_hierarchical(
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
+            previous_raw_lower = raw_lower_residual.astype(
+                np.float32, copy=True
+            )
             steps_since_upper += 1
             if done:
                 terminal = float(bool(terminated))
@@ -663,7 +688,7 @@ def rollout_hierarchical(
                         executed,
                         filter_contexts=(
                             responsibility.raw_lower_lf,
-                            executed_lower_lf,
+                            previous_raw_lower,
                         ),
                         frequency_routing=frequency_routing,
                         level="upper",
@@ -673,11 +698,13 @@ def rollout_hierarchical(
                         sample=False,
                     )
                     upper_next_value = float(next_upper["value"])
+                    next_upper_policy_action = upper_policy_action
                     next_upper_anchor = upper_anchor
                     if steps_since_upper >= int(upper_period):
                         next_upper_policy = float(upper_action_scale) * np.tanh(
                             np.asarray(next_upper["action"], dtype=np.float32)
                         )
+                        next_upper_policy_action = next_upper_policy
                         next_upper_anchor = np.asarray(
                             responsibility.preview_upper(next_upper_policy)[
                                 "upper_responsibility"
@@ -685,6 +712,22 @@ def rollout_hierarchical(
                             dtype=np.float32,
                         )
                     next_lower_state = _feature_state(
+                        next_observation,
+                        next_bands,
+                        next_upper_policy_action,
+                        filter_contexts=(
+                            responsibility.raw_lower_lf,
+                            previous_raw_lower,
+                        ),
+                        frequency_routing=frequency_routing,
+                        level="lower",
+                    )
+                    lower_next_value = _value_prediction(
+                        model.lower_value,
+                        next_lower_state,
+                        device=model.device,
+                    )
+                    next_lower_cost_state = _feature_state(
                         next_observation,
                         next_bands,
                         next_upper_anchor,
@@ -695,14 +738,9 @@ def rollout_hierarchical(
                         frequency_routing=frequency_routing,
                         level="lower",
                     )
-                    lower_next_value = _value_prediction(
-                        model.lower_value,
-                        next_lower_state,
-                        device=model.device,
-                    )
                     lower_next_cost_value = _value_prediction(
                         model.lower_cost_value,
-                        next_lower_state,
+                        next_lower_cost_state,
                         device=model.device,
                     )
                 boundary_upper_next_values.append(upper_next_value)
@@ -726,6 +764,9 @@ def rollout_hierarchical(
                 observation, _ = env.reset(seed=episode_seed)
                 model.reset_recurrent_inference()
                 previous_action = np.zeros(action_dim, dtype=np.float32)
+                previous_raw_lower = np.zeros(
+                    action_dim, dtype=np.float32
+                )
                 upper_anchor = np.zeros(action_dim, dtype=np.float32)
                 upper_policy_action = np.zeros(action_dim, dtype=np.float32)
                 current_requested_transfer = np.zeros(
@@ -1846,7 +1887,10 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
-            "raw_and_responsibility_lower_lf_states_observed_v1"
+            "canonical_raw_lf_and_previous_raw_lower_actor_state_v1"
+        ),
+        "lower_cost_state_contract": (
+            "causal_responsibility_anchor_and_lower_lf_cost_critic_only_v1"
         ),
         "lower_constraint_update_mode": selected_constraint_update_mode,
         "exogenous_observation_contract": (

@@ -191,6 +191,69 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
 
+    def test_lower_cost_critic_can_use_a_distinct_causal_state(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            lower_cost_state_dim=3,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            lower_dual_lr=0.1,
+        ))
+        actor_state = np.asarray([0.25, -0.5], dtype=np.float32)
+        first = model.act_lower(
+            actor_state,
+            sample=False,
+            cost_state=np.asarray([1.0, 2.0, 3.0], dtype=np.float32),
+        )
+        second = model.act_lower(
+            actor_state,
+            sample=False,
+            cost_state=np.asarray([-3.0, -2.0, -1.0], dtype=np.float32),
+        )
+        np.testing.assert_array_equal(first["action"], second["action"])
+        self.assertEqual(first["value"], second["value"])
+
+        rng = np.random.default_rng(17)
+        builder = HierarchicalRolloutBuilder(gamma=0.99)
+        builder.begin_upper(
+            state=rng.normal(size=3).astype(np.float32),
+            action=rng.normal(size=1).astype(np.float32),
+            logp=-0.5,
+            value=0.1,
+        )
+        for step in range(3):
+            builder.add_lower(
+                state=rng.normal(size=2).astype(np.float32),
+                cost_state=rng.normal(size=3).astype(np.float32),
+                action=rng.normal(size=1).astype(np.float32),
+                logp=-0.4,
+                value=0.2,
+                reward=0.1,
+                cost=0.05,
+                done=step == 2,
+            )
+        batch = builder.build()
+        self.assertEqual(batch.lower.cost_state.shape, (3, 3))
+        metrics = model.update(batch)
+        self.assertEqual(metrics["lower_transitions"], 3.0)
+
+    def test_distinct_cost_state_is_required_when_dimensions_differ(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            lower_cost_state_dim=3,
+            upper_action_dim=1,
+            lower_action_dim=1,
+        ))
+        with self.assertRaisesRegex(ValueError, "lower cost state"):
+            model.act_lower(np.zeros(2, dtype=np.float32), sample=False)
+        with self.assertRaisesRegex(ValueError, "explicit cost_state"):
+            model.update(self._batch())
+
     def test_smdp_truncation_uses_duration_aware_bootstrap(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=1,

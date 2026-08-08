@@ -455,6 +455,53 @@ def build_theorem_rows(examples: dict[str, Any]) -> list[dict[str, Any]]:
                 f"{_fmt(examples['responsibility_reconstruction_error_example'], digits=12)}."
             ),
         },
+        {
+            "id": "Proposition 11",
+            "title": "Canonical Policy State Preserves Unconstrained Training Paths",
+            "statement": (
+                "Consider additive and causal-transfer controllers with matched "
+                "initial parameters, random-number streams, environment seeds, "
+                "and optimizer updates. If the actor and reward critic consume "
+                "only a decomposition-invariant canonical state, the actuator "
+                "executes the canonical raw action sum, and the responsibility "
+                "cost is inactive, then both controllers have identical raw "
+                "actions, environment trajectories, reward updates, and learned "
+                "actor/reward-critic parameters at every training iteration."
+            ),
+            "assumptions": [
+                "Canonical policy states are equal whenever raw policy outputs and environment histories are equal.",
+                "The actuator computes one canonical raw sum rather than re-adding separately rounded responsibility components.",
+                "Responsibility-specific state is confined to an inactive or separately optimized cost critic with no reward-path parameter sharing.",
+                "Simulation, sampling, minibatch ordering, and optimizer operations are deterministic under the matched random streams.",
+            ],
+            "proof": (
+                "At the initial step, parameters, canonical states, and random "
+                "draws match, so raw actions match. The canonical actuator map "
+                "then gives identical executed actions, rewards, and next "
+                "environment states. By induction this holds for every step of "
+                "the rollout. The resulting reward trajectories, log "
+                "probabilities, advantages, and minibatch order are identical, "
+                "so deterministic actor and reward-critic optimizer updates are "
+                "identical. Repeating the argument over training iterations "
+                "establishes pathwise equality."
+            ),
+            "limitation": (
+                "The result does not cover active responsibility constraints, "
+                "shared cost/reward parameters, nondeterministic kernels, or a "
+                "policy state that exposes responsibility-specific variables. "
+                "Safe constrained branches still require empirical return and "
+                "drift gates."
+            ),
+            "diagnostic": (
+                "MuJoCo v11 requires paired no-leakage checkpoint hashes and "
+                "held-out raw-action, return, and raw-drift differences within "
+                "the registered numerical tolerance."
+            ),
+            "example": (
+                "The registered v11 preflight gate requires paired return and "
+                "raw-action differences no larger than 1e-8."
+            ),
+        },
     ]
 
 
@@ -538,6 +585,7 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples.",
             "A8: global stress-generalization claims declare their required regime set before selecting headline artifacts.",
             "A9: responsibility transfer is computed before an upper boundary and applied equal-and-oppositely to upper and lower action contributions.",
+            "A10: canonical actor/reward-critic state and actuator reconstruction are responsibility-mode invariant when proving unconstrained path equality.",
         ],
         "theorems": build_theorem_rows(examples),
         "examples": examples,

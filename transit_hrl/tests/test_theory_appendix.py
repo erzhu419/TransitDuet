@@ -87,6 +87,7 @@ class TheoryAppendixTest(unittest.TestCase):
             self.assertIn("Proposition 8", report)
             self.assertIn("Proposition 9", report)
             self.assertIn("Proposition 10", report)
+            self.assertIn("Proposition 11", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)
 

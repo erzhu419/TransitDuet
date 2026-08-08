@@ -221,6 +221,72 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
 class MujocoControlIntegrationTest(unittest.TestCase):
+    def test_canonical_policy_state_is_pathwise_decomposition_invariant(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=64
+        )
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=127,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=64,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            sample=True,
+            episode_horizon=64,
+        )
+        torch.manual_seed(131)
+        np.random.seed(131)
+        additive_batch, additive = rollout_hierarchical(
+            model, responsibility_mode="additive", **common
+        )
+        torch.manual_seed(131)
+        np.random.seed(131)
+        transfer_batch, transfer = rollout_hierarchical(
+            model, responsibility_mode="causal_lf_transfer", **common
+        )
+
+        np.testing.assert_array_equal(
+            additive_batch.upper.state, transfer_batch.upper.state
+        )
+        np.testing.assert_array_equal(
+            additive_batch.lower.state, transfer_batch.lower.state
+        )
+        np.testing.assert_array_equal(
+            additive_batch.upper.action, transfer_batch.upper.action
+        )
+        np.testing.assert_array_equal(
+            additive_batch.lower.action, transfer_batch.lower.action
+        )
+        np.testing.assert_array_equal(
+            additive_batch.lower.reward, transfer_batch.lower.reward
+        )
+        self.assertEqual(
+            additive["episode_return"], transfer["episode_return"]
+        )
+        self.assertEqual(
+            additive["RawLowerActionRMS"], transfer["RawLowerActionRMS"]
+        )
+        self.assertEqual(
+            additive["RawLowerLFDriftAbs"],
+            transfer["RawLowerLFDriftAbs"],
+        )
+        self.assertLessEqual(
+            transfer["ResponsibilityReconstructionRMS"], 1e-7
+        )
+        self.assertFalse(np.array_equal(
+            additive_batch.lower.cost_state,
+            transfer_batch.lower.cost_state,
+        ))
+
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
         observation_dim, action_dim = environment_dimensions(
             "HalfCheetah-v5", episode_horizon=24
@@ -315,13 +381,21 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v10_causal_responsibility_transfer",
+            "freq_hrl_mujoco_shared_core_v11_canonical_policy_state",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
         self.assertEqual(payload["upper_action_scale"], 1.0)
         self.assertEqual(payload["lower_action_scale"], 1.0)
         self.assertEqual(payload["responsibility_mode"], "causal_lf_transfer")
+        self.assertEqual(
+            payload["policy_filter_state_contract"],
+            "canonical_raw_lf_and_previous_raw_lower_actor_state_v1",
+        )
+        self.assertEqual(
+            payload["lower_cost_state_contract"],
+            "causal_responsibility_anchor_and_lower_lf_cost_critic_only_v1",
+        )
         self.assertEqual(payload["role_capacity_status"], "symmetric")
         self.assertEqual(payload["upper_to_lower_action_capacity_ratio"], 1.0)
         self.assertEqual(

@@ -325,6 +325,7 @@ class SMDPPPOConfig:
     lower_state_dim: int
     upper_action_dim: int
     lower_action_dim: int
+    lower_cost_state_dim: int = 0
     hf_state_dim: int = 0
     hf_action_dim: int = 0
     promotion_state_dim: int = 0
@@ -384,13 +385,21 @@ class LevelTrajectoryBatch:
     done: np.ndarray
     old_logp: np.ndarray
     old_value: np.ndarray
+    cost_state: np.ndarray | None = None
     cost: np.ndarray | None = None
     counterfactual_advantage: np.ndarray | None = None
     next_value: np.ndarray | None = None
     terminal: np.ndarray | None = None
     next_cost_value: np.ndarray | None = None
 
-    def validate(self, *, state_dim: int, action_dim: int, level: str) -> None:
+    def validate(
+        self,
+        *,
+        state_dim: int,
+        action_dim: int,
+        level: str,
+        cost_state_dim: int | None = None,
+    ) -> None:
         state = np.asarray(self.state)
         action = np.asarray(self.action)
         if state.ndim != 2 or state.shape[1] != int(state_dim):
@@ -409,6 +418,28 @@ class LevelTrajectoryBatch:
         duration = np.asarray(self.duration, dtype=np.int64).reshape(-1)
         if np.any(duration < 1):
             raise ValueError(f"{level} duration must be at least one primitive step")
+        if self.cost_state is not None:
+            expected_cost_dim = (
+                int(state_dim)
+                if cost_state_dim is None
+                else int(cost_state_dim)
+            )
+            cost_state = np.asarray(self.cost_state)
+            if cost_state.ndim != 2 or cost_state.shape != (
+                n,
+                expected_cost_dim,
+            ):
+                raise ValueError(
+                    f"{level} cost_state shape must be "
+                    f"({n}, {expected_cost_dim}), got {cost_state.shape}"
+                )
+            if not np.all(np.isfinite(cost_state)):
+                raise ValueError(f"{level} cost_state must be finite")
+        elif cost_state_dim is not None and int(cost_state_dim) != int(state_dim):
+            raise ValueError(
+                f"{level} requires an explicit cost_state with dimension "
+                f"{int(cost_state_dim)}"
+            )
         if self.cost is not None:
             cost = np.asarray(self.cost).reshape(-1)
             if cost.size != n or not np.all(np.isfinite(cost)):
@@ -510,13 +541,24 @@ class HierarchicalRolloutBuilder:
             key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
         }
         self._lower: dict[str, list[Any]] = {
-            key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
+            key: [] for key in (
+                "state",
+                "cost_state",
+                "action",
+                "reward",
+                "duration",
+                "done",
+                "old_logp",
+                "old_value",
+                "cost",
+            )
         }
         self._hf: dict[str, list[Any]] = {
             key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
         }
         self._pending_upper: dict[str, Any] | None = None
         self._hf_enabled: bool | None = None
+        self._lower_cost_state_enabled: bool | None = None
 
     @property
     def has_pending_upper(self) -> bool:
@@ -550,6 +592,7 @@ class HierarchicalRolloutBuilder:
         value: float,
         reward: float,
         done: bool,
+        cost_state: np.ndarray | None = None,
         cost: float = 0.0,
         upper_reward: float | None = None,
         upper_cost: float | None = None,
@@ -571,7 +614,19 @@ class HierarchicalRolloutBuilder:
             )
         if self._hf_enabled is not None and self._hf_enabled != hf_enabled:
             raise ValueError("HF trajectory presence must be consistent within an episode")
+        cost_state_enabled = cost_state is not None
+        if (
+            self._lower_cost_state_enabled is not None
+            and self._lower_cost_state_enabled != cost_state_enabled
+        ):
+            raise ValueError(
+                "lower cost-state presence must be consistent within an episode"
+            )
         self._lower["state"].append(np.asarray(state, dtype=np.float32).copy())
+        if cost_state_enabled:
+            self._lower["cost_state"].append(
+                np.asarray(cost_state, dtype=np.float32).copy()
+            )
         self._lower["action"].append(np.asarray(action, dtype=np.float32).copy())
         self._lower["reward"].append(float(reward))
         self._lower["duration"].append(1)
@@ -579,6 +634,8 @@ class HierarchicalRolloutBuilder:
         self._lower["old_logp"].append(float(logp))
         self._lower["old_value"].append(float(value))
         self._lower["cost"].append(float(cost))
+        if self._lower_cost_state_enabled is None:
+            self._lower_cost_state_enabled = cost_state_enabled
         if self._hf_enabled is None:
             self._hf_enabled = hf_enabled
         if hf_enabled:
@@ -632,6 +689,11 @@ class HierarchicalRolloutBuilder:
             done=np.asarray(data["done"], dtype=np.float32),
             old_logp=np.asarray(data["old_logp"], dtype=np.float32),
             old_value=np.asarray(data["old_value"], dtype=np.float32),
+            cost_state=(
+                np.asarray(data["cost_state"], dtype=np.float32)
+                if data.get("cost_state")
+                else None
+            ),
             cost=np.asarray(data["cost"], dtype=np.float32),
             counterfactual_advantage=(
                 np.asarray(data["counterfactual_advantage"], dtype=np.float32)
@@ -777,6 +839,13 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
     counterfactual_batches = [
         item.counterfactual_advantage for item in items
     ]
+    cost_state_batches = [item.cost_state for item in items]
+    if any(item is None for item in cost_state_batches) and not all(
+        item is None for item in cost_state_batches
+    ):
+        raise ValueError(
+            "cost states must be present for every level batch or none"
+        )
     if any(item is None for item in counterfactual_batches) and not all(
         item is None for item in counterfactual_batches
     ):
@@ -806,6 +875,14 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         done=np.concatenate([np.asarray(item.done).reshape(-1) for item in items], axis=0),
         old_logp=np.concatenate([np.asarray(item.old_logp).reshape(-1) for item in items], axis=0),
         old_value=np.concatenate([np.asarray(item.old_value).reshape(-1) for item in items], axis=0),
+        cost_state=(
+            None
+            if all(item is None for item in cost_state_batches)
+            else np.concatenate([
+                np.asarray(item)
+                for item in cost_state_batches if item is not None
+            ], axis=0)
+        ),
         cost=(
             np.concatenate([np.asarray(item.cost).reshape(-1) for item in items], axis=0)
             if all(item.cost is not None for item in items) else None
@@ -881,6 +958,13 @@ class FrequencySeparatedActorCriticPPO:
     def __init__(self, config: SMDPPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
+        self.lower_cost_state_dim = (
+            int(config.lower_state_dim)
+            if int(config.lower_cost_state_dim) == 0
+            else int(config.lower_cost_state_dim)
+        )
+        if self.lower_cost_state_dim < 1:
+            raise ValueError("lower_cost_state_dim must be positive or zero")
         promotion_entropy_coef = (
             float(config.entropy_coef)
             if config.promotion_entropy_coef is None
@@ -993,7 +1077,7 @@ class FrequencySeparatedActorCriticPPO:
                 config.lower_state_dim, config.hidden_dim
             ).to(self.device)
             self.lower_cost_value = ValueNet(
-                config.lower_state_dim, config.hidden_dim
+                self.lower_cost_state_dim, config.hidden_dim
             ).to(self.device)
             if int(config.hf_state_dim) > 0:
                 self.hf_actor = GaussianActor(
@@ -1034,7 +1118,7 @@ class FrequencySeparatedActorCriticPPO:
                 state_dim=config.lower_state_dim, **value_kwargs
             ).to(self.device)
             self.lower_cost_value = CausalGRUValueNet(
-                state_dim=config.lower_state_dim, **value_kwargs
+                state_dim=self.lower_cost_state_dim, **value_kwargs
             ).to(self.device)
             if int(config.hf_state_dim) > 0:
                 self.hf_actor = CausalGRUGaussianActor(
@@ -1255,18 +1339,33 @@ class FrequencySeparatedActorCriticPPO:
         }
 
     @torch.no_grad()
-    def act_lower(self, state: np.ndarray, sample: bool = True) -> dict[str, np.ndarray | float]:
+    def act_lower(
+        self,
+        state: np.ndarray,
+        sample: bool = True,
+        *,
+        cost_state: np.ndarray | None = None,
+    ) -> dict[str, np.ndarray | float]:
         tensor = self._state_tensor(state)
+        cost_tensor = self._state_tensor(
+            state if cost_state is None else cost_state
+        )
+        if int(cost_tensor.shape[1]) != self.lower_cost_state_dim:
+            raise ValueError(
+                "lower cost state has dimension "
+                f"{int(cost_tensor.shape[1])}, expected "
+                f"{self.lower_cost_state_dim}"
+            )
         if str(self.config.state_encoder) == "causal_gru":
             action, logp = self.lower_actor.forward_incremental(
                 tensor, sample=sample
             )
             value = self.lower_value.forward_incremental(tensor)
-            cost_value = self.lower_cost_value.forward_incremental(tensor)
+            cost_value = self.lower_cost_value.forward_incremental(cost_tensor)
         else:
             action, logp = self.lower_actor(tensor, sample=sample)
             value = self.lower_value(tensor)
-            cost_value = self.lower_cost_value(tensor)
+            cost_value = self.lower_cost_value(cost_tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
@@ -1467,7 +1566,14 @@ class FrequencySeparatedActorCriticPPO:
             action_dim = 1
         else:
             raise ValueError(f"unknown policy level: {level}")
-        batch.validate(state_dim=state_dim, action_dim=action_dim, level=level)
+        batch.validate(
+            state_dim=state_dim,
+            action_dim=action_dim,
+            level=level,
+            cost_state_dim=(
+                self.lower_cost_state_dim if level == "lower" else None
+            ),
+        )
         if batch.size == 0:
             empty = {
                 f"{level}_{key}": 0.0
@@ -1482,6 +1588,11 @@ class FrequencySeparatedActorCriticPPO:
             }
 
         state = torch.as_tensor(batch.state, dtype=torch.float32, device=self.device)
+        cost_state = torch.as_tensor(
+            batch.state if batch.cost_state is None else batch.cost_state,
+            dtype=torch.float32,
+            device=self.device,
+        )
         action = torch.as_tensor(batch.action, dtype=torch.float32, device=self.device)
         old_logp = torch.as_tensor(batch.old_logp, dtype=torch.float32, device=self.device)
         reward_adv, returns = self._gae(
@@ -1526,7 +1637,9 @@ class FrequencySeparatedActorCriticPPO:
         if level == "lower" and batch.cost is not None and cost_value_net is not None:
             cost = np.asarray(batch.cost, dtype=np.float32).reshape(-1)
             with torch.no_grad():
-                old_cost_value = cost_value_net(state).detach().cpu().numpy()
+                old_cost_value = cost_value_net(
+                    cost_state
+                ).detach().cpu().numpy()
             cost_adv, cost_returns = self._gae(
                 cost,
                 batch.done,
@@ -1627,7 +1740,12 @@ class FrequencySeparatedActorCriticPPO:
                 value_loss = torch.mean((value_net(state[idx]) - returns_t[idx]) ** 2)
                 cost_value_loss = torch.zeros((), dtype=torch.float32, device=self.device)
                 if cost_returns_t is not None and cost_value_net is not None:
-                    cost_value_loss = torch.mean((cost_value_net(state[idx]) - cost_returns_t[idx]) ** 2)
+                    cost_value_loss = torch.mean(
+                        (
+                            cost_value_net(cost_state[idx])
+                            - cost_returns_t[idx]
+                        ) ** 2
+                    )
                 entropy_mean = entropy.mean()
                 entropy_coef = (
                     float(cfg.entropy_coef)
