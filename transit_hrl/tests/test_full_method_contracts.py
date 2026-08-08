@@ -9,6 +9,7 @@ from freq_hrl.domains.trading import (
     TradingCreditAssigner,
 )
 from freq_hrl.experiments.trading.ppo_actor_critic import (
+    causal_lf_plan_reference,
     decode_hf_tactical_action,
     decode_hierarchical_lower_action,
     evaluate_hf_lower_intervention,
@@ -25,6 +26,26 @@ from freq_hrl.rl import LearnedPlanActionMapper, LearnedPlanCurveState
 
 
 class FullMethodContractTest(unittest.TestCase):
+    def test_causal_lf_reference_uses_only_declared_lf_inputs(self):
+        common = {
+            "x_low": np.asarray([0.0014, -0.0007]),
+            "x_low_forecast": np.asarray([[0.0007, 0.0014]]),
+        }
+        first = causal_lf_plan_reference(
+            {**common, "x_high": np.asarray([100.0, -100.0])},
+            2,
+            gain=1.0,
+            forecast_blend=0.25,
+        )
+        second = causal_lf_plan_reference(
+            {**common, "x_high": np.asarray([-100.0, 100.0])},
+            2,
+            gain=1.0,
+            forecast_blend=0.25,
+        )
+        np.testing.assert_allclose(first, second)
+        self.assertLessEqual(float(np.sum(np.abs(first))), 1.0)
+
     def test_v4_ablation_contracts_change_only_the_registered_mechanism(self):
         full = resolve_method_contract("full_freq_hrl_v4")
         expected_changes = {
@@ -406,6 +427,49 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertEqual(
             rows["ablate_promotion_v6"]["promotion_gate_transition_count"], 0
         )
+
+    def test_rollout_executes_reference_projection_and_promotion_controls(self):
+        cap = 0.00025
+        payload, rows, _ = train_ppo_actor_critic(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=36,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            seed=7,
+            leakage_scale=0.01,
+            lower_lf_constraint_coef=0.01,
+            lower_lf_dual_lr=0.01,
+            plan_basis_dim=3,
+            plan_horizon_s=600.0,
+            upper_period=12,
+            min_upper_duration=3,
+            execution_timeline_contract="causal_post_trade_v3",
+            method_contract="full_freq_hrl_v6",
+            upper_plan_reference_mode="causal_lf",
+            upper_plan_reference_gain=1.0,
+            upper_plan_reference_forecast_blend=0.25,
+            hard_hf_budget_projection=True,
+            hf_lf_budget_rms=cap,
+            promotion_deterministic_threshold=0.01,
+            promotion_adapt_gain=0.25,
+            promotion_cooldown_steps=8,
+        )
+        self.assertEqual(payload["upper_plan_reference_mode"], "causal_lf")
+        self.assertTrue(payload["hard_hf_budget_projection"])
+        self.assertEqual(payload["promotion_cooldown_steps"], 8)
+        row = rows[0]
+        self.assertGreater(row["upper_plan_reference_target_abs"], 0.0)
+        self.assertGreater(row["upper_plan_reference_coeff_abs"], 0.0)
+        self.assertGreater(row["promotion_replan_count"], 0)
+        self.assertGreater(row["promotion_cooldown_block_count"], 0)
+        self.assertEqual(row["hard_hf_budget_projection"], 1.0)
+        self.assertLessEqual(
+            row["hf_overlay_rms_after_projection_max"], cap + 1e-12
+        )
+        self.assertLessEqual(row["hf_leakage_budget_ratio_max"], 1.0 + 1e-9)
 
     def test_full_contract_rejects_noncausal_or_flat_configuration(self):
         common = dict(

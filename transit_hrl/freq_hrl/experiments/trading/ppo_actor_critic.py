@@ -116,6 +116,10 @@ LOWER_OBSERVATION_INTERVENTIONS = (
     "none",
     "zero_residual_frequency",
 )
+UPPER_PLAN_REFERENCE_MODES = (
+    "none",
+    "causal_lf",
+)
 
 RAW_HISTORY_WINDOW = 120
 
@@ -230,6 +234,36 @@ def gross_cap(target: np.ndarray, max_gross: float = 1.0) -> np.ndarray:
     return out
 
 
+def causal_lf_plan_reference(
+    freq: dict[str, Any],
+    assets: int,
+    *,
+    gain: float = 1.0,
+    forecast_blend: float = 0.0,
+) -> np.ndarray:
+    """Map only causal LF features to an executable portfolio reference."""
+
+    selected_gain = float(gain)
+    blend = float(forecast_blend)
+    if not np.isfinite(selected_gain) or selected_gain < 0.0:
+        raise ValueError("gain must be finite and non-negative")
+    if not np.isfinite(blend) or not 0.0 <= blend <= 1.0:
+        raise ValueError("forecast_blend must be finite and in [0, 1]")
+    dim = int(assets)
+    if dim < 1:
+        raise ValueError("assets must be positive")
+    low = resize(freq.get("x_low", 0.0), dim)
+    raw_forecast = np.asarray(
+        freq.get("x_low_forecast", low), dtype=np.float64
+    )
+    forecast = resize(
+        raw_forecast[0] if raw_forecast.ndim >= 2 else raw_forecast,
+        dim,
+    )
+    signal = (1.0 - blend) * low + blend * forecast
+    return gross_cap(np.tanh(selected_gain * signal / 0.0014))
+
+
 def resize(value: Any, dim: int) -> np.ndarray:
     arr = np.asarray(value, dtype=np.float64).reshape(-1)
     if arr.size != dim:
@@ -241,6 +275,7 @@ def make_tracker(
     assets: int,
     *,
     heuristic_promotion: bool = True,
+    promotion_adapt_gain: float = 0.05,
 ) -> TradingFrequencyTracker:
     return TradingFrequencyTracker(
         bar_sec=60.0,
@@ -259,7 +294,7 @@ def make_tracker(
         promotion_cooldown_s=10 * 60.0,
         promotion_regime_threshold=3e-05,
         promotion_adapt_low=bool(heuristic_promotion),
-        promotion_adapt_gain=0.05,
+        promotion_adapt_gain=float(promotion_adapt_gain),
     )
 
 
@@ -1180,6 +1215,13 @@ def smdp_rollout(
     hf_lf_budget_rms: float = 0.00025,
     include_hf_predictability: bool | None = None,
     allow_inactive_mechanism_modules: bool = False,
+    upper_plan_reference_mode: str = "none",
+    upper_plan_reference_gain: float = 1.0,
+    upper_plan_reference_forecast_blend: float = 0.0,
+    hard_hf_budget_projection: bool = False,
+    promotion_deterministic_threshold: float = 0.5,
+    promotion_adapt_gain: float = 0.05,
+    promotion_cooldown_steps: int = 0,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
@@ -1191,6 +1233,46 @@ def smdp_rollout(
         )
     if execute_plan_curve and plan_mapper is None:
         raise ValueError("execute_plan_curve requires a learned plan mapper")
+    upper_plan_reference_mode = str(upper_plan_reference_mode)
+    if upper_plan_reference_mode not in UPPER_PLAN_REFERENCE_MODES:
+        raise ValueError(
+            "unknown upper_plan_reference_mode: "
+            f"{upper_plan_reference_mode}"
+        )
+    if upper_plan_reference_mode != "none" and (
+        policy_mode != "freq_hrl" or not execute_plan_curve
+    ):
+        raise ValueError(
+            "a causal upper plan reference requires executable Freq-HRL plans"
+        )
+    if (
+        not np.isfinite(float(upper_plan_reference_gain))
+        or float(upper_plan_reference_gain) < 0.0
+    ):
+        raise ValueError(
+            "upper_plan_reference_gain must be finite and non-negative"
+        )
+    if (
+        not np.isfinite(float(upper_plan_reference_forecast_blend))
+        or not 0.0 <= float(upper_plan_reference_forecast_blend) <= 1.0
+    ):
+        raise ValueError(
+            "upper_plan_reference_forecast_blend must be finite and in [0, 1]"
+        )
+    if (
+        not np.isfinite(float(promotion_deterministic_threshold))
+        or not 0.0 < float(promotion_deterministic_threshold) < 1.0
+    ):
+        raise ValueError(
+            "promotion_deterministic_threshold must be finite and in (0, 1)"
+        )
+    if (
+        not np.isfinite(float(promotion_adapt_gain))
+        or float(promotion_adapt_gain) < 0.0
+    ):
+        raise ValueError("promotion_adapt_gain must be finite and non-negative")
+    if int(promotion_cooldown_steps) < 0:
+        raise ValueError("promotion_cooldown_steps must be non-negative")
     method_flags = resolve_method_contract(str(method_contract))
     if str(promotion_credit_mode) == "auto":
         promotion_credit_mode = (
@@ -1226,6 +1308,12 @@ def smdp_rollout(
         ):
             if not np.isfinite(float(value)) or float(value) <= 0.0:
                 raise ValueError(f"{name} must be positive and finite")
+    if hard_hf_budget_projection and not enable_hf_lower:
+        raise ValueError("hard HF budget projection requires an active HF lower")
+    if hard_hf_budget_projection and str(leakage_cost_mode) != "fixed_rms_budget":
+        raise ValueError(
+            "hard HF budget projection requires fixed_rms_budget leakage accounting"
+        )
     if (
         str(promotion_credit_mode) == "incremental_plan_advantage"
         and not execute_plan_curve
@@ -1324,6 +1412,7 @@ def smdp_rollout(
     tracker = make_tracker(
         assets,
         heuristic_promotion=bool(heuristic_promotion_gate),
+        promotion_adapt_gain=float(promotion_adapt_gain),
     )
     leakage = CausalLeakageRewardShaper(
         regularizer=LeakageRegularizer(upper_hf_window=6, lower_lf_window=24),
@@ -1374,6 +1463,9 @@ def smdp_rollout(
     raw_recenter_boosts: list[np.ndarray] = []
     plan_smoothness: list[float] = []
     plan_coeff_abs: list[float] = []
+    plan_reference_target_abs: list[float] = []
+    plan_reference_coeff_abs: list[float] = []
+    plan_residual_coeff_abs: list[float] = []
     upper_credits: list[float] = []
     lower_credits: list[float] = []
     hf_tactical_credits: list[float] = []
@@ -1404,6 +1496,10 @@ def smdp_rollout(
     tracking_leakage_budget_ratios: list[float] = []
     hf_leakage_budget_ratios: list[float] = []
     leakage_budget_violations: list[float] = []
+    hf_overlay_rms_before_projection: list[float] = []
+    hf_overlay_rms_after_projection: list[float] = []
+    hf_overlay_projection_scales: list[float] = []
+    hf_overlay_projection_events: list[float] = []
     hf_predictability_values: list[np.ndarray] = []
     latest_leakage_feedback = 0.0
     current_target: np.ndarray | None = None
@@ -1412,6 +1508,8 @@ def smdp_rollout(
     realized_return_history: list[np.ndarray] = []
     promotion_counterfactual_plan: LearnedPlanCurveState | None = None
     pending_plan_smoothness_cost = 0.0
+    last_learned_promotion_step: int | None = None
+    promotion_cooldown_blocks = 0
 
     env.reset()
     for t in range(steps):
@@ -1451,7 +1549,12 @@ def smdp_rollout(
             if current_target is None or scheduler.last_upper_step is None:
                 raise RuntimeError("learned promotion requires an active upper plan")
             elapsed = int(t - scheduler.last_upper_step)
-            if elapsed >= int(min_upper_duration):
+            cooldown_ready = (
+                last_learned_promotion_step is None
+                or int(t - last_learned_promotion_step)
+                >= int(promotion_cooldown_steps)
+            )
+            if elapsed >= int(min_upper_duration) and cooldown_ready:
                 gate_state = promotion_gate_feature_vector(
                     dict(freq),
                     position=env.position.copy(),
@@ -1461,7 +1564,13 @@ def smdp_rollout(
                     elapsed_steps=elapsed,
                     upper_period=int(upper_period),
                 )
-                gate_out = model.act_promotion(gate_state, sample=sample)
+                gate_out = model.act_promotion(
+                    gate_state,
+                    sample=sample,
+                    deterministic_threshold=float(
+                        promotion_deterministic_threshold
+                    ),
+                )
                 gate_action = float(gate_out["action"])
                 if promotion_builder is None:
                     raise RuntimeError("learned promotion builder is unavailable")
@@ -1501,9 +1610,12 @@ def smdp_rollout(
                         raise RuntimeError(
                             "eligible learned gate did not produce a promotion decision"
                         )
+                    last_learned_promotion_step = int(t)
                 else:
                     reason = None
             else:
+                if elapsed >= int(min_upper_duration) and not cooldown_ready:
+                    promotion_cooldown_blocks += 1
                 reason = None
         elif heuristic_promotion_gate:
             if promote:
@@ -1528,6 +1640,22 @@ def smdp_rollout(
                 hf_predictability=hf_predictability,
             )
             upper_out = model.act_upper(upper_state, sample=sample)
+            reference_target = (
+                causal_lf_plan_reference(
+                    dict(freq),
+                    int(assets),
+                    gain=float(upper_plan_reference_gain),
+                    forecast_blend=float(
+                        upper_plan_reference_forecast_blend
+                    ),
+                )
+                if upper_plan_reference_mode == "causal_lf"
+                else None
+            )
+            if reference_target is not None:
+                plan_reference_target_abs.append(
+                    float(np.mean(np.abs(reference_target)))
+                )
             if plan_mapper is None:
                 current_target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
             elif plan_state is not None:
@@ -1540,20 +1668,39 @@ def smdp_rollout(
                     latent_action=np.asarray(
                         upper_out["action"], dtype=np.float64
                     ),
+                    reference_target=reference_target,
                 )
                 current_target = gross_cap(plan.target)
                 plan_smoothness.append(float(plan.smoothness_penalty))
                 plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
+                if plan.reference_coefficients is not None:
+                    plan_reference_coeff_abs.append(float(np.mean(np.abs(
+                        plan.reference_coefficients
+                    ))))
+                if plan.residual_coefficients is not None:
+                    plan_residual_coeff_abs.append(float(np.mean(np.abs(
+                        plan.residual_coefficients
+                    ))))
                 pending_plan_smoothness_cost = max(
                     float(plan_smoothness_weight), 0.0
                 ) * float(plan.smoothness_penalty)
             else:
                 plan = plan_mapper.target(
-                    env.position.copy(), np.asarray(upper_out["action"], dtype=np.float64)
+                    env.position.copy(),
+                    np.asarray(upper_out["action"], dtype=np.float64),
+                    reference_target=reference_target,
                 )
                 current_target = gross_cap(plan.target)
                 plan_smoothness.append(float(plan.smoothness_penalty))
                 plan_coeff_abs.append(float(np.mean(np.abs(plan.coefficients))))
+                if plan.reference_coefficients is not None:
+                    plan_reference_coeff_abs.append(float(np.mean(np.abs(
+                        plan.reference_coefficients
+                    ))))
+                if plan.residual_coefficients is not None:
+                    plan_residual_coeff_abs.append(float(np.mean(np.abs(
+                        plan.residual_coefficients
+                    ))))
             builder.begin_upper(
                 state=upper_state,
                 action=np.asarray(upper_out["action"], dtype=np.float32),
@@ -1663,10 +1810,27 @@ def smdp_rollout(
         if lower_lf_raw_recenter_gain > 0.0:
             speed = np.clip(speed + raw_recenter_boost, 0.05, 1.0)
         env.set_target(current_target)
-        _, reward, done, info = env.lower_step({
+        lower_env_action: dict[str, Any] = {
             "execution_speed": speed,
             "residual_order": residual_order,
-        })
+        }
+        if hard_hf_budget_projection:
+            lower_env_action["hf_overlay_rms_cap"] = float(
+                hf_lf_budget_rms
+            )
+        _, reward, done, info = env.lower_step(lower_env_action)
+        hf_overlay_rms_before_projection.append(float(
+            info["hf_overlay_rms_before_projection"]
+        ))
+        hf_overlay_rms_after_projection.append(float(
+            info["hf_overlay_rms_after_projection"]
+        ))
+        hf_overlay_projection_scales.append(float(
+            info["hf_overlay_projection_scale"]
+        ))
+        hf_overlay_projection_events.append(float(
+            bool(info["hf_overlay_projected"])
+        ))
         raw_lower_effect = np.asarray(info["position"], dtype=np.float64) - np.asarray(
             info["target"], dtype=np.float64
         )
@@ -2002,6 +2166,7 @@ def smdp_rollout(
         "promotion_scheduled_boundary_close_count": int(
             promotion_scheduled_boundary_closes
         ),
+        "promotion_cooldown_block_count": int(promotion_cooldown_blocks),
         "promotion_absorbed_norm_mean": float(
             np.mean(learned_promotion_absorbed_norm)
         ) if learned_promotion_absorbed_norm else 0.0,
@@ -2032,6 +2197,19 @@ def smdp_rollout(
         "hf_overlay_task_effect_total": float(
             np.sum(hf_overlay_task_effects)
         ) if hf_overlay_task_effects else 0.0,
+        "hard_hf_budget_projection": float(bool(hard_hf_budget_projection)),
+        "hf_overlay_projection_rate": float(
+            np.mean(hf_overlay_projection_events)
+        ) if hf_overlay_projection_events else 0.0,
+        "hf_overlay_projection_scale_mean": float(
+            np.mean(hf_overlay_projection_scales)
+        ) if hf_overlay_projection_scales else 1.0,
+        "hf_overlay_rms_before_projection_max": float(
+            np.max(hf_overlay_rms_before_projection)
+        ) if hf_overlay_rms_before_projection else 0.0,
+        "hf_overlay_rms_after_projection_max": float(
+            np.max(hf_overlay_rms_after_projection)
+        ) if hf_overlay_rms_after_projection else 0.0,
         "hf_tactical_transition_count": int(
             trajectory.hf.size if trajectory.hf is not None else 0
         ),
@@ -2115,6 +2293,16 @@ def smdp_rollout(
         ) if finite_reconstruction_errors.size else float("nan"),
         "plan_smoothness": float(np.mean(plan_smoothness)) if plan_smoothness else 0.0,
         "plan_coeff_abs": float(np.mean(plan_coeff_abs)) if plan_coeff_abs else 0.0,
+        "upper_plan_reference_mode": str(upper_plan_reference_mode),
+        "upper_plan_reference_target_abs": float(
+            np.mean(plan_reference_target_abs)
+        ) if plan_reference_target_abs else 0.0,
+        "upper_plan_reference_coeff_abs": float(
+            np.mean(plan_reference_coeff_abs)
+        ) if plan_reference_coeff_abs else 0.0,
+        "upper_plan_residual_coeff_abs": float(
+            np.mean(plan_residual_coeff_abs)
+        ) if plan_residual_coeff_abs else 0.0,
         "plan_target_step_change_mean": float(
             np.mean(np.abs(target_steps))
         ) if target_steps.size else 0.0,
@@ -2137,6 +2325,11 @@ def smdp_rollout(
         "heuristic_promotion_disabled": float(not bool(heuristic_promotion_gate)),
         "heuristic_promotion_gate": float(bool(heuristic_promotion_gate)),
         "promotion_replan_cost": float(promotion_replan_cost),
+        "promotion_deterministic_threshold": float(
+            promotion_deterministic_threshold
+        ),
+        "promotion_adapt_gain": float(promotion_adapt_gain),
+        "promotion_cooldown_steps": int(promotion_cooldown_steps),
         "hf_lower_overlay_enabled": float(bool(enable_hf_lower)),
         "hf_tactical_stream_enabled": float(bool(use_separate_hf)),
         "exact_three_way_credit": float(bool(use_separate_hf)),
@@ -2419,6 +2612,13 @@ def train_ppo_actor_critic(
     lower_lf_budget_rms: float = 0.0025,
     hf_lf_budget_rms: float = 0.00025,
     include_hf_predictability: bool | None = None,
+    upper_plan_reference_mode: str = "none",
+    upper_plan_reference_gain: float = 1.0,
+    upper_plan_reference_forecast_blend: float = 0.0,
+    hard_hf_budget_projection: bool = False,
+    promotion_deterministic_threshold: float = 0.5,
+    promotion_adapt_gain: float = 0.05,
+    promotion_cooldown_steps: int = 0,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, float]],
@@ -2443,6 +2643,43 @@ def train_ppo_actor_critic(
         )
     method_contract = str(method_contract)
     method_flags = resolve_method_contract(method_contract)
+    upper_plan_reference_mode = str(upper_plan_reference_mode)
+    if upper_plan_reference_mode not in UPPER_PLAN_REFERENCE_MODES:
+        raise ValueError(
+            "unknown upper_plan_reference_mode: "
+            f"{upper_plan_reference_mode}"
+        )
+    if upper_plan_reference_mode != "none" and (
+        policy_mode != "freq_hrl"
+        or not method_flags["execute_plan_curve"]
+    ):
+        raise ValueError(
+            "a causal upper plan reference requires executable Freq-HRL plans"
+        )
+    if hard_hf_budget_projection and not method_flags["lower_hf_overlay"]:
+        raise ValueError("hard HF budget projection requires an active HF lower")
+    for name, value in (
+        ("upper_plan_reference_gain", upper_plan_reference_gain),
+        ("promotion_adapt_gain", promotion_adapt_gain),
+    ):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(f"{name} must be finite and non-negative")
+    if (
+        not np.isfinite(float(upper_plan_reference_forecast_blend))
+        or not 0.0 <= float(upper_plan_reference_forecast_blend) <= 1.0
+    ):
+        raise ValueError(
+            "upper_plan_reference_forecast_blend must be finite and in [0, 1]"
+        )
+    if (
+        not np.isfinite(float(promotion_deterministic_threshold))
+        or not 0.0 < float(promotion_deterministic_threshold) < 1.0
+    ):
+        raise ValueError(
+            "promotion_deterministic_threshold must be finite and in (0, 1)"
+        )
+    if int(promotion_cooldown_steps) < 0:
+        raise ValueError("promotion_cooldown_steps must be non-negative")
     fixed_ablation_architecture = method_contract in V6_METHOD_CONTRACTS
     capacity_reference_method_contract = str(
         (
@@ -2486,6 +2723,13 @@ def train_ppo_actor_critic(
         "fixed_rms_budget",
     }:
         raise ValueError("unknown leakage_cost_mode")
+    if (
+        hard_hf_budget_projection
+        and resolved_leakage_cost_mode != "fixed_rms_budget"
+    ):
+        raise ValueError(
+            "hard HF budget projection requires fixed_rms_budget leakage accounting"
+        )
     resolved_include_hf_predictability = (
         bool(method_flags["hf_predictability_summary"])
         if include_hf_predictability is None
@@ -3043,6 +3287,17 @@ def train_ppo_actor_critic(
             hf_lf_budget_rms=float(hf_lf_budget_rms),
             include_hf_predictability=resolved_include_hf_predictability,
             allow_inactive_mechanism_modules=fixed_ablation_architecture,
+            upper_plan_reference_mode=upper_plan_reference_mode,
+            upper_plan_reference_gain=float(upper_plan_reference_gain),
+            upper_plan_reference_forecast_blend=float(
+                upper_plan_reference_forecast_blend
+            ),
+            hard_hf_budget_projection=bool(hard_hf_budget_projection),
+            promotion_deterministic_threshold=float(
+                promotion_deterministic_threshold
+            ),
+            promotion_adapt_gain=float(promotion_adapt_gain),
+            promotion_cooldown_steps=int(promotion_cooldown_steps),
         ),
         objective_fn=lambda row: objective(row) - max(
             float(lower_lf_objective_weight), 0.0
@@ -3160,6 +3415,11 @@ def train_ppo_actor_critic(
             ),
             "promotion_replan_cost": float(promotion_replan_cost),
             "promotion_init_logit": float(promotion_init_logit),
+            "promotion_deterministic_threshold": float(
+                promotion_deterministic_threshold
+            ),
+            "promotion_adapt_gain": float(promotion_adapt_gain),
+            "promotion_cooldown_steps": int(promotion_cooldown_steps),
             "hf_lower_overlay_enabled": bool(
                 method_flags["lower_hf_overlay"]
             ),
@@ -3175,6 +3435,9 @@ def train_ppo_actor_critic(
             "leakage_cost_mode": resolved_leakage_cost_mode,
             "lower_lf_budget_rms": float(lower_lf_budget_rms),
             "hf_lf_budget_rms": float(hf_lf_budget_rms),
+            "hard_hf_budget_projection": bool(
+                hard_hf_budget_projection
+            ),
             "hf_predictability_summary": bool(
                 resolved_include_hf_predictability
             ),
@@ -3196,6 +3459,13 @@ def train_ppo_actor_critic(
             "hf_learning_rate": resolved_learning_rates["hf"],
             "promotion_learning_rate": resolved_learning_rates["promotion"],
             "plan_smoothness_weight": float(plan_smoothness_weight),
+            "upper_plan_reference_mode": upper_plan_reference_mode,
+            "upper_plan_reference_gain": float(
+                upper_plan_reference_gain
+            ),
+            "upper_plan_reference_forecast_blend": float(
+                upper_plan_reference_forecast_blend
+            ),
             "training_path_protocol": (
                 "fresh_mixed_support_path_per_root_and_iteration_ood_excluded_v3"
                 if scenario == SUPPORT_MIXTURE_SCENARIO else
@@ -3359,6 +3629,11 @@ def main() -> None:
     parser.add_argument("--plan-smoothness-weight", type=float, default=0.0)
     parser.add_argument("--promotion-replan-cost", type=float, default=0.0)
     parser.add_argument("--promotion-init-logit", type=float, default=-2.0)
+    parser.add_argument(
+        "--promotion-deterministic-threshold", type=float, default=0.5
+    )
+    parser.add_argument("--promotion-adapt-gain", type=float, default=0.05)
+    parser.add_argument("--promotion-cooldown-steps", type=int, default=0)
     parser.add_argument("--lower-hf-order-scale", type=float, default=0.025)
     parser.add_argument(
         "--promotion-credit-mode",
@@ -3372,6 +3647,18 @@ def main() -> None:
     )
     parser.add_argument("--lower-lf-budget-rms", type=float, default=0.0025)
     parser.add_argument("--hf-lf-budget-rms", type=float, default=0.00025)
+    parser.add_argument(
+        "--hard-hf-budget-projection", action="store_true"
+    )
+    parser.add_argument(
+        "--upper-plan-reference-mode",
+        choices=UPPER_PLAN_REFERENCE_MODES,
+        default="none",
+    )
+    parser.add_argument("--upper-plan-reference-gain", type=float, default=1.0)
+    parser.add_argument(
+        "--upper-plan-reference-forecast-blend", type=float, default=0.0
+    )
     parser.add_argument(
         "--include-hf-predictability",
         action="store_true",
@@ -3423,12 +3710,23 @@ def main() -> None:
         plan_smoothness_weight=args.plan_smoothness_weight,
         promotion_replan_cost=args.promotion_replan_cost,
         promotion_init_logit=args.promotion_init_logit,
+        promotion_deterministic_threshold=(
+            args.promotion_deterministic_threshold
+        ),
+        promotion_adapt_gain=args.promotion_adapt_gain,
+        promotion_cooldown_steps=args.promotion_cooldown_steps,
         lower_hf_order_scale=args.lower_hf_order_scale,
         promotion_credit_mode=args.promotion_credit_mode,
         leakage_cost_mode=args.leakage_cost_mode,
         lower_lf_budget_rms=args.lower_lf_budget_rms,
         hf_lf_budget_rms=args.hf_lf_budget_rms,
         include_hf_predictability=args.include_hf_predictability,
+        hard_hf_budget_projection=args.hard_hf_budget_projection,
+        upper_plan_reference_mode=args.upper_plan_reference_mode,
+        upper_plan_reference_gain=args.upper_plan_reference_gain,
+        upper_plan_reference_forecast_blend=(
+            args.upper_plan_reference_forecast_blend
+        ),
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)
