@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
 PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v11"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v14"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -100,6 +100,11 @@ def build_training_command(
         "--upper-action-scale", str(args.upper_action_scale),
         "--lower-action-scale", str(args.lower_action_scale),
         "--responsibility-mode", str(args.responsibility_mode),
+        "--leakage-constraint-scope", str(args.leakage_constraint_scope),
+        "--upper-transition-rms-budget",
+        str(args.upper_transition_rms_budget),
+        "--upper-transition-penalty-coef",
+        str(args.upper_transition_penalty_coef),
         "--lower-constraint-update-mode",
         str(args.lower_constraint_update_mode),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
@@ -302,6 +307,21 @@ def build_parser() -> argparse.ArgumentParser:
         default="additive",
     )
     parser.add_argument(
+        "--leakage-constraint-scope",
+        choices=validation.LEAKAGE_CONSTRAINT_SCOPES,
+        default="joint_behavior",
+    )
+    parser.add_argument(
+        "--upper-transition-rms-budget",
+        type=float,
+        default=validation.DEFAULT_UPPER_TRANSITION_RMS_BUDGET,
+    )
+    parser.add_argument(
+        "--upper-transition-penalty-coef",
+        type=float,
+        default=validation.DEFAULT_UPPER_TRANSITION_PENALTY_COEF,
+    )
+    parser.add_argument(
         "--lower-constraint-update-mode",
         choices=(
             "scalarized",
@@ -391,6 +411,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         raise SystemExit("upper action scale must be in [0, 1]")
     if not 0.0 < float(args.lower_action_scale) <= 1.0:
         raise SystemExit("lower action scale must be in (0, 1]")
+    if float(args.upper_transition_rms_budget) <= 0.0:
+        raise SystemExit("upper transition RMS budget must be positive")
+    if float(args.upper_transition_penalty_coef) < 0.0:
+        raise SystemExit("upper transition penalty must be non-negative")
     return args
 
 

@@ -42,13 +42,22 @@ def mujoco_available() -> bool:
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
     @staticmethod
-    def _selector_rows(reward: float, drift: float):
+    def _selector_rows(
+        reward: float,
+        drift: float,
+        raw_drift: float | None = None,
+        upper_hf_power: float = 0.0025,
+    ):
         return [
             {
                 "disturbance_mode": mode,
                 "seed": seed,
                 "episode_return": reward,
                 "LowerLFDriftAbs": drift,
+                "RawLowerLFDriftAbs": (
+                    drift if raw_drift is None else raw_drift
+                ),
+                "UpperHFPowerAbs": upper_hf_power,
             }
             for seed in (1, 2)
             for mode in ("standard", "mixed")
@@ -57,29 +66,83 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
     def test_safe_selector_requires_reward_floor_and_drift_reduction(self):
         result = select_safe_mujoco_branch({
             SAFE_SELECTOR_BASELINE_BRANCH: self._selector_rows(100.0, 1.0),
-            "reward_guarded_adam_projection": self._selector_rows(99.5, 0.7),
-            "scalarized": self._selector_rows(80.0, 0.2),
+            "responsibility_guarded_adam_projection": self._selector_rows(
+                99.5, 0.7, raw_drift=0.7
+            ),
+            "behavior_guarded_adam_projection": self._selector_rows(
+                80.0, 0.2, raw_drift=0.2
+            ),
+            "behavior_guarded_upper_smooth": self._selector_rows(
+                80.0, 0.2, raw_drift=0.2
+            ),
+            "behavior_scalarized_upper_smooth": self._selector_rows(
+                80.0, 0.2, raw_drift=0.2
+            ),
         }, bootstrap_seed=7, bootstrap_draws=200)
         self.assertEqual(
-            result["selected_branch"], "reward_guarded_adam_projection"
+            result["selected_branch"],
+            "responsibility_guarded_adam_projection",
         )
         self.assertTrue(result["branch_diagnostics"][
-            "reward_guarded_adam_projection"
+            "responsibility_guarded_adam_projection"
         ]["feasible"])
         self.assertFalse(
-            result["branch_diagnostics"]["scalarized"]["feasible"]
+            result["branch_diagnostics"][
+                "behavior_guarded_adam_projection"
+            ]["feasible"]
         )
 
     def test_safe_selector_falls_back_when_no_candidate_is_pareto_safe(self):
         result = select_safe_mujoco_branch({
             SAFE_SELECTOR_BASELINE_BRANCH: self._selector_rows(100.0, 1.0),
-            "reward_guarded_adam_projection": self._selector_rows(95.0, 0.5),
-            "scalarized": self._selector_rows(101.0, 0.95),
+            "responsibility_guarded_adam_projection": self._selector_rows(
+                95.0, 0.5
+            ),
+            "behavior_guarded_adam_projection": self._selector_rows(
+                101.0, 0.95
+            ),
+            "behavior_guarded_upper_smooth": self._selector_rows(
+                95.0, 0.5
+            ),
+            "behavior_scalarized_upper_smooth": self._selector_rows(
+                101.0, 0.95
+            ),
         }, bootstrap_seed=11, bootstrap_draws=200)
         self.assertEqual(result["selected_branch"], SAFE_SELECTOR_BASELINE_BRANCH)
         self.assertEqual(
             result["selection_status"], "fallback_to_no_leakage"
         )
+
+    def test_safe_selector_rejects_responsibility_only_improvement(self):
+        rows = {
+            SAFE_SELECTOR_BASELINE_BRANCH: self._selector_rows(
+                100.0, 1.0, raw_drift=1.0
+            ),
+            "responsibility_guarded_adam_projection": self._selector_rows(
+                100.0, 0.6, raw_drift=1.1
+            ),
+            "behavior_guarded_adam_projection": self._selector_rows(
+                100.0, 0.6, raw_drift=0.6
+            ),
+            "behavior_guarded_upper_smooth": self._selector_rows(
+                100.0, 0.6, raw_drift=0.6, upper_hf_power=0.04
+            ),
+            "behavior_scalarized_upper_smooth": self._selector_rows(
+                80.0, 0.2, raw_drift=0.2
+            ),
+        }
+        result = select_safe_mujoco_branch(
+            rows, bootstrap_seed=13, bootstrap_draws=200
+        )
+        self.assertEqual(
+            result["selected_branch"], "behavior_guarded_adam_projection"
+        )
+        self.assertFalse(result["branch_diagnostics"][
+            "responsibility_guarded_adam_projection"
+        ]["minimum_raw_drift_reduction_supported"])
+        self.assertFalse(result["branch_diagnostics"][
+            "behavior_guarded_upper_smooth"
+        ]["upper_hf_budget_supported"])
 
     def test_flat_batch_bootstrap_does_not_require_cost_fields(self):
         batch = JointTrajectoryBatch(
@@ -326,6 +389,68 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(float(batch.lower.terminal[-1]), 0.0)
         self.assertEqual(row["bootstrap_boundary_count"], 1)
 
+    def test_behavior_constraint_and_upper_penalty_do_not_relabel_return(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=64
+        )
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=True,
+        )
+        common = dict(
+            seed=211,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=64,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=True,
+            lower_lf_rms_budget=1e-3,
+            responsibility_mode="causal_lf_transfer",
+            sample=True,
+            episode_horizon=64,
+        )
+        torch.manual_seed(223)
+        np.random.seed(223)
+        responsibility_batch, responsibility_row = rollout_hierarchical(
+            model,
+            leakage_constraint_scope="responsibility",
+            upper_transition_rms_budget=1e-4,
+            upper_transition_penalty_coef=0.0,
+            **common,
+        )
+        torch.manual_seed(223)
+        np.random.seed(223)
+        behavior_batch, behavior_row = rollout_hierarchical(
+            model,
+            leakage_constraint_scope="joint_behavior",
+            upper_transition_rms_budget=1e-4,
+            upper_transition_penalty_coef=1.0,
+            **common,
+        )
+        np.testing.assert_array_equal(
+            responsibility_batch.lower.reward,
+            behavior_batch.lower.reward,
+        )
+        self.assertEqual(
+            responsibility_row["episode_return"],
+            behavior_row["episode_return"],
+        )
+        self.assertTrue(np.all(
+            behavior_batch.lower.cost + 1e-12
+            >= responsibility_batch.lower.cost
+        ))
+        self.assertGreater(
+            behavior_row["UpperContinuityPenaltyTotal"], 0.0
+        )
+        self.assertLess(
+            float(np.sum(behavior_batch.upper.reward)),
+            float(np.sum(responsibility_batch.upper.reward)),
+        )
+
     def test_training_budget_continues_across_hopper_terminations(self):
         observation_dim, action_dim = environment_dimensions(
             "Hopper-v5", episode_horizon=1000
@@ -381,7 +506,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v11_canonical_policy_state",
+            "freq_hrl_mujoco_shared_core_v14_behavior_safe_training",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -394,7 +519,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(
             payload["lower_cost_state_contract"],
-            "causal_responsibility_anchor_and_lower_lf_cost_critic_only_v1",
+            "causal_responsibility_anchor_raw_lower_lf_and_"
+            "responsibility_lf_cost_critic_only_v2",
         )
         self.assertEqual(payload["role_capacity_status"], "symmetric")
         self.assertEqual(payload["upper_to_lower_action_capacity_ratio"], 1.0)
@@ -421,6 +547,10 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "UpperActionEnergyShare",
             "AdditiveActionClipRate",
             "RawLowerLFDriftAbs",
+            "RawLowerLFRmsOnlineMean",
+            "LowerConstraintCostMean",
+            "UpperTransitionDeltaRMSMean",
+            "UpperContinuityPenaltyTotal",
             "ResponsibilityTransferRMS",
             "ResponsibilityReconstructionRMS",
         ):
@@ -456,7 +586,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             training_disturbance_modes=["standard"],
             evaluation_disturbance_modes=["standard"],
         )
-        self.assertEqual(payload["safe_selector_training_compute_multiplier"], 3)
+        self.assertEqual(payload["safe_selector_training_compute_multiplier"], 5)
         self.assertEqual(payload["safe_selector_selection_seeds"], [107])
         self.assertEqual(payload["branch_training_eval_seeds"], [])
         self.assertEqual(payload["eval_seeds"], [109])
