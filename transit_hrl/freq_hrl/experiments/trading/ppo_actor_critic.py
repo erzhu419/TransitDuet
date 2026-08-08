@@ -84,6 +84,9 @@ FULL_METHOD_V5_IMPLEMENTATION_VERSION = (
 FULL_METHOD_V6_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v6_mixed_regime_counterfactual_control_2026_08_03"
 )
+FULL_METHOD_V7_IMPLEMENTATION_VERSION = (
+    "freq_hrl_full_v7_residual_reference_hard_budget_2026_08_08"
+)
 FULL_METHOD_V3_IMPLEMENTATION_VERSION = (
     "freq_hrl_full_v3_credit_plan_leakage_2026_08_03"
 )
@@ -107,12 +110,26 @@ METHOD_CONTRACTS = (
     "ablate_promotion_v6",
     "ablate_hf_lower_v6",
     "ablate_leakage_v6",
+    "full_freq_hrl_v7",
+    "ablate_promotion_v7",
+    "ablate_hf_lower_v7",
+    "ablate_leakage_v7",
+    "ablate_lf_reference_v7",
+    "ablate_upper_residual_v7",
 )
 V6_METHOD_CONTRACTS = {
     "full_freq_hrl_v6",
     "ablate_promotion_v6",
     "ablate_hf_lower_v6",
     "ablate_leakage_v6",
+}
+V7_METHOD_CONTRACTS = {
+    "full_freq_hrl_v7",
+    "ablate_promotion_v7",
+    "ablate_hf_lower_v7",
+    "ablate_leakage_v7",
+    "ablate_lf_reference_v7",
+    "ablate_upper_residual_v7",
 }
 LOWER_OBSERVATION_INTERVENTIONS = (
     "none",
@@ -146,6 +163,11 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v6",
             "ablate_promotion_v6",
             "ablate_hf_lower_v6",
+            "full_freq_hrl_v7",
+            "ablate_promotion_v7",
+            "ablate_hf_lower_v7",
+            "ablate_lf_reference_v7",
+            "ablate_upper_residual_v7",
         },
         "learned_promotion_gate": contract in {
             "full_freq_hrl_v4",
@@ -157,6 +179,11 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v6",
             "ablate_hf_lower_v6",
             "ablate_leakage_v6",
+            "full_freq_hrl_v7",
+            "ablate_hf_lower_v7",
+            "ablate_leakage_v7",
+            "ablate_lf_reference_v7",
+            "ablate_upper_residual_v7",
         },
         "heuristic_promotion_gate": contract in {
             "routing_core_v2",
@@ -173,6 +200,11 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "full_freq_hrl_v6",
             "ablate_promotion_v6",
             "ablate_leakage_v6",
+            "full_freq_hrl_v7",
+            "ablate_promotion_v7",
+            "ablate_leakage_v7",
+            "ablate_lf_reference_v7",
+            "ablate_upper_residual_v7",
         },
         "separate_hf_tactical": contract in {
             "full_freq_hrl_v5",
@@ -183,30 +215,46 @@ def resolve_method_contract(method_contract: str) -> dict[str, bool]:
             "ablate_promotion_v6",
             "ablate_hf_lower_v6",
             "ablate_leakage_v6",
+            *V7_METHOD_CONTRACTS,
         },
         "promotion_plan_advantage_credit": contract in {
             "full_freq_hrl_v6",
             "ablate_promotion_v6",
             "ablate_hf_lower_v6",
             "ablate_leakage_v6",
+            *V7_METHOD_CONTRACTS,
         },
         "fixed_rms_leakage_budget": contract in {
             "full_freq_hrl_v6",
             "ablate_promotion_v6",
             "ablate_hf_lower_v6",
             "ablate_leakage_v6",
+            *V7_METHOD_CONTRACTS,
         },
         "hf_predictability_summary": contract in {
             "full_freq_hrl_v6",
             "ablate_promotion_v6",
             "ablate_hf_lower_v6",
             "ablate_leakage_v6",
+            *V7_METHOD_CONTRACTS,
         },
+        "causal_lf_plan_reference": contract in (
+            V7_METHOD_CONTRACTS - {"ablate_lf_reference_v7"}
+        ),
+        "hard_hf_budget_projection": contract in {
+            "full_freq_hrl_v7",
+            "ablate_promotion_v7",
+            "ablate_lf_reference_v7",
+            "ablate_upper_residual_v7",
+        },
+        "upper_residual_control": contract != "ablate_upper_residual_v7",
     }
     return flags
 
 
 def full_method_implementation_version(method_contract: str) -> str:
+    if str(method_contract) in V7_METHOD_CONTRACTS:
+        return FULL_METHOD_V7_IMPLEMENTATION_VERSION
     if str(method_contract) in V6_METHOD_CONTRACTS:
         return FULL_METHOD_V6_IMPLEMENTATION_VERSION
     if str(method_contract) in {
@@ -1309,6 +1357,7 @@ def smdp_rollout(
     promotion_deterministic_threshold: float = 0.5,
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
+    upper_residual_action_scale: float = 1.0,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, float]]:
     """Roll out generic-HRL or Freq-HRL on asynchronous SMDP streams."""
     policy_mode = str(policy_mode)
@@ -1360,6 +1409,13 @@ def smdp_rollout(
         raise ValueError("promotion_adapt_gain must be finite and non-negative")
     if int(promotion_cooldown_steps) < 0:
         raise ValueError("promotion_cooldown_steps must be non-negative")
+    if (
+        not np.isfinite(float(upper_residual_action_scale))
+        or float(upper_residual_action_scale) < 0.0
+    ):
+        raise ValueError(
+            "upper_residual_action_scale must be finite and non-negative"
+        )
     method_flags = resolve_method_contract(str(method_contract))
     if str(promotion_credit_mode) == "auto":
         promotion_credit_mode = (
@@ -1727,6 +1783,10 @@ def smdp_rollout(
                 hf_predictability=hf_predictability,
             )
             upper_out = model.act_upper(upper_state, sample=sample)
+            executed_upper_action = (
+                np.asarray(upper_out["action"], dtype=np.float64)
+                * float(upper_residual_action_scale)
+            )
             reference_target = (
                 causal_lf_plan_reference(
                     dict(freq),
@@ -1744,7 +1804,7 @@ def smdp_rollout(
                     float(np.mean(np.abs(reference_target)))
                 )
             if plan_mapper is None:
-                current_target = latent_target(np.asarray(upper_out["action"], dtype=np.float64))
+                current_target = latent_target(executed_upper_action)
             elif plan_state is not None:
                 plan = plan_state.activate(
                     now_s=float(t * 60.0),
@@ -1752,9 +1812,7 @@ def smdp_rollout(
                         env.position.copy()
                         if current_target is None else current_target
                     ),
-                    latent_action=np.asarray(
-                        upper_out["action"], dtype=np.float64
-                    ),
+                    latent_action=executed_upper_action,
                     reference_target=reference_target,
                 )
                 current_target = gross_cap(plan.target)
@@ -1774,7 +1832,7 @@ def smdp_rollout(
             else:
                 plan = plan_mapper.target(
                     env.position.copy(),
-                    np.asarray(upper_out["action"], dtype=np.float64),
+                    executed_upper_action,
                     reference_target=reference_target,
                 )
                 current_target = gross_cap(plan.target)
@@ -2012,7 +2070,10 @@ def smdp_rollout(
                 leak_info.get("lower_lf_penalty", 0.0)
             )
             lower_constraint_feedback = tracking_budget_ratio
-        if str(method_contract) == "ablate_leakage_v6":
+        if str(method_contract) in {
+            "ablate_leakage_v6",
+            "ablate_leakage_v7",
+        }:
             latest_leakage_feedback = 0.0
             lower_constraint_feedback = 0.0
         tracking_leakage_budget_ratios.append(tracking_budget_ratio)
@@ -2390,6 +2451,7 @@ def smdp_rollout(
         "upper_plan_residual_coeff_abs": float(
             np.mean(plan_residual_coeff_abs)
         ) if plan_residual_coeff_abs else 0.0,
+        "upper_residual_action_scale": float(upper_residual_action_scale),
         "plan_target_step_change_mean": float(
             np.mean(np.abs(target_steps))
         ) if target_steps.size else 0.0,
@@ -2706,6 +2768,7 @@ def train_ppo_actor_critic(
     promotion_deterministic_threshold: float = 0.5,
     promotion_adapt_gain: float = 0.05,
     promotion_cooldown_steps: int = 0,
+    upper_residual_action_scale: float = 1.0,
     training_scenarios: Sequence[str] | None = None,
 ) -> tuple[
     dict[str, Any],
@@ -2749,6 +2812,7 @@ def train_ppo_actor_critic(
     for name, value in (
         ("upper_plan_reference_gain", upper_plan_reference_gain),
         ("promotion_adapt_gain", promotion_adapt_gain),
+        ("upper_residual_action_scale", upper_residual_action_scale),
     ):
         if not np.isfinite(float(value)) or float(value) < 0.0:
             raise ValueError(f"{name} must be finite and non-negative")
@@ -2792,10 +2856,19 @@ def train_ppo_actor_critic(
         len(independent_training_scenarios)
         if independent_training_scenarios is not None else 1
     )
-    fixed_ablation_architecture = method_contract in V6_METHOD_CONTRACTS
+    fixed_ablation_architecture = method_contract in (
+        V6_METHOD_CONTRACTS | V7_METHOD_CONTRACTS
+    )
+    fixed_architecture_reference = (
+        "full_freq_hrl_v7"
+        if method_contract in V7_METHOD_CONTRACTS else
+        "full_freq_hrl_v6"
+        if method_contract in V6_METHOD_CONTRACTS else
+        method_contract
+    )
     capacity_reference_method_contract = str(
         (
-            "full_freq_hrl_v6"
+            fixed_architecture_reference
             if fixed_ablation_architecture else method_contract
         )
         if capacity_reference_method_contract is None
@@ -2806,10 +2879,11 @@ def train_ppo_actor_critic(
     )
     if (
         fixed_ablation_architecture
-        and capacity_reference_method_contract != "full_freq_hrl_v6"
+        and capacity_reference_method_contract != fixed_architecture_reference
     ):
         raise ValueError(
-            "v6 contracts require full_freq_hrl_v6 as the fixed architecture reference"
+            f"{method_contract} requires {fixed_architecture_reference} "
+            "as the fixed architecture reference"
         )
     resolved_promotion_credit_mode = str(promotion_credit_mode)
     if resolved_promotion_credit_mode == "auto":
@@ -2853,9 +2927,38 @@ def train_ppo_actor_critic(
         or not resolved_include_hf_predictability
     ):
         raise ValueError(
-            "v6 requires incremental promotion credit, fixed RMS leakage budgets, "
+            "fixed-architecture contracts require incremental promotion credit, "
+            "fixed RMS leakage budgets, "
             "and the causal HF predictability summary"
         )
+    if method_contract in V7_METHOD_CONTRACTS:
+        expected_reference_mode = (
+            "causal_lf"
+            if method_flags["causal_lf_plan_reference"] else "none"
+        )
+        expected_hard_projection = bool(
+            method_flags["hard_hf_budget_projection"]
+        )
+        expected_residual_scale = (
+            1.0 if method_flags["upper_residual_control"] else 0.0
+        )
+        if upper_plan_reference_mode != expected_reference_mode:
+            raise ValueError(
+                f"{method_contract} requires upper_plan_reference_mode="
+                f"{expected_reference_mode!r}"
+            )
+        if bool(hard_hf_budget_projection) != expected_hard_projection:
+            raise ValueError(
+                f"{method_contract} requires hard_hf_budget_projection="
+                f"{expected_hard_projection}"
+            )
+        if not np.isclose(
+            float(upper_residual_action_scale), expected_residual_scale
+        ):
+            raise ValueError(
+                f"{method_contract} requires upper_residual_action_scale="
+                f"{expected_residual_scale}"
+            )
     mark_to_market_timing = (
         "post_trade"
         if execution_timeline_contract == "causal_post_trade_v3"
@@ -2928,6 +3031,7 @@ def train_ppo_actor_critic(
         "ablate_hf_lower_v5",
         "ablate_leakage_v5",
         *V6_METHOD_CONTRACTS,
+        *V7_METHOD_CONTRACTS,
     }
     if method_contract in frequency_method_contracts:
         if policy_mode != "freq_hrl":
@@ -2938,6 +3042,7 @@ def train_ppo_actor_critic(
             "ablate_leakage_v4",
             "ablate_leakage_v5",
             "ablate_leakage_v6",
+            "ablate_leakage_v7",
         } and not (
             float(leakage_scale) > 0.0
             or float(lower_lf_constraint_coef) > 0.0
@@ -2950,6 +3055,7 @@ def train_ppo_actor_critic(
         "ablate_leakage_v4",
         "ablate_leakage_v5",
         "ablate_leakage_v6",
+        "ablate_leakage_v7",
     } and any(
         float(value) != 0.0
         for value in (
@@ -3438,6 +3544,9 @@ def train_ppo_actor_critic(
                 ),
                 promotion_adapt_gain=float(promotion_adapt_gain),
                 promotion_cooldown_steps=int(promotion_cooldown_steps),
+                upper_residual_action_scale=float(
+                    upper_residual_action_scale
+                ),
             )
 
         if independent_training_scenarios is None:
@@ -3500,7 +3609,8 @@ def train_ppo_actor_critic(
                 policy_mode == "freq_hrl" and use_handcrafted_frequency_prior
             ),
             "capacity_match_contract": (
-                "identical full-v6 module architecture with inactive ablated modules"
+                "identical versioned full-method architecture with inactive "
+                "ablated modules"
                 if fixed_ablation_architecture else
                 "Freq-HRL reference or active parameter count matched to Freq-HRL "
                 "within 5%; equal optimizer, epochs, and rollout seed budget"
@@ -3552,6 +3662,12 @@ def train_ppo_actor_critic(
             ),
             "raw_lower_effect_constraint": bool(
                 method_flags["constrain_raw_lower_effect"]
+            ),
+            "causal_lf_plan_reference": bool(
+                method_flags["causal_lf_plan_reference"]
+            ),
+            "upper_residual_control": bool(
+                method_flags["upper_residual_control"]
             ),
             "learned_promotion_gate": bool(
                 method_flags["learned_promotion_gate"]
@@ -3633,6 +3749,9 @@ def train_ppo_actor_critic(
             "upper_plan_reference_forecast_blend": float(
                 upper_plan_reference_forecast_blend
             ),
+            "upper_residual_action_scale": float(
+                upper_residual_action_scale
+            ),
             "training_path_protocol": (
                 "independent_full_episode_support_batch_v1"
                 if independent_training_scenarios is not None else
@@ -3670,15 +3789,20 @@ def train_ppo_actor_critic(
         },
     )
     if fixed_ablation_architecture:
+        architecture_label = (
+            "full-v7" if method_contract in V7_METHOD_CONTRACTS else "full-v6"
+        )
         payload["trajectory_contract"]["hf"] = (
             payload["trajectory_contract"]["hf"]
             if method_flags["lower_hf_overlay"]
-            else "full-v6 HF module retained but inactive; no HF transitions"
+            else f"{architecture_label} HF module retained but inactive; "
+            "no HF transitions"
         )
         payload["trajectory_contract"]["promotion"] = (
             payload["trajectory_contract"]["promotion"]
             if method_flags["learned_promotion_gate"]
-            else "full-v6 promotion module retained but inactive; no gate transitions"
+            else f"{architecture_label} promotion module retained but inactive; "
+            "no gate transitions"
         )
     for row in heldout_rows:
         row["baseline"] = policy_mode
@@ -3837,6 +3961,7 @@ def main() -> None:
     parser.add_argument(
         "--upper-plan-reference-forecast-blend", type=float, default=0.0
     )
+    parser.add_argument("--upper-residual-action-scale", type=float, default=1.0)
     parser.add_argument(
         "--include-hf-predictability",
         action="store_true",
@@ -3905,6 +4030,7 @@ def main() -> None:
         upper_plan_reference_forecast_blend=(
             args.upper_plan_reference_forecast_blend
         ),
+        upper_residual_action_scale=args.upper_residual_action_scale,
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     write_rows(args.output_dir / "per_seed.csv", rows)

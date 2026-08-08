@@ -101,6 +101,32 @@ class FullMethodContractTest(unittest.TestCase):
                 self.assertTrue(ablated["fixed_rms_leakage_budget"])
                 self.assertTrue(ablated["hf_predictability_summary"])
 
+    def test_v7_registers_reference_budget_and_residual_ablations(self):
+        full = resolve_method_contract("full_freq_hrl_v7")
+        expected_changes = {
+            "ablate_promotion_v7": {"learned_promotion_gate"},
+            "ablate_hf_lower_v7": {
+                "lower_hf_overlay",
+                "hard_hf_budget_projection",
+            },
+            "ablate_leakage_v7": {
+                "constrain_raw_lower_effect",
+                "hard_hf_budget_projection",
+            },
+            "ablate_lf_reference_v7": {"causal_lf_plan_reference"},
+            "ablate_upper_residual_v7": {"upper_residual_control"},
+        }
+        self.assertTrue(full["causal_lf_plan_reference"])
+        self.assertTrue(full["hard_hf_budget_projection"])
+        self.assertTrue(full["upper_residual_control"])
+        for contract, expected in expected_changes.items():
+            with self.subTest(contract=contract):
+                ablated = resolve_method_contract(contract)
+                changed = {
+                    key for key in full if full[key] != ablated[key]
+                }
+                self.assertEqual(changed, expected)
+
     def test_hf_lower_action_is_bounded_and_separate_from_tracking_speed(self):
         speed, overlay = decode_hierarchical_lower_action(
             np.asarray([-10.0, 10.0, 10.0, -10.0]),
@@ -453,7 +479,7 @@ class FullMethodContractTest(unittest.TestCase):
             upper_period=12,
             min_upper_duration=3,
             execution_timeline_contract="causal_post_trade_v3",
-            method_contract="full_freq_hrl_v6",
+            method_contract="full_freq_hrl_v7",
             upper_plan_reference_mode="causal_lf",
             upper_plan_reference_gain=1.0,
             upper_plan_reference_forecast_blend=0.25,
@@ -476,6 +502,40 @@ class FullMethodContractTest(unittest.TestCase):
             row["hf_overlay_rms_after_projection_max"], cap + 1e-12
         )
         self.assertLessEqual(row["hf_leakage_budget_ratio_max"], 1.0 + 1e-9)
+
+    def test_v7_anchor_only_ablation_retains_architecture_but_zeroes_residual(self):
+        payload, rows, model = train_ppo_actor_critic(
+            train_seeds=[42],
+            validation_seeds=[84],
+            eval_seeds=[123],
+            steps=16,
+            assets=2,
+            scenario="persistent_shift",
+            iterations=1,
+            seed=7,
+            leakage_scale=0.01,
+            lower_lf_constraint_coef=0.01,
+            lower_lf_dual_lr=0.01,
+            plan_basis_dim=3,
+            plan_horizon_s=600.0,
+            upper_period=8,
+            min_upper_duration=2,
+            execution_timeline_contract="causal_post_trade_v3",
+            method_contract="ablate_upper_residual_v7",
+            upper_plan_reference_mode="causal_lf",
+            hard_hf_budget_projection=True,
+            upper_residual_action_scale=0.0,
+        )
+        self.assertEqual(
+            payload["capacity_reference_method_contract"],
+            "full_freq_hrl_v7",
+        )
+        self.assertEqual(
+            count_parameters(model), payload["capacity_target_parameter_count"]
+        )
+        self.assertEqual(rows[0]["upper_residual_action_scale"], 0.0)
+        self.assertEqual(rows[0]["upper_plan_residual_coeff_abs"], 0.0)
+        self.assertGreater(rows[0]["upper_plan_reference_coeff_abs"], 0.0)
 
     def test_support_training_uses_full_reset_episodes_for_ppo(self):
         steps = 16
