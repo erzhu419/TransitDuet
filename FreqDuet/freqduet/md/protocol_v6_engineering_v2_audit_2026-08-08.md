@@ -173,3 +173,22 @@ to disjoint-seed confirmation only if it satisfies all of these gates:
 5. Selection uncertainty and all 16 screened variants are retained in the
    negative-results appendix; only a later disjoint-seed run can support an
    efficacy claim.
+
+## Engineering-v4 dispatch record (2026-08-09)
+
+- Frozen source: `9685558e1985d9c5fb25fe3803dd0f058c3de716` in detached
+  worktree `FreqDuet-v6-engineering-v4-snapshot`.
+- Run: `protocol_v6_softreg_ep40_s4_e2_v4`.
+- Scheduler tasks: `t74910` through `t74981`, one config/seed job per shard,
+  round-robin pinned to `node001` through `node006`.
+- Initial launch: 72 of 72 tasks reached `running`. Four transient jump-host
+  SSH key-exchange failures were retried without duplicating a shard.
+- Result transfer: `summary` scope only. Training logs and final checkpoints
+  remain on the HPC filesystem and are not automatically copied to WSL.
+- The regularity module and runner SHA256 values were identical on all six
+  nodes: `b64e5f864142008afe31a91cee1cb19298a81af9776af461db0dea1557d127d5`
+  and `9b2bde0bd64ec1e6c08e059a17824dfd921f3e53eed68ef624895de354b57cd2`.
+- The first weight-0.25 shard completed episode zero with 5,200 transitions,
+  zero action adjustment, 64.4% valid evidence, regularity-cost mean `0.0945`,
+  replay batch-cost mean `0.7501` against limit `0.35`, and lambda `1.009`.
+  This remains implementation evidence only.
