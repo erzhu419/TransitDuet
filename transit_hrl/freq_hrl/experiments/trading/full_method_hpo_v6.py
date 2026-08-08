@@ -81,6 +81,8 @@ DEFAULT_TRAIN_SEEDS = (42, 123, 456)
 DEFAULT_CHECKPOINT_VALIDATION_SEEDS = (57721, 57727, 57731)
 DEFAULT_TUNING_SEEDS = (68207, 68209, 68213, 68219, 68227)
 ABLATION_PARENT_VARIANT = "freq_hrl_full_v6"
+MIN_MECHANISM_REPLICATE_FRACTION = 0.8
+MIN_HF_ACTION_SENSITIVITY = 1e-8
 
 
 @dataclass(frozen=True)
@@ -817,6 +819,89 @@ def frozen_config_sha256(payload: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _mechanism_activity_summary(
+    candidate_rows: Iterable[dict[str, Any]],
+    hf_rows: Iterable[dict[str, Any]],
+) -> dict[str, Any]:
+    """Require executed mechanisms, not merely policy-decision records."""
+
+    candidate_rows = list(candidate_rows)
+    hf_rows = list(hf_rows)
+    replicate_ids = sorted({
+        int(float(row["training_replicate_seed"])) for row in candidate_rows
+    })
+    if not replicate_ids:
+        return {
+            "status": "ineligible",
+            "promotion_execution_count": 0.0,
+            "promotion_replan_count": 0.0,
+            "promotion_active_replicate_fraction": 0.0,
+            "hf_action_sensitivity_mean": 0.0,
+            "hf_active_replicate_fraction": 0.0,
+        }
+
+    promotion_active = []
+    hf_active = []
+    for replicate in replicate_ids:
+        replicate_rows = [
+            row for row in candidate_rows
+            if int(float(row["training_replicate_seed"])) == replicate
+        ]
+        executed = float(np.sum([
+            float(row.get("promotion_count", 0.0) or 0.0)
+            for row in replicate_rows
+        ]))
+        replans = float(np.sum([
+            float(row.get("promotion_replan_count", 0.0) or 0.0)
+            for row in replicate_rows
+        ]))
+        promotion_active.append(executed > 0.0 and replans > 0.0)
+
+        replicate_hf = [
+            row for row in hf_rows
+            if int(float(row["training_replicate_seed"])) == replicate
+        ]
+        sensitivity = float(np.mean([
+            float(row.get("lower_hf_action_sensitivity", 0.0) or 0.0)
+            for row in replicate_hf
+        ] or [0.0]))
+        paired_paths_valid = bool(replicate_hf) and all(
+            str(row.get("paired_exogenous_path_identity", "")).lower()
+            in {"1", "1.0", "true"}
+            for row in replicate_hf
+        )
+        hf_active.append(
+            paired_paths_valid and sensitivity > MIN_HF_ACTION_SENSITIVITY
+        )
+
+    promotion_execution_count = float(np.sum([
+        float(row.get("promotion_count", 0.0) or 0.0)
+        for row in candidate_rows
+    ]))
+    promotion_replan_count = float(np.sum([
+        float(row.get("promotion_replan_count", 0.0) or 0.0)
+        for row in candidate_rows
+    ]))
+    hf_action_sensitivity = float(np.mean([
+        float(row.get("lower_hf_action_sensitivity", 0.0) or 0.0)
+        for row in hf_rows
+    ] or [0.0]))
+    promotion_fraction = float(np.mean(promotion_active))
+    hf_fraction = float(np.mean(hf_active))
+    eligible = (
+        promotion_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
+        and hf_fraction >= MIN_MECHANISM_REPLICATE_FRACTION
+    )
+    return {
+        "status": "eligible" if eligible else "ineligible",
+        "promotion_execution_count": promotion_execution_count,
+        "promotion_replan_count": promotion_replan_count,
+        "promotion_active_replicate_fraction": promotion_fraction,
+        "hf_action_sensitivity_mean": hf_action_sensitivity,
+        "hf_active_replicate_fraction": hf_fraction,
+    }
+
+
 def merge_hpo_cells(
     input_dirs: list[Path],
     *,
@@ -918,27 +1003,27 @@ def merge_hpo_cells(
             gain_mean = float(np.mean([
                 float(summary["validation_learning_gain"]) for summary in matching
             ]))
-            mechanism_status = "not_applicable"
+            mechanism_evidence = {
+                "status": "not_applicable",
+                "promotion_execution_count": 0.0,
+                "promotion_replan_count": 0.0,
+                "promotion_active_replicate_fraction": 0.0,
+                "hf_action_sensitivity_mean": 0.0,
+                "hf_active_replicate_fraction": 0.0,
+            }
             if variant_id == ABLATION_PARENT_VARIANT:
                 candidate_rows = [
                     row for row in rows
                     if row["variant_id"] == variant_id
                     and row["candidate_id"] == candidate_id
                 ]
-                promotion_transitions = float(np.sum([
-                    float(row.get("promotion_gate_transition_count", 0.0) or 0.0)
-                    for row in candidate_rows
-                ]))
-                hf_sensitivity = float(np.mean([
-                    float(row["lower_hf_action_sensitivity"])
-                    for row in hf_rows
+                candidate_hf_rows = [
+                    row for row in hf_rows
                     if row["variant_id"] == variant_id
                     and row["candidate_id"] == candidate_id
-                ] or [0.0]))
-                mechanism_status = (
-                    "eligible"
-                    if promotion_transitions > 0.0 and hf_sensitivity > 1e-8
-                    else "ineligible"
+                ]
+                mechanism_evidence = _mechanism_activity_summary(
+                    candidate_rows, candidate_hf_rows
                 )
             ranked.append({
                 "variant_id": variant_id,
@@ -953,7 +1038,22 @@ def merge_hpo_cells(
                 "trained_checkpoint_fraction": trained_fraction,
                 "validation_learning_gain_mean": gain_mean,
                 "learning_gate_status": "eligible" if trained_fraction >= 0.8 and gain_mean > 0.0 else "ineligible",
-                "mechanism_activity_status": mechanism_status,
+                "mechanism_activity_status": mechanism_evidence["status"],
+                "promotion_execution_count": mechanism_evidence[
+                    "promotion_execution_count"
+                ],
+                "promotion_replan_count": mechanism_evidence[
+                    "promotion_replan_count"
+                ],
+                "promotion_active_replicate_fraction": mechanism_evidence[
+                    "promotion_active_replicate_fraction"
+                ],
+                "hf_action_sensitivity_mean": mechanism_evidence[
+                    "hf_action_sensitivity_mean"
+                ],
+                "hf_active_replicate_fraction": mechanism_evidence[
+                    "hf_active_replicate_fraction"
+                ],
             })
         ranked.sort(key=lambda row: (
             0 if row["learning_gate_status"] == "eligible" else 1,

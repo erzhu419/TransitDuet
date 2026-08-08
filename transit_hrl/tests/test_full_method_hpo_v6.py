@@ -4,6 +4,34 @@ from freq_hrl.experiments.trading import full_method_hpo_v6 as v6
 
 
 class FullMethodHPOV6Test(unittest.TestCase):
+    def test_mechanism_gate_requires_executed_promotion_across_replicates(self):
+        rows = []
+        hf_rows = []
+        for replicate in range(5):
+            rows.append({
+                "training_replicate_seed": replicate,
+                "promotion_gate_transition_count": 20,
+                "promotion_count": 0,
+                "promotion_replan_count": 0,
+            })
+            hf_rows.append({
+                "training_replicate_seed": replicate,
+                "paired_exogenous_path_identity": True,
+                "lower_hf_action_sensitivity": 0.1,
+            })
+        evidence = v6._mechanism_activity_summary(rows, hf_rows)
+        self.assertEqual(evidence["status"], "ineligible")
+        self.assertEqual(evidence["promotion_execution_count"], 0.0)
+        self.assertEqual(evidence["promotion_active_replicate_fraction"], 0.0)
+
+        for row in rows[:4]:
+            row["promotion_count"] = 1
+            row["promotion_replan_count"] = 1
+        evidence = v6._mechanism_activity_summary(rows, hf_rows)
+        self.assertEqual(evidence["status"], "eligible")
+        self.assertEqual(evidence["promotion_active_replicate_fraction"], 0.8)
+        self.assertEqual(evidence["hf_active_replicate_fraction"], 1.0)
+
     def test_registry_tunes_only_full_method_and_baselines_with_equal_budgets(self):
         self.assertEqual(len(v6.ALL_VARIANT_IDS), 10)
         self.assertEqual(len(v6.HPO_VARIANT_IDS), 7)
