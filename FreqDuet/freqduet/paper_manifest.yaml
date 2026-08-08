@@ -4,11 +4,11 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-06-26-historical
-submission_status: hold_pending_protocol_v5
-active_protocol: freqduet-eval-v5
-active_source_commit: f2a5ae8e183c48ca2e15295e854913736ca88857
-active_contract: ../md/protocol_v5_journey_feasible_contract_2026-08-08.md
+version: 2026-08-08-protocol-v6-development
+submission_status: hold_pending_protocol_v6
+active_protocol: freqduet-eval-v6
+active_source_commit: ae745773f446d2d03c63e71cfcfd47258d2f316f
+active_contract: ../md/protocol_v6_locked_contract_2026-08-08.md
 active_metrics:
   primary: restricted_total_journey_horizon_min
   safety:
@@ -18,11 +18,35 @@ active_metrics:
     - holding_passenger_min_per_generated
     - fleet_denied_trip_rate
     - fleet_readiness_delay_mean_s
+    - fleet_denied_retry_trip_seconds
+    - commanded_holding_vehicle_seconds
+    - commanded_holding_passenger_min_per_generated
+    - terminal_dispatch_execution_error_abs_mean_s
     - passenger_unserved_rate
     - trip_launch_rate
     - trip_completion_rate
-# Everything below remains the reproducibility manifest for the historical
-# June composite package until the V5 result paths are promoted explicitly.
+
+development:
+  status: pending_engineering_screen
+  stage: development
+  source_commit: ae745773f446d2d03c63e71cfcfd47258d2f316f
+  run_name: protocol_v6_engineering_ep40_s4_e4_v1
+  train_episodes: 40
+  train_seeds: [503, 521, 541, 557]
+  eval_seeds: [41011, 41017, 41023, 41039]
+  config_contract: ../md/protocol_v6_locked_contract_2026-08-08.md
+  decision_status: no_effectiveness_claim_before_locked_decision
+
+historical_reproduction:
+  version: 2026-06-26-historical
+  submission_status: hold_pending_protocol_v5
+  active_protocol: freqduet-eval-v5
+  active_source_commit: f2a5ae8e183c48ca2e15295e854913736ca88857
+  contract: ../md/protocol_v5_journey_feasible_contract_2026-08-08.md
+
+# Everything below remains the path/config map for the historical June
+# composite package. It is reachable only through the explicit historical
+# reproduction gate and cannot be promoted as V6 evidence.
 project_root: /home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet
 python_path: .
 
