@@ -162,6 +162,7 @@ def build_scheduler_spec(
         "ckpt_glob": "checkpoint.pt",
         "result_dir": str(absolute),
         "local_result_dir": str(absolute),
+        "wait_for_files": list(args.wait_for_files),
         "allow_cpu_training": True,
         "cpu_training_justification": (
             "Independent headless MuJoCo PPO cells use one physical CPU core."
@@ -321,6 +322,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--allow-duplicate", action="store_true")
     parser.add_argument("--skip-launch-staging", action="store_true")
     parser.add_argument("--stage-input-path", action="append", default=[])
+    parser.add_argument("--wait-for-file", action="append", default=[])
     return parser
 
 
@@ -341,6 +343,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.stage_input_paths = [
         str(Path(path).expanduser().resolve())
         for path in args.stage_input_path if str(path).strip()
+    ]
+    args.wait_for_files = [
+        str(Path(path).expanduser().resolve())
+        for path in args.wait_for_file if str(path).strip()
     ]
     if not args.environments or not set(args.environments).issubset(
         validation.DEFAULT_ENV_IDS

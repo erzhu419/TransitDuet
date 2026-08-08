@@ -48,6 +48,7 @@ def args_fixture() -> argparse.Namespace:
         code_revision="a" * 40,
         source_manifest_sha256="b" * 64,
         stage_input_paths=[],
+        wait_for_files=["/tmp/preflight/cell_summary.json"],
         skip_launch_staging=False,
         allow_duplicate=False,
     )
@@ -115,6 +116,9 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         self.assertIsNone(spec["require_node"])
         self.assertEqual(spec["cpu"], 1)
         self.assertEqual(spec["ram_mb"], 2048)
+        self.assertEqual(
+            spec["wait_for_files"], ["/tmp/preflight/cell_summary.json"]
+        )
 
 
 if __name__ == "__main__":
