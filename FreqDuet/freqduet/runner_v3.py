@@ -267,6 +267,8 @@ class DiagnosticLog:
         'lower_load_hold_penalty_mean', 'lower_load_hold_penalty_max',
         'lower_load_ratio_mean', 'lower_normalized_person_delay_mean',
         'lower_causal_guard_enabled', 'lower_causal_guard_evidence_mode',
+        'lower_causal_guard_policy_mask_enabled',
+        'lower_causal_guard_feasible_actions_mean',
         'lower_causal_guard_active_mean',
         'lower_causal_guard_limit_mean_s',
         'lower_causal_guard_adjustment_mean_s',
@@ -1176,7 +1178,8 @@ class TransitDuetV2Runner:
         freq_cfg = config.get('frequency', {})
         self.upper_state_dim = upper_cfg.get('state_dim', 10)
         if (freq_cfg.get('enable', False)
-                or self.protocol_version == 'freqduet-eval-v5'):
+                or self.protocol_version in {
+                    'freqduet-eval-v5', 'freqduet-eval-v6'}):
             self.upper_state_dim = self.env.upper_state_dim
         freq_holdfb_cfg = freq_cfg.get('hold_feedback', {}) or {}
         self.freq_holdfb_enable = bool(freq_holdfb_cfg.get('enable', False))
@@ -1958,6 +1961,34 @@ class TransitDuetV2Runner:
         )
         self.lower_causal_holding_guard = CausalHoldingActionGuard.from_config(
             lower_cfg.get('causal_holding_guard', {}))
+        guard_cfg = lower_cfg.get('causal_holding_guard', {}) or {}
+        self.lower_causal_guard_policy_mask_enabled = bool(
+            guard_cfg.get('policy_mask', False))
+        self.lower_action_limit_feature_index = None
+        if self.lower_causal_guard_policy_mask_enabled:
+            if not self.lower_causal_holding_guard.enabled:
+                raise ValueError(
+                    "lower causal guard policy_mask requires enable=true")
+            if self.lower_action_bins is None:
+                raise ValueError(
+                    "lower causal guard policy_mask requires action_bins")
+            if self.lower_action_bins_gate_enabled:
+                raise ValueError(
+                    "lower causal guard policy_mask is incompatible with "
+                    "action_bins_gate")
+            feature = 'causal_hold_limit'
+            if feature not in self.env.lower_context_features:
+                raise ValueError(
+                    "lower causal guard policy_mask requires the "
+                    "causal_hold_limit context feature")
+            self.lower_action_limit_feature_index = (
+                int(self.env._base_state_dim)
+                + self.env.lower_context_features.index(feature))
+        self.env.lower_causal_holding_guard = self.lower_causal_holding_guard
+        self.env.lower_causal_holding_action_scale_s = (
+            float(np.max(self.lower_action_bins))
+            if self.lower_action_bins is not None
+            else float(lower_cfg['action_range']))
         self.env.lower_observation_contract = self.lower_observation_contract
         self.env.headway_reward_mode = self.lower_headway_reward_mode
         self.lower_state_encoder = None
@@ -2018,6 +2049,8 @@ class TransitDuetV2Runner:
                     self.randomness.seed('lower_policy')
                     if self.randomness.isolated else None),
                 action_bins=lower_trainer_action_bins,
+                action_limit_feature_index=(
+                    self.lower_action_limit_feature_index),
                 device=device)
         self.lower_state_dim = lower_state_dim
 
@@ -2496,6 +2529,7 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_active = []
         self._ep_lower_causal_guard_limits = []
         self._ep_lower_causal_guard_adjustments = []
+        self._ep_lower_causal_guard_feasible_actions = []
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
@@ -5452,8 +5486,14 @@ class TransitDuetV2Runner:
         if getattr(self, '_fixed_expert_active', False):
             return np.asarray([0.0], dtype=np.float32)
         state = self._augment_lower_state(obs, last_action)
+        state_tensor = torch.from_numpy(state).float().to(self.device)
+        if self.lower_causal_guard_policy_mask_enabled:
+            feasible = self.lower_trainer.policy_net.feasible_action_mask(
+                state_tensor.unsqueeze(0))
+            self._ep_lower_causal_guard_feasible_actions.append(
+                float(feasible.sum().item()))
         action = self.lower_trainer.policy_net.get_action(
-            torch.from_numpy(state).float().to(self.device),
+            state_tensor,
             deterministic=deterministic)
         return self._quantize_lower_action(action)
 
@@ -7480,6 +7520,7 @@ class TransitDuetV2Runner:
         self._ep_lower_causal_guard_active = []
         self._ep_lower_causal_guard_limits = []
         self._ep_lower_causal_guard_adjustments = []
+        self._ep_lower_causal_guard_feasible_actions = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -8127,6 +8168,8 @@ class TransitDuetV2Runner:
             self._ep_lower_causal_guard_limits)
         lower_causal_guard_adjustment_stat = _stat(
             self._ep_lower_causal_guard_adjustments)
+        lower_causal_guard_feasible_action_stat = _stat(
+            self._ep_lower_causal_guard_feasible_actions)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8536,6 +8579,10 @@ class TransitDuetV2Runner:
                 self.lower_causal_holding_guard.enabled),
             'lower_causal_guard_evidence_mode': (
                 self.lower_causal_holding_guard.evidence_mode),
+            'lower_causal_guard_policy_mask_enabled': int(
+                self.lower_causal_guard_policy_mask_enabled),
+            'lower_causal_guard_feasible_actions_mean': round(
+                lower_causal_guard_feasible_action_stat['mean'], 6),
             'lower_causal_guard_active_mean': round(
                 lower_causal_guard_active_stat['mean'], 6),
             'lower_causal_guard_limit_mean_s': round(

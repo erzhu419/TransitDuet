@@ -126,12 +126,23 @@ class CategoricalPolicy(nn.Module):
     """Categorical policy over a configured holding-time alphabet."""
 
     def __init__(self, num_inputs, action_bins, hidden_dim=64, init_w=3e-3,
-                 sample_seed=None, device="cpu"):
+                 sample_seed=None, device="cpu",
+                 action_limit_feature_index=None):
         super().__init__()
         bins = torch.as_tensor(action_bins, dtype=torch.float32).view(-1, 1)
         if bins.numel() < 2:
             raise ValueError("action_bins must contain at least two values")
+        if action_limit_feature_index is not None:
+            action_limit_feature_index = int(action_limit_feature_index)
+            if not 0 <= action_limit_feature_index < int(num_inputs):
+                raise ValueError(
+                    "action_limit_feature_index is outside the policy state")
+            if not torch.any(torch.isclose(
+                    bins.reshape(-1), torch.tensor(0.0))):
+                raise ValueError(
+                    "a dynamically masked action alphabet must include zero")
         self.register_buffer("action_bins", bins)
+        self.action_limit_feature_index = action_limit_feature_index
         self.fc1 = nn.Linear(num_inputs, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.logits = nn.Linear(hidden_dim, bins.shape[0])
@@ -148,11 +159,45 @@ class CategoricalPolicy(nn.Module):
         x = F.relu(self.fc2(x))
         return self.logits(x)
 
+    def feasible_action_mask(self, state):
+        """Return the state-dependent executable action alphabet.
+
+        The configured state feature is the causal holding limit normalized by
+        the largest action bin. Keeping the mask inside the policy makes target
+        backups, actor optimization, sampling, and deterministic evaluation use
+        the same feasible action set.
+        """
+        batch = int(state.shape[0])
+        n_actions = int(self.action_bins.shape[0])
+        if self.action_limit_feature_index is None:
+            return torch.ones(
+                (batch, n_actions), dtype=torch.bool, device=state.device)
+        limit_ratio = torch.clamp(
+            state[:, self.action_limit_feature_index], 0.0, 1.0)
+        max_action = torch.max(self.action_bins).to(
+            device=state.device, dtype=state.dtype)
+        limit_s = limit_ratio.unsqueeze(-1) * max_action
+        bins = self.action_bins.reshape(1, -1).to(
+            device=state.device, dtype=state.dtype)
+        mask = bins <= limit_s + 1e-6
+        zero_idx = torch.argmin(torch.abs(bins), dim=-1).item()
+        mask[:, zero_idx] = True
+        return mask
+
     def dist_info(self, state, epsilon=1e-8):
         logits = self.forward(state)
-        probs = F.softmax(logits, dim=-1)
-        log_probs = torch.log(probs + epsilon)
+        feasible = self.feasible_action_mask(state)
+        masked_logits = logits.masked_fill(
+            ~feasible, torch.finfo(logits.dtype).min)
+        probs = F.softmax(masked_logits, dim=-1)
+        log_probs = torch.where(
+            feasible, torch.log(probs + epsilon), torch.zeros_like(probs))
         return probs, log_probs, logits
+
+    def target_entropy(self, state):
+        feasible_count = self.feasible_action_mask(state).sum(
+            dim=-1, keepdim=True).to(dtype=state.dtype)
+        return 0.98 * torch.log(torch.clamp(feasible_count, min=1.0))
 
     def evaluate(self, state, epsilon=1e-8):
         probs, log_probs, logits = self.dist_info(state, epsilon=epsilon)
@@ -292,6 +337,7 @@ class RESACLagrangianTrainer:
                  cost_limit_semantics="per_decision_rate",
                  critic_aggregation="ensemble_mean_lcb",
                  policy_sample_seed=None,
+                 action_limit_feature_index=None,
                  device='cpu'):
         self.device = device
         self.gamma = gamma
@@ -319,6 +365,9 @@ class RESACLagrangianTrainer:
             raise ValueError("weight_reg_mode must be 'sum' or 'mean'")
 
         self.discrete_actions = None
+        self.action_limit_feature_index = (
+            None if action_limit_feature_index is None
+            else int(action_limit_feature_index))
         if action_bins is not None:
             bins = np.asarray(action_bins, dtype=np.float32).reshape(-1)
             bins = np.unique(np.clip(bins, 0.0, float(action_range)))
@@ -328,8 +377,13 @@ class RESACLagrangianTrainer:
                 bins, dtype=torch.float32, device=device).view(-1, 1)
             self.policy_net = CategoricalPolicy(
                 state_dim, bins, hidden_dim, sample_seed=policy_sample_seed,
-                device=device).to(device)
+                device=device,
+                action_limit_feature_index=self.action_limit_feature_index,
+            ).to(device)
         else:
+            if self.action_limit_feature_index is not None:
+                raise ValueError(
+                    "action_limit_feature_index requires categorical actions")
             self.policy_net = GaussianPolicy(
                 state_dim, hidden_dim, action_range,
                 entropy_action_coordinates=entropy_action_coordinates,
@@ -607,8 +661,12 @@ class RESACLagrangianTrainer:
 
             # ──── Alpha update ────
             if self.auto_entropy:
+                target_entropy = self.target_entropy
+                if (discrete_policy
+                        and self.action_limit_feature_index is not None):
+                    target_entropy = self.policy_net.target_entropy(state)
                 alpha_loss = -(self.log_alpha *
-                               (entropy_log_prob + self.target_entropy).detach()).mean()
+                               (entropy_log_prob + target_entropy).detach()).mean()
                 self.alpha_optimizer.zero_grad()
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
@@ -682,6 +740,7 @@ class RESACLagrangianTrainer:
             'cost_limit_semantics': self.cost_limit_semantics,
             'critic_aggregation': self.critic_aggregation,
             'policy_sampling_state': self.policy_net.sampling_state(),
+            'action_limit_feature_index': self.action_limit_feature_index,
         }
 
     def load_training_state_dict(self, state):
@@ -693,6 +752,9 @@ class RESACLagrangianTrainer:
             raise ValueError('lower cost-limit semantics mismatch')
         if state.get('critic_aggregation') != self.critic_aggregation:
             raise ValueError('lower critic aggregation mismatch')
+        if (state.get('action_limit_feature_index')
+                != self.action_limit_feature_index):
+            raise ValueError('lower action-limit feature contract mismatch')
         self.policy_net.load_state_dict(state['policy'])
         self.q_net.load_state_dict(state['q_net'])
         self.target_q_net.load_state_dict(state['target_q_net'])
@@ -723,6 +785,7 @@ class RESACLagrangianTrainer:
             'entropy_action_coordinates': getattr(
                 self.policy_net, 'entropy_action_coordinates', 'categorical'),
             'policy_sampling_state': self.policy_net.sampling_state(),
+            'action_limit_feature_index': self.action_limit_feature_index,
         }, path)
 
     def load(self, path):
@@ -731,6 +794,9 @@ class RESACLagrangianTrainer:
             'critic_aggregation', 'ensemble_mean_lcb')
         if saved_aggregation != self.critic_aggregation:
             raise ValueError('lower checkpoint critic aggregation mismatch')
+        if (ckpt.get('action_limit_feature_index')
+                != self.action_limit_feature_index):
+            raise ValueError('lower checkpoint action-limit contract mismatch')
         self.policy_net.load_state_dict(ckpt['policy'])
         self.q_net.load_state_dict(ckpt['q_net'])
         self.target_q_net.load_state_dict(ckpt['q_net'])

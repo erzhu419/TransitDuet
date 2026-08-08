@@ -2,8 +2,10 @@ import unittest
 from types import SimpleNamespace
 
 import numpy as np
+import torch
 
 from lower.causal_holding_guard import CausalHoldingActionGuard
+from lower.resac_lagrangian import CategoricalPolicy
 from runner_v3 import TransitDuetV2Runner
 
 
@@ -102,6 +104,29 @@ class CausalHoldingActionGuardTest(unittest.TestCase):
             np.asarray([10.0], dtype=np.float32), bus)
 
         self.assertEqual(float(adjusted[0]), 0.0)
+
+    def test_categorical_policy_masks_infeasible_actions_in_distribution(self):
+        policy = CategoricalPolicy(
+            num_inputs=3,
+            action_bins=[0.0, 5.0, 10.0, 15.0, 30.0, 45.0],
+            action_limit_feature_index=1,
+        )
+        state = torch.tensor([
+            [0.0, 0.0, 0.0],
+            [0.0, 10.5 / 45.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ])
+
+        probs, log_probs, _ = policy.dist_info(state)
+        feasible = policy.feasible_action_mask(state)
+
+        self.assertEqual(feasible[0].tolist(), [True, False, False, False, False, False])
+        self.assertEqual(feasible[1].tolist(), [True, True, True, False, False, False])
+        self.assertTrue(bool(feasible[2].all()))
+        self.assertTrue(bool(torch.all(probs[~feasible] == 0.0)))
+        self.assertTrue(bool(torch.isfinite(log_probs).all()))
+        self.assertTrue(bool(torch.allclose(
+            probs.sum(dim=-1), torch.ones(3))))
 
 
 if __name__ == "__main__":

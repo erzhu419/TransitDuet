@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v6_maskguard_hiro.yaml
+_name: F_freqduet_protocol_v6_maskguard_nofreq_hiro
+
+protocol:
+  role: experimental_policy_consistent_guard_no_frequency_v6
+  frequency_contract: no_frequency_features_v6
+
+frequency:
+  enable: false
+  upper_features: false
+  lower_features: false
+  use_historical_prior: false

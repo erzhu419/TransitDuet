@@ -28,13 +28,22 @@ LOCKED_CONFIGS = [
         "noloadcost", "waitonlycredit", "csac",
     )
 ]
+EXPERIMENTAL_CONFIGS = [
+    "F_freqduet_protocol_v6_maskguard_hiro",
+    "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
+]
 
 
-def validate(configs: list[str]) -> dict[str, object]:
+def validate(
+    configs: list[str], *, allow_experimental: bool = False
+) -> dict[str, object]:
     names = [config_name(value) for value in configs]
     if len(names) != len(set(names)):
         raise ValueError("V6 configs must be unique")
-    unknown = sorted(set(names) - set(LOCKED_CONFIGS))
+    allowed = set(LOCKED_CONFIGS)
+    if allow_experimental:
+        allowed.update(EXPERIMENTAL_CONFIGS)
+    unknown = sorted(set(names) - allowed)
     if unknown:
         raise ValueError(f"unregistered V6 configs: {unknown}")
     if "F_freqduet_protocol_v6_main_hiro" not in names:
@@ -108,14 +117,24 @@ def validate(configs: list[str]) -> dict[str, object]:
         "configs": names,
         "scenario_contract_sha256": next(iter(scenario_hashes)),
         "main_checks": main_checks,
+        "experimental_configs": sorted(
+            set(names).intersection(EXPERIMENTAL_CONFIGS)),
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-experimental",
+        action="store_true",
+        help="Permit registered exploratory configs without promoting them.",
+    )
     parser.add_argument("configs", nargs="*", default=LOCKED_CONFIGS)
     args = parser.parse_args()
-    print(json.dumps(validate(args.configs), indent=2))
+    print(json.dumps(validate(
+        args.configs,
+        allow_experimental=args.allow_experimental,
+    ), indent=2))
 
 
 if __name__ == "__main__":

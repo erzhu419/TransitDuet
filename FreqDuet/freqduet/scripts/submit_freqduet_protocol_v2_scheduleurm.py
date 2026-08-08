@@ -107,7 +107,7 @@ def git_output(*args: str) -> str:
 
 def preflight_source(
     configs: list[str], protocol: str, require_clean: bool,
-    expected_commit: str | None,
+    expected_commit: str | None, allow_experimental_configs: bool = False,
 ) -> str:
     commit = git_output("rev-parse", "HEAD")
     if expected_commit and commit != str(expected_commit).strip():
@@ -130,12 +130,15 @@ def preflight_source(
         ]
         if protocol == "protocol-v6":
             names = [Path(name).stem for name in names]
+        validator_command = [
+            sys.executable,
+            str(ROOT / "scripts" / validator),
+        ]
+        if protocol == "protocol-v6" and allow_experimental_configs:
+            validator_command.append("--allow-experimental")
+        validator_command.extend(names)
         process = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts" / validator),
-                *names,
-            ],
+            validator_command,
             cwd=ROOT,
             text=True,
             stdout=subprocess.PIPE,
@@ -184,6 +187,11 @@ def main() -> None:
     )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--allow-duplicate", action="store_true")
+    parser.add_argument(
+        "--allow-experimental-configs",
+        action="store_true",
+        help="Allow registered V6 exploratory configs; requires --stage exploratory.",
+    )
     args = parser.parse_args()
 
     configs = parse_csv(args.configs)
@@ -216,6 +224,9 @@ def main() -> None:
     if protocol_label(configs) == "protocol-v6" and set(train_seeds) & set(
             eval_seeds):
         parser.error("V6 train and evaluation seed sets must be disjoint")
+    if args.allow_experimental_configs and args.stage != "exploratory":
+        parser.error(
+            "--allow-experimental-configs requires --stage exploratory")
     total = len(configs) * len(train_seeds)
     shards = ranges(total, args.shard_size)
     result_base = f"results_freqduet/{args.run_name}"
@@ -224,7 +235,9 @@ def main() -> None:
     try:
         commit = preflight_source(
             configs, protocol, args.require_clean_source,
-            args.expected_commit)
+            args.expected_commit,
+            allow_experimental_configs=args.allow_experimental_configs,
+        )
     except RuntimeError as exc:
         parser.error(str(exc))
     print(

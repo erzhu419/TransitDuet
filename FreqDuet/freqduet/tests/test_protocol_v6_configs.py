@@ -1,7 +1,10 @@
+from tempfile import TemporaryDirectory
 import unittest
 
+from runner_v3 import TransitDuetV2Runner
+from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
-from scripts.validate_freqduet_protocol_v6_configs import validate
+from scripts.validate_freqduet_protocol_v6_configs import ROOT, validate
 
 
 CONFIGS = {
@@ -126,6 +129,70 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                 CONFIGS["main"],
                 "F_freqduet_protocol_v5_main_hiro",
             ])
+
+    def test_experimental_maskguard_requires_explicit_validator_opt_in(self):
+        configs = [CONFIGS["main"], "F_freqduet_protocol_v6_maskguard_hiro"]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            ["F_freqduet_protocol_v6_maskguard_hiro"],
+        )
+
+    def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_nofreq_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        self.assertEqual(
+            runner.upper_state_dim,
+            runner.env.upper_state_dim + runner.upper_plan_context_dim,
+        )
+        runner._current_ep = runner.upper_warmup
+        runner._episode_training = False
+        runner.env.reset()
+        trip = runner.env.timetables[0]
+        target = runner._upper_callback_v2(
+            runner.env._build_upper_state(trip), trip)
+        self.assertGreater(float(target), 0.0)
+
+    def test_maskguard_uses_same_feasible_actions_in_policy_and_execution(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_maskguard_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        expected_index = (
+            runner.env._base_state_dim
+            + runner.env.lower_context_features.index("causal_hold_limit"))
+        self.assertTrue(runner.lower_causal_guard_policy_mask_enabled)
+        self.assertEqual(runner.lower_action_limit_feature_index, expected_index)
+        self.assertEqual(
+            runner.lower_trainer.policy_net.action_limit_feature_index,
+            expected_index,
+        )
+        runner._current_ep = 0
+        runner._episode_training = False
+        runner.env.reset()
+        runner.env._upper_policy_callback = None
+        states, _, _ = runner.env.initialize_state()
+        key = next(key for key, value in states.items() if value)
+        raw_state = states[key][0]
+        action = runner._lower_action_for_agent(
+            raw_state, key, deterministic=False)
+        encoded = runner._augment_lower_state(raw_state, 0.0)
+        limit_s = (
+            float(encoded[expected_index])
+            * float(runner.lower_action_bins.max()))
+        self.assertLessEqual(float(action[0]), limit_s + 1e-6)
+        self.assertEqual(
+            runner._ep_lower_causal_guard_adjustments[-1], 0.0)
 
 
 if __name__ == "__main__":

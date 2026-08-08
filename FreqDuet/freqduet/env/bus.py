@@ -245,6 +245,8 @@ class Bus(object):
               frequency_tracker=None, lower_frequency_enabled=False,
               lower_context_enabled=False, lower_context_queue_norm=50.0,
               lower_context_features=None, lower_context_gate_value=1.0,
+              causal_holding_guard=None,
+              causal_holding_action_scale_s=60.0,
               headway_recorder=None,
               lower_state_input_schema="legacy_headway_deviation",
               lower_observation_contract="latent_oracle_legacy",
@@ -261,6 +263,9 @@ class Bus(object):
         self._lower_context_features = list(lower_context_features or [])
         self._lower_context_gate_value = float(np.clip(
             lower_context_gate_value, 0.0, 1.0))
+        self._causal_holding_guard = causal_holding_guard
+        self._causal_holding_action_scale_s = max(
+            float(causal_holding_action_scale_s), 1e-6)
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -401,6 +406,33 @@ class Bus(object):
                         self._frequency_tracker.local_promotion_summary(
                             station_id, self.direction).get("age", 0.0))
                 schedule_slack = (target_hw - self.forward_headway) / target_hw_safe
+                guard_scale_s = getattr(
+                    self, '_causal_holding_action_scale_s', 60.0)
+                causal_holding_guard = getattr(
+                    self, '_causal_holding_guard', None)
+                causal_hold_limit = 1.0
+                if (causal_holding_guard is not None
+                        and causal_holding_guard.enabled):
+                    departure_mode = (
+                        causal_holding_guard.evidence_mode
+                        == 'pre_action_departure_v6')
+                    if departure_mode:
+                        guard_headway = self.pre_action_forward_headway
+                        guard_evidence_valid = (
+                            self.pre_action_forward_headway_source
+                            == 'matched_departure_event')
+                    else:
+                        guard_headway = self.forward_headway
+                        guard_evidence_valid = (
+                            self.forward_headway_source == 'arrival_event')
+                    guard_result = causal_holding_guard.evaluate(
+                        guard_scale_s,
+                        forward_headway_s=guard_headway,
+                        target_headway_s=target_hw,
+                        evidence_valid=guard_evidence_valid,
+                    )
+                    causal_hold_limit = (
+                        float(guard_result.allowed_s) / guard_scale_s)
                 fwd_norm = self.forward_headway / target_hw_safe
                 bwd_norm = self.backward_headway / target_hw_safe
                 headway_balance = (
@@ -459,6 +491,8 @@ class Bus(object):
                     'speed_residual': float(np.clip(speed_residual, -2.0, 2.0)),
                     'shock_age': float(np.clip(shock_age, 0.0, 1.0)),
                     'schedule_slack': float(np.clip(schedule_slack, -2.0, 2.0)),
+                    'causal_hold_limit': float(np.clip(
+                        causal_hold_limit, 0.0, 1.0)),
                     'fwd_headway_norm': float(np.clip(fwd_norm, 0.0, 3.0)),
                     'bwd_headway_norm': float(np.clip(bwd_norm, 0.0, 3.0)),
                     'headway_balance': float(np.clip(headway_balance, -3.0, 3.0)),
@@ -474,7 +508,9 @@ class Bus(object):
                 }
                 gate = self._lower_context_gate_value
                 self.obs.extend([
-                    gate * context_values[name]
+                    (context_values[name]
+                     if name == 'causal_hold_limit'
+                     else gate * context_values[name])
                     for name in self._lower_context_features
                     if name in context_values
                 ])

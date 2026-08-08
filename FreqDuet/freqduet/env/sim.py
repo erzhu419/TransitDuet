@@ -823,6 +823,11 @@ class env_bus(object):
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features,
                           lower_context_gate_value=self.lower_context_gate_value,
+                          causal_holding_guard=getattr(
+                              self, 'lower_causal_holding_guard', None),
+                          causal_holding_action_scale_s=getattr(
+                              self, 'lower_causal_holding_action_scale_s',
+                              60.0),
                           headway_recorder=(
                               self.headway_events
                               if self.headway_state_mode == 'arrival_event'
@@ -1082,6 +1087,7 @@ class env_bus(object):
             'next_launch_gap',
             'time_sin',
             'time_cos',
+            'causal_hold_limit',
             'prev_queue',
             'next_queue',
         }

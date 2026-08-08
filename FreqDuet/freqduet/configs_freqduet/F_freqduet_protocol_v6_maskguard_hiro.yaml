@@ -1,0 +1,20 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_maskguard_hiro
+
+protocol:
+  role: experimental_policy_consistent_causal_guard_v6
+
+lower:
+  causal_holding_guard:
+    policy_mask: true
+
+frequency:
+  lower_context:
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
+      - causal_hold_limit

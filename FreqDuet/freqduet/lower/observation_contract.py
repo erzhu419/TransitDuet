@@ -23,6 +23,10 @@ _CONTEXT_LEDGER = {
     "speed_residual": ("AVL segment speed", "latest causal AVL sample"),
     "shock_age": ("causal APC boarding residual filter", "latest completed filter bin"),
     "schedule_slack": ("executable upper plan and exact forward headway", "current decision"),
+    "causal_hold_limit": (
+        "matched predecessor departure and executable target headway",
+        "current pre-action departure event",
+    ),
     "fwd_headway_norm": ("same-stop AVL arrival recorder", "current arrival event"),
     "route_progress": ("AVL vehicle location", "current decision"),
     "station_phase": ("static stop sequence and AVL stop id", "current stop event"),

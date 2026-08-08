@@ -14,7 +14,7 @@ class LowerObservationContractTest(unittest.TestCase):
             "frequency_source": "apc_boardings",
             "context_features": [
                 "load", "capacity", "queue", "speed_residual",
-                "shock_age", "schedule_slack",
+                "shock_age", "schedule_slack", "causal_hold_limit",
             ],
         }
         values.update(overrides)
@@ -29,6 +29,9 @@ class LowerObservationContractTest(unittest.TestCase):
         self.assertTrue(all(row["deployable"] for row in rows))
         self.assertTrue(all("latent" not in row["source"] for row in rows))
         self.assertEqual(len(contract.fingerprint), 64)
+        limit_row = next(
+            row for row in rows if row["feature"] == "causal_hold_limit")
+        self.assertIn("predecessor departure", limit_row["source"])
 
     def test_rejects_stale_follower_and_true_neighbor_queues(self):
         with self.assertRaisesRegex(ValueError, "rejects context"):
