@@ -86,6 +86,8 @@ class HeadwayEventRecorder:
 
     def __init__(self) -> None:
         self._last_arrival: dict[tuple[int, bool], float] = {}
+        self._last_arrival_trip: dict[tuple[int, bool], int] = {}
+        self._last_departure: dict[tuple[int, bool], dict[str, float | int]] = {}
         self.headways_s: list[float] = []
         self.events: list[dict[str, Any]] = []
 
@@ -105,6 +107,7 @@ class HeadwayEventRecorder:
             headway_s = max(0.0, time_s - previous)
             self.headways_s.append(headway_s)
         self._last_arrival[key] = time_s
+        self._last_arrival_trip[key] = int(trip_id)
         self.events.append({
             "station_id": key[0],
             "direction": key[1],
@@ -123,6 +126,35 @@ class HeadwayEventRecorder:
         """Return the last causal arrival before the caller records its event."""
         value = self._last_arrival.get((int(station_id), bool(direction)))
         return None if value is None else float(value)
+
+    def previous_arrival_event(
+        self, station_id: int, direction: bool
+    ) -> dict[str, float | int] | None:
+        key = (int(station_id), bool(direction))
+        if key not in self._last_arrival:
+            return None
+        return {
+            "time_s": float(self._last_arrival[key]),
+            "trip_id": int(self._last_arrival_trip[key]),
+        }
+
+    def record_departure(
+        self,
+        station_id: int,
+        direction: bool,
+        departure_time_s: float,
+        trip_id: int,
+    ) -> None:
+        self._last_departure[(int(station_id), bool(direction))] = {
+            "time_s": float(departure_time_s),
+            "trip_id": int(trip_id),
+        }
+
+    def previous_departure_event(
+        self, station_id: int, direction: bool
+    ) -> dict[str, float | int] | None:
+        event = self._last_departure.get((int(station_id), bool(direction)))
+        return None if event is None else dict(event)
 
     def summary(self) -> dict[str, float | int]:
         values = np.asarray(self.headways_s, dtype=np.float64)

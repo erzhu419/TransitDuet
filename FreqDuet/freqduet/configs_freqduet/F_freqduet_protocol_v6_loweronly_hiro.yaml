@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_loweronly_hiro
+
+protocol:
+  role: ablation_lower_high_only_v6
+
+frequency:
+  upper_features: false
+  replace_upper_demand_with_low: false
+

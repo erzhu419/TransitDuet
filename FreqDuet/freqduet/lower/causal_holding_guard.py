@@ -27,10 +27,10 @@ class CausalHoldingGuardResult:
 class CausalHoldingActionGuard:
     """Prevent holding beyond the observed gap to the preceding vehicle.
 
-    At an arrival event, holding increases the forward departure headway by the
-    same duration. The deployable upper bound is therefore a configured fraction
-    of ``max(target_headway - observed_forward_headway, 0)``. No follower state
-    or future trajectory is used.
+    Holding increases the current bus's forward departure headway by the same
+    duration. V6 uses the matched predecessor departure observed after mandatory
+    service; the legacy V5 mode uses the same-stop arrival event. Neither mode
+    uses follower state or a future trajectory.
     """
 
     def __init__(
@@ -38,15 +38,22 @@ class CausalHoldingActionGuard:
         enabled: bool = False,
         max_deficit_fraction: float = 1.0,
         minimum_deficit_s: float = 0.0,
+        evidence_mode: str = "arrival_event_v5",
     ) -> None:
         self.enabled = bool(enabled)
         self.max_deficit_fraction = float(max_deficit_fraction)
         self.minimum_deficit_s = float(minimum_deficit_s)
+        self.evidence_mode = str(evidence_mode).strip().lower()
         if not np.isfinite(self.max_deficit_fraction) or not (
                 0.0 <= self.max_deficit_fraction <= 1.0):
             raise ValueError("max_deficit_fraction must lie in [0, 1]")
         if not np.isfinite(self.minimum_deficit_s) or self.minimum_deficit_s < 0.0:
             raise ValueError("minimum_deficit_s must be finite and non-negative")
+        if self.evidence_mode not in {
+                "arrival_event_v5", "pre_action_departure_v6"}:
+            raise ValueError(
+                "evidence_mode must be arrival_event_v5 or "
+                "pre_action_departure_v6")
 
     @classmethod
     def from_config(
@@ -57,6 +64,7 @@ class CausalHoldingActionGuard:
             enabled=cfg.get("enable", False),
             max_deficit_fraction=cfg.get("max_deficit_fraction", 1.0),
             minimum_deficit_s=cfg.get("minimum_deficit_s", 0.0),
+            evidence_mode=cfg.get("evidence_mode", "arrival_event_v5"),
         )
 
     def evaluate(

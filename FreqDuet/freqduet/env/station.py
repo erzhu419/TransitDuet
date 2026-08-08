@@ -12,6 +12,7 @@ class Station(object):
         # waiting passengers in this station
         self.waiting_passengers = np.array([])
         self.total_passenger = []
+        self._pending_passengers = []
         # the direction is True if upstream, else False
         self.direction = direction
         # od is the passengers demand of every hour
@@ -48,85 +49,134 @@ class Station(object):
     #                     self.waiting_passengers = np.append(self.waiting_passengers, new_passengers)
     #                     self.total_passenger.extend(new_passengers)
 
+    def schedule_passenger_window(
+            self, current_time, stations, passenger_update_interval=1,
+            demand_multipliers=None, demand_scale=1.0,
+            od_multipliers=None, peak_shift=0,
+            service_start_hour=6, service_end_hour=19,
+            scenario_tape=None):
+        """Sample a Poisson window but keep future arrivals unobservable."""
+        interval_s = float(passenger_update_interval)
+        if interval_s <= 0.0:
+            raise ValueError("passenger_update_interval must be positive")
+        if self.od is None:
+            return 0
+
+        service_start_hour = int(service_start_hour)
+        service_end_hour = int(service_end_hour)
+        hour = service_start_hour + int(float(current_time) // 3600)
+        hour = max(service_start_hour, min(service_end_hour, hour))
+        lookup_hour = max(
+            service_start_hour,
+            min(service_end_hour, hour + int(peak_shift)),
+        )
+        period_od = self.od.get(f"{lookup_hour:02}:00:00", {})
+        demand_mult = 1.0
+        if demand_multipliers is not None and hour in demand_multipliers:
+            demand_mult = demand_multipliers[hour]
+        demand_mult *= max(0.0, float(demand_scale))
+
+        scheduled = 0
+        for destination_name, demand in period_od.items():
+            if demand <= 0:
+                continue
+            od_mult = 1.0
+            if od_multipliers is not None:
+                od_key = (
+                    int(self.station_id),
+                    bool(self.direction),
+                    str(destination_name),
+                )
+                od_mult = float(od_multipliers.get(od_key, 1.0))
+            arrival_rate = (
+                float(demand) * demand_mult * od_mult / 3600.0 * interval_s)
+            if scenario_tape is None:
+                count = int(np.random.poisson(arrival_rate))
+            else:
+                count = scenario_tape.poisson(
+                    arrival_rate,
+                    "passenger_arrival_window",
+                    int(self.station_id),
+                    bool(self.direction),
+                    str(destination_name),
+                    float(current_time),
+                    interval_s,
+                )
+            if count <= 0:
+                continue
+            destination = next(
+                station for station in stations
+                if station.station_name == destination_name
+                and station.direction == self.direction
+            )
+            for index in range(count):
+                if scenario_tape is None:
+                    offset_s = float(np.random.uniform(0.0, interval_s))
+                else:
+                    offset_s = scenario_tape.uniform(
+                        0.0,
+                        interval_s,
+                        "passenger_arrival_offset",
+                        int(self.station_id),
+                        bool(self.direction),
+                        str(destination_name),
+                        float(current_time),
+                        int(index),
+                    )
+                # A draw at exactly zero must not become visible before the
+                # first simulation second in the sampled window has elapsed.
+                offset_s = max(offset_s, float(np.nextafter(0.0, 1.0)))
+                passenger = Passenger(
+                    float(current_time) + offset_s, self, destination)
+                self._pending_passengers.append(passenger)
+            scheduled += int(count)
+        if scheduled:
+            self._pending_passengers.sort(key=lambda item: item.appear_time)
+        return scheduled
+
+    def release_passengers(self, current_time, return_details=False):
+        """Expose only passengers whose sampled arrival time has elapsed."""
+        split = 0
+        now = float(current_time)
+        for passenger in self._pending_passengers:
+            if float(passenger.appear_time) > now + 1e-9:
+                break
+            split += 1
+        released = self._pending_passengers[:split]
+        if split:
+            self._pending_passengers = self._pending_passengers[split:]
+            self.waiting_passengers = np.append(
+                self.waiting_passengers, released)
+            self.total_passenger.extend(released)
+        od_counts = {}
+        if return_details:
+            for passenger in released:
+                key = (
+                    int(self.station_id),
+                    int(passenger.destination_station.station_id),
+                    bool(self.direction),
+                )
+                od_counts[key] = od_counts.get(key, 0) + 1
+            return len(released), od_counts
+        return len(released)
+
     def station_update(self, current_time, stations, passenger_update_interval=1,
                         demand_multipliers=None, demand_scale=1.0,
                         od_multipliers=None, peak_shift=0,
                         service_start_hour=6, service_end_hour=19,
                         return_details=False, scenario_tape=None):
-        """
-        每秒更新一次，减少不必要的泊松分布计算
-        demand_multipliers: dict {hour: float} episode-level demand noise
-        peak_shift: int, shift OD lookup hour by this amount
-        """
-        new_passenger_count = 0
-        new_passenger_od = {} if return_details else None
-        if self.od is not None:
-            service_start_hour = int(service_start_hour)
-            service_end_hour = int(service_end_hour)
-            hour = service_start_hour + int(current_time // 3600)
-            hour = max(service_start_hour, min(service_end_hour, hour))
-            # Apply peak shift: look up demand from shifted hour
-            lookup_hour = max(
-                service_start_hour,
-                min(service_end_hour, hour + int(peak_shift)),
-            )
-            effective_period_str = f"{lookup_hour:02}:00:00"
-            period_od = self.od.get(effective_period_str, {})
-
-            # Episode-level demand multiplier
-            demand_mult = 1.0
-            if demand_multipliers is not None and hour in demand_multipliers:
-                demand_mult = demand_multipliers[hour]
-            demand_mult *= max(0.0, float(demand_scale))
-
-            for destination_name, demand in period_od.items():
-                if demand > 0:
-                    od_mult = 1.0
-                    if od_multipliers is not None:
-                        od_key = (
-                            int(self.station_id),
-                            bool(self.direction),
-                            str(destination_name),
-                        )
-                        od_mult = float(od_multipliers.get(od_key, 1.0))
-                    demand_per_second = demand * demand_mult * od_mult / 3600.0
-
-                    arrival_rate = demand_per_second * passenger_update_interval
-                    if scenario_tape is None:
-                        destination_demand_num = int(np.random.poisson(arrival_rate))
-                    else:
-                        destination_demand_num = scenario_tape.poisson_stream(
-                            arrival_rate,
-                            "passenger_arrival",
-                            int(self.station_id),
-                            bool(self.direction),
-                            str(destination_name),
-                        )
-
-                    if destination_demand_num > 0:
-                        destination = next(
-                            x for x in stations
-                            if x.station_name == destination_name and x.direction == self.direction
-                        )
-                        if return_details:
-                            od_key = (
-                                int(self.station_id),
-                                int(destination.station_id),
-                                bool(self.direction),
-                            )
-                            new_passenger_od[od_key] = (
-                                new_passenger_od.get(od_key, 0)
-                                + int(destination_demand_num)
-                            )
-
-                        # 创建新乘客并更新等候队列
-                        new_passengers = [
-                            Passenger(current_time, self, destination)
-                            for _ in range(destination_demand_num)
-                        ]
-                        self.waiting_passengers = np.append(self.waiting_passengers, new_passengers)
-                        self.total_passenger.extend(new_passengers)
-                        new_passenger_count += int(destination_demand_num)
-        if return_details:
-            return new_passenger_count, new_passenger_od
-        return new_passenger_count
+        """Compatibility wrapper for scheduling one window and releasing due rows."""
+        self.schedule_passenger_window(
+            current_time,
+            stations,
+            passenger_update_interval=passenger_update_interval,
+            demand_multipliers=demand_multipliers,
+            demand_scale=demand_scale,
+            od_multipliers=od_multipliers,
+            peak_shift=peak_shift,
+            service_start_hour=service_start_hour,
+            service_end_hour=service_end_hour,
+            scenario_tape=scenario_tape,
+        )
+        return self.release_passengers(
+            current_time, return_details=return_details)

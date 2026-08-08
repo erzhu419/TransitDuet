@@ -23,7 +23,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.paper_submission_gate import require_submission_ready
+from scripts.paper_submission_gate import (
+    require_no_missing_artifacts,
+    require_submission_ready,
+)
 
 
 DEFAULT_MANIFEST = ROOT / "paper_manifest.yaml"
@@ -646,7 +649,10 @@ def main() -> None:
     out_dir = Path(args.out_dir)
     manifest = read_manifest(manifest_path)
     require_submission_ready(
-        manifest, allow_historical=args.allow_historical)
+        manifest,
+        allow_historical=args.allow_historical,
+        manifest_path=manifest_path,
+    )
     if out_dir.exists() and not args.no_clean:
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -663,6 +669,7 @@ def main() -> None:
     copy_paper_scripts(manifest, out_dir, copied, missing)
     copy_paper_curation(manifest, out_dir, copied, missing)
     build_negative_appendix(manifest, out_dir, copied, missing)
+    require_no_missing_artifacts(missing)
     write_readme(out_dir, manifest, copied, missing)
 
     payload = {

@@ -17,6 +17,21 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+try:
+    from scripts.analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        runtime_environment,
+        validate_csv_artifact,
+    )
+except ModuleNotFoundError:  # Direct execution from the scripts directory.
+    from analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        runtime_environment,
+        validate_csv_artifact,
+    )
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -33,8 +48,12 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     V4_SAFETY_METRICS,
     V5_SAFETY_METRICS,
     config_fingerprint,
+    git_provenance,
+    protocol_version_for_config,
+    scenario_contract,
     source_fingerprint,
 )
+from scripts import run_freqduet_protocol_v2_matrix as matrix_protocol
 
 
 BASELINE_VARIANTS = ("fixed_headway", "rule_holding", "rule_mpc")
@@ -51,6 +70,43 @@ DEFAULT_DOMAIN_CONFIGS = {
     "rushshift": "F_freqduet_gen_rushshift_main_hiro",
 }
 EXTERNAL_BASELINE_MANIFEST = "external_baseline_manifest.json"
+V6_PROTOCOL_VERSION = "freqduet-eval-v6"
+V6_RUN_MANIFEST_VERSION = "freqduet-external-baseline-v6"
+V6_SUMMARY_MANIFEST_VERSION = "freqduet-external-summary-v6"
+V6_SCENARIO_CONTRACT_VERSION = "freqduet-scenario-contract-v1"
+V6_COMMAND_CONTRACT_VERSION = "freqduet-external-command-v1"
+V6_DIAGNOSTICS_PRIMARY_KEY = ["config", "variant", "eval_seed"]
+V6_PER_SEED_PRIMARY_KEY = ["config", "method", "eval_seed"]
+V6_SUMMARY_PRIMARY_KEY = ["config", "domain", "method"]
+V6_EXECUTION_METRICS_FALLBACK = [
+    "fleet_denied_retry_trip_seconds",
+    "commanded_holding_vehicle_seconds",
+    "commanded_holding_passenger_seconds",
+    "commanded_holding_passenger_min_per_generated",
+    "terminal_actual_dispatch_gap_mean_s",
+    "terminal_dispatch_execution_error_mean_s",
+    "terminal_dispatch_execution_error_abs_mean_s",
+]
+
+
+def _ordered_union(*groups: list[str] | tuple[str, ...]) -> list[str]:
+    result = []
+    for group in groups:
+        for value in group:
+            if value not in result:
+                result.append(value)
+    return result
+
+
+V6_EXECUTION_METRICS = _ordered_union(
+    list(getattr(matrix_protocol, "V6_EXECUTION_METRICS", [])),
+    V6_EXECUTION_METRICS_FALLBACK,
+)
+V6_SAFETY_METRICS = _ordered_union(
+    V5_SAFETY_METRICS,
+    list(getattr(matrix_protocol, "V6_SAFETY_METRICS", [])),
+    V6_EXECUTION_METRICS,
+)
 
 
 def parse_csv_list(value: str, cast=str) -> list:
@@ -122,6 +178,8 @@ def external_evaluator_fingerprint() -> dict[str, object]:
     paths = [
         Path(__file__).resolve(),
         ROOT / "run_baseline_rule.py",
+        ROOT / "scripts/analysis_provenance.py",
+        ROOT / "scripts/run_freqduet_protocol_v2_matrix.py",
     ]
     digest = hashlib.sha256()
     files = []
@@ -141,6 +199,81 @@ def external_evaluator_fingerprint() -> dict[str, object]:
         "file_count": len(files),
         "files": files,
     }
+
+
+def _fingerprint_sha(record: object, label: str) -> str:
+    if not isinstance(record, dict):
+        raise ValueError(f"{label} fingerprint is missing")
+    value = str(record.get("sha256", ""))
+    if len(value) != 64:
+        raise ValueError(f"{label} fingerprint is invalid")
+    return value
+
+
+def scenario_contract_fingerprint(config: str) -> dict[str, object]:
+    """Use the learned-matrix scenario contract without reimplementation."""
+    record = scenario_contract(config)
+    if record.get("version") != V6_SCENARIO_CONTRACT_VERSION:
+        raise ValueError("matrix scenario contract version mismatch")
+    _validate_self_hashed_record(
+        record, payload_key="payload", label="scenario contract")
+    return record
+
+
+def locked_runtime_environment() -> dict[str, object]:
+    payload = runtime_environment()
+    return {
+        "sha256": canonical_json_sha256(payload),
+        "environment": payload,
+    }
+
+
+def external_command_contract(
+    *,
+    config: str,
+    variant: str,
+    seed: int,
+    episodes: int,
+    direct_scenario_seed: bool,
+    worker_threads: int | None,
+    route_headway_target_s: float | None,
+) -> dict[str, object]:
+    payload = {
+        "version": V6_COMMAND_CONTRACT_VERSION,
+        "entrypoint": "scripts/run_freqduet_external_baselines.py",
+        "config_name": str(config),
+        "variant": str(variant),
+        "method": str(variant),
+        "seed": int(seed),
+        "episodes": int(episodes),
+        "direct_scenario_seed": bool(direct_scenario_seed),
+        "worker_threads": (
+            None if worker_threads is None else int(worker_threads)),
+        "route_headway_target_s": (
+            None if route_headway_target_s is None
+            else float(route_headway_target_s)),
+    }
+    return {
+        "sha256": canonical_json_sha256(payload),
+        "payload": payload,
+    }
+
+
+def _validate_self_hashed_record(
+    record: object,
+    *,
+    payload_key: str,
+    label: str,
+) -> dict[str, object]:
+    if not isinstance(record, dict):
+        raise ValueError(f"{label} record is missing")
+    payload = record.get(payload_key)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} payload is missing")
+    observed = canonical_json_sha256(payload)
+    if observed != str(record.get("sha256", "")):
+        raise ValueError(f"{label} hash does not match its payload")
+    return payload
 
 
 def install_exact_dispatch_schedule(env, target_fn, projection_mode: str) -> None:
@@ -435,8 +568,8 @@ def run_episode_external(
     projection_mode = "legacy_headway_enforcement"
     if exact_schedule:
         contract_label = str(schedule_contract_version).strip().lower()
-        if contract_label not in {"v4", "v5"}:
-            raise ValueError("exact schedule contract must be v4 or v5")
+        if contract_label not in {"v4", "v5", "v6"}:
+            raise ValueError("exact schedule contract must be v4, v5, or v6")
         if variant == "rule_mpc":
             projection_mode = f"exact_rule_mpc_schedule_{contract_label}"
         elif route_headway_target_s is not None:
@@ -524,6 +657,8 @@ def run_episode_external(
             "fleet_inventory_mode", env.fleet_inventory_mode)),
         "fleet_denied_dispatch_events": int(details.get(
             "fleet_denied_dispatch_events", 0)),
+        "fleet_denied_retry_trip_seconds": float(details.get(
+            "fleet_denied_retry_trip_seconds", 0.0)),
         "fleet_denied_trips": int(details.get("fleet_denied_trips", 0)),
         "fleet_denied_trip_rate": float(details.get(
             "fleet_denied_trip_rate", 0.0)),
@@ -539,6 +674,18 @@ def run_episode_external(
             "holding_passenger_seconds", 0.0)),
         "holding_passenger_min_per_generated": float(details.get(
             "holding_passenger_min_per_generated", 0.0)),
+        "commanded_holding_vehicle_seconds": float(details.get(
+            "commanded_holding_vehicle_seconds", 0.0)),
+        "commanded_holding_passenger_seconds": float(details.get(
+            "commanded_holding_passenger_seconds", 0.0)),
+        "commanded_holding_passenger_min_per_generated": float(details.get(
+            "commanded_holding_passenger_min_per_generated", 0.0)),
+        "terminal_actual_dispatch_gap_mean_s": float(details.get(
+            "terminal_actual_dispatch_gap_mean_s", 0.0)),
+        "terminal_dispatch_execution_error_mean_s": float(details.get(
+            "terminal_dispatch_execution_error_mean_s", 0.0)),
+        "terminal_dispatch_execution_error_abs_mean_s": float(details.get(
+            "terminal_dispatch_execution_error_abs_mean_s", 0.0)),
         "fleet_overshoot": overshoot,
         "composite": selected_service_cost,
         "service_cost_wait_metric": wait_metric,
@@ -570,6 +717,10 @@ def run_one(
 ) -> Path:
     if direct_scenario_seed and int(episodes) != 1:
         raise ValueError("direct scenario-seed mode requires episodes=1")
+    protocol_version = protocol_version_for_config(config)
+    if protocol_version == V6_PROTOCOL_VERSION and not direct_scenario_seed:
+        raise ValueError(
+            "V6 external evidence requires direct scenario-seed mode")
     apply_worker_threads(worker_threads)
     run_dir = run_dir_for(config, variant, seed, logs_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -590,8 +741,10 @@ def run_one(
         )
     rows = []
     t_start = time.time()
-    protocol_version = str(
+    loaded_protocol_version = str(
         (cfg.get("protocol", {}) or {}).get("version", "legacy"))
+    if loaded_protocol_version != protocol_version:
+        raise ValueError("resolved and loaded protocol versions differ")
     frozen_protocol = protocol_version.startswith("freqduet-eval-v")
     objective_cfg = cfg.get("objective", {}) or {}
     for ep in range(int(episodes)):
@@ -617,9 +770,12 @@ def run_one(
                 objective_cfg.get("wait_metric", "observed")),
             objective_weights=dict(objective_cfg.get("weights", {}) or {}),
             exact_schedule=(protocol_version in {
-                "freqduet-eval-v4", "freqduet-eval-v5"}),
+                "freqduet-eval-v4", "freqduet-eval-v5",
+                V6_PROTOCOL_VERSION}),
             schedule_contract_version=(
-                "v5" if protocol_version == "freqduet-eval-v5" else "v4"),
+                "v6" if protocol_version == V6_PROTOCOL_VERSION
+                else "v5" if protocol_version == "freqduet-eval-v5"
+                else "v4"),
         )
         row.update({
             "ep": ep,
@@ -655,23 +811,57 @@ def run_one(
             "episodes": int(episodes),
             "wall_s": round(time.time() - t_start, 3),
         }, f, indent=2)
+    manifest_version = (
+        V6_RUN_MANIFEST_VERSION
+        if protocol_version == V6_PROTOCOL_VERSION
+        else "freqduet-external-baseline-v5"
+        if protocol_version == "freqduet-eval-v5"
+        else "freqduet-external-baseline-v4"
+    )
+    manifest = {
+        "manifest_version": manifest_version,
+        "protocol_version": protocol_version,
+        "config_name": config,
+        "config_fingerprint": config_fingerprint(config),
+        "core_source_fingerprint": source_fingerprint(),
+        "evaluator_source_fingerprint": external_evaluator_fingerprint(),
+        "variant": variant,
+        "seed": int(seed),
+        "direct_scenario_seed": bool(direct_scenario_seed),
+        "scenario_seeds": [int(row["scenario_seed"]) for row in rows],
+        "episodes": int(episodes),
+    }
+    if protocol_version == V6_PROTOCOL_VERSION:
+        diagnostics_frame = pd.read_csv(diag_path)
+        diagnostics_key = (
+            V6_DIAGNOSTICS_PRIMARY_KEY if direct_scenario_seed
+            else ["config", "variant", "seed", "ep"])
+        argv = [str(value) for value in sys.argv]
+        manifest.update({
+            "method": variant,
+            "scenario_seed": (
+                int(rows[0]["scenario_seed"]) if len(rows) == 1 else None),
+            "scenario_contract": scenario_contract_fingerprint(config),
+            "runtime_environment": locked_runtime_environment(),
+            "git": git_provenance(),
+            "launch_argv": {
+                "sha256": canonical_json_sha256(argv),
+                "argv": argv,
+            },
+            "command_contract": external_command_contract(
+                config=config,
+                variant=variant,
+                seed=seed,
+                episodes=episodes,
+                direct_scenario_seed=direct_scenario_seed,
+                worker_threads=worker_threads,
+                route_headway_target_s=route_headway_target,
+            ),
+            "diagnostics_artifact": csv_artifact_record(
+                diag_path, diagnostics_frame, diagnostics_key),
+        })
     with (run_dir / EXTERNAL_BASELINE_MANIFEST).open("w") as f:
-        json.dump({
-            "manifest_version": (
-                "freqduet-external-baseline-v5"
-                if protocol_version == "freqduet-eval-v5"
-                else "freqduet-external-baseline-v4"),
-            "protocol_version": protocol_version,
-            "config_name": config,
-            "config_fingerprint": config_fingerprint(config),
-            "core_source_fingerprint": source_fingerprint(),
-            "evaluator_source_fingerprint": external_evaluator_fingerprint(),
-            "variant": variant,
-            "seed": int(seed),
-            "direct_scenario_seed": bool(direct_scenario_seed),
-            "scenario_seeds": [int(row["scenario_seed"]) for row in rows],
-            "episodes": int(episodes),
-        }, f, indent=2)
+        json.dump(manifest, f, indent=2)
     return run_dir
 
 
@@ -765,24 +955,59 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if not manifest_path.exists():
         raise ValueError(f"{run_dir}: missing {EXTERNAL_BASELINE_MANIFEST}")
     manifest = json.loads(manifest_path.read_text())
+    required_columns = {
+        "config", "variant", "seed", "scenario_seed", "eval_seed",
+        "protocol_version", "scenario_tape_id", "fleet_inventory_mode",
+        "lower_observation_contract", "headway_reward_mode",
+        "baseline_schedule_projection_mode", "physical_vehicle_count",
+        "N_fleet", "peak_fleet", "frequency_share_max_error",
+    }
+    missing_columns = sorted(required_columns - set(frame.columns))
+    if missing_columns:
+        raise ValueError(f"{run_dir}: missing direct columns {missing_columns}")
     versions = set(frame["protocol_version"].astype(str))
     if len(versions) != 1:
         raise ValueError(f"{run_dir}: mixed protocol versions")
     protocol_version = next(iter(versions))
-    if protocol_version not in {"freqduet-eval-v4", "freqduet-eval-v5"}:
+    if protocol_version not in {
+            "freqduet-eval-v4", "freqduet-eval-v5",
+            V6_PROTOCOL_VERSION}:
         raise ValueError(f"{run_dir}: unsupported frozen protocol")
     expected_manifest_version = (
-        "freqduet-external-baseline-v5"
+        V6_RUN_MANIFEST_VERSION
+        if protocol_version == V6_PROTOCOL_VERSION
+        else "freqduet-external-baseline-v5"
         if protocol_version == "freqduet-eval-v5"
         else "freqduet-external-baseline-v4")
     if manifest.get("manifest_version") != expected_manifest_version:
         raise ValueError(f"{manifest_path}: manifest version mismatch")
+    if len(frame) != 1 or frame["eval_seed"].duplicated().any():
+        raise ValueError(
+            f"{run_dir}: direct mode requires exactly one unique eval seed")
     expected_seeds = frame["scenario_seed"].astype(int).tolist()
     if manifest.get("scenario_seeds") != expected_seeds:
         raise ValueError(f"{manifest_path}: scenario seeds do not match rows")
     if not bool(manifest.get("direct_scenario_seed")):
         raise ValueError(f"{manifest_path}: direct scenario mode is not locked")
     config = str(frame["config"].iloc[0])
+    variant = str(frame["variant"].iloc[0])
+    run_seed = int(frame["seed"].iloc[0])
+    eval_seed = int(pd.to_numeric(frame["eval_seed"], errors="raise").iloc[0])
+    scenario_seed = int(frame["scenario_seed"].iloc[0])
+    if eval_seed != scenario_seed or run_seed != scenario_seed:
+        raise ValueError(
+            f"{run_dir}: direct seed, scenario seed, and eval seed differ")
+    expected_manifest_values = {
+        "protocol_version": protocol_version,
+        "config_name": config,
+        "variant": variant,
+        "seed": run_seed,
+        "episodes": 1,
+    }
+    for key, expected in expected_manifest_values.items():
+        if manifest.get(key) != expected:
+            raise ValueError(
+                f"{manifest_path}: {key} does not match diagnostics")
     if manifest.get("config_fingerprint") != config_fingerprint(config):
         raise ValueError(f"{manifest_path}: config fingerprint mismatch")
     if manifest.get("core_source_fingerprint") != source_fingerprint():
@@ -790,10 +1015,79 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if manifest.get(
             "evaluator_source_fingerprint") != external_evaluator_fingerprint():
         raise ValueError(f"{manifest_path}: evaluator fingerprint mismatch")
-    safety_metrics = (
-        V5_SAFETY_METRICS
-        if protocol_version == "freqduet-eval-v5"
-        else V4_SAFETY_METRICS)
+    if protocol_version == V6_PROTOCOL_VERSION:
+        if manifest.get("method") != variant:
+            raise ValueError(f"{manifest_path}: method/variant mismatch")
+        if manifest.get("scenario_seed") != scenario_seed:
+            raise ValueError(f"{manifest_path}: scenario seed mismatch")
+        expected_scenario = scenario_contract_fingerprint(config)
+        scenario_payload = _validate_self_hashed_record(
+            manifest.get("scenario_contract"),
+            payload_key="payload",
+            label="scenario contract",
+        )
+        if scenario_payload.get(
+                "contract_version") != V6_SCENARIO_CONTRACT_VERSION:
+            raise ValueError(f"{manifest_path}: scenario contract version mismatch")
+        if manifest.get("scenario_contract") != expected_scenario:
+            raise ValueError(f"{manifest_path}: scenario contract mismatch")
+        runtime_payload = _validate_self_hashed_record(
+            manifest.get("runtime_environment"),
+            payload_key="environment",
+            label="runtime environment",
+        )
+        if not {"python", "python_executable", "platform", "packages"}.issubset(
+                runtime_payload):
+            raise ValueError(f"{manifest_path}: runtime environment is incomplete")
+        launch_argv = manifest.get("launch_argv")
+        if not isinstance(launch_argv, dict) or not isinstance(
+                launch_argv.get("argv"), list):
+            raise ValueError(f"{manifest_path}: launch argv is missing")
+        if (not launch_argv["argv"]
+                or not all(isinstance(value, str)
+                           for value in launch_argv["argv"])):
+            raise ValueError(f"{manifest_path}: launch argv is invalid")
+        if canonical_json_sha256(launch_argv["argv"]) != str(
+                launch_argv.get("sha256", "")):
+            raise ValueError(f"{manifest_path}: launch argv hash mismatch")
+        command_payload = _validate_self_hashed_record(
+            manifest.get("command_contract"),
+            payload_key="payload",
+            label="command contract",
+        )
+        expected_command_values = {
+            "version": V6_COMMAND_CONTRACT_VERSION,
+            "entrypoint": "scripts/run_freqduet_external_baselines.py",
+            "config_name": config,
+            "variant": variant,
+            "method": variant,
+            "seed": run_seed,
+            "episodes": 1,
+            "direct_scenario_seed": True,
+        }
+        for key, expected in expected_command_values.items():
+            if command_payload.get(key) != expected:
+                raise ValueError(
+                    f"{manifest_path}: command contract {key} mismatch")
+        git = manifest.get("git")
+        git_commit = str(git.get("commit", "")) if isinstance(git, dict) else ""
+        if (not isinstance(git, dict)
+                or len(git_commit) != 40
+                or any(char not in "0123456789abcdef" for char in git_commit)
+                or not isinstance(git.get("tracked_dirty"), bool)):
+            raise ValueError(f"{manifest_path}: Git provenance is incomplete")
+        locked_frame = validate_csv_artifact(
+            run_dir / "diagnostics.csv",
+            manifest.get("diagnostics_artifact"),
+            expected_primary_key=V6_DIAGNOSTICS_PRIMARY_KEY,
+        )
+        if len(locked_frame) != 1:
+            raise ValueError(f"{manifest_path}: diagnostics artifact is not direct")
+        safety_metrics = V6_SAFETY_METRICS
+    elif protocol_version == "freqduet-eval-v5":
+        safety_metrics = V5_SAFETY_METRICS
+    else:
+        safety_metrics = V4_SAFETY_METRICS
     missing_safety = sorted(set(safety_metrics) - set(frame.columns))
     if missing_safety:
         raise ValueError(
@@ -814,6 +1108,10 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if not frame["baseline_schedule_projection_mode"].astype(
             str).str.startswith("exact_").all():
         raise ValueError(f"{run_dir}: external schedule is not exact")
+    if (protocol_version == V6_PROTOCOL_VERSION
+            and not frame["baseline_schedule_projection_mode"].astype(
+                str).str.endswith("_v6").all()):
+        raise ValueError(f"{run_dir}: external schedule is not V6 exact")
     physical = pd.to_numeric(frame["physical_vehicle_count"], errors="raise")
     fleet = pd.to_numeric(frame["N_fleet"], errors="raise")
     peak = pd.to_numeric(frame["peak_fleet"], errors="raise")
@@ -825,6 +1123,26 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
         raise ValueError(f"{run_dir}: frequency-share conservation failed")
     if frame["scenario_tape_id"].isna().any():
         raise ValueError(f"{run_dir}: missing scenario tape identifier")
+    if protocol_version == V6_PROTOCOL_VERSION:
+        for realized, commanded in [
+            ("holding_vehicle_seconds", "commanded_holding_vehicle_seconds"),
+            ("holding_passenger_seconds", "commanded_holding_passenger_seconds"),
+            ("holding_passenger_min_per_generated",
+             "commanded_holding_passenger_min_per_generated"),
+        ]:
+            realized_values = pd.to_numeric(frame[realized], errors="raise")
+            commanded_values = pd.to_numeric(frame[commanded], errors="raise")
+            if not realized_values.le(commanded_values + 1e-9).all():
+                raise ValueError(
+                    f"{run_dir}: realized {realized} exceeds commanded value")
+        signed_error = pd.to_numeric(
+            frame["terminal_dispatch_execution_error_mean_s"], errors="raise")
+        absolute_error = pd.to_numeric(
+            frame["terminal_dispatch_execution_error_abs_mean_s"],
+            errors="raise")
+        if not signed_error.abs().le(absolute_error + 1e-9).all():
+            raise ValueError(
+                f"{run_dir}: terminal execution error moments are inconsistent")
     return manifest
 
 
@@ -834,8 +1152,9 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         "eval_seed" in df
         and pd.to_numeric(df["eval_seed"], errors="coerce").notna().all()
     )
+    run_manifest = None
     if direct_eval:
-        validate_direct_baseline_run(run_dir, df)
+        run_manifest = validate_direct_baseline_run(run_dir, df)
     tail = df.iloc[-min(int(last_k), len(df)):]
     row = {
         "config": str(tail["config"].iloc[0]),
@@ -852,6 +1171,10 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
             tail["eval_seed"], errors="raise").iloc[0])
     if "scenario_tape_id" in tail and tail["scenario_tape_id"].nunique() == 1:
         row["scenario_tape_id"] = str(tail["scenario_tape_id"].iloc[0])
+    if (run_manifest is not None
+            and row["protocol_version"] == V6_PROTOCOL_VERSION):
+        row["scenario_contract_sha256"] = _fingerprint_sha(
+            run_manifest.get("scenario_contract"), "scenario contract")
     for out_col, src_col in [
         ("wait", "avg_wait_min"),
         ("cv", "headway_cv"),
@@ -875,6 +1198,8 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         ("trip_completion_rate", "trip_completion_rate"),
         ("physical_vehicle_count", "physical_vehicle_count"),
         ("fleet_denied_dispatch_events", "fleet_denied_dispatch_events"),
+        ("fleet_denied_retry_trip_seconds",
+         "fleet_denied_retry_trip_seconds"),
         ("fleet_denied_trips", "fleet_denied_trips"),
         ("fleet_denied_trip_rate", "fleet_denied_trip_rate"),
         ("fleet_readiness_delay_mean_s", "fleet_readiness_delay_mean_s"),
@@ -885,6 +1210,18 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         ("holding_passenger_seconds", "holding_passenger_seconds"),
         ("holding_passenger_min_per_generated",
          "holding_passenger_min_per_generated"),
+        ("commanded_holding_vehicle_seconds",
+         "commanded_holding_vehicle_seconds"),
+        ("commanded_holding_passenger_seconds",
+         "commanded_holding_passenger_seconds"),
+        ("commanded_holding_passenger_min_per_generated",
+         "commanded_holding_passenger_min_per_generated"),
+        ("terminal_actual_dispatch_gap_mean_s",
+         "terminal_actual_dispatch_gap_mean_s"),
+        ("terminal_dispatch_execution_error_mean_s",
+         "terminal_dispatch_execution_error_mean_s"),
+        ("terminal_dispatch_execution_error_abs_mean_s",
+         "terminal_dispatch_execution_error_abs_mean_s"),
     ]:
         row[out_col] = (
             float(pd.to_numeric(tail[src_col], errors="coerce").mean())
@@ -901,14 +1238,24 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
     return row
 
 
-def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
+def aggregate(
+    logs_dirs: list[Path] | Path,
+    out_dir: Path,
+    last_k: int,
+    *,
+    configs: list[str] | None = None,
+    variants: list[str] | None = None,
+    eval_seeds: list[int] | None = None,
+) -> None:
     if isinstance(logs_dirs, (str, Path)):
         logs_dirs = [Path(logs_dirs)]
     rows = []
     manifests = []
+    diagnostics_paths = []
     for logs_dir in logs_dirs:
         for diag in sorted(Path(logs_dir).glob("*/diagnostics.csv")):
             rows.append(summarize_run(diag.parent, last_k=last_k))
+            diagnostics_paths.append(diag.resolve())
             manifest_path = diag.parent / EXTERNAL_BASELINE_MANIFEST
             if manifest_path.exists():
                 manifests.append(json.loads(manifest_path.read_text()))
@@ -919,6 +1266,62 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
     direct_mode = "eval_seed" in per_seed and per_seed["eval_seed"].notna().all()
     if direct_mode and len(manifests) != len(per_seed):
         raise ValueError("direct external matrix has missing run manifests")
+    protocol_versions = sorted(set(per_seed["protocol_version"].astype(str)))
+    is_v6 = V6_PROTOCOL_VERSION in protocol_versions
+    if is_v6 and protocol_versions != [V6_PROTOCOL_VERSION]:
+        raise ValueError("V6 external matrix mixes protocol versions")
+    if is_v6:
+        if not direct_mode:
+            raise ValueError("V6 external aggregation requires direct seed mode")
+        if len(manifests) != len(per_seed):
+            raise ValueError("V6 external matrix has missing run manifests")
+        if configs is None or variants is None or eval_seeds is None:
+            raise ValueError(
+                "V6 aggregation requires exact configs, variants, and eval seeds")
+        expected_configs = [Path(value).stem for value in configs]
+        expected_methods = [str(value) for value in variants]
+        expected_eval_seeds = [int(value) for value in eval_seeds]
+        for label, values in [
+            ("configs", expected_configs),
+            ("methods", expected_methods),
+            ("eval seeds", expected_eval_seeds),
+        ]:
+            if len(values) != len(set(values)):
+                raise ValueError(f"V6 aggregation {label} must be unique")
+        observed_configs = set(per_seed["config"].astype(str))
+        observed_methods = set(per_seed["method"].astype(str))
+        observed_eval_seeds = set(per_seed["eval_seed"].astype(int))
+        if observed_configs != set(expected_configs):
+            raise ValueError(
+                "V6 external configs do not match the exact requested set")
+        if observed_methods != set(expected_methods):
+            raise ValueError(
+                "V6 external methods do not match the exact requested set")
+        if observed_eval_seeds != set(expected_eval_seeds):
+            raise ValueError(
+                "V6 external eval seeds do not match the exact requested set")
+        if per_seed.duplicated(V6_PER_SEED_PRIMARY_KEY).any():
+            raise ValueError("V6 external matrix has duplicate config/method/eval seed")
+        expected_rows = (
+            len(expected_configs) * len(expected_methods)
+            * len(expected_eval_seeds))
+        if len(per_seed) != expected_rows:
+            raise ValueError(
+                f"V6 external matrix has {len(per_seed)} rows, "
+                f"expected {expected_rows}")
+        expected_grid = {
+            (config, method, seed)
+            for config in expected_configs
+            for method in expected_methods
+            for seed in expected_eval_seeds
+        }
+        observed_grid = set(zip(
+            per_seed["config"].astype(str),
+            per_seed["method"].astype(str),
+            per_seed["eval_seed"].astype(int),
+        ))
+        if observed_grid != expected_grid:
+            raise ValueError("V6 external matrix is not a complete requested grid")
     core_hashes = {
         item["core_source_fingerprint"]["sha256"] for item in manifests
     }
@@ -927,8 +1330,73 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
     }
     if len(core_hashes) > 1 or len(evaluator_hashes) > 1:
         raise ValueError("external matrix mixes source fingerprints")
+    input_diagnostics = []
+    config_fingerprints: dict[str, dict[str, object]] = {}
+    scenario_contracts: dict[str, dict[str, object]] = {}
+    runtime_records: dict[str, dict[str, object]] = {}
+    run_git_records: dict[tuple[str, bool], dict[str, object]] = {}
+    if is_v6:
+        manifest_by_key = {}
+        for diag_path, manifest in zip(diagnostics_paths, manifests):
+            config = str(manifest.get("config_name", ""))
+            method = str(manifest.get("method", ""))
+            scenario_seed = int(manifest.get("scenario_seed", -1))
+            key = (config, method, scenario_seed)
+            if key in manifest_by_key:
+                raise ValueError(f"duplicate V6 external run manifest for {key}")
+            manifest_by_key[key] = manifest
+            artifact = manifest.get("diagnostics_artifact")
+            validate_csv_artifact(
+                diag_path,
+                artifact,
+                expected_primary_key=V6_DIAGNOSTICS_PRIMARY_KEY,
+            )
+            config_record = manifest.get("config_fingerprint")
+            if config in config_fingerprints \
+                    and config_fingerprints[config] != config_record:
+                raise ValueError(f"V6 external config {config} mixes fingerprints")
+            config_fingerprints[config] = config_record
+            scenario_record = manifest.get("scenario_contract")
+            if config in scenario_contracts \
+                    and scenario_contracts[config] != scenario_record:
+                raise ValueError(
+                    f"V6 external config {config} mixes scenario contracts")
+            scenario_contracts[config] = scenario_record
+            runtime_record = manifest.get("runtime_environment")
+            runtime_sha = _fingerprint_sha(runtime_record, "runtime environment")
+            runtime_records[runtime_sha] = runtime_record
+            git_record = manifest.get("git") or {}
+            git_key = (
+                str(git_record.get("commit", "")),
+                bool(git_record.get("tracked_dirty")),
+            )
+            run_git_records[git_key] = git_record
+            input_diagnostics.append({
+                "path": str(diag_path),
+                "config": config,
+                "method": method,
+                "eval_seed": scenario_seed,
+                "artifact": artifact,
+            })
+        if set(manifest_by_key) != expected_grid:
+            raise ValueError("V6 run manifests do not match the requested grid")
+        if len(runtime_records) != 1:
+            raise ValueError("V6 external matrix mixes runtime environments")
+        if len(run_git_records) != 1:
+            raise ValueError("V6 external matrix mixes run Git provenance")
+        common_run_git = next(iter(run_git_records.values()))
+        aggregate_git = git_provenance()
+        if str(common_run_git.get("commit", "")) != str(
+                aggregate_git.get("commit", "")):
+            raise ValueError(
+                "V6 external aggregation Git commit differs from its runs")
+        scenario_hashes = {
+            _fingerprint_sha(record, "scenario contract")
+            for record in scenario_contracts.values()
+        }
     out_dir.mkdir(parents=True, exist_ok=True)
-    per_seed.to_csv(out_dir / "external_baselines_per_seed.csv", index=False)
+    per_seed_path = out_dir / "external_baselines_per_seed.csv"
+    per_seed.to_csv(per_seed_path, index=False)
 
     summary_rows = []
     for (config, domain, method), group in per_seed.groupby(
@@ -950,22 +1418,32 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
             "service_cost_observed", "service_cost_restricted",
             "passenger_unserved_rate", "trip_launch_rate",
             "trip_completion_rate", "fleet_denied_dispatch_events",
+            "fleet_denied_retry_trip_seconds",
             "fleet_denied_trips", "fleet_readiness_delay_mean_s",
             "fleet_readiness_delay_max_s", "holding_vehicle_seconds",
             "holding_vehicle_seconds_per_launched_trip",
             "holding_passenger_seconds",
             "holding_passenger_min_per_generated", "fleet_denied_trip_rate",
+            "commanded_holding_vehicle_seconds",
+            "commanded_holding_passenger_seconds",
+            "commanded_holding_passenger_min_per_generated",
+            "terminal_actual_dispatch_gap_mean_s",
+            "terminal_dispatch_execution_error_mean_s",
+            "terminal_dispatch_execution_error_abs_mean_s",
         ]:
             vals = pd.to_numeric(group[metric], errors="coerce")
             row[f"{metric}_mean"] = float(vals.mean())
             row[f"{metric}_std"] = float(vals.std(ddof=0))
         summary_rows.append(row)
     summary = pd.DataFrame(summary_rows)
-    summary.to_csv(out_dir / "external_baselines_summary.csv", index=False)
+    summary_path = out_dir / "external_baselines_summary.csv"
+    summary.to_csv(summary_path, index=False)
     with (out_dir / "external_baselines_summary.json").open("w") as f:
-        protocol_versions = sorted(
-            set(per_seed["protocol_version"].astype(str)))
-        json.dump({
+        payload = {
+            "manifest_version": (
+                V6_SUMMARY_MANIFEST_VERSION if is_v6 else None),
+            "protocol_version": (
+                protocol_versions[0] if len(protocol_versions) == 1 else None),
             "logs_dirs": [str(p) for p in logs_dirs],
             "last_k": int(last_k),
             "n_rows": int(len(per_seed)),
@@ -976,7 +1454,39 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
                 next(iter(core_hashes)) if core_hashes else None),
             "evaluator_source_sha256": (
                 next(iter(evaluator_hashes)) if evaluator_hashes else None),
-        }, f, indent=2)
+        }
+        if is_v6:
+            payload.update({
+                "strict_complete": True,
+                "configs": expected_configs,
+                "methods": expected_methods,
+                "eval_seeds": expected_eval_seeds,
+                "expected_rows": expected_rows,
+                "primary_key": V6_PER_SEED_PRIMARY_KEY,
+                "core_source_fingerprint": manifests[0][
+                    "core_source_fingerprint"],
+                "evaluator_source_fingerprint": manifests[0][
+                    "evaluator_source_fingerprint"],
+                "config_fingerprints": config_fingerprints,
+                "scenario_contract_fingerprints": scenario_contracts,
+                "scenario_contract": (
+                    next(iter(scenario_contracts.values()))
+                    if len(scenario_hashes) == 1 else None),
+                "runtime_environment": next(iter(runtime_records.values())),
+                "run_git_provenance": {
+                    "commit": str(common_run_git["commit"]),
+                    "tracked_dirty": bool(common_run_git["tracked_dirty"]),
+                },
+                "git": aggregate_git,
+                "input_diagnostics": input_diagnostics,
+                "artifacts": {
+                    "external_baselines_per_seed.csv": csv_artifact_record(
+                        per_seed_path, per_seed, V6_PER_SEED_PRIMARY_KEY),
+                    "external_baselines_summary.csv": csv_artifact_record(
+                        summary_path, summary, V6_SUMMARY_PRIMARY_KEY),
+                },
+            })
+        json.dump(payload, f, indent=2)
     print(summary.to_string(index=False))
     print(f"Wrote {out_dir}")
 
@@ -1026,6 +1536,12 @@ def main() -> None:
     )
     variants = parse_csv_list(args.variants)
     seeds = parse_csv_list(args.seeds, int)
+    protocol_versions = {
+        protocol_version_for_config(config) for config in configs}
+    if (V6_PROTOCOL_VERSION in protocol_versions
+            and not args.direct_scenario_seeds):
+        raise SystemExit(
+            "V6 external evidence requires --direct-scenario-seeds")
     if args.direct_scenario_seeds and int(args.episodes) != 1:
         raise SystemExit("--direct-scenario-seeds requires --episodes 1")
     unknown = sorted(v for v in set(variants) if not is_known_variant(v))
@@ -1082,7 +1598,14 @@ def main() -> None:
         ]
     else:
         aggregate_logs_dirs = [logs_dir]
-    aggregate(aggregate_logs_dirs, out_dir, args.last_k)
+    aggregate(
+        aggregate_logs_dirs,
+        out_dir,
+        args.last_k,
+        configs=configs,
+        variants=variants,
+        eval_seeds=seeds,
+    )
 
 
 if __name__ == "__main__":

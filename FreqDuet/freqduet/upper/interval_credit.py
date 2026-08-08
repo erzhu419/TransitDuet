@@ -381,14 +381,23 @@ class UpperIntervalOutcomeTracker:
                 / self.fleet_reference
             )
 
-        wait_cost = float(np.clip(wait_cost, 0.0, self.component_clip))
-        onboard_cost = float(np.clip(
-            onboard_cost, 0.0, self.component_clip))
-        dispatch_backlog_cost = float(np.clip(
-            dispatch_backlog_cost, 0.0, self.component_clip))
-        headway_cost = float(np.clip(
-            headway_cost, 0.0, self.component_clip))
-        fleet_cost = float(np.clip(fleet_cost, 0.0, self.component_clip))
+        if self.assignment_mode == "additive":
+            # These components use episode-level denominators, so clipping each
+            # interval would make their sum depend on how the episode is split.
+            wait_cost = float(max(wait_cost, 0.0))
+            onboard_cost = float(max(onboard_cost, 0.0))
+            dispatch_backlog_cost = float(max(dispatch_backlog_cost, 0.0))
+            headway_cost = float(max(headway_cost, 0.0))
+            fleet_cost = float(max(fleet_cost, 0.0))
+        else:
+            wait_cost = float(np.clip(wait_cost, 0.0, self.component_clip))
+            onboard_cost = float(np.clip(
+                onboard_cost, 0.0, self.component_clip))
+            dispatch_backlog_cost = float(np.clip(
+                dispatch_backlog_cost, 0.0, self.component_clip))
+            headway_cost = float(np.clip(
+                headway_cost, 0.0, self.component_clip))
+            fleet_cost = float(np.clip(fleet_cost, 0.0, self.component_clip))
         reward = -self.reward_scale * (
             self.wait_weight * wait_cost
             + self.onboard_weight * onboard_cost
@@ -404,3 +413,47 @@ class UpperIntervalOutcomeTracker:
             "headway_cost": headway_cost,
             "fleet_cost": fleet_cost,
         }
+
+    def score_many(
+        self,
+        outcomes: Sequence[Mapping[str, Any] | None],
+        *,
+        passengers_generated: int,
+        episode_headway_samples: int,
+        episode_duration_s: float,
+        n_fleet_target: float,
+    ) -> list[dict[str, float]]:
+        """Score one episode and clip additive components only after summing."""
+        scores = [
+            self.score(
+                outcome,
+                passengers_generated=passengers_generated,
+                episode_headway_samples=episode_headway_samples,
+                episode_duration_s=episode_duration_s,
+                n_fleet_target=n_fleet_target,
+            )
+            for outcome in outcomes
+        ]
+        if self.assignment_mode != "additive" or not scores:
+            return scores
+
+        component_weights = {
+            "wait_cost": self.wait_weight,
+            "onboard_cost": self.onboard_weight,
+            "dispatch_backlog_cost": self.dispatch_backlog_weight,
+            "headway_cost": self.headway_weight,
+            "fleet_cost": self.fleet_weight,
+        }
+        for component in component_weights:
+            total = float(sum(score[component] for score in scores))
+            scale = (
+                min(total, self.component_clip) / total
+                if total > 0.0 else 1.0)
+            for score in scores:
+                score[component] = float(score[component] * scale)
+        for score in scores:
+            score["reward"] = -self.reward_scale * sum(
+                component_weights[component] * score[component]
+                for component in component_weights
+            )
+        return scores

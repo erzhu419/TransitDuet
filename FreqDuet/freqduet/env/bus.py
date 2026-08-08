@@ -62,6 +62,9 @@ class Bus(object):
         self._frequency_tracker = None
         self._headway_recorder = None
         self.forward_headway_source = "target_default"
+        self.forward_predecessor_trip_id = None
+        self.pre_action_forward_headway = None
+        self.pre_action_forward_headway_source = "unavailable"
         self._lower_state_input_schema = "legacy_headway_deviation"
         self._lower_observation_contract = "latent_oracle_legacy"
         self._headway_reward_mode = "symmetric_legacy"
@@ -114,6 +117,9 @@ class Bus(object):
         self.applied_action_loads = []
         self.episode_hold_vehicle_seconds = 0.0
         self.episode_hold_person_seconds = 0.0
+        self.episode_commanded_hold_vehicle_seconds = 0.0
+        self.episode_commanded_hold_person_seconds = 0.0
+        self._active_holding_load = 0
         self.holding_action_trace_mode = "positive_only"
         self.unobserved_action_mode = "legacy_stale"
 
@@ -318,6 +324,7 @@ class Bus(object):
     def _prepare_for_action(self, current_time, bus_all, debug):
         self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
+        self._update_pre_action_forward_headway(current_time)
 
         controlled_stop = self.next_station in self.effective_station[2:]
         exact_forward_valid = (
@@ -509,11 +516,13 @@ class Bus(object):
             if not hasattr(self, 'applied_action_loads'):
                 self.applied_action_loads = []
             self.applied_action_loads.append(load)
-            self.episode_hold_vehicle_seconds = float(getattr(
-                self, 'episode_hold_vehicle_seconds', 0.0)) + float(dwell_time)
-            self.episode_hold_person_seconds = float(getattr(
-                self, 'episode_hold_person_seconds', 0.0)) + (
+            self.episode_commanded_hold_vehicle_seconds = float(getattr(
+                self, 'episode_commanded_hold_vehicle_seconds', 0.0)) + float(
+                    dwell_time)
+            self.episode_commanded_hold_person_seconds = float(getattr(
+                self, 'episode_commanded_hold_person_seconds', 0.0)) + (
                     float(dwell_time) * load)
+            self._active_holding_load = load
 
         if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
@@ -576,6 +585,13 @@ class Bus(object):
         return float(reward), float(min(headway_dev ** 2, 1.0))
 
     def _process_dwelling(self, current_time):
+        if self.dwelling_time is not None and self.dwelling_time > 0.0:
+            executed_s = min(1.0, float(self.dwelling_time))
+            self.episode_hold_vehicle_seconds = float(getattr(
+                self, 'episode_hold_vehicle_seconds', 0.0)) + executed_s
+            self.episode_hold_person_seconds = float(getattr(
+                self, 'episode_hold_person_seconds', 0.0)) + (
+                    executed_s * int(getattr(self, '_active_holding_load', 0)))
         if self.dwelling_time is None or self.dwelling_time <= 1:
             self.in_station = False
             if self._stop_start_time is not None:
@@ -586,7 +602,16 @@ class Bus(object):
                 ])
                 self._stop_start_time = None
                 self._stop_station = None
+            recorder = getattr(self, '_headway_recorder', None)
+            if recorder is not None and hasattr(recorder, 'record_departure'):
+                recorder.record_departure(
+                    int(self.last_station.station_id),
+                    bool(self.direction),
+                    float(current_time),
+                    int(self.trip_id),
+                )
             self.dwelling_time = 0
+            self._active_holding_load = 0
             self.state = BusState.TRAVEL
         else:
             self.dwelling_time -= 1
@@ -617,13 +642,43 @@ class Bus(object):
     def _recorded_forward_headway(self, current_time):
         """Return the causal same-stop arrival headway when one is available."""
         recorder = getattr(self, '_headway_recorder', None)
-        if recorder is None or not hasattr(recorder, 'previous_arrival_time'):
+        if recorder is None:
             return None
-        previous = recorder.previous_arrival_time(
-            int(self.next_station.station_id), bool(self.direction))
+        if hasattr(recorder, 'previous_arrival_event'):
+            event = recorder.previous_arrival_event(
+                int(self.next_station.station_id), bool(self.direction))
+            if event is None:
+                return None
+            self.forward_predecessor_trip_id = int(event['trip_id'])
+            previous = float(event['time_s'])
+        elif hasattr(recorder, 'previous_arrival_time'):
+            previous = recorder.previous_arrival_time(
+                int(self.next_station.station_id), bool(self.direction))
+        else:
+            return None
         if previous is None:
             return None
         return max(0.0, float(current_time) - float(previous))
+
+    def _update_pre_action_forward_headway(self, current_time):
+        """Match the immediate predecessor's causal departure at this stop."""
+        self.pre_action_forward_headway = None
+        self.pre_action_forward_headway_source = "unavailable"
+        recorder = getattr(self, '_headway_recorder', None)
+        predecessor = getattr(self, 'forward_predecessor_trip_id', None)
+        if (recorder is None or predecessor is None
+                or not hasattr(recorder, 'previous_departure_event')):
+            return
+        event = recorder.previous_departure_event(
+            int(self.last_station.station_id), bool(self.direction))
+        if event is None or int(event['trip_id']) != int(predecessor):
+            self.pre_action_forward_headway_source = "predecessor_not_departed"
+            return
+        gap_s = float(current_time) - float(event['time_s'])
+        if not np.isfinite(gap_s) or gap_s < 0.0:
+            return
+        self.pre_action_forward_headway = gap_s
+        self.pre_action_forward_headway_source = "matched_departure_event"
 
     def arrive_station(self, current_time, bus_all, debug):
         # Because we have to use the self.holding_time later, so we exchange passenger first when arrived a station
@@ -722,6 +777,10 @@ class Bus(object):
 
         self.forward_headway = 360
         self.backward_headway = 360
+        self.forward_headway_source = "target_default"
+        self.forward_predecessor_trip_id = None
+        self.pre_action_forward_headway = None
+        self.pre_action_forward_headway_source = "unavailable"
 
         self.last_station_dis = 0.
         self.next_station_dis = self.current_route.distance
@@ -760,6 +819,7 @@ class Bus(object):
         self.last_action_station_id = int(self.last_station.station_id)
         self.applied_actions = []  # v2: reset per-trip action tracking
         self.applied_action_loads = []
+        self._active_holding_load = 0
         self.in_station = False
         self.forward_bus = None
         self.backward_bus = None

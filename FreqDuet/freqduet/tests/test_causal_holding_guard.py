@@ -58,6 +58,51 @@ class CausalHoldingActionGuardTest(unittest.TestCase):
         self.assertEqual(runner._ep_lower_causal_guard_limits, [7.0])
         self.assertEqual(runner._ep_lower_causal_guard_adjustments, [10.0])
 
+    def test_v6_guard_uses_matched_pre_action_departure_gap(self):
+        runner = TransitDuetV2Runner.__new__(TransitDuetV2Runner)
+        runner.lower_causal_holding_guard = CausalHoldingActionGuard(
+            enabled=True, evidence_mode="pre_action_departure_v6")
+        runner.lower_action_bins = np.asarray(
+            [0.0, 5.0, 10.0, 15.0], dtype=np.float32)
+        runner.lower_action_bins_gate_enabled = False
+        runner._ep_lower_causal_guard_active = []
+        runner._ep_lower_causal_guard_limits = []
+        runner._ep_lower_causal_guard_adjustments = []
+        bus = SimpleNamespace(
+            forward_headway_source="arrival_event",
+            forward_headway=300.0,
+            pre_action_forward_headway_source="matched_departure_event",
+            pre_action_forward_headway=353.0,
+            _target_headway=360.0,
+        )
+
+        adjusted = runner._apply_causal_holding_guard(
+            np.asarray([15.0], dtype=np.float32), bus)
+
+        self.assertEqual(float(adjusted[0]), 5.0)
+        self.assertEqual(runner._ep_lower_causal_guard_limits, [7.0])
+
+    def test_v6_guard_masks_when_immediate_predecessor_has_not_departed(self):
+        runner = TransitDuetV2Runner.__new__(TransitDuetV2Runner)
+        runner.lower_causal_holding_guard = CausalHoldingActionGuard(
+            enabled=True, evidence_mode="pre_action_departure_v6")
+        runner.lower_action_bins = np.asarray(
+            [0.0, 5.0, 10.0], dtype=np.float32)
+        runner.lower_action_bins_gate_enabled = False
+        runner._ep_lower_causal_guard_active = []
+        runner._ep_lower_causal_guard_limits = []
+        runner._ep_lower_causal_guard_adjustments = []
+        bus = SimpleNamespace(
+            pre_action_forward_headway_source="predecessor_not_departed",
+            pre_action_forward_headway=None,
+            _target_headway=360.0,
+        )
+
+        adjusted = runner._apply_causal_holding_guard(
+            np.asarray([10.0], dtype=np.float32), bus)
+
+        self.assertEqual(float(adjusted[0]), 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

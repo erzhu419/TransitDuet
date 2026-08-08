@@ -12,12 +12,15 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     V4_SAFETY_METRICS,
     V5_MECHANISM_METRICS,
     V5_SAFETY_METRICS,
+    V6_MECHANISM_METRICS,
+    V6_SAFETY_METRICS,
     analysis_metrics_for_frame,
     config_fingerprint,
     hierarchical_bootstrap,
     holm_adjusted_pvalues,
     paired_sign_flip_p,
     protocol_version_for_config,
+    scenario_contract,
     source_fingerprint,
     validate_common_scenario_tapes,
     validate_evaluation_frame,
@@ -88,6 +91,30 @@ class ProtocolV2MatrixTest(unittest.TestCase):
                 "synthetic-v5",
                 protocol_version="freqduet-eval-v5",
             )
+
+    def test_v6_requires_execution_metrics_and_departure_guard_contract(self):
+        frame = evaluation_frame([101, 102])
+        frame["protocol_version"] = "freqduet-eval-v6"
+        for metric in V6_SAFETY_METRICS + V6_MECHANISM_METRICS:
+            frame[metric] = 1.0
+        frame["lower_causal_guard_evidence_mode"] = "arrival_event_v5"
+
+        with self.assertRaisesRegex(ValueError, "evidence contract"):
+            validate_evaluation_frame(
+                frame,
+                [101, 102],
+                "synthetic-v6",
+                protocol_version="freqduet-eval-v6",
+            )
+
+        frame["lower_causal_guard_evidence_mode"] = (
+            "pre_action_departure_v6")
+        validate_evaluation_frame(
+            frame,
+            [101, 102],
+            "synthetic-v6",
+            protocol_version="freqduet-eval-v6",
+        )
 
     def test_analysis_metrics_reject_mixed_cost_contract(self):
         frame = evaluation_frame([101, 102])
@@ -195,15 +222,29 @@ class ProtocolV2MatrixTest(unittest.TestCase):
         self.assertIn("env/data/passenger_OD.xlsx", paths)
         self.assertEqual(first["file_count"], len(first["files"]))
 
+    def test_v6_ablation_configs_share_one_scenario_contract(self):
+        names = [
+            "main", "nofreq", "rawhistory", "allfreq", "upperonly",
+            "loweronly", "swapped", "nobudget", "noguard",
+            "noloadcost", "waitonlycredit", "csac",
+        ]
+        contracts = [
+            scenario_contract(f"F_freqduet_protocol_v6_{name}_hiro")
+            for name in names
+        ]
+        self.assertEqual(len({value["sha256"] for value in contracts}), 1)
+        self.assertEqual(
+            contracts[0]["version"], "freqduet-scenario-contract-v1")
+
     def test_run_manifest_rejects_source_mismatch_on_resume(self):
         expected = {
-            "manifest_version": "freqduet-run-manifest-v1",
+            "manifest_version": "freqduet-run-manifest-v2",
             "source_fingerprint": {"sha256": "a" * 64},
         }
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "protocol_run_manifest.json"
             path.write_text(
-                '{"manifest_version":"freqduet-run-manifest-v1",'
+                '{"manifest_version":"freqduet-run-manifest-v2",'
                 '"source_fingerprint":{"sha256":"' + "b" * 64 + '"}}')
             with self.assertRaisesRegex(ValueError, "do not match"):
                 validate_run_manifest(path, expected=expected)

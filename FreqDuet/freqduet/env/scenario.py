@@ -106,6 +106,19 @@ class ScenarioTape:
                 float(loc), float(scale))
         )
 
+    def uniform(
+        self,
+        low: float,
+        high: float,
+        namespace: str,
+        *key: Any,
+    ) -> float:
+        low = float(low)
+        high = float(high)
+        if high <= low:
+            raise ValueError("ScenarioTape.uniform requires high > low")
+        return float(self._rng(namespace, *key).uniform(low, high))
+
     def lognormal(
         self,
         mean: float,

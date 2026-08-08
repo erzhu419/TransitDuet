@@ -45,12 +45,52 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
         self.assertIn(f"--reference {REFERENCE}", result.stdout)
         self.assertIn("--allow-no-ckpt", result.stdout)
         self.assertIn("--allow-no-resume", result.stdout)
+        self.assertIn("FREQDUET_SOURCE_COMMIT=", result.stdout)
+        self.assertRegex(
+            result.stdout, r"FREQDUET_SOURCE_TRACKED_DIRTY=[01]")
 
     def test_reference_must_be_in_config_matrix(self):
         result = self.run_submitter("--reference", "missing_config")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
             "reference config must be included in --configs", result.stderr)
+
+    def test_matrix_stage_is_forwarded_to_every_shard(self):
+        result = self.run_submitter("--stage", "confirmation")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--stage confirmation", result.stdout)
+        self.assertIn("--train-episodes 40", result.stdout)
+
+    def test_defaults_select_the_locked_v6_development_matrix(self):
+        self.assertEqual(len(SUBMITTER.DEFAULT_CONFIGS), 12)
+        self.assertEqual(
+            SUBMITTER.DEFAULT_CONFIGS[0],
+            "F_freqduet_protocol_v6_main_hiro",
+        )
+        self.assertEqual(SUBMITTER.DEFAULT_TRAIN_SEEDS, [503, 521, 541, 557])
+        self.assertEqual(
+            SUBMITTER.DEFAULT_EVAL_SEEDS, [41011, 41017, 41023, 41039])
+
+    def test_v6_rejects_overlapping_train_and_eval_seeds(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--configs", "F_freqduet_protocol_v6_main_hiro",
+                "--train-seeds", "503",
+                "--eval-seeds", "503",
+                "--run-name", "protocol_v6_overlap_test",
+                "--dry-run",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "V6 train and evaluation seed sets must be disjoint",
+            result.stderr,
+        )
 
     def test_protocol_label_follows_submitted_configs(self):
         config = "F_freqduet_protocol_v3_compact_b30_hiro"
@@ -80,6 +120,9 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
             if command[:2] == ["git", "rev-parse"]:
                 return subprocess.CompletedProcess(
                     command, 0, stdout="a" * 40 + "\n", stderr="")
+            if command[:2] == ["git", "status"]:
+                return subprocess.CompletedProcess(
+                    command, 0, stdout="", stderr="")
             self.assertIn("submit-jsonl", command)
             specs = json.loads(kwargs["input"])
             captured["command"] = command

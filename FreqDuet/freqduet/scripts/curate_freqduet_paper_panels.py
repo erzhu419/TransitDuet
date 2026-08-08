@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.paper_submission_gate import (
     read_submission_manifest,
+    require_no_missing_artifacts,
     require_submission_ready,
 )
 
@@ -286,7 +287,10 @@ def main() -> None:
 
     manifest = read_submission_manifest(args.manifest)
     require_submission_ready(
-        manifest, allow_historical=args.allow_historical)
+        manifest,
+        allow_historical=args.allow_historical,
+        manifest_path=args.manifest,
+    )
     out_dir = Path(args.out_dir)
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -295,6 +299,7 @@ def main() -> None:
     missing: list[str] = []
     table_manifest = build_manifest(table_specs(), out_dir, missing)
     figure_manifest = build_manifest(figure_specs(), out_dir, missing)
+    require_no_missing_artifacts(missing)
     table_manifest.to_csv(out_dir / "paper_table_manifest.csv", index=False)
     figure_manifest.to_csv(out_dir / "paper_panel_manifest.csv", index=False)
     write_claim_map(out_dir)

@@ -11,6 +11,19 @@ import sys
 import numpy as np
 import pandas as pd
 
+try:
+    from scripts.analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        validate_csv_artifact,
+    )
+except ModuleNotFoundError:  # Direct execution from the scripts directory.
+    from analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        validate_csv_artifact,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -22,6 +35,18 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     holm_adjusted_pvalues,
     paired_sign_flip_p,
 )
+from scripts.run_freqduet_external_baselines import (
+    BASELINE_VARIANTS,
+    V6_EXECUTION_METRICS,
+    V6_PER_SEED_PRIMARY_KEY,
+    V6_PROTOCOL_VERSION,
+    V6_SUMMARY_MANIFEST_VERSION,
+    external_evaluator_fingerprint,
+    git_provenance,
+    scenario_contract_fingerprint,
+    source_fingerprint,
+)
+from scripts import run_freqduet_protocol_v2_matrix as matrix_protocol
 
 
 METRICS = [
@@ -50,6 +75,17 @@ V5_METRICS = METRICS + [
     "holding_passenger_min_per_generated",
     "fleet_denied_trip_rate",
 ]
+V6_METRICS = list(dict.fromkeys(V5_METRICS + V6_EXECUTION_METRICS))
+V6_LEARNED_PRIMARY_KEY = ["config", "train_seed", "eval_seed"]
+V6_PAIR_PRIMARY_KEY = [
+    "learned_config", "baseline_config", "baseline_method",
+    "train_seed", "eval_seed",
+]
+V6_COMPARISON_SUMMARY_PRIMARY_KEY = [
+    "learned_config", "baseline_config", "baseline_method",
+]
+V6_COMPARISON_MANIFEST_VERSION = "freqduet-external-comparison-v6"
+REQUIRED_EXTERNAL_METHODS = tuple(BASELINE_VARIANTS)
 
 
 def _require_columns(frame: pd.DataFrame, columns: set[str], source: Path) -> None:
@@ -80,12 +116,60 @@ def _validate_tapes(
             f"{learned_map.index[mismatch].tolist()}")
 
 
+def _validate_fingerprint_record(record: object, label: str) -> dict:
+    if not isinstance(record, dict):
+        raise ValueError(f"missing {label} fingerprint")
+    sha = str(record.get("sha256", ""))
+    if len(sha) != 64:
+        raise ValueError(f"invalid {label} fingerprint")
+    if "payload" in record:
+        payload = record.get("payload")
+        if not isinstance(payload, dict):
+            raise ValueError(f"invalid {label} fingerprint payload")
+        if canonical_json_sha256(payload) != sha:
+            raise ValueError(f"{label} fingerprint payload does not match hash")
+    return record
+
+
+def _scenario_contract_for(
+    manifest: dict,
+    config: str,
+    label: str,
+) -> dict:
+    contracts = manifest.get("scenario_contract_fingerprints")
+    if isinstance(contracts, dict) and config in contracts:
+        record = contracts[config]
+    else:
+        record = (
+            manifest.get("scenario_contract")
+            or manifest.get("scenario_contract_fingerprint"))
+    return _validate_fingerprint_record(record, f"{label} scenario contract")
+
+
+def _manifest_artifact(
+    manifest: dict,
+    path: Path,
+    primary_key: list[str],
+    label: str,
+    artifact_key: str,
+) -> pd.DataFrame:
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError(f"{label} manifest has no artifact records")
+    record = artifacts.get(artifact_key)
+    if record is None:
+        raise ValueError(
+            f"{label} manifest does not bind artifact {artifact_key}")
+    return validate_csv_artifact(
+        path, record, expected_primary_key=primary_key)
+
+
 def _load_and_validate_manifests(
     learned_path: Path,
     baseline_path: Path,
     learned_manifest_path: Path | None,
     baseline_manifest_path: Path | None,
-) -> dict[str, object]:
+) -> tuple[dict[str, object], dict, dict]:
     learned_manifest_path = (
         learned_manifest_path or learned_path.with_name("matrix_manifest.json"))
     baseline_manifest_path = (
@@ -99,7 +183,9 @@ def _load_and_validate_manifests(
     learned = json.loads(learned_manifest_path.read_text())
     baseline = json.loads(baseline_manifest_path.read_text())
     protocol_version = str(learned.get("protocol_version", ""))
-    if protocol_version not in {"freqduet-eval-v4", "freqduet-eval-v5"}:
+    if protocol_version not in {
+            "freqduet-eval-v4", "freqduet-eval-v5",
+            V6_PROTOCOL_VERSION}:
         raise ValueError(
             f"unsupported learned protocol version {protocol_version!r}")
     required_learned = {
@@ -122,6 +208,29 @@ def _load_and_validate_manifests(
             raise ValueError(
                 f"external manifest {key}={baseline.get(key)!r}, "
                 f"expected {expected!r}")
+    if protocol_version == V6_PROTOCOL_VERSION:
+        expected_matrix_version = str(getattr(
+            matrix_protocol,
+            "MATRIX_MANIFEST_VERSION",
+            "freqduet-matrix-manifest-v2",
+        ))
+        if learned.get("manifest_version") != expected_matrix_version:
+            raise ValueError("learned V6 matrix manifest version mismatch")
+        required_v6_baseline = {
+            "manifest_version": V6_SUMMARY_MANIFEST_VERSION,
+            "protocol_version": V6_PROTOCOL_VERSION,
+            "strict_complete": True,
+            "protocol_versions": [V6_PROTOCOL_VERSION],
+        }
+        for key, expected in required_v6_baseline.items():
+            if baseline.get(key) != expected:
+                raise ValueError(
+                    f"external V6 manifest {key}={baseline.get(key)!r}, "
+                    f"expected {expected!r}")
+        if not isinstance(learned.get("artifacts"), dict):
+            raise ValueError("learned V6 matrix manifest has no artifact records")
+        if not isinstance(baseline.get("artifacts"), dict):
+            raise ValueError("external V6 manifest has no artifact records")
     learned_source = learned.get("run_source_fingerprint") or {}
     learned_sha = str(learned_source.get("sha256", ""))
     baseline_sha = str(baseline.get("core_source_sha256", ""))
@@ -133,13 +242,69 @@ def _load_and_validate_manifests(
             "learned and external baseline core source fingerprints differ")
     if len(evaluator_sha) != 64:
         raise ValueError("external evaluator fingerprint is missing or invalid")
-    return {
+    if protocol_version == V6_PROTOCOL_VERSION:
+        baseline_source = _validate_fingerprint_record(
+            baseline.get("core_source_fingerprint"), "external core source")
+        if str(baseline_source.get("sha256")) != baseline_sha:
+            raise ValueError("external core source records disagree")
+        evaluator_source = _validate_fingerprint_record(
+            baseline.get("evaluator_source_fingerprint"),
+            "external evaluator source",
+        )
+        if str(evaluator_source.get("sha256")) != evaluator_sha:
+            raise ValueError("external evaluator source records disagree")
+        if str(source_fingerprint().get("sha256")) != learned_sha:
+            raise ValueError(
+                "current model source does not match the V6 evidence source")
+        if str(external_evaluator_fingerprint().get("sha256")) != evaluator_sha:
+            raise ValueError(
+                "current external evaluator does not match V6 evidence")
+        learned_run_git = learned.get("run_git_provenance")
+        baseline_run_git = baseline.get("run_git_provenance")
+        learned_git = learned.get("git")
+        baseline_git = baseline.get("git")
+        git_records = {
+            label: record
+            for label, record in [
+                ("learned run", learned_run_git),
+                ("external run", baseline_run_git),
+                ("learned aggregation", learned_git),
+                ("external aggregation", baseline_git),
+            ]
+        }
+        commits = set()
+        dirty_values = set()
+        for label, record in git_records.items():
+            if not isinstance(record, dict):
+                raise ValueError(f"missing {label} Git provenance")
+            commit = str(record.get("commit", ""))
+            dirty = record.get("tracked_dirty")
+            if (len(commit) != 40
+                    or any(char not in "0123456789abcdef" for char in commit)
+                    or not isinstance(dirty, bool)):
+                raise ValueError(f"invalid {label} Git provenance")
+            commits.add(commit)
+            dirty_values.add(dirty)
+        if len(commits) != 1 or len(dirty_values) != 1:
+            raise ValueError(
+                "learned and external V6 Git provenance differs")
+        current_git = git_provenance()
+        if str(current_git.get("commit", "")) != next(iter(commits)):
+            raise ValueError(
+                "current comparison Git commit differs from V6 evidence")
+    provenance = {
         "learned_manifest": str(learned_manifest_path),
         "baseline_manifest": str(baseline_manifest_path),
         "core_source_sha256": learned_sha,
         "external_evaluator_sha256": evaluator_sha,
         "protocol_version": protocol_version,
     }
+    if protocol_version == V6_PROTOCOL_VERSION:
+        provenance["git"] = {
+            "commit": next(iter(commits)),
+            "tracked_dirty": next(iter(dirty_values)),
+        }
+    return provenance, learned, baseline
 
 
 def compare(
@@ -152,17 +317,39 @@ def compare(
     learned_manifest_path: Path | None = None,
     baseline_manifest_path: Path | None = None,
 ) -> None:
-    provenance = _load_and_validate_manifests(
+    provenance, learned_manifest, baseline_manifest = (
+        _load_and_validate_manifests(
         learned_path,
         baseline_path,
         learned_manifest_path,
         baseline_manifest_path,
-    )
-    learned_all = pd.read_csv(learned_path)
-    baseline_all = pd.read_csv(baseline_path)
+    ))
     protocol_version = str(provenance["protocol_version"])
-    metrics = V5_METRICS if protocol_version == "freqduet-eval-v5" else METRICS
+    if protocol_version == V6_PROTOCOL_VERSION:
+        learned_all = _manifest_artifact(
+            learned_manifest,
+            learned_path,
+            V6_LEARNED_PRIMARY_KEY,
+            "learned V6 matrix",
+            "frozen_per_eval.csv",
+        )
+        baseline_all = _manifest_artifact(
+            baseline_manifest,
+            baseline_path,
+            V6_PER_SEED_PRIMARY_KEY,
+            "external V6 baseline",
+            "external_baselines_per_seed.csv",
+        )
+        metrics = V6_METRICS
+    else:
+        learned_all = pd.read_csv(learned_path)
+        baseline_all = pd.read_csv(baseline_path)
+        metrics = (
+            V5_METRICS
+            if protocol_version == "freqduet-eval-v5" else METRICS)
     required_common = {"config", "eval_seed", "scenario_tape_id", *metrics}
+    if protocol_version == V6_PROTOCOL_VERSION:
+        required_common.add("scenario_contract_sha256")
     _require_columns(
         learned_all, required_common | {"train_seed"}, learned_path)
     _require_columns(
@@ -188,7 +375,127 @@ def compare(
             != {protocol_version}):
         raise ValueError("external baseline protocol does not match learned")
 
-    selected_methods = methods or sorted(baselines["method"].astype(str).unique())
+    if protocol_version == V6_PROTOCOL_VERSION:
+        learned_configs = [
+            str(value) for value in learned_manifest.get("configs", [])]
+        baseline_configs = [
+            str(value) for value in baseline_manifest.get("configs", [])]
+        learned_train_seeds = [
+            int(value) for value in learned_manifest.get("train_seeds", [])]
+        learned_eval_seeds = [
+            int(value) for value in learned_manifest.get("eval_seeds", [])]
+        baseline_eval_seeds = [
+            int(value) for value in baseline_manifest.get("eval_seeds", [])]
+        baseline_methods = [
+            str(value) for value in baseline_manifest.get("methods", [])]
+        for label, values in [
+            ("learned configs", learned_configs),
+            ("baseline configs", baseline_configs),
+            ("learned train seeds", learned_train_seeds),
+            ("learned eval seeds", learned_eval_seeds),
+            ("baseline eval seeds", baseline_eval_seeds),
+            ("baseline methods", baseline_methods),
+        ]:
+            if not values or len(values) != len(set(values)):
+                raise ValueError(f"V6 manifest {label} are missing or duplicated")
+        if set(learned_all["config"].astype(str)) != set(learned_configs):
+            raise ValueError("learned V6 artifact config set mismatches manifest")
+        if set(baseline_all["config"].astype(str)) != set(baseline_configs):
+            raise ValueError("external V6 artifact config set mismatches manifest")
+        if set(learned_all["train_seed"].astype(int)) != set(
+                learned_train_seeds):
+            raise ValueError("learned V6 train seed set mismatches manifest")
+        if set(learned_all["eval_seed"].astype(int)) != set(
+                learned_eval_seeds):
+            raise ValueError("learned V6 eval seed set mismatches manifest")
+        if set(baseline_all["eval_seed"].astype(int)) != set(
+                baseline_eval_seeds):
+            raise ValueError("external V6 eval seed set mismatches manifest")
+        learned_grid = set(zip(
+            learned_all["config"].astype(str),
+            learned_all["train_seed"].astype(int),
+            learned_all["eval_seed"].astype(int),
+        ))
+        expected_learned_grid = {
+            (config, train_seed, eval_seed)
+            for config in learned_configs
+            for train_seed in learned_train_seeds
+            for eval_seed in learned_eval_seeds
+        }
+        if learned_grid != expected_learned_grid:
+            raise ValueError("learned V6 artifact is not a complete manifest grid")
+        if learned_eval_seeds != baseline_eval_seeds:
+            raise ValueError("learned and external V6 eval seed contracts differ")
+        required_methods = set(REQUIRED_EXTERNAL_METHODS)
+        if (len(baseline_methods) != len(REQUIRED_EXTERNAL_METHODS)
+                or set(baseline_methods) != required_methods):
+            raise ValueError(
+                "V6 external manifest must contain exactly fixed_headway, "
+                "rule_holding, and rule_mpc")
+        observed_methods = set(baseline_all["method"].astype(str))
+        if observed_methods != required_methods:
+            raise ValueError(
+                "V6 external artifact must contain exactly fixed_headway, "
+                "rule_holding, and rule_mpc")
+        baseline_grid = set(zip(
+            baseline_all["config"].astype(str),
+            baseline_all["method"].astype(str),
+            baseline_all["eval_seed"].astype(int),
+        ))
+        expected_baseline_grid = {
+            (config, method, eval_seed)
+            for config in baseline_configs
+            for method in REQUIRED_EXTERNAL_METHODS
+            for eval_seed in baseline_eval_seeds
+        }
+        if baseline_grid != expected_baseline_grid:
+            raise ValueError("external V6 artifact is not a complete manifest grid")
+        requested_methods = (
+            list(REQUIRED_EXTERNAL_METHODS) if methods is None
+            else [str(value) for value in methods])
+        if (len(requested_methods) != len(REQUIRED_EXTERNAL_METHODS)
+                or set(requested_methods) != required_methods):
+            raise ValueError(
+                "V6 comparison methods must be exactly fixed_headway, "
+                "rule_holding, and rule_mpc")
+        selected_methods = list(REQUIRED_EXTERNAL_METHODS)
+        learned_contract = _scenario_contract_for(
+            learned_manifest, str(learned_config), "learned")
+        baseline_contract = _scenario_contract_for(
+            baseline_manifest, baseline_name, "external")
+        if learned_contract["sha256"] != baseline_contract["sha256"]:
+            raise ValueError(
+                "learned and external scenario contract fingerprints differ")
+        if scenario_contract_fingerprint(
+                str(learned_config)) != learned_contract:
+            raise ValueError(
+                "current scenario contract does not match V6 evidence")
+        for label, frame, contract in [
+            ("learned", learned_all, learned_contract),
+            ("external", baseline_all, baseline_contract),
+        ]:
+            observed_contracts = set(
+                frame["scenario_contract_sha256"].astype(str))
+            if observed_contracts != {str(contract["sha256"])}:
+                raise ValueError(
+                    f"{label} V6 rows disagree with scenario contract manifest")
+        provenance["scenario_contract_sha256"] = learned_contract["sha256"]
+        learned_config_records = learned_manifest.get(
+            "config_fingerprints", {})
+        baseline_config_records = baseline_manifest.get(
+            "config_fingerprints", {})
+        if str(learned_config) not in learned_config_records:
+            raise ValueError("learned V6 config fingerprint is missing")
+        if baseline_name not in baseline_config_records:
+            raise ValueError("external V6 config fingerprint is missing")
+        if (str(learned_config) == baseline_name
+                and learned_config_records[str(learned_config)]
+                != baseline_config_records[baseline_name]):
+            raise ValueError(
+                "learned and external config fingerprints differ")
+    else:
+        selected_methods = (
+            methods or sorted(baselines["method"].astype(str).unique()))
     pair_frames = []
     summary_rows = []
     for method in selected_methods:
@@ -268,11 +575,16 @@ def compare(
             row[f"{key}_holm"] = value
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    pd.concat(pair_frames, ignore_index=True).to_csv(
-        out_dir / "learned_vs_external_per_pair.csv", index=False)
-    pd.DataFrame(summary_rows).to_csv(
-        out_dir / "learned_vs_external_summary.csv", index=False)
-    (out_dir / "learned_vs_external_manifest.json").write_text(json.dumps({
+    pair_output = pd.concat(pair_frames, ignore_index=True)
+    summary_output = pd.DataFrame(summary_rows)
+    pair_path = out_dir / "learned_vs_external_per_pair.csv"
+    summary_path = out_dir / "learned_vs_external_summary.csv"
+    pair_output.to_csv(pair_path, index=False)
+    summary_output.to_csv(summary_path, index=False)
+    manifest_payload = {
+        "manifest_version": (
+            V6_COMPARISON_MANIFEST_VERSION
+            if protocol_version == V6_PROTOCOL_VERSION else None),
         "protocol_version": protocol_version,
         "learned_input": str(learned_path),
         "baseline_input": str(baseline_path),
@@ -289,7 +601,30 @@ def compare(
         "multiple_testing": "Holm correction across external methods per metric",
         "common_random_numbers_verified": True,
         "source_provenance": provenance,
-    }, indent=2) + "\n")
+    }
+    if protocol_version == V6_PROTOCOL_VERSION:
+        manifest_payload.update({
+            "strict_complete": True,
+            "required_external_method_family": list(
+                REQUIRED_EXTERNAL_METHODS),
+            "input_artifacts": {
+                "learned": learned_manifest["artifacts"][
+                    "frozen_per_eval.csv"],
+                "external": baseline_manifest["artifacts"][
+                    "external_baselines_per_seed.csv"],
+            },
+            "artifacts": {
+                "learned_vs_external_per_pair.csv": csv_artifact_record(
+                    pair_path, pair_output, V6_PAIR_PRIMARY_KEY),
+                "learned_vs_external_summary.csv": csv_artifact_record(
+                    summary_path,
+                    summary_output,
+                    V6_COMPARISON_SUMMARY_PRIMARY_KEY,
+                ),
+            },
+        })
+    (out_dir / "learned_vs_external_manifest.json").write_text(
+        json.dumps(manifest_payload, indent=2) + "\n")
 
 
 def main() -> None:

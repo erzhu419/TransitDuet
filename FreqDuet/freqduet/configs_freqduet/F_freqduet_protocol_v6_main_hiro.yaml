@@ -1,0 +1,23 @@
+_extends: F_freqduet_protocol_v5_main_hiro.yaml
+_name: F_freqduet_protocol_v6_main_hiro
+
+protocol:
+  version: freqduet-eval-v6
+  role: journey_feasible_frequency_main_v6
+  action_contract: rolling_budget_departure_guard_v6
+  objective_contract: realized_restricted_passenger_journey_v6
+
+upper:
+  timetable_planner:
+    headway_budget_mode: rolling_zero_sum_delta_v6
+    headway_budget_window_s: 900.0
+  interval_credit:
+    # Fixed-pool feasibility is represented by dispatch backlog. A directional
+    # N/2 penalty would incorrectly punish demand-responsive fleet imbalance.
+    weights:
+      fleet: 0.0
+
+lower:
+  causal_holding_guard:
+    evidence_mode: pre_action_departure_v6
+

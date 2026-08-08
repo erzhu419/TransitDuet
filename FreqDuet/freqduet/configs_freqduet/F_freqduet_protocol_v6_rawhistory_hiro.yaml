@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_rawhistory_hiro
+
+protocol:
+  role: ablation_raw_causal_history_v6
+  frequency_contract: raw_history_features_v6
+
+frequency:
+  method: raw_history
+  od_features: false
+  upper_history_bins: 6
+  lower_history_bins: 4
+

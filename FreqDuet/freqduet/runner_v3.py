@@ -236,13 +236,20 @@ class DiagnosticLog:
         'simulation_end_time_s', 'done_reason', 'scenario_tape_id',
         'peak_fleet', 'fleet_inventory_mode', 'physical_vehicle_count',
         'fleet_capacity', 'fleet_ready_up', 'fleet_ready_down',
-        'fleet_denied_dispatch_events', 'fleet_denied_trips',
+        'fleet_denied_dispatch_events', 'fleet_denied_retry_trip_seconds',
+        'fleet_denied_trips',
         'fleet_readiness_delay_mean_s', 'fleet_readiness_delay_max_s',
         'fleet_denied_trip_rate',
         'holding_vehicle_seconds',
         'holding_vehicle_seconds_per_launched_trip',
         'holding_passenger_seconds',
         'holding_passenger_min_per_generated',
+        'commanded_holding_vehicle_seconds',
+        'commanded_holding_passenger_seconds',
+        'commanded_holding_passenger_min_per_generated',
+        'terminal_actual_dispatch_gap_mean_s',
+        'terminal_dispatch_execution_error_mean_s',
+        'terminal_dispatch_execution_error_abs_mean_s',
         'invalid_headway_decisions_masked',
         'lower_observation_contract', 'headway_reward_mode',
         'frequency_observation_source', 'lower_observation_ledger_hash',
@@ -259,7 +266,8 @@ class DiagnosticLog:
         'lower_reward_mean', 'lower_reward_std',
         'lower_load_hold_penalty_mean', 'lower_load_hold_penalty_max',
         'lower_load_ratio_mean', 'lower_normalized_person_delay_mean',
-        'lower_causal_guard_enabled', 'lower_causal_guard_active_mean',
+        'lower_causal_guard_enabled', 'lower_causal_guard_evidence_mode',
+        'lower_causal_guard_active_mean',
         'lower_causal_guard_limit_mean_s',
         'lower_causal_guard_adjustment_mean_s',
         # lower training
@@ -5476,13 +5484,28 @@ class TransitDuetV2Runner:
 
     def _apply_causal_holding_guard(self, action, bus=None):
         requested = self._lower_action_scalar(action)
-        evidence_valid = bool(
-            bus is not None
-            and getattr(bus, 'forward_headway_source', None) == 'arrival_event')
+        departure_mode = (
+            self.lower_causal_holding_guard.evidence_mode
+            == 'pre_action_departure_v6')
+        if departure_mode:
+            observed_headway = (
+                getattr(bus, 'pre_action_forward_headway', None)
+                if bus is not None else None)
+            evidence_valid = bool(
+                bus is not None
+                and getattr(bus, 'pre_action_forward_headway_source', None)
+                == 'matched_departure_event')
+        else:
+            observed_headway = (
+                getattr(bus, 'forward_headway', None)
+                if bus is not None else None)
+            evidence_valid = bool(
+                bus is not None
+                and getattr(bus, 'forward_headway_source', None)
+                == 'arrival_event')
         result = self.lower_causal_holding_guard.evaluate(
             requested,
-            forward_headway_s=(
-                getattr(bus, 'forward_headway', None) if bus is not None else None),
+            forward_headway_s=observed_headway,
             target_headway_s=(
                 getattr(bus, '_target_headway', None) if bus is not None else None),
             evidence_valid=evidence_valid,
@@ -7113,16 +7136,20 @@ class TransitDuetV2Runner:
                     and snapshot_write_terminal_dispatch
                     and self.timetable_terminal_headway_floor_enable)
                 else 0.0)
-            plan_summary = self.timetable_planner.apply(
-                self.env.timetables, trip, action_vec,
-                origin_launch_s=plan_origin_launch,
-                write_scheduled_launch=snapshot_write_terminal_dispatch,
-                terminal_shift_min_s=terminal_shift_min_s,
-                terminal_shift_max_s=terminal_shift_max_s,
-                terminal_shift_bias_s=terminal_shift_bias_s,
-                terminal_headway_floor_ratio=terminal_floor_ratio,
-                terminal_headway_floor_min_s=terminal_floor_min_s,
-                plan_id=plan_id)
+            if exact_headway_curve and not upper_decision_taken:
+                plan_summary = self.timetable_planner.cached_plan_summary(
+                    trip, plan_id=int(plan_id))
+            else:
+                plan_summary = self.timetable_planner.apply(
+                    self.env.timetables, trip, action_vec,
+                    origin_launch_s=plan_origin_launch,
+                    write_scheduled_launch=snapshot_write_terminal_dispatch,
+                    terminal_shift_min_s=terminal_shift_min_s,
+                    terminal_shift_max_s=terminal_shift_max_s,
+                    terminal_shift_bias_s=terminal_shift_bias_s,
+                    terminal_headway_floor_ratio=terminal_floor_ratio,
+                    terminal_headway_floor_min_s=terminal_floor_min_s,
+                    plan_id=plan_id)
             delta_t = float(plan_summary['effective_delta'])
             base_hw = float(plan_summary['base_headway'])
             self._ep_terminal_shift_caps.append(
@@ -7147,12 +7174,13 @@ class TransitDuetV2Runner:
                 self._ep_upper_plan_penalties.append(plan_penalty)
             self._ep_upper_plan_targets.append(
                 float(plan_summary.get('planned_mean', trip.target_headway)))
-            self._ep_upper_plan_raw_delta_means.append(float(
-                plan_summary.get('raw_headway_delta_mean_s', 0.0)))
-            self._ep_upper_plan_projected_delta_means.append(float(
-                plan_summary.get('projected_headway_delta_mean_s', 0.0)))
-            self._ep_upper_plan_projected_delta_sums.append(float(
-                plan_summary.get('projected_headway_delta_sum_s', 0.0)))
+            if upper_decision_taken:
+                self._ep_upper_plan_raw_delta_means.append(float(
+                    plan_summary.get('raw_headway_delta_mean_s', 0.0)))
+                self._ep_upper_plan_projected_delta_means.append(float(
+                    plan_summary.get('projected_headway_delta_mean_s', 0.0)))
+                self._ep_upper_plan_projected_delta_sums.append(float(
+                    plan_summary.get('projected_headway_delta_sum_s', 0.0)))
         self._ep_upper_deltas.append(delta_t)
         self._ep_upper_deltas_by_dir[bool(trip.direction)].append(delta_t)
         if getattr(self.env, 'frequency_tracker', None) is not None:
@@ -7797,10 +7825,22 @@ class TransitDuetV2Runner:
                 1.0 - float(env_details['trip_completion_rate'])),
             count=len(self._episode_upper_transitions),
         )
-        for trans, system_reward, reliability_reward in zip(
+        interval_scores = self.upper_interval_credit.score_many(
+            [
+                trans.get('interval_outcome')
+                for trans in self._episode_upper_transitions
+            ],
+            passengers_generated=int(env_details['passengers_generated']),
+            episode_headway_samples=int(env_details['headway_sample_count']),
+            episode_duration_s=float(
+                self.env.protocol.evaluation_end_time_s),
+            n_fleet_target=float(N_fleet),
+        )
+        for trans, system_reward, reliability_reward, interval_score in zip(
                 self._episode_upper_transitions,
                 system_rewards,
-                reliability_rewards):
+                reliability_rewards,
+                interval_scores):
             tid = trans['tid']
             credit = float(gap_credits.get(int(tid), 0.0))
             a_u = float(trans.get(
@@ -7816,15 +7856,6 @@ class TransitDuetV2Runner:
                 upper_value_active)
             wait_credit = float(upper_wait_credits.get(int(tid), 0.0))
             self._ep_upper_wait_credits.append(wait_credit)
-            interval_score = self.upper_interval_credit.score(
-                trans.get('interval_outcome'),
-                passengers_generated=int(env_details['passengers_generated']),
-                episode_headway_samples=int(
-                    env_details['headway_sample_count']),
-                episode_duration_s=float(
-                    self.env.protocol.evaluation_end_time_s),
-                n_fleet_target=float(N_fleet),
-            )
             interval_reward = float(interval_score['reward'])
             interval_wait_cost = float(interval_score['wait_cost'])
             interval_onboard_cost = float(interval_score['onboard_cost'])
@@ -8416,6 +8447,8 @@ class TransitDuetV2Runner:
             'fleet_ready_down': int(env_details.get('fleet_ready_down', 0)),
             'fleet_denied_dispatch_events': int(
                 env_details.get('fleet_denied_dispatch_events', 0)),
+            'fleet_denied_retry_trip_seconds': round(float(
+                env_details.get('fleet_denied_retry_trip_seconds', 0.0)), 6),
             'fleet_denied_trips': int(
                 env_details.get('fleet_denied_trips', 0)),
             'fleet_denied_trip_rate': round(float(
@@ -8434,6 +8467,24 @@ class TransitDuetV2Runner:
             'holding_passenger_min_per_generated': round(float(
                 env_details.get(
                     'holding_passenger_min_per_generated', 0.0)), 6),
+            'commanded_holding_vehicle_seconds': round(float(
+                env_details.get(
+                    'commanded_holding_vehicle_seconds', 0.0)), 6),
+            'commanded_holding_passenger_seconds': round(float(
+                env_details.get(
+                    'commanded_holding_passenger_seconds', 0.0)), 6),
+            'commanded_holding_passenger_min_per_generated': round(float(
+                env_details.get(
+                    'commanded_holding_passenger_min_per_generated', 0.0)), 6),
+            'terminal_actual_dispatch_gap_mean_s': round(float(
+                env_details.get(
+                    'terminal_actual_dispatch_gap_mean_s', 0.0)), 6),
+            'terminal_dispatch_execution_error_mean_s': round(float(
+                env_details.get(
+                    'terminal_dispatch_execution_error_mean_s', 0.0)), 6),
+            'terminal_dispatch_execution_error_abs_mean_s': round(float(
+                env_details.get(
+                    'terminal_dispatch_execution_error_abs_mean_s', 0.0)), 6),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(
@@ -8483,6 +8534,8 @@ class TransitDuetV2Runner:
                 lower_normalized_person_delay_stat['mean'], 6),
             'lower_causal_guard_enabled': int(
                 self.lower_causal_holding_guard.enabled),
+            'lower_causal_guard_evidence_mode': (
+                self.lower_causal_holding_guard.evidence_mode),
             'lower_causal_guard_active_mean': round(
                 lower_causal_guard_active_stat['mean'], 6),
             'lower_causal_guard_limit_mean_s': round(
@@ -9556,12 +9609,26 @@ class TransitDuetV2Runner:
                 / f'checkpoint_ep{int(getattr(self, "loaded_checkpoint_ep", policy_ep))}'))
         destination.mkdir(parents=True, exist_ok=True)
         fieldnames = list(rows[0].keys())
-        with (destination / 'evaluation.csv').open('w', newline='') as f:
+        evaluation_path = destination / 'evaluation.csv'
+        with evaluation_path.open('w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(rows)
+        evaluation_sha256 = hashlib.sha256(
+            evaluation_path.read_bytes()).hexdigest()
+        primary_key_records = [
+            {'eval_seed': int(row['eval_seed'])}
+            for row in sorted(rows, key=lambda value: int(value['eval_seed']))
+        ]
+        primary_key_sha256 = hashlib.sha256(json.dumps(
+            primary_key_records,
+            ensure_ascii=True,
+            separators=(',', ':'),
+            sort_keys=True,
+        ).encode('utf-8')).hexdigest()
         with (destination / 'evaluation_manifest.json').open('w') as f:
             json.dump({
+                'manifest_version': 'freqduet-evaluation-manifest-v2',
                 'protocol_version': self.protocol_version,
                 'config_fingerprint_sha256': self.config_fingerprint_sha256,
                 'config_name': self.exp_name,
@@ -9573,6 +9640,16 @@ class TransitDuetV2Runner:
                 'policy_digest': before,
                 'n_episodes': len(rows),
                 'randomness': self.randomness_manifest,
+                'artifacts': {
+                    'evaluation_csv': {
+                        'sha256': evaluation_sha256,
+                        'size_bytes': int(evaluation_path.stat().st_size),
+                        'n_rows': len(rows),
+                        'columns': fieldnames,
+                        'primary_key': ['eval_seed'],
+                        'primary_key_sha256': primary_key_sha256,
+                    },
+                },
             }, f, indent=2)
         return rows, destination
 

@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -17,6 +18,25 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
+
+try:
+    from scripts.analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        files_fingerprint,
+        runtime_environment,
+        sha256_file,
+        validate_csv_artifact,
+    )
+except ModuleNotFoundError:  # Direct execution from the scripts directory.
+    from analysis_provenance import (
+        canonical_json_sha256,
+        csv_artifact_record,
+        files_fingerprint,
+        runtime_environment,
+        sha256_file,
+        validate_csv_artifact,
+    )
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,6 +90,17 @@ V5_MECHANISM_METRICS = [
     "upper_plan_projected_delta_mean_s",
     "upper_plan_projected_delta_sum_abs_mean_s",
 ]
+V6_SAFETY_METRICS = V5_SAFETY_METRICS + [
+    "fleet_denied_retry_trip_seconds",
+    "commanded_holding_vehicle_seconds",
+    "commanded_holding_passenger_seconds",
+    "commanded_holding_passenger_min_per_generated",
+    "terminal_actual_dispatch_gap_mean_s",
+    "terminal_dispatch_execution_error_mean_s",
+    "terminal_dispatch_execution_error_abs_mean_s",
+]
+V6_MECHANISM_METRICS = list(V5_MECHANISM_METRICS)
+V6_CONTRACT_COLUMNS = ["lower_causal_guard_evidence_mode"]
 OPTIONAL_COST_METRICS = [
     "service_cost_observed",
     "service_cost_restricted",
@@ -101,6 +132,13 @@ METRIC_DIRECTIONS = {
     "upper_interval_wait_cost_sum": "min",
     "upper_interval_onboard_cost_sum": "min",
     "upper_interval_dispatch_backlog_cost_sum": "min",
+    "fleet_denied_retry_trip_seconds": "min",
+    "commanded_holding_vehicle_seconds": "min",
+    "commanded_holding_passenger_seconds": "min",
+    "commanded_holding_passenger_min_per_generated": "min",
+    "terminal_actual_dispatch_gap_mean_s": "descriptive",
+    "terminal_dispatch_execution_error_mean_s": "descriptive",
+    "terminal_dispatch_execution_error_abs_mean_s": "min",
 }
 
 
@@ -109,6 +147,8 @@ def strict_protocol_metrics(protocol_version: str) -> list[str]:
         return list(V4_SAFETY_METRICS)
     if str(protocol_version) == "freqduet-eval-v5":
         return list(V5_SAFETY_METRICS + V5_MECHANISM_METRICS)
+    if str(protocol_version) == "freqduet-eval-v6":
+        return list(V6_SAFETY_METRICS + V6_MECHANISM_METRICS)
     return []
 
 
@@ -167,19 +207,38 @@ def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
         metrics.extend(OPTIONAL_COST_METRICS)
     return metrics
 PROTOCOL_VERSION = "freqduet-eval-v2"
-RUN_MANIFEST_VERSION = "freqduet-run-manifest-v1"
+RUN_MANIFEST_VERSION = "freqduet-run-manifest-v2"
+LEGACY_RUN_MANIFEST_VERSION = "freqduet-run-manifest-v1"
 RUN_MANIFEST_NAME = "protocol_run_manifest.json"
+MATRIX_MANIFEST_VERSION = "freqduet-matrix-manifest-v2"
+MODEL_SOURCE_FINGERPRINT_VERSION = "freqduet-model-source-v2"
 SOURCE_PACKAGE_DIRS = ["env", "frequency", "lower", "upper", "coupling"]
 SOURCE_FIXED_FILES = [
     "runner_v3.py",
     "randomness.py",
-    "scripts/run_freqduet_protocol_v2_matrix.py",
     "env/config.json",
     "env/data/passenger_OD.xlsx",
     "env/data/route_news.xlsx",
     "env/data/stop_news.xlsx",
     "env/data/time_table.xlsx",
 ]
+ANALYSIS_FILES = [
+    "scripts/analysis_provenance.py",
+    "scripts/run_freqduet_protocol_v2_matrix.py",
+    "scripts/decide_freqduet_protocol_v6_screen.py",
+    "scripts/compare_freqduet_external_frozen.py",
+    "scripts/run_freqduet_external_baselines.py",
+    "scripts/submit_freqduet_protocol_v2_scheduleurm.py",
+    "scripts/validate_freqduet_protocol_v6_configs.py",
+]
+SCENARIO_SOURCE_FILES = [
+    "randomness.py",
+    *sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / "env").glob("*.py")
+    ),
+]
+MATRIX_STAGES = {"development", "confirmation", "exploratory"}
 
 
 def parse_csv(value, cast=str):
@@ -261,6 +320,8 @@ def validate_evaluation_frame(
         "protocol_version", "eval_seed", "checkpoint_ep", "policy_digest",
         "scenario_tape_id", *required_metrics,
     }
+    if str(protocol_version) == "freqduet-eval-v6":
+        required.update(V6_CONTRACT_COLUMNS)
     missing = sorted(required - set(frame.columns))
     if missing:
         raise ValueError(f"{source}: missing evaluation columns {missing}")
@@ -286,6 +347,13 @@ def validate_evaluation_frame(
         values = pd.to_numeric(frame[metric], errors="coerce").to_numpy()
         if not np.isfinite(values).all():
             raise ValueError(f"{source}: non-finite metric {metric}")
+    if str(protocol_version) == "freqduet-eval-v6":
+        evidence = set(
+            frame["lower_causal_guard_evidence_mode"].astype(str))
+        if evidence != {"pre_action_departure_v6"}:
+            raise ValueError(
+                f"{source}: V6 holding guard evidence contract mismatch: "
+                f"{sorted(evidence)}")
 
 
 def evaluation_complete(
@@ -299,7 +367,15 @@ def evaluation_complete(
     if not result.exists() or not manifest_path.exists():
         return False
     try:
-        frame = pd.read_csv(result)
+        manifest = json.loads(manifest_path.read_text())
+        if manifest.get("manifest_version") != (
+                "freqduet-evaluation-manifest-v2"):
+            return False
+        frame = validate_csv_artifact(
+            result,
+            (manifest.get("artifacts") or {}).get("evaluation_csv"),
+            expected_primary_key=["eval_seed"],
+        )
         validate_evaluation_frame(
             frame,
             eval_seeds,
@@ -307,7 +383,6 @@ def evaluation_complete(
             checkpoint_ep=checkpoint_ep,
             protocol_version=protocol_version,
         )
-        manifest = json.loads(manifest_path.read_text())
         if manifest.get("protocol_version") != str(protocol_version):
             return False
         if [int(seed) for seed in manifest.get("scenario_seeds", [])] \
@@ -315,6 +390,10 @@ def evaluation_complete(
             return False
         if str(manifest.get("policy_digest")) != str(
                 frame["policy_digest"].iloc[0]):
+            return False
+        if (checkpoint_ep is not None
+                and int(manifest.get("checkpoint_ep", -1))
+                != int(checkpoint_ep)):
             return False
     except Exception:
         return False
@@ -327,18 +406,22 @@ def validate_evaluation_manifest(
     config: str,
     train_seed: int,
     eval_seeds: list[int],
+    checkpoint_ep: int,
     protocol_version: str = PROTOCOL_VERSION,
 ) -> None:
     manifest_path = result.parent / "evaluation_manifest.json"
     if not manifest_path.exists():
         raise ValueError(f"{result}: missing evaluation manifest")
     manifest = json.loads(manifest_path.read_text())
+    if manifest.get("manifest_version") != "freqduet-evaluation-manifest-v2":
+        raise ValueError(f"{manifest_path}: manifest version mismatch")
     expected = {
         "protocol_version": str(protocol_version),
         "config_name": config_name(config),
         "training_seed": int(train_seed),
         "scenario_seeds": [int(seed) for seed in eval_seeds],
         "n_episodes": len(eval_seeds),
+        "checkpoint_ep": int(checkpoint_ep),
     }
     for key, value in expected.items():
         if manifest.get(key) != value:
@@ -348,6 +431,13 @@ def validate_evaluation_manifest(
     if str(manifest.get("policy_digest")) != str(
             frame["policy_digest"].iloc[0]):
         raise ValueError(f"{manifest_path}: policy digest mismatch")
+    locked_frame = validate_csv_artifact(
+        result,
+        (manifest.get("artifacts") or {}).get("evaluation_csv"),
+        expected_primary_key=["eval_seed"],
+    )
+    if not locked_frame.equals(frame):
+        raise ValueError(f"{manifest_path}: evaluation CSV changed while read")
 
 
 def run_subprocess(command: list[str], cwd: Path, env: dict[str, str], log: Path) -> None:
@@ -377,6 +467,7 @@ def run_job(
     suppress_heavy_artifacts: bool,
     clean: bool,
     skip_existing: bool,
+    stage: str = "development",
 ) -> tuple[str, int, Path]:
     path = run_dir(logs_dir, config, train_seed)
     protocol_version = protocol_version_for_config(config)
@@ -387,6 +478,7 @@ def run_job(
         train_seed=train_seed,
         eval_seeds=eval_seeds,
         train_episodes=train_episodes,
+        stage=stage,
     )
     manifest_path = path / RUN_MANIFEST_NAME
     existing_artifacts = (
@@ -638,6 +730,36 @@ def protocol_version_for_config(name: str) -> str:
     return str(protocol.get("version", PROTOCOL_VERSION))
 
 
+def analysis_fingerprint() -> dict[str, object]:
+    return files_fingerprint(ROOT, ANALYSIS_FILES)
+
+
+def scenario_contract(name: str) -> dict[str, object]:
+    """Fingerprint exogenous dynamics shared by every policy in a matrix."""
+    payload = resolved_config(name)
+    protocol = payload.get("protocol", {}) or {}
+    contract_payload = {
+        "contract_version": "freqduet-scenario-contract-v1",
+        "protocol_version": str(protocol.get("version", PROTOCOL_VERSION)),
+        "objective_contract": str(protocol.get("objective_contract", "")),
+        "env": payload.get("env", {}) or {},
+        "randomness": payload.get("randomness", {}) or {},
+        "scenario_sources": files_fingerprint(ROOT, SCENARIO_SOURCE_FILES),
+        "environment_data": files_fingerprint(ROOT, [
+            "env/config.json",
+            "env/data/passenger_OD.xlsx",
+            "env/data/route_news.xlsx",
+            "env/data/stop_news.xlsx",
+            "env/data/time_table.xlsx",
+        ]),
+    }
+    return {
+        "version": "freqduet-scenario-contract-v1",
+        "sha256": canonical_json_sha256(contract_payload),
+        "payload": contract_payload,
+    }
+
+
 def source_fingerprint() -> dict[str, object]:
     paths = {ROOT / relative for relative in SOURCE_FIXED_FILES}
     for package in SOURCE_PACKAGE_DIRS:
@@ -668,16 +790,32 @@ def source_fingerprint() -> dict[str, object]:
 
 def run_manifest(
     *, config: str, train_seed: int, eval_seeds: list[int],
-    train_episodes: int
+    train_episodes: int, stage: str = "development",
 ) -> dict[str, object]:
+    if str(stage) not in MATRIX_STAGES:
+        raise ValueError(f"unsupported matrix stage {stage!r}")
     return {
         "manifest_version": RUN_MANIFEST_VERSION,
+        "model_source_fingerprint_version": (
+            MODEL_SOURCE_FINGERPRINT_VERSION),
         "protocol_version": protocol_version_for_config(config),
+        "stage": str(stage),
         "config_name": config_name(config),
         "config_fingerprint": config_fingerprint(config),
         "source_fingerprint": source_fingerprint(),
+        "scenario_contract": scenario_contract(config),
+        "analysis_fingerprint_at_launch": analysis_fingerprint(),
+        "runtime_environment": runtime_environment(),
+        "invocation": {
+            "entrypoint": "scripts/run_freqduet_protocol_v2_matrix.py",
+            "argv": [str(value) for value in sys.argv],
+            "cwd": str(ROOT),
+            "python_executable": str(Path(sys.executable).resolve()),
+        },
+        "git": git_provenance(),
         "train_seed": int(train_seed),
         "train_episodes": int(train_episodes),
+        "checkpoint_ep": int(train_episodes) - 1,
         "eval_seeds": [int(seed) for seed in eval_seeds],
     }
 
@@ -701,28 +839,62 @@ def validate_run_manifest(
     source_payload = payload.get("source_fingerprint", {})
     if len(str(source_payload.get("sha256", ""))) != 64:
         raise ValueError(f"{label}: invalid source fingerprint")
+    if payload.get("model_source_fingerprint_version") != (
+            MODEL_SOURCE_FINGERPRINT_VERSION):
+        raise ValueError(f"{label}: model source fingerprint version mismatch")
+    scenario_payload = payload.get("scenario_contract", {})
+    if len(str(scenario_payload.get("sha256", ""))) != 64:
+        raise ValueError(f"{label}: invalid scenario contract fingerprint")
+    if not isinstance(payload.get("runtime_environment"), dict):
+        raise ValueError(f"{label}: missing runtime environment")
+    if not isinstance(payload.get("invocation"), dict):
+        raise ValueError(f"{label}: missing invocation provenance")
     return payload
 
 
 def git_provenance() -> dict[str, object]:
-    def run(*args: str) -> str:
+    def run(*args: str) -> tuple[bool, str]:
         process = subprocess.run(
             ["git", *args], cwd=ROOT, text=True,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        return process.stdout.strip() if process.returncode == 0 else ""
+        return process.returncode == 0, process.stdout.strip()
+
+    commit_ok, commit = run("rev-parse", "HEAD")
+    branch_ok, branch = run("rev-parse", "--abbrev-ref", "HEAD")
+    status_ok, status = run(
+        "status", "--porcelain", "--untracked-files=no")
+    if not commit_ok:
+        commit = str(os.environ.get(
+            "FREQDUET_SOURCE_COMMIT", "unavailable")).strip()
+    if not branch_ok:
+        branch = str(os.environ.get(
+            "FREQDUET_SOURCE_BRANCH", "unavailable")).strip()
+    if status_ok:
+        tracked_dirty: bool | None = bool(status)
+    else:
+        dirty_env = os.environ.get("FREQDUET_SOURCE_TRACKED_DIRTY")
+        tracked_dirty = (
+            None if dirty_env is None
+            else str(dirty_env).strip().lower() in {"1", "true", "yes"}
+        )
 
     return {
-        "commit": run("rev-parse", "HEAD") or "unavailable",
-        "branch": run("rev-parse", "--abbrev-ref", "HEAD") or "unavailable",
-        "tracked_dirty": bool(run(
-            "status", "--porcelain", "--untracked-files=no")),
+        "commit": commit or "unavailable",
+        "branch": branch or "unavailable",
+        "tracked_dirty": tracked_dirty,
     }
 
 
 def aggregate(
     configs: list[str], train_seeds: list[int], eval_seeds: list[int],
-    logs_dirs: list[Path], out_dir: Path, reference: str
+    logs_dirs: list[Path], out_dir: Path, reference: str,
+    train_episodes: int, stage: str,
 ) -> None:
+    if str(stage) not in MATRIX_STAGES:
+        raise ValueError(f"unsupported matrix stage {stage!r}")
+    if int(train_episodes) <= 0:
+        raise ValueError("train_episodes must be positive")
+    checkpoint_ep = int(train_episodes) - 1
     protocol_versions = {
         protocol_version_for_config(config) for config in configs}
     if len(protocol_versions) != 1:
@@ -730,10 +902,22 @@ def aggregate(
             "one matrix cannot mix protocol versions: "
             f"{sorted(protocol_versions)}")
     protocol_version = next(iter(protocol_versions))
+    expected_source = source_fingerprint()
+    scenario_contracts = {
+        config_name(config): scenario_contract(config) for config in configs
+    }
+    scenario_hashes = {
+        str(value["sha256"]) for value in scenario_contracts.values()
+    }
+    if len(scenario_hashes) != 1:
+        raise ValueError(
+            "one matrix cannot mix scenario contracts: "
+            f"{scenario_contracts}")
+    common_scenario_contract = next(iter(scenario_contracts.values()))
     records = []
     missing_runs = []
     run_manifests = []
-    runs_without_manifest = []
+    run_manifest_artifacts = []
     for config in configs:
         name = config_name(config)
         for train_seed in train_seeds:
@@ -756,7 +940,7 @@ def aggregate(
                 frame,
                 eval_seeds,
                 result,
-                checkpoint_ep=None,
+                checkpoint_ep=checkpoint_ep,
                 protocol_version=protocol_version,
             )
             validate_evaluation_manifest(
@@ -765,52 +949,106 @@ def aggregate(
                 config,
                 train_seed,
                 eval_seeds,
+                checkpoint_ep=checkpoint_ep,
                 protocol_version=protocol_version,
             )
             run_manifest_path = result.parent.parent / RUN_MANIFEST_NAME
-            if run_manifest_path.exists():
-                manifest = validate_run_manifest(
-                    run_manifest_path, source=result.parent.parent)
-                expected_config = config_fingerprint(config)
-                expected_fields = {
-                    "protocol_version": protocol_version,
-                    "config_name": name,
-                    "config_fingerprint": expected_config,
-                    "train_seed": int(train_seed),
-                    "eval_seeds": [int(seed) for seed in eval_seeds],
-                }
-                for key, expected_value in expected_fields.items():
-                    if manifest.get(key) != expected_value:
-                        raise ValueError(
-                            f"{run_manifest_path}: {key} does not match "
-                            "the aggregation protocol")
-                run_manifests.append(manifest)
-            else:
-                runs_without_manifest.append(str(result.parent.parent))
+            manifest = validate_run_manifest(
+                run_manifest_path, source=result.parent.parent)
+            expected_fields = {
+                "protocol_version": protocol_version,
+                "stage": str(stage),
+                "config_name": name,
+                "config_fingerprint": config_fingerprint(config),
+                "source_fingerprint": expected_source,
+                "scenario_contract": scenario_contracts[name],
+                "train_seed": int(train_seed),
+                "train_episodes": int(train_episodes),
+                "checkpoint_ep": checkpoint_ep,
+                "eval_seeds": [int(seed) for seed in eval_seeds],
+            }
+            for key, expected_value in expected_fields.items():
+                if manifest.get(key) != expected_value:
+                    raise ValueError(
+                        f"{run_manifest_path}: {key} does not match "
+                        "the aggregation protocol")
+            run_manifests.append(manifest)
+            run_manifest_artifacts.append({
+                "config": name,
+                "train_seed": int(train_seed),
+                "path": str(run_manifest_path),
+                "sha256": sha256_file(run_manifest_path),
+                "size_bytes": int(run_manifest_path.stat().st_size),
+            })
             frame["config"] = name
             frame["train_seed"] = int(train_seed)
+            frame["scenario_contract_sha256"] = str(
+                common_scenario_contract["sha256"])
             records.append(frame)
     if missing_runs:
         raise RuntimeError(f"missing frozen evaluations: {missing_runs}")
     if not records:
         raise RuntimeError("no frozen evaluation files found")
-    if run_manifests and runs_without_manifest:
-        raise RuntimeError(
-            "matrix mixes source-fingerprinted and legacy runs without a "
-            f"manifest: {runs_without_manifest}")
     run_source_hashes = {
         manifest["source_fingerprint"]["sha256"]
         for manifest in run_manifests
     }
-    if len(run_source_hashes) > 1:
+    if run_source_hashes != {str(expected_source["sha256"])}:
         raise RuntimeError(
-            "matrix mixes multiple source fingerprints: "
+            "matrix source fingerprint does not match the locked source: "
             f"{sorted(run_source_hashes)}")
+    launch_analysis_hashes = {
+        str(manifest.get("analysis_fingerprint_at_launch", {}).get(
+            "sha256", ""))
+        for manifest in run_manifests
+    }
+    if len(launch_analysis_hashes) != 1 or any(
+            len(value) != 64 for value in launch_analysis_hashes):
+        raise RuntimeError(
+            "matrix mixes or lacks launch analysis fingerprints: "
+            f"{sorted(launch_analysis_hashes)}")
+    current_analysis = analysis_fingerprint()
+    if (protocol_version == "freqduet-eval-v6"
+            and launch_analysis_hashes != {
+                str(current_analysis["sha256"])}):
+        raise RuntimeError(
+            "V6 analysis source changed between launch and aggregation")
+    run_git_commits = {
+        str((manifest.get("git") or {}).get("commit", ""))
+        for manifest in run_manifests
+    }
+    run_git_dirty = {
+        (manifest.get("git") or {}).get("tracked_dirty")
+        for manifest in run_manifests
+    }
+    if (len(run_git_commits) != 1
+            or any(not re.fullmatch(r"[0-9a-f]{40}", value)
+                   for value in run_git_commits)
+            or len(run_git_dirty) != 1
+            or not isinstance(next(iter(run_git_dirty)), bool)):
+        raise RuntimeError(
+            "matrix mixes or lacks run Git provenance: "
+            f"commits={sorted(run_git_commits)}, dirty={run_git_dirty}")
+    aggregate_git = git_provenance()
+    if (str(aggregate_git.get("commit", ""))
+            != next(iter(run_git_commits))):
+        raise RuntimeError(
+            "aggregation Git commit differs from the run manifests")
+    common_run_git = {
+        "commit": next(iter(run_git_commits)),
+        "tracked_dirty": next(iter(run_git_dirty)),
+    }
     per_eval = pd.concat(records, ignore_index=True)
     expected_rows = len(configs) * len(train_seeds) * len(eval_seeds)
     if len(per_eval) != expected_rows:
         raise RuntimeError(
             f"matrix has {len(per_eval)} rows, expected {expected_rows}")
+    if per_eval.duplicated(["config", "train_seed", "eval_seed"]).any():
+        raise RuntimeError("matrix contains duplicate config/train/eval rows")
+    observed_checkpoint = set(per_eval["checkpoint_ep"].astype(int))
+    if observed_checkpoint != {checkpoint_ep}:
+        raise RuntimeError(
+            "matrix checkpoint does not match the locked training length")
     validate_common_scenario_tapes(per_eval)
     analysis_metrics = analysis_metrics_for_frame(per_eval)
     summary_rows = []
@@ -891,21 +1129,58 @@ def aggregate(
             row[f"{key}_holm"] = value
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    per_eval.to_csv(out_dir / "frozen_per_eval.csv", index=False)
-    pd.DataFrame(summary_rows).to_csv(out_dir / "frozen_summary.csv", index=False)
-    pd.DataFrame(delta_rows).to_csv(out_dir / "frozen_paired_deltas.csv", index=False)
+    per_eval_path = out_dir / "frozen_per_eval.csv"
+    summary_path = out_dir / "frozen_summary.csv"
+    paired_path = out_dir / "frozen_paired_deltas.csv"
+    summary_frame = pd.DataFrame(summary_rows)
+    paired_frame = pd.DataFrame(delta_rows)
+    if paired_frame.empty:
+        paired_frame = pd.DataFrame(columns=[
+            "candidate", "reference", "n_pairs"])
+    per_eval.to_csv(per_eval_path, index=False)
+    summary_frame.to_csv(summary_path, index=False)
+    paired_frame.to_csv(paired_path, index=False)
+    artifacts = {
+        "frozen_per_eval.csv": csv_artifact_record(
+            per_eval_path,
+            per_eval,
+            ["config", "train_seed", "eval_seed"],
+        ),
+        "frozen_summary.csv": csv_artifact_record(
+            summary_path,
+            summary_frame,
+            ["config"],
+        ),
+        "frozen_paired_deltas.csv": csv_artifact_record(
+            paired_path,
+            paired_frame,
+            ["candidate", "reference"],
+        ),
+    }
     (out_dir / "matrix_manifest.json").write_text(json.dumps({
+        "manifest_version": MATRIX_MANIFEST_VERSION,
+        "model_source_fingerprint_version": (
+            MODEL_SOURCE_FINGERPRINT_VERSION),
         "protocol_version": protocol_version,
+        "stage": str(stage),
+        "independent_confirmation": str(stage) == "confirmation",
         "configs": [config_name(value) for value in configs],
-        "train_seeds": train_seeds,
+        "train_seeds": [int(seed) for seed in train_seeds],
         "eval_seeds": [int(seed) for seed in eval_seeds],
+        "train_episodes": int(train_episodes),
+        "checkpoint_ep": checkpoint_ep,
         "reference": reference_name,
+        "primary_metric": "restricted_total_journey_horizon_min",
         "metrics": analysis_metrics,
         "uncertainty": (
             "crossed bootstrap over training and evaluation seeds; one shared "
             "evaluation-seed resample is used across policies within each draw"
         ),
-        "paired_test": "two-sided sign-flip test over train-seed mean deltas",
+        "paired_test": (
+            "two-sided sign-flip test over train-seed mean deltas; this "
+            "conditional training-seed inference is distinct from the crossed "
+            "train/evaluation population targeted by bootstrap intervals"
+        ),
         "multiple_testing": (
             "Holm family-wise correction across candidate-reference "
             "comparisons, separately for each metric"
@@ -913,12 +1188,21 @@ def aggregate(
         "strict_complete": True,
         "expected_rollouts": expected_rows,
         "common_random_numbers_verified": True,
-        "run_manifests_verified": bool(run_manifests),
-        "run_source_fingerprint": (
-            run_manifests[0]["source_fingerprint"]
-            if run_manifests else None
-        ),
-        "git": git_provenance(),
+        "run_manifests_verified": True,
+        "run_source_fingerprint": expected_source,
+        "scenario_contract": common_scenario_contract,
+        "launch_analysis_sha256": next(iter(launch_analysis_hashes)),
+        "analysis_fingerprint": current_analysis,
+        "runtime_environment": runtime_environment(),
+        "invocation": {
+            "argv": [str(value) for value in sys.argv],
+            "cwd": str(ROOT),
+            "python_executable": str(Path(sys.executable).resolve()),
+        },
+        "artifacts": artifacts,
+        "run_manifest_artifacts": run_manifest_artifacts,
+        "run_git_provenance": common_run_git,
+        "git": aggregate_git,
         "config_fingerprints": {
             config_name(value): config_fingerprint(value)
             for value in configs
@@ -932,6 +1216,11 @@ def main() -> None:
     parser.add_argument("--train-seeds", default=",".join(map(str, DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--eval-seeds", default=",".join(map(str, DEFAULT_EVAL_SEEDS)))
     parser.add_argument("--train-episodes", type=int, default=60)
+    parser.add_argument(
+        "--stage",
+        choices=sorted(MATRIX_STAGES),
+        default="development",
+    )
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--worker-threads", type=int, default=1)
     parser.add_argument("--logs-dir", required=True)
@@ -982,6 +1271,7 @@ def main() -> None:
                     args.suppress_heavy_artifacts,
                     args.clean,
                     args.skip_existing,
+                    args.stage,
                 )
                 for config, train_seed in jobs
             ]
@@ -1001,6 +1291,8 @@ def main() -> None:
             aggregate_logs_dirs,
             Path(args.out_dir),
             args.reference,
+            args.train_episodes,
+            args.stage,
         )
 
 

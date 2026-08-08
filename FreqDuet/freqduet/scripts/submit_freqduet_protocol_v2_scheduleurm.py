@@ -23,13 +23,15 @@ except ValueError:
         "/home/zhengliang01/scheduleurm_work/TransitDuet/FreqDuet/freqduet")
 REMOTE_PYTHON = Path("/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python")
 DEFAULT_CONFIGS = [
-    "F_freqduet_protocol_v2_main_hiro",
-    "F_freqduet_protocol_v2_upperdisc_hiro",
-    "F_freqduet_protocol_v2_upperhist_hiro",
-    "F_freqduet_protocol_v2_upperdisc_hist_hiro",
+    f"F_freqduet_protocol_v6_{name}_hiro"
+    for name in (
+        "main", "nofreq", "rawhistory", "allfreq", "upperonly",
+        "loweronly", "swapped", "nobudget", "noguard", "noloadcost",
+        "waitonlycredit", "csac",
+    )
 ]
-DEFAULT_TRAIN_SEEDS = [7, 17, 31, 42]
-DEFAULT_EVAL_SEEDS = [10001, 10007, 10009, 10037, 10039, 10061, 10067, 10069]
+DEFAULT_TRAIN_SEEDS = [503, 521, 541, 557]
+DEFAULT_EVAL_SEEDS = [41011, 41017, 41023, 41039]
 DEFAULT_NODES = ["node001", "node002", "node003", "node004", "node005", "node006"]
 CPU_JUSTIFICATION = (
     "FreqDuet transit simulation and reinforcement learning are "
@@ -116,15 +118,22 @@ def preflight_source(
         if status:
             raise RuntimeError(
                 "submission source is dirty; use an immutable worktree snapshot")
+    validator = None
     if protocol == "protocol-v4":
+        validator = "validate_freqduet_protocol_v4_configs.py"
+    elif protocol == "protocol-v6":
+        validator = "validate_freqduet_protocol_v6_configs.py"
+    if validator is not None:
         names = [
             name if str(name).endswith(".yaml") else f"{name}.yaml"
             for name in configs
         ]
+        if protocol == "protocol-v6":
+            names = [Path(name).stem for name in names]
         process = subprocess.run(
             [
                 sys.executable,
-                str(ROOT / "scripts/validate_freqduet_protocol_v4_configs.py"),
+                str(ROOT / "scripts" / validator),
                 *names,
             ],
             cwd=ROOT,
@@ -134,7 +143,8 @@ def preflight_source(
         )
         if process.returncode != 0:
             raise RuntimeError(
-                "v4 config preflight failed:\n" + (process.stdout or ""))
+                f"{protocol} config preflight failed:\n"
+                + (process.stdout or ""))
         if process.stdout.strip():
             print(process.stdout.strip())
     return commit
@@ -150,7 +160,12 @@ def main() -> None:
     )
     parser.add_argument("--train-seeds", default=",".join(map(str, DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--eval-seeds", default=",".join(map(str, DEFAULT_EVAL_SEEDS)))
-    parser.add_argument("--train-episodes", type=int, default=60)
+    parser.add_argument("--train-episodes", type=int, default=40)
+    parser.add_argument(
+        "--stage",
+        choices=["development", "confirmation", "exploratory"],
+        default="development",
+    )
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--shard-size", type=int, default=4)
     parser.add_argument("--workers", type=int, default=4)
@@ -179,6 +194,28 @@ def main() -> None:
     train_seeds = parse_csv(args.train_seeds, int)
     eval_seeds = parse_csv(args.eval_seeds, int)
     nodes = parse_csv(args.nodes)
+    for label, values in [
+        ("configs", configs),
+        ("train seeds", train_seeds),
+        ("eval seeds", eval_seeds),
+        ("nodes", nodes),
+    ]:
+        if not values:
+            parser.error(f"{label} must not be empty")
+        if len(values) != len(set(values)):
+            parser.error(f"{label} must be unique")
+    for label, value in [
+        ("train episodes", args.train_episodes),
+        ("shard size", args.shard_size),
+        ("workers", args.workers),
+        ("cpu", args.cpu),
+        ("RAM", args.ram_mb),
+    ]:
+        if int(value) <= 0:
+            parser.error(f"{label} must be positive")
+    if protocol_label(configs) == "protocol-v6" and set(train_seeds) & set(
+            eval_seeds):
+        parser.error("V6 train and evaluation seed sets must be disjoint")
     total = len(configs) * len(train_seeds)
     shards = ranges(total, args.shard_size)
     result_base = f"results_freqduet/{args.run_name}"
@@ -194,6 +231,9 @@ def main() -> None:
         f"{protocol} run={args.run_name} jobs={total} shards={len(shards)} "
         f"train_episodes={args.train_episodes} eval_seeds={len(eval_seeds)}")
     print(f"source_commit={commit} local_root={ROOT} remote_root={remote_root}")
+    source_branch = git_output("rev-parse", "--abbrev-ref", "HEAD")
+    source_tracked_dirty = bool(git_output(
+        "status", "--porcelain", "--untracked-files=no"))
 
     submitted_task_ids: list[str] = []
     bulk_specs: list[dict[str, object]] = []
@@ -209,6 +249,10 @@ def main() -> None:
             "NUMEXPR_NUM_THREADS=1",
             "TORCH_NUM_THREADS=1",
             "FREQDUET_TORCH_THREADS=1",
+            f"FREQDUET_SOURCE_COMMIT={shlex.quote(commit)}",
+            f"FREQDUET_SOURCE_BRANCH={shlex.quote(source_branch)}",
+            "FREQDUET_SOURCE_TRACKED_DIRTY="
+            f"{int(source_tracked_dirty)}",
             shlex.join([
                 str(REMOTE_PYTHON),
                 "-u",
@@ -218,6 +262,7 @@ def main() -> None:
                 "--train-seeds", ",".join(map(str, train_seeds)),
                 "--eval-seeds", ",".join(map(str, eval_seeds)),
                 "--train-episodes", str(args.train_episodes),
+                "--stage", args.stage,
                 "--workers", str(args.workers),
                 "--worker-threads", "1",
                 "--logs-dir", logs_dir,
@@ -320,6 +365,8 @@ def main() -> None:
         f"--reference {shlex.quote(reference)} "
         f"--train-seeds {shlex.quote(','.join(map(str, train_seeds)))} "
         f"--eval-seeds {shlex.quote(','.join(map(str, eval_seeds)))} "
+        f"--train-episodes {int(args.train_episodes)} "
+        f"--stage {shlex.quote(args.stage)} "
         f"--logs-dir {result_base}/logs_shards/shard_0000_0000 "
         f"--aggregate-logs-dirs \"$(find {result_base}/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)\" "
         f"--out-dir {result_base}/combined_summary")

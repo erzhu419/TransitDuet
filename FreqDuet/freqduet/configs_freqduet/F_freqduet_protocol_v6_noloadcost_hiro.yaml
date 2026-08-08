@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_noloadcost_hiro
+
+protocol:
+  role: ablation_no_load_holding_cost_v6
+
+lower:
+  load_weighted_holding:
+    enable: false
+    reward_weight: 0.0
+

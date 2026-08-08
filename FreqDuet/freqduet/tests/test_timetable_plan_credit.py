@@ -129,7 +129,7 @@ class TimetablePlanCreditTest(unittest.TestCase):
         )
 
         self.assertEqual(trips[1]._freqduet_scheduled_launch, 280.0)
-        self.assertEqual(trips[1].target_headway, 270.0)
+        self.assertEqual(trips[1].target_headway, 300.0)
         self.assertEqual(trips[1]._freqduet_planned_by, 3)
         self.assertEqual(trips[2]._freqduet_scheduled_launch, 640.0)
         self.assertEqual(trips[3]._freqduet_scheduled_launch, 1000.0)
@@ -194,7 +194,84 @@ class TimetablePlanCreditTest(unittest.TestCase):
             self.assertGreaterEqual(trip.target_headway - 300.0, -60.0)
             self.assertLessEqual(trip.target_headway - 300.0, 60.0)
 
-    def test_v5_anchor_delay_does_not_become_a_control_target(self):
+    def test_cached_exact_plan_reuse_is_immutable(self):
+        trips = self._trips()
+        planner = TimetableCurvePlanner(
+            horizon_s=1200.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            terminal_schedule_mode="exact_headway_curve",
+            headway_budget_mode="zero_sum_delta_v5",
+            coefficient_parameterization="antisymmetric_linear_v5",
+        )
+        planner.apply(
+            trips, trips[0], [60.0], write_scheduled_launch=True, plan_id=0)
+        before = [trip._freqduet_scheduled_launch for trip in trips]
+        trips[1].target_headway = -1.0
+
+        trips[0].launched = True
+        summary = planner.cached_plan_summary(trips[1], plan_id=0)
+
+        self.assertEqual(
+            before, [trip._freqduet_scheduled_launch for trip in trips])
+        self.assertTrue(summary["plan_reused"])
+        self.assertEqual(summary["projection_mode"],
+                         "exact_headway_curve_cached")
+        self.assertEqual(trips[1].target_headway, -1.0)
+
+    def test_v6_rolling_budget_prevents_replan_phase_drift(self):
+        trips = [
+            SimpleNamespace(
+                launch_time=i * 300,
+                launch_turn=i,
+                direction=True,
+                launched=False,
+                target_headway=300.0,
+            )
+            for i in range(13)
+        ]
+        planner = TimetableCurvePlanner(
+            horizon_s=2700.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            delta_min_s=-60.0,
+            delta_max_s=60.0,
+            terminal_schedule_mode="exact_headway_curve",
+            headway_budget_mode="rolling_zero_sum_delta_v6",
+            headway_budget_window_s=900.0,
+            coefficient_parameterization="antisymmetric_linear_v5",
+        )
+
+        for anchor_index in (0, 3, 6, 9):
+            for index in range(anchor_index):
+                trips[index].launched = True
+                trips[index]._freqduet_actual_launch = float(
+                    trips[index]._freqduet_scheduled_launch)
+            summary = planner.apply(
+                trips,
+                trips[anchor_index],
+                [60.0],
+                origin_launch_s=float(trips[anchor_index].launch_time),
+                write_scheduled_launch=True,
+                plan_id=anchor_index,
+            )
+            self.assertAlmostEqual(
+                trips[anchor_index]._freqduet_scheduled_launch,
+                trips[anchor_index].launch_time,
+            )
+            self.assertAlmostEqual(
+                summary["projected_headway_delta_sum_s"], 0.0)
+
+        self.assertAlmostEqual(
+            trips[-1]._freqduet_scheduled_launch,
+            trips[-1].launch_time,
+        )
+
+    def test_anchor_readiness_delay_does_not_become_a_control_target(self):
         trips = self._trips()
         trips[0].launched = True
         trips[0]._freqduet_actual_launch = 650.0
@@ -216,8 +293,8 @@ class TimetablePlanCreditTest(unittest.TestCase):
             trips, trips[1], [0.0], origin_launch_s=300.0,
             write_scheduled_launch=True, plan_id=1)
 
-        self.assertEqual(trips[1].target_headway, 240.0)
-        self.assertEqual(summary["effective_delta"], -60.0)
+        self.assertEqual(trips[1].target_headway, 300.0)
+        self.assertEqual(summary["effective_delta"], 0.0)
 
     def test_v5_headway_budget_projection_respects_box_bounds(self):
         projected = TimetableCurvePlanner._project_box_sum(

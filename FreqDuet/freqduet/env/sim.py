@@ -416,6 +416,11 @@ class env_bus(object):
         self._fleet_denied_dispatch_events = 0
         self._fleet_denied_trip_ids = set()
         self._fleet_readiness_delays_s = []
+        self._dispatch_execution_errors_s = []
+        self._actual_dispatch_gaps_s = []
+        self._latent_arrivals_pending = {}
+        self._latent_od_arrivals_pending = {}
+        self._apc_boardings_pending = {}
         self.route_state = []
 
         # self.state is combine with route_state, which contains the route.speed_limit of each route, station_state, which
@@ -682,6 +687,19 @@ class env_bus(object):
                     float(self.current_time) - float(trip.launch_time)
                 )
                 self._fleet_readiness_delays_s.append(readiness_delay)
+                previous_dispatch = float(
+                    self._last_dispatch_time[trip.direction])
+                if previous_dispatch > -9000.0:
+                    actual_gap_s = float(self.current_time) - previous_dispatch
+                    target_gap_s = float(getattr(
+                        trip, 'target_headway', 360.0))
+                    execution_error_s = actual_gap_s - target_gap_s
+                    trip._freqduet_actual_dispatch_gap_s = actual_gap_s
+                    trip._freqduet_dispatch_execution_error_s = (
+                        execution_error_s)
+                    self._actual_dispatch_gaps_s.append(actual_gap_s)
+                    self._dispatch_execution_errors_s.append(
+                        execution_error_s)
                 self._last_dispatch_time[trip.direction] = self.current_time
         # route
         route_state = []
@@ -695,82 +713,92 @@ class env_bus(object):
                 )
                 route_state.append(route.speed_limit)
             self.route_state = route_state
-        # update waiting passengers of every station every second
-        # station_state = []
-        if (self.protocol.demand_active(self.current_time)
-                and self.current_time % self.passenger_update_freq == 0):
-            freq_arrivals = {}
-            freq_od_arrivals = {}
-            collect_od_frequency = (
-                self.frequency_enabled
-                and self.frequency_tracker is not None
-                and getattr(self.frequency_tracker, 'od_features_enabled', False)
-            )
-            for station in self.stations:
-                passenger_start = len(station.total_passenger)
-                if collect_od_frequency:
-                    new_count, od_counts = station.station_update(
-                        self.current_time, self.stations, self.passenger_update_freq,
-                        demand_multipliers=self._demand_multipliers,
-                        demand_scale=self._demand_scale,
-                        od_multipliers=self._od_multipliers,
-                        peak_shift=self._peak_shift,
-                        service_start_hour=self._service_start_hour,
-                        service_end_hour=self._service_end_hour,
-                        return_details=True,
-                        scenario_tape=self.scenario_tape)
-                else:
-                    new_count = station.station_update(
-                        self.current_time, self.stations, self.passenger_update_freq,
-                        demand_multipliers=self._demand_multipliers,
-                        demand_scale=self._demand_scale,
-                        od_multipliers=self._od_multipliers,
-                        peak_shift=self._peak_shift,
-                        service_start_hour=self._service_start_hour,
-                        service_end_hour=self._service_end_hour,
-                        return_details=False,
-                        scenario_tape=self.scenario_tape)
-                    od_counts = {}
-                if self.frequency_enabled and new_count:
-                    low_share, high_share = (
-                        self.frequency_tracker.causal_arrival_band_shares(
-                            station.station_id,
-                            station.direction,
-                            new_count,
-                            observation_interval_s=self.passenger_update_freq,
-                            register_state=(
-                                self.frequency_observation_source
-                                == 'latent_arrivals'),
-                        )
+        # Release sampled passengers only when their within-window arrival time
+        # has elapsed. Latent frequency observations are flushed after each
+        # completed batch, before the next exogenous window is sampled.
+        collect_od_frequency = (
+            self.frequency_enabled
+            and self.frequency_tracker is not None
+            and getattr(self.frequency_tracker, 'od_features_enabled', False)
+        )
+        for station in self.stations:
+            passenger_start = len(station.total_passenger)
+            if collect_od_frequency:
+                new_count, od_counts = station.release_passengers(
+                    self.current_time, return_details=True)
+            else:
+                new_count = station.release_passengers(
+                    self.current_time, return_details=False)
+                od_counts = {}
+            if self.frequency_enabled and new_count:
+                low_share, high_share = (
+                    self.frequency_tracker.causal_arrival_band_shares(
+                        station.station_id,
+                        station.direction,
+                        new_count,
+                        observation_interval_s=self.passenger_update_freq,
+                        register_state=(
+                            self.frequency_observation_source
+                            == 'latent_arrivals'),
                     )
-                    for passenger in station.total_passenger[passenger_start:]:
-                        passenger.set_frequency_shares(
-                            low_share,
-                            high_share,
-                            source='causal_preupdate_expected_excess',
-                        )
-                if self.frequency_enabled and new_count:
-                    key = (int(station.station_id), bool(station.direction))
-                    freq_arrivals[key] = freq_arrivals.get(key, 0) + int(new_count)
-                    if collect_od_frequency:
-                        for od_key, od_count in od_counts.items():
-                            freq_od_arrivals[od_key] = (
-                                freq_od_arrivals.get(od_key, 0) + int(od_count))
-            if (self.frequency_enabled and self.frequency_tracker is not None
-                    and self.frequency_observation_source == 'latent_arrivals'):
-                prev_freq_updates = int(self.frequency_tracker.total_updates)
-                self.frequency_tracker.update(freq_arrivals, freq_od_arrivals)
-                bin_applied = int(self.frequency_tracker.total_updates) > prev_freq_updates
-                if self.frequency_logger is not None:
-                    self.frequency_logger.log_step(
-                        self.current_time,
-                        freq_arrivals,
-                        self.stations,
-                        self.bus_all,
-                        self.frequency_tracker,
-                        bin_applied=bin_applied)
-            self.lower_context_gate_value = self._lower_context_gate_value()
-            # station_state.append(len(station.waiting_passengers))
+                )
+                for passenger in station.total_passenger[passenger_start:]:
+                    passenger.set_frequency_shares(
+                        low_share,
+                        high_share,
+                        source='causal_preupdate_expected_excess',
+                    )
+            if (self.frequency_enabled and new_count
+                    and self.frequency_observation_source
+                    == 'latent_arrivals'):
+                key = (int(station.station_id), bool(station.direction))
+                self._latent_arrivals_pending[key] = (
+                    self._latent_arrivals_pending.get(key, 0)
+                    + int(new_count))
+                if collect_od_frequency:
+                    for od_key, od_count in od_counts.items():
+                        self._latent_od_arrivals_pending[od_key] = (
+                            self._latent_od_arrivals_pending.get(od_key, 0)
+                            + int(od_count))
+
+        passenger_boundary = (
+            self.current_time % self.passenger_update_freq == 0)
+        if (passenger_boundary and self.current_time > 0
+                and self.frequency_enabled
+                and self.frequency_tracker is not None
+                and self.frequency_observation_source == 'latent_arrivals'):
+            freq_arrivals = dict(self._latent_arrivals_pending)
+            freq_od_arrivals = dict(self._latent_od_arrivals_pending)
+            self._latent_arrivals_pending.clear()
+            self._latent_od_arrivals_pending.clear()
+            prev_freq_updates = int(self.frequency_tracker.total_updates)
+            self.frequency_tracker.update(freq_arrivals, freq_od_arrivals)
+            bin_applied = (
+                int(self.frequency_tracker.total_updates) > prev_freq_updates)
+            if self.frequency_logger is not None:
+                self.frequency_logger.log_step(
+                    self.current_time,
+                    freq_arrivals,
+                    self.stations,
+                    self.bus_all,
+                    self.frequency_tracker,
+                    bin_applied=bin_applied)
+
+        if passenger_boundary and self.protocol.demand_active(self.current_time):
+            for station in self.stations:
+                station.schedule_passenger_window(
+                    self.current_time,
+                    self.stations,
+                    self.passenger_update_freq,
+                    demand_multipliers=self._demand_multipliers,
+                    demand_scale=self._demand_scale,
+                    od_multipliers=self._od_multipliers,
+                    peak_shift=self._peak_shift,
+                    service_start_hour=self._service_start_hour,
+                    service_end_hour=self._service_end_hour,
+                    scenario_tape=self.scenario_tape,
+                )
+        self.lower_context_gate_value = self._lower_context_gate_value()
         # update bus state
         apc_frequency_counts = {}
         for bus in self.bus_all:
@@ -834,16 +862,25 @@ class env_bus(object):
                     )
 
         if (self.frequency_enabled and self.frequency_tracker is not None
+                and self.frequency_observation_source == 'apc_boardings'):
+            for key, count in apc_frequency_counts.items():
+                self._apc_boardings_pending[key] = (
+                    self._apc_boardings_pending.get(key, 0) + int(count))
+
+        if (self.frequency_enabled and self.frequency_tracker is not None
                 and self.frequency_observation_source == 'apc_boardings'
+                and self.current_time > 0
                 and self.current_time % self.passenger_update_freq == 0):
+            completed_apc_bin = dict(self._apc_boardings_pending)
+            self._apc_boardings_pending.clear()
             previous_updates = int(self.frequency_tracker.total_updates)
-            self.frequency_tracker.update(apc_frequency_counts, {})
+            self.frequency_tracker.update(completed_apc_bin, {})
             bin_applied = (
                 int(self.frequency_tracker.total_updates) > previous_updates)
             if self.frequency_logger is not None:
                 self.frequency_logger.log_step(
                     self.current_time,
-                    apc_frequency_counts,
+                    completed_apc_bin,
                     self.stations,
                     self.bus_all,
                     self.frequency_tracker,
@@ -1452,6 +1489,14 @@ class env_bus(object):
             getattr(bus, 'episode_hold_person_seconds', 0.0)
             for bus in self.bus_all
         ))
+        commanded_holding_vehicle_seconds = float(sum(
+            getattr(bus, 'episode_commanded_hold_vehicle_seconds', 0.0)
+            for bus in self.bus_all
+        ))
+        commanded_holding_passenger_seconds = float(sum(
+            getattr(bus, 'episode_commanded_hold_person_seconds', 0.0)
+            for bus in self.bus_all
+        ))
         headway_state_total = sum(self._headway_state_source_counts.values())
         headway_state_event_count = self._headway_state_source_counts[
             'arrival_event']
@@ -1483,6 +1528,8 @@ class env_bus(object):
             'fleet_ready_down': int(self._ready_vehicle_count(False)),
             'fleet_denied_dispatch_events': int(
                 self._fleet_denied_dispatch_events),
+            'fleet_denied_retry_trip_seconds': float(
+                self._fleet_denied_dispatch_events * self.time_step),
             'fleet_denied_trips': denied_trips,
             'fleet_denied_trip_rate': denied_trips / max(total_trips, 1),
             'fleet_readiness_delay_mean_s': (
@@ -1511,6 +1558,23 @@ class env_bus(object):
                 holding_passenger_seconds
                 / max(int(wait_metrics['passengers_generated']), 1)
                 / 60.0),
+            'commanded_holding_vehicle_seconds': (
+                commanded_holding_vehicle_seconds),
+            'commanded_holding_passenger_seconds': (
+                commanded_holding_passenger_seconds),
+            'commanded_holding_passenger_min_per_generated': (
+                commanded_holding_passenger_seconds
+                / max(int(wait_metrics['passengers_generated']), 1)
+                / 60.0),
+            'terminal_actual_dispatch_gap_mean_s': (
+                float(np.mean(self._actual_dispatch_gaps_s))
+                if self._actual_dispatch_gaps_s else 0.0),
+            'terminal_dispatch_execution_error_mean_s': (
+                float(np.mean(self._dispatch_execution_errors_s))
+                if self._dispatch_execution_errors_s else 0.0),
+            'terminal_dispatch_execution_error_abs_mean_s': (
+                float(np.mean(np.abs(self._dispatch_execution_errors_s)))
+                if self._dispatch_execution_errors_s else 0.0),
             'simulation_end_time_s': int(self.current_time),
             'demand_end_time_s': int(self.protocol.demand_end_time_s),
             'evaluation_end_time_s': int(

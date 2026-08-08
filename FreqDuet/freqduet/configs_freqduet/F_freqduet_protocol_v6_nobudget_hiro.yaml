@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_nobudget_hiro
+
+protocol:
+  role: ablation_no_headway_budget_v6
+
+upper:
+  timetable_planner:
+    headway_budget_mode: free
+

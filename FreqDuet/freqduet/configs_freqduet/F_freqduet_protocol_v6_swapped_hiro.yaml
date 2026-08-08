@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v6_main_hiro.yaml
+_name: F_freqduet_protocol_v6_swapped_hiro
+
+protocol:
+  role: ablation_swapped_frequency_allocation_v6
+  frequency_contract: swapped_lf_hf_layers_v6
+
+frequency:
+  upper_mode: high
+  lower_mode: low
+  replace_upper_demand_with_low: false
+
