@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
 PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v9"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v10"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -99,6 +99,7 @@ def build_training_command(
         "--lower-lf-rms-budget", str(args.lower_lf_rms_budget),
         "--upper-action-scale", str(args.upper_action_scale),
         "--lower-action-scale", str(args.lower_action_scale),
+        "--responsibility-mode", str(args.responsibility_mode),
         "--lower-constraint-update-mode",
         str(args.lower_constraint_update_mode),
         "--checkpoint-smoothing-window", str(args.checkpoint_smoothing_window),
@@ -295,6 +296,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--upper-action-scale", type=float, default=1.0)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--responsibility-mode",
+        choices=validation.RESPONSIBILITY_MODES,
+        default="additive",
+    )
     parser.add_argument(
         "--lower-constraint-update-mode",
         choices=(

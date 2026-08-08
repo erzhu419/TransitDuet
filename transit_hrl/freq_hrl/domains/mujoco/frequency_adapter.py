@@ -15,6 +15,11 @@ DISTURBANCE_MODES = (
     "ood_chirp",
 )
 
+RESPONSIBILITY_MODES = (
+    "additive",
+    "causal_lf_transfer",
+)
+
 
 @dataclass
 class CausalBandDecomposer:
@@ -72,6 +77,128 @@ class CausalBandDecomposer:
             "high": (current - self._fast).astype(np.float32, copy=False),
             "delta": np.asarray(delta, dtype=np.float32).copy(),
         }
+
+
+@dataclass
+class CausalResponsibilityTransfer:
+    """Move prior lower LF bias to the next upper macro action causally."""
+
+    mode: str = "additive"
+    alpha: float = 0.04
+
+    def __post_init__(self) -> None:
+        if str(self.mode) not in RESPONSIBILITY_MODES:
+            raise ValueError(f"unknown responsibility mode: {self.mode}")
+        if not 0.0 < float(self.alpha) <= 1.0:
+            raise ValueError("responsibility-transfer alpha must be in (0, 1]")
+        self.mode = str(self.mode)
+        self.alpha = float(self.alpha)
+        self._raw_lower_lf: np.ndarray | None = None
+        self._effective_transfer: np.ndarray | None = None
+        self._upper_policy: np.ndarray | None = None
+        self._upper_responsibility: np.ndarray | None = None
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("responsibility-transfer action_dim must be positive")
+        zeros = np.zeros(int(action_dim), dtype=np.float64)
+        self._raw_lower_lf = zeros.copy()
+        self._effective_transfer = zeros.copy()
+        self._upper_policy = zeros.copy()
+        self._upper_responsibility = zeros.copy()
+
+    @property
+    def raw_lower_lf(self) -> np.ndarray:
+        self._require_reset()
+        return self._raw_lower_lf.astype(np.float32, copy=True)
+
+    @property
+    def effective_transfer(self) -> np.ndarray:
+        self._require_reset()
+        return self._effective_transfer.astype(np.float32, copy=True)
+
+    def preview_upper(self, upper_policy: np.ndarray) -> dict[str, np.ndarray | float]:
+        """Preview a boundary assignment without mutating filter state."""
+
+        self._require_reset()
+        policy = self._aligned_action(upper_policy)
+        requested = (
+            self._raw_lower_lf.copy()
+            if self.mode == "causal_lf_transfer"
+            else np.zeros_like(policy)
+        )
+        lower_headroom = -1.0 - policy
+        upper_headroom = 1.0 - policy
+        effective = np.clip(requested, lower_headroom, upper_headroom)
+        responsibility = policy + effective
+        saturated = np.abs(effective - requested) > 1e-12
+        return {
+            "upper_policy": policy.astype(np.float32, copy=True),
+            "requested_transfer": requested.astype(np.float32, copy=True),
+            "effective_transfer": effective.astype(np.float32, copy=True),
+            "upper_responsibility": responsibility.astype(np.float32, copy=True),
+            "headroom_saturation_rate": float(np.mean(saturated)),
+        }
+
+    def begin_macro(self, upper_policy: np.ndarray) -> dict[str, np.ndarray | float]:
+        assignment = self.preview_upper(upper_policy)
+        self._upper_policy = np.asarray(
+            assignment["upper_policy"], dtype=np.float64
+        ).copy()
+        self._effective_transfer = np.asarray(
+            assignment["effective_transfer"], dtype=np.float64
+        ).copy()
+        self._upper_responsibility = np.asarray(
+            assignment["upper_responsibility"], dtype=np.float64
+        ).copy()
+        return assignment
+
+    def split_lower(self, raw_lower: np.ndarray) -> dict[str, np.ndarray]:
+        """Return the responsibility split and update LF state for the future."""
+
+        self._require_reset()
+        raw = self._aligned_action(raw_lower)
+        lower_responsibility = raw - self._effective_transfer
+        original_total = self._upper_policy + raw
+        reassigned_total = self._upper_responsibility + lower_responsibility
+        reconstruction_error = reassigned_total - original_total
+        before = self._raw_lower_lf.copy()
+        self._raw_lower_lf += self.alpha * (raw - self._raw_lower_lf)
+        return {
+            "raw_lower": raw.astype(np.float32, copy=True),
+            "lower_responsibility": lower_responsibility.astype(
+                np.float32, copy=True
+            ),
+            "effective_transfer": self._effective_transfer.astype(
+                np.float32, copy=True
+            ),
+            "raw_lower_lf_before": before.astype(np.float32, copy=True),
+            "raw_lower_lf_after": self._raw_lower_lf.astype(
+                np.float32, copy=True
+            ),
+            "reconstruction_error": reconstruction_error.astype(
+                np.float64, copy=True
+            ),
+        }
+
+    def _require_reset(self) -> None:
+        if any(value is None for value in (
+            self._raw_lower_lf,
+            self._effective_transfer,
+            self._upper_policy,
+            self._upper_responsibility,
+        )):
+            raise RuntimeError("responsibility transfer must be reset before use")
+
+    def _aligned_action(self, action: np.ndarray) -> np.ndarray:
+        self._require_reset()
+        value = np.asarray(action, dtype=np.float64).reshape(-1)
+        if (
+            value.shape != self._raw_lower_lf.shape
+            or not np.all(np.isfinite(value))
+        ):
+            raise ValueError("responsibility action must be finite and aligned")
+        return value
 
 
 def action_from_unit_box(

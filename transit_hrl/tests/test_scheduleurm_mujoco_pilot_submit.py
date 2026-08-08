@@ -35,6 +35,7 @@ def args_fixture() -> argparse.Namespace:
         lower_lf_rms_budget=0.05,
         upper_action_scale=0.35,
         lower_action_scale=1.0,
+        responsibility_mode="causal_lf_transfer",
         lower_constraint_update_mode="reward_guarded_adam_projection",
         checkpoint_smoothing_window=8,
         checkpoint_min_delta=1e-3,
@@ -98,6 +99,7 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         self.assertIn("--lower-lf-rms-budget 0.05", command)
         self.assertIn("--upper-action-scale 0.35", command)
         self.assertIn("--lower-action-scale 1.0", command)
+        self.assertIn("--responsibility-mode causal_lf_transfer", command)
         self.assertIn(
             "--lower-constraint-update-mode reward_guarded_adam_projection",
             command,

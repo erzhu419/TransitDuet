@@ -9,6 +9,7 @@ import torch
 
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
+    CausalResponsibilityTransfer,
     action_from_unit_box,
     deterministic_actuation_disturbance,
 )
@@ -112,6 +113,43 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         for index in range(len(prefix)):
             for band in ("slow", "mid", "high", "delta"):
                 np.testing.assert_allclose(left[index][band], right[index][band])
+
+    def test_responsibility_transfer_is_causal_and_exactly_reconstructs(self):
+        def trace(future):
+            transfer = CausalResponsibilityTransfer(
+                mode="causal_lf_transfer", alpha=0.25
+            )
+            transfer.reset(2)
+            rows = []
+            sequence = [
+                np.asarray([0.4, -0.2]),
+                np.asarray([0.6, -0.4]),
+                *future,
+            ]
+            for index, raw_lower in enumerate(sequence):
+                if index % 2 == 0:
+                    assignment = transfer.begin_macro(
+                        np.asarray([0.2, 0.85])
+                    )
+                split = transfer.split_lower(raw_lower)
+                np.testing.assert_allclose(
+                    np.asarray(assignment["upper_responsibility"])
+                    + np.asarray(split["lower_responsibility"]),
+                    np.asarray(assignment["upper_policy"]) + raw_lower,
+                    atol=1e-7,
+                )
+                rows.append((
+                    np.asarray(assignment["upper_responsibility"]).copy(),
+                    np.asarray(split["lower_responsibility"]).copy(),
+                    np.asarray(split["raw_lower_lf_after"]).copy(),
+                ))
+            return rows
+
+        left = trace([np.asarray([1.0, 1.0]), np.asarray([1.0, 1.0])])
+        right = trace([np.asarray([-1.0, -1.0]), np.asarray([-1.0, -1.0])])
+        for left_row, right_row in zip(left[:2], right[:2]):
+            for left_value, right_value in zip(left_row, right_row):
+                np.testing.assert_allclose(left_value, right_value)
 
     def test_disturbance_modes_are_deterministic_and_frequency_separated(self):
         low = np.asarray([
@@ -272,16 +310,18 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             checkpoint_min_delta=0.0,
             checkpoint_evaluation_interval=4,
             evaluation_disturbance_modes=["standard", "ood_chirp"],
+            responsibility_mode="causal_lf_transfer",
         )
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v9_role_capacity_and_safe_selector",
+            "freq_hrl_mujoco_shared_core_v10_causal_responsibility_transfer",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
         self.assertEqual(payload["upper_action_scale"], 1.0)
         self.assertEqual(payload["lower_action_scale"], 1.0)
+        self.assertEqual(payload["responsibility_mode"], "causal_lf_transfer")
         self.assertEqual(payload["role_capacity_status"], "symmetric")
         self.assertEqual(payload["upper_to_lower_action_capacity_ratio"], 1.0)
         self.assertEqual(
@@ -306,9 +346,13 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "LowerActionRMS",
             "UpperActionEnergyShare",
             "AdditiveActionClipRate",
+            "RawLowerLFDriftAbs",
+            "ResponsibilityTransferRMS",
+            "ResponsibilityReconstructionRMS",
         ):
             self.assertIn(metric, rows[0])
             self.assertTrue(np.isfinite(rows[0][metric]))
+        self.assertLessEqual(rows[0]["ResponsibilityReconstructionRMS"], 1e-7)
         self.assertEqual(
             payload["bootstrap_contract"],
             "explicit_reward_and_cost_next_value_with_separate_trace_boundary_"

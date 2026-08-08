@@ -16,7 +16,9 @@ import torch
 from freq_hrl.core import LeakageRegularizer, evaluate_rms_leakage_budget
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
+    CausalResponsibilityTransfer,
     DISTURBANCE_MODES,
+    RESPONSIBILITY_MODES,
     action_from_unit_box,
     deterministic_actuation_disturbance,
 )
@@ -42,7 +44,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v9_role_capacity_and_safe_selector"
+    "freq_hrl_mujoco_shared_core_v10_causal_responsibility_transfer"
 )
 METHODS = (
     "freq_hrl",
@@ -74,6 +76,7 @@ SAFE_SELECTOR_REWARD_MARGIN_FRACTION = 0.02
 SAFE_SELECTOR_MIN_DRIFT_REDUCTION_FRACTION = 0.10
 SAFE_SELECTOR_CONFIDENCE = 0.90
 SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
+RESPONSIBILITY_TRANSFER_ALPHA = 0.04
 
 
 def _gym() -> Any:
@@ -276,7 +279,7 @@ def capacity_matched_flat_hidden_dim(
 def mujoco_policy_state_dim(observation_dim: int, action_dim: int) -> int:
     if int(observation_dim) < 1 or int(action_dim) < 1:
         raise ValueError("MuJoCo observation and action dimensions must be positive")
-    return int(observation_dim) + 3 * int(action_dim)
+    return int(observation_dim) + 5 * int(action_dim)
 
 
 def _feature_state(
@@ -284,18 +287,28 @@ def _feature_state(
     bands: dict[str, np.ndarray],
     action_context: np.ndarray,
     *,
+    filter_contexts: tuple[np.ndarray, np.ndarray] | None = None,
     frequency_routing: bool,
     level: str,
 ) -> np.ndarray:
     endogenous = np.asarray(observation, dtype=np.float32).reshape(-1)
     context = np.asarray(action_context, dtype=np.float32).reshape(-1)
+    if filter_contexts is None:
+        filters = (np.zeros_like(context), np.zeros_like(context))
+    else:
+        filters = tuple(
+            np.asarray(value, dtype=np.float32).reshape(-1)
+            for value in filter_contexts
+        )
+        if len(filters) != 2 or any(value.shape != context.shape for value in filters):
+            raise ValueError("MuJoCo filter contexts must match the action context")
     if frequency_routing and level == "upper":
         exogenous = (bands["slow"], bands["mid"])
     elif frequency_routing and level == "lower":
         exogenous = (bands["mid"], bands["high"])
     else:
         exogenous = (bands["raw"], bands["delta"])
-    pieces = (endogenous, *exogenous, context)
+    pieces = (endogenous, *exogenous, context, *filters)
     return np.concatenate(pieces).astype(np.float32, copy=False)
 
 
@@ -308,6 +321,12 @@ def _episode_row(
     executed_actions: list[np.ndarray],
     upper_actions: list[np.ndarray],
     lower_actions: list[np.ndarray],
+    upper_policy_actions: list[np.ndarray],
+    raw_lower_actions: list[np.ndarray],
+    responsibility_transfers: list[np.ndarray],
+    requested_transfers: list[np.ndarray],
+    transfer_saturation_values: list[float],
+    reconstruction_errors: list[np.ndarray],
     forward_rewards: list[float],
     control_rewards: list[float],
     upper_decisions: int,
@@ -325,10 +344,23 @@ def _episode_row(
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
     lower = np.asarray(lower_actions, dtype=np.float64)
+    upper_policy = np.asarray(upper_policy_actions, dtype=np.float64)
+    raw_lower = np.asarray(raw_lower_actions, dtype=np.float64)
+    transfers = np.asarray(responsibility_transfers, dtype=np.float64)
+    requested = np.asarray(requested_transfers, dtype=np.float64)
+    reconstruction = np.asarray(reconstruction_errors, dtype=np.float64)
     leakage = LeakageRegularizer(
         upper_hf_window=8,
         lower_lf_window=32,
     ).compute(upper, lower)
+    raw_leakage = LeakageRegularizer(
+        upper_hf_window=8,
+        lower_lf_window=32,
+    ).compute(upper_policy, raw_lower)
+    transfer_leakage = LeakageRegularizer(
+        upper_hf_window=8,
+        lower_lf_window=32,
+    ).compute(np.zeros_like(transfers), transfers)
     upper_energy = float(np.mean(np.square(upper)))
     lower_energy = float(np.mean(np.square(lower)))
     responsibility_energy = upper_energy + lower_energy
@@ -360,6 +392,8 @@ def _episode_row(
         "action_smoothness": smoothness,
         "UpperActionRMS": float(np.sqrt(upper_energy)),
         "LowerActionRMS": float(np.sqrt(lower_energy)),
+        "UpperPolicyActionRMS": float(np.sqrt(np.mean(np.square(upper_policy)))),
+        "RawLowerActionRMS": float(np.sqrt(np.mean(np.square(raw_lower)))),
         "UpperActionEnergyShare": float(
             upper_energy / responsibility_energy
             if responsibility_energy > 0.0 else 0.0
@@ -371,6 +405,25 @@ def _episode_row(
         "UpperHFPowerAbs": float(leakage["UpperHFPowerAbs"]),
         "LowerLFDrift": float(leakage["LowerLFDrift"]),
         "LowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
+        "RawLowerLFDrift": float(raw_leakage["LowerLFDrift"]),
+        "RawLowerLFDriftAbs": float(raw_leakage["LowerLFDriftAbs"]),
+        "TransferredLFDriftAbs": float(transfer_leakage["LowerLFDriftAbs"]),
+        "ResponsibilityTransferRMS": float(
+            np.sqrt(np.mean(np.square(transfers)))
+        ),
+        "RequestedResponsibilityTransferRMS": float(
+            np.sqrt(np.mean(np.square(requested)))
+        ),
+        "ResponsibilityTransferActivationRate": float(
+            np.mean(np.abs(transfers) > 1e-12)
+        ),
+        "ResponsibilityTransferHeadroomSaturationRate": float(
+            np.mean(transfer_saturation_values)
+        ),
+        "ResponsibilityReconstructionRMS": float(
+            np.sqrt(np.mean(np.square(reconstruction)))
+        ),
+        "LowerContributionOutOfUnitRate": float(np.mean(np.abs(lower) > 1.0)),
         "LowerLFRmsOnlineMean": float(np.mean(lower_lf_rms_values)),
         "LowerLFBudgetExcessMean": float(np.mean(lower_lf_budget_excesses)),
         "LowerLFBudgetViolationRate": float(np.mean(
@@ -406,6 +459,7 @@ def rollout_hierarchical(
     lower_action_scale: float = 1.0,
     lower_lf_alpha: float = 0.04,
     lower_lf_rms_budget: float = 0.05,
+    responsibility_mode: str = "additive",
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -418,12 +472,24 @@ def rollout_hierarchical(
         action_dim = int(env.action_space.shape[0])
         previous_action = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
-        lower_lf = np.zeros(action_dim, dtype=np.float64)
+        upper_policy_action = np.zeros(action_dim, dtype=np.float32)
+        current_requested_transfer = np.zeros(action_dim, dtype=np.float32)
+        responsibility = CausalResponsibilityTransfer(
+            mode=str(responsibility_mode), alpha=float(lower_lf_alpha)
+        )
+        responsibility.reset(action_dim)
+        executed_lower_lf = np.zeros(action_dim, dtype=np.float64)
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
         upper_actions: list[np.ndarray] = []
         lower_actions: list[np.ndarray] = []
+        upper_policy_actions: list[np.ndarray] = []
+        raw_lower_actions: list[np.ndarray] = []
+        responsibility_transfers: list[np.ndarray] = []
+        requested_transfers: list[np.ndarray] = []
+        transfer_saturation_values: list[float] = []
+        reconstruction_errors: list[np.ndarray] = []
         forward_rewards: list[float] = []
         control_rewards: list[float] = []
         upper_decisions = 0
@@ -463,12 +529,32 @@ def rollout_hierarchical(
                     observation,
                     bands,
                     previous_action,
+                    filter_contexts=(
+                        responsibility.raw_lower_lf,
+                        executed_lower_lf,
+                    ),
                     frequency_routing=frequency_routing,
                     level="upper",
                 )
                 upper_out = model.act_upper(upper_state, sample=sample)
                 upper_raw = np.asarray(upper_out["action"], dtype=np.float32)
-                upper_anchor = float(upper_action_scale) * np.tanh(upper_raw)
+                upper_policy_action = (
+                    float(upper_action_scale) * np.tanh(upper_raw)
+                )
+                upper_assignment = responsibility.begin_macro(
+                    upper_policy_action
+                )
+                upper_anchor = np.asarray(
+                    upper_assignment["upper_responsibility"],
+                    dtype=np.float32,
+                )
+                current_requested_transfer = np.asarray(
+                    upper_assignment["requested_transfer"],
+                    dtype=np.float32,
+                )
+                transfer_saturation_values.append(float(
+                    upper_assignment["headroom_saturation_rate"]
+                ))
                 builder.begin_upper(
                     state=upper_state,
                     action=upper_raw,
@@ -483,13 +569,26 @@ def rollout_hierarchical(
                 observation,
                 bands,
                 upper_anchor,
+                filter_contexts=(
+                    responsibility.raw_lower_lf,
+                    executed_lower_lf,
+                ),
                 frequency_routing=frequency_routing,
                 level="lower",
             )
             lower_out = model.act_lower(lower_state, sample=sample)
             lower_raw = np.asarray(lower_out["action"], dtype=np.float32)
             lower_cost_values.append(float(lower_out["cost_value"]))
-            lower_residual = float(lower_action_scale) * np.tanh(lower_raw)
+            raw_lower_residual = (
+                float(lower_action_scale) * np.tanh(lower_raw)
+            )
+            responsibility_split = responsibility.split_lower(
+                raw_lower_residual
+            )
+            lower_residual = np.asarray(
+                responsibility_split["lower_responsibility"],
+                dtype=np.float32,
+            )
             nominal = np.clip(upper_anchor + lower_residual, -1.0, 1.0)
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
@@ -501,11 +600,12 @@ def rollout_hierarchical(
             natural_done = bool(terminated or truncated)
             budget_done = step == transition_budget - 1
             done = bool(natural_done or budget_done)
-            lower_lf += float(lower_lf_alpha) * (
-                np.asarray(lower_residual, dtype=np.float64) - lower_lf
+            executed_lower_lf += float(lower_lf_alpha) * (
+                np.asarray(lower_residual, dtype=np.float64)
+                - executed_lower_lf
             )
             lower_budget = evaluate_rms_leakage_budget(
-                float(np.mean(np.square(lower_lf))),
+                float(np.mean(np.square(executed_lower_lf))),
                 float(lower_lf_rms_budget),
             )
             lower_lf_rms_values.append(float(lower_budget["rms"]))
@@ -529,6 +629,16 @@ def rollout_hierarchical(
             executed_actions.append(executed.copy())
             upper_actions.append(upper_anchor.copy())
             lower_actions.append(lower_residual.copy())
+            upper_policy_actions.append(upper_policy_action.copy())
+            raw_lower_actions.append(raw_lower_residual.copy())
+            responsibility_transfers.append(
+                responsibility.effective_transfer
+            )
+            requested_transfers.append(current_requested_transfer.copy())
+            reconstruction_errors.append(np.asarray(
+                responsibility_split["reconstruction_error"],
+                dtype=np.float64,
+            ))
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
@@ -551,6 +661,10 @@ def rollout_hierarchical(
                         next_observation,
                         next_bands,
                         executed,
+                        filter_contexts=(
+                            responsibility.raw_lower_lf,
+                            executed_lower_lf,
+                        ),
                         frequency_routing=frequency_routing,
                         level="upper",
                     )
@@ -561,13 +675,23 @@ def rollout_hierarchical(
                     upper_next_value = float(next_upper["value"])
                     next_upper_anchor = upper_anchor
                     if steps_since_upper >= int(upper_period):
-                        next_upper_anchor = float(upper_action_scale) * np.tanh(
+                        next_upper_policy = float(upper_action_scale) * np.tanh(
                             np.asarray(next_upper["action"], dtype=np.float32)
+                        )
+                        next_upper_anchor = np.asarray(
+                            responsibility.preview_upper(next_upper_policy)[
+                                "upper_responsibility"
+                            ],
+                            dtype=np.float32,
                         )
                     next_lower_state = _feature_state(
                         next_observation,
                         next_bands,
                         next_upper_anchor,
+                        filter_contexts=(
+                            responsibility.raw_lower_lf,
+                            executed_lower_lf,
+                        ),
                         frequency_routing=frequency_routing,
                         level="lower",
                     )
@@ -603,7 +727,12 @@ def rollout_hierarchical(
                 model.reset_recurrent_inference()
                 previous_action = np.zeros(action_dim, dtype=np.float32)
                 upper_anchor = np.zeros(action_dim, dtype=np.float32)
-                lower_lf = np.zeros(action_dim, dtype=np.float64)
+                upper_policy_action = np.zeros(action_dim, dtype=np.float32)
+                current_requested_transfer = np.zeros(
+                    action_dim, dtype=np.float32
+                )
+                responsibility.reset(action_dim)
+                executed_lower_lf = np.zeros(action_dim, dtype=np.float64)
                 episode_step = 0
                 reset_exogenous = True
                 steps_since_upper = int(upper_period)
@@ -641,6 +770,12 @@ def rollout_hierarchical(
             executed_actions=executed_actions,
             upper_actions=upper_actions,
             lower_actions=lower_actions,
+            upper_policy_actions=upper_policy_actions,
+            raw_lower_actions=raw_lower_actions,
+            responsibility_transfers=responsibility_transfers,
+            requested_transfers=requested_transfers,
+            transfer_saturation_values=transfer_saturation_values,
+            reconstruction_errors=reconstruction_errors,
             forward_rewards=forward_rewards,
             control_rewards=control_rewards,
             upper_decisions=upper_decisions,
@@ -685,6 +820,7 @@ def rollout_flat(
         }
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
+        nominal_actions: list[np.ndarray] = []
         forward_rewards: list[float] = []
         control_rewards: list[float] = []
         segment_returns: list[float] = []
@@ -718,6 +854,7 @@ def rollout_flat(
                 observation,
                 bands,
                 previous_action,
+                filter_contexts=(lower_lf, lower_lf),
                 frequency_routing=False,
                 level="lower",
             )
@@ -743,6 +880,7 @@ def rollout_flat(
             rewards.append(float(reward))
             current_episode_return += float(reward)
             executed_actions.append(executed.copy())
+            nominal_actions.append(nominal.copy())
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
@@ -771,6 +909,7 @@ def rollout_flat(
                         next_observation,
                         next_bands,
                         executed,
+                        filter_contexts=(lower_lf, lower_lf),
                         frequency_routing=False,
                         level="lower",
                     )
@@ -826,6 +965,12 @@ def rollout_flat(
             executed_actions=executed_actions,
             upper_actions=zeros,
             lower_actions=executed_actions,
+            upper_policy_actions=zeros,
+            raw_lower_actions=nominal_actions,
+            responsibility_transfers=zeros,
+            requested_transfers=zeros,
+            transfer_saturation_values=[0.0 for _ in rewards],
+            reconstruction_errors=zeros,
             forward_rewards=forward_rewards,
             control_rewards=control_rewards,
             upper_decisions=len(rewards),
@@ -863,12 +1008,23 @@ SUMMARY_KEYS = [
     "action_smoothness",
     "UpperActionRMS",
     "LowerActionRMS",
+    "UpperPolicyActionRMS",
+    "RawLowerActionRMS",
     "UpperActionEnergyShare",
     "AdditiveActionClipRate",
     "UpperHFPower",
     "UpperHFPowerAbs",
     "LowerLFDrift",
     "LowerLFDriftAbs",
+    "RawLowerLFDrift",
+    "RawLowerLFDriftAbs",
+    "TransferredLFDriftAbs",
+    "ResponsibilityTransferRMS",
+    "RequestedResponsibilityTransferRMS",
+    "ResponsibilityTransferActivationRate",
+    "ResponsibilityTransferHeadroomSaturationRate",
+    "ResponsibilityReconstructionRMS",
+    "LowerContributionOutOfUnitRate",
     "LowerLFRmsOnlineMean",
     "LowerLFBudgetExcessMean",
     "LowerLFBudgetViolationRate",
@@ -1188,6 +1344,7 @@ def train_mujoco_method(
     evaluation_disturbance_modes: Iterable[str] | None = None,
     upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
+    responsibility_mode: str = "additive",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
@@ -1233,6 +1390,10 @@ def train_mujoco_method(
         raise ValueError("MuJoCo upper_action_scale must be in [0, 1]")
     if not 0.0 < float(lower_action_scale) <= 1.0:
         raise ValueError("MuJoCo lower_action_scale must be in (0, 1]")
+    if str(responsibility_mode) not in RESPONSIBILITY_MODES:
+        raise ValueError("unknown MuJoCo responsibility mode")
+    if name == "flat_ppo" and str(responsibility_mode) != "additive":
+        raise ValueError("flat PPO cannot use hierarchical responsibility transfer")
     if str(lower_constraint_update_mode) not in {
         "scalarized",
         "reward_guarded_projection",
@@ -1351,8 +1512,10 @@ def train_mujoco_method(
                 frequency_routing=True,
                 leakage_constraint=leakage,
                 lower_lf_rms_budget=lower_lf_rms_budget,
+                lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                 upper_action_scale=upper_action_scale,
                 lower_action_scale=lower_action_scale,
+                responsibility_mode=responsibility_mode,
                 sample=sample,
                 method=name,
                 episode_horizon=episode_horizon,
@@ -1389,8 +1552,10 @@ def train_mujoco_method(
                         frequency_routing=True,
                         leakage_constraint=branch_leakage,
                         lower_lf_rms_budget=lower_lf_rms_budget,
+                        lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                         upper_action_scale=upper_action_scale,
                         lower_action_scale=lower_action_scale,
+                        responsibility_mode=responsibility_mode,
                         sample=False,
                         method=name,
                         episode_horizon=episode_horizon,
@@ -1542,8 +1707,10 @@ def train_mujoco_method(
             frequency_routing=frequency_routing,
             leakage_constraint=leakage_constraint,
             lower_lf_rms_budget=lower_lf_rms_budget,
+            lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
             upper_action_scale=upper_action_scale,
             lower_action_scale=lower_action_scale,
+            responsibility_mode=responsibility_mode,
             sample=sample,
             method=name,
             episode_horizon=episode_horizon,
@@ -1601,8 +1768,10 @@ def train_mujoco_method(
                     frequency_routing=name != "generic_hrl",
                     leakage_constraint=selected_leakage_constraint,
                     lower_lf_rms_budget=lower_lf_rms_budget,
+                    lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
+                    responsibility_mode=responsibility_mode,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -1614,6 +1783,7 @@ def train_mujoco_method(
                 "parameter_count": actual_parameters,
                 "training_disturbance_mode": "multi_condition",
                 "training_disturbance_modes": "|".join(training_modes),
+                "responsibility_mode": str(responsibility_mode),
             })
             evaluation_rows.append(row)
     if checkpoint_hash != _model_parameter_sha256(model):
@@ -1651,6 +1821,8 @@ def train_mujoco_method(
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
+        "responsibility_mode": str(responsibility_mode),
+        "responsibility_transfer_alpha": RESPONSIBILITY_TRANSFER_ALPHA,
         "upper_to_lower_action_capacity_ratio": float(
             upper_action_scale / lower_action_scale
         ),
@@ -1666,6 +1838,15 @@ def train_mujoco_method(
         "action_capacity_contract": (
             "upper_anchor_and_lower_residual_unit_box_scales_reported_"
             "separately_v1"
+        ),
+        "responsibility_transfer_contract": (
+            "causal_prior_lower_lf_to_next_upper_exact_nominal_"
+            "reconstruction_v1"
+            if str(responsibility_mode) == "causal_lf_transfer"
+            else "additive_responsibility_control_v1"
+        ),
+        "policy_filter_state_contract": (
+            "raw_and_responsibility_lower_lf_states_observed_v1"
         ),
         "lower_constraint_update_mode": selected_constraint_update_mode,
         "exogenous_observation_contract": (
@@ -1785,6 +1966,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--upper-action-scale", type=float, default=1.0)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument(
+        "--responsibility-mode",
+        choices=RESPONSIBILITY_MODES,
+        default="additive",
+    )
+    parser.add_argument(
         "--lower-constraint-update-mode",
         choices=(
             "scalarized",
@@ -1827,6 +2013,7 @@ def main() -> None:
         evaluation_disturbance_modes=args.evaluation_disturbance_modes,
         upper_action_scale=args.upper_action_scale,
         lower_action_scale=args.lower_action_scale,
+        responsibility_mode=args.responsibility_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
