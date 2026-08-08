@@ -81,3 +81,50 @@ Do not rename or promote the candidate unless all of the following hold:
 If the masked candidate fails these gates, repeated retries are not justified.
 The next valid choices are to remove the hard deficit guard from the main
 method or redesign the lower objective and causal action set.
+
+## Engineering-v3 pilot outcome (2026-08-09)
+
+The exploratory run `protocol_v6_maskguard_ep40_s4_e2_v3` completed all 16
+train shards and 32 frozen-evaluation rollouts at source commit
+`a34167c9e1e97d641acfba7b103ea6f9f14cdfb9`. The aggregate is strict-complete,
+uses four train seeds and two evaluation seeds, verifies common random numbers,
+and contains only checkpoint-39 evaluations.
+
+The engineering gates passed:
+
+- All four corrected `maskguard_nofreq` shards crossed upper warmup and
+  completed without a state-dimension failure.
+- The masked configs enabled the policy mask on every rollout and exposed a
+  mean of about `3.62` feasible lower actions.
+- Their post-policy execution-guard adjustment is exactly `0.0 s`; the old
+  main still requires `26.79 s` of mean adjustment and activates its guard on
+  about `75.8%` of decisions.
+
+The efficacy gate failed. Frozen means are:
+
+| Config | Journey (min) | Wait (min) | Headway CV | Holding (passenger-min/generated) | Denied-trip rate |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| old main | 17.6611 | 5.0333 | 0.1935 | 1.7963 | 0.8822 |
+| no guard | 16.5366 | 4.5038 | 0.2579 | 1.1937 | 0.7013 |
+| mask guard | 17.5248 | 4.9588 | 0.2009 | 1.7243 | 0.8812 |
+| mask guard, no frequency | 17.6221 | 5.0465 | 0.1998 | 1.7372 | 0.8807 |
+
+Relative to mask guard, no guard improves restricted journey by `0.9882 min`
+(paired bootstrap 95% CI `[0.4679, 1.5123]`), wait by `0.4550 min`, holding by
+`0.5306 passenger-min/generated`, and denied-trip rate by `0.1799`. It worsens
+headway CV by `0.0571`. Restricted service cost remains statistically tied.
+Mask guard closes only about `12.1%` of the old-main-to-no-guard journey gap.
+
+The frequency control is now executable, but this small pilot provides only a
+weak journey result: no-frequency minus mask-guard journey is `+0.0974 min`
+with 95% CI `[-0.0054, 0.3046]`. Its wait increase is `+0.0878 min` with 95%
+CI `[0.0068, 0.2583]`.
+
+## Decision
+
+Retain the state-dimension fix, policy-action consistency implementation, and
+regression coverage. Do not promote `maskguard`, rename it as main, or spend a
+four-evaluation-seed confirmation budget on it. The next algorithmic candidate
+must start from the coherent no-guard action semantics and recover regularity
+through the lower objective or a soft causal constraint, not by projecting or
+hard-masking the deployed action.
