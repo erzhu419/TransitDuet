@@ -310,6 +310,36 @@ class FullMethodHPOV7Test(unittest.TestCase):
             summary["capacity_target_parameter_count"],
         )
 
+    def test_offpolicy_cells_do_not_require_promotion_calibration_fields(self):
+        for variant_id in ("flat_sac_matched_v7", "flat_td3_matched_v7"):
+            with self.subTest(variant_id=variant_id):
+                payload = v7.run_hpo_cell(
+                    candidate_id="off_lr1e4_w1024_b64",
+                    variant_id=variant_id,
+                    training_replicate_seed=2026,
+                    train_seeds=[42],
+                    promotion_calibration_seeds=[140001],
+                    checkpoint_validation_seeds=[57721],
+                    tuning_validation_seeds=[68207],
+                    steps=24,
+                    assets=2,
+                    iterations=1,
+                )
+                summary = payload["cell_summary"]
+                calibration = summary["promotion_calibration"]
+                self.assertEqual(summary["cell_status"], "valid")
+                self.assertEqual(calibration["status"], "not_applicable")
+                self.assertEqual(calibration["sample_count"], 0)
+                self.assertEqual(calibration["target_threshold"], 0.0)
+                self.assertEqual(
+                    calibration["calibrated_decision_threshold"], 0.0
+                )
+                self.assertEqual(payload["promotion_calibration_rows"], [])
+                self.assertTrue(all(
+                    row["promotion_calibration_status"] == "not_applicable"
+                    for row in payload["tuning_rows"]
+                ))
+
     def test_hpo_rejects_independently_tuned_ablation(self):
         with self.assertRaisesRegex(ValueError, "non-ablation"):
             v7.run_hpo_cell(

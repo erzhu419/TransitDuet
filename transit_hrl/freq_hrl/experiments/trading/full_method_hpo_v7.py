@@ -1,4 +1,4 @@
-"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3 protocol.
+"""Support-only nested HPO for the frozen-checkpoint Freq-HRL v7.3.1 protocol.
 
 One model is trained per variant/candidate/training replicate on four complete,
 independently reset support-regime episodes. Candidate selection never loads
@@ -62,9 +62,9 @@ from .ppo_actor_critic import (
 from .strong_learned_baseline_validation import count_parameters
 
 
-FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3"
+FULL_METHOD_TUNING_PROTOCOL_VERSION = "full_method_support_only_hpo_v7_3_1"
 FULL_METHOD_HPO_IMPLEMENTATION_VERSION = (
-    "full_method_hpo_calibrated_advantage_promotion_v7_3_2026_08_08"
+    "full_method_hpo_calibrated_advantage_promotion_v7_3_1_2026_08_08"
 )
 PROMOTION_CALIBRATION_PROTOCOL_VERSION = (
     "paired_advantage_median_bias_calibration_v1"
@@ -1035,6 +1035,12 @@ def run_hpo_cell(
     checkpoint_hash = _state_dict_sha256(model)
     evaluation_params = dict(params)
     promotion_calibration_rows: list[dict[str, Any]] = []
+    promotion_target_threshold = float(
+        params.get("promotion_advantage_target_threshold", 0.0)
+    )
+    promotion_decision_threshold = float(
+        params.get("promotion_advantage_threshold", promotion_target_threshold)
+    )
     promotion_calibration = {
         "status": "not_applicable",
         "protocol_version": PROMOTION_CALIBRATION_PROTOCOL_VERSION,
@@ -1043,15 +1049,9 @@ def run_hpo_cell(
         "seeds": [],
         "scenario_count": 0,
         "scenarios": [],
-        "target_threshold": float(
-            params["promotion_advantage_target_threshold"]
-        ),
-        "uncalibrated_decision_threshold": float(
-            params["promotion_advantage_threshold"]
-        ),
-        "calibrated_decision_threshold": float(
-            params["promotion_advantage_threshold"]
-        ),
+        "target_threshold": promotion_target_threshold,
+        "uncalibrated_decision_threshold": promotion_decision_threshold,
+        "calibrated_decision_threshold": promotion_decision_threshold,
         "median_prediction_bias": 0.0,
         "prediction_target_mae_before": 0.0,
         "prediction_target_mae_after": 0.0,
@@ -1293,7 +1293,7 @@ def write_hpo_cell(output_dir: Path, payload: dict[str, Any]) -> None:
     summary = payload["cell_summary"]
     (output_dir / "report.md").write_text(
         "\n".join([
-            "# Freq-HRL v7.3 Support-Only HPO Cell", "",
+            "# Freq-HRL v7.3.1 Support-Only HPO Cell", "",
             f"- variant: `{summary['variant_id']}`",
             f"- candidate: `{summary['candidate_id']}`",
             f"- checkpoint: `{summary['frozen_checkpoint_sha256']}`",

@@ -29,7 +29,7 @@ def args_fixture() -> argparse.Namespace:
         nodes=list(LINUX_CPU_NODES),
         python_executable=DEFAULT_LINUX_PYTHON,
         launch_subdir=".",
-        project="Freq-HRL-v7.3",
+        project="Freq-HRL-v7.3.1",
         ppo_ram_mb=768,
         offpolicy_ram_mb=1536,
         priority="normal",
@@ -54,6 +54,7 @@ class ScheduleurmFullMethodHPOV7SubmitTest(unittest.TestCase):
         self.assertEqual(POOL_CPU_CAPACITY, 1152)
         self.assertEqual(args.iterations, 12)
         self.assertEqual(args.steps, 120)
+        self.assertEqual(args.project, "Freq-HRL-v7.3.1")
         self.assertEqual(
             tuple(args.optimizer_seeds), hpo.DEFAULT_PILOT_OPTIMIZER_SEEDS
         )
