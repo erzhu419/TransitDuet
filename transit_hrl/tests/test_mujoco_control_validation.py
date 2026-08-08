@@ -13,11 +13,13 @@ from freq_hrl.domains.mujoco import (
     deterministic_actuation_disturbance,
 )
 from freq_hrl.experiments.mujoco.control_validation import (
+    SAFE_SELECTOR_BASELINE_BRANCH,
     _with_explicit_bootstrap,
     capacity_matched_flat_hidden_dim,
     environment_dimensions,
     mujoco_policy_state_dim,
     rollout_hierarchical,
+    select_safe_mujoco_branch,
     train_mujoco_method,
     write_cell,
     _hierarchical_model,
@@ -38,6 +40,46 @@ def mujoco_available() -> bool:
 
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
+    @staticmethod
+    def _selector_rows(reward: float, drift: float):
+        return [
+            {
+                "disturbance_mode": mode,
+                "seed": seed,
+                "episode_return": reward,
+                "LowerLFDriftAbs": drift,
+            }
+            for seed in (1, 2)
+            for mode in ("standard", "mixed")
+        ]
+
+    def test_safe_selector_requires_reward_floor_and_drift_reduction(self):
+        result = select_safe_mujoco_branch({
+            SAFE_SELECTOR_BASELINE_BRANCH: self._selector_rows(100.0, 1.0),
+            "reward_guarded_adam_projection": self._selector_rows(99.5, 0.7),
+            "scalarized": self._selector_rows(80.0, 0.2),
+        }, bootstrap_seed=7, bootstrap_draws=200)
+        self.assertEqual(
+            result["selected_branch"], "reward_guarded_adam_projection"
+        )
+        self.assertTrue(result["branch_diagnostics"][
+            "reward_guarded_adam_projection"
+        ]["feasible"])
+        self.assertFalse(
+            result["branch_diagnostics"]["scalarized"]["feasible"]
+        )
+
+    def test_safe_selector_falls_back_when_no_candidate_is_pareto_safe(self):
+        result = select_safe_mujoco_branch({
+            SAFE_SELECTOR_BASELINE_BRANCH: self._selector_rows(100.0, 1.0),
+            "reward_guarded_adam_projection": self._selector_rows(95.0, 0.5),
+            "scalarized": self._selector_rows(101.0, 0.95),
+        }, bootstrap_seed=11, bootstrap_draws=200)
+        self.assertEqual(result["selected_branch"], SAFE_SELECTOR_BASELINE_BRANCH)
+        self.assertEqual(
+            result["selection_status"], "fallback_to_no_leakage"
+        )
+
     def test_flat_batch_bootstrap_does_not_require_cost_fields(self):
         batch = JointTrajectoryBatch(
             state=np.zeros((2, 3), dtype=np.float32),
@@ -234,7 +276,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v7_reward_guarded_adam_projection",
+            "freq_hrl_mujoco_shared_core_v8_trajectory_safe_selector",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -264,6 +306,43 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertIsNotNone(payload["history"][-1]["lower_cost_actor_active"])
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
+
+    def test_safe_selector_keeps_branch_selection_out_of_heldout_paths(self):
+        payload, rows, _ = train_mujoco_method(
+            method="freq_hrl_safe_selector",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[101],
+            selection_seeds=[103],
+            safety_selection_seeds=[107],
+            eval_seeds=[109],
+            steps=16,
+            episode_horizon=16,
+            iterations=1,
+            optimizer_seed=113,
+            upper_period=4,
+            hidden_dim=8,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+        )
+        self.assertEqual(payload["safe_selector_training_compute_multiplier"], 3)
+        self.assertEqual(payload["safe_selector_selection_seeds"], [107])
+        self.assertEqual(payload["branch_training_eval_seeds"], [])
+        self.assertEqual(payload["eval_seeds"], [109])
+        self.assertEqual(
+            payload["heldout_test_access_status"],
+            "loaded_once_after_safe_branch_selection",
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["seed"], 109)
+        self.assertEqual(rows[0]["evaluation_role"], "heldout_test")
+        self.assertIn(
+            payload["safe_selector"]["selected_branch"],
+            payload["safe_selector_branch_training"],
+        )
 
     def test_standard_condition_keeps_frequency_and_generic_inputs_equivalent(self):
         common = dict(

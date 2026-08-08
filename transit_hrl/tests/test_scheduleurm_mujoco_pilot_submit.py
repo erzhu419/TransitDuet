@@ -24,6 +24,7 @@ def args_fixture() -> argparse.Namespace:
         evaluation_disturbance_modes=["standard", "ood_chirp"],
         train_seeds=[31013],
         selection_seeds=[32003],
+        safety_selection_seeds=[32503],
         eval_seeds=[33013],
         steps=512,
         episode_horizon=1000,
@@ -91,6 +92,7 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
             command,
         )
         self.assertIn("--evaluation-disturbance-modes standard ood_chirp", command)
+        self.assertIn("--safety-selection-seeds 32503", command)
         self.assertIn("--episode-horizon 1000", command)
         self.assertIn("--lower-lf-rms-budget 0.05", command)
         self.assertIn("--upper-action-scale 0.35", command)

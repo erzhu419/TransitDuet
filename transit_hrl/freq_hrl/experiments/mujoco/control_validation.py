@@ -42,10 +42,11 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v7_reward_guarded_adam_projection"
+    "freq_hrl_mujoco_shared_core_v8_trajectory_safe_selector"
 )
 METHODS = (
     "freq_hrl",
+    "freq_hrl_safe_selector",
     "freq_hrl_no_leakage",
     "generic_hrl",
     "flat_ppo",
@@ -53,6 +54,9 @@ METHODS = (
 DEFAULT_ENV_IDS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
 DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033, 31039)
 DEFAULT_SELECTION_SEEDS = (32003, 32009, 32027, 32029)
+DEFAULT_SAFETY_SELECTION_SEEDS = (
+    32503, 32507, 32531, 32533, 32537, 32561, 32563, 32569,
+)
 DEFAULT_EVAL_SEEDS = (33013, 33023, 33029, 33037, 33049)
 DEFAULT_TRAINING_DISTURBANCE_MODES = (
     "standard",
@@ -60,6 +64,16 @@ DEFAULT_TRAINING_DISTURBANCE_MODES = (
     "high_frequency",
     "mixed",
 )
+SAFE_SELECTOR_BASELINE_BRANCH = "no_leakage"
+SAFE_SELECTOR_BRANCHES = (
+    SAFE_SELECTOR_BASELINE_BRANCH,
+    "reward_guarded_adam_projection",
+    "scalarized",
+)
+SAFE_SELECTOR_REWARD_MARGIN_FRACTION = 0.02
+SAFE_SELECTOR_MIN_DRIFT_REDUCTION_FRACTION = 0.10
+SAFE_SELECTOR_CONFIDENCE = 0.90
+SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 
 
 def _gym() -> Any:
@@ -854,6 +868,231 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return summarize_numeric_rows(rows, keys=SUMMARY_KEYS)
 
 
+def _one_sided_bootstrap_bounds(
+    values: np.ndarray,
+    *,
+    confidence: float,
+    draws: int,
+    seed: int,
+) -> tuple[float, float]:
+    array = np.asarray(values, dtype=np.float64).reshape(-1)
+    if array.size < 1 or not np.all(np.isfinite(array)):
+        raise ValueError("safe-selector bootstrap values must be finite")
+    if not 0.5 < float(confidence) < 1.0:
+        raise ValueError("safe-selector confidence must be in (0.5, 1)")
+    if int(draws) < 100:
+        raise ValueError("safe-selector bootstrap requires at least 100 draws")
+    if array.size == 1 or np.all(array == array[0]):
+        value = float(np.mean(array))
+        return value, value
+    generator = np.random.default_rng(int(seed))
+    indices = generator.integers(
+        0,
+        array.size,
+        size=(int(draws), array.size),
+    )
+    means = np.mean(array[indices], axis=1)
+    alpha = 1.0 - float(confidence)
+    return (
+        float(np.quantile(means, alpha)),
+        float(np.quantile(means, 1.0 - alpha)),
+    )
+
+
+def select_safe_mujoco_branch(
+    branch_rows: dict[str, list[dict[str, Any]]],
+    *,
+    bootstrap_seed: int,
+    reward_margin_fraction: float = SAFE_SELECTOR_REWARD_MARGIN_FRACTION,
+    minimum_drift_reduction_fraction: float = (
+        SAFE_SELECTOR_MIN_DRIFT_REDUCTION_FRACTION
+    ),
+    confidence: float = SAFE_SELECTOR_CONFIDENCE,
+    bootstrap_draws: int = SAFE_SELECTOR_BOOTSTRAP_DRAWS,
+) -> dict[str, Any]:
+    """Choose a constrained branch only when paired safety paths support it."""
+    if set(branch_rows) != set(SAFE_SELECTOR_BRANCHES):
+        raise ValueError("safe-selector branch registry is incomplete")
+    if not 0.0 <= float(reward_margin_fraction) < 1.0:
+        raise ValueError("safe-selector reward margin must be in [0, 1)")
+    if not 0.0 < float(minimum_drift_reduction_fraction) < 1.0:
+        raise ValueError("safe-selector drift reduction must be in (0, 1)")
+
+    def indexed(rows: list[dict[str, Any]]) -> dict[tuple[str, int], dict[str, Any]]:
+        output: dict[tuple[str, int], dict[str, Any]] = {}
+        for row in rows:
+            key = (str(row["disturbance_mode"]), int(row["seed"]))
+            if key in output:
+                raise ValueError("safe-selector paths must be unique")
+            output[key] = row
+        if not output:
+            raise ValueError("safe-selector requires at least one path")
+        return output
+
+    indexed_rows = {branch: indexed(rows) for branch, rows in branch_rows.items()}
+    baseline_index = indexed_rows[SAFE_SELECTOR_BASELINE_BRANCH]
+    path_keys = tuple(sorted(baseline_index))
+    if any(set(rows) != set(path_keys) for rows in indexed_rows.values()):
+        raise ValueError("safe-selector branches must use paired paths")
+    baseline_reward = np.asarray([
+        float(baseline_index[key]["episode_return"]) for key in path_keys
+    ])
+    baseline_drift = np.asarray([
+        float(baseline_index[key]["LowerLFDriftAbs"]) for key in path_keys
+    ])
+    baseline_reward_mean = float(np.mean(baseline_reward))
+    baseline_drift_mean = float(np.mean(baseline_drift))
+    independent_seeds = tuple(sorted({seed for _, seed in path_keys}))
+    modes_by_seed = {
+        seed: tuple(sorted(
+            mode for mode, item_seed in path_keys if item_seed == seed
+        ))
+        for seed in independent_seeds
+    }
+    if len(set(modes_by_seed.values())) != 1:
+        raise ValueError(
+            "safe-selector disturbance modes must be balanced within seed"
+        )
+    reward_margin = float(reward_margin_fraction) * max(
+        abs(baseline_reward_mean), 1.0
+    )
+    required_drift_reduction = (
+        float(minimum_drift_reduction_fraction) * baseline_drift_mean
+    )
+    diagnostics: dict[str, dict[str, Any]] = {
+        SAFE_SELECTOR_BASELINE_BRANCH: {
+            "path_count": len(path_keys),
+            "independent_seed_count": len(independent_seeds),
+            "episode_return_mean": baseline_reward_mean,
+            "LowerLFDriftAbs_mean": baseline_drift_mean,
+            "reward_difference_mean": 0.0,
+            "reward_difference_one_sided_lower": 0.0,
+            "reward_difference_one_sided_upper": 0.0,
+            "drift_difference_mean": 0.0,
+            "drift_difference_one_sided_lower": 0.0,
+            "drift_difference_one_sided_upper": 0.0,
+            "reward_noninferiority_supported": True,
+            "minimum_drift_reduction_supported": False,
+            "feasible": True,
+        }
+    }
+    feasible_candidates: list[str] = []
+    for branch in SAFE_SELECTOR_BRANCHES:
+        if branch == SAFE_SELECTOR_BASELINE_BRANCH:
+            continue
+        rows = indexed_rows[branch]
+        reward = np.asarray([
+            float(rows[key]["episode_return"]) for key in path_keys
+        ])
+        drift = np.asarray([
+            float(rows[key]["LowerLFDriftAbs"]) for key in path_keys
+        ])
+        reward_difference = reward - baseline_reward
+        drift_difference = drift - baseline_drift
+        reward_difference_by_seed = np.asarray([
+            float(np.mean([
+                float(rows[(mode, seed)]["episode_return"])
+                - float(baseline_index[(mode, seed)]["episode_return"])
+                for mode in modes_by_seed[seed]
+            ]))
+            for seed in independent_seeds
+        ])
+        drift_difference_by_seed = np.asarray([
+            float(np.mean([
+                float(rows[(mode, seed)]["LowerLFDriftAbs"])
+                - float(baseline_index[(mode, seed)]["LowerLFDriftAbs"])
+                for mode in modes_by_seed[seed]
+            ]))
+            for seed in independent_seeds
+        ])
+        reward_lower, reward_upper = _one_sided_bootstrap_bounds(
+            reward_difference_by_seed,
+            confidence=confidence,
+            draws=bootstrap_draws,
+            seed=derive_seed(
+                "mujoco_safe_selector_reward_bootstrap_v1",
+                int(bootstrap_seed),
+                branch,
+            ),
+        )
+        drift_lower, drift_upper = _one_sided_bootstrap_bounds(
+            drift_difference_by_seed,
+            confidence=confidence,
+            draws=bootstrap_draws,
+            seed=derive_seed(
+                "mujoco_safe_selector_drift_bootstrap_v1",
+                int(bootstrap_seed),
+                branch,
+            ),
+        )
+        reward_supported = reward_lower >= -reward_margin
+        drift_supported = (
+            baseline_drift_mean > np.finfo(np.float64).eps
+            and drift_upper <= -required_drift_reduction
+        )
+        feasible = bool(reward_supported and drift_supported)
+        diagnostics[branch] = {
+            "path_count": len(path_keys),
+            "independent_seed_count": len(independent_seeds),
+            "episode_return_mean": float(np.mean(reward)),
+            "LowerLFDriftAbs_mean": float(np.mean(drift)),
+            "reward_difference_mean": float(np.mean(reward_difference)),
+            "reward_difference_one_sided_lower": reward_lower,
+            "reward_difference_one_sided_upper": reward_upper,
+            "drift_difference_mean": float(np.mean(drift_difference)),
+            "drift_difference_one_sided_lower": drift_lower,
+            "drift_difference_one_sided_upper": drift_upper,
+            "reward_noninferiority_supported": bool(reward_supported),
+            "minimum_drift_reduction_supported": bool(drift_supported),
+            "feasible": feasible,
+        }
+        if feasible:
+            feasible_candidates.append(branch)
+
+    selected_branch = (
+        min(
+            feasible_candidates,
+            key=lambda branch: (
+                float(diagnostics[branch][
+                    "drift_difference_one_sided_upper"
+                ]),
+                -float(diagnostics[branch][
+                    "reward_difference_one_sided_lower"
+                ]),
+                branch,
+            ),
+        )
+        if feasible_candidates else SAFE_SELECTOR_BASELINE_BRANCH
+    )
+    return {
+        "protocol": (
+            "paired_seed_cluster_bootstrap_reward_floor_and_drift_reduction_v1"
+        ),
+        "inference_unit": "independent_safety_selection_seed",
+        "selected_branch": selected_branch,
+        "selection_status": (
+            "constrained_branch_selected"
+            if feasible_candidates else "fallback_to_no_leakage"
+        ),
+        "baseline_branch": SAFE_SELECTOR_BASELINE_BRANCH,
+        "candidate_branches": [
+            branch for branch in SAFE_SELECTOR_BRANCHES
+            if branch != SAFE_SELECTOR_BASELINE_BRANCH
+        ],
+        "paired_path_count": len(path_keys),
+        "independent_seed_count": len(independent_seeds),
+        "confidence": float(confidence),
+        "bootstrap_draws": int(bootstrap_draws),
+        "reward_margin_fraction": float(reward_margin_fraction),
+        "reward_noninferiority_margin": reward_margin,
+        "minimum_drift_reduction_fraction": float(
+            minimum_drift_reduction_fraction
+        ),
+        "required_absolute_drift_reduction": required_drift_reduction,
+        "branch_diagnostics": diagnostics,
+    }
+
+
 def _hierarchical_model(
     *,
     state_dim: int,
@@ -917,6 +1156,7 @@ def train_mujoco_method(
     train_seeds: Iterable[int],
     selection_seeds: Iterable[int],
     eval_seeds: Iterable[int],
+    safety_selection_seeds: Iterable[int] | None = None,
     steps: int,
     iterations: int,
     optimizer_seed: int,
@@ -943,9 +1183,28 @@ def train_mujoco_method(
     selection, evaluation = validate_evaluation_seed_roles(
         selection_seeds, eval_seeds
     )
-    roles = (set(roots), set(selection), set(evaluation))
-    if roles[0] & roles[1] or roles[0] & roles[2]:
-        raise ValueError("MuJoCo training and evaluation seed roles overlap")
+    safety_selection = (
+        validate_unique_seeds(
+            DEFAULT_SAFETY_SELECTION_SEEDS
+            if safety_selection_seeds is None else safety_selection_seeds,
+            role="mujoco_safety_selection_seeds",
+        )
+        if name == "freq_hrl_safe_selector" else []
+    )
+    seed_roles = {
+        "training": set(roots),
+        "checkpoint_selection": set(selection),
+        "safety_selection": set(safety_selection),
+        "heldout_test": set(evaluation),
+    }
+    role_names = list(seed_roles)
+    for index, left in enumerate(role_names):
+        for right in role_names[index + 1:]:
+            overlap = sorted(seed_roles[left] & seed_roles[right])
+            if overlap:
+                raise ValueError(
+                    f"MuJoCo seed roles {left} and {right} overlap: {overlap}"
+                )
     if int(upper_period) < 2:
         raise ValueError("MuJoCo upper_period must be at least two")
     source_identity = verify_current_freq_hrl_source_identity(
@@ -1028,7 +1287,179 @@ def train_mujoco_method(
         lower_constraint_update_mode=lower_constraint_update_mode,
     )
     target_parameters = _module_parameter_count(reference)
-    if name == "flat_ppo":
+    selected_leakage_constraint = name == "freq_hrl"
+    selected_constraint_update_mode = str(lower_constraint_update_mode)
+    if name == "freq_hrl_safe_selector":
+        branch_specs = {
+            SAFE_SELECTOR_BASELINE_BRANCH: {
+                "leakage_constraint": False,
+                "constraint_update_mode": "reward_guarded_adam_projection",
+            },
+            "reward_guarded_adam_projection": {
+                "leakage_constraint": True,
+                "constraint_update_mode": "reward_guarded_adam_projection",
+            },
+            "scalarized": {
+                "leakage_constraint": True,
+                "constraint_update_mode": "scalarized",
+            },
+        }
+        branch_models: dict[str, FrequencySeparatedActorCriticPPO] = {}
+        branch_payloads: dict[str, dict[str, Any]] = {}
+        branch_selection_rows: dict[str, list[dict[str, Any]]] = {}
+        branch_training_summaries: dict[str, dict[str, Any]] = {}
+        initial_hashes: set[str] = set()
+        for branch in SAFE_SELECTOR_BRANCHES:
+            spec = branch_specs[branch]
+            branch_leakage = bool(spec["leakage_constraint"])
+            branch_update_mode = str(spec["constraint_update_mode"])
+            torch.manual_seed(int(optimizer_seed))
+            np.random.seed(int(optimizer_seed))
+            branch_model = _hierarchical_model(
+                state_dim=state_dim,
+                action_dim=action_dim,
+                hidden_dim=hidden_dim,
+                learning_rate=learning_rate,
+                leakage_constraint=branch_leakage,
+                lower_constraint_update_mode=branch_update_mode,
+            )
+            initial_hash = _model_parameter_sha256(branch_model)
+            initial_hashes.add(initial_hash)
+            branch_rollout = lambda policy, seed, sample, leakage=branch_leakage: rollout_hierarchical(
+                policy,
+                seed=seed,
+                env_id=env_id,
+                disturbance_mode=assigned_mode(seed),
+                steps=steps,
+                upper_period=upper_period,
+                frequency_routing=True,
+                leakage_constraint=leakage,
+                lower_lf_rms_budget=lower_lf_rms_budget,
+                upper_action_scale=upper_action_scale,
+                lower_action_scale=lower_action_scale,
+                sample=sample,
+                method=name,
+                episode_horizon=episode_horizon,
+            )
+            branch_payload, _, branch_model = train_frequency_separated_ppo(
+                model=branch_model,
+                train_seeds=roots,
+                selection_seeds=selection,
+                eval_seeds=[],
+                iterations=iterations,
+                training_seed_fn=lambda root, iteration: training_rollout_seed(
+                    int(optimizer_seed), root, iteration,
+                    domain=domain_seed_key,
+                ),
+                rollout_fn=branch_rollout,
+                objective_fn=lambda row: float(row["reward_mean"]),
+                summary_fn=summarize,
+                policy=f"{name}:{branch}",
+                domain="mujoco",
+                checkpoint_smoothing_window=checkpoint_smoothing_window,
+                checkpoint_min_delta=checkpoint_min_delta,
+                checkpoint_evaluation_interval=checkpoint_evaluation_interval,
+            )
+            safety_rows: list[dict[str, Any]] = []
+            for safety_mode in training_modes:
+                for safety_seed in safety_selection:
+                    row = rollout_hierarchical(
+                        branch_model,
+                        seed=int(safety_seed),
+                        env_id=env_id,
+                        disturbance_mode=safety_mode,
+                        steps=steps,
+                        upper_period=upper_period,
+                        frequency_routing=True,
+                        leakage_constraint=branch_leakage,
+                        lower_lf_rms_budget=lower_lf_rms_budget,
+                        upper_action_scale=upper_action_scale,
+                        lower_action_scale=lower_action_scale,
+                        sample=False,
+                        method=name,
+                        episode_horizon=episode_horizon,
+                    )[1]
+                    row["safe_selector_branch"] = branch
+                    safety_rows.append(row)
+            branch_models[branch] = branch_model
+            branch_payloads[branch] = branch_payload
+            branch_selection_rows[branch] = safety_rows
+            branch_training_summaries[branch] = {
+                "leakage_constraint_enabled": branch_leakage,
+                "constraint_update_mode": branch_update_mode,
+                "initial_parameter_sha256": initial_hash,
+                "selected_parameter_sha256": _model_parameter_sha256(
+                    branch_model
+                ),
+                "selected_checkpoint_iteration": int(
+                    branch_payload["selected_checkpoint_iteration"]
+                ),
+                "validation_learning_gain": float(
+                    branch_payload["validation_learning_gain"]
+                ),
+                "actor_optimizer_steps_train": int(
+                    branch_payload["actor_optimizer_steps_train"]
+                ),
+                "critic_optimizer_steps_train": int(
+                    branch_payload["critic_optimizer_steps_train"]
+                ),
+                "safety_selection_summary": summarize(safety_rows),
+            }
+        if len(initial_hashes) != 1:
+            raise RuntimeError(
+                "safe-selector branches did not share one initialization"
+            )
+        selector = select_safe_mujoco_branch(
+            branch_selection_rows,
+            bootstrap_seed=derive_seed(
+                "mujoco_safe_selector_v1",
+                str(env_id),
+                int(optimizer_seed),
+            ),
+        )
+        selected_branch = str(selector["selected_branch"])
+        selected_spec = branch_specs[selected_branch]
+        model = branch_models[selected_branch]
+        payload = branch_payloads[selected_branch]
+        rows = []
+        selected_leakage_constraint = bool(
+            selected_spec["leakage_constraint"]
+        )
+        selected_constraint_update_mode = (
+            str(selected_spec["constraint_update_mode"])
+            if selected_leakage_constraint else "disabled"
+        )
+        selected_actor_steps = int(payload["actor_optimizer_steps_train"])
+        selected_critic_steps = int(payload["critic_optimizer_steps_train"])
+        payload.update({
+            "policy": name,
+            "branch_training_eval_seeds": [],
+            "eval_seeds": list(evaluation),
+            "safe_selector": selector,
+            "safe_selector_branch_training": branch_training_summaries,
+            "safe_selector_initialization_sha256": next(iter(initial_hashes)),
+            "safe_selector_selection_seeds": list(safety_selection),
+            "safe_selector_selection_disturbance_modes": list(training_modes),
+            "selected_branch_actor_optimizer_steps_train": selected_actor_steps,
+            "selected_branch_critic_optimizer_steps_train": selected_critic_steps,
+            "actor_optimizer_steps_train": int(sum(
+                item["actor_optimizer_steps_train"]
+                for item in branch_training_summaries.values()
+            )),
+            "critic_optimizer_steps_train": int(sum(
+                item["critic_optimizer_steps_train"]
+                for item in branch_training_summaries.values()
+            )),
+            "safe_selector_training_compute_multiplier": len(
+                SAFE_SELECTOR_BRANCHES
+            ),
+            "heldout_test_access_status": "not_loaded_during_branch_selection",
+        })
+        payload["gradient_updates_train"] = int(
+            payload["actor_optimizer_steps_train"]
+            + payload["critic_optimizer_steps_train"]
+        )
+    elif name == "flat_ppo":
         flat_hidden, _, _ = capacity_matched_flat_hidden_dim(
             target_parameter_count=target_parameters,
             state_dim=state_dim,
@@ -1152,7 +1583,7 @@ def train_mujoco_method(
                     steps=steps,
                     upper_period=upper_period,
                     frequency_routing=name != "generic_hrl",
-                    leakage_constraint=name == "freq_hrl",
+                    leakage_constraint=selected_leakage_constraint,
                     lower_lf_rms_budget=lower_lf_rms_budget,
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
@@ -1171,6 +1602,8 @@ def train_mujoco_method(
             evaluation_rows.append(row)
     if checkpoint_hash != _model_parameter_sha256(model):
         raise RuntimeError("MuJoCo held-out evaluation mutated the checkpoint")
+    if name == "freq_hrl_safe_selector":
+        payload["summary"] = summarize(evaluation_rows)
     payload.update({
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
         "method": name,
@@ -1197,12 +1630,19 @@ def train_mujoco_method(
         ),
         "upper_period": int(upper_period),
         "frequency_routing_enabled": name.startswith("freq_hrl"),
-        "leakage_constraint_enabled": name == "freq_hrl",
+        "leakage_constraint_enabled": selected_leakage_constraint,
         "leakage_cost_contract": "causal_lf_rms_budget_excess_squared_v1",
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
-        "lower_constraint_update_mode": str(lower_constraint_update_mode),
+        "upper_to_lower_action_capacity_ratio": float(
+            upper_action_scale / lower_action_scale
+        ),
+        "action_capacity_contract": (
+            "upper_anchor_and_lower_residual_unit_box_scales_reported_"
+            "separately_v1"
+        ),
+        "lower_constraint_update_mode": selected_constraint_update_mode,
         "exogenous_observation_contract": (
             "current_causal_actuation_disturbance_decomposed_separately_from_"
             "raw_endogenous_state"
@@ -1214,7 +1654,11 @@ def train_mujoco_method(
         "source_identity_status": source_identity["source_identity_status"],
         "code_revision": source_identity["code_revision"],
         "source_manifest_sha256": source_identity["source_manifest_sha256"],
-        "heldout_test_access_status": "loaded_after_checkpoint_selection",
+        "heldout_test_access_status": (
+            "loaded_once_after_safe_branch_selection"
+            if name == "freq_hrl_safe_selector"
+            else "loaded_after_checkpoint_selection"
+        ),
         "frozen_parameter_sha256": checkpoint_hash,
         "frozen_checkpoint_sha256": checkpoint_hash,
         "evaluation_summary_by_disturbance": {
@@ -1298,6 +1742,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--train-seeds", type=int, nargs="+", default=list(DEFAULT_TRAIN_SEEDS))
     parser.add_argument("--selection-seeds", type=int, nargs="+", default=list(DEFAULT_SELECTION_SEEDS))
+    parser.add_argument(
+        "--safety-selection-seeds",
+        type=int,
+        nargs="+",
+        default=list(DEFAULT_SAFETY_SELECTION_SEEDS),
+    )
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=list(DEFAULT_EVAL_SEEDS))
     parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--episode-horizon", type=int, default=1000)
@@ -1335,6 +1785,7 @@ def main() -> None:
         disturbance_mode=args.disturbance_mode,
         train_seeds=args.train_seeds,
         selection_seeds=args.selection_seeds,
+        safety_selection_seeds=args.safety_selection_seeds,
         eval_seeds=args.eval_seeds,
         steps=args.steps,
         iterations=args.iterations,

@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
 PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v7"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v8"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -86,6 +86,8 @@ def build_training_command(
         "--evaluation-disturbance-modes", *args.evaluation_disturbance_modes,
         "--train-seeds", *(str(seed) for seed in args.train_seeds),
         "--selection-seeds", *(str(seed) for seed in args.selection_seeds),
+        "--safety-selection-seeds",
+        *(str(seed) for seed in args.safety_selection_seeds),
         "--eval-seeds", *(str(seed) for seed in args.eval_seeds),
         "--steps", str(args.steps),
         "--episode-horizon", str(args.episode_horizon),
@@ -278,6 +280,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evaluation-disturbance-modes", default=",".join(DISTURBANCE_MODES))
     parser.add_argument("--train-seeds", default=",".join(map(str, validation.DEFAULT_TRAIN_SEEDS)))
     parser.add_argument("--selection-seeds", default=",".join(map(str, validation.DEFAULT_SELECTION_SEEDS)))
+    parser.add_argument(
+        "--safety-selection-seeds",
+        default=",".join(map(str, validation.DEFAULT_SAFETY_SELECTION_SEEDS)),
+    )
     parser.add_argument("--eval-seeds", default=",".join(map(str, validation.DEFAULT_EVAL_SEEDS)))
     parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--episode-horizon", type=int, default=1000)
@@ -329,6 +335,7 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     )
     args.train_seeds = parse_csv(args.train_seeds, int)
     args.selection_seeds = parse_csv(args.selection_seeds, int)
+    args.safety_selection_seeds = parse_csv(args.safety_selection_seeds, int)
     args.eval_seeds = parse_csv(args.eval_seeds, int)
     args.nodes = parse_csv(args.nodes)
     args.stage_input_paths = [
@@ -359,6 +366,7 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.evaluation_disturbance_modes = ["standard"]
         args.train_seeds = args.train_seeds[:1]
         args.selection_seeds = args.selection_seeds[:1]
+        args.safety_selection_seeds = args.safety_selection_seeds[:1]
         args.eval_seeds = args.eval_seeds[:1]
         args.checkpoint_smoothing_window = 1
         args.checkpoint_min_delta = 0.0
