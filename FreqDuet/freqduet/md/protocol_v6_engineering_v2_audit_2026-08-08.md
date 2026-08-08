@@ -260,3 +260,30 @@ A candidate may advance only if:
 5. headway CV improves over same-source `noguard` by at least `0.02`, without
    reversing its holding and denied-dispatch gains by more than 10%; and
 6. only a later disjoint-seed confirmation can support an efficacy claim.
+
+## Engineering-v5 smoke and dispatch record (2026-08-09)
+
+Commit `e8b825e74d430340ecccf25f991a50d6242537c1` passed the complete test suite:
+263 tests passed, one was skipped, and 33 subtests passed. A four-job
+integration smoke then completed on `node001` and `node002` as scheduler tasks
+`t75984` through `t75987`.
+
+The smoke is not efficacy evidence. It verifies that:
+
+- main, same-source `noguard`, `fwdadv_w2`, and `avlbal_w2` all train,
+  checkpoint, and complete frozen evaluation;
+- both new candidates retain exactly zero execution adjustment;
+- the weight-two incremental reward remains within its configured
+  `[-0.5, 0.5]` bound;
+- `avlbal_w2` reports 62.60% valid same-time follower evidence in frozen
+  evaluation, above the preregistered 50% engineering gate; and
+- the untrained/one-episode policies still have negative mean regularity
+  improvement, so the smoke cannot be interpreted as learned control.
+
+The full exploratory run is
+`protocol_v6_incremental_ep40_s4_e2_v5`. It contains 12 configs, four train
+seeds `503,521,541,557`, two frozen evaluation seeds `41011,41017`, and 40
+training episodes. The 48 one-job shards are scheduler tasks `t76004` through
+`t76051`, round-robin pinned to `node001` through `node006` with eight shards
+per node. All 48 reached running state. Heavy checkpoints and logs remain on
+the HPC filesystem; only later aggregate summaries will be synchronized.
