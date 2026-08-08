@@ -26,6 +26,20 @@ Current domain entry points:
   frequency features for portfolio/execution experiments.
 - `freq_hrl.domains.trading.PortfolioExecutionEnv`: a minimal portfolio target
   plus execution-speed environment for early FreqTradeDuet tests.
+- `freq_hrl.domains.mujoco`: a causal slow/mid/high observation adapter for
+  standard Gymnasium MuJoCo tasks. It uses the same shared flat PPO and SMDP
+  PPO trainers as the Trading and Transit paths.
+
+Run a single MuJoCo shared-core validation cell with:
+
+```bash
+MUJOCO_GL=egl PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.mujoco.control_validation --method freq_hrl --env-id HalfCheetah-v5 --disturbance-mode standard --train-seeds 31013 31019 31033 --selection-seeds 32003 32009 32027 --eval-seeds 33013 33023 33029 33037 33049 --steps 500 --iterations 64 --optimizer-seed 34019 --output-dir transit_hrl/results/mujoco_control/halfcheetah/freq_hrl/replicate_34019
+```
+
+The optional pinned runtime is listed in `requirements-mujoco.txt`. The
+MuJoCo path compares capacity-matched `flat_ppo`, `generic_hrl`,
+`freq_hrl_no_leakage`, and `freq_hrl`; a short smoke cell validates only the
+software path and is not performance evidence.
 
 Run the current smoke tests with:
 
