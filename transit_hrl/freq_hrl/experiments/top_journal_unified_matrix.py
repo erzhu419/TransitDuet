@@ -799,17 +799,26 @@ def build_unified_matrix(results_root: Path) -> dict[str, Any]:
             "status": _status_from_flags(
                 present=bool(theory),
                 supported=(
-                    str(theory.get("proof_verification_status", "")) == "verified"
-                    and bool(theory.get("theorems"))
-                    and "primal_dual_avg_violation_bound_example" in theory_examples
+                    str(theory.get("proof_verification_status", ""))
+                    == "independently_verified"
+                    and {"F1", "F3", "F6", "F9"}.issubset({
+                        str(row.get("id", ""))
+                        for row in theory.get("formal_statements", []) or []
+                        if isinstance(row, dict)
+                    })
                 ),
-                partial=bool(theory.get("theorems") or theory_examples),
+                partial=bool(
+                    theory.get("formal_statements")
+                    or theory.get("theorems")
+                    or theory_examples
+                ),
             ),
             "evidence": (
                 f"verification={theory.get('proof_verification_status', 'missing')} "
+                f"independent={theory.get('independent_proof_verification', False)} "
                 f"examples={sorted(theory_examples.keys())}"
             ),
-            "remaining_gap": "Structured propositions are present, but C6 remains partial until assumptions and proofs receive an explicit verification audit.",
+            "remaining_gap": "Scope-limited formal statements are present, but C6 remains partial until assumptions and proofs receive independent verification.",
             "artifact": (
                 paths["theory_appendix_latest"]
                 if artifacts["theory_appendix_latest"]

@@ -7,7 +7,7 @@ from freq_hrl.experiments.theory_report import run_theory_report
 
 
 class TheoryReportTest(unittest.TestCase):
-    def test_theory_report_writes_theorems_and_stat_summary(self):
+    def test_theory_report_writes_formal_scope_and_stat_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             paper = root / "paper.json"
@@ -18,9 +18,10 @@ class TheoryReportTest(unittest.TestCase):
                 ]
             }), encoding="utf-8")
             payload = run_theory_report(root / "out", paper)
-            self.assertGreaterEqual(len(payload["theorems"]), 4)
+            self.assertGreaterEqual(len(payload["formal_statements"]), 9)
             self.assertEqual(payload["statistical_coverage"]["n_checks"], 2)
             self.assertTrue((root / "out" / "theory_report.md").exists())
+            self.assertFalse(payload["independent_proof_verification"])
 
 
 if __name__ == "__main__":

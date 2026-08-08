@@ -175,7 +175,11 @@ def build_manuscript_boundary_table(
     baseline_summary = baseline.get("summary", {}) if isinstance(baseline.get("summary"), dict) else {}
     agency_summary = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
     coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
-    theorem_count = len(theory.get("theorems", []) or [])
+    formal_statement_count = len(
+        theory.get("formal_statements", [])
+        or theory.get("theorems", [])
+        or []
+    )
     supported_claims = sum(row.get("status") == "supported" for row in claim_rows)
     claims_by_id = {str(row.get("id", "")): row for row in claim_rows}
     order_book_claim_status = str(claims_by_id.get("C3", {}).get("status", "missing"))
@@ -223,7 +227,10 @@ def build_manuscript_boundary_table(
                 "reporting boundaries; independent proof verification remains unresolved."
             ),
             "disallowed_wording": "The paper proves universal nonconvex actor-critic convergence.",
-            "evidence_hook": f"theorems_or_propositions={theorem_count}",
+            "evidence_hook": (
+                f"formal_statements={formal_statement_count}; "
+                f"verification={theory.get('proof_verification_status', 'missing')}"
+            ),
         },
     ]
 

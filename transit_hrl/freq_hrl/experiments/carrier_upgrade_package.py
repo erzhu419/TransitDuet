@@ -379,15 +379,23 @@ def build_data_scaleup_manifest(
 def build_proof_manifest(theory_payload: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     theory_payload = dict(theory_payload or {})
     theorem_rows = [
-        dict(row) for row in theory_payload.get("theorems", []) or []
+        dict(row)
+        for row in (
+            theory_payload.get("formal_statements", [])
+            or theory_payload.get("theorems", [])
+            or []
+        )
         if isinstance(row, dict)
     ]
     if theorem_rows:
         return [
             {
                 "proof_item": f"{row.get('id', '')}: {row.get('title', '')}".strip(": "),
-                "status": "formalized_statement",
+                "status": str(
+                    row.get("verification_status", "formalized_statement")
+                ),
                 "statement": str(row.get("statement", "")),
+                "statement_kind": str(row.get("kind", "legacy_theorem")),
                 "paper_use": str(row.get("diagnostic", "")),
                 "assumption_count": len(row.get("assumptions", []) or []),
                 "limitation": str(row.get("limitation", "")),
@@ -627,7 +635,14 @@ def build_cs_top_venue_readiness(
     baseline_meta = baseline_summary.get("summary", {}) if isinstance(baseline_summary.get("summary"), dict) else {}
     agency_meta = agency.get("summary", {}) if isinstance(agency.get("summary"), dict) else {}
     order_coverage = order_book.get("coverage", {}) if isinstance(order_book.get("coverage"), dict) else {}
-    theorem_count = len(theory_summary.get("theorems", []) or [])
+    formal_statement_count = len(
+        theory_summary.get("formal_statements", [])
+        or theory_summary.get("theorems", [])
+        or []
+    )
+    independent_proof_verification = bool(
+        theory_summary.get("independent_proof_verification", False)
+    )
     claims_supported = sum(1 for row in claim_freeze if row.get("status") == "supported")
     learned_status = str(baseline_meta.get("strong_learned_baseline_status", "registered_missing"))
     same_agency_status = str(agency_meta.get("same_agency_native_control_status", "external_missing"))
@@ -699,9 +714,16 @@ def build_cs_top_venue_readiness(
         {
             "review_axis": "theory_scope",
             "cs_expectation": "Formal statements should support the method but avoid false convergence claims.",
-            "current_status": "paper_ready_with_boundary" if theorem_count >= 9 else "partial",
-            "evidence": f"formal_theorems_or_propositions={theorem_count}",
-            "next_action": "Frame theory as causality/leakage/promotion/CI reporting bounds, not universal RL convergence.",
+            "current_status": (
+                "paper_ready_with_boundary"
+                if formal_statement_count >= 9 and independent_proof_verification
+                else "partial"
+            ),
+            "evidence": (
+                f"formal_statements={formal_statement_count}; "
+                f"independent_verification={independent_proof_verification}"
+            ),
+            "next_action": "Independently verify the scope-limited causality, projection, promotion, and dual-sequence statements; do not claim universal RL convergence.",
             "venue_risk": "The theory is adequate for an empirical ML systems paper, not a theory-track claim.",
         },
         {

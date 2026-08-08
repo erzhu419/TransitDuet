@@ -45,9 +45,11 @@ class CarrierUpgradePackageTest(unittest.TestCase):
             proof_path = out / "proof_manifest.csv"
             with proof_path.open("r", newline="", encoding="utf-8") as f:
                 proof_rows = list(csv.DictReader(f))
-            self.assertTrue(any("Theorem 1" in row["proof_item"] for row in proof_rows))
-            self.assertTrue(any("Proposition 9" in row["proof_item"] for row in proof_rows))
-            self.assertTrue(all(row["status"] == "formalized_statement" for row in proof_rows))
+            self.assertTrue(any(row["proof_item"].startswith("F1:") for row in proof_rows))
+            self.assertTrue(any(row["proof_item"].startswith("F9:") for row in proof_rows))
+            self.assertIn("lemma", {row["statement_kind"] for row in proof_rows})
+            self.assertIn("proposition", {row["statement_kind"] for row in proof_rows})
+            self.assertTrue(all(row["status"] for row in proof_rows))
 
             spec_validation = json.loads((out / "spec_validation.json").read_text(encoding="utf-8"))
             self.assertEqual(spec_validation["claim_freeze"]["status"], "valid")

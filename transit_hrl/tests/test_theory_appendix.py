@@ -7,8 +7,11 @@ from freq_hrl.experiments.theory_appendix import (
     conditional_no_tradeoff_margin,
     finite_sample_mean_ci_radius,
     hierarchical_credit_residual_bound,
+    ideal_transfer_relative_leakage_reduction,
     promotion_detection_delay_bound,
     promotion_false_positive_bound,
+    promotion_warm_window_delay_bound,
+    projected_dual_regret_term,
     responsibility_reconstruction_error,
     shaped_return_deviation_bound,
     stress_claim_coverage_fraction,
@@ -41,6 +44,14 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             600.0,
         )
+        self.assertEqual(
+            promotion_warm_window_delay_bound(
+                update_interval_s=60.0,
+                window_bins=10,
+                persistence_ratio=0.35,
+            ),
+            240.0,
+        )
         self.assertLess(
             finite_sample_mean_ci_radius(sample_std=1.0, n=16),
             finite_sample_mean_ci_radius(sample_std=1.0, n=4),
@@ -65,6 +76,22 @@ class TheoryAppendixTest(unittest.TestCase):
             stress_claim_coverage_fraction(supported_regimes=4, required_regimes=5),
             0.8,
         )
+        self.assertAlmostEqual(
+            ideal_transfer_relative_leakage_reduction(
+                lower_lf_norm=0.5,
+                transfer_error_norm=0.2,
+            ),
+            0.84,
+        )
+        self.assertGreater(
+            projected_dual_regret_term(
+                dual_radius=2.0,
+                step_size=0.05,
+                horizon=400,
+                gradient_bound=1.0,
+            ),
+            0.0,
+        )
         self.assertLessEqual(
             responsibility_reconstruction_error(
                 upper_policy=[0.2, -0.7],
@@ -81,15 +108,14 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
-            self.assertGreaterEqual(len(payload["theorems"]), 9)
-            self.assertIn("Theorem 1", report)
-            self.assertIn("Theorem 5", report)
-            self.assertIn("Proposition 8", report)
-            self.assertIn("Proposition 9", report)
-            self.assertIn("Proposition 10", report)
-            self.assertIn("Proposition 11", report)
+            self.assertGreaterEqual(len(payload["formal_statements"]), 9)
+            self.assertIn("F1 (lemma)", report)
+            self.assertIn("F3 (proposition)", report)
+            self.assertIn("F9 (lemma)", report)
+            self.assertIn("R1 (reporting_approximation)", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)
+            self.assertFalse(payload["independent_proof_verification"])
 
 
 if __name__ == "__main__":
