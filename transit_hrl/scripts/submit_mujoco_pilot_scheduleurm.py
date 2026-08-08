@@ -440,6 +440,8 @@ def main() -> None:
         str(SUBMIT_SCRIPT_PATH),
         "--run-name", args.run_name,
         "--stage", args.stage,
+        "--environments", ",".join(args.environments),
+        "--methods", ",".join(args.methods),
         "--merge-only",
     ]))
 
