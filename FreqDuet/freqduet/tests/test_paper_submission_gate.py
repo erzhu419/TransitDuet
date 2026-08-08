@@ -19,6 +19,7 @@ from scripts.decide_freqduet_protocol_v6_screen import (
     REFERENCE,
 )
 from scripts.paper_submission_gate import (
+    ACTIVE_HOLD_STATUS,
     ACTIVE_PROTOCOL,
     ARTIFACT_BINDING_FIELDS,
     CONFIRMATION_DECISION_STATUS,
@@ -194,6 +195,7 @@ class PaperSubmissionGateTest(unittest.TestCase):
             {
                 "version": "2026-06-26-historical",
                 "submission_status": "hold_pending_protocol_v5",
+                "active_protocol": "freqduet-eval-v5",
             },
             allow_historical=True,
         )
@@ -202,6 +204,7 @@ class PaperSubmissionGateTest(unittest.TestCase):
                 {
                     "version": "2026-08-08-protocol-v6",
                     "submission_status": "hold_pending_protocol_v5",
+                    "active_protocol": "freqduet-eval-v5",
                 },
                 allow_historical=True,
             )
@@ -213,6 +216,26 @@ class PaperSubmissionGateTest(unittest.TestCase):
                 },
                 allow_historical=True,
             )
+
+    def test_active_v6_hold_preserves_explicit_historical_reproduction(self):
+        manifest = {
+            "version": "2026-08-08-protocol-v6-development",
+            "submission_status": ACTIVE_HOLD_STATUS,
+            "active_protocol": ACTIVE_PROTOCOL,
+            "historical_reproduction": {
+                "version": "2026-06-26-historical",
+                "submission_status": "hold_pending_protocol_v5",
+                "active_protocol": "freqduet-eval-v5",
+            },
+        }
+        require_submission_ready(manifest, allow_historical=True)
+        with self.assertRaisesRegex(RuntimeError, "submission_status"):
+            require_submission_ready(manifest)
+
+        broken = copy.deepcopy(manifest)
+        del broken["historical_reproduction"]
+        with self.assertRaisesRegex(RuntimeError, "historical_reproduction"):
+            require_submission_ready(broken, allow_historical=True)
 
     def test_confirmed_v6_manifest_is_accepted(self):
         with TemporaryDirectory() as tmp:

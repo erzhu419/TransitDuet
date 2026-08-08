@@ -25,6 +25,7 @@ from scripts.run_freqduet_protocol_v2_matrix import (
 )
 
 READY_STATUS = "ready_protocol_v6_confirmed"
+ACTIVE_HOLD_STATUS = "hold_pending_protocol_v6"
 HISTORICAL_HOLD_STATUS = "hold_pending_protocol_v5"
 ACTIVE_PROTOCOL = "freqduet-eval-v6"
 PRIMARY_METRIC = "restricted_total_journey_horizon_min"
@@ -352,12 +353,33 @@ def require_submission_ready(
     status = str(manifest.get("submission_status", "")).strip().lower()
     if status.startswith("hold"):
         if allow_historical:
-            if status != HISTORICAL_HOLD_STATUS:
+            if status == HISTORICAL_HOLD_STATUS:
+                historical = manifest
+            elif status == ACTIVE_HOLD_STATUS:
+                historical = _require_mapping(
+                    manifest.get("historical_reproduction"),
+                    "historical_reproduction",
+                )
+            else:
                 raise RuntimeError(
                     "--allow-historical only accepts the locked historical "
-                    f"hold status {HISTORICAL_HOLD_STATUS!r}"
+                    f"hold status {HISTORICAL_HOLD_STATUS!r} or an active "
+                    f"{ACTIVE_HOLD_STATUS!r} manifest with an explicit "
+                    "historical_reproduction mapping"
                 )
-            version = str(manifest.get("version", "")).strip().lower()
+            if str(historical.get(
+                    "submission_status", "")).strip().lower() != (
+                    HISTORICAL_HOLD_STATUS):
+                raise RuntimeError(
+                    "historical_reproduction must retain the locked V5 hold "
+                    "status"
+                )
+            if str(historical.get(
+                    "active_protocol", "")).strip() != "freqduet-eval-v5":
+                raise RuntimeError(
+                    "historical_reproduction must identify freqduet-eval-v5"
+                )
+            version = str(historical.get("version", "")).strip().lower()
             if "historical" not in version:
                 raise RuntimeError(
                     "--allow-historical requires an explicitly historical "
