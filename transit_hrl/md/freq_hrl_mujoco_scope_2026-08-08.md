@@ -28,6 +28,13 @@ parameter count within 3%. All methods use the same environment seeds,
 episode cap, action bounds, reward, checkpoint-selection paths, and held-out
 paths.
 
+Checkpoint validation is evaluated every four optimizer iterations rather
+than after every update. The robust selector averages eight validation
+observations, so its default smoothing horizon spans approximately 32 training
+iterations. The initial observation, every evaluation event, the final
+evaluation, and every non-evaluation training iteration are all retained in
+the training-history artifact.
+
 Upper actions are slow action anchors held for a fixed macro interval. Lower
 actions are bounded residual corrections. The shared
 `FrequencySeparatedActorCriticPPO` records one discounted SMDP transition per

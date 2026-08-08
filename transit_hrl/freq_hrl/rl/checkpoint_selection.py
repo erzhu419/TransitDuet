@@ -49,6 +49,7 @@ class RobustValidationCheckpointSelector:
 
     def initial_history_fields(self) -> dict[str, Any]:
         return {
+            "checkpoint_evaluation_performed": True,
             "checkpoint_selection_score": self.initial_score,
             "checkpoint_selection_eligible": True,
             "checkpoint_selected": True,

@@ -124,6 +124,20 @@ def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> d
     return out
 
 
+def _checkpoint_evaluation_due(
+    iteration: int,
+    *,
+    total_iterations: int,
+    interval: int,
+) -> bool:
+    if isinstance(interval, bool) or int(interval) < 1:
+        raise ValueError("checkpoint evaluation interval must be positive")
+    return bool(
+        (int(iteration) + 1) % int(interval) == 0
+        or int(iteration) == int(total_iterations) - 1
+    )
+
+
 def train_dual_ppo(
     model: DualActorCriticPPO,
     train_seeds: list[int],
@@ -141,9 +155,13 @@ def train_dual_ppo(
     metadata: dict[str, Any] | None = None,
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
+    checkpoint_evaluation_interval: int = 1,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], DualActorCriticPPO]:
     """Train a dual-level PPO model through a domain-supplied rollout adapter."""
     metadata = dict(metadata or {})
+    _checkpoint_evaluation_due(
+        0, total_iterations=1, interval=checkpoint_evaluation_interval
+    )
     selection_seed_list = list(selection_seeds or train_seeds)
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
@@ -172,7 +190,8 @@ def train_dual_ppo(
         "constraint_lambda": float(model.constraint_lambda),
     }]
 
-    for iteration in range(max(1, int(iterations))):
+    total_iterations = max(1, int(iterations))
+    for iteration in range(total_iterations):
         batches = []
         sampled_rows = []
         rollout_seeds = _iteration_rollout_seeds(
@@ -184,20 +203,37 @@ def train_dual_ppo(
                 batches.append(batch)
             sampled_rows.append(row)
         metrics = model.update(concat_batches(batches))
-        eval_rows = [
-            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
-        ]
-        score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        checkpoint_fields = selector.consider(
-            score=score, state=model.state_dict(), iteration=iteration
+        evaluate_checkpoint = _checkpoint_evaluation_due(
+            iteration,
+            total_iterations=total_iterations,
+            interval=checkpoint_evaluation_interval,
+        )
+        eval_rows = (
+            [rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list]
+            if evaluate_checkpoint else []
+        )
+        score = (
+            float(np.mean([objective_fn(row) for row in eval_rows]))
+            if evaluate_checkpoint else None
+        )
+        checkpoint_fields = (
+            selector.consider(
+                score=float(score), state=model.state_dict(), iteration=iteration
+            )
+            if evaluate_checkpoint else {
+                "checkpoint_selection_score": float(selector.best_score),
+                "checkpoint_selection_eligible": False,
+                "checkpoint_selected": False,
+            }
         )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            "checkpoint_evaluation_performed": evaluate_checkpoint,
             **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
-            **summary_fn(eval_rows),
+            **(summary_fn(eval_rows) if evaluate_checkpoint else {}),
             **metrics,
         })
 
@@ -223,6 +259,7 @@ def train_dual_ppo(
         "summary": summary_fn(heldout_rows),
         **metadata,
         **selector.metadata(total_iterations=max(1, int(iterations))),
+        "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
     }
     return payload, heldout_rows, model
 
@@ -243,10 +280,14 @@ def train_joint_ppo(
     metadata: dict[str, Any] | None = None,
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
+    checkpoint_evaluation_interval: int = 1,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], JointActorCriticPPO]:
     """Train a standard flat PPO with one joint action and one task return."""
 
     metadata = dict(metadata or {})
+    _checkpoint_evaluation_due(
+        0, total_iterations=1, interval=checkpoint_evaluation_interval
+    )
     selection_seed_list = list(selection_seeds or train_seeds)
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
@@ -276,7 +317,8 @@ def train_joint_ppo(
         "value_optimizer_steps": 0.0,
     }]
 
-    for iteration in range(max(1, int(iterations))):
+    total_iterations = max(1, int(iterations))
+    for iteration in range(total_iterations):
         batches: list[JointTrajectoryBatch] = []
         sampled_rows: list[dict[str, Any]] = []
         rollout_seeds = _iteration_rollout_seeds(
@@ -290,20 +332,37 @@ def train_joint_ppo(
         if not batches:
             raise RuntimeError("sampled rollouts did not produce a joint trajectory")
         metrics = model.update(concat_joint_batches(batches))
-        eval_rows = [
-            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
-        ]
-        score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        checkpoint_fields = selector.consider(
-            score=score, state=model.state_dict(), iteration=iteration
+        evaluate_checkpoint = _checkpoint_evaluation_due(
+            iteration,
+            total_iterations=total_iterations,
+            interval=checkpoint_evaluation_interval,
+        )
+        eval_rows = (
+            [rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list]
+            if evaluate_checkpoint else []
+        )
+        score = (
+            float(np.mean([objective_fn(row) for row in eval_rows]))
+            if evaluate_checkpoint else None
+        )
+        checkpoint_fields = (
+            selector.consider(
+                score=float(score), state=model.state_dict(), iteration=iteration
+            )
+            if evaluate_checkpoint else {
+                "checkpoint_selection_score": float(selector.best_score),
+                "checkpoint_selection_eligible": False,
+                "checkpoint_selected": False,
+            }
         )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            "checkpoint_evaluation_performed": evaluate_checkpoint,
             **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
-            **summary_fn(eval_rows),
+            **(summary_fn(eval_rows) if evaluate_checkpoint else {}),
             **metrics,
         })
 
@@ -345,6 +404,7 @@ def train_joint_ppo(
         },
         **metadata,
         **selector.metadata(total_iterations=max(1, int(iterations))),
+        "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
     }
     return payload, heldout_rows, model
 
@@ -391,9 +451,13 @@ def train_frequency_separated_ppo(
     metadata: dict[str, Any] | None = None,
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
+    checkpoint_evaluation_interval: int = 1,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
+    _checkpoint_evaluation_due(
+        0, total_iterations=1, interval=checkpoint_evaluation_interval
+    )
     has_hf_stream = int(getattr(model.config, "hf_state_dim", 0)) > 0
     has_promotion_stream = int(getattr(model.config, "promotion_state_dim", 0)) > 0
     if has_hf_stream and has_promotion_stream:
@@ -445,7 +509,8 @@ def train_frequency_separated_ppo(
         "promotion_cost_value_optimizer_steps": 0.0,
     }]
 
-    for iteration in range(max(1, int(iterations))):
+    total_iterations = max(1, int(iterations))
+    for iteration in range(total_iterations):
         batches: list[HierarchicalTrajectoryBatch] = []
         sampled_rows = []
         rollout_seeds = _iteration_rollout_seeds(
@@ -459,20 +524,37 @@ def train_frequency_separated_ppo(
         if not batches:
             raise RuntimeError("sampled rollouts did not produce an SMDP trajectory")
         metrics = model.update(concat_hierarchical_batches(batches))
-        eval_rows = [
-            rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
-        ]
-        score = float(np.mean([objective_fn(row) for row in eval_rows]))
-        checkpoint_fields = selector.consider(
-            score=score, state=model.state_dict(), iteration=iteration
+        evaluate_checkpoint = _checkpoint_evaluation_due(
+            iteration,
+            total_iterations=total_iterations,
+            interval=checkpoint_evaluation_interval,
+        )
+        eval_rows = (
+            [rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list]
+            if evaluate_checkpoint else []
+        )
+        score = (
+            float(np.mean([objective_fn(row) for row in eval_rows]))
+            if evaluate_checkpoint else None
+        )
+        checkpoint_fields = (
+            selector.consider(
+                score=float(score), state=model.state_dict(), iteration=iteration
+            )
+            if evaluate_checkpoint else {
+                "checkpoint_selection_score": float(selector.best_score),
+                "checkpoint_selection_eligible": False,
+                "checkpoint_selected": False,
+            }
         )
         history.append({
             "iteration": int(iteration),
             "training_rollout_seeds": rollout_seeds,
             "score": score,
+            "checkpoint_evaluation_performed": evaluate_checkpoint,
             **checkpoint_fields,
             **_sampled_summary(sampled_rows, objective_fn),
-            **summary_fn(eval_rows),
+            **(summary_fn(eval_rows) if evaluate_checkpoint else {}),
             **metrics,
         })
 
@@ -538,5 +620,6 @@ def train_frequency_separated_ppo(
         },
         **metadata,
         **selector.metadata(total_iterations=max(1, int(iterations))),
+        "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
     }
     return payload, heldout_rows, model

@@ -133,10 +133,13 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             hidden_dim=8,
             checkpoint_smoothing_window=1,
             checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=4,
         )
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(payload["protocol_version"], "freq_hrl_mujoco_shared_core_v1")
         self.assertTrue(payload["frequency_routing_enabled"])
+        self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
+        self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["protocol_valid"], 1.0)
 

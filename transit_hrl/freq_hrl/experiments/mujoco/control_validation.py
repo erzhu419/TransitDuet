@@ -500,6 +500,7 @@ def train_mujoco_method(
     learning_rate: float = 3e-4,
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
+    checkpoint_evaluation_interval: int = 4,
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -573,6 +574,7 @@ def train_mujoco_method(
             domain="mujoco",
             checkpoint_smoothing_window=checkpoint_smoothing_window,
             checkpoint_min_delta=checkpoint_min_delta,
+            checkpoint_evaluation_interval=checkpoint_evaluation_interval,
         )
     else:
         frequency_routing = name != "generic_hrl"
@@ -614,6 +616,7 @@ def train_mujoco_method(
             domain="mujoco",
             checkpoint_smoothing_window=checkpoint_smoothing_window,
             checkpoint_min_delta=checkpoint_min_delta,
+            checkpoint_evaluation_interval=checkpoint_evaluation_interval,
         )
 
     actual_parameters = _module_parameter_count(model)
@@ -705,6 +708,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
+    parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
     parser.add_argument("--code-revision", default="")
     parser.add_argument("--source-manifest-sha256", default="")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -728,6 +732,7 @@ def main() -> None:
         learning_rate=args.learning_rate,
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
+        checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
     )
