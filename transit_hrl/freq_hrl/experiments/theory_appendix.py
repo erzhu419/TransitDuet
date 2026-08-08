@@ -112,6 +112,29 @@ def stress_claim_coverage_fraction(*, supported_regimes: int, required_regimes: 
     return float(supported / required)
 
 
+def responsibility_reconstruction_error(
+    *,
+    upper_policy: list[float],
+    raw_lower: list[float],
+    transferred_lf: list[float],
+) -> float:
+    """Maximum action error after equal-and-opposite responsibility transfer."""
+
+    if not (
+        len(upper_policy) == len(raw_lower) == len(transferred_lf)
+        and len(upper_policy) > 0
+    ):
+        raise ValueError("responsibility vectors must be non-empty and aligned")
+    return float(max(
+        abs(
+            (float(upper_policy[index]) + float(transferred_lf[index]))
+            + (float(raw_lower[index]) - float(transferred_lf[index]))
+            - (float(upper_policy[index]) + float(raw_lower[index]))
+        )
+        for index in range(len(upper_policy))
+    ))
+
+
 def read_csv_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -396,6 +419,42 @@ def build_theorem_rows(examples: dict[str, Any]) -> list[dict[str, Any]]:
                 f"{_fmt(examples['stress_claim_coverage_fraction_example'])}."
             ),
         },
+        {
+            "id": "Proposition 10",
+            "title": "Causal Responsibility Transfer Preserves Nominal Action",
+            "statement": (
+                "Let p_k be a lower low-frequency estimate available before upper "
+                "boundary k. Assign u'_k = u_k + p_k and l'_t = l_t - p_k "
+                "through that macro interval. The assignment is nonanticipative and "
+                "u'_k + l'_t = u_k + l_t at every lower step."
+            ),
+            "assumptions": [
+                "The transferred estimate p_k uses only lower commands observed before boundary k.",
+                "The same effective transfer is added to the upper contribution and subtracted from the lower contribution.",
+                "The actuator receives a deterministic function of the summed upper and lower contributions plus the same disturbance.",
+            ],
+            "proof": (
+                "Because p_k is computed from the filter state immediately before "
+                "boundary k, it is measurable with respect to the available history "
+                "and is therefore nonanticipative. Algebraically, (u_k + p_k) + "
+                "(l_t - p_k) = u_k + l_t componentwise. Applying the same actuator "
+                "clipping and disturbance map to equal nominal sums yields equal "
+                "executed actions for fixed raw policy outputs."
+            ),
+            "limitation": (
+                "The proposition is a mechanism-level invariance. Retraining changes "
+                "policy states and learned raw outputs, so empirical reward "
+                "noninferiority and leakage reduction still require paired gates."
+            ),
+            "diagnostic": (
+                "MuJoCo v10 reports raw and responsibility actions, transfer "
+                "saturation, and per-path ResponsibilityReconstructionRMS."
+            ),
+            "example": (
+                "Example maximum reconstruction error: "
+                f"{_fmt(examples['responsibility_reconstruction_error_example'], digits=12)}."
+            ),
+        },
     ]
 
 
@@ -440,6 +499,13 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             supported_regimes=4,
             required_regimes=5,
         ),
+        "responsibility_reconstruction_error_example": (
+            responsibility_reconstruction_error(
+                upper_policy=[0.2, -0.7],
+                raw_lower=[0.5, -0.1],
+                transferred_lf=[0.12, -0.08],
+            )
+        ),
     }
     cited_checks = {
         "transit_learned_promotion_wait": _check(checks, "transit_learned_promotion_wait_vs_interval"),
@@ -471,6 +537,7 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
             "A6: frequency credit residuals are explicitly measurable from the same causal rollout.",
             "A7: constrained updates use bounded nonnegative dual variables and bounded constraint samples.",
             "A8: global stress-generalization claims declare their required regime set before selecting headline artifacts.",
+            "A9: responsibility transfer is computed before an upper boundary and applied equal-and-oppositely to upper and lower action contributions.",
         ],
         "theorems": build_theorem_rows(examples),
         "examples": examples,

@@ -9,6 +9,7 @@ from freq_hrl.experiments.theory_appendix import (
     hierarchical_credit_residual_bound,
     promotion_detection_delay_bound,
     promotion_false_positive_bound,
+    responsibility_reconstruction_error,
     shaped_return_deviation_bound,
     stress_claim_coverage_fraction,
     write_outputs,
@@ -64,6 +65,14 @@ class TheoryAppendixTest(unittest.TestCase):
             stress_claim_coverage_fraction(supported_regimes=4, required_regimes=5),
             0.8,
         )
+        self.assertLessEqual(
+            responsibility_reconstruction_error(
+                upper_policy=[0.2, -0.7],
+                raw_lower=[0.5, -0.1],
+                transferred_lf=[0.12, -0.08],
+            ),
+            1e-15,
+        )
 
     def test_theory_appendix_writes_report(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -77,6 +86,7 @@ class TheoryAppendixTest(unittest.TestCase):
             self.assertIn("Theorem 5", report)
             self.assertIn("Proposition 8", report)
             self.assertIn("Proposition 9", report)
+            self.assertIn("Proposition 10", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)
 

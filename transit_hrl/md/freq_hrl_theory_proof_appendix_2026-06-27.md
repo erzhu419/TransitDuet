@@ -15,6 +15,7 @@ The target is not a universal convergence theorem. The target is a defensible se
 | Theorem 7: Projected Primal-Dual Leakage Updates Control Average Excess | formalized_statement | For bounded projected dual variables and bounded constraint samples, the standard projected-subgradient bookkeeping term for average constraint excess is O(1 / sqrt(T)) when the dual step is chosen on the 1 / sqrt(T) scale. | Dual PPO validation reports leakage budget, multiplier direction, and no-tradeoff status. | 3 | This is a constraint-control argument for the multiplier path. It is not a global convergence theorem for nonconvex actor-critic training. |
 | Proposition 8: Leakage No-Tradeoff Requires Positive Slack | formalized_statement | A leakage-constrained Freq-HRL variant can claim no-tradeoff only when its paired task advantage exceeds the leakage shaping budget and any consumed constraint slack on the same validation domain. | Leakage no-tradeoff matrices must report drift reduction and task noninferiority on the same native or trading domain. | 3 | This is only a sufficient condition. If the margin is nonpositive, empirical no-tradeoff may still occur, but it must be supported by paired CIs rather than by this bookkeeping argument alone. |
 | Proposition 9: Stress-Generalization Claims Are Intersection Claims | formalized_statement | A global stress-generalization claim over a pre-registered set of regimes is supported only if every required regime has paired evidence for the stated metric; otherwise the valid claim is the intersection of regimes that pass the evidence gate. | The unified matrix C9 lists required, supported, missing, and not-supported pressure regimes. | 3 | This proposition is a reporting rule rather than a statistical power theorem. It prevents overclaiming but does not decide how many seeds are needed within each regime. |
+| Proposition 10: Causal Responsibility Transfer Preserves Nominal Action | formalized_statement | A lower LF estimate available before an upper boundary can be added to the upper contribution and subtracted from every lower contribution in that macro interval without changing their summed nominal action. | MuJoCo v10 audits raw/responsibility actions, transfer saturation, and reconstruction RMS on every held-out path. | 3 | This is fixed-output mechanism invariance; retrained policies still require paired reward and leakage validation. |
 
 ## Suggested Assumptions
 
@@ -22,6 +23,7 @@ A1. The exogenous process admits a causal approximate band decomposition with bo
 A2. The upper action affects low-frequency plan variables more directly than high-frequency residual dynamics.
 A3. The lower action affects high-frequency correction more directly than long-horizon plan variables, up to measurable leakage.
 A4. Paired experiment seeds or source windows are exchangeable enough for direction-aware CI gates.
+A5. Responsibility transfer uses only pre-boundary lower history and applies one effective transfer equal-and-oppositely to upper and lower contributions.
 
 ## Proof Strategy
 
