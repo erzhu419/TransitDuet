@@ -13,6 +13,7 @@ from freq_hrl.domains.mujoco import (
     deterministic_actuation_disturbance,
 )
 from freq_hrl.experiments.mujoco.control_validation import (
+    _with_explicit_bootstrap,
     capacity_matched_flat_hidden_dim,
     environment_dimensions,
     rollout_hierarchical,
@@ -20,6 +21,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     write_cell,
     _hierarchical_model,
 )
+from freq_hrl.rl import JointTrajectoryBatch
 
 
 def mujoco_available() -> bool:
@@ -35,6 +37,23 @@ def mujoco_available() -> bool:
 
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
+    def test_flat_batch_bootstrap_does_not_require_cost_fields(self):
+        batch = JointTrajectoryBatch(
+            state=np.zeros((2, 3), dtype=np.float32),
+            action=np.zeros((2, 1), dtype=np.float32),
+            reward=np.ones(2, dtype=np.float32),
+            done=np.asarray([0.0, 1.0], dtype=np.float32),
+            old_logp=np.zeros(2, dtype=np.float32),
+            old_value=np.asarray([0.25, 0.5], dtype=np.float32),
+        )
+        bootstrapped = _with_explicit_bootstrap(
+            batch,
+            boundary_next_values=[0.75],
+            boundary_terminals=[0.0],
+        )
+        np.testing.assert_allclose(bootstrapped.next_value, [0.5, 0.75])
+        np.testing.assert_allclose(bootstrapped.terminal, [0.0, 0.0])
+
     def test_causal_bands_are_invariant_to_future_noise(self):
         prefix = np.asarray([[0.0, 1.0], [0.5, 0.5], [1.0, -0.5]])
 

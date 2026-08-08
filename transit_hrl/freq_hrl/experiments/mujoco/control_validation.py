@@ -194,12 +194,15 @@ def _with_explicit_bootstrap(
             boundary_indices, boundary_next_cost_values
         ):
             next_cost_values[int(index)] = float(next_cost_value)
-    return replace(
-        level,
-        next_value=next_values,
-        terminal=terminals,
-        next_cost_value=next_cost_values,
-    )
+    replacement = {
+        "next_value": next_values,
+        "terminal": terminals,
+    }
+    if hasattr(level, "next_cost_value"):
+        replacement["next_cost_value"] = next_cost_values
+    elif next_cost_values is not None:
+        raise TypeError("trajectory type does not support cost bootstrap")
+    return replace(level, **replacement)
 
 
 def _mlp_count(in_dim: int, out_dim: int, hidden_dim: int) -> int:
