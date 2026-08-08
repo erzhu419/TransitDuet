@@ -15,10 +15,15 @@ submission-ready. Only a successful independent confirmation decision may do
 that, after the paper manifest is separately and explicitly updated.
 
 The frozen implementation source is commit
-`ae745773f446d2d03c63e71cfcfd47258d2f316f`. The preregistered development
-screen is `protocol_v6_engineering_ep40_s4_e4_v1`: 12 locked configs, four
+`95f406a49fabd075014ee6eeb33d3309d2f0c475`. The preregistered development
+screen is `protocol_v6_engineering_ep40_s4_e4_v2`: 12 locked configs, four
 training seeds (`503,521,541,557`), four direct evaluation seeds
 (`41011,41017,41023,41039`), and 40 training episodes.
+
+The `protocol_v6_engineering_ep40_s4_e4_v1` scheduler attempt (`t72782` to
+`t72829`) is invalid transport evidence: 30 tasks failed and 18 were cancelled
+before training because the isolated remote environment had no `git` binary.
+No artifact from that run name may enter a V6 matrix.
 
 ## Locked implementation repairs
 
