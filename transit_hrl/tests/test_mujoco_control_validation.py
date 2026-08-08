@@ -276,12 +276,14 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v8_trajectory_safe_selector",
+            "freq_hrl_mujoco_shared_core_v9_role_capacity_and_safe_selector",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
-        self.assertEqual(payload["upper_action_scale"], 0.35)
+        self.assertEqual(payload["upper_action_scale"], 1.0)
         self.assertEqual(payload["lower_action_scale"], 1.0)
+        self.assertEqual(payload["role_capacity_status"], "symmetric")
+        self.assertEqual(payload["upper_to_lower_action_capacity_ratio"], 1.0)
         self.assertEqual(
             payload["lower_constraint_update_mode"],
             "reward_guarded_adam_projection",
@@ -299,6 +301,14 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             1.0,
         )
         self.assertEqual(payload["evaluation_episode_horizon"], 32)
+        for metric in (
+            "UpperActionRMS",
+            "LowerActionRMS",
+            "UpperActionEnergyShare",
+            "AdditiveActionClipRate",
+        ):
+            self.assertIn(metric, rows[0])
+            self.assertTrue(np.isfinite(rows[0][metric]))
         self.assertEqual(
             payload["bootstrap_contract"],
             "explicit_reward_and_cost_next_value_with_separate_trace_boundary_"

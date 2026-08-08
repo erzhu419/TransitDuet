@@ -42,7 +42,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v8_trajectory_safe_selector"
+    "freq_hrl_mujoco_shared_core_v9_role_capacity_and_safe_selector"
 )
 METHODS = (
     "freq_hrl",
@@ -329,6 +329,9 @@ def _episode_row(
         upper_hf_window=8,
         lower_lf_window=32,
     ).compute(upper, lower)
+    upper_energy = float(np.mean(np.square(upper)))
+    lower_energy = float(np.mean(np.square(lower)))
+    responsibility_energy = upper_energy + lower_energy
     smoothness = (
         float(np.mean(np.square(np.diff(executed, axis=0))))
         if executed.shape[0] > 1 else 0.0
@@ -355,6 +358,15 @@ def _episode_row(
         "control_reward_sum": float(np.sum(control_rewards)),
         "action_energy": float(np.mean(np.square(executed))),
         "action_smoothness": smoothness,
+        "UpperActionRMS": float(np.sqrt(upper_energy)),
+        "LowerActionRMS": float(np.sqrt(lower_energy)),
+        "UpperActionEnergyShare": float(
+            upper_energy / responsibility_energy
+            if responsibility_energy > 0.0 else 0.0
+        ),
+        "AdditiveActionClipRate": float(np.mean(
+            np.abs(upper + lower) > 1.0
+        )),
         "UpperHFPower": float(leakage["UpperHFPower"]),
         "UpperHFPowerAbs": float(leakage["UpperHFPowerAbs"]),
         "LowerLFDrift": float(leakage["LowerLFDrift"]),
@@ -390,7 +402,7 @@ def rollout_hierarchical(
     frequency_routing: bool,
     leakage_constraint: bool,
     sample: bool,
-    upper_action_scale: float = 0.35,
+    upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
     lower_lf_alpha: float = 0.04,
     lower_lf_rms_budget: float = 0.05,
@@ -849,6 +861,10 @@ SUMMARY_KEYS = [
     "control_reward_sum",
     "action_energy",
     "action_smoothness",
+    "UpperActionRMS",
+    "LowerActionRMS",
+    "UpperActionEnergyShare",
+    "AdditiveActionClipRate",
     "UpperHFPower",
     "UpperHFPowerAbs",
     "LowerLFDrift",
@@ -1170,7 +1186,7 @@ def train_mujoco_method(
     checkpoint_evaluation_interval: int = 4,
     training_disturbance_modes: Iterable[str] | None = None,
     evaluation_disturbance_modes: Iterable[str] | None = None,
-    upper_action_scale: float = 0.35,
+    upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     code_revision: str = "",
@@ -1638,6 +1654,15 @@ def train_mujoco_method(
         "upper_to_lower_action_capacity_ratio": float(
             upper_action_scale / lower_action_scale
         ),
+        "role_capacity_status": (
+            "symmetric"
+            if np.isclose(upper_action_scale, lower_action_scale)
+            else (
+                "upper_limited"
+                if upper_action_scale < lower_action_scale
+                else "lower_limited"
+            )
+        ),
         "action_capacity_contract": (
             "upper_anchor_and_lower_residual_unit_box_scales_reported_"
             "separately_v1"
@@ -1757,7 +1782,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
-    parser.add_argument("--upper-action-scale", type=float, default=0.35)
+    parser.add_argument("--upper-action-scale", type=float, default=1.0)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument(
         "--lower-constraint-update-mode",
