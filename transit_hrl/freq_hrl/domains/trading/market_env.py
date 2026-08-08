@@ -110,6 +110,7 @@ class PortfolioExecutionEnv:
         if self.done:
             return self.state(), 0.0, True, {"reason": "done"}
         residual_order = np.zeros(self.n_assets, dtype=np.float64)
+        hf_overlay_rms_cap: float | None = None
         if isinstance(execution_speed, Mapping):
             residual_order = np.asarray(
                 execution_speed.get("residual_order", residual_order),
@@ -117,6 +118,16 @@ class PortfolioExecutionEnv:
             ).reshape(-1)
             if residual_order.size != self.n_assets:
                 residual_order = np.resize(residual_order, self.n_assets)
+            requested_cap = execution_speed.get("hf_overlay_rms_cap")
+            if requested_cap is not None:
+                hf_overlay_rms_cap = float(requested_cap)
+                if (
+                    not np.isfinite(hf_overlay_rms_cap)
+                    or hf_overlay_rms_cap <= 0.0
+                ):
+                    raise ValueError(
+                        "hf_overlay_rms_cap must be positive and finite"
+                    )
             execution_speed = execution_speed.get("execution_speed", 1.0)
 
         alpha = np.asarray(execution_speed, dtype=np.float64)
@@ -142,10 +153,31 @@ class PortfolioExecutionEnv:
             old_position + requested_tracking_trade
         )
         requested_trade = requested_tracking_trade + residual_order
-        self.position = capped_position(old_position + requested_trade)
+        unconstrained_position = capped_position(old_position + requested_trade)
+        unconstrained_overlay = unconstrained_position - tracking_only_position
+        overlay_rms_before_projection = float(
+            np.sqrt(np.mean(np.square(unconstrained_overlay)))
+        )
+        overlay_projection_scale = 1.0
+        if (
+            hf_overlay_rms_cap is not None
+            and overlay_rms_before_projection > hf_overlay_rms_cap
+        ):
+            overlay_projection_scale = float(
+                hf_overlay_rms_cap / overlay_rms_before_projection
+            )
+        # Both endpoints satisfy the gross constraint, so their convex
+        # combination is feasible and preserves the exact RMS projection.
+        self.position = (
+            tracking_only_position
+            + overlay_projection_scale * unconstrained_overlay
+        )
         realized_trade = self.position - old_position
         realized_tracking_trade = tracking_only_position - old_position
         hf_overlay_position_effect = self.position - tracking_only_position
+        overlay_rms_after_projection = float(
+            np.sqrt(np.mean(np.square(hf_overlay_position_effect)))
+        )
 
         ret = self.returns[self.t]
         market_position = (
@@ -272,6 +304,15 @@ class PortfolioExecutionEnv:
             "tracking_only_position": tracking_only_position.copy(),
             "realized_tracking_trade": realized_tracking_trade.copy(),
             "hf_overlay_position_effect": hf_overlay_position_effect.copy(),
+            "hf_overlay_rms_cap": (
+                0.0 if hf_overlay_rms_cap is None else hf_overlay_rms_cap
+            ),
+            "hf_overlay_rms_before_projection": (
+                overlay_rms_before_projection
+            ),
+            "hf_overlay_rms_after_projection": overlay_rms_after_projection,
+            "hf_overlay_projection_scale": overlay_projection_scale,
+            "hf_overlay_projected": bool(overlay_projection_scale < 1.0),
             "tracking_portfolio_return": tracking_portfolio_return,
             "tracking_transaction_cost": tracking_transaction_cost,
             "tracking_inventory_drift_cost": tracking_inventory_drift_cost,

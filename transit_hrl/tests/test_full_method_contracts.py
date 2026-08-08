@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+from freq_hrl.core import LeakageRegularizer
 from freq_hrl.domains.trading import (
     PortfolioExecutionConfig,
     PortfolioExecutionEnv,
@@ -501,6 +502,68 @@ class FullMethodContractTest(unittest.TestCase):
         self.assertAlmostEqual(info["tracking_task_reward"], 0.0)
         self.assertAlmostEqual(info["tracking_hf_task_reconstruction_error"], 0.0)
         self.assertAlmostEqual(reward, 0.02)
+
+    def test_hf_overlay_projection_enforces_realized_rms_budget(self):
+        env = PortfolioExecutionEnv(
+            np.asarray([[0.10, -0.05]], dtype=np.float64),
+            config=PortfolioExecutionConfig(
+                transaction_cost_bps=0.0,
+                slippage_bps=0.0,
+                volume_impact_bps=0.0,
+                inventory_drift_penalty=0.0,
+                mark_to_market_timing="post_trade",
+            ),
+        )
+        env.set_target([0.3, -0.2])
+        _, _, _, info = env.lower_step({
+            "execution_speed": [0.5, 0.5],
+            "residual_order": [0.4, -0.2],
+            "hf_overlay_rms_cap": 0.05,
+        })
+        self.assertTrue(info["hf_overlay_projected"])
+        self.assertLess(info["hf_overlay_projection_scale"], 1.0)
+        self.assertGreater(info["hf_overlay_rms_before_projection"], 0.05)
+        self.assertAlmostEqual(
+            info["hf_overlay_rms_after_projection"], 0.05
+        )
+        self.assertLessEqual(np.sum(np.abs(info["position"])), 1.0)
+
+    def test_hf_overlay_projection_rejects_invalid_budget(self):
+        env = PortfolioExecutionEnv(np.zeros((1, 1), dtype=np.float64))
+        env.set_target([0.0])
+        with self.assertRaisesRegex(ValueError, "positive and finite"):
+            env.lower_step({
+                "execution_speed": [1.0],
+                "residual_order": [0.1],
+                "hf_overlay_rms_cap": 0.0,
+            })
+
+    def test_stepwise_hf_projection_implies_episode_lf_budget(self):
+        cap = 0.03
+        rng = np.random.default_rng(9)
+        env = PortfolioExecutionEnv(
+            np.zeros((48, 3), dtype=np.float64),
+            config=PortfolioExecutionConfig(
+                transaction_cost_bps=0.0,
+                slippage_bps=0.0,
+                inventory_drift_penalty=0.0,
+            ),
+        )
+        effects = []
+        for _ in range(48):
+            env.set_target(rng.uniform(-0.4, 0.4, size=3))
+            _, _, done, info = env.lower_step({
+                "execution_speed": rng.uniform(0.1, 1.0, size=3),
+                "residual_order": rng.normal(0.0, 0.2, size=3),
+                "hf_overlay_rms_cap": cap,
+            })
+            effects.append(info["hf_overlay_position_effect"])
+            if done:
+                break
+        leakage = LeakageRegularizer(lower_lf_window=24).compute(
+            np.zeros_like(effects), np.asarray(effects)
+        )
+        self.assertLessEqual(leakage["LowerLFDriftAbs"], cap * cap + 1e-12)
 
     def test_hf_counterfactual_includes_incremental_drawdown(self):
         env = PortfolioExecutionEnv(
