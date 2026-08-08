@@ -34,7 +34,7 @@ def args_fixture() -> argparse.Namespace:
         lower_lf_rms_budget=0.05,
         upper_action_scale=0.35,
         lower_action_scale=1.0,
-        lower_constraint_update_mode="reward_guarded_projection",
+        lower_constraint_update_mode="reward_guarded_adam_projection",
         checkpoint_smoothing_window=8,
         checkpoint_min_delta=1e-3,
         checkpoint_evaluation_interval=4,
@@ -96,7 +96,7 @@ class ScheduleurmMujocoPilotSubmitTest(unittest.TestCase):
         self.assertIn("--upper-action-scale 0.35", command)
         self.assertIn("--lower-action-scale 1.0", command)
         self.assertIn(
-            "--lower-constraint-update-mode reward_guarded_projection",
+            "--lower-constraint-update-mode reward_guarded_adam_projection",
             command,
         )
         self.assertNotIn("jtl110cpu", command)

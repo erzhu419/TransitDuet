@@ -21,6 +21,7 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     count_parameters,
 )
 from freq_hrl.rl.smdp_actor_critic import (
+    _reward_guarded_adam_step,
     _project_constraint_gradients,
     _reward_guarded_constraint_step,
 )
@@ -355,6 +356,76 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertAlmostEqual(float(parameter[0].item()), 0.0, places=6)
         self.assertGreater(float(parameter[1].item()), 0.0)
 
+    def test_reward_guarded_adam_candidate_beats_reward_only_candidate(self):
+        parameter = torch.nn.Parameter(torch.zeros(2))
+        optimizer = torch.optim.Adam([parameter], lr=0.1)
+
+        def reward_loss():
+            return (parameter[0] - 1.0).square()
+
+        def constraint_loss():
+            return (
+                (parameter[0] + 1.0).square()
+                + (parameter[1] - 1.0).square()
+            )
+
+        diagnostics = _reward_guarded_adam_step(
+            parameters=[parameter],
+            optimizer=optimizer,
+            reward_actor_loss_fn=reward_loss,
+            reward_guard_loss_fn=reward_loss,
+            constraint_loss_fn=constraint_loss,
+            constraint_scale=1.0,
+            max_grad_norm=10.0,
+            max_backtracks=4,
+            reward_tolerance=0.0,
+        )
+        self.assertEqual(diagnostics["gradient_conflict"], 1.0)
+        self.assertEqual(diagnostics["accepted"], 1.0)
+        self.assertLessEqual(diagnostics["reward_loss_delta"], 0.0)
+        self.assertLess(diagnostics["constraint_loss_delta"], 0.0)
+        self.assertGreater(float(parameter[0].item()), 0.0)
+        self.assertGreater(float(parameter[1].item()), 0.0)
+
+    def test_reward_guarded_adam_fallback_matches_reward_only_adam(self):
+        parameter = torch.nn.Parameter(torch.zeros(1))
+        reference = torch.nn.Parameter(torch.zeros(1))
+        optimizer = torch.optim.Adam([parameter], lr=0.1)
+        reference_optimizer = torch.optim.Adam([reference], lr=0.1)
+
+        def reward_loss():
+            return (parameter[0] - 1.0).square()
+
+        def constraint_loss():
+            return (parameter[0] + 1.0).square()
+
+        diagnostics = _reward_guarded_adam_step(
+            parameters=[parameter],
+            optimizer=optimizer,
+            reward_actor_loss_fn=reward_loss,
+            reward_guard_loss_fn=reward_loss,
+            constraint_loss_fn=constraint_loss,
+            constraint_scale=1.0,
+            max_grad_norm=10.0,
+            max_backtracks=4,
+            reward_tolerance=0.0,
+        )
+        reference_optimizer.zero_grad()
+        (reference[0] - 1.0).square().backward()
+        reference_optimizer.step()
+        self.assertEqual(diagnostics["gradient_conflict"], 1.0)
+        self.assertEqual(diagnostics["accepted"], 0.0)
+        torch.testing.assert_close(parameter, reference)
+        self.assertEqual(
+            optimizer.state_dict()["state"].keys(),
+            reference_optimizer.state_dict()["state"].keys(),
+        )
+        for key, value in optimizer.state_dict()["state"][0].items():
+            torch.testing.assert_close(
+                value,
+                reference_optimizer.state_dict()["state"][0][key],
+            )
+
     def test_reward_guarded_constraint_mode_runs_and_reports_diagnostics(self):
         config = SMDPPPOConfig(
             upper_state_dim=3,
@@ -365,7 +436,7 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             epochs=1,
             minibatch_size=8,
             lower_lambda_init=1.0,
-            lower_constraint_update_mode="reward_guarded_projection",
+            lower_constraint_update_mode="reward_guarded_adam_projection",
             lower_constraint_max_backtracks=3,
         )
         model = FrequencySeparatedActorCriticPPO(config)

@@ -42,7 +42,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v6_reward_guarded_projection"
+    "freq_hrl_mujoco_shared_core_v7_reward_guarded_adam_projection"
 )
 METHODS = (
     "freq_hrl",
@@ -861,7 +861,7 @@ def _hierarchical_model(
     hidden_dim: int,
     learning_rate: float,
     leakage_constraint: bool,
-    lower_constraint_update_mode: str = "reward_guarded_projection",
+    lower_constraint_update_mode: str = "reward_guarded_adam_projection",
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -932,7 +932,7 @@ def train_mujoco_method(
     evaluation_disturbance_modes: Iterable[str] | None = None,
     upper_action_scale: float = 0.35,
     lower_action_scale: float = 1.0,
-    lower_constraint_update_mode: str = "reward_guarded_projection",
+    lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -961,6 +961,7 @@ def train_mujoco_method(
     if str(lower_constraint_update_mode) not in {
         "scalarized",
         "reward_guarded_projection",
+        "reward_guarded_adam_projection",
     }:
         raise ValueError("unknown lower constraint update mode")
     observation_dim, action_dim = environment_dimensions(
@@ -1310,8 +1311,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument(
         "--lower-constraint-update-mode",
-        choices=("scalarized", "reward_guarded_projection"),
-        default="reward_guarded_projection",
+        choices=(
+            "scalarized",
+            "reward_guarded_projection",
+            "reward_guarded_adam_projection",
+        ),
+        default="reward_guarded_adam_projection",
     )
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)

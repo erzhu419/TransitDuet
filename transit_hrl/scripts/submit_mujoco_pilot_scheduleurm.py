@@ -33,7 +33,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 PILOT_OPTIMIZER_SEEDS = (35207, 35211, 35227)
 PREFLIGHT_OPTIMIZER_SEED = 35233
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-shared-core-pilot-v6"
+SIGNATURE_VERSION = "mujoco-shared-core-pilot-v7"
 SUBMIT_SCRIPT_PATH = Path(__file__).resolve()
 
 
@@ -290,8 +290,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
     parser.add_argument(
         "--lower-constraint-update-mode",
-        choices=("scalarized", "reward_guarded_projection"),
-        default="reward_guarded_projection",
+        choices=(
+            "scalarized",
+            "reward_guarded_projection",
+            "reward_guarded_adam_projection",
+        ),
+        default="reward_guarded_adam_projection",
     )
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)

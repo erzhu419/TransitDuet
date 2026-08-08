@@ -234,7 +234,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v6_reward_guarded_projection",
+            "freq_hrl_mujoco_shared_core_v7_reward_guarded_adam_projection",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -242,7 +242,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["lower_action_scale"], 1.0)
         self.assertEqual(
             payload["lower_constraint_update_mode"],
-            "reward_guarded_projection",
+            "reward_guarded_adam_projection",
         )
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)

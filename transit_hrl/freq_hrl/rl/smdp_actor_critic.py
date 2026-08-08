@@ -9,6 +9,7 @@ for every lower transition.
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from typing import Any, Iterable
 
@@ -24,6 +25,7 @@ from .dual_actor_critic import BernoulliActor, GaussianActor, ValueNet
 LOWER_CONSTRAINT_UPDATE_MODES = (
     "scalarized",
     "reward_guarded_projection",
+    "reward_guarded_adam_projection",
 )
 
 
@@ -175,6 +177,144 @@ def _reward_guarded_constraint_step(
     with torch.no_grad():
         for parameter, original in zip(params, originals):
             parameter.copy_(original)
+    diagnostics["backtracks"] = float(attempts)
+    return diagnostics
+
+
+def _reward_guarded_adam_step(
+    *,
+    parameters: Iterable[torch.nn.Parameter],
+    optimizer: torch.optim.Optimizer,
+    reward_actor_loss_fn: Any,
+    reward_guard_loss_fn: Any,
+    constraint_loss_fn: Any,
+    constraint_scale: float,
+    max_grad_norm: float,
+    max_backtracks: int,
+    reward_tolerance: float,
+) -> dict[str, float]:
+    """Choose a projected Adam candidate only if it beats reward-only Adam."""
+
+    params = [parameter for parameter in parameters if parameter.requires_grad]
+    reward_actor_loss = reward_actor_loss_fn()
+    reward_guard_loss = reward_guard_loss_fn()
+    constraint_loss = constraint_loss_fn()
+    base_gradients = torch.autograd.grad(
+        reward_actor_loss,
+        params,
+        retain_graph=True,
+        allow_unused=True,
+    )
+    reward_gradients = torch.autograd.grad(
+        reward_guard_loss,
+        params,
+        retain_graph=True,
+        allow_unused=True,
+    )
+    constraint_gradients = torch.autograd.grad(
+        constraint_loss,
+        params,
+        allow_unused=True,
+    )
+    projected, diagnostics = _project_constraint_gradients(
+        reward_gradients,
+        constraint_gradients,
+    )
+    projected_tensors = [
+        gradient for gradient in projected if gradient is not None
+    ]
+    projected_norm = (
+        float(torch.sqrt(sum(
+            torch.sum(gradient.square())
+            for gradient in projected_tensors
+        )).detach().cpu().item())
+        if projected_tensors else 0.0
+    )
+    diagnostics.update({
+        "projected_gradient_norm": projected_norm,
+        "accepted": 0.0,
+        "backtracks": 0.0,
+        "reward_loss_delta": 0.0,
+        "constraint_loss_delta": 0.0,
+    })
+    original_parameters = [
+        parameter.detach().clone() for parameter in params
+    ]
+    original_optimizer = copy.deepcopy(optimizer.state_dict())
+
+    def restore(
+        values: list[torch.Tensor], optimizer_state: dict[str, Any]
+    ) -> None:
+        with torch.no_grad():
+            for parameter, value in zip(params, values):
+                parameter.copy_(value)
+        optimizer.load_state_dict(copy.deepcopy(optimizer_state))
+        optimizer.zero_grad(set_to_none=True)
+
+    def apply_gradients(
+        gradients: list[torch.Tensor | None],
+    ) -> tuple[list[torch.Tensor], dict[str, Any], float, float]:
+        optimizer.zero_grad(set_to_none=True)
+        for parameter, gradient in zip(params, gradients):
+            parameter.grad = (
+                None if gradient is None else gradient.detach().clone()
+            )
+        nn.utils.clip_grad_norm_(params, max_norm=float(max_grad_norm))
+        optimizer.step()
+        with torch.no_grad():
+            reward_value = float(
+                reward_guard_loss_fn().detach().cpu().item()
+            )
+            constraint_value = float(
+                constraint_loss_fn().detach().cpu().item()
+            )
+        return (
+            [parameter.detach().clone() for parameter in params],
+            copy.deepcopy(optimizer.state_dict()),
+            reward_value,
+            constraint_value,
+        )
+
+    restore(original_parameters, original_optimizer)
+    baseline = apply_gradients(list(base_gradients))
+    if projected_norm <= 1e-12:
+        return diagnostics
+
+    attempts = max(0, int(max_backtracks)) + 1
+    for attempt in range(attempts):
+        scale = float(constraint_scale) * (0.5 ** attempt)
+        combined = [
+            (
+                None
+                if base_gradient is None and constraint_gradient is None
+                else (
+                    torch.zeros_like(constraint_gradient)
+                    if base_gradient is None else base_gradient
+                ) + scale * (
+                    torch.zeros_like(base_gradient)
+                    if constraint_gradient is None else constraint_gradient
+                )
+            )
+            for base_gradient, constraint_gradient in zip(
+                base_gradients, projected
+            )
+        ]
+        restore(original_parameters, original_optimizer)
+        candidate = apply_gradients(combined)
+        reward_delta = candidate[2] - baseline[2]
+        constraint_delta = candidate[3] - baseline[3]
+        if (
+            reward_delta <= float(reward_tolerance)
+            and constraint_delta <= 1e-12
+        ):
+            diagnostics.update({
+                "accepted": 1.0,
+                "backtracks": float(attempt),
+                "reward_loss_delta": reward_delta,
+                "constraint_loss_delta": constraint_delta,
+            })
+            return diagnostics
+    restore(baseline[0], baseline[1])
     diagnostics["backtracks"] = float(attempts)
     return diagnostics
 
@@ -808,8 +948,9 @@ class FrequencySeparatedActorCriticPPO:
             LOWER_CONSTRAINT_UPDATE_MODES
         ):
             raise ValueError(
-                "lower_constraint_update_mode must be scalarized or "
-                "reward_guarded_projection"
+                "lower_constraint_update_mode must be scalarized, "
+                "reward_guarded_projection, or "
+                "reward_guarded_adam_projection"
             )
         if (
             not np.isfinite(float(config.lower_constraint_step_scale))
@@ -1505,28 +1646,27 @@ class FrequencySeparatedActorCriticPPO:
                     "constraint_loss_delta": 0.0,
                     "attempted": 0.0,
                 }
+                constraint_update_mode = str(
+                    cfg.lower_constraint_update_mode
+                )
                 guarded_update = bool(
                     level == "lower"
-                    and str(cfg.lower_constraint_update_mode)
-                    == "reward_guarded_projection"
+                    and constraint_update_mode in {
+                        "reward_guarded_projection",
+                        "reward_guarded_adam_projection",
+                    }
                     and cost_adv_t is not None
                     and cost_actor_active
                     and self.constraint_lambda > 0.0
                 )
                 if guarded_update:
-                    reward_actor_loss = -reward_surrogate - (
-                        entropy_coef * entropy_mean
-                    )
-                    actor_optimizer.zero_grad()
-                    reward_actor_loss.backward()
-                    nn.utils.clip_grad_norm_(
-                        actor.parameters(), max_norm=float(cfg.max_grad_norm)
-                    )
-                    actor_optimizer.step()
-
-                    def reward_loss_fn() -> torch.Tensor:
-                        current_logp, _ = actor.log_prob_entropy(
-                            state[idx], action[idx]
+                    def current_surrogates() -> tuple[
+                        torch.Tensor, torch.Tensor, torch.Tensor
+                    ]:
+                        current_logp, current_entropy = (
+                            actor.log_prob_entropy(
+                                state[idx], action[idx]
+                            )
                         )
                         current_ratio = torch.exp(
                             (current_logp - old_logp[idx]).clamp(-20.0, 20.0)
@@ -1540,44 +1680,83 @@ class FrequencySeparatedActorCriticPPO:
                             current_ratio * reward_adv_t[idx],
                             current_clipped * reward_adv_t[idx],
                         ).mean()
-                        return -current_reward
-
-                    def constraint_loss_fn() -> torch.Tensor:
-                        current_logp, _ = actor.log_prob_entropy(
-                            state[idx], action[idx]
-                        )
-                        current_ratio = torch.exp(
-                            (current_logp - old_logp[idx]).clamp(-20.0, 20.0)
-                        )
-                        current_clipped = torch.clamp(
-                            current_ratio,
-                            1.0 - cfg.clip_ratio,
-                            1.0 + cfg.clip_ratio,
-                        )
                         current_cost = torch.maximum(
                             current_ratio * cost_adv_t[idx],
                             current_clipped * cost_adv_t[idx],
                         ).mean()
+                        return (
+                            current_reward,
+                            current_entropy.mean(),
+                            current_cost,
+                        )
+
+                    def reward_actor_loss_fn() -> torch.Tensor:
+                        current_reward, current_entropy, _ = (
+                            current_surrogates()
+                        )
+                        return -current_reward - (
+                            entropy_coef * current_entropy
+                        )
+
+                    def reward_guard_loss_fn() -> torch.Tensor:
+                        current_reward, _, _ = current_surrogates()
+                        return -current_reward
+
+                    def constraint_loss_fn() -> torch.Tensor:
+                        _, _, current_cost = current_surrogates()
                         return float(self.constraint_lambda) * current_cost
 
-                    guarded_diagnostics.update(
-                        _reward_guarded_constraint_step(
-                            parameters=actor.parameters(),
-                            reward_loss_fn=reward_loss_fn,
-                            constraint_loss_fn=constraint_loss_fn,
-                            step_size=(
-                                float(actor_optimizer.param_groups[0]["lr"])
-                                * float(cfg.lower_constraint_step_scale)
-                            ),
-                            max_grad_norm=float(cfg.max_grad_norm),
-                            max_backtracks=int(
-                                cfg.lower_constraint_max_backtracks
-                            ),
-                            reward_tolerance=float(
-                                cfg.lower_constraint_reward_tolerance
-                            ),
+                    if (
+                        constraint_update_mode
+                        == "reward_guarded_adam_projection"
+                    ):
+                        guarded_diagnostics.update(
+                            _reward_guarded_adam_step(
+                                parameters=actor.parameters(),
+                                optimizer=actor_optimizer,
+                                reward_actor_loss_fn=reward_actor_loss_fn,
+                                reward_guard_loss_fn=reward_guard_loss_fn,
+                                constraint_loss_fn=constraint_loss_fn,
+                                constraint_scale=float(
+                                    cfg.lower_constraint_step_scale
+                                ),
+                                max_grad_norm=float(cfg.max_grad_norm),
+                                max_backtracks=int(
+                                    cfg.lower_constraint_max_backtracks
+                                ),
+                                reward_tolerance=float(
+                                    cfg.lower_constraint_reward_tolerance
+                                ),
+                            )
                         )
-                    )
+                    else:
+                        actor_optimizer.zero_grad()
+                        reward_actor_loss_fn().backward()
+                        nn.utils.clip_grad_norm_(
+                            actor.parameters(),
+                            max_norm=float(cfg.max_grad_norm),
+                        )
+                        actor_optimizer.step()
+                        guarded_diagnostics.update(
+                            _reward_guarded_constraint_step(
+                                parameters=actor.parameters(),
+                                reward_loss_fn=reward_guard_loss_fn,
+                                constraint_loss_fn=constraint_loss_fn,
+                                step_size=(
+                                    float(
+                                        actor_optimizer.param_groups[0]["lr"]
+                                    )
+                                    * float(cfg.lower_constraint_step_scale)
+                                ),
+                                max_grad_norm=float(cfg.max_grad_norm),
+                                max_backtracks=int(
+                                    cfg.lower_constraint_max_backtracks
+                                ),
+                                reward_tolerance=float(
+                                    cfg.lower_constraint_reward_tolerance
+                                ),
+                            )
+                        )
                     guarded_diagnostics["attempted"] = 1.0
                 else:
                     actor_optimizer.zero_grad()
