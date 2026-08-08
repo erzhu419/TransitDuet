@@ -85,6 +85,7 @@ from lower.lifecycle import LowerEpisodeLifecycle
 from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
 from lower.holding_externality import LoadWeightedHoldingPenalty
+from lower.causal_holding_guard import CausalHoldingActionGuard
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
 from randomness import RandomnessContract
@@ -220,6 +221,10 @@ class DiagnosticLog:
         'randomness_fingerprint_sha256',
         'avg_wait_min', 'avg_wait_observed_min',
         'restricted_wait_horizon_min',
+        'avg_in_vehicle_observed_min',
+        'restricted_in_vehicle_horizon_min',
+        'avg_total_journey_observed_min',
+        'restricted_total_journey_horizon_min',
         'passengers_generated', 'passengers_unserved',
         'passenger_unserved_rate',
         'headway_sample_count', 'trips_unlaunched', 'trip_launch_rate',
@@ -233,7 +238,11 @@ class DiagnosticLog:
         'fleet_capacity', 'fleet_ready_up', 'fleet_ready_down',
         'fleet_denied_dispatch_events', 'fleet_denied_trips',
         'fleet_readiness_delay_mean_s', 'fleet_readiness_delay_max_s',
-        'holding_vehicle_seconds', 'holding_passenger_seconds',
+        'fleet_denied_trip_rate',
+        'holding_vehicle_seconds',
+        'holding_vehicle_seconds_per_launched_trip',
+        'holding_passenger_seconds',
+        'holding_passenger_min_per_generated',
         'invalid_headway_decisions_masked',
         'lower_observation_contract', 'headway_reward_mode',
         'frequency_observation_source', 'lower_observation_ledger_hash',
@@ -250,6 +259,9 @@ class DiagnosticLog:
         'lower_reward_mean', 'lower_reward_std',
         'lower_load_hold_penalty_mean', 'lower_load_hold_penalty_max',
         'lower_load_ratio_mean', 'lower_normalized_person_delay_mean',
+        'lower_causal_guard_enabled', 'lower_causal_guard_active_mean',
+        'lower_causal_guard_limit_mean_s',
+        'lower_causal_guard_adjustment_mean_s',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
         'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
@@ -273,6 +285,8 @@ class DiagnosticLog:
         'upper_gap_credit_mean', 'upper_gap_credit_std',
         'upper_interval_reward_mean', 'upper_interval_reward_sum',
         'upper_interval_wait_cost_sum',
+        'upper_interval_onboard_cost_sum',
+        'upper_interval_dispatch_backlog_cost_sum',
         'upper_interval_headway_cost_sum',
         'upper_interval_fleet_cost_sum',
         'upper_interval_coverage_mean',
@@ -372,6 +386,10 @@ class DiagnosticLog:
         'upper_plan_target_mean', 'upper_plan_target_std',
         'upper_plan_decisions', 'upper_plan_reuse_ratio',
         'upper_plan_projection_mode', 'upper_interval_wait_ownership',
+        'upper_plan_headway_budget_mode',
+        'upper_plan_raw_delta_mean_s',
+        'upper_plan_projected_delta_mean_s',
+        'upper_plan_projected_delta_sum_abs_mean_s',
         'terminal_launch_shift_mean', 'terminal_launch_shift_std',
         'terminal_shift_cap_mean', 'terminal_shift_cap_max',
         'terminal_shift_min_mean', 'terminal_shift_min_min',
@@ -1149,7 +1167,8 @@ class TransitDuetV2Runner:
         self._current_N_fleet = self.N_fleet_default  # set per-episode in elastic mode
         freq_cfg = config.get('frequency', {})
         self.upper_state_dim = upper_cfg.get('state_dim', 10)
-        if freq_cfg.get('enable', False):
+        if (freq_cfg.get('enable', False)
+                or self.protocol_version == 'freqduet-eval-v5'):
             self.upper_state_dim = self.env.upper_state_dim
         freq_holdfb_cfg = freq_cfg.get('hold_feedback', {}) or {}
         self.freq_holdfb_enable = bool(freq_holdfb_cfg.get('enable', False))
@@ -1929,6 +1948,8 @@ class TransitDuetV2Runner:
             observation_mode=self.lower_observation_contract,
             context_features=self.env.lower_context_features,
         )
+        self.lower_causal_holding_guard = CausalHoldingActionGuard.from_config(
+            lower_cfg.get('causal_holding_guard', {}))
         self.env.lower_observation_contract = self.lower_observation_contract
         self.env.headway_reward_mode = self.lower_headway_reward_mode
         self.lower_state_encoder = None
@@ -2218,6 +2239,9 @@ class TransitDuetV2Runner:
         self._ep_headway_value_planner_feature_norms = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
+        self._ep_upper_plan_raw_delta_means = []
+        self._ep_upper_plan_projected_delta_means = []
+        self._ep_upper_plan_projected_delta_sums = []
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
@@ -2461,6 +2485,9 @@ class TransitDuetV2Runner:
         self._ep_lower_context_gate_values = []
         self._ep_lower_action_bins_gate_values = []
         self._ep_lower_rewards = []     # all lower rewards this episode
+        self._ep_lower_causal_guard_active = []
+        self._ep_lower_causal_guard_limits = []
+        self._ep_lower_causal_guard_adjustments = []
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
@@ -2470,6 +2497,8 @@ class TransitDuetV2Runner:
         self._ep_upper_reliability_rewards = []
         self._ep_upper_interval_rewards = []
         self._ep_upper_interval_wait_costs = []
+        self._ep_upper_interval_onboard_costs = []
+        self._ep_upper_interval_dispatch_backlog_costs = []
         self._ep_upper_interval_headway_costs = []
         self._ep_upper_interval_fleet_costs = []
         self._ep_upper_interval_coverages = []
@@ -5442,7 +5471,35 @@ class TransitDuetV2Runner:
             return np.asarray([0.0], dtype=np.float32)
         action = self._lower_policy_action(
             obs, last_action=last_action, deterministic=deterministic)
+        action = self._apply_causal_holding_guard(action, bus)
         return self._apply_lower_fleet_noharm(action, bus)
+
+    def _apply_causal_holding_guard(self, action, bus=None):
+        requested = self._lower_action_scalar(action)
+        evidence_valid = bool(
+            bus is not None
+            and getattr(bus, 'forward_headway_source', None) == 'arrival_event')
+        result = self.lower_causal_holding_guard.evaluate(
+            requested,
+            forward_headway_s=(
+                getattr(bus, 'forward_headway', None) if bus is not None else None),
+            target_headway_s=(
+                getattr(bus, '_target_headway', None) if bus is not None else None),
+            evidence_valid=evidence_valid,
+        )
+        allowed = float(result.allowed_s)
+        if (self.lower_action_bins is not None
+                and not self.lower_action_bins_gate_enabled):
+            feasible = self.lower_action_bins[
+                self.lower_action_bins <= allowed + 1e-7]
+            allowed = float(feasible[-1]) if feasible.size else 0.0
+        adjusted = np.asarray([allowed], dtype=np.float32)
+        self._ep_lower_causal_guard_active.append(
+            1.0 if requested - allowed > 1e-9 else 0.0)
+        self._ep_lower_causal_guard_limits.append(float(result.limit_s))
+        self._ep_lower_causal_guard_adjustments.append(
+            max(0.0, requested - allowed))
+        return adjusted
 
     def _record_lower_transition(
             self, *, key, raw_state, raw_next_state, action, reward, cost,
@@ -7090,6 +7147,12 @@ class TransitDuetV2Runner:
                 self._ep_upper_plan_penalties.append(plan_penalty)
             self._ep_upper_plan_targets.append(
                 float(plan_summary.get('planned_mean', trip.target_headway)))
+            self._ep_upper_plan_raw_delta_means.append(float(
+                plan_summary.get('raw_headway_delta_mean_s', 0.0)))
+            self._ep_upper_plan_projected_delta_means.append(float(
+                plan_summary.get('projected_headway_delta_mean_s', 0.0)))
+            self._ep_upper_plan_projected_delta_sums.append(float(
+                plan_summary.get('projected_headway_delta_sum_s', 0.0)))
         self._ep_upper_deltas.append(delta_t)
         self._ep_upper_deltas_by_dir[bool(trip.direction)].append(delta_t)
         if getattr(self.env, 'frequency_tracker', None) is not None:
@@ -7377,6 +7440,8 @@ class TransitDuetV2Runner:
         self._ep_upper_reliability_rewards = []
         self._ep_upper_interval_rewards = []
         self._ep_upper_interval_wait_costs = []
+        self._ep_upper_interval_onboard_costs = []
+        self._ep_upper_interval_dispatch_backlog_costs = []
         self._ep_upper_interval_headway_costs = []
         self._ep_upper_interval_fleet_costs = []
         self._ep_upper_interval_coverages = []
@@ -7384,6 +7449,9 @@ class TransitDuetV2Runner:
         self._ep_lower_load_hold_penalties = []
         self._ep_lower_load_ratios = []
         self._ep_lower_normalized_person_delays = []
+        self._ep_lower_causal_guard_active = []
+        self._ep_lower_causal_guard_limits = []
+        self._ep_lower_causal_guard_adjustments = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -7441,6 +7509,9 @@ class TransitDuetV2Runner:
         self._ep_headway_value_planner_feature_norms = []
         self._ep_upper_plan_penalties = []
         self._ep_upper_plan_targets = []
+        self._ep_upper_plan_raw_delta_means = []
+        self._ep_upper_plan_projected_delta_means = []
+        self._ep_upper_plan_projected_delta_sums = []
         self._ep_upper_plan_decisions = 0
         self._ep_upper_plan_reuses = 0
         self._ep_terminal_launch_shifts = []
@@ -7751,11 +7822,14 @@ class TransitDuetV2Runner:
                 episode_headway_samples=int(
                     env_details['headway_sample_count']),
                 episode_duration_s=float(
-                    env_details['simulation_end_time_s']),
+                    self.env.protocol.evaluation_end_time_s),
                 n_fleet_target=float(N_fleet),
             )
             interval_reward = float(interval_score['reward'])
             interval_wait_cost = float(interval_score['wait_cost'])
+            interval_onboard_cost = float(interval_score['onboard_cost'])
+            interval_dispatch_backlog_cost = float(
+                interval_score['dispatch_backlog_cost'])
             interval_headway_cost = float(interval_score['headway_cost'])
             interval_fleet_cost = float(interval_score['fleet_cost'])
             interval_coverage = float(
@@ -7809,6 +7883,9 @@ class TransitDuetV2Runner:
                     'transition_stream_key', '__legacy_global__'),
                 'interval_reward': interval_reward,
                 'interval_wait_cost': interval_wait_cost,
+                'interval_onboard_cost': interval_onboard_cost,
+                'interval_dispatch_backlog_cost': (
+                    interval_dispatch_backlog_cost),
                 'interval_headway_cost': interval_headway_cost,
                 'interval_fleet_cost': interval_fleet_cost,
                 'interval_coverage': interval_coverage,
@@ -7820,6 +7897,10 @@ class TransitDuetV2Runner:
                 float(reliability_reward))
             self._ep_upper_interval_rewards.append(interval_reward)
             self._ep_upper_interval_wait_costs.append(interval_wait_cost)
+            self._ep_upper_interval_onboard_costs.append(
+                interval_onboard_cost)
+            self._ep_upper_interval_dispatch_backlog_costs.append(
+                interval_dispatch_backlog_cost)
             self._ep_upper_interval_headway_costs.append(
                 interval_headway_cost)
             self._ep_upper_interval_fleet_costs.append(interval_fleet_cost)
@@ -8009,6 +8090,12 @@ class TransitDuetV2Runner:
         lower_load_ratio_stat = _stat(self._ep_lower_load_ratios)
         lower_normalized_person_delay_stat = _stat(
             self._ep_lower_normalized_person_delays)
+        lower_causal_guard_active_stat = _stat(
+            self._ep_lower_causal_guard_active)
+        lower_causal_guard_limit_stat = _stat(
+            self._ep_lower_causal_guard_limits)
+        lower_causal_guard_adjustment_stat = _stat(
+            self._ep_lower_causal_guard_adjustments)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8059,6 +8146,13 @@ class TransitDuetV2Runner:
             self._ep_freq_wait_lower_raw_credit_weights)
         upper_plan_penalty_stat = _stat(self._ep_upper_plan_penalties)
         upper_plan_target_stat = _stat(self._ep_upper_plan_targets)
+        upper_plan_raw_delta_stat = _stat(
+            self._ep_upper_plan_raw_delta_means)
+        upper_plan_projected_delta_stat = _stat(
+            self._ep_upper_plan_projected_delta_means)
+        upper_plan_projected_delta_sum_abs_stat = _stat([
+            abs(value) for value in self._ep_upper_plan_projected_delta_sums
+        ])
         terminal_launch_shift_stat = _stat(self._ep_terminal_launch_shifts)
         terminal_shift_cap_stat = _stat(self._ep_terminal_shift_caps)
         terminal_shift_min_stat = _stat(self._ep_terminal_shift_mins)
@@ -8324,14 +8418,22 @@ class TransitDuetV2Runner:
                 env_details.get('fleet_denied_dispatch_events', 0)),
             'fleet_denied_trips': int(
                 env_details.get('fleet_denied_trips', 0)),
+            'fleet_denied_trip_rate': round(float(
+                env_details.get('fleet_denied_trip_rate', 0.0)), 6),
             'fleet_readiness_delay_mean_s': round(float(
                 env_details.get('fleet_readiness_delay_mean_s', 0.0)), 6),
             'fleet_readiness_delay_max_s': round(float(
                 env_details.get('fleet_readiness_delay_max_s', 0.0)), 6),
             'holding_vehicle_seconds': round(float(
                 env_details.get('holding_vehicle_seconds', 0.0)), 6),
+            'holding_vehicle_seconds_per_launched_trip': round(float(
+                env_details.get(
+                    'holding_vehicle_seconds_per_launched_trip', 0.0)), 6),
             'holding_passenger_seconds': round(float(
                 env_details.get('holding_passenger_seconds', 0.0)), 6),
+            'holding_passenger_min_per_generated': round(float(
+                env_details.get(
+                    'holding_passenger_min_per_generated', 0.0)), 6),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(
@@ -8379,6 +8481,14 @@ class TransitDuetV2Runner:
                 lower_load_ratio_stat['mean'], 6),
             'lower_normalized_person_delay_mean': round(
                 lower_normalized_person_delay_stat['mean'], 6),
+            'lower_causal_guard_enabled': int(
+                self.lower_causal_holding_guard.enabled),
+            'lower_causal_guard_active_mean': round(
+                lower_causal_guard_active_stat['mean'], 6),
+            'lower_causal_guard_limit_mean_s': round(
+                lower_causal_guard_limit_stat['mean'], 6),
+            'lower_causal_guard_adjustment_mean_s': round(
+                lower_causal_guard_adjustment_stat['mean'], 6),
             # lower training
             'lower_q_mean': lower_m.get('q_mean', 0.),
             'lower_q_std': lower_m.get('q_std', 0.),
@@ -8436,6 +8546,11 @@ class TransitDuetV2Runner:
                 float(sum(self._ep_upper_interval_rewards)), 6),
             'upper_interval_wait_cost_sum': round(
                 float(sum(self._ep_upper_interval_wait_costs)), 6),
+            'upper_interval_onboard_cost_sum': round(
+                float(sum(self._ep_upper_interval_onboard_costs)), 6),
+            'upper_interval_dispatch_backlog_cost_sum': round(
+                float(sum(
+                    self._ep_upper_interval_dispatch_backlog_costs)), 6),
             'upper_interval_headway_cost_sum': round(
                 float(sum(self._ep_upper_interval_headway_costs)), 6),
             'upper_interval_fleet_cost_sum': round(
@@ -8640,6 +8755,15 @@ class TransitDuetV2Runner:
             'upper_interval_wait_ownership': (
                 self.upper_interval_credit.wait_ownership
                 if self.upper_interval_credit.enabled else 'disabled'),
+            'upper_plan_headway_budget_mode': (
+                self.timetable_planner.headway_budget_mode
+                if self.timetable_planner is not None else 'disabled'),
+            'upper_plan_raw_delta_mean_s': round(
+                upper_plan_raw_delta_stat['mean'], 6),
+            'upper_plan_projected_delta_mean_s': round(
+                upper_plan_projected_delta_stat['mean'], 6),
+            'upper_plan_projected_delta_sum_abs_mean_s': round(
+                upper_plan_projected_delta_sum_abs_stat['mean'], 6),
             'terminal_launch_shift_mean': terminal_launch_shift_stat['mean'],
             'terminal_launch_shift_std': terminal_launch_shift_stat['std'],
             'terminal_shift_cap_mean': terminal_shift_cap_stat['mean'],

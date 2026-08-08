@@ -136,6 +136,99 @@ class TimetablePlanCreditTest(unittest.TestCase):
         self.assertEqual(trips[4]._freqduet_scheduled_launch, 1360.0)
         self.assertEqual(trips[2]._freqduet_planned_by, 9)
 
+    def test_v5_exact_curve_redistributes_without_adding_departures(self):
+        trips = self._trips()
+        planner = TimetableCurvePlanner(
+            horizon_s=1200.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            terminal_schedule_mode="exact_headway_curve",
+            headway_budget_mode="zero_sum_delta_v5",
+            coefficient_parameterization="antisymmetric_linear_v5",
+        )
+
+        summary = planner.apply(
+            trips,
+            trips[0],
+            [40.0],
+            write_scheduled_launch=True,
+            plan_id=21,
+        )
+
+        targets = [trip.target_headway for trip in trips[1:]]
+        self.assertEqual(targets, [270.0, 290.0, 310.0, 330.0])
+        self.assertAlmostEqual(sum(targets), 4 * 300.0)
+        self.assertEqual(trips[-1]._freqduet_scheduled_launch, 1200.0)
+        self.assertEqual(summary["headway_budget_mode"], "zero_sum_delta_v5")
+        self.assertEqual(planner.action_dim, 1)
+        self.assertAlmostEqual(summary["raw_headway_delta_mean_s"], 10.0)
+        self.assertAlmostEqual(summary["projected_headway_delta_sum_s"], 0.0)
+        self.assertTrue(all(-60.0 <= target - 300.0 <= 60.0
+                            for target in targets))
+
+    def test_v5_receding_horizon_keeps_each_effective_delta_bounded(self):
+        trips = self._trips()
+        planner = TimetableCurvePlanner(
+            horizon_s=1200.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            delta_min_s=-60.0,
+            delta_max_s=60.0,
+            terminal_schedule_mode="exact_headway_curve",
+            headway_budget_mode="zero_sum_delta_v5",
+            coefficient_parameterization="antisymmetric_linear_v5",
+        )
+
+        planner.apply(
+            trips, trips[0], [60.0], write_scheduled_launch=True, plan_id=0)
+        trips[0].launched = True
+        planner.apply(
+            trips, trips[1], [-60.0], origin_launch_s=300.0,
+            write_scheduled_launch=True, plan_id=1)
+
+        for trip in trips[1:]:
+            self.assertGreaterEqual(trip.target_headway - 300.0, -60.0)
+            self.assertLessEqual(trip.target_headway - 300.0, 60.0)
+
+    def test_v5_anchor_delay_does_not_become_a_control_target(self):
+        trips = self._trips()
+        trips[0].launched = True
+        trips[0]._freqduet_actual_launch = 650.0
+        trips[1]._freqduet_scheduled_launch = 300.0
+        planner = TimetableCurvePlanner(
+            horizon_s=1200.0,
+            basis_per_direction=2,
+            shared_directions=True,
+            min_headway_s=120.0,
+            max_headway_s=600.0,
+            delta_min_s=-60.0,
+            delta_max_s=60.0,
+            terminal_schedule_mode="exact_headway_curve",
+            headway_budget_mode="zero_sum_delta_v5",
+            coefficient_parameterization="antisymmetric_linear_v5",
+        )
+
+        summary = planner.apply(
+            trips, trips[1], [0.0], origin_launch_s=300.0,
+            write_scheduled_launch=True, plan_id=1)
+
+        self.assertEqual(trips[1].target_headway, 240.0)
+        self.assertEqual(summary["effective_delta"], -60.0)
+
+    def test_v5_headway_budget_projection_respects_box_bounds(self):
+        projected = TimetableCurvePlanner._project_box_sum(
+            raw=[-100.0, -20.0, 80.0],
+            lower=[-30.0, -30.0, -30.0],
+            upper=[40.0, 40.0, 40.0],
+        )
+        self.assertAlmostEqual(float(projected.sum()), 0.0, places=6)
+        self.assertTrue(all(projected >= -30.0))
+        self.assertTrue(all(projected <= 40.0))
+
     def test_exact_curve_rejects_independent_terminal_bias(self):
         trips = self._trips()
         planner = TimetableCurvePlanner(

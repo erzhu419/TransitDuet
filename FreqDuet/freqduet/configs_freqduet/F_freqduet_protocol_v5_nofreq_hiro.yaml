@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v5_main_hiro.yaml
+_name: F_freqduet_protocol_v5_nofreq_hiro
+
+protocol:
+  role: ablation_no_frequency_features_v5
+  frequency_contract: no_frequency_features_v5
+
+frequency:
+  enable: false
+  upper_features: false
+  lower_features: false
+  use_historical_prior: false
+

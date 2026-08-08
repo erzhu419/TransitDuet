@@ -10,6 +10,8 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     OPTIONAL_COST_METRICS,
     PROTOCOL_VERSION,
     V4_SAFETY_METRICS,
+    V5_MECHANISM_METRICS,
+    V5_SAFETY_METRICS,
     analysis_metrics_for_frame,
     config_fingerprint,
     hierarchical_bootstrap,
@@ -59,6 +61,33 @@ class ProtocolV2MatrixTest(unittest.TestCase):
             frame[metric] = 1.0
         self.assertTrue(
             set(V4_SAFETY_METRICS).issubset(analysis_metrics_for_frame(frame)))
+
+    def test_v5_analysis_requires_safety_and_mechanism_endpoints(self):
+        frame = evaluation_frame([101, 102])
+        frame["protocol_version"] = "freqduet-eval-v5"
+        with self.assertRaisesRegex(RuntimeError, "required passenger"):
+            analysis_metrics_for_frame(frame)
+
+        strict_metrics = V5_SAFETY_METRICS + V5_MECHANISM_METRICS
+        for metric in strict_metrics:
+            frame[metric] = 1.0
+        self.assertTrue(
+            set(strict_metrics).issubset(analysis_metrics_for_frame(frame)))
+
+    def test_v5_evaluation_validation_rejects_missing_mechanism_metric(self):
+        frame = evaluation_frame([101, 102])
+        frame["protocol_version"] = "freqduet-eval-v5"
+        for metric in V5_SAFETY_METRICS + V5_MECHANISM_METRICS:
+            frame[metric] = 1.0
+        frame = frame.drop(columns=["upper_plan_projected_delta_sum_abs_mean_s"])
+
+        with self.assertRaisesRegex(ValueError, "missing evaluation columns"):
+            validate_evaluation_frame(
+                frame,
+                [101, 102],
+                "synthetic-v5",
+                protocol_version="freqduet-eval-v5",
+            )
 
     def test_analysis_metrics_reject_mixed_cost_contract(self):
         frame = evaluation_frame([101, 102])

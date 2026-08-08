@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v5_main_hiro.yaml
+_name: F_freqduet_protocol_v5_noguard_hiro
+
+protocol:
+  role: ablation_no_causal_holding_guard_v5
+
+lower:
+  causal_holding_guard:
+    enable: false
+

@@ -1,0 +1,22 @@
+_extends: F_freqduet_protocol_v5_main_hiro.yaml
+_name: F_freqduet_protocol_v5_csac_hiro
+
+protocol:
+  role: optimizer_ablation_standard_constrained_sac_v5
+
+upper:
+  algorithm_id: standard_sac_v4
+  critic_aggregation: twin_min
+  ensemble_size: 2
+  resac_beta: 0.0
+  beta_ood: 0.0
+  weight_reg: 0.0
+
+lower:
+  algorithm_id: standard_sac_lagrangian_v4
+  critic_aggregation: twin_min
+  ensemble_size: 2
+  resac_beta: 0.0
+  beta_ood: 0.0
+  weight_reg: 0.0
+

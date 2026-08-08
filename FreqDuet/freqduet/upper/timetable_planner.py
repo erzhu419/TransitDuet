@@ -19,6 +19,8 @@ _TERMINAL_SCHEDULE_MODES = {
     "bounded_shift_legacy",
     "exact_headway_curve",
 }
+_HEADWAY_BUDGET_MODES = {"free", "zero_sum_delta_v5"}
+_COEFFICIENT_PARAMETERIZATIONS = {"full", "antisymmetric_linear_v5"}
 
 
 @dataclass
@@ -36,6 +38,8 @@ class TimetableCurvePlanner:
     terminal_shift_min_s: float = -180.0
     terminal_shift_max_s: float = 120.0
     terminal_schedule_mode: str = "bounded_shift_legacy"
+    headway_budget_mode: str = "free"
+    coefficient_parameterization: str = "full"
 
     def __post_init__(self) -> None:
         mode = str(self.terminal_schedule_mode).strip().lower()
@@ -51,6 +55,25 @@ class TimetableCurvePlanner:
         if self.max_headway_s < self.min_headway_s:
             raise ValueError("max_headway_s must not be below min_headway_s")
         self.terminal_schedule_mode = mode
+        budget_mode = str(self.headway_budget_mode).strip().lower()
+        if budget_mode not in _HEADWAY_BUDGET_MODES:
+            raise ValueError(
+                "headway_budget_mode must be one of "
+                f"{sorted(_HEADWAY_BUDGET_MODES)}"
+            )
+        self.headway_budget_mode = budget_mode
+        parameterization = str(
+            self.coefficient_parameterization).strip().lower()
+        if parameterization not in _COEFFICIENT_PARAMETERIZATIONS:
+            raise ValueError(
+                "coefficient_parameterization must be one of "
+                f"{sorted(_COEFFICIENT_PARAMETERIZATIONS)}"
+            )
+        if (parameterization == "antisymmetric_linear_v5"
+                and self.basis_per_direction != 2):
+            raise ValueError(
+                "antisymmetric_linear_v5 requires basis_per_direction=2")
+        self.coefficient_parameterization = parameterization
 
     @classmethod
     def from_config(cls, cfg, delta_max_s=120.0):
@@ -69,10 +92,15 @@ class TimetableCurvePlanner:
             terminal_schedule_mode=str(
                 cfg.get("terminal_schedule_mode", "bounded_shift_legacy")
             ),
+            headway_budget_mode=str(cfg.get("headway_budget_mode", "free")),
+            coefficient_parameterization=str(
+                cfg.get("coefficient_parameterization", "full")),
         )
 
     @property
     def action_dim(self) -> int:
+        if self.coefficient_parameterization == "antisymmetric_linear_v5":
+            return 1 if self.shared_directions else 2
         if self.shared_directions:
             return self.basis_per_direction
         return 2 * self.basis_per_direction
@@ -97,6 +125,14 @@ class TimetableCurvePlanner:
 
     def _coefficients(self, action: Iterable[float], direction: bool) -> np.ndarray:
         a = np.asarray(action, dtype=np.float64).reshape(-1)
+        if self.coefficient_parameterization == "antisymmetric_linear_v5":
+            expected = 1 if self.shared_directions else 2
+            if a.size != expected:
+                raise ValueError(
+                    f"Expected {expected} antisymmetric amplitude(s), got {a.size}")
+            amplitude = float(a[0] if self.shared_directions else (
+                a[0] if bool(direction) else a[1]))
+            return np.asarray([-amplitude, amplitude], dtype=np.float64)
         b = self.basis_per_direction
         if a.size == b:
             return a
@@ -139,6 +175,45 @@ class TimetableCurvePlanner:
             return float(scheduled)
         return TimetableCurvePlanner._base_launch(tt)
 
+    @staticmethod
+    def _project_box_sum(
+        raw: np.ndarray,
+        lower: np.ndarray,
+        upper: np.ndarray,
+        target_sum: float = 0.0,
+    ) -> np.ndarray:
+        """Euclidean projection onto box bounds with one sum constraint."""
+        raw = np.asarray(raw, dtype=np.float64).reshape(-1)
+        lower = np.asarray(lower, dtype=np.float64).reshape(-1)
+        upper = np.asarray(upper, dtype=np.float64).reshape(-1)
+        if raw.shape != lower.shape or raw.shape != upper.shape:
+            raise ValueError("headway budget projection arrays must align")
+        if np.any(lower > upper):
+            raise ValueError("headway budget projection has invalid bounds")
+        target_sum = float(target_sum)
+        tolerance = 1e-8 * max(1.0, raw.size)
+        if target_sum < float(lower.sum()) - tolerance or target_sum > float(
+                upper.sum()) + tolerance:
+            raise ValueError(
+                "headway budget target is infeasible under configured bounds")
+        if raw.size == 0:
+            return raw.copy()
+
+        lambda_low = float(np.min(raw - upper))
+        lambda_high = float(np.max(raw - lower))
+        for _ in range(100):
+            midpoint = 0.5 * (lambda_low + lambda_high)
+            projected = np.clip(raw - midpoint, lower, upper)
+            if float(projected.sum()) > target_sum:
+                lambda_low = midpoint
+            else:
+                lambda_high = midpoint
+        projected = np.clip(
+            raw - 0.5 * (lambda_low + lambda_high), lower, upper)
+        if abs(float(projected.sum()) - target_sum) > 1e-6:
+            raise AssertionError("headway budget projection did not conserve sum")
+        return projected
+
     def _apply_exact_headway_curve(
         self,
         timetables,
@@ -165,6 +240,8 @@ class TimetableCurvePlanner:
         scheduled_launches = []
         phase_displacements = []
         headway_floors = []
+        raw_headway_deltas = []
+        projected_headway_deltas = []
         current_target = None
 
         for direction in directions:
@@ -197,10 +274,24 @@ class TimetableCurvePlanner:
             )
             anchor_launch = self._effective_launch(anchor)
             anchor_base = self._base_headway(anchor)
-            if predecessor_launch is None:
+            existing_target = getattr(
+                anchor, "_freqduet_projected_target_headway", None)
+            if existing_target is not None:
+                anchor_target = float(existing_target)
+            elif predecessor_launch is None:
                 anchor_target = anchor_base
             else:
-                anchor_target = max(anchor_launch - predecessor_launch, 1e-9)
+                anchor_target = anchor_launch - predecessor_launch
+            anchor_lower = max(
+                self.min_headway_s, anchor_base + self.delta_min_s)
+            anchor_upper = min(
+                self.max_headway_s, anchor_base + self.delta_max_s)
+            if anchor_lower > anchor_upper:
+                raise ValueError(
+                    "configured action and absolute headway bounds do not "
+                    "admit the anchor baseline")
+            anchor_target = float(np.clip(
+                anchor_target, anchor_lower, anchor_upper))
 
             anchor._freqduet_desired_headway_s = float(anchor_target)
             anchor._freqduet_scheduled_launch = float(anchor_launch)
@@ -227,8 +318,11 @@ class TimetableCurvePlanner:
             if anchor is current_trip:
                 current_target = float(anchor_target)
 
-            previous_launch = float(anchor_launch)
-            for tt in candidates[1:]:
+            future = candidates[1:]
+            desired_headways = []
+            bases = []
+            floors_for_trip = []
+            for tt in future:
                 offset = self._base_launch(tt) - float(origin_launch_s)
                 base = self._base_headway(tt)
                 desired = self.target_headway(base, action, direction, offset)
@@ -243,7 +337,37 @@ class TimetableCurvePlanner:
                     desired = max(desired, floor)
                     headway_floors.append(float(floor))
                     tt._freqduet_min_dispatch_headway = float(floor)
+                bases.append(float(base))
+                desired_headways.append(float(desired))
+                floors_for_trip.append(float(floor))
 
+            if future:
+                bases_arr = np.asarray(bases, dtype=np.float64)
+                raw_deltas = (
+                    np.asarray(desired_headways, dtype=np.float64) - bases_arr)
+                projected_deltas = raw_deltas.copy()
+                if self.headway_budget_mode == "zero_sum_delta_v5":
+                    lower = np.asarray([
+                        max(
+                            self.min_headway_s - base,
+                            floor - base,
+                            self.delta_min_s,
+                        )
+                        for base, floor in zip(bases, floors_for_trip)
+                    ], dtype=np.float64)
+                    upper = np.asarray([
+                        min(self.max_headway_s - base, self.delta_max_s)
+                        for base in bases
+                    ], dtype=np.float64)
+                    projected_deltas = self._project_box_sum(
+                        raw_deltas, lower, upper, target_sum=0.0)
+                desired_headways = list(bases_arr + projected_deltas)
+                raw_headway_deltas.extend(raw_deltas.tolist())
+                projected_headway_deltas.extend(projected_deltas.tolist())
+
+            previous_launch = float(anchor_launch)
+            for tt, desired in zip(future, desired_headways):
+                offset = self._base_launch(tt) - float(origin_launch_s)
                 projected_launch = previous_launch + float(desired)
                 projected_target = projected_launch - previous_launch
                 if projected_target <= 0.0:
@@ -282,6 +406,9 @@ class TimetableCurvePlanner:
         scheduled = np.asarray(scheduled_launches, dtype=np.float64)
         phases = np.asarray(phase_displacements, dtype=np.float64)
         floors = np.asarray(headway_floors, dtype=np.float64)
+        raw_deltas = np.asarray(raw_headway_deltas, dtype=np.float64)
+        projected_deltas = np.asarray(
+            projected_headway_deltas, dtype=np.float64)
         base_current = self._base_headway(current_trip)
         return {
             "target_headway": float(current_target),
@@ -303,6 +430,15 @@ class TimetableCurvePlanner:
             "phase_displacement_mean_s": float(phases.mean()),
             "phase_displacement_max_abs_s": float(np.max(np.abs(phases))),
             "projection_mode": "exact_headway_curve",
+            "headway_budget_mode": self.headway_budget_mode,
+            "raw_headway_delta_mean_s": (
+                float(raw_deltas.mean()) if raw_deltas.size else 0.0),
+            "projected_headway_delta_mean_s": (
+                float(projected_deltas.mean())
+                if projected_deltas.size else 0.0),
+            "projected_headway_delta_sum_s": (
+                float(projected_deltas.sum())
+                if projected_deltas.size else 0.0),
             "plan_id": int(plan_owner),
         }
 

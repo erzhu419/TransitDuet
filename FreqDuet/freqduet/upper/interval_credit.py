@@ -19,6 +19,9 @@ class _IntervalAccumulator:
     sampled_duration_s: float = 0.0
     waiting_exposure_s: float = 0.0
     waiting_total_exposure_s: float = 0.0
+    onboard_exposure_s: float = 0.0
+    onboard_total_exposure_s: float = 0.0
+    dispatch_backlog_exposure_trip_s: float = 0.0
     fleet_excess_exposure_bus_s: float = 0.0
     headway_abs_deviation_sum: float = 0.0
     headway_sample_count: int = 0
@@ -40,8 +43,12 @@ class UpperIntervalOutcomeTracker:
         wait_weight: float = 1.0,
         headway_weight: float = 1.0,
         fleet_weight: float = 1.0,
+        onboard_weight: float = 0.0,
+        dispatch_backlog_weight: float = 0.0,
         reward_scale: float = 1.0,
         wait_reference_min: float = 10.0,
+        onboard_reference_min: float = 10.0,
+        dispatch_backlog_reference_trips: float = 1.0,
         local_wait_queue_norm: float = 100.0,
         headway_reference: float = 1.0,
         fleet_reference: float = 1.0,
@@ -58,9 +65,19 @@ class UpperIntervalOutcomeTracker:
         self.headway_weight = self._nonnegative(
             headway_weight, "headway_weight")
         self.fleet_weight = self._nonnegative(fleet_weight, "fleet_weight")
+        self.onboard_weight = self._nonnegative(
+            onboard_weight, "onboard_weight")
+        self.dispatch_backlog_weight = self._nonnegative(
+            dispatch_backlog_weight, "dispatch_backlog_weight")
         self.reward_scale = self._nonnegative(reward_scale, "reward_scale")
         self.wait_reference_min = self._positive(
             wait_reference_min, "wait_reference_min")
+        self.onboard_reference_min = self._positive(
+            onboard_reference_min, "onboard_reference_min")
+        self.dispatch_backlog_reference_trips = self._positive(
+            dispatch_backlog_reference_trips,
+            "dispatch_backlog_reference_trips",
+        )
         self.local_wait_queue_norm = self._positive(
             local_wait_queue_norm, "local_wait_queue_norm")
         self.headway_reference = self._positive(
@@ -104,8 +121,18 @@ class UpperIntervalOutcomeTracker:
                 "headway", cfg.get("headway_weight", 1.0)),
             fleet_weight=weights.get(
                 "fleet", cfg.get("fleet_weight", 1.0)),
+            onboard_weight=weights.get(
+                "onboard", cfg.get("onboard_weight", 0.0)),
+            dispatch_backlog_weight=weights.get(
+                "dispatch_backlog",
+                cfg.get("dispatch_backlog_weight", 0.0),
+            ),
             reward_scale=cfg.get("reward_scale", 1.0),
             wait_reference_min=cfg.get("wait_reference_min", 10.0),
+            onboard_reference_min=cfg.get(
+                "onboard_reference_min", 10.0),
+            dispatch_backlog_reference_trips=cfg.get(
+                "dispatch_backlog_reference_trips", 1.0),
             local_wait_queue_norm=cfg.get("local_wait_queue_norm", 100.0),
             headway_reference=cfg.get("headway_reference", 1.0),
             fleet_reference=cfg.get("fleet_reference", 1.0),
@@ -141,6 +168,9 @@ class UpperIntervalOutcomeTracker:
         dt_s: float,
         waiting_by_direction: Mapping[bool, float],
         waiting_low_by_direction: Mapping[bool, float] | None = None,
+        onboard_by_direction: Mapping[bool, float] | None = None,
+        onboard_low_by_direction: Mapping[bool, float] | None = None,
+        dispatch_backlog_by_direction: Mapping[bool, float] | None = None,
         fleet_by_direction: Mapping[bool, float],
         n_fleet_target: float,
         headway_events: Sequence[Mapping[str, Any]],
@@ -159,28 +189,55 @@ class UpperIntervalOutcomeTracker:
             raise ValueError(
                 "frozen_low_frequency interval credit requires frozen LF "
                 "queue mass")
+        if (self.wait_ownership == "frozen_low_frequency"
+                and self.onboard_weight > 0.0
+                and onboard_low_by_direction is None):
+            raise ValueError(
+                "frozen_low_frequency onboard credit requires frozen LF "
+                "onboard mass")
+        onboard_by_direction = onboard_by_direction or {}
+        onboard_low_by_direction = onboard_low_by_direction or {}
+        dispatch_backlog_by_direction = dispatch_backlog_by_direction or {}
         for accumulator in self._active.values():
             direction = accumulator.direction
             if direction is None:
                 waiting = sum(float(v) for v in waiting_by_direction.values())
                 waiting_low = sum(
                     float(v) for v in (waiting_low_by_direction or {}).values())
+                onboard = sum(float(v) for v in onboard_by_direction.values())
+                onboard_low = sum(
+                    float(v) for v in onboard_low_by_direction.values())
+                dispatch_backlog = sum(
+                    float(v) for v in dispatch_backlog_by_direction.values())
                 fleet = sum(float(v) for v in fleet_by_direction.values())
                 fleet_target = target_global
             else:
                 waiting = float(waiting_by_direction.get(direction, 0.0))
                 waiting_low = float(
                     (waiting_low_by_direction or {}).get(direction, 0.0))
+                onboard = float(onboard_by_direction.get(direction, 0.0))
+                onboard_low = float(
+                    onboard_low_by_direction.get(direction, 0.0))
+                dispatch_backlog = float(
+                    dispatch_backlog_by_direction.get(direction, 0.0))
                 fleet = float(fleet_by_direction.get(direction, 0.0))
                 fleet_target = max(target_global / 2.0, 1.0)
 
             accumulator.sampled_duration_s += dt_s
             accumulator.waiting_total_exposure_s += max(waiting, 0.0) * dt_s
+            accumulator.onboard_total_exposure_s += max(onboard, 0.0) * dt_s
             owned_waiting = (
                 waiting_low
                 if self.wait_ownership == "frozen_low_frequency"
                 else waiting)
+            owned_onboard = (
+                onboard_low
+                if self.wait_ownership == "frozen_low_frequency"
+                else onboard)
             accumulator.waiting_exposure_s += max(owned_waiting, 0.0) * dt_s
+            accumulator.onboard_exposure_s += max(owned_onboard, 0.0) * dt_s
+            accumulator.dispatch_backlog_exposure_trip_s += (
+                max(dispatch_backlog, 0.0) * dt_s)
             accumulator.fleet_excess_exposure_bus_s += (
                 max(0.0, fleet - fleet_target) * dt_s)
 
@@ -224,6 +281,11 @@ class UpperIntervalOutcomeTracker:
             "waiting_exposure_s": accumulator.waiting_exposure_s,
             "waiting_total_exposure_s": (
                 accumulator.waiting_total_exposure_s),
+            "onboard_exposure_s": accumulator.onboard_exposure_s,
+            "onboard_total_exposure_s": (
+                accumulator.onboard_total_exposure_s),
+            "dispatch_backlog_exposure_trip_s": (
+                accumulator.dispatch_backlog_exposure_trip_s),
             "wait_ownership": self.wait_ownership,
             "fleet_excess_exposure_bus_s": (
                 accumulator.fleet_excess_exposure_bus_s),
@@ -247,12 +309,19 @@ class UpperIntervalOutcomeTracker:
                 "wait_cost": 0.0,
                 "headway_cost": 0.0,
                 "fleet_cost": 0.0,
+                "onboard_cost": 0.0,
+                "dispatch_backlog_cost": 0.0,
             }
 
         sampled_duration_s = max(
             float(outcome.get("sampled_duration_s", 0.0)), 1.0)
         waiting_exposure_s = max(
             float(outcome.get("waiting_exposure_s", 0.0)), 0.0)
+        onboard_exposure_s = max(
+            float(outcome.get("onboard_exposure_s", 0.0)), 0.0)
+        dispatch_backlog_exposure = max(
+            float(outcome.get(
+                "dispatch_backlog_exposure_trip_s", 0.0)), 0.0)
         headway_sum = max(
             float(outcome.get("headway_abs_deviation_sum", 0.0)), 0.0)
         headway_count = max(
@@ -271,6 +340,15 @@ class UpperIntervalOutcomeTracker:
                 * 60.0
                 * self.wait_reference_min
             )
+            onboard_cost = onboard_exposure_s / (
+                max(int(passengers_generated), 1)
+                * 60.0
+                * self.onboard_reference_min
+            )
+            dispatch_backlog_cost = dispatch_backlog_exposure / (
+                max(float(episode_duration_s), 1.0)
+                * self.dispatch_backlog_reference_trips
+            )
             headway_cost = headway_sum / (
                 max(int(episode_headway_samples), 1)
                 * self.headway_reference
@@ -285,6 +363,14 @@ class UpperIntervalOutcomeTracker:
                 waiting_exposure_s / sampled_duration_s
                 / self.local_wait_queue_norm
             )
+            onboard_cost = (
+                onboard_exposure_s / sampled_duration_s
+                / self.local_wait_queue_norm
+            )
+            dispatch_backlog_cost = (
+                dispatch_backlog_exposure / sampled_duration_s
+                / self.dispatch_backlog_reference_trips
+            )
             headway_cost = (
                 headway_sum / max(headway_count, 1)
                 / self.headway_reference
@@ -296,17 +382,25 @@ class UpperIntervalOutcomeTracker:
             )
 
         wait_cost = float(np.clip(wait_cost, 0.0, self.component_clip))
+        onboard_cost = float(np.clip(
+            onboard_cost, 0.0, self.component_clip))
+        dispatch_backlog_cost = float(np.clip(
+            dispatch_backlog_cost, 0.0, self.component_clip))
         headway_cost = float(np.clip(
             headway_cost, 0.0, self.component_clip))
         fleet_cost = float(np.clip(fleet_cost, 0.0, self.component_clip))
         reward = -self.reward_scale * (
             self.wait_weight * wait_cost
+            + self.onboard_weight * onboard_cost
+            + self.dispatch_backlog_weight * dispatch_backlog_cost
             + self.headway_weight * headway_cost
             + self.fleet_weight * fleet_cost
         )
         return {
             "reward": float(reward),
             "wait_cost": wait_cost,
+            "onboard_cost": onboard_cost,
+            "dispatch_backlog_cost": dispatch_backlog_cost,
             "headway_cost": headway_cost,
             "fleet_cost": fleet_cost,
         }

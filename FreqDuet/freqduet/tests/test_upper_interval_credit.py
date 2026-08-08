@@ -113,6 +113,8 @@ class UpperIntervalOutcomeTrackerTest(unittest.TestCase):
             dt_s=10.0,
             waiting_by_direction={True: 10.0, False: 0.0},
             waiting_low_by_direction={True: 6.5, False: 0.0},
+            onboard_by_direction={True: 4.0, False: 0.0},
+            onboard_low_by_direction={True: 2.5, False: 0.0},
             fleet_by_direction={True: 0.0, False: 0.0},
             n_fleet_target=12.0,
             headway_events=[],
@@ -122,6 +124,44 @@ class UpperIntervalOutcomeTrackerTest(unittest.TestCase):
         self.assertEqual(outcome["wait_ownership"], "frozen_low_frequency")
         self.assertAlmostEqual(outcome["waiting_exposure_s"], 65.0)
         self.assertAlmostEqual(outcome["waiting_total_exposure_s"], 100.0)
+        self.assertAlmostEqual(outcome["onboard_exposure_s"], 25.0)
+        self.assertAlmostEqual(outcome["onboard_total_exposure_s"], 40.0)
+
+    def test_v5_passenger_time_and_dispatch_backlog_are_priced(self):
+        tracker = UpperIntervalOutcomeTracker(
+            enabled=True,
+            wait_weight=1.0,
+            onboard_weight=1.0,
+            dispatch_backlog_weight=0.5,
+            headway_weight=0.0,
+            fleet_weight=0.0,
+            wait_reference_min=10.0,
+            onboard_reference_min=10.0,
+            dispatch_backlog_reference_trips=2.0,
+        )
+        tracker.begin(True, 0.0)
+        tracker.record_step(
+            dt_s=60.0,
+            waiting_by_direction={True: 10.0, False: 0.0},
+            onboard_by_direction={True: 20.0, False: 0.0},
+            dispatch_backlog_by_direction={True: 2.0, False: 0.0},
+            fleet_by_direction={True: 6.0, False: 6.0},
+            n_fleet_target=12.0,
+            headway_events=[],
+        )
+        outcome = tracker.close(True, 60.0)
+        score = tracker.score(
+            outcome,
+            passengers_generated=100,
+            episode_headway_samples=1,
+            episode_duration_s=60.0,
+            n_fleet_target=12.0,
+        )
+
+        self.assertAlmostEqual(score["wait_cost"], 0.01)
+        self.assertAlmostEqual(score["onboard_cost"], 0.02)
+        self.assertAlmostEqual(score["dispatch_backlog_cost"], 1.0)
+        self.assertAlmostEqual(score["reward"], -0.53)
 
     def test_v4_wait_credit_rejects_missing_frequency_ownership(self):
         tracker = UpperIntervalOutcomeTracker(

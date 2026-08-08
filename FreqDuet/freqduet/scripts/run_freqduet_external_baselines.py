@@ -31,6 +31,7 @@ from runner_v3 import load_config
 from run_baseline_rule import hour_to_slot, mpc_plan, rule_holding_action
 from scripts.run_freqduet_protocol_v2_matrix import (
     V4_SAFETY_METRICS,
+    V5_SAFETY_METRICS,
     config_fingerprint,
     source_fingerprint,
 )
@@ -375,6 +376,7 @@ def run_episode_external(
     objective_wait_metric: str = "observed",
     objective_weights: dict | None = None,
     exact_schedule: bool = False,
+    schedule_contract_version: str = "v4",
 ):
     env._n_fleet_target = int(n_fleet)
     fixed_target = fixed_headway_target_s(variant)
@@ -432,12 +434,15 @@ def run_episode_external(
     env.reset()
     projection_mode = "legacy_headway_enforcement"
     if exact_schedule:
+        contract_label = str(schedule_contract_version).strip().lower()
+        if contract_label not in {"v4", "v5"}:
+            raise ValueError("exact schedule contract must be v4 or v5")
         if variant == "rule_mpc":
-            projection_mode = "exact_rule_mpc_schedule_v4"
+            projection_mode = f"exact_rule_mpc_schedule_{contract_label}"
         elif route_headway_target_s is not None:
-            projection_mode = "exact_route_headway_schedule_v4"
+            projection_mode = f"exact_route_headway_schedule_{contract_label}"
         else:
-            projection_mode = "exact_fixed_headway_schedule_v4"
+            projection_mode = f"exact_fixed_headway_schedule_{contract_label}"
         install_exact_dispatch_schedule(
             env, schedule_target, projection_mode=projection_mode)
     env._upper_policy_callback = upper_cb
@@ -520,14 +525,20 @@ def run_episode_external(
         "fleet_denied_dispatch_events": int(details.get(
             "fleet_denied_dispatch_events", 0)),
         "fleet_denied_trips": int(details.get("fleet_denied_trips", 0)),
+        "fleet_denied_trip_rate": float(details.get(
+            "fleet_denied_trip_rate", 0.0)),
         "fleet_readiness_delay_mean_s": float(details.get(
             "fleet_readiness_delay_mean_s", 0.0)),
         "fleet_readiness_delay_max_s": float(details.get(
             "fleet_readiness_delay_max_s", 0.0)),
         "holding_vehicle_seconds": float(details.get(
             "holding_vehicle_seconds", 0.0)),
+        "holding_vehicle_seconds_per_launched_trip": float(details.get(
+            "holding_vehicle_seconds_per_launched_trip", 0.0)),
         "holding_passenger_seconds": float(details.get(
             "holding_passenger_seconds", 0.0)),
+        "holding_passenger_min_per_generated": float(details.get(
+            "holding_passenger_min_per_generated", 0.0)),
         "fleet_overshoot": overshoot,
         "composite": selected_service_cost,
         "service_cost_wait_metric": wait_metric,
@@ -605,7 +616,10 @@ def run_one(
             objective_wait_metric=str(
                 objective_cfg.get("wait_metric", "observed")),
             objective_weights=dict(objective_cfg.get("weights", {}) or {}),
-            exact_schedule=(protocol_version == "freqduet-eval-v4"),
+            exact_schedule=(protocol_version in {
+                "freqduet-eval-v4", "freqduet-eval-v5"}),
+            schedule_contract_version=(
+                "v5" if protocol_version == "freqduet-eval-v5" else "v4"),
         )
         row.update({
             "ep": ep,
@@ -643,7 +657,10 @@ def run_one(
         }, f, indent=2)
     with (run_dir / EXTERNAL_BASELINE_MANIFEST).open("w") as f:
         json.dump({
-            "manifest_version": "freqduet-external-baseline-v4",
+            "manifest_version": (
+                "freqduet-external-baseline-v5"
+                if protocol_version == "freqduet-eval-v5"
+                else "freqduet-external-baseline-v4"),
             "protocol_version": protocol_version,
             "config_name": config,
             "config_fingerprint": config_fingerprint(config),
@@ -748,7 +765,17 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if not manifest_path.exists():
         raise ValueError(f"{run_dir}: missing {EXTERNAL_BASELINE_MANIFEST}")
     manifest = json.loads(manifest_path.read_text())
-    if manifest.get("manifest_version") != "freqduet-external-baseline-v4":
+    versions = set(frame["protocol_version"].astype(str))
+    if len(versions) != 1:
+        raise ValueError(f"{run_dir}: mixed protocol versions")
+    protocol_version = next(iter(versions))
+    if protocol_version not in {"freqduet-eval-v4", "freqduet-eval-v5"}:
+        raise ValueError(f"{run_dir}: unsupported frozen protocol")
+    expected_manifest_version = (
+        "freqduet-external-baseline-v5"
+        if protocol_version == "freqduet-eval-v5"
+        else "freqduet-external-baseline-v4")
+    if manifest.get("manifest_version") != expected_manifest_version:
         raise ValueError(f"{manifest_path}: manifest version mismatch")
     expected_seeds = frame["scenario_seed"].astype(int).tolist()
     if manifest.get("scenario_seeds") != expected_seeds:
@@ -763,16 +790,20 @@ def validate_direct_baseline_run(run_dir: Path, frame: pd.DataFrame) -> dict:
     if manifest.get(
             "evaluator_source_fingerprint") != external_evaluator_fingerprint():
         raise ValueError(f"{manifest_path}: evaluator fingerprint mismatch")
-    missing_safety = sorted(set(V4_SAFETY_METRICS) - set(frame.columns))
+    safety_metrics = (
+        V5_SAFETY_METRICS
+        if protocol_version == "freqduet-eval-v5"
+        else V4_SAFETY_METRICS)
+    missing_safety = sorted(set(safety_metrics) - set(frame.columns))
     if missing_safety:
         raise ValueError(
-            f"{run_dir}: missing protocol-v4 safety metrics {missing_safety}")
-    for metric in V4_SAFETY_METRICS:
+            f"{run_dir}: missing frozen safety metrics {missing_safety}")
+    for metric in safety_metrics:
         values = pd.to_numeric(frame[metric], errors="coerce").to_numpy()
         if not np.isfinite(values).all():
             raise ValueError(f"{run_dir}: non-finite safety metric {metric}")
     required_values = {
-        "protocol_version": "freqduet-eval-v4",
+        "protocol_version": protocol_version,
         "fleet_inventory_mode": "fixed_pool",
         "lower_observation_contract": "deployable_apc_avl_v4",
         "headway_reward_mode": "forward_event_only",
@@ -845,10 +876,15 @@ def summarize_run(run_dir: Path, last_k: int) -> dict:
         ("physical_vehicle_count", "physical_vehicle_count"),
         ("fleet_denied_dispatch_events", "fleet_denied_dispatch_events"),
         ("fleet_denied_trips", "fleet_denied_trips"),
+        ("fleet_denied_trip_rate", "fleet_denied_trip_rate"),
         ("fleet_readiness_delay_mean_s", "fleet_readiness_delay_mean_s"),
         ("fleet_readiness_delay_max_s", "fleet_readiness_delay_max_s"),
         ("holding_vehicle_seconds", "holding_vehicle_seconds"),
+        ("holding_vehicle_seconds_per_launched_trip",
+         "holding_vehicle_seconds_per_launched_trip"),
         ("holding_passenger_seconds", "holding_passenger_seconds"),
+        ("holding_passenger_min_per_generated",
+         "holding_passenger_min_per_generated"),
     ]:
         row[out_col] = (
             float(pd.to_numeric(tail[src_col], errors="coerce").mean())
@@ -916,7 +952,9 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
             "trip_completion_rate", "fleet_denied_dispatch_events",
             "fleet_denied_trips", "fleet_readiness_delay_mean_s",
             "fleet_readiness_delay_max_s", "holding_vehicle_seconds",
+            "holding_vehicle_seconds_per_launched_trip",
             "holding_passenger_seconds",
+            "holding_passenger_min_per_generated", "fleet_denied_trip_rate",
         ]:
             vals = pd.to_numeric(group[metric], errors="coerce")
             row[f"{metric}_mean"] = float(vals.mean())
@@ -925,12 +963,15 @@ def aggregate(logs_dirs: list[Path] | Path, out_dir: Path, last_k: int) -> None:
     summary = pd.DataFrame(summary_rows)
     summary.to_csv(out_dir / "external_baselines_summary.csv", index=False)
     with (out_dir / "external_baselines_summary.json").open("w") as f:
+        protocol_versions = sorted(
+            set(per_seed["protocol_version"].astype(str)))
         json.dump({
             "logs_dirs": [str(p) for p in logs_dirs],
             "last_k": int(last_k),
             "n_rows": int(len(per_seed)),
             "direct_scenario_seeds": bool(direct_mode),
             "run_manifests_verified": bool(manifests),
+            "protocol_versions": protocol_versions,
             "core_source_sha256": (
                 next(iter(core_hashes)) if core_hashes else None),
             "evaluator_source_sha256": (

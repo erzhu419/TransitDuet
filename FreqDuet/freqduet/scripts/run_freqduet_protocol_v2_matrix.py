@@ -53,6 +53,23 @@ V4_SAFETY_METRICS = [
     "fleet_readiness_delay_mean_s",
     "fleet_readiness_delay_max_s",
 ]
+V5_SAFETY_METRICS = V4_SAFETY_METRICS + [
+    "holding_vehicle_seconds_per_launched_trip",
+    "holding_passenger_min_per_generated",
+    "fleet_denied_trip_rate",
+]
+V5_MECHANISM_METRICS = [
+    "lower_causal_guard_enabled",
+    "lower_causal_guard_active_mean",
+    "lower_causal_guard_limit_mean_s",
+    "lower_causal_guard_adjustment_mean_s",
+    "upper_interval_wait_cost_sum",
+    "upper_interval_onboard_cost_sum",
+    "upper_interval_dispatch_backlog_cost_sum",
+    "upper_plan_raw_delta_mean_s",
+    "upper_plan_projected_delta_mean_s",
+    "upper_plan_projected_delta_sum_abs_mean_s",
+]
 OPTIONAL_COST_METRICS = [
     "service_cost_observed",
     "service_cost_restricted",
@@ -78,7 +95,21 @@ METRIC_DIRECTIONS = {
     "fleet_denied_trips": "min",
     "fleet_readiness_delay_mean_s": "min",
     "fleet_readiness_delay_max_s": "min",
+    "holding_vehicle_seconds_per_launched_trip": "min",
+    "holding_passenger_min_per_generated": "min",
+    "fleet_denied_trip_rate": "min",
+    "upper_interval_wait_cost_sum": "min",
+    "upper_interval_onboard_cost_sum": "min",
+    "upper_interval_dispatch_backlog_cost_sum": "min",
 }
+
+
+def strict_protocol_metrics(protocol_version: str) -> list[str]:
+    if str(protocol_version) == "freqduet-eval-v4":
+        return list(V4_SAFETY_METRICS)
+    if str(protocol_version) == "freqduet-eval-v5":
+        return list(V5_SAFETY_METRICS + V5_MECHANISM_METRICS)
+    return []
 
 
 def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
@@ -114,21 +145,24 @@ def analysis_metrics_for_frame(frame: pd.DataFrame) -> list[str]:
     ]
     protocol_versions = set(frame.get(
         "protocol_version", pd.Series(dtype=str)).astype(str))
-    if "freqduet-eval-v4" in protocol_versions:
-        missing = sorted(set(V4_SAFETY_METRICS) - set(frame.columns))
+    for protocol_version in sorted(protocol_versions):
+        strict_metrics = strict_protocol_metrics(protocol_version)
+        if not strict_metrics:
+            continue
+        missing = sorted(set(strict_metrics) - set(frame.columns))
         if missing:
             raise RuntimeError(
-                "protocol v4 matrix is missing passenger/fleet safety metrics: "
-                f"{missing}")
+                f"{protocol_version} matrix is missing required passenger/"
+                f"fleet/mechanism safety metrics: {missing}")
         incomplete = [
-            metric for metric in V4_SAFETY_METRICS
+            metric for metric in strict_metrics
             if not pd.to_numeric(frame[metric], errors="coerce").notna().all()
         ]
         if incomplete:
             raise RuntimeError(
-                "protocol v4 matrix has incomplete safety metrics: "
+                f"{protocol_version} matrix has incomplete required metrics: "
                 f"{incomplete}")
-        metrics.extend(V4_SAFETY_METRICS)
+        metrics.extend(metric for metric in strict_metrics if metric not in metrics)
     if all(optional_complete.values()):
         metrics.extend(OPTIONAL_COST_METRICS)
     return metrics
@@ -222,8 +256,7 @@ def validate_evaluation_frame(
     if len(expected) != len(set(expected)):
         raise ValueError("evaluation seeds must be unique")
     required_metrics = list(METRICS)
-    if str(protocol_version) == "freqduet-eval-v4":
-        required_metrics.extend(V4_SAFETY_METRICS)
+    required_metrics.extend(strict_protocol_metrics(protocol_version))
     required = {
         "protocol_version", "eval_seed", "checkpoint_ep", "policy_digest",
         "scenario_tape_id", *required_metrics,

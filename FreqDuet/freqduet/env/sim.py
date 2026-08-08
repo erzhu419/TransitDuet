@@ -917,6 +917,35 @@ class env_bus(object):
                 )
                 for direction in (True, False)
             }
+            onboard_by_direction = {
+                direction: sum(
+                    len(getattr(bus, 'passengers', ()))
+                    for bus in self.bus_all
+                    if bus.on_route and bool(bus.direction) == direction
+                )
+                for direction in (True, False)
+            }
+            onboard_low_by_direction = {
+                direction: sum(
+                    float(getattr(
+                        passenger, 'frequency_low_share', 1.0))
+                    for bus in self.bus_all
+                    if bus.on_route and bool(bus.direction) == direction
+                    for passenger in getattr(bus, 'passengers', ())
+                )
+                for direction in (True, False)
+            }
+            dispatch_backlog_by_direction = {
+                direction: sum(
+                    1 for trip in self.timetables
+                    if (not trip.launched
+                        and bool(trip.direction) == direction
+                        and float(getattr(
+                            trip, '_freqduet_scheduled_launch',
+                            trip.launch_time)) <= float(self.current_time))
+                )
+                for direction in (True, False)
+            }
             fleet_by_direction = {
                 direction: sum(
                     1 for bus in self.bus_all
@@ -928,6 +957,9 @@ class env_bus(object):
                 dt_s=self.time_step,
                 waiting_by_direction=waiting_by_direction,
                 waiting_low_by_direction=waiting_low_by_direction,
+                onboard_by_direction=onboard_by_direction,
+                onboard_low_by_direction=onboard_low_by_direction,
+                dispatch_backlog_by_direction=dispatch_backlog_by_direction,
                 fleet_by_direction=fleet_by_direction,
                 n_fleet_target=getattr(self, '_n_fleet_target', 12),
                 headway_events=self.headway_events.events,
@@ -1411,6 +1443,15 @@ class env_bus(object):
             range(total_trips)))
         unfinished_buses = sum(1 for bus in self.bus_all if bus.on_route)
         onboard_at_end = sum(len(bus.passengers) for bus in self.bus_all)
+        denied_trips = int(len(self._fleet_denied_trip_ids))
+        holding_vehicle_seconds = float(sum(
+            getattr(bus, 'episode_hold_vehicle_seconds', 0.0)
+            for bus in self.bus_all
+        ))
+        holding_passenger_seconds = float(sum(
+            getattr(bus, 'episode_hold_person_seconds', 0.0)
+            for bus in self.bus_all
+        ))
         headway_state_total = sum(self._headway_state_source_counts.values())
         headway_state_event_count = self._headway_state_source_counts[
             'arrival_event']
@@ -1442,7 +1483,8 @@ class env_bus(object):
             'fleet_ready_down': int(self._ready_vehicle_count(False)),
             'fleet_denied_dispatch_events': int(
                 self._fleet_denied_dispatch_events),
-            'fleet_denied_trips': int(len(self._fleet_denied_trip_ids)),
+            'fleet_denied_trips': denied_trips,
+            'fleet_denied_trip_rate': denied_trips / max(total_trips, 1),
             'fleet_readiness_delay_mean_s': (
                 float(np.mean(self._fleet_readiness_delays_s))
                 if self._fleet_readiness_delays_s else 0.0
@@ -1461,14 +1503,14 @@ class env_bus(object):
             'trip_completion_rate': completed / max(total_trips, 1),
             'unfinished_buses': int(unfinished_buses),
             'passengers_onboard_at_end': int(onboard_at_end),
-            'holding_vehicle_seconds': float(sum(
-                getattr(bus, 'episode_hold_vehicle_seconds', 0.0)
-                for bus in self.bus_all
-            )),
-            'holding_passenger_seconds': float(sum(
-                getattr(bus, 'episode_hold_person_seconds', 0.0)
-                for bus in self.bus_all
-            )),
+            'holding_vehicle_seconds': holding_vehicle_seconds,
+            'holding_vehicle_seconds_per_launched_trip': (
+                holding_vehicle_seconds / max(launched, 1)),
+            'holding_passenger_seconds': holding_passenger_seconds,
+            'holding_passenger_min_per_generated': (
+                holding_passenger_seconds
+                / max(int(wait_metrics['passengers_generated']), 1)
+                / 60.0),
             'simulation_end_time_s': int(self.current_time),
             'demand_end_time_s': int(self.protocol.demand_end_time_s),
             'evaluation_end_time_s': int(

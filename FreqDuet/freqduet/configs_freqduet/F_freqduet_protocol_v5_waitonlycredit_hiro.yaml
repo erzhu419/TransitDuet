@@ -1,0 +1,12 @@
+_extends: F_freqduet_protocol_v5_main_hiro.yaml
+_name: F_freqduet_protocol_v5_waitonlycredit_hiro
+
+protocol:
+  role: ablation_wait_only_upper_credit_v5
+
+upper:
+  interval_credit:
+    weights:
+      onboard: 0.0
+      dispatch_backlog: 0.0
+

@@ -45,6 +45,11 @@ METRICS = [
     "trip_launch_rate",
     "trip_completion_rate",
 ]
+V5_METRICS = METRICS + [
+    "holding_vehicle_seconds_per_launched_trip",
+    "holding_passenger_min_per_generated",
+    "fleet_denied_trip_rate",
+]
 
 
 def _require_columns(frame: pd.DataFrame, columns: set[str], source: Path) -> None:
@@ -93,8 +98,12 @@ def _load_and_validate_manifests(
             f"missing external baseline manifest {baseline_manifest_path}")
     learned = json.loads(learned_manifest_path.read_text())
     baseline = json.loads(baseline_manifest_path.read_text())
+    protocol_version = str(learned.get("protocol_version", ""))
+    if protocol_version not in {"freqduet-eval-v4", "freqduet-eval-v5"}:
+        raise ValueError(
+            f"unsupported learned protocol version {protocol_version!r}")
     required_learned = {
-        "protocol_version": "freqduet-eval-v4",
+        "protocol_version": protocol_version,
         "strict_complete": True,
         "common_random_numbers_verified": True,
         "run_manifests_verified": True,
@@ -129,6 +138,7 @@ def _load_and_validate_manifests(
         "baseline_manifest": str(baseline_manifest_path),
         "core_source_sha256": learned_sha,
         "external_evaluator_sha256": evaluator_sha,
+        "protocol_version": protocol_version,
     }
 
 
@@ -150,7 +160,9 @@ def compare(
     )
     learned_all = pd.read_csv(learned_path)
     baseline_all = pd.read_csv(baseline_path)
-    required_common = {"config", "eval_seed", "scenario_tape_id", *METRICS}
+    protocol_version = str(provenance["protocol_version"])
+    metrics = V5_METRICS if protocol_version == "freqduet-eval-v5" else METRICS
+    required_common = {"config", "eval_seed", "scenario_tape_id", *metrics}
     _require_columns(
         learned_all, required_common | {"train_seed"}, learned_path)
     _require_columns(
@@ -169,12 +181,12 @@ def compare(
         raise ValueError(f"no baseline rows for {baseline_name}")
     if learned.duplicated(["train_seed", "eval_seed"]).any():
         raise ValueError("learned matrix has duplicate train/eval pairs")
-    if set(learned["protocol_version"].astype(str)) != {"freqduet-eval-v4"}:
-        raise ValueError("learned input is not protocol v4")
+    if set(learned["protocol_version"].astype(str)) != {protocol_version}:
+        raise ValueError("learned input protocol does not match its manifest")
     if ("protocol_version" not in baselines
             or set(baselines["protocol_version"].astype(str))
-            != {"freqduet-eval-v4"}):
-        raise ValueError("external baseline input is not protocol v4")
+            != {protocol_version}):
+        raise ValueError("external baseline protocol does not match learned")
 
     selected_methods = methods or sorted(baselines["method"].astype(str).unique())
     pair_frames = []
@@ -209,7 +221,7 @@ def compare(
             "n_eval_seeds": int(learned["eval_seed"].nunique()),
             "n_pairs": int(len(merged)),
         }
-        for metric in METRICS:
+        for metric in metrics:
             learned_values = pd.to_numeric(
                 merged[f"{metric}_learned"], errors="raise")
             baseline_values = pd.to_numeric(
@@ -247,7 +259,7 @@ def compare(
         pair_frames.append(pair_frame)
         summary_rows.append(row)
 
-    for metric in METRICS:
+    for metric in metrics:
         key = f"delta_{metric}_signflip_p"
         adjusted = holm_adjusted_pvalues([
             float(row.get(key, float("nan"))) for row in summary_rows
@@ -261,13 +273,13 @@ def compare(
     pd.DataFrame(summary_rows).to_csv(
         out_dir / "learned_vs_external_summary.csv", index=False)
     (out_dir / "learned_vs_external_manifest.json").write_text(json.dumps({
-        "protocol_version": "freqduet-eval-v4",
+        "protocol_version": protocol_version,
         "learned_input": str(learned_path),
         "baseline_input": str(baseline_path),
         "learned_config": learned_config,
         "baseline_config": baseline_name,
         "baseline_methods": selected_methods,
-        "metrics": METRICS,
+        "metrics": metrics,
         "delta_definition": "learned minus external baseline",
         "uncertainty": (
             "paired crossed bootstrap over train and eval seed; each draw "

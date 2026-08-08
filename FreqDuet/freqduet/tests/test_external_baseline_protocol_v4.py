@@ -6,7 +6,7 @@ import unittest
 
 import pandas as pd
 
-from scripts.compare_freqduet_external_frozen import METRICS, compare
+from scripts.compare_freqduet_external_frozen import METRICS, V5_METRICS, compare
 from scripts.run_freqduet_external_baselines import (
     external_evaluator_fingerprint,
     install_exact_dispatch_schedule,
@@ -66,6 +66,15 @@ class ExternalBaselineProtocolV4Test(unittest.TestCase):
         self.assertEqual(env.lower_state_input_schema, "causal_forward_v4")
         self.assertEqual(env.headway_reward_mode, "forward_event_only")
         self.assertTrue(env.frequency_enabled)
+
+    def test_v5_baseline_env_uses_the_same_fixed_pool_contract(self):
+        env, config = make_env_from_config(
+            "F_freqduet_protocol_v5_main_hiro")
+
+        self.assertEqual(config["protocol"]["version"], "freqduet-eval-v5")
+        self.assertEqual(env.fleet_inventory_mode, "fixed_pool")
+        self.assertEqual(env.lower_observation_contract, "deployable_apc_avl_v4")
+        self.assertEqual(config["upper"]["fleet_mode"], "fixed")
 
     def test_direct_scenario_mode_rejects_episode_averaging(self):
         with self.assertRaisesRegex(ValueError, "requires episodes=1"):
@@ -195,6 +204,63 @@ class ExternalBaselineProtocolV4Test(unittest.TestCase):
                     root / "out",
                     learned_config="main",
                 )
+
+    def test_external_comparison_accepts_v5_normalized_safety_metrics(self):
+        learned_rows = []
+        for train_seed in (1, 2):
+            for eval_seed in (11, 12):
+                learned_rows.append({
+                    "config": "main",
+                    "train_seed": train_seed,
+                    "eval_seed": eval_seed,
+                    "scenario_tape_id": f"tape-{eval_seed}",
+                    "protocol_version": "freqduet-eval-v5",
+                    **{metric: 0.8 for metric in V5_METRICS},
+                })
+        baseline_rows = [{
+            "config": "main",
+            "method": "fixed_headway",
+            "eval_seed": eval_seed,
+            "scenario_tape_id": f"tape-{eval_seed}",
+            "protocol_version": "freqduet-eval-v5",
+            **{metric: 1.0 for metric in V5_METRICS},
+        } for eval_seed in (11, 12)]
+
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            learned_path = root / "learned.csv"
+            baseline_path = root / "baseline.csv"
+            pd.DataFrame(learned_rows).to_csv(learned_path, index=False)
+            pd.DataFrame(baseline_rows).to_csv(baseline_path, index=False)
+            source_sha = "a" * 64
+            (root / "matrix_manifest.json").write_text(json.dumps({
+                "protocol_version": "freqduet-eval-v5",
+                "strict_complete": True,
+                "common_random_numbers_verified": True,
+                "run_manifests_verified": True,
+                "run_source_fingerprint": {"sha256": source_sha},
+            }))
+            (root / "external_baselines_summary.json").write_text(json.dumps({
+                "direct_scenario_seeds": True,
+                "run_manifests_verified": True,
+                "core_source_sha256": source_sha,
+                "evaluator_source_sha256": "b" * 64,
+            }))
+
+            compare(
+                learned_path,
+                baseline_path,
+                root / "out",
+                learned_config="main",
+            )
+
+            summary = pd.read_csv(
+                root / "out" / "learned_vs_external_summary.csv")
+            self.assertAlmostEqual(
+                summary.iloc[0][
+                    "delta_holding_passenger_min_per_generated_mean"],
+                -0.2,
+            )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,58 @@
+_extends: F_freqduet_protocol_v4_main_hiro.yaml
+_name: F_freqduet_protocol_v5_main_hiro
+
+protocol:
+  version: freqduet-eval-v5
+  role: journey_feasible_frequency_main
+  frequency_contract: split_features_v5
+  action_contract: causal_discrete_holding_v5
+  objective_contract: restricted_passenger_journey_v5
+
+objective:
+  primary_endpoint: restricted_total_journey_horizon_min
+
+upper:
+  # Keep the training deployment contract matched to the N=12 fixed-pool
+  # evaluation. Fleet-size robustness is tested as held-out generalization.
+  fleet_mode: fixed
+  timetable_planner:
+    delta_min_s: -60.0
+    delta_max_s: 60.0
+    headway_budget_mode: zero_sum_delta_v5
+    coefficient_parameterization: antisymmetric_linear_v5
+    promotion_replan: false
+  interval_credit:
+    wait_ownership: all_wait_legacy
+    wait_reference_min: 20.0
+    onboard_reference_min: 20.0
+    dispatch_backlog_reference_trips: 1.0
+    weights:
+      wait: 1.0
+      onboard: 1.0
+      dispatch_backlog: 0.5
+      headway: 0.25
+      fleet: 0.25
+
+lower:
+  causal_holding_guard:
+    enable: true
+    max_deficit_fraction: 1.0
+    minimum_deficit_s: 0.0
+  load_weighted_holding:
+    enable: true
+    source: observation_load
+    reward_weight: 0.03
+    action_norm_s: 45.0
+    load_clip: 1.0
+
+frequency:
+  promotion:
+    enable: false
+  drift_feedback:
+    enable: false
+
+reward_attribution:
+  enable: false
+
+leakage:
+  enable: false
