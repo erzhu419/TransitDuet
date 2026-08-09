@@ -126,6 +126,7 @@ CHECKPOINT_SCORE_MODES = (
     "behavior_robust",
     "latent_behavior_robust",
     "latent_behavior_feasibility_first",
+    "paired_relative_frequency_feasibility_first",
 )
 DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
 DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
@@ -2552,6 +2553,129 @@ def latent_behavior_feasibility_rank(
     )
 
 
+def paired_relative_frequency_feasibility_rank(
+    rows: list[dict[str, Any]],
+    *,
+    baseline_rows: list[dict[str, Any]],
+    expected_modes: Iterable[str],
+    lower_reduction_fraction: float,
+    upper_reduction_fraction: float,
+    lower_power_floor: float,
+    upper_power_floor: float,
+    reward_noninferiority_margin_fraction: float = 0.02,
+) -> tuple[float, float, float]:
+    """Rank against a paired checkpoint on the same selection paths."""
+
+    modes = tuple(dict.fromkeys(map(str, expected_modes)))
+    if not rows or not baseline_rows or not modes:
+        raise ValueError("paired-relative checkpoint ranking needs paired rows")
+    candidate_keys = {
+        (str(row.get("disturbance_mode")), int(row.get("seed")))
+        for row in rows
+    }
+    baseline_keys = {
+        (str(row.get("disturbance_mode")), int(row.get("seed")))
+        for row in baseline_rows
+    }
+    if (
+        len(candidate_keys) != len(rows)
+        or len(baseline_keys) != len(baseline_rows)
+        or candidate_keys != baseline_keys
+    ):
+        raise ValueError(
+            "paired-relative checkpoint rows must use identical unique paths"
+        )
+    for label, fraction in (
+        ("lower", lower_reduction_fraction),
+        ("upper", upper_reduction_fraction),
+    ):
+        if not np.isfinite(float(fraction)) or not 0.0 <= float(fraction) < 1.0:
+            raise ValueError(
+                f"paired-relative {label} reduction must be in [0, 1)"
+            )
+    for label, floor in (
+        ("lower", lower_power_floor),
+        ("upper", upper_power_floor),
+    ):
+        if not np.isfinite(float(floor)) or float(floor) <= 0.0:
+            raise ValueError(
+                f"paired-relative {label} power floor must be positive"
+            )
+    margin_fraction = float(reward_noninferiority_margin_fraction)
+    if not np.isfinite(margin_fraction) or margin_fraction < 0.0:
+        raise ValueError("paired-relative reward margin must be non-negative")
+
+    metrics = (
+        "reward_mean",
+        "LowerLFDriftAbs",
+        "RawLowerLFDriftAbs",
+        "LatentLowerLFDriftAbs",
+        "UpperHFPowerAbs",
+        "LatentUpperHFPowerAbs",
+    )
+
+    def mode_means(source: list[dict[str, Any]], mode: str) -> dict[str, float]:
+        selected = [
+            row for row in source
+            if str(row.get("disturbance_mode")) == mode
+        ]
+        if not selected:
+            raise ValueError(
+                f"paired-relative checkpoint rows omit mode {mode}"
+            )
+        values = {
+            metric: np.asarray(
+                [float(row[metric]) for row in selected], dtype=np.float64
+            )
+            for metric in metrics
+        }
+        if any(not np.all(np.isfinite(value)) for value in values.values()):
+            raise ValueError("paired-relative checkpoint metrics must be finite")
+        return {metric: float(np.mean(value)) for metric, value in values.items()}
+
+    violations: list[float] = []
+    reward_slacks: list[float] = []
+    for mode in modes:
+        baseline = mode_means(baseline_rows, mode)
+        candidate = mode_means(rows, mode)
+        reward_scale = max(abs(baseline["reward_mean"]), 1.0)
+        reward_floor = (
+            baseline["reward_mean"] - margin_fraction * reward_scale
+        )
+        reward_violation = max(
+            (reward_floor - candidate["reward_mean"]) / reward_scale,
+            0.0,
+        )
+        violations.append(reward_violation)
+        reward_slacks.append(
+            (candidate["reward_mean"] - reward_floor) / reward_scale
+        )
+        for metric in (
+            "LowerLFDriftAbs",
+            "RawLowerLFDriftAbs",
+            "LatentLowerLFDriftAbs",
+        ):
+            target = max(
+                (1.0 - float(lower_reduction_fraction)) * baseline[metric],
+                float(lower_power_floor),
+            )
+            violations.append(max(candidate[metric] / target - 1.0, 0.0))
+        for metric in ("UpperHFPowerAbs", "LatentUpperHFPowerAbs"):
+            target = max(
+                (1.0 - float(upper_reduction_fraction)) * baseline[metric],
+                float(upper_power_floor),
+            )
+            violations.append(max(candidate[metric] / target - 1.0, 0.0))
+    values = np.asarray(violations, dtype=np.float64)
+    if values.size != len(modes) * 6 or not np.all(np.isfinite(values)):
+        raise ValueError("paired-relative checkpoint violation registry is invalid")
+    return (
+        -float(np.max(values)),
+        -float(np.sum(np.square(values))),
+        float(min(reward_slacks)),
+    )
+
+
 def train_mujoco_method(
     *,
     method: str,
@@ -2836,11 +2960,21 @@ def train_mujoco_method(
         raise ValueError("unknown MuJoCo checkpoint score mode")
     if (
         name == "flat_ppo"
-        and str(checkpoint_score_mode)
-        == "latent_behavior_feasibility_first"
+        and str(checkpoint_score_mode) in {
+            "latent_behavior_feasibility_first",
+            "paired_relative_frequency_feasibility_first",
+        }
     ):
         raise ValueError(
             "latent behavior feasibility ranking requires hierarchical metrics"
+        )
+    if (
+        str(checkpoint_score_mode)
+        == "paired_relative_frequency_feasibility_first"
+        and not paired_continuation
+    ):
+        raise ValueError(
+            "paired-relative checkpoint ranking requires a paired continuation"
         )
     if (
         not np.isfinite(float(checkpoint_constraint_penalty))
@@ -3056,6 +3190,8 @@ def train_mujoco_method(
     checkpoint_rank_names: tuple[str, ...] = ()
     checkpoint_rank_contract = "disabled"
     checkpoint_score_contract = "mean_reward_mean_v1"
+    paired_relative_baseline_rows: list[dict[str, Any]] = []
+    paired_relative_baseline_parameter_sha256 = ""
     if str(checkpoint_score_mode) in {
         "behavior_robust",
         "latent_behavior_robust",
@@ -3604,6 +3740,53 @@ def train_mujoco_method(
             method=name,
             episode_horizon=episode_horizon,
         )
+        if (
+            str(checkpoint_score_mode)
+            == "paired_relative_frequency_feasibility_first"
+        ):
+            baseline_parameter_sha256 = _model_parameter_sha256(model)
+            paired_relative_baseline_parameter_sha256 = (
+                baseline_parameter_sha256
+            )
+            paired_relative_baseline_rows = [
+                rollout(model, int(seed), False)[1]
+                for seed in selection_rollout_seeds
+            ]
+            if baseline_parameter_sha256 != _model_parameter_sha256(model):
+                raise RuntimeError(
+                    "paired checkpoint baseline evaluation mutated the model"
+                )
+            checkpoint_rank_fn = lambda rows: (
+                paired_relative_frequency_feasibility_rank(
+                    rows,
+                    baseline_rows=paired_relative_baseline_rows,
+                    expected_modes=training_modes,
+                    lower_reduction_fraction=(
+                        selected_lower_deployment_frequency_reference_reduction
+                    ),
+                    upper_reduction_fraction=(
+                        selected_upper_deployment_frequency_reference_reduction
+                    ),
+                    lower_power_floor=(
+                        float(lower_deployment_frequency_rms_budget) ** 2
+                    ),
+                    upper_power_floor=(
+                        float(upper_deployment_frequency_rms_budget) ** 2
+                    ),
+                )
+            )
+            checkpoint_rank_names = (
+                "negative_worst_paired_relative_violation",
+                "negative_paired_relative_violation_l2",
+                "worst_reward_floor_slack",
+            )
+            checkpoint_rank_contract = (
+                "state_aligned_paired_selection_path_reward_floor_and_five_"
+                "frequency_endpoint_relative_feasibility_v1"
+            )
+            checkpoint_score_contract = (
+                "paired_checkpoint_selection_path_relative_feasibility_v1"
+            )
         payload, rows, model = train_frequency_separated_ppo(
             model=model,
             train_seeds=roots,
@@ -3726,6 +3909,23 @@ def train_mujoco_method(
         "checkpoint_constraint_penalty": float(
             checkpoint_constraint_penalty
         ),
+        "paired_relative_checkpoint_baseline": {
+            "enabled": bool(paired_relative_baseline_rows),
+            "row_count": len(paired_relative_baseline_rows),
+            "parameter_sha256": paired_relative_baseline_parameter_sha256,
+            "selection_paths": [
+                {
+                    "disturbance_mode": str(row["disturbance_mode"]),
+                    "seed": int(row["seed"]),
+                }
+                for row in paired_relative_baseline_rows
+            ],
+            "summary": (
+                summarize(paired_relative_baseline_rows)
+                if paired_relative_baseline_rows else {}
+            ),
+            "heldout_rows_used": 0,
+        },
         "core_evaluation_seed_condition_assignment": {
             str(seed): mode for seed, mode in evaluation_seed_modes.items()
         },

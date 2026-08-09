@@ -25,6 +25,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     crossed_checkpoint_selection_paths,
     environment_dimensions,
     latent_behavior_feasibility_rank,
+    paired_relative_frequency_feasibility_rank,
     lower_action_router_training_strength,
     load_paired_mujoco_checkpoint,
     mujoco_policy_state_dim,
@@ -549,6 +550,55 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 
         self.assertGreater(balanced, imbalanced)
         self.assertLess(balanced[2], imbalanced[2])
+
+    def test_paired_relative_rank_enforces_reward_and_all_endpoints(self):
+        def rows(reward: float, frequency: float):
+            return [
+                {
+                    "disturbance_mode": mode,
+                    "seed": seed,
+                    "reward_mean": reward,
+                    "LowerLFDriftAbs": frequency,
+                    "RawLowerLFDriftAbs": frequency,
+                    "LatentLowerLFDriftAbs": frequency,
+                    "UpperHFPowerAbs": frequency,
+                    "LatentUpperHFPowerAbs": frequency,
+                }
+                for mode in ("standard", "mixed")
+                for seed in (11, 13)
+            ]
+
+        baseline = rows(100.0, 1.0)
+        feasible = paired_relative_frequency_feasibility_rank(
+            rows(99.0, 0.90),
+            baseline_rows=baseline,
+            expected_modes=("standard", "mixed"),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        high_reward_leaky = paired_relative_frequency_feasibility_rank(
+            rows(110.0, 1.20),
+            baseline_rows=baseline,
+            expected_modes=("standard", "mixed"),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        self.assertEqual(feasible[0], 0.0)
+        self.assertGreater(feasible, high_reward_leaky)
+        with self.assertRaisesRegex(ValueError, "identical unique paths"):
+            paired_relative_frequency_feasibility_rank(
+                rows(99.0, 0.90)[:-1],
+                baseline_rows=baseline,
+                expected_modes=("standard", "mixed"),
+                lower_reduction_fraction=0.05,
+                upper_reduction_fraction=0.05,
+                lower_power_floor=1e-6,
+                upper_power_floor=1e-6,
+            )
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
