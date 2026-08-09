@@ -3829,7 +3829,7 @@ def train_mujoco_method(
         "deployment_frequency_constraint_contract": (
             "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
             "lower_lpf32_anchor_relative_target_with_absolute_floor_and_"
-            "separate_reward_guarded_duals_v2"
+            "dimensionless_separate_reward_guarded_duals_v3"
             if deployment_frequency_requested and name == "freq_hrl"
             else "disabled"
         ),

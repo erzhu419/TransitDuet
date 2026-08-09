@@ -21,6 +21,8 @@ class DeploymentFrequencyStats:
     power_budget: torch.Tensor
     signed_excess: torch.Tensor
     violation: torch.Tensor
+    normalized_signed_excess: torch.Tensor
+    normalized_violation: torch.Tensor
     primitive_steps: int
     segment_count: int
 
@@ -143,11 +145,14 @@ def deployment_frequency_stats(
     component = torch.cat(components, dim=0)
     power = torch.mean(component.square())
     signed_excess = power - power_budget_t
+    normalized_signed_excess = power / power_budget_t - 1.0
     return DeploymentFrequencyStats(
         power=power,
         power_budget=power_budget_t,
         signed_excess=signed_excess,
         violation=F.relu(signed_excess),
+        normalized_signed_excess=normalized_signed_excess,
+        normalized_violation=F.relu(normalized_signed_excess),
         primitive_steps=int(primitive.shape[0]),
         segment_count=len(components),
     )

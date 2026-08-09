@@ -71,6 +71,11 @@ class DeploymentFrequencyStatsTest(unittest.TestCase):
         self.assertAlmostEqual(
             float(stats.signed_excess.detach().cpu().item()), 0.15, places=6
         )
+        self.assertAlmostEqual(
+            float(stats.normalized_signed_excess.detach().cpu().item()),
+            15.0,
+            places=5,
+        )
         stats.signed_excess.backward()
         self.assertTrue(torch.all(torch.isfinite(actions.grad)))
         self.assertGreater(float(torch.linalg.vector_norm(actions.grad)), 0.0)

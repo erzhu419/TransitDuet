@@ -2521,6 +2521,10 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_signed_excess_after": 0.0,
             f"{prefix}_violation_before": 0.0,
             f"{prefix}_violation_after": 0.0,
+            f"{prefix}_normalized_signed_excess_before": 0.0,
+            f"{prefix}_normalized_signed_excess_after": 0.0,
+            f"{prefix}_normalized_violation_before": 0.0,
+            f"{prefix}_normalized_violation_after": 0.0,
             f"{prefix}_reference_power": 0.0,
             f"{prefix}_target_power": 0.0,
             f"{prefix}_reference_reduction_fraction": reference_reduction,
@@ -2639,7 +2643,7 @@ class FrequencySeparatedActorCriticPPO:
             return -reward_surrogate + anchor_loss
 
         def constraint_loss_fn() -> torch.Tensor:
-            return lambda_before * current_stats().signed_excess
+            return lambda_before * current_stats().normalized_signed_excess
 
         with torch.no_grad():
             before = current_stats()
@@ -2654,7 +2658,9 @@ class FrequencySeparatedActorCriticPPO:
         }
         attempted = bool(
             lambda_before > 0.0
-            and float(before.signed_excess.detach().cpu().item()) > 0.0
+            and float(
+                before.normalized_signed_excess.detach().cpu().item()
+            ) > 0.0
         )
         if attempted:
             diagnostics.update(_reward_guarded_constraint_step(
@@ -2678,8 +2684,11 @@ class FrequencySeparatedActorCriticPPO:
         with torch.no_grad():
             after = current_stats()
         signed_after = float(after.signed_excess.detach().cpu().item())
+        normalized_signed_after = float(
+            after.normalized_signed_excess.detach().cpu().item()
+        )
         lambda_after = float(np.clip(
-            lambda_before + dual_lr * signed_after,
+            lambda_before + dual_lr * normalized_signed_after,
             0.0,
             float(getattr(cfg, f"{prefix}_max_lambda")),
         ))
@@ -2701,6 +2710,18 @@ class FrequencySeparatedActorCriticPPO:
             ),
             f"{prefix}_violation_after": float(
                 after.violation.detach().cpu().item()
+            ),
+            f"{prefix}_normalized_signed_excess_before": float(
+                before.normalized_signed_excess.detach().cpu().item()
+            ),
+            f"{prefix}_normalized_signed_excess_after": (
+                normalized_signed_after
+            ),
+            f"{prefix}_normalized_violation_before": float(
+                before.normalized_violation.detach().cpu().item()
+            ),
+            f"{prefix}_normalized_violation_after": float(
+                after.normalized_violation.detach().cpu().item()
             ),
             f"{prefix}_reference_power": float(
                 reference_power.detach().cpu().item()
