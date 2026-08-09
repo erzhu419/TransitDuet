@@ -20,7 +20,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_8_latent_matched_preflight | mujoco_control | development_preflight | no_joint_candidate | development_only | false |
 | mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development_preflight | deployment_constraint_misaligned | development_only | false |
 | mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_11_iterative_projection_protocol | mujoco_control | development_preflight | preregistered_not_run | excluded_until_audited | false |
+| mujoco_v14_11_iterative_projection_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -116,20 +116,22 @@ The source-bound single-seed HalfCheetah preflight completed and passed projecti
 
 Forbidden: MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a submission-ready selected algorithm.
 
-### mujoco_v14_11_iterative_projection_protocol
+### mujoco_v14_11_iterative_projection_preflight
 
-The source-bound v14.11 development protocol replaces the v14.10 single
-post-PPO correction with an iterative deterministic actor-mean projection.
-All accepted steps share one cumulative PPO reward-loss budget. The frozen
-single-seed preflight compares otherwise matched `k=1`, `k=4`, `k=8`, and
-`k=16` arms and requires a trained checkpoint plus a material within-update
-reduction gain over `k=1` before any multiseed expansion. No scheduler outcome
-has yet been admitted to this ledger.
+The source-bound v14.11 HalfCheetah preflight completed through scheduleurm.
+Iterative deterministic actor-mean projection increased mean same-batch power
+reduction from 0.94% for `k=1` to 3.87--10.18% for the registered iterative
+arms, with zero cumulative PPO surrogate-budget violations. The calibration
+passed, but every learned arm selected the initial-checkpoint fallback. A
+near-candidate improved mean return and all five pooled frequency endpoints,
+yet failed the worst-condition paired frequency and reward-floor rank. The
+full multiseed screen was not launched. This outcome identifies pooled-mean
+training constraints versus worst-condition selection as the next objective
+mismatch.
 
-Forbidden: The v14.11 implementation, unit test, local smoke, scheduler task
-state, or unaudited artifact supports reward improvement, learned frequency
-separation, no-tradeoff behavior, cross-task generality, or confirmatory
-evidence.
+Forbidden: v14.11 supports an accepted learned checkpoint, held-out frequency
+separation, reward improvement, no-tradeoff behavior, cross-task generality,
+confirmatory evidence, or a submission-ready selected algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
