@@ -185,6 +185,10 @@ class MujocoV1411IterativeProjectionScreenTest(unittest.TestCase):
         self.assertFalse(set(flattened) & old)
         self.assertEqual(
             spec.FROZEN_CORE_PROTOCOL_VERSION,
+            "freq_hrl_mujoco_shared_core_v14_11_iterative_deployment_projection",
+        )
+        self.assertNotEqual(
+            spec.FROZEN_CORE_PROTOCOL_VERSION,
             MUJOCO_CONTROL_PROTOCOL_VERSION,
         )
 
