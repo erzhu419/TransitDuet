@@ -129,6 +129,7 @@ def _input_sha256(run_dir: Path) -> str:
     digest = hashlib.sha256()
     files = [
         run_dir / "preregistration.json",
+        run_dir / "merged" / "run_scoped_result_sync.json",
         run_dir / "merged" / "cell_manifest.json",
     ]
     for environment in spec.ENVIRONMENTS:

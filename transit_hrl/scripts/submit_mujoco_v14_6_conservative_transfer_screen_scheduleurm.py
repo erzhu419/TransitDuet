@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import hashlib
 import json
@@ -11,6 +12,7 @@ import math
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -138,6 +140,20 @@ def task_relative_dir(
         environment=environment,
         arm=arm,
         optimizer_seed=optimizer_seed,
+    )
+
+
+def task_signature(
+    run_name: str,
+    *,
+    phase: str,
+    environment: str,
+    arm: str,
+    optimizer_seed: int,
+) -> str:
+    return (
+        f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/{phase}/"
+        f"{environment}/{arm}/rep-{int(optimizer_seed)}"
     )
 
 
@@ -288,9 +304,12 @@ def build_scheduler_spec(
             output_dir=relative,
         ),
         "cwd": str(ROOT),
-        "signature": (
-            f"Freq-HRL/{SIGNATURE_VERSION}/{args.run_name}/{phase}/"
-            f"{environment}/{arm}/rep-{optimizer_seed}"
+        "signature": task_signature(
+            args.run_name,
+            phase=phase,
+            environment=environment,
+            arm=arm,
+            optimizer_seed=optimizer_seed,
         ),
         "resource_family": (
             f"Freq-HRL/{SIGNATURE_VERSION}/{phase}/{arm}/{environment}/cell"
@@ -410,6 +429,19 @@ def _read_cell(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]], list[d
 def merge_results(args: argparse.Namespace) -> None:
     required = ("cell_summary.json", "training_history.json", "evaluation_rows.csv", "checkpoint.pt")
     tasks = experiment_cells(tuple(spec.ARMS), PHASES)
+    sync_manifest_path = (
+        ROOT / "results" / args.run_name / "merged"
+        / "run_scoped_result_sync.json"
+    )
+    if not sync_manifest_path.is_file():
+        raise SystemExit("v14.6 merge requires run-scoped result sync")
+    sync_manifest = json.loads(sync_manifest_path.read_text(encoding="utf-8"))
+    if (
+        sync_manifest.get("status") != "run_scoped_result_sync_complete"
+        or int(sync_manifest.get("cell_count", -1)) != len(tasks)
+        or len(sync_manifest.get("task_ids", [])) != len(tasks)
+    ):
+        raise SystemExit("v14.6 run-scoped result sync manifest is invalid")
     expected = [
         (
             phase,
@@ -682,6 +714,158 @@ def merge_results(args: argparse.Namespace) -> None:
     print(f"merged {len(cells)} frozen MuJoCo v14.6 cells")
 
 
+def _scheduler_tasks_for_run(run_name: str) -> dict[str, dict[str, Any]]:
+    command = [
+        sys.executable,
+        str(SCHEDULER),
+        "status",
+        "--all",
+        "--json",
+        "--brief",
+        "--readonly",
+        "--lock-timeout",
+        "30",
+    ]
+    completed = None
+    for attempt in range(1, 4):
+        completed = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode == 0:
+            break
+        if attempt < 3:
+            time.sleep(float(attempt))
+    if completed is None or completed.returncode != 0:
+        raise RuntimeError(
+            "v14.6 scheduler snapshot failed after three attempts: "
+            + str((completed.stderr if completed else "")[-500:])
+        )
+    payload = json.loads(completed.stdout)
+    prefix = f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/"
+    matches: dict[str, dict[str, Any]] = {}
+    for task in payload.get("tasks", []):
+        signature = str(task.get("signature", ""))
+        if not signature.startswith(prefix):
+            continue
+        if signature in matches:
+            raise RuntimeError(
+                f"duplicate scheduler signature during v14.6 sync: {signature}"
+            )
+        matches[signature] = task
+    return matches
+
+
+def sync_results(args: argparse.Namespace) -> None:
+    required = (
+        "cell_summary.json",
+        "training_history.json",
+        "evaluation_rows.csv",
+        "checkpoint.pt",
+    )
+    expected: list[tuple[str, Path, dict[str, Any]]] = []
+    scheduler_tasks = _scheduler_tasks_for_run(args.run_name)
+    cells = experiment_cells(
+        args.arms, args.phases
+    )
+    if int(args.max_cells) > 0:
+        cells = cells[:int(args.max_cells)]
+    for phase, environment, arm, seed in cells:
+        signature = task_signature(
+            args.run_name,
+            phase=phase,
+            environment=environment,
+            arm=arm,
+            optimizer_seed=seed,
+        )
+        task = scheduler_tasks.get(signature)
+        if task is None:
+            raise SystemExit(f"v14.6 sync task missing: {signature}")
+        if task.get("status") != "done" or not task.get("node"):
+            raise SystemExit(
+                f"v14.6 sync task is not done: {task.get('id')} "
+                f"status={task.get('status')}"
+            )
+        path = ROOT / task_relative_dir(
+            args.run_name,
+            phase=phase,
+            environment=environment,
+            arm=arm,
+            optimizer_seed=seed,
+        )
+        expected.append((signature, path, task))
+
+    scheduler_dir = str(SCHEDULER.parent)
+    if scheduler_dir not in sys.path:
+        sys.path.insert(0, scheduler_dir)
+    import scheduler as scheduler_runtime  # type: ignore  # noqa: E402
+
+    pending = [
+        item for item in expected
+        if any(not (item[1] / name).is_file() for name in required)
+    ]
+    errors: dict[str, str] = {}
+    for attempt in range(1, 4):
+        if not pending:
+            break
+
+        def sync_one(
+            item: tuple[str, Path, dict[str, Any]],
+        ) -> tuple[str, bool, str]:
+            signature, path, task = item
+            ok, message = scheduler_runtime._sync_one_result({
+                "node": task["node"],
+                "result_dir": str(path),
+                "local_result_dir": str(path),
+            })
+            return signature, bool(ok), str(message)
+
+        errors = {}
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=int(args.sync_workers)
+        ) as executor:
+            for signature, ok, message in executor.map(sync_one, pending):
+                if not ok:
+                    errors[signature] = message
+        pending = [
+            item for item in pending
+            if any(not (item[1] / name).is_file() for name in required)
+        ]
+        if pending and attempt < 3:
+            time.sleep(float(attempt))
+    if pending:
+        signature, path, _ = pending[0]
+        raise SystemExit(
+            "v14.6 result sync incomplete: "
+            f"{len(pending)} cells; first={signature}; path={path}; "
+            f"error={errors.get(signature, 'missing required files')}"
+        )
+
+    output = ROOT / "results" / args.run_name / "merged"
+    output.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "status": "run_scoped_result_sync_complete",
+        "run_name": args.run_name,
+        "sync_workers": int(args.sync_workers),
+        "cell_count": len(expected),
+        "task_ids": [item[2]["id"] for item in expected],
+        "node_counts": {
+            node: sum(item[2]["node"] == node for item in expected)
+            for node in sorted({str(item[2]["node"]) for item in expected})
+        },
+    }
+    (output / "run_scoped_result_sync.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"synced {len(expected)} MuJoCo v14.6 cells with "
+        f"{int(args.sync_workers)} workers"
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
@@ -694,6 +878,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--max-cells", type=int, default=0)
     parser.add_argument("--skip-complete-cells", action="store_true")
+    parser.add_argument("--sync-only", action="store_true")
+    parser.add_argument("--sync-workers", type=int, default=4)
     parser.add_argument("--merge-only", action="store_true")
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -713,11 +899,16 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         raise SystemExit(f"invalid v14.6 screen nodes: {unknown_nodes}")
     if not args.python_executable.strip():
         args.python_executable = default_python_executable(args.nodes)
+    if not 1 <= int(args.sync_workers) <= 8:
+        raise SystemExit("v14.6 sync workers must be in [1, 8]")
     return args
 
 
 def main() -> None:
     args = normalize_args(build_parser().parse_args())
+    if args.sync_only:
+        sync_results(args)
+        return
     if args.merge_only:
         merge_results(args)
         return

@@ -21,6 +21,7 @@ from scripts.submit_mujoco_v14_6_conservative_transfer_screen_scheduleurm import
     build_scheduler_spec,
     build_training_command,
     experiment_cells,
+    task_signature,
 )
 
 
@@ -104,6 +105,16 @@ class MujocoV146ConservativeTransferScreenTest(unittest.TestCase):
         self.assertIsNone(scheduler["require_node"])
         self.assertEqual(scheduler["cpu"], 1)
         self.assertEqual(scheduler["allowed_nodes"], args.nodes)
+        self.assertEqual(
+            scheduler["signature"],
+            task_signature(
+                args.run_name,
+                phase="continuation",
+                environment="HalfCheetah-v5",
+                arm=candidate,
+                optimizer_seed=spec.OPTIMIZER_SEEDS[0],
+            ),
+        )
         self.assertEqual(len(scheduler["wait_for_files"]), 2)
         self.assertTrue(all(
             "anchors/HalfCheetah-v5" in path
@@ -176,6 +187,13 @@ class MujocoV146ConservativeTransferScreenTest(unittest.TestCase):
                 "status": "development_screen_complete_unanalyzed",
                 "cell_count": expected_cells,
             }), encoding="utf-8")
+            (run / "merged" / "run_scoped_result_sync.json").write_text(
+                json.dumps({
+                    "status": "run_scoped_result_sync_complete",
+                    "cell_count": expected_cells,
+                }),
+                encoding="utf-8",
+            )
 
             for seed in spec.OPTIMIZER_SEEDS:
                 anchor = (
