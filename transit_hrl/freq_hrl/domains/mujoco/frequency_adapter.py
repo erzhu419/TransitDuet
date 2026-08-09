@@ -23,6 +23,7 @@ RESPONSIBILITY_MODES = (
 LOWER_ACTION_ROUTER_MODES = (
     "direct",
     "causal_ema_high_pass",
+    "causal_ema_conservative_transfer",
 )
 
 
@@ -213,7 +214,10 @@ class CausalLowerActionRouter:
     The EMA baseline is computed only from proposals available before the
     current action.  Its current value is exposed through ``context`` so the
     policy observes all router state.  ``direct`` exactly preserves the legacy
-    action path and exposes the preceding effective lower action.
+    action path and exposes the preceding effective lower action.  The
+    conservative-transfer mode returns the removed component as a causal upper
+    transfer, making transfer plus effective action reconstruct the latent
+    proposal even when the effective branch clips.
     """
 
     mode: str = "direct"
@@ -275,8 +279,14 @@ class CausalLowerActionRouter:
         )
         effective = np.clip(requested, -limit, limit)
         clipped = np.abs(effective - requested) > 1e-12
-        if self.mode == "causal_ema_high_pass":
+        if self.mode != "direct":
             self._baseline += self.alpha * (latent - self._baseline)
+        removed = latent - effective
+        upper_transfer = (
+            removed
+            if self.mode == "causal_ema_conservative_transfer"
+            else np.zeros_like(removed)
+        )
         self._previous_effective = effective.copy()
         return {
             "latent": latent.astype(np.float32, copy=True),
@@ -284,9 +294,11 @@ class CausalLowerActionRouter:
             "baseline_after": self._baseline.astype(np.float32, copy=True),
             "requested_effective": requested.astype(np.float32, copy=True),
             "effective": effective.astype(np.float32, copy=True),
-            "removed_low_frequency": (latent - effective).astype(
-                np.float32, copy=True
-            ),
+            "removed_low_frequency": removed.astype(np.float32, copy=True),
+            "upper_transfer": upper_transfer.astype(np.float32, copy=True),
+            "transfer_reconstruction_error": (
+                upper_transfer + effective - latent
+            ).astype(np.float64, copy=True),
             "clip_rate": float(np.mean(clipped)),
         }
 

@@ -306,6 +306,30 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertIsNotNone(effective)
         np.testing.assert_allclose(effective, [0.54], atol=1e-8)
 
+    def test_conservative_router_transfers_removed_action_exactly(self):
+        router = CausalLowerActionRouter(
+            mode="causal_ema_conservative_transfer",
+            alpha=1.0,
+            strength=1.0,
+        )
+        router.reset(2)
+        router.route(np.asarray([1.0, -1.0]), action_limit=1.0)
+        routed = router.route(
+            np.asarray([-1.0, 1.0]), action_limit=0.5
+        )
+        np.testing.assert_allclose(
+            np.asarray(routed["upper_transfer"])
+            + np.asarray(routed["effective"]),
+            routed["latent"],
+            atol=1e-7,
+        )
+        np.testing.assert_allclose(
+            routed["transfer_reconstruction_error"],
+            np.zeros(2),
+            atol=1e-12,
+        )
+        self.assertEqual(float(routed["clip_rate"]), 1.0)
+
     def test_physical_constraint_cost_avoids_small_budget_blowup(self):
         budget = {
             "budget_excess_squared": 100.0,
@@ -423,6 +447,9 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "source_manifest_sha256": "c" * 64,
             "frozen_parameter_sha256": "a" * 64,
             "frozen_checkpoint_sha256": "a" * 64,
+            "lower_action_router_mode": "direct",
+            "lower_action_router_observe_strength": False,
+            "responsibility_mode": "additive",
         }
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
@@ -578,6 +605,70 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             additive_batch.lower.cost_state,
             transfer_batch.lower.cost_state,
         ))
+
+    def test_conservative_router_is_closed_loop_action_invariant(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=64
+        )
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=137,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=64,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            responsibility_mode="additive",
+            lower_action_router_mode=(
+                "causal_ema_conservative_transfer"
+            ),
+            lower_action_router_alpha=0.04,
+            lower_action_router_observe_strength=False,
+            sample=False,
+            episode_horizon=64,
+        )
+        _, control = rollout_hierarchical(
+            model, lower_action_router_strength=0.0, **common
+        )
+        _, transferred = rollout_hierarchical(
+            model, lower_action_router_strength=0.15, **common
+        )
+
+        for metric in (
+            "episode_return",
+            "reward_mean",
+            "action_energy",
+            "action_smoothness",
+            "UpperPolicyActionRMS",
+            "LatentLowerActionRMS",
+            "LatentLowerLFDriftAbs",
+        ):
+            self.assertEqual(control[metric], transferred[metric], metric)
+        self.assertGreater(transferred["LowerRouterRemovedRMS"], 0.0)
+        self.assertEqual(
+            transferred["LowerRouterUpperTransferRMS"],
+            transferred["LowerRouterRemovedRMS"],
+        )
+        self.assertEqual(
+            transferred["LowerRouterFunctionPreserving"], 1.0
+        )
+        self.assertLessEqual(
+            transferred["LowerRouterActionReconstructionRMS"], 1e-7
+        )
+        self.assertLessEqual(
+            transferred["ResponsibilityReconstructionRMS"], 1e-7
+        )
+        self.assertLess(
+            transferred["RawLowerLFDriftAbs"],
+            control["RawLowerLFDriftAbs"],
+        )
 
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
         observation_dim, action_dim = environment_dimensions(
@@ -735,7 +826,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_5_paired_anchor_continuation",
+            MUJOCO_CONTROL_PROTOCOL_VERSION,
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -1044,6 +1135,90 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             self.assertEqual(
                 direct_payload["lower_action_router_mode"], "direct"
             )
+
+    def test_conservative_router_continuation_uses_same_hidden_state_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            baseline_dir = Path(directory) / "conservative_baseline"
+            common = dict(
+                method="freq_hrl_no_leakage",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                train_seeds=[337],
+                selection_seeds=[347],
+                eval_seeds=[349],
+                steps=8,
+                episode_horizon=8,
+                iterations=1,
+                optimizer_seed=353,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_mode=(
+                    "causal_ema_conservative_transfer"
+                ),
+                lower_action_router_alpha=0.04,
+                lower_action_router_observe_strength=False,
+                responsibility_mode="additive",
+                checkpoint_smoothing_window=1,
+                checkpoint_min_delta=0.0,
+                checkpoint_evaluation_interval=1,
+                evaluation_disturbance_modes=["standard"],
+            )
+            baseline_payload, baseline_rows, baseline_model = (
+                train_mujoco_method(
+                    lower_action_router_strength=0.0,
+                    **common,
+                )
+            )
+            write_cell(
+                baseline_dir,
+                baseline_payload,
+                baseline_rows,
+                baseline_model,
+            )
+
+            candidate_payload, candidate_rows, _ = train_mujoco_method(
+                lower_action_router_strength=0.15,
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                initial_checkpoint_router_mode=(
+                    "causal_ema_conservative_transfer"
+                ),
+                checkpoint_minimum_iteration=0,
+                **common,
+            )
+
+            continuation = candidate_payload[
+                "paired_checkpoint_continuation"
+            ]
+            self.assertTrue(continuation["enabled"])
+            self.assertEqual(
+                continuation["checkpoint_router_mode"],
+                "causal_ema_conservative_transfer",
+            )
+            self.assertFalse(
+                continuation["checkpoint_router_observe_strength"]
+            )
+            self.assertEqual(
+                continuation["checkpoint_responsibility_mode"], "additive"
+            )
+            self.assertEqual(
+                candidate_payload["actor_anchor_zero_state_indices"], []
+            )
+            self.assertEqual(
+                candidate_payload["selected_checkpoint_iteration"], 0
+            )
+            self.assertEqual(
+                candidate_payload["actor_anchor_contract"],
+                "frozen_matched_conservative_policy_same_state_analytic_"
+                "gaussian_kl_v2",
+            )
+            self.assertTrue(all(
+                row["LowerRouterFunctionPreserving"] == 1.0
+                and row["LowerRouterActionReconstructionRMS"] <= 1e-7
+                for row in candidate_rows
+            ))
 
     def test_router_curriculum_rejects_hidden_strength(self):
         with self.assertRaisesRegex(

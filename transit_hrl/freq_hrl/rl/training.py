@@ -483,6 +483,7 @@ def train_frequency_separated_ppo(
     metadata: dict[str, Any] | None = None,
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
+    checkpoint_minimum_iteration: int = -1,
     checkpoint_evaluation_interval: int = 1,
     checkpoint_score_fn: CheckpointScoreFn | None = None,
     checkpoint_score_contract: str = "mean_objective",
@@ -518,6 +519,11 @@ def train_frequency_separated_ppo(
             raise ValueError("checkpoint score must be finite")
         return score
 
+    total_iterations = max(1, int(iterations))
+    if int(checkpoint_minimum_iteration) >= total_iterations:
+        raise ValueError(
+            "checkpoint minimum iteration must be below total iterations"
+        )
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
@@ -527,6 +533,7 @@ def train_frequency_separated_ppo(
         initial_state=model.state_dict(),
         smoothing_window=checkpoint_smoothing_window,
         min_delta=checkpoint_min_delta,
+        minimum_eligible_iteration=checkpoint_minimum_iteration,
     )
     history: list[dict[str, Any]] = [{
         "iteration": -1,
@@ -562,7 +569,6 @@ def train_frequency_separated_ppo(
         "promotion_cost_value_optimizer_steps": 0.0,
     }]
 
-    total_iterations = max(1, int(iterations))
     for iteration in range(total_iterations):
         batches: list[HierarchicalTrajectoryBatch] = []
         sampled_rows = []
@@ -611,6 +617,8 @@ def train_frequency_separated_ppo(
             **metrics,
         })
 
+    if not selector.has_eligible_selection:
+        raise RuntimeError("checkpoint selector produced no eligible checkpoint")
     model.load_state_dict(selector.best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     actor_optimizer_steps = int(sum(

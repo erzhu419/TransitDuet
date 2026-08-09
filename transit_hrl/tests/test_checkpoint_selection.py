@@ -79,6 +79,38 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
                 initial_state={},
                 min_delta=-1e-3,
             )
+        with self.assertRaises(ValueError):
+            RobustValidationCheckpointSelector(
+                initial_score=0.0,
+                initial_state={},
+                minimum_eligible_iteration=-2,
+            )
+
+    def test_minimum_iteration_excludes_anchor_and_selects_first_trained_state(self):
+        selector = RobustValidationCheckpointSelector(
+            initial_score=10.0,
+            initial_state={"step": -1},
+            minimum_eligible_iteration=2,
+        )
+        self.assertFalse(
+            selector.initial_history_fields()["checkpoint_selection_eligible"]
+        )
+        for iteration, score in enumerate((9.0, 8.0, 7.0)):
+            result = selector.consider(
+                score=score,
+                state={"step": iteration},
+                iteration=iteration,
+            )
+        self.assertTrue(result["checkpoint_selected"])
+        self.assertEqual(selector.selected_iteration, 2)
+        self.assertEqual(selector.best_state, {"step": 2})
+        metadata = selector.metadata(total_iterations=4)
+        self.assertEqual(
+            metadata["checkpoint_selection_protocol"],
+            "trailing_mean_material_improvement_minimum_iteration_v2",
+        )
+        self.assertEqual(metadata["checkpoint_minimum_eligible_iteration"], 2)
+        self.assertTrue(metadata["checkpoint_has_eligible_selection"])
 
     def test_smdp_trainer_accepts_a_registered_custom_score_contract(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
@@ -135,6 +167,54 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             "minimum_validation_reward_v1",
         )
         self.assertEqual(heldout[0]["reward_mean"], 30.0)
+
+    def test_smdp_trainer_can_require_a_trained_checkpoint(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+        ))
+
+        def rollout_fn(_model, seed, train):
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+            )
+            return (builder.build() if train else None), {
+                "reward_mean": float(seed),
+            }
+
+        payload, _, _ = train_frequency_separated_ppo(
+            model=model,
+            train_seeds=[1],
+            selection_seeds=[10],
+            eval_seeds=[20],
+            iterations=1,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+            checkpoint_minimum_iteration=0,
+        )
+
+        self.assertFalse(
+            payload["history"][0]["checkpoint_selection_eligible"]
+        )
+        self.assertEqual(payload["selected_checkpoint_iteration"], 0)
+        self.assertTrue(payload["checkpoint_has_eligible_selection"])
 
     def test_joint_trainer_uses_the_same_custom_score_contract(self):
         model = JointActorCriticPPO(JointPPOConfig(

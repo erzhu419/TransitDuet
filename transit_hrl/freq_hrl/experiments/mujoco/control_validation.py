@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_5_paired_anchor_continuation"
+    "freq_hrl_mujoco_shared_core_v14_6_conservative_router_transfer"
 )
 METHODS = (
     "freq_hrl",
@@ -93,6 +93,13 @@ LOWER_ACTION_ROUTER_TRAINING_SCHEDULES = (
     "constant",
     "delayed_linear",
     "delayed_cosine",
+)
+CAUSAL_LOWER_ACTION_ROUTER_MODES = {
+    "causal_ema_high_pass",
+    "causal_ema_conservative_transfer",
+}
+CONSERVATIVE_LOWER_ACTION_ROUTER_MODE = (
+    "causal_ema_conservative_transfer"
 )
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
 LEAKAGE_COST_MODES = (
@@ -204,8 +211,11 @@ def load_paired_mujoco_checkpoint(
     optimizer_seed: int,
     expected_code_revision: str,
     expected_source_manifest_sha256: str,
+    expected_router_mode: str = "direct",
+    expected_router_observe_strength: bool = True,
+    expected_responsibility_mode: str = "causal_lf_transfer",
 ) -> dict[str, Any]:
-    """Load and audit a matched direct-policy continuation checkpoint."""
+    """Load and audit a matched zero-strength continuation checkpoint."""
 
     checkpoint_file = Path(checkpoint_path)
     summary_file = Path(summary_path)
@@ -224,10 +234,12 @@ def load_paired_mujoco_checkpoint(
         "optimizer_seed": int(optimizer_seed),
         "code_revision": str(expected_code_revision),
         "source_manifest_sha256": str(expected_source_manifest_sha256),
-        "lower_action_router_mode": "direct",
+        "lower_action_router_mode": str(expected_router_mode),
         "lower_action_router_strength": 0.0,
-        "lower_action_router_observe_strength": True,
-        "responsibility_mode": "causal_lf_transfer",
+        "lower_action_router_observe_strength": bool(
+            expected_router_observe_strength
+        ),
+        "responsibility_mode": str(expected_responsibility_mode),
     }
     mismatches = {
         key: {"expected": value, "observed": summary.get(key)}
@@ -264,6 +276,11 @@ def load_paired_mujoco_checkpoint(
         "frozen_parameter_sha256": frozen_parameter_sha256,
         "code_revision": str(expected_code_revision),
         "source_manifest_sha256": str(expected_source_manifest_sha256),
+        "lower_action_router_mode": str(expected_router_mode),
+        "lower_action_router_observe_strength": bool(
+            expected_router_observe_strength
+        ),
+        "responsibility_mode": str(expected_responsibility_mode),
     }
     checkpoint_mismatches = {
         key: {"expected": value, "observed": checkpoint.get(key)}
@@ -313,6 +330,11 @@ def load_paired_mujoco_checkpoint(
         "checkpoint_optimizer_seed": int(optimizer_seed),
         "checkpoint_environment": str(env_id),
         "checkpoint_protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "checkpoint_router_mode": str(expected_router_mode),
+        "checkpoint_router_observe_strength": bool(
+            expected_router_observe_strength
+        ),
+        "checkpoint_responsibility_mode": str(expected_responsibility_mode),
     }
 
 
@@ -550,6 +572,7 @@ def _episode_row(
     raw_lower_actions: list[np.ndarray],
     latent_lower_actions: list[np.ndarray],
     lower_router_removed_actions: list[np.ndarray],
+    lower_router_reconstruction_errors: list[np.ndarray],
     lower_router_clip_values: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
@@ -594,6 +617,9 @@ def _episode_row(
     latent_lower = np.asarray(latent_lower_actions, dtype=np.float64)
     router_removed = np.asarray(
         lower_router_removed_actions, dtype=np.float64
+    )
+    router_reconstruction = np.asarray(
+        lower_router_reconstruction_errors, dtype=np.float64
     )
     transfers = np.asarray(responsibility_transfers, dtype=np.float64)
     requested = np.asarray(requested_transfers, dtype=np.float64)
@@ -653,6 +679,19 @@ def _episode_row(
         "LowerRouterRemovedRMS": float(np.sqrt(
             np.mean(np.square(router_removed))
         )),
+        "LowerRouterUpperTransferRMS": float(
+            np.sqrt(np.mean(np.square(router_removed)))
+            if str(lower_action_router_mode)
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            else 0.0
+        ),
+        "LowerRouterFunctionPreserving": float(
+            str(lower_action_router_mode)
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+        ),
+        "LowerRouterActionReconstructionRMS": float(
+            np.sqrt(np.mean(np.square(router_reconstruction)))
+        ),
         "LowerRouterClipRate": float(np.mean(lower_router_clip_values)),
         "EffectiveToLatentLowerEnergyRatio": float(
             np.mean(np.square(raw_lower))
@@ -768,6 +807,16 @@ def _episode_row(
                 method == "flat_ppo"
                 or 0 < upper_transitions < lower_transitions
             )
+            and np.all(np.isfinite(reconstruction))
+            and np.all(np.isfinite(router_reconstruction))
+            and (
+                str(lower_action_router_mode)
+                != CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                or (
+                    float(np.max(np.abs(router_reconstruction))) <= 1e-7
+                    and float(np.max(np.abs(reconstruction))) <= 1e-7
+                )
+            )
         ),
     }
 
@@ -865,6 +914,22 @@ def rollout_hierarchical(
         latent_lower_lf_tracker.reset(action_dim)
         upper_hf_tracker = CausalRollingBandTracker(window=8)
         upper_hf_tracker.reset(action_dim)
+        conservative_router = bool(
+            str(lower_action_router_mode)
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+        )
+
+        def actor_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
+            if conservative_router:
+                context = lower_router.context
+                return context, context
+            return responsibility.raw_lower_lf, lower_router.context
+
+        def cost_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
+            if conservative_router:
+                context = latent_lower_lf_tracker.low
+                return context, context
+            return raw_lower_lf_tracker.low, responsibility_lf_tracker.low
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
@@ -874,6 +939,7 @@ def rollout_hierarchical(
         raw_lower_actions: list[np.ndarray] = []
         latent_lower_actions: list[np.ndarray] = []
         lower_router_removed_actions: list[np.ndarray] = []
+        lower_router_reconstruction_errors: list[np.ndarray] = []
         lower_router_clip_values: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
@@ -930,10 +996,7 @@ def rollout_hierarchical(
                     observation,
                     bands,
                     previous_action,
-                    filter_contexts=(
-                        responsibility.raw_lower_lf,
-                        lower_router.context,
-                    ),
+                    filter_contexts=actor_filter_contexts(),
                     router_strength_context=router_strength_context,
                     frequency_routing=frequency_routing,
                     level="upper",
@@ -984,10 +1047,7 @@ def rollout_hierarchical(
                 observation,
                 bands,
                 upper_policy_action,
-                filter_contexts=(
-                    responsibility.raw_lower_lf,
-                    lower_router.context,
-                ),
+                filter_contexts=actor_filter_contexts(),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -996,10 +1056,7 @@ def rollout_hierarchical(
                 observation,
                 bands,
                 upper_anchor,
-                filter_contexts=(
-                    raw_lower_lf_tracker.low,
-                    responsibility_lf_tracker.low,
-                ),
+                filter_contexts=cost_filter_contexts(),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -1021,6 +1078,9 @@ def rollout_hierarchical(
             raw_lower_residual = np.asarray(
                 routed_lower["effective"], dtype=np.float32
             )
+            router_upper_transfer = np.asarray(
+                routed_lower["upper_transfer"], dtype=np.float32
+            )
             responsibility_split = responsibility.split_lower(
                 raw_lower_residual
             )
@@ -1028,11 +1088,21 @@ def rollout_hierarchical(
                 responsibility_split["lower_responsibility"],
                 dtype=np.float32,
             )
-            # Execute the canonical raw sum once. Re-adding the two attributed
-            # float32 components can introduce mode-specific roundoff that is
-            # amplified by chaotic dynamics despite analytical reconstruction.
+            effective_upper_action = np.asarray(
+                upper_anchor + router_upper_transfer,
+                dtype=np.float32,
+            )
+            canonical_lower_action = (
+                latent_lower_residual
+                if str(lower_action_router_mode)
+                == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                else raw_lower_residual
+            )
+            # Use the pre-split canonical sum once. In conservative mode this
+            # is exactly the direct-policy action, while the reported upper and
+            # lower responsibilities reconstruct it independently.
             nominal = np.clip(
-                upper_policy_action + raw_lower_residual, -1.0, 1.0
+                upper_policy_action + canonical_lower_action, -1.0, 1.0
             )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
@@ -1063,7 +1133,7 @@ def rollout_hierarchical(
                 float(np.mean(np.square(latent_lower_bands["low"]))),
                 float(lower_lf_rms_budget),
             )
-            upper_bands = upper_hf_tracker.update(upper_anchor)
+            upper_bands = upper_hf_tracker.update(effective_upper_action)
             upper_budget = evaluate_rms_leakage_budget(
                 float(np.mean(np.square(upper_bands["high"]))),
                 float(upper_hf_rms_budget),
@@ -1130,7 +1200,7 @@ def rollout_hierarchical(
             rewards.append(float(reward))
             current_episode_return += float(reward)
             executed_actions.append(executed.copy())
-            upper_actions.append(upper_anchor.copy())
+            upper_actions.append(effective_upper_action.copy())
             lower_actions.append(lower_residual.copy())
             upper_policy_actions.append(upper_policy_action.copy())
             raw_lower_actions.append(raw_lower_residual.copy())
@@ -1138,15 +1208,25 @@ def rollout_hierarchical(
             lower_router_removed_actions.append(np.asarray(
                 routed_lower["removed_low_frequency"], dtype=np.float32
             ))
-            lower_router_clip_values.append(float(routed_lower["clip_rate"]))
-            responsibility_transfers.append(
-                responsibility.effective_transfer
-            )
-            requested_transfers.append(current_requested_transfer.copy())
-            reconstruction_errors.append(np.asarray(
-                responsibility_split["reconstruction_error"],
+            lower_router_reconstruction_errors.append(np.asarray(
+                routed_lower["transfer_reconstruction_error"],
                 dtype=np.float64,
             ))
+            lower_router_clip_values.append(float(routed_lower["clip_rate"]))
+            responsibility_transfers.append(np.asarray(
+                responsibility.effective_transfer + router_upper_transfer,
+                dtype=np.float32,
+            ))
+            requested_transfers.append(np.asarray(
+                current_requested_transfer + router_upper_transfer,
+                dtype=np.float32,
+            ))
+            reconstruction_errors.append(
+                np.asarray(effective_upper_action, dtype=np.float64)
+                + np.asarray(lower_residual, dtype=np.float64)
+                - np.asarray(upper_policy_action, dtype=np.float64)
+                - np.asarray(canonical_lower_action, dtype=np.float64)
+            )
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
@@ -1170,10 +1250,7 @@ def rollout_hierarchical(
                         next_observation,
                         next_bands,
                         executed,
-                        filter_contexts=(
-                            responsibility.raw_lower_lf,
-                            lower_router.context,
-                        ),
+                        filter_contexts=actor_filter_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="upper",
@@ -1201,10 +1278,7 @@ def rollout_hierarchical(
                         next_observation,
                         next_bands,
                         next_upper_policy_action,
-                        filter_contexts=(
-                            responsibility.raw_lower_lf,
-                            lower_router.context,
-                        ),
+                        filter_contexts=actor_filter_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -1218,10 +1292,7 @@ def rollout_hierarchical(
                         next_observation,
                         next_bands,
                         next_upper_anchor,
-                        filter_contexts=(
-                            raw_lower_lf_tracker.low,
-                            responsibility_lf_tracker.low,
-                        ),
+                        filter_contexts=cost_filter_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -1321,6 +1392,9 @@ def rollout_hierarchical(
             raw_lower_actions=raw_lower_actions,
             latent_lower_actions=latent_lower_actions,
             lower_router_removed_actions=lower_router_removed_actions,
+            lower_router_reconstruction_errors=(
+                lower_router_reconstruction_errors
+            ),
             lower_router_clip_values=lower_router_clip_values,
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
@@ -1545,6 +1619,7 @@ def rollout_flat(
             raw_lower_actions=nominal_actions,
             latent_lower_actions=nominal_actions,
             lower_router_removed_actions=zeros,
+            lower_router_reconstruction_errors=zeros,
             lower_router_clip_values=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
@@ -1608,6 +1683,9 @@ SUMMARY_KEYS = [
     "RawLowerActionRMS",
     "LatentLowerActionRMS",
     "LowerRouterRemovedRMS",
+    "LowerRouterUpperTransferRMS",
+    "LowerRouterFunctionPreserving",
+    "LowerRouterActionReconstructionRMS",
     "LowerRouterClipRate",
     "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
@@ -2263,6 +2341,7 @@ def train_mujoco_method(
     lower_lf_rms_budget: float = 0.05,
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
+    checkpoint_minimum_iteration: int = -1,
     checkpoint_evaluation_interval: int = 4,
     training_disturbance_modes: Iterable[str] | None = None,
     evaluation_disturbance_modes: Iterable[str] | None = None,
@@ -2287,6 +2366,7 @@ def train_mujoco_method(
     lower_action_router_observe_strength: bool = False,
     initial_checkpoint_path: Path | None = None,
     initial_checkpoint_summary_path: Path | None = None,
+    initial_checkpoint_router_mode: str = "direct",
     upper_actor_anchor_coef: float = 0.0,
     lower_actor_anchor_coef: float = 0.0,
     checkpoint_selection_mode: str = "assigned_condition",
@@ -2328,6 +2408,14 @@ def train_mujoco_method(
                 )
     if int(upper_period) < 2:
         raise ValueError("MuJoCo upper_period must be at least two")
+    if (
+        isinstance(checkpoint_minimum_iteration, bool)
+        or int(checkpoint_minimum_iteration) < -1
+        or int(checkpoint_minimum_iteration) >= max(1, int(iterations))
+    ):
+        raise ValueError(
+            "MuJoCo checkpoint minimum iteration must be in [-1, iterations)"
+        )
     source_identity = verify_current_freq_hrl_source_identity(
         code_revision=str(code_revision),
         expected_source_manifest_sha256=str(expected_source_manifest_sha256),
@@ -2394,6 +2482,8 @@ def train_mujoco_method(
         raise ValueError("unknown MuJoCo leakage constraint cost mode")
     if str(lower_action_router_mode) not in LOWER_ACTION_ROUTER_MODES:
         raise ValueError("unknown MuJoCo lower-action router mode")
+    if str(initial_checkpoint_router_mode) not in LOWER_ACTION_ROUTER_MODES:
+        raise ValueError("unknown initial-checkpoint lower-action router mode")
     if not 0.0 < float(lower_action_router_alpha) <= 1.0:
         raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
     if not 0.0 <= float(lower_action_router_strength) <= 1.0:
@@ -2452,19 +2542,19 @@ def train_mujoco_method(
     )
     effective_lower_action_router_strength = (
         float(lower_action_router_strength)
-        if effective_lower_action_router_mode == "causal_ema_high_pass"
+        if effective_lower_action_router_mode in CAUSAL_LOWER_ACTION_ROUTER_MODES
         else 0.0
     )
     effective_router_training_schedule = (
         str(lower_action_router_training_schedule)
-        if effective_lower_action_router_mode == "causal_ema_high_pass"
+        if effective_lower_action_router_mode in CAUSAL_LOWER_ACTION_ROUTER_MODES
         else "constant"
     )
     effective_router_observe_strength = bool(
         lower_action_router_observe_strength
     )
     if (
-        effective_lower_action_router_mode != "causal_ema_high_pass"
+        effective_lower_action_router_mode not in CAUSAL_LOWER_ACTION_ROUTER_MODES
         and str(lower_action_router_training_schedule) != "constant"
     ):
         raise ValueError("a direct lower-action router cannot use a curriculum")
@@ -2477,9 +2567,19 @@ def train_mujoco_method(
         )
     if name == "flat_ppo" and effective_router_observe_strength:
         raise ValueError("flat PPO cannot observe hierarchical router strength")
-    if paired_continuation and not effective_router_observe_strength:
+    if name == "flat_ppo" and int(checkpoint_minimum_iteration) != -1:
         raise ValueError(
-            "paired continuation requires an observed router-strength context"
+            "flat PPO does not implement checkpoint minimum iteration"
+        )
+    if (
+        paired_continuation
+        and not effective_router_observe_strength
+        and effective_lower_action_router_mode
+        != CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+    ):
+        raise ValueError(
+            "non-conservative paired continuation requires an observed "
+            "router-strength context"
         )
     router_training_strengths_by_iteration = [
         lower_action_router_training_strength(
@@ -2498,7 +2598,9 @@ def train_mujoco_method(
         observe_router_strength=effective_router_observe_strength,
     )
     actor_anchor_zero_state_indices = (
-        (int(state_dim) - 1,) if paired_continuation else ()
+        (int(state_dim) - 1,)
+        if paired_continuation and effective_router_observe_strength
+        else ()
     )
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
@@ -2785,6 +2887,7 @@ def train_mujoco_method(
                 domain="mujoco",
                 checkpoint_smoothing_window=checkpoint_smoothing_window,
                 checkpoint_min_delta=checkpoint_min_delta,
+                checkpoint_minimum_iteration=checkpoint_minimum_iteration,
                 checkpoint_evaluation_interval=checkpoint_evaluation_interval,
                 checkpoint_score_fn=checkpoint_score_fn,
                 checkpoint_score_contract=checkpoint_score_contract,
@@ -3027,6 +3130,11 @@ def train_mujoco_method(
                 expected_source_manifest_sha256=(
                     source_identity["source_manifest_sha256"]
                 ),
+                expected_router_mode=str(initial_checkpoint_router_mode),
+                expected_router_observe_strength=bool(
+                    effective_router_observe_strength
+                ),
+                expected_responsibility_mode=str(responsibility_mode),
             )
             model.capture_actor_anchor()
         rollout = lambda policy, seed, sample: rollout_hierarchical(
@@ -3077,6 +3185,7 @@ def train_mujoco_method(
             domain="mujoco",
             checkpoint_smoothing_window=checkpoint_smoothing_window,
             checkpoint_min_delta=checkpoint_min_delta,
+            checkpoint_minimum_iteration=checkpoint_minimum_iteration,
             checkpoint_evaluation_interval=checkpoint_evaluation_interval,
             checkpoint_score_fn=checkpoint_score_fn,
             checkpoint_score_contract=checkpoint_score_contract,
@@ -3267,8 +3376,15 @@ def train_mujoco_method(
             actor_anchor_zero_state_indices
         ),
         "actor_anchor_contract": (
-            "frozen_matched_direct_policy_at_zero_router_context_analytic_"
-            "gaussian_kl_v1"
+            (
+                "frozen_matched_conservative_policy_same_state_analytic_"
+                "gaussian_kl_v2"
+                if effective_lower_action_router_mode
+                == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                else
+                "frozen_matched_direct_policy_at_zero_router_context_"
+                "analytic_gaussian_kl_v1"
+            )
             if paired_continuation else "disabled"
         ),
         "upper_actor_anchor_parameter_rms": (
@@ -3287,10 +3403,20 @@ def train_mujoco_method(
             "checkpoint_selection_and_heldout_use_frozen_target_v1"
         ),
         "lower_action_router_contract": (
-            "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
-            "observed_router_state_strength_and_effective_action_clipping_v3"
-            if effective_lower_action_router_mode == "causal_ema_high_pass"
-            else "direct_latent_to_effective_lower_action_v1"
+            "causal_prior_only_ema_split_with_removed_component_transferred_"
+            "to_upper_and_exact_pre_split_action_execution_v4"
+            if effective_lower_action_router_mode
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            else (
+                "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
+                "observed_router_state_strength_and_effective_action_clipping_v3"
+                if effective_lower_action_router_mode == "causal_ema_high_pass"
+                else "direct_latent_to_effective_lower_action_v1"
+            )
+        ),
+        "lower_action_router_function_preserving": bool(
+            effective_lower_action_router_mode
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
         ),
         "lower_action_router_diagnostic_contract": (
             "latent_and_effective_lower_actions_both_reported_v1"
@@ -3320,11 +3446,22 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
-            "canonical_raw_lf_observed_lower_router_state_and_strength_v3"
-            if effective_router_observe_strength
-            else "canonical_raw_lf_and_observed_lower_router_state_v2"
+            "conservative_latent_ema_context_independent_of_transfer_"
+            "strength_v4"
+            if effective_lower_action_router_mode
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            else (
+                "canonical_raw_lf_observed_lower_router_state_and_strength_v3"
+                if effective_router_observe_strength
+                else "canonical_raw_lf_and_observed_lower_router_state_v2"
+            )
         ),
         "lower_cost_state_contract": (
+            "conservative_latent_32_step_lf_context_independent_of_transfer_"
+            "strength_v4"
+            if effective_lower_action_router_mode
+            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            else
             "causal_responsibility_anchor_32_step_raw_and_responsibility_"
             "rolling_lf_cost_critic_only_v3"
         ),
@@ -3397,6 +3534,11 @@ def write_cell(
         "source_manifest_sha256": payload["source_manifest_sha256"],
         "frozen_parameter_sha256": payload["frozen_parameter_sha256"],
         "frozen_checkpoint_sha256": payload["frozen_checkpoint_sha256"],
+        "lower_action_router_mode": payload["lower_action_router_mode"],
+        "lower_action_router_observe_strength": payload[
+            "lower_action_router_observe_strength"
+        ],
+        "responsibility_mode": payload["responsibility_mode"],
     }, checkpoint_path)
     payload["checkpoint_file_sha256"] = _file_sha256(checkpoint_path)
     payload["checkpoint_integrity_contract"] = (
@@ -3495,6 +3637,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--initial-checkpoint-path", type=Path)
     parser.add_argument("--initial-checkpoint-summary-path", type=Path)
+    parser.add_argument(
+        "--initial-checkpoint-router-mode",
+        choices=LOWER_ACTION_ROUTER_MODES,
+        default="direct",
+    )
     parser.add_argument("--upper-actor-anchor-coef", type=float, default=0.0)
     parser.add_argument("--lower-actor-anchor-coef", type=float, default=0.0)
     parser.add_argument(
@@ -3552,6 +3699,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
+    parser.add_argument(
+        "--checkpoint-minimum-iteration", type=int, default=-1
+    )
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
     parser.add_argument(
         "--checkpoint-selection-mode",
@@ -3594,6 +3744,7 @@ def main() -> None:
         lower_lf_rms_budget=args.lower_lf_rms_budget,
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
+        checkpoint_minimum_iteration=args.checkpoint_minimum_iteration,
         checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
         training_disturbance_modes=args.training_disturbance_modes,
         evaluation_disturbance_modes=args.evaluation_disturbance_modes,
@@ -3619,6 +3770,7 @@ def main() -> None:
         initial_checkpoint_summary_path=(
             args.initial_checkpoint_summary_path
         ),
+        initial_checkpoint_router_mode=args.initial_checkpoint_router_mode,
         upper_actor_anchor_coef=args.upper_actor_anchor_coef,
         lower_actor_anchor_coef=args.lower_actor_anchor_coef,
         leakage_constraint_scope=args.leakage_constraint_scope,

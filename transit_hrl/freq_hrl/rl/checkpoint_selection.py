@@ -17,6 +17,9 @@ class RobustValidationCheckpointSelector:
     """
 
     PROTOCOL_VERSION = "trailing_mean_material_improvement_v1"
+    MINIMUM_ITERATION_PROTOCOL_VERSION = (
+        "trailing_mean_material_improvement_minimum_iteration_v2"
+    )
     LEGACY_PROTOCOL_VERSION = "disjoint_validation_paths"
 
     def __init__(
@@ -26,6 +29,7 @@ class RobustValidationCheckpointSelector:
         initial_state: Any,
         smoothing_window: int = 1,
         min_delta: float = 0.0,
+        minimum_eligible_iteration: int = -1,
     ) -> None:
         if isinstance(smoothing_window, bool) or int(smoothing_window) < 1:
             raise ValueError("checkpoint smoothing_window must be positive")
@@ -36,9 +40,17 @@ class RobustValidationCheckpointSelector:
             raise ValueError("checkpoint min_delta must be finite and non-negative")
         if not np.isfinite(float(initial_score)):
             raise ValueError("initial checkpoint score must be finite")
+        if (
+            isinstance(minimum_eligible_iteration, bool)
+            or int(minimum_eligible_iteration) < -1
+        ):
+            raise ValueError(
+                "checkpoint minimum_eligible_iteration must be at least -1"
+            )
 
         self.smoothing_window = int(smoothing_window)
         self.min_delta = float(min_delta)
+        self.minimum_eligible_iteration = int(minimum_eligible_iteration)
         self.initial_score = float(initial_score)
         self.best_score = float(initial_score)
         self.selected_raw_score = float(initial_score)
@@ -46,20 +58,28 @@ class RobustValidationCheckpointSelector:
         self.last_material_improvement_iteration = -1
         self.best_state = copy.deepcopy(initial_state)
         self._scores = [float(initial_score)]
+        self._has_eligible_selection = self.minimum_eligible_iteration < 0
 
     def initial_history_fields(self) -> dict[str, Any]:
+        eligible = self.minimum_eligible_iteration < 0
         return {
             "checkpoint_evaluation_performed": True,
             "checkpoint_selection_score": self.initial_score,
-            "checkpoint_selection_eligible": True,
-            "checkpoint_selected": True,
+            "checkpoint_selection_eligible": eligible,
+            "checkpoint_selected": eligible,
         }
 
     @property
     def protocol_version(self) -> str:
+        if self.minimum_eligible_iteration >= 0:
+            return self.MINIMUM_ITERATION_PROTOCOL_VERSION
         if self.smoothing_window == 1 and self.min_delta == 0.0:
             return self.LEGACY_PROTOCOL_VERSION
         return self.PROTOCOL_VERSION
+
+    @property
+    def has_eligible_selection(self) -> bool:
+        return bool(self._has_eligible_selection)
 
     def consider(
         self,
@@ -75,13 +95,19 @@ class RobustValidationCheckpointSelector:
             raise ValueError("checkpoint iteration must be non-negative")
 
         self._scores.append(value)
-        eligible = len(self._scores) >= self.smoothing_window
+        eligible = bool(
+            len(self._scores) >= self.smoothing_window
+            and int(iteration) >= self.minimum_eligible_iteration
+        )
         selection_score = float(np.mean(
             self._scores[-self.smoothing_window:]
         ))
         selected = bool(
             eligible
-            and selection_score > self.best_score + self.min_delta
+            and (
+                not self._has_eligible_selection
+                or selection_score > self.best_score + self.min_delta
+            )
         )
         if selected:
             self.best_score = selection_score
@@ -89,6 +115,7 @@ class RobustValidationCheckpointSelector:
             self.selected_iteration = int(iteration)
             self.last_material_improvement_iteration = int(iteration)
             self.best_state = copy.deepcopy(state)
+            self._has_eligible_selection = True
         return {
             "checkpoint_selection_score": selection_score,
             "checkpoint_selection_eligible": eligible,
@@ -108,6 +135,12 @@ class RobustValidationCheckpointSelector:
             "checkpoint_selection_protocol": self.protocol_version,
             "checkpoint_smoothing_window": self.smoothing_window,
             "checkpoint_min_delta": self.min_delta,
+            "checkpoint_minimum_eligible_iteration": (
+                self.minimum_eligible_iteration
+            ),
+            "checkpoint_has_eligible_selection": bool(
+                self._has_eligible_selection
+            ),
             "checkpoint_selection_score": float(self.best_score),
             "selected_checkpoint_raw_score": float(self.selected_raw_score),
             "last_material_improvement_iteration": int(
