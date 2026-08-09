@@ -44,6 +44,14 @@ _CONTEXT_LEDGER = {
         "same-time physical follower AVL availability",
         "current pre-action AVL snapshot",
     ),
+    "regularity_hold_target_norm": (
+        "analytic balance of matched predecessor departure and same-time follower AVL gap",
+        "current pre-action departure event",
+    ),
+    "regularity_hold_target_valid": (
+        "joint predecessor-departure and same-time follower AVL availability",
+        "current pre-action departure event",
+    ),
     "route_progress": ("AVL vehicle location", "current decision"),
     "station_phase": ("static stop sequence and AVL stop id", "current stop event"),
     "prev_launch_gap": ("actual terminal launch log", "latest prior launch"),

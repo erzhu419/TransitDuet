@@ -42,21 +42,61 @@ def _finite(values: Iterable[object]) -> bool:
     return bool(array.size and np.isfinite(array).all())
 
 
+def _paired_delta(
+    per_eval: pd.DataFrame,
+    *,
+    candidate: str,
+    reference: str,
+    metric: str,
+) -> tuple[float, int]:
+    keys = ["train_seed", "eval_seed"]
+    columns = [*keys, metric]
+    candidate_rows = per_eval.loc[
+        per_eval["config"] == candidate, columns].rename(
+            columns={metric: "candidate_value"})
+    reference_rows = per_eval.loc[
+        per_eval["config"] == reference, columns].rename(
+            columns={metric: "reference_value"})
+    paired = candidate_rows.merge(
+        reference_rows,
+        on=keys,
+        how="inner",
+        validate="one_to_one",
+    )
+    values = pd.to_numeric(
+        paired["candidate_value"], errors="coerce") - pd.to_numeric(
+            paired["reference_value"], errors="coerce")
+    if not _finite(values):
+        raise ValueError(
+            f"non-finite matched delta for {candidate} vs {reference}: "
+            f"{metric}")
+    return float(values.mean()), int(len(values))
+
+
 def evaluate_selection(
     aggregate_dir: Path,
     *,
     candidates: list[str] | None = None,
     main: str = DEFAULT_MAIN,
     reference: str = DEFAULT_REFERENCE,
+    matched_context: str | None = None,
+    expected_stage: str = "exploratory",
     max_journey_regression_min: float = 0.15,
     min_headway_cv_improvement: float = 0.02,
     min_follower_coverage: float = 0.50,
     max_gain_reversal_fraction: float = 0.10,
+    min_headway_cv_improvement_vs_context: float = 0.01,
+    max_journey_regression_vs_context_min: float = 0.15,
 ) -> dict[str, object]:
     aggregate_dir = Path(aggregate_dir).resolve()
     candidates = list(candidates or DEFAULT_CANDIDATES)
     if len(candidates) != len(set(candidates)) or not candidates:
         raise ValueError("candidate configs must be non-empty and unique")
+    expected_stage = str(expected_stage).strip().lower()
+    if expected_stage not in {"exploratory", "confirmation"}:
+        raise ValueError("expected_stage must be exploratory or confirmation")
+    if expected_stage == "confirmation" and len(candidates) != 1:
+        raise ValueError("confirmation audit requires exactly one candidate")
 
     paths = {
         "manifest": aggregate_dir / "matrix_manifest.json",
@@ -80,9 +120,10 @@ def evaluate_selection(
             manifest.get("common_random_numbers_verified") is True),
         "run_manifests_verified": (
             manifest.get("run_manifests_verified") is True),
-        "exploratory_stage": manifest.get("stage") == "exploratory",
-        "not_labeled_confirmation": (
-            manifest.get("independent_confirmation") is False),
+        "expected_stage": manifest.get("stage") == expected_stage,
+        "confirmation_label_matches_stage": (
+            manifest.get("independent_confirmation")
+            is (expected_stage == "confirmation")),
         "expected_rollout_count": expected_rollouts == len(per_eval),
         "unique_rollout_keys": not per_eval.duplicated(
             ["config", "train_seed", "eval_seed"]).any(),
@@ -91,6 +132,15 @@ def evaluate_selection(
         raise ValueError(f"aggregate strict checks failed: {strict_checks}")
 
     requested = {main, reference, *candidates}
+    if matched_context is not None:
+        matched_context = str(matched_context).strip()
+        if not matched_context:
+            raise ValueError("matched_context must be a non-empty config name")
+        if matched_context in {main, reference, *candidates}:
+            raise ValueError(
+                "matched_context must be distinct from main, reference, "
+                "and candidate configs")
+        requested.add(matched_context)
     manifest_configs = set(manifest.get("configs", []))
     if not requested.issubset(manifest_configs):
         raise ValueError(
@@ -199,6 +249,37 @@ def evaluate_selection(
             "holding_gain_preserved": candidate_holding <= holding_limit,
             "denied_dispatch_gain_preserved": candidate_denied <= denied_limit,
         }
+        context_deltas = None
+        if matched_context is not None:
+            context_journey_delta, context_journey_pairs = _paired_delta(
+                per_eval,
+                candidate=candidate,
+                reference=matched_context,
+                metric="restricted_total_journey_horizon_min",
+            )
+            context_cv_delta, context_cv_pairs = _paired_delta(
+                per_eval,
+                candidate=candidate,
+                reference=matched_context,
+                metric="headway_cv",
+            )
+            context_deltas = {
+                "reference": matched_context,
+                "journey_delta_min": context_journey_delta,
+                "headway_cv_delta": context_cv_delta,
+                "n_pairs": min(context_journey_pairs, context_cv_pairs),
+            }
+            gates.update({
+                "matched_context_pairs_complete": (
+                    context_journey_pairs == expected_candidate_rows
+                    and context_cv_pairs == expected_candidate_rows),
+                "journey_within_matched_context_margin": (
+                    context_journey_delta
+                    <= max_journey_regression_vs_context_min),
+                "headway_cv_improves_over_matched_context": (
+                    context_cv_delta
+                    <= -min_headway_cv_improvement_vs_context),
+            })
         loss_improvement = baseline_loss - post_loss
         candidate_results.append({
             "candidate": candidate,
@@ -226,6 +307,7 @@ def evaluate_selection(
                 loss_improvement.mean()),
             "regularity_loss_improvement_min": float(
                 loss_improvement.min()),
+            "matched_context_deltas": context_deltas,
         })
 
     passing = [
@@ -236,17 +318,23 @@ def evaluate_selection(
         else "ambiguous_multiple_passes"
     )
     return {
-        "gate_version": "freqduet-v6-incremental-selection-v1",
+        "gate_version": "freqduet-v6-incremental-selection-v3",
+        "audit_stage": expected_stage,
         "status": status,
         "selected_candidate": passing[0] if len(passing) == 1 else None,
         "passing_candidates": passing,
         "main": main,
         "reference": reference,
+        "matched_context": matched_context,
         "thresholds": {
             "max_journey_regression_min": max_journey_regression_min,
             "min_headway_cv_improvement": min_headway_cv_improvement,
             "min_follower_coverage": min_follower_coverage,
             "max_gain_reversal_fraction": max_gain_reversal_fraction,
+            "min_headway_cv_improvement_vs_context": (
+                min_headway_cv_improvement_vs_context),
+            "max_journey_regression_vs_context_min": (
+                max_journey_regression_vs_context_min),
         },
         "strict_checks": strict_checks,
         "expected_candidate_rollouts": expected_candidate_rows,
@@ -287,6 +375,12 @@ def main() -> None:
         "--candidates", default=",".join(DEFAULT_CANDIDATES))
     parser.add_argument("--main", default=DEFAULT_MAIN)
     parser.add_argument("--reference", default=DEFAULT_REFERENCE)
+    parser.add_argument("--matched-context", default=None)
+    parser.add_argument(
+        "--expected-stage",
+        choices=("exploratory", "confirmation"),
+        default="exploratory",
+    )
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--require-unique-pass", action="store_true")
     args = parser.parse_args()
@@ -296,6 +390,8 @@ def main() -> None:
         candidates=parse_csv(args.candidates),
         main=args.main,
         reference=args.reference,
+        matched_context=args.matched_context,
+        expected_stage=args.expected_stage,
     )
     out = args.out or Path(args.aggregate_dir) / "selection_gate.json"
     out.parent.mkdir(parents=True, exist_ok=True)

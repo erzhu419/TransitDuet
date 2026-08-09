@@ -352,3 +352,65 @@ exploratory estimate cannot be substituted for it.
 - Result synchronization is disabled for train shards. Heavy checkpoints and
   logs remain on the HPC filesystem; only the later strict aggregate will be
   synchronized.
+
+## Engineering-v6 independent-confirmation outcome (2026-08-09)
+
+All 16 train shards and all 64 frozen rollouts completed without a traceback.
+The strict aggregate verifies confirmation-stage manifests, checkpoint 39,
+common random numbers, four disjoint train seeds, four disjoint evaluation
+seeds, clean source commit `fa20bbbb854989794c207ea2c8319e54c5ce16d5`,
+and the launch-time source and scenario fingerprints. Its frozen artifact
+hashes are:
+
+- matrix manifest: `1a9e90023f2dc0b847934d2693292cceeec9e1602731202a11b9f9b11fbc8d00`;
+- per-evaluation rows: `fb82b6481669c2b157a1d9fa736646a645023e0f28718807d8656768fc288d39`;
+- summary: `8c476b0398e35bc09a53f8888c63c459aa1cd3943773f421104c81fc1b82f81d`;
+- paired deltas: `ed21730c1fbdeac28da31ffc1d7ef2ea713d923dde78a76361ad79a510b8f253`.
+
+The preregistered candidate does not confirm. Against same-source `noguard`,
+`avlbal_w4` improves restricted journey by `-1.10516 min`, crossed bootstrap
+95% CI `[-2.63355, -0.18993]`, holding by `-12651.56 vehicle-s`, and denied
+dispatch events by `-43223.63`. It retains exactly zero execution adjustment,
+100% predecessor evidence, at least 82.79% follower evidence, and positive
+baseline-minus-post regularity loss in every rollout. However, headway CV
+improves by only `-0.01436`, 95% CI `[-0.02799, 0.00124]`, below the locked
+`-0.02` threshold. `freqduet-v6-incremental-selection-v2` therefore returns
+`no_pass`; the exploratory estimate is not substituted and the candidate is
+not promoted.
+
+The matched controls identify the structural source of the failure. Raw
+two-sided AVL context alone changes CV by `+0.03076` versus `noguard`; adding
+the weight-four regularity objective recovers `-0.04512` versus that raw
+context, but only `-0.01436` net versus `noguard`. The reward mechanism is
+active and directionally useful; the four-dimensional raw-gap state is the
+measured variance/confounding cost.
+
+## Engineering-v7 compact-causal-state preregistration (2026-08-09)
+
+Engineering-v7 preserves the no-guard action semantics and the complete
+frozen action-time evidence used by the reward. It changes only what the
+policy must learn from that evidence. The four raw predecessor/follower gap
+and validity inputs are replaced by two deployable sufficient statistics:
+
+- `regularity_hold_target_norm`: the clipped analytic minimizer
+  `clip((follower_gap - forward_gap) / 2, 0, action_cap) / action_cap` of the
+  same symmetric two-sided local objective; and
+- `regularity_hold_target_valid`: joint availability of the matched
+  predecessor departure and same-time physical follower AVL estimate.
+
+The feature is an observation, not an action override. The categorical policy
+still chooses from the unchanged action bins; execution adjustment must remain
+exactly zero. Invalid evidence emits target zero and validity zero. The reward
+continues to evaluate the full raw causal context after the sampled action.
+
+The exploratory matrix is locked to `main`, `noguard`, raw `avlctx`, raw
+`avlbal_w4`, compact context-only `avlcompact`, and compact regularity weights
+`2, 4, 6, 8`. It uses 40 episodes, four new training seeds
+`701, 719, 743, 761`, and two new frozen evaluation seeds `43011, 43017`.
+
+A compact weight may advance only if the fail-closed v3 audit finds exactly
+one candidate satisfying every prior engineering-v5 gate and both matched
+mechanism gates: CV must improve over compact context-only by at least `0.01`,
+and restricted journey may be no more than `0.15 min` worse than compact
+context-only. Selection evidence remains insufficient for efficacy; any
+selected weight requires another disjoint-seed confirmation.

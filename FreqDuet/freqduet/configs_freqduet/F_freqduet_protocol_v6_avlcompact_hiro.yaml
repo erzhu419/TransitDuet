@@ -1,0 +1,19 @@
+_extends: F_freqduet_protocol_v6_noguard_hiro.yaml
+_name: F_freqduet_protocol_v6_avlcompact_hiro
+
+protocol:
+  role: exploratory_compact_avl_regularity_context_v6
+
+frequency:
+  lower_context:
+    enable: true
+    queue_norm: 50.0
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
+      - regularity_hold_target_norm
+      - regularity_hold_target_valid

@@ -1082,6 +1082,8 @@ class env_bus(object):
             'departure_gap_valid',
             'avl_follower_gap_norm',
             'avl_follower_gap_valid',
+            'regularity_hold_target_norm',
+            'regularity_hold_target_valid',
             'bwd_headway_norm',
             'headway_balance',
             'hold_value_proxy',

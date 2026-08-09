@@ -49,6 +49,11 @@ EXPERIMENTAL_CONFIGS = [
         for weight in ("05", "1", "2", "4")
         if not (kind == "avlbal" and weight == "4")
     ],
+    "F_freqduet_protocol_v6_avlcompact_hiro",
+    *[
+        f"F_freqduet_protocol_v6_avlcompact_w{weight}_hiro"
+        for weight in ("2", "4", "6", "8")
+    ],
 ]
 
 
@@ -119,15 +124,29 @@ def validate(
                     f"{name}: incremental regularity must preserve noguard "
                     "action semantics")
             features = set(lower_context.get("features", []))
-            required_features = {
+            forward_features = {
                 "departure_gap_norm", "departure_gap_valid"}
+            raw_two_sided_features = forward_features.union({
+                "avl_follower_gap_norm", "avl_follower_gap_valid"})
+            compact_two_sided_features = {
+                "regularity_hold_target_norm",
+                "regularity_hold_target_valid",
+            }
             if objective_mode == "avl_two_sided_incremental_reward":
-                required_features.update({
-                    "avl_follower_gap_norm", "avl_follower_gap_valid"})
-            if not required_features.issubset(features):
+                causal_state_present = (
+                    raw_two_sided_features.issubset(features)
+                    or compact_two_sided_features.issubset(features)
+                )
+                required_description = (
+                    f"raw={sorted(raw_two_sided_features)} or "
+                    f"compact={sorted(compact_two_sided_features)}")
+            else:
+                causal_state_present = forward_features.issubset(features)
+                required_description = sorted(forward_features)
+            if not causal_state_present:
                 raise ValueError(
                     f"{name}: incremental regularity lacks causal state "
-                    f"features {sorted(required_features - features)}")
+                    f"features; requires {required_description}")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
     main = resolved["F_freqduet_protocol_v6_main_hiro"]

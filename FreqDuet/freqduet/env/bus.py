@@ -6,6 +6,9 @@ from lower.causal_follower_eta import (
     AVLVehicleSnapshot,
     estimate_follower_departure_gap,
 )
+from lower.causal_departure_regularity import (
+    causal_two_sided_holding_target_s,
+)
 
 
 def _remove_indices_preserve_order(values, removed_indices):
@@ -462,6 +465,18 @@ class Bus(object):
                     float(self.pre_action_follower_departure_gap)
                     / target_hw_safe
                     if follower_gap_valid else 1.0)
+                regularity_target_s = None
+                if departure_gap_valid and follower_gap_valid:
+                    regularity_target_s = causal_two_sided_holding_target_s(
+                        forward_headway_s=self.pre_action_forward_headway,
+                        follower_departure_gap_s=(
+                            self.pre_action_follower_departure_gap),
+                        action_cap_s=guard_scale_s,
+                    )
+                regularity_target_valid = regularity_target_s is not None
+                regularity_target_norm = (
+                    float(regularity_target_s) / guard_scale_s
+                    if regularity_target_valid else 0.0)
                 headway_balance = (
                     self.backward_headway - self.forward_headway
                 ) / target_hw_safe
@@ -527,6 +542,10 @@ class Bus(object):
                     'avl_follower_gap_norm': float(np.clip(
                         follower_gap_norm, 0.0, 3.0)),
                     'avl_follower_gap_valid': float(follower_gap_valid),
+                    'regularity_hold_target_norm': float(np.clip(
+                        regularity_target_norm, 0.0, 1.0)),
+                    'regularity_hold_target_valid': float(
+                        regularity_target_valid),
                     'bwd_headway_norm': float(np.clip(bwd_norm, 0.0, 3.0)),
                     'headway_balance': float(np.clip(headway_balance, -3.0, 3.0)),
                     'hold_value_proxy': float(np.clip(hold_value_proxy, -1.0, 1.0)),

@@ -35,6 +35,13 @@ INCREMENTAL_CONFIGS = [
         for weight in ("05", "1", "2", "4")
     ],
 ]
+COMPACT_CONFIGS = [
+    "F_freqduet_protocol_v6_avlcompact_hiro",
+    *[
+        f"F_freqduet_protocol_v6_avlcompact_w{weight}_hiro"
+        for weight in ("2", "4", "6", "8")
+    ],
+]
 
 
 class ProtocolV6ConfigTest(unittest.TestCase):
@@ -239,6 +246,40 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(result["experimental_configs"], [])
         self.assertEqual(
             result["confirmation_configs"], sorted(CONFIRMATION_CONFIGS))
+
+    def test_compact_regularity_factorial_uses_only_sufficient_state(self):
+        configs = [CONFIGS["main"], CONFIGS["noguard"], *COMPACT_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(result["experimental_configs"], sorted(COMPACT_CONFIGS))
+
+        compact_features = {
+            "regularity_hold_target_norm",
+            "regularity_hold_target_valid",
+        }
+        raw_features = {
+            "departure_gap_norm",
+            "departure_gap_valid",
+            "avl_follower_gap_norm",
+            "avl_follower_gap_valid",
+        }
+        for name in COMPACT_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            features = set(config["frequency"]["lower_context"]["features"])
+            self.assertTrue(compact_features.issubset(features))
+            self.assertTrue(raw_features.isdisjoint(features))
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            regularity = lower.get("causal_departure_regularity", {})
+            if "_w" in name:
+                self.assertTrue(regularity["enable"])
+                self.assertEqual(
+                    regularity["objective_mode"],
+                    "avl_two_sided_incremental_reward",
+                )
+            else:
+                self.assertFalse(regularity.get("enable", False))
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

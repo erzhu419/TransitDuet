@@ -8,6 +8,35 @@ from typing import Any, Mapping
 import numpy as np
 
 
+def causal_two_sided_holding_target_s(
+    *,
+    forward_headway_s: float | None,
+    follower_departure_gap_s: float | None,
+    action_cap_s: float,
+) -> float | None:
+    """Return the clipped holding action that balances two causal gaps.
+
+    Holding the current bus by ``a`` seconds changes the local pair to
+    ``(forward + a, follower - a)``. The midpoint action therefore minimizes
+    the unconstrained symmetric quadratic loss used by the two-sided
+    regularity objective. Invalid evidence fails closed instead of encoding a
+    synthetic recommendation.
+    """
+    cap = float(action_cap_s)
+    if not np.isfinite(cap) or cap <= 0.0:
+        raise ValueError("action_cap_s must be finite and positive")
+
+    values = (forward_headway_s, follower_departure_gap_s)
+    if any(value is None for value in values):
+        return None
+    forward, follower = (float(value) for value in values)
+    if not (np.isfinite(forward) and np.isfinite(follower)):
+        return None
+    if forward < 0.0 or follower < 0.0:
+        return None
+    return float(np.clip(0.5 * (follower - forward), 0.0, cap))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

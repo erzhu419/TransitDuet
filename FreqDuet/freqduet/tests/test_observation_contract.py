@@ -55,6 +55,24 @@ class LowerObservationContractTest(unittest.TestCase):
             rows["avl_follower_gap_norm"]["source"],
         )
 
+    def test_accepts_compact_causal_regularity_target(self):
+        contract = self._deployable(context_features=[
+            "regularity_hold_target_norm",
+            "regularity_hold_target_valid",
+        ])
+
+        rows = {row["feature"]: row for row in contract.ledger()}
+
+        self.assertTrue(rows["regularity_hold_target_norm"]["deployable"])
+        self.assertIn(
+            "matched predecessor departure",
+            rows["regularity_hold_target_norm"]["source"],
+        )
+        self.assertIn(
+            "same-time follower AVL",
+            rows["regularity_hold_target_norm"]["source"],
+        )
+
     def test_rejects_latent_frequency_observation(self):
         with self.assertRaisesRegex(ValueError, "APC frequency"):
             self._deployable(frequency_source="latent_arrivals")

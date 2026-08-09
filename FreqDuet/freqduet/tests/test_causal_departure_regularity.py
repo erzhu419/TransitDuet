@@ -1,11 +1,49 @@
 import unittest
 from types import SimpleNamespace
 
-from lower.causal_departure_regularity import CausalDepartureRegularityCost
+from lower.causal_departure_regularity import (
+    CausalDepartureRegularityCost,
+    causal_two_sided_holding_target_s,
+)
 from runner_v3 import TransitDuetV2Runner
 
 
 class CausalDepartureRegularityCostTest(unittest.TestCase):
+    def test_compact_target_is_the_clipped_two_sided_balance_action(self):
+        self.assertEqual(causal_two_sided_holding_target_s(
+            forward_headway_s=300.0,
+            follower_departure_gap_s=360.0,
+            action_cap_s=45.0,
+        ), 30.0)
+        self.assertEqual(causal_two_sided_holding_target_s(
+            forward_headway_s=300.0,
+            follower_departure_gap_s=500.0,
+            action_cap_s=45.0,
+        ), 45.0)
+        self.assertEqual(causal_two_sided_holding_target_s(
+            forward_headway_s=420.0,
+            follower_departure_gap_s=360.0,
+            action_cap_s=45.0,
+        ), 0.0)
+
+    def test_compact_target_fails_closed_for_invalid_evidence(self):
+        self.assertIsNone(causal_two_sided_holding_target_s(
+            forward_headway_s=None,
+            follower_departure_gap_s=360.0,
+            action_cap_s=45.0,
+        ))
+        self.assertIsNone(causal_two_sided_holding_target_s(
+            forward_headway_s=300.0,
+            follower_departure_gap_s=float("nan"),
+            action_cap_s=45.0,
+        ))
+        with self.assertRaisesRegex(ValueError, "action_cap_s"):
+            causal_two_sided_holding_target_s(
+                forward_headway_s=300.0,
+                follower_departure_gap_s=360.0,
+                action_cap_s=0.0,
+            )
+
     def test_cost_is_minimized_by_action_that_closes_observed_deficit(self):
         regularity = CausalDepartureRegularityCost(
             enabled=True, cost_weight=2.0)
