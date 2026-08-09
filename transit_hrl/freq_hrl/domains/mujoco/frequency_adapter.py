@@ -218,14 +218,18 @@ class CausalLowerActionRouter:
 
     mode: str = "direct"
     alpha: float = 0.10
+    strength: float = 1.0
 
     def __post_init__(self) -> None:
         if str(self.mode) not in LOWER_ACTION_ROUTER_MODES:
             raise ValueError(f"unknown lower-action router mode: {self.mode}")
         if not 0.0 < float(self.alpha) <= 1.0:
             raise ValueError("lower-action router alpha must be in (0, 1]")
+        if not 0.0 <= float(self.strength) <= 1.0:
+            raise ValueError("lower-action router strength must be in [0, 1]")
         self.mode = str(self.mode)
         self.alpha = float(self.alpha)
+        self.strength = float(self.strength)
         self._baseline: np.ndarray | None = None
         self._previous_effective: np.ndarray | None = None
 
@@ -267,7 +271,7 @@ class CausalLowerActionRouter:
         requested = (
             latent
             if self.mode == "direct"
-            else latent - baseline_before
+            else latent - self.strength * baseline_before
         )
         effective = np.clip(requested, -limit, limit)
         clipped = np.abs(effective - requested) > 1e-12

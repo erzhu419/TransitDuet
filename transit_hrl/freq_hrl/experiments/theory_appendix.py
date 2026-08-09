@@ -198,26 +198,35 @@ def lower_router_frequency_response_power(
     *,
     alpha: float,
     angular_frequency: float,
+    strength: float = 1.0,
 ) -> float:
     """Return the zero-state EMA-router power gain at one frequency.
 
     For the unclipped router
 
         b_{t+1} = (1-alpha) b_t + alpha z_t,
-        e_t = z_t - b_t,
+        e_t = z_t - beta b_t,
 
     the transfer function from latent proposal z to effective action e is
-    H(q)=(1-q^-1)/(1-(1-alpha)q^-1).
+    H(q)=[1-(1-alpha(1-beta))q^-1]/[1-(1-alpha)q^-1].
     """
 
     smoothing = float(alpha)
+    routing = float(strength)
     omega = float(angular_frequency)
     if not 0.0 < smoothing <= 1.0:
         raise ValueError("alpha must be in (0, 1]")
     if not math.isfinite(omega):
         raise ValueError("angular_frequency must be finite")
+    if not 0.0 <= routing <= 1.0:
+        raise ValueError("strength must be in [0, 1]")
     cosine = math.cos(omega)
-    numerator = 2.0 - 2.0 * cosine
+    numerator_coefficient = 1.0 - smoothing * (1.0 - routing)
+    numerator = (
+        1.0
+        + numerator_coefficient ** 2
+        - 2.0 * numerator_coefficient * cosine
+    )
     denominator = (
         1.0
         + (1.0 - smoothing) ** 2
@@ -231,17 +240,24 @@ def lower_router_constant_transient(
     latent_magnitude: float,
     alpha: float,
     step: int,
+    strength: float = 1.0,
 ) -> float:
     """Return |e_t| for a constant proposal and a zero router baseline."""
 
     smoothing = float(alpha)
+    routing = float(strength)
     if not 0.0 < smoothing <= 1.0:
         raise ValueError("alpha must be in (0, 1]")
     if int(step) < 0:
         raise ValueError("step must be non-negative")
+    if not 0.0 <= routing <= 1.0:
+        raise ValueError("strength must be in [0, 1]")
     return float(
         abs(float(latent_magnitude))
-        * (1.0 - smoothing) ** int(step)
+        * (
+            (1.0 - routing)
+            + routing * (1.0 - smoothing) ** int(step)
+        )
     )
 
 
@@ -349,6 +365,13 @@ def build_numeric_examples() -> dict[str, float]:
             lower_router_frequency_response_power(
                 alpha=0.10,
                 angular_frequency=math.pi,
+            )
+        ),
+        "partial_router_dc_power_gain_example": (
+            lower_router_frequency_response_power(
+                alpha=0.10,
+                angular_frequency=0.0,
+                strength=0.10,
             )
         ),
         "lower_router_constant_transient_step_32_example": (
@@ -609,24 +632,24 @@ def build_formal_statement_rows(
         {
             "id": "F11",
             "kind": "proposition",
-            "title": "Causal EMA lower router has an exact high-pass response",
+            "title": "Causal partial EMA lower router has an exact response",
             "statement": (
                 "For the unclipped zero-state recursion b_{t+1}=(1-alpha)b_t+"
-                "alpha z_t and e_t=z_t-b_t, 0<alpha<=1, the transfer function is "
-                "H(q)=(1-q^-1)/(1-(1-alpha)q^-1). Hence H(1)=0 and "
-                "|H(exp(i omega))|^2=(2-2 cos(omega))/(1+(1-alpha)^2-"
-                "2(1-alpha)cos(omega)). A constant latent proposal c produces "
-                "|e_t|=(1-alpha)^t|c| from a zero baseline."
+                "alpha z_t and e_t=z_t-beta b_t, 0<alpha<=1 and 0<=beta<=1, "
+                "the transfer function is H(q)=[1-(1-alpha(1-beta))q^-1]/"
+                "[1-(1-alpha)q^-1]. Hence H(1)=1-beta and the DC power gain is "
+                "(1-beta)^2. A constant proposal c produces "
+                "|e_t|=|c|[(1-beta)+beta(1-alpha)^t] from a zero baseline."
             ),
             "assumptions": [
-                "The router is in causal_ema_high_pass mode and actuator clipping is inactive.",
+                "The router is in causal_ema_high_pass mode with fixed strength beta and actuator clipping is inactive.",
                 "The analysis uses the zero-state linear recursion implemented by the router.",
                 "Each action component is analyzed independently before the actuator map.",
             ],
             "proof": (
                 "Take the one-sided z transform of the baseline recursion to obtain "
-                "B(q)/Z(q)=alpha q^-1/[1-(1-alpha)q^-1]. Subtract this ratio "
-                "from one, evaluate on the unit circle, and square the modulus. "
+                "B(q)/Z(q)=alpha q^-1/[1-(1-alpha)q^-1]. Subtract beta times "
+                "this ratio from one, evaluate on the unit circle, and square the modulus. "
                 "For z_t=c, solve the scalar recurrence directly."
             ),
             "limitation": (
@@ -639,6 +662,7 @@ def build_formal_statement_rows(
             ),
             "example": (
                 f"DC power gain={_fmt(examples['lower_router_dc_power_gain_example'], 8)}; "
+                f"10% router DC power gain={_fmt(examples['partial_router_dc_power_gain_example'], 6)}; "
                 f"Nyquist power gain={_fmt(examples['lower_router_nyquist_power_gain_example'], 6)}; "
                 f"constant residual at t=32={_fmt(examples['lower_router_constant_transient_step_32_example'], 6)}"
             ),

@@ -257,6 +257,21 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         np.testing.assert_allclose(router.context, latent)
         self.assertEqual(float(routed["clip_rate"]), 0.0)
 
+    def test_partial_lower_action_router_has_registered_dc_gain(self):
+        router = CausalLowerActionRouter(
+            mode="causal_ema_high_pass",
+            alpha=0.5,
+            strength=0.1,
+        )
+        router.reset(1)
+        effective = None
+        for _ in range(64):
+            effective = router.route(
+                np.asarray([0.6]), action_limit=1.0
+            )["effective"]
+        self.assertIsNotNone(effective)
+        np.testing.assert_allclose(effective, [0.54], atol=1e-8)
+
     def test_physical_constraint_cost_avoids_small_budget_blowup(self):
         budget = {
             "budget_excess_squared": 100.0,
@@ -612,7 +627,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_2_physical_cost_action_router",
+            "freq_hrl_mujoco_shared_core_v14_3_partial_action_router",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -721,6 +736,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             lower_dual_lr=0.2,
             leakage_cost_mode="power_excess",
             lower_action_router_mode="causal_ema_high_pass",
+            lower_action_router_strength=0.1,
             checkpoint_selection_mode="crossed_conditions",
             checkpoint_score_mode="behavior_robust",
             checkpoint_smoothing_window=1,
@@ -740,6 +756,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(
             payload["lower_action_router_mode"], "causal_ema_high_pass"
         )
+        self.assertEqual(payload["lower_action_router_strength"], 0.1)
+        self.assertEqual(rows[0]["LowerActionRouterStrength"], 0.1)
         self.assertEqual(
             payload["checkpoint_score_mode"], "behavior_robust"
         )

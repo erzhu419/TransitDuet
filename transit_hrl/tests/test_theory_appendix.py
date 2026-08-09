@@ -100,6 +100,14 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             4.0 / (2.0 - 0.1) ** 2,
         )
+        self.assertAlmostEqual(
+            lower_router_frequency_response_power(
+                alpha=0.1,
+                angular_frequency=0.0,
+                strength=0.1,
+            ),
+            0.81,
+        )
         self.assertLess(
             lower_router_constant_transient(
                 latent_magnitude=1.0,
@@ -107,6 +115,15 @@ class TheoryAppendixTest(unittest.TestCase):
                 step=32,
             ),
             0.04,
+        )
+        self.assertAlmostEqual(
+            lower_router_constant_transient(
+                latent_magnitude=1.0,
+                alpha=0.1,
+                step=1000,
+                strength=0.1,
+            ),
+            0.9,
         )
         self.assertAlmostEqual(
             physical_power_excess_upper_bound(

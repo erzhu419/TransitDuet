@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_2_physical_cost_action_router"
+    "freq_hrl_mujoco_shared_core_v14_3_partial_action_router"
 )
 METHODS = (
     "freq_hrl",
@@ -88,6 +88,7 @@ SAFE_SELECTOR_CONFIDENCE = 0.90
 SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 RESPONSIBILITY_TRANSFER_ALPHA = 0.04
 DEFAULT_LOWER_ROUTER_ALPHA = 0.10
+DEFAULT_LOWER_ROUTER_STRENGTH = 1.0
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
 LEAKAGE_COST_MODES = (
     "ratio_excess_squared",
@@ -402,6 +403,7 @@ def _episode_row(
     upper_hf_penalty_coef: float,
     leakage_cost_mode: str,
     lower_action_router_mode: str,
+    lower_action_router_strength: float,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
@@ -543,6 +545,7 @@ def _episode_row(
         "LeakageConstraintScope": str(leakage_constraint_scope),
         "LeakageConstraintCostMode": str(leakage_cost_mode),
         "LowerActionRouterMode": str(lower_action_router_mode),
+        "LowerActionRouterStrength": float(lower_action_router_strength),
         "UpperTransitionDeltaRMSMean": float(np.mean(
             upper_transition_delta_rms_values
         )),
@@ -611,6 +614,7 @@ def rollout_hierarchical(
     leakage_cost_mode: str = "ratio_excess_squared",
     lower_action_router_mode: str = "direct",
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
+    lower_action_router_strength: float = DEFAULT_LOWER_ROUTER_STRENGTH,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -624,6 +628,10 @@ def rollout_hierarchical(
         raise ValueError("unknown MuJoCo lower-action router mode")
     if not 0.0 < float(lower_action_router_alpha) <= 1.0:
         raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
+    if not 0.0 <= float(lower_action_router_strength) <= 1.0:
+        raise ValueError(
+            "MuJoCo lower-action router strength must be in [0, 1]"
+        )
     if (
         str(upper_constraint_mode) == "primal_dual"
         and model.upper_cost_value is None
@@ -659,6 +667,7 @@ def rollout_hierarchical(
         lower_router = CausalLowerActionRouter(
             mode=str(lower_action_router_mode),
             alpha=float(lower_action_router_alpha),
+            strength=float(lower_action_router_strength),
         )
         lower_router.reset(action_dim)
         responsibility_lf_tracker = CausalRollingBandTracker(window=32)
@@ -1160,6 +1169,9 @@ def rollout_hierarchical(
             upper_hf_penalty_coef=upper_hf_penalty_coef,
             leakage_cost_mode=str(leakage_cost_mode),
             lower_action_router_mode=str(lower_action_router_mode),
+            lower_action_router_strength=float(
+                lower_action_router_strength
+            ),
         )
         return (trajectory if sample else None), row
     finally:
@@ -1374,6 +1386,7 @@ def rollout_flat(
             upper_hf_penalty_coef=0.0,
             leakage_cost_mode="ratio_excess_squared",
             lower_action_router_mode="direct",
+            lower_action_router_strength=1.0,
         )
         return (batch if sample else None), row
     finally:
@@ -1403,6 +1416,7 @@ SUMMARY_KEYS = [
     "LatentLowerActionRMS",
     "LowerRouterRemovedRMS",
     "LowerRouterClipRate",
+    "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
     "AdditiveActionClipRate",
@@ -2065,6 +2079,7 @@ def train_mujoco_method(
     leakage_cost_mode: str = "ratio_excess_squared",
     lower_action_router_mode: str = "direct",
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
+    lower_action_router_strength: float = DEFAULT_LOWER_ROUTER_STRENGTH,
     checkpoint_selection_mode: str = "assigned_condition",
     checkpoint_score_mode: str = "mean_reward",
     checkpoint_constraint_penalty: float = (
@@ -2146,6 +2161,10 @@ def train_mujoco_method(
         raise ValueError("unknown MuJoCo lower-action router mode")
     if not 0.0 < float(lower_action_router_alpha) <= 1.0:
         raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
+    if not 0.0 <= float(lower_action_router_strength) <= 1.0:
+        raise ValueError(
+            "MuJoCo lower-action router strength must be in [0, 1]"
+        )
     if str(checkpoint_selection_mode) not in CHECKPOINT_SELECTION_MODES:
         raise ValueError("unknown MuJoCo checkpoint selection mode")
     if str(checkpoint_score_mode) not in CHECKPOINT_SCORE_MODES:
@@ -2179,6 +2198,11 @@ def train_mujoco_method(
     effective_lower_action_router_mode = (
         str(lower_action_router_mode)
         if name.startswith("freq_hrl") else "direct"
+    )
+    effective_lower_action_router_strength = (
+        float(lower_action_router_strength)
+        if effective_lower_action_router_mode == "causal_ema_high_pass"
+        else 1.0
     )
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
@@ -2428,6 +2452,9 @@ def train_mujoco_method(
                     leakage_cost_mode=leakage_cost_mode,
                     lower_action_router_mode=effective_lower_action_router_mode,
                     lower_action_router_alpha=lower_action_router_alpha,
+                    lower_action_router_strength=(
+                        effective_lower_action_router_strength
+                    ),
                     sample=sample,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -2483,6 +2510,9 @@ def train_mujoco_method(
                             effective_lower_action_router_mode
                         ),
                         lower_action_router_alpha=lower_action_router_alpha,
+                        lower_action_router_strength=(
+                            effective_lower_action_router_strength
+                        ),
                         sample=False,
                         method=name,
                         episode_horizon=episode_horizon,
@@ -2690,6 +2720,9 @@ def train_mujoco_method(
             leakage_cost_mode=leakage_cost_mode,
             lower_action_router_mode=effective_lower_action_router_mode,
             lower_action_router_alpha=lower_action_router_alpha,
+            lower_action_router_strength=(
+                effective_lower_action_router_strength
+            ),
             sample=sample,
             method=name,
             episode_horizon=episode_horizon,
@@ -2768,6 +2801,9 @@ def train_mujoco_method(
                     leakage_cost_mode=leakage_cost_mode,
                     lower_action_router_mode=effective_lower_action_router_mode,
                     lower_action_router_alpha=lower_action_router_alpha,
+                    lower_action_router_strength=(
+                        effective_lower_action_router_strength
+                    ),
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -2872,9 +2908,12 @@ def train_mujoco_method(
         "lower_action_scale": float(lower_action_scale),
         "lower_action_router_mode": effective_lower_action_router_mode,
         "lower_action_router_alpha": float(lower_action_router_alpha),
+        "lower_action_router_strength": float(
+            effective_lower_action_router_strength
+        ),
         "lower_action_router_contract": (
-            "latent_proposal_minus_prior_only_ema_baseline_with_observed_"
-            "router_state_and_effective_action_clipping_v1"
+            "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
+            "observed_router_state_and_effective_action_clipping_v2"
             if effective_lower_action_router_mode == "causal_ema_high_pass"
             else "direct_latent_to_effective_lower_action_v1"
         ),
@@ -3051,6 +3090,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_LOWER_ROUTER_ALPHA,
     )
     parser.add_argument(
+        "--lower-action-router-strength",
+        type=float,
+        default=DEFAULT_LOWER_ROUTER_STRENGTH,
+    )
+    parser.add_argument(
         "--leakage-constraint-scope",
         choices=LEAKAGE_CONSTRAINT_SCOPES,
         default="joint_behavior",
@@ -3155,6 +3199,7 @@ def main() -> None:
         responsibility_mode=args.responsibility_mode,
         lower_action_router_mode=args.lower_action_router_mode,
         lower_action_router_alpha=args.lower_action_router_alpha,
+        lower_action_router_strength=args.lower_action_router_strength,
         leakage_constraint_scope=args.leakage_constraint_scope,
         leakage_cost_mode=args.leakage_cost_mode,
         upper_hf_rms_budget=args.upper_hf_rms_budget,
