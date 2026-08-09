@@ -102,6 +102,12 @@ The v14.9 HalfCheetah development preflight used state-aligned feasibility check
 
 Forbidden: MuJoCo v14.9 supports joint frequency separation, no-tradeoff, cross-task generality, confirmatory reward improvement, or a submission-ready selected algorithm.
 
+### mujoco_v14_10_deployment_aligned_protocol
+
+The source-bound v14.10 development protocol replaces sampled Gaussian-action frequency costs with reward-guarded constraints on deterministic squashed actor-mean deployment traces. It uses episode-aware upper holds, paired-anchor relative targets, separate dimensionless upper/lower multipliers, held-out-free paired checkpoint selection, and an explicit initial-checkpoint fallback. A single-seed 11-cell HalfCheetah preflight must pass mechanism, provenance, reward-floor, and five-endpoint gates before any multi-seed screen is authorized. No v14.10 performance result has yet been admitted to this ledger.
+
+Forbidden: The v14.10 implementation or smoke test alone supports reward improvement, learned frequency separation, no-tradeoff behavior, cross-task generality, or confirmatory evidence.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
