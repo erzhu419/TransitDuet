@@ -562,6 +562,27 @@ def train_frequency_separated_ppo(
         raise ValueError(
             "checkpoint minimum iteration must be below total iterations"
         )
+    anchor_state_replay_enabled = bool(
+        model.config.deployment_frequency_anchor_state_replay
+    )
+    anchor_state_replay_seeds: list[int] = []
+    anchor_state_replay_batch: HierarchicalTrajectoryBatch | None = None
+    if anchor_state_replay_enabled:
+        anchor_state_replay_seeds = _iteration_rollout_seeds(
+            train_seeds, 0, training_seed_fn
+        )
+        reference_batches: list[HierarchicalTrajectoryBatch] = []
+        for seed in anchor_state_replay_seeds:
+            reference_batch, _ = rollout_fn(model, int(seed), False)
+            if reference_batch is None:
+                raise RuntimeError(
+                    "anchor-state replay rollout did not produce an SMDP "
+                    "trajectory"
+                )
+            reference_batches.append(reference_batch)
+        anchor_state_replay_batch = concat_hierarchical_batches(
+            reference_batches
+        )
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
@@ -625,6 +646,12 @@ def train_frequency_separated_ppo(
         "promotion_actor_optimizer_steps": 0.0,
         "promotion_value_optimizer_steps": 0.0,
         "promotion_cost_value_optimizer_steps": 0.0,
+        "deployment_frequency_anchor_state_replay_enabled": float(
+            anchor_state_replay_enabled
+        ),
+        "deployment_frequency_anchor_state_replay_path_count": float(
+            len(anchor_state_replay_seeds)
+        ),
         **(
             {
                 "checkpoint_selection_diagnostics": (
@@ -648,7 +675,12 @@ def train_frequency_separated_ppo(
             sampled_rows.append(row)
         if not batches:
             raise RuntimeError("sampled rollouts did not produce an SMDP trajectory")
-        metrics = model.update(concat_hierarchical_batches(batches))
+        metrics = model.update(
+            concat_hierarchical_batches(batches),
+            deployment_frequency_reference_batch=(
+                anchor_state_replay_batch
+            ),
+        )
         evaluate_checkpoint = _checkpoint_evaluation_due(
             iteration,
             total_iterations=total_iterations,
@@ -739,6 +771,25 @@ def train_frequency_separated_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
+        "deployment_frequency_anchor_state_replay_enabled": (
+            anchor_state_replay_enabled
+        ),
+        "deployment_frequency_anchor_state_replay_seeds": list(
+            anchor_state_replay_seeds
+        ),
+        "deployment_frequency_anchor_state_replay_path_count": len(
+            anchor_state_replay_seeds
+        ),
+        "deployment_frequency_anchor_state_replay_upper_transitions": (
+            0
+            if anchor_state_replay_batch is None
+            else anchor_state_replay_batch.upper.size
+        ),
+        "deployment_frequency_anchor_state_replay_lower_transitions": (
+            0
+            if anchor_state_replay_batch is None
+            else anchor_state_replay_batch.lower.size
+        ),
         "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,
         "validation_learning_gain": float(

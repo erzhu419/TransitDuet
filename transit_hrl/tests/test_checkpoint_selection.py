@@ -339,6 +339,73 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
         self.assertEqual(payload["selected_checkpoint_iteration"], 0)
         self.assertTrue(payload["checkpoint_has_eligible_selection"])
 
+    def test_smdp_trainer_freezes_anchor_state_replay_on_training_paths(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+            lower_deployment_frequency_rms_budget=1.0,
+            lower_deployment_frequency_lambda_init=1.0,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_anchor_state_replay=True,
+        ))
+        calls = []
+
+        def rollout_fn(_model, seed, train):
+            calls.append((int(seed), bool(train)))
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+            )
+            return builder.build(), {"reward_mean": float(seed)}
+
+        payload, _, _ = train_frequency_separated_ppo(
+            model=model,
+            train_seeds=[1],
+            selection_seeds=[10],
+            eval_seeds=[30],
+            iterations=1,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+            training_seed_fn=lambda root, iteration: (
+                int(root) + 100 + int(iteration)
+            ),
+        )
+
+        self.assertEqual(calls.count((101, False)), 1)
+        self.assertEqual(calls.count((101, True)), 1)
+        self.assertEqual(
+            payload["deployment_frequency_anchor_state_replay_seeds"],
+            [101],
+        )
+        self.assertEqual(
+            payload[
+                "deployment_frequency_anchor_state_replay_lower_transitions"
+            ],
+            1,
+        )
+        self.assertEqual(
+            payload["history"][1][
+                "lower_deployment_frequency_group_count"
+            ],
+            2.0,
+        )
+
     def test_joint_trainer_uses_the_same_custom_score_contract(self):
         model = JointActorCriticPPO(JointPPOConfig(
             state_dim=1,

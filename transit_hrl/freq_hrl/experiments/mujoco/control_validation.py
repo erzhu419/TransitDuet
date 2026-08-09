@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_12_groupwise_robust_projection"
+    "freq_hrl_mujoco_shared_core_v14_13_anchor_replay_trust_region"
 )
 METHODS = (
     "freq_hrl",
@@ -2246,6 +2246,9 @@ def _hierarchical_model(
     upper_deployment_frequency_action_scale: float = 1.0,
     lower_deployment_frequency_action_scale: float = 1.0,
     deployment_frequency_groupwise_robust: bool = False,
+    deployment_frequency_anchor_state_replay: bool = False,
+    deployment_frequency_ppo_trust_region: bool = False,
+    deployment_frequency_ppo_trust_region_backtracks: int = 8,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2319,6 +2322,15 @@ def _hierarchical_model(
         ),
         deployment_frequency_groupwise_robust=bool(
             deployment_frequency_groupwise_robust
+        ),
+        deployment_frequency_anchor_state_replay=bool(
+            deployment_frequency_anchor_state_replay
+        ),
+        deployment_frequency_ppo_trust_region=bool(
+            deployment_frequency_ppo_trust_region
+        ),
+        deployment_frequency_ppo_trust_region_backtracks=int(
+            deployment_frequency_ppo_trust_region_backtracks
         ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
@@ -2828,6 +2840,9 @@ def train_mujoco_method(
     upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
     lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
     deployment_frequency_groupwise_robust: bool = False,
+    deployment_frequency_anchor_state_replay: bool = False,
+    deployment_frequency_ppo_trust_region: bool = False,
+    deployment_frequency_ppo_trust_region_backtracks: int = 8,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -3032,6 +3047,34 @@ def train_mujoco_method(
         raise ValueError(
             "groupwise robust deployment frequency requires an active constraint"
         )
+    for feature_name, enabled in (
+        (
+            "deployment-frequency anchor-state replay",
+            deployment_frequency_anchor_state_replay,
+        ),
+        (
+            "deployment-frequency PPO trust region",
+            deployment_frequency_ppo_trust_region,
+        ),
+        ):
+        if not isinstance(enabled, bool):
+            raise ValueError(
+                f"MuJoCo {feature_name} flag must be boolean"
+            )
+        if enabled and not deployment_frequency_groupwise_robust:
+            raise ValueError(
+                f"MuJoCo {feature_name} requires groupwise robust constraints"
+            )
+    if (
+        isinstance(deployment_frequency_ppo_trust_region_backtracks, bool)
+        or int(deployment_frequency_ppo_trust_region_backtracks)
+        != deployment_frequency_ppo_trust_region_backtracks
+        or int(deployment_frequency_ppo_trust_region_backtracks) < 1
+    ):
+        raise ValueError(
+            "MuJoCo deployment-frequency PPO trust-region backtracks must "
+            "be a positive integer"
+        )
     for level, value in (
         ("upper", upper_deployment_frequency_rms_budget),
         ("lower", lower_deployment_frequency_rms_budget),
@@ -3063,6 +3106,14 @@ def train_mujoco_method(
             "paired continuation requires both checkpoint and summary paths"
         )
     paired_continuation = all(checkpoint_paths_present)
+    if (
+        deployment_frequency_anchor_state_replay
+        or deployment_frequency_ppo_trust_region
+    ) and not paired_continuation:
+        raise ValueError(
+            "MuJoCo anchor-state replay and PPO trust regions require a "
+            "paired frozen-anchor continuation"
+        )
     if (
         any(
             value > 0.0
@@ -3866,6 +3917,15 @@ def train_mujoco_method(
             deployment_frequency_groupwise_robust=bool(
                 deployment_frequency_groupwise_robust
             ),
+            deployment_frequency_anchor_state_replay=bool(
+                deployment_frequency_anchor_state_replay
+            ),
+            deployment_frequency_ppo_trust_region=bool(
+                deployment_frequency_ppo_trust_region
+            ),
+            deployment_frequency_ppo_trust_region_backtracks=int(
+                deployment_frequency_ppo_trust_region_backtracks
+            ),
         )
         if paired_continuation:
             paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
@@ -4252,12 +4312,37 @@ def train_mujoco_method(
             and deployment_frequency_requested
             and name == "freq_hrl"
         ),
+        "deployment_frequency_anchor_state_replay": bool(
+            deployment_frequency_anchor_state_replay
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_ppo_trust_region": bool(
+            deployment_frequency_ppo_trust_region
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_ppo_trust_region_backtracks": int(
+            deployment_frequency_ppo_trust_region_backtracks
+        ),
         "deployment_frequency_constraint_contract": (
             (
-                "episode_reset_groupwise_worst_differentiable_actor_mean_"
-                "tanh_upper_hold_hpf8_lower_lpf32_per_group_anchor_relative_"
-                "target_with_absolute_floor_iterative_per_group_cumulative_"
-                "reward_budget_projection_v5"
+                (
+                    "episode_reset_candidate_and_frozen_anchor_state_replay_"
+                    "groupwise_worst_differentiable_actor_mean_tanh_upper_"
+                    "hold_hpf8_lower_lpf32_per_group_anchor_relative_target_"
+                    "with_absolute_floor_ppo_trust_region_and_iterative_per_"
+                    "group_cumulative_reward_budget_projection_v6"
+                    if (
+                        deployment_frequency_anchor_state_replay
+                        and deployment_frequency_ppo_trust_region
+                    ) else (
+                        "episode_reset_groupwise_worst_differentiable_actor_"
+                        "mean_tanh_upper_hold_hpf8_lower_lpf32_per_group_"
+                        "anchor_relative_target_with_absolute_floor_iterative_"
+                        "per_group_cumulative_reward_budget_projection_v5"
+                    )
+                )
                 if deployment_frequency_groupwise_robust
                 else (
                     "episode_reset_differentiable_actor_mean_tanh_upper_hold_"
@@ -4706,6 +4791,19 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
     )
     parser.add_argument(
+        "--deployment-frequency-anchor-state-replay",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-ppo-trust-region",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-ppo-trust-region-backtracks",
+        type=int,
+        default=8,
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -4861,6 +4959,15 @@ def main() -> None:
         ),
         deployment_frequency_groupwise_robust=(
             args.deployment_frequency_groupwise_robust
+        ),
+        deployment_frequency_anchor_state_replay=(
+            args.deployment_frequency_anchor_state_replay
+        ),
+        deployment_frequency_ppo_trust_region=(
+            args.deployment_frequency_ppo_trust_region
+        ),
+        deployment_frequency_ppo_trust_region_backtracks=(
+            args.deployment_frequency_ppo_trust_region_backtracks
         ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,

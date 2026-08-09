@@ -439,6 +439,9 @@ class SMDPPPOConfig:
     lower_deployment_frequency_reward_tolerance: float = 1e-8
     lower_deployment_frequency_target_tolerance: float = 0.0
     deployment_frequency_groupwise_robust: bool = False
+    deployment_frequency_anchor_state_replay: bool = False
+    deployment_frequency_ppo_trust_region: bool = False
+    deployment_frequency_ppo_trust_region_backtracks: int = 8
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -1220,6 +1223,32 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "deployment_frequency_groupwise_robust must be boolean"
             )
+        for name in (
+            "deployment_frequency_anchor_state_replay",
+            "deployment_frequency_ppo_trust_region",
+        ):
+            if not isinstance(getattr(config, name), bool):
+                raise ValueError(f"{name} must be boolean")
+        if (
+            config.deployment_frequency_anchor_state_replay
+            or config.deployment_frequency_ppo_trust_region
+        ) and not config.deployment_frequency_groupwise_robust:
+            raise ValueError(
+                "deployment frequency anchor-state replay and PPO trust "
+                "regions require groupwise robust constraints"
+            )
+        trust_region_backtracks = (
+            config.deployment_frequency_ppo_trust_region_backtracks
+        )
+        if (
+            isinstance(trust_region_backtracks, bool)
+            or int(trust_region_backtracks) != trust_region_backtracks
+            or int(trust_region_backtracks) < 1
+        ):
+            raise ValueError(
+                "deployment_frequency_ppo_trust_region_backtracks must be "
+                "a positive integer"
+            )
         for level in ("upper", "lower"):
             budget = float(getattr(
                 config, f"{level}_deployment_frequency_rms_budget"
@@ -1701,6 +1730,387 @@ class FrequencySeparatedActorCriticPPO:
             reference_distribution, current_distribution
         ).sum(dim=-1).mean()
         return divergence, coefficient * divergence
+
+    def _deployment_frequency_active(self, level: str) -> bool:
+        prefix = f"{level}_deployment_frequency"
+        return bool(
+            float(getattr(self.config, f"{prefix}_dual_lr")) > 0.0
+            or float(getattr(self, f"{prefix}_lambda")) > 0.0
+        )
+
+    def _deployment_frequency_state_batch(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        reference_batch: LevelTrajectoryBatch | None,
+    ) -> LevelTrajectoryBatch:
+        if reference_batch is None:
+            return batch
+        state_dim = int(getattr(self.config, f"{level}_state_dim"))
+        action_dim = int(getattr(self.config, f"{level}_action_dim"))
+        cost_state_dim = (
+            self.upper_cost_state_dim
+            if level == "upper" else self.lower_cost_state_dim
+        )
+        reference_batch.validate(
+            state_dim=state_dim,
+            action_dim=action_dim,
+            level=f"{level}_deployment_frequency_reference",
+            cost_state_dim=cost_state_dim,
+        )
+        return concat_level_batches((batch, reference_batch))
+
+    def _deployment_frequency_group_masks(
+        self,
+        batch: LevelTrajectoryBatch,
+    ) -> list[torch.Tensor]:
+        groupwise = bool(
+            self.config.deployment_frequency_groupwise_robust
+        )
+        if groupwise and batch.deployment_frequency_group is not None:
+            group_values = np.asarray(
+                batch.deployment_frequency_group
+            ).reshape(-1)
+            if (
+                group_values.size != batch.size
+                or not np.all(np.isfinite(group_values))
+                or np.any(group_values < 0)
+                or not np.all(group_values == np.floor(group_values))
+            ):
+                raise ValueError(
+                    "deployment frequency groups are invalid"
+                )
+            group = torch.as_tensor(
+                group_values, dtype=torch.long, device=self.device
+            )
+        else:
+            group = torch.zeros(
+                batch.size, dtype=torch.long, device=self.device
+            )
+        masks = [
+            group == item for item in torch.unique(group, sorted=True)
+        ]
+        if not masks or any(
+            not bool(torch.any(mask).detach().cpu().item())
+            for mask in masks
+        ):
+            raise RuntimeError("deployment frequency groups cannot be empty")
+        return masks
+
+    def _deployment_frequency_normalized_excess(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        actor: nn.Module,
+        reference_batch: LevelTrajectoryBatch | None,
+    ) -> tuple[float, int]:
+        prefix = f"{level}_deployment_frequency"
+        frequency_batch = self._deployment_frequency_state_batch(
+            level=level,
+            batch=batch,
+            reference_batch=reference_batch,
+        )
+        state = torch.as_tensor(
+            frequency_batch.state,
+            dtype=torch.float32,
+            device=self.device,
+        )
+        duration = torch.as_tensor(
+            frequency_batch.duration,
+            dtype=torch.long,
+            device=self.device,
+        )
+        done = torch.as_tensor(
+            frequency_batch.done,
+            dtype=torch.bool,
+            device=self.device,
+        )
+        masks = self._deployment_frequency_group_masks(frequency_batch)
+        budget = float(getattr(self.config, f"{prefix}_rms_budget"))
+        reduction = float(getattr(
+            self.config, f"{prefix}_reference_reduction_fraction"
+        ))
+        window = int(getattr(self.config, f"{prefix}_window"))
+        action_scale = float(getattr(
+            self.config, f"{prefix}_action_scale"
+        ))
+        band = "high" if level == "upper" else "low"
+
+        def powers(policy: nn.Module) -> torch.Tensor:
+            action = deterministic_actor_action(
+                policy,
+                state,
+                transform=str(self.config.deployment_action_transform),
+                scale=action_scale,
+            )
+            return torch.stack([
+                deployment_frequency_stats(
+                    action[mask],
+                    duration[mask],
+                    done[mask],
+                    window=window,
+                    band=band,
+                    rms_budget=budget,
+                ).power
+                for mask in masks
+            ])
+
+        with torch.no_grad():
+            target = torch.full(
+                (len(masks),),
+                budget * budget,
+                dtype=state.dtype,
+                device=self.device,
+            )
+            if reduction > 0.0:
+                anchor = self._actor_anchors.get(level)
+                if anchor is None:
+                    raise RuntimeError(
+                        f"{level} deployment frequency trust region "
+                        "requires a captured actor anchor"
+                    )
+                target = torch.maximum(
+                    (1.0 - reduction) * powers(anchor), target
+                )
+            excess = torch.max(powers(actor) / target - 1.0)
+        return float(excess.cpu().item()), len(masks)
+
+    def _deployment_frequency_reward_guard_values(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        actor: nn.Module,
+    ) -> torch.Tensor:
+        state = torch.as_tensor(
+            batch.state, dtype=torch.float32, device=self.device
+        )
+        action = torch.as_tensor(
+            batch.action, dtype=torch.float32, device=self.device
+        )
+        old_logp = torch.as_tensor(
+            batch.old_logp, dtype=torch.float32, device=self.device
+        )
+        reward_adv, _ = self._gae(
+            batch.reward,
+            batch.done,
+            batch.duration,
+            batch.old_value,
+            batch.next_value,
+            batch.terminal,
+        )
+        reward_adv_t = torch.as_tensor(
+            self._normalize(reward_adv),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        logp, _ = actor.log_prob_entropy(state, action)
+        ratio = torch.exp((logp - old_logp).clamp(-20.0, 20.0))
+        clipped = torch.clamp(
+            ratio,
+            1.0 - self.config.clip_ratio,
+            1.0 + self.config.clip_ratio,
+        )
+        reward_surrogate = torch.minimum(
+            ratio * reward_adv_t, clipped * reward_adv_t
+        )
+        _, anchor_loss = self._actor_anchor_terms(
+            level=level, actor=actor, state=state
+        )
+        return torch.stack([
+            -reward_surrogate[mask].mean() + anchor_loss
+            for mask in self._deployment_frequency_group_masks(batch)
+        ])
+
+    def _capture_deployment_frequency_ppo_guard(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        actor: nn.Module,
+        actor_optimizer: torch.optim.Optimizer,
+        reference_batch: LevelTrajectoryBatch | None,
+    ) -> dict[str, Any] | None:
+        if (
+            not self.config.deployment_frequency_ppo_trust_region
+            or not self._deployment_frequency_active(level)
+        ):
+            return None
+        if (
+            self.config.deployment_frequency_anchor_state_replay
+            and reference_batch is None
+        ):
+            raise RuntimeError(
+                "deployment frequency anchor-state replay is enabled but "
+                "no reference batch was supplied"
+            )
+        excess, group_count = self._deployment_frequency_normalized_excess(
+            level=level,
+            batch=batch,
+            actor=actor,
+            reference_batch=reference_batch,
+        )
+        with torch.no_grad():
+            reward_values = self._deployment_frequency_reward_guard_values(
+                level=level, batch=batch, actor=actor
+            ).detach()
+        return {
+            "parameters": [
+                parameter.detach().clone()
+                for parameter in actor.parameters()
+            ],
+            "optimizer": copy.deepcopy(actor_optimizer.state_dict()),
+            "frequency_excess": float(excess),
+            "frequency_group_count": int(group_count),
+            "reward_values": reward_values,
+        }
+
+    def _apply_deployment_frequency_ppo_guard(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        actor: nn.Module,
+        actor_optimizer: torch.optim.Optimizer,
+        reference_batch: LevelTrajectoryBatch | None,
+        captured: dict[str, Any] | None,
+    ) -> dict[str, float]:
+        prefix = f"{level}_deployment_frequency_ppo_guard"
+        if captured is None:
+            return {
+                f"{prefix}_enabled": 0.0,
+                f"{prefix}_attempted": 0.0,
+                f"{prefix}_accepted": 0.0,
+                f"{prefix}_backtracks": 0.0,
+                f"{prefix}_step_fraction": 1.0,
+                f"{prefix}_frequency_excess_before": 0.0,
+                f"{prefix}_frequency_excess_full_step": 0.0,
+                f"{prefix}_frequency_excess_after": 0.0,
+                f"{prefix}_frequency_group_count": 0.0,
+                f"{prefix}_reward_group_count": 0.0,
+                f"{prefix}_full_step_group_reward_max_loss_delta": 0.0,
+                f"{prefix}_full_step_group_reward_violation_count": 0.0,
+                f"{prefix}_group_reward_guard_max_loss_delta": 0.0,
+                f"{prefix}_group_reward_budget_violation_count": 0.0,
+                f"{prefix}_optimizer_restored": 0.0,
+            }
+
+        parameters = list(actor.parameters())
+        before_parameters = list(captured["parameters"])
+        after_parameters = [
+            parameter.detach().clone() for parameter in parameters
+        ]
+        before_excess = float(captured["frequency_excess"])
+        reward_baseline = captured["reward_values"]
+        target_tolerance = float(getattr(
+            self.config,
+            f"{level}_deployment_frequency_target_tolerance",
+        ))
+        reward_tolerance = float(getattr(
+            self.config,
+            f"{level}_deployment_frequency_reward_tolerance",
+        ))
+        frequency_limit = max(before_excess, target_tolerance) + 1e-8
+
+        def evaluate() -> tuple[float, torch.Tensor, bool]:
+            excess, _ = self._deployment_frequency_normalized_excess(
+                level=level,
+                batch=batch,
+                actor=actor,
+                reference_batch=reference_batch,
+            )
+            with torch.no_grad():
+                reward_delta = (
+                    self._deployment_frequency_reward_guard_values(
+                        level=level, batch=batch, actor=actor
+                    ).detach()
+                    - reward_baseline
+                )
+            accepted = bool(
+                excess <= frequency_limit
+                and float(torch.max(reward_delta).cpu().item())
+                <= reward_tolerance + 1e-12
+            )
+            return excess, reward_delta, accepted
+
+        full_step_excess, full_step_reward_delta, accepted = evaluate()
+        reward_delta = full_step_reward_delta
+        final_excess = float(full_step_excess)
+        selected_fraction = 1.0
+        backtracks = 0
+        if not accepted:
+            for backtrack in range(1, int(
+                self.config.deployment_frequency_ppo_trust_region_backtracks
+            ) + 1):
+                fraction = 0.5 ** backtrack
+                with torch.no_grad():
+                    for parameter, before, after in zip(
+                        parameters,
+                        before_parameters,
+                        after_parameters,
+                        strict=True,
+                    ):
+                        parameter.copy_(before + fraction * (after - before))
+                backtracks = backtrack
+                excess, candidate_delta, candidate_accepted = evaluate()
+                if candidate_accepted:
+                    selected_fraction = float(fraction)
+                    final_excess = float(excess)
+                    reward_delta = candidate_delta
+                    accepted = True
+                    actor_optimizer.load_state_dict(captured["optimizer"])
+                    break
+        if not accepted:
+            with torch.no_grad():
+                for parameter, before in zip(
+                    parameters, before_parameters, strict=True
+                ):
+                    parameter.copy_(before)
+            actor_optimizer.load_state_dict(captured["optimizer"])
+            selected_fraction = 0.0
+            final_excess, reward_delta, _ = evaluate()
+
+        reward_max_delta = float(torch.max(reward_delta).cpu().item())
+        reward_violations = int(torch.sum(
+            reward_delta > reward_tolerance + 1e-12
+        ).cpu().item())
+        return {
+            f"{prefix}_enabled": 1.0,
+            f"{prefix}_attempted": 1.0,
+            f"{prefix}_accepted": float(selected_fraction > 0.0),
+            f"{prefix}_backtracks": float(backtracks),
+            f"{prefix}_step_fraction": float(selected_fraction),
+            f"{prefix}_frequency_excess_before": before_excess,
+            f"{prefix}_frequency_excess_full_step": float(
+                full_step_excess
+            ),
+            f"{prefix}_frequency_excess_after": float(final_excess),
+            f"{prefix}_frequency_group_count": float(
+                captured["frequency_group_count"]
+            ),
+            f"{prefix}_reward_group_count": float(
+                int(reward_baseline.numel())
+            ),
+            f"{prefix}_full_step_group_reward_max_loss_delta": float(
+                torch.max(full_step_reward_delta).cpu().item()
+            ),
+            f"{prefix}_full_step_group_reward_violation_count": float(
+                int(torch.sum(
+                    full_step_reward_delta > reward_tolerance + 1e-12
+                ).cpu().item())
+            ),
+            f"{prefix}_group_reward_guard_max_loss_delta": (
+                reward_max_delta
+            ),
+            f"{prefix}_group_reward_budget_violation_count": float(
+                reward_violations
+            ),
+            f"{prefix}_optimizer_restored": float(
+                selected_fraction < 1.0
+            ),
+        }
 
     def state_dict(self) -> dict[str, Any]:
         payload = {
@@ -2635,6 +3045,7 @@ class FrequencySeparatedActorCriticPPO:
         level: str,
         batch: LevelTrajectoryBatch,
         actor: nn.Module,
+        reference_batch: LevelTrajectoryBatch | None = None,
     ) -> dict[str, float]:
         """Constrain the deterministic action sequence used at deployment."""
 
@@ -2700,6 +3111,13 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_segment_count": 0.0,
             f"{prefix}_groupwise_robust": float(groupwise_robust),
             f"{prefix}_group_count": 0.0,
+            f"{prefix}_reward_guard_group_count": 0.0,
+            f"{prefix}_anchor_state_replay_enabled": float(
+                reference_batch is not None
+            ),
+            f"{prefix}_anchor_state_replay_transitions": float(
+                0 if reference_batch is None else reference_batch.size
+            ),
             f"{prefix}_groups_target_reached_before": 0.0,
             f"{prefix}_groups_target_reached_after": 0.0,
             f"{prefix}_group_reward_guard_max_loss_delta": 0.0,
@@ -2708,7 +3126,25 @@ class FrequencySeparatedActorCriticPPO:
         if not active or batch.size == 0:
             return empty
 
-        state = torch.as_tensor(
+        if (
+            cfg.deployment_frequency_anchor_state_replay
+            and reference_batch is None
+        ):
+            raise RuntimeError(
+                "deployment frequency anchor-state replay is enabled but "
+                "no reference batch was supplied"
+            )
+        frequency_batch = self._deployment_frequency_state_batch(
+            level=level,
+            batch=batch,
+            reference_batch=reference_batch,
+        )
+        frequency_state = torch.as_tensor(
+            frequency_batch.state,
+            dtype=torch.float32,
+            device=self.device,
+        )
+        reward_state = torch.as_tensor(
             batch.state, dtype=torch.float32, device=self.device
         )
         action = torch.as_tensor(
@@ -2718,10 +3154,14 @@ class FrequencySeparatedActorCriticPPO:
             batch.old_logp, dtype=torch.float32, device=self.device
         )
         duration = torch.as_tensor(
-            batch.duration, dtype=torch.long, device=self.device
+            frequency_batch.duration,
+            dtype=torch.long,
+            device=self.device,
         )
         done = torch.as_tensor(
-            batch.done, dtype=torch.bool, device=self.device
+            frequency_batch.done,
+            dtype=torch.bool,
+            device=self.device,
         )
         reward_adv, _ = self._gae(
             batch.reward,
@@ -2740,40 +3180,15 @@ class FrequencySeparatedActorCriticPPO:
         window = int(getattr(cfg, f"{prefix}_window"))
         action_scale = float(getattr(cfg, f"{prefix}_action_scale"))
 
-        if groupwise_robust and batch.deployment_frequency_group is not None:
-            group_values = np.asarray(
-                batch.deployment_frequency_group
-            ).reshape(-1)
-            if (
-                group_values.size != batch.size
-                or not np.all(np.isfinite(group_values))
-                or np.any(group_values < 0)
-                or not np.all(group_values == np.floor(group_values))
-            ):
-                raise ValueError(
-                    f"{level} deployment frequency groups are invalid"
-                )
-            group = torch.as_tensor(
-                group_values,
-                dtype=torch.long,
-                device=self.device,
-            )
-        else:
-            group = torch.zeros(
-                batch.size, dtype=torch.long, device=self.device
-            )
-        group_ids = torch.unique(group, sorted=True)
-        group_masks = [group == item for item in group_ids]
-        if not group_masks or any(
-            not bool(torch.any(mask).detach().cpu().item())
-            for mask in group_masks
-        ):
-            raise RuntimeError("deployment frequency groups cannot be empty")
+        frequency_group_masks = self._deployment_frequency_group_masks(
+            frequency_batch
+        )
+        reward_group_masks = self._deployment_frequency_group_masks(batch)
 
         def actor_frequency_powers(policy: nn.Module) -> torch.Tensor:
             deterministic_action = deterministic_actor_action(
                 policy,
-                state,
+                frequency_state,
                 transform=str(cfg.deployment_action_transform),
                 scale=action_scale,
             )
@@ -2786,16 +3201,18 @@ class FrequencySeparatedActorCriticPPO:
                     band=band,
                     rms_budget=budget,
                 ).power
-                for mask in group_masks
+                for mask in frequency_group_masks
             ])
 
         reference_powers = torch.zeros(
-            len(group_masks), dtype=state.dtype, device=self.device
+            len(frequency_group_masks),
+            dtype=frequency_state.dtype,
+            device=self.device,
         )
         target_powers = torch.full(
-            (len(group_masks),),
+            (len(frequency_group_masks),),
             budget * budget,
-            dtype=state.dtype,
+            dtype=frequency_state.dtype,
             device=self.device,
         )
         if reference_reduction > 0.0:
@@ -2815,7 +3232,7 @@ class FrequencySeparatedActorCriticPPO:
         def current_stats():
             deterministic_action = deterministic_actor_action(
                 actor,
-                state,
+                frequency_state,
                 transform=str(cfg.deployment_action_transform),
                 scale=action_scale,
             )
@@ -2828,7 +3245,7 @@ class FrequencySeparatedActorCriticPPO:
                     band=band,
                     power_budget=target_powers[index],
                 )
-                for index, mask in enumerate(group_masks)
+                for index, mask in enumerate(frequency_group_masks)
             ]
             powers = torch.stack([item.power for item in grouped])
             signed_excesses = powers - target_powers
@@ -2854,7 +3271,7 @@ class FrequencySeparatedActorCriticPPO:
             }
 
         def reward_guard_values_fn() -> torch.Tensor:
-            logp, _ = actor.log_prob_entropy(state, action)
+            logp, _ = actor.log_prob_entropy(reward_state, action)
             ratio = torch.exp((logp - old_logp).clamp(-20.0, 20.0))
             clipped = torch.clamp(
                 ratio, 1.0 - cfg.clip_ratio, 1.0 + cfg.clip_ratio
@@ -2863,11 +3280,11 @@ class FrequencySeparatedActorCriticPPO:
                 ratio * reward_adv_t, clipped * reward_adv_t
             )
             _, anchor_loss = self._actor_anchor_terms(
-                level=level, actor=actor, state=state
+                level=level, actor=actor, state=reward_state
             )
             return torch.stack([
                 -reward_surrogate[mask].mean() + anchor_loss
-                for mask in group_masks
+                for mask in reward_group_masks
             ])
 
         def reward_guard_loss_fn() -> torch.Tensor:
@@ -3072,7 +3489,16 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_primitive_steps": float(after["primitive_steps"]),
             f"{prefix}_segment_count": float(after["segment_count"]),
             f"{prefix}_groupwise_robust": float(groupwise_robust),
-            f"{prefix}_group_count": float(len(group_masks)),
+            f"{prefix}_group_count": float(len(frequency_group_masks)),
+            f"{prefix}_reward_guard_group_count": float(
+                len(reward_group_masks)
+            ),
+            f"{prefix}_anchor_state_replay_enabled": float(
+                reference_batch is not None
+            ),
+            f"{prefix}_anchor_state_replay_transitions": float(
+                0 if reference_batch is None else reference_batch.size
+            ),
             f"{prefix}_groups_target_reached_before": float(
                 groups_target_reached_before
             ),
@@ -3087,7 +3513,31 @@ class FrequencySeparatedActorCriticPPO:
             ),
         }
 
-    def update(self, batch: HierarchicalTrajectoryBatch) -> dict[str, float]:
+    def update(
+        self,
+        batch: HierarchicalTrajectoryBatch,
+        *,
+        deployment_frequency_reference_batch: (
+            HierarchicalTrajectoryBatch | None
+        ) = None,
+    ) -> dict[str, float]:
+        upper_reference = (
+            None
+            if deployment_frequency_reference_batch is None
+            else deployment_frequency_reference_batch.upper
+        )
+        lower_reference = (
+            None
+            if deployment_frequency_reference_batch is None
+            else deployment_frequency_reference_batch.lower
+        )
+        upper_guard = self._capture_deployment_frequency_ppo_guard(
+            level="upper",
+            batch=batch.upper,
+            actor=self.upper_actor,
+            actor_optimizer=self.upper_actor_optimizer,
+            reference_batch=upper_reference,
+        )
         upper_metrics = self._update_level(
             level="upper",
             batch=batch.upper,
@@ -3098,11 +3548,27 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.upper_value_optimizer,
             cost_value_optimizer=self.upper_cost_value_optimizer,
         )
+        upper_metrics.update(self._apply_deployment_frequency_ppo_guard(
+            level="upper",
+            batch=batch.upper,
+            actor=self.upper_actor,
+            actor_optimizer=self.upper_actor_optimizer,
+            reference_batch=upper_reference,
+            captured=upper_guard,
+        ))
         upper_metrics.update(self._update_deployment_frequency_constraint(
             level="upper",
             batch=batch.upper,
             actor=self.upper_actor,
+            reference_batch=upper_reference,
         ))
+        lower_guard = self._capture_deployment_frequency_ppo_guard(
+            level="lower",
+            batch=batch.lower,
+            actor=self.lower_actor,
+            actor_optimizer=self.lower_actor_optimizer,
+            reference_batch=lower_reference,
+        )
         lower_metrics = self._update_level(
             level="lower",
             batch=batch.lower,
@@ -3113,10 +3579,19 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.lower_value_optimizer,
             cost_value_optimizer=self.lower_cost_value_optimizer,
         )
+        lower_metrics.update(self._apply_deployment_frequency_ppo_guard(
+            level="lower",
+            batch=batch.lower,
+            actor=self.lower_actor,
+            actor_optimizer=self.lower_actor_optimizer,
+            reference_batch=lower_reference,
+            captured=lower_guard,
+        ))
         lower_metrics.update(self._update_deployment_frequency_constraint(
             level="lower",
             batch=batch.lower,
             actor=self.lower_actor,
+            reference_batch=lower_reference,
         ))
         hf_metrics: dict[str, float] = {}
         if batch.hf is not None:

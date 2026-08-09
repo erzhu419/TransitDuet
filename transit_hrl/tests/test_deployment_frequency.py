@@ -338,6 +338,107 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
             0.0,
         )
 
+    def test_anchor_state_replay_expands_only_frequency_groups(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            deployment_action_transform="tanh",
+            lower_deployment_frequency_rms_budget=0.01,
+            lower_deployment_frequency_lambda_init=1.0,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_anchor_state_replay=True,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        current = self._batch(model).lower
+        reference = copy.deepcopy(current)
+        metrics = model._update_deployment_frequency_constraint(
+            level="lower",
+            batch=current,
+            actor=model.lower_actor,
+            reference_batch=reference,
+        )
+        prefix = "lower_deployment_frequency_"
+        self.assertEqual(metrics[prefix + "group_count"], 2.0)
+        self.assertEqual(
+            metrics[prefix + "reward_guard_group_count"], 1.0
+        )
+        self.assertEqual(
+            metrics[prefix + "anchor_state_replay_enabled"], 1.0
+        )
+        self.assertEqual(
+            metrics[prefix + "anchor_state_replay_transitions"],
+            float(reference.size),
+        )
+
+    def test_ppo_trust_region_blocks_worst_group_frequency_drift(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            deployment_action_transform="tanh",
+            lower_deployment_frequency_rms_budget=0.1,
+            lower_deployment_frequency_lambda_init=1.0,
+            lower_deployment_frequency_reward_tolerance=1e-8,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_ppo_trust_region=True,
+            deployment_frequency_ppo_trust_region_backtracks=8,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        with torch.no_grad():
+            for parameter in model.lower_actor.parameters():
+                parameter.zero_()
+        batch = self._batch(model).lower
+        captured = model._capture_deployment_frequency_ppo_guard(
+            level="lower",
+            batch=batch,
+            actor=model.lower_actor,
+            actor_optimizer=model.lower_actor_optimizer,
+            reference_batch=None,
+        )
+        self.assertIsNotNone(captured)
+        with torch.no_grad():
+            model.lower_actor.net[-1].bias.fill_(1.0)
+        metrics = model._apply_deployment_frequency_ppo_guard(
+            level="lower",
+            batch=batch,
+            actor=model.lower_actor,
+            actor_optimizer=model.lower_actor_optimizer,
+            reference_batch=None,
+            captured=captured,
+        )
+        prefix = "lower_deployment_frequency_ppo_guard_"
+        self.assertGreater(
+            metrics[prefix + "frequency_excess_full_step"],
+            metrics[prefix + "frequency_excess_before"],
+        )
+        self.assertLess(metrics[prefix + "step_fraction"], 1.0)
+        self.assertLessEqual(
+            metrics[prefix + "frequency_excess_after"], 1e-7
+        )
+        self.assertEqual(
+            metrics[prefix + "group_reward_budget_violation_count"], 0.0
+        )
+        self.assertEqual(metrics[prefix + "optimizer_restored"], 1.0)
+
+    def test_replay_and_trust_region_require_groupwise_constraints(self):
+        with self.assertRaisesRegex(ValueError, "groupwise robust"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                deployment_frequency_anchor_state_replay=True,
+            ))
+
     def test_active_constraint_requires_positive_budget(self):
         with self.assertRaisesRegex(ValueError, "positive RMS budget"):
             FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
