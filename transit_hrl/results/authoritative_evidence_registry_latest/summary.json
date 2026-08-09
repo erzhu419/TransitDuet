@@ -1,5 +1,5 @@
 {
-  "development_record_count": 2,
+  "development_record_count": 3,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 1,
-  "record_count": 7,
+  "record_count": 8,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -514,6 +514,388 @@
       "selection_access": "development_outcomes_visible"
     },
     {
+      "allowed_wording": "The v14.2 development screen corrected the leakage-cost scale and showed that full causal high-pass routing reduced raw and responsibility lower-LF drift in every registered environment-by-disturbance condition. No arm was behavior-safe overall: the best arm passed 2 of 15 complete condition gates, full routing harmed return or lower-action activity, and upper primal-dual variants saturated in at least one environment. These outcomes motivate partial-strength routing and are not confirmatory evidence.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_2/decision.json",
+          "role": "decision",
+          "sha256": "7a24c1d624063cd3f13bc5f532cc418f0999fc6cdb2fa2df4083d89fddb7873e"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_2/environment_condition_gates.csv",
+          "role": "environment_condition_gates",
+          "sha256": "9267f4f12e3f55a347483bd65d0527483020d10aa50b7a1d846367c35be89acb"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_2/screen_report.md",
+          "role": "report",
+          "sha256": "148a542fe6092d9dc2c057e9249cde459754e1813315cec6770f330e010a2b73"
+        }
+      ],
+      "claim": "Physical-scale leakage costs and a causal lower-action high-pass router produce a behavior-safe MuJoCo candidate.",
+      "claim_id": "D3_PHYSICAL_COST_ACTION_ROUTER",
+      "decision": "no_behavior_safe_candidate",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_2_physical_router_screen",
+      "evidence_stage": "development",
+      "facts": {
+        "arm_status": {
+          "crossed_direct_pd_u2_l8": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": false,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 1.0,
+            "mean_return_lower_bound": -51.41324293003323,
+            "minimum_environment_trained_checkpoint_fraction": 0.8125,
+            "minimum_normalized_safety_slack": -20.135079439200624,
+            "passed_gate_count": 2,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 10,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 0.8125,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 0.9375,
+                  "upper_dual_saturation_fraction": 1.0
+                }
+              },
+              "dual_saturation_gate_applicable": true,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 1.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.8125,
+              "trained_checkpoint_fraction": 0.9166666666666666,
+              "upper_dual_saturation_fraction": 1.0
+            }
+          },
+          "crossed_direct_reward": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -1.0,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": false,
+            "strict_raw_improvement_condition_count": 0,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "trained_checkpoint_fraction": 1.0,
+              "upper_dual_saturation_fraction": 0.0
+            }
+          },
+          "crossed_router_a004_pd_u2_l8": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": false,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 1.0,
+            "mean_return_lower_bound": -67.02776368598492,
+            "minimum_environment_trained_checkpoint_fraction": 0.625,
+            "minimum_normalized_safety_slack": -36.200875774802064,
+            "passed_gate_count": 1,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 0.625,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                }
+              },
+              "dual_saturation_gate_applicable": true,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 1.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.625,
+              "trained_checkpoint_fraction": 0.875,
+              "upper_dual_saturation_fraction": 1.0
+            }
+          },
+          "crossed_router_a004_reward": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -86.20437241835529,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -25.580381443225857,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "trained_checkpoint_fraction": 1.0,
+              "upper_dual_saturation_fraction": 0.0
+            }
+          },
+          "crossed_router_a010_pd_u0p5_l2": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": false,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 1.0,
+            "mean_return_lower_bound": -97.02833531424697,
+            "minimum_environment_trained_checkpoint_fraction": 0.6875,
+            "minimum_normalized_safety_slack": -39.60003168890845,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_dual_saturation_fraction": 0.5
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": true,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 1.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.6875,
+              "trained_checkpoint_fraction": 0.8958333333333334,
+              "upper_dual_saturation_fraction": 0.5
+            }
+          },
+          "crossed_router_a010_pd_u2_l8": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": false,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 1.0,
+            "mean_return_lower_bound": -98.89809419056733,
+            "minimum_environment_trained_checkpoint_fraction": 0.5625,
+            "minimum_normalized_safety_slack": -40.48532770410662,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 0.5625,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                }
+              },
+              "dual_saturation_gate_applicable": true,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 1.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.5625,
+              "trained_checkpoint_fraction": 0.8541666666666666,
+              "upper_dual_saturation_fraction": 1.0
+            }
+          },
+          "crossed_router_a010_pd_u8_l32": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": false,
+            "maximum_environment_lower_dual_saturation_fraction": 1.0,
+            "maximum_environment_upper_dual_saturation_fraction": 1.0,
+            "mean_return_lower_bound": -90.04072205486538,
+            "minimum_environment_trained_checkpoint_fraction": 0.5,
+            "minimum_normalized_safety_slack": -40.74049951857956,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 1.0,
+                  "trained_checkpoint_fraction": 0.5,
+                  "upper_dual_saturation_fraction": 1.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 1.0
+                }
+              },
+              "dual_saturation_gate_applicable": true,
+              "lower_dual_saturation_fraction": 0.3333333333333333,
+              "maximum_environment_lower_dual_saturation_fraction": 1.0,
+              "maximum_environment_upper_dual_saturation_fraction": 1.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.5,
+              "trained_checkpoint_fraction": 0.8333333333333334,
+              "upper_dual_saturation_fraction": 1.0
+            }
+          },
+          "crossed_router_a010_reward": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -99.5726123140356,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -25.77544624639501,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Hopper-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                },
+                "Walker2d-v5": {
+                  "lower_dual_saturation_fraction": 0.0,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_dual_saturation_fraction": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "trained_checkpoint_fraction": 1.0,
+              "upper_dual_saturation_fraction": 0.0
+            }
+          }
+        },
+        "bootstrap_draws": 20000,
+        "decision_status": "no_behavior_safe_candidate",
+        "eligible_arms": [],
+        "gate_granularity": "environment_by_disturbance_mode",
+        "maximum_complete_condition_count": 2,
+        "selected_arm": null,
+        "selection_confidence": 0.9
+      },
+      "forbidden_wording": "MuJoCo v14.2 validates physical behavioral separation, no-tradeoff, or any selected confirmatory Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "development_observed_return_plus_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_2",
+      "positive_claim_supported": false,
+      "selection_access": "development_outcomes_visible"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -572,7 +954,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "625c095e0aa4a36d24c518a96629b93cd129c65ca9e03ea4c48432a3f75bf145",
+  "registry_sha256": "9735a67aedb54039fe4a24ec11c16f1ccf57c076e43698898ba3f5190d8e581f",
   "reportable_record_count": 3,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

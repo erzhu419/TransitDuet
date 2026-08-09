@@ -8,6 +8,9 @@ from freq_hrl.experiments.theory_appendix import (
     finite_sample_mean_ci_radius,
     hierarchical_credit_residual_bound,
     ideal_transfer_relative_leakage_reduction,
+    lower_router_constant_transient,
+    lower_router_frequency_response_power,
+    physical_power_excess_upper_bound,
     promotion_detection_delay_bound,
     promotion_false_positive_bound,
     promotion_warm_window_delay_bound,
@@ -83,6 +86,35 @@ class TheoryAppendixTest(unittest.TestCase):
             ),
             0.84,
         )
+        self.assertEqual(
+            lower_router_frequency_response_power(
+                alpha=0.1,
+                angular_frequency=0.0,
+            ),
+            0.0,
+        )
+        self.assertAlmostEqual(
+            lower_router_frequency_response_power(
+                alpha=0.1,
+                angular_frequency=3.141592653589793,
+            ),
+            4.0 / (2.0 - 0.1) ** 2,
+        )
+        self.assertLess(
+            lower_router_constant_transient(
+                latent_magnitude=1.0,
+                alpha=0.1,
+                step=32,
+            ),
+            0.04,
+        )
+        self.assertAlmostEqual(
+            physical_power_excess_upper_bound(
+                action_limit=1.0,
+                rms_budget=0.05,
+            ),
+            0.9975,
+        )
         self.assertGreater(
             projected_dual_regret_term(
                 dual_radius=2.0,
@@ -108,10 +140,12 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
-            self.assertGreaterEqual(len(payload["formal_statements"]), 9)
+            self.assertGreaterEqual(len(payload["formal_statements"]), 14)
             self.assertIn("F1 (lemma)", report)
             self.assertIn("F3 (proposition)", report)
             self.assertIn("F9 (lemma)", report)
+            self.assertIn("F11 (proposition)", report)
+            self.assertIn("F14 (proposition)", report)
             self.assertIn("R1 (reporting_approximation)", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)

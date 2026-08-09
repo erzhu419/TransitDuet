@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-FORMAL_SCOPE_VERSION = "freq_hrl_formal_scope_v2"
+FORMAL_SCOPE_VERSION = "freq_hrl_formal_scope_v3"
 
 
 def shaped_return_deviation_bound(
@@ -194,6 +194,73 @@ def ideal_transfer_relative_leakage_reduction(
     return float(1.0 - (error_norm / lower_norm) ** 2)
 
 
+def lower_router_frequency_response_power(
+    *,
+    alpha: float,
+    angular_frequency: float,
+) -> float:
+    """Return the zero-state EMA-router power gain at one frequency.
+
+    For the unclipped router
+
+        b_{t+1} = (1-alpha) b_t + alpha z_t,
+        e_t = z_t - b_t,
+
+    the transfer function from latent proposal z to effective action e is
+    H(q)=(1-q^-1)/(1-(1-alpha)q^-1).
+    """
+
+    smoothing = float(alpha)
+    omega = float(angular_frequency)
+    if not 0.0 < smoothing <= 1.0:
+        raise ValueError("alpha must be in (0, 1]")
+    if not math.isfinite(omega):
+        raise ValueError("angular_frequency must be finite")
+    cosine = math.cos(omega)
+    numerator = 2.0 - 2.0 * cosine
+    denominator = (
+        1.0
+        + (1.0 - smoothing) ** 2
+        - 2.0 * (1.0 - smoothing) * cosine
+    )
+    return float(numerator / denominator)
+
+
+def lower_router_constant_transient(
+    *,
+    latent_magnitude: float,
+    alpha: float,
+    step: int,
+) -> float:
+    """Return |e_t| for a constant proposal and a zero router baseline."""
+
+    smoothing = float(alpha)
+    if not 0.0 < smoothing <= 1.0:
+        raise ValueError("alpha must be in (0, 1]")
+    if int(step) < 0:
+        raise ValueError("step must be non-negative")
+    return float(
+        abs(float(latent_magnitude))
+        * (1.0 - smoothing) ** int(step)
+    )
+
+
+def physical_power_excess_upper_bound(
+    *,
+    action_limit: float,
+    rms_budget: float,
+) -> float:
+    """Bound a convex-low-pass power excess for clipped actions."""
+
+    limit = float(action_limit)
+    budget = float(rms_budget)
+    if not math.isfinite(limit) or limit <= 0.0:
+        raise ValueError("action_limit must be positive and finite")
+    if not math.isfinite(budget) or budget <= 0.0:
+        raise ValueError("rms_budget must be positive and finite")
+    return float(max(limit * limit - budget * budget, 0.0))
+
+
 def read_csv_rows(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -270,6 +337,31 @@ def build_numeric_examples() -> dict[str, float]:
             ideal_transfer_relative_leakage_reduction(
                 lower_lf_norm=0.5,
                 transfer_error_norm=0.2,
+            )
+        ),
+        "lower_router_dc_power_gain_example": (
+            lower_router_frequency_response_power(
+                alpha=0.10,
+                angular_frequency=0.0,
+            )
+        ),
+        "lower_router_nyquist_power_gain_example": (
+            lower_router_frequency_response_power(
+                alpha=0.10,
+                angular_frequency=math.pi,
+            )
+        ),
+        "lower_router_constant_transient_step_32_example": (
+            lower_router_constant_transient(
+                latent_magnitude=1.0,
+                alpha=0.10,
+                step=32,
+            )
+        ),
+        "physical_power_excess_upper_bound_example": (
+            physical_power_excess_upper_bound(
+                action_limit=1.0,
+                rms_budget=0.05,
             )
         ),
     }
@@ -514,6 +606,132 @@ def build_formal_statement_rows(
             "example": _fmt(examples["conditional_no_tradeoff_margin_example"]),
             "verification_status": "accounting_identity",
         },
+        {
+            "id": "F11",
+            "kind": "proposition",
+            "title": "Causal EMA lower router has an exact high-pass response",
+            "statement": (
+                "For the unclipped zero-state recursion b_{t+1}=(1-alpha)b_t+"
+                "alpha z_t and e_t=z_t-b_t, 0<alpha<=1, the transfer function is "
+                "H(q)=(1-q^-1)/(1-(1-alpha)q^-1). Hence H(1)=0 and "
+                "|H(exp(i omega))|^2=(2-2 cos(omega))/(1+(1-alpha)^2-"
+                "2(1-alpha)cos(omega)). A constant latent proposal c produces "
+                "|e_t|=(1-alpha)^t|c| from a zero baseline."
+            ),
+            "assumptions": [
+                "The router is in causal_ema_high_pass mode and actuator clipping is inactive.",
+                "The analysis uses the zero-state linear recursion implemented by the router.",
+                "Each action component is analyzed independently before the actuator map.",
+            ],
+            "proof": (
+                "Take the one-sided z transform of the baseline recursion to obtain "
+                "B(q)/Z(q)=alpha q^-1/[1-(1-alpha)q^-1]. Subtract this ratio "
+                "from one, evaluate on the unit circle, and square the modulus. "
+                "For z_t=c, solve the scalar recurrence directly."
+            ),
+            "limitation": (
+                "The exact spectral formula is pre-clipping. Clipping is audited "
+                "separately because a nonlinear projection can create new harmonics."
+            ),
+            "diagnostic": (
+                "Report latent and effective lower LF drift, router-removed RMS, "
+                "and router clip rate on every held-out path."
+            ),
+            "example": (
+                f"DC power gain={_fmt(examples['lower_router_dc_power_gain_example'], 8)}; "
+                f"Nyquist power gain={_fmt(examples['lower_router_nyquist_power_gain_example'], 6)}; "
+                f"constant residual at t=32={_fmt(examples['lower_router_constant_transient_step_32_example'], 6)}"
+            ),
+            "verification_status": "proved_under_stated_assumptions",
+        },
+        {
+            "id": "F12",
+            "kind": "proposition",
+            "title": "Exposed router state preserves an augmented Markov description",
+            "statement": (
+                "If the base controlled process is Markov in s_t and the router "
+                "baseline b_t is updated deterministically from (b_t,z_t), then "
+                "the augmented process (s_t,b_t) is Markov. Supplying b_t to the "
+                "lower policy therefore prevents this router from introducing "
+                "unobserved controller state."
+            ),
+            "assumptions": [
+                "The base transition kernel is Markov in the declared environment state and executed action.",
+                "The router update is deterministic and uses no future proposal or observation.",
+                "The policy observation contains the complete router baseline used for the current route.",
+            ],
+            "proof": (
+                "Conditioned on (s_t,b_t) and z_t, the effective action is fixed; "
+                "the base kernel determines s_{t+1}, and the router recursion "
+                "determines b_{t+1}. No earlier history enters either transition."
+            ),
+            "limitation": (
+                "This isolates router-state observability only; other encoders or "
+                "partially observed environments can still require recurrent state."
+            ),
+            "diagnostic": "The registered lower-policy input schema must include router.context.",
+            "verification_status": "proved_under_stated_assumptions",
+        },
+        {
+            "id": "F13",
+            "kind": "lemma",
+            "title": "Actuator clipping is bounded and nonexpansive",
+            "statement": (
+                "Componentwise projection C_A onto [-A,A]^d satisfies "
+                "||C_A(x)-C_A(y)||_2<=||x-y||_2 and ||C_A(x)||_infinity<=A."
+            ),
+            "assumptions": [
+                "The router uses componentwise Euclidean projection onto a fixed box.",
+                "The action limit A is positive and finite.",
+            ],
+            "proof": (
+                "Scalar interval projection is monotone with slope in [0,1]. "
+                "Apply the scalar inequality componentwise and sum squared terms."
+            ),
+            "limitation": (
+                "Nonexpansiveness does not preserve the linear high-pass spectrum; "
+                "the preregistered clip-rate gate bounds reliance on this nonlinear regime."
+            ),
+            "diagnostic": "Reject candidates whose held-out router clip-rate CI exceeds the registered tolerance.",
+            "verification_status": "proved_under_stated_assumptions",
+        },
+        {
+            "id": "F14",
+            "kind": "proposition",
+            "title": "Physical leakage excess gives a bounded dual-update scale",
+            "statement": (
+                "Let each effective action component lie in [-A,A] and let its "
+                "low-frequency estimate be a convex combination of prior effective "
+                "actions. Then P_t=d^-1||ell_t||_2^2<=A^2 and the physical cost "
+                "g_t=[P_t-beta^2]_+ is at most [A^2-beta^2]_+. Consequently a "
+                "projected update lambda_{t+1}=Pi_[0,R](lambda_t+eta g_t) has "
+                "one-step increase at most eta[A^2-beta^2]_+."
+            ),
+            "assumptions": [
+                "Effective actions are clipped to a fixed componentwise limit A.",
+                "The reported low-frequency estimate is a convex moving average of those actions.",
+                "The RMS budget beta and dual step eta are positive and finite.",
+            ],
+            "proof": (
+                "Convexity preserves each component's [-A,A] bound, so averaging "
+                "their squares gives P_t<=A^2. Monotonicity of the positive-part "
+                "operator yields the cost bound; projection cannot increase the "
+                "unprojected positive update."
+            ),
+            "limitation": (
+                "This is a numerical-scale and feasibility bound, not a guarantee "
+                "that the learned policy satisfies the budget or preserves return."
+            ),
+            "diagnostic": (
+                "Report physical power, power budget, power excess, dual saturation, "
+                "and raw task return; do not infer success from multiplier motion."
+            ),
+            "example": _fmt(
+                examples["physical_power_excess_upper_bound_example"],
+                digits=6,
+            ),
+            "verification_status": "proved_under_stated_assumptions",
+        },
     ]
 
 
@@ -602,7 +820,8 @@ def build_theory_payload(results_root: Path) -> dict[str, Any]:
         "cited_checks": cited_checks,
         "claim_boundary": (
             "The appendix proves finite-horizon causal, algebraic, projection, "
-            "concentration, and dual-sequence statements under explicit assumptions. "
+            "concentration, router-frequency, and dual-sequence statements under "
+            "explicit assumptions. "
             "It does not prove global nonconvex actor-critic convergence, universal "
             "encoder optimality, or deployment-wide performance."
         ),
