@@ -18,6 +18,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_6_conservative_transfer_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | mujoco_v14_7_joint_learned_projection_preflight | mujoco_control | development_preflight | comparator_confounded | excluded_from_selection | false |
 | mujoco_v14_8_latent_matched_preflight | mujoco_control | development_preflight | no_joint_candidate | development_only | false |
+| mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development_preflight | deployment_constraint_misaligned | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -94,6 +95,12 @@ Forbidden: MuJoCo v14.7 supports reward improvement, learned frequency separatio
 The v14.8 single-replicate HalfCheetah preflight removed the v14.7 comparator and actor-identity confounds. Projection-only calibration was pathwise exact. No learned arm combined reward preservation with latent lower- and upper-frequency improvement: the shared `0.20` dual rate improved mean return in four of five disturbance modes but worsened latent lower-LF behavior in three, whereas `0.30` improved both latent frequency endpoints but reduced return in every mode. Equal upper/lower dual rates operated at incompatible cost scales, and the scalar checkpoint score was dominated by upper-HF violations.
 
 Forbidden: MuJoCo v14.8 supports a learned no-tradeoff result, cross-task generality, reward improvement, or confirmatory evidence.
+
+### mujoco_v14_9_asymmetric_feasibility_preflight
+
+The v14.9 HalfCheetah development preflight used state-aligned feasibility checkpoint selection and separately scaled upper/lower dual rates. In a five-optimizer-replicate adaptive extension, the `u=0.30, l=3.00` arm supported strict return improvement in four of five disturbance modes and reduced latent upper-HF power, but worsened every mean lower-frequency endpoint. The audit further showed that primal-dual costs were computed from stochastic actions with approximately 0.50 initial standard deviation while held-out evaluation used deterministic actor means, so the optimized constraint did not match the deployed policy.
+
+Forbidden: MuJoCo v14.9 supports joint frequency separation, no-tradeoff, cross-task generality, confirmatory reward improvement, or a submission-ready selected algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
