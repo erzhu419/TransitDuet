@@ -262,11 +262,41 @@ def _mujoco_v14_facts(paths: dict[str, Path]) -> dict[str, Any]:
     }
 
 
+def _mujoco_v14_1_facts(paths: dict[str, Path]) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    arm_status = dict(decision.get("arm_status") or {})
+    if (
+        decision.get("status") != "no_behavior_safe_candidate"
+        or decision.get("evidence_role")
+        != "development_screen_not_confirmatory"
+        or decision.get("selected_arm") is not None
+        or decision.get("gate_granularity")
+        != "environment_by_disturbance_mode"
+        or not arm_status
+        or any(
+            int(status.get("passed_gate_count", -1)) != 0
+            or int(status.get("total_gate_count", -1)) != 15
+            for status in arm_status.values()
+        )
+    ):
+        raise ValueError("MuJoCo v14.1 registered screen decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "selected_arm": None,
+        "eligible_arms": list(decision.get("eligible_arms") or []),
+        "arm_status": arm_status,
+        "gate_granularity": str(decision["gate_granularity"]),
+        "selection_confidence": float(decision["selection_confidence"]),
+        "bootstrap_draws": int(decision["bootstrap_draws"]),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
     "quant_v74": _quant_v74_facts,
     "mujoco_v14": _mujoco_v14_facts,
+    "mujoco_v14_1": _mujoco_v14_1_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

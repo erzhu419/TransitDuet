@@ -1,5 +1,5 @@
 {
-  "development_record_count": 1,
+  "development_record_count": 2,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 1,
-  "record_count": 6,
+  "record_count": 7,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -434,6 +434,86 @@
       "selection_access": "development_outcomes_visible"
     },
     {
+      "allowed_wording": "The v14.1 development screen evaluated crossed-condition checkpoint selection, the strongest v14 static arm, and three upper primal-dual rates. No arm passed the preregistered return and behavioral gates in all 15 environment-by-disturbance conditions; every candidate passed zero complete condition gates. These outcomes are development evidence only.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_1/decision.json",
+          "role": "decision",
+          "sha256": "614a3d914798a199d3d26012f756309a3da91c31a42572f295c1dea58c71db6c"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_1/environment_condition_gates.csv",
+          "role": "environment_condition_gates",
+          "sha256": "82d96e7245dff55bbbfe4be20062ea28d1c0da7565b547aa173947085fb88fd9"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_1/screen_report.md",
+          "role": "report",
+          "sha256": "64280af1293094e4d4ae867b67b59da0a945bf7c9000b179e427edaa9da825a0"
+        }
+      ],
+      "claim": "Crossed-condition checkpoint selection and upper primal-dual training produce a behavior-safe MuJoCo candidate.",
+      "claim_id": "D2_CROSSED_UPPER_PRIMAL_DUAL",
+      "decision": "no_behavior_safe_candidate",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_1_crossed_upper_pd_screen",
+      "evidence_stage": "development",
+      "facts": {
+        "arm_status": {
+          "crossed_joint_beta0": {
+            "all_environment_condition_gates_pass": false,
+            "mean_return_lower_bound": -13.596425262247424,
+            "minimum_normalized_safety_slack": -65.62939688664481,
+            "passed_gate_count": 0,
+            "total_gate_count": 15
+          },
+          "crossed_joint_beta0p5": {
+            "all_environment_condition_gates_pass": false,
+            "mean_return_lower_bound": 54.60357210147264,
+            "minimum_normalized_safety_slack": -71.22123171722573,
+            "passed_gate_count": 0,
+            "total_gate_count": 15
+          },
+          "crossed_joint_pd0p5": {
+            "all_environment_condition_gates_pass": false,
+            "mean_return_lower_bound": -53.723881605942125,
+            "minimum_normalized_safety_slack": -67.59385327807458,
+            "passed_gate_count": 0,
+            "total_gate_count": 15
+          },
+          "crossed_joint_pd2": {
+            "all_environment_condition_gates_pass": false,
+            "mean_return_lower_bound": -53.723881605942125,
+            "minimum_normalized_safety_slack": -67.59385327807458,
+            "passed_gate_count": 0,
+            "total_gate_count": 15
+          },
+          "crossed_joint_pd8": {
+            "all_environment_condition_gates_pass": false,
+            "mean_return_lower_bound": -53.723881605942125,
+            "minimum_normalized_safety_slack": -67.59385327807458,
+            "passed_gate_count": 0,
+            "total_gate_count": 15
+          }
+        },
+        "bootstrap_draws": 20000,
+        "decision_status": "no_behavior_safe_candidate",
+        "eligible_arms": [],
+        "gate_granularity": "environment_by_disturbance_mode",
+        "selected_arm": null,
+        "selection_confidence": 0.9
+      },
+      "forbidden_wording": "MuJoCo v14.1 validates behavior-safe upper primal-dual Freq-HRL or supplies confirmatory evidence for any selected arm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "development_observed_return_plus_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_1",
+      "positive_claim_supported": false,
+      "selection_access": "development_outcomes_visible"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -492,7 +572,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "3d9eab7ceb3a62774750c1ac052249407b8f48e48913ec97e67c6571d6c8577a",
+  "registry_sha256": "625c095e0aa4a36d24c518a96629b93cd129c65ca9e03ea4c48432a3f75bf145",
   "reportable_record_count": 3,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

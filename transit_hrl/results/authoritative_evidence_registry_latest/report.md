@@ -10,6 +10,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v13_behavioral_confirmatory | mujoco_control | confirmatory | not_supported | mixed_or_negative_main_or_si | false |
 | quant_v74_matched_baseline_confirmatory | quant_synthetic_control | confirmatory | mixed | mixed_or_negative_main_or_si | false |
 | mujoco_v14_endpoint_aligned_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
+| mujoco_v14_1_crossed_upper_pd_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -38,6 +39,12 @@ Forbidden: Freq-HRL uniformly dominates all matched PPO, recurrent HRL, SAC, and
 The v14 development screen found no fixed endpoint-aligned coefficient that passed all four safety gates in all three MuJoCo tasks; it motivates adaptive or constrained upper-policy training. These outcomes are not confirmatory evidence.
 
 Forbidden: MuJoCo v14 supports a positive performance or behavior claim, or supplies held-out confirmation for a later algorithm.
+
+### mujoco_v14_1_crossed_upper_pd_screen
+
+The v14.1 development screen evaluated crossed-condition checkpoint selection, the strongest v14 static arm, and three upper primal-dual rates. No arm passed the preregistered return and behavioral gates in all 15 environment-by-disturbance conditions; every candidate passed zero complete condition gates. These outcomes are development evidence only.
+
+Forbidden: MuJoCo v14.1 validates behavior-safe upper primal-dual Freq-HRL or supplies confirmatory evidence for any selected arm.
 
 ### legacy_c1_c9_matrix_snapshot
 
