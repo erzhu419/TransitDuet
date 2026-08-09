@@ -218,6 +218,38 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v14_3_partial_router_screen",
+      "claim_id": "D4_PARTIAL_STRENGTH_ACTION_ROUTER",
+      "claim": "A fixed partial-strength causal lower-action router produces behavior-safe physical separation across the registered MuJoCo conditions.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_behavior_safe_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "development_observed_return_plus_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_3",
+      "allowed_wording": "The v14.3 development screen tested seven fixed partial-strength causal lower-action routers on fresh seeds. Every arm reduced responsibility-space lower-LF drift in all 15 environment-by-disturbance conditions, but no arm jointly passed return and raw-behavior gates everywhere. The best arm passed 4 of 15 complete conditions and 10 of 15 strict raw-drift gates. These outcomes motivate a training-time routing curriculum and are not confirmatory evidence.",
+      "forbidden_wording": "MuJoCo v14.3 validates fixed partial-strength routing, physical no-tradeoff, or any selected confirmatory Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_3/decision.json",
+          "sha256": "bf919b484c89942bbb66d369ff4b9d88f099b5b40d64eaa69a6aab35ed7a31b2"
+        },
+        {
+          "role": "environment_condition_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_3/environment_condition_gates.csv",
+          "sha256": "9140171fa7cf7f691c2a52f84a7f59cfcdc528b636b5f0d6dc668b7a52e27144"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_3/screen_report.md",
+          "sha256": "2fdd524bd69efec56dffef90b437eb2bd11dfc5a659c8fecdf797311ea6a8d6b"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

@@ -308,6 +308,12 @@ def _mujoco_v14_2_facts(paths: dict[str, Path]) -> dict[str, Any]:
             int(status.get("total_gate_count", -1)) != 15
             for status in arm_status.values()
         )
+        or any(
+            int(status.get(
+                "strict_responsibility_improvement_condition_count", -1
+            )) != 15
+            for status in arm_status.values()
+        )
         or max(
             int(status.get("passed_gate_count", -1))
             for status in arm_status.values()
@@ -329,6 +335,67 @@ def _mujoco_v14_2_facts(paths: dict[str, Path]) -> dict[str, Any]:
     }
 
 
+def _mujoco_v14_3_facts(paths: dict[str, Path]) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    arm_status = dict(decision.get("arm_status") or {})
+    best_arm = "router_a004_s010_reward"
+    if (
+        decision.get("status") != "no_behavior_safe_candidate"
+        or decision.get("evidence_role")
+        != "development_screen_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v14_3_partial_router_screen_v1"
+        or decision.get("selected_arm") is not None
+        or decision.get("gate_granularity")
+        != "environment_by_disturbance_mode"
+        or len(arm_status) != 7
+        or best_arm not in arm_status
+        or any(
+            int(status.get("total_gate_count", -1)) != 15
+            for status in arm_status.values()
+        )
+        or max(
+            int(status.get("passed_gate_count", -1))
+            for status in arm_status.values()
+        ) != 4
+        or int(
+            arm_status[best_arm].get(
+                "strict_responsibility_improvement_condition_count", -1
+            )
+        ) != 15
+        or int(
+            arm_status[best_arm].get(
+                "strict_raw_improvement_condition_count", -1
+            )
+        ) != 10
+    ):
+        raise ValueError(
+            "MuJoCo v14.3 registered screen decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "selected_arm": None,
+        "eligible_arms": list(decision.get("eligible_arms") or []),
+        "arm_status": arm_status,
+        "gate_granularity": str(decision["gate_granularity"]),
+        "selection_confidence": float(decision["selection_confidence"]),
+        "bootstrap_draws": int(decision["bootstrap_draws"]),
+        "maximum_complete_condition_count": max(
+            int(status["passed_gate_count"])
+            for status in arm_status.values()
+        ),
+        "best_arm": best_arm,
+        "best_arm_responsibility_improvement_condition_count": int(
+            arm_status[best_arm][
+                "strict_responsibility_improvement_condition_count"
+            ]
+        ),
+        "best_arm_raw_improvement_condition_count": int(
+            arm_status[best_arm]["strict_raw_improvement_condition_count"]
+        ),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -336,6 +403,7 @@ PARSERS = {
     "mujoco_v14": _mujoco_v14_facts,
     "mujoco_v14_1": _mujoco_v14_1_facts,
     "mujoco_v14_2": _mujoco_v14_2_facts,
+    "mujoco_v14_3": _mujoco_v14_3_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),
