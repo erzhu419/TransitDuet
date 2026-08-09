@@ -104,6 +104,8 @@ def _reward_guarded_constraint_step(
     max_backtracks: int,
     reward_tolerance: float,
     reward_baseline: float | None = None,
+    reward_guard_values_fn: Any | None = None,
+    reward_guard_baseline_values: torch.Tensor | None = None,
 ) -> dict[str, float]:
     """Apply a projected cost correction only when reward does not regress."""
 
@@ -134,6 +136,7 @@ def _reward_guarded_constraint_step(
             "accepted": 0.0,
             "backtracks": 0.0,
             "reward_loss_delta": 0.0,
+            "reward_guard_max_loss_delta": 0.0,
             "constraint_loss_delta": 0.0,
         })
         return diagnostics
@@ -145,6 +148,7 @@ def _reward_guarded_constraint_step(
     diagnostics["accepted"] = 0.0
     diagnostics["backtracks"] = 0.0
     diagnostics["reward_loss_delta"] = 0.0
+    diagnostics["reward_guard_max_loss_delta"] = 0.0
     diagnostics["constraint_loss_delta"] = 0.0
     if projected_norm <= 1e-12 or float(step_size) <= 0.0:
         return diagnostics
@@ -161,6 +165,27 @@ def _reward_guarded_constraint_step(
     )
     if not np.isfinite(reward_limit_baseline):
         raise ValueError("reward_baseline must be finite when provided")
+    if (reward_guard_values_fn is None) != (
+        reward_guard_baseline_values is None
+    ):
+        raise ValueError(
+            "group reward guard values and baselines must be configured together"
+        )
+    guard_baseline: torch.Tensor | None = None
+    if reward_guard_values_fn is not None:
+        guard_baseline = torch.as_tensor(
+            reward_guard_baseline_values,
+            dtype=reward_loss.dtype,
+            device=reward_loss.device,
+        ).reshape(-1)
+        guard_before = reward_guard_values_fn().reshape(-1)
+        if (
+            guard_baseline.numel() < 1
+            or guard_before.shape != guard_baseline.shape
+            or not bool(torch.all(torch.isfinite(guard_baseline)).item())
+            or not bool(torch.all(torch.isfinite(guard_before)).item())
+        ):
+            raise ValueError("group reward guard values must be finite and aligned")
     constraint_before = float(constraint_loss.detach().cpu().item())
     attempts = max(0, int(max_backtracks)) + 1
     for attempt in range(attempts):
@@ -173,12 +198,27 @@ def _reward_guarded_constraint_step(
                 if gradient is not None:
                     parameter.add_(gradient, alpha=-trial_step)
             reward_after = float(reward_loss_fn().detach().cpu().item())
+            guard_max_delta = 0.0
+            if reward_guard_values_fn is not None:
+                guard_after = reward_guard_values_fn().detach().reshape(-1)
+                if (
+                    guard_baseline is None
+                    or guard_after.shape != guard_baseline.shape
+                    or not bool(torch.all(torch.isfinite(guard_after)).item())
+                ):
+                    raise ValueError(
+                        "group reward guard values changed shape or became non-finite"
+                    )
+                guard_max_delta = float(
+                    torch.max(guard_after - guard_baseline).cpu().item()
+                )
             constraint_after = float(
                 constraint_loss_fn().detach().cpu().item()
             )
         reward_ok = (
             reward_after
             <= reward_limit_baseline + float(reward_tolerance)
+            and guard_max_delta <= float(reward_tolerance)
         )
         constraint_ok = constraint_after <= constraint_before + 1e-12
         if reward_ok and constraint_ok:
@@ -186,6 +226,7 @@ def _reward_guarded_constraint_step(
                 "accepted": 1.0,
                 "backtracks": float(attempt),
                 "reward_loss_delta": reward_after - reward_limit_baseline,
+                "reward_guard_max_loss_delta": guard_max_delta,
                 "constraint_loss_delta": constraint_after - constraint_before,
             })
             return diagnostics
@@ -397,6 +438,7 @@ class SMDPPPOConfig:
     lower_deployment_frequency_max_projection_steps: int = 1
     lower_deployment_frequency_reward_tolerance: float = 1e-8
     lower_deployment_frequency_target_tolerance: float = 0.0
+    deployment_frequency_groupwise_robust: bool = False
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -445,6 +487,7 @@ class LevelTrajectoryBatch:
     next_value: np.ndarray | None = None
     terminal: np.ndarray | None = None
     next_cost_value: np.ndarray | None = None
+    deployment_frequency_group: np.ndarray | None = None
 
     def validate(
         self,
@@ -534,6 +577,18 @@ class LevelTrajectoryBatch:
             ):
                 raise ValueError(
                     f"{level} next_cost_value must contain {n} finite values"
+                )
+        if self.deployment_frequency_group is not None:
+            group = np.asarray(self.deployment_frequency_group).reshape(-1)
+            if (
+                group.size != n
+                or not np.all(np.isfinite(group))
+                or np.any(group < 0)
+                or not np.all(group == np.floor(group))
+            ):
+                raise ValueError(
+                    f"{level} deployment_frequency_group must contain "
+                    f"{n} non-negative integer labels"
                 )
 
     @property
@@ -949,6 +1004,30 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         raise ValueError(
             "explicit cost bootstrap must be present for every level batch"
         )
+    frequency_groups: list[np.ndarray] = []
+    next_group = 0
+    for item in items:
+        raw_labels = (
+            np.zeros(item.size, dtype=np.float64)
+            if item.deployment_frequency_group is None
+            else np.asarray(item.deployment_frequency_group).reshape(-1)
+        )
+        if (
+            raw_labels.size != item.size
+            or not np.all(np.isfinite(raw_labels))
+            or np.any(raw_labels < 0)
+            or not np.all(raw_labels == np.floor(raw_labels))
+        ):
+            raise ValueError(
+                "deployment frequency groups must be aligned non-negative "
+                "integer labels"
+            )
+        labels = raw_labels.astype(np.int64, copy=False)
+        remapped = np.empty(item.size, dtype=np.int64)
+        for label in np.unique(labels):
+            remapped[labels == label] = next_group
+            next_group += 1
+        frequency_groups.append(remapped)
     return LevelTrajectoryBatch(
         state=np.concatenate([np.asarray(item.state) for item in items], axis=0),
         action=np.concatenate([np.asarray(item.action) for item in items], axis=0),
@@ -994,6 +1073,9 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
                 np.asarray(item.next_cost_value).reshape(-1) for item in items
             ], axis=0)
             if all(explicit_cost_bootstrap) else None
+        ),
+        deployment_frequency_group=np.concatenate(
+            frequency_groups, axis=0
         ),
     )
 
@@ -1131,6 +1213,12 @@ class FrequencySeparatedActorCriticPPO:
         ):
             raise ValueError(
                 "deployment_action_transform must be identity or tanh"
+            )
+        if not isinstance(
+            config.deployment_frequency_groupwise_robust, bool
+        ):
+            raise ValueError(
+                "deployment_frequency_groupwise_robust must be boolean"
             )
         for level in ("upper", "lower"):
             budget = float(getattr(
@@ -2569,6 +2657,9 @@ class FrequencySeparatedActorCriticPPO:
         target_tolerance = float(getattr(
             cfg, f"{prefix}_target_tolerance"
         ))
+        groupwise_robust = bool(
+            cfg.deployment_frequency_groupwise_robust
+        )
         empty = {
             f"{prefix}_enabled": float(active),
             f"{prefix}_power_before": 0.0,
@@ -2607,6 +2698,12 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_projection_reward_tolerance": reward_tolerance,
             f"{prefix}_primitive_steps": 0.0,
             f"{prefix}_segment_count": 0.0,
+            f"{prefix}_groupwise_robust": float(groupwise_robust),
+            f"{prefix}_group_count": 0.0,
+            f"{prefix}_groups_target_reached_before": 0.0,
+            f"{prefix}_groups_target_reached_after": 0.0,
+            f"{prefix}_group_reward_guard_max_loss_delta": 0.0,
+            f"{prefix}_group_reward_budget_violation_count": 0.0,
         }
         if not active or batch.size == 0:
             return empty
@@ -2643,27 +2740,63 @@ class FrequencySeparatedActorCriticPPO:
         window = int(getattr(cfg, f"{prefix}_window"))
         action_scale = float(getattr(cfg, f"{prefix}_action_scale"))
 
-        def actor_frequency_power(policy: nn.Module) -> torch.Tensor:
+        if groupwise_robust and batch.deployment_frequency_group is not None:
+            group_values = np.asarray(
+                batch.deployment_frequency_group
+            ).reshape(-1)
+            if (
+                group_values.size != batch.size
+                or not np.all(np.isfinite(group_values))
+                or np.any(group_values < 0)
+                or not np.all(group_values == np.floor(group_values))
+            ):
+                raise ValueError(
+                    f"{level} deployment frequency groups are invalid"
+                )
+            group = torch.as_tensor(
+                group_values,
+                dtype=torch.long,
+                device=self.device,
+            )
+        else:
+            group = torch.zeros(
+                batch.size, dtype=torch.long, device=self.device
+            )
+        group_ids = torch.unique(group, sorted=True)
+        group_masks = [group == item for item in group_ids]
+        if not group_masks or any(
+            not bool(torch.any(mask).detach().cpu().item())
+            for mask in group_masks
+        ):
+            raise RuntimeError("deployment frequency groups cannot be empty")
+
+        def actor_frequency_powers(policy: nn.Module) -> torch.Tensor:
             deterministic_action = deterministic_actor_action(
                 policy,
                 state,
                 transform=str(cfg.deployment_action_transform),
                 scale=action_scale,
             )
-            return deployment_frequency_stats(
-                deterministic_action,
-                duration,
-                done,
-                window=window,
-                band=band,
-                rms_budget=budget,
-            ).power
+            return torch.stack([
+                deployment_frequency_stats(
+                    deterministic_action[mask],
+                    duration[mask],
+                    done[mask],
+                    window=window,
+                    band=band,
+                    rms_budget=budget,
+                ).power
+                for mask in group_masks
+            ])
 
-        reference_power = torch.zeros(
-            (), dtype=state.dtype, device=self.device
+        reference_powers = torch.zeros(
+            len(group_masks), dtype=state.dtype, device=self.device
         )
-        target_power = torch.as_tensor(
-            budget * budget, dtype=state.dtype, device=self.device
+        target_powers = torch.full(
+            (len(group_masks),),
+            budget * budget,
+            dtype=state.dtype,
+            device=self.device,
         )
         if reference_reduction > 0.0:
             anchor = self._actor_anchors.get(level)
@@ -2673,10 +2806,10 @@ class FrequencySeparatedActorCriticPPO:
                     "requires a captured actor anchor"
                 )
             with torch.no_grad():
-                reference_power = actor_frequency_power(anchor).detach()
-                target_power = torch.maximum(
-                    (1.0 - reference_reduction) * reference_power,
-                    target_power,
+                reference_powers = actor_frequency_powers(anchor).detach()
+                target_powers = torch.maximum(
+                    (1.0 - reference_reduction) * reference_powers,
+                    target_powers,
                 ).detach()
 
         def current_stats():
@@ -2686,16 +2819,41 @@ class FrequencySeparatedActorCriticPPO:
                 transform=str(cfg.deployment_action_transform),
                 scale=action_scale,
             )
-            return deployment_frequency_stats(
-                deterministic_action,
-                duration,
-                done,
-                window=window,
-                band=band,
-                power_budget=target_power,
-            )
+            grouped = [
+                deployment_frequency_stats(
+                    deterministic_action[mask],
+                    duration[mask],
+                    done[mask],
+                    window=window,
+                    band=band,
+                    power_budget=target_powers[index],
+                )
+                for index, mask in enumerate(group_masks)
+            ]
+            powers = torch.stack([item.power for item in grouped])
+            signed_excesses = powers - target_powers
+            normalized_excesses = powers / target_powers - 1.0
+            return {
+                "power": torch.mean(powers),
+                "power_budget": torch.mean(target_powers),
+                "signed_excess": torch.max(signed_excesses),
+                "violation": F.relu(torch.max(signed_excesses)),
+                "normalized_signed_excess": torch.max(
+                    normalized_excesses
+                ),
+                "normalized_violation": F.relu(torch.max(
+                    normalized_excesses
+                )),
+                "primitive_steps": sum(
+                    item.primitive_steps for item in grouped
+                ),
+                "segment_count": sum(
+                    item.segment_count for item in grouped
+                ),
+                "normalized_excesses": normalized_excesses,
+            }
 
-        def reward_guard_loss_fn() -> torch.Tensor:
+        def reward_guard_values_fn() -> torch.Tensor:
             logp, _ = actor.log_prob_entropy(state, action)
             ratio = torch.exp((logp - old_logp).clamp(-20.0, 20.0))
             clipped = torch.clamp(
@@ -2703,17 +2861,29 @@ class FrequencySeparatedActorCriticPPO:
             )
             reward_surrogate = torch.minimum(
                 ratio * reward_adv_t, clipped * reward_adv_t
-            ).mean()
+            )
             _, anchor_loss = self._actor_anchor_terms(
                 level=level, actor=actor, state=state
             )
-            return -reward_surrogate + anchor_loss
+            return torch.stack([
+                -reward_surrogate[mask].mean() + anchor_loss
+                for mask in group_masks
+            ])
+
+        def reward_guard_loss_fn() -> torch.Tensor:
+            return torch.mean(reward_guard_values_fn())
 
         def constraint_loss_fn() -> torch.Tensor:
-            return lambda_before * current_stats().normalized_signed_excess
+            return (
+                lambda_before
+                * current_stats()["normalized_signed_excess"]
+            )
 
         with torch.no_grad():
             before = current_stats()
+            reward_guard_baseline_values = (
+                reward_guard_values_fn().detach()
+            )
             reward_baseline = float(
                 reward_guard_loss_fn().detach().cpu().item()
             )
@@ -2722,7 +2892,7 @@ class FrequencySeparatedActorCriticPPO:
             )
         target_reached_before = bool(
             float(
-                before.normalized_signed_excess.detach().cpu().item()
+                before["normalized_signed_excess"].detach().cpu().item()
             ) <= target_tolerance
         )
         projection_attempts = 0
@@ -2740,7 +2910,7 @@ class FrequencySeparatedActorCriticPPO:
             if (
                 not correction_active
                 or float(
-                    current.normalized_signed_excess.detach().cpu().item()
+                    current["normalized_signed_excess"].detach().cpu().item()
                 ) <= target_tolerance
             ):
                 break
@@ -2761,6 +2931,13 @@ class FrequencySeparatedActorCriticPPO:
                 )),
                 reward_tolerance=reward_tolerance,
                 reward_baseline=reward_baseline,
+                reward_guard_values_fn=(
+                    reward_guard_values_fn if groupwise_robust else None
+                ),
+                reward_guard_baseline_values=(
+                    reward_guard_baseline_values
+                    if groupwise_robust else None
+                ),
             )
             backtracks += float(step_diagnostics["backtracks"])
             conflicts.append(float(step_diagnostics["gradient_conflict"]))
@@ -2773,16 +2950,34 @@ class FrequencySeparatedActorCriticPPO:
             projection_accepts += 1
         with torch.no_grad():
             after = current_stats()
+            reward_after_values = reward_guard_values_fn().detach()
             reward_after = float(
                 reward_guard_loss_fn().detach().cpu().item()
             )
             constraint_after = float(
                 constraint_loss_fn().detach().cpu().item()
             )
-        signed_after = float(after.signed_excess.detach().cpu().item())
-        normalized_signed_after = float(
-            after.normalized_signed_excess.detach().cpu().item()
+        signed_after = float(
+            after["signed_excess"].detach().cpu().item()
         )
+        normalized_signed_after = float(
+            after["normalized_signed_excess"].detach().cpu().item()
+        )
+        group_reward_deltas = (
+            reward_after_values - reward_guard_baseline_values
+        )
+        group_reward_guard_max_delta = float(
+            torch.max(group_reward_deltas).cpu().item()
+        )
+        group_reward_budget_violation_count = int(torch.sum(
+            group_reward_deltas > reward_tolerance + 1e-12
+        ).cpu().item())
+        groups_target_reached_before = int(torch.sum(
+            before["normalized_excesses"] <= target_tolerance
+        ).cpu().item())
+        groups_target_reached_after = int(torch.sum(
+            after["normalized_excesses"] <= target_tolerance
+        ).cpu().item())
         lambda_after = float(np.clip(
             lambda_before + dual_lr * normalized_signed_after,
             0.0,
@@ -2795,38 +2990,38 @@ class FrequencySeparatedActorCriticPPO:
         return {
             f"{prefix}_enabled": 1.0,
             f"{prefix}_power_before": float(
-                before.power.detach().cpu().item()
+                before["power"].detach().cpu().item()
             ),
             f"{prefix}_power_after": float(
-                after.power.detach().cpu().item()
+                after["power"].detach().cpu().item()
             ),
             f"{prefix}_signed_excess_before": float(
-                before.signed_excess.detach().cpu().item()
+                before["signed_excess"].detach().cpu().item()
             ),
             f"{prefix}_signed_excess_after": signed_after,
             f"{prefix}_violation_before": float(
-                before.violation.detach().cpu().item()
+                before["violation"].detach().cpu().item()
             ),
             f"{prefix}_violation_after": float(
-                after.violation.detach().cpu().item()
+                after["violation"].detach().cpu().item()
             ),
             f"{prefix}_normalized_signed_excess_before": float(
-                before.normalized_signed_excess.detach().cpu().item()
+                before["normalized_signed_excess"].detach().cpu().item()
             ),
             f"{prefix}_normalized_signed_excess_after": (
                 normalized_signed_after
             ),
             f"{prefix}_normalized_violation_before": float(
-                before.normalized_violation.detach().cpu().item()
+                before["normalized_violation"].detach().cpu().item()
             ),
             f"{prefix}_normalized_violation_after": float(
-                after.normalized_violation.detach().cpu().item()
+                after["normalized_violation"].detach().cpu().item()
             ),
             f"{prefix}_reference_power": float(
-                reference_power.detach().cpu().item()
+                torch.mean(reference_powers).detach().cpu().item()
             ),
             f"{prefix}_target_power": float(
-                target_power.detach().cpu().item()
+                torch.mean(target_powers).detach().cpu().item()
             ),
             f"{prefix}_reference_reduction_fraction": reference_reduction,
             f"{prefix}_lambda_before": lambda_before,
@@ -2874,8 +3069,22 @@ class FrequencySeparatedActorCriticPPO:
                 and not target_reached_after
             ),
             f"{prefix}_projection_reward_tolerance": reward_tolerance,
-            f"{prefix}_primitive_steps": float(after.primitive_steps),
-            f"{prefix}_segment_count": float(after.segment_count),
+            f"{prefix}_primitive_steps": float(after["primitive_steps"]),
+            f"{prefix}_segment_count": float(after["segment_count"]),
+            f"{prefix}_groupwise_robust": float(groupwise_robust),
+            f"{prefix}_group_count": float(len(group_masks)),
+            f"{prefix}_groups_target_reached_before": float(
+                groups_target_reached_before
+            ),
+            f"{prefix}_groups_target_reached_after": float(
+                groups_target_reached_after
+            ),
+            f"{prefix}_group_reward_guard_max_loss_delta": (
+                group_reward_guard_max_delta
+            ),
+            f"{prefix}_group_reward_budget_violation_count": float(
+                group_reward_budget_violation_count
+            ),
         }
 
     def update(self, batch: HierarchicalTrajectoryBatch) -> dict[str, float]:

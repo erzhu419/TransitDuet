@@ -7,6 +7,7 @@ import torch
 from freq_hrl.rl import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
+    LevelTrajectoryBatch,
     SMDPPPOConfig,
     deployment_frequency_stats,
     deterministic_actor_action,
@@ -271,6 +272,70 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
         )
         self.assertEqual(
             four_steps[prefix + "projection_step_budget_exhausted"], 1.0
+        )
+
+    def test_groupwise_projection_constrains_the_worst_rollout(self):
+        common = {
+            "upper_state_dim": 3,
+            "lower_state_dim": 2,
+            "upper_action_dim": 1,
+            "lower_action_dim": 1,
+            "hidden_dim": 0,
+            "deployment_action_transform": "tanh",
+            "lower_deployment_frequency_rms_budget": 0.5,
+            "lower_deployment_frequency_window": 3,
+            "lower_deployment_frequency_lambda_init": 1.0,
+            "lower_deployment_frequency_step_scale": 1.0,
+        }
+        pooled = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(**common))
+        robust = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            **common,
+            deployment_frequency_groupwise_robust=True,
+        ))
+        with torch.no_grad():
+            pooled.lower_actor.net[-1].weight.zero_()
+            pooled.lower_actor.net[-1].weight[0, 0] = 3.0
+            pooled.lower_actor.net[-1].bias.zero_()
+        robust.load_state_dict(copy.deepcopy(pooled.state_dict()))
+        state = np.zeros((10, 2), dtype=np.float32)
+        state[0, 0] = 1.0
+        batch = LevelTrajectoryBatch(
+            state=state,
+            action=np.zeros((10, 1), dtype=np.float32),
+            reward=np.zeros(10, dtype=np.float32),
+            duration=np.ones(10, dtype=np.int64),
+            done=np.asarray(
+                [True] + [False] * 8 + [True], dtype=np.float32
+            ),
+            old_logp=np.zeros(10, dtype=np.float32),
+            old_value=np.zeros(10, dtype=np.float32),
+            deployment_frequency_group=np.asarray(
+                [0] + [1] * 9, dtype=np.int64
+            ),
+        )
+        pooled_metrics = pooled._update_deployment_frequency_constraint(
+            level="lower", batch=batch, actor=pooled.lower_actor
+        )
+        robust_metrics = robust._update_deployment_frequency_constraint(
+            level="lower", batch=batch, actor=robust.lower_actor
+        )
+        prefix = "lower_deployment_frequency_"
+        self.assertEqual(
+            pooled_metrics[prefix + "projection_target_reached_before"], 1.0
+        )
+        self.assertEqual(
+            pooled_metrics[prefix + "projection_steps_attempted"], 0.0
+        )
+        self.assertEqual(robust_metrics[prefix + "group_count"], 2.0)
+        self.assertEqual(
+            robust_metrics[prefix + "projection_target_reached_before"], 0.0
+        )
+        self.assertGreater(
+            robust_metrics[prefix + "projection_steps_attempted"], 0.0
+        )
+        self.assertEqual(
+            robust_metrics[prefix + "group_reward_budget_violation_count"],
+            0.0,
         )
 
     def test_active_constraint_requires_positive_budget(self):

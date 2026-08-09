@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_11_iterative_deployment_projection"
+    "freq_hrl_mujoco_shared_core_v14_12_groupwise_robust_projection"
 )
 METHODS = (
     "freq_hrl",
@@ -2245,6 +2245,7 @@ def _hierarchical_model(
     lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
     upper_deployment_frequency_action_scale: float = 1.0,
     lower_deployment_frequency_action_scale: float = 1.0,
+    deployment_frequency_groupwise_robust: bool = False,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2315,6 +2316,9 @@ def _hierarchical_model(
         ),
         lower_deployment_frequency_target_tolerance=float(
             lower_deployment_frequency_target_tolerance
+        ),
+        deployment_frequency_groupwise_robust=bool(
+            deployment_frequency_groupwise_robust
         ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
@@ -2577,7 +2581,7 @@ def latent_behavior_feasibility_rank(
     )
 
 
-def paired_relative_frequency_feasibility_rank(
+def paired_relative_frequency_feasibility_diagnostics(
     rows: list[dict[str, Any]],
     *,
     baseline_rows: list[dict[str, Any]],
@@ -2587,8 +2591,8 @@ def paired_relative_frequency_feasibility_rank(
     lower_power_floor: float,
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
-) -> tuple[float, float, float]:
-    """Rank against a paired checkpoint on the same selection paths."""
+) -> dict[str, Any]:
+    """Audit paired reward and frequency feasibility by mode and endpoint."""
 
     modes = tuple(dict.fromkeys(map(str, expected_modes)))
     if not rows or not baseline_rows or not modes:
@@ -2659,6 +2663,7 @@ def paired_relative_frequency_feasibility_rank(
 
     violations: list[float] = []
     reward_slacks: list[float] = []
+    constraints: list[dict[str, Any]] = []
     for mode in modes:
         baseline = mode_means(baseline_rows, mode)
         candidate = mode_means(rows, mode)
@@ -2671,9 +2676,20 @@ def paired_relative_frequency_feasibility_rank(
             0.0,
         )
         violations.append(reward_violation)
-        reward_slacks.append(
+        reward_slack = (
             (candidate["reward_mean"] - reward_floor) / reward_scale
         )
+        reward_slacks.append(reward_slack)
+        constraints.append({
+            "disturbance_mode": mode,
+            "endpoint": "reward_mean",
+            "direction": "minimum",
+            "baseline": baseline["reward_mean"],
+            "candidate": candidate["reward_mean"],
+            "target": reward_floor,
+            "normalized_violation": reward_violation,
+            "normalized_slack": reward_slack,
+        })
         for metric in (
             "LowerLFDriftAbs",
             "RawLowerLFDriftAbs",
@@ -2683,21 +2699,84 @@ def paired_relative_frequency_feasibility_rank(
                 (1.0 - float(lower_reduction_fraction)) * baseline[metric],
                 float(lower_power_floor),
             )
-            violations.append(max(candidate[metric] / target - 1.0, 0.0))
+            violation = max(candidate[metric] / target - 1.0, 0.0)
+            violations.append(violation)
+            constraints.append({
+                "disturbance_mode": mode,
+                "endpoint": metric,
+                "direction": "maximum",
+                "baseline": baseline[metric],
+                "candidate": candidate[metric],
+                "target": target,
+                "normalized_violation": violation,
+                "normalized_slack": 1.0 - candidate[metric] / target,
+            })
         for metric in ("UpperHFPowerAbs", "LatentUpperHFPowerAbs"):
             target = max(
                 (1.0 - float(upper_reduction_fraction)) * baseline[metric],
                 float(upper_power_floor),
             )
-            violations.append(max(candidate[metric] / target - 1.0, 0.0))
+            violation = max(candidate[metric] / target - 1.0, 0.0)
+            violations.append(violation)
+            constraints.append({
+                "disturbance_mode": mode,
+                "endpoint": metric,
+                "direction": "maximum",
+                "baseline": baseline[metric],
+                "candidate": candidate[metric],
+                "target": target,
+                "normalized_violation": violation,
+                "normalized_slack": 1.0 - candidate[metric] / target,
+            })
     values = np.asarray(violations, dtype=np.float64)
     if values.size != len(modes) * 6 or not np.all(np.isfinite(values)):
         raise ValueError("paired-relative checkpoint violation registry is invalid")
-    return (
-        -float(np.max(values)),
-        -float(np.sum(np.square(values))),
-        float(min(reward_slacks)),
+    worst = max(
+        constraints,
+        key=lambda item: (
+            float(item["normalized_violation"]),
+            str(item["disturbance_mode"]),
+            str(item["endpoint"]),
+        ),
     )
+    return {
+        "rank": (
+            -float(np.max(values)),
+            -float(np.sum(np.square(values))),
+            float(min(reward_slacks)),
+        ),
+        "constraint_count": len(constraints),
+        "constraints": constraints,
+        "worst_constraint": worst,
+    }
+
+
+def paired_relative_frequency_feasibility_rank(
+    rows: list[dict[str, Any]],
+    *,
+    baseline_rows: list[dict[str, Any]],
+    expected_modes: Iterable[str],
+    lower_reduction_fraction: float,
+    upper_reduction_fraction: float,
+    lower_power_floor: float,
+    upper_power_floor: float,
+    reward_noninferiority_margin_fraction: float = 0.02,
+) -> tuple[float, float, float]:
+    """Rank against a paired checkpoint on the same selection paths."""
+
+    diagnostics = paired_relative_frequency_feasibility_diagnostics(
+        rows,
+        baseline_rows=baseline_rows,
+        expected_modes=expected_modes,
+        lower_reduction_fraction=lower_reduction_fraction,
+        upper_reduction_fraction=upper_reduction_fraction,
+        lower_power_floor=lower_power_floor,
+        upper_power_floor=upper_power_floor,
+        reward_noninferiority_margin_fraction=(
+            reward_noninferiority_margin_fraction
+        ),
+    )
+    return tuple(map(float, diagnostics["rank"]))
 
 
 def train_mujoco_method(
@@ -2748,6 +2827,7 @@ def train_mujoco_method(
     lower_deployment_frequency_rms_budget: float = 0.0,
     upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
     lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
+    deployment_frequency_groupwise_robust: bool = False,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -2940,6 +3020,17 @@ def train_mujoco_method(
     if deployment_frequency_requested and name != "freq_hrl":
         raise ValueError(
             "deployment-frequency constraints require method=freq_hrl"
+        )
+    if not isinstance(deployment_frequency_groupwise_robust, bool):
+        raise ValueError(
+            "MuJoCo deployment-frequency groupwise robust flag must be boolean"
+        )
+    if (
+        deployment_frequency_groupwise_robust
+        and not deployment_frequency_requested
+    ):
+        raise ValueError(
+            "groupwise robust deployment frequency requires an active constraint"
         )
     for level, value in (
         ("upper", upper_deployment_frequency_rms_budget),
@@ -3257,6 +3348,7 @@ def train_mujoco_method(
 
     checkpoint_score_fn = None
     checkpoint_rank_fn = None
+    checkpoint_diagnostics_fn = None
     checkpoint_rank_names: tuple[str, ...] = ()
     checkpoint_rank_contract = "disabled"
     checkpoint_score_contract = "mean_reward_mean_v1"
@@ -3771,6 +3863,9 @@ def train_mujoco_method(
             lower_deployment_frequency_action_scale=float(
                 lower_action_scale
             ),
+            deployment_frequency_groupwise_robust=bool(
+                deployment_frequency_groupwise_robust
+            ),
         )
         if paired_continuation:
             paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
@@ -3863,6 +3958,25 @@ def train_mujoco_method(
                     ),
                 )
             )
+            checkpoint_diagnostics_fn = lambda rows: (
+                paired_relative_frequency_feasibility_diagnostics(
+                    rows,
+                    baseline_rows=paired_relative_baseline_rows,
+                    expected_modes=training_modes,
+                    lower_reduction_fraction=(
+                        selected_lower_deployment_frequency_reference_reduction
+                    ),
+                    upper_reduction_fraction=(
+                        selected_upper_deployment_frequency_reference_reduction
+                    ),
+                    lower_power_floor=(
+                        float(lower_deployment_frequency_rms_budget) ** 2
+                    ),
+                    upper_power_floor=(
+                        float(upper_deployment_frequency_rms_budget) ** 2
+                    ),
+                )
+            )
             checkpoint_rank_names = (
                 "negative_worst_paired_relative_violation",
                 "negative_paired_relative_violation_l2",
@@ -3899,6 +4013,7 @@ def train_mujoco_method(
             checkpoint_rank_fn=checkpoint_rank_fn,
             checkpoint_rank_names=checkpoint_rank_names,
             checkpoint_rank_contract=checkpoint_rank_contract,
+            checkpoint_diagnostics_fn=checkpoint_diagnostics_fn,
         )
 
     actual_parameters = _module_parameter_count(model)
@@ -4132,10 +4247,25 @@ def train_mujoco_method(
         "lower_deployment_frequency_reference_reduction_fraction": (
             selected_lower_deployment_frequency_reference_reduction
         ),
+        "deployment_frequency_groupwise_robust": bool(
+            deployment_frequency_groupwise_robust
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
         "deployment_frequency_constraint_contract": (
-            "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
-            "lower_lpf32_anchor_relative_target_with_absolute_floor_and_"
-            "dimensionless_iterative_cumulative_reward_budget_projection_v4"
+            (
+                "episode_reset_groupwise_worst_differentiable_actor_mean_"
+                "tanh_upper_hold_hpf8_lower_lpf32_per_group_anchor_relative_"
+                "target_with_absolute_floor_iterative_per_group_cumulative_"
+                "reward_budget_projection_v5"
+                if deployment_frequency_groupwise_robust
+                else (
+                    "episode_reset_differentiable_actor_mean_tanh_upper_hold_"
+                    "hpf8_lower_lpf32_anchor_relative_target_with_absolute_"
+                    "floor_and_dimensionless_iterative_cumulative_reward_"
+                    "budget_projection_v4"
+                )
+            )
             if deployment_frequency_requested and name == "freq_hrl"
             else "disabled"
         ),
@@ -4572,6 +4702,10 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.0,
     )
     parser.add_argument(
+        "--deployment-frequency-groupwise-robust",
+        action="store_true",
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -4724,6 +4858,9 @@ def main() -> None:
         ),
         lower_deployment_frequency_reference_reduction_fraction=(
             args.lower_deployment_frequency_reference_reduction_fraction
+        ),
+        deployment_frequency_groupwise_robust=(
+            args.deployment_frequency_groupwise_robust
         ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,

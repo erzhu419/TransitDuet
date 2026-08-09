@@ -26,6 +26,9 @@ RolloutFn = Callable[[DualActorCriticPPO, int, bool], tuple[TrajectoryBatch | No
 ObjectiveFn = Callable[[dict[str, Any]], float]
 CheckpointScoreFn = Callable[[list[dict[str, Any]]], float]
 CheckpointRankFn = Callable[[list[dict[str, Any]]], tuple[float, ...]]
+CheckpointDiagnosticsFn = Callable[
+    [list[dict[str, Any]]], dict[str, Any]
+]
 SummaryFn = Callable[[list[dict[str, Any]]], dict[str, Any]]
 SMDPRolloutFn = Callable[
     [FrequencySeparatedActorCriticPPO, int, bool],
@@ -494,6 +497,7 @@ def train_frequency_separated_ppo(
     checkpoint_rank_fn: CheckpointRankFn | None = None,
     checkpoint_rank_names: tuple[str, ...] = (),
     checkpoint_rank_contract: str = "disabled",
+    checkpoint_diagnostics_fn: CheckpointDiagnosticsFn | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -563,6 +567,15 @@ def train_frequency_separated_ppo(
     ]
     initial_validation_score = validation_score(initial_rows)
     initial_validation_rank = validation_rank(initial_rows)
+    initial_checkpoint_diagnostics = (
+        checkpoint_diagnostics_fn(initial_rows)
+        if checkpoint_diagnostics_fn is not None else None
+    )
+    if (
+        initial_checkpoint_diagnostics is not None
+        and not isinstance(initial_checkpoint_diagnostics, dict)
+    ):
+        raise ValueError("checkpoint diagnostics must be a mapping")
     selector = (
         StateAlignedLexicographicCheckpointSelector(
             initial_score=initial_validation_score,
@@ -612,6 +625,14 @@ def train_frequency_separated_ppo(
         "promotion_actor_optimizer_steps": 0.0,
         "promotion_value_optimizer_steps": 0.0,
         "promotion_cost_value_optimizer_steps": 0.0,
+        **(
+            {
+                "checkpoint_selection_diagnostics": (
+                    initial_checkpoint_diagnostics
+                )
+            }
+            if initial_checkpoint_diagnostics is not None else {}
+        ),
     }]
 
     for iteration in range(total_iterations):
@@ -642,6 +663,16 @@ def train_frequency_separated_ppo(
             if evaluate_checkpoint else None
         )
         rank = validation_rank(eval_rows) if evaluate_checkpoint else None
+        checkpoint_diagnostics = (
+            checkpoint_diagnostics_fn(eval_rows)
+            if evaluate_checkpoint and checkpoint_diagnostics_fn is not None
+            else None
+        )
+        if (
+            checkpoint_diagnostics is not None
+            and not isinstance(checkpoint_diagnostics, dict)
+        ):
+            raise ValueError("checkpoint diagnostics must be a mapping")
         checkpoint_fields = (
             (
                 selector.consider(
@@ -672,6 +703,10 @@ def train_frequency_separated_ppo(
             **_sampled_summary(sampled_rows, objective_fn),
             **(summary_fn(eval_rows) if evaluate_checkpoint else {}),
             **metrics,
+            **(
+                {"checkpoint_selection_diagnostics": checkpoint_diagnostics}
+                if checkpoint_diagnostics is not None else {}
+            ),
         })
 
     if not selector.has_eligible_selection:
@@ -745,4 +780,18 @@ def train_frequency_separated_ppo(
             if checkpoint_rank_fn is not None else "disabled"
         ),
     }
+    if checkpoint_diagnostics_fn is not None:
+        selected_diagnostics = next(
+            (
+                row["checkpoint_selection_diagnostics"]
+                for row in history
+                if int(row["iteration"]) == int(selector.selected_iteration)
+            ),
+            None,
+        )
+        if selected_diagnostics is None:
+            raise RuntimeError(
+                "selected checkpoint diagnostics were not retained"
+            )
+        payload["selected_checkpoint_diagnostics"] = selected_diagnostics
     return payload, heldout_rows, model

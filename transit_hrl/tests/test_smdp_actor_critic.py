@@ -625,6 +625,32 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertAlmostEqual(float(parameter[0].item()), 0.0, places=6)
         self.assertGreater(float(parameter[1].item()), 0.0)
 
+    def test_group_reward_guard_rejects_a_hidden_group_regression(self):
+        parameter = torch.nn.Parameter(torch.zeros(1))
+
+        def reward_loss():
+            return torch.sum(parameter * 0.0)
+
+        def group_reward_losses():
+            return torch.stack((parameter[0], -parameter[0]))
+
+        def constraint_loss():
+            return (parameter[0] - 1.0).square()
+
+        diagnostics = _reward_guarded_constraint_step(
+            parameters=[parameter],
+            reward_loss_fn=reward_loss,
+            constraint_loss_fn=constraint_loss,
+            step_size=0.1,
+            max_grad_norm=10.0,
+            max_backtracks=3,
+            reward_tolerance=0.0,
+            reward_guard_values_fn=group_reward_losses,
+            reward_guard_baseline_values=torch.zeros(2),
+        )
+        self.assertEqual(diagnostics["accepted"], 0.0)
+        self.assertAlmostEqual(float(parameter.item()), 0.0, places=7)
+
     def test_reward_guarded_adam_candidate_beats_reward_only_candidate(self):
         parameter = torch.nn.Parameter(torch.zeros(2))
         optimizer = torch.optim.Adam([parameter], lr=0.1)
@@ -935,6 +961,12 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertEqual(batch.upper.size, 4)
         self.assertEqual(batch.lower.size, 8)
         self.assertEqual(int(np.sum(batch.upper.duration)), batch.lower.size)
+        np.testing.assert_array_equal(
+            np.unique(batch.upper.deployment_frequency_group), [0, 1]
+        )
+        np.testing.assert_array_equal(
+            np.unique(batch.lower.deployment_frequency_group), [0, 1]
+        )
 
     def test_critic_reward_scale_does_not_suppress_actor_step(self):
         config = SMDPPPOConfig(

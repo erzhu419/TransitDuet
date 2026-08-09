@@ -264,6 +264,9 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
                 "worst_reward",
             ),
             checkpoint_rank_contract="feasibility_then_reward_v1",
+            checkpoint_diagnostics_fn=lambda rows: {
+                "worst_seed": max(int(row["reward_mean"]) for row in rows)
+            },
             checkpoint_minimum_iteration=0,
         )
 
@@ -280,6 +283,13 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             ["negative_max_violation", "worst_reward"],
         )
         self.assertEqual(payload["selected_checkpoint_iteration"], 0)
+        self.assertEqual(
+            payload["selected_checkpoint_diagnostics"], {"worst_seed": 20}
+        )
+        self.assertEqual(
+            payload["history"][-1]["checkpoint_selection_diagnostics"],
+            {"worst_seed": 20},
+        )
 
     def test_smdp_trainer_can_require_a_trained_checkpoint(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

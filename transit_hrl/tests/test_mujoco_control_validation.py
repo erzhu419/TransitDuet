@@ -25,6 +25,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     crossed_checkpoint_selection_paths,
     environment_dimensions,
     latent_behavior_feasibility_rank,
+    paired_relative_frequency_feasibility_diagnostics,
     paired_relative_frequency_feasibility_rank,
     lower_action_router_training_strength,
     load_paired_mujoco_checkpoint,
@@ -589,6 +590,27 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         )
         self.assertEqual(feasible[0], 0.0)
         self.assertGreater(feasible, high_reward_leaky)
+        diagnostics = paired_relative_frequency_feasibility_diagnostics(
+            rows(110.0, 1.20),
+            baseline_rows=baseline,
+            expected_modes=("standard", "mixed"),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        self.assertEqual(diagnostics["constraint_count"], 12)
+        self.assertEqual(tuple(diagnostics["rank"]), high_reward_leaky)
+        self.assertIn(
+            diagnostics["worst_constraint"]["endpoint"],
+            {
+                "LowerLFDriftAbs",
+                "RawLowerLFDriftAbs",
+                "LatentLowerLFDriftAbs",
+                "UpperHFPowerAbs",
+                "LatentUpperHFPowerAbs",
+            },
+        )
         with self.assertRaisesRegex(ValueError, "identical unique paths"):
             paired_relative_frequency_feasibility_rank(
                 rows(99.0, 0.90)[:-1],
