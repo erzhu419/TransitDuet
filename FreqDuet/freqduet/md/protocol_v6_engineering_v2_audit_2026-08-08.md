@@ -623,3 +623,51 @@ evaluation seeds and exactly `fixed_headway`, `rule_holding`, and `rule_mpc`,
 as required by the V6 external-comparison contract. This first long-training
 gate remains on the base terminal scenario. Multi-domain aliases and the final
 paper matrix advance only if the confirmed main survives this test.
+
+## Engineering-v9 dispatch and external-provenance closure (2026-08-09)
+
+Clean detached commit `673355cae10640b2737b6d51d541a9685059c342` in
+`FreqDuet-v6-engineering-v9-snapshot` passed the complete pre-dispatch suite:
+283 tests passed, one was skipped, and 33 subtests passed. The learned matrix
+was submitted as scheduler tasks `t79401` through `t79432`, one config/seed
+pair per shard across `node001` through `node006`. Task `t79428` had one
+transient SSH launch failure and then launched successfully under the same
+task ID. All 32 run manifests are parseable and bind confirmation stage, 200
+episodes, checkpoint 199, the preregistered seeds, clean commit `673355cae1`,
+the isolated `freqduet-cpu-py310` interpreter, model-source fingerprint
+`d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada`,
+and scenario contract
+`45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17`.
+At the dispatch audit all shards were running at episode 6 of 199; no frozen
+evaluation artifact existed, so no long-training effect is inferred here.
+
+The first external submission, tasks `t79437` through `t79460`, completed all
+24 config/method/seed jobs but exposed a fail-closed launcher defect: the
+staged source has no `.git` directory and the external submitter had not
+forwarded the frozen Git environment, so every run manifest recorded
+`git.commit=unavailable`. These artifacts are provenance-invalid and are
+excluded from every comparison and paper table; their values were not used to
+select or modify the policy.
+
+The maintained external submitter now forwards the same source commit, branch,
+and tracked-dirty fields as the learned-matrix submitter and has a direct
+dry-run regression test. The complete post-fix suite passes with 284 tests,
+one skip, and 33 subtests. To preserve exact learned/external source identity,
+the corrected run used the unchanged clean V9 snapshot with the repaired
+environment contract under a new run name,
+`protocol_v6_confirmed_main_external_s8_v9r1`. Scheduler tasks `t79461`
+through `t79484` all completed. Its 24 manifests cover exactly eight direct
+scenario seeds and `fixed_headway`, `rule_holding`, and `rule_mpc`; all report
+commit `673355cae1`, `tracked_dirty=false`, the same model-source and scenario
+fingerprints as the learned matrix, and no parse error or traceback.
+
+The strict external aggregate reports `strict_complete=true` and verified all
+run manifests. Its frozen artifact hashes are:
+
+- per-seed rows: `cfca02acb8946db07b6b3b8d805f096c91f2c6b139b4d9e27b68329d9946519d`;
+- summary CSV: `3e87025270c73888916fa99e71d5913a61a996c287c1f4465f627127c519cd65`;
+- summary manifest: `37208935911fc5dc3356c0c62fcb850a9b29f31ac86af9f7409490ef26b7699d`.
+
+This closes external-baseline provenance only. Learned-versus-external paired
+effects remain unavailable until all 32 learned tasks complete, synchronize,
+strict-aggregate, and pass the preregistered V9 long-training audit.

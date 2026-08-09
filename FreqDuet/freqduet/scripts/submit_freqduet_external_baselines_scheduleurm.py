@@ -22,6 +22,7 @@ from submit_freqduet_config_matrix_scheduleurm import (
     shard_ranges,
 )
 from submit_freqduet_protocol_v2_scheduleurm import (
+    git_output,
     preflight_source,
     protocol_label,
 )
@@ -46,6 +47,9 @@ def build_inner_cmd(
     end: int,
     logs_dir: str,
     out_dir: str,
+    source_commit: str,
+    source_branch: str,
+    source_tracked_dirty: bool,
 ) -> str:
     env_bits = [
         "PYTHONPATH=.",
@@ -56,6 +60,10 @@ def build_inner_cmd(
         "VECLIB_MAXIMUM_THREADS=1",
         "TORCH_NUM_THREADS=1",
         "FREQDUET_TORCH_THREADS=1",
+        f"FREQDUET_SOURCE_COMMIT={shlex.quote(source_commit)}",
+        f"FREQDUET_SOURCE_BRANCH={shlex.quote(source_branch)}",
+        "FREQDUET_SOURCE_TRACKED_DIRTY="
+        f"{int(source_tracked_dirty)}",
     ]
     cmd = [
         str(REMOTE_PYTHON),
@@ -97,6 +105,9 @@ def submit_shard(
     start: int,
     end: int,
     node: str,
+    source_commit: str,
+    source_branch: str,
+    source_tracked_dirty: bool,
 ) -> None:
     shard_id = f"{start:04d}_{end:04d}"
     result_base = f"results_freqduet/{args.run_name}"
@@ -105,7 +116,18 @@ def submit_shard(
     remote_result_dir = str(Path(args.remote_root) / logs_dir)
     local_result_dir = str(ROOT / logs_dir)
     cmd = build_inner_cmd(
-        args, configs_csv, variants_csv, seeds_csv, start, end, logs_dir, out_dir)
+        args,
+        configs_csv,
+        variants_csv,
+        seeds_csv,
+        start,
+        end,
+        logs_dir,
+        out_dir,
+        source_commit,
+        source_branch,
+        source_tracked_dirty,
+    )
     command = [
         sys.executable, str(SCHEDULER), "submit",
         "--project", "FreqDuet",
@@ -219,6 +241,9 @@ def main() -> None:
     print(
         f"source_commit={commit} local_root={ROOT} "
         f"remote_root={Path(args.remote_root)}")
+    source_branch = git_output("rev-parse", "--abbrev-ref", "HEAD")
+    source_tracked_dirty = bool(git_output(
+        "status", "--porcelain", "--untracked-files=no"))
     print_aggregate_hint(
         args.run_name, configs, variants, seeds, args.last_k,
         configs_file=args.configs_file)
@@ -237,6 +262,9 @@ def main() -> None:
             start=start,
             end=end,
             node=nodes[i % len(nodes)],
+            source_commit=commit,
+            source_branch=source_branch,
+            source_tracked_dirty=source_tracked_dirty,
         )
 
     if args.dispatch and not args.dry_run:
