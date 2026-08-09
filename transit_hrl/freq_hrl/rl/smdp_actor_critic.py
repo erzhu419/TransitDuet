@@ -22,7 +22,7 @@ from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
 from .dual_actor_critic import BernoulliActor, GaussianActor, ValueNet
 
 
-LOWER_CONSTRAINT_UPDATE_MODES = (
+CONSTRAINT_UPDATE_MODES = (
     "scalarized",
     "reward_guarded_projection",
     "reward_guarded_adam_projection",
@@ -325,6 +325,8 @@ class SMDPPPOConfig:
     lower_state_dim: int
     upper_action_dim: int
     lower_action_dim: int
+    upper_cost_critic: bool = False
+    upper_cost_state_dim: int = 0
     lower_cost_state_dim: int = 0
     hf_state_dim: int = 0
     hf_action_dim: int = 0
@@ -355,6 +357,17 @@ class SMDPPPOConfig:
     minibatch_size: int = 512
     init_log_std: float = -1.0
     promotion_init_logit: float = -2.0
+    upper_cost_target: float = 0.0
+    upper_dual_lr: float = 0.0
+    upper_lambda_init: float = 0.0
+    upper_max_lambda: float = 100.0
+    upper_cost_activation_threshold: float = 1e-12
+    upper_zero_init_cost_value: bool = False
+    upper_skip_inactive_cost_value_update: bool = False
+    upper_constraint_update_mode: str = "scalarized"
+    upper_constraint_step_scale: float = 1.0
+    upper_constraint_max_backtracks: int = 8
+    upper_constraint_reward_tolerance: float = 1e-8
     lower_cost_target: float = 0.0
     lower_dual_lr: float = 0.0
     lower_lambda_init: float = 0.0
@@ -538,7 +551,17 @@ class HierarchicalRolloutBuilder:
             raise ValueError("gamma must be in (0, 1]")
         self.gamma = float(gamma)
         self._upper: dict[str, list[Any]] = {
-            key: [] for key in ("state", "action", "reward", "duration", "done", "old_logp", "old_value", "cost")
+            key: [] for key in (
+                "state",
+                "cost_state",
+                "action",
+                "reward",
+                "duration",
+                "done",
+                "old_logp",
+                "old_value",
+                "cost",
+            )
         }
         self._lower: dict[str, list[Any]] = {
             key: [] for key in (
@@ -558,6 +581,7 @@ class HierarchicalRolloutBuilder:
         }
         self._pending_upper: dict[str, Any] | None = None
         self._hf_enabled: bool | None = None
+        self._upper_cost_state_enabled: bool | None = None
         self._lower_cost_state_enabled: bool | None = None
 
     @property
@@ -571,17 +595,32 @@ class HierarchicalRolloutBuilder:
         action: np.ndarray,
         logp: float,
         value: float,
+        cost_state: np.ndarray | None = None,
     ) -> None:
+        cost_state_enabled = cost_state is not None
+        if (
+            self._upper_cost_state_enabled is not None
+            and self._upper_cost_state_enabled != cost_state_enabled
+        ):
+            raise ValueError(
+                "upper cost-state presence must be consistent within an episode"
+            )
         if self._pending_upper is not None:
             self._close_upper(done=False)
         self._pending_upper = {
             "state": np.asarray(state, dtype=np.float32).copy(),
+            "cost_state": (
+                np.asarray(cost_state, dtype=np.float32).copy()
+                if cost_state_enabled else None
+            ),
             "action": np.asarray(action, dtype=np.float32).copy(),
             "logp": float(logp),
             "value": float(value),
             "rewards": [],
             "costs": [],
         }
+        if self._upper_cost_state_enabled is None:
+            self._upper_cost_state_enabled = cost_state_enabled
 
     def add_lower(
         self,
@@ -670,6 +709,8 @@ class HierarchicalRolloutBuilder:
             raise RuntimeError("an upper macro action must contain at least one lower transition")
         discounts = np.power(self.gamma, np.arange(len(rewards), dtype=np.float64))
         self._upper["state"].append(pending["state"])
+        if pending["cost_state"] is not None:
+            self._upper["cost_state"].append(pending["cost_state"])
         self._upper["action"].append(pending["action"])
         self._upper["reward"].append(float(np.dot(discounts, np.asarray(rewards, dtype=np.float64))))
         self._upper["duration"].append(int(len(rewards)))
@@ -958,6 +999,13 @@ class FrequencySeparatedActorCriticPPO:
     def __init__(self, config: SMDPPPOConfig) -> None:
         self.config = config
         self.device = torch.device(config.device)
+        self.upper_cost_state_dim = (
+            int(config.upper_state_dim)
+            if int(config.upper_cost_state_dim) == 0
+            else int(config.upper_cost_state_dim)
+        )
+        if self.upper_cost_state_dim < 1:
+            raise ValueError("upper_cost_state_dim must be positive or zero")
         self.lower_cost_state_dim = (
             int(config.lower_state_dim)
             if int(config.lower_cost_state_dim) == 0
@@ -1028,9 +1076,74 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "lower_cost_activation_threshold must be finite and non-negative"
             )
-        if str(config.lower_constraint_update_mode) not in (
-            LOWER_CONSTRAINT_UPDATE_MODES
+        if (
+            not np.isfinite(float(config.upper_cost_activation_threshold))
+            or float(config.upper_cost_activation_threshold) < 0.0
         ):
+            raise ValueError(
+                "upper_cost_activation_threshold must be finite and non-negative"
+            )
+        for level in ("upper", "lower"):
+            cost_target = float(getattr(config, f"{level}_cost_target"))
+            dual_lr = float(getattr(config, f"{level}_dual_lr"))
+            lambda_init = float(getattr(config, f"{level}_lambda_init"))
+            max_lambda = float(getattr(config, f"{level}_max_lambda"))
+            if not np.isfinite(cost_target) or cost_target < 0.0:
+                raise ValueError(
+                    f"{level}_cost_target must be finite and non-negative"
+                )
+            if not np.isfinite(dual_lr) or dual_lr < 0.0:
+                raise ValueError(
+                    f"{level}_dual_lr must be finite and non-negative"
+                )
+            if not np.isfinite(max_lambda) or max_lambda < 0.0:
+                raise ValueError(
+                    f"{level}_max_lambda must be finite and non-negative"
+                )
+            if (
+                not np.isfinite(lambda_init)
+                or lambda_init < 0.0
+                or lambda_init > max_lambda
+            ):
+                raise ValueError(
+                    f"{level}_lambda_init must be finite and in [0, {level}_max_lambda]"
+                )
+        if (
+            not bool(config.upper_cost_critic)
+            and (
+                float(config.upper_dual_lr) > 0.0
+                or float(config.upper_lambda_init) > 0.0
+            )
+        ):
+            raise ValueError(
+                "an active upper constraint requires upper_cost_critic=True"
+            )
+        if str(config.upper_constraint_update_mode) not in CONSTRAINT_UPDATE_MODES:
+            raise ValueError(
+                "upper_constraint_update_mode must be scalarized, "
+                "reward_guarded_projection, or "
+                "reward_guarded_adam_projection"
+            )
+        if (
+            not np.isfinite(float(config.upper_constraint_step_scale))
+            or float(config.upper_constraint_step_scale) <= 0.0
+        ):
+            raise ValueError(
+                "upper_constraint_step_scale must be positive and finite"
+            )
+        if int(config.upper_constraint_max_backtracks) < 0:
+            raise ValueError(
+                "upper_constraint_max_backtracks must be non-negative"
+            )
+        if (
+            not np.isfinite(float(config.upper_constraint_reward_tolerance))
+            or float(config.upper_constraint_reward_tolerance) < 0.0
+        ):
+            raise ValueError(
+                "upper_constraint_reward_tolerance must be finite and "
+                "non-negative"
+            )
+        if str(config.lower_constraint_update_mode) not in CONSTRAINT_UPDATE_MODES:
             raise ValueError(
                 "lower_constraint_update_mode must be scalarized, "
                 "reward_guarded_projection, or "
@@ -1073,6 +1186,12 @@ class FrequencySeparatedActorCriticPPO:
             self.upper_value = ValueNet(
                 config.upper_state_dim, config.hidden_dim
             ).to(self.device)
+            self.upper_cost_value = (
+                ValueNet(
+                    self.upper_cost_state_dim, config.hidden_dim
+                ).to(self.device)
+                if bool(config.upper_cost_critic) else None
+            )
             self.lower_value = ValueNet(
                 config.lower_state_dim, config.hidden_dim
             ).to(self.device)
@@ -1114,6 +1233,12 @@ class FrequencySeparatedActorCriticPPO:
             self.upper_value = CausalGRUValueNet(
                 state_dim=config.upper_state_dim, **value_kwargs
             ).to(self.device)
+            self.upper_cost_value = (
+                CausalGRUValueNet(
+                    state_dim=self.upper_cost_state_dim, **value_kwargs
+                ).to(self.device)
+                if bool(config.upper_cost_critic) else None
+            )
             self.lower_value = CausalGRUValueNet(
                 state_dim=config.lower_state_dim, **value_kwargs
             ).to(self.device)
@@ -1131,6 +1256,20 @@ class FrequencySeparatedActorCriticPPO:
                 ).to(self.device)
         else:
             raise ValueError(f"unknown state_encoder: {config.state_encoder}")
+        if (
+            bool(config.upper_zero_init_cost_value)
+            and self.upper_cost_value is not None
+        ):
+            linear_layers = [
+                module
+                for module in self.upper_cost_value.modules()
+                if isinstance(module, nn.Linear)
+            ]
+            if not linear_layers:
+                raise TypeError("upper cost critic must contain a linear output head")
+            nn.init.zeros_(linear_layers[-1].weight)
+            if linear_layers[-1].bias is not None:
+                nn.init.zeros_(linear_layers[-1].bias)
         if bool(config.lower_zero_init_cost_value):
             linear_layers = [
                 module
@@ -1188,6 +1327,13 @@ class FrequencySeparatedActorCriticPPO:
             self.upper_value.parameters(),
             lr=float(config.upper_learning_rate),
         )
+        self.upper_cost_value_optimizer = (
+            torch.optim.Adam(
+                self.upper_cost_value.parameters(),
+                lr=float(config.upper_learning_rate),
+            )
+            if self.upper_cost_value is not None else None
+        )
         self.lower_actor_optimizer = torch.optim.Adam(
             self.lower_actor.parameters(),
             lr=float(config.lower_learning_rate),
@@ -1214,6 +1360,7 @@ class FrequencySeparatedActorCriticPPO:
             self.hf_value_optimizer = torch.optim.Adam(
                 self.hf_value.parameters(), lr=hf_lr
             )
+        self.upper_constraint_lambda = float(config.upper_lambda_init)
         self.constraint_lambda = float(config.lower_lambda_init)
 
     def state_dict(self) -> dict[str, Any]:
@@ -1230,7 +1377,17 @@ class FrequencySeparatedActorCriticPPO:
             "lower_value_optimizer": self.lower_value_optimizer.state_dict(),
             "lower_cost_value_optimizer": self.lower_cost_value_optimizer.state_dict(),
             "constraint_lambda": float(self.constraint_lambda),
+            "upper_constraint_lambda": float(
+                self.upper_constraint_lambda
+            ),
         }
+        if self.upper_cost_value is not None:
+            payload.update({
+                "upper_cost_value": self.upper_cost_value.state_dict(),
+                "upper_cost_value_optimizer": (
+                    self.upper_cost_value_optimizer.state_dict()
+                ),
+            })
         if self.promotion_actor is not None and self.promotion_value is not None:
             payload.update({
                 "promotion_actor": self.promotion_actor.state_dict(),
@@ -1263,6 +1420,14 @@ class FrequencySeparatedActorCriticPPO:
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
         self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
+        if self.upper_cost_value is not None:
+            if "upper_cost_value" not in payload:
+                raise ValueError(
+                    "checkpoint is missing the configured upper cost critic"
+                )
+            self.upper_cost_value.load_state_dict(
+                payload["upper_cost_value"]
+            )
         if self.hf_actor is not None and self.hf_value is not None:
             if "hf_actor" not in payload or "hf_value" not in payload:
                 raise ValueError(
@@ -1288,6 +1453,7 @@ class FrequencySeparatedActorCriticPPO:
         for name in (
             "upper_actor_optimizer",
             "upper_value_optimizer",
+            "upper_cost_value_optimizer",
             "lower_actor_optimizer",
             "lower_value_optimizer",
             "lower_cost_value_optimizer",
@@ -1301,6 +1467,11 @@ class FrequencySeparatedActorCriticPPO:
             if name in payload and optimizer is not None:
                 optimizer.load_state_dict(payload[name])
         self.constraint_lambda = float(payload.get("constraint_lambda", self.constraint_lambda))
+        self.upper_constraint_lambda = float(
+            payload.get(
+                "upper_constraint_lambda", self.upper_constraint_lambda
+            )
+        )
         self.reset_recurrent_inference()
 
     def reset_recurrent_inference(self) -> None:
@@ -1308,6 +1479,7 @@ class FrequencySeparatedActorCriticPPO:
             self.upper_actor,
             self.lower_actor,
             self.upper_value,
+            self.upper_cost_value,
             self.lower_value,
             self.lower_cost_value,
             self.hf_actor,
@@ -1322,20 +1494,49 @@ class FrequencySeparatedActorCriticPPO:
         return torch.as_tensor(state, dtype=torch.float32, device=self.device).view(1, -1)
 
     @torch.no_grad()
-    def act_upper(self, state: np.ndarray, sample: bool = True) -> dict[str, np.ndarray | float]:
+    def act_upper(
+        self,
+        state: np.ndarray,
+        sample: bool = True,
+        *,
+        cost_state: np.ndarray | None = None,
+    ) -> dict[str, np.ndarray | float]:
         tensor = self._state_tensor(state)
+        cost_tensor = self._state_tensor(
+            state if cost_state is None else cost_state
+        )
+        if (
+            self.upper_cost_value is not None
+            and int(cost_tensor.shape[1]) != self.upper_cost_state_dim
+        ):
+            raise ValueError(
+                "upper cost state has dimension "
+                f"{int(cost_tensor.shape[1])}, expected "
+                f"{self.upper_cost_state_dim}"
+            )
         if str(self.config.state_encoder) == "causal_gru":
             action, logp = self.upper_actor.forward_incremental(
                 tensor, sample=sample
             )
             value = self.upper_value.forward_incremental(tensor)
+            cost_value = (
+                self.upper_cost_value.forward_incremental(cost_tensor)
+                if self.upper_cost_value is not None else None
+            )
         else:
             action, logp = self.upper_actor(tensor, sample=sample)
             value = self.upper_value(tensor)
+            cost_value = (
+                self.upper_cost_value(cost_tensor)
+                if self.upper_cost_value is not None else None
+            )
         return {
             "action": action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
             "value": float(value.item()),
+            "cost_value": (
+                float(cost_value.item()) if cost_value is not None else 0.0
+            ),
         }
 
     @torch.no_grad()
@@ -1566,13 +1767,68 @@ class FrequencySeparatedActorCriticPPO:
             action_dim = 1
         else:
             raise ValueError(f"unknown policy level: {level}")
+        if level == "upper":
+            cost_state_dim = (
+                self.upper_cost_state_dim
+                if cost_value_net is not None else None
+            )
+            cost_activation_threshold = float(
+                cfg.upper_cost_activation_threshold
+            )
+            constraint_update_mode = str(
+                cfg.upper_constraint_update_mode
+            )
+            constraint_step_scale = float(
+                cfg.upper_constraint_step_scale
+            )
+            constraint_max_backtracks = int(
+                cfg.upper_constraint_max_backtracks
+            )
+            constraint_reward_tolerance = float(
+                cfg.upper_constraint_reward_tolerance
+            )
+            skip_inactive_cost_value_update = bool(
+                cfg.upper_skip_inactive_cost_value_update
+            )
+            constraint_lambda = float(self.upper_constraint_lambda)
+        elif level == "lower":
+            cost_state_dim = (
+                self.lower_cost_state_dim
+                if cost_value_net is not None else None
+            )
+            cost_activation_threshold = float(
+                cfg.lower_cost_activation_threshold
+            )
+            constraint_update_mode = str(
+                cfg.lower_constraint_update_mode
+            )
+            constraint_step_scale = float(
+                cfg.lower_constraint_step_scale
+            )
+            constraint_max_backtracks = int(
+                cfg.lower_constraint_max_backtracks
+            )
+            constraint_reward_tolerance = float(
+                cfg.lower_constraint_reward_tolerance
+            )
+            skip_inactive_cost_value_update = bool(
+                cfg.lower_skip_inactive_cost_value_update
+            )
+            constraint_lambda = float(self.constraint_lambda)
+        else:
+            cost_state_dim = None
+            cost_activation_threshold = 0.0
+            constraint_update_mode = "scalarized"
+            constraint_step_scale = 1.0
+            constraint_max_backtracks = 0
+            constraint_reward_tolerance = 0.0
+            skip_inactive_cost_value_update = False
+            constraint_lambda = 0.0
         batch.validate(
             state_dim=state_dim,
             action_dim=action_dim,
             level=level,
-            cost_state_dim=(
-                self.lower_cost_state_dim if level == "lower" else None
-            ),
+            cost_state_dim=cost_state_dim,
         )
         if batch.size == 0:
             empty = {
@@ -1634,7 +1890,7 @@ class FrequencySeparatedActorCriticPPO:
         cost = None
         cost_adv_t = None
         cost_returns_t = None
-        if level == "lower" and batch.cost is not None and cost_value_net is not None:
+        if batch.cost is not None and cost_value_net is not None:
             cost = np.asarray(batch.cost, dtype=np.float32).reshape(-1)
             with torch.no_grad():
                 old_cost_value = cost_value_net(
@@ -1650,7 +1906,7 @@ class FrequencySeparatedActorCriticPPO:
             )
             cost_actor_active = bool(
                 float(np.mean(cost))
-                > float(cfg.lower_cost_activation_threshold)
+                > cost_activation_threshold
             )
             if not cost_actor_active:
                 # An inactive constraint must not create a policy gradient
@@ -1679,12 +1935,12 @@ class FrequencySeparatedActorCriticPPO:
                 if (
                     cost_adv_t is not None
                     and cost_actor_active
-                    and self.constraint_lambda > 0.0
+                    and constraint_lambda > 0.0
                 ):
                     cost_surrogate = torch.maximum(
                         ratio * cost_adv_t[idx], clipped * cost_adv_t[idx]
                     ).mean()
-                    constraint_loss = float(self.constraint_lambda) * cost_surrogate
+                    constraint_loss = constraint_lambda * cost_surrogate
                 promotion_rate_loss = torch.zeros(
                     (), dtype=torch.float32, device=self.device
                 )
@@ -1764,18 +2020,15 @@ class FrequencySeparatedActorCriticPPO:
                     "constraint_loss_delta": 0.0,
                     "attempted": 0.0,
                 }
-                constraint_update_mode = str(
-                    cfg.lower_constraint_update_mode
-                )
                 guarded_update = bool(
-                    level == "lower"
+                    level in {"upper", "lower"}
                     and constraint_update_mode in {
                         "reward_guarded_projection",
                         "reward_guarded_adam_projection",
                     }
                     and cost_adv_t is not None
                     and cost_actor_active
-                    and self.constraint_lambda > 0.0
+                    and constraint_lambda > 0.0
                 )
                 if guarded_update:
                     def current_surrogates() -> tuple[
@@ -1822,7 +2075,7 @@ class FrequencySeparatedActorCriticPPO:
 
                     def constraint_loss_fn() -> torch.Tensor:
                         _, _, current_cost = current_surrogates()
-                        return float(self.constraint_lambda) * current_cost
+                        return constraint_lambda * current_cost
 
                     if (
                         constraint_update_mode
@@ -1835,16 +2088,10 @@ class FrequencySeparatedActorCriticPPO:
                                 reward_actor_loss_fn=reward_actor_loss_fn,
                                 reward_guard_loss_fn=reward_guard_loss_fn,
                                 constraint_loss_fn=constraint_loss_fn,
-                                constraint_scale=float(
-                                    cfg.lower_constraint_step_scale
-                                ),
+                                constraint_scale=constraint_step_scale,
                                 max_grad_norm=float(cfg.max_grad_norm),
-                                max_backtracks=int(
-                                    cfg.lower_constraint_max_backtracks
-                                ),
-                                reward_tolerance=float(
-                                    cfg.lower_constraint_reward_tolerance
-                                ),
+                                max_backtracks=constraint_max_backtracks,
+                                reward_tolerance=constraint_reward_tolerance,
                             )
                         )
                     else:
@@ -1864,15 +2111,11 @@ class FrequencySeparatedActorCriticPPO:
                                     float(
                                         actor_optimizer.param_groups[0]["lr"]
                                     )
-                                    * float(cfg.lower_constraint_step_scale)
+                                    * constraint_step_scale
                                 ),
                                 max_grad_norm=float(cfg.max_grad_norm),
-                                max_backtracks=int(
-                                    cfg.lower_constraint_max_backtracks
-                                ),
-                                reward_tolerance=float(
-                                    cfg.lower_constraint_reward_tolerance
-                                ),
+                                max_backtracks=constraint_max_backtracks,
+                                reward_tolerance=constraint_reward_tolerance,
                             )
                         )
                     guarded_diagnostics["attempted"] = 1.0
@@ -1911,7 +2154,7 @@ class FrequencySeparatedActorCriticPPO:
                     and cost_value_optimizer is not None
                     and (
                         cost_actor_active
-                        or not bool(cfg.lower_skip_inactive_cost_value_update)
+                        or not skip_inactive_cost_value_update
                     )
                 ):
                     cost_value_optimizer.zero_grad()
@@ -1994,7 +2237,7 @@ class FrequencySeparatedActorCriticPPO:
                 and cost_value_optimizer is not None
                 and (
                     cost_actor_active
-                    or not bool(cfg.lower_skip_inactive_cost_value_update)
+                    or not skip_inactive_cost_value_update
                 )
             )
             else 0
@@ -2008,7 +2251,7 @@ class FrequencySeparatedActorCriticPPO:
         if cost is not None:
             out[f"{level}_cost_mean"] = float(np.mean(cost))
             out[f"{level}_cost_violation_rate"] = float(
-                np.mean(cost > float(cfg.lower_cost_activation_threshold))
+                np.mean(cost > cost_activation_threshold)
             )
             out[f"{level}_cost_actor_active"] = float(cost_actor_active)
         return out
@@ -2019,8 +2262,10 @@ class FrequencySeparatedActorCriticPPO:
             batch=batch.upper,
             actor=self.upper_actor,
             value_net=self.upper_value,
+            cost_value_net=self.upper_cost_value,
             actor_optimizer=self.upper_actor_optimizer,
             value_optimizer=self.upper_value_optimizer,
+            cost_value_optimizer=self.upper_cost_value_optimizer,
         )
         lower_metrics = self._update_level(
             level="lower",
@@ -2086,6 +2331,26 @@ class FrequencySeparatedActorCriticPPO:
                 "promotion_cost_value_optimizer_steps": 0.0,
                 "promotion_advantage_optimizer_steps": 0.0,
             }
+        upper_cost_mean = (
+            float(np.mean(batch.upper.cost))
+            if batch.upper.cost is not None else 0.0
+        )
+        if (
+            self.upper_cost_value is not None
+            and batch.upper.cost is not None
+            and float(self.config.upper_dual_lr) > 0.0
+        ):
+            updated = (
+                self.upper_constraint_lambda
+                + float(self.config.upper_dual_lr)
+                * (
+                    upper_cost_mean
+                    - float(self.config.upper_cost_target)
+                )
+            )
+            self.upper_constraint_lambda = float(np.clip(
+                updated, 0.0, float(self.config.upper_max_lambda)
+            ))
         cost_mean = float(np.mean(batch.lower.cost)) if batch.lower.cost is not None else 0.0
         if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:
             updated = self.constraint_lambda + float(self.config.lower_dual_lr) * (
@@ -2097,6 +2362,12 @@ class FrequencySeparatedActorCriticPPO:
             **lower_metrics,
             **hf_metrics,
             **promotion_metrics,
+            "upper_constraint_mean": upper_cost_mean,
+            "upper_constraint_lambda": float(
+                self.upper_constraint_lambda
+            ),
+            "lower_constraint_mean": cost_mean,
+            "lower_constraint_lambda": float(self.constraint_lambda),
             "constraint_mean": cost_mean,
             "constraint_lambda": float(self.constraint_lambda),
         }

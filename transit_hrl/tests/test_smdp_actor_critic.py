@@ -241,6 +241,137 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         metrics = model.update(batch)
         self.assertEqual(metrics["lower_transitions"], 3.0)
 
+    def test_upper_primal_dual_constraint_updates_and_round_trips(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            upper_cost_critic=True,
+            upper_dual_lr=0.1,
+            upper_cost_target=0.0,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        metrics = model.update(self._batch(19))
+
+        self.assertGreater(metrics["upper_constraint_mean"], 0.0)
+        self.assertGreater(metrics["upper_constraint_lambda"], 0.0)
+        self.assertGreater(metrics["upper_cost_value_optimizer_steps"], 0.0)
+        state = copy.deepcopy(model.state_dict())
+        self.assertIn("upper_cost_value", state)
+        self.assertIn("upper_cost_value_optimizer", state)
+
+        restored = FrequencySeparatedActorCriticPPO(config)
+        restored.load_state_dict(state)
+        self.assertAlmostEqual(
+            restored.upper_constraint_lambda,
+            model.upper_constraint_lambda,
+        )
+        for expected, actual in zip(
+            model.upper_cost_value.parameters(),
+            restored.upper_cost_value.parameters(),
+        ):
+            torch.testing.assert_close(expected, actual)
+
+    def test_upper_cost_critic_can_use_a_distinct_causal_state(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            upper_cost_state_dim=4,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            upper_cost_critic=True,
+            upper_dual_lr=0.1,
+        ))
+        actor_state = np.asarray([0.25, -0.5, 0.75], dtype=np.float32)
+        first = model.act_upper(
+            actor_state,
+            sample=False,
+            cost_state=np.asarray([1.0, 2.0, 3.0, 4.0], dtype=np.float32),
+        )
+        second = model.act_upper(
+            actor_state,
+            sample=False,
+            cost_state=np.asarray([-4.0, -3.0, -2.0, -1.0], dtype=np.float32),
+        )
+        np.testing.assert_array_equal(first["action"], second["action"])
+        self.assertEqual(first["value"], second["value"])
+
+        rng = np.random.default_rng(23)
+        builder = HierarchicalRolloutBuilder(gamma=0.99)
+        for macro in range(2):
+            builder.begin_upper(
+                state=rng.normal(size=3).astype(np.float32),
+                cost_state=rng.normal(size=4).astype(np.float32),
+                action=rng.normal(size=1).astype(np.float32),
+                logp=-0.5,
+                value=0.1,
+            )
+            for lower_step in range(2):
+                builder.add_lower(
+                    state=rng.normal(size=2).astype(np.float32),
+                    action=rng.normal(size=1).astype(np.float32),
+                    logp=-0.4,
+                    value=0.2,
+                    reward=0.1,
+                    upper_cost=0.05,
+                    done=macro == 1 and lower_step == 1,
+                )
+        batch = builder.build()
+        self.assertEqual(batch.upper.cost_state.shape, (2, 4))
+        metrics = model.update(batch)
+        self.assertEqual(metrics["upper_transitions"], 2.0)
+
+    def test_zero_upper_cost_cannot_inject_constraint_actor_gradient(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            upper_cost_critic=True,
+            upper_lambda_init=0.5,
+            upper_zero_init_cost_value=True,
+            upper_skip_inactive_cost_value_update=True,
+        )
+        torch.manual_seed(29)
+        constrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained = FrequencySeparatedActorCriticPPO(config)
+        unconstrained.load_state_dict(copy.deepcopy(constrained.state_dict()))
+        unconstrained.upper_constraint_lambda = 0.0
+        batch = self._batch(31)
+        batch = replace(
+            batch,
+            upper=replace(
+                batch.upper,
+                cost=np.zeros(batch.upper.size, dtype=np.float32),
+            ),
+        )
+
+        np.random.seed(37)
+        metrics = constrained.update(copy.deepcopy(batch))
+        np.random.seed(37)
+        unconstrained.update(copy.deepcopy(batch))
+        constrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in constrained.upper_actor.parameters()
+        ])
+        unconstrained_actor = torch.cat([
+            parameter.detach().reshape(-1)
+            for parameter in unconstrained.upper_actor.parameters()
+        ])
+        torch.testing.assert_close(constrained_actor, unconstrained_actor)
+        self.assertEqual(metrics["upper_cost_actor_active"], 0.0)
+        self.assertEqual(metrics["upper_cost_value_optimizer_steps"], 0.0)
+
     def test_distinct_cost_state_is_required_when_dimensions_differ(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=3,
@@ -253,6 +384,16 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             model.act_lower(np.zeros(2, dtype=np.float32), sample=False)
         with self.assertRaisesRegex(ValueError, "explicit cost_state"):
             model.update(self._batch())
+
+    def test_active_upper_constraint_requires_cost_critic(self):
+        with self.assertRaisesRegex(ValueError, "upper_cost_critic=True"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                upper_dual_lr=0.1,
+            ))
 
     def test_smdp_truncation_uses_duration_aware_bootstrap(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

@@ -48,7 +48,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_endpoint_aligned_training"
+    "freq_hrl_mujoco_shared_core_v14_1_crossed_behavior_selection"
 )
 METHODS = (
     "freq_hrl",
@@ -86,8 +86,20 @@ SAFE_SELECTOR_CONFIDENCE = 0.90
 SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 RESPONSIBILITY_TRANSFER_ALPHA = 0.04
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
+UPPER_CONSTRAINT_MODES = (
+    "disabled",
+    "static_reward_penalty",
+    "primal_dual",
+)
+CHECKPOINT_SELECTION_MODES = (
+    "assigned_condition",
+    "crossed_conditions",
+)
+CHECKPOINT_SCORE_MODES = ("mean_reward", "behavior_robust")
 DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
 DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
+DEFAULT_UPPER_DUAL_LR = 0.1
+DEFAULT_CHECKPOINT_CONSTRAINT_PENALTY = 10.0
 
 
 def _gym() -> Any:
@@ -359,6 +371,8 @@ def _episode_row(
     upper_hf_rms_values: list[float],
     upper_hf_budget_excesses: list[float],
     upper_hf_penalties: list[float],
+    upper_constraint_costs: list[float],
+    upper_constraint_mode: str,
     upper_hf_rms_budget: float,
     upper_hf_penalty_coef: float,
 ) -> dict[str, Any]:
@@ -489,6 +503,13 @@ def _episode_row(
         "UpperHFPenaltyTotal": float(np.sum(
             upper_hf_penalties
         )),
+        "UpperConstraintCostMean": float(np.mean(
+            upper_constraint_costs
+        )),
+        "UpperConstraintCostMax": float(np.max(
+            upper_constraint_costs
+        )),
+        "UpperConstraintMode": str(upper_constraint_mode),
         "UpperHFRMSBudget": float(upper_hf_rms_budget),
         "UpperHFPenaltyCoef": float(upper_hf_penalty_coef),
         "upper_decision_count": int(upper_decisions),
@@ -523,12 +544,20 @@ def rollout_hierarchical(
     leakage_constraint_scope: str = "responsibility",
     upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
     upper_hf_penalty_coef: float = 0.0,
+    upper_constraint_mode: str = "static_reward_penalty",
     responsibility_mode: str = "additive",
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
+    if str(upper_constraint_mode) not in UPPER_CONSTRAINT_MODES:
+        raise ValueError("unknown MuJoCo upper constraint mode")
+    if (
+        str(upper_constraint_mode) == "primal_dual"
+        and model.upper_cost_value is None
+    ):
+        raise ValueError("primal-dual upper control requires an upper cost critic")
     if (
         not np.isfinite(float(upper_hf_penalty_coef))
         or float(upper_hf_penalty_coef) < 0.0
@@ -580,6 +609,7 @@ def rollout_hierarchical(
         segment_returns: list[float] = []
         natural_episode_returns: list[float] = []
         boundary_upper_next_values: list[float] = []
+        boundary_upper_next_cost_values: list[float] = []
         boundary_lower_next_values: list[float] = []
         boundary_lower_next_cost_values: list[float] = []
         boundary_terminals: list[float] = []
@@ -592,6 +622,8 @@ def rollout_hierarchical(
         upper_hf_rms_values: list[float] = []
         upper_hf_budget_excesses: list[float] = []
         upper_hf_penalties: list[float] = []
+        upper_constraint_costs: list[float] = []
+        upper_cost_values: list[float] = []
         lower_cost_values: list[float] = []
         current_episode_return = 0.0
         episode_index = 0
@@ -628,6 +660,7 @@ def rollout_hierarchical(
                     level="upper",
                 )
                 upper_out = model.act_upper(upper_state, sample=sample)
+                upper_cost_values.append(float(upper_out["cost_value"]))
                 upper_raw = np.asarray(upper_out["action"], dtype=np.float32)
                 upper_policy_action = (
                     float(upper_action_scale) * np.tanh(upper_raw)
@@ -743,6 +776,13 @@ def rollout_hierarchical(
             upper_hf_penalty = (
                 float(upper_hf_penalty_coef)
                 * float(upper_budget["budget_excess_squared"])
+                if str(upper_constraint_mode) == "static_reward_penalty"
+                else 0.0
+            )
+            upper_constraint_cost = (
+                float(upper_budget["budget_excess_squared"])
+                if str(upper_constraint_mode) == "primal_dual"
+                else 0.0
             )
             lower_lf_rms_values.append(float(lower_budget["rms"]))
             lower_lf_budget_excesses.append(float(lower_budget["budget_excess"]))
@@ -769,6 +809,7 @@ def rollout_hierarchical(
                 upper_budget["budget_excess"]
             ))
             upper_hf_penalties.append(float(upper_hf_penalty))
+            upper_constraint_costs.append(float(upper_constraint_cost))
             builder.add_lower(
                 state=lower_state,
                 action=lower_raw,
@@ -776,6 +817,7 @@ def rollout_hierarchical(
                 value=float(lower_out["value"]),
                 reward=float(reward),
                 upper_reward=float(reward) - upper_hf_penalty,
+                upper_cost=upper_constraint_cost,
                 cost_state=lower_cost_state,
                 cost=float(lower_cost),
                 done=done,
@@ -805,6 +847,7 @@ def rollout_hierarchical(
             if done:
                 terminal = float(bool(terminated))
                 upper_next_value = 0.0
+                upper_next_cost_value = 0.0
                 lower_next_value = 0.0
                 lower_next_cost_value = 0.0
                 if sample and not bool(terminated):
@@ -832,6 +875,7 @@ def rollout_hierarchical(
                         sample=False,
                     )
                     upper_next_value = float(next_upper["value"])
+                    upper_next_cost_value = float(next_upper["cost_value"])
                     next_upper_policy_action = upper_policy_action
                     next_upper_anchor = upper_anchor
                     if steps_since_upper >= int(upper_period):
@@ -878,6 +922,9 @@ def rollout_hierarchical(
                         device=model.device,
                     )
                 boundary_upper_next_values.append(upper_next_value)
+                boundary_upper_next_cost_values.append(
+                    upper_next_cost_value
+                )
                 boundary_lower_next_values.append(lower_next_value)
                 boundary_lower_next_cost_values.append(
                     lower_next_cost_value
@@ -931,6 +978,16 @@ def rollout_hierarchical(
                     trajectory.upper,
                     boundary_next_values=boundary_upper_next_values,
                     boundary_terminals=boundary_terminals,
+                    boundary_next_cost_values=(
+                        boundary_upper_next_cost_values
+                        if str(upper_constraint_mode) == "primal_dual"
+                        else None
+                    ),
+                    cost_values=(
+                        upper_cost_values
+                        if str(upper_constraint_mode) == "primal_dual"
+                        else None
+                    ),
                 ),
                 lower=_with_explicit_bootstrap(
                     trajectory.lower,
@@ -983,6 +1040,8 @@ def rollout_hierarchical(
             upper_hf_rms_values=upper_hf_rms_values,
             upper_hf_budget_excesses=upper_hf_budget_excesses,
             upper_hf_penalties=upper_hf_penalties,
+            upper_constraint_costs=upper_constraint_costs,
+            upper_constraint_mode=str(upper_constraint_mode),
             upper_hf_rms_budget=upper_hf_rms_budget,
             upper_hf_penalty_coef=upper_hf_penalty_coef,
         )
@@ -1188,6 +1247,8 @@ def rollout_flat(
             upper_hf_rms_values=[0.0 for _ in rewards],
             upper_hf_budget_excesses=[0.0 for _ in rewards],
             upper_hf_penalties=[0.0 for _ in rewards],
+            upper_constraint_costs=[0.0 for _ in rewards],
+            upper_constraint_mode="disabled",
             upper_hf_rms_budget=DEFAULT_UPPER_HF_RMS_BUDGET,
             upper_hf_penalty_coef=0.0,
         )
@@ -1250,6 +1311,8 @@ SUMMARY_KEYS = [
     "UpperHFBudgetViolationRate",
     "UpperHFPenaltyMean",
     "UpperHFPenaltyTotal",
+    "UpperConstraintCostMean",
+    "UpperConstraintCostMax",
     "UpperHFRMSBudget",
     "UpperHFPenaltyCoef",
     "upper_decision_count",
@@ -1622,6 +1685,10 @@ def _hierarchical_model(
     hidden_dim: int,
     learning_rate: float,
     leakage_constraint: bool,
+    upper_cost_critic: bool = False,
+    upper_constraint: bool = False,
+    upper_dual_lr: float = DEFAULT_UPPER_DUAL_LR,
+    upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
@@ -1635,6 +1702,20 @@ def _hierarchical_model(
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
+        upper_cost_critic=bool(upper_cost_critic),
+        upper_lambda_init=0.0,
+        upper_cost_target=0.0,
+        upper_dual_lr=(
+            float(upper_dual_lr) if upper_constraint else 0.0
+        ),
+        upper_max_lambda=20.0,
+        upper_cost_activation_threshold=1e-6,
+        upper_zero_init_cost_value=True,
+        upper_skip_inactive_cost_value_update=True,
+        upper_constraint_update_mode=str(upper_constraint_update_mode),
+        upper_constraint_step_scale=1.0,
+        upper_constraint_max_backtracks=8,
+        upper_constraint_reward_tolerance=1e-8,
         lower_lambda_init=0.0,
         lower_cost_target=0.0,
         lower_dual_lr=0.1 if leakage_constraint else 0.0,
@@ -1670,6 +1751,148 @@ def _assign_seed_modes(
     }
 
 
+def crossed_checkpoint_selection_paths(
+    selection_roots: Iterable[int],
+    modes: Iterable[str],
+    *,
+    env_id: str,
+) -> tuple[list[int], dict[int, str]]:
+    """Expand independent validation roots across every disturbance mode."""
+
+    roots = validate_unique_seeds(
+        selection_roots, role="mujoco_checkpoint_selection_roots"
+    )
+    condition_registry = _validated_disturbance_modes(
+        modes, role="checkpoint selection"
+    )
+    path_seeds: list[int] = []
+    assignments: dict[int, str] = {}
+    for root in roots:
+        for mode in condition_registry:
+            path_seed = derive_seed(
+                "mujoco_checkpoint_selection_crossed_v1",
+                str(env_id),
+                int(root),
+                str(mode),
+            )
+            if path_seed in assignments:
+                raise RuntimeError(
+                    "crossed MuJoCo checkpoint path seeds collided"
+                )
+            path_seeds.append(path_seed)
+            assignments[path_seed] = str(mode)
+    return path_seeds, assignments
+
+
+def behavior_robust_checkpoint_diagnostics(
+    rows: list[dict[str, Any]],
+    *,
+    expected_modes: Iterable[str],
+    lower_lf_rms_budget: float,
+    upper_hf_rms_budget: float,
+    constraint_penalty: float,
+) -> dict[str, Any]:
+    """Score worst-condition reward while penalizing endpoint violations."""
+
+    modes = tuple(dict.fromkeys(map(str, expected_modes)))
+    if not rows or not modes:
+        raise ValueError("behavior-robust checkpoint scoring needs rows and modes")
+    if (
+        not np.isfinite(float(lower_lf_rms_budget))
+        or float(lower_lf_rms_budget) <= 0.0
+        or not np.isfinite(float(upper_hf_rms_budget))
+        or float(upper_hf_rms_budget) <= 0.0
+    ):
+        raise ValueError("checkpoint leakage budgets must be positive")
+    if (
+        not np.isfinite(float(constraint_penalty))
+        or float(constraint_penalty) < 0.0
+    ):
+        raise ValueError("checkpoint constraint penalty must be non-negative")
+    grouped = {
+        mode: [
+            row for row in rows
+            if str(row.get("disturbance_mode")) == mode
+        ]
+        for mode in modes
+    }
+    missing = [mode for mode, values in grouped.items() if not values]
+    unexpected = sorted({
+        str(row.get("disturbance_mode")) for row in rows
+    } - set(modes))
+    if missing or unexpected:
+        raise ValueError(
+            "checkpoint rows do not match the expected disturbance registry: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+
+    by_mode: dict[str, dict[str, float]] = {}
+    for mode, values in grouped.items():
+        metrics = {
+            key: np.asarray([float(row[key]) for row in values])
+            for key in (
+                "reward_mean",
+                "LowerLFDriftAbs",
+                "RawLowerLFDriftAbs",
+                "UpperHFPowerAbs",
+            )
+        }
+        if any(not np.all(np.isfinite(metric)) for metric in metrics.values()):
+            raise ValueError("checkpoint metrics must be finite")
+        lower_rms = float(np.sqrt(max(
+            float(np.mean(metrics["LowerLFDriftAbs"])), 0.0
+        )))
+        raw_lower_rms = float(np.sqrt(max(
+            float(np.mean(metrics["RawLowerLFDriftAbs"])), 0.0
+        )))
+        upper_hf_rms = float(np.sqrt(max(
+            float(np.mean(metrics["UpperHFPowerAbs"])), 0.0
+        )))
+        by_mode[mode] = {
+            "reward_mean": float(np.mean(metrics["reward_mean"])),
+            "lower_lf_rms": lower_rms,
+            "raw_lower_lf_rms": raw_lower_rms,
+            "upper_hf_rms": upper_hf_rms,
+            "lower_violation": max(
+                0.0, lower_rms / float(lower_lf_rms_budget) - 1.0
+            ),
+            "raw_lower_violation": max(
+                0.0, raw_lower_rms / float(lower_lf_rms_budget) - 1.0
+            ),
+            "upper_hf_violation": max(
+                0.0, upper_hf_rms / float(upper_hf_rms_budget) - 1.0
+            ),
+        }
+    worst_reward = min(item["reward_mean"] for item in by_mode.values())
+    reward_scale = max(
+        1.0,
+        max(abs(item["reward_mean"]) for item in by_mode.values()),
+    )
+    worst_violations = {
+        key: max(item[key] for item in by_mode.values())
+        for key in (
+            "lower_violation",
+            "raw_lower_violation",
+            "upper_hf_violation",
+        )
+    }
+    normalized_penalty = float(sum(
+        value * value for value in worst_violations.values()
+    ))
+    score = (
+        float(worst_reward)
+        - float(constraint_penalty) * reward_scale * normalized_penalty
+    )
+    return {
+        "score": score,
+        "worst_condition_reward_mean": float(worst_reward),
+        "reward_scale": reward_scale,
+        "normalized_constraint_penalty": normalized_penalty,
+        "worst_normalized_violations": worst_violations,
+        "by_disturbance": by_mode,
+    }
+
+
 def train_mujoco_method(
     *,
     method: str,
@@ -1698,7 +1921,15 @@ def train_mujoco_method(
     leakage_constraint_scope: str = "joint_behavior",
     upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
     upper_hf_penalty_coef: float = DEFAULT_UPPER_HF_PENALTY_COEF,
+    upper_constraint_mode: str = "static_reward_penalty",
+    upper_dual_lr: float = DEFAULT_UPPER_DUAL_LR,
+    upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
+    checkpoint_selection_mode: str = "assigned_condition",
+    checkpoint_score_mode: str = "mean_reward",
+    checkpoint_constraint_penalty: float = (
+        DEFAULT_CHECKPOINT_CONSTRAINT_PENALTY
+    ),
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
@@ -1757,6 +1988,24 @@ def train_mujoco_method(
         or float(upper_hf_penalty_coef) < 0.0
     ):
         raise ValueError("MuJoCo upper-HF penalty must be non-negative")
+    if str(upper_constraint_mode) not in UPPER_CONSTRAINT_MODES:
+        raise ValueError("unknown MuJoCo upper constraint mode")
+    if (
+        not np.isfinite(float(upper_dual_lr))
+        or float(upper_dual_lr) < 0.0
+    ):
+        raise ValueError("MuJoCo upper dual learning rate must be non-negative")
+    if str(checkpoint_selection_mode) not in CHECKPOINT_SELECTION_MODES:
+        raise ValueError("unknown MuJoCo checkpoint selection mode")
+    if str(checkpoint_score_mode) not in CHECKPOINT_SCORE_MODES:
+        raise ValueError("unknown MuJoCo checkpoint score mode")
+    if (
+        not np.isfinite(float(checkpoint_constraint_penalty))
+        or float(checkpoint_constraint_penalty) < 0.0
+    ):
+        raise ValueError(
+            "MuJoCo checkpoint constraint penalty must be non-negative"
+        )
     if name == "flat_ppo" and str(responsibility_mode) != "additive":
         raise ValueError("flat PPO cannot use hierarchical responsibility transfer")
     if str(lower_constraint_update_mode) not in {
@@ -1765,6 +2014,12 @@ def train_mujoco_method(
         "reward_guarded_adam_projection",
     }:
         raise ValueError("unknown lower constraint update mode")
+    if str(upper_constraint_update_mode) not in {
+        "scalarized",
+        "reward_guarded_projection",
+        "reward_guarded_adam_projection",
+    }:
+        raise ValueError("unknown upper constraint update mode")
     observation_dim, action_dim = environment_dimensions(
         env_id,
         episode_horizon=episode_horizon,
@@ -1781,16 +2036,31 @@ def train_mujoco_method(
     )
     if len(training_modes) > 1 and (
         len(roots) < len(training_modes)
-        or len(selection) < len(training_modes)
+        or (
+            str(checkpoint_selection_mode) == "assigned_condition"
+            and len(selection) < len(training_modes)
+        )
     ):
         raise ValueError(
             "multi-condition MuJoCo training requires at least one train and "
-            "selection seed per disturbance mode"
+            "assigned selection seed per disturbance mode"
         )
     domain_seed_key = f"mujoco:{env_id}:multi_condition_v1"
     seed_modes: dict[int, str] = {}
     train_root_modes = _assign_seed_modes(roots, training_modes)
-    selection_seed_modes = _assign_seed_modes(selection, training_modes)
+    if str(checkpoint_selection_mode) == "crossed_conditions":
+        selection_rollout_seeds, selection_seed_modes = (
+            crossed_checkpoint_selection_paths(
+                selection,
+                training_modes,
+                env_id=env_id,
+            )
+        )
+    else:
+        selection_rollout_seeds = list(selection)
+        selection_seed_modes = _assign_seed_modes(
+            selection_rollout_seeds, training_modes
+        )
     evaluation_seed_modes = _assign_seed_modes(evaluation, training_modes)
 
     def register_seed_mode(seed: int, mode: str) -> None:
@@ -1801,16 +2071,36 @@ def train_mujoco_method(
             )
         seed_modes[int(seed)] = str(mode)
 
+    derived_training_seeds: set[int] = set()
     for iteration in range(max(1, int(iterations))):
         for root in roots:
             derived = training_rollout_seed(
                 int(optimizer_seed), root, iteration, domain=domain_seed_key
             )
+            derived_training_seeds.add(int(derived))
             register_seed_mode(derived, train_root_modes[int(root)])
     for seed, mode in selection_seed_modes.items():
         register_seed_mode(seed, mode)
     for seed, mode in evaluation_seed_modes.items():
         register_seed_mode(seed, mode)
+    protected_seed_roles = (
+        set(roots)
+        | set(selection)
+        | set(safety_selection)
+        | set(evaluation)
+    )
+    crossed_collisions = sorted(
+        set(selection_rollout_seeds)
+        & (protected_seed_roles | derived_training_seeds)
+    )
+    if (
+        str(checkpoint_selection_mode) == "crossed_conditions"
+        and crossed_collisions
+    ):
+        raise RuntimeError(
+            "crossed checkpoint paths overlap a seed-role root: "
+            f"{crossed_collisions}"
+        )
 
     def assigned_mode(seed: int) -> str:
         try:
@@ -1820,12 +2110,36 @@ def train_mujoco_method(
                 f"MuJoCo rollout seed {int(seed)} has no registered condition"
             ) from exc
 
+    checkpoint_score_fn = None
+    checkpoint_score_contract = "mean_reward_mean_v1"
+    if str(checkpoint_score_mode) == "behavior_robust":
+        checkpoint_score_fn = lambda rows: float(
+            behavior_robust_checkpoint_diagnostics(
+                rows,
+                expected_modes=training_modes,
+                lower_lf_rms_budget=lower_lf_rms_budget,
+                upper_hf_rms_budget=upper_hf_rms_budget,
+                constraint_penalty=checkpoint_constraint_penalty,
+            )["score"]
+        )
+        checkpoint_score_contract = (
+            "worst_condition_reward_minus_scale_normalized_squared_"
+            "lower_raw_lower_and_upper_hf_budget_violations_v1"
+        )
+
+    upper_cost_critic_for_capacity = (
+        str(upper_constraint_mode) == "primal_dual"
+    )
     reference = _hierarchical_model(
         state_dim=state_dim,
         action_dim=action_dim,
         hidden_dim=hidden_dim,
         learning_rate=learning_rate,
         leakage_constraint=True,
+        upper_cost_critic=upper_cost_critic_for_capacity,
+        upper_constraint=False,
+        upper_dual_lr=upper_dual_lr,
+        upper_constraint_update_mode=upper_constraint_update_mode,
         lower_constraint_update_mode=lower_constraint_update_mode,
     )
     target_parameters = _module_parameter_count(reference)
@@ -1837,7 +2151,14 @@ def train_mujoco_method(
     )
     selected_upper_hf_penalty_coef = (
         float(upper_hf_penalty_coef)
-        if selected_leakage_constraint else 0.0
+        if (
+            selected_leakage_constraint
+            and str(upper_constraint_mode) == "static_reward_penalty"
+        ) else 0.0
+    )
+    selected_upper_constraint_mode = (
+        str(upper_constraint_mode)
+        if selected_leakage_constraint else "disabled"
     )
     if name == "freq_hrl_safe_selector":
         branch_specs = {
@@ -1846,18 +2167,21 @@ def train_mujoco_method(
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "responsibility",
                 "upper_hf_penalty_coef": 0.0,
+                "upper_constraint_mode": "disabled",
             },
             "responsibility_guarded_adam_projection": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "responsibility",
                 "upper_hf_penalty_coef": 0.0,
+                "upper_constraint_mode": "disabled",
             },
             "behavior_guarded_adam_projection": {
                 "leakage_constraint": True,
                 "constraint_update_mode": "reward_guarded_adam_projection",
                 "constraint_scope": "joint_behavior",
                 "upper_hf_penalty_coef": 0.0,
+                "upper_constraint_mode": "disabled",
             },
             "behavior_guarded_upper_hf": {
                 "leakage_constraint": True,
@@ -1865,7 +2189,10 @@ def train_mujoco_method(
                 "constraint_scope": "joint_behavior",
                 "upper_hf_penalty_coef": float(
                     upper_hf_penalty_coef
+                    if str(upper_constraint_mode) == "static_reward_penalty"
+                    else 0.0
                 ),
+                "upper_constraint_mode": str(upper_constraint_mode),
             },
             "behavior_scalarized_upper_hf": {
                 "leakage_constraint": True,
@@ -1873,7 +2200,10 @@ def train_mujoco_method(
                 "constraint_scope": "joint_behavior",
                 "upper_hf_penalty_coef": float(
                     upper_hf_penalty_coef
+                    if str(upper_constraint_mode) == "static_reward_penalty"
+                    else 0.0
                 ),
+                "upper_constraint_mode": str(upper_constraint_mode),
             },
         }
         branch_models: dict[str, FrequencySeparatedActorCriticPPO] = {}
@@ -1889,6 +2219,9 @@ def train_mujoco_method(
             branch_upper_penalty_coef = float(
                 spec["upper_hf_penalty_coef"]
             )
+            branch_upper_constraint_mode = str(
+                spec["upper_constraint_mode"]
+            )
             torch.manual_seed(int(optimizer_seed))
             np.random.seed(int(optimizer_seed))
             branch_model = _hierarchical_model(
@@ -1897,6 +2230,12 @@ def train_mujoco_method(
                 hidden_dim=hidden_dim,
                 learning_rate=learning_rate,
                 leakage_constraint=branch_leakage,
+                upper_cost_critic=upper_cost_critic_for_capacity,
+                upper_constraint=(
+                    branch_upper_constraint_mode == "primal_dual"
+                ),
+                upper_dual_lr=upper_dual_lr,
+                upper_constraint_update_mode=upper_constraint_update_mode,
                 lower_constraint_update_mode=branch_update_mode,
             )
             initial_hash = _model_parameter_sha256(branch_model)
@@ -1909,6 +2248,7 @@ def train_mujoco_method(
                 leakage: bool = branch_leakage,
                 scope: str = branch_constraint_scope,
                 upper_penalty: float = branch_upper_penalty_coef,
+                upper_mode: str = branch_upper_constraint_mode,
             ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
                 return rollout_hierarchical(
                     policy,
@@ -1923,6 +2263,7 @@ def train_mujoco_method(
                     leakage_constraint_scope=scope,
                     upper_hf_rms_budget=upper_hf_rms_budget,
                     upper_hf_penalty_coef=upper_penalty,
+                    upper_constraint_mode=upper_mode,
                     lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
@@ -1934,7 +2275,7 @@ def train_mujoco_method(
             branch_payload, _, branch_model = train_frequency_separated_ppo(
                 model=branch_model,
                 train_seeds=roots,
-                selection_seeds=selection,
+                selection_seeds=selection_rollout_seeds,
                 eval_seeds=[],
                 iterations=iterations,
                 training_seed_fn=lambda root, iteration: training_rollout_seed(
@@ -1949,6 +2290,8 @@ def train_mujoco_method(
                 checkpoint_smoothing_window=checkpoint_smoothing_window,
                 checkpoint_min_delta=checkpoint_min_delta,
                 checkpoint_evaluation_interval=checkpoint_evaluation_interval,
+                checkpoint_score_fn=checkpoint_score_fn,
+                checkpoint_score_contract=checkpoint_score_contract,
             )
             safety_rows: list[dict[str, Any]] = []
             for safety_mode in training_modes:
@@ -1967,6 +2310,9 @@ def train_mujoco_method(
                         upper_hf_rms_budget=upper_hf_rms_budget,
                         upper_hf_penalty_coef=(
                             branch_upper_penalty_coef
+                        ),
+                        upper_constraint_mode=(
+                            branch_upper_constraint_mode
                         ),
                         lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                         upper_action_scale=upper_action_scale,
@@ -1991,6 +2337,7 @@ def train_mujoco_method(
                 "upper_hf_penalty_coef": (
                     branch_upper_penalty_coef
                 ),
+                "upper_constraint_mode": branch_upper_constraint_mode,
                 "initial_parameter_sha256": initial_hash,
                 "selected_parameter_sha256": _model_parameter_sha256(
                     branch_model
@@ -2039,6 +2386,9 @@ def train_mujoco_method(
         )
         selected_upper_hf_penalty_coef = float(
             selected_spec["upper_hf_penalty_coef"]
+        )
+        selected_upper_constraint_mode = str(
+            selected_spec["upper_constraint_mode"]
         )
         selected_actor_steps = int(payload["actor_optimizer_steps_train"])
         selected_critic_steps = int(payload["critic_optimizer_steps_train"])
@@ -2102,8 +2452,8 @@ def train_mujoco_method(
         payload, rows, model = train_joint_ppo(
             model=model,
             train_seeds=roots,
-            selection_seeds=selection,
-            eval_seeds=evaluation,
+            selection_seeds=selection_rollout_seeds,
+            eval_seeds=[],
             iterations=iterations,
             training_seed_fn=lambda root, iteration: training_rollout_seed(
                 int(optimizer_seed), root, iteration,
@@ -2117,6 +2467,8 @@ def train_mujoco_method(
             checkpoint_smoothing_window=checkpoint_smoothing_window,
             checkpoint_min_delta=checkpoint_min_delta,
             checkpoint_evaluation_interval=checkpoint_evaluation_interval,
+            checkpoint_score_fn=checkpoint_score_fn,
+            checkpoint_score_contract=checkpoint_score_contract,
         )
     else:
         frequency_routing = name != "generic_hrl"
@@ -2127,7 +2479,14 @@ def train_mujoco_method(
         )
         method_upper_penalty_coef = (
             float(upper_hf_penalty_coef)
-            if leakage_constraint else 0.0
+            if (
+                leakage_constraint
+                and str(upper_constraint_mode) == "static_reward_penalty"
+            ) else 0.0
+        )
+        method_upper_constraint_mode = (
+            str(upper_constraint_mode)
+            if leakage_constraint else "disabled"
         )
         torch.manual_seed(int(optimizer_seed))
         model = _hierarchical_model(
@@ -2136,6 +2495,12 @@ def train_mujoco_method(
             hidden_dim=hidden_dim,
             learning_rate=learning_rate,
             leakage_constraint=leakage_constraint,
+            upper_cost_critic=upper_cost_critic_for_capacity,
+            upper_constraint=(
+                method_upper_constraint_mode == "primal_dual"
+            ),
+            upper_dual_lr=upper_dual_lr,
+            upper_constraint_update_mode=upper_constraint_update_mode,
             lower_constraint_update_mode=lower_constraint_update_mode,
         )
         rollout = lambda policy, seed, sample: rollout_hierarchical(
@@ -2151,6 +2516,7 @@ def train_mujoco_method(
             leakage_constraint_scope=method_constraint_scope,
             upper_hf_rms_budget=upper_hf_rms_budget,
             upper_hf_penalty_coef=method_upper_penalty_coef,
+            upper_constraint_mode=method_upper_constraint_mode,
             lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
             upper_action_scale=upper_action_scale,
             lower_action_scale=lower_action_scale,
@@ -2162,8 +2528,8 @@ def train_mujoco_method(
         payload, rows, model = train_frequency_separated_ppo(
             model=model,
             train_seeds=roots,
-            selection_seeds=selection,
-            eval_seeds=evaluation,
+            selection_seeds=selection_rollout_seeds,
+            eval_seeds=[],
             iterations=iterations,
             training_seed_fn=lambda root, iteration: training_rollout_seed(
                 int(optimizer_seed), root, iteration,
@@ -2177,6 +2543,8 @@ def train_mujoco_method(
             checkpoint_smoothing_window=checkpoint_smoothing_window,
             checkpoint_min_delta=checkpoint_min_delta,
             checkpoint_evaluation_interval=checkpoint_evaluation_interval,
+            checkpoint_score_fn=checkpoint_score_fn,
+            checkpoint_score_contract=checkpoint_score_contract,
         )
 
     actual_parameters = _module_parameter_count(model)
@@ -2221,6 +2589,9 @@ def train_mujoco_method(
                     upper_hf_penalty_coef=(
                         selected_upper_hf_penalty_coef
                     ),
+                    upper_constraint_mode=(
+                        selected_upper_constraint_mode
+                    ),
                     lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
@@ -2241,8 +2612,8 @@ def train_mujoco_method(
             evaluation_rows.append(row)
     if checkpoint_hash != _model_parameter_sha256(model):
         raise RuntimeError("MuJoCo held-out evaluation mutated the checkpoint")
-    if name == "freq_hrl_safe_selector":
-        payload["summary"] = summarize(evaluation_rows)
+    payload["summary"] = summarize(evaluation_rows)
+    payload["eval_seeds"] = list(evaluation)
     payload.update({
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
         "method": name,
@@ -2252,9 +2623,16 @@ def train_mujoco_method(
         "training_root_condition_assignment": {
             str(seed): mode for seed, mode in train_root_modes.items()
         },
+        "checkpoint_selection_mode": str(checkpoint_selection_mode),
+        "checkpoint_selection_seed_roots": list(selection),
+        "checkpoint_selection_path_count": len(selection_rollout_seeds),
         "selection_seed_condition_assignment": {
             str(seed): mode for seed, mode in selection_seed_modes.items()
         },
+        "checkpoint_score_mode": str(checkpoint_score_mode),
+        "checkpoint_constraint_penalty": float(
+            checkpoint_constraint_penalty
+        ),
         "core_evaluation_seed_condition_assignment": {
             str(seed): mode for seed, mode in evaluation_seed_modes.items()
         },
@@ -2287,11 +2665,27 @@ def train_mujoco_method(
         "upper_hf_penalty_coef": float(
             selected_upper_hf_penalty_coef
         ),
+        "upper_constraint_mode": selected_upper_constraint_mode,
+        "upper_dual_lr": (
+            float(upper_dual_lr)
+            if selected_upper_constraint_mode == "primal_dual"
+            else 0.0
+        ),
+        "upper_constraint_update_mode": (
+            str(upper_constraint_update_mode)
+            if selected_upper_constraint_mode == "primal_dual"
+            else "disabled"
+        ),
         "upper_objective_contract": (
-            "raw_environment_reward_minus_endpoint_aligned_causal_upper_"
-            "high_pass_budget_penalty_v2"
-            if selected_upper_hf_penalty_coef > 0.0
-            else "raw_environment_reward"
+            "raw_environment_reward_with_separate_primal_dual_endpoint_"
+            "aligned_upper_high_pass_constraint_v1"
+            if selected_upper_constraint_mode == "primal_dual"
+            else (
+                "raw_environment_reward_minus_endpoint_aligned_causal_upper_"
+                "high_pass_budget_penalty_v2"
+                if selected_upper_hf_penalty_coef > 0.0
+                else "raw_environment_reward"
+            )
         ),
         "reported_return_contract": "unshaped_environment_return",
         "diagnostic_alignment_contract": (
@@ -2331,6 +2725,11 @@ def train_mujoco_method(
             "causal_responsibility_anchor_32_step_raw_and_responsibility_"
             "rolling_lf_cost_critic_only_v3"
         ),
+        "upper_cost_state_contract": (
+            "same_causal_upper_policy_state_with_8_step_upper_high_pass_"
+            "endpoint_cost_critic_v1"
+            if upper_cost_critic_for_capacity else "disabled"
+        ),
         "lower_constraint_update_mode": selected_constraint_update_mode,
         "exogenous_observation_contract": (
             "current_causal_actuation_disturbance_decomposed_separately_from_"
@@ -2346,8 +2745,9 @@ def train_mujoco_method(
         "heldout_test_access_status": (
             "loaded_once_after_safe_branch_selection"
             if name == "freq_hrl_safe_selector"
-            else "loaded_after_checkpoint_selection"
+            else "loaded_once_after_checkpoint_selection"
         ),
+        "heldout_evaluation_pass_count": 1,
         "frozen_parameter_sha256": checkpoint_hash,
         "frozen_checkpoint_sha256": checkpoint_hash,
         "evaluation_summary_by_disturbance": {
@@ -2469,6 +2869,25 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_UPPER_HF_PENALTY_COEF,
     )
     parser.add_argument(
+        "--upper-constraint-mode",
+        choices=UPPER_CONSTRAINT_MODES,
+        default="static_reward_penalty",
+    )
+    parser.add_argument(
+        "--upper-dual-lr",
+        type=float,
+        default=DEFAULT_UPPER_DUAL_LR,
+    )
+    parser.add_argument(
+        "--upper-constraint-update-mode",
+        choices=(
+            "scalarized",
+            "reward_guarded_projection",
+            "reward_guarded_adam_projection",
+        ),
+        default="reward_guarded_adam_projection",
+    )
+    parser.add_argument(
         "--lower-constraint-update-mode",
         choices=(
             "scalarized",
@@ -2480,6 +2899,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint-smoothing-window", type=int, default=8)
     parser.add_argument("--checkpoint-min-delta", type=float, default=1e-3)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=4)
+    parser.add_argument(
+        "--checkpoint-selection-mode",
+        choices=CHECKPOINT_SELECTION_MODES,
+        default="assigned_condition",
+    )
+    parser.add_argument(
+        "--checkpoint-score-mode",
+        choices=CHECKPOINT_SCORE_MODES,
+        default="mean_reward",
+    )
+    parser.add_argument(
+        "--checkpoint-constraint-penalty",
+        type=float,
+        default=DEFAULT_CHECKPOINT_CONSTRAINT_PENALTY,
+    )
     parser.add_argument("--code-revision", default="")
     parser.add_argument("--source-manifest-sha256", default="")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -2515,7 +2949,15 @@ def main() -> None:
         leakage_constraint_scope=args.leakage_constraint_scope,
         upper_hf_rms_budget=args.upper_hf_rms_budget,
         upper_hf_penalty_coef=args.upper_hf_penalty_coef,
+        upper_constraint_mode=args.upper_constraint_mode,
+        upper_dual_lr=args.upper_dual_lr,
+        upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,
+        checkpoint_selection_mode=args.checkpoint_selection_mode,
+        checkpoint_score_mode=args.checkpoint_score_mode,
+        checkpoint_constraint_penalty=(
+            args.checkpoint_constraint_penalty
+        ),
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
     )

@@ -16,7 +16,9 @@ from freq_hrl.domains.mujoco import (
 from freq_hrl.experiments.mujoco.control_validation import (
     SAFE_SELECTOR_BASELINE_BRANCH,
     _with_explicit_bootstrap,
+    behavior_robust_checkpoint_diagnostics,
     capacity_matched_flat_hidden_dim,
+    crossed_checkpoint_selection_paths,
     environment_dimensions,
     mujoco_policy_state_dim,
     rollout_hierarchical,
@@ -255,6 +257,53 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertGreater(hidden, 0)
         self.assertGreater(actual, 0)
         self.assertLess(abs(ratio - 1.0), 0.03)
+
+    def test_crossed_checkpoint_paths_cover_every_root_condition_pair(self):
+        paths, assignments = crossed_checkpoint_selection_paths(
+            [101, 103],
+            ["standard", "mixed", "ood_chirp"],
+            env_id="HalfCheetah-v5",
+        )
+        repeated, repeated_assignments = crossed_checkpoint_selection_paths(
+            [101, 103],
+            ["standard", "mixed", "ood_chirp"],
+            env_id="HalfCheetah-v5",
+        )
+        self.assertEqual(paths, repeated)
+        self.assertEqual(assignments, repeated_assignments)
+        self.assertEqual(len(paths), 6)
+        self.assertEqual(len(set(paths)), 6)
+        self.assertEqual(
+            {mode: list(assignments.values()).count(mode) for mode in set(assignments.values())},
+            {"standard": 2, "mixed": 2, "ood_chirp": 2},
+        )
+
+    def test_behavior_robust_checkpoint_score_penalizes_worst_endpoint(self):
+        rows = [
+            {
+                "disturbance_mode": mode,
+                "reward_mean": reward,
+                "LowerLFDriftAbs": lower ** 2,
+                "RawLowerLFDriftAbs": raw_lower ** 2,
+                "UpperHFPowerAbs": upper ** 2,
+            }
+            for mode, reward, lower, raw_lower, upper in (
+                ("standard", 2.0, 0.04, 0.04, 0.08),
+                ("mixed", 1.0, 0.10, 0.12, 0.20),
+            )
+        ]
+        diagnostics = behavior_robust_checkpoint_diagnostics(
+            rows,
+            expected_modes=["standard", "mixed"],
+            lower_lf_rms_budget=0.05,
+            upper_hf_rms_budget=0.10,
+            constraint_penalty=10.0,
+        )
+        self.assertEqual(diagnostics["worst_condition_reward_mean"], 1.0)
+        self.assertGreater(
+            diagnostics["normalized_constraint_penalty"], 0.0
+        )
+        self.assertLess(diagnostics["score"], 1.0)
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
@@ -506,7 +555,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_endpoint_aligned_training",
+            "freq_hrl_mujoco_shared_core_v14_1_crossed_behavior_selection",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -541,6 +590,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             1.0,
         )
         self.assertEqual(payload["evaluation_episode_horizon"], 32)
+        self.assertEqual(payload["heldout_evaluation_pass_count"], 1)
         for metric in (
             "UpperActionRMS",
             "LowerActionRMS",
@@ -582,6 +632,50 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertIsNotNone(payload["history"][-1]["lower_cost_actor_active"])
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
+
+    def test_crossed_behavior_selection_and_upper_primal_dual_are_wired(self):
+        payload, rows, _ = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[151, 157],
+            selection_seeds=[163],
+            eval_seeds=[167],
+            steps=16,
+            episode_horizon=16,
+            iterations=1,
+            optimizer_seed=173,
+            upper_period=4,
+            hidden_dim=8,
+            lower_lf_rms_budget=1e-3,
+            upper_hf_rms_budget=1e-4,
+            upper_constraint_mode="primal_dual",
+            upper_dual_lr=0.1,
+            checkpoint_selection_mode="crossed_conditions",
+            checkpoint_score_mode="behavior_robust",
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard", "mixed"],
+            evaluation_disturbance_modes=["standard"],
+        )
+        self.assertEqual(payload["checkpoint_selection_path_count"], 2)
+        self.assertEqual(
+            set(payload["selection_seed_condition_assignment"].values()),
+            {"standard", "mixed"},
+        )
+        self.assertEqual(payload["upper_constraint_mode"], "primal_dual")
+        self.assertEqual(
+            payload["checkpoint_score_mode"], "behavior_robust"
+        )
+        self.assertGreater(
+            payload["history"][-1]["upper_constraint_mean"], 0.0
+        )
+        self.assertGreater(
+            payload["history"][-1]["upper_constraint_lambda"], 0.0
+        )
+        self.assertGreater(rows[0]["UpperConstraintCostMean"], 0.0)
+        self.assertEqual(rows[0]["UpperHFPenaltyTotal"], 0.0)
 
     def test_safe_selector_keeps_branch_selection_out_of_heldout_paths(self):
         payload, rows, _ = train_mujoco_method(

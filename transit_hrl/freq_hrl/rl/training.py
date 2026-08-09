@@ -21,6 +21,7 @@ from .smdp_actor_critic import (
 
 RolloutFn = Callable[[DualActorCriticPPO, int, bool], tuple[TrajectoryBatch | None, dict[str, Any]]]
 ObjectiveFn = Callable[[dict[str, Any]], float]
+CheckpointScoreFn = Callable[[list[dict[str, Any]]], float]
 SummaryFn = Callable[[list[dict[str, Any]]], dict[str, Any]]
 SMDPRolloutFn = Callable[
     [FrequencySeparatedActorCriticPPO, int, bool],
@@ -294,6 +295,8 @@ def train_joint_ppo(
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
     checkpoint_evaluation_interval: int = 1,
+    checkpoint_score_fn: CheckpointScoreFn | None = None,
+    checkpoint_score_contract: str = "mean_objective",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], JointActorCriticPPO]:
     """Train a standard flat PPO with one joint action and one task return."""
 
@@ -302,12 +305,23 @@ def train_joint_ppo(
         0, total_iterations=1, interval=checkpoint_evaluation_interval
     )
     selection_seed_list = list(selection_seeds or train_seeds)
+    if not str(checkpoint_score_contract).strip():
+        raise ValueError("checkpoint_score_contract must be non-empty")
+
+    def validation_score(rows: list[dict[str, Any]]) -> float:
+        score = (
+            float(checkpoint_score_fn(rows))
+            if checkpoint_score_fn is not None
+            else float(np.mean([objective_fn(row) for row in rows]))
+        )
+        if not np.isfinite(score):
+            raise ValueError("checkpoint score must be finite")
+        return score
+
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
-    initial_validation_score = float(np.mean([
-        objective_fn(row) for row in initial_rows
-    ]))
+    initial_validation_score = validation_score(initial_rows)
     selector = RobustValidationCheckpointSelector(
         initial_score=initial_validation_score,
         initial_state=model.state_dict(),
@@ -355,7 +369,7 @@ def train_joint_ppo(
             if evaluate_checkpoint else []
         )
         score = (
-            float(np.mean([objective_fn(row) for row in eval_rows]))
+            validation_score(eval_rows)
             if evaluate_checkpoint else None
         )
         checkpoint_fields = (
@@ -418,6 +432,7 @@ def train_joint_ppo(
         **metadata,
         **selector.metadata(total_iterations=max(1, int(iterations))),
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
+        "checkpoint_score_contract": str(checkpoint_score_contract),
     }
     return payload, heldout_rows, model
 
@@ -465,6 +480,8 @@ def train_frequency_separated_ppo(
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
     checkpoint_evaluation_interval: int = 1,
+    checkpoint_score_fn: CheckpointScoreFn | None = None,
+    checkpoint_score_contract: str = "mean_objective",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -484,12 +501,23 @@ def train_frequency_separated_ppo(
     else:
         policy_ratio_contract = "independent upper and lower PPO ratios"
     selection_seed_list = list(selection_seeds or train_seeds)
+    if not str(checkpoint_score_contract).strip():
+        raise ValueError("checkpoint_score_contract must be non-empty")
+
+    def validation_score(rows: list[dict[str, Any]]) -> float:
+        score = (
+            float(checkpoint_score_fn(rows))
+            if checkpoint_score_fn is not None
+            else float(np.mean([objective_fn(row) for row in rows]))
+        )
+        if not np.isfinite(score):
+            raise ValueError("checkpoint score must be finite")
+        return score
+
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
-    initial_validation_score = float(np.mean([
-        objective_fn(row) for row in initial_rows
-    ]))
+    initial_validation_score = validation_score(initial_rows)
     selector = RobustValidationCheckpointSelector(
         initial_score=initial_validation_score,
         initial_state=model.state_dict(),
@@ -508,6 +536,10 @@ def train_frequency_separated_ppo(
         "lower_value_loss": 0.0,
         "constraint_mean": 0.0,
         "constraint_lambda": float(model.constraint_lambda),
+        "upper_constraint_mean": 0.0,
+        "upper_constraint_lambda": float(model.upper_constraint_lambda),
+        "lower_constraint_mean": 0.0,
+        "lower_constraint_lambda": float(model.constraint_lambda),
         "upper_actor_optimizer_steps": 0.0,
         "upper_value_optimizer_steps": 0.0,
         "upper_cost_value_optimizer_steps": 0.0,
@@ -547,7 +579,7 @@ def train_frequency_separated_ppo(
             if evaluate_checkpoint else []
         )
         score = (
-            float(np.mean([objective_fn(row) for row in eval_rows]))
+            validation_score(eval_rows)
             if evaluate_checkpoint else None
         )
         checkpoint_fields = (
@@ -634,5 +666,6 @@ def train_frequency_separated_ppo(
         **metadata,
         **selector.metadata(total_iterations=max(1, int(iterations))),
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
+        "checkpoint_score_contract": str(checkpoint_score_contract),
     }
     return payload, heldout_rows, model
