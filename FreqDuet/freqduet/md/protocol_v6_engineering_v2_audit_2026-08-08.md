@@ -447,3 +447,11 @@ config/seed keys, exploratory stage, clean commit `66d15cfd64`, and one common
 source and scenario fingerprint. Heavy checkpoints and logs remain on the HPC
 filesystem. No efficacy inference is permitted until all 72 frozen rollouts
 are strict-aggregated and evaluated by the preregistered matched-context gate.
+
+All 36 episode-zero diagnostics subsequently completed with 5,200 transitions
+per shard and no traceback. Every compact arm retains exactly zero execution
+adjustment. Weights `2, 4, 6, 8` remain within their respective observed
+reward bounds `+/-0.5, +/-1, +/-1.5, +/-2`. Minimum same-time follower
+coverage at this training checkpoint is 44.92%; this is below the final 50%
+gate but is not the preregistered frozen-evaluation quantity. It is recorded
+without being promoted to either a pass or a failure.
