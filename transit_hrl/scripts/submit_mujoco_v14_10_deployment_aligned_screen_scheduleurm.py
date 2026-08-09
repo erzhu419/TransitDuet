@@ -1228,12 +1228,22 @@ def main() -> None:
     ))
     if args.dispatch and not args.dry_run:
         execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
-    print("merge after result sync: " + shlex.join([
+    merge_command = [
         sys.executable,
         str(LAUNCHER_PATH),
         "--run-name", args.run_name,
+        "--arms", ",".join(args.arms),
+        "--phases", ",".join(args.phases),
+        "--environments", ",".join(args.environments),
+        "--optimizer-seeds", ",".join(
+            str(seed) for seed in args.optimizer_seeds
+        ),
+        "--nodes", ",".join(args.nodes),
         "--merge-only",
-    ]))
+    ]
+    if int(args.max_cells) > 0:
+        merge_command.extend(("--max-cells", str(args.max_cells)))
+    print("merge after result sync: " + shlex.join(merge_command))
 
 
 if __name__ == "__main__":

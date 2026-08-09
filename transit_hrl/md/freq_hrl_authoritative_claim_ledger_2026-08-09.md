@@ -108,6 +108,12 @@ The source-bound v14.10 development protocol replaces sampled Gaussian-action fr
 
 Forbidden: The v14.10 implementation or smoke test alone supports reward improvement, learned frequency separation, no-tradeoff behavior, cross-task generality, or confirmatory evidence.
 
+### mujoco_v14_10_deployment_aligned_preflight
+
+The source-bound single-seed HalfCheetah preflight completed and passed projection calibration, provenance, checkpoint, and held-out-grid integrity checks. Every active deployment-frequency correction reduced same-batch power, but each correction was much smaller than the registered target and all seven learned arms safely fell back to the initial checkpoint. No learned actor or action change was admitted. The full 528-cell screen was not launched. This outcome motivates an iterative, cumulative-reward-budget projection rather than additional dual-rate tuning.
+
+Forbidden: MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a submission-ready selected algorithm.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
