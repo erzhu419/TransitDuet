@@ -1,5 +1,5 @@
 {
-  "development_record_count": 5,
+  "development_record_count": 6,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 1,
-  "record_count": 10,
+  "record_count": 11,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -1584,6 +1584,437 @@
       "selection_access": "development_outcomes_visible"
     },
     {
+      "allowed_wording": "The v14.5 development screen started every candidate and its compute-matched direct comparator from the same serialized policy and optimizer state. Actor-space proximal constraints stabilized latent policy movement, and two arms met both raw and responsibility drift gates in all 15 conditions. No arm was behavior-safe overall: every routed arm met return noninferiority in only the five Walker2d conditions, Hopper missed the upper-HF budget, and no arm met the trained-checkpoint gate. This identifies a function-discontinuous router intervention rather than optimizer initialization as the remaining defect.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/decision.json",
+          "role": "decision",
+          "sha256": "073e3860b58be0e3e23d6bf52f214e5ce429331e322c7441f4a6f0252400d6f6"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/environment_condition_gates.csv",
+          "role": "environment_condition_gates",
+          "sha256": "47a90801148a591b8bc9f3c484602c3185ca25f75b0370802743c8b681da7c09"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/screen_report.md",
+          "role": "report",
+          "sha256": "e2f9a0a4cb7bac513e81547d7f54d6f025bf0478fe430f99a1c78ce3802e58c0"
+        }
+      ],
+      "claim": "Paired checkpoint continuation with actor-space proximal constraints produces behavior-safe physical separation across the registered MuJoCo conditions.",
+      "claim_id": "D6_PAIRED_PROXIMAL_ROUTER_CONTINUATION",
+      "decision": "no_behavior_safe_candidate",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_5_paired_anchor_screen",
+      "evidence_stage": "development",
+      "facts": {
+        "all_arms_trained_checkpoint_gate_pass": false,
+        "arm_status": {
+          "router_s010_ua000_la000": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.0063159802848655475,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -67.68835351985183,
+            "minimum_environment_trained_checkpoint_fraction": 0.0625,
+            "minimum_normalized_safety_slack": -41.96260005900202,
+            "passed_gate_count": 0,
+            "strict_improvement_gate_pass": false,
+            "strict_raw_improvement_condition_count": 0,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009760495116875163,
+                  "trained_checkpoint_fraction": 0.625,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.006143999720541693
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.008793831583913034,
+                  "trained_checkpoint_fraction": 0.8125,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008150799760035916
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0003936141538084438,
+                  "trained_checkpoint_fraction": 0.0625,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.00019077782895360462
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.0063159802848655475,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0625,
+              "trained_checkpoint_fraction": 0.5,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.0048285257698437375
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.0048285257698437375
+          },
+          "router_s010_ua000_la001": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.18309934441340817,
+            "lower_actor_anchor_parameter_rms_mean": 0.006104391210441659,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -60.51846333279566,
+            "minimum_environment_trained_checkpoint_fraction": 0.0,
+            "minimum_normalized_safety_slack": -13.746069545089233,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 10,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.2997291198960875,
+                  "lower_actor_anchor_parameter_rms_mean": 0.010921177322888328,
+                  "trained_checkpoint_fraction": 0.8125,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.00687203794145669
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.10229579748111228,
+                  "lower_actor_anchor_parameter_rms_mean": 0.007391996308436652,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.0071674484312400895
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.14727311586302466,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0,
+                  "trained_checkpoint_fraction": 0.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.18309934441340817,
+              "lower_actor_anchor_parameter_rms_mean": 0.006104391210441659,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0,
+              "trained_checkpoint_fraction": 0.5,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.004679828790898927
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.004679828790898927
+          },
+          "router_s010_ua000_la010": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.04469637447665159,
+            "lower_actor_anchor_parameter_rms_mean": 0.005012074749031333,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -89.7698414922667,
+            "minimum_environment_trained_checkpoint_fraction": 0.0,
+            "minimum_normalized_safety_slack": -17.174346722207776,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 10,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.06518519920218023,
+                  "lower_actor_anchor_parameter_rms_mean": 0.008230307786181675,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.006058405438671033
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.031146352891547845,
+                  "lower_actor_anchor_parameter_rms_mean": 0.006805916460912324,
+                  "trained_checkpoint_fraction": 0.8125,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008365008218592703
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.03775757133622666,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0,
+                  "trained_checkpoint_fraction": 0.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.04469637447665159,
+              "lower_actor_anchor_parameter_rms_mean": 0.005012074749031333,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0,
+              "trained_checkpoint_fraction": 0.5,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.004807804552421246
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.004807804552421246
+          },
+          "router_s010_ua000_la100": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.004942334620293256,
+            "lower_actor_anchor_parameter_rms_mean": 0.0026402664656725674,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -102.58266191625604,
+            "minimum_environment_trained_checkpoint_fraction": 0.0,
+            "minimum_normalized_safety_slack": -20.26581574581856,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 11,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0068640948624033886,
+                  "lower_actor_anchor_parameter_rms_mean": 0.004112335554223079,
+                  "trained_checkpoint_fraction": 0.4375,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.004026718509255267
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0034664800235927632,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0038084638427946247,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.006560996522000629
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.004496428974883617,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0,
+                  "trained_checkpoint_fraction": 0.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.004942334620293256,
+              "lower_actor_anchor_parameter_rms_mean": 0.0026402664656725674,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0,
+              "trained_checkpoint_fraction": 0.375,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.0035292383437519653
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.0035292383437519653
+          },
+          "router_s010_ua005_la010": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.04645322306630487,
+            "lower_actor_anchor_parameter_rms_mean": 0.00458154906455788,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -78.60603119771615,
+            "minimum_environment_trained_checkpoint_fraction": 0.0625,
+            "minimum_normalized_safety_slack": -14.994126041075878,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 10,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.06472519114068487,
+                  "lower_actor_anchor_parameter_rms_mean": 0.00702783114739419,
+                  "trained_checkpoint_fraction": 0.5625,
+                  "upper_actor_anchor_kl_mean": 0.0836622683970528,
+                  "upper_actor_anchor_parameter_rms_mean": 0.004891301038157225
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.031228927198901517,
+                  "lower_actor_anchor_parameter_rms_mean": 0.006277614559769019,
+                  "trained_checkpoint_fraction": 0.8125,
+                  "upper_actor_anchor_kl_mean": 0.1848918888761511,
+                  "upper_actor_anchor_parameter_rms_mean": 0.006719993713490784
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.04340555085932822,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0004392014865104321,
+                  "trained_checkpoint_fraction": 0.0625,
+                  "upper_actor_anchor_kl_mean": 0.7624848188973945,
+                  "upper_actor_anchor_parameter_rms_mean": 0.00031464868995539116
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.04645322306630487,
+              "lower_actor_anchor_parameter_rms_mean": 0.00458154906455788,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0625,
+              "trained_checkpoint_fraction": 0.4791666666666667,
+              "upper_actor_anchor_kl_mean": 0.34367965872353284,
+              "upper_actor_anchor_parameter_rms_mean": 0.003975314480534467
+            },
+            "upper_actor_anchor_kl_mean": 0.34367965872353284,
+            "upper_actor_anchor_parameter_rms_mean": 0.003975314480534467
+          },
+          "router_s010_ua020_la100": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.00523031498141202,
+            "lower_actor_anchor_parameter_rms_mean": 0.003015127210168772,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -107.27882597954455,
+            "minimum_environment_trained_checkpoint_fraction": 0.0,
+            "minimum_normalized_safety_slack": -21.275133494476318,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.006827845837787593,
+                  "lower_actor_anchor_parameter_rms_mean": 0.005298816761086811,
+                  "trained_checkpoint_fraction": 0.5625,
+                  "upper_actor_anchor_kl_mean": 0.051644586593919364,
+                  "upper_actor_anchor_parameter_rms_mean": 0.004137444877133259
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0034882005061672144,
+                  "lower_actor_anchor_parameter_rms_mean": 0.003746564869419506,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_actor_anchor_kl_mean": 0.08080865137842051,
+                  "upper_actor_anchor_parameter_rms_mean": 0.004850194848003268
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.005374898600281252,
+                  "lower_actor_anchor_parameter_rms_mean": 0.0,
+                  "trained_checkpoint_fraction": 0.0,
+                  "upper_actor_anchor_kl_mean": 0.2435677850613136,
+                  "upper_actor_anchor_parameter_rms_mean": 0.0
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.00523031498141202,
+              "lower_actor_anchor_parameter_rms_mean": 0.003015127210168772,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0,
+              "trained_checkpoint_fraction": 0.4166666666666667,
+              "upper_actor_anchor_kl_mean": 0.12534034101121783,
+              "upper_actor_anchor_parameter_rms_mean": 0.002995879908378842
+            },
+            "upper_actor_anchor_kl_mean": 0.12534034101121783,
+            "upper_actor_anchor_parameter_rms_mean": 0.002995879908378842
+          },
+          "router_s015_ua005_la010": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.04742458108229871,
+            "lower_actor_anchor_parameter_rms_mean": 0.004717360845032981,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": -88.24705459197753,
+            "minimum_environment_trained_checkpoint_fraction": 0.0625,
+            "minimum_normalized_safety_slack": -20.57949582667044,
+            "passed_gate_count": 5,
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": false,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.065214975646367,
+                  "lower_actor_anchor_parameter_rms_mean": 0.00761404218098177,
+                  "trained_checkpoint_fraction": 0.6875,
+                  "upper_actor_anchor_kl_mean": 0.08570440021504289,
+                  "upper_actor_anchor_parameter_rms_mean": 0.005311196892753412
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0318707855331786,
+                  "lower_actor_anchor_parameter_rms_mean": 0.006120010897485261,
+                  "trained_checkpoint_fraction": 0.75,
+                  "upper_actor_anchor_kl_mean": 0.1770209905363219,
+                  "upper_actor_anchor_parameter_rms_mean": 0.006252743591633537
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.04518798206735053,
+                  "lower_actor_anchor_parameter_rms_mean": 0.00041802945663191375,
+                  "trained_checkpoint_fraction": 0.0625,
+                  "upper_actor_anchor_kl_mean": 0.7502058078117411,
+                  "upper_actor_anchor_parameter_rms_mean": 0.00026757141767041884
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.04742458108229871,
+              "lower_actor_anchor_parameter_rms_mean": 0.004717360845032981,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 0.0625,
+              "trained_checkpoint_fraction": 0.5,
+              "upper_actor_anchor_kl_mean": 0.3376437328543686,
+              "upper_actor_anchor_parameter_rms_mean": 0.003943837300685789
+            },
+            "upper_actor_anchor_kl_mean": 0.3376437328543686,
+            "upper_actor_anchor_parameter_rms_mean": 0.003943837300685789
+          }
+        },
+        "bootstrap_draws": 20000,
+        "decision_status": "no_behavior_safe_candidate",
+        "eligible_arms": [],
+        "full_drift_arm_reward_noninferiority_condition_count": 5,
+        "full_drift_arm_upper_hf_condition_count": 10,
+        "full_drift_arms": [
+          "router_s010_ua020_la100",
+          "router_s015_ua005_la010"
+        ],
+        "gate_granularity": "environment_by_disturbance_mode",
+        "maximum_complete_condition_count": 5,
+        "selected_arm": null,
+        "selection_confidence": 0.9
+      },
+      "forbidden_wording": "MuJoCo v14.5 validates paired proximal routing, physical no-tradeoff, or any selected confirmatory Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "development_paired_checkpoint_continuation_with_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_5",
+      "positive_claim_supported": false,
+      "selection_access": "development_outcomes_visible"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -1642,7 +2073,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "8e286b7713bfc037df9a1e15a2fc526f6b76db15a06e1a4a3b8944602825aadb",
+  "registry_sha256": "b2958fdbd582d28c8799836c7f2fd8fe5c060bc46028189084bbf0321fd59a34",
   "reportable_record_count": 3,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

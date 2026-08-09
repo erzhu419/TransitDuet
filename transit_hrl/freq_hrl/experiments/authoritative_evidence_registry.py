@@ -471,6 +471,90 @@ def _mujoco_v14_4_facts(paths: dict[str, Path]) -> dict[str, Any]:
     }
 
 
+def _mujoco_v14_5_facts(paths: dict[str, Path]) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    arm_status = dict(decision.get("arm_status") or {})
+    rows = _read_csv(paths["environment_condition_gates"])
+    full_drift_arms = {
+        "router_s010_ua020_la100",
+        "router_s015_ua005_la010",
+    }
+    expected_arms = set(arm_status)
+    if (
+        decision.get("status") != "no_behavior_safe_candidate"
+        or decision.get("evidence_role")
+        != "development_screen_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v14_5_paired_anchor_screen_v1"
+        or decision.get("selected_arm") is not None
+        or decision.get("gate_granularity")
+        != "environment_by_disturbance_mode"
+        or len(arm_status) != 7
+        or full_drift_arms - expected_arms
+        or len(rows) != 105
+        or {row.get("arm") for row in rows} != expected_arms
+        or any(
+            sum(row.get("arm") == arm for row in rows) != 15
+            for arm in expected_arms
+        )
+        or any(
+            int(status.get("total_gate_count", -1)) != 15
+            for status in arm_status.values()
+        )
+        or max(
+            int(status.get("passed_gate_count", -1))
+            for status in arm_status.values()
+        ) != 5
+    ):
+        raise ValueError(
+            "MuJoCo v14.5 registered screen decision no longer matches"
+        )
+
+    def pass_count(arm: str, field: str) -> int:
+        return sum(
+            row["arm"] == arm and row.get(field) == "True"
+            for row in rows
+        )
+
+    if (
+        any(
+            pass_count(arm, "reward_noninferiority_pass") != 5
+            or pass_count(arm, "effective_lower_activity_pass") != 15
+            or pass_count(arm, "router_clip_pass") != 15
+            or pass_count(arm, "reconstruction_integrity_pass") != 15
+            for arm in expected_arms
+        )
+        or any(
+            pass_count(arm, "responsibility_drift_pass") != 15
+            or pass_count(arm, "raw_lower_drift_pass") != 15
+            or pass_count(arm, "upper_hf_budget_pass") != 10
+            or pass_count(arm, "condition_gate_pass") != 5
+            for arm in full_drift_arms
+        )
+        or any(
+            status.get("trained_checkpoint_gate_pass") is not False
+            for status in arm_status.values()
+        )
+    ):
+        raise ValueError(
+            "MuJoCo v14.5 registered condition gates no longer match"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "selected_arm": None,
+        "eligible_arms": list(decision.get("eligible_arms") or []),
+        "arm_status": arm_status,
+        "gate_granularity": str(decision["gate_granularity"]),
+        "selection_confidence": float(decision["selection_confidence"]),
+        "bootstrap_draws": int(decision["bootstrap_draws"]),
+        "maximum_complete_condition_count": 5,
+        "full_drift_arms": sorted(full_drift_arms),
+        "full_drift_arm_reward_noninferiority_condition_count": 5,
+        "full_drift_arm_upper_hf_condition_count": 10,
+        "all_arms_trained_checkpoint_gate_pass": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -480,6 +564,7 @@ PARSERS = {
     "mujoco_v14_2": _mujoco_v14_2_facts,
     "mujoco_v14_3": _mujoco_v14_3_facts,
     "mujoco_v14_4": _mujoco_v14_4_facts,
+    "mujoco_v14_5": _mujoco_v14_5_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

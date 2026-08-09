@@ -282,6 +282,38 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v14_5_paired_anchor_screen",
+      "claim_id": "D6_PAIRED_PROXIMAL_ROUTER_CONTINUATION",
+      "claim": "Paired checkpoint continuation with actor-space proximal constraints produces behavior-safe physical separation across the registered MuJoCo conditions.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_behavior_safe_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "development_paired_checkpoint_continuation_with_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_5",
+      "allowed_wording": "The v14.5 development screen started every candidate and its compute-matched direct comparator from the same serialized policy and optimizer state. Actor-space proximal constraints stabilized latent policy movement, and two arms met both raw and responsibility drift gates in all 15 conditions. No arm was behavior-safe overall: every routed arm met return noninferiority in only the five Walker2d conditions, Hopper missed the upper-HF budget, and no arm met the trained-checkpoint gate. This identifies a function-discontinuous router intervention rather than optimizer initialization as the remaining defect.",
+      "forbidden_wording": "MuJoCo v14.5 validates paired proximal routing, physical no-tradeoff, or any selected confirmatory Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/decision.json",
+          "sha256": "073e3860b58be0e3e23d6bf52f214e5ce429331e322c7441f4a6f0252400d6f6"
+        },
+        {
+          "role": "environment_condition_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/environment_condition_gates.csv",
+          "sha256": "47a90801148a591b8bc9f3c484602c3185ca25f75b0370802743c8b681da7c09"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_5/screen_report.md",
+          "sha256": "e2f9a0a4cb7bac513e81547d7f54d6f025bf0478fe430f99a1c78ce3802e58c0"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
