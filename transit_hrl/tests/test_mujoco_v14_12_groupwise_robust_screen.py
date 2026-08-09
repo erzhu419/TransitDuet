@@ -7,11 +7,16 @@ from pathlib import Path
 
 from scripts import mujoco_v14_11_iterative_projection_screen_spec as v1411
 from scripts import mujoco_v14_12_groupwise_robust_screen_spec as spec
+from freq_hrl.experiments.mujoco.control_validation import (
+    MUJOCO_CONTROL_PROTOCOL_VERSION,
+)
+from freq_hrl.experiments.reproducibility import (
+    git_source_manifest_sha256,
+)
 from scripts.analyze_mujoco_v14_12_groupwise_robust_preflight import (
     _projection_diagnostics,
     _read_rows,
 )
-from scripts.submit_hyperparameter_pilot_scheduleurm import source_identity
 from scripts.submit_mujoco_v14_12_groupwise_robust_screen_scheduleurm import (
     build_scheduler_spec,
     build_training_command,
@@ -29,13 +34,19 @@ class MujocoV1412GroupwiseRobustScreenTest(unittest.TestCase):
         )
 
     def test_frozen_core_identity_is_source_bound(self):
-        revision, manifest = source_identity(
-            spec.FROZEN_ALGORITHM_REVISION
+        root = Path(__file__).resolve().parents[1]
+        manifest = git_source_manifest_sha256(
+            root,
+            Path("freq_hrl"),
+            revision=spec.FROZEN_ALGORITHM_REVISION,
         )
-        self.assertEqual(revision, spec.FROZEN_ALGORITHM_REVISION)
         self.assertEqual(manifest, spec.FROZEN_SOURCE_MANIFEST_SHA256)
         self.assertIn("v14_12", spec.DEVELOPMENT_PROTOCOL_VERSION)
         self.assertIn("v14_12", spec.FROZEN_CORE_PROTOCOL_VERSION)
+        self.assertNotEqual(
+            spec.FROZEN_CORE_PROTOCOL_VERSION,
+            MUJOCO_CONTROL_PROTOCOL_VERSION,
+        )
 
     def test_seed_namespace_is_fresh_and_role_disjoint(self):
         current_roles = (
