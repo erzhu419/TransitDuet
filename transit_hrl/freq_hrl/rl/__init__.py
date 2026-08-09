@@ -28,6 +28,11 @@ from .checkpoint_selection import (
     RobustValidationCheckpointSelector,
     StateAlignedLexicographicCheckpointSelector,
 )
+from .deployment_frequency import (
+    DeploymentFrequencyStats,
+    deployment_frequency_stats,
+    deterministic_actor_action,
+)
 from .smdp_actor_critic import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
@@ -57,6 +62,7 @@ from .offpolicy_actor_critic import (
 __all__ = [
     "DualActorCriticPPO",
     "DualPPOConfig",
+    "DeploymentFrequencyStats",
     "CausalGRUGaussianActor",
     "CausalGRUStateEncoder",
     "CausalGRUValueNet",
@@ -85,6 +91,8 @@ __all__ = [
     "concat_hierarchical_batches",
     "concat_joint_batches",
     "concat_level_batches",
+    "deployment_frequency_stats",
+    "deterministic_actor_action",
     "summarize_numeric_rows",
     "train_dual_ppo",
     "train_frequency_separated_ppo",

@@ -1084,6 +1084,10 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             payload["lower_constraint_update_mode"],
             "reward_guarded_adam_projection",
         )
+        self.assertFalse(payload["deployment_frequency_constraint_enabled"])
+        self.assertEqual(
+            payload["deployment_frequency_action_source"], "disabled"
+        )
         self.assertEqual(payload["checkpoint_evaluation_interval"], 4)
         self.assertEqual(payload["checkpoint_validation_observation_count"], 2)
         self.assertEqual(len(rows), 2)
@@ -1150,6 +1154,49 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertIsNotNone(payload["history"][-1]["lower_cost_actor_active"])
         self.assertEqual(len(payload["frozen_checkpoint_sha256"]), 64)
+
+    def test_deployment_frequency_constraint_is_audited_separately(self):
+        payload, _, model = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[141],
+            selection_seeds=[143],
+            eval_seeds=[147],
+            steps=24,
+            episode_horizon=32,
+            iterations=1,
+            optimizer_seed=153,
+            upper_period=6,
+            hidden_dim=8,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            upper_constraint_mode="primal_dual",
+            upper_dual_lr=0.0,
+            lower_dual_lr=0.0,
+            upper_deployment_frequency_dual_lr=10.0,
+            upper_deployment_frequency_lambda_init=1.0,
+            upper_deployment_frequency_step_scale=10.0,
+            upper_deployment_frequency_rms_budget=0.001,
+        )
+        self.assertTrue(payload["deployment_frequency_constraint_enabled"])
+        self.assertTrue(
+            payload["upper_deployment_frequency_constraint_enabled"]
+        )
+        self.assertFalse(
+            payload["lower_deployment_frequency_constraint_enabled"]
+        )
+        self.assertEqual(
+            payload["deployment_frequency_action_source"],
+            "deterministic_squashed_actor_mean",
+        )
+        self.assertEqual(
+            payload["upper_deployment_frequency_rms_budget"], 0.001
+        )
+        self.assertGreaterEqual(
+            model.upper_deployment_frequency_lambda, 0.0
+        )
 
     def test_crossed_behavior_selection_and_upper_primal_dual_are_wired(self):
         payload, rows, _ = train_mujoco_method(

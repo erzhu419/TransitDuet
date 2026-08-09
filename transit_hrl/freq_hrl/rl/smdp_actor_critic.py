@@ -19,6 +19,11 @@ from torch import nn
 from torch.nn import functional as F
 
 from .causal_sequence import CausalGRUGaussianActor, CausalGRUValueNet
+from .deployment_frequency import (
+    DEPLOYMENT_ACTION_TRANSFORMS,
+    deployment_frequency_stats,
+    deterministic_actor_action,
+)
 from .dual_actor_critic import BernoulliActor, GaussianActor, ValueNet
 
 
@@ -359,6 +364,21 @@ class SMDPPPOConfig:
     epochs: int = 4
     minibatch_size: int = 512
     init_log_std: float = -1.0
+    deployment_action_transform: str = "identity"
+    upper_deployment_frequency_rms_budget: float = 0.0
+    upper_deployment_frequency_window: int = 8
+    upper_deployment_frequency_action_scale: float = 1.0
+    upper_deployment_frequency_dual_lr: float = 0.0
+    upper_deployment_frequency_lambda_init: float = 0.0
+    upper_deployment_frequency_max_lambda: float = 100.0
+    upper_deployment_frequency_step_scale: float = 1.0
+    lower_deployment_frequency_rms_budget: float = 0.0
+    lower_deployment_frequency_window: int = 32
+    lower_deployment_frequency_action_scale: float = 1.0
+    lower_deployment_frequency_dual_lr: float = 0.0
+    lower_deployment_frequency_lambda_init: float = 0.0
+    lower_deployment_frequency_max_lambda: float = 100.0
+    lower_deployment_frequency_step_scale: float = 1.0
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -1088,6 +1108,79 @@ class FrequencySeparatedActorCriticPPO:
         ):
             raise ValueError("a lower actor anchor state index is out of range")
         if (
+            str(config.deployment_action_transform)
+            not in DEPLOYMENT_ACTION_TRANSFORMS
+        ):
+            raise ValueError(
+                "deployment_action_transform must be identity or tanh"
+            )
+        for level in ("upper", "lower"):
+            budget = float(getattr(
+                config, f"{level}_deployment_frequency_rms_budget"
+            ))
+            window = int(getattr(
+                config, f"{level}_deployment_frequency_window"
+            ))
+            action_scale = float(getattr(
+                config, f"{level}_deployment_frequency_action_scale"
+            ))
+            dual_lr = float(getattr(
+                config, f"{level}_deployment_frequency_dual_lr"
+            ))
+            lambda_init = float(getattr(
+                config, f"{level}_deployment_frequency_lambda_init"
+            ))
+            max_lambda = float(getattr(
+                config, f"{level}_deployment_frequency_max_lambda"
+            ))
+            step_scale = float(getattr(
+                config, f"{level}_deployment_frequency_step_scale"
+            ))
+            active = dual_lr > 0.0 or lambda_init > 0.0
+            if not np.isfinite(budget) or budget < 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_rms_budget must be "
+                    "finite and non-negative"
+                )
+            if active and budget <= 0.0:
+                raise ValueError(
+                    f"an active {level} deployment frequency constraint "
+                    "requires a positive RMS budget"
+                )
+            if window < 1:
+                raise ValueError(
+                    f"{level}_deployment_frequency_window must be positive"
+                )
+            if not np.isfinite(action_scale) or action_scale <= 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_action_scale must be "
+                    "positive and finite"
+                )
+            if not np.isfinite(dual_lr) or dual_lr < 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_dual_lr must be finite "
+                    "and non-negative"
+                )
+            if not np.isfinite(max_lambda) or max_lambda < 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_max_lambda must be "
+                    "finite and non-negative"
+                )
+            if (
+                not np.isfinite(lambda_init)
+                or lambda_init < 0.0
+                or lambda_init > max_lambda
+            ):
+                raise ValueError(
+                    f"{level}_deployment_frequency_lambda_init must be "
+                    "finite and within its maximum"
+                )
+            if not np.isfinite(step_scale) or step_scale <= 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_step_scale must be "
+                    "positive and finite"
+                )
+        if (
             float(config.promotion_advantage_coef) > 0.0
             and int(config.promotion_state_dim) <= 0
         ):
@@ -1391,6 +1484,12 @@ class FrequencySeparatedActorCriticPPO:
             )
         self.upper_constraint_lambda = float(config.upper_lambda_init)
         self.constraint_lambda = float(config.lower_lambda_init)
+        self.upper_deployment_frequency_lambda = float(
+            config.upper_deployment_frequency_lambda_init
+        )
+        self.lower_deployment_frequency_lambda = float(
+            config.lower_deployment_frequency_lambda_init
+        )
         self._actor_anchors: dict[str, nn.Module] = {}
 
     def capture_actor_anchor(self) -> None:
@@ -1470,6 +1569,12 @@ class FrequencySeparatedActorCriticPPO:
             "constraint_lambda": float(self.constraint_lambda),
             "upper_constraint_lambda": float(
                 self.upper_constraint_lambda
+            ),
+            "upper_deployment_frequency_lambda": float(
+                self.upper_deployment_frequency_lambda
+            ),
+            "lower_deployment_frequency_lambda": float(
+                self.lower_deployment_frequency_lambda
             ),
         }
         if self.upper_cost_value is not None:
@@ -1563,6 +1668,14 @@ class FrequencySeparatedActorCriticPPO:
                 "upper_constraint_lambda", self.upper_constraint_lambda
             )
         )
+        self.upper_deployment_frequency_lambda = float(payload.get(
+            "upper_deployment_frequency_lambda",
+            self.upper_deployment_frequency_lambda,
+        ))
+        self.lower_deployment_frequency_lambda = float(payload.get(
+            "lower_deployment_frequency_lambda",
+            self.lower_deployment_frequency_lambda,
+        ))
         self.reset_recurrent_inference()
 
     def reset_recurrent_inference(self) -> None:
@@ -2367,6 +2480,198 @@ class FrequencySeparatedActorCriticPPO:
             out[f"{level}_cost_actor_active"] = float(cost_actor_active)
         return out
 
+    def _update_deployment_frequency_constraint(
+        self,
+        *,
+        level: str,
+        batch: LevelTrajectoryBatch,
+        actor: nn.Module,
+    ) -> dict[str, float]:
+        """Constrain the deterministic action sequence used at deployment."""
+
+        cfg = self.config
+        prefix = f"{level}_deployment_frequency"
+        dual_lr = float(getattr(cfg, f"{prefix}_dual_lr"))
+        budget = float(getattr(cfg, f"{prefix}_rms_budget"))
+        lambda_name = f"{prefix}_lambda"
+        lambda_before = float(getattr(self, lambda_name))
+        active = bool(dual_lr > 0.0 or lambda_before > 0.0)
+        empty = {
+            f"{prefix}_enabled": float(active),
+            f"{prefix}_power_before": 0.0,
+            f"{prefix}_power_after": 0.0,
+            f"{prefix}_signed_excess_before": 0.0,
+            f"{prefix}_signed_excess_after": 0.0,
+            f"{prefix}_violation_before": 0.0,
+            f"{prefix}_violation_after": 0.0,
+            f"{prefix}_lambda_before": lambda_before,
+            f"{prefix}_lambda_after": lambda_before,
+            f"{prefix}_guard_attempted": 0.0,
+            f"{prefix}_guard_accepted": 0.0,
+            f"{prefix}_gradient_conflict": 0.0,
+            f"{prefix}_gradient_cosine": 0.0,
+            f"{prefix}_projected_gradient_norm": 0.0,
+            f"{prefix}_guard_backtracks": 0.0,
+            f"{prefix}_guard_reward_loss_delta": 0.0,
+            f"{prefix}_guard_cost_loss_delta": 0.0,
+            f"{prefix}_primitive_steps": 0.0,
+            f"{prefix}_segment_count": 0.0,
+        }
+        if not active or batch.size == 0:
+            return empty
+
+        state = torch.as_tensor(
+            batch.state, dtype=torch.float32, device=self.device
+        )
+        action = torch.as_tensor(
+            batch.action, dtype=torch.float32, device=self.device
+        )
+        old_logp = torch.as_tensor(
+            batch.old_logp, dtype=torch.float32, device=self.device
+        )
+        duration = torch.as_tensor(
+            batch.duration, dtype=torch.long, device=self.device
+        )
+        done = torch.as_tensor(
+            batch.done, dtype=torch.bool, device=self.device
+        )
+        reward_adv, _ = self._gae(
+            batch.reward,
+            batch.done,
+            batch.duration,
+            batch.old_value,
+            batch.next_value,
+            batch.terminal,
+        )
+        reward_adv_t = torch.as_tensor(
+            self._normalize(reward_adv),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        band = "high" if level == "upper" else "low"
+        window = int(getattr(cfg, f"{prefix}_window"))
+        action_scale = float(getattr(cfg, f"{prefix}_action_scale"))
+
+        def current_stats():
+            deterministic_action = deterministic_actor_action(
+                actor,
+                state,
+                transform=str(cfg.deployment_action_transform),
+                scale=action_scale,
+            )
+            return deployment_frequency_stats(
+                deterministic_action,
+                duration,
+                done,
+                window=window,
+                band=band,
+                rms_budget=budget,
+            )
+
+        def reward_guard_loss_fn() -> torch.Tensor:
+            logp, _ = actor.log_prob_entropy(state, action)
+            ratio = torch.exp((logp - old_logp).clamp(-20.0, 20.0))
+            clipped = torch.clamp(
+                ratio, 1.0 - cfg.clip_ratio, 1.0 + cfg.clip_ratio
+            )
+            reward_surrogate = torch.minimum(
+                ratio * reward_adv_t, clipped * reward_adv_t
+            ).mean()
+            _, anchor_loss = self._actor_anchor_terms(
+                level=level, actor=actor, state=state
+            )
+            return -reward_surrogate + anchor_loss
+
+        def constraint_loss_fn() -> torch.Tensor:
+            return lambda_before * current_stats().signed_excess
+
+        with torch.no_grad():
+            before = current_stats()
+        diagnostics = {
+            "gradient_conflict": 0.0,
+            "gradient_cosine": 0.0,
+            "projected_gradient_norm": 0.0,
+            "accepted": 0.0,
+            "backtracks": 0.0,
+            "reward_loss_delta": 0.0,
+            "constraint_loss_delta": 0.0,
+        }
+        attempted = bool(
+            lambda_before > 0.0
+            and float(before.signed_excess.detach().cpu().item()) > 0.0
+        )
+        if attempted:
+            diagnostics.update(_reward_guarded_constraint_step(
+                parameters=actor.parameters(),
+                reward_loss_fn=reward_guard_loss_fn,
+                constraint_loss_fn=constraint_loss_fn,
+                step_size=(
+                    float(
+                        getattr(cfg, f"{level}_learning_rate")
+                    )
+                    * float(getattr(cfg, f"{prefix}_step_scale"))
+                ),
+                max_grad_norm=float(cfg.max_grad_norm),
+                max_backtracks=int(getattr(
+                    cfg, f"{level}_constraint_max_backtracks"
+                )),
+                reward_tolerance=float(getattr(
+                    cfg, f"{level}_constraint_reward_tolerance"
+                )),
+            ))
+        with torch.no_grad():
+            after = current_stats()
+        signed_after = float(after.signed_excess.detach().cpu().item())
+        lambda_after = float(np.clip(
+            lambda_before + dual_lr * signed_after,
+            0.0,
+            float(getattr(cfg, f"{prefix}_max_lambda")),
+        ))
+        setattr(self, lambda_name, lambda_after)
+        return {
+            f"{prefix}_enabled": 1.0,
+            f"{prefix}_power_before": float(
+                before.power.detach().cpu().item()
+            ),
+            f"{prefix}_power_after": float(
+                after.power.detach().cpu().item()
+            ),
+            f"{prefix}_signed_excess_before": float(
+                before.signed_excess.detach().cpu().item()
+            ),
+            f"{prefix}_signed_excess_after": signed_after,
+            f"{prefix}_violation_before": float(
+                before.violation.detach().cpu().item()
+            ),
+            f"{prefix}_violation_after": float(
+                after.violation.detach().cpu().item()
+            ),
+            f"{prefix}_lambda_before": lambda_before,
+            f"{prefix}_lambda_after": lambda_after,
+            f"{prefix}_guard_attempted": float(attempted),
+            f"{prefix}_guard_accepted": float(diagnostics["accepted"]),
+            f"{prefix}_gradient_conflict": float(
+                diagnostics["gradient_conflict"]
+            ),
+            f"{prefix}_gradient_cosine": float(
+                diagnostics["gradient_cosine"]
+            ),
+            f"{prefix}_projected_gradient_norm": float(
+                diagnostics["projected_gradient_norm"]
+            ),
+            f"{prefix}_guard_backtracks": float(
+                diagnostics["backtracks"]
+            ),
+            f"{prefix}_guard_reward_loss_delta": float(
+                diagnostics["reward_loss_delta"]
+            ),
+            f"{prefix}_guard_cost_loss_delta": float(
+                diagnostics["constraint_loss_delta"]
+            ),
+            f"{prefix}_primitive_steps": float(after.primitive_steps),
+            f"{prefix}_segment_count": float(after.segment_count),
+        }
+
     def update(self, batch: HierarchicalTrajectoryBatch) -> dict[str, float]:
         upper_metrics = self._update_level(
             level="upper",
@@ -2378,6 +2683,11 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.upper_value_optimizer,
             cost_value_optimizer=self.upper_cost_value_optimizer,
         )
+        upper_metrics.update(self._update_deployment_frequency_constraint(
+            level="upper",
+            batch=batch.upper,
+            actor=self.upper_actor,
+        ))
         lower_metrics = self._update_level(
             level="lower",
             batch=batch.lower,
@@ -2388,6 +2698,11 @@ class FrequencySeparatedActorCriticPPO:
             value_optimizer=self.lower_value_optimizer,
             cost_value_optimizer=self.lower_cost_value_optimizer,
         )
+        lower_metrics.update(self._update_deployment_frequency_constraint(
+            level="lower",
+            batch=batch.lower,
+            actor=self.lower_actor,
+        ))
         hf_metrics: dict[str, float] = {}
         if batch.hf is not None:
             if (

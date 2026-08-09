@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_9_state_aligned_feasibility"
+    "freq_hrl_mujoco_shared_core_v14_10_deployment_aligned_constraints"
 )
 METHODS = (
     "freq_hrl",
@@ -2181,6 +2181,16 @@ def _hierarchical_model(
     upper_actor_anchor_coef: float = 0.0,
     lower_actor_anchor_coef: float = 0.0,
     actor_anchor_zero_state_indices: tuple[int, ...] = (),
+    upper_deployment_frequency_dual_lr: float = 0.0,
+    lower_deployment_frequency_dual_lr: float = 0.0,
+    upper_deployment_frequency_lambda_init: float = 0.0,
+    lower_deployment_frequency_lambda_init: float = 0.0,
+    upper_deployment_frequency_step_scale: float = 1.0,
+    lower_deployment_frequency_step_scale: float = 1.0,
+    upper_deployment_frequency_rms_budget: float = 0.0,
+    lower_deployment_frequency_rms_budget: float = 0.0,
+    upper_deployment_frequency_action_scale: float = 1.0,
+    lower_deployment_frequency_action_scale: float = 1.0,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2193,6 +2203,41 @@ def _hierarchical_model(
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
+        deployment_action_transform="tanh",
+        upper_deployment_frequency_rms_budget=float(
+            upper_deployment_frequency_rms_budget
+        ),
+        upper_deployment_frequency_window=8,
+        upper_deployment_frequency_action_scale=float(
+            upper_deployment_frequency_action_scale
+        ),
+        upper_deployment_frequency_dual_lr=float(
+            upper_deployment_frequency_dual_lr
+        ),
+        upper_deployment_frequency_lambda_init=float(
+            upper_deployment_frequency_lambda_init
+        ),
+        upper_deployment_frequency_max_lambda=20.0,
+        upper_deployment_frequency_step_scale=float(
+            upper_deployment_frequency_step_scale
+        ),
+        lower_deployment_frequency_rms_budget=float(
+            lower_deployment_frequency_rms_budget
+        ),
+        lower_deployment_frequency_window=32,
+        lower_deployment_frequency_action_scale=float(
+            lower_deployment_frequency_action_scale
+        ),
+        lower_deployment_frequency_dual_lr=float(
+            lower_deployment_frequency_dual_lr
+        ),
+        lower_deployment_frequency_lambda_init=float(
+            lower_deployment_frequency_lambda_init
+        ),
+        lower_deployment_frequency_max_lambda=20.0,
+        lower_deployment_frequency_step_scale=float(
+            lower_deployment_frequency_step_scale
+        ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
         actor_anchor_zero_state_indices=tuple(
@@ -2486,6 +2531,14 @@ def train_mujoco_method(
     upper_constraint_mode: str = "static_reward_penalty",
     upper_dual_lr: float = DEFAULT_UPPER_DUAL_LR,
     lower_dual_lr: float = DEFAULT_LOWER_DUAL_LR,
+    upper_deployment_frequency_dual_lr: float = 0.0,
+    lower_deployment_frequency_dual_lr: float = 0.0,
+    upper_deployment_frequency_lambda_init: float = 0.0,
+    lower_deployment_frequency_lambda_init: float = 0.0,
+    upper_deployment_frequency_step_scale: float = 1.0,
+    lower_deployment_frequency_step_scale: float = 1.0,
+    upper_deployment_frequency_rms_budget: float = 0.0,
+    lower_deployment_frequency_rms_budget: float = 0.0,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -2584,6 +2637,56 @@ def train_mujoco_method(
         or float(lower_dual_lr) < 0.0
     ):
         raise ValueError("MuJoCo lower dual learning rate must be non-negative")
+    deployment_values = {
+        "upper dual learning rate": upper_deployment_frequency_dual_lr,
+        "lower dual learning rate": lower_deployment_frequency_dual_lr,
+        "upper lambda init": upper_deployment_frequency_lambda_init,
+        "lower lambda init": lower_deployment_frequency_lambda_init,
+    }
+    for label, value in deployment_values.items():
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {label} must be non-negative"
+            )
+    for label, value in (
+        ("upper step scale", upper_deployment_frequency_step_scale),
+        ("lower step scale", lower_deployment_frequency_step_scale),
+    ):
+        if not np.isfinite(float(value)) or float(value) <= 0.0:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {label} must be positive"
+            )
+    deployment_frequency_level_active = {
+        "upper": (
+            float(upper_deployment_frequency_dual_lr) > 0.0
+            or float(upper_deployment_frequency_lambda_init) > 0.0
+        ),
+        "lower": (
+            float(lower_deployment_frequency_dual_lr) > 0.0
+            or float(lower_deployment_frequency_lambda_init) > 0.0
+        ),
+    }
+    deployment_frequency_requested = any(
+        deployment_frequency_level_active.values()
+    )
+    if deployment_frequency_requested and name != "freq_hrl":
+        raise ValueError(
+            "deployment-frequency constraints require method=freq_hrl"
+        )
+    for level, value in (
+        ("upper", upper_deployment_frequency_rms_budget),
+        ("lower", lower_deployment_frequency_rms_budget),
+    ):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {level} RMS budget must be "
+                "non-negative"
+            )
+        if deployment_frequency_level_active[level] and float(value) <= 0.0:
+            raise ValueError(
+                f"an active MuJoCo deployment-frequency {level} RMS budget "
+                "must be positive"
+            )
     for level, coefficient in (
         ("upper", upper_actor_anchor_coef),
         ("lower", lower_actor_anchor_coef),
@@ -2687,6 +2790,22 @@ def train_mujoco_method(
         float(lower_action_router_strength)
         if effective_lower_action_router_mode in CAUSAL_LOWER_ACTION_ROUTER_MODES
         else 0.0
+    )
+    selected_upper_deployment_frequency_dual_lr = (
+        float(upper_deployment_frequency_dual_lr)
+        if name == "freq_hrl" else 0.0
+    )
+    selected_lower_deployment_frequency_dual_lr = (
+        float(lower_deployment_frequency_dual_lr)
+        if name == "freq_hrl" else 0.0
+    )
+    selected_upper_deployment_frequency_lambda_init = (
+        float(upper_deployment_frequency_lambda_init)
+        if name == "freq_hrl" else 0.0
+    )
+    selected_lower_deployment_frequency_lambda_init = (
+        float(lower_deployment_frequency_lambda_init)
+        if name == "freq_hrl" else 0.0
     )
     effective_router_training_schedule = (
         str(lower_action_router_training_schedule)
@@ -3299,6 +3418,36 @@ def train_mujoco_method(
             actor_anchor_zero_state_indices=(
                 actor_anchor_zero_state_indices
             ),
+            upper_deployment_frequency_dual_lr=(
+                selected_upper_deployment_frequency_dual_lr
+            ),
+            lower_deployment_frequency_dual_lr=(
+                selected_lower_deployment_frequency_dual_lr
+            ),
+            upper_deployment_frequency_lambda_init=(
+                selected_upper_deployment_frequency_lambda_init
+            ),
+            lower_deployment_frequency_lambda_init=(
+                selected_lower_deployment_frequency_lambda_init
+            ),
+            upper_deployment_frequency_step_scale=float(
+                upper_deployment_frequency_step_scale
+            ),
+            lower_deployment_frequency_step_scale=float(
+                lower_deployment_frequency_step_scale
+            ),
+            upper_deployment_frequency_rms_budget=float(
+                upper_deployment_frequency_rms_budget
+            ),
+            lower_deployment_frequency_rms_budget=float(
+                lower_deployment_frequency_rms_budget
+            ),
+            upper_deployment_frequency_action_scale=float(
+                upper_action_scale
+            ),
+            lower_deployment_frequency_action_scale=float(
+                lower_action_scale
+            ),
         )
         if paired_continuation:
             paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
@@ -3519,6 +3668,58 @@ def train_mujoco_method(
         ),
         "lower_dual_lr": (
             float(lower_dual_lr) if selected_leakage_constraint else 0.0
+        ),
+        "deployment_frequency_constraint_enabled": bool(
+            deployment_frequency_requested and name == "freq_hrl"
+        ),
+        "upper_deployment_frequency_constraint_enabled": bool(
+            deployment_frequency_level_active["upper"]
+            and name == "freq_hrl"
+        ),
+        "lower_deployment_frequency_constraint_enabled": bool(
+            deployment_frequency_level_active["lower"]
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_action_source": (
+            "deterministic_squashed_actor_mean"
+            if deployment_frequency_requested and name == "freq_hrl"
+            else "disabled"
+        ),
+        "upper_deployment_frequency_dual_lr": (
+            selected_upper_deployment_frequency_dual_lr
+        ),
+        "lower_deployment_frequency_dual_lr": (
+            selected_lower_deployment_frequency_dual_lr
+        ),
+        "upper_deployment_frequency_lambda_init": (
+            selected_upper_deployment_frequency_lambda_init
+        ),
+        "lower_deployment_frequency_lambda_init": (
+            selected_lower_deployment_frequency_lambda_init
+        ),
+        "upper_deployment_frequency_lambda_final": float(
+            getattr(model, "upper_deployment_frequency_lambda", 0.0)
+        ),
+        "lower_deployment_frequency_lambda_final": float(
+            getattr(model, "lower_deployment_frequency_lambda", 0.0)
+        ),
+        "upper_deployment_frequency_step_scale": float(
+            upper_deployment_frequency_step_scale
+        ),
+        "lower_deployment_frequency_step_scale": float(
+            lower_deployment_frequency_step_scale
+        ),
+        "upper_deployment_frequency_rms_budget": float(
+            upper_deployment_frequency_rms_budget
+        ),
+        "lower_deployment_frequency_rms_budget": float(
+            lower_deployment_frequency_rms_budget
+        ),
+        "deployment_frequency_constraint_contract": (
+            "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
+            "lower_lpf32_separate_reward_guarded_duals_v1"
+            if deployment_frequency_requested and name == "freq_hrl"
+            else "disabled"
         ),
         "upper_constraint_update_mode": (
             str(upper_constraint_update_mode)
@@ -3889,6 +4090,30 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_LOWER_DUAL_LR,
     )
     parser.add_argument(
+        "--upper-deployment-frequency-dual-lr", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-dual-lr", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--upper-deployment-frequency-lambda-init", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-lambda-init", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--upper-deployment-frequency-step-scale", type=float, default=1.0
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-step-scale", type=float, default=1.0
+    )
+    parser.add_argument(
+        "--upper-deployment-frequency-rms-budget", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-rms-budget", type=float, default=0.0
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -3994,6 +4219,30 @@ def main() -> None:
         upper_constraint_mode=args.upper_constraint_mode,
         upper_dual_lr=args.upper_dual_lr,
         lower_dual_lr=args.lower_dual_lr,
+        upper_deployment_frequency_dual_lr=(
+            args.upper_deployment_frequency_dual_lr
+        ),
+        lower_deployment_frequency_dual_lr=(
+            args.lower_deployment_frequency_dual_lr
+        ),
+        upper_deployment_frequency_lambda_init=(
+            args.upper_deployment_frequency_lambda_init
+        ),
+        lower_deployment_frequency_lambda_init=(
+            args.lower_deployment_frequency_lambda_init
+        ),
+        upper_deployment_frequency_step_scale=(
+            args.upper_deployment_frequency_step_scale
+        ),
+        lower_deployment_frequency_step_scale=(
+            args.lower_deployment_frequency_step_scale
+        ),
+        upper_deployment_frequency_rms_budget=(
+            args.upper_deployment_frequency_rms_budget
+        ),
+        lower_deployment_frequency_rms_budget=(
+            args.lower_deployment_frequency_rms_budget
+        ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,
         checkpoint_selection_mode=args.checkpoint_selection_mode,
