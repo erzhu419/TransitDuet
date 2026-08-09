@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_7_joint_band_projection"
+    "freq_hrl_mujoco_shared_core_v14_8_latent_responsibility_constraints"
 )
 METHODS = (
     "freq_hrl",
@@ -103,7 +103,11 @@ FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
 }
-LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
+LEAKAGE_CONSTRAINT_SCOPES = (
+    "responsibility",
+    "joint_behavior",
+    "joint_behavior_latent",
+)
 LEAKAGE_COST_MODES = (
     "ratio_excess_squared",
     "power_excess",
@@ -117,7 +121,11 @@ CHECKPOINT_SELECTION_MODES = (
     "assigned_condition",
     "crossed_conditions",
 )
-CHECKPOINT_SCORE_MODES = ("mean_reward", "behavior_robust")
+CHECKPOINT_SCORE_MODES = (
+    "mean_reward",
+    "behavior_robust",
+    "latent_behavior_robust",
+)
 DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
 DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
 DEFAULT_UPPER_DUAL_LR = 0.1
@@ -726,6 +734,10 @@ def _episode_row(
         )),
         "UpperHFPower": float(leakage["UpperHFPower"]),
         "UpperHFPowerAbs": float(leakage["UpperHFPowerAbs"]),
+        "LatentUpperHFPower": float(latent_leakage["UpperHFPower"]),
+        "LatentUpperHFPowerAbs": float(
+            latent_leakage["UpperHFPowerAbs"]
+        ),
         "LowerLFDrift": float(leakage["LowerLFDrift"]),
         "LowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leakage["LowerLFDrift"]),
@@ -934,6 +946,8 @@ def rollout_hierarchical(
         latent_lower_lf_tracker.reset(action_dim)
         upper_hf_tracker = CausalRollingBandTracker(window=8)
         upper_hf_tracker.reset(action_dim)
+        latent_upper_hf_tracker = CausalRollingBandTracker(window=8)
+        latent_upper_hf_tracker.reset(action_dim)
         function_preserving_router = bool(
             str(lower_action_router_mode)
             in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
@@ -1164,18 +1178,33 @@ def rollout_hierarchical(
                 float(np.mean(np.square(upper_bands["high"]))),
                 float(upper_hf_rms_budget),
             )
+            latent_upper_bands = latent_upper_hf_tracker.update(
+                upper_policy_action
+            )
+            latent_upper_budget = evaluate_rms_leakage_budget(
+                float(np.mean(np.square(latent_upper_bands["high"]))),
+                float(upper_hf_rms_budget),
+            )
+            upper_effective_cost = _leakage_constraint_cost(
+                upper_budget, mode=str(leakage_cost_mode)
+            )
+            upper_latent_cost = _leakage_constraint_cost(
+                latent_upper_budget, mode=str(leakage_cost_mode)
+            )
+            upper_endpoint_cost = (
+                max(upper_effective_cost, upper_latent_cost)
+                if str(leakage_constraint_scope)
+                == "joint_behavior_latent"
+                else upper_effective_cost
+            )
             upper_hf_penalty = (
                 float(upper_hf_penalty_coef)
-                * _leakage_constraint_cost(
-                    upper_budget, mode=str(leakage_cost_mode)
-                )
+                * upper_endpoint_cost
                 if str(upper_constraint_mode) == "static_reward_penalty"
                 else 0.0
             )
             upper_constraint_cost = (
-                _leakage_constraint_cost(
-                    upper_budget, mode=str(leakage_cost_mode)
-                )
+                upper_endpoint_cost
                 if str(upper_constraint_mode) == "primal_dual"
                 else 0.0
             )
@@ -1199,11 +1228,21 @@ def rollout_hierarchical(
             )
             lower_cost = 0.0
             if leakage_constraint:
-                lower_cost = (
-                    responsibility_cost
-                    if str(leakage_constraint_scope) == "responsibility"
-                    else max(responsibility_cost, raw_behavior_cost)
-                )
+                if str(leakage_constraint_scope) == "responsibility":
+                    lower_cost = responsibility_cost
+                elif str(leakage_constraint_scope) == "joint_behavior":
+                    lower_cost = max(
+                        responsibility_cost, raw_behavior_cost
+                    )
+                else:
+                    latent_behavior_cost = _leakage_constraint_cost(
+                        latent_lower_budget, mode=str(leakage_cost_mode)
+                    )
+                    lower_cost = max(
+                        responsibility_cost,
+                        raw_behavior_cost,
+                        latent_behavior_cost,
+                    )
             lower_constraint_costs.append(float(lower_cost))
             upper_hf_rms_values.append(float(upper_budget["rms"]))
             upper_hf_budget_excesses.append(float(
@@ -1367,6 +1406,7 @@ def rollout_hierarchical(
                 raw_lower_lf_tracker.reset(action_dim)
                 latent_lower_lf_tracker.reset(action_dim)
                 upper_hf_tracker.reset(action_dim)
+                latent_upper_hf_tracker.reset(action_dim)
                 episode_step = 0
                 reset_exogenous = True
                 steps_since_upper = int(upper_period)
@@ -1719,6 +1759,8 @@ SUMMARY_KEYS = [
     "AdditiveActionClipRate",
     "UpperHFPower",
     "UpperHFPowerAbs",
+    "LatentUpperHFPower",
+    "LatentUpperHFPowerAbs",
     "LowerLFDrift",
     "LowerLFDriftAbs",
     "RawLowerLFDrift",
@@ -2246,6 +2288,7 @@ def behavior_robust_checkpoint_diagnostics(
     lower_lf_rms_budget: float,
     upper_hf_rms_budget: float,
     constraint_penalty: float,
+    include_latent: bool = False,
 ) -> dict[str, Any]:
     """Score worst-condition reward while penalizing endpoint violations."""
 
@@ -2283,14 +2326,20 @@ def behavior_robust_checkpoint_diagnostics(
 
     by_mode: dict[str, dict[str, float]] = {}
     for mode, values in grouped.items():
+        metric_names = [
+            "reward_mean",
+            "LowerLFDriftAbs",
+            "RawLowerLFDriftAbs",
+            "UpperHFPowerAbs",
+        ]
+        if bool(include_latent):
+            metric_names.extend((
+                "LatentLowerLFDriftAbs",
+                "LatentUpperHFPowerAbs",
+            ))
         metrics = {
             key: np.asarray([float(row[key]) for row in values])
-            for key in (
-                "reward_mean",
-                "LowerLFDriftAbs",
-                "RawLowerLFDriftAbs",
-                "UpperHFPowerAbs",
-            )
+            for key in metric_names
         }
         if any(not np.all(np.isfinite(metric)) for metric in metrics.values()):
             raise ValueError("checkpoint metrics must be finite")
@@ -2303,7 +2352,7 @@ def behavior_robust_checkpoint_diagnostics(
         upper_hf_rms = float(np.sqrt(max(
             float(np.mean(metrics["UpperHFPowerAbs"])), 0.0
         )))
-        by_mode[mode] = {
+        diagnostics = {
             "reward_mean": float(np.mean(metrics["reward_mean"])),
             "lower_lf_rms": lower_rms,
             "raw_lower_lf_rms": raw_lower_rms,
@@ -2318,18 +2367,44 @@ def behavior_robust_checkpoint_diagnostics(
                 0.0, upper_hf_rms / float(upper_hf_rms_budget) - 1.0
             ),
         }
+        if bool(include_latent):
+            latent_lower_rms = float(np.sqrt(max(
+                float(np.mean(metrics["LatentLowerLFDriftAbs"])), 0.0
+            )))
+            latent_upper_hf_rms = float(np.sqrt(max(
+                float(np.mean(metrics["LatentUpperHFPowerAbs"])), 0.0
+            )))
+            diagnostics.update({
+                "latent_lower_lf_rms": latent_lower_rms,
+                "latent_upper_hf_rms": latent_upper_hf_rms,
+                "latent_lower_violation": max(
+                    0.0,
+                    latent_lower_rms / float(lower_lf_rms_budget) - 1.0,
+                ),
+                "latent_upper_hf_violation": max(
+                    0.0,
+                    latent_upper_hf_rms / float(upper_hf_rms_budget) - 1.0,
+                ),
+            })
+        by_mode[mode] = diagnostics
     worst_reward = min(item["reward_mean"] for item in by_mode.values())
     reward_scale = max(
         1.0,
         max(abs(item["reward_mean"]) for item in by_mode.values()),
     )
+    violation_keys = [
+        "lower_violation",
+        "raw_lower_violation",
+        "upper_hf_violation",
+    ]
+    if bool(include_latent):
+        violation_keys.extend((
+            "latent_lower_violation",
+            "latent_upper_hf_violation",
+        ))
     worst_violations = {
         key: max(item[key] for item in by_mode.values())
-        for key in (
-            "lower_violation",
-            "raw_lower_violation",
-            "upper_hf_violation",
-        )
+        for key in violation_keys
     }
     normalized_penalty = float(sum(
         value * value for value in worst_violations.values()
@@ -2727,7 +2802,12 @@ def train_mujoco_method(
 
     checkpoint_score_fn = None
     checkpoint_score_contract = "mean_reward_mean_v1"
-    if str(checkpoint_score_mode) == "behavior_robust":
+    if str(checkpoint_score_mode) in {
+        "behavior_robust", "latent_behavior_robust"
+    }:
+        include_latent_checkpoint_cost = (
+            str(checkpoint_score_mode) == "latent_behavior_robust"
+        )
         checkpoint_score_fn = lambda rows: float(
             behavior_robust_checkpoint_diagnostics(
                 rows,
@@ -2735,11 +2815,17 @@ def train_mujoco_method(
                 lower_lf_rms_budget=lower_lf_rms_budget,
                 upper_hf_rms_budget=upper_hf_rms_budget,
                 constraint_penalty=checkpoint_constraint_penalty,
+                include_latent=include_latent_checkpoint_cost,
             )["score"]
         )
         checkpoint_score_contract = (
             "worst_condition_reward_minus_scale_normalized_squared_"
-            "lower_raw_lower_and_upper_hf_budget_violations_v1"
+            + (
+                "lower_raw_lower_latent_lower_upper_and_latent_upper_"
+                "budget_violations_v2"
+                if include_latent_checkpoint_cost
+                else "lower_raw_lower_and_upper_hf_budget_violations_v1"
+            )
         )
 
     upper_cost_critic_for_capacity = (
@@ -3335,14 +3421,20 @@ def train_mujoco_method(
         "leakage_constraint_scope": selected_constraint_scope,
         "leakage_constraint_cost_mode": str(leakage_cost_mode),
         "leakage_cost_contract": (
-            "max_endpoint_aligned_32_step_causal_responsibility_and_"
-            f"effective_lower_lf_{str(leakage_cost_mode)}_v4"
-            if selected_constraint_scope == "joint_behavior"
+            "max_endpoint_aligned_32_step_causal_responsibility_effective_"
+            "and_latent_lower_lf_"
+            f"{str(leakage_cost_mode)}_v5"
+            if selected_constraint_scope == "joint_behavior_latent"
             else (
-                "endpoint_aligned_32_step_causal_responsibility_lf_"
-                f"{str(leakage_cost_mode)}_v3"
-                if selected_constraint_scope == "responsibility"
-                else "disabled"
+                "max_endpoint_aligned_32_step_causal_responsibility_and_"
+                f"effective_lower_lf_{str(leakage_cost_mode)}_v4"
+                if selected_constraint_scope == "joint_behavior"
+                else (
+                    "endpoint_aligned_32_step_causal_responsibility_lf_"
+                    f"{str(leakage_cost_mode)}_v3"
+                    if selected_constraint_scope == "responsibility"
+                    else "disabled"
+                )
             )
         ),
         "lower_lf_rms_budget": float(lower_lf_rms_budget),
@@ -3366,7 +3458,11 @@ def train_mujoco_method(
         ),
         "upper_objective_contract": (
             "raw_environment_reward_with_separate_primal_dual_endpoint_"
-            "aligned_upper_high_pass_constraint_v1"
+            + (
+                "aligned_effective_and_latent_upper_high_pass_constraint_v2"
+                if selected_constraint_scope == "joint_behavior_latent"
+                else "aligned_upper_high_pass_constraint_v1"
+            )
             if selected_upper_constraint_mode == "primal_dual"
             else (
                 "raw_environment_reward_minus_endpoint_aligned_causal_upper_"
@@ -3493,17 +3589,30 @@ def train_mujoco_method(
             )
         ),
         "lower_cost_state_contract": (
-            "conservative_latent_32_step_lf_context_independent_of_transfer_"
-            "strength_v4"
-            if effective_lower_action_router_mode
-            in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
-            else
-            "causal_responsibility_anchor_32_step_raw_and_responsibility_"
-            "rolling_lf_cost_critic_only_v3"
+            "conservative_latent_32_step_lf_context_with_latent_effective_"
+            "and_responsibility_endpoint_cost_v5"
+            if (
+                effective_lower_action_router_mode
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
+                and selected_constraint_scope == "joint_behavior_latent"
+            )
+            else (
+                "conservative_latent_32_step_lf_context_independent_of_"
+                "transfer_strength_v4"
+                if effective_lower_action_router_mode
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
+                else
+                "causal_responsibility_anchor_32_step_raw_and_responsibility_"
+                "rolling_lf_cost_critic_only_v3"
+            )
         ),
         "upper_cost_state_contract": (
-            "same_causal_upper_policy_state_with_8_step_upper_high_pass_"
-            "endpoint_cost_critic_v1"
+            "same_causal_upper_policy_state_with_8_step_"
+            + (
+                "effective_and_latent_upper_high_pass_endpoint_cost_critic_v2"
+                if selected_constraint_scope == "joint_behavior_latent"
+                else "upper_high_pass_endpoint_cost_critic_v1"
+            )
             if upper_cost_critic_for_capacity else "disabled"
         ),
         "lower_constraint_update_mode": selected_constraint_update_mode,

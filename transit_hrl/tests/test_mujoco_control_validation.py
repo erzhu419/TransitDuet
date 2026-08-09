@@ -477,6 +477,8 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 "LowerLFDriftAbs": lower ** 2,
                 "RawLowerLFDriftAbs": raw_lower ** 2,
                 "UpperHFPowerAbs": upper ** 2,
+                "LatentLowerLFDriftAbs": (lower * 1.5) ** 2,
+                "LatentUpperHFPowerAbs": (upper * 1.5) ** 2,
             }
             for mode, reward, lower, raw_lower, upper in (
                 ("standard", 2.0, 0.04, 0.04, 0.08),
@@ -495,6 +497,26 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             diagnostics["normalized_constraint_penalty"], 0.0
         )
         self.assertLess(diagnostics["score"], 1.0)
+        latent_diagnostics = behavior_robust_checkpoint_diagnostics(
+            rows,
+            expected_modes=["standard", "mixed"],
+            lower_lf_rms_budget=0.05,
+            upper_hf_rms_budget=0.10,
+            constraint_penalty=10.0,
+            include_latent=True,
+        )
+        self.assertGreater(
+            latent_diagnostics["normalized_constraint_penalty"],
+            diagnostics["normalized_constraint_penalty"],
+        )
+        self.assertIn(
+            "latent_lower_violation",
+            latent_diagnostics["worst_normalized_violations"],
+        )
+        self.assertIn(
+            "latent_upper_hf_violation",
+            latent_diagnostics["worst_normalized_violations"],
+        )
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
@@ -785,6 +807,14 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertLess(
             projected["LowerLFDriftAbs"], control["LowerLFDriftAbs"]
         )
+        self.assertEqual(
+            projected["LatentUpperHFPowerAbs"],
+            control["LatentUpperHFPowerAbs"],
+        )
+        self.assertEqual(
+            projected["LatentLowerLFDriftAbs"],
+            control["LatentLowerLFDriftAbs"],
+        )
         self.assertEqual(projected["LowerRouterFunctionPreserving"], 1.0)
         self.assertLessEqual(
             projected["ResponsibilityReconstructionRMS"], 1e-7
@@ -891,6 +921,60 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             float(np.sum(responsibility_batch.upper.reward)),
         )
 
+    def test_latent_joint_scope_cannot_hide_actor_leakage_with_projection(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=64
+        )
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=True,
+        )
+        common = dict(
+            seed=227,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=64,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=True,
+            lower_lf_rms_budget=1e-3,
+            upper_hf_rms_budget=1e-4,
+            upper_hf_penalty_coef=1.0,
+            responsibility_mode="additive",
+            lower_action_router_mode="causal_joint_band_projection",
+            lower_action_router_strength=0.5,
+            sample=True,
+            episode_horizon=64,
+        )
+        torch.manual_seed(229)
+        np.random.seed(229)
+        behavior_batch, behavior_row = rollout_hierarchical(
+            model, leakage_constraint_scope="joint_behavior", **common
+        )
+        torch.manual_seed(229)
+        np.random.seed(229)
+        latent_batch, latent_row = rollout_hierarchical(
+            model, leakage_constraint_scope="joint_behavior_latent", **common
+        )
+        self.assertTrue(np.all(
+            latent_batch.lower.cost + 1e-12 >= behavior_batch.lower.cost
+        ))
+        self.assertGreaterEqual(
+            latent_row["UpperHFPenaltyTotal"],
+            behavior_row["UpperHFPenaltyTotal"],
+        )
+        self.assertEqual(
+            latent_row["LatentUpperHFPowerAbs"],
+            behavior_row["LatentUpperHFPowerAbs"],
+        )
+        self.assertEqual(
+            latent_row["LatentLowerLFDriftAbs"],
+            behavior_row["LatentLowerLFDriftAbs"],
+        )
+
     def test_training_budget_continues_across_hopper_terminations(self):
         observation_dim, action_dim = environment_dimensions(
             "Hopper-v5", episode_horizon=1000
@@ -990,6 +1074,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "LowerRouterClipRate",
             "UpperActionEnergyShare",
             "AdditiveActionClipRate",
+            "LatentUpperHFPowerAbs",
             "RawLowerLFDriftAbs",
             "LatentLowerLFDriftAbs",
             "RawLowerLFRmsOnlineMean",
