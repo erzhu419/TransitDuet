@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_4_router_homotopy"
+    "freq_hrl_mujoco_shared_core_v14_5_paired_anchor_continuation"
 )
 METHODS = (
     "freq_hrl",
@@ -193,6 +193,127 @@ def _file_sha256(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def load_paired_mujoco_checkpoint(
+    model: FrequencySeparatedActorCriticPPO,
+    *,
+    checkpoint_path: Path,
+    summary_path: Path,
+    env_id: str,
+    optimizer_seed: int,
+    expected_code_revision: str,
+    expected_source_manifest_sha256: str,
+) -> dict[str, Any]:
+    """Load and audit a matched direct-policy continuation checkpoint."""
+
+    checkpoint_file = Path(checkpoint_path)
+    summary_file = Path(summary_path)
+    if not checkpoint_file.is_file():
+        raise FileNotFoundError(checkpoint_file)
+    if not summary_file.is_file():
+        raise FileNotFoundError(summary_file)
+    summary = json.loads(summary_file.read_text(encoding="utf-8"))
+    if not isinstance(summary, dict):
+        raise ValueError("paired checkpoint summary must be a JSON object")
+    file_sha256 = _file_sha256(checkpoint_file)
+    expected_summary = {
+        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "method": "freq_hrl_no_leakage",
+        "environment": str(env_id),
+        "optimizer_seed": int(optimizer_seed),
+        "code_revision": str(expected_code_revision),
+        "source_manifest_sha256": str(expected_source_manifest_sha256),
+        "lower_action_router_mode": "direct",
+        "lower_action_router_strength": 0.0,
+        "lower_action_router_observe_strength": True,
+        "responsibility_mode": "causal_lf_transfer",
+    }
+    mismatches = {
+        key: {"expected": value, "observed": summary.get(key)}
+        for key, value in expected_summary.items()
+        if summary.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(
+            "paired checkpoint summary contract mismatch: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
+    if summary.get("checkpoint_file_sha256") != file_sha256:
+        raise ValueError("paired checkpoint serialized SHA-256 mismatch")
+    frozen_parameter_sha256 = str(
+        summary.get("frozen_parameter_sha256", "")
+    )
+    if len(frozen_parameter_sha256) != 64:
+        raise ValueError("paired checkpoint parameter SHA-256 is invalid")
+
+    checkpoint = torch.load(
+        checkpoint_file,
+        map_location=model.device,
+        weights_only=True,
+    )
+    if not isinstance(checkpoint, dict) or not isinstance(
+        checkpoint.get("model_state_dict"), dict
+    ):
+        raise ValueError("paired checkpoint payload is invalid")
+    checkpoint_contract = {
+        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "method": "freq_hrl_no_leakage",
+        "environment": str(env_id),
+        "optimizer_seed": int(optimizer_seed),
+        "frozen_parameter_sha256": frozen_parameter_sha256,
+        "code_revision": str(expected_code_revision),
+        "source_manifest_sha256": str(expected_source_manifest_sha256),
+    }
+    checkpoint_mismatches = {
+        key: {"expected": value, "observed": checkpoint.get(key)}
+        for key, value in checkpoint_contract.items()
+        if checkpoint.get(key) != value
+    }
+    if checkpoint_mismatches:
+        raise ValueError(
+            "paired checkpoint payload contract mismatch: "
+            + json.dumps(checkpoint_mismatches, sort_keys=True)
+        )
+    saved_config = dict(checkpoint["model_state_dict"].get("config") or {})
+    architecture_keys = (
+        "upper_state_dim",
+        "lower_state_dim",
+        "upper_action_dim",
+        "lower_action_dim",
+        "hidden_dim",
+        "state_encoder",
+    )
+    architecture_mismatches = {
+        key: {
+            "expected": getattr(model.config, key),
+            "observed": saved_config.get(key),
+        }
+        for key in architecture_keys
+        if saved_config.get(key) != getattr(model.config, key)
+    }
+    if architecture_mismatches:
+        raise ValueError(
+            "paired checkpoint architecture mismatch: "
+            + json.dumps(architecture_mismatches, sort_keys=True)
+        )
+    model.load_state_dict(checkpoint["model_state_dict"])
+    loaded_parameter_sha256 = _model_parameter_sha256(model)
+    if loaded_parameter_sha256 != frozen_parameter_sha256:
+        raise ValueError("paired checkpoint parameter SHA-256 mismatch")
+    return {
+        "enabled": True,
+        "checkpoint_path": str(checkpoint_file),
+        "summary_path": str(summary_file),
+        "checkpoint_file_sha256": file_sha256,
+        "checkpoint_parameter_sha256": loaded_parameter_sha256,
+        "checkpoint_selected_iteration": int(
+            summary["selected_checkpoint_iteration"]
+        ),
+        "checkpoint_optimizer_seed": int(optimizer_seed),
+        "checkpoint_environment": str(env_id),
+        "checkpoint_protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+    }
 
 
 @torch.no_grad()
@@ -1910,6 +2031,9 @@ def _hierarchical_model(
     lower_dual_lr: float = DEFAULT_LOWER_DUAL_LR,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
+    upper_actor_anchor_coef: float = 0.0,
+    lower_actor_anchor_coef: float = 0.0,
+    actor_anchor_zero_state_indices: tuple[int, ...] = (),
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -1922,6 +2046,11 @@ def _hierarchical_model(
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
+        upper_actor_anchor_coef=float(upper_actor_anchor_coef),
+        lower_actor_anchor_coef=float(lower_actor_anchor_coef),
+        actor_anchor_zero_state_indices=tuple(
+            map(int, actor_anchor_zero_state_indices)
+        ),
         upper_cost_critic=bool(upper_cost_critic),
         upper_lambda_init=0.0,
         upper_cost_target=0.0,
@@ -2156,6 +2285,10 @@ def train_mujoco_method(
     lower_action_router_warmup_fraction: float = 0.0,
     lower_action_router_ramp_fraction: float = 0.0,
     lower_action_router_observe_strength: bool = False,
+    initial_checkpoint_path: Path | None = None,
+    initial_checkpoint_summary_path: Path | None = None,
+    upper_actor_anchor_coef: float = 0.0,
+    lower_actor_anchor_coef: float = 0.0,
     checkpoint_selection_mode: str = "assigned_condition",
     checkpoint_score_mode: str = "mean_reward",
     checkpoint_constraint_penalty: float = (
@@ -2231,6 +2364,32 @@ def train_mujoco_method(
         or float(lower_dual_lr) < 0.0
     ):
         raise ValueError("MuJoCo lower dual learning rate must be non-negative")
+    for level, coefficient in (
+        ("upper", upper_actor_anchor_coef),
+        ("lower", lower_actor_anchor_coef),
+    ):
+        if not np.isfinite(float(coefficient)) or float(coefficient) < 0.0:
+            raise ValueError(
+                f"MuJoCo {level} actor anchor coefficient must be non-negative"
+            )
+    checkpoint_paths_present = (
+        initial_checkpoint_path is not None,
+        initial_checkpoint_summary_path is not None,
+    )
+    if checkpoint_paths_present[0] != checkpoint_paths_present[1]:
+        raise ValueError(
+            "paired continuation requires both checkpoint and summary paths"
+        )
+    paired_continuation = all(checkpoint_paths_present)
+    if (
+        float(upper_actor_anchor_coef) > 0.0
+        or float(lower_actor_anchor_coef) > 0.0
+    ) and not paired_continuation:
+        raise ValueError("an actor anchor requires a paired checkpoint")
+    if paired_continuation and name != "freq_hrl_no_leakage":
+        raise ValueError(
+            "paired MuJoCo continuation is restricted to freq_hrl_no_leakage"
+        )
     if str(leakage_cost_mode) not in LEAKAGE_COST_MODES:
         raise ValueError("unknown MuJoCo leakage constraint cost mode")
     if str(lower_action_router_mode) not in LOWER_ACTION_ROUTER_MODES:
@@ -2318,6 +2477,13 @@ def train_mujoco_method(
         )
     if name == "flat_ppo" and effective_router_observe_strength:
         raise ValueError("flat PPO cannot observe hierarchical router strength")
+    if paired_continuation and (
+        effective_lower_action_router_mode != "causal_ema_high_pass"
+        or not effective_router_observe_strength
+    ):
+        raise ValueError(
+            "paired continuation requires an observed causal lower-action router"
+        )
     router_training_strengths_by_iteration = [
         lower_action_router_training_strength(
             iteration=iteration,
@@ -2333,6 +2499,9 @@ def train_mujoco_method(
         observation_dim,
         action_dim,
         observe_router_strength=effective_router_observe_strength,
+    )
+    actor_anchor_zero_state_indices = (
+        (int(state_dim) - 1,) if paired_continuation else ()
     )
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
@@ -2479,6 +2648,7 @@ def train_mujoco_method(
         str(upper_constraint_mode)
         if selected_leakage_constraint else "disabled"
     )
+    paired_checkpoint_metadata: dict[str, Any] = {"enabled": False}
     if name == "freq_hrl_safe_selector":
         branch_specs = {
             SAFE_SELECTOR_BASELINE_BRANCH: {
@@ -2843,7 +3013,25 @@ def train_mujoco_method(
             lower_dual_lr=lower_dual_lr,
             upper_constraint_update_mode=upper_constraint_update_mode,
             lower_constraint_update_mode=lower_constraint_update_mode,
+            upper_actor_anchor_coef=upper_actor_anchor_coef,
+            lower_actor_anchor_coef=lower_actor_anchor_coef,
+            actor_anchor_zero_state_indices=(
+                actor_anchor_zero_state_indices
+            ),
         )
+        if paired_continuation:
+            paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
+                model,
+                checkpoint_path=Path(initial_checkpoint_path),
+                summary_path=Path(initial_checkpoint_summary_path),
+                env_id=env_id,
+                optimizer_seed=optimizer_seed,
+                expected_code_revision=source_identity["code_revision"],
+                expected_source_manifest_sha256=(
+                    source_identity["source_manifest_sha256"]
+                ),
+            )
+            model.capture_actor_anchor()
         rollout = lambda policy, seed, sample: rollout_hierarchical(
             policy,
             seed=seed,
@@ -2976,6 +3164,7 @@ def train_mujoco_method(
     payload.update({
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
         "method": name,
+        "optimizer_seed": int(optimizer_seed),
         "environment": str(env_id),
         "disturbance_mode": str(disturbance_mode),
         "training_disturbance_modes": list(training_modes),
@@ -3073,6 +3262,25 @@ def train_mujoco_method(
         ),
         "lower_action_router_observe_strength": bool(
             effective_router_observe_strength
+        ),
+        "paired_checkpoint_continuation": paired_checkpoint_metadata,
+        "upper_actor_anchor_coef": float(upper_actor_anchor_coef),
+        "lower_actor_anchor_coef": float(lower_actor_anchor_coef),
+        "actor_anchor_zero_state_indices": list(
+            actor_anchor_zero_state_indices
+        ),
+        "actor_anchor_contract": (
+            "frozen_matched_direct_policy_at_zero_router_context_analytic_"
+            "gaussian_kl_v1"
+            if paired_continuation else "disabled"
+        ),
+        "upper_actor_anchor_parameter_rms": (
+            model.actor_anchor_parameter_rms("upper")
+            if paired_continuation else 0.0
+        ),
+        "lower_actor_anchor_parameter_rms": (
+            model.actor_anchor_parameter_rms("lower")
+            if paired_continuation else 0.0
         ),
         "lower_action_router_training_strengths_by_iteration": [
             float(value) for value in router_training_strengths_by_iteration
@@ -3187,6 +3395,9 @@ def write_cell(
         "method": payload["method"],
         "environment": payload["environment"],
         "disturbance_mode": payload["disturbance_mode"],
+        "optimizer_seed": payload["optimizer_seed"],
+        "code_revision": payload["code_revision"],
+        "source_manifest_sha256": payload["source_manifest_sha256"],
         "frozen_parameter_sha256": payload["frozen_parameter_sha256"],
         "frozen_checkpoint_sha256": payload["frozen_checkpoint_sha256"],
     }, checkpoint_path)
@@ -3285,6 +3496,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--lower-action-router-observe-strength",
         action="store_true",
     )
+    parser.add_argument("--initial-checkpoint-path", type=Path)
+    parser.add_argument("--initial-checkpoint-summary-path", type=Path)
+    parser.add_argument("--upper-actor-anchor-coef", type=float, default=0.0)
+    parser.add_argument("--lower-actor-anchor-coef", type=float, default=0.0)
     parser.add_argument(
         "--leakage-constraint-scope",
         choices=LEAKAGE_CONSTRAINT_SCOPES,
@@ -3403,6 +3618,12 @@ def main() -> None:
         lower_action_router_observe_strength=(
             args.lower_action_router_observe_strength
         ),
+        initial_checkpoint_path=args.initial_checkpoint_path,
+        initial_checkpoint_summary_path=(
+            args.initial_checkpoint_summary_path
+        ),
+        upper_actor_anchor_coef=args.upper_actor_anchor_coef,
+        lower_actor_anchor_coef=args.lower_actor_anchor_coef,
         leakage_constraint_scope=args.leakage_constraint_scope,
         leakage_cost_mode=args.leakage_cost_mode,
         upper_hf_rms_budget=args.upper_hf_rms_budget,

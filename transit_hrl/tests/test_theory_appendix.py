@@ -157,7 +157,7 @@ class TheoryAppendixTest(unittest.TestCase):
             write_outputs(root / "out", payload)
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
-            self.assertGreaterEqual(len(payload["formal_statements"]), 14)
+            self.assertGreaterEqual(len(payload["formal_statements"]), 15)
             router_markov = next(
                 row for row in payload["formal_statements"]
                 if row["id"] == "F12"
@@ -172,6 +172,7 @@ class TheoryAppendixTest(unittest.TestCase):
             self.assertIn("F9 (lemma)", report)
             self.assertIn("F11 (proposition)", report)
             self.assertIn("F14 (proposition)", report)
+            self.assertIn("F15 (proposition)", report)
             self.assertIn("R1 (reporting_approximation)", report)
             self.assertIn("Proof:", report)
             self.assertIn("Limitation:", report)

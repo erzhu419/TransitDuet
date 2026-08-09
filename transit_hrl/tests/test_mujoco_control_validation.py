@@ -16,6 +16,8 @@ from freq_hrl.domains.mujoco import (
 )
 from freq_hrl.experiments.mujoco.control_validation import (
     SAFE_SELECTOR_BASELINE_BRANCH,
+    MUJOCO_CONTROL_PROTOCOL_VERSION,
+    _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
     behavior_robust_checkpoint_diagnostics,
@@ -23,6 +25,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     crossed_checkpoint_selection_paths,
     environment_dimensions,
     lower_action_router_training_strength,
+    load_paired_mujoco_checkpoint,
     mujoco_policy_state_dim,
     rollout_hierarchical,
     select_safe_mujoco_branch,
@@ -415,6 +418,9 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "method": "unit",
             "environment": "unit",
             "disturbance_mode": "standard",
+            "optimizer_seed": 7,
+            "code_revision": "b" * 40,
+            "source_manifest_sha256": "c" * 64,
             "frozen_parameter_sha256": "a" * 64,
             "frozen_checkpoint_sha256": "a" * 64,
         }
@@ -432,6 +438,77 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 summary["checkpoint_integrity_contract"],
                 "independent_parameter_and_serialized_file_sha256_v1",
             )
+
+    def test_paired_checkpoint_loader_verifies_provenance_and_parameters(self):
+        torch.manual_seed(401)
+        baseline = _hierarchical_model(
+            state_dim=5,
+            action_dim=2,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        parameter_sha256 = _model_parameter_sha256(baseline)
+        code_revision = "d" * 40
+        source_manifest = "e" * 64
+        payload = {
+            "history": [{"iteration": 0}],
+            "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+            "method": "freq_hrl_no_leakage",
+            "environment": "HalfCheetah-v5",
+            "disturbance_mode": "standard",
+            "optimizer_seed": 409,
+            "code_revision": code_revision,
+            "source_manifest_sha256": source_manifest,
+            "lower_action_router_mode": "direct",
+            "lower_action_router_strength": 0.0,
+            "lower_action_router_observe_strength": True,
+            "responsibility_mode": "causal_lf_transfer",
+            "selected_checkpoint_iteration": 3,
+            "frozen_parameter_sha256": parameter_sha256,
+            "frozen_checkpoint_sha256": parameter_sha256,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            write_cell(output, payload, [{"metric": 1.0}], baseline)
+            torch.manual_seed(419)
+            candidate = _hierarchical_model(
+                state_dim=5,
+                action_dim=2,
+                hidden_dim=8,
+                learning_rate=3e-4,
+                leakage_constraint=False,
+                lower_actor_anchor_coef=0.5,
+                actor_anchor_zero_state_indices=(4,),
+            )
+            self.assertNotEqual(
+                _model_parameter_sha256(candidate), parameter_sha256
+            )
+            metadata = load_paired_mujoco_checkpoint(
+                candidate,
+                checkpoint_path=output / "checkpoint.pt",
+                summary_path=output / "cell_summary.json",
+                env_id="HalfCheetah-v5",
+                optimizer_seed=409,
+                expected_code_revision=code_revision,
+                expected_source_manifest_sha256=source_manifest,
+            )
+            self.assertEqual(
+                _model_parameter_sha256(candidate), parameter_sha256
+            )
+            self.assertEqual(
+                metadata["checkpoint_parameter_sha256"], parameter_sha256
+            )
+            with self.assertRaisesRegex(ValueError, "summary contract"):
+                load_paired_mujoco_checkpoint(
+                    candidate,
+                    checkpoint_path=output / "checkpoint.pt",
+                    summary_path=output / "cell_summary.json",
+                    env_id="Hopper-v5",
+                    optimizer_seed=409,
+                    expected_code_revision=code_revision,
+                    expected_source_manifest_sha256=source_manifest,
+                )
 
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
@@ -658,7 +735,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_4_router_homotopy",
+            "freq_hrl_mujoco_shared_core_v14_5_paired_anchor_continuation",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -850,6 +927,90 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(rows[0]["LowerActionRouterStrength"], 0.1)
         self.assertTrue(payload["lower_action_router_observe_strength"])
+
+    def test_paired_router_continuation_starts_from_exact_baseline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            baseline_dir = Path(directory) / "baseline"
+            baseline_payload, baseline_rows, baseline_model = (
+                train_mujoco_method(
+                    method="freq_hrl_no_leakage",
+                    env_id="HalfCheetah-v5",
+                    disturbance_mode="standard",
+                    train_seeds=[271],
+                    selection_seeds=[277],
+                    eval_seeds=[281],
+                    steps=8,
+                    episode_horizon=8,
+                    iterations=1,
+                    optimizer_seed=283,
+                    upper_period=4,
+                    hidden_dim=8,
+                    lower_action_router_mode="direct",
+                    lower_action_router_strength=0.0,
+                    lower_action_router_observe_strength=True,
+                    responsibility_mode="causal_lf_transfer",
+                    checkpoint_smoothing_window=1,
+                    checkpoint_min_delta=0.0,
+                    checkpoint_evaluation_interval=1,
+                    evaluation_disturbance_modes=["standard"],
+                )
+            )
+            write_cell(
+                baseline_dir,
+                baseline_payload,
+                baseline_rows,
+                baseline_model,
+            )
+            candidate_payload, _, _ = train_mujoco_method(
+                method="freq_hrl_no_leakage",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                train_seeds=[293],
+                selection_seeds=[307],
+                eval_seeds=[311],
+                steps=8,
+                episode_horizon=8,
+                iterations=1,
+                optimizer_seed=283,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_mode="causal_ema_high_pass",
+                lower_action_router_alpha=0.04,
+                lower_action_router_strength=0.1,
+                lower_action_router_observe_strength=True,
+                responsibility_mode="causal_lf_transfer",
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                upper_actor_anchor_coef=0.05,
+                lower_actor_anchor_coef=0.25,
+                checkpoint_smoothing_window=1,
+                checkpoint_min_delta=0.0,
+                checkpoint_evaluation_interval=1,
+                evaluation_disturbance_modes=["standard"],
+            )
+            continuation = candidate_payload[
+                "paired_checkpoint_continuation"
+            ]
+            self.assertTrue(continuation["enabled"])
+            self.assertEqual(
+                continuation["checkpoint_parameter_sha256"],
+                baseline_payload["frozen_parameter_sha256"],
+            )
+            self.assertEqual(
+                candidate_payload["actor_anchor_zero_state_indices"],
+                [candidate_payload["config"]["lower_state_dim"] - 1],
+            )
+            self.assertEqual(
+                candidate_payload["actor_anchor_contract"],
+                "frozen_matched_direct_policy_at_zero_router_context_"
+                "analytic_gaussian_kl_v1",
+            )
+            self.assertGreaterEqual(
+                candidate_payload["history"][-1]["lower_actor_anchor_kl"],
+                0.0,
+            )
 
     def test_router_curriculum_rejects_hidden_strength(self):
         with self.assertRaisesRegex(

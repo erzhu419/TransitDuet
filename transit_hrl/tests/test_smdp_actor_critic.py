@@ -191,6 +191,71 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
 
+    def test_actor_anchor_uses_zeroed_context_and_reports_policy_drift(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            lower_actor_anchor_coef=0.5,
+            actor_anchor_zero_state_indices=(1,),
+        ))
+        with self.assertRaisesRegex(RuntimeError, "before capture"):
+            model._actor_anchor_terms(
+                level="lower",
+                actor=model.lower_actor,
+                state=torch.as_tensor([[0.25, 1.0]], dtype=torch.float32),
+            )
+
+        model.capture_actor_anchor()
+        zero_context_kl, _ = model._actor_anchor_terms(
+            level="lower",
+            actor=model.lower_actor,
+            state=torch.as_tensor([[0.25, 0.0]], dtype=torch.float32),
+        )
+        nonzero_context_kl, nonzero_context_loss = (
+            model._actor_anchor_terms(
+                level="lower",
+                actor=model.lower_actor,
+                state=torch.as_tensor([[0.25, 1.0]], dtype=torch.float32),
+            )
+        )
+        self.assertAlmostEqual(float(zero_context_kl.item()), 0.0, places=7)
+        self.assertGreater(float(nonzero_context_kl.item()), 0.0)
+        self.assertAlmostEqual(
+            float(nonzero_context_loss.item()),
+            0.5 * float(nonzero_context_kl.item()),
+            places=7,
+        )
+
+        metrics = model.update(self._batch(seed=71))
+        self.assertGreaterEqual(metrics["lower_actor_anchor_kl"], 0.0)
+        self.assertGreaterEqual(metrics["lower_actor_anchor_loss"], 0.0)
+        self.assertGreater(model.actor_anchor_parameter_rms("lower"), 0.0)
+
+    def test_actor_anchor_configuration_rejects_invalid_indices(self):
+        with self.assertRaisesRegex(ValueError, "unique non-negative"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                lower_actor_anchor_coef=1.0,
+                actor_anchor_zero_state_indices=(1, 1),
+            ))
+        with self.assertRaisesRegex(ValueError, "out of range"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                lower_actor_anchor_coef=1.0,
+                actor_anchor_zero_state_indices=(2,),
+            ))
+
     def test_lower_cost_critic_can_use_a_distinct_causal_state(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=3,

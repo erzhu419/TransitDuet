@@ -763,6 +763,41 @@ def build_formal_statement_rows(
             ),
             "verification_status": "proved_under_stated_assumptions",
         },
+        {
+            "id": "F15",
+            "kind": "proposition",
+            "title": "Gaussian actor-anchor KL bounds latent mean compensation",
+            "statement": (
+                "Let p0=N(mu0,diag(sigma0^2)) be the frozen direct-policy "
+                "anchor at zero router context and p=N(mu,diag(sigma^2)) the "
+                "continuation policy at the current context. If every current "
+                "standard deviation is at most S, then ||mu-mu0||_2^2 <= "
+                "2 S^2 D_KL(p0||p). The implemented S=3 clamp therefore gives "
+                "||mu-mu0||_2^2 <= 18 D_KL(p0||p)."
+            ),
+            "assumptions": [
+                "Both policies are diagonal Gaussian actors over the same latent action coordinates.",
+                "The anchor receives the matched state with registered router-context coordinates set to zero.",
+                "The continuation actor standard deviation uses the implemented finite upper clamp S.",
+            ],
+            "proof": (
+                "The diagonal Gaussian KL is one half the sum of the mean term "
+                "(mu_i-mu0_i)^2/sigma_i^2 and the nonnegative variance term "
+                "sigma0_i^2/sigma_i^2-1-log(sigma0_i^2/sigma_i^2). Drop the "
+                "variance term and use sigma_i^2<=S^2."
+            ),
+            "limitation": (
+                "The bound controls latent distribution movement only. Routing, "
+                "sampling, clipping, state-distribution shift, and model error "
+                "prevent it from implying return preservation or physical "
+                "low-frequency reduction. Those remain paired empirical gates."
+            ),
+            "diagnostic": (
+                "Report anchor KL, actor parameter RMS, routed physical drift, "
+                "and return on the same paired seed units."
+            ),
+            "verification_status": "proved_under_stated_assumptions",
+        },
     ]
 
 

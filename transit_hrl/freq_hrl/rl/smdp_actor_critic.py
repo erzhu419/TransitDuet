@@ -345,6 +345,9 @@ class SMDPPPOConfig:
     value_coef: float = 0.5
     cost_value_coef: float = 0.5
     entropy_coef: float = 0.001
+    upper_actor_anchor_coef: float = 0.0
+    lower_actor_anchor_coef: float = 0.0
+    actor_anchor_zero_state_indices: tuple[int, ...] = ()
     promotion_entropy_coef: float | None = None
     promotion_rate_budget: float = 1.0
     promotion_rate_coef: float = 0.0
@@ -1058,6 +1061,32 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "promotion_advantage_huber_delta must be positive and finite"
             )
+        for level in ("upper", "lower"):
+            coefficient = float(
+                getattr(config, f"{level}_actor_anchor_coef")
+            )
+            if not np.isfinite(coefficient) or coefficient < 0.0:
+                raise ValueError(
+                    f"{level}_actor_anchor_coef must be finite and non-negative"
+                )
+        anchor_indices = tuple(config.actor_anchor_zero_state_indices)
+        if any(
+            isinstance(index, bool) or int(index) != index or int(index) < 0
+            for index in anchor_indices
+        ) or len(set(map(int, anchor_indices))) != len(anchor_indices):
+            raise ValueError(
+                "actor_anchor_zero_state_indices must be unique non-negative integers"
+            )
+        if (
+            float(config.upper_actor_anchor_coef) > 0.0
+            and any(int(index) >= int(config.upper_state_dim) for index in anchor_indices)
+        ):
+            raise ValueError("an upper actor anchor state index is out of range")
+        if (
+            float(config.lower_actor_anchor_coef) > 0.0
+            and any(int(index) >= int(config.lower_state_dim) for index in anchor_indices)
+        ):
+            raise ValueError("a lower actor anchor state index is out of range")
         if (
             float(config.promotion_advantage_coef) > 0.0
             and int(config.promotion_state_dim) <= 0
@@ -1362,6 +1391,68 @@ class FrequencySeparatedActorCriticPPO:
             )
         self.upper_constraint_lambda = float(config.upper_lambda_init)
         self.constraint_lambda = float(config.lower_lambda_init)
+        self._actor_anchors: dict[str, nn.Module] = {}
+
+    def capture_actor_anchor(self) -> None:
+        """Freeze the current upper/lower policies as a proximal reference."""
+
+        self._actor_anchors = {
+            "upper": copy.deepcopy(self.upper_actor).to(self.device).eval(),
+            "lower": copy.deepcopy(self.lower_actor).to(self.device).eval(),
+        }
+        for anchor in self._actor_anchors.values():
+            for parameter in anchor.parameters():
+                parameter.requires_grad_(False)
+
+    def actor_anchor_parameter_rms(self, level: str) -> float:
+        """Return parameter-space movement from the frozen actor anchor."""
+
+        name = str(level)
+        actor = getattr(self, f"{name}_actor", None)
+        anchor = self._actor_anchors.get(name)
+        if actor is None or anchor is None:
+            raise RuntimeError(f"{name} actor anchor is not configured")
+        squared = 0.0
+        count = 0
+        with torch.no_grad():
+            for current, reference in zip(
+                actor.parameters(), anchor.parameters(), strict=True
+            ):
+                difference = current.detach() - reference.detach()
+                squared += float(torch.sum(difference.square()).cpu().item())
+                count += int(difference.numel())
+        if count < 1:
+            raise RuntimeError("actor anchor exposes no parameters")
+        return float(np.sqrt(squared / count))
+
+    def _actor_anchor_terms(
+        self,
+        *,
+        level: str,
+        actor: nn.Module,
+        state: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        coefficient = float(
+            getattr(self.config, f"{level}_actor_anchor_coef", 0.0)
+        )
+        zero = torch.zeros((), dtype=torch.float32, device=self.device)
+        if coefficient <= 0.0:
+            return zero, zero
+        anchor = self._actor_anchors.get(str(level))
+        if anchor is None:
+            raise RuntimeError(
+                f"{level} actor anchor coefficient is active before capture"
+            )
+        anchor_state = state.detach().clone()
+        for index in self.config.actor_anchor_zero_state_indices:
+            anchor_state[:, int(index)] = 0.0
+        with torch.no_grad():
+            reference_distribution = anchor.distribution(anchor_state)
+        current_distribution = actor.distribution(state)
+        divergence = torch.distributions.kl_divergence(
+            reference_distribution, current_distribution
+        ).sum(dim=-1).mean()
+        return divergence, coefficient * divergence
 
     def state_dict(self) -> dict[str, Any]:
         payload = {
@@ -1986,12 +2077,18 @@ class FrequencySeparatedActorCriticPPO:
                             counterfactual_target_t[idx],
                             beta=float(cfg.promotion_advantage_huber_delta),
                         )
+                actor_anchor_kl, actor_anchor_loss = self._actor_anchor_terms(
+                    level=level,
+                    actor=actor,
+                    state=state[idx],
+                )
                 policy_loss = (
                     -reward_surrogate
                     - float(cfg.promotion_counterfactual_coef)
                     * promotion_counterfactual_surrogate
                     + constraint_loss
                     + promotion_rate_loss
+                    + actor_anchor_loss
                 )
                 value_loss = torch.mean((value_net(state[idx]) - returns_t[idx]) ** 2)
                 cost_value_loss = torch.zeros((), dtype=torch.float32, device=self.device)
@@ -2032,7 +2129,7 @@ class FrequencySeparatedActorCriticPPO:
                 )
                 if guarded_update:
                     def current_surrogates() -> tuple[
-                        torch.Tensor, torch.Tensor, torch.Tensor
+                        torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
                     ]:
                         current_logp, current_entropy = (
                             actor.log_prob_entropy(
@@ -2055,26 +2152,34 @@ class FrequencySeparatedActorCriticPPO:
                             current_ratio * cost_adv_t[idx],
                             current_clipped * cost_adv_t[idx],
                         ).mean()
+                        _, current_anchor_loss = self._actor_anchor_terms(
+                            level=level,
+                            actor=actor,
+                            state=state[idx],
+                        )
                         return (
                             current_reward,
                             current_entropy.mean(),
                             current_cost,
+                            current_anchor_loss,
                         )
 
                     def reward_actor_loss_fn() -> torch.Tensor:
-                        current_reward, current_entropy, _ = (
+                        current_reward, current_entropy, _, current_anchor = (
                             current_surrogates()
                         )
                         return -current_reward - (
                             entropy_coef * current_entropy
-                        )
+                        ) + current_anchor
 
                     def reward_guard_loss_fn() -> torch.Tensor:
-                        current_reward, _, _ = current_surrogates()
-                        return -current_reward
+                        current_reward, _, _, current_anchor = (
+                            current_surrogates()
+                        )
+                        return -current_reward + current_anchor
 
                     def constraint_loss_fn() -> torch.Tensor:
-                        _, _, current_cost = current_surrogates()
+                        _, _, current_cost, _ = current_surrogates()
                         return constraint_lambda * current_cost
 
                     if (
@@ -2177,6 +2282,12 @@ class FrequencySeparatedActorCriticPPO:
                     "cost_value_loss": float(cost_value_loss.detach().cpu().item()),
                     "entropy": float(entropy_mean.detach().cpu().item()),
                     "constraint_loss": float(constraint_loss.detach().cpu().item()),
+                    "actor_anchor_kl": float(
+                        actor_anchor_kl.detach().cpu().item()
+                    ),
+                    "actor_anchor_loss": float(
+                        actor_anchor_loss.detach().cpu().item()
+                    ),
                     "constraint_guard_attempted": float(
                         guarded_diagnostics["attempted"]
                     ),
