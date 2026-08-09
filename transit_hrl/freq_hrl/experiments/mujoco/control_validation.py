@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_3_partial_action_router"
+    "freq_hrl_mujoco_shared_core_v14_4_router_homotopy"
 )
 METHODS = (
     "freq_hrl",
@@ -89,6 +89,11 @@ SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 RESPONSIBILITY_TRANSFER_ALPHA = 0.04
 DEFAULT_LOWER_ROUTER_ALPHA = 0.10
 DEFAULT_LOWER_ROUTER_STRENGTH = 1.0
+LOWER_ACTION_ROUTER_TRAINING_SCHEDULES = (
+    "constant",
+    "delayed_linear",
+    "delayed_cosine",
+)
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
 LEAKAGE_COST_MODES = (
     "ratio_excess_squared",
@@ -308,10 +313,59 @@ def capacity_matched_flat_hidden_dim(
     return hidden, actual, float(actual / int(target_parameter_count))
 
 
-def mujoco_policy_state_dim(observation_dim: int, action_dim: int) -> int:
+def mujoco_policy_state_dim(
+    observation_dim: int,
+    action_dim: int,
+    *,
+    observe_router_strength: bool = False,
+) -> int:
     if int(observation_dim) < 1 or int(action_dim) < 1:
         raise ValueError("MuJoCo observation and action dimensions must be positive")
-    return int(observation_dim) + 5 * int(action_dim)
+    return (
+        int(observation_dim)
+        + 5 * int(action_dim)
+        + int(bool(observe_router_strength))
+    )
+
+
+def lower_action_router_training_strength(
+    *,
+    iteration: int,
+    total_iterations: int,
+    target_strength: float,
+    schedule: str,
+    warmup_fraction: float,
+    ramp_fraction: float,
+) -> float:
+    if int(total_iterations) < 1:
+        raise ValueError("router schedule requires a positive iteration count")
+    if not 0 <= int(iteration) < int(total_iterations):
+        raise ValueError("router schedule iteration is out of range")
+    target = float(target_strength)
+    warmup = float(warmup_fraction)
+    ramp = float(ramp_fraction)
+    if not np.isfinite(target) or not 0.0 <= target <= 1.0:
+        raise ValueError("router target strength must be in [0, 1]")
+    if (
+        not np.isfinite(warmup)
+        or not np.isfinite(ramp)
+        or not 0.0 <= warmup <= 1.0
+        or not 0.0 <= ramp <= 1.0
+        or warmup + ramp > 1.0
+    ):
+        raise ValueError("router warmup and ramp fractions are invalid")
+    mode = str(schedule)
+    if mode not in LOWER_ACTION_ROUTER_TRAINING_SCHEDULES:
+        raise ValueError("unknown lower-action router training schedule")
+    if mode == "constant" or target == 0.0:
+        return target
+    if ramp <= 0.0:
+        raise ValueError("a delayed router schedule requires a positive ramp")
+    progress = float(int(iteration) + 1) / float(int(total_iterations))
+    phase = float(np.clip((progress - warmup) / ramp, 0.0, 1.0))
+    if mode == "delayed_cosine":
+        phase = 0.5 - 0.5 * float(np.cos(np.pi * phase))
+    return float(target * phase)
 
 
 def _feature_state(
@@ -320,6 +374,7 @@ def _feature_state(
     action_context: np.ndarray,
     *,
     filter_contexts: tuple[np.ndarray, np.ndarray] | None = None,
+    router_strength_context: float | None = None,
     frequency_routing: bool,
     level: str,
 ) -> np.ndarray:
@@ -340,7 +395,12 @@ def _feature_state(
         exogenous = (bands["mid"], bands["high"])
     else:
         exogenous = (bands["raw"], bands["delta"])
-    pieces = (endogenous, *exogenous, context, *filters)
+    strength = (
+        ()
+        if router_strength_context is None
+        else (np.asarray([router_strength_context], dtype=np.float32),)
+    )
+    pieces = (endogenous, *exogenous, context, *filters, *strength)
     return np.concatenate(pieces).astype(np.float32, copy=False)
 
 
@@ -615,6 +675,7 @@ def rollout_hierarchical(
     lower_action_router_mode: str = "direct",
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
     lower_action_router_strength: float = DEFAULT_LOWER_ROUTER_STRENGTH,
+    lower_action_router_observe_strength: bool = False,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -632,6 +693,11 @@ def rollout_hierarchical(
         raise ValueError(
             "MuJoCo lower-action router strength must be in [0, 1]"
         )
+    router_strength_context = (
+        float(lower_action_router_strength)
+        if bool(lower_action_router_observe_strength)
+        else None
+    )
     if (
         str(upper_constraint_mode) == "primal_dual"
         and model.upper_cost_value is None
@@ -747,6 +813,7 @@ def rollout_hierarchical(
                         responsibility.raw_lower_lf,
                         lower_router.context,
                     ),
+                    router_strength_context=router_strength_context,
                     frequency_routing=frequency_routing,
                     level="upper",
                 )
@@ -800,6 +867,7 @@ def rollout_hierarchical(
                     responsibility.raw_lower_lf,
                     lower_router.context,
                 ),
+                router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
             )
@@ -811,6 +879,7 @@ def rollout_hierarchical(
                     raw_lower_lf_tracker.low,
                     responsibility_lf_tracker.low,
                 ),
+                router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
             )
@@ -984,6 +1053,7 @@ def rollout_hierarchical(
                             responsibility.raw_lower_lf,
                             lower_router.context,
                         ),
+                        router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="upper",
                     )
@@ -1014,6 +1084,7 @@ def rollout_hierarchical(
                             responsibility.raw_lower_lf,
                             lower_router.context,
                         ),
+                        router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
                     )
@@ -1030,6 +1101,7 @@ def rollout_hierarchical(
                             raw_lower_lf_tracker.low,
                             responsibility_lf_tracker.low,
                         ),
+                        router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
                     )
@@ -2080,6 +2152,10 @@ def train_mujoco_method(
     lower_action_router_mode: str = "direct",
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
     lower_action_router_strength: float = DEFAULT_LOWER_ROUTER_STRENGTH,
+    lower_action_router_training_schedule: str = "constant",
+    lower_action_router_warmup_fraction: float = 0.0,
+    lower_action_router_ramp_fraction: float = 0.0,
+    lower_action_router_observe_strength: bool = False,
     checkpoint_selection_mode: str = "assigned_condition",
     checkpoint_score_mode: str = "mean_reward",
     checkpoint_constraint_penalty: float = (
@@ -2165,6 +2241,23 @@ def train_mujoco_method(
         raise ValueError(
             "MuJoCo lower-action router strength must be in [0, 1]"
         )
+    if (
+        str(lower_action_router_training_schedule)
+        not in LOWER_ACTION_ROUTER_TRAINING_SCHEDULES
+    ):
+        raise ValueError("unknown lower-action router training schedule")
+    if (
+        not np.isfinite(float(lower_action_router_warmup_fraction))
+        or not np.isfinite(float(lower_action_router_ramp_fraction))
+        or not 0.0 <= float(lower_action_router_warmup_fraction) <= 1.0
+        or not 0.0 <= float(lower_action_router_ramp_fraction) <= 1.0
+        or (
+            float(lower_action_router_warmup_fraction)
+            + float(lower_action_router_ramp_fraction)
+            > 1.0
+        )
+    ):
+        raise ValueError("invalid lower-action router schedule fractions")
     if str(checkpoint_selection_mode) not in CHECKPOINT_SELECTION_MODES:
         raise ValueError("unknown MuJoCo checkpoint selection mode")
     if str(checkpoint_score_mode) not in CHECKPOINT_SCORE_MODES:
@@ -2194,7 +2287,6 @@ def train_mujoco_method(
         env_id,
         episode_horizon=episode_horizon,
     )
-    state_dim = mujoco_policy_state_dim(observation_dim, action_dim)
     effective_lower_action_router_mode = (
         str(lower_action_router_mode)
         if name.startswith("freq_hrl") else "direct"
@@ -2202,7 +2294,45 @@ def train_mujoco_method(
     effective_lower_action_router_strength = (
         float(lower_action_router_strength)
         if effective_lower_action_router_mode == "causal_ema_high_pass"
-        else 1.0
+        else 0.0
+    )
+    effective_router_training_schedule = (
+        str(lower_action_router_training_schedule)
+        if effective_lower_action_router_mode == "causal_ema_high_pass"
+        else "constant"
+    )
+    effective_router_observe_strength = bool(
+        lower_action_router_observe_strength
+    )
+    if (
+        effective_lower_action_router_mode != "causal_ema_high_pass"
+        and str(lower_action_router_training_schedule) != "constant"
+    ):
+        raise ValueError("a direct lower-action router cannot use a curriculum")
+    if (
+        effective_router_training_schedule != "constant"
+        and not effective_router_observe_strength
+    ):
+        raise ValueError(
+            "a router curriculum must expose its strength in policy state"
+        )
+    if name == "flat_ppo" and effective_router_observe_strength:
+        raise ValueError("flat PPO cannot observe hierarchical router strength")
+    router_training_strengths_by_iteration = [
+        lower_action_router_training_strength(
+            iteration=iteration,
+            total_iterations=max(1, int(iterations)),
+            target_strength=effective_lower_action_router_strength,
+            schedule=effective_router_training_schedule,
+            warmup_fraction=lower_action_router_warmup_fraction,
+            ramp_fraction=lower_action_router_ramp_fraction,
+        )
+        for iteration in range(max(1, int(iterations)))
+    ]
+    state_dim = mujoco_policy_state_dim(
+        observation_dim,
+        action_dim,
+        observe_router_strength=effective_router_observe_strength,
     )
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
@@ -2251,12 +2381,16 @@ def train_mujoco_method(
         seed_modes[int(seed)] = str(mode)
 
     derived_training_seeds: set[int] = set()
+    training_router_strength_by_seed: dict[int, float] = {}
     for iteration in range(max(1, int(iterations))):
         for root in roots:
             derived = training_rollout_seed(
                 int(optimizer_seed), root, iteration, domain=domain_seed_key
             )
             derived_training_seeds.add(int(derived))
+            training_router_strength_by_seed[int(derived)] = float(
+                router_training_strengths_by_iteration[iteration]
+            )
             register_seed_mode(derived, train_root_modes[int(root)])
     for seed, mode in selection_seed_modes.items():
         register_seed_mode(seed, mode)
@@ -2288,6 +2422,11 @@ def train_mujoco_method(
             raise KeyError(
                 f"MuJoCo rollout seed {int(seed)} has no registered condition"
             ) from exc
+
+    def router_strength_for_seed(seed: int) -> float:
+        return float(training_router_strength_by_seed.get(
+            int(seed), effective_lower_action_router_strength
+        ))
 
     checkpoint_score_fn = None
     checkpoint_score_contract = "mean_reward_mean_v1"
@@ -2453,7 +2592,10 @@ def train_mujoco_method(
                     lower_action_router_mode=effective_lower_action_router_mode,
                     lower_action_router_alpha=lower_action_router_alpha,
                     lower_action_router_strength=(
-                        effective_lower_action_router_strength
+                        router_strength_for_seed(seed)
+                    ),
+                    lower_action_router_observe_strength=(
+                        effective_router_observe_strength
                     ),
                     sample=sample,
                     method=name,
@@ -2512,6 +2654,9 @@ def train_mujoco_method(
                         lower_action_router_alpha=lower_action_router_alpha,
                         lower_action_router_strength=(
                             effective_lower_action_router_strength
+                        ),
+                        lower_action_router_observe_strength=(
+                            effective_router_observe_strength
                         ),
                         sample=False,
                         method=name,
@@ -2721,7 +2866,10 @@ def train_mujoco_method(
             lower_action_router_mode=effective_lower_action_router_mode,
             lower_action_router_alpha=lower_action_router_alpha,
             lower_action_router_strength=(
-                effective_lower_action_router_strength
+                router_strength_for_seed(seed)
+            ),
+            lower_action_router_observe_strength=(
+                effective_router_observe_strength
             ),
             sample=sample,
             method=name,
@@ -2803,6 +2951,9 @@ def train_mujoco_method(
                     lower_action_router_alpha=lower_action_router_alpha,
                     lower_action_router_strength=(
                         effective_lower_action_router_strength
+                    ),
+                    lower_action_router_observe_strength=(
+                        effective_router_observe_strength
                     ),
                     sample=False,
                     method=name,
@@ -2911,9 +3062,28 @@ def train_mujoco_method(
         "lower_action_router_strength": float(
             effective_lower_action_router_strength
         ),
+        "lower_action_router_training_schedule": (
+            effective_router_training_schedule
+        ),
+        "lower_action_router_warmup_fraction": float(
+            lower_action_router_warmup_fraction
+        ),
+        "lower_action_router_ramp_fraction": float(
+            lower_action_router_ramp_fraction
+        ),
+        "lower_action_router_observe_strength": bool(
+            effective_router_observe_strength
+        ),
+        "lower_action_router_training_strengths_by_iteration": [
+            float(value) for value in router_training_strengths_by_iteration
+        ],
+        "lower_action_router_schedule_contract": (
+            "curriculum_applies_only_to_sampled_training_rollouts_while_"
+            "checkpoint_selection_and_heldout_use_frozen_target_v1"
+        ),
         "lower_action_router_contract": (
             "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
-            "observed_router_state_and_effective_action_clipping_v2"
+            "observed_router_state_strength_and_effective_action_clipping_v3"
             if effective_lower_action_router_mode == "causal_ema_high_pass"
             else "direct_latent_to_effective_lower_action_v1"
         ),
@@ -2945,7 +3115,9 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
-            "canonical_raw_lf_and_observed_lower_router_state_v2"
+            "canonical_raw_lf_observed_lower_router_state_and_strength_v3"
+            if effective_router_observe_strength
+            else "canonical_raw_lf_and_observed_lower_router_state_v2"
         ),
         "lower_cost_state_contract": (
             "causal_responsibility_anchor_32_step_raw_and_responsibility_"
@@ -3095,6 +3267,25 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_LOWER_ROUTER_STRENGTH,
     )
     parser.add_argument(
+        "--lower-action-router-training-schedule",
+        choices=LOWER_ACTION_ROUTER_TRAINING_SCHEDULES,
+        default="constant",
+    )
+    parser.add_argument(
+        "--lower-action-router-warmup-fraction",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
+        "--lower-action-router-ramp-fraction",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
+        "--lower-action-router-observe-strength",
+        action="store_true",
+    )
+    parser.add_argument(
         "--leakage-constraint-scope",
         choices=LEAKAGE_CONSTRAINT_SCOPES,
         default="joint_behavior",
@@ -3200,6 +3391,18 @@ def main() -> None:
         lower_action_router_mode=args.lower_action_router_mode,
         lower_action_router_alpha=args.lower_action_router_alpha,
         lower_action_router_strength=args.lower_action_router_strength,
+        lower_action_router_training_schedule=(
+            args.lower_action_router_training_schedule
+        ),
+        lower_action_router_warmup_fraction=(
+            args.lower_action_router_warmup_fraction
+        ),
+        lower_action_router_ramp_fraction=(
+            args.lower_action_router_ramp_fraction
+        ),
+        lower_action_router_observe_strength=(
+            args.lower_action_router_observe_strength
+        ),
         leakage_constraint_scope=args.leakage_constraint_scope,
         leakage_cost_mode=args.leakage_cost_mode,
         upper_hf_rms_budget=args.upper_hf_rms_budget,

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-FORMAL_SCOPE_VERSION = "freq_hrl_formal_scope_v3"
+FORMAL_SCOPE_VERSION = "freq_hrl_formal_scope_v4"
 
 
 def shaped_return_deviation_bound(
@@ -671,29 +671,36 @@ def build_formal_statement_rows(
         {
             "id": "F12",
             "kind": "proposition",
-            "title": "Exposed router state preserves an augmented Markov description",
+            "title": "Exposed router state and strength preserve a rollout-level Markov description",
             "statement": (
                 "If the base controlled process is Markov in s_t and the router "
                 "baseline b_t is updated deterministically from (b_t,z_t), then "
-                "the augmented process (s_t,b_t) is Markov. Supplying b_t to the "
-                "lower policy therefore prevents this router from introducing "
-                "unobserved controller state."
+                "for any strength beta held fixed within a rollout the augmented "
+                "process (s_t,b_t,beta) is Markov. Supplying both b_t and beta to "
+                "the policy prevents the routed action from introducing unobserved "
+                "controller state within that rollout."
             ),
             "assumptions": [
                 "The base transition kernel is Markov in the declared environment state and executed action.",
                 "The router update is deterministic and uses no future proposal or observation.",
                 "The policy observation contains the complete router baseline used for the current route.",
+                "The routing strength is fixed within each rollout and is included in the policy observation.",
             ],
             "proof": (
-                "Conditioned on (s_t,b_t) and z_t, the effective action is fixed; "
+                "Conditioned on (s_t,b_t,beta) and z_t, the effective action is fixed; "
                 "the base kernel determines s_{t+1}, and the router recursion "
                 "determines b_{t+1}. No earlier history enters either transition."
             ),
             "limitation": (
-                "This isolates router-state observability only; other encoders or "
-                "partially observed environments can still require recurrent state."
+                "A training curriculum changes beta between rollouts and is therefore "
+                "a nonstationary optimization procedure. This proposition gives no "
+                "convergence, return-preservation, or cross-task performance guarantee."
             ),
-            "diagnostic": "The registered lower-policy input schema must include router.context.",
+            "diagnostic": (
+                "The registered policy input must include router.context and the "
+                "current strength; checkpoint selection and held-out evaluation must "
+                "report the frozen target strength."
+            ),
             "verification_status": "proved_under_stated_assumptions",
         },
         {

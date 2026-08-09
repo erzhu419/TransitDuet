@@ -158,6 +158,15 @@ class TheoryAppendixTest(unittest.TestCase):
             self.assertTrue((root / "out" / "summary.json").exists())
             report = (root / "out" / "report.md").read_text()
             self.assertGreaterEqual(len(payload["formal_statements"]), 14)
+            router_markov = next(
+                row for row in payload["formal_statements"]
+                if row["id"] == "F12"
+            )
+            self.assertIn("(s_t,b_t,beta)", router_markov["statement"])
+            self.assertIn(
+                "nonstationary optimization",
+                router_markov["limitation"],
+            )
             self.assertIn("F1 (lemma)", report)
             self.assertIn("F3 (proposition)", report)
             self.assertIn("F9 (lemma)", report)

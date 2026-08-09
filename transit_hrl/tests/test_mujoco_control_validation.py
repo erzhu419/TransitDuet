@@ -22,6 +22,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     capacity_matched_flat_hidden_dim,
     crossed_checkpoint_selection_paths,
     environment_dimensions,
+    lower_action_router_training_strength,
     mujoco_policy_state_dim,
     rollout_hierarchical,
     select_safe_mujoco_branch,
@@ -94,6 +95,36 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             result["branch_diagnostics"][
                 "behavior_guarded_adam_projection"
             ]["feasible"]
+        )
+
+    def test_router_homotopy_has_registered_linear_and_cosine_paths(self):
+        linear = [
+            lower_action_router_training_strength(
+                iteration=iteration,
+                total_iterations=4,
+                target_strength=0.1,
+                schedule="delayed_linear",
+                warmup_fraction=0.25,
+                ramp_fraction=0.5,
+            )
+            for iteration in range(4)
+        ]
+        self.assertTrue(np.allclose(linear, [0.0, 0.05, 0.1, 0.1]))
+        cosine = lower_action_router_training_strength(
+            iteration=2,
+            total_iterations=8,
+            target_strength=0.1,
+            schedule="delayed_cosine",
+            warmup_fraction=0.25,
+            ramp_fraction=0.5,
+        )
+        expected = 0.1 * (0.5 - 0.5 * np.cos(np.pi * 0.25))
+        self.assertAlmostEqual(cosine, expected)
+        self.assertEqual(
+            mujoco_policy_state_dim(
+                17, 6, observe_router_strength=True
+            ),
+            mujoco_policy_state_dim(17, 6) + 1,
         )
 
     def test_safe_selector_falls_back_when_no_candidate_is_pareto_safe(self):
@@ -627,7 +658,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_3_partial_action_router",
+            "freq_hrl_mujoco_shared_core_v14_4_router_homotopy",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -771,6 +802,80 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertLessEqual(rows[0]["UpperConstraintCostMax"], 1.0)
         self.assertLessEqual(rows[0]["LowerConstraintCostMax"], 1.0)
         self.assertEqual(rows[0]["UpperHFPenaltyTotal"], 0.0)
+
+    def test_router_curriculum_is_training_only_and_observed(self):
+        payload, rows, _ = train_mujoco_method(
+            method="freq_hrl_no_leakage",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[211],
+            selection_seeds=[223],
+            eval_seeds=[227],
+            steps=8,
+            episode_horizon=8,
+            iterations=4,
+            optimizer_seed=229,
+            upper_period=4,
+            hidden_dim=8,
+            lower_action_router_mode="causal_ema_high_pass",
+            lower_action_router_alpha=0.04,
+            lower_action_router_strength=0.1,
+            lower_action_router_training_schedule="delayed_linear",
+            lower_action_router_warmup_fraction=0.25,
+            lower_action_router_ramp_fraction=0.5,
+            lower_action_router_observe_strength=True,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=4,
+        )
+        expected = [0.0, 0.05, 0.1, 0.1]
+        self.assertTrue(np.allclose(
+            payload["lower_action_router_training_strengths_by_iteration"],
+            expected,
+        ))
+        self.assertTrue(np.allclose(
+            [
+                row["sampled_lower_action_router_strength"]
+                for row in payload["history"][1:]
+            ],
+            expected,
+        ))
+        self.assertEqual(
+            payload["history"][0]["LowerActionRouterStrength_mean"],
+            0.1,
+        )
+        self.assertEqual(
+            payload["history"][-1]["LowerActionRouterStrength_mean"],
+            0.1,
+        )
+        self.assertEqual(rows[0]["LowerActionRouterStrength"], 0.1)
+        self.assertTrue(payload["lower_action_router_observe_strength"])
+
+    def test_router_curriculum_rejects_hidden_strength(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "must expose its strength",
+        ):
+            train_mujoco_method(
+                method="freq_hrl_no_leakage",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                train_seeds=[233],
+                selection_seeds=[239],
+                eval_seeds=[241],
+                steps=8,
+                episode_horizon=8,
+                iterations=2,
+                optimizer_seed=251,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_mode="causal_ema_high_pass",
+                lower_action_router_strength=0.1,
+                lower_action_router_training_schedule="delayed_linear",
+                lower_action_router_warmup_fraction=0.0,
+                lower_action_router_ramp_fraction=0.5,
+                lower_action_router_observe_strength=False,
+            )
 
     def test_safe_selector_keeps_branch_selection_out_of_heldout_paths(self):
         payload, rows, _ = train_mujoco_method(

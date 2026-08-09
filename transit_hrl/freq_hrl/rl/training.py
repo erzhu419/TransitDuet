@@ -122,6 +122,10 @@ def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> d
         out["sampled_sharpe"] = float(np.mean([float(row["sharpe"]) for row in rows]))
     if rows and "reward_mean" in rows[0]:
         out["sampled_reward_mean"] = float(np.mean([float(row["reward_mean"]) for row in rows]))
+    if rows and "LowerActionRouterStrength" in rows[0]:
+        out["sampled_lower_action_router_strength"] = float(np.mean([
+            float(row["LowerActionRouterStrength"]) for row in rows
+        ]))
     for key in (
         "episode_length",
         "rollout_segment_count",
