@@ -513,3 +513,30 @@ separately to weight two and weight four. The primary claim is eligible only
 when weight two alone returns `unique_pass`. Weight four is reported as
 sensitivity evidence regardless of outcome and cannot alter the primary
 decision.
+
+## Engineering-v8 dispatch record (2026-08-09)
+
+Clean detached commit `54f4a8e66763059274b2d6d5c9f4b2bc5e7ad92a` in
+`FreqDuet-v6-engineering-v8-snapshot` passed the complete local suite: 278
+tests passed, one was skipped, and 33 subtests passed. The five-arm config
+validator also passed without permitting an exploratory config.
+
+The confirmation run is
+`protocol_v6_compact_primary_confirm_ep40_s6_e4_v8`. Scheduler tasks `t78895`
+through `t78924` were submitted as 30 one-job shards and hard-pinned
+round-robin to `node001` through `node006`, five tasks per node. All 30 reached
+running state and are visible to the scheduler.
+
+Before episode zero, the shared HPC result tree contained 30 unique run
+manifests and 30 diagnostics files, with six manifests for each locked arm.
+Every manifest reports confirmation stage, 40 episodes, checkpoint 39, the
+six preregistered training seeds, the four preregistered evaluation seeds,
+clean commit `54f4a8e667`, and the isolated
+`freqduet-cpu-py310` interpreter. Their common model-source fingerprint is
+`d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada`,
+their common scenario contract is
+`45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17`,
+and their common launch-analysis fingerprint is
+`5f9be9647ce2f6053fccd15b63195c649b188a652aa42a62bcd35b8be1a1b9a8`.
+No traceback was present. Episode-zero checkpoints were not yet available at
+this launch audit, so this record is dispatch and provenance evidence only.
