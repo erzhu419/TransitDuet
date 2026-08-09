@@ -559,6 +559,16 @@ def _leakage_constraint_cost(
     raise ValueError(f"unknown leakage constraint cost mode: {mode}")
 
 
+def _trace_sha256(*arrays: np.ndarray) -> str:
+    digest = hashlib.sha256()
+    for value in arrays:
+        array = np.ascontiguousarray(np.asarray(value))
+        digest.update(str(array.dtype).encode("ascii") + b"\0")
+        digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
+        digest.update(array.tobytes())
+    return digest.hexdigest()
+
+
 def _episode_row(
     *,
     seed: int,
@@ -654,6 +664,13 @@ def _episode_row(
         "method": str(method),
         "episode_return": float(np.sum(rewards)),
         "reward_mean": float(np.mean(rewards)),
+        "RewardTraceSHA256": _trace_sha256(np.asarray(
+            rewards, dtype=np.float64
+        )),
+        "ExecutedActionTraceSHA256": _trace_sha256(executed),
+        "LatentPolicyTraceSHA256": _trace_sha256(
+            upper_policy, latent_lower
+        ),
         "episode_length": len(rewards),
         "rollout_segment_count": len(segment_returns),
         "rollout_segment_return_mean": float(np.mean(segment_returns)),

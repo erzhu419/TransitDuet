@@ -651,6 +651,12 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "LatentLowerLFDriftAbs",
         ):
             self.assertEqual(control[metric], transferred[metric], metric)
+        for trace in (
+            "RewardTraceSHA256",
+            "ExecutedActionTraceSHA256",
+            "LatentPolicyTraceSHA256",
+        ):
+            self.assertEqual(control[trace], transferred[trace], trace)
         self.assertGreater(transferred["LowerRouterRemovedRMS"], 0.0)
         self.assertEqual(
             transferred["LowerRouterUpperTransferRMS"],
