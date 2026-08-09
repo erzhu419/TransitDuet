@@ -1,4 +1,9 @@
-"""Build a conservative manuscript submission package from Freq-HRL artifacts."""
+"""Build the legacy C1-C9 manuscript scaffold.
+
+This generator is retained for provenance and historical table reconstruction.
+It is not the authoritative manuscript evidence source after the independent
+2026-08-09 audit; use ``authoritative_evidence_registry`` for paper claims.
+"""
 
 from __future__ import annotations
 
@@ -44,6 +49,12 @@ CENTRAL_MANUSCRIPT_CLAIM = (
     "Freq-HRL implements frequency-responsibility routing for hierarchical "
     "time-series control; its performance claims are limited to raw observed "
     "outcomes that pass frozen confirmatory gates."
+)
+
+LEGACY_NOTICE = (
+    "LEGACY SCAFFOLD: the C1-C9 matrix predates the 2026-08-09 independent "
+    "evidence audit. It must not be used as the current manuscript claim "
+    "ledger. Use transit_hrl/evidence/authoritative_registry_v1.json."
 )
 
 
@@ -315,6 +326,8 @@ def write_submission_package(
         "",
         "Date: 2026-06-12",
         "",
+        f"> **{LEGACY_NOTICE}**",
+        "",
         "## One-Sentence Argument",
         "",
         CENTRAL_MANUSCRIPT_CLAIM,
@@ -336,7 +349,7 @@ def write_submission_package(
             "high-frequency disturbances. We introduce Freq-HRL, a frequency-routed "
             "hierarchical control protocol with causal encoders, temporally distinct "
             "upper and lower policies, promotion-triggered replanning, and leakage "
-            "accounting. The current raw-only evidence ledger supports "
+            "accounting. The historical raw-only evidence ledger supports "
             f"{len(supported_ids)} of {len(claim_rows)} registered claims "
             f"({', '.join(supported_ids) or 'none'}); unresolved claims are "
             f"{', '.join(unresolved_ids) or 'none'}. Counterfactual outcome projections "
@@ -404,6 +417,8 @@ def write_methods_si(md_path: Path, paths: dict[str, Path]) -> None:
         "# Freq-HRL Methods And Supplementary Information Draft",
         "",
         "Date: 2026-06-12",
+        "",
+        f"> **{LEGACY_NOTICE}**",
         "",
         "## Method Overview",
         "",
@@ -573,6 +588,7 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
 
     payload = {
         "summary": {
+            "status": "legacy_scaffold_not_authoritative",
             "claims": len(claim_rows),
             "supported_claims": sum(1 for row in claim_rows if row["status"] == "supported"),
             "baseline_rows": len(baseline_rows),
@@ -595,9 +611,9 @@ def build_submission_pack(results_root: Path, output_dir: Path, md_dir: Path) ->
             "data_code_availability": str(data_md),
         },
         "boundary": (
-            "This package is submission-preparation scaffolding. It keeps claim "
-            "wording conservative and links to Python-rendered draft figures, "
-            "while preserving deployment-scale boundaries."
+            "This package is legacy submission-preparation scaffolding. It is "
+            "retained for provenance but is not an authoritative manuscript "
+            "claim source after the 2026-08-09 evidence audit."
         ),
     }
     with (output_dir / "summary.json").open("w", encoding="utf-8") as f:

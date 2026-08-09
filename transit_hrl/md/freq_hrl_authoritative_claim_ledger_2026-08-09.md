@@ -1,0 +1,52 @@
+# Freq-HRL Authoritative Evidence Ledger
+
+Date: 2026-08-09
+
+This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
+
+| Evidence | Domain | Stage | Decision | Paper use | Positive claim |
+|---|---|---|---|---|---:|
+| mujoco_v12_responsibility_confirmatory | mujoco_control | confirmatory | supported | positive_main_or_si | true |
+| mujoco_v13_behavioral_confirmatory | mujoco_control | confirmatory | not_supported | mixed_or_negative_main_or_si | false |
+| quant_v74_matched_baseline_confirmatory | quant_synthetic_control | confirmatory | mixed | mixed_or_negative_main_or_si | false |
+| mujoco_v14_endpoint_aligned_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
+| legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
+| legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
+
+## Allowed Wording
+
+### mujoco_v12_responsibility_confirmatory
+
+On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.
+
+Forbidden: MuJoCo v12 proves raw behavioral frequency separation or universal no-tradeoff.
+
+### mujoco_v13_behavioral_confirmatory
+
+The stricter frozen v13 behavioral claim failed: HalfCheetah-v5 missed the raw lower-LF reduction gate and Hopper-v5 missed the upper-HF budget; Walker2d-v5 passed all registered gates. Return noninferiority and responsibility-space reduction passed in all three tasks.
+
+Forbidden: Freq-HRL has confirmatory support for raw behavioral frequency separation across all MuJoCo tasks.
+
+### quant_v74_matched_baseline_confirmatory
+
+Across 24 independent training replicates, eight held-out paths per replicate, and six registered scenarios, Freq-HRL v7.4 supported improvement in 8 of 12 Holm-controlled pooled contrasts. Its return was significantly worse than matched generic HRL-GRU-PPO, while its return contrast with matched SAC and both drift contrasts with generic HRL variants were inconclusive.
+
+Forbidden: Freq-HRL uniformly dominates all matched PPO, recurrent HRL, SAC, and TD3 baselines.
+
+### mujoco_v14_endpoint_aligned_screen
+
+The v14 development screen found no fixed endpoint-aligned coefficient that passed all four safety gates in all three MuJoCo tasks; it motivates adaptive or constrained upper-policy training. These outcomes are not confirmatory evidence.
+
+Forbidden: MuJoCo v14 supports a positive performance or behavior claim, or supplies held-out confirmation for a later algorithm.
+
+### legacy_c1_c9_matrix_snapshot
+
+This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
+
+Forbidden: The historical 1-of-9 count is the current authoritative paper conclusion.
+
+### legacy_paper_diagnostics_snapshot
+
+This file is retained as a historical diagnostic inventory, not as a manuscript evidence source.
+
+Forbidden: A path test, three-seed surrogate interval, or mechanism diagnostic in the historical file establishes a confirmatory domain-general result.

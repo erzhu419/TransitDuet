@@ -1,0 +1,201 @@
+{
+  "schema_version": "freq_hrl_authoritative_evidence_registry_v1",
+  "snapshot_date": "2026-08-09",
+  "policy": {
+    "manuscript_source_of_truth": "this_registry_only",
+    "unregistered_artifacts": "excluded",
+    "development_evidence": "methods_and_failure_analysis_only",
+    "negative_confirmatory_results": "mandatory_to_report",
+    "counterfactual_projections": "headline_ineligible",
+    "legacy_claim_generators": "headline_ineligible_until_record_level_readjudication"
+  },
+  "records": [
+    {
+      "evidence_id": "mujoco_v12_responsibility_confirmatory",
+      "claim_id": "M1_RESPONSIBILITY_SPACE",
+      "claim": "Freq-HRL reduces responsibility-space lower LF drift without harming return across the registered MuJoCo tasks.",
+      "domain": "mujoco_control",
+      "evidence_stage": "confirmatory",
+      "decision": "supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_heldout",
+      "outcome_provenance": "observed_return_plus_mechanism_diagnostic",
+      "paper_disposition": "positive_main_or_si",
+      "parser": "mujoco_v12",
+      "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
+      "forbidden_wording": "MuJoCo v12 proves raw behavioral frequency separation or universal no-tradeoff.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v12/decision.json",
+          "sha256": "548df0b336181ee7e46795cc27874b5f34bf73d49fddd78e266ea627493c52d2"
+        },
+        {
+          "role": "environment_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v12/environment_gate_rows.csv",
+          "sha256": "62fb5ce8872b94741d77a9047ce5c0325216166abc3594f5adb4a62a031c4b23"
+        },
+        {
+          "role": "paired_replicates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v12/paired_replicate_rows.csv",
+          "sha256": "041007d91fca72b811b04c3c63cb9fbdc2a84b443bf31a1d084553215037eb83"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v12/report.md",
+          "sha256": "ff7adb2a79bb1c3359bd22828304bc2eb047dfcc8c8f97bc4de5dcfe04c545d3"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v13_behavioral_confirmatory",
+      "claim_id": "M2_RAW_BEHAVIORAL_SEPARATION",
+      "claim": "Freq-HRL simultaneously preserves return, reduces responsibility and raw lower LF drift, and bounds upper HF action power across all registered MuJoCo tasks.",
+      "domain": "mujoco_control",
+      "evidence_stage": "confirmatory",
+      "decision": "not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_heldout",
+      "outcome_provenance": "observed_return_plus_behavioral_diagnostics",
+      "paper_disposition": "mixed_or_negative_main_or_si",
+      "parser": "mujoco_v13",
+      "allowed_wording": "The stricter frozen v13 behavioral claim failed: HalfCheetah-v5 missed the raw lower-LF reduction gate and Hopper-v5 missed the upper-HF budget; Walker2d-v5 passed all registered gates. Return noninferiority and responsibility-space reduction passed in all three tasks.",
+      "forbidden_wording": "Freq-HRL has confirmatory support for raw behavioral frequency separation across all MuJoCo tasks.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v13/decision.json",
+          "sha256": "1cfb52b4e403756a3c947161f44df44aab7a57954832de01936b78f9d3bb7e0b"
+        },
+        {
+          "role": "environment_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v13/environment_gate_rows.csv",
+          "sha256": "552522b3da6a10c0abf37d0dda6c9f88dfee6b6d4b7027493edddcaa5845987c"
+        },
+        {
+          "role": "paired_replicates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v13/paired_replicate_rows.csv",
+          "sha256": "a839d442667162d395825b3d276b896169fd72b6a0e578870f0462dc4249f216"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v13/report.md",
+          "sha256": "26365bdd1b0b9e907a8d9185261391a30e2a2e13a46d5e08433237333d8605b9"
+        }
+      ]
+    },
+    {
+      "evidence_id": "quant_v74_matched_baseline_confirmatory",
+      "claim_id": "Q1_MATCHED_LEARNED_BASELINES",
+      "claim": "Freq-HRL outperforms every matched learned baseline on pooled return and lower-LF drift.",
+      "domain": "quant_synthetic_control",
+      "evidence_stage": "confirmatory",
+      "decision": "mixed",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_heldout",
+      "outcome_provenance": "observed_return_plus_behavioral_diagnostic",
+      "paper_disposition": "mixed_or_negative_main_or_si",
+      "parser": "quant_v74",
+      "allowed_wording": "Across 24 independent training replicates, eight held-out paths per replicate, and six registered scenarios, Freq-HRL v7.4 supported improvement in 8 of 12 Holm-controlled pooled contrasts. Its return was significantly worse than matched generic HRL-GRU-PPO, while its return contrast with matched SAC and both drift contrasts with generic HRL variants were inconclusive.",
+      "forbidden_wording": "Freq-HRL uniformly dominates all matched PPO, recurrent HRL, SAC, and TD3 baselines.",
+      "artifacts": [
+        {
+          "role": "summary",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/quant_v74/summary.json",
+          "sha256": "0465a8dac169a7cb7c5a472d8e33bbde86943dd4aefe1d0392f20f73f0ce820d"
+        },
+        {
+          "role": "analysis_plan",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/quant_v74/analysis_plan.json",
+          "sha256": "d0ca632ae94fd68b05cadd9ea43eb2e55b6c21b06564d33dabc67fac56ed8590"
+        },
+        {
+          "role": "paired_effects",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/quant_v74/paired_effects.csv",
+          "sha256": "520ac5425995fde065ad489966f5144bef9923d80f7b807d9f6f35c613ba05f2"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/quant_v74/report.md",
+          "sha256": "b6329ac25dd5a5096590adb84f92c6d98e8d4ab304d3a177c2a3a2e291fc6184"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_endpoint_aligned_screen",
+      "claim_id": "D1_ENDPOINT_ALIGNED_TRAINING",
+      "claim": "A fixed endpoint-aligned leakage coefficient is behavior-safe across all registered MuJoCo tasks.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_behavior_safe_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "development_observed_return_plus_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14",
+      "allowed_wording": "The v14 development screen found no fixed endpoint-aligned coefficient that passed all four safety gates in all three MuJoCo tasks; it motivates adaptive or constrained upper-policy training. These outcomes are not confirmatory evidence.",
+      "forbidden_wording": "MuJoCo v14 supports a positive performance or behavior claim, or supplies held-out confirmation for a later algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14/decision.json",
+          "sha256": "032e2e6dcb241e04baf7c6578dcc83c9dc19ac05771bf4ae1d54ccd7d03144ee"
+        },
+        {
+          "role": "environment_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14/environment_gates.csv",
+          "sha256": "13f9549faf24b5aa57a2e95d7f5906d872a71155fb43297689e38e6b97f7fc37"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14/screen_report.md",
+          "sha256": "ef69a76ae656c45e961698aa16f5f0dc918a5df3a8d016980cfe3ce2f2395cca"
+        }
+      ]
+    },
+    {
+      "evidence_id": "legacy_c1_c9_matrix_snapshot",
+      "claim_id": "LEGACY_C1_C9",
+      "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
+      "domain": "cross_domain_legacy",
+      "evidence_stage": "legacy",
+      "decision": "excluded_legacy",
+      "integrity_status": "legacy_unadjudicated",
+      "selection_access": "mixed_historical",
+      "outcome_provenance": "mixed_historical",
+      "paper_disposition": "excluded_legacy",
+      "parser": "opaque_legacy",
+      "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
+      "forbidden_wording": "The historical 1-of-9 count is the current authoritative paper conclusion.",
+      "artifacts": [
+        {
+          "role": "legacy_summary",
+          "path": "transit_hrl/results/top_journal_unified_matrix_latest/summary.json",
+          "sha256": "f0eeb8a4c96cdf121081844a86402e39c5c40e0781f7edb70ad667877585da5c"
+        }
+      ]
+    },
+    {
+      "evidence_id": "legacy_paper_diagnostics_snapshot",
+      "claim_id": "LEGACY_DIAGNOSTICS",
+      "claim": "Historical paper diagnostics that mixed path, surrogate, native, and small-seed support labels.",
+      "domain": "cross_domain_legacy",
+      "evidence_stage": "legacy",
+      "decision": "excluded_legacy",
+      "integrity_status": "legacy_unadjudicated",
+      "selection_access": "mixed_historical",
+      "outcome_provenance": "mixed_historical",
+      "paper_disposition": "excluded_legacy",
+      "parser": "opaque_legacy",
+      "allowed_wording": "This file is retained as a historical diagnostic inventory, not as a manuscript evidence source.",
+      "forbidden_wording": "A path test, three-seed surrogate interval, or mechanism diagnostic in the historical file establishes a confirmatory domain-general result.",
+      "artifacts": [
+        {
+          "role": "legacy_claim_matrix",
+          "path": "transit_hrl/results/freq_hrl_paper_diagnostics/claim_matrix.json",
+          "sha256": "45d9d10350ce39f5d7a6d9f47066243c6173c176e6217cdfd0342060b49b3005"
+        }
+      ]
+    }
+  ]
+}

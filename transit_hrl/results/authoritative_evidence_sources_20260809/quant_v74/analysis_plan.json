@@ -1,0 +1,83 @@
+{
+  "alpha": 0.05,
+  "evaluation_scenarios": [
+    "persistent_shift",
+    "promotion_recovery",
+    "stationary_low_noise",
+    "stationary_high_noise",
+    "localized_burst",
+    "ood_period"
+  ],
+  "heldout_path_seeds": [
+    91009,
+    91019,
+    91033,
+    91079,
+    91121,
+    91139,
+    91153,
+    91159
+  ],
+  "inference_unit": "independent_training_replicate",
+  "mechanism_ablation_comparators": [
+    "freq_hrl_no_promotion_v7",
+    "freq_hrl_no_hf_lower_v7",
+    "freq_hrl_no_leakage_v7",
+    "freq_hrl_no_lf_reference_v7",
+    "freq_hrl_anchor_only_v7"
+  ],
+  "path_aggregation": "mean_within_training_replicate_and_scenario",
+  "pooled_scenario_aggregation": "equal_weight_mean_across_registered_scenarios",
+  "primary_baseline_comparators": [
+    "flat_ppo_matched_v7",
+    "flat_gru_ppo_matched_v7",
+    "generic_hrl_ppo_matched_v7",
+    "generic_hrl_gru_ppo_matched_v7",
+    "flat_sac_matched_v7",
+    "flat_td3_matched_v7"
+  ],
+  "primary_bootstrap_draws": 50000,
+  "primary_metrics": [
+    "total_return",
+    "LowerLFDriftAbs"
+  ],
+  "primary_multiplicity": "holm_across_pooled_baseline_metric_family",
+  "primary_randomization_draws": 200000,
+  "report_metric_directions": {
+    "LowerLFDriftAbs": false,
+    "max_drawdown": false,
+    "sharpe": true,
+    "total_return": true,
+    "turnover": false
+  },
+  "secondary_bootstrap_draws": 20000,
+  "secondary_multiplicity": "holm_within_metric_and_analysis_scope",
+  "secondary_randomization_draws": 50000,
+  "training_replicates": [
+    81013,
+    81031,
+    81041,
+    81043,
+    81047,
+    81049,
+    81071,
+    81077,
+    81083,
+    81097,
+    81101,
+    81119,
+    81131,
+    81157,
+    81163,
+    81173,
+    81181,
+    81197,
+    81203,
+    81223,
+    81233,
+    81239,
+    81281,
+    81283
+  ],
+  "version": "freq_hrl_v7_4_confirmatory_plan_v1"
+}

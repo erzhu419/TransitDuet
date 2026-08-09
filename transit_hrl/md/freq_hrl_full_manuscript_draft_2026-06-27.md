@@ -2,6 +2,11 @@
 
 Draft date: 2026-06-27
 
+> **RETIRED LEGACY SCAFFOLD. Do not submit or quote this file as the current
+> evidence state. The authoritative ledger is
+> `transit_hrl/evidence/authoritative_registry_v1.json`; a replacement
+> manuscript must be generated only from that ledger.**
+
 ## Abstract
 
 Many control problems are driven by exogenous time series that mix slow regime structure with fast residual disturbances. We introduce Freq-HRL, a frequency-separated hierarchical reinforcement learning protocol with causal routing, promotion-triggered replanning, and leakage accounting. The v2 evidence policy admits only observed raw outcomes to headline claim status; deterministic outcome projections remain sensitivity analyses. The current package is therefore a research implementation under confirmatory validation, not a completed domain-general performance result.
@@ -26,7 +31,9 @@ Experiments are organized around claim boundaries rather than isolated metrics: 
 
 ## 4. Results
 
-The raw-only matrix currently supports 1 of 9 registered claims.
+The historical raw-only C1-C9 matrix supported 1 of 9 registered claims at the
+time of this draft. This table is retained for provenance and is not the
+current paper evidence ledger.
 
 | claim_id | status | allowed_wording |
 | --- | --- | --- |

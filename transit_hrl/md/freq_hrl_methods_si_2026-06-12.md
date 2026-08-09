@@ -2,6 +2,8 @@
 
 Date: 2026-06-12
 
+> **LEGACY SCAFFOLD: the C1-C9 matrix predates the 2026-08-09 independent evidence audit. It must not be used as the current manuscript claim ledger. Use transit_hrl/evidence/authoritative_registry_v1.json.**
+
 ## Method Overview
 
 Freq-HRL treats each domain as a causal time-series control environment with endogenous state `z_t`, exogenous stream `x_t`, and action-dependent outcomes. A causal encoder maps `x_{<=t}` into low-frequency trend, middle-frequency regime buffer, high-frequency residual, uncertainty, persistence, and energy summaries. The upper controller consumes low-frequency trend and bounded residual summaries to produce a plan action. The lower controller consumes the active plan, local state, and high-frequency context to produce fast control actions. A promotion gate monitors persistent residual events and can trigger early upper-level replanning. Leakage diagnostics and constraints measure whether upper and lower controllers are acting outside their assigned frequency responsibilities.
