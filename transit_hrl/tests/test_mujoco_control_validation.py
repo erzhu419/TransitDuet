@@ -23,6 +23,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     behavior_robust_checkpoint_diagnostics,
     capacity_matched_flat_hidden_dim,
     crossed_checkpoint_selection_paths,
+    deployment_frequency_constraint_contract,
     environment_dimensions,
     latent_behavior_feasibility_rank,
     paired_relative_frequency_feasibility_diagnostics,
@@ -52,6 +53,23 @@ def mujoco_available() -> bool:
 
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
+    def test_deployment_constraint_contract_separates_v14_13_ablations(self):
+        contracts = {
+            (replay, trust): deployment_frequency_constraint_contract(
+                requested=True,
+                groupwise=True,
+                anchor_state_replay=replay,
+                ppo_trust_region=trust,
+            )
+            for replay in (False, True)
+            for trust in (False, True)
+        }
+        self.assertEqual(len(set(contracts.values())), 4)
+        self.assertIn("state_replay", contracts[(True, False)])
+        self.assertIn("trust_region", contracts[(False, True)])
+        self.assertIn("state_replay", contracts[(True, True)])
+        self.assertIn("trust_region", contracts[(True, True)])
+
     @staticmethod
     def _selector_rows(
         reward: float,

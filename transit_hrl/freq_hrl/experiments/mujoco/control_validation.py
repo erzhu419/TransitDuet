@@ -62,6 +62,52 @@ METHODS = (
 DEFAULT_ENV_IDS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
 DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033, 31039)
 DEFAULT_SELECTION_SEEDS = (32003, 32009, 32027, 32029)
+
+
+def deployment_frequency_constraint_contract(
+    *,
+    requested: bool,
+    groupwise: bool,
+    anchor_state_replay: bool,
+    ppo_trust_region: bool,
+) -> str:
+    if not requested:
+        return "disabled"
+    if not groupwise:
+        return (
+            "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
+            "lower_lpf32_anchor_relative_target_with_absolute_floor_and_"
+            "dimensionless_iterative_cumulative_reward_budget_projection_v4"
+        )
+    base = (
+        "episode_reset_groupwise_worst_differentiable_actor_mean_tanh_upper_"
+        "hold_hpf8_lower_lpf32_per_group_anchor_relative_target_with_"
+        "absolute_floor"
+    )
+    if anchor_state_replay and ppo_trust_region:
+        return (
+            "episode_reset_candidate_and_frozen_anchor_state_replay_"
+            "groupwise_worst_differentiable_actor_mean_tanh_upper_hold_hpf8_"
+            "lower_lpf32_per_group_anchor_relative_target_with_absolute_"
+            "floor_ppo_trust_region_and_iterative_per_group_cumulative_"
+            "reward_budget_projection_v6"
+        )
+    if anchor_state_replay:
+        return (
+            base
+            + "_frozen_anchor_state_replay_iterative_per_group_cumulative_"
+            "reward_budget_projection_v6"
+        )
+    if ppo_trust_region:
+        return (
+            base
+            + "_ppo_trust_region_and_iterative_per_group_cumulative_reward_"
+            "budget_projection_v6"
+        )
+    return (
+        base
+        + "_iterative_per_group_cumulative_reward_budget_projection_v5"
+    )
 DEFAULT_SAFETY_SELECTION_SEEDS = (
     32503, 32507, 32531, 32533, 32537, 32561, 32563, 32569,
 )
@@ -4350,33 +4396,16 @@ def train_mujoco_method(
             deployment_frequency_ppo_trust_region_backtracks
         ),
         "deployment_frequency_constraint_contract": (
-            (
-                (
-                    "episode_reset_candidate_and_frozen_anchor_state_replay_"
-                    "groupwise_worst_differentiable_actor_mean_tanh_upper_"
-                    "hold_hpf8_lower_lpf32_per_group_anchor_relative_target_"
-                    "with_absolute_floor_ppo_trust_region_and_iterative_per_"
-                    "group_cumulative_reward_budget_projection_v6"
-                    if (
-                        deployment_frequency_anchor_state_replay
-                        and deployment_frequency_ppo_trust_region
-                    ) else (
-                        "episode_reset_groupwise_worst_differentiable_actor_"
-                        "mean_tanh_upper_hold_hpf8_lower_lpf32_per_group_"
-                        "anchor_relative_target_with_absolute_floor_iterative_"
-                        "per_group_cumulative_reward_budget_projection_v5"
-                    )
-                )
-                if deployment_frequency_groupwise_robust
-                else (
-                    "episode_reset_differentiable_actor_mean_tanh_upper_hold_"
-                    "hpf8_lower_lpf32_anchor_relative_target_with_absolute_"
-                    "floor_and_dimensionless_iterative_cumulative_reward_"
-                    "budget_projection_v4"
-                )
+            deployment_frequency_constraint_contract(
+                requested=(
+                    deployment_frequency_requested and name == "freq_hrl"
+                ),
+                groupwise=deployment_frequency_groupwise_robust,
+                anchor_state_replay=(
+                    deployment_frequency_anchor_state_replay
+                ),
+                ppo_trust_region=deployment_frequency_ppo_trust_region,
             )
-            if deployment_frequency_requested and name == "freq_hrl"
-            else "disabled"
         ),
         "upper_constraint_update_mode": (
             str(upper_constraint_update_mode)
