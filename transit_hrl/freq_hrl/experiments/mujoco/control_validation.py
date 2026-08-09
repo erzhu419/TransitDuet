@@ -911,6 +911,7 @@ def rollout_hierarchical(
     frequency_routing: bool,
     leakage_constraint: bool,
     sample: bool,
+    collect_trajectory: bool = False,
     upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
     lower_lf_alpha: float = 0.04,
@@ -1553,7 +1554,9 @@ def rollout_hierarchical(
                 lower_action_router_strength
             ),
         )
-        return (trajectory if sample else None), row
+        return (
+            trajectory if sample or collect_trajectory else None
+        ), row
     finally:
         env.close()
 
@@ -3952,37 +3955,47 @@ def train_mujoco_method(
                 ),
             )
             model.capture_actor_anchor()
-        rollout = lambda policy, seed, sample: rollout_hierarchical(
-            policy,
-            seed=seed,
-            env_id=env_id,
-            disturbance_mode=assigned_mode(seed),
-            steps=steps,
-            upper_period=upper_period,
-            frequency_routing=frequency_routing,
-            leakage_constraint=leakage_constraint,
-            lower_lf_rms_budget=lower_lf_rms_budget,
-            leakage_constraint_scope=method_constraint_scope,
-            upper_hf_rms_budget=upper_hf_rms_budget,
-            upper_hf_penalty_coef=method_upper_penalty_coef,
-            upper_constraint_mode=method_upper_constraint_mode,
-            lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
-            upper_action_scale=upper_action_scale,
-            lower_action_scale=lower_action_scale,
-            responsibility_mode=responsibility_mode,
-            leakage_cost_mode=leakage_cost_mode,
-            lower_action_router_mode=effective_lower_action_router_mode,
-            lower_action_router_alpha=lower_action_router_alpha,
-            lower_action_router_strength=(
-                router_strength_for_seed(seed)
-            ),
-            lower_action_router_observe_strength=(
-                effective_router_observe_strength
-            ),
-            sample=sample,
-            method=name,
-            episode_horizon=episode_horizon,
-        )
+        def rollout(
+            policy: FrequencySeparatedActorCriticPPO,
+            seed: int,
+            sample: bool,
+            *,
+            collect_trajectory: bool = False,
+        ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
+            return rollout_hierarchical(
+                policy,
+                seed=seed,
+                env_id=env_id,
+                disturbance_mode=assigned_mode(seed),
+                steps=steps,
+                upper_period=upper_period,
+                frequency_routing=frequency_routing,
+                leakage_constraint=leakage_constraint,
+                lower_lf_rms_budget=lower_lf_rms_budget,
+                leakage_constraint_scope=method_constraint_scope,
+                upper_hf_rms_budget=upper_hf_rms_budget,
+                upper_hf_penalty_coef=method_upper_penalty_coef,
+                upper_constraint_mode=method_upper_constraint_mode,
+                lower_lf_alpha=RESPONSIBILITY_TRANSFER_ALPHA,
+                upper_action_scale=upper_action_scale,
+                lower_action_scale=lower_action_scale,
+                responsibility_mode=responsibility_mode,
+                leakage_cost_mode=leakage_cost_mode,
+                lower_action_router_mode=(
+                    effective_lower_action_router_mode
+                ),
+                lower_action_router_alpha=lower_action_router_alpha,
+                lower_action_router_strength=(
+                    router_strength_for_seed(seed)
+                ),
+                lower_action_router_observe_strength=(
+                    effective_router_observe_strength
+                ),
+                sample=sample,
+                collect_trajectory=collect_trajectory,
+                method=name,
+                episode_horizon=episode_horizon,
+            )
         if (
             str(checkpoint_score_mode)
             == "paired_relative_frequency_feasibility_first"
@@ -4074,6 +4087,17 @@ def train_mujoco_method(
             checkpoint_rank_names=checkpoint_rank_names,
             checkpoint_rank_contract=checkpoint_rank_contract,
             checkpoint_diagnostics_fn=checkpoint_diagnostics_fn,
+            deployment_frequency_reference_rollout_fn=(
+                (
+                    lambda policy, seed: rollout(
+                        policy,
+                        seed,
+                        False,
+                        collect_trajectory=True,
+                    )[0]
+                )
+                if deployment_frequency_anchor_state_replay else None
+            ),
         )
 
     actual_parameters = _module_parameter_count(model)

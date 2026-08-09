@@ -385,6 +385,11 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             training_seed_fn=lambda root, iteration: (
                 int(root) + 100 + int(iteration)
             ),
+            deployment_frequency_reference_rollout_fn=(
+                lambda replay_model, seed: rollout_fn(
+                    replay_model, seed, False
+                )[0]
+            ),
         )
 
         self.assertEqual(calls.count((101, False)), 1)

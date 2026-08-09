@@ -34,6 +34,10 @@ SMDPRolloutFn = Callable[
     [FrequencySeparatedActorCriticPPO, int, bool],
     tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]],
 ]
+SMDPReferenceRolloutFn = Callable[
+    [FrequencySeparatedActorCriticPPO, int],
+    HierarchicalTrajectoryBatch,
+]
 TrainingSeedFn = Callable[[int, int], int]
 JointRolloutFn = Callable[
     [JointActorCriticPPO, int, bool],
@@ -498,6 +502,9 @@ def train_frequency_separated_ppo(
     checkpoint_rank_names: tuple[str, ...] = (),
     checkpoint_rank_contract: str = "disabled",
     checkpoint_diagnostics_fn: CheckpointDiagnosticsFn | None = None,
+    deployment_frequency_reference_rollout_fn: (
+        SMDPReferenceRolloutFn | None
+    ) = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -568,13 +575,20 @@ def train_frequency_separated_ppo(
     anchor_state_replay_seeds: list[int] = []
     anchor_state_replay_batch: HierarchicalTrajectoryBatch | None = None
     if anchor_state_replay_enabled:
+        if deployment_frequency_reference_rollout_fn is None:
+            raise ValueError(
+                "anchor-state replay requires an explicit deterministic "
+                "reference rollout function"
+            )
         anchor_state_replay_seeds = _iteration_rollout_seeds(
             train_seeds, 0, training_seed_fn
         )
         reference_batches: list[HierarchicalTrajectoryBatch] = []
         for seed in anchor_state_replay_seeds:
-            reference_batch, _ = rollout_fn(model, int(seed), False)
-            if reference_batch is None:
+            reference_batch = deployment_frequency_reference_rollout_fn(
+                model, int(seed)
+            )
+            if not isinstance(reference_batch, HierarchicalTrajectoryBatch):
                 raise RuntimeError(
                     "anchor-state replay rollout did not produce an SMDP "
                     "trajectory"
@@ -779,6 +793,10 @@ def train_frequency_separated_ppo(
         ),
         "deployment_frequency_anchor_state_replay_path_count": len(
             anchor_state_replay_seeds
+        ),
+        "deployment_frequency_anchor_state_replay_contract": (
+            "deterministic_frozen_anchor_deployment_trajectory_v1"
+            if anchor_state_replay_enabled else "disabled"
         ),
         "deployment_frequency_anchor_state_replay_upper_transitions": (
             0
