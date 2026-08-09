@@ -28,6 +28,10 @@ LOCKED_CONFIGS = [
         "noloadcost", "waitonlycredit", "csac",
     )
 ]
+CONFIRMATION_CONFIGS = [
+    "F_freqduet_protocol_v6_avlctx_hiro",
+    "F_freqduet_protocol_v6_avlbal_w4_hiro",
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -39,11 +43,11 @@ EXPERIMENTAL_CONFIGS = [
         for rate in ("l3e4", "l1e3")
     ],
     "F_freqduet_protocol_v6_departctx_hiro",
-    "F_freqduet_protocol_v6_avlctx_hiro",
     *[
         f"F_freqduet_protocol_v6_{kind}_w{weight}_hiro"
         for kind in ("fwdadv", "avlbal")
         for weight in ("05", "1", "2", "4")
+        if not (kind == "avlbal" and weight == "4")
     ],
 ]
 
@@ -54,7 +58,7 @@ def validate(
     names = [config_name(value) for value in configs]
     if len(names) != len(set(names)):
         raise ValueError("V6 configs must be unique")
-    allowed = set(LOCKED_CONFIGS)
+    allowed = set(LOCKED_CONFIGS).union(CONFIRMATION_CONFIGS)
     if allow_experimental:
         allowed.update(EXPERIMENTAL_CONFIGS)
     unknown = sorted(set(names) - allowed)
@@ -160,6 +164,8 @@ def validate(
         "main_checks": main_checks,
         "experimental_configs": sorted(
             set(names).intersection(EXPERIMENTAL_CONFIGS)),
+        "confirmation_configs": sorted(
+            set(names).intersection(CONFIRMATION_CONFIGS)),
     }
 
 

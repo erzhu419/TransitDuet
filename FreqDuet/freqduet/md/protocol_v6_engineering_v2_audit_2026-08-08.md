@@ -287,3 +287,48 @@ training episodes. The 48 one-job shards are scheduler tasks `t76004` through
 `t76051`, round-robin pinned to `node001` through `node006` with eight shards
 per node. All 48 reached running state. Heavy checkpoints and logs remain on
 the HPC filesystem; only later aggregate summaries will be synchronized.
+
+## Engineering-v5 exploratory outcome (2026-08-09)
+
+All 48 train shards and 96 frozen rollouts completed without a traceback. The
+strict aggregate verifies checkpoint 39, common random numbers, four train
+seeds, two evaluation seeds, one scenario contract, 48 run manifests, and
+clean source commit `e8b825e74d430340ecccf25f991a50d6242537c1`. Its frozen
+artifact hashes are:
+
+- matrix manifest: `327510397f0cf6dcd059eca25a9bcbf8b755e81914e1af1209da1468f83aaaf1`;
+- per-evaluation rows: `5db29b7bb2637327bd4cefd080fb1a2191ae0ca2d1e47f813ae8cd5da87e3a04`;
+- summary: `e1dca5d773bc30aedf7a871e2977788071f04d8fdc7eaf6538d57dce0af5d6b8`;
+- paired deltas: `3b4ec19c58dd01cbfc00b9d5a597d29da4a11c048b30a5a9b1e1b5e32265d797`.
+
+The fail-closed `freqduet-v6-incremental-selection-v1` audit evaluates every
+preregistered AVL weight. `avlbal_w4` is the unique passing row:
+
+- restricted journey delta versus `noguard` is `-0.52630 min`, crossed
+  bootstrap 95% CI `[-0.87956, -0.17679]`;
+- headway CV delta is `-0.02160`, 95% CI `[-0.04875, -0.00324]`;
+- holding changes by `-11016.88 vehicle-s` and denied dispatch events by
+  `-37177.63`, so neither no-guard gain is reversed;
+- execution adjustment is exactly zero in every rollout;
+- minimum predecessor evidence coverage is 100%, and minimum same-time AVL
+  follower coverage is 83.44%; and
+- regularity baseline-minus-post loss is positive in every frozen rollout.
+
+The lower weights do not pass: `avlbal_w05` misses the CV and holding gates,
+`avlbal_w1` worsens CV, and `avlbal_w2` improves CV by only `0.01648`. This
+screen is selection evidence only. It does not establish efficacy.
+
+## Engineering-v6 independent-confirmation preregistration (2026-08-09)
+
+The confirmation matrix is locked before launch to `main`, `noguard`, the
+context-only `avlctx`, and selected `avlbal_w4`. It uses 40 train episodes,
+disjoint training seeds `601,619,641,659`, and disjoint frozen evaluation
+seeds `42011,42017,42023,42029`. No additional candidate or weight may be
+added after launch.
+
+Confirmation succeeds only if all shards remain strict-complete and
+hash-homogeneous, `avlbal_w4` preserves zero execution adjustment and at least
+50% follower evidence in every rollout, and the same journey, headway-CV,
+holding, and denied-dispatch gates used for selection pass again. The result
+must be reported as a negative confirmation if any required gate fails; the
+exploratory estimate cannot be substituted for it.

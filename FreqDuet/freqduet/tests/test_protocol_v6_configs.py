@@ -4,7 +4,11 @@ import unittest
 from runner_v3 import TransitDuetV2Runner
 from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
-from scripts.validate_freqduet_protocol_v6_configs import ROOT, validate
+from scripts.validate_freqduet_protocol_v6_configs import (
+    CONFIRMATION_CONFIGS,
+    ROOT,
+    validate,
+)
 
 
 CONFIGS = {
@@ -189,11 +193,15 @@ class ProtocolV6ConfigTest(unittest.TestCase):
     def test_incremental_regularity_factorial_is_causal_and_opt_in(self):
         configs = [
             CONFIGS["main"], CONFIGS["noguard"], *INCREMENTAL_CONFIGS]
+        experimental = sorted(
+            set(INCREMENTAL_CONFIGS) - set(CONFIRMATION_CONFIGS))
         with self.assertRaisesRegex(ValueError, "unregistered"):
-            validate(configs)
+            validate([CONFIGS["main"], CONFIGS["noguard"], *experimental])
         result = validate(configs, allow_experimental=True)
         self.assertEqual(
-            result["experimental_configs"], sorted(INCREMENTAL_CONFIGS))
+            result["experimental_configs"], experimental)
+        self.assertEqual(
+            result["confirmation_configs"], sorted(CONFIRMATION_CONFIGS))
 
         for name in INCREMENTAL_CONFIGS:
             config = resolved_config(name)
@@ -221,6 +229,16 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                 }.issubset(features))
             else:
                 self.assertFalse(regularity.get("enable", False))
+
+    def test_selected_incremental_pair_is_registered_for_confirmation(self):
+        result = validate([
+            CONFIGS["main"],
+            CONFIGS["noguard"],
+            *CONFIRMATION_CONFIGS,
+        ])
+        self.assertEqual(result["experimental_configs"], [])
+        self.assertEqual(
+            result["confirmation_configs"], sorted(CONFIRMATION_CONFIGS))
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(
