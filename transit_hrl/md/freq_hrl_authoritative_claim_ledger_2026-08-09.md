@@ -16,6 +16,8 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_4_router_homotopy_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | mujoco_v14_5_paired_anchor_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | mujoco_v14_6_conservative_transfer_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
+| mujoco_v14_7_joint_learned_projection_preflight | mujoco_control | development_preflight | comparator_confounded | excluded_from_selection | false |
+| mujoco_v14_8_latent_matched_preflight | mujoco_control | development_preflight | no_joint_candidate | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -80,6 +82,18 @@ Forbidden: MuJoCo v14.5 validates paired proximal routing, physical no-tradeoff,
 The v14.6 development screen made lower-to-upper transfer function preserving and excluded untrained checkpoints. Every candidate exactly matched its paired control in selected parameters, latent-policy traces, executed-action traces, rewards, and returns. Strengths at or above 0.075 reduced both registered lower-LF diagnostics in all 15 conditions, but every such arm failed the upper-HF budget in all five Hopper conditions and passed only 10 of 15 complete gates. Because policy parameters and environment behavior were identical across arms, this is a responsibility-coordinate diagnostic rather than evidence of improved learned control.
 
 Forbidden: MuJoCo v14.6 validates learned behavior-safe Freq-HRL, improves control performance, or supplies a selected algorithm for confirmatory testing.
+
+### mujoco_v14_7_joint_learned_projection_preflight
+
+The v14.7 single-replicate preflight found one apparently promising high-dual arm, but its learned checkpoint used a robust selector while the comparator used a mean-reward selector. It also showed that routed responsibility diagnostics can improve while latent lower-LF behavior worsens, and that full-model hashes are confounded by cost-critic state. The result is excluded from algorithm selection.
+
+Forbidden: MuJoCo v14.7 supports reward improvement, learned frequency separation, or any confirmatory candidate.
+
+### mujoco_v14_8_latent_matched_preflight
+
+The v14.8 single-replicate HalfCheetah preflight removed the v14.7 comparator and actor-identity confounds. Projection-only calibration was pathwise exact. No learned arm combined reward preservation with latent lower- and upper-frequency improvement: the shared `0.20` dual rate improved mean return in four of five disturbance modes but worsened latent lower-LF behavior in three, whereas `0.30` improved both latent frequency endpoints but reduced return in every mode. Equal upper/lower dual rates operated at incompatible cost scales, and the scalar checkpoint score was dominated by upper-HF violations.
+
+Forbidden: MuJoCo v14.8 supports a learned no-tradeoff result, cross-task generality, reward improvement, or confirmatory evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 
