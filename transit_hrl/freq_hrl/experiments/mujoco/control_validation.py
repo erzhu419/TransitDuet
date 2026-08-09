@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_10_deployment_aligned_constraints"
+    "freq_hrl_mujoco_shared_core_v14_11_iterative_deployment_projection"
 )
 METHODS = (
     "freq_hrl",
@@ -2233,6 +2233,12 @@ def _hierarchical_model(
     lower_deployment_frequency_lambda_init: float = 0.0,
     upper_deployment_frequency_step_scale: float = 1.0,
     lower_deployment_frequency_step_scale: float = 1.0,
+    upper_deployment_frequency_max_projection_steps: int = 1,
+    lower_deployment_frequency_max_projection_steps: int = 1,
+    upper_deployment_frequency_reward_tolerance: float = 1e-8,
+    lower_deployment_frequency_reward_tolerance: float = 1e-8,
+    upper_deployment_frequency_target_tolerance: float = 0.0,
+    lower_deployment_frequency_target_tolerance: float = 0.0,
     upper_deployment_frequency_rms_budget: float = 0.0,
     lower_deployment_frequency_rms_budget: float = 0.0,
     upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
@@ -2272,6 +2278,15 @@ def _hierarchical_model(
         upper_deployment_frequency_step_scale=float(
             upper_deployment_frequency_step_scale
         ),
+        upper_deployment_frequency_max_projection_steps=int(
+            upper_deployment_frequency_max_projection_steps
+        ),
+        upper_deployment_frequency_reward_tolerance=float(
+            upper_deployment_frequency_reward_tolerance
+        ),
+        upper_deployment_frequency_target_tolerance=float(
+            upper_deployment_frequency_target_tolerance
+        ),
         lower_deployment_frequency_rms_budget=float(
             lower_deployment_frequency_rms_budget
         ),
@@ -2291,6 +2306,15 @@ def _hierarchical_model(
         lower_deployment_frequency_max_lambda=20.0,
         lower_deployment_frequency_step_scale=float(
             lower_deployment_frequency_step_scale
+        ),
+        lower_deployment_frequency_max_projection_steps=int(
+            lower_deployment_frequency_max_projection_steps
+        ),
+        lower_deployment_frequency_reward_tolerance=float(
+            lower_deployment_frequency_reward_tolerance
+        ),
+        lower_deployment_frequency_target_tolerance=float(
+            lower_deployment_frequency_target_tolerance
         ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
@@ -2714,6 +2738,12 @@ def train_mujoco_method(
     lower_deployment_frequency_lambda_init: float = 0.0,
     upper_deployment_frequency_step_scale: float = 1.0,
     lower_deployment_frequency_step_scale: float = 1.0,
+    upper_deployment_frequency_max_projection_steps: int = 1,
+    lower_deployment_frequency_max_projection_steps: int = 1,
+    upper_deployment_frequency_reward_tolerance: float = 1e-8,
+    lower_deployment_frequency_reward_tolerance: float = 1e-8,
+    upper_deployment_frequency_target_tolerance: float = 0.0,
+    lower_deployment_frequency_target_tolerance: float = 0.0,
     upper_deployment_frequency_rms_budget: float = 0.0,
     lower_deployment_frequency_rms_budget: float = 0.0,
     upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
@@ -2834,6 +2864,46 @@ def train_mujoco_method(
         if not np.isfinite(float(value)) or float(value) <= 0.0:
             raise ValueError(
                 f"MuJoCo deployment-frequency {label} must be positive"
+            )
+    for label, value in (
+        (
+            "upper maximum projection steps",
+            upper_deployment_frequency_max_projection_steps,
+        ),
+        (
+            "lower maximum projection steps",
+            lower_deployment_frequency_max_projection_steps,
+        ),
+    ):
+        if (
+            isinstance(value, bool)
+            or int(value) != value
+            or int(value) < 1
+        ):
+            raise ValueError(
+                f"MuJoCo deployment-frequency {label} must be a positive integer"
+            )
+    for label, value in (
+        (
+            "upper reward tolerance",
+            upper_deployment_frequency_reward_tolerance,
+        ),
+        (
+            "lower reward tolerance",
+            lower_deployment_frequency_reward_tolerance,
+        ),
+        (
+            "upper target tolerance",
+            upper_deployment_frequency_target_tolerance,
+        ),
+        (
+            "lower target tolerance",
+            lower_deployment_frequency_target_tolerance,
+        ),
+    ):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {label} must be non-negative"
             )
     deployment_frequency_level_active = {
         "upper": (
@@ -3665,6 +3735,24 @@ def train_mujoco_method(
             lower_deployment_frequency_step_scale=float(
                 lower_deployment_frequency_step_scale
             ),
+            upper_deployment_frequency_max_projection_steps=int(
+                upper_deployment_frequency_max_projection_steps
+            ),
+            lower_deployment_frequency_max_projection_steps=int(
+                lower_deployment_frequency_max_projection_steps
+            ),
+            upper_deployment_frequency_reward_tolerance=float(
+                upper_deployment_frequency_reward_tolerance
+            ),
+            lower_deployment_frequency_reward_tolerance=float(
+                lower_deployment_frequency_reward_tolerance
+            ),
+            upper_deployment_frequency_target_tolerance=float(
+                upper_deployment_frequency_target_tolerance
+            ),
+            lower_deployment_frequency_target_tolerance=float(
+                lower_deployment_frequency_target_tolerance
+            ),
             upper_deployment_frequency_rms_budget=float(
                 upper_deployment_frequency_rms_budget
             ),
@@ -4014,6 +4102,24 @@ def train_mujoco_method(
         "lower_deployment_frequency_step_scale": float(
             lower_deployment_frequency_step_scale
         ),
+        "upper_deployment_frequency_max_projection_steps": int(
+            upper_deployment_frequency_max_projection_steps
+        ),
+        "lower_deployment_frequency_max_projection_steps": int(
+            lower_deployment_frequency_max_projection_steps
+        ),
+        "upper_deployment_frequency_reward_tolerance": float(
+            upper_deployment_frequency_reward_tolerance
+        ),
+        "lower_deployment_frequency_reward_tolerance": float(
+            lower_deployment_frequency_reward_tolerance
+        ),
+        "upper_deployment_frequency_target_tolerance": float(
+            upper_deployment_frequency_target_tolerance
+        ),
+        "lower_deployment_frequency_target_tolerance": float(
+            lower_deployment_frequency_target_tolerance
+        ),
         "upper_deployment_frequency_rms_budget": float(
             upper_deployment_frequency_rms_budget
         ),
@@ -4029,7 +4135,7 @@ def train_mujoco_method(
         "deployment_frequency_constraint_contract": (
             "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
             "lower_lpf32_anchor_relative_target_with_absolute_floor_and_"
-            "dimensionless_separate_reward_guarded_duals_v3"
+            "dimensionless_iterative_cumulative_reward_budget_projection_v4"
             if deployment_frequency_requested and name == "freq_hrl"
             else "disabled"
         ),
@@ -4420,6 +4526,36 @@ def build_parser() -> argparse.ArgumentParser:
         "--lower-deployment-frequency-step-scale", type=float, default=1.0
     )
     parser.add_argument(
+        "--upper-deployment-frequency-max-projection-steps",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-max-projection-steps",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--upper-deployment-frequency-reward-tolerance",
+        type=float,
+        default=1e-8,
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-reward-tolerance",
+        type=float,
+        default=1e-8,
+    )
+    parser.add_argument(
+        "--upper-deployment-frequency-target-tolerance",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-target-tolerance",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
         "--upper-deployment-frequency-rms-budget", type=float, default=0.0
     )
     parser.add_argument(
@@ -4558,6 +4694,24 @@ def main() -> None:
         ),
         lower_deployment_frequency_step_scale=(
             args.lower_deployment_frequency_step_scale
+        ),
+        upper_deployment_frequency_max_projection_steps=(
+            args.upper_deployment_frequency_max_projection_steps
+        ),
+        lower_deployment_frequency_max_projection_steps=(
+            args.lower_deployment_frequency_max_projection_steps
+        ),
+        upper_deployment_frequency_reward_tolerance=(
+            args.upper_deployment_frequency_reward_tolerance
+        ),
+        lower_deployment_frequency_reward_tolerance=(
+            args.lower_deployment_frequency_reward_tolerance
+        ),
+        upper_deployment_frequency_target_tolerance=(
+            args.upper_deployment_frequency_target_tolerance
+        ),
+        lower_deployment_frequency_target_tolerance=(
+            args.lower_deployment_frequency_target_tolerance
         ),
         upper_deployment_frequency_rms_budget=(
             args.upper_deployment_frequency_rms_budget

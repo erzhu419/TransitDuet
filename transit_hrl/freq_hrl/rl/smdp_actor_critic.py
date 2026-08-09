@@ -103,6 +103,7 @@ def _reward_guarded_constraint_step(
     max_grad_norm: float,
     max_backtracks: int,
     reward_tolerance: float,
+    reward_baseline: float | None = None,
 ) -> dict[str, float]:
     """Apply a projected cost correction only when reward does not regress."""
 
@@ -154,6 +155,12 @@ def _reward_guarded_constraint_step(
     ]
     originals = [parameter.detach().clone() for parameter in params]
     reward_before = float(reward_loss.detach().cpu().item())
+    reward_limit_baseline = (
+        reward_before
+        if reward_baseline is None else float(reward_baseline)
+    )
+    if not np.isfinite(reward_limit_baseline):
+        raise ValueError("reward_baseline must be finite when provided")
     constraint_before = float(constraint_loss.detach().cpu().item())
     attempts = max(0, int(max_backtracks)) + 1
     for attempt in range(attempts):
@@ -169,13 +176,16 @@ def _reward_guarded_constraint_step(
             constraint_after = float(
                 constraint_loss_fn().detach().cpu().item()
             )
-        reward_ok = reward_after <= reward_before + float(reward_tolerance)
+        reward_ok = (
+            reward_after
+            <= reward_limit_baseline + float(reward_tolerance)
+        )
         constraint_ok = constraint_after <= constraint_before + 1e-12
         if reward_ok and constraint_ok:
             diagnostics.update({
                 "accepted": 1.0,
                 "backtracks": float(attempt),
-                "reward_loss_delta": reward_after - reward_before,
+                "reward_loss_delta": reward_after - reward_limit_baseline,
                 "constraint_loss_delta": constraint_after - constraint_before,
             })
             return diagnostics
@@ -373,6 +383,9 @@ class SMDPPPOConfig:
     upper_deployment_frequency_lambda_init: float = 0.0
     upper_deployment_frequency_max_lambda: float = 100.0
     upper_deployment_frequency_step_scale: float = 1.0
+    upper_deployment_frequency_max_projection_steps: int = 1
+    upper_deployment_frequency_reward_tolerance: float = 1e-8
+    upper_deployment_frequency_target_tolerance: float = 0.0
     lower_deployment_frequency_rms_budget: float = 0.0
     lower_deployment_frequency_reference_reduction_fraction: float = 0.0
     lower_deployment_frequency_window: int = 32
@@ -381,6 +394,9 @@ class SMDPPPOConfig:
     lower_deployment_frequency_lambda_init: float = 0.0
     lower_deployment_frequency_max_lambda: float = 100.0
     lower_deployment_frequency_step_scale: float = 1.0
+    lower_deployment_frequency_max_projection_steps: int = 1
+    lower_deployment_frequency_reward_tolerance: float = 1e-8
+    lower_deployment_frequency_target_tolerance: float = 0.0
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -1142,6 +1158,18 @@ class FrequencySeparatedActorCriticPPO:
             step_scale = float(getattr(
                 config, f"{level}_deployment_frequency_step_scale"
             ))
+            max_projection_steps = getattr(
+                config,
+                f"{level}_deployment_frequency_max_projection_steps",
+            )
+            reward_tolerance = float(getattr(
+                config,
+                f"{level}_deployment_frequency_reward_tolerance",
+            ))
+            target_tolerance = float(getattr(
+                config,
+                f"{level}_deployment_frequency_target_tolerance",
+            ))
             active = dual_lr > 0.0 or lambda_init > 0.0
             if not np.isfinite(budget) or budget < 0.0:
                 raise ValueError(
@@ -1193,6 +1221,25 @@ class FrequencySeparatedActorCriticPPO:
                 raise ValueError(
                     f"{level}_deployment_frequency_step_scale must be "
                     "positive and finite"
+                )
+            if (
+                isinstance(max_projection_steps, bool)
+                or int(max_projection_steps) != max_projection_steps
+                or int(max_projection_steps) < 1
+            ):
+                raise ValueError(
+                    f"{level}_deployment_frequency_max_projection_steps "
+                    "must be a positive integer"
+                )
+            if not np.isfinite(reward_tolerance) or reward_tolerance < 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_reward_tolerance must "
+                    "be finite and non-negative"
+                )
+            if not np.isfinite(target_tolerance) or target_tolerance < 0.0:
+                raise ValueError(
+                    f"{level}_deployment_frequency_target_tolerance must "
+                    "be finite and non-negative"
                 )
         if (
             float(config.promotion_advantage_coef) > 0.0
@@ -2513,6 +2560,15 @@ class FrequencySeparatedActorCriticPPO:
         lambda_name = f"{prefix}_lambda"
         lambda_before = float(getattr(self, lambda_name))
         active = bool(dual_lr > 0.0 or lambda_before > 0.0)
+        max_projection_steps = int(getattr(
+            cfg, f"{prefix}_max_projection_steps"
+        ))
+        reward_tolerance = float(getattr(
+            cfg, f"{prefix}_reward_tolerance"
+        ))
+        target_tolerance = float(getattr(
+            cfg, f"{prefix}_target_tolerance"
+        ))
         empty = {
             f"{prefix}_enabled": float(active),
             f"{prefix}_power_before": 0.0,
@@ -2538,6 +2594,17 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_guard_backtracks": 0.0,
             f"{prefix}_guard_reward_loss_delta": 0.0,
             f"{prefix}_guard_cost_loss_delta": 0.0,
+            f"{prefix}_projection_steps_requested": float(
+                max_projection_steps
+            ),
+            f"{prefix}_projection_steps_attempted": 0.0,
+            f"{prefix}_projection_steps_accepted": 0.0,
+            f"{prefix}_projection_target_tolerance": target_tolerance,
+            f"{prefix}_projection_target_reached_before": 0.0,
+            f"{prefix}_projection_target_reached_after": 0.0,
+            f"{prefix}_projection_stalled": 0.0,
+            f"{prefix}_projection_step_budget_exhausted": 0.0,
+            f"{prefix}_projection_reward_tolerance": reward_tolerance,
             f"{prefix}_primitive_steps": 0.0,
             f"{prefix}_segment_count": 0.0,
         }
@@ -2647,23 +2714,38 @@ class FrequencySeparatedActorCriticPPO:
 
         with torch.no_grad():
             before = current_stats()
-        diagnostics = {
-            "gradient_conflict": 0.0,
-            "gradient_cosine": 0.0,
-            "projected_gradient_norm": 0.0,
-            "accepted": 0.0,
-            "backtracks": 0.0,
-            "reward_loss_delta": 0.0,
-            "constraint_loss_delta": 0.0,
-        }
-        attempted = bool(
-            lambda_before > 0.0
-            and float(
+            reward_baseline = float(
+                reward_guard_loss_fn().detach().cpu().item()
+            )
+            constraint_baseline = float(
+                constraint_loss_fn().detach().cpu().item()
+            )
+        target_reached_before = bool(
+            float(
                 before.normalized_signed_excess.detach().cpu().item()
-            ) > 0.0
+            ) <= target_tolerance
         )
-        if attempted:
-            diagnostics.update(_reward_guarded_constraint_step(
+        projection_attempts = 0
+        projection_accepts = 0
+        backtracks = 0.0
+        conflicts: list[float] = []
+        cosines: list[float] = []
+        gradient_norms: list[float] = []
+        correction_active = bool(
+            lambda_before > 0.0
+        )
+        for _ in range(max_projection_steps):
+            with torch.no_grad():
+                current = current_stats()
+            if (
+                not correction_active
+                or float(
+                    current.normalized_signed_excess.detach().cpu().item()
+                ) <= target_tolerance
+            ):
+                break
+            projection_attempts += 1
+            step_diagnostics = _reward_guarded_constraint_step(
                 parameters=actor.parameters(),
                 reward_loss_fn=reward_guard_loss_fn,
                 constraint_loss_fn=constraint_loss_fn,
@@ -2677,12 +2759,26 @@ class FrequencySeparatedActorCriticPPO:
                 max_backtracks=int(getattr(
                     cfg, f"{level}_constraint_max_backtracks"
                 )),
-                reward_tolerance=float(getattr(
-                    cfg, f"{level}_constraint_reward_tolerance"
-                )),
+                reward_tolerance=reward_tolerance,
+                reward_baseline=reward_baseline,
+            )
+            backtracks += float(step_diagnostics["backtracks"])
+            conflicts.append(float(step_diagnostics["gradient_conflict"]))
+            cosines.append(float(step_diagnostics["gradient_cosine"]))
+            gradient_norms.append(float(
+                step_diagnostics["projected_gradient_norm"]
             ))
+            if float(step_diagnostics["accepted"]) <= 0.0:
+                break
+            projection_accepts += 1
         with torch.no_grad():
             after = current_stats()
+            reward_after = float(
+                reward_guard_loss_fn().detach().cpu().item()
+            )
+            constraint_after = float(
+                constraint_loss_fn().detach().cpu().item()
+            )
         signed_after = float(after.signed_excess.detach().cpu().item())
         normalized_signed_after = float(
             after.normalized_signed_excess.detach().cpu().item()
@@ -2693,6 +2789,9 @@ class FrequencySeparatedActorCriticPPO:
             float(getattr(cfg, f"{prefix}_max_lambda")),
         ))
         setattr(self, lambda_name, lambda_after)
+        target_reached_after = bool(
+            normalized_signed_after <= target_tolerance
+        )
         return {
             f"{prefix}_enabled": 1.0,
             f"{prefix}_power_before": float(
@@ -2732,26 +2831,49 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_reference_reduction_fraction": reference_reduction,
             f"{prefix}_lambda_before": lambda_before,
             f"{prefix}_lambda_after": lambda_after,
-            f"{prefix}_guard_attempted": float(attempted),
-            f"{prefix}_guard_accepted": float(diagnostics["accepted"]),
+            f"{prefix}_guard_attempted": float(projection_attempts),
+            f"{prefix}_guard_accepted": float(projection_accepts),
             f"{prefix}_gradient_conflict": float(
-                diagnostics["gradient_conflict"]
+                max(conflicts, default=0.0)
             ),
             f"{prefix}_gradient_cosine": float(
-                diagnostics["gradient_cosine"]
+                np.mean(cosines) if cosines else 0.0
             ),
             f"{prefix}_projected_gradient_norm": float(
-                diagnostics["projected_gradient_norm"]
+                np.mean(gradient_norms) if gradient_norms else 0.0
             ),
-            f"{prefix}_guard_backtracks": float(
-                diagnostics["backtracks"]
-            ),
+            f"{prefix}_guard_backtracks": backtracks,
             f"{prefix}_guard_reward_loss_delta": float(
-                diagnostics["reward_loss_delta"]
+                reward_after - reward_baseline
             ),
             f"{prefix}_guard_cost_loss_delta": float(
-                diagnostics["constraint_loss_delta"]
+                constraint_after - constraint_baseline
             ),
+            f"{prefix}_projection_steps_requested": float(
+                max_projection_steps
+            ),
+            f"{prefix}_projection_steps_attempted": float(
+                projection_attempts
+            ),
+            f"{prefix}_projection_steps_accepted": float(
+                projection_accepts
+            ),
+            f"{prefix}_projection_target_tolerance": target_tolerance,
+            f"{prefix}_projection_target_reached_before": float(
+                target_reached_before
+            ),
+            f"{prefix}_projection_target_reached_after": float(
+                target_reached_after
+            ),
+            f"{prefix}_projection_stalled": float(
+                projection_attempts > projection_accepts
+                and not target_reached_after
+            ),
+            f"{prefix}_projection_step_budget_exhausted": float(
+                projection_accepts >= max_projection_steps
+                and not target_reached_after
+            ),
+            f"{prefix}_projection_reward_tolerance": reward_tolerance,
             f"{prefix}_primitive_steps": float(after.primitive_steps),
             f"{prefix}_segment_count": float(after.segment_count),
         }

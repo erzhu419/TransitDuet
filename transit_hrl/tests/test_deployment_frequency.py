@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 import numpy as np
@@ -213,6 +214,63 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
                 "lower_deployment_frequency_reference_reduction_fraction"
             ],
             0.1,
+        )
+
+    def test_iterative_projection_outperforms_one_step_under_one_reward_budget(self):
+        common = {
+            "upper_state_dim": 3,
+            "lower_state_dim": 2,
+            "upper_action_dim": 1,
+            "lower_action_dim": 1,
+            "hidden_dim": 8,
+            "epochs": 1,
+            "minibatch_size": 8,
+            "deployment_action_transform": "tanh",
+            "lower_deployment_frequency_rms_budget": 0.01,
+            "lower_deployment_frequency_window": 3,
+            "lower_deployment_frequency_lambda_init": 1.0,
+            "lower_deployment_frequency_step_scale": 10.0,
+            "lower_deployment_frequency_reward_tolerance": 1e-8,
+        }
+        torch.manual_seed(7)
+        source = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(**common))
+        with torch.no_grad():
+            source.lower_actor.net[-1].bias.fill_(0.5)
+        batch = self._batch(source).lower
+        initial_state = copy.deepcopy(source.state_dict())
+
+        def project(steps: int) -> dict[str, float]:
+            model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                **common,
+                lower_deployment_frequency_max_projection_steps=steps,
+            ))
+            model.load_state_dict(copy.deepcopy(initial_state))
+            return model._update_deployment_frequency_constraint(
+                level="lower",
+                batch=batch,
+                actor=model.lower_actor,
+            )
+
+        one_step = project(1)
+        four_steps = project(4)
+        prefix = "lower_deployment_frequency_"
+        self.assertEqual(one_step[prefix + "projection_steps_accepted"], 1.0)
+        self.assertEqual(four_steps[prefix + "projection_steps_attempted"], 4.0)
+        self.assertEqual(four_steps[prefix + "projection_steps_accepted"], 4.0)
+        self.assertLess(
+            four_steps[prefix + "power_after"],
+            one_step[prefix + "power_after"],
+        )
+        self.assertLess(
+            four_steps[prefix + "normalized_signed_excess_after"],
+            one_step[prefix + "normalized_signed_excess_after"],
+        )
+        self.assertLessEqual(
+            four_steps[prefix + "guard_reward_loss_delta"],
+            common["lower_deployment_frequency_reward_tolerance"] + 1e-7,
+        )
+        self.assertEqual(
+            four_steps[prefix + "projection_step_budget_exhausted"], 1.0
         )
 
     def test_active_constraint_requires_positive_budget(self):
