@@ -6,6 +6,7 @@ from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
     CONFIRMATION_CONFIGS,
+    PROMOTED_CONFIGS,
     ROOT,
     validate,
 )
@@ -44,6 +45,7 @@ COMPACT_CONFIGS = [
 ]
 COMPACT_CONFIRMATION_CONFIGS = COMPACT_CONFIGS[:3]
 COMPACT_EXPERIMENTAL_CONFIGS = COMPACT_CONFIGS[3:]
+CONFIRMED_MAIN = "F_freqduet_protocol_v6_confirmed_main_hiro"
 
 
 class ProtocolV6ConfigTest(unittest.TestCase):
@@ -299,6 +301,24 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(result["experimental_configs"], [])
         self.assertTrue(set(COMPACT_CONFIRMATION_CONFIGS).issubset(
             result["confirmation_configs"]))
+
+    def test_confirmed_main_is_an_exact_behavioral_alias_of_compact_w2(self):
+        result = validate([CONFIRMED_MAIN])
+        self.assertEqual(result["canonical_main"], CONFIRMED_MAIN)
+        self.assertEqual(result["promoted_configs"], PROMOTED_CONFIGS)
+
+        confirmed = resolved_config(CONFIRMED_MAIN)
+        selected = resolved_config(
+            "F_freqduet_protocol_v6_avlcompact_w2_hiro")
+        self.assertEqual(
+            confirmed["protocol"]["role"],
+            "confirmed_compact_avl_two_sided_regularity_w2_main_v6",
+        )
+        confirmed.pop("_name")
+        selected.pop("_name")
+        confirmed["protocol"].pop("role")
+        selected["protocol"].pop("role")
+        self.assertEqual(confirmed, selected)
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

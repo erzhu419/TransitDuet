@@ -1,6 +1,9 @@
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
@@ -14,6 +17,25 @@ from scripts.audit_protocol_v6_compact_confirmation import (
 
 
 class ProtocolV6CompactConfirmationTest(unittest.TestCase):
+    def test_cli_direct_invocation_bootstraps_project_root(self):
+        root = Path(__file__).resolve().parents[1]
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+        process = subprocess.run(
+            [
+                sys.executable,
+                str(root / "scripts" /
+                    "audit_protocol_v6_compact_confirmation.py"),
+                "--help",
+            ],
+            cwd=root,
+            env=env,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertIn("Audit the preregistered V8", process.stdout)
+
     def make_artifacts(self, root: Path, *, overlapping_seeds: bool = False):
         selection_manifest = root / "selection_manifest.json"
         selection_manifest.write_text(json.dumps({

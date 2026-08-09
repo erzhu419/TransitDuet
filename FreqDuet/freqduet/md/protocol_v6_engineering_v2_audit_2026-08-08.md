@@ -540,3 +540,86 @@ and their common launch-analysis fingerprint is
 `5f9be9647ce2f6053fccd15b63195c649b188a652aa42a62bcd35b8be1a1b9a8`.
 No traceback was present. Episode-zero checkpoints were not yet available at
 this launch audit, so this record is dispatch and provenance evidence only.
+
+## Engineering-v8 independent-confirmation outcome (2026-08-09)
+
+Scheduler tasks `t78895` through `t78924` all completed. Each of the 30
+training shards contains 40 diagnostic episodes, checkpoint-39 upper, lower,
+and runner states, and a four-seed frozen evaluation with no traceback. The
+node001 strict aggregate task `t79246` verified 120 unique rollouts, common
+random numbers, all run manifests, the clean preregistered source and disjoint
+seed sets. Its frozen artifact hashes are:
+
+- matrix manifest: `baff736d7b176668b2895be989e73518872a91690e111a145c02de5998f827ec`;
+- per-evaluation rows: `96f36a168106d852c1d859b592ffbc277083c743e8212abec352f3ecb3b7421d`;
+- summary: `c273a1bf496e5a5e9a28bb0741322fea26c7b6e685dd02dae64d271f6e861acd`;
+- paired deltas: `f8732b7fabf32dcdcc4711392c5fe26316d22979a9bb8e08796060b49bb8ef79`;
+- confirmation gate: `a72da292c10a990552db8291a43f92c0c80097217db30153ecfbdee5a1ae8cd6`.
+
+The preregistered primary compact weight two confirms. Against same-source
+`noguard`, it improves headway CV by `-0.02231`, crossed bootstrap 95% CI
+`[-0.03805, -0.00750]`, restricted journey by `-0.26266 min`, 95% CI
+`[-0.83661, 0.17494]`, holding by `-455.21 vehicle-s`, and denied dispatch
+events by `-22751.00`. Against compact context-only, its headway CV and journey
+deltas are `-0.02677` and `-0.08539 min`. All 12 locked effect, mechanism, and
+completeness gates pass across 24 frozen rollouts. Execution adjustment is
+exactly zero, same-time follower coverage is at least 83.10%, and regularity
+loss improves in every rollout.
+
+The weight-four sensitivity arm does not confirm. Its CV delta versus
+`noguard` is only `-0.01448`, 95% CI `[-0.03178, 0.00111]`, so it fails the
+locked `-0.02` net-improvement gate even though its journey point estimate is
+lower. The final gate therefore returns `primary_confirmed` for weight two and
+`no_pass` for weight four, without sensitivity rescue.
+
+The claim boundary is deliberate: compact weight two confirms a statistically
+clear headway-regularity gain while satisfying the locked journey no-harm and
+mechanism conditions. Its journey interval crosses zero, so this experiment
+does not establish a statistically significant journey-time reduction.
+
+Direct CLI execution of the frozen audit initially exposed a module-path
+bootstrap defect before any result was read. Running the unchanged frozen
+audit with `PYTHONPATH=.` produced the gate above. The maintained script now
+adds the project root to `sys.path`, with a clean-environment subprocess test;
+no threshold, metric, input artifact, or decision logic changed.
+
+## Engineering-v8 promotion decision (2026-08-09)
+
+`F_freqduet_protocol_v6_avlcompact_w2_hiro` is promoted as the confirmed lower
+regularity design. Historical `F_freqduet_protocol_v6_main_hiro` remains
+immutable. The new canonical candidate
+`F_freqduet_protocol_v6_confirmed_main_hiro` is an exact behavioral alias of
+the confirmed row, differing only in config name and protocol role. It must
+next undergo fresh-seed long-training and external fixed-headway validation;
+the 40-episode confirmation is not relabeled as a final multi-domain paper
+matrix.
+
+## Engineering-v9 confirmed-main long-training preregistration (2026-08-09)
+
+The next gate tests whether the independently confirmed 40-episode mechanism
+survives unrestricted 200-episode learning. The learned matrix is
+`protocol_v6_confirmed_main_ep200_s8_e8_v9` and contains exactly historical
+hard-guard `main`, same-semantics `noguard`, compact context-only, and the new
+confirmed-main alias. It uses 200 episodes, eight fresh training seeds
+`12011, 12037, 12049, 12071, 12097, 12109, 12143, 12161`, and eight fresh
+frozen evaluation seeds
+`45007, 45013, 45053, 45061, 45077, 45119, 45131, 45137`. This gives 32
+one-job training shards and 256 frozen rollouts. No policy or critic freeze is
+enabled.
+
+The fail-closed `audit_protocol_v6_confirmed_longtrain.py` binds the parent V8
+confirmation gate hash, exact configs and seeds, 200-episode checkpoint,
+clean source, model-source fingerprint, and scenario contract. It reuses all
+12 V8 effect and mechanism gates and adds three long-training requirements:
+
+- the headway-CV improvement interval versus `noguard` must lie fully below
+  zero;
+- the restricted-journey delta 95% CI upper bound versus `noguard` must be at
+  most `+0.15 min`;
+- at least 75% of training-seed mean headway-CV deltas must be negative.
+
+The same clean commit will run direct-scenario external baselines for all eight
+evaluation seeds and exactly `fixed_headway`, `rule_holding`, and `rule_mpc`,
+as required by the V6 external-comparison contract. This first long-training
+gate remains on the base terminal scenario. Multi-domain aliases and the final
+paper matrix advance only if the confirmed main survives this test.

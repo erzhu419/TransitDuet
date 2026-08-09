@@ -35,6 +35,9 @@ CONFIRMATION_CONFIGS = [
     "F_freqduet_protocol_v6_avlcompact_w2_hiro",
     "F_freqduet_protocol_v6_avlcompact_w4_hiro",
 ]
+PROMOTED_CONFIGS = [
+    "F_freqduet_protocol_v6_confirmed_main_hiro",
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -65,14 +68,24 @@ def validate(
     names = [config_name(value) for value in configs]
     if len(names) != len(set(names)):
         raise ValueError("V6 configs must be unique")
-    allowed = set(LOCKED_CONFIGS).union(CONFIRMATION_CONFIGS)
+    allowed = set(LOCKED_CONFIGS).union(
+        CONFIRMATION_CONFIGS, PROMOTED_CONFIGS)
     if allow_experimental:
         allowed.update(EXPERIMENTAL_CONFIGS)
     unknown = sorted(set(names) - allowed)
     if unknown:
         raise ValueError(f"unregistered V6 configs: {unknown}")
-    if "F_freqduet_protocol_v6_main_hiro" not in names:
-        raise ValueError("V6 matrix must include the locked main config")
+    historical_main = "F_freqduet_protocol_v6_main_hiro"
+    promoted_mains = sorted(set(names).intersection(PROMOTED_CONFIGS))
+    if len(promoted_mains) > 1:
+        raise ValueError("V6 matrix includes multiple promoted main configs")
+    if promoted_mains:
+        canonical_main = promoted_mains[0]
+    elif historical_main in names:
+        canonical_main = historical_main
+    else:
+        raise ValueError(
+            "V6 matrix must include a historical or promoted main config")
 
     resolved = {name: resolved_config(name) for name in names}
     scenario_hashes = set()
@@ -151,7 +164,7 @@ def validate(
                     f"features; requires {required_description}")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
-    main = resolved["F_freqduet_protocol_v6_main_hiro"]
+    main = resolved[canonical_main]
     frequency = main["frequency"]
     timetable = main["upper"]["timetable_planner"]
     credit = main["upper"]["interval_credit"]
@@ -181,12 +194,15 @@ def validate(
         "status": "valid",
         "protocol_version": "freqduet-eval-v6",
         "configs": names,
+        "canonical_main": canonical_main,
         "scenario_contract_sha256": next(iter(scenario_hashes)),
         "main_checks": main_checks,
         "experimental_configs": sorted(
             set(names).intersection(EXPERIMENTAL_CONFIGS)),
         "confirmation_configs": sorted(
             set(names).intersection(CONFIRMATION_CONFIGS)),
+        "promoted_configs": sorted(
+            set(names).intersection(PROMOTED_CONFIGS)),
     }
 
 
