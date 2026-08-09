@@ -1759,7 +1759,55 @@ class FrequencySeparatedActorCriticPPO:
             level=f"{level}_deployment_frequency_reference",
             cost_state_dim=cost_state_dim,
         )
-        return concat_level_batches((batch, reference_batch))
+        groups: list[np.ndarray] = []
+        next_group = 0
+        for item in (batch, reference_batch):
+            raw = (
+                np.zeros(item.size, dtype=np.int64)
+                if item.deployment_frequency_group is None
+                else np.asarray(
+                    item.deployment_frequency_group
+                ).reshape(-1)
+            )
+            if (
+                raw.size != item.size
+                or not np.all(np.isfinite(raw))
+                or np.any(raw < 0)
+                or not np.all(raw == np.floor(raw))
+            ):
+                raise ValueError(
+                    "deployment frequency replay groups are invalid"
+                )
+            remapped = np.empty(item.size, dtype=np.int64)
+            for label in np.unique(raw.astype(np.int64, copy=False)):
+                remapped[raw == label] = next_group
+                next_group += 1
+            groups.append(remapped)
+        items = (batch, reference_batch)
+        return LevelTrajectoryBatch(
+            state=np.concatenate([
+                np.asarray(item.state) for item in items
+            ], axis=0),
+            action=np.concatenate([
+                np.asarray(item.action) for item in items
+            ], axis=0),
+            reward=np.concatenate([
+                np.asarray(item.reward).reshape(-1) for item in items
+            ], axis=0),
+            duration=np.concatenate([
+                np.asarray(item.duration).reshape(-1) for item in items
+            ], axis=0),
+            done=np.concatenate([
+                np.asarray(item.done).reshape(-1) for item in items
+            ], axis=0),
+            old_logp=np.concatenate([
+                np.asarray(item.old_logp).reshape(-1) for item in items
+            ], axis=0),
+            old_value=np.concatenate([
+                np.asarray(item.old_value).reshape(-1) for item in items
+            ], axis=0),
+            deployment_frequency_group=np.concatenate(groups, axis=0),
+        )
 
     def _deployment_frequency_group_masks(
         self,

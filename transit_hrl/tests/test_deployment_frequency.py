@@ -356,6 +356,10 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
         model = FrequencySeparatedActorCriticPPO(config)
         current = self._batch(model).lower
         reference = copy.deepcopy(current)
+        current.next_value = np.zeros(current.size, dtype=np.float32)
+        current.terminal = np.zeros(current.size, dtype=np.float32)
+        reference.next_value = None
+        reference.terminal = None
         metrics = model._update_deployment_frequency_constraint(
             level="lower",
             batch=current,
