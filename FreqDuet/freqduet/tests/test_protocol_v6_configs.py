@@ -42,6 +42,8 @@ COMPACT_CONFIGS = [
         for weight in ("2", "4", "6", "8")
     ],
 ]
+COMPACT_CONFIRMATION_CONFIGS = COMPACT_CONFIGS[:3]
+COMPACT_EXPERIMENTAL_CONFIGS = COMPACT_CONFIGS[3:]
 
 
 class ProtocolV6ConfigTest(unittest.TestCase):
@@ -208,7 +210,9 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(
             result["experimental_configs"], experimental)
         self.assertEqual(
-            result["confirmation_configs"], sorted(CONFIRMATION_CONFIGS))
+            result["confirmation_configs"], sorted(
+                set(INCREMENTAL_CONFIGS).intersection(
+                    CONFIRMATION_CONFIGS)))
 
         for name in INCREMENTAL_CONFIGS:
             config = resolved_config(name)
@@ -252,7 +256,12 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unregistered"):
             validate(configs)
         result = validate(configs, allow_experimental=True)
-        self.assertEqual(result["experimental_configs"], sorted(COMPACT_CONFIGS))
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(COMPACT_EXPERIMENTAL_CONFIGS),
+        )
+        self.assertTrue(set(COMPACT_CONFIRMATION_CONFIGS).issubset(
+            result["confirmation_configs"]))
 
         compact_features = {
             "regularity_hold_target_norm",
@@ -280,6 +289,16 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                 )
             else:
                 self.assertFalse(regularity.get("enable", False))
+
+    def test_compact_primary_pair_is_registered_for_confirmation(self):
+        result = validate([
+            CONFIGS["main"],
+            CONFIGS["noguard"],
+            *COMPACT_CONFIRMATION_CONFIGS,
+        ])
+        self.assertEqual(result["experimental_configs"], [])
+        self.assertTrue(set(COMPACT_CONFIRMATION_CONFIGS).issubset(
+            result["confirmation_configs"]))
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

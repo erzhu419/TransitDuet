@@ -31,6 +31,9 @@ LOCKED_CONFIGS = [
 CONFIRMATION_CONFIGS = [
     "F_freqduet_protocol_v6_avlctx_hiro",
     "F_freqduet_protocol_v6_avlbal_w4_hiro",
+    "F_freqduet_protocol_v6_avlcompact_hiro",
+    "F_freqduet_protocol_v6_avlcompact_w2_hiro",
+    "F_freqduet_protocol_v6_avlcompact_w4_hiro",
 ]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
@@ -49,10 +52,9 @@ EXPERIMENTAL_CONFIGS = [
         for weight in ("05", "1", "2", "4")
         if not (kind == "avlbal" and weight == "4")
     ],
-    "F_freqduet_protocol_v6_avlcompact_hiro",
     *[
         f"F_freqduet_protocol_v6_avlcompact_w{weight}_hiro"
-        for weight in ("2", "4", "6", "8")
+        for weight in ("6", "8")
     ],
 ]
 

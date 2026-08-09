@@ -455,3 +455,61 @@ reward bounds `+/-0.5, +/-1, +/-1.5, +/-2`. Minimum same-time follower
 coverage at this training checkpoint is 44.92%; this is below the final 50%
 gate but is not the preregistered frozen-evaluation quantity. It is recorded
 without being promoted to either a pass or a failure.
+
+## Engineering-v7 exploratory outcome (2026-08-09)
+
+All 36 training shards and all 72 checkpoint-39 frozen rollouts completed
+without a traceback. The strict aggregate verifies the exploratory label,
+common random numbers, four training seeds, two evaluation seeds, clean commit
+`66d15cfd64c110c91b114e1bcf2e137782390fb0`, source fingerprint
+`d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada`,
+and scenario contract
+`45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17`.
+The frozen aggregate hashes are:
+
+- matrix manifest: `cd9ed92389a8048b48a5f49167ae1f9d9a5687b785fbee9cd009891c68b5ab8a`;
+- per-evaluation rows: `725a4e4a405131a1d607400e0403d12445f1ed155754a76f0020053bb14911f0`;
+- summary: `4a8358881f63fb65d9bc95bcab89896234d1887dba5785ca094d6c4bb3875ea7`;
+- paired deltas: `8409959c98db2d786403dcd6c686c9b19404a8a4c97ee9cf871b28df54b1ca4e`.
+
+The v3 matched-context gate returns `ambiguous_multiple_passes`, not a selected
+candidate. Compact weight two improves restricted journey by `-0.35381 min`
+versus `noguard`, crossed bootstrap 95% CI `[-0.58728, -0.02593]`, and headway
+CV by `-0.02530`, 95% CI `[-0.03940, -0.01190]`. Relative to compact
+context-only, its journey and CV deltas are `-0.48574 min` and `-0.01248`.
+Compact weight four improves restricted journey by `-0.54800 min`, 95% CI
+`[-0.84175, -0.25889]`, and headway CV by `-0.02409`, 95% CI
+`[-0.04952, 0.00268]`. Relative to compact context-only, its journey and CV
+deltas are `-0.67994 min` and `-0.01126`.
+
+Both weights pass every locked absolute and matched-context gate, retain zero
+execution adjustment, exceed 83.32% same-time follower coverage, and improve
+the measured regularity loss in every rollout. Weight six fails the locked
+matched-context CV threshold (`-0.00887` versus required `-0.01`). Weight eight
+fails both the net CV and matched-context CV thresholds. No result from this
+matrix is promoted as independent confirmation.
+
+## Engineering-v8 compact primary confirmation preregistration (2026-08-09)
+
+The minimum effective dose, compact weight two, is the primary candidate.
+Compact weight four is retained as a prespecified sensitivity arm because it
+also passed exploration, but it cannot rescue a failed weight-two primary
+claim. The controls are hard `main`, same-semantics `noguard`, and compact
+context-only. No weight or threshold will be selected from the confirmation
+data.
+
+The independent matrix is locked to 40 episodes; training seeds
+`809, 827, 853, 877, 907, 929`; and frozen evaluation seeds
+`44011, 44017, 44023, 44029`. It therefore contains 30 one-job training shards
+and 120 frozen rollouts. All training and evaluation seeds are disjoint from
+engineering-v7. Source and scenario fingerprints must remain identical to the
+v7 exploratory matrix; the confirmation source must be clean and the manifest
+must be explicitly labelled `confirmation` with independent confirmation
+enabled.
+
+The fail-closed `audit_protocol_v6_compact_confirmation.py` first verifies
+this lineage, then applies the unchanged v3 absolute and matched-context gates
+separately to weight two and weight four. The primary claim is eligible only
+when weight two alone returns `unique_pass`. Weight four is reported as
+sensitivity evidence regardless of outcome and cannot alter the primary
+decision.
