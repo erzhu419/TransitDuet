@@ -314,6 +314,38 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v14_6_conservative_transfer_screen",
+      "claim_id": "D7_FUNCTION_PRESERVING_CONSERVATIVE_TRANSFER",
+      "claim": "Function-preserving conservative responsibility transfer produces behavior-safe learned frequency separation across the registered MuJoCo conditions.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_behavior_safe_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "development_paired_function_preserving_transfer_with_exact_path_and_environment_by_disturbance_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_6",
+      "allowed_wording": "The v14.6 development screen made lower-to-upper transfer function preserving and excluded untrained checkpoints. Every candidate exactly matched its paired control in selected parameters, latent-policy traces, executed-action traces, rewards, and returns. Strengths at or above 0.075 reduced both registered lower-LF diagnostics in all 15 conditions, but every such arm failed the upper-HF budget in all five Hopper conditions and passed only 10 of 15 complete gates. Because policy parameters and environment behavior were identical across arms, this is a responsibility-coordinate diagnostic rather than evidence of improved learned control.",
+      "forbidden_wording": "MuJoCo v14.6 validates learned behavior-safe Freq-HRL, improves control performance, or supplies a selected algorithm for confirmatory testing.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/decision.json",
+          "sha256": "d51bd2af7f5528df503469ad17415dce91ee3b498e7477c9894d5720faeaf4ad"
+        },
+        {
+          "role": "environment_condition_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/environment_condition_gates.csv",
+          "sha256": "e5c294413b34213f271243dbb9491f9fc01163bba4dc909346a7fff8c9c4a46c"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/screen_report.md",
+          "sha256": "1c204c17b6df09e51e177e5bad1e3df8aadc954600aa7acedde2abd383eb0d41"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

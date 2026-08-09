@@ -1,5 +1,5 @@
 {
-  "development_record_count": 6,
+  "development_record_count": 7,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 1,
-  "record_count": 11,
+  "record_count": 12,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -2015,6 +2015,876 @@
       "selection_access": "development_outcomes_visible"
     },
     {
+      "allowed_wording": "The v14.6 development screen made lower-to-upper transfer function preserving and excluded untrained checkpoints. Every candidate exactly matched its paired control in selected parameters, latent-policy traces, executed-action traces, rewards, and returns. Strengths at or above 0.075 reduced both registered lower-LF diagnostics in all 15 conditions, but every such arm failed the upper-HF budget in all five Hopper conditions and passed only 10 of 15 complete gates. Because policy parameters and environment behavior were identical across arms, this is a responsibility-coordinate diagnostic rather than evidence of improved learned control.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/decision.json",
+          "role": "decision",
+          "sha256": "d51bd2af7f5528df503469ad17415dce91ee3b498e7477c9894d5720faeaf4ad"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/environment_condition_gates.csv",
+          "role": "environment_condition_gates",
+          "sha256": "e5c294413b34213f271243dbb9491f9fc01163bba4dc909346a7fff8c9c4a46c"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/screen_report.md",
+          "role": "report",
+          "sha256": "1c204c17b6df09e51e177e5bad1e3df8aadc954600aa7acedde2abd383eb0d41"
+        }
+      ],
+      "claim": "Function-preserving conservative responsibility transfer produces behavior-safe learned frequency separation across the registered MuJoCo conditions.",
+      "claim_id": "D7_FUNCTION_PRESERVING_CONSERVATIVE_TRANSFER",
+      "decision": "no_behavior_safe_candidate",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_6_conservative_transfer_screen",
+      "evidence_stage": "development",
+      "facts": {
+        "all_arms_exact_parameter_hash_pass": true,
+        "all_arms_exact_return_trace_pass": true,
+        "all_arms_trained_checkpoint_gate_pass": true,
+        "arm_status": {
+          "conservative_s0025": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -1.0,
+            "passed_gate_count": 0,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": false,
+            "strict_raw_improvement_condition_count": 0,
+            "strict_responsibility_improvement_condition_count": 0,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0050": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.12131654308403003,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 10,
+            "strict_responsibility_improvement_condition_count": 10,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0075": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.12237287761988846,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0100": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.12106635045514624,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0125": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.12368806710420482,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0150": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.1221139748836654,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          },
+          "conservative_s0200": {
+            "all_environment_condition_gates_pass": false,
+            "development_selection_pass": false,
+            "dual_saturation_gate_pass": true,
+            "exact_selected_parameter_hash_gate_pass": true,
+            "lower_actor_anchor_kl_mean": 0.0,
+            "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+            "maximum_environment_lower_dual_saturation_fraction": 0.0,
+            "maximum_environment_upper_dual_saturation_fraction": 0.0,
+            "mean_return_lower_bound": 0.0,
+            "minimum_environment_trained_checkpoint_fraction": 1.0,
+            "minimum_normalized_safety_slack": -0.12549139160216563,
+            "passed_gate_count": 10,
+            "selected_parameter_hash_match_by_environment": {
+              "HalfCheetah-v5": true,
+              "Hopper-v5": true,
+              "Walker2d-v5": true
+            },
+            "strict_improvement_gate_pass": true,
+            "strict_raw_improvement_condition_count": 15,
+            "strict_responsibility_improvement_condition_count": 15,
+            "total_gate_count": 15,
+            "trained_checkpoint_gate_pass": true,
+            "training_diagnostics": {
+              "by_environment": {
+                "HalfCheetah-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.012893351558642279,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008415819654406671
+                },
+                "Hopper-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009738897280592608,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.007437679014563616
+                },
+                "Walker2d-v5": {
+                  "lower_actor_anchor_kl_mean": 0.0,
+                  "lower_actor_anchor_parameter_rms_mean": 0.009791223343459752,
+                  "trained_checkpoint_fraction": 1.0,
+                  "upper_actor_anchor_kl_mean": 0.0,
+                  "upper_actor_anchor_parameter_rms_mean": 0.008193643345308328
+                }
+              },
+              "dual_saturation_gate_applicable": false,
+              "lower_actor_anchor_kl_mean": 0.0,
+              "lower_actor_anchor_parameter_rms_mean": 0.010807824060898212,
+              "maximum_environment_lower_dual_saturation_fraction": 0.0,
+              "maximum_environment_upper_dual_saturation_fraction": 0.0,
+              "minimum_environment_trained_checkpoint_fraction": 1.0,
+              "selected_parameter_sha256_by_environment": {
+                "HalfCheetah-v5": {
+                  "128515602": "4e26dcc2ee4ae426541b6dc8c2c457ffe2bb2730f1f420117295539bff31d940",
+                  "1439262987": "a333a3f76517e66ef42b27a746ad67174df1124db50f69ecbd9c954c53d98ac8",
+                  "1607848361": "4b6d5f60c83533c8b1b47871caec9ebec896931edf57a5c207760f5f7221c291",
+                  "251561761": "ed45004c2c310aa02c8ec5284b4dbdcd80592deda867a1d12a3a53542bcf12f7",
+                  "2837914129": "533cc6e4d4d09653e1241d278cebc5fbd70e8d16402665e16a5b145794564a53",
+                  "2838959313": "5c5da111bb08391ae0deb19ebba7ebb39b496000dd18cad937b5b2d2a58fcb69",
+                  "2912892372": "0f711bd641f046512efbf88e5469a77c1feccd86fab1d286dd249ef942fa52d7",
+                  "2996362467": "5a1a1fa300751912bee2ccce843bbcbd654ecef2fb778c2eff1888d8267ef742",
+                  "3444335686": "e3499e196333011e3ae4190d361086c85247f674232ccf55093cb38da23074b7",
+                  "3535643925": "d1bff1ab2bc032b3381b805023b6ea97a78f04e17278656cf9ebc28ab682e44e",
+                  "3604527835": "77f1fc712478040f3eb24dee630cdf0bebc37595387d0151b2a2b1b92324f1b7",
+                  "362893922": "aa3aa7ebe87546b8d561822c0a4dd41f0bdf9febee5a1a94c192dc6a147f89e8",
+                  "4184033156": "aeb6f7563c18c758f5378b07a638aad6746a929fa00e2aa55c3a2431f778f3f7",
+                  "793385307": "2f7d006ee3ed898a9c77d209afb9fb8caa3e654a19911936f594ac29bac33c57",
+                  "833649984": "0ab367cbf88d3af6c5476ed120e346fa917934713cde47f78d70a51186faebd7",
+                  "966058201": "910cda49e762ad63041c89dbe1d772e29f9e8061ba1cee28b0d4efcdaa970e11"
+                },
+                "Hopper-v5": {
+                  "128515602": "f6098c0123dcbb6ec7c48bb58c331cc9dffbfc95b38699957d7b5ddcad5bb66a",
+                  "1439262987": "eca612113c32f33f73eb9d0af7920ab821de86e04bb34e5bcaf38dfd40766750",
+                  "1607848361": "aae021f21c563a03f51037fdc9ad1e3a1f52b8ad35d205d0949bae14f6028ab6",
+                  "251561761": "6b3a94ae30fef9dcf343d7c5523d8dd4fb91b74231261ebe3f6050c99e8d2d55",
+                  "2837914129": "0ae75c9a5869e0db3794b70c6764848ccc93d1fb2834e12315c0f4896e9722e9",
+                  "2838959313": "f29161c1f7d2dab5b746159d3aeb419f082a106948b9bd9a74c247d68751f82f",
+                  "2912892372": "898a027b50c7e22398c8d478ac246fcc1c755ca2abfc2c7bcb68851a6515dc52",
+                  "2996362467": "84ce81bb69f8b3269ec6e7770e4f25a3eae9773e0a49f7b46f5884b29f778602",
+                  "3444335686": "eca69c70b37652050ee615942c97e99cfab06dff2d19de89992d664f7d74367a",
+                  "3535643925": "a1c15e6c195edcd4bfe60a3f6905d82c024aff41ffee0ba2ff32dd39d6b2c9b1",
+                  "3604527835": "44c5e8364e1f58597ab50131085e57fe8f4619790988f9d4e25c91754977cabd",
+                  "362893922": "9b3783bb4b32253f07a8d853bcd8cedf66904292da0b76ef8b96da03f25edac6",
+                  "4184033156": "02f797d6af183f3862e313b832d5e2eefd356223642e49dc425b708d2ec64ef0",
+                  "793385307": "983e6bc888eb2307d60dd504f9f9496aa97f11975c57d8121796a57d58bac1f5",
+                  "833649984": "aede4a060ff16590ca7a7b0fe13906b8c6771a1ab345f1b3a0080c53b3cbdc1b",
+                  "966058201": "f7dfee0daa4a9e199c857fb7f06b15f8a3d2ae2ad9df727f5ce86d821f884244"
+                },
+                "Walker2d-v5": {
+                  "128515602": "af0f065640804b54a3fd624cb9fcb950b42f4ca301c30f493a8ecef1e1062bfe",
+                  "1439262987": "7a820f0db690204082d688751af25228cb94c0aeceaaca3fa1b76bb43921c7e8",
+                  "1607848361": "d1007bd681247dabe3a17ecacd241b8510d1c073015aed9fcdc710c737859589",
+                  "251561761": "2572cf82f61a9c12ade204f11e4b3ea33482c3ee8b70d4d1be38cc0383a42f88",
+                  "2837914129": "ce29fe83ae7d0294b5ecaa3792db19a2f3f9d90a51257c7930fc521358111db7",
+                  "2838959313": "fb04135bf23fb16bc623555ac09afd5447d7bb1863578341aa4c7c22e7cb9f10",
+                  "2912892372": "430482d137104bec85d50f9f63f8eaf962be11737f20c3278b240d26f7b1df96",
+                  "2996362467": "db9ab326c68e58820804d52af1ffbd707ddd75d5a9dd7d0792754b01aa66ba2a",
+                  "3444335686": "102d68197c8d2f4a2c9383d8bcec2cbaa1a749b9ed21004d243ea7f245d8e5f5",
+                  "3535643925": "2b74b4de6bfa60374036d0e8c8a7ffed25a083ca38fcb94e18d836d041b215bd",
+                  "3604527835": "9f2ca1ef105b5b099ae4d202d5dc2c6016a56d10fc237f792d967b16904bc802",
+                  "362893922": "fb150d25ebd8c52e09996b3e113c7a41a1ae412e8c430d4fc30826a05bb2fc90",
+                  "4184033156": "ba289c22fa9aed30617b77dc4e014f82ef4f2c1cbca6f23f29ad395e0ad41392",
+                  "793385307": "fa4c0d06e82e6c2725ddc949541f2c7ac551fc354288b601e8e904f0868b62aa",
+                  "833649984": "de942afaabf392b2bf2a449c17450bf44bebb1b9d2a1ed7aaa6fe6780601e834",
+                  "966058201": "98d85c0f0b70093d9d1f4157af99eea370df643abab33ba61c09af5dbb38ae35"
+                }
+              },
+              "trained_checkpoint_fraction": 1.0,
+              "upper_actor_anchor_kl_mean": 0.0,
+              "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+            },
+            "upper_actor_anchor_kl_mean": 0.0,
+            "upper_actor_anchor_parameter_rms_mean": 0.008015714004759538
+          }
+        },
+        "bootstrap_draws": 20000,
+        "decision_status": "no_behavior_safe_candidate",
+        "eligible_arms": [],
+        "full_drift_arm_reward_noninferiority_condition_count": 15,
+        "full_drift_arm_upper_hf_condition_count": 10,
+        "full_drift_arms": [
+          "conservative_s0075",
+          "conservative_s0100",
+          "conservative_s0125",
+          "conservative_s0150",
+          "conservative_s0200"
+        ],
+        "gate_granularity": "environment_by_disturbance_mode",
+        "maximum_complete_condition_count": 10,
+        "selected_arm": null,
+        "selection_confidence": 0.9
+      },
+      "forbidden_wording": "MuJoCo v14.6 validates learned behavior-safe Freq-HRL, improves control performance, or supplies a selected algorithm for confirmatory testing.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "development_paired_function_preserving_transfer_with_exact_path_and_environment_by_disturbance_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_6",
+      "positive_claim_supported": false,
+      "selection_access": "development_outcomes_visible"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -2073,7 +2943,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "b2958fdbd582d28c8799836c7f2fd8fe5c060bc46028189084bbf0321fd59a34",
+  "registry_sha256": "83a6388d4f029e67c8677e66fcbd5cbfc3d233d3976b64284290644911741350",
   "reportable_record_count": 3,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }
