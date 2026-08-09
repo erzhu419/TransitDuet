@@ -2477,12 +2477,9 @@ def train_mujoco_method(
         )
     if name == "flat_ppo" and effective_router_observe_strength:
         raise ValueError("flat PPO cannot observe hierarchical router strength")
-    if paired_continuation and (
-        effective_lower_action_router_mode != "causal_ema_high_pass"
-        or not effective_router_observe_strength
-    ):
+    if paired_continuation and not effective_router_observe_strength:
         raise ValueError(
-            "paired continuation requires an observed causal lower-action router"
+            "paired continuation requires an observed router-strength context"
         )
     router_training_strengths_by_iteration = [
         lower_action_router_training_strength(

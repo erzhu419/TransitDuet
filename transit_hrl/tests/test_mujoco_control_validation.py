@@ -1012,6 +1012,39 @@ class MujocoControlIntegrationTest(unittest.TestCase):
                 0.0,
             )
 
+            direct_payload, _, _ = train_mujoco_method(
+                method="freq_hrl_no_leakage",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                train_seeds=[313],
+                selection_seeds=[317],
+                eval_seeds=[331],
+                steps=8,
+                episode_horizon=8,
+                iterations=1,
+                optimizer_seed=283,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_mode="direct",
+                lower_action_router_strength=0.0,
+                lower_action_router_observe_strength=True,
+                responsibility_mode="causal_lf_transfer",
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                checkpoint_smoothing_window=1,
+                checkpoint_min_delta=0.0,
+                checkpoint_evaluation_interval=1,
+                evaluation_disturbance_modes=["standard"],
+            )
+            self.assertTrue(
+                direct_payload["paired_checkpoint_continuation"]["enabled"]
+            )
+            self.assertEqual(
+                direct_payload["lower_action_router_mode"], "direct"
+            )
+
     def test_router_curriculum_rejects_hidden_strength(self):
         with self.assertRaisesRegex(
             ValueError,
