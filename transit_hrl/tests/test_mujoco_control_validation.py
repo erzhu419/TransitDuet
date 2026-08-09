@@ -24,6 +24,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     capacity_matched_flat_hidden_dim,
     crossed_checkpoint_selection_paths,
     environment_dimensions,
+    latent_behavior_feasibility_rank,
     lower_action_router_training_strength,
     load_paired_mujoco_checkpoint,
     mujoco_policy_state_dim,
@@ -517,6 +518,37 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "latent_upper_hf_violation",
             latent_diagnostics["worst_normalized_violations"],
         )
+
+    def test_latent_feasibility_rank_prioritizes_the_worst_endpoint(self):
+        def rows(latent_lower: float, latent_upper: float, reward: float):
+            return [
+                {
+                    "disturbance_mode": mode,
+                    "reward_mean": reward,
+                    "LowerLFDriftAbs": 0.04 ** 2,
+                    "RawLowerLFDriftAbs": 0.04 ** 2,
+                    "LatentLowerLFDriftAbs": latent_lower ** 2,
+                    "UpperHFPowerAbs": 0.08 ** 2,
+                    "LatentUpperHFPowerAbs": latent_upper ** 2,
+                }
+                for mode in ("standard", "mixed")
+            ]
+
+        imbalanced = latent_behavior_feasibility_rank(
+            rows(0.05, 0.20, 10.0),
+            expected_modes=("standard", "mixed"),
+            lower_lf_rms_budget=0.05,
+            upper_hf_rms_budget=0.10,
+        )
+        balanced = latent_behavior_feasibility_rank(
+            rows(0.07, 0.15, 1.0),
+            expected_modes=("standard", "mixed"),
+            lower_lf_rms_budget=0.05,
+            upper_hf_rms_budget=0.10,
+        )
+
+        self.assertGreater(balanced, imbalanced)
+        self.assertLess(balanced[2], imbalanced[2])
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
@@ -1142,7 +1174,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             lower_action_router_mode="causal_ema_high_pass",
             lower_action_router_strength=0.1,
             checkpoint_selection_mode="crossed_conditions",
-            checkpoint_score_mode="behavior_robust",
+            checkpoint_score_mode="latent_behavior_feasibility_first",
             checkpoint_smoothing_window=1,
             checkpoint_min_delta=0.0,
             checkpoint_evaluation_interval=1,
@@ -1163,7 +1195,16 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["lower_action_router_strength"], 0.1)
         self.assertEqual(rows[0]["LowerActionRouterStrength"], 0.1)
         self.assertEqual(
-            payload["checkpoint_score_mode"], "behavior_robust"
+            payload["checkpoint_score_mode"],
+            "latent_behavior_feasibility_first",
+        )
+        self.assertEqual(
+            payload["checkpoint_selection_protocol"],
+            "state_aligned_lexicographic_validation_v1",
+        )
+        self.assertIn(
+            "negative_worst_endpoint_violation",
+            payload["checkpoint_selected_rank"],
         )
         self.assertGreater(
             payload["history"][-1]["upper_constraint_mean"], 0.0

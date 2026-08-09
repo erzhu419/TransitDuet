@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_8_latent_responsibility_constraints"
+    "freq_hrl_mujoco_shared_core_v14_9_state_aligned_feasibility"
 )
 METHODS = (
     "freq_hrl",
@@ -125,6 +125,7 @@ CHECKPOINT_SCORE_MODES = (
     "mean_reward",
     "behavior_robust",
     "latent_behavior_robust",
+    "latent_behavior_feasibility_first",
 )
 DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
 DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
@@ -2423,6 +2424,36 @@ def behavior_robust_checkpoint_diagnostics(
     }
 
 
+def latent_behavior_feasibility_rank(
+    rows: list[dict[str, Any]],
+    *,
+    expected_modes: Iterable[str],
+    lower_lf_rms_budget: float,
+    upper_hf_rms_budget: float,
+) -> tuple[float, float, float]:
+    """Rank one checkpoint by worst endpoint feasibility, then reward."""
+
+    diagnostics = behavior_robust_checkpoint_diagnostics(
+        rows,
+        expected_modes=expected_modes,
+        lower_lf_rms_budget=lower_lf_rms_budget,
+        upper_hf_rms_budget=upper_hf_rms_budget,
+        constraint_penalty=1.0,
+        include_latent=True,
+    )
+    violations = np.asarray(
+        list(diagnostics["worst_normalized_violations"].values()),
+        dtype=np.float64,
+    )
+    if violations.size != 5 or not np.all(np.isfinite(violations)):
+        raise ValueError("latent checkpoint endpoint registry is invalid")
+    return (
+        -float(np.max(violations)),
+        -float(np.sum(np.square(violations))),
+        float(diagnostics["worst_condition_reward_mean"]),
+    )
+
+
 def train_mujoco_method(
     *,
     method: str,
@@ -2616,6 +2647,14 @@ def train_mujoco_method(
     if str(checkpoint_score_mode) not in CHECKPOINT_SCORE_MODES:
         raise ValueError("unknown MuJoCo checkpoint score mode")
     if (
+        name == "flat_ppo"
+        and str(checkpoint_score_mode)
+        == "latent_behavior_feasibility_first"
+    ):
+        raise ValueError(
+            "latent behavior feasibility ranking requires hierarchical metrics"
+        )
+    if (
         not np.isfinite(float(checkpoint_constraint_penalty))
         or float(checkpoint_constraint_penalty) < 0.0
     ):
@@ -2801,12 +2840,20 @@ def train_mujoco_method(
         ))
 
     checkpoint_score_fn = None
+    checkpoint_rank_fn = None
+    checkpoint_rank_names: tuple[str, ...] = ()
+    checkpoint_rank_contract = "disabled"
     checkpoint_score_contract = "mean_reward_mean_v1"
     if str(checkpoint_score_mode) in {
-        "behavior_robust", "latent_behavior_robust"
+        "behavior_robust",
+        "latent_behavior_robust",
+        "latent_behavior_feasibility_first",
     }:
         include_latent_checkpoint_cost = (
-            str(checkpoint_score_mode) == "latent_behavior_robust"
+            str(checkpoint_score_mode) in {
+                "latent_behavior_robust",
+                "latent_behavior_feasibility_first",
+            }
         )
         checkpoint_score_fn = lambda rows: float(
             behavior_robust_checkpoint_diagnostics(
@@ -2827,6 +2874,22 @@ def train_mujoco_method(
                 else "lower_raw_lower_and_upper_hf_budget_violations_v1"
             )
         )
+        if str(checkpoint_score_mode) == "latent_behavior_feasibility_first":
+            checkpoint_rank_fn = lambda rows: latent_behavior_feasibility_rank(
+                rows,
+                expected_modes=training_modes,
+                lower_lf_rms_budget=lower_lf_rms_budget,
+                upper_hf_rms_budget=upper_hf_rms_budget,
+            )
+            checkpoint_rank_names = (
+                "negative_worst_endpoint_violation",
+                "negative_endpoint_violation_l2",
+                "worst_condition_reward_mean",
+            )
+            checkpoint_rank_contract = (
+                "state_aligned_minimax_latent_behavior_feasibility_then_"
+                "worst_condition_reward_v1"
+            )
 
     upper_cost_critic_for_capacity = (
         str(upper_constraint_mode) == "primal_dual"
@@ -3006,6 +3069,9 @@ def train_mujoco_method(
                 checkpoint_evaluation_interval=checkpoint_evaluation_interval,
                 checkpoint_score_fn=checkpoint_score_fn,
                 checkpoint_score_contract=checkpoint_score_contract,
+                checkpoint_rank_fn=checkpoint_rank_fn,
+                checkpoint_rank_names=checkpoint_rank_names,
+                checkpoint_rank_contract=checkpoint_rank_contract,
             )
             safety_rows: list[dict[str, Any]] = []
             for safety_mode in training_modes:
@@ -3305,6 +3371,9 @@ def train_mujoco_method(
             checkpoint_evaluation_interval=checkpoint_evaluation_interval,
             checkpoint_score_fn=checkpoint_score_fn,
             checkpoint_score_contract=checkpoint_score_contract,
+            checkpoint_rank_fn=checkpoint_rank_fn,
+            checkpoint_rank_names=checkpoint_rank_names,
+            checkpoint_rank_contract=checkpoint_rank_contract,
         )
 
     actual_parameters = _module_parameter_count(model)

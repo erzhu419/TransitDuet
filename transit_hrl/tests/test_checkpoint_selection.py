@@ -9,12 +9,55 @@ from freq_hrl.rl import (
     JointPPOConfig,
     JointTrajectoryBatch,
     RobustValidationCheckpointSelector,
+    StateAlignedLexicographicCheckpointSelector,
     SMDPPPOConfig,
 )
 from freq_hrl.rl.training import train_frequency_separated_ppo, train_joint_ppo
 
 
 class RobustValidationCheckpointSelectorTest(unittest.TestCase):
+    def test_state_aligned_selector_uses_each_states_own_rank(self):
+        selector = StateAlignedLexicographicCheckpointSelector(
+            initial_score=10.0,
+            initial_rank=(-2.0, -3.0, 10.0),
+            rank_names=("negative_max_violation", "negative_l2", "reward"),
+            initial_state={"step": -1},
+            minimum_eligible_iteration=1,
+        )
+        first = selector.consider(
+            score=100.0,
+            rank=(-0.8, -1.2, 100.0),
+            state={"step": 0},
+            iteration=0,
+        )
+        second = selector.consider(
+            score=5.0,
+            rank=(-0.5, -0.9, 5.0),
+            state={"step": 1},
+            iteration=1,
+        )
+        third = selector.consider(
+            score=200.0,
+            rank=(-0.6, -0.1, 200.0),
+            state={"step": 2},
+            iteration=2,
+        )
+
+        self.assertFalse(first["checkpoint_selection_eligible"])
+        self.assertTrue(second["checkpoint_selected"])
+        self.assertFalse(third["checkpoint_selected"])
+        self.assertEqual(selector.best_state, {"step": 1})
+        self.assertEqual(selector.selected_iteration, 1)
+        metadata = selector.metadata(total_iterations=3)
+        self.assertEqual(
+            metadata["checkpoint_selection_protocol"],
+            "state_aligned_lexicographic_validation_v1",
+        )
+        self.assertEqual(
+            metadata["checkpoint_selected_rank"]["negative_max_violation"],
+            -0.5,
+        )
+
     def test_trailing_window_rejects_an_isolated_validation_spike(self):
         selector = RobustValidationCheckpointSelector(
             initial_score=0.0,
@@ -167,6 +210,76 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             "minimum_validation_reward_v1",
         )
         self.assertEqual(heldout[0]["reward_mean"], 30.0)
+
+    def test_smdp_trainer_accepts_a_state_aligned_rank_contract(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+        ))
+
+        def rollout_fn(_model, seed, train):
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+            )
+            return (builder.build() if train else None), {
+                "reward_mean": float(seed),
+                "violation": float(seed) / 100.0,
+            }
+
+        payload, _, _ = train_frequency_separated_ppo(
+            model=model,
+            train_seeds=[1],
+            selection_seeds=[10, 20],
+            eval_seeds=[30],
+            iterations=1,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+            checkpoint_score_fn=lambda rows: min(
+                float(row["reward_mean"]) for row in rows
+            ),
+            checkpoint_score_contract="minimum_validation_reward_v1",
+            checkpoint_rank_fn=lambda rows: (
+                -max(float(row["violation"]) for row in rows),
+                min(float(row["reward_mean"]) for row in rows),
+            ),
+            checkpoint_rank_names=(
+                "negative_max_violation",
+                "worst_reward",
+            ),
+            checkpoint_rank_contract="feasibility_then_reward_v1",
+            checkpoint_minimum_iteration=0,
+        )
+
+        self.assertEqual(
+            payload["checkpoint_selection_protocol"],
+            "state_aligned_lexicographic_validation_v1",
+        )
+        self.assertEqual(
+            payload["checkpoint_rank_contract"],
+            "feasibility_then_reward_v1",
+        )
+        self.assertEqual(
+            payload["checkpoint_rank_names"],
+            ["negative_max_violation", "worst_reward"],
+        )
+        self.assertEqual(payload["selected_checkpoint_iteration"], 0)
 
     def test_smdp_trainer_can_require_a_trained_checkpoint(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

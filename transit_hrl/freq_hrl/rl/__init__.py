@@ -24,7 +24,10 @@ from .joint_actor_critic import (
     JointTrajectoryBatch,
     concat_joint_batches,
 )
-from .checkpoint_selection import RobustValidationCheckpointSelector
+from .checkpoint_selection import (
+    RobustValidationCheckpointSelector,
+    StateAlignedLexicographicCheckpointSelector,
+)
 from .smdp_actor_critic import (
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
@@ -69,6 +72,7 @@ __all__ = [
     "PlanActionResult",
     "PromotionRolloutBuilder",
     "RobustValidationCheckpointSelector",
+    "StateAlignedLexicographicCheckpointSelector",
     "SMDPPPOConfig",
     "TemporalDecisionScheduler",
     "TrajectoryBatch",
