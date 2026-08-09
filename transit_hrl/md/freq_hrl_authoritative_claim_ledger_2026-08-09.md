@@ -19,6 +19,8 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_7_joint_learned_projection_preflight | mujoco_control | development_preflight | comparator_confounded | excluded_from_selection | false |
 | mujoco_v14_8_latent_matched_preflight | mujoco_control | development_preflight | no_joint_candidate | development_only | false |
 | mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development_preflight | deployment_constraint_misaligned | development_only | false |
+| mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
+| mujoco_v14_11_iterative_projection_protocol | mujoco_control | development_preflight | preregistered_not_run | excluded_until_audited | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -113,6 +115,21 @@ Forbidden: The v14.10 implementation or smoke test alone supports reward improve
 The source-bound single-seed HalfCheetah preflight completed and passed projection calibration, provenance, checkpoint, and held-out-grid integrity checks. Every active deployment-frequency correction reduced same-batch power, but each correction was much smaller than the registered target and all seven learned arms safely fell back to the initial checkpoint. No learned actor or action change was admitted. The full 528-cell screen was not launched. This outcome motivates an iterative, cumulative-reward-budget projection rather than additional dual-rate tuning.
 
 Forbidden: MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a submission-ready selected algorithm.
+
+### mujoco_v14_11_iterative_projection_protocol
+
+The source-bound v14.11 development protocol replaces the v14.10 single
+post-PPO correction with an iterative deterministic actor-mean projection.
+All accepted steps share one cumulative PPO reward-loss budget. The frozen
+single-seed preflight compares otherwise matched `k=1`, `k=4`, `k=8`, and
+`k=16` arms and requires a trained checkpoint plus a material within-update
+reduction gain over `k=1` before any multiseed expansion. No scheduler outcome
+has yet been admitted to this ledger.
+
+Forbidden: The v14.11 implementation, unit test, local smoke, scheduler task
+state, or unaudited artifact supports reward improvement, learned frequency
+separation, no-tradeoff behavior, cross-task generality, or confirmatory
+evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 
