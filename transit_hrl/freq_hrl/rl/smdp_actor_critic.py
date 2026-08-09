@@ -366,6 +366,7 @@ class SMDPPPOConfig:
     init_log_std: float = -1.0
     deployment_action_transform: str = "identity"
     upper_deployment_frequency_rms_budget: float = 0.0
+    upper_deployment_frequency_reference_reduction_fraction: float = 0.0
     upper_deployment_frequency_window: int = 8
     upper_deployment_frequency_action_scale: float = 1.0
     upper_deployment_frequency_dual_lr: float = 0.0
@@ -373,6 +374,7 @@ class SMDPPPOConfig:
     upper_deployment_frequency_max_lambda: float = 100.0
     upper_deployment_frequency_step_scale: float = 1.0
     lower_deployment_frequency_rms_budget: float = 0.0
+    lower_deployment_frequency_reference_reduction_fraction: float = 0.0
     lower_deployment_frequency_window: int = 32
     lower_deployment_frequency_action_scale: float = 1.0
     lower_deployment_frequency_dual_lr: float = 0.0
@@ -1121,6 +1123,10 @@ class FrequencySeparatedActorCriticPPO:
             window = int(getattr(
                 config, f"{level}_deployment_frequency_window"
             ))
+            reference_reduction = float(getattr(
+                config,
+                f"{level}_deployment_frequency_reference_reduction_fraction",
+            ))
             action_scale = float(getattr(
                 config, f"{level}_deployment_frequency_action_scale"
             ))
@@ -1146,6 +1152,14 @@ class FrequencySeparatedActorCriticPPO:
                 raise ValueError(
                     f"an active {level} deployment frequency constraint "
                     "requires a positive RMS budget"
+                )
+            if (
+                not np.isfinite(reference_reduction)
+                or not 0.0 <= reference_reduction < 1.0
+            ):
+                raise ValueError(
+                    f"{level}_deployment_frequency_reference_reduction_"
+                    "fraction must be finite and in [0, 1)"
                 )
             if window < 1:
                 raise ValueError(
@@ -2493,6 +2507,9 @@ class FrequencySeparatedActorCriticPPO:
         prefix = f"{level}_deployment_frequency"
         dual_lr = float(getattr(cfg, f"{prefix}_dual_lr"))
         budget = float(getattr(cfg, f"{prefix}_rms_budget"))
+        reference_reduction = float(getattr(
+            cfg, f"{prefix}_reference_reduction_fraction"
+        ))
         lambda_name = f"{prefix}_lambda"
         lambda_before = float(getattr(self, lambda_name))
         active = bool(dual_lr > 0.0 or lambda_before > 0.0)
@@ -2504,6 +2521,9 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_signed_excess_after": 0.0,
             f"{prefix}_violation_before": 0.0,
             f"{prefix}_violation_after": 0.0,
+            f"{prefix}_reference_power": 0.0,
+            f"{prefix}_target_power": 0.0,
+            f"{prefix}_reference_reduction_fraction": reference_reduction,
             f"{prefix}_lambda_before": lambda_before,
             f"{prefix}_lambda_after": lambda_before,
             f"{prefix}_guard_attempted": 0.0,
@@ -2552,6 +2572,42 @@ class FrequencySeparatedActorCriticPPO:
         window = int(getattr(cfg, f"{prefix}_window"))
         action_scale = float(getattr(cfg, f"{prefix}_action_scale"))
 
+        def actor_frequency_power(policy: nn.Module) -> torch.Tensor:
+            deterministic_action = deterministic_actor_action(
+                policy,
+                state,
+                transform=str(cfg.deployment_action_transform),
+                scale=action_scale,
+            )
+            return deployment_frequency_stats(
+                deterministic_action,
+                duration,
+                done,
+                window=window,
+                band=band,
+                rms_budget=budget,
+            ).power
+
+        reference_power = torch.zeros(
+            (), dtype=state.dtype, device=self.device
+        )
+        target_power = torch.as_tensor(
+            budget * budget, dtype=state.dtype, device=self.device
+        )
+        if reference_reduction > 0.0:
+            anchor = self._actor_anchors.get(level)
+            if anchor is None:
+                raise RuntimeError(
+                    f"{level} relative deployment frequency constraint "
+                    "requires a captured actor anchor"
+                )
+            with torch.no_grad():
+                reference_power = actor_frequency_power(anchor).detach()
+                target_power = torch.maximum(
+                    (1.0 - reference_reduction) * reference_power,
+                    target_power,
+                ).detach()
+
         def current_stats():
             deterministic_action = deterministic_actor_action(
                 actor,
@@ -2565,7 +2621,7 @@ class FrequencySeparatedActorCriticPPO:
                 done,
                 window=window,
                 band=band,
-                rms_budget=budget,
+                power_budget=target_power,
             )
 
         def reward_guard_loss_fn() -> torch.Tensor:
@@ -2646,6 +2702,13 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_violation_after": float(
                 after.violation.detach().cpu().item()
             ),
+            f"{prefix}_reference_power": float(
+                reference_power.detach().cpu().item()
+            ),
+            f"{prefix}_target_power": float(
+                target_power.detach().cpu().item()
+            ),
+            f"{prefix}_reference_reduction_fraction": reference_reduction,
             f"{prefix}_lambda_before": lambda_before,
             f"{prefix}_lambda_after": lambda_after,
             f"{prefix}_guard_attempted": float(attempted),

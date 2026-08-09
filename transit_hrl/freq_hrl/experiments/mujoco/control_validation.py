@@ -226,6 +226,8 @@ def load_paired_mujoco_checkpoint(
     expected_router_mode: str = "direct",
     expected_router_observe_strength: bool = True,
     expected_responsibility_mode: str = "causal_lf_transfer",
+    reset_upper_deployment_frequency_lambda: float | None = None,
+    reset_lower_deployment_frequency_lambda: float | None = None,
 ) -> dict[str, Any]:
     """Load and audit a matched zero-strength continuation checkpoint."""
 
@@ -330,6 +332,29 @@ def load_paired_mujoco_checkpoint(
     loaded_parameter_sha256 = _model_parameter_sha256(model)
     if loaded_parameter_sha256 != frozen_parameter_sha256:
         raise ValueError("paired checkpoint parameter SHA-256 mismatch")
+    loaded_upper_deployment_lambda = float(
+        model.upper_deployment_frequency_lambda
+    )
+    loaded_lower_deployment_lambda = float(
+        model.lower_deployment_frequency_lambda
+    )
+    reset_values = {
+        "upper": reset_upper_deployment_frequency_lambda,
+        "lower": reset_lower_deployment_frequency_lambda,
+    }
+    for level, value in reset_values.items():
+        if value is None:
+            continue
+        maximum = float(getattr(
+            model.config, f"{level}_deployment_frequency_max_lambda"
+        ))
+        numeric = float(value)
+        if not np.isfinite(numeric) or not 0.0 <= numeric <= maximum:
+            raise ValueError(
+                f"paired {level} deployment-frequency lambda reset must "
+                "be finite and within its configured maximum"
+            )
+        setattr(model, f"{level}_deployment_frequency_lambda", numeric)
     return {
         "enabled": True,
         "checkpoint_path": str(checkpoint_file),
@@ -347,6 +372,26 @@ def load_paired_mujoco_checkpoint(
             expected_router_observe_strength
         ),
         "checkpoint_responsibility_mode": str(expected_responsibility_mode),
+        "loaded_upper_deployment_frequency_lambda": (
+            loaded_upper_deployment_lambda
+        ),
+        "loaded_lower_deployment_frequency_lambda": (
+            loaded_lower_deployment_lambda
+        ),
+        "reset_upper_deployment_frequency_lambda": (
+            float(reset_upper_deployment_frequency_lambda)
+            if reset_upper_deployment_frequency_lambda is not None
+            else loaded_upper_deployment_lambda
+        ),
+        "reset_lower_deployment_frequency_lambda": (
+            float(reset_lower_deployment_frequency_lambda)
+            if reset_lower_deployment_frequency_lambda is not None
+            else loaded_lower_deployment_lambda
+        ),
+        "deployment_frequency_state_reset_contract": (
+            "new_constraint_duals_optionally_reset_to_registered_"
+            "continuation_initial_values_after_actor_critic_optimizer_load_v2"
+        ),
     }
 
 
@@ -2189,6 +2234,8 @@ def _hierarchical_model(
     lower_deployment_frequency_step_scale: float = 1.0,
     upper_deployment_frequency_rms_budget: float = 0.0,
     lower_deployment_frequency_rms_budget: float = 0.0,
+    upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
+    lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
     upper_deployment_frequency_action_scale: float = 1.0,
     lower_deployment_frequency_action_scale: float = 1.0,
 ) -> FrequencySeparatedActorCriticPPO:
@@ -2207,6 +2254,9 @@ def _hierarchical_model(
         upper_deployment_frequency_rms_budget=float(
             upper_deployment_frequency_rms_budget
         ),
+        upper_deployment_frequency_reference_reduction_fraction=float(
+            upper_deployment_frequency_reference_reduction_fraction
+        ),
         upper_deployment_frequency_window=8,
         upper_deployment_frequency_action_scale=float(
             upper_deployment_frequency_action_scale
@@ -2223,6 +2273,9 @@ def _hierarchical_model(
         ),
         lower_deployment_frequency_rms_budget=float(
             lower_deployment_frequency_rms_budget
+        ),
+        lower_deployment_frequency_reference_reduction_fraction=float(
+            lower_deployment_frequency_reference_reduction_fraction
         ),
         lower_deployment_frequency_window=32,
         lower_deployment_frequency_action_scale=float(
@@ -2539,6 +2592,8 @@ def train_mujoco_method(
     lower_deployment_frequency_step_scale: float = 1.0,
     upper_deployment_frequency_rms_budget: float = 0.0,
     lower_deployment_frequency_rms_budget: float = 0.0,
+    upper_deployment_frequency_reference_reduction_fraction: float = 0.0,
+    lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -2666,6 +2721,25 @@ def train_mujoco_method(
             or float(lower_deployment_frequency_lambda_init) > 0.0
         ),
     }
+    deployment_frequency_reference_reductions = {
+        "upper": float(
+            upper_deployment_frequency_reference_reduction_fraction
+        ),
+        "lower": float(
+            lower_deployment_frequency_reference_reduction_fraction
+        ),
+    }
+    for level, fraction in deployment_frequency_reference_reductions.items():
+        if not np.isfinite(fraction) or not 0.0 <= fraction < 1.0:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {level} reference reduction "
+                "must be in [0, 1)"
+            )
+        if fraction > 0.0 and not deployment_frequency_level_active[level]:
+            raise ValueError(
+                f"MuJoCo deployment-frequency {level} reference reduction "
+                "requires an active level constraint"
+            )
     deployment_frequency_requested = any(
         deployment_frequency_level_active.values()
     )
@@ -2704,6 +2778,17 @@ def train_mujoco_method(
             "paired continuation requires both checkpoint and summary paths"
         )
     paired_continuation = all(checkpoint_paths_present)
+    if (
+        any(
+            value > 0.0
+            for value in deployment_frequency_reference_reductions.values()
+        )
+        and not paired_continuation
+    ):
+        raise ValueError(
+            "a relative deployment-frequency target requires a paired "
+            "checkpoint"
+        )
     if (
         float(upper_actor_anchor_coef) > 0.0
         or float(lower_actor_anchor_coef) > 0.0
@@ -2805,6 +2890,14 @@ def train_mujoco_method(
     )
     selected_lower_deployment_frequency_lambda_init = (
         float(lower_deployment_frequency_lambda_init)
+        if name == "freq_hrl" else 0.0
+    )
+    selected_upper_deployment_frequency_reference_reduction = (
+        float(upper_deployment_frequency_reference_reduction_fraction)
+        if name == "freq_hrl" else 0.0
+    )
+    selected_lower_deployment_frequency_reference_reduction = (
+        float(lower_deployment_frequency_reference_reduction_fraction)
         if name == "freq_hrl" else 0.0
     )
     effective_router_training_schedule = (
@@ -3442,6 +3535,12 @@ def train_mujoco_method(
             lower_deployment_frequency_rms_budget=float(
                 lower_deployment_frequency_rms_budget
             ),
+            upper_deployment_frequency_reference_reduction_fraction=(
+                selected_upper_deployment_frequency_reference_reduction
+            ),
+            lower_deployment_frequency_reference_reduction_fraction=(
+                selected_lower_deployment_frequency_reference_reduction
+            ),
             upper_deployment_frequency_action_scale=float(
                 upper_action_scale
             ),
@@ -3466,6 +3565,12 @@ def train_mujoco_method(
                     effective_router_observe_strength
                 ),
                 expected_responsibility_mode=str(responsibility_mode),
+                reset_upper_deployment_frequency_lambda=(
+                    selected_upper_deployment_frequency_lambda_init
+                ),
+                reset_lower_deployment_frequency_lambda=(
+                    selected_lower_deployment_frequency_lambda_init
+                ),
             )
             model.capture_actor_anchor()
         rollout = lambda policy, seed, sample: rollout_hierarchical(
@@ -3715,9 +3820,16 @@ def train_mujoco_method(
         "lower_deployment_frequency_rms_budget": float(
             lower_deployment_frequency_rms_budget
         ),
+        "upper_deployment_frequency_reference_reduction_fraction": (
+            selected_upper_deployment_frequency_reference_reduction
+        ),
+        "lower_deployment_frequency_reference_reduction_fraction": (
+            selected_lower_deployment_frequency_reference_reduction
+        ),
         "deployment_frequency_constraint_contract": (
             "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
-            "lower_lpf32_separate_reward_guarded_duals_v1"
+            "lower_lpf32_anchor_relative_target_with_absolute_floor_and_"
+            "separate_reward_guarded_duals_v2"
             if deployment_frequency_requested and name == "freq_hrl"
             else "disabled"
         ),
@@ -4114,6 +4226,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--lower-deployment-frequency-rms-budget", type=float, default=0.0
     )
     parser.add_argument(
+        "--upper-deployment-frequency-reference-reduction-fraction",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
+        "--lower-deployment-frequency-reference-reduction-fraction",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -4242,6 +4364,12 @@ def main() -> None:
         ),
         lower_deployment_frequency_rms_budget=(
             args.lower_deployment_frequency_rms_budget
+        ),
+        upper_deployment_frequency_reference_reduction_fraction=(
+            args.upper_deployment_frequency_reference_reduction_fraction
+        ),
+        lower_deployment_frequency_reference_reduction_fraction=(
+            args.lower_deployment_frequency_reference_reduction_fraction
         ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,

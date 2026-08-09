@@ -634,6 +634,8 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 optimizer_seed=409,
                 expected_code_revision=code_revision,
                 expected_source_manifest_sha256=source_manifest,
+                reset_upper_deployment_frequency_lambda=1.25,
+                reset_lower_deployment_frequency_lambda=2.5,
             )
             self.assertEqual(
                 _model_parameter_sha256(candidate), parameter_sha256
@@ -641,6 +643,14 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             self.assertEqual(
                 metadata["checkpoint_parameter_sha256"], parameter_sha256
             )
+            self.assertEqual(
+                metadata["loaded_upper_deployment_frequency_lambda"], 0.0
+            )
+            self.assertEqual(
+                metadata["reset_upper_deployment_frequency_lambda"], 1.25
+            )
+            self.assertEqual(candidate.upper_deployment_frequency_lambda, 1.25)
+            self.assertEqual(candidate.lower_deployment_frequency_lambda, 2.5)
             with self.assertRaisesRegex(ValueError, "summary contract"):
                 load_paired_mujoco_checkpoint(
                     candidate,

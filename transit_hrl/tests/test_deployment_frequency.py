@@ -178,6 +178,38 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
         self.assertEqual(restored.upper_deployment_frequency_lambda, 1.5)
         self.assertEqual(restored.lower_deployment_frequency_lambda, 2.5)
 
+    def test_relative_target_uses_frozen_actor_on_the_same_states(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            deployment_action_transform="tanh",
+            lower_deployment_frequency_rms_budget=0.001,
+            lower_deployment_frequency_reference_reduction_fraction=0.1,
+            lower_deployment_frequency_lambda_init=1.0,
+        )
+        model = FrequencySeparatedActorCriticPPO(config)
+        with torch.no_grad():
+            model.lower_actor.net[-1].bias.fill_(0.4)
+        model.capture_actor_anchor()
+        with torch.no_grad():
+            model.lower_actor.net[-1].bias.fill_(0.5)
+        metrics = model.update(self._batch(model))
+        reference = metrics["lower_deployment_frequency_reference_power"]
+        target = metrics["lower_deployment_frequency_target_power"]
+        self.assertGreater(reference, 1e-6)
+        self.assertAlmostEqual(target, 0.9 * reference, places=6)
+        self.assertEqual(
+            metrics[
+                "lower_deployment_frequency_reference_reduction_fraction"
+            ],
+            0.1,
+        )
+
     def test_active_constraint_requires_positive_budget(self):
         with self.assertRaisesRegex(ValueError, "positive RMS budget"):
             FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

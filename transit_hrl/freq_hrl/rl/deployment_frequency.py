@@ -18,6 +18,7 @@ class DeploymentFrequencyStats:
     """A deployed action sequence's aggregate frequency constraint values."""
 
     power: torch.Tensor
+    power_budget: torch.Tensor
     signed_excess: torch.Tensor
     violation: torch.Tensor
     primitive_steps: int
@@ -95,16 +96,36 @@ def deployment_frequency_stats(
     *,
     window: int,
     band: str,
-    rms_budget: float,
+    rms_budget: float | None = None,
+    power_budget: torch.Tensor | float | None = None,
 ) -> DeploymentFrequencyStats:
     """Compute an episode-reset causal frequency power and signed budget gap."""
 
     mode = str(band)
     if mode not in DEPLOYMENT_FREQUENCY_BANDS:
         raise ValueError(f"unknown deployment frequency band: {mode}")
-    budget = float(rms_budget)
-    if not math.isfinite(budget) or budget <= 0.0:
-        raise ValueError("deployment frequency RMS budget must be positive")
+    if (rms_budget is None) == (power_budget is None):
+        raise ValueError(
+            "provide exactly one deployment RMS or power budget"
+        )
+    if rms_budget is not None:
+        budget = float(rms_budget)
+        if not math.isfinite(budget) or budget <= 0.0:
+            raise ValueError("deployment frequency RMS budget must be positive")
+        power_budget_t = torch.as_tensor(
+            budget * budget, dtype=actions.dtype, device=actions.device
+        )
+    else:
+        power_budget_t = torch.as_tensor(
+            power_budget, dtype=actions.dtype, device=actions.device
+        ).reshape(())
+        if (
+            not bool(torch.isfinite(power_budget_t).detach().cpu().item())
+            or float(power_budget_t.detach().cpu().item()) <= 0.0
+        ):
+            raise ValueError(
+                "deployment frequency power budget must be positive and finite"
+            )
     primitive, boundaries = _expanded_primitive_sequence(
         actions, duration, done
     )
@@ -121,9 +142,10 @@ def deployment_frequency_stats(
         raise RuntimeError("deployment frequency boundaries did not cover trace")
     component = torch.cat(components, dim=0)
     power = torch.mean(component.square())
-    signed_excess = power - budget * budget
+    signed_excess = power - power_budget_t
     return DeploymentFrequencyStats(
         power=power,
+        power_budget=power_budget_t,
         signed_excess=signed_excess,
         violation=F.relu(signed_excess),
         primitive_steps=int(primitive.shape[0]),
