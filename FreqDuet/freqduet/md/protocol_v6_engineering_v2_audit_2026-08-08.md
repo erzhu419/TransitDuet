@@ -414,3 +414,36 @@ mechanism gates: CV must improve over compact context-only by at least `0.01`,
 and restricted journey may be no more than `0.15 min` worse than compact
 context-only. Selection evidence remains insufficient for efficacy; any
 selected weight requires another disjoint-seed confirmation.
+
+## Engineering-v7 smoke and dispatch record (2026-08-09)
+
+Clean detached commit `66d15cfd64c110c91b114e1bcf2e137782390fb0`
+passed the complete local suite: 274 tests passed, one was skipped, and 33
+subtests passed. Scheduler tasks `t78137` through `t78140` then completed a
+one-episode integration smoke on `node001` through `node004` for `main`,
+`noguard`, compact context-only, and compact weight eight.
+
+All four smoke arms produced an episode-zero checkpoint, frozen evaluation
+CSV, evaluation manifest, diagnostics, and a clean run manifest without a
+traceback. Their source fingerprint is
+`d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada` and
+their scenario contract is
+`45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17`.
+The compact weight-eight arm retains zero execution adjustment. Its frozen
+evaluation reports 98.44% matched-predecessor evidence and 81.77% same-time
+follower evidence; its observed reward remains within the configured
+`[-2, 2]` bound. This is implementation evidence only.
+
+The full exploratory run is
+`protocol_v6_compactstate_ep40_s4_e2_v7`. It contains nine configs, four
+training seeds `701, 719, 743, 761`, two frozen evaluation seeds
+`43011, 43017`, and 40 training episodes. Its 36 one-job shards are scheduler
+tasks `t78150` through `t78185`, round-robin hard-pinned with six tasks each to
+`node001` through `node006`. Three shards required a second transient launch
+attempt; all 36 subsequently reached running state.
+
+Before episode zero, all 36 launch manifests were present with unique
+config/seed keys, exploratory stage, clean commit `66d15cfd64`, and one common
+source and scenario fingerprint. Heavy checkpoints and logs remain on the HPC
+filesystem. No efficacy inference is permitted until all 72 frozen rollouts
+are strict-aggregated and evaluated by the preregistered matched-context gate.
