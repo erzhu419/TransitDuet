@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_6_conservative_router_transfer"
+    "freq_hrl_mujoco_shared_core_v14_7_joint_band_projection"
 )
 METHODS = (
     "freq_hrl",
@@ -97,10 +97,12 @@ LOWER_ACTION_ROUTER_TRAINING_SCHEDULES = (
 CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_high_pass",
     "causal_ema_conservative_transfer",
+    "causal_joint_band_projection",
 }
-CONSERVATIVE_LOWER_ACTION_ROUTER_MODE = (
-    "causal_ema_conservative_transfer"
-)
+FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
+    "causal_ema_conservative_transfer",
+    "causal_joint_band_projection",
+}
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
 LEAKAGE_COST_MODES = (
     "ratio_excess_squared",
@@ -211,6 +213,7 @@ def load_paired_mujoco_checkpoint(
     optimizer_seed: int,
     expected_code_revision: str,
     expected_source_manifest_sha256: str,
+    expected_method: str = "freq_hrl_no_leakage",
     expected_router_mode: str = "direct",
     expected_router_observe_strength: bool = True,
     expected_responsibility_mode: str = "causal_lf_transfer",
@@ -229,7 +232,7 @@ def load_paired_mujoco_checkpoint(
     file_sha256 = _file_sha256(checkpoint_file)
     expected_summary = {
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
-        "method": "freq_hrl_no_leakage",
+        "method": str(expected_method),
         "environment": str(env_id),
         "optimizer_seed": int(optimizer_seed),
         "code_revision": str(expected_code_revision),
@@ -270,7 +273,7 @@ def load_paired_mujoco_checkpoint(
         raise ValueError("paired checkpoint payload is invalid")
     checkpoint_contract = {
         "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
-        "method": "freq_hrl_no_leakage",
+        "method": str(expected_method),
         "environment": str(env_id),
         "optimizer_seed": int(optimizer_seed),
         "frozen_parameter_sha256": frozen_parameter_sha256,
@@ -696,16 +699,16 @@ def _episode_row(
         "LowerRouterRemovedRMS": float(np.sqrt(
             np.mean(np.square(router_removed))
         )),
-        "LowerRouterUpperTransferRMS": float(
-            np.sqrt(np.mean(np.square(router_removed)))
-            if str(lower_action_router_mode)
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
-            else 0.0
-        ),
-        "LowerRouterFunctionPreserving": float(
-            str(lower_action_router_mode)
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
-        ),
+            "LowerRouterUpperTransferRMS": float(
+                np.sqrt(np.mean(np.square(router_removed)))
+                if str(lower_action_router_mode)
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
+                else 0.0
+            ),
+            "LowerRouterFunctionPreserving": float(
+                str(lower_action_router_mode)
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
+            ),
         "LowerRouterActionReconstructionRMS": float(
             np.sqrt(np.mean(np.square(router_reconstruction)))
         ),
@@ -828,7 +831,7 @@ def _episode_row(
             and np.all(np.isfinite(router_reconstruction))
             and (
                 str(lower_action_router_mode)
-                != CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                not in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
                 or (
                     float(np.max(np.abs(router_reconstruction))) <= 1e-7
                     and float(np.max(np.abs(reconstruction))) <= 1e-7
@@ -931,19 +934,19 @@ def rollout_hierarchical(
         latent_lower_lf_tracker.reset(action_dim)
         upper_hf_tracker = CausalRollingBandTracker(window=8)
         upper_hf_tracker.reset(action_dim)
-        conservative_router = bool(
+        function_preserving_router = bool(
             str(lower_action_router_mode)
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
         )
 
         def actor_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
-            if conservative_router:
+            if function_preserving_router:
                 context = lower_router.context
                 return context, context
             return responsibility.raw_lower_lf, lower_router.context
 
         def cost_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
-            if conservative_router:
+            if function_preserving_router:
                 context = latent_lower_lf_tracker.low
                 return context, context
             return raw_lower_lf_tracker.low, responsibility_lf_tracker.low
@@ -1090,6 +1093,12 @@ def rollout_hierarchical(
             )
             routed_lower = lower_router.route(
                 latent_lower_residual,
+                upper_action=(
+                    upper_anchor
+                    if str(lower_action_router_mode)
+                    == "causal_joint_band_projection"
+                    else None
+                ),
                 action_limit=float(lower_action_scale),
             )
             raw_lower_residual = np.asarray(
@@ -1112,7 +1121,7 @@ def rollout_hierarchical(
             canonical_lower_action = (
                 latent_lower_residual
                 if str(lower_action_router_mode)
-                == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
                 else raw_lower_residual
             )
             # Use the pre-split canonical sum once. In conservative mode this
@@ -2491,9 +2500,12 @@ def train_mujoco_method(
         or float(lower_actor_anchor_coef) > 0.0
     ) and not paired_continuation:
         raise ValueError("an actor anchor requires a paired checkpoint")
-    if paired_continuation and name != "freq_hrl_no_leakage":
+    if paired_continuation and name not in {
+        "freq_hrl",
+        "freq_hrl_no_leakage",
+    }:
         raise ValueError(
-            "paired MuJoCo continuation is restricted to freq_hrl_no_leakage"
+            "paired MuJoCo continuation requires a Freq-HRL policy"
         )
     if str(leakage_cost_mode) not in LEAKAGE_COST_MODES:
         raise ValueError("unknown MuJoCo leakage constraint cost mode")
@@ -2592,7 +2604,7 @@ def train_mujoco_method(
         paired_continuation
         and not effective_router_observe_strength
         and effective_lower_action_router_mode
-        != CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+        not in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
     ):
         raise ValueError(
             "non-conservative paired continuation requires an observed "
@@ -3147,6 +3159,7 @@ def train_mujoco_method(
                 expected_source_manifest_sha256=(
                     source_identity["source_manifest_sha256"]
                 ),
+                expected_method=name,
                 expected_router_mode=str(initial_checkpoint_router_mode),
                 expected_router_observe_strength=bool(
                     effective_router_observe_strength
@@ -3397,7 +3410,7 @@ def train_mujoco_method(
                 "frozen_matched_conservative_policy_same_state_analytic_"
                 "gaussian_kl_v2"
                 if effective_lower_action_router_mode
-                == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+                in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
                 else
                 "frozen_matched_direct_policy_at_zero_router_context_"
                 "analytic_gaussian_kl_v1"
@@ -3420,20 +3433,26 @@ def train_mujoco_method(
             "checkpoint_selection_and_heldout_use_frozen_target_v1"
         ),
         "lower_action_router_contract": (
-            "causal_prior_only_ema_split_with_removed_component_transferred_"
-            "to_upper_and_exact_pre_split_action_execution_v4"
+            "causal_lower_lpf32_minus_upper_hpf8_transfer_and_exact_"
+            "complement_with_pre_split_action_execution_v1"
             if effective_lower_action_router_mode
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            == "causal_joint_band_projection"
             else (
-                "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
-                "observed_router_state_strength_and_effective_action_clipping_v3"
-                if effective_lower_action_router_mode == "causal_ema_high_pass"
-                else "direct_latent_to_effective_lower_action_v1"
+                "causal_prior_only_ema_split_with_removed_component_transferred_"
+                "to_upper_and_exact_pre_split_action_execution_v4"
+                if effective_lower_action_router_mode
+                == "causal_ema_conservative_transfer"
+                else (
+                    "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
+                    "observed_router_state_strength_and_effective_action_clipping_v3"
+                    if effective_lower_action_router_mode == "causal_ema_high_pass"
+                    else "direct_latent_to_effective_lower_action_v1"
+                )
             )
         ),
         "lower_action_router_function_preserving": bool(
             effective_lower_action_router_mode
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
         ),
         "lower_action_router_diagnostic_contract": (
             "latent_and_effective_lower_actions_both_reported_v1"
@@ -3466,7 +3485,7 @@ def train_mujoco_method(
             "conservative_latent_ema_context_independent_of_transfer_"
             "strength_v4"
             if effective_lower_action_router_mode
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
             else (
                 "canonical_raw_lf_observed_lower_router_state_and_strength_v3"
                 if effective_router_observe_strength
@@ -3477,7 +3496,7 @@ def train_mujoco_method(
             "conservative_latent_32_step_lf_context_independent_of_transfer_"
             "strength_v4"
             if effective_lower_action_router_mode
-            == CONSERVATIVE_LOWER_ACTION_ROUTER_MODE
+            in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
             else
             "causal_responsibility_anchor_32_step_raw_and_responsibility_"
             "rolling_lf_cost_critic_only_v3"

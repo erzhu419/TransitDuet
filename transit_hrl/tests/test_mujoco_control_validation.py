@@ -330,6 +330,67 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         )
         self.assertEqual(float(routed["clip_rate"]), 1.0)
 
+    def test_joint_band_projection_is_causal_and_reconstructs_total(self):
+        prefix = [
+            (np.asarray([0.4, -0.2]), np.asarray([0.1, 0.3])),
+            (np.asarray([0.4, -0.2]), np.asarray([0.1, 0.3])),
+        ]
+
+        def trace(future_lower):
+            router = CausalLowerActionRouter(
+                mode="causal_joint_band_projection",
+                alpha=0.5,
+                strength=1.0,
+            )
+            router.reset(2)
+            rows = []
+            for upper, lower in [
+                *prefix,
+                (np.asarray([0.4, -0.2]), future_lower),
+            ]:
+                routed = router.route(
+                    lower,
+                    upper_action=upper,
+                    action_limit=2.0,
+                )
+                projected_upper = (
+                    upper + np.asarray(routed["upper_transfer"])
+                )
+                projected_lower = np.asarray(routed["effective"])
+                np.testing.assert_allclose(
+                    projected_upper + projected_lower,
+                    upper + lower,
+                    atol=1e-7,
+                )
+                rows.append((
+                    np.asarray(routed["baseline_before"]).copy(),
+                    projected_upper.copy(),
+                    projected_lower.copy(),
+                ))
+            return rows
+
+        left = trace(np.asarray([1.0, 1.0]))
+        right = trace(np.asarray([-1.0, -1.0]))
+        for left_row, right_row in zip(left[:2], right[:2]):
+            for left_value, right_value in zip(left_row, right_row):
+                np.testing.assert_allclose(left_value, right_value)
+        np.testing.assert_allclose(
+            left[0][1], np.asarray([0.5, 0.1]), atol=1e-7
+        )
+        np.testing.assert_allclose(
+            left[1][1], np.asarray([0.5, 0.1]), atol=1e-7
+        )
+
+    def test_joint_band_projection_requires_upper_action(self):
+        router = CausalLowerActionRouter(
+            mode="causal_joint_band_projection",
+            alpha=0.5,
+            strength=0.5,
+        )
+        router.reset(1)
+        with self.assertRaisesRegex(ValueError, "requires the current upper"):
+            router.route(np.asarray([0.2]))
+
     def test_physical_constraint_cost_avoids_small_budget_blowup(self):
         budget = {
             "budget_excess_squared": 100.0,
@@ -674,6 +735,59 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertLess(
             transferred["RawLowerLFDriftAbs"],
             control["RawLowerLFDriftAbs"],
+        )
+
+    def test_joint_projection_preserves_path_and_reduces_both_leakages(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=128
+        )
+        torch.manual_seed(701)
+        np.random.seed(701)
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=16,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=709,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=128,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            responsibility_mode="additive",
+            lower_action_router_mode="causal_joint_band_projection",
+            lower_action_router_alpha=0.04,
+            lower_action_router_observe_strength=False,
+            upper_constraint_mode="disabled",
+            sample=False,
+            episode_horizon=128,
+        )
+        _, control = rollout_hierarchical(
+            model, lower_action_router_strength=0.0, **common
+        )
+        _, projected = rollout_hierarchical(
+            model, lower_action_router_strength=0.5, **common
+        )
+
+        for trace in (
+            "RewardTraceSHA256",
+            "ExecutedActionTraceSHA256",
+            "LatentPolicyTraceSHA256",
+        ):
+            self.assertEqual(control[trace], projected[trace], trace)
+        self.assertLess(
+            projected["UpperHFPowerAbs"], control["UpperHFPowerAbs"]
+        )
+        self.assertLess(
+            projected["LowerLFDriftAbs"], control["LowerLFDriftAbs"]
+        )
+        self.assertEqual(projected["LowerRouterFunctionPreserving"], 1.0)
+        self.assertLessEqual(
+            projected["ResponsibilityReconstructionRMS"], 1e-7
         )
 
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
