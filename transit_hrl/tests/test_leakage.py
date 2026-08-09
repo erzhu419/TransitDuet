@@ -114,6 +114,9 @@ class LeakageTest(unittest.TestCase):
         small = evaluate_rms_leakage_budget(4e-10, rms_budget=1e-3)
         self.assertAlmostEqual(float(large["budget_ratio"]), 2.0)
         self.assertAlmostEqual(float(small["budget_ratio"]), 0.02)
+        self.assertAlmostEqual(float(large["power_budget"]), 1e-6)
+        self.assertAlmostEqual(float(large["power_excess"]), 3e-6)
+        self.assertEqual(float(small["power_excess"]), 0.0)
         self.assertTrue(bool(large["budget_violated"]))
         self.assertFalse(bool(small["budget_violated"]))
 

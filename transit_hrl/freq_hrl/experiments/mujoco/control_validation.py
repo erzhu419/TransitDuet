@@ -20,8 +20,10 @@ from freq_hrl.core import (
 )
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
+    CausalLowerActionRouter,
     CausalResponsibilityTransfer,
     DISTURBANCE_MODES,
+    LOWER_ACTION_ROUTER_MODES,
     RESPONSIBILITY_MODES,
     action_from_unit_box,
     deterministic_actuation_disturbance,
@@ -48,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_1_crossed_behavior_selection"
+    "freq_hrl_mujoco_shared_core_v14_2_physical_cost_action_router"
 )
 METHODS = (
     "freq_hrl",
@@ -85,7 +87,12 @@ SAFE_SELECTOR_MAX_UPPER_HF_RMS = 0.10
 SAFE_SELECTOR_CONFIDENCE = 0.90
 SAFE_SELECTOR_BOOTSTRAP_DRAWS = 4096
 RESPONSIBILITY_TRANSFER_ALPHA = 0.04
+DEFAULT_LOWER_ROUTER_ALPHA = 0.10
 LEAKAGE_CONSTRAINT_SCOPES = ("responsibility", "joint_behavior")
+LEAKAGE_COST_MODES = (
+    "ratio_excess_squared",
+    "power_excess",
+)
 UPPER_CONSTRAINT_MODES = (
     "disabled",
     "static_reward_penalty",
@@ -99,6 +106,7 @@ CHECKPOINT_SCORE_MODES = ("mean_reward", "behavior_robust")
 DEFAULT_UPPER_HF_RMS_BUDGET = 0.10
 DEFAULT_UPPER_HF_PENALTY_COEF = 2.0
 DEFAULT_UPPER_DUAL_LR = 0.1
+DEFAULT_LOWER_DUAL_LR = 0.1
 DEFAULT_CHECKPOINT_CONSTRAINT_PENALTY = 10.0
 
 
@@ -335,6 +343,18 @@ def _feature_state(
     return np.concatenate(pieces).astype(np.float32, copy=False)
 
 
+def _leakage_constraint_cost(
+    budget_info: dict[str, float | bool],
+    *,
+    mode: str,
+) -> float:
+    if str(mode) == "ratio_excess_squared":
+        return float(budget_info["budget_excess_squared"])
+    if str(mode) == "power_excess":
+        return float(budget_info["power_excess"])
+    raise ValueError(f"unknown leakage constraint cost mode: {mode}")
+
+
 def _episode_row(
     *,
     seed: int,
@@ -346,6 +366,9 @@ def _episode_row(
     lower_actions: list[np.ndarray],
     upper_policy_actions: list[np.ndarray],
     raw_lower_actions: list[np.ndarray],
+    latent_lower_actions: list[np.ndarray],
+    lower_router_removed_actions: list[np.ndarray],
+    lower_router_clip_values: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
     transfer_saturation_values: list[float],
@@ -364,6 +387,8 @@ def _episode_row(
     lower_lf_budget_excesses: list[float],
     raw_lower_lf_rms_values: list[float],
     raw_lower_lf_budget_excesses: list[float],
+    latent_lower_lf_rms_values: list[float],
+    latent_lower_lf_budget_excesses: list[float],
     lower_constraint_costs: list[float],
     lower_lf_rms_budget: float,
     leakage_constraint_scope: str,
@@ -375,12 +400,18 @@ def _episode_row(
     upper_constraint_mode: str,
     upper_hf_rms_budget: float,
     upper_hf_penalty_coef: float,
+    leakage_cost_mode: str,
+    lower_action_router_mode: str,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
     lower = np.asarray(lower_actions, dtype=np.float64)
     upper_policy = np.asarray(upper_policy_actions, dtype=np.float64)
     raw_lower = np.asarray(raw_lower_actions, dtype=np.float64)
+    latent_lower = np.asarray(latent_lower_actions, dtype=np.float64)
+    router_removed = np.asarray(
+        lower_router_removed_actions, dtype=np.float64
+    )
     transfers = np.asarray(responsibility_transfers, dtype=np.float64)
     requested = np.asarray(requested_transfers, dtype=np.float64)
     reconstruction = np.asarray(reconstruction_errors, dtype=np.float64)
@@ -392,6 +423,10 @@ def _episode_row(
         upper_hf_window=8,
         lower_lf_window=32,
     ).compute(upper_policy, raw_lower)
+    latent_leakage = LeakageRegularizer(
+        upper_hf_window=8,
+        lower_lf_window=32,
+    ).compute(upper_policy, latent_lower)
     transfer_leakage = LeakageRegularizer(
         upper_hf_window=8,
         lower_lf_window=32,
@@ -429,6 +464,17 @@ def _episode_row(
         "LowerActionRMS": float(np.sqrt(lower_energy)),
         "UpperPolicyActionRMS": float(np.sqrt(np.mean(np.square(upper_policy)))),
         "RawLowerActionRMS": float(np.sqrt(np.mean(np.square(raw_lower)))),
+        "LatentLowerActionRMS": float(np.sqrt(
+            np.mean(np.square(latent_lower))
+        )),
+        "LowerRouterRemovedRMS": float(np.sqrt(
+            np.mean(np.square(router_removed))
+        )),
+        "LowerRouterClipRate": float(np.mean(lower_router_clip_values)),
+        "EffectiveToLatentLowerEnergyRatio": float(
+            np.mean(np.square(raw_lower))
+            / max(float(np.mean(np.square(latent_lower))), 1e-12)
+        ),
         "UpperActionEnergyShare": float(
             upper_energy / responsibility_energy
             if responsibility_energy > 0.0 else 0.0
@@ -442,6 +488,8 @@ def _episode_row(
         "LowerLFDriftAbs": float(leakage["LowerLFDriftAbs"]),
         "RawLowerLFDrift": float(raw_leakage["LowerLFDrift"]),
         "RawLowerLFDriftAbs": float(raw_leakage["LowerLFDriftAbs"]),
+        "LatentLowerLFDrift": float(latent_leakage["LowerLFDrift"]),
+        "LatentLowerLFDriftAbs": float(latent_leakage["LowerLFDriftAbs"]),
         "TransferredLFDriftAbs": float(transfer_leakage["LowerLFDriftAbs"]),
         "ResponsibilityTransferRMS": float(
             np.sqrt(np.mean(np.square(transfers)))
@@ -477,10 +525,24 @@ def _episode_row(
         "RawLowerLFBudgetViolationRate": float(np.mean(
             np.asarray(raw_lower_lf_budget_excesses, dtype=np.float64) > 0.0
         )),
+        "LatentLowerLFRmsOnlineMean": float(np.mean(
+            latent_lower_lf_rms_values
+        )),
+        "LatentLowerLFPowerOnlineMean": float(np.mean(np.square(
+            latent_lower_lf_rms_values
+        ))),
+        "LatentLowerLFBudgetExcessMean": float(np.mean(
+            latent_lower_lf_budget_excesses
+        )),
+        "LatentLowerLFBudgetViolationRate": float(np.mean(
+            np.asarray(latent_lower_lf_budget_excesses, dtype=np.float64) > 0.0
+        )),
         "LowerConstraintCostMean": float(np.mean(lower_constraint_costs)),
         "LowerConstraintCostMax": float(np.max(lower_constraint_costs)),
         "LowerLFRmsBudget": float(lower_lf_rms_budget),
         "LeakageConstraintScope": str(leakage_constraint_scope),
+        "LeakageConstraintCostMode": str(leakage_cost_mode),
+        "LowerActionRouterMode": str(lower_action_router_mode),
         "UpperTransitionDeltaRMSMean": float(np.mean(
             upper_transition_delta_rms_values
         )),
@@ -546,6 +608,9 @@ def rollout_hierarchical(
     upper_hf_penalty_coef: float = 0.0,
     upper_constraint_mode: str = "static_reward_penalty",
     responsibility_mode: str = "additive",
+    leakage_cost_mode: str = "ratio_excess_squared",
+    lower_action_router_mode: str = "direct",
+    lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -553,6 +618,12 @@ def rollout_hierarchical(
         raise ValueError("unknown MuJoCo leakage constraint scope")
     if str(upper_constraint_mode) not in UPPER_CONSTRAINT_MODES:
         raise ValueError("unknown MuJoCo upper constraint mode")
+    if str(leakage_cost_mode) not in LEAKAGE_COST_MODES:
+        raise ValueError("unknown MuJoCo leakage constraint cost mode")
+    if str(lower_action_router_mode) not in LOWER_ACTION_ROUTER_MODES:
+        raise ValueError("unknown MuJoCo lower-action router mode")
+    if not 0.0 < float(lower_action_router_alpha) <= 1.0:
+        raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
     if (
         str(upper_constraint_mode) == "primal_dual"
         and model.upper_cost_value is None
@@ -576,7 +647,6 @@ def rollout_hierarchical(
         decomposer = CausalBandDecomposer()
         action_dim = int(env.action_space.shape[0])
         previous_action = np.zeros(action_dim, dtype=np.float32)
-        previous_raw_lower = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
         upper_policy_action = np.zeros(action_dim, dtype=np.float32)
         previous_upper_anchor = np.zeros(action_dim, dtype=np.float32)
@@ -586,10 +656,17 @@ def rollout_hierarchical(
             mode=str(responsibility_mode), alpha=float(lower_lf_alpha)
         )
         responsibility.reset(action_dim)
+        lower_router = CausalLowerActionRouter(
+            mode=str(lower_action_router_mode),
+            alpha=float(lower_action_router_alpha),
+        )
+        lower_router.reset(action_dim)
         responsibility_lf_tracker = CausalRollingBandTracker(window=32)
         responsibility_lf_tracker.reset(action_dim)
         raw_lower_lf_tracker = CausalRollingBandTracker(window=32)
         raw_lower_lf_tracker.reset(action_dim)
+        latent_lower_lf_tracker = CausalRollingBandTracker(window=32)
+        latent_lower_lf_tracker.reset(action_dim)
         upper_hf_tracker = CausalRollingBandTracker(window=8)
         upper_hf_tracker.reset(action_dim)
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
@@ -599,6 +676,9 @@ def rollout_hierarchical(
         lower_actions: list[np.ndarray] = []
         upper_policy_actions: list[np.ndarray] = []
         raw_lower_actions: list[np.ndarray] = []
+        latent_lower_actions: list[np.ndarray] = []
+        lower_router_removed_actions: list[np.ndarray] = []
+        lower_router_clip_values: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
         transfer_saturation_values: list[float] = []
@@ -617,6 +697,8 @@ def rollout_hierarchical(
         lower_lf_budget_excesses: list[float] = []
         raw_lower_lf_rms_values: list[float] = []
         raw_lower_lf_budget_excesses: list[float] = []
+        latent_lower_lf_rms_values: list[float] = []
+        latent_lower_lf_budget_excesses: list[float] = []
         lower_constraint_costs: list[float] = []
         upper_transition_delta_rms_values: list[float] = []
         upper_hf_rms_values: list[float] = []
@@ -654,7 +736,7 @@ def rollout_hierarchical(
                     previous_action,
                     filter_contexts=(
                         responsibility.raw_lower_lf,
-                        previous_raw_lower,
+                        lower_router.context,
                     ),
                     frequency_routing=frequency_routing,
                     level="upper",
@@ -707,7 +789,7 @@ def rollout_hierarchical(
                 upper_policy_action,
                 filter_contexts=(
                     responsibility.raw_lower_lf,
-                    previous_raw_lower,
+                    lower_router.context,
                 ),
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -730,8 +812,15 @@ def rollout_hierarchical(
             )
             lower_raw = np.asarray(lower_out["action"], dtype=np.float32)
             lower_cost_values.append(float(lower_out["cost_value"]))
-            raw_lower_residual = (
+            latent_lower_residual = (
                 float(lower_action_scale) * np.tanh(lower_raw)
+            )
+            routed_lower = lower_router.route(
+                latent_lower_residual,
+                action_limit=float(lower_action_scale),
+            )
+            raw_lower_residual = np.asarray(
+                routed_lower["effective"], dtype=np.float32
             )
             responsibility_split = responsibility.split_lower(
                 raw_lower_residual
@@ -760,12 +849,19 @@ def rollout_hierarchical(
                 lower_residual
             )
             raw_lower_bands = raw_lower_lf_tracker.update(raw_lower_residual)
+            latent_lower_bands = latent_lower_lf_tracker.update(
+                latent_lower_residual
+            )
             lower_budget = evaluate_rms_leakage_budget(
                 float(np.mean(np.square(responsibility_bands["low"]))),
                 float(lower_lf_rms_budget),
             )
             raw_lower_budget = evaluate_rms_leakage_budget(
                 float(np.mean(np.square(raw_lower_bands["low"]))),
+                float(lower_lf_rms_budget),
+            )
+            latent_lower_budget = evaluate_rms_leakage_budget(
+                float(np.mean(np.square(latent_lower_bands["low"]))),
                 float(lower_lf_rms_budget),
             )
             upper_bands = upper_hf_tracker.update(upper_anchor)
@@ -775,12 +871,16 @@ def rollout_hierarchical(
             )
             upper_hf_penalty = (
                 float(upper_hf_penalty_coef)
-                * float(upper_budget["budget_excess_squared"])
+                * _leakage_constraint_cost(
+                    upper_budget, mode=str(leakage_cost_mode)
+                )
                 if str(upper_constraint_mode) == "static_reward_penalty"
                 else 0.0
             )
             upper_constraint_cost = (
-                float(upper_budget["budget_excess_squared"])
+                _leakage_constraint_cost(
+                    upper_budget, mode=str(leakage_cost_mode)
+                )
                 if str(upper_constraint_mode) == "primal_dual"
                 else 0.0
             )
@@ -790,11 +890,17 @@ def rollout_hierarchical(
             raw_lower_lf_budget_excesses.append(float(
                 raw_lower_budget["budget_excess"]
             ))
-            responsibility_cost = float(
-                lower_budget["budget_excess_squared"]
+            latent_lower_lf_rms_values.append(float(
+                latent_lower_budget["rms"]
+            ))
+            latent_lower_lf_budget_excesses.append(float(
+                latent_lower_budget["budget_excess"]
+            ))
+            responsibility_cost = _leakage_constraint_cost(
+                lower_budget, mode=str(leakage_cost_mode)
             )
-            raw_behavior_cost = float(
-                raw_lower_budget["budget_excess_squared"]
+            raw_behavior_cost = _leakage_constraint_cost(
+                raw_lower_budget, mode=str(leakage_cost_mode)
             )
             lower_cost = 0.0
             if leakage_constraint:
@@ -829,6 +935,11 @@ def rollout_hierarchical(
             lower_actions.append(lower_residual.copy())
             upper_policy_actions.append(upper_policy_action.copy())
             raw_lower_actions.append(raw_lower_residual.copy())
+            latent_lower_actions.append(latent_lower_residual.copy())
+            lower_router_removed_actions.append(np.asarray(
+                routed_lower["removed_low_frequency"], dtype=np.float32
+            ))
+            lower_router_clip_values.append(float(routed_lower["clip_rate"]))
             responsibility_transfers.append(
                 responsibility.effective_transfer
             )
@@ -840,9 +951,6 @@ def rollout_hierarchical(
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
             control_rewards.append(float(info.get("reward_ctrl", 0.0)))
             previous_action = executed.astype(np.float32, copy=True)
-            previous_raw_lower = raw_lower_residual.astype(
-                np.float32, copy=True
-            )
             steps_since_upper += 1
             if done:
                 terminal = float(bool(terminated))
@@ -865,7 +973,7 @@ def rollout_hierarchical(
                         executed,
                         filter_contexts=(
                             responsibility.raw_lower_lf,
-                            previous_raw_lower,
+                            lower_router.context,
                         ),
                         frequency_routing=frequency_routing,
                         level="upper",
@@ -895,7 +1003,7 @@ def rollout_hierarchical(
                         next_upper_policy_action,
                         filter_contexts=(
                             responsibility.raw_lower_lf,
-                            previous_raw_lower,
+                            lower_router.context,
                         ),
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -945,9 +1053,6 @@ def rollout_hierarchical(
                 observation, _ = env.reset(seed=episode_seed)
                 model.reset_recurrent_inference()
                 previous_action = np.zeros(action_dim, dtype=np.float32)
-                previous_raw_lower = np.zeros(
-                    action_dim, dtype=np.float32
-                )
                 upper_anchor = np.zeros(action_dim, dtype=np.float32)
                 upper_policy_action = np.zeros(action_dim, dtype=np.float32)
                 previous_upper_anchor = np.zeros(
@@ -958,8 +1063,10 @@ def rollout_hierarchical(
                     action_dim, dtype=np.float32
                 )
                 responsibility.reset(action_dim)
+                lower_router.reset(action_dim)
                 responsibility_lf_tracker.reset(action_dim)
                 raw_lower_lf_tracker.reset(action_dim)
+                latent_lower_lf_tracker.reset(action_dim)
                 upper_hf_tracker.reset(action_dim)
                 episode_step = 0
                 reset_exogenous = True
@@ -1010,6 +1117,9 @@ def rollout_hierarchical(
             lower_actions=lower_actions,
             upper_policy_actions=upper_policy_actions,
             raw_lower_actions=raw_lower_actions,
+            latent_lower_actions=latent_lower_actions,
+            lower_router_removed_actions=lower_router_removed_actions,
+            lower_router_clip_values=lower_router_clip_values,
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
             transfer_saturation_values=transfer_saturation_values,
@@ -1028,6 +1138,10 @@ def rollout_hierarchical(
             lower_lf_budget_excesses=lower_lf_budget_excesses,
             raw_lower_lf_rms_values=raw_lower_lf_rms_values,
             raw_lower_lf_budget_excesses=raw_lower_lf_budget_excesses,
+            latent_lower_lf_rms_values=latent_lower_lf_rms_values,
+            latent_lower_lf_budget_excesses=(
+                latent_lower_lf_budget_excesses
+            ),
             lower_constraint_costs=lower_constraint_costs,
             lower_lf_rms_budget=lower_lf_rms_budget,
             leakage_constraint_scope=(
@@ -1044,6 +1158,8 @@ def rollout_hierarchical(
             upper_constraint_mode=str(upper_constraint_mode),
             upper_hf_rms_budget=upper_hf_rms_budget,
             upper_hf_penalty_coef=upper_hf_penalty_coef,
+            leakage_cost_mode=str(leakage_cost_mode),
+            lower_action_router_mode=str(lower_action_router_mode),
         )
         return (trajectory if sample else None), row
     finally:
@@ -1222,6 +1338,9 @@ def rollout_flat(
             lower_actions=executed_actions,
             upper_policy_actions=zeros,
             raw_lower_actions=nominal_actions,
+            latent_lower_actions=nominal_actions,
+            lower_router_removed_actions=zeros,
+            lower_router_clip_values=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
             transfer_saturation_values=[0.0 for _ in rewards],
@@ -1240,6 +1359,8 @@ def rollout_flat(
             lower_lf_budget_excesses=lower_lf_budget_excesses,
             raw_lower_lf_rms_values=lower_lf_rms_values,
             raw_lower_lf_budget_excesses=lower_lf_budget_excesses,
+            latent_lower_lf_rms_values=lower_lf_rms_values,
+            latent_lower_lf_budget_excesses=lower_lf_budget_excesses,
             lower_constraint_costs=[0.0 for _ in rewards],
             lower_lf_rms_budget=lower_lf_rms_budget,
             leakage_constraint_scope="disabled",
@@ -1251,6 +1372,8 @@ def rollout_flat(
             upper_constraint_mode="disabled",
             upper_hf_rms_budget=DEFAULT_UPPER_HF_RMS_BUDGET,
             upper_hf_penalty_coef=0.0,
+            leakage_cost_mode="ratio_excess_squared",
+            lower_action_router_mode="direct",
         )
         return (batch if sample else None), row
     finally:
@@ -1277,6 +1400,10 @@ SUMMARY_KEYS = [
     "LowerActionRMS",
     "UpperPolicyActionRMS",
     "RawLowerActionRMS",
+    "LatentLowerActionRMS",
+    "LowerRouterRemovedRMS",
+    "LowerRouterClipRate",
+    "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
     "AdditiveActionClipRate",
     "UpperHFPower",
@@ -1285,6 +1412,8 @@ SUMMARY_KEYS = [
     "LowerLFDriftAbs",
     "RawLowerLFDrift",
     "RawLowerLFDriftAbs",
+    "LatentLowerLFDrift",
+    "LatentLowerLFDriftAbs",
     "TransferredLFDriftAbs",
     "ResponsibilityTransferRMS",
     "RequestedResponsibilityTransferRMS",
@@ -1300,6 +1429,10 @@ SUMMARY_KEYS = [
     "RawLowerLFPowerOnlineMean",
     "RawLowerLFBudgetExcessMean",
     "RawLowerLFBudgetViolationRate",
+    "LatentLowerLFRmsOnlineMean",
+    "LatentLowerLFPowerOnlineMean",
+    "LatentLowerLFBudgetExcessMean",
+    "LatentLowerLFBudgetViolationRate",
     "LowerConstraintCostMean",
     "LowerConstraintCostMax",
     "LowerLFRmsBudget",
@@ -1688,6 +1821,7 @@ def _hierarchical_model(
     upper_cost_critic: bool = False,
     upper_constraint: bool = False,
     upper_dual_lr: float = DEFAULT_UPPER_DUAL_LR,
+    lower_dual_lr: float = DEFAULT_LOWER_DUAL_LR,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
 ) -> FrequencySeparatedActorCriticPPO:
@@ -1718,7 +1852,9 @@ def _hierarchical_model(
         upper_constraint_reward_tolerance=1e-8,
         lower_lambda_init=0.0,
         lower_cost_target=0.0,
-        lower_dual_lr=0.1 if leakage_constraint else 0.0,
+        lower_dual_lr=(
+            float(lower_dual_lr) if leakage_constraint else 0.0
+        ),
         lower_max_lambda=20.0,
         lower_cost_activation_threshold=1e-6,
         lower_zero_init_cost_value=True,
@@ -1923,8 +2059,12 @@ def train_mujoco_method(
     upper_hf_penalty_coef: float = DEFAULT_UPPER_HF_PENALTY_COEF,
     upper_constraint_mode: str = "static_reward_penalty",
     upper_dual_lr: float = DEFAULT_UPPER_DUAL_LR,
+    lower_dual_lr: float = DEFAULT_LOWER_DUAL_LR,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
+    leakage_cost_mode: str = "ratio_excess_squared",
+    lower_action_router_mode: str = "direct",
+    lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
     checkpoint_selection_mode: str = "assigned_condition",
     checkpoint_score_mode: str = "mean_reward",
     checkpoint_constraint_penalty: float = (
@@ -1995,6 +2135,17 @@ def train_mujoco_method(
         or float(upper_dual_lr) < 0.0
     ):
         raise ValueError("MuJoCo upper dual learning rate must be non-negative")
+    if (
+        not np.isfinite(float(lower_dual_lr))
+        or float(lower_dual_lr) < 0.0
+    ):
+        raise ValueError("MuJoCo lower dual learning rate must be non-negative")
+    if str(leakage_cost_mode) not in LEAKAGE_COST_MODES:
+        raise ValueError("unknown MuJoCo leakage constraint cost mode")
+    if str(lower_action_router_mode) not in LOWER_ACTION_ROUTER_MODES:
+        raise ValueError("unknown MuJoCo lower-action router mode")
+    if not 0.0 < float(lower_action_router_alpha) <= 1.0:
+        raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
     if str(checkpoint_selection_mode) not in CHECKPOINT_SELECTION_MODES:
         raise ValueError("unknown MuJoCo checkpoint selection mode")
     if str(checkpoint_score_mode) not in CHECKPOINT_SCORE_MODES:
@@ -2025,6 +2176,10 @@ def train_mujoco_method(
         episode_horizon=episode_horizon,
     )
     state_dim = mujoco_policy_state_dim(observation_dim, action_dim)
+    effective_lower_action_router_mode = (
+        str(lower_action_router_mode)
+        if name.startswith("freq_hrl") else "direct"
+    )
     torch.manual_seed(int(optimizer_seed))
     np.random.seed(int(optimizer_seed))
 
@@ -2139,6 +2294,7 @@ def train_mujoco_method(
         upper_cost_critic=upper_cost_critic_for_capacity,
         upper_constraint=False,
         upper_dual_lr=upper_dual_lr,
+        lower_dual_lr=lower_dual_lr,
         upper_constraint_update_mode=upper_constraint_update_mode,
         lower_constraint_update_mode=lower_constraint_update_mode,
     )
@@ -2235,6 +2391,7 @@ def train_mujoco_method(
                     branch_upper_constraint_mode == "primal_dual"
                 ),
                 upper_dual_lr=upper_dual_lr,
+                lower_dual_lr=lower_dual_lr,
                 upper_constraint_update_mode=upper_constraint_update_mode,
                 lower_constraint_update_mode=branch_update_mode,
             )
@@ -2268,6 +2425,9 @@ def train_mujoco_method(
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
                     responsibility_mode=responsibility_mode,
+                    leakage_cost_mode=leakage_cost_mode,
+                    lower_action_router_mode=effective_lower_action_router_mode,
+                    lower_action_router_alpha=lower_action_router_alpha,
                     sample=sample,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -2318,6 +2478,11 @@ def train_mujoco_method(
                         upper_action_scale=upper_action_scale,
                         lower_action_scale=lower_action_scale,
                         responsibility_mode=responsibility_mode,
+                        leakage_cost_mode=leakage_cost_mode,
+                        lower_action_router_mode=(
+                            effective_lower_action_router_mode
+                        ),
+                        lower_action_router_alpha=lower_action_router_alpha,
                         sample=False,
                         method=name,
                         episode_horizon=episode_horizon,
@@ -2500,6 +2665,7 @@ def train_mujoco_method(
                 method_upper_constraint_mode == "primal_dual"
             ),
             upper_dual_lr=upper_dual_lr,
+            lower_dual_lr=lower_dual_lr,
             upper_constraint_update_mode=upper_constraint_update_mode,
             lower_constraint_update_mode=lower_constraint_update_mode,
         )
@@ -2521,6 +2687,9 @@ def train_mujoco_method(
             upper_action_scale=upper_action_scale,
             lower_action_scale=lower_action_scale,
             responsibility_mode=responsibility_mode,
+            leakage_cost_mode=leakage_cost_mode,
+            lower_action_router_mode=effective_lower_action_router_mode,
+            lower_action_router_alpha=lower_action_router_alpha,
             sample=sample,
             method=name,
             episode_horizon=episode_horizon,
@@ -2596,6 +2765,9 @@ def train_mujoco_method(
                     upper_action_scale=upper_action_scale,
                     lower_action_scale=lower_action_scale,
                     responsibility_mode=responsibility_mode,
+                    leakage_cost_mode=leakage_cost_mode,
+                    lower_action_router_mode=effective_lower_action_router_mode,
+                    lower_action_router_alpha=lower_action_router_alpha,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -2649,13 +2821,14 @@ def train_mujoco_method(
         "frequency_routing_enabled": name.startswith("freq_hrl"),
         "leakage_constraint_enabled": selected_leakage_constraint,
         "leakage_constraint_scope": selected_constraint_scope,
+        "leakage_constraint_cost_mode": str(leakage_cost_mode),
         "leakage_cost_contract": (
-            "max_endpoint_aligned_32_step_causal_responsibility_and_raw_"
-            "lower_lf_rms_budget_excess_squared_v3"
+            "max_endpoint_aligned_32_step_causal_responsibility_and_"
+            f"effective_lower_lf_{str(leakage_cost_mode)}_v4"
             if selected_constraint_scope == "joint_behavior"
             else (
-                "endpoint_aligned_32_step_causal_responsibility_lf_rms_"
-                "budget_excess_squared_v2"
+                "endpoint_aligned_32_step_causal_responsibility_lf_"
+                f"{str(leakage_cost_mode)}_v3"
                 if selected_constraint_scope == "responsibility"
                 else "disabled"
             )
@@ -2670,6 +2843,9 @@ def train_mujoco_method(
             float(upper_dual_lr)
             if selected_upper_constraint_mode == "primal_dual"
             else 0.0
+        ),
+        "lower_dual_lr": (
+            float(lower_dual_lr) if selected_leakage_constraint else 0.0
         ),
         "upper_constraint_update_mode": (
             str(upper_constraint_update_mode)
@@ -2694,6 +2870,17 @@ def train_mujoco_method(
         ),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
+        "lower_action_router_mode": effective_lower_action_router_mode,
+        "lower_action_router_alpha": float(lower_action_router_alpha),
+        "lower_action_router_contract": (
+            "latent_proposal_minus_prior_only_ema_baseline_with_observed_"
+            "router_state_and_effective_action_clipping_v1"
+            if effective_lower_action_router_mode == "causal_ema_high_pass"
+            else "direct_latent_to_effective_lower_action_v1"
+        ),
+        "lower_action_router_diagnostic_contract": (
+            "latent_and_effective_lower_actions_both_reported_v1"
+        ),
         "responsibility_mode": str(responsibility_mode),
         "responsibility_transfer_alpha": RESPONSIBILITY_TRANSFER_ALPHA,
         "upper_to_lower_action_capacity_ratio": float(
@@ -2719,7 +2906,7 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
-            "canonical_raw_lf_and_previous_raw_lower_actor_state_v1"
+            "canonical_raw_lf_and_observed_lower_router_state_v2"
         ),
         "lower_cost_state_contract": (
             "causal_responsibility_anchor_32_step_raw_and_responsibility_"
@@ -2854,6 +3041,16 @@ def build_parser() -> argparse.ArgumentParser:
         default="additive",
     )
     parser.add_argument(
+        "--lower-action-router-mode",
+        choices=LOWER_ACTION_ROUTER_MODES,
+        default="direct",
+    )
+    parser.add_argument(
+        "--lower-action-router-alpha",
+        type=float,
+        default=DEFAULT_LOWER_ROUTER_ALPHA,
+    )
+    parser.add_argument(
         "--leakage-constraint-scope",
         choices=LEAKAGE_CONSTRAINT_SCOPES,
         default="joint_behavior",
@@ -2877,6 +3074,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--upper-dual-lr",
         type=float,
         default=DEFAULT_UPPER_DUAL_LR,
+    )
+    parser.add_argument(
+        "--lower-dual-lr",
+        type=float,
+        default=DEFAULT_LOWER_DUAL_LR,
+    )
+    parser.add_argument(
+        "--leakage-cost-mode",
+        choices=LEAKAGE_COST_MODES,
+        default="ratio_excess_squared",
     )
     parser.add_argument(
         "--upper-constraint-update-mode",
@@ -2946,11 +3153,15 @@ def main() -> None:
         upper_action_scale=args.upper_action_scale,
         lower_action_scale=args.lower_action_scale,
         responsibility_mode=args.responsibility_mode,
+        lower_action_router_mode=args.lower_action_router_mode,
+        lower_action_router_alpha=args.lower_action_router_alpha,
         leakage_constraint_scope=args.leakage_constraint_scope,
+        leakage_cost_mode=args.leakage_cost_mode,
         upper_hf_rms_budget=args.upper_hf_rms_budget,
         upper_hf_penalty_coef=args.upper_hf_penalty_coef,
         upper_constraint_mode=args.upper_constraint_mode,
         upper_dual_lr=args.upper_dual_lr,
+        lower_dual_lr=args.lower_dual_lr,
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,
         checkpoint_selection_mode=args.checkpoint_selection_mode,

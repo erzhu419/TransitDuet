@@ -20,6 +20,11 @@ RESPONSIBILITY_MODES = (
     "causal_lf_transfer",
 )
 
+LOWER_ACTION_ROUTER_MODES = (
+    "direct",
+    "causal_ema_high_pass",
+)
+
 
 @dataclass
 class CausalBandDecomposer:
@@ -199,6 +204,91 @@ class CausalResponsibilityTransfer:
         ):
             raise ValueError("responsibility action must be finite and aligned")
         return value
+
+
+@dataclass
+class CausalLowerActionRouter:
+    """Turn a latent lower proposal into a causally high-passed action effect.
+
+    The EMA baseline is computed only from proposals available before the
+    current action.  Its current value is exposed through ``context`` so the
+    policy observes all router state.  ``direct`` exactly preserves the legacy
+    action path and exposes the preceding effective lower action.
+    """
+
+    mode: str = "direct"
+    alpha: float = 0.10
+
+    def __post_init__(self) -> None:
+        if str(self.mode) not in LOWER_ACTION_ROUTER_MODES:
+            raise ValueError(f"unknown lower-action router mode: {self.mode}")
+        if not 0.0 < float(self.alpha) <= 1.0:
+            raise ValueError("lower-action router alpha must be in (0, 1]")
+        self.mode = str(self.mode)
+        self.alpha = float(self.alpha)
+        self._baseline: np.ndarray | None = None
+        self._previous_effective: np.ndarray | None = None
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("lower-action router action_dim must be positive")
+        zeros = np.zeros(int(action_dim), dtype=np.float64)
+        self._baseline = zeros.copy()
+        self._previous_effective = zeros.copy()
+
+    @property
+    def context(self) -> np.ndarray:
+        self._require_reset()
+        value = (
+            self._previous_effective
+            if self.mode == "direct"
+            else self._baseline
+        )
+        return value.astype(np.float32, copy=True)
+
+    def route(
+        self,
+        latent_action: np.ndarray,
+        *,
+        action_limit: float = 1.0,
+    ) -> dict[str, np.ndarray | float]:
+        self._require_reset()
+        latent = np.asarray(latent_action, dtype=np.float64).reshape(-1)
+        limit = float(action_limit)
+        if (
+            latent.shape != self._baseline.shape
+            or not np.all(np.isfinite(latent))
+        ):
+            raise ValueError("latent lower action must be finite and aligned")
+        if not np.isfinite(limit) or limit <= 0.0:
+            raise ValueError("lower-action router limit must be positive")
+
+        baseline_before = self._baseline.copy()
+        requested = (
+            latent
+            if self.mode == "direct"
+            else latent - baseline_before
+        )
+        effective = np.clip(requested, -limit, limit)
+        clipped = np.abs(effective - requested) > 1e-12
+        if self.mode == "causal_ema_high_pass":
+            self._baseline += self.alpha * (latent - self._baseline)
+        self._previous_effective = effective.copy()
+        return {
+            "latent": latent.astype(np.float32, copy=True),
+            "baseline_before": baseline_before.astype(np.float32, copy=True),
+            "baseline_after": self._baseline.astype(np.float32, copy=True),
+            "requested_effective": requested.astype(np.float32, copy=True),
+            "effective": effective.astype(np.float32, copy=True),
+            "removed_low_frequency": (latent - effective).astype(
+                np.float32, copy=True
+            ),
+            "clip_rate": float(np.mean(clipped)),
+        }
+
+    def _require_reset(self) -> None:
+        if self._baseline is None or self._previous_effective is None:
+            raise RuntimeError("lower-action router must be reset before use")
 
 
 def action_from_unit_box(

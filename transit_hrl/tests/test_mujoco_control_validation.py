@@ -9,12 +9,14 @@ import torch
 
 from freq_hrl.domains.mujoco import (
     CausalBandDecomposer,
+    CausalLowerActionRouter,
     CausalResponsibilityTransfer,
     action_from_unit_box,
     deterministic_actuation_disturbance,
 )
 from freq_hrl.experiments.mujoco.control_validation import (
     SAFE_SELECTOR_BASELINE_BRANCH,
+    _leakage_constraint_cost,
     _with_explicit_bootstrap,
     behavior_robust_checkpoint_diagnostics,
     capacity_matched_flat_hidden_dim,
@@ -215,6 +217,61 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         for left_row, right_row in zip(left[:2], right[:2]):
             for left_value, right_value in zip(left_row, right_row):
                 np.testing.assert_allclose(left_value, right_value)
+
+    def test_lower_action_router_is_causal_observable_and_high_passes(self):
+        prefix = [
+            np.asarray([0.6, -0.4]),
+            np.asarray([0.6, -0.4]),
+            np.asarray([0.6, -0.4]),
+        ]
+
+        def trace(future):
+            router = CausalLowerActionRouter(
+                mode="causal_ema_high_pass", alpha=0.5
+            )
+            router.reset(2)
+            rows = []
+            for latent in [*prefix, *future]:
+                before = router.context
+                routed = router.route(latent, action_limit=1.0)
+                rows.append((before, routed["effective"], router.context))
+            return rows
+
+        left = trace([np.asarray([1.0, 1.0])])
+        right = trace([np.asarray([-1.0, -1.0])])
+        for left_row, right_row in zip(left[:len(prefix)], right[:len(prefix)]):
+            for left_value, right_value in zip(left_row, right_row):
+                np.testing.assert_allclose(left_value, right_value)
+        effective_norms = [
+            float(np.linalg.norm(row[1])) for row in left[:len(prefix)]
+        ]
+        self.assertGreater(effective_norms[0], effective_norms[-1])
+        np.testing.assert_allclose(left[0][0], np.zeros(2))
+
+    def test_direct_lower_action_router_preserves_legacy_action(self):
+        router = CausalLowerActionRouter(mode="direct", alpha=0.25)
+        router.reset(2)
+        latent = np.asarray([0.25, -0.75])
+        routed = router.route(latent, action_limit=1.0)
+        np.testing.assert_allclose(routed["effective"], latent)
+        np.testing.assert_allclose(router.context, latent)
+        self.assertEqual(float(routed["clip_rate"]), 0.0)
+
+    def test_physical_constraint_cost_avoids_small_budget_blowup(self):
+        budget = {
+            "budget_excess_squared": 100.0,
+            "power_excess": 0.01,
+        }
+        self.assertEqual(
+            _leakage_constraint_cost(
+                budget, mode="ratio_excess_squared"
+            ),
+            100.0,
+        )
+        self.assertEqual(
+            _leakage_constraint_cost(budget, mode="power_excess"),
+            0.01,
+        )
 
     def test_disturbance_modes_are_deterministic_and_frequency_separated(self):
         low = np.asarray([
@@ -555,7 +612,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["domain"], "mujoco")
         self.assertEqual(
             payload["protocol_version"],
-            "freq_hrl_mujoco_shared_core_v14_1_crossed_behavior_selection",
+            "freq_hrl_mujoco_shared_core_v14_2_physical_cost_action_router",
         )
         self.assertTrue(payload["frequency_routing_enabled"])
         self.assertEqual(payload["training_disturbance_modes"], ["standard"])
@@ -564,7 +621,7 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertEqual(payload["responsibility_mode"], "causal_lf_transfer")
         self.assertEqual(
             payload["policy_filter_state_contract"],
-            "canonical_raw_lf_and_previous_raw_lower_actor_state_v1",
+            "canonical_raw_lf_and_observed_lower_router_state_v2",
         )
         self.assertEqual(
             payload["lower_cost_state_contract"],
@@ -594,12 +651,17 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         for metric in (
             "UpperActionRMS",
             "LowerActionRMS",
+            "LatentLowerActionRMS",
+            "LowerRouterRemovedRMS",
+            "LowerRouterClipRate",
             "UpperActionEnergyShare",
             "AdditiveActionClipRate",
             "RawLowerLFDriftAbs",
+            "LatentLowerLFDriftAbs",
             "RawLowerLFRmsOnlineMean",
             "LowerLFPowerOnlineMean",
             "RawLowerLFPowerOnlineMean",
+            "LatentLowerLFPowerOnlineMean",
             "LowerConstraintCostMean",
             "UpperTransitionDeltaRMSMean",
             "UpperHFPowerOnlineMean",
@@ -617,6 +679,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertAlmostEqual(
             rows[0]["RawLowerLFPowerOnlineMean"],
             rows[0]["RawLowerLFDriftAbs"],
+            places=10,
+        )
+        self.assertAlmostEqual(
+            rows[0]["LatentLowerLFPowerOnlineMean"],
+            rows[0]["LatentLowerLFDriftAbs"],
             places=10,
         )
         self.assertAlmostEqual(
@@ -651,6 +718,9 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             upper_hf_rms_budget=1e-4,
             upper_constraint_mode="primal_dual",
             upper_dual_lr=0.1,
+            lower_dual_lr=0.2,
+            leakage_cost_mode="power_excess",
+            lower_action_router_mode="causal_ema_high_pass",
             checkpoint_selection_mode="crossed_conditions",
             checkpoint_score_mode="behavior_robust",
             checkpoint_smoothing_window=1,
@@ -665,6 +735,11 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             {"standard", "mixed"},
         )
         self.assertEqual(payload["upper_constraint_mode"], "primal_dual")
+        self.assertEqual(payload["leakage_constraint_cost_mode"], "power_excess")
+        self.assertEqual(payload["lower_dual_lr"], 0.2)
+        self.assertEqual(
+            payload["lower_action_router_mode"], "causal_ema_high_pass"
+        )
         self.assertEqual(
             payload["checkpoint_score_mode"], "behavior_robust"
         )
@@ -675,6 +750,8 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             payload["history"][-1]["upper_constraint_lambda"], 0.0
         )
         self.assertGreater(rows[0]["UpperConstraintCostMean"], 0.0)
+        self.assertLessEqual(rows[0]["UpperConstraintCostMax"], 1.0)
+        self.assertLessEqual(rows[0]["LowerConstraintCostMax"], 1.0)
         self.assertEqual(rows[0]["UpperHFPenaltyTotal"], 0.0)
 
     def test_safe_selector_keeps_branch_selection_out_of_heldout_paths(self):

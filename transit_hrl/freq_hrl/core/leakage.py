@@ -92,8 +92,9 @@ def evaluate_rms_leakage_budget(
 
     Unlike a power ratio normalized by the action effect itself, this measure
     preserves economic scale: a negligible action effect remains negligible.
-    The excess is dimensionless and can be used by a primal-dual constraint;
-    the original spectral ratio remains useful as a separate diagnostic.
+    Both dimensionless and physical-scale excesses are returned.  The former
+    preserves the historical diagnostic, while ``power_excess`` is suitable
+    for primal-dual updates without dividing by a potentially tiny budget.
     """
 
     power = float(low_frequency_power)
@@ -105,9 +106,14 @@ def evaluate_rms_leakage_budget(
     rms = float(np.sqrt(power))
     ratio = float(rms / budget)
     excess = float(max(ratio - 1.0, 0.0))
+    power_budget = float(budget * budget)
+    power_excess = float(max(power - power_budget, 0.0))
     return {
         "rms": rms,
         "budget": budget,
+        "power": power,
+        "power_budget": power_budget,
+        "power_excess": power_excess,
         "budget_ratio": ratio,
         "budget_excess": excess,
         "budget_excess_squared": float(excess * excess),
