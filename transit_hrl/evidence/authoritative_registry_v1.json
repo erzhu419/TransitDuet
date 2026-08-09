@@ -250,6 +250,38 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v14_4_router_homotopy_screen",
+      "claim_id": "D5_OBSERVED_ROUTER_HOMOTOPY",
+      "claim": "An observed training-time router homotopy produces behavior-safe physical separation across the registered MuJoCo conditions.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_behavior_safe_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "development_observed_return_plus_environment_by_disturbance_behavioral_diagnostics",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_4",
+      "allowed_wording": "The v14.4 development screen exposed router strength to both policies and tested seven frozen constant or delayed homotopy schedules on fresh seeds. No schedule was behavior-safe across all 15 environment-by-disturbance conditions. The best joint arm passed 3 of 15 complete conditions. The fastest ramp met return noninferiority in 10 of 15 conditions but met responsibility and raw-drift gates in only 5 each, indicating policy compensation rather than stable physical separation. These outcomes motivate paired checkpoint continuation and are not confirmatory evidence.",
+      "forbidden_wording": "MuJoCo v14.4 validates router homotopy, physical no-tradeoff, or any selected confirmatory Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_4/decision.json",
+          "sha256": "f6b50e7871dd1ed8fee18fefea3ce73e487c54fae7cae6d53bdb888eb7ec7211"
+        },
+        {
+          "role": "environment_condition_gates",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_4/environment_condition_gates.csv",
+          "sha256": "9f60cf1ce969a39fda881d0df51e8f69a07faf801159f4059cc1983988ed009e"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_4/screen_report.md",
+          "sha256": "573a8f7d11fcb15c03dc8be8997bbf1971537a4f346a4b3df104f7b54eb4193a"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
