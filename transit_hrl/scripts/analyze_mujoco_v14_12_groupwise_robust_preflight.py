@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import sys
@@ -23,7 +24,6 @@ from scripts.analyze_mujoco_v14_11_iterative_projection_screen import (  # noqa:
     METRICS,
     TRACE_KEYS,
     _actor_rms_difference,
-    _read_rows,
 )
 
 
@@ -35,6 +35,28 @@ FREQUENCY_METRICS = (
     "UpperHFPowerAbs",
     "LatentUpperHFPowerAbs",
 )
+
+
+def _read_rows(path: Path) -> list[dict[str, str]]:
+    with Path(path).open("r", newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    expected = (
+        len(spec.DEVELOPMENT_EVALUATION_SEEDS)
+        * len(spec.EVALUATION_DISTURBANCE_MODES)
+    )
+    if len(rows) != expected:
+        raise ValueError(
+            f"v14.12 cell has {len(rows)} rows; expected {expected}: {path}"
+        )
+    keys = [(str(row["disturbance_mode"]), int(row["seed"])) for row in rows]
+    expected_keys = {
+        (mode, int(seed))
+        for mode in spec.EVALUATION_DISTURBANCE_MODES
+        for seed in spec.DEVELOPMENT_EVALUATION_SEEDS
+    }
+    if len(set(keys)) != len(keys) or set(keys) != expected_keys:
+        raise ValueError(f"v14.12 evaluation path registry mismatch: {path}")
+    return rows
 
 
 def _cell_dir(

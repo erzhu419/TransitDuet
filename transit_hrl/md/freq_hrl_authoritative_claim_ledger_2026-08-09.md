@@ -21,7 +21,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development_preflight | deployment_constraint_misaligned | development_only | false |
 | mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_11_iterative_projection_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_12_groupwise_robust_protocol | mujoco_control | development_preflight | preregistered_not_run | excluded_until_audited | false |
+| mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -134,20 +134,21 @@ Forbidden: v14.11 supports an accepted learned checkpoint, held-out frequency
 separation, reward improvement, no-tradeoff behavior, cross-task generality,
 confirmatory evidence, or a submission-ready selected algorithm.
 
-### mujoco_v14_12_groupwise_robust_protocol
+### mujoco_v14_12_groupwise_robust_preflight
 
-The source-bound v14.12 development protocol preserves rollout identity and
-aligns training with worst-condition checkpoint selection. It projects the
-maximum per-rollout paired frequency excess, enforces a cumulative PPO
-reward-loss allowance for every training group, and persists all 24
-mode-by-endpoint checkpoint constraints. Its frozen single-seed preflight
-compares the matched v14.11 pooled arm with six groupwise variants. No scheduler
-outcome has yet been admitted to this ledger.
+The source-bound v14.12 HalfCheetah preflight completed through scheduleurm and
+preserved all four rollout groups with zero per-group cumulative PPO
+surrogate-budget violations. Groupwise correction reduced maximum same-batch
+normalized excess by 1.99--3.62% on average, but five of six groupwise arms
+selected the initial fallback and the remaining arm selected iteration 3,
+below the registered learned-checkpoint minimum. No arm met every paired reward
+floor and five-endpoint frequency target. The full multiseed screen was not
+launched. This outcome identifies unconstrained PPO drift before post-update
+projection and candidate-only state coverage as the next defects.
 
-Forbidden: The v14.12 implementation, unit test, local smoke, scheduler task
-state, or unaudited artifact supports an accepted learned checkpoint, held-out
-frequency separation, reward improvement, no-tradeoff behavior, cross-task
-generality, confirmatory evidence, or a submission-ready selected algorithm.
+Forbidden: v14.12 supports an accepted learned checkpoint, held-out frequency
+separation, reward improvement, no-tradeoff behavior, cross-task generality,
+confirmatory evidence, or a submission-ready selected algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

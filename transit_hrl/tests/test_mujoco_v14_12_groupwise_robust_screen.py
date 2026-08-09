@@ -1,5 +1,7 @@
 import argparse
 import copy
+import csv
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -7,6 +9,7 @@ from scripts import mujoco_v14_11_iterative_projection_screen_spec as v1411
 from scripts import mujoco_v14_12_groupwise_robust_screen_spec as spec
 from scripts.analyze_mujoco_v14_12_groupwise_robust_preflight import (
     _projection_diagnostics,
+    _read_rows,
 )
 from scripts.submit_hyperparameter_pilot_scheduleurm import source_identity
 from scripts.submit_mujoco_v14_12_groupwise_robust_screen_scheduleurm import (
@@ -139,6 +142,33 @@ class MujocoV1412GroupwiseRobustScreenTest(unittest.TestCase):
             "lower_deployment_frequency_group_reward_budget_violation_count"
         ] = 1.0
         self.assertFalse(_projection_diagnostics([unguarded], arm)["pass"])
+
+    def test_evaluation_registry_is_owned_by_v14_12(self):
+        fields = ("disturbance_mode", "seed", "episode_return")
+        rows = [
+            {
+                "disturbance_mode": mode,
+                "seed": seed,
+                "episode_return": 0.0,
+            }
+            for mode in spec.EVALUATION_DISTURBANCE_MODES
+            for seed in spec.DEVELOPMENT_EVALUATION_SEEDS
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "evaluation_rows.csv"
+            with path.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fields)
+                writer.writeheader()
+                writer.writerows(rows)
+            self.assertEqual(len(_read_rows(path)), len(rows))
+
+            rows[-1] = dict(rows[0])
+            with path.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=fields)
+                writer.writeheader()
+                writer.writerows(rows)
+            with self.assertRaisesRegex(ValueError, "v14.12 evaluation"):
+                _read_rows(path)
 
 
 if __name__ == "__main__":
