@@ -332,3 +332,23 @@ hash-homogeneous, `avlbal_w4` preserves zero execution adjustment and at least
 holding, and denied-dispatch gates used for selection pass again. The result
 must be reported as a negative confirmation if any required gate fails; the
 exploratory estimate cannot be substituted for it.
+
+## Engineering-v6 confirmation dispatch record (2026-08-09)
+
+- Frozen source: clean commit
+  `fa20bbbb854989794c207ea2c8319e54c5ce16d5` in detached worktree
+  `FreqDuet-v6-engineering-v6-snapshot`.
+- Run: `protocol_v6_avlbal_w4_confirm_ep40_s4_e4_v6`.
+- Scheduler tasks: `t76801` through `t76816`, one config/seed job per shard,
+  round-robin pinned to `node001` through `node006`.
+- All 16 tasks reached `running`, emitted a confirmation-stage run manifest,
+  and completed episode zero. Their source commit, clean flag, and scenario
+  hash `7c88934b754c1c22fc0f1695c9732fa8d4f2294db6acd8051cce6852de9c4718`
+  are homogeneous.
+- The four episode-zero `avlbal_w4` rows retain exactly zero execution
+  adjustment and report 53.77% to 58.60% valid same-time follower evidence.
+  Their untrained incremental reward is still negative and is not efficacy
+  evidence.
+- Result synchronization is disabled for train shards. Heavy checkpoints and
+  logs remain on the HPC filesystem; only the later strict aggregate will be
+  synchronized.
