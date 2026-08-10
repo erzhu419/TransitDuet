@@ -591,7 +591,12 @@ def _input_sha256(paths: list[Path], *, root: Path) -> str:
 
 
 def analyze_preflight(
-    run_dir: Path, *, environment: str, optimizer_seed: int
+    run_dir: Path,
+    *,
+    environment: str,
+    optimizer_seed: int,
+    manifest_environments: tuple[str, ...] | list[str] | None = None,
+    manifest_optimizer_seeds: tuple[int, ...] | list[int] | None = None,
 ) -> dict[str, Any]:
     run = Path(run_dir).resolve()
     if environment not in spec.ENVIRONMENTS:
@@ -604,7 +609,28 @@ def analyze_preflight(
     preregistration = json.loads(preregistration_path.read_text(encoding="utf-8"))
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     sync = json.loads(sync_path.read_text(encoding="utf-8"))
-    expected_count = len(spec.ARMS) + 1
+    scoped_environments = list(
+        manifest_environments
+        if manifest_environments is not None else (environment,)
+    )
+    scoped_optimizer_seeds = [
+        int(seed) for seed in (
+            manifest_optimizer_seeds
+            if manifest_optimizer_seeds is not None else (optimizer_seed,)
+        )
+    ]
+    if (
+        environment not in scoped_environments
+        or int(optimizer_seed) not in scoped_optimizer_seeds
+        or not set(scoped_environments).issubset(spec.ENVIRONMENTS)
+        or not set(scoped_optimizer_seeds).issubset(spec.OPTIMIZER_SEEDS)
+    ):
+        raise ValueError("v14.15 requested cell is outside the merged scope")
+    expected_count = (
+        len(scoped_environments)
+        * len(scoped_optimizer_seeds)
+        * (len(spec.ARMS) + 1)
+    )
     identity_pass = bool(
         preregistration.get("status")
         == "frozen_before_v14_15_closed_loop_restoration_filter_outcome_access"
@@ -616,8 +642,12 @@ def analyze_preflight(
         == spec.FROZEN_SOURCE_MANIFEST_SHA256
         and manifest.get("status") == "development_scope_complete_unanalyzed"
         and manifest.get("full_screen_scope") is False
-        and manifest.get("environments") == [environment]
-        and manifest.get("optimizer_seeds") == [int(optimizer_seed)]
+        and manifest.get("environments") == scoped_environments
+        and manifest.get("optimizer_seeds") == scoped_optimizer_seeds
+        and preregistration.get("dispatched_environment_subset")
+        == scoped_environments
+        and preregistration.get("dispatched_optimizer_seed_subset")
+        == scoped_optimizer_seeds
         and set(manifest.get("arms", [])) == set(spec.ARMS)
         and set(manifest.get("phases", [])) == {"anchor", "continuation"}
         and int(manifest.get("cell_count", -1)) == expected_count

@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import mujoco_v14_15_closed_loop_restoration_filter_screen_spec as spec  # noqa: E402
+from scripts import mujoco_v14_15_restoration_multiseed_screen_spec as multiseed_spec  # noqa: E402
 from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
     LINUX_CPU_NODES,
     SCHEDULER,
@@ -44,6 +45,10 @@ SIGNATURE_VERSION = "mujoco-v14-15-closed-loop-restoration-filter-screen-v1"
 ANCHOR_ARM = "closed_loop_guard_pretrain_anchor"
 PHASES = ("anchor", "continuation")
 SPEC_PATH = Path(spec.__file__).resolve()
+MULTISEED_SPEC_PATH = Path(multiseed_spec.__file__).resolve()
+MULTISEED_ANALYZER_PATH = Path(__file__).resolve().with_name(
+    "analyze_mujoco_v14_15_restoration_multiseed_screen.py"
+)
 LAUNCHER_PATH = Path(__file__).resolve()
 
 
@@ -492,7 +497,12 @@ def runtime_identity() -> dict[str, str]:
         capture_output=True,
         text=True,
     ).stdout.strip().lower()
-    paths = (LAUNCHER_PATH, SPEC_PATH)
+    paths = (
+        LAUNCHER_PATH,
+        SPEC_PATH,
+        MULTISEED_SPEC_PATH,
+        MULTISEED_ANALYZER_PATH,
+    )
     relatives = [str(path.relative_to(git_root)) for path in paths]
     subprocess.run(
         ["git", "-C", str(git_root), "ls-files", "--error-unmatch", *relatives],
@@ -508,6 +518,8 @@ def runtime_identity() -> dict[str, str]:
         "runtime_revision": revision,
         "launcher_sha256": _sha256(LAUNCHER_PATH),
         "spec_sha256": _sha256(SPEC_PATH),
+        "multiseed_spec_sha256": _sha256(MULTISEED_SPEC_PATH),
+        "multiseed_analyzer_sha256": _sha256(MULTISEED_ANALYZER_PATH),
     }
 
 
@@ -1046,6 +1058,41 @@ def _write_preregistration(args: argparse.Namespace) -> None:
             "bootstrap_draws": spec.BOOTSTRAP_DRAWS,
         },
     }
+    if bool(getattr(args, "fixed_candidate_multiseed", False)):
+        payload.update({
+            "analysis_profile": multiseed_spec.ANALYSIS_PROFILE,
+            "multiseed_development_protocol_version": (
+                multiseed_spec.DEVELOPMENT_PROTOCOL_VERSION
+            ),
+            "multiseed_spec_sha256": args.multiseed_spec_sha256,
+            "multiseed_analyzer_sha256": args.multiseed_analyzer_sha256,
+            "preselected_candidate_arm": (
+                multiseed_spec.PRESELECTED_CANDIDATE_ARM
+            ),
+            "strict_ablation_arm": multiseed_spec.STRICT_ABLATION_ARM,
+            "selection_source_evidence_id": (
+                multiseed_spec.SELECTION_SOURCE_EVIDENCE_ID
+            ),
+            "selection_source_decision_sha256": (
+                multiseed_spec.SELECTION_SOURCE_DECISION_SHA256
+            ),
+            "statistical_unit": "optimizer_seed",
+            "optimizer_seed_reuse_policy": (
+                "preflight_selection_seed_excluded"
+            ),
+            "primary_contrast_order": [
+                list(item) for item in multiseed_spec.PRIMARY_CONTRAST_ORDER
+            ],
+            "primary_thresholds": {
+                f"{environment}/{metric}": threshold
+                for (environment, metric), threshold
+                in multiseed_spec.PRIMARY_THRESHOLDS.items()
+            },
+            "simultaneous_confidence": multiseed_spec.CONFIDENCE,
+            "bootstrap_draws": multiseed_spec.BOOTSTRAP_DRAWS,
+            "bootstrap_seed": multiseed_spec.BOOTSTRAP_SEED,
+            "claim_boundary": multiseed_spec.CLAIM_BOUNDARY,
+        })
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if path.exists() and path.read_text(encoding="utf-8") != rendered:
         raise RuntimeError("existing v14.15 preregistration differs")
@@ -1859,6 +1906,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sync-only", action="store_true")
     parser.add_argument("--sync-workers", type=int, default=4)
     parser.add_argument("--merge-only", action="store_true")
+    parser.add_argument(
+        "--fixed-candidate-multiseed",
+        action="store_true",
+        help="enforce the frozen candidate-fixed 15-seed development profile",
+    )
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     return parser
@@ -1897,6 +1949,13 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
         args.python_executable = default_python_executable(args.nodes)
     if not 1 <= int(args.sync_workers) <= 8:
         raise SystemExit("v14.15 sync workers must be in [1, 8]")
+    if bool(args.fixed_candidate_multiseed):
+        if set(args.arms) != set(multiseed_spec.ARMS):
+            raise SystemExit("multiseed profile requires the full frozen arm registry")
+        if args.environments != list(multiseed_spec.ENVIRONMENTS):
+            raise SystemExit("multiseed profile requires all environments in order")
+        if args.optimizer_seeds != list(multiseed_spec.OPTIMIZER_SEEDS):
+            raise SystemExit("multiseed profile requires all 15 fresh seeds in order")
     return args
 
 
@@ -1912,6 +1971,10 @@ def main() -> None:
     args.runtime_revision = identity["runtime_revision"]
     args.launcher_sha256 = identity["launcher_sha256"]
     args.spec_sha256 = identity["spec_sha256"]
+    args.multiseed_spec_sha256 = identity["multiseed_spec_sha256"]
+    args.multiseed_analyzer_sha256 = identity[
+        "multiseed_analyzer_sha256"
+    ]
     revision, manifest = source_identity(spec.FROZEN_ALGORITHM_REVISION)
     if (
         revision != spec.FROZEN_ALGORITHM_REVISION
