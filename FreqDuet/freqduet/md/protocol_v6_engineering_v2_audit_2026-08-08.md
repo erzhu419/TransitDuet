@@ -964,3 +964,37 @@ Frozen execution records zero guard adjustment and an oracle floor of
 approximately `6.1e-6` for both rows. Their actions and outcomes remain
 identical at this horizon. These observations validate conditioning,
 instrumentation, and restoration only, not efficacy.
+
+## Engineering-v12 normalized-constraint dispatch (2026-08-10)
+
+The frozen V12 source is clean detached commit
+`7fee57e65693afd22c7617765b10be2769c60fcf` at
+`FreqDuet-v6-engineering-v12-snapshot`. A pre-dispatch inventory found no
+existing scheduler signature or remote run directory for the locked run name
+`protocol_v6_normalized_constraint_ep40_s4_e4_v12`. Scheduler tasks `t81852`
+through `t81907` cover exactly the 56 config-by-training-seed jobs, one job per
+shard. The hard placement is ten shards each on `node001` and `node002`, and
+nine shards each on `node003` through `node006`.
+
+The first dispatch launched 50 tasks. Six launch attempts encountered a
+transient SSH key-exchange closure before a remote process was created:
+`t81857`, `t81870`, `t81872`, `t81880`, `t81889`, and `t81898`. The scheduler
+watcher subsequently launched those same task records; no replacement or
+duplicate shard was submitted. The post-recovery audit found all 56 tasks in
+`running` state, each with a live remote PID and approximately one fully active
+CPU core. Task execution retry counts remained zero.
+
+Remote process and artifact inspection through the scheduler route compared
+the V11 entropy control in shard 25 with the first V12 normalized candidate in
+shard 33. Both execute from the mapped V12 snapshot and both have already
+written a nonempty run manifest and episode diagnostics. The normalized
+manifest records source commit `7fee57e65693afd22c7617765b10be2769c60fcf`
+with `tracked_dirty=false`. Its early diagnostics report
+`cost_limit_ratio_v1`, initial dual `0.05`, scaled limit `1.0`, raw action cost
+approximately `0.0050`, scaled cost approximately `5.0`, regularity penalty
+approximately `0.24--0.26`, and nearest-bin oracle cost below `1.2e-5`. The
+matched raw-cost control reports a penalty near `0.005` at comparable raw cost.
+This establishes source lineage, live execution, and the intended numerical
+conditioning only. It does not establish action-cost satisfaction, control
+benefit, or eligibility for confirmation; those require all 56 tasks to finish
+successfully, strict frozen aggregation, and the locked V12 screen.
