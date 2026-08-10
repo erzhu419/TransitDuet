@@ -52,6 +52,8 @@ JointRolloutFn = Callable[
 
 def _validated_closed_loop_guard_snapshot(
     payload: dict[str, Any],
+    *,
+    restoration_filter: bool = False,
 ) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise TypeError("closed-loop guard snapshot must be a mapping")
@@ -81,6 +83,36 @@ def _validated_closed_loop_guard_snapshot(
     if not contract:
         raise ValueError("closed-loop guard contract must be non-empty")
     normalized["contract"] = contract
+    if restoration_filter:
+        for key in (
+            "frequency_violation_merit",
+            "worst_frequency_violation",
+        ):
+            value = float(payload.get(key, float("nan")))
+            if not np.isfinite(value) or value < 0.0:
+                raise ValueError(
+                    f"closed-loop guard {key} must be finite and non-negative"
+                )
+            normalized[key] = value
+        merit = float(normalized["frequency_violation_merit"])
+        worst = float(normalized["worst_frequency_violation"])
+        frequency_count = int(normalized["frequency_violation_count"])
+        tolerance = 1e-10
+        if worst * worst > merit + tolerance:
+            raise ValueError(
+                "closed-loop guard worst frequency violation exceeds its "
+                "aggregate merit"
+            )
+        if frequency_count == 0 and worst > tolerance:
+            raise ValueError(
+                "a frequency-feasible guard snapshot has a positive worst "
+                "violation"
+            )
+        if frequency_count > 0 and (worst <= tolerance or merit <= tolerance):
+            raise ValueError(
+                "an infeasible guard snapshot must have positive continuous "
+                "frequency violations"
+            )
     return normalized
 
 
@@ -100,21 +132,102 @@ def _lexicographic_rank_not_worse(
     return True
 
 
-def _closed_loop_guard_accepts(
+def _closed_loop_guard_assessment(
     candidate: dict[str, Any],
     baseline: dict[str, Any],
-) -> bool:
+    *,
+    restoration_filter: bool = False,
+    trial_fraction: float = 1.0,
+    restoration_min_reduction: float = 0.0,
+    restoration_funnel_limit: float | None = None,
+) -> tuple[bool, list[str]]:
     registry_keys = ("contract", "path_count", "constraint_count")
     if any(candidate[key] != baseline[key] for key in registry_keys):
         raise ValueError("closed-loop guard registry changed during training")
-    return bool(
-        int(candidate["reward_violation_count"]) == 0
-        and int(candidate["frequency_violation_count"])
-        <= int(baseline["frequency_violation_count"])
-        and _lexicographic_rank_not_worse(
-            tuple(candidate["rank"]), tuple(baseline["rank"])
+    fraction = float(trial_fraction)
+    min_reduction = float(restoration_min_reduction)
+    if not 0.0 <= fraction <= 1.0:
+        raise ValueError("closed-loop guard trial fraction must be in [0, 1]")
+    if not 0.0 <= min_reduction < 1.0:
+        raise ValueError(
+            "closed-loop restoration minimum reduction must be in [0, 1)"
         )
+    reasons: list[str] = []
+    if int(candidate["reward_violation_count"]) != 0:
+        reasons.append("reward_floor_violation")
+    candidate_count = int(candidate["frequency_violation_count"])
+    baseline_count = int(baseline["frequency_violation_count"])
+    if not restoration_filter:
+        if candidate_count > baseline_count:
+            reasons.append("frequency_violation_count_increase")
+        if not _lexicographic_rank_not_worse(
+            tuple(candidate["rank"]), tuple(baseline["rank"])
+        ):
+            reasons.append("lexicographic_rank_worse")
+        return not reasons, reasons
+
+    if baseline_count == 0:
+        if candidate_count != 0:
+            reasons.append("maintenance_frequency_violation")
+        return not reasons, reasons
+
+    if restoration_funnel_limit is None:
+        raise ValueError("closed-loop restoration requires a funnel limit")
+    funnel_limit = float(restoration_funnel_limit)
+    if not np.isfinite(funnel_limit) or funnel_limit < 0.0:
+        raise ValueError(
+            "closed-loop restoration funnel limit must be finite and "
+            "non-negative"
+        )
+    baseline_merit = float(baseline["frequency_violation_merit"])
+    candidate_merit = float(candidate["frequency_violation_merit"])
+    required_merit = baseline_merit * (
+        1.0 - min_reduction * fraction
     )
+    if candidate_merit > required_merit + 1e-12:
+        reasons.append("restoration_merit_not_reduced")
+    if (
+        float(candidate["worst_frequency_violation"])
+        > funnel_limit + 1e-12
+    ):
+        reasons.append("restoration_funnel_exceeded")
+    return not reasons, reasons
+
+
+def _closed_loop_guard_accepts(
+    candidate: dict[str, Any],
+    baseline: dict[str, Any],
+    **kwargs: Any,
+) -> bool:
+    accepted, _ = _closed_loop_guard_assessment(
+        candidate, baseline, **kwargs
+    )
+    return bool(accepted)
+
+
+def _closed_loop_guard_trial_record(
+    snapshot: dict[str, Any],
+    *,
+    fraction: float,
+    accepted: bool,
+    rejection_reasons: list[str],
+) -> dict[str, Any]:
+    return {
+        "fraction": float(fraction),
+        "accepted": bool(accepted),
+        "rejection_reasons": list(rejection_reasons),
+        "reward_violation_count": int(snapshot["reward_violation_count"]),
+        "frequency_violation_count": int(
+            snapshot["frequency_violation_count"]
+        ),
+        "rank": list(snapshot["rank"]),
+        "frequency_violation_merit": float(
+            snapshot.get("frequency_violation_merit", 0.0)
+        ),
+        "worst_frequency_violation": float(
+            snapshot.get("worst_frequency_violation", 0.0)
+        ),
+    }
 
 
 def _actor_state_rms_difference(
@@ -182,15 +295,39 @@ def _apply_closed_loop_actor_guard(
     before_snapshot: dict[str, Any],
     evaluate_fn: SMDPClosedLoopGuardFn,
     max_backtracks: int,
+    restoration_filter: bool = False,
+    restoration_min_reduction: float = 0.0,
+    restoration_funnel_limit: float | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     prefix = "deployment_frequency_closed_loop_guard_"
-    before = _validated_closed_loop_guard_snapshot(before_snapshot)
-    full = _validated_closed_loop_guard_snapshot(evaluate_fn(model))
+    before = _validated_closed_loop_guard_snapshot(
+        before_snapshot,
+        restoration_filter=restoration_filter,
+    )
+    full = _validated_closed_loop_guard_snapshot(
+        evaluate_fn(model),
+        restoration_filter=restoration_filter,
+    )
     full_actor_rms = _actor_state_rms_difference(before_state, after_state)
     selected = full
     selected_fraction = 1.0
     backtracks = 0
-    accepted = _closed_loop_guard_accepts(full, before)
+    accepted, reasons = _closed_loop_guard_assessment(
+        full,
+        before,
+        restoration_filter=restoration_filter,
+        trial_fraction=1.0,
+        restoration_min_reduction=restoration_min_reduction,
+        restoration_funnel_limit=restoration_funnel_limit,
+    )
+    trial_trace: list[dict[str, Any]] = [
+        _closed_loop_guard_trial_record(
+            full,
+            fraction=1.0,
+            accepted=accepted,
+            rejection_reasons=reasons,
+        )
+    ]
     evaluations = 1
     if not accepted:
         for backtrack in range(1, int(max_backtracks) + 1):
@@ -202,11 +339,28 @@ def _apply_closed_loop_actor_guard(
                 fraction=fraction,
             )
             candidate = _validated_closed_loop_guard_snapshot(
-                evaluate_fn(model)
+                evaluate_fn(model),
+                restoration_filter=restoration_filter,
             )
             evaluations += 1
             backtracks = backtrack
-            if _closed_loop_guard_accepts(candidate, before):
+            candidate_accepted, candidate_reasons = (
+                _closed_loop_guard_assessment(
+                    candidate,
+                    before,
+                    restoration_filter=restoration_filter,
+                    trial_fraction=fraction,
+                    restoration_min_reduction=restoration_min_reduction,
+                    restoration_funnel_limit=restoration_funnel_limit,
+                )
+            )
+            trial_trace.append(_closed_loop_guard_trial_record(
+                candidate,
+                fraction=fraction,
+                accepted=candidate_accepted,
+                rejection_reasons=candidate_reasons,
+            ))
+            if candidate_accepted:
                 selected = candidate
                 selected_fraction = float(fraction)
                 accepted = True
@@ -218,9 +372,26 @@ def _apply_closed_loop_actor_guard(
             after_state=after_state,
             fraction=0.0,
         )
-        selected = _validated_closed_loop_guard_snapshot(evaluate_fn(model))
+        selected = _validated_closed_loop_guard_snapshot(
+            evaluate_fn(model),
+            restoration_filter=restoration_filter,
+        )
         evaluations += 1
-        if not _closed_loop_guard_accepts(selected, before):
+        rollback_accepted, rollback_reasons = _closed_loop_guard_assessment(
+            selected,
+            before,
+            restoration_filter=restoration_filter,
+            trial_fraction=0.0,
+            restoration_min_reduction=restoration_min_reduction,
+            restoration_funnel_limit=restoration_funnel_limit,
+        )
+        trial_trace.append(_closed_loop_guard_trial_record(
+            selected,
+            fraction=0.0,
+            accepted=rollback_accepted,
+            rejection_reasons=rollback_reasons,
+        ))
+        if not rollback_accepted:
             raise RuntimeError(
                 "closed-loop actor rollback did not restore the guard rank"
             )
@@ -260,6 +431,39 @@ def _apply_closed_loop_actor_guard(
         f"{prefix}frequency_violation_count": float(
             selected["frequency_violation_count"]
         ),
+        f"{prefix}restoration_filter_enabled": float(restoration_filter),
+        f"{prefix}restoration_phase_before": (
+            "restoration"
+            if int(before["frequency_violation_count"]) > 0
+            else "maintenance"
+        ),
+        f"{prefix}restoration_phase_after": (
+            "restoration"
+            if int(selected["frequency_violation_count"]) > 0
+            else "maintenance"
+        ),
+        f"{prefix}restoration_funnel_limit": float(
+            restoration_funnel_limit or 0.0
+        ),
+        f"{prefix}restoration_merit_before": float(
+            before.get("frequency_violation_merit", 0.0)
+        ),
+        f"{prefix}restoration_merit_full_step": float(
+            full.get("frequency_violation_merit", 0.0)
+        ),
+        f"{prefix}restoration_merit_after": float(
+            selected.get("frequency_violation_merit", 0.0)
+        ),
+        f"{prefix}worst_frequency_violation_before": float(
+            before.get("worst_frequency_violation", 0.0)
+        ),
+        f"{prefix}worst_frequency_violation_full_step": float(
+            full.get("worst_frequency_violation", 0.0)
+        ),
+        f"{prefix}worst_frequency_violation_after": float(
+            selected.get("worst_frequency_violation", 0.0)
+        ),
+        f"{prefix}trial_trace": trial_trace,
     }, selected
 
 
@@ -285,6 +489,17 @@ def _disabled_closed_loop_guard_metrics() -> dict[str, Any]:
         f"{prefix}reward_violation_count": 0.0,
         f"{prefix}full_step_frequency_violation_count": 0.0,
         f"{prefix}frequency_violation_count": 0.0,
+        f"{prefix}restoration_filter_enabled": 0.0,
+        f"{prefix}restoration_phase_before": "disabled",
+        f"{prefix}restoration_phase_after": "disabled",
+        f"{prefix}restoration_funnel_limit": 0.0,
+        f"{prefix}restoration_merit_before": 0.0,
+        f"{prefix}restoration_merit_full_step": 0.0,
+        f"{prefix}restoration_merit_after": 0.0,
+        f"{prefix}worst_frequency_violation_before": 0.0,
+        f"{prefix}worst_frequency_violation_full_step": 0.0,
+        f"{prefix}worst_frequency_violation_after": 0.0,
+        f"{prefix}trial_trace": [],
     }
 
 
@@ -846,6 +1061,10 @@ def train_frequency_separated_ppo(
     closed_loop_guard_enabled = bool(
         model.config.deployment_frequency_closed_loop_trust_region
     )
+    restoration_filter_enabled = bool(
+        model.config.
+        deployment_frequency_closed_loop_restoration_filter
+    )
     if closed_loop_guard_enabled and deployment_frequency_closed_loop_guard_fn is None:
         raise ValueError(
             "closed-loop trust region requires an explicit deterministic "
@@ -858,9 +1077,20 @@ def train_frequency_separated_ppo(
         )
     initial_closed_loop_guard_snapshot = (
         _validated_closed_loop_guard_snapshot(
-            deployment_frequency_closed_loop_guard_fn(model)
+            deployment_frequency_closed_loop_guard_fn(model),
+            restoration_filter=restoration_filter_enabled,
         )
         if deployment_frequency_closed_loop_guard_fn is not None else None
+    )
+    restoration_funnel_limit = (
+        0.0
+        if initial_closed_loop_guard_snapshot is None
+        else float(initial_closed_loop_guard_snapshot.get(
+            "worst_frequency_violation", 0.0
+        )) * float(
+            model.config.
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
+        )
     )
     current_closed_loop_guard_snapshot = initial_closed_loop_guard_snapshot
     closed_loop_guard_evaluation_count = int(closed_loop_guard_enabled)
@@ -908,6 +1138,55 @@ def train_frequency_separated_ppo(
             f"{guard_prefix}frequency_violation_count": float(
                 initial_closed_loop_guard_snapshot["frequency_violation_count"]
             ),
+            f"{guard_prefix}restoration_filter_enabled": float(
+                restoration_filter_enabled
+            ),
+            f"{guard_prefix}restoration_phase_before": (
+                "restoration"
+                if int(initial_closed_loop_guard_snapshot[
+                    "frequency_violation_count"
+                ]) > 0 else "maintenance"
+            ),
+            f"{guard_prefix}restoration_phase_after": (
+                "restoration"
+                if int(initial_closed_loop_guard_snapshot[
+                    "frequency_violation_count"
+                ]) > 0 else "maintenance"
+            ),
+            f"{guard_prefix}restoration_funnel_limit": float(
+                restoration_funnel_limit
+            ),
+            f"{guard_prefix}restoration_merit_before": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "frequency_violation_merit", 0.0
+                )
+            ),
+            f"{guard_prefix}restoration_merit_full_step": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "frequency_violation_merit", 0.0
+                )
+            ),
+            f"{guard_prefix}restoration_merit_after": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "frequency_violation_merit", 0.0
+                )
+            ),
+            f"{guard_prefix}worst_frequency_violation_before": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "worst_frequency_violation", 0.0
+                )
+            ),
+            f"{guard_prefix}worst_frequency_violation_full_step": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "worst_frequency_violation", 0.0
+                )
+            ),
+            f"{guard_prefix}worst_frequency_violation_after": float(
+                initial_closed_loop_guard_snapshot.get(
+                    "worst_frequency_violation", 0.0
+                )
+            ),
+            f"{guard_prefix}trial_trace": [],
         }
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
@@ -1031,6 +1310,12 @@ def train_frequency_separated_ppo(
                         model.config.
                         deployment_frequency_closed_loop_trust_region_backtracks
                     ),
+                    restoration_filter=restoration_filter_enabled,
+                    restoration_min_reduction=float(
+                        model.config.
+                        deployment_frequency_closed_loop_restoration_min_reduction
+                    ),
+                    restoration_funnel_limit=restoration_funnel_limit,
                 )
             )
             closed_loop_guard_evaluation_count += int(
@@ -1106,7 +1391,8 @@ def train_frequency_separated_ppo(
     model.load_state_dict(selector.best_state)
     selected_closed_loop_guard_snapshot = (
         _validated_closed_loop_guard_snapshot(
-            deployment_frequency_closed_loop_guard_fn(model)
+            deployment_frequency_closed_loop_guard_fn(model),
+            restoration_filter=restoration_filter_enabled,
         )
         if deployment_frequency_closed_loop_guard_fn is not None else None
     )
@@ -1117,6 +1403,9 @@ def train_frequency_separated_ppo(
         and not _closed_loop_guard_accepts(
             selected_closed_loop_guard_snapshot,
             initial_closed_loop_guard_snapshot,
+            restoration_filter=restoration_filter_enabled,
+            restoration_min_reduction=0.0,
+            restoration_funnel_limit=restoration_funnel_limit,
         )
     ):
         raise RuntimeError(
@@ -1190,6 +1479,20 @@ def train_frequency_separated_ppo(
             if initial_closed_loop_guard_snapshot is None
             else int(initial_closed_loop_guard_snapshot["constraint_count"])
         ),
+        "deployment_frequency_closed_loop_restoration_filter_enabled": (
+            restoration_filter_enabled
+        ),
+        "deployment_frequency_closed_loop_restoration_min_reduction": float(
+            model.config.
+            deployment_frequency_closed_loop_restoration_min_reduction
+        ),
+        "deployment_frequency_closed_loop_restoration_funnel_multiplier": float(
+            model.config.
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
+        ),
+        "deployment_frequency_closed_loop_restoration_funnel_limit": float(
+            restoration_funnel_limit
+        ),
         "deployment_frequency_closed_loop_guard_initial_rank": (
             []
             if initial_closed_loop_guard_snapshot is None
@@ -1208,6 +1511,20 @@ def train_frequency_separated_ppo(
             else int(initial_closed_loop_guard_snapshot[
                 "frequency_violation_count"
             ])
+        ),
+        "deployment_frequency_closed_loop_guard_initial_frequency_violation_merit": (
+            0.0
+            if initial_closed_loop_guard_snapshot is None
+            else float(initial_closed_loop_guard_snapshot.get(
+                "frequency_violation_merit", 0.0
+            ))
+        ),
+        "deployment_frequency_closed_loop_guard_initial_worst_frequency_violation": (
+            0.0
+            if initial_closed_loop_guard_snapshot is None
+            else float(initial_closed_loop_guard_snapshot.get(
+                "worst_frequency_violation", 0.0
+            ))
         ),
         "deployment_frequency_closed_loop_guard_training_final_rank": (
             []
@@ -1228,6 +1545,20 @@ def train_frequency_separated_ppo(
                 "frequency_violation_count"
             ])
         ),
+        "deployment_frequency_closed_loop_guard_training_final_frequency_violation_merit": (
+            0.0
+            if current_closed_loop_guard_snapshot is None
+            else float(current_closed_loop_guard_snapshot.get(
+                "frequency_violation_merit", 0.0
+            ))
+        ),
+        "deployment_frequency_closed_loop_guard_training_final_worst_frequency_violation": (
+            0.0
+            if current_closed_loop_guard_snapshot is None
+            else float(current_closed_loop_guard_snapshot.get(
+                "worst_frequency_violation", 0.0
+            ))
+        ),
         "deployment_frequency_closed_loop_guard_selected_rank": (
             []
             if selected_closed_loop_guard_snapshot is None
@@ -1246,6 +1577,20 @@ def train_frequency_separated_ppo(
             else int(selected_closed_loop_guard_snapshot[
                 "frequency_violation_count"
             ])
+        ),
+        "deployment_frequency_closed_loop_guard_selected_frequency_violation_merit": (
+            0.0
+            if selected_closed_loop_guard_snapshot is None
+            else float(selected_closed_loop_guard_snapshot.get(
+                "frequency_violation_merit", 0.0
+            ))
+        ),
+        "deployment_frequency_closed_loop_guard_selected_worst_frequency_violation": (
+            0.0
+            if selected_closed_loop_guard_snapshot is None
+            else float(selected_closed_loop_guard_snapshot.get(
+                "worst_frequency_violation", 0.0
+            ))
         ),
         "deployment_frequency_closed_loop_guard_evaluation_count": int(
             closed_loop_guard_evaluation_count

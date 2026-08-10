@@ -46,7 +46,7 @@ class MujocoV1414ClosedLoopActorGuardScreenTest(unittest.TestCase):
         self.assertEqual(manifest, spec.FROZEN_SOURCE_MANIFEST_SHA256)
         self.assertIn("v14_14", spec.DEVELOPMENT_PROTOCOL_VERSION)
         self.assertIn("v14_14", spec.FROZEN_CORE_PROTOCOL_VERSION)
-        self.assertEqual(
+        self.assertNotEqual(
             spec.FROZEN_CORE_PROTOCOL_VERSION,
             MUJOCO_CONTROL_PROTOCOL_VERSION,
         )

@@ -444,6 +444,9 @@ class SMDPPPOConfig:
     deployment_frequency_ppo_trust_region_backtracks: int = 8
     deployment_frequency_closed_loop_trust_region: bool = False
     deployment_frequency_closed_loop_trust_region_backtracks: int = 8
+    deployment_frequency_closed_loop_restoration_filter: bool = False
+    deployment_frequency_closed_loop_restoration_min_reduction: float = 1e-4
+    deployment_frequency_closed_loop_restoration_funnel_multiplier: float = 3.0
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -1229,6 +1232,7 @@ class FrequencySeparatedActorCriticPPO:
             "deployment_frequency_anchor_state_replay",
             "deployment_frequency_ppo_trust_region",
             "deployment_frequency_closed_loop_trust_region",
+            "deployment_frequency_closed_loop_restoration_filter",
         ):
             if not isinstance(getattr(config, name), bool):
                 raise ValueError(f"{name} must be boolean")
@@ -1240,6 +1244,14 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "deployment frequency anchor-state replay and PPO trust "
                 "regions require groupwise robust constraints"
+            )
+        if (
+            config.deployment_frequency_closed_loop_restoration_filter
+            and not config.deployment_frequency_closed_loop_trust_region
+        ):
+            raise ValueError(
+                "closed-loop restoration filtering requires the closed-loop "
+                "trust region"
             )
         trust_region_backtracks = (
             config.deployment_frequency_ppo_trust_region_backtracks
@@ -1264,6 +1276,29 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "deployment_frequency_closed_loop_trust_region_backtracks "
                 "must be a positive integer"
+            )
+        restoration_min_reduction = float(
+            config.deployment_frequency_closed_loop_restoration_min_reduction
+        )
+        if (
+            not np.isfinite(restoration_min_reduction)
+            or not 0.0 < restoration_min_reduction < 1.0
+        ):
+            raise ValueError(
+                "deployment_frequency_closed_loop_restoration_min_reduction "
+                "must be finite and in (0, 1)"
+            )
+        restoration_funnel_multiplier = float(
+            config.
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
+        )
+        if (
+            not np.isfinite(restoration_funnel_multiplier)
+            or restoration_funnel_multiplier < 1.0
+        ):
+            raise ValueError(
+                "deployment_frequency_closed_loop_restoration_funnel_"
+                "multiplier must be finite and at least one"
             )
         for level in ("upper", "lower"):
             budget = float(getattr(

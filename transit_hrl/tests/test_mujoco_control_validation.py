@@ -681,6 +681,11 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertEqual(snapshot["constraint_count"], 12)
         self.assertEqual(snapshot["reward_violation_count"], 0)
         self.assertEqual(snapshot["frequency_violation_count"], 0)
+        self.assertEqual(snapshot["frequency_violation_merit"], 0.0)
+        self.assertEqual(snapshot["worst_frequency_violation"], 0.0)
+        self.assertTrue(snapshot["contract"].endswith(
+            "frequency_endpoints_with_restoration_merit_v2"
+        ))
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
@@ -1621,6 +1626,13 @@ class MujocoControlIntegrationTest(unittest.TestCase):
                 deployment_frequency_groupwise_robust=True,
                 deployment_frequency_closed_loop_trust_region=True,
                 deployment_frequency_closed_loop_trust_region_backtracks=2,
+                deployment_frequency_closed_loop_restoration_filter=True,
+                deployment_frequency_closed_loop_restoration_min_reduction=(
+                    1e-4
+                ),
+                deployment_frequency_closed_loop_restoration_funnel_multiplier=(
+                    3.0
+                ),
                 **common,
             )
 
@@ -1639,6 +1651,15 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             self.assertGreaterEqual(candidate_payload[
                 "deployment_frequency_closed_loop_guard_evaluation_count"
             ], 3)
+            self.assertTrue(candidate_payload[
+                "deployment_frequency_closed_loop_restoration_filter_enabled"
+            ])
+            self.assertGreaterEqual(candidate_payload[
+                "deployment_frequency_closed_loop_restoration_funnel_limit"
+            ], 0.0)
+            self.assertTrue(candidate_payload["history"][1][
+                "deployment_frequency_closed_loop_guard_trial_trace"
+            ])
             guard_paths = set(map(
                 int,
                 candidate_payload[

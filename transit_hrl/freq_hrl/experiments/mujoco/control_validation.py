@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_14_closed_loop_actor_guard"
+    "freq_hrl_mujoco_shared_core_v14_15_closed_loop_restoration_filter"
 )
 METHODS = (
     "freq_hrl",
@@ -71,6 +71,7 @@ def deployment_frequency_constraint_contract(
     anchor_state_replay: bool,
     ppo_trust_region: bool,
     closed_loop_trust_region: bool = False,
+    closed_loop_restoration_filter: bool = False,
 ) -> str:
     if not requested:
         return "disabled"
@@ -91,13 +92,20 @@ def deployment_frequency_constraint_contract(
             inner_mechanisms += "frozen_anchor_state_replay_"
         if ppo_trust_region:
             inner_mechanisms += "ppo_trust_region_"
-        return (
+        closed_loop_contract = (
             base
             + "_"
             + inner_mechanisms
             + "independent_crossed_closed_loop_reward_floor_and_five_"
             "frequency_endpoint_joint_actor_backtracking_v7"
         )
+        if closed_loop_restoration_filter:
+            return (
+                closed_loop_contract
+                + "_infeasible_start_merit_restoration_and_feasible_"
+                "maintenance_filter_v8"
+            )
+        return closed_loop_contract
     if anchor_state_replay and ppo_trust_region:
         return (
             "episode_reset_candidate_and_frozen_anchor_state_replay_"
@@ -2314,6 +2322,9 @@ def _hierarchical_model(
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
     deployment_frequency_closed_loop_trust_region: bool = False,
     deployment_frequency_closed_loop_trust_region_backtracks: int = 8,
+    deployment_frequency_closed_loop_restoration_filter: bool = False,
+    deployment_frequency_closed_loop_restoration_min_reduction: float = 1e-4,
+    deployment_frequency_closed_loop_restoration_funnel_multiplier: float = 3.0,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2402,6 +2413,15 @@ def _hierarchical_model(
         ),
         deployment_frequency_closed_loop_trust_region_backtracks=int(
             deployment_frequency_closed_loop_trust_region_backtracks
+        ),
+        deployment_frequency_closed_loop_restoration_filter=bool(
+            deployment_frequency_closed_loop_restoration_filter
+        ),
+        deployment_frequency_closed_loop_restoration_min_reduction=float(
+            deployment_frequency_closed_loop_restoration_min_reduction
+        ),
+        deployment_frequency_closed_loop_restoration_funnel_multiplier=float(
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
         ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
@@ -2931,16 +2951,29 @@ def paired_closed_loop_guard_snapshot(
         for item in diagnostics["constraints"]
         if str(item["endpoint"]) != "reward_mean"
     )
+    frequency_values = np.asarray([
+        float(item["normalized_violation"])
+        for item in diagnostics["constraints"]
+        if str(item["endpoint"]) != "reward_mean"
+    ], dtype=np.float64)
+    if frequency_values.size < 1 or not np.all(np.isfinite(frequency_values)):
+        raise ValueError(
+            "closed-loop guard frequency violation registry is invalid"
+        )
     return {
         "contract": (
             "paired_frozen_anchor_actual_closed_loop_reward_floor_and_five_"
-            "frequency_endpoints_v1"
+            "frequency_endpoints_with_restoration_merit_v2"
         ),
         "rank": tuple(map(float, diagnostics["rank"])),
         "path_count": len(rows),
         "constraint_count": int(diagnostics["constraint_count"]),
         "reward_violation_count": int(reward_violations),
         "frequency_violation_count": int(frequency_violations),
+        "frequency_violation_merit": float(np.sum(
+            np.square(frequency_values)
+        )),
+        "worst_frequency_violation": float(np.max(frequency_values)),
         "worst_constraint": dict(diagnostics["worst_constraint"]),
     }
 
@@ -3002,6 +3035,9 @@ def train_mujoco_method(
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
     deployment_frequency_closed_loop_trust_region: bool = False,
     deployment_frequency_closed_loop_trust_region_backtracks: int = 8,
+    deployment_frequency_closed_loop_restoration_filter: bool = False,
+    deployment_frequency_closed_loop_restoration_min_reduction: float = 1e-4,
+    deployment_frequency_closed_loop_restoration_funnel_multiplier: float = 3.0,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -3032,6 +3068,21 @@ def train_mujoco_method(
         raise ValueError(
             "MuJoCo deployment-frequency closed-loop trust-region flag "
             "must be boolean"
+        )
+    if not isinstance(
+        deployment_frequency_closed_loop_restoration_filter, bool
+    ):
+        raise ValueError(
+            "MuJoCo deployment-frequency closed-loop restoration-filter "
+            "flag must be boolean"
+        )
+    if (
+        deployment_frequency_closed_loop_restoration_filter
+        and not deployment_frequency_closed_loop_trust_region
+    ):
+        raise ValueError(
+            "MuJoCo closed-loop restoration filtering requires the "
+            "closed-loop trust region"
         )
     closed_loop_guard_seed_values = (
         None
@@ -3282,6 +3333,28 @@ def train_mujoco_method(
         raise ValueError(
             "MuJoCo deployment-frequency closed-loop trust-region "
             "backtracks must be a positive integer"
+        )
+    restoration_min_reduction = float(
+        deployment_frequency_closed_loop_restoration_min_reduction
+    )
+    if (
+        not np.isfinite(restoration_min_reduction)
+        or not 0.0 < restoration_min_reduction < 1.0
+    ):
+        raise ValueError(
+            "MuJoCo closed-loop restoration minimum reduction must be "
+            "finite and in (0, 1)"
+        )
+    restoration_funnel_multiplier = float(
+        deployment_frequency_closed_loop_restoration_funnel_multiplier
+    )
+    if (
+        not np.isfinite(restoration_funnel_multiplier)
+        or restoration_funnel_multiplier < 1.0
+    ):
+        raise ValueError(
+            "MuJoCo closed-loop restoration funnel multiplier must be "
+            "finite and at least one"
         )
     for level, value in (
         ("upper", upper_deployment_frequency_rms_budget),
@@ -4171,6 +4244,15 @@ def train_mujoco_method(
             deployment_frequency_closed_loop_trust_region_backtracks=int(
                 deployment_frequency_closed_loop_trust_region_backtracks
             ),
+            deployment_frequency_closed_loop_restoration_filter=bool(
+                deployment_frequency_closed_loop_restoration_filter
+            ),
+            deployment_frequency_closed_loop_restoration_min_reduction=float(
+                deployment_frequency_closed_loop_restoration_min_reduction
+            ),
+            deployment_frequency_closed_loop_restoration_funnel_multiplier=float(
+                deployment_frequency_closed_loop_restoration_funnel_multiplier
+            ),
         )
         if paired_continuation:
             paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
@@ -4678,6 +4760,17 @@ def train_mujoco_method(
         "deployment_frequency_closed_loop_trust_region_backtracks": int(
             deployment_frequency_closed_loop_trust_region_backtracks
         ),
+        "deployment_frequency_closed_loop_restoration_filter": bool(
+            deployment_frequency_closed_loop_restoration_filter
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_closed_loop_restoration_min_reduction": float(
+            deployment_frequency_closed_loop_restoration_min_reduction
+        ),
+        "deployment_frequency_closed_loop_restoration_funnel_multiplier": float(
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
+        ),
         "deployment_frequency_constraint_contract": (
             deployment_frequency_constraint_contract(
                 requested=(
@@ -4690,6 +4783,9 @@ def train_mujoco_method(
                 ppo_trust_region=deployment_frequency_ppo_trust_region,
                 closed_loop_trust_region=(
                     deployment_frequency_closed_loop_trust_region
+                ),
+                closed_loop_restoration_filter=(
+                    deployment_frequency_closed_loop_restoration_filter
                 ),
             )
         ),
@@ -5157,6 +5253,20 @@ def build_parser() -> argparse.ArgumentParser:
         default=8,
     )
     parser.add_argument(
+        "--deployment-frequency-closed-loop-restoration-filter",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-restoration-min-reduction",
+        type=float,
+        default=1e-4,
+    )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-restoration-funnel-multiplier",
+        type=float,
+        default=3.0,
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -5330,6 +5440,16 @@ def main() -> None:
         ),
         deployment_frequency_closed_loop_trust_region_backtracks=(
             args.deployment_frequency_closed_loop_trust_region_backtracks
+        ),
+        deployment_frequency_closed_loop_restoration_filter=(
+            args.deployment_frequency_closed_loop_restoration_filter
+        ),
+        deployment_frequency_closed_loop_restoration_min_reduction=(
+            args.deployment_frequency_closed_loop_restoration_min_reduction
+        ),
+        deployment_frequency_closed_loop_restoration_funnel_multiplier=(
+            args.
+            deployment_frequency_closed_loop_restoration_funnel_multiplier
         ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,

@@ -16,6 +16,7 @@ from freq_hrl.rl import (
 )
 from freq_hrl.rl.training import (
     _apply_closed_loop_actor_guard,
+    _closed_loop_guard_accepts,
     train_frequency_separated_ppo,
     train_joint_ppo,
 )
@@ -28,8 +29,10 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
         *,
         reward_violations=0,
         frequency_violations=0,
+        frequency_merit=None,
+        worst_frequency_violation=None,
     ):
-        return {
+        snapshot = {
             "contract": "unit_closed_loop_guard_v1",
             "rank": tuple(rank),
             "path_count": 1,
@@ -37,9 +40,17 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             "reward_violation_count": int(reward_violations),
             "frequency_violation_count": int(frequency_violations),
         }
+        if frequency_merit is not None:
+            snapshot["frequency_violation_merit"] = float(
+                frequency_merit
+            )
+            snapshot["worst_frequency_violation"] = float(
+                worst_frequency_violation
+            )
+        return snapshot
 
     @staticmethod
-    def _closed_loop_model():
+    def _closed_loop_model(*, restoration_filter=False):
         return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=1,
             lower_state_dim=1,
@@ -51,6 +62,9 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             deployment_frequency_groupwise_robust=True,
             deployment_frequency_closed_loop_trust_region=True,
             deployment_frequency_closed_loop_trust_region_backtracks=4,
+            deployment_frequency_closed_loop_restoration_filter=bool(
+                restoration_filter
+            ),
         ))
 
     @staticmethod
@@ -172,6 +186,131 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
                 )
         for key, value in model.upper_value.state_dict().items():
             torch.testing.assert_close(value, after_state["upper_value"][key])
+
+    def test_closed_loop_restoration_backtracks_to_merit_safe_funnel(self):
+        model = self._closed_loop_model(restoration_filter=True)
+        before_state = copy.deepcopy(model.state_dict())
+        with torch.no_grad():
+            for parameter in model.upper_actor.parameters():
+                parameter.add_(1.0)
+            for parameter in model.lower_actor.parameters():
+                parameter.add_(1.0)
+        after_state = copy.deepcopy(model.state_dict())
+        actor_key = next(iter(before_state["upper_actor"]))
+        before_value = before_state["upper_actor"][actor_key].flatten()[0]
+        after_value = after_state["upper_actor"][actor_key].flatten()[0]
+
+        def snapshot(*, count, merit, worst, rank):
+            return self._guard_snapshot(
+                rank=rank,
+                frequency_violations=count,
+                frequency_merit=merit,
+                worst_frequency_violation=worst,
+            )
+
+        baseline = snapshot(
+            count=20,
+            merit=0.05,
+            worst=0.05,
+            rank=(-0.05, -0.05, 0.02),
+        )
+
+        def evaluate(policy):
+            current = policy.upper_actor.state_dict()[actor_key].flatten()[0]
+            fraction = float(
+                ((current - before_value) / (after_value - before_value)).item()
+            )
+            if fraction > 0.75:
+                return snapshot(
+                    count=2,
+                    merit=0.04,
+                    worst=0.20,
+                    rank=(-0.20, -0.04, 0.02),
+                )
+            if fraction > 1e-8:
+                return snapshot(
+                    count=4,
+                    merit=0.045,
+                    worst=0.10,
+                    rank=(-0.10, -0.045, 0.02),
+                )
+            return baseline
+
+        metrics, selected = _apply_closed_loop_actor_guard(
+            model,
+            before_state=before_state,
+            after_state=after_state,
+            before_snapshot=baseline,
+            evaluate_fn=evaluate,
+            max_backtracks=4,
+            restoration_filter=True,
+            restoration_min_reduction=1e-3,
+            restoration_funnel_limit=0.15,
+        )
+
+        prefix = "deployment_frequency_closed_loop_guard_"
+        self.assertEqual(metrics[f"{prefix}step_fraction"], 0.5)
+        self.assertEqual(metrics[f"{prefix}accepted"], 1.0)
+        self.assertEqual(metrics[f"{prefix}restoration_phase_before"], "restoration")
+        self.assertEqual(metrics[f"{prefix}restoration_merit_after"], 0.045)
+        self.assertEqual(selected["frequency_violation_count"], 4)
+        trace = metrics[f"{prefix}trial_trace"]
+        self.assertEqual([item["fraction"] for item in trace], [1.0, 0.5])
+        self.assertIn(
+            "restoration_funnel_exceeded",
+            trace[0]["rejection_reasons"],
+        )
+        self.assertTrue(trace[1]["accepted"])
+
+    def test_closed_loop_restoration_switches_to_hard_maintenance(self):
+        feasible = self._guard_snapshot(
+            rank=(0.0, 0.0, 0.02),
+            frequency_merit=0.0,
+            worst_frequency_violation=0.0,
+        )
+        still_feasible = self._guard_snapshot(
+            rank=(-1.0, -1.0, 0.001),
+            frequency_merit=0.0,
+            worst_frequency_violation=0.0,
+        )
+        newly_infeasible = self._guard_snapshot(
+            rank=(-0.1, -0.01, 0.02),
+            frequency_violations=1,
+            frequency_merit=0.01,
+            worst_frequency_violation=0.1,
+        )
+        self.assertTrue(_closed_loop_guard_accepts(
+            still_feasible,
+            feasible,
+            restoration_filter=True,
+            restoration_funnel_limit=0.0,
+        ))
+        self.assertFalse(_closed_loop_guard_accepts(
+            newly_infeasible,
+            feasible,
+            restoration_filter=True,
+            restoration_funnel_limit=0.0,
+        ))
+
+        infeasible = self._guard_snapshot(
+            rank=(-0.15, -0.04, 0.02),
+            frequency_violations=2,
+            frequency_merit=0.04,
+            worst_frequency_violation=0.15,
+        )
+        distributed_improvement = self._guard_snapshot(
+            rank=(-0.10, -0.03, 0.02),
+            frequency_violations=3,
+            frequency_merit=0.03,
+            worst_frequency_violation=0.10,
+        )
+        self.assertTrue(_closed_loop_guard_accepts(
+            distributed_improvement,
+            infeasible,
+            restoration_filter=True,
+            restoration_min_reduction=1e-3,
+            restoration_funnel_limit=0.20,
+        ))
 
     def test_state_aligned_selector_uses_each_states_own_rank(self):
         selector = StateAlignedLexicographicCheckpointSelector(
