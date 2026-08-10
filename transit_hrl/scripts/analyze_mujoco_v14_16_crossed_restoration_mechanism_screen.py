@@ -32,6 +32,7 @@ FREQUENCY_METRICS = (
     "UpperHFPowerAbs",
     "LatentUpperHFPowerAbs",
 )
+EXPECTED_MERGED_MANIFEST_STATUS = "development_screen_complete_unanalyzed"
 RETURN_THRESHOLD = -0.02
 FREQUENCY_THRESHOLD = -math.log(0.95)
 EPSILON = 1e-12
@@ -188,7 +189,7 @@ def analyze(run_dir: Path) -> dict[str, Any]:
         == json.loads(json.dumps(spec.ARMS))
     ):
         raise ValueError("v14.16 preregistration identity mismatch")
-    if manifest.get("status") != "development_scope_complete_unanalyzed":
+    if manifest.get("status") != EXPECTED_MERGED_MANIFEST_STATUS:
         raise ValueError("v14.16 merged cell manifest is not valid")
 
     expected_cells = (

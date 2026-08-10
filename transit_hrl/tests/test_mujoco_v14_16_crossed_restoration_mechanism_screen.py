@@ -9,6 +9,7 @@ from scripts import (
     mujoco_v14_16_crossed_restoration_mechanism_screen_spec as spec,
 )
 from scripts.analyze_mujoco_v14_16_crossed_restoration_mechanism_screen import (
+    EXPECTED_MERGED_MANIFEST_STATUS,
     FREQUENCY_METRICS,
     _effect_gate,
     _paired_path_effects,
@@ -64,6 +65,12 @@ class MujocoV1416MechanismScreenTest(unittest.TestCase):
             int(seed) for role in predecessor_roles for seed in role
         }
         self.assertFalse(current & previous)
+
+    def test_analyzer_requires_the_full_screen_merge_status(self):
+        self.assertEqual(
+            EXPECTED_MERGED_MANIFEST_STATUS,
+            "development_screen_complete_unanalyzed",
+        )
 
     def test_cumulative_ablation_chain_is_complete(self):
         observed = [
