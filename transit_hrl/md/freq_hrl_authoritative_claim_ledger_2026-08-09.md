@@ -22,7 +22,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_11_iterative_projection_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_13_anchor_replay_trust_protocol | mujoco_control | preregistered_development_preflight | frozen_unrun | protocol_only | false |
+| mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -151,17 +151,20 @@ Forbidden: v14.12 supports an accepted learned checkpoint, held-out frequency
 separation, reward improvement, no-tradeoff behavior, cross-task generality,
 confirmatory evidence, or a submission-ready selected algorithm.
 
-### mujoco_v14_13_anchor_replay_trust_protocol
+### mujoco_v14_13_anchor_replay_trust_preflight
 
-The source-bound v14.13 development protocol freezes deterministic anchor-state
-replay and a per-group frequency/reward trust region around every PPO actor
-update, followed by iterative reward-guarded projection. Its single-seed
-HalfCheetah preflight separates replay-only, trust-only, and joint mechanisms;
-only four joint finite-budget arms can authorize a larger development screen.
-No v14.13 scheduler outcome has yet been admitted to this ledger.
+The source-bound v14.13 HalfCheetah preflight completed 13 of 13 scheduler cells
+and passed exact projection calibration. Frozen anchor-state replay and the
+per-group PPO trust region preserved same-batch frequency and reward contracts
+for the finite-budget joint arms, but all nine learned arms selected the initial
+checkpoint fallback. Every trained checkpoint had a worse registered
+worst-condition rank than the fallback; the best finite-budget joint checkpoints
+still failed unseen-seed upper-HF or lower-LF endpoints. The full multiseed
+screen was not launched. This outcome identifies an open-loop training-state
+constraint versus deterministic closed-loop trajectory mismatch.
 
-Forbidden: the v14.13 implementation, unit tests, local smoke, or an unanalysed
-preflight supports reward improvement, learned frequency separation,
+Forbidden: v14.13 supports an accepted learned checkpoint, reward improvement,
+learned frequency separation,
 no-tradeoff behavior, cross-task generality, statistical evidence,
 confirmatory evidence, or a submission-ready selected algorithm.
 
