@@ -3284,10 +3284,13 @@ def train_mujoco_method(
     )
     anchor_state_replay_roots = (
         validate_unique_seeds(
-            anchor_state_replay_seed_values or (),
+            anchor_state_replay_seed_values,
             role="mujoco_deployment_frequency_anchor_state_replay_seeds",
         )
-        if deployment_frequency_anchor_state_replay else []
+        if (
+            deployment_frequency_anchor_state_replay
+            and anchor_state_replay_seed_values is not None
+        ) else []
     )
     if (
         deployment_frequency_closed_loop_trust_region

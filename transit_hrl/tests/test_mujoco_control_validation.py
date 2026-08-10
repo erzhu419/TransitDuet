@@ -1820,6 +1820,46 @@ class MujocoControlIntegrationTest(unittest.TestCase):
                 baseline_rows,
                 baseline_model,
             )
+            training_replay_payload, _, _ = train_mujoco_method(
+                train_seeds=[661],
+                selection_seeds=[673],
+                deployment_frequency_closed_loop_guard_seeds=[677],
+                eval_seeds=[683],
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                upper_deployment_frequency_lambda_init=1.0,
+                lower_deployment_frequency_lambda_init=1.0,
+                upper_deployment_frequency_rms_budget=0.001,
+                lower_deployment_frequency_rms_budget=0.001,
+                upper_deployment_frequency_reference_reduction_fraction=0.05,
+                lower_deployment_frequency_reference_reduction_fraction=0.05,
+                deployment_frequency_groupwise_robust=True,
+                deployment_frequency_anchor_state_replay=True,
+                deployment_frequency_closed_loop_trust_region=True,
+                deployment_frequency_closed_loop_trust_region_backtracks=2,
+                deployment_frequency_closed_loop_restoration_filter=True,
+                **common,
+            )
+            self.assertEqual(
+                training_replay_payload[
+                    "deployment_frequency_anchor_state_replay_seed_roots"
+                ],
+                [],
+            )
+            self.assertEqual(
+                training_replay_payload[
+                    "deployment_frequency_anchor_state_replay_seed_source"
+                ],
+                "iteration_zero_training_paths",
+            )
+            self.assertEqual(
+                training_replay_payload[
+                    "deployment_frequency_anchor_state_replay_path_count"
+                ],
+                1,
+            )
             candidate_payload, _, _ = train_mujoco_method(
                 train_seeds=[619],
                 selection_seeds=[631],
