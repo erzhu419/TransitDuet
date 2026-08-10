@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-08-09
+Date: 2026-08-10
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -16,15 +16,15 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_4_router_homotopy_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | mujoco_v14_5_paired_anchor_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
 | mujoco_v14_6_conservative_transfer_screen | mujoco_control | development | no_behavior_safe_candidate | development_only | false |
-| mujoco_v14_7_joint_learned_projection_preflight | mujoco_control | development_preflight | comparator_confounded | excluded_from_selection | false |
-| mujoco_v14_8_latent_matched_preflight | mujoco_control | development_preflight | no_joint_candidate | development_only | false |
-| mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development_preflight | deployment_constraint_misaligned | development_only | false |
-| mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_11_iterative_projection_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development_preflight | preregistered_unrun | excluded_until_audited | false |
+| mujoco_v14_7_joint_learned_projection_preflight | mujoco_control | development | comparator_confounded | development_only | false |
+| mujoco_v14_8_latent_matched_preflight | mujoco_control | development | no_joint_candidate | development_only | false |
+| mujoco_v14_9_asymmetric_feasibility_preflight | mujoco_control | development | deployment_constraint_misaligned | development_only | false |
+| mujoco_v14_10_deployment_aligned_preflight | mujoco_control | development | do_not_expand | development_only | false |
+| mujoco_v14_11_iterative_projection_preflight | mujoco_control | development | do_not_expand | development_only | false |
+| mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development | do_not_expand | development_only | false |
+| mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development | do_not_expand | development_only | false |
+| mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development | do_not_expand | development_only | false |
+| mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development | expand_to_multiseed_screen | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -92,116 +92,57 @@ Forbidden: MuJoCo v14.6 validates learned behavior-safe Freq-HRL, improves contr
 
 ### mujoco_v14_7_joint_learned_projection_preflight
 
-The v14.7 single-replicate preflight found one apparently promising high-dual arm, but its learned checkpoint used a robust selector while the comparator used a mean-reward selector. It also showed that routed responsibility diagnostics can improve while latent lower-LF behavior worsens, and that full-model hashes are confounded by cost-critic state. The result is excluded from algorithm selection.
+The v14.7 single-replicate preflight validated pathwise projection calibration and confirmed that learned arms changed actor behavior, but the learned arms used a behavior-robust checkpoint selector while the comparator used mean reward. The result is excluded from algorithm selection.
 
-Forbidden: MuJoCo v14.7 supports reward improvement, learned frequency separation, or any confirmatory candidate.
+Forbidden: MuJoCo v14.7 supports reward improvement, learned frequency separation, no-tradeoff behavior, or any confirmatory candidate.
 
 ### mujoco_v14_8_latent_matched_preflight
 
-The v14.8 single-replicate HalfCheetah preflight removed the v14.7 comparator and actor-identity confounds. Projection-only calibration was pathwise exact. No learned arm combined reward preservation with latent lower- and upper-frequency improvement: the shared `0.20` dual rate improved mean return in four of five disturbance modes but worsened latent lower-LF behavior in three, whereas `0.30` improved both latent frequency endpoints but reduced return in every mode. Equal upper/lower dual rates operated at incompatible cost scales, and the scalar checkpoint score was dominated by upper-HF violations.
+The v14.8 single-replicate HalfCheetah preflight removed the v14.7 comparator and actor-identity confounds. Projection-only calibration was pathwise exact, but no learned arm combined reward preservation with latent lower- and upper-frequency improvement. Equal upper and lower dual rates operated at incompatible cost scales.
 
 Forbidden: MuJoCo v14.8 supports a learned no-tradeoff result, cross-task generality, reward improvement, or confirmatory evidence.
 
 ### mujoco_v14_9_asymmetric_feasibility_preflight
 
-The v14.9 HalfCheetah development preflight used state-aligned feasibility checkpoint selection and separately scaled upper/lower dual rates. In a five-optimizer-replicate adaptive extension, the `u=0.30, l=3.00` arm supported strict return improvement in four of five disturbance modes and reduced latent upper-HF power, but worsened every mean lower-frequency endpoint. The audit further showed that primal-dual costs were computed from stochastic actions with approximately 0.50 initial standard deviation while held-out evaluation used deterministic actor means, so the optimized constraint did not match the deployed policy.
+The v14.9 HalfCheetah development extension found that one asymmetric arm improved mean return in four modes and reduced latent upper-HF power, but worsened every mean lower-frequency endpoint. The audit showed that stochastic rollout-action constraints did not match deterministic deployment actions.
 
-Forbidden: MuJoCo v14.9 supports joint frequency separation, no-tradeoff, cross-task generality, confirmatory reward improvement, or a submission-ready selected algorithm.
-
-### mujoco_v14_10_deployment_aligned_protocol
-
-The source-bound v14.10 development protocol replaces sampled Gaussian-action frequency costs with reward-guarded constraints on deterministic squashed actor-mean deployment traces. It uses episode-aware upper holds, paired-anchor relative targets, separate dimensionless upper/lower multipliers, held-out-free paired checkpoint selection, and an explicit initial-checkpoint fallback. A single-seed 11-cell HalfCheetah preflight must pass mechanism, provenance, reward-floor, and five-endpoint gates before any multi-seed screen is authorized. No v14.10 performance result has yet been admitted to this ledger.
-
-Forbidden: The v14.10 implementation or smoke test alone supports reward improvement, learned frequency separation, no-tradeoff behavior, cross-task generality, or confirmatory evidence.
+Forbidden: MuJoCo v14.9 supports joint learned frequency separation, no-tradeoff behavior, cross-task generality, confirmatory reward improvement, or a submission-ready selected algorithm.
 
 ### mujoco_v14_10_deployment_aligned_preflight
 
-The source-bound single-seed HalfCheetah preflight completed and passed projection calibration, provenance, checkpoint, and held-out-grid integrity checks. Every active deployment-frequency correction reduced same-batch power, but each correction was much smaller than the registered target and all seven learned arms safely fell back to the initial checkpoint. No learned actor or action change was admitted. The full 528-cell screen was not launched. This outcome motivates an iterative, cumulative-reward-budget projection rather than additional dual-rate tuning.
+The source-bound v14.10 preflight validated deterministic deployment-frequency gradients, projection calibration, provenance, and held-out-grid integrity. Every learned arm fell back to the initial checkpoint because single-step corrections were smaller than the registered targets.
 
-Forbidden: MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a submission-ready selected algorithm.
+Forbidden: MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.
 
 ### mujoco_v14_11_iterative_projection_preflight
 
-The source-bound v14.11 HalfCheetah preflight completed through scheduleurm.
-Iterative deterministic actor-mean projection increased mean same-batch power
-reduction from 0.94% for `k=1` to 3.87--10.18% for the registered iterative
-arms, with zero cumulative PPO surrogate-budget violations. The calibration
-passed, but every learned arm selected the initial-checkpoint fallback. A
-near-candidate improved mean return and all five pooled frequency endpoints,
-yet failed the worst-condition paired frequency and reward-floor rank. The
-full multiseed screen was not launched. This outcome identifies pooled-mean
-training constraints versus worst-condition selection as the next objective
-mismatch.
+The source-bound v14.11 preflight showed that iterative deterministic projection increased same-batch frequency reduction without surrogate reward-budget violations. Every learned arm nevertheless selected the fallback because pooled improvements did not satisfy worst-condition reward and frequency ranks.
 
-Forbidden: v14.11 supports an accepted learned checkpoint, held-out frequency
-separation, reward improvement, no-tradeoff behavior, cross-task generality,
-confirmatory evidence, or a submission-ready selected algorithm.
+Forbidden: MuJoCo v14.11 supports an accepted learned checkpoint, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.
 
 ### mujoco_v14_12_groupwise_robust_preflight
 
-The source-bound v14.12 HalfCheetah preflight completed through scheduleurm and
-preserved all four rollout groups with zero per-group cumulative PPO
-surrogate-budget violations. Groupwise correction reduced maximum same-batch
-normalized excess by 1.99--3.62% on average, but five of six groupwise arms
-selected the initial fallback and the remaining arm selected iteration 3,
-below the registered learned-checkpoint minimum. No arm met every paired reward
-floor and five-endpoint frequency target. The full multiseed screen was not
-launched. This outcome identifies unconstrained PPO drift before post-update
-projection and candidate-only state coverage as the next defects.
+The source-bound v14.12 preflight preserved four rollout groups and zero per-group surrogate reward-budget violations, but no arm met every paired reward floor and frequency target at an eligible learned checkpoint.
 
-Forbidden: v14.12 supports an accepted learned checkpoint, held-out frequency
-separation, reward improvement, no-tradeoff behavior, cross-task generality,
-confirmatory evidence, or a submission-ready selected algorithm.
+Forbidden: MuJoCo v14.12 supports an accepted learned checkpoint, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.
 
 ### mujoco_v14_13_anchor_replay_trust_preflight
 
-The source-bound v14.13 HalfCheetah preflight completed 13 of 13 scheduler cells
-and passed exact projection calibration. Frozen anchor-state replay and the
-per-group PPO trust region preserved same-batch frequency and reward contracts
-for the finite-budget joint arms, but all nine learned arms selected the initial
-checkpoint fallback. Every trained checkpoint had a worse registered
-worst-condition rank than the fallback; the best finite-budget joint checkpoints
-still failed unseen-seed upper-HF or lower-LF endpoints. The full multiseed
-screen was not launched. This outcome identifies an open-loop training-state
-constraint versus deterministic closed-loop trajectory mismatch.
+The source-bound v14.13 preflight validated exact projection calibration, frozen anchor replay, and finite-budget PPO trust regions. All learned arms selected the fallback because trained checkpoints still failed unseen-seed closed-loop frequency endpoints.
 
-Forbidden: v14.13 supports an accepted learned checkpoint, reward improvement,
-learned frequency separation,
-no-tradeoff behavior, cross-task generality, statistical evidence,
-confirmatory evidence, or a submission-ready selected algorithm.
+Forbidden: MuJoCo v14.13 supports an accepted learned checkpoint, reward improvement, learned frequency separation, statistical evidence, confirmatory evidence, or a selected algorithm.
 
 ### mujoco_v14_14_closed_loop_actor_guard_preflight
 
-The source-bound v14.14 HalfCheetah preflight completed 10 of 10 scheduler cells,
-passed projection calibration, and passed the frozen run-scoped sync and merge.
-The independent closed-loop guard executed 146 evaluations for the `bt=4` arm
-and 242 evaluations for each `bt=8` arm, but accepted zero effective actor
-updates. Full steps often reduced the number of frequency violations while
-preserving reward; the infeasible anchor's lexicographic worst-condition gate
-nevertheless rejected every nonzero fraction. All learned arms selected the
-iteration `-1` fallback, so the full multiseed screen was not launched. This
-outcome identifies a feasible-set maintenance rule applied at an infeasible
-start and motivates a separate feasibility-restoration filter.
+The source-bound v14.14 preflight executed the independent closed-loop guard but accepted zero effective actor updates. It identified a feasible-set maintenance rule incorrectly applied at an infeasible starting point.
 
-Forbidden: v14.14 supports an accepted learned checkpoint, held-out frequency
-separation, reward improvement, no-tradeoff behavior, cross-task generality,
-statistical evidence, confirmatory evidence, or a submission-ready selected
-algorithm.
+Forbidden: MuJoCo v14.14 supports an accepted learned checkpoint, reward improvement, learned frequency separation, statistical evidence, confirmatory evidence, or a selected algorithm.
 
 ### mujoco_v14_15_closed_loop_restoration_filter_preflight
 
-The source-bound v14.15 protocol is preregistered but has no admitted outcome.
-It replaces v14.14's infeasible-start lexicographic maintenance gate with a
-two-phase closed-loop filter: continuous positive-violation merit restoration
-under a fixed worst-endpoint funnel, followed by strict zero-violation
-maintenance. The single-optimizer-seed HalfCheetah preflight may only reject a
-broken mechanism or authorize a larger development screen after frozen merge
-and audit. Until then it is excluded from all manuscript claims.
+The source-bound v14.15 HalfCheetah preflight selected the restoration arm with reward tolerance 0.005, eight backtracks, and funnel multiplier 3. It accepted 22 effective joint actor updates, reduced 20 closed-loop frequency violations and continuous violation merit to zero under the reward floor, and passed all five held-out disturbance gates. This single-seed result authorizes a fresh multiseed development screen only.
 
-Forbidden: the v14.15 implementation, tests, preregistration, queued tasks, or
-smoke output supports an accepted learned checkpoint, reward improvement,
-frequency separation, no-tradeoff behavior, robustness, cross-task generality,
-statistical evidence, confirmatory evidence, or a submission-ready algorithm.
+Forbidden: MuJoCo v14.15 preflight alone supports statistically reliable reward improvement, robust frequency separation, no-tradeoff behavior, cross-environment generality, confirmatory evidence, or a submission-ready algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

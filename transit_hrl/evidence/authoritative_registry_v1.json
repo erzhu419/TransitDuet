@@ -1,6 +1,6 @@
 {
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1",
-  "snapshot_date": "2026-08-09",
+  "snapshot_date": "2026-08-10",
   "policy": {
     "manuscript_source_of_truth": "this_registry_only",
     "unregistered_artifacts": "excluded",
@@ -342,6 +342,249 @@
           "role": "report",
           "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_6/screen_report.md",
           "sha256": "1c204c17b6df09e51e177e5bad1e3df8aadc954600aa7acedde2abd383eb0d41"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_7_joint_learned_projection_preflight",
+      "claim_id": "D8_JOINT_LEARNED_PROJECTION_PREFLIGHT",
+      "claim": "Joint learned projection improves reward and both latent and executed frequency endpoints in MuJoCo.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "comparator_confounded",
+      "integrity_status": "comparator_confounded",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "single_optimizer_seed_recomputed_development_adjudication",
+      "paper_disposition": "development_only",
+      "parser": "development_preflight_adjudication",
+      "allowed_wording": "The v14.7 single-replicate preflight validated pathwise projection calibration and confirmed that learned arms changed actor behavior, but the learned arms used a behavior-robust checkpoint selector while the comparator used mean reward. The result is excluded from algorithm selection.",
+      "forbidden_wording": "MuJoCo v14.7 supports reward improvement, learned frequency separation, no-tradeoff behavior, or any confirmatory candidate.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/development_preflight_adjudications/mujoco_v14_7.json",
+          "sha256": "1c9a6ed1ef491a5489205572de3f0ca9b3763c59614ee0c3ef3196b1abd1eb59"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v14_7_joint_learned_projection_preflight_outcome_2026-08-10.md",
+          "sha256": "b0310b9bf6c00e11196f55a60182ff71a79beace34c36b9bb97a325ca2249144"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_8_latent_matched_preflight",
+      "claim_id": "D9_LATENT_MATCHED_PREFLIGHT",
+      "claim": "Selector-matched learned projection jointly preserves reward and improves latent lower- and upper-frequency endpoints.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "no_joint_candidate",
+      "integrity_status": "valid",
+      "selection_access": "development_outcomes_visible",
+      "outcome_provenance": "single_optimizer_seed_recomputed_development_adjudication",
+      "paper_disposition": "development_only",
+      "parser": "development_preflight_adjudication",
+      "allowed_wording": "The v14.8 single-replicate HalfCheetah preflight removed the v14.7 comparator and actor-identity confounds. Projection-only calibration was pathwise exact, but no learned arm combined reward preservation with latent lower- and upper-frequency improvement. Equal upper and lower dual rates operated at incompatible cost scales.",
+      "forbidden_wording": "MuJoCo v14.8 supports a learned no-tradeoff result, cross-task generality, reward improvement, or confirmatory evidence.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/development_preflight_adjudications/mujoco_v14_8.json",
+          "sha256": "14f35f473508116a6d14abdbe4f81bf224c7c8d988e8c4c2ce21f7aec0aa2978"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v14_8_latent_matched_preflight_outcome_2026-08-09.md",
+          "sha256": "0fa186b94094ab9e6423b09a3a72f55e242c284ff95308c9ff2e6c1fa5e346d5"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_9_asymmetric_feasibility_preflight",
+      "claim_id": "D10_ASYMMETRIC_FEASIBILITY_PREFLIGHT",
+      "claim": "Asymmetric feasibility-aware primal-dual training yields joint deployed frequency separation without reward tradeoff.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "deployment_constraint_misaligned",
+      "integrity_status": "valid",
+      "selection_access": "adaptive_development_outcomes_visible",
+      "outcome_provenance": "adaptive_five_optimizer_replicate_recomputed_development_adjudication",
+      "paper_disposition": "development_only",
+      "parser": "development_preflight_adjudication",
+      "allowed_wording": "The v14.9 HalfCheetah development extension found that one asymmetric arm improved mean return in four modes and reduced latent upper-HF power, but worsened every mean lower-frequency endpoint. The audit showed that stochastic rollout-action constraints did not match deterministic deployment actions.",
+      "forbidden_wording": "MuJoCo v14.9 supports joint learned frequency separation, no-tradeoff behavior, cross-task generality, confirmatory reward improvement, or a submission-ready selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/development_preflight_adjudications/mujoco_v14_9.json",
+          "sha256": "e343a2f0992d756f433c8e7a1e70adf33da42bffcb9650e89ccef8ce3628fb11"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v14_9_asymmetric_feasibility_preflight_outcome_2026-08-09.md",
+          "sha256": "590865398f9b7531a3b38ebbf8f69c1f6490667998f37db8578506dd89049eaf"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_10_deployment_aligned_preflight",
+      "claim_id": "D11_DEPLOYMENT_ALIGNED_PREFLIGHT",
+      "claim": "Deployment-aligned deterministic frequency projection admits a behavior-safe learned checkpoint.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "do_not_expand",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.10 preflight validated deterministic deployment-frequency gradients, projection calibration, provenance, and held-out-grid integrity. Every learned arm fell back to the initial checkpoint because single-step corrections were smaller than the registered targets.",
+      "forbidden_wording": "MuJoCo v14.10 supports learned frequency separation, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_10/decision.json",
+          "sha256": "6cd39a951423aa2c21a3c9d2c2444d7f42c38c2b54e6843be0bbf28ae2cbffad"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_10/report.md",
+          "sha256": "fa9d880b768a3e4f469182704c076baf1308866cb094a4be26569d1237dc7303"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_11_iterative_projection_preflight",
+      "claim_id": "D12_ITERATIVE_PROJECTION_PREFLIGHT",
+      "claim": "Iterative deterministic projection admits a behavior-safe learned checkpoint.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "do_not_expand",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.11 preflight showed that iterative deterministic projection increased same-batch frequency reduction without surrogate reward-budget violations. Every learned arm nevertheless selected the fallback because pooled improvements did not satisfy worst-condition reward and frequency ranks.",
+      "forbidden_wording": "MuJoCo v14.11 supports an accepted learned checkpoint, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_11/decision.json",
+          "sha256": "ae5d2e03ae4131786302c8fa7f453122dcb1b660f67e70ffa3938324173f94e2"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_11/report.md",
+          "sha256": "d8e7add005e0feb14a506d23f61489e48da6d4edd68df75b19db60b3e1a191b1"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_12_groupwise_robust_preflight",
+      "claim_id": "D13_GROUPWISE_ROBUST_PREFLIGHT",
+      "claim": "Per-group robust projection admits a behavior-safe learned checkpoint.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "do_not_expand",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.12 preflight preserved four rollout groups and zero per-group surrogate reward-budget violations, but no arm met every paired reward floor and frequency target at an eligible learned checkpoint.",
+      "forbidden_wording": "MuJoCo v14.12 supports an accepted learned checkpoint, reward improvement, no-tradeoff behavior, cross-task generality, confirmatory evidence, or a selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_12/decision.json",
+          "sha256": "10c21c086d1782f3dd39a53805609220e307774e333ac308ac8807ebdeacd925"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_12/report.md",
+          "sha256": "e7ce89a4c6acf65618bd20b0196870967df980f143a3aba537d4a4035bc03868"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_13_anchor_replay_trust_preflight",
+      "claim_id": "D14_ANCHOR_REPLAY_TRUST_PREFLIGHT",
+      "claim": "Frozen anchor replay and PPO trust regions close the training-state versus deployment-state gap.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "do_not_expand",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.13 preflight validated exact projection calibration, frozen anchor replay, and finite-budget PPO trust regions. All learned arms selected the fallback because trained checkpoints still failed unseen-seed closed-loop frequency endpoints.",
+      "forbidden_wording": "MuJoCo v14.13 supports an accepted learned checkpoint, reward improvement, learned frequency separation, statistical evidence, confirmatory evidence, or a selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_13/decision.json",
+          "sha256": "ba36e67c9031fc370a4455af04323dc9b7672137c56f9aec5ebbb78f5165c879"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_13/report.md",
+          "sha256": "0248d4d38f0054ebc1baa4e6d82c8e355861fdddb4ac149a1ab6968fccd17f7e"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_14_closed_loop_actor_guard_preflight",
+      "claim_id": "D15_CLOSED_LOOP_ACTOR_GUARD_PREFLIGHT",
+      "claim": "Strict closed-loop actor backtracking admits a behavior-safe learned checkpoint from an infeasible anchor.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "do_not_expand",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.14 preflight executed the independent closed-loop guard but accepted zero effective actor updates. It identified a feasible-set maintenance rule incorrectly applied at an infeasible starting point.",
+      "forbidden_wording": "MuJoCo v14.14 supports an accepted learned checkpoint, reward improvement, learned frequency separation, statistical evidence, confirmatory evidence, or a selected algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_14/decision.json",
+          "sha256": "2db460c23b29497e0e80d1366e6d08beed2d212e6dd00d0abe0a505f0aab4b52"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_14/report.md",
+          "sha256": "81987baecc8c993b7ca47e475ca200c6f8caeff78959e732b26e422509304041"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_15_closed_loop_restoration_filter_preflight",
+      "claim_id": "D16_RESTORATION_FILTER_PREFLIGHT",
+      "claim": "Two-phase closed-loop restoration admits a complete-gate learned checkpoint and authorizes multiseed development.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "expand_to_multiseed_screen",
+      "integrity_status": "valid",
+      "selection_access": "frozen_development_preflight",
+      "outcome_provenance": "automated_single_optimizer_seed_mechanism_preflight",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_mechanism_preflight",
+      "allowed_wording": "The source-bound v14.15 HalfCheetah preflight selected the restoration arm with reward tolerance 0.005, eight backtracks, and funnel multiplier 3. It accepted 22 effective joint actor updates, reduced 20 closed-loop frequency violations and continuous violation merit to zero under the reward floor, and passed all five held-out disturbance gates. This single-seed result authorizes a fresh multiseed development screen only.",
+      "forbidden_wording": "MuJoCo v14.15 preflight alone supports statistically reliable reward improvement, robust frequency separation, no-tradeoff behavior, cross-environment generality, confirmatory evidence, or a submission-ready algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_15/decision.json",
+          "sha256": "540036f775d4fce2c10f0d9aa854da4209cf4e5c8801ff87430713493fb16fdf"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260809/mujoco_v14_15/report.md",
+          "sha256": "69545d67d920feeca24e71a2370fddacaef99ab7e59015633a29469a998a6787"
         }
       ]
     },

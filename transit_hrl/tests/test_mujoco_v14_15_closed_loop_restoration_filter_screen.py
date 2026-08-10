@@ -22,6 +22,7 @@ from scripts.analyze_mujoco_v14_15_closed_loop_restoration_filter_preflight impo
 )
 from scripts.submit_mujoco_v14_15_closed_loop_restoration_filter_screen_scheduleurm import (
     _closed_loop_guard_contract_valid,
+    _runtime_deployment_constraint_contract,
     build_scheduler_spec,
     build_training_command,
 )
@@ -434,6 +435,13 @@ class MujocoV1415ClosedLoopRestorationFilterScreenTest(unittest.TestCase):
         self.assertIn("anchor_state_replay", restoration)
         self.assertIn("ppo_trust_region", restoration)
         self.assertIn("two_phase", restoration)
+
+        runtime_restoration = _runtime_deployment_constraint_contract(
+            spec.AUTHORIZING_ARMS[0]
+        )
+        self.assertIn("infeasible_start_merit_restoration", runtime_restoration)
+        self.assertIn("maintenance_filter_v8", runtime_restoration)
+        self.assertNotEqual(restoration, runtime_restoration)
 
     def test_evaluation_registry_is_owned_by_v14_15(self):
         fields = ("disturbance_mode", "seed", "episode_return")

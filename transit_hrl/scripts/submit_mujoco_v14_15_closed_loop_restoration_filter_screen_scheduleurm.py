@@ -34,6 +34,9 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
     parse_csv,
     source_identity,
 )
+from freq_hrl.experiments.mujoco.control_validation import (  # noqa: E402
+    deployment_frequency_constraint_contract,
+)
 
 
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
@@ -46,6 +49,32 @@ LAUNCHER_PATH = Path(__file__).resolve()
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _runtime_deployment_constraint_contract(arm: str) -> str:
+    """Rebuild the contract emitted by the frozen production core."""
+
+    arm_spec = spec.ARMS[str(arm)]
+    requested = bool(
+        float(arm_spec["upper_deployment_frequency_dual_lr"]) > 0.0
+        or float(arm_spec["lower_deployment_frequency_dual_lr"]) > 0.0
+    )
+    return deployment_frequency_constraint_contract(
+        requested=requested,
+        groupwise=bool(arm_spec["deployment_frequency_groupwise_robust"]),
+        anchor_state_replay=bool(
+            arm_spec["deployment_frequency_anchor_state_replay"]
+        ),
+        ppo_trust_region=bool(
+            arm_spec["deployment_frequency_ppo_trust_region"]
+        ),
+        closed_loop_trust_region=bool(
+            arm_spec["deployment_frequency_closed_loop_trust_region"]
+        ),
+        closed_loop_restoration_filter=bool(
+            arm_spec["deployment_frequency_closed_loop_restoration_filter"]
+        ),
+    )
 
 
 def _rank_not_worse(
@@ -1391,7 +1420,7 @@ def merge_results(args: argparse.Namespace) -> None:
                 ),
                 "deployment_projection_contract": summary.get(
                     "deployment_frequency_constraint_contract"
-                ) == spec.deployment_constraint_contract(arm),
+                ) == _runtime_deployment_constraint_contract(arm),
                 "deployment_groupwise_robust": bool(summary.get(
                     "deployment_frequency_groupwise_robust", False
                 )) == bool(arm_spec[

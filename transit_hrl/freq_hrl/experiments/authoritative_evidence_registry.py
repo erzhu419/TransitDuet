@@ -17,6 +17,9 @@ from typing import Any
 
 
 SCHEMA_VERSION = "freq_hrl_authoritative_evidence_registry_v1"
+DEVELOPMENT_ADJUDICATION_SCHEMA_VERSION = (
+    "freq_hrl_development_preflight_adjudication_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -656,6 +659,104 @@ def _mujoco_v14_6_facts(paths: dict[str, Path]) -> dict[str, Any]:
     }
 
 
+def _development_preflight_adjudication_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    if (
+        decision.get("schema_version")
+        != DEVELOPMENT_ADJUDICATION_SCHEMA_VERSION
+        or not str(decision.get("status", ""))
+        or not str(decision.get("source_run", ""))
+        or not str(decision.get("development_protocol_version", ""))
+        or decision.get("full_screen_launched") is not False
+        or decision.get("selected_arm") is not None
+        or int(decision.get("optimizer_replicates", 0)) < 1
+        or int(decision.get("heldout_paths_per_continuation", 0)) < 1
+        or int(decision.get("completed_anchor_cells", 0)) < 1
+        or int(decision.get("completed_continuation_cells", 0)) < 1
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+    ):
+        raise ValueError("development preflight adjudication is incomplete")
+    if report is None:
+        raise ValueError("development preflight adjudication lacks its report")
+    if (
+        _sha256(report) != decision.get("source_report_sha256")
+        or not report.as_posix().endswith(str(decision.get("source_report", "")))
+    ):
+        raise ValueError("development preflight report identity drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": str(decision["integrity_status"]),
+        "source_run": str(decision["source_run"]),
+        "development_protocol_version": str(
+            decision["development_protocol_version"]
+        ),
+        "environment": str(decision["environment"]),
+        "optimizer_replicates": int(decision["optimizer_replicates"]),
+        "heldout_paths_per_continuation": int(
+            decision["heldout_paths_per_continuation"]
+        ),
+        "completed_anchor_cells": int(decision["completed_anchor_cells"]),
+        "completed_continuation_cells": int(
+            decision["completed_continuation_cells"]
+        ),
+        "selected_arm": None,
+        "full_screen_launched": False,
+    }
+
+
+def _mujoco_mechanism_preflight_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    status = str(decision.get("status", ""))
+    selected = decision.get("selected_arm")
+    eligible = list(decision.get("eligible_arms") or [])
+    arm_status = dict(decision.get("arm_status") or {})
+    if (
+        status not in {"do_not_expand", "expand_to_multiseed_screen"}
+        or decision.get("evidence_role")
+        != "single_optimizer_seed_mechanism_preflight_no_ci"
+        or not str(decision.get("analysis_version", "")).startswith("mujoco_v14_")
+        or str(decision.get("environment", "")) != "HalfCheetah-v5"
+        or int(decision.get("optimizer_seed", -1)) < 0
+        or len(str(decision.get("input_sha256", ""))) != 64
+        or not arm_status
+        or (status == "do_not_expand" and selected is not None)
+        or (
+            status == "expand_to_multiseed_screen"
+            and (not isinstance(selected, str) or selected not in eligible)
+        )
+    ):
+        raise ValueError("MuJoCo mechanism preflight decision is incomplete")
+    if report is None:
+        raise ValueError("MuJoCo mechanism preflight lacks its report")
+    report_text = report.read_text(encoding="utf-8")
+    if (
+        f"Status: `{status}`" not in report_text
+        or f"Selected arm: `{selected}`" not in report_text
+        or "single optimizer seed" not in report_text.lower()
+        or "no ci" not in report_text.lower()
+    ):
+        raise ValueError("MuJoCo mechanism preflight report drifted")
+    return {
+        "decision_status": status,
+        "integrity_status": "valid",
+        "analysis_version": str(decision["analysis_version"]),
+        "environment": str(decision["environment"]),
+        "optimizer_seed": int(decision["optimizer_seed"]),
+        "calibration_pass": bool(decision.get("calibration_pass", False)),
+        "eligible_arms": eligible,
+        "selected_arm": selected,
+        "arm_count": len(arm_status),
+        "input_sha256": str(decision["input_sha256"]),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -667,6 +768,10 @@ PARSERS = {
     "mujoco_v14_4": _mujoco_v14_4_facts,
     "mujoco_v14_5": _mujoco_v14_5_facts,
     "mujoco_v14_6": _mujoco_v14_6_facts,
+    "development_preflight_adjudication": (
+        _development_preflight_adjudication_facts
+    ),
+    "mujoco_mechanism_preflight": _mujoco_mechanism_preflight_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),
@@ -735,6 +840,12 @@ def validate_registry(
         facts = PARSERS[parser_name](paths)
         if str(facts["decision_status"]) != str(record["decision"]):
             raise ValueError(f"{evidence_id}: registered decision drifted")
+        if (
+            "integrity_status" in facts
+            and str(facts["integrity_status"])
+            != str(record["integrity_status"])
+        ):
+            raise ValueError(f"{evidence_id}: registered integrity drifted")
         reportable, positive = _paper_eligibility(record)
         disposition = str(record["paper_disposition"])
         if disposition == "positive_main_or_si" and not positive:
@@ -821,7 +932,7 @@ def build_registry_outputs(
     lines = [
         "# Freq-HRL Authoritative Evidence Ledger",
         "",
-        "Date: 2026-08-09",
+        f"Date: {registry.get('snapshot_date', 'unknown')}",
         "",
         "This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.",
         "",

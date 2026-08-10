@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 12)
+        self.assertEqual(len(records), 21)
         by_id = {row["evidence_id"]: row for row in records}
         self.assertTrue(
             by_id["mujoco_v12_responsibility_confirmatory"][
@@ -133,6 +133,20 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         self.assertTrue(
             v14_6["facts"]["all_arms_trained_checkpoint_gate_pass"]
         )
+        v14_7 = by_id["mujoco_v14_7_joint_learned_projection_preflight"]
+        self.assertEqual(v14_7["integrity_status"], "comparator_confounded")
+        self.assertEqual(v14_7["facts"]["completed_continuation_cells"], 7)
+        v14_15 = by_id[
+            "mujoco_v14_15_closed_loop_restoration_filter_preflight"
+        ]
+        self.assertEqual(v14_15["decision"], "expand_to_multiseed_screen")
+        self.assertEqual(
+            v14_15["facts"]["selected_arm"],
+            "group_replay1_trust1_outer1_restore1_eps5e3_bt8_f3",
+        )
+        self.assertTrue(v14_15["facts"]["calibration_pass"])
+        self.assertEqual(v14_15["facts"]["arm_count"], 6)
+        self.assertFalse(v14_15["manuscript_reportable"])
         self.assertFalse(
             by_id["legacy_paper_diagnostics_snapshot"][
                 "manuscript_reportable"
@@ -162,13 +176,29 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 12)
+            self.assertEqual(summary["record_count"], 21)
             self.assertEqual(summary["reportable_record_count"], 3)
             self.assertEqual(summary["positive_supported_record_count"], 1)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 7)
+            self.assertEqual(summary["development_record_count"], 16)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
+
+    def test_tracked_ledger_is_generated_from_registry(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            generated = root / "ledger.md"
+            build_registry_outputs(
+                registry_path=self.registry_path,
+                repository_root=self.root,
+                output_dir=root / "results",
+                md_output=generated,
+            )
+            tracked = (
+                self.root
+                / "transit_hrl/md/freq_hrl_authoritative_claim_ledger_2026-08-09.md"
+            )
+            self.assertEqual(generated.read_bytes(), tracked.read_bytes())
 
 
 if __name__ == "__main__":

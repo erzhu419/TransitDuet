@@ -1,0 +1,4408 @@
+{
+  "analysis_version": "mujoco_v14_13_anchor_replay_trust_preflight_analysis_v1",
+  "arm_status": {
+    "group_replay0_trust0_eps1e8_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "disabled",
+        "enabled": false,
+        "expected": false,
+        "lower_transitions": 0,
+        "pass": true,
+        "path_count": 0,
+        "upper_transitions": 0
+      },
+      "authorizing_candidate": false,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.07114899158477783,
+        "anchor_state_replay": false,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.014496326446533203,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 0,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": false,
+            "guard_accepted_update_count": 2,
+            "guard_attempted_update_count": 32,
+            "pass": false,
+            "projection_steps_accepted": 7,
+            "projection_steps_attempted": 39,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 32
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.1844543218612671,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 1,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 1,
+            "guard_attempted_update_count": 32,
+            "pass": true,
+            "projection_steps_accepted": 8,
+            "projection_steps_attempted": 39,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 32
+          }
+        },
+        "expected_frequency_group_count": 4,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 1,
+        "groupwise_robust": true,
+        "pass": false,
+        "projection_steps_accepted": 15,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 0,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 0,
+            "enabled_match": true,
+            "expected": false,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 0,
+            "enabled_match": true,
+            "expected": false,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": false,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": false,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": false
+    },
+    "group_replay0_trust1_eps1e2_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "disabled",
+        "enabled": false,
+        "expected": false,
+        "lower_transitions": 0,
+        "pass": true,
+        "path_count": 0,
+        "upper_transitions": 0
+      },
+      "authorizing_candidate": false,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.035192582918250045,
+        "anchor_state_replay": false,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.046990123060014516,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 128,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 9,
+            "guard_attempted_update_count": 9,
+            "pass": true,
+            "projection_steps_accepted": 29,
+            "projection_steps_attempted": 29,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 9
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.027608449969972883,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 128,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 14,
+            "guard_attempted_update_count": 14,
+            "pass": true,
+            "projection_steps_accepted": 21,
+            "projection_steps_attempted": 21,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 14
+          }
+        },
+        "expected_frequency_group_count": 4,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 256,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 50,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 44,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 27,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 17,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": false,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust0_eps1e2_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": false,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.09160028434381252,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.0678888433857968,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 252,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 19,
+            "guard_attempted_update_count": 19,
+            "pass": true,
+            "projection_steps_accepted": 82,
+            "projection_steps_attempted": 82,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 19
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.11207834698937157,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 248,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 22,
+            "guard_attempted_update_count": 22,
+            "pass": true,
+            "projection_steps_accepted": 116,
+            "projection_steps_attempted": 116,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 22
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 500,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 198,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 0,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 0,
+            "enabled_match": true,
+            "expected": false,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 0,
+            "enabled_match": true,
+            "expected": false,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": false,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": false
+    },
+    "group_replay1_trust1_eps1e2_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": true,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.031322802106539406,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.03701896468798319,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 8,
+            "projection_steps_attempted": 8,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.025626639525095623,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 9,
+            "projection_steps_attempted": 9,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 512,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 17,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 42,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 26,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 16,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust1_eps1e3_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": true,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.026706759418760027,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.037519795554024835,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 7,
+            "guard_attempted_update_count": 7,
+            "pass": true,
+            "projection_steps_accepted": 10,
+            "projection_steps_attempted": 10,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 7
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.015893723283495222,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 240,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 7,
+            "guard_attempted_update_count": 7,
+            "pass": true,
+            "projection_steps_accepted": 17,
+            "projection_steps_attempted": 19,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 7
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 496,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 27,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 38,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 25,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 13,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust1_eps1e8_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": false,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.05451405048370361,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.0,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 59,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": false,
+            "guard_accepted_update_count": 0,
+            "guard_attempted_update_count": 32,
+            "pass": false,
+            "projection_steps_accepted": 0,
+            "projection_steps_attempted": 32,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 32
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.05451405048370361,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 226,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 1,
+            "guard_attempted_update_count": 15,
+            "pass": true,
+            "projection_steps_accepted": 4,
+            "projection_steps_attempted": 18,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 15
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 285,
+        "groupwise_robust": true,
+        "pass": false,
+        "projection_steps_accepted": 4,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 8,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 3,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 5,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust1_eps2e2_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": false,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.031322802106539406,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.03701896468798319,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 8,
+            "projection_steps_attempted": 8,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.025626639525095623,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 9,
+            "projection_steps_attempted": 9,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 512,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 17,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 42,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 26,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 16,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust1_eps5e3_k16": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": true,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.031322802106539406,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.03701896468798319,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 8,
+            "projection_steps_attempted": 8,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.025626639525095623,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 9,
+            "projection_steps_attempted": 9,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 512,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 17,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 42,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 26,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 16,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    },
+    "group_replay1_trust1_eps5e3_k8": {
+      "action_changed_pass": false,
+      "actor_changed_pass": false,
+      "all_condition_gates_pass": false,
+      "anchor_state_replay": {
+        "contract": "deterministic_frozen_anchor_deployment_trajectory_v1",
+        "enabled": true,
+        "expected": true,
+        "lower_transitions": 4000,
+        "pass": true,
+        "path_count": 4,
+        "upper_transitions": 252
+      },
+      "authorizing_candidate": true,
+      "base_preflight_pass": false,
+      "conditions": [
+        {
+          "disturbance_mode": "standard",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.164865537111105
+        },
+        {
+          "disturbance_mode": "low_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.892149465657111
+        },
+        {
+          "disturbance_mode": "high_frequency",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 9.256046776042396
+        },
+        {
+          "disturbance_mode": "mixed",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 7.947146839713435
+        },
+        {
+          "disturbance_mode": "ood_chirp",
+          "frequency_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.0,
+            "LatentUpperHFPowerAbs": 0.0,
+            "LowerLFDriftAbs": 0.0,
+            "RawLowerLFDriftAbs": 0.0,
+            "UpperHFPowerAbs": 0.0
+          },
+          "frequency_target_pass": false,
+          "pass": false,
+          "registered_reduction_fraction": {
+            "LatentLowerLFDriftAbs": 0.05,
+            "LatentUpperHFPowerAbs": 0.05,
+            "LowerLFDriftAbs": 0.05,
+            "RawLowerLFDriftAbs": 0.05,
+            "UpperHFPowerAbs": 0.05
+          },
+          "reward_difference": 0.0,
+          "reward_floor_pass": true,
+          "reward_noninferiority_margin": 8.741706569219764
+        }
+      ],
+      "deployment_projection": {
+        "accepted_robust_excess_reduction_mean": 0.031322802106539406,
+        "anchor_state_replay": true,
+        "by_level": {
+          "lower": {
+            "accepted_robust_excess_reduction_mean": 0.03701896468798319,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 8,
+            "projection_steps_attempted": 8,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          },
+          "upper": {
+            "accepted_robust_excess_reduction_mean": 0.025626639525095623,
+            "active": true,
+            "anchor_state_replay_flag_match": true,
+            "cumulative_reward_budget_match": true,
+            "diagnostic_update_count": 32,
+            "group_count_match": true,
+            "group_reward_budget_violation_count": 0,
+            "groups_target_reached_total": 256,
+            "groupwise_flag_match": true,
+            "groupwise_mechanism_pass": true,
+            "guard_accepted_update_count": 6,
+            "guard_attempted_update_count": 6,
+            "pass": true,
+            "projection_steps_accepted": 9,
+            "projection_steps_attempted": 9,
+            "requested_steps_match": true,
+            "reward_budget_violation_count": 0,
+            "reward_group_count_match": true,
+            "violating_update_count": 6
+          }
+        },
+        "expected_frequency_group_count": 8,
+        "group_reward_budget_violation_count": 0,
+        "groups_target_reached_total": 512,
+        "groupwise_robust": true,
+        "pass": true,
+        "projection_steps_accepted": 17,
+        "reward_budget_violation_count": 0
+      },
+      "groupwise_candidate": true,
+      "paired_actor_rms": {
+        "combined": 0.0,
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "ppo_trust_region": {
+        "accepted_update_count": 42,
+        "by_level": {
+          "lower": {
+            "accepted_update_count": 26,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          },
+          "upper": {
+            "accepted_update_count": 16,
+            "enabled_match": true,
+            "expected": true,
+            "feasibility_preserved": true,
+            "final_group_reward_violation_count": 0,
+            "frequency_group_count_match": true,
+            "pass": true,
+            "reward_group_count_match": true
+          }
+        },
+        "expected": true,
+        "final_group_reward_violation_count": 0,
+        "pass": true
+      },
+      "preflight_pass": false,
+      "replay_candidate": true,
+      "selected_checkpoint_diagnostics": {
+        "constraint_count": 24,
+        "constraints": [
+          {
+            "baseline": 0.46836530165876294,
+            "candidate": 0.46836530165876294,
+            "direction": "minimum",
+            "disturbance_mode": "standard",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.4483653016587629
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0007119385553428315,
+            "candidate": 0.0007119385553428315,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006763416275756899
+          },
+          {
+            "baseline": 0.0012695253600520187,
+            "candidate": 0.0012695253600520187,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0012060490920494176
+          },
+          {
+            "baseline": 0.002997908406218889,
+            "candidate": 0.002997908406218889,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0028480129859079443
+          },
+          {
+            "baseline": 0.004935666999034455,
+            "candidate": 0.004935666999034455,
+            "direction": "maximum",
+            "disturbance_mode": "standard",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004688883649082732
+          },
+          {
+            "baseline": 0.3688035859387979,
+            "candidate": 0.3688035859387979,
+            "direction": "minimum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3488035859387979
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0006338567711473557,
+            "candidate": 0.0006338567711473557,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0006021639325899879
+          },
+          {
+            "baseline": 0.0013262013683799537,
+            "candidate": 0.0013262013683799537,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.001259891299960956
+          },
+          {
+            "baseline": 0.0027208959643076503,
+            "candidate": 0.0027208959643076503,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0025848511660922675
+          },
+          {
+            "baseline": 0.004470489496643398,
+            "candidate": 0.004470489496643398,
+            "direction": "maximum",
+            "disturbance_mode": "low_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.004246965021811227
+          },
+          {
+            "baseline": 0.48572678908013056,
+            "candidate": 0.48572678908013056,
+            "direction": "minimum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.46572678908013054
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.0006062618604116268,
+            "candidate": 0.0006062618604116268,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0005759487673910454
+          },
+          {
+            "baseline": 0.001031092901129573,
+            "candidate": 0.001031092901129573,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0009795382560730944
+          },
+          {
+            "baseline": 0.0019902046907619227,
+            "candidate": 0.0019902046907619227,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0018906944562238264
+          },
+          {
+            "baseline": 0.0032718973666218424,
+            "candidate": 0.0032718973666218424,
+            "direction": "maximum",
+            "disturbance_mode": "high_frequency",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00310830249829075
+          },
+          {
+            "baseline": 0.39778467998104133,
+            "candidate": 0.39778467998104133,
+            "direction": "minimum",
+            "disturbance_mode": "mixed",
+            "endpoint": "reward_mean",
+            "normalized_slack": 0.020000000000000018,
+            "normalized_violation": 0.0,
+            "target": 0.3777846799810413
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0008552943171637164,
+            "candidate": 0.0008552943171637164,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "RawLowerLFDriftAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0008125296013055306
+          },
+          {
+            "baseline": 0.0018356001442632283,
+            "candidate": 0.0018356001442632283,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentLowerLFDriftAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.0017438201370500667
+          },
+          {
+            "baseline": 0.0016956514926116002,
+            "candidate": 0.0016956514926116002,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "UpperHFPowerAbs",
+            "normalized_slack": -0.052631578947368585,
+            "normalized_violation": 0.052631578947368585,
+            "target": 0.00161086891798102
+          },
+          {
+            "baseline": 0.002779780677878931,
+            "candidate": 0.002779780677878931,
+            "direction": "maximum",
+            "disturbance_mode": "mixed",
+            "endpoint": "LatentUpperHFPowerAbs",
+            "normalized_slack": -0.05263157894736836,
+            "normalized_violation": 0.05263157894736836,
+            "target": 0.0026407916439849842
+          }
+        ],
+        "rank": [
+          -0.052631578947368585,
+          -0.05540166204986163,
+          0.020000000000000018
+        ],
+        "worst_constraint": {
+          "baseline": 0.002997908406218889,
+          "candidate": 0.002997908406218889,
+          "direction": "maximum",
+          "disturbance_mode": "standard",
+          "endpoint": "UpperHFPowerAbs",
+          "normalized_slack": -0.052631578947368585,
+          "normalized_violation": 0.052631578947368585,
+          "target": 0.0028480129859079443
+        }
+      },
+      "selected_checkpoint_iteration": -1,
+      "strict_reward_signal_pass": false,
+      "trained_checkpoint_pass": false,
+      "trust_candidate": true
+    }
+  },
+  "calibration_actor_rms": {
+    "combined": 0.0,
+    "lower": 0.0,
+    "upper": 0.0
+  },
+  "calibration_conditions": [
+    {
+      "disturbance_mode": "standard",
+      "exact_reward": true,
+      "exact_traces": true,
+      "minimum_lower_reduction_fraction": 0.475019407829133,
+      "pass": true,
+      "upper_reduction_fraction": 0.3880975342722892
+    },
+    {
+      "disturbance_mode": "low_frequency",
+      "exact_reward": true,
+      "exact_traces": true,
+      "minimum_lower_reduction_fraction": 0.3600904745389134,
+      "pass": true,
+      "upper_reduction_fraction": 0.38170490083941
+    },
+    {
+      "disturbance_mode": "high_frequency",
+      "exact_reward": true,
+      "exact_traces": true,
+      "minimum_lower_reduction_fraction": 0.5009953769548543,
+      "pass": true,
+      "upper_reduction_fraction": 0.3894387938117354
+    },
+    {
+      "disturbance_mode": "mixed",
+      "exact_reward": true,
+      "exact_traces": true,
+      "minimum_lower_reduction_fraction": 0.5591852054366854,
+      "pass": true,
+      "upper_reduction_fraction": 0.39022976311615665
+    },
+    {
+      "disturbance_mode": "ood_chirp",
+      "exact_reward": true,
+      "exact_traces": true,
+      "minimum_lower_reduction_fraction": 0.44206735928735075,
+      "pass": true,
+      "upper_reduction_fraction": 0.38580438864618727
+    }
+  ],
+  "calibration_pass": true,
+  "claim_boundary": "This single-optimizer-seed preflight can reject a broken mechanism or authorize a larger development screen. It cannot support a performance, robustness, or statistical significance claim.",
+  "eligible_arms": [],
+  "environment": "HalfCheetah-v5",
+  "evidence_role": "single_optimizer_seed_mechanism_preflight_no_ci",
+  "input_sha256": "b2870b63ad9a4371d634827032de1cd00bcf04395b744e0da081dbc8bb61b2e1",
+  "optimizer_seed": 1313726498,
+  "selected_arm": null,
+  "status": "do_not_expand"
+}
