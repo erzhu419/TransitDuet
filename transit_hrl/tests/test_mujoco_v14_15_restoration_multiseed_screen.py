@@ -11,6 +11,7 @@ from scripts.analyze_mujoco_v14_15_restoration_multiseed_screen import (
 )
 from scripts.submit_mujoco_v14_15_closed_loop_restoration_filter_screen_scheduleurm import (
     build_parser,
+    frozen_execution_identity,
     normalize_args,
 )
 
@@ -37,6 +38,13 @@ class MujocoV1415RestorationMultiseedScreenTest(unittest.TestCase):
         ]))
         self.assertEqual(args.environments, list(spec.ENVIRONMENTS))
         self.assertEqual(args.optimizer_seeds, list(spec.OPTIMIZER_SEEDS))
+        self.assertEqual(
+            frozen_execution_identity(args),
+            (
+                spec.FROZEN_EXECUTION_REVISION,
+                spec.FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256,
+            ),
+        )
         with self.assertRaisesRegex(SystemExit, "15 fresh seeds"):
             normalize_args(build_parser().parse_args([
                 "--run-name", "mujoco_v14_15_multiseed_unit",

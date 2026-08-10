@@ -19,6 +19,14 @@ fixed before any multiseed outcome is accessed:
 No multiseed arm may replace this candidate. Other v14.15 arms are retained
 only as frozen controls and ablations.
 
+The executable `freq_hrl` package is frozen at Git revision
+`deb798c56fbb1fce06a8c84bbac84c77d3556703` and source-manifest SHA-256
+`1708dd24b9a7badc641b8b188b111020f5d4dd10e73338d591b032a4f64cfc91`.
+This execution identity includes the authoritative evidence registry added
+after the single-seed run; the v14.15 algorithm implementation itself is
+unchanged. The earlier preflight remains verified against its original
+revision and manifest.
+
 ## Scope
 
 - Environments: `HalfCheetah-v5`, `Hopper-v5`, `Walker2d-v5`.

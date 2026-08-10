@@ -597,6 +597,8 @@ def analyze_preflight(
     optimizer_seed: int,
     manifest_environments: tuple[str, ...] | list[str] | None = None,
     manifest_optimizer_seeds: tuple[int, ...] | list[int] | None = None,
+    expected_algorithm_revision: str = spec.FROZEN_ALGORITHM_REVISION,
+    expected_source_manifest_sha256: str = spec.FROZEN_SOURCE_MANIFEST_SHA256,
 ) -> dict[str, Any]:
     run = Path(run_dir).resolve()
     if environment not in spec.ENVIRONMENTS:
@@ -637,9 +639,9 @@ def analyze_preflight(
         and preregistration.get("development_protocol_version")
         == spec.DEVELOPMENT_PROTOCOL_VERSION
         and preregistration.get("frozen_algorithm_revision")
-        == spec.FROZEN_ALGORITHM_REVISION
+        == expected_algorithm_revision
         and preregistration.get("frozen_source_manifest_sha256")
-        == spec.FROZEN_SOURCE_MANIFEST_SHA256
+        == expected_source_manifest_sha256
         and manifest.get("status") == "development_scope_complete_unanalyzed"
         and manifest.get("full_screen_scope") is False
         and manifest.get("environments") == scoped_environments
@@ -675,9 +677,9 @@ def analyze_preflight(
         and int(anchor_summary.get("optimizer_seed", -1))
         == int(optimizer_seed)
         and anchor_summary.get("code_revision")
-        == spec.FROZEN_ALGORITHM_REVISION
+        == expected_algorithm_revision
         and anchor_summary.get("source_manifest_sha256")
-        == spec.FROZEN_SOURCE_MANIFEST_SHA256
+        == expected_source_manifest_sha256
     ):
         raise ValueError("v14.15 preflight anchor identity mismatch")
     cells: dict[str, tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]] = {}
@@ -697,9 +699,9 @@ def analyze_preflight(
             summary.get("protocol_version") == spec.FROZEN_CORE_PROTOCOL_VERSION
             and summary.get("environment") == environment
             and int(summary.get("optimizer_seed", -1)) == int(optimizer_seed)
-            and summary.get("code_revision") == spec.FROZEN_ALGORITHM_REVISION
+            and summary.get("code_revision") == expected_algorithm_revision
             and summary.get("source_manifest_sha256")
-            == spec.FROZEN_SOURCE_MANIFEST_SHA256
+            == expected_source_manifest_sha256
         ):
             raise ValueError(f"v14.15 preflight cell identity mismatch: {arm}")
         continuation = dict(summary.get("paired_checkpoint_continuation") or {})

@@ -523,6 +523,15 @@ def runtime_identity() -> dict[str, str]:
     }
 
 
+def frozen_execution_identity(args: argparse.Namespace) -> tuple[str, str]:
+    if bool(getattr(args, "fixed_candidate_multiseed", False)):
+        return (
+            multiseed_spec.FROZEN_EXECUTION_REVISION,
+            multiseed_spec.FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256,
+        )
+    return spec.FROZEN_ALGORITHM_REVISION, spec.FROZEN_SOURCE_MANIFEST_SHA256
+
+
 def experiment_cells(
     arms: tuple[str, ...] | list[str] = tuple(spec.ARMS),
     phases: tuple[str, ...] | list[str] = PHASES,
@@ -626,6 +635,7 @@ def build_training_command(
     output_dir: Path,
 ) -> str:
     is_anchor = str(phase) == "anchor"
+    frozen_revision, frozen_manifest = frozen_execution_identity(args)
     arm_spec = spec.ANCHOR_SPEC if is_anchor else spec.ARMS[str(arm)]
     train_seeds = (
         spec.PRETRAIN_SEEDS if is_anchor else spec.CONTINUATION_TRAIN_SEEDS
@@ -726,8 +736,8 @@ def build_training_command(
         str(checkpoint_minimum_iteration),
         "--checkpoint-evaluation-interval",
         str(spec.CHECKPOINT_EVALUATION_INTERVAL),
-        "--code-revision", spec.FROZEN_ALGORITHM_REVISION,
-        "--source-manifest-sha256", spec.FROZEN_SOURCE_MANIFEST_SHA256,
+        "--code-revision", frozen_revision,
+        "--source-manifest-sha256", frozen_manifest,
         "--output-dir", str(output_dir),
     ]
     if bool(arm_spec["lower_action_router_observe_strength"]):
@@ -882,6 +892,7 @@ def _write_preregistration(args: argparse.Namespace) -> None:
     output = ROOT / "results" / args.run_name
     output.mkdir(parents=True, exist_ok=True)
     path = output / "preregistration.json"
+    frozen_revision, frozen_manifest = frozen_execution_identity(args)
     payload: dict[str, Any] = {
         "status": "frozen_before_v14_15_closed_loop_restoration_filter_outcome_access",
         "evidence_role": "development_screen_not_confirmatory",
@@ -938,8 +949,8 @@ def _write_preregistration(args: argparse.Namespace) -> None:
         "checkpoint_min_delta": spec.CHECKPOINT_MIN_DELTA,
         "lower_lf_rms_budget": spec.LOWER_LF_RMS_BUDGET,
         "upper_hf_rms_budget": spec.UPPER_HF_RMS_BUDGET,
-        "frozen_algorithm_revision": spec.FROZEN_ALGORITHM_REVISION,
-        "frozen_source_manifest_sha256": spec.FROZEN_SOURCE_MANIFEST_SHA256,
+        "frozen_algorithm_revision": frozen_revision,
+        "frozen_source_manifest_sha256": frozen_manifest,
         "runtime_revision": args.runtime_revision,
         "launcher_sha256": args.launcher_sha256,
         "spec_sha256": args.spec_sha256,
@@ -1110,6 +1121,7 @@ def _read_cell(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]], list[d
 
 
 def merge_results(args: argparse.Namespace) -> None:
+    frozen_revision, frozen_manifest = frozen_execution_identity(args)
     required = ("cell_summary.json", "training_history.json", "evaluation_rows.csv", "checkpoint.pt")
     tasks = selected_experiment_cells(args)
     sync_manifest_path = (
@@ -1173,10 +1185,9 @@ def merge_results(args: argparse.Namespace) -> None:
             == spec.FROZEN_CORE_PROTOCOL_VERSION,
             "environment": summary.get("environment") == environment,
             "optimizer_seed": int(summary.get("optimizer_seed", -1)) == seed,
-            "revision": summary.get("code_revision")
-            == spec.FROZEN_ALGORITHM_REVISION,
+            "revision": summary.get("code_revision") == frozen_revision,
             "manifest": summary.get("source_manifest_sha256")
-            == spec.FROZEN_SOURCE_MANIFEST_SHA256,
+            == frozen_manifest,
             "source_verified": summary.get("source_identity_status") == "verified",
             "checkpoint_hash": checkpoint_file_sha256
             == summary.get("checkpoint_file_sha256"),
@@ -1975,10 +1986,11 @@ def main() -> None:
     args.multiseed_analyzer_sha256 = identity[
         "multiseed_analyzer_sha256"
     ]
-    revision, manifest = source_identity(spec.FROZEN_ALGORITHM_REVISION)
+    frozen_revision, frozen_manifest = frozen_execution_identity(args)
+    revision, manifest = source_identity(frozen_revision)
     if (
-        revision != spec.FROZEN_ALGORITHM_REVISION
-        or manifest != spec.FROZEN_SOURCE_MANIFEST_SHA256
+        revision != frozen_revision
+        or manifest != frozen_manifest
     ):
         raise SystemExit("v14.15 frozen algorithm identity mismatch")
     _write_preregistration(args)
@@ -2030,6 +2042,8 @@ def main() -> None:
         "--nodes", ",".join(args.nodes),
         "--merge-only",
     ]
+    if bool(args.fixed_candidate_multiseed):
+        merge_command.append("--fixed-candidate-multiseed")
     if int(args.max_cells) > 0:
         merge_command.extend(("--max-cells", str(args.max_cells)))
     print("merge after result sync: " + shlex.join(merge_command))

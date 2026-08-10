@@ -13,6 +13,10 @@ DEVELOPMENT_PROTOCOL_VERSION = (
     "mujoco_v14_15_restoration_multiseed_development_screen_v1"
 )
 ANALYSIS_PROFILE = "fixed_v14_15_restoration_candidate_multiseed_v1"
+FROZEN_EXECUTION_REVISION = "deb798c56fbb1fce06a8c84bbac84c77d3556703"
+FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256 = (
+    "1708dd24b9a7badc641b8b188b111020f5d4dd10e73338d591b032a4f64cfc91"
+)
 SELECTION_SOURCE_EVIDENCE_ID = (
     "mujoco_v14_15_closed_loop_restoration_filter_preflight"
 )
@@ -79,6 +83,10 @@ CLAIM_BOUNDARY = (
 
 
 def validate() -> None:
+    if len(FROZEN_EXECUTION_REVISION) != 40:
+        raise RuntimeError("multiseed execution revision is not frozen")
+    if len(FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256) != 64:
+        raise RuntimeError("multiseed execution source manifest is not frozen")
     if PRESELECTED_CANDIDATE_ARM not in base.AUTHORIZING_ARMS:
         raise RuntimeError("multiseed candidate is not a v14.15 authorizing arm")
     if set(OPTIMIZER_SEEDS) & {base.OPTIMIZER_SEEDS[0]}:

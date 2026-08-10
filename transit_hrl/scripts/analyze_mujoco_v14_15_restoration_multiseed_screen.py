@@ -186,6 +186,10 @@ def analyze(run_dir: Path) -> dict[str, Any]:
                 optimizer_seed=optimizer_seed,
                 manifest_environments=spec.ENVIRONMENTS,
                 manifest_optimizer_seeds=spec.OPTIMIZER_SEEDS,
+                expected_algorithm_revision=spec.FROZEN_EXECUTION_REVISION,
+                expected_source_manifest_sha256=(
+                    spec.FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256
+                ),
             )
             decisions.append(decision)
             candidate = decision["arm_status"][spec.PRESELECTED_CANDIDATE_ARM]
