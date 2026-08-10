@@ -17,6 +17,7 @@ from freq_hrl.domains.mujoco import (
 from freq_hrl.experiments.mujoco.control_validation import (
     SAFE_SELECTOR_BASELINE_BRANCH,
     MUJOCO_CONTROL_PROTOCOL_VERSION,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -883,6 +884,39 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
 class MujocoControlIntegrationTest(unittest.TestCase):
+    def test_explicit_v1416_protocol_keeps_control_arm_comparable(self):
+        payload, _, _ = train_mujoco_method(
+            method="freq_hrl_no_leakage",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[811],
+            selection_seeds=[821],
+            eval_seeds=[823],
+            steps=8,
+            episode_horizon=8,
+            iterations=1,
+            optimizer_seed=827,
+            upper_period=4,
+            hidden_dim=8,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+            control_protocol_version=(
+                MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+            ),
+        )
+        self.assertEqual(
+            payload["protocol_version"],
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+        )
+        self.assertEqual(
+            payload["protocol_version_selection"],
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+        )
+        self.assertFalse(payload["deployment_frequency_constraint_enabled"])
+
     def test_canonical_policy_state_is_pathwise_decomposition_invariant(self):
         observation_dim, action_dim = environment_dimensions(
             "HalfCheetah-v5", episode_horizon=64

@@ -56,6 +56,14 @@ MUJOCO_CONTROL_PROTOCOL_VERSION = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16 = (
     "freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
+    MUJOCO_CONTROL_PROTOCOL_VERSION,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+)
+MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
+    "auto",
+    *MUJOCO_CONTROL_PROTOCOL_VERSIONS,
+)
 METHODS = (
     "freq_hrl",
     "freq_hrl_safe_selector",
@@ -3220,6 +3228,7 @@ def train_mujoco_method(
     ),
     code_revision: str = "",
     expected_source_manifest_sha256: str = "",
+    control_protocol_version: str = "auto",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
     name = str(method)
     if name not in METHODS:
@@ -3338,7 +3347,7 @@ def train_mujoco_method(
             "MuJoCo pathwise frequency robustness requires groupwise "
             "constraints"
         )
-    effective_protocol_version = (
+    inferred_protocol_version = (
         MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
         if (
             anchor_state_replay_roots
@@ -3348,6 +3357,21 @@ def train_mujoco_method(
             or deployment_frequency_pathwise_robust
         )
         else MUJOCO_CONTROL_PROTOCOL_VERSION
+    )
+    selected_protocol_version = str(control_protocol_version)
+    if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
+        raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+        and selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION
+    ):
+        raise ValueError(
+            "v14.16 restoration mechanisms cannot be labeled as v14.15"
+        )
+    effective_protocol_version = (
+        inferred_protocol_version
+        if selected_protocol_version == "auto"
+        else selected_protocol_version
     )
     seed_roles = {
         "training": set(roots),
@@ -4833,6 +4857,7 @@ def train_mujoco_method(
     payload["eval_seeds"] = list(evaluation)
     payload.update({
         "protocol_version": effective_protocol_version,
+        "protocol_version_selection": selected_protocol_version,
         "method": name,
         "optimizer_seed": int(optimizer_seed),
         "environment": str(env_id),
@@ -5644,6 +5669,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--code-revision", default="")
     parser.add_argument("--source-manifest-sha256", default="")
+    parser.add_argument(
+        "--control-protocol-version",
+        choices=MUJOCO_CONTROL_PROTOCOL_SELECTIONS,
+        default="auto",
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser
 
@@ -5804,6 +5834,7 @@ def main() -> None:
         ),
         code_revision=args.code_revision,
         expected_source_manifest_sha256=args.source_manifest_sha256,
+        control_protocol_version=args.control_protocol_version,
     )
     write_cell(args.output_dir, payload, rows, model)
     print(
