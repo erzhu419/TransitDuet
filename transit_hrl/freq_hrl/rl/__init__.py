@@ -34,6 +34,7 @@ from .deployment_frequency import (
     deterministic_actor_action,
 )
 from .smdp_actor_critic import (
+    DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -63,6 +64,7 @@ __all__ = [
     "DualActorCriticPPO",
     "DualPPOConfig",
     "DeploymentFrequencyStats",
+    "DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES",
     "CausalGRUGaussianActor",
     "CausalGRUStateEncoder",
     "CausalGRUValueNet",

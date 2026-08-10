@@ -977,6 +977,7 @@ def train_frequency_separated_ppo(
     deployment_frequency_reference_rollout_fn: (
         SMDPReferenceRolloutFn | None
     ) = None,
+    deployment_frequency_reference_seeds: list[int] | None = None,
     deployment_frequency_closed_loop_guard_fn: (
         SMDPClosedLoopGuardFn | None
     ) = None,
@@ -1049,14 +1050,36 @@ def train_frequency_separated_ppo(
     )
     anchor_state_replay_seeds: list[int] = []
     anchor_state_replay_batch: HierarchicalTrajectoryBatch | None = None
+    explicit_reference_seeds = (
+        None
+        if deployment_frequency_reference_seeds is None
+        else list(deployment_frequency_reference_seeds)
+    )
+    if explicit_reference_seeds is not None and (
+        not explicit_reference_seeds
+        or any(
+            isinstance(seed, bool) or int(seed) != seed or int(seed) < 0
+            for seed in explicit_reference_seeds
+        )
+        or len(set(map(int, explicit_reference_seeds)))
+        != len(explicit_reference_seeds)
+    ):
+        raise ValueError(
+            "deployment-frequency reference seeds must be unique "
+            "non-negative integers"
+        )
     if anchor_state_replay_enabled:
         if deployment_frequency_reference_rollout_fn is None:
             raise ValueError(
                 "anchor-state replay requires an explicit deterministic "
                 "reference rollout function"
             )
-        anchor_state_replay_seeds = _iteration_rollout_seeds(
-            train_seeds, 0, training_seed_fn
+        anchor_state_replay_seeds = (
+            list(map(int, explicit_reference_seeds))
+            if explicit_reference_seeds is not None
+            else _iteration_rollout_seeds(
+                train_seeds, 0, training_seed_fn
+            )
         )
         reference_batches: list[HierarchicalTrajectoryBatch] = []
         for seed in anchor_state_replay_seeds:
@@ -1071,6 +1094,11 @@ def train_frequency_separated_ppo(
             reference_batches.append(reference_batch)
         anchor_state_replay_batch = concat_hierarchical_batches(
             reference_batches
+        )
+    elif explicit_reference_seeds is not None:
+        raise ValueError(
+            "explicit deployment-frequency reference seeds require "
+            "anchor-state replay"
         )
     closed_loop_guard_enabled = bool(
         model.config.deployment_frequency_closed_loop_trust_region
@@ -1299,11 +1327,19 @@ def train_frequency_separated_ppo(
             copy.deepcopy(model.state_dict())
             if closed_loop_guard_enabled else None
         )
+        restoration_mode = bool(
+            restoration_filter_enabled
+            and current_closed_loop_guard_snapshot is not None
+            and int(current_closed_loop_guard_snapshot[
+                "frequency_violation_count"
+            ]) > 0
+        )
         metrics = model.update(
             concat_hierarchical_batches(batches),
             deployment_frequency_reference_batch=(
                 anchor_state_replay_batch
             ),
+            deployment_frequency_restoration_mode=restoration_mode,
         )
         if closed_loop_guard_enabled:
             if (
@@ -1461,6 +1497,14 @@ def train_frequency_separated_ppo(
         "deployment_frequency_anchor_state_replay_path_count": len(
             anchor_state_replay_seeds
         ),
+        "deployment_frequency_anchor_state_replay_seed_source": (
+            "explicit"
+            if explicit_reference_seeds is not None
+            else (
+                "iteration_zero_training_paths"
+                if anchor_state_replay_enabled else "disabled"
+            )
+        ),
         "deployment_frequency_anchor_state_replay_contract": (
             "deterministic_frozen_anchor_deployment_trajectory_v1"
             if anchor_state_replay_enabled else "disabled"
@@ -1495,6 +1539,10 @@ def train_frequency_separated_ppo(
         ),
         "deployment_frequency_closed_loop_restoration_filter_enabled": (
             restoration_filter_enabled
+        ),
+        "deployment_frequency_restoration_freeze_reward_actor_enabled": bool(
+            model.config.
+            deployment_frequency_restoration_freeze_reward_actor
         ),
         "deployment_frequency_closed_loop_restoration_min_reduction": float(
             model.config.

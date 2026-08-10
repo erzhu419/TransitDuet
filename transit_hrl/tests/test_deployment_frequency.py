@@ -338,6 +338,139 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
             0.0,
         )
 
+    def test_violation_l2_projection_updates_every_violating_group(self):
+        common = dict(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=0,
+            deployment_action_transform="identity",
+            lower_learning_rate=0.01,
+            lower_deployment_frequency_rms_budget=0.1,
+            lower_deployment_frequency_window=3,
+            lower_deployment_frequency_lambda_init=1.0,
+            lower_deployment_frequency_step_scale=1.0,
+            deployment_frequency_groupwise_robust=True,
+        )
+        state = np.concatenate((
+            np.tile(np.asarray([[1.0, 0.0]], dtype=np.float32), (4, 1)),
+            np.tile(np.asarray([[0.0, 1.0]], dtype=np.float32), (4, 1)),
+        ))
+        batch = LevelTrajectoryBatch(
+            state=state,
+            action=np.zeros((8, 1), dtype=np.float32),
+            reward=np.zeros(8, dtype=np.float32),
+            duration=np.ones(8, dtype=np.int64),
+            done=np.asarray(
+                [False, False, False, True] * 2, dtype=np.float32
+            ),
+            old_logp=np.zeros(8, dtype=np.float32),
+            old_value=np.zeros(8, dtype=np.float32),
+            deployment_frequency_group=np.asarray(
+                [0] * 4 + [1] * 4, dtype=np.int64
+            ),
+        )
+
+        def project(objective: str):
+            model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                **common,
+                deployment_frequency_projection_objective=objective,
+            ))
+            with torch.no_grad():
+                model.lower_actor.net[-1].weight.copy_(
+                    torch.tensor([[1.0, 0.8]])
+                )
+                model.lower_actor.net[-1].bias.zero_()
+            before = model.lower_actor.net[-1].weight.detach().clone()
+            metrics = model._update_deployment_frequency_constraint(
+                level="lower", batch=batch, actor=model.lower_actor
+            )
+            after = model.lower_actor.net[-1].weight.detach().clone()
+            return before, after, metrics
+
+        _, worst_after, _ = project("worst_group")
+        l2_before, l2_after, l2_metrics = project("violation_l2")
+        prefix = "lower_deployment_frequency_"
+        self.assertAlmostEqual(float(worst_after[0, 1]), 0.8, places=7)
+        self.assertLess(float(l2_after[0, 0]), float(l2_before[0, 0]))
+        self.assertLess(float(l2_after[0, 1]), float(l2_before[0, 1]))
+        self.assertEqual(
+            l2_metrics[prefix + "active_violation_groups_before"], 2.0
+        )
+        self.assertLess(
+            l2_metrics[prefix + "projection_objective_after"],
+            l2_metrics[prefix + "projection_objective_before"],
+        )
+        self.assertEqual(
+            l2_metrics[prefix + "projection_objective_violation_l2"], 1.0
+        )
+
+    def test_restoration_freezes_reward_actors_but_not_critics_or_projection(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            epochs=1,
+            minibatch_size=8,
+            deployment_action_transform="tanh",
+            lower_deployment_frequency_rms_budget=0.01,
+            lower_deployment_frequency_lambda_init=1.0,
+            lower_deployment_frequency_step_scale=10.0,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_projection_objective="violation_l2",
+            deployment_frequency_closed_loop_trust_region=True,
+            deployment_frequency_closed_loop_restoration_filter=True,
+            deployment_frequency_restoration_freeze_reward_actor=True,
+        ))
+        with torch.no_grad():
+            model.lower_actor.net[-1].bias.fill_(0.5)
+        batch = self._batch(model)
+        upper_actor_before = copy.deepcopy(model.upper_actor.state_dict())
+        lower_actor_before = copy.deepcopy(model.lower_actor.state_dict())
+        lower_value_before = copy.deepcopy(model.lower_value.state_dict())
+        restoration = model.update(
+            batch, deployment_frequency_restoration_mode=True
+        )
+
+        def changed(before, after):
+            return any(
+                not torch.equal(before[key], after[key]) for key in before
+            )
+
+        self.assertFalse(changed(
+            upper_actor_before, model.upper_actor.state_dict()
+        ))
+        self.assertTrue(changed(
+            lower_actor_before, model.lower_actor.state_dict()
+        ))
+        self.assertTrue(changed(
+            lower_value_before, model.lower_value.state_dict()
+        ))
+        self.assertEqual(restoration["upper_actor_optimizer_steps"], 0.0)
+        self.assertEqual(restoration["lower_actor_optimizer_steps"], 0.0)
+        self.assertGreater(restoration["lower_value_optimizer_steps"], 0.0)
+        self.assertGreater(
+            restoration[
+                "lower_deployment_frequency_projection_steps_accepted"
+            ],
+            0.0,
+        )
+        self.assertEqual(
+            restoration["deployment_frequency_reward_actor_frozen"], 1.0
+        )
+
+        maintenance = model.update(
+            self._batch(model), deployment_frequency_restoration_mode=False
+        )
+        self.assertGreater(maintenance["upper_actor_optimizer_steps"], 0.0)
+        self.assertGreater(maintenance["lower_actor_optimizer_steps"], 0.0)
+        self.assertEqual(
+            maintenance["deployment_frequency_reward_actor_frozen"], 0.0
+        )
+
     def test_anchor_state_replay_expands_only_frequency_groups(self):
         config = SMDPPPOConfig(
             upper_state_dim=3,
@@ -458,6 +591,14 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
                 lower_action_dim=1,
                 deployment_frequency_groupwise_robust=True,
                 deployment_frequency_closed_loop_trust_region_backtracks=0,
+            ))
+        with self.assertRaisesRegex(ValueError, "restoration filter"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                deployment_frequency_restoration_freeze_reward_actor=True,
             ))
 
     def test_active_constraint_requires_positive_budget(self):

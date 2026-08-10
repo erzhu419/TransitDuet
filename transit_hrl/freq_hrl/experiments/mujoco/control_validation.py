@@ -36,6 +36,7 @@ from freq_hrl.experiments.reproducibility import (
     verify_current_freq_hrl_source_identity,
 )
 from freq_hrl.rl import (
+    DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -51,6 +52,9 @@ from freq_hrl.rl import (
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
     "freq_hrl_mujoco_shared_core_v14_15_closed_loop_restoration_filter"
+)
+MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16 = (
+    "freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration"
 )
 METHODS = (
     "freq_hrl",
@@ -72,9 +76,40 @@ def deployment_frequency_constraint_contract(
     ppo_trust_region: bool,
     closed_loop_trust_region: bool = False,
     closed_loop_restoration_filter: bool = False,
+    projection_objective: str = "worst_group",
+    restoration_freeze_reward_actor: bool = False,
+    pathwise_robust: bool = False,
 ) -> str:
     if not requested:
         return "disabled"
+    objective = str(projection_objective)
+    if objective not in DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES:
+        raise ValueError("unknown deployment-frequency projection objective")
+    if (
+        objective != "worst_group"
+        or restoration_freeze_reward_actor
+        or pathwise_robust
+    ):
+        mechanisms = [
+            "episode_reset",
+            "groupwise" if groupwise else "pooled",
+            objective,
+            "frozen_anchor_state_replay"
+            if anchor_state_replay else "current_state_only",
+            "ppo_trust_region"
+            if ppo_trust_region else "unfiltered_ppo_step",
+            "crossed_closed_loop_filter"
+            if closed_loop_trust_region else "no_closed_loop_filter",
+            "restoration_filter"
+            if closed_loop_restoration_filter else "no_restoration_filter",
+            "frozen_reward_actor_during_restoration"
+            if restoration_freeze_reward_actor
+            else "joint_reward_actor_during_restoration",
+            "individual_path_constraints"
+            if pathwise_robust else "mode_mean_constraints",
+            "v9",
+        ]
+        return "_".join(mechanisms)
     if not groupwise:
         return (
             "episode_reset_differentiable_actor_mean_tanh_upper_hold_hpf8_"
@@ -295,6 +330,7 @@ def load_paired_mujoco_checkpoint(
     expected_router_mode: str = "direct",
     expected_router_observe_strength: bool = True,
     expected_responsibility_mode: str = "causal_lf_transfer",
+    expected_protocol_version: str = MUJOCO_CONTROL_PROTOCOL_VERSION,
     reset_upper_deployment_frequency_lambda: float | None = None,
     reset_lower_deployment_frequency_lambda: float | None = None,
 ) -> dict[str, Any]:
@@ -311,7 +347,7 @@ def load_paired_mujoco_checkpoint(
         raise ValueError("paired checkpoint summary must be a JSON object")
     file_sha256 = _file_sha256(checkpoint_file)
     expected_summary = {
-        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "protocol_version": str(expected_protocol_version),
         "method": str(expected_method),
         "environment": str(env_id),
         "optimizer_seed": int(optimizer_seed),
@@ -352,7 +388,7 @@ def load_paired_mujoco_checkpoint(
     ):
         raise ValueError("paired checkpoint payload is invalid")
     checkpoint_contract = {
-        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "protocol_version": str(expected_protocol_version),
         "method": str(expected_method),
         "environment": str(env_id),
         "optimizer_seed": int(optimizer_seed),
@@ -435,7 +471,7 @@ def load_paired_mujoco_checkpoint(
         ),
         "checkpoint_optimizer_seed": int(optimizer_seed),
         "checkpoint_environment": str(env_id),
-        "checkpoint_protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "checkpoint_protocol_version": str(expected_protocol_version),
         "checkpoint_router_mode": str(expected_router_mode),
         "checkpoint_router_observe_strength": bool(
             expected_router_observe_strength
@@ -2318,6 +2354,8 @@ def _hierarchical_model(
     lower_deployment_frequency_action_scale: float = 1.0,
     deployment_frequency_groupwise_robust: bool = False,
     deployment_frequency_anchor_state_replay: bool = False,
+    deployment_frequency_projection_objective: str = "worst_group",
+    deployment_frequency_restoration_freeze_reward_actor: bool = False,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
     deployment_frequency_closed_loop_trust_region: bool = False,
@@ -2401,6 +2439,12 @@ def _hierarchical_model(
         ),
         deployment_frequency_anchor_state_replay=bool(
             deployment_frequency_anchor_state_replay
+        ),
+        deployment_frequency_projection_objective=str(
+            deployment_frequency_projection_objective
+        ),
+        deployment_frequency_restoration_freeze_reward_actor=bool(
+            deployment_frequency_restoration_freeze_reward_actor
         ),
         deployment_frequency_ppo_trust_region=bool(
             deployment_frequency_ppo_trust_region
@@ -2539,6 +2583,40 @@ def crossed_deployment_frequency_guard_paths(
             if path_seed in assignments:
                 raise RuntimeError(
                     "crossed MuJoCo closed-loop guard path seeds collided"
+                )
+            path_seeds.append(path_seed)
+            assignments[path_seed] = str(mode)
+    return path_seeds, assignments
+
+
+def crossed_deployment_frequency_reference_paths(
+    reference_roots: Iterable[int],
+    modes: Iterable[str],
+    *,
+    env_id: str,
+) -> tuple[list[int], dict[int, str]]:
+    """Expand frozen constraint-state roots across every disturbance mode."""
+
+    roots = validate_unique_seeds(
+        reference_roots,
+        role="mujoco_deployment_frequency_reference_roots",
+    )
+    condition_registry = _validated_disturbance_modes(
+        modes, role="deployment frequency frozen-state reference"
+    )
+    path_seeds: list[int] = []
+    assignments: dict[int, str] = {}
+    for root in roots:
+        for mode in condition_registry:
+            path_seed = derive_seed(
+                "mujoco_deployment_frequency_reference_crossed_v1",
+                str(env_id),
+                int(root),
+                str(mode),
+            )
+            if path_seed in assignments:
+                raise RuntimeError(
+                    "crossed MuJoCo frequency-reference path seeds collided"
                 )
             path_seeds.append(path_seed)
             assignments[path_seed] = str(mode)
@@ -2727,6 +2805,7 @@ def paired_relative_frequency_feasibility_diagnostics(
     lower_power_floor: float,
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
+    pathwise_robust: bool = False,
 ) -> dict[str, Any]:
     """Audit paired reward and frequency feasibility by mode and endpoint."""
 
@@ -2768,6 +2847,8 @@ def paired_relative_frequency_feasibility_diagnostics(
     margin_fraction = float(reward_noninferiority_margin_fraction)
     if not np.isfinite(margin_fraction) or margin_fraction < 0.0:
         raise ValueError("paired-relative reward margin must be non-negative")
+    if not isinstance(pathwise_robust, bool):
+        raise TypeError("paired-relative pathwise_robust must be boolean")
 
     metrics = (
         "reward_mean",
@@ -2777,6 +2858,14 @@ def paired_relative_frequency_feasibility_diagnostics(
         "UpperHFPowerAbs",
         "LatentUpperHFPowerAbs",
     )
+
+    def metric_row(row: dict[str, Any]) -> dict[str, float]:
+        values = {
+            metric: float(row[metric]) for metric in metrics
+        }
+        if not np.all(np.isfinite(list(values.values()))):
+            raise ValueError("paired-relative checkpoint metrics must be finite")
+        return values
 
     def mode_means(source: list[dict[str, Any]], mode: str) -> dict[str, float]:
         selected = [
@@ -2797,12 +2886,50 @@ def paired_relative_frequency_feasibility_diagnostics(
             raise ValueError("paired-relative checkpoint metrics must be finite")
         return {metric: float(np.mean(value)) for metric, value in values.items()}
 
+    candidate_index = {
+        (str(row["disturbance_mode"]), int(row["seed"])): row
+        for row in rows
+    }
+    baseline_index = {
+        (str(row["disturbance_mode"]), int(row["seed"])): row
+        for row in baseline_rows
+    }
+    comparison_groups: list[
+        tuple[str, int | None, dict[str, float], dict[str, float]]
+    ] = []
+    if pathwise_robust:
+        for mode in modes:
+            mode_keys = sorted(
+                key for key in candidate_keys if key[0] == mode
+            )
+            if not mode_keys:
+                raise ValueError(
+                    f"paired-relative checkpoint rows omit mode {mode}"
+                )
+            comparison_groups.extend(
+                (
+                    mode,
+                    int(seed),
+                    metric_row(baseline_index[mode, seed]),
+                    metric_row(candidate_index[mode, seed]),
+                )
+                for _, seed in mode_keys
+            )
+    else:
+        comparison_groups.extend(
+            (
+                mode,
+                None,
+                mode_means(baseline_rows, mode),
+                mode_means(rows, mode),
+            )
+            for mode in modes
+        )
+
     violations: list[float] = []
     reward_slacks: list[float] = []
     constraints: list[dict[str, Any]] = []
-    for mode in modes:
-        baseline = mode_means(baseline_rows, mode)
-        candidate = mode_means(rows, mode)
+    for mode, path_seed, baseline, candidate in comparison_groups:
         reward_scale = max(abs(baseline["reward_mean"]), 1.0)
         reward_floor = (
             baseline["reward_mean"] - margin_fraction * reward_scale
@@ -2816,7 +2943,7 @@ def paired_relative_frequency_feasibility_diagnostics(
             (candidate["reward_mean"] - reward_floor) / reward_scale
         )
         reward_slacks.append(reward_slack)
-        constraints.append({
+        reward_constraint = {
             "disturbance_mode": mode,
             "endpoint": "reward_mean",
             "direction": "minimum",
@@ -2825,7 +2952,10 @@ def paired_relative_frequency_feasibility_diagnostics(
             "target": reward_floor,
             "normalized_violation": reward_violation,
             "normalized_slack": reward_slack,
-        })
+        }
+        if path_seed is not None:
+            reward_constraint["seed"] = int(path_seed)
+        constraints.append(reward_constraint)
         for metric in (
             "LowerLFDriftAbs",
             "RawLowerLFDriftAbs",
@@ -2837,7 +2967,7 @@ def paired_relative_frequency_feasibility_diagnostics(
             )
             violation = max(candidate[metric] / target - 1.0, 0.0)
             violations.append(violation)
-            constraints.append({
+            constraint = {
                 "disturbance_mode": mode,
                 "endpoint": metric,
                 "direction": "maximum",
@@ -2846,7 +2976,10 @@ def paired_relative_frequency_feasibility_diagnostics(
                 "target": target,
                 "normalized_violation": violation,
                 "normalized_slack": 1.0 - candidate[metric] / target,
-            })
+            }
+            if path_seed is not None:
+                constraint["seed"] = int(path_seed)
+            constraints.append(constraint)
         for metric in ("UpperHFPowerAbs", "LatentUpperHFPowerAbs"):
             target = max(
                 (1.0 - float(upper_reduction_fraction)) * baseline[metric],
@@ -2854,7 +2987,7 @@ def paired_relative_frequency_feasibility_diagnostics(
             )
             violation = max(candidate[metric] / target - 1.0, 0.0)
             violations.append(violation)
-            constraints.append({
+            constraint = {
                 "disturbance_mode": mode,
                 "endpoint": metric,
                 "direction": "maximum",
@@ -2863,9 +2996,15 @@ def paired_relative_frequency_feasibility_diagnostics(
                 "target": target,
                 "normalized_violation": violation,
                 "normalized_slack": 1.0 - candidate[metric] / target,
-            })
+            }
+            if path_seed is not None:
+                constraint["seed"] = int(path_seed)
+            constraints.append(constraint)
     values = np.asarray(violations, dtype=np.float64)
-    if values.size != len(modes) * 6 or not np.all(np.isfinite(values)):
+    if (
+        values.size != len(comparison_groups) * 6
+        or not np.all(np.isfinite(values))
+    ):
         raise ValueError("paired-relative checkpoint violation registry is invalid")
     worst = max(
         constraints,
@@ -2882,6 +3021,10 @@ def paired_relative_frequency_feasibility_diagnostics(
             float(min(reward_slacks)),
         ),
         "constraint_count": len(constraints),
+        "comparison_group_count": len(comparison_groups),
+        "aggregation": (
+            "pathwise" if pathwise_robust else "disturbance_mode_mean"
+        ),
         "constraints": constraints,
         "worst_constraint": worst,
     }
@@ -2897,6 +3040,7 @@ def paired_relative_frequency_feasibility_rank(
     lower_power_floor: float,
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
+    pathwise_robust: bool = False,
 ) -> tuple[float, float, float]:
     """Rank against a paired checkpoint on the same selection paths."""
 
@@ -2911,6 +3055,7 @@ def paired_relative_frequency_feasibility_rank(
         reward_noninferiority_margin_fraction=(
             reward_noninferiority_margin_fraction
         ),
+        pathwise_robust=pathwise_robust,
     )
     return tuple(map(float, diagnostics["rank"]))
 
@@ -2925,6 +3070,7 @@ def paired_closed_loop_guard_snapshot(
     lower_power_floor: float,
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
+    pathwise_robust: bool = False,
 ) -> dict[str, Any]:
     """Reduce actual paired rollouts to the generic actor-guard contract."""
 
@@ -2939,6 +3085,7 @@ def paired_closed_loop_guard_snapshot(
         reward_noninferiority_margin_fraction=(
             reward_noninferiority_margin_fraction
         ),
+        pathwise_robust=pathwise_robust,
     )
     violation_tolerance = 1e-10
     reward_violations = sum(
@@ -2962,8 +3109,15 @@ def paired_closed_loop_guard_snapshot(
         )
     return {
         "contract": (
-            "paired_frozen_anchor_actual_closed_loop_reward_floor_and_five_"
-            "frequency_endpoints_with_restoration_merit_v2"
+            (
+                "paired_frozen_anchor_actual_closed_loop_pathwise_reward_"
+                "floor_and_five_frequency_endpoints_with_restoration_"
+                "merit_v3"
+            )
+            if pathwise_robust else (
+                "paired_frozen_anchor_actual_closed_loop_reward_floor_and_"
+                "five_frequency_endpoints_with_restoration_merit_v2"
+            )
         ),
         "rank": tuple(map(float, diagnostics["rank"])),
         "path_count": len(rows),
@@ -2988,6 +3142,9 @@ def train_mujoco_method(
     eval_seeds: Iterable[int],
     safety_selection_seeds: Iterable[int] | None = None,
     deployment_frequency_closed_loop_guard_seeds: (
+        Iterable[int] | None
+    ) = None,
+    deployment_frequency_anchor_state_replay_seeds: (
         Iterable[int] | None
     ) = None,
     steps: int,
@@ -3031,6 +3188,9 @@ def train_mujoco_method(
     lower_deployment_frequency_reference_reduction_fraction: float = 0.0,
     deployment_frequency_groupwise_robust: bool = False,
     deployment_frequency_anchor_state_replay: bool = False,
+    deployment_frequency_projection_objective: str = "worst_group",
+    deployment_frequency_restoration_freeze_reward_actor: bool = False,
+    deployment_frequency_pathwise_robust: bool = False,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
     deployment_frequency_closed_loop_trust_region: bool = False,
@@ -3089,6 +3249,11 @@ def train_mujoco_method(
         if deployment_frequency_closed_loop_guard_seeds is None
         else tuple(map(int, deployment_frequency_closed_loop_guard_seeds))
     )
+    anchor_state_replay_seed_values = (
+        None
+        if deployment_frequency_anchor_state_replay_seeds is None
+        else tuple(map(int, deployment_frequency_anchor_state_replay_seeds))
+    )
     roots = validate_unique_seeds(train_seeds, role="mujoco_train_seeds")
     selection, evaluation = validate_evaluation_seed_roles(
         selection_seeds, eval_seeds
@@ -3108,6 +3273,13 @@ def train_mujoco_method(
         )
         if deployment_frequency_closed_loop_trust_region else []
     )
+    anchor_state_replay_roots = (
+        validate_unique_seeds(
+            anchor_state_replay_seed_values or (),
+            role="mujoco_deployment_frequency_anchor_state_replay_seeds",
+        )
+        if deployment_frequency_anchor_state_replay else []
+    )
     if (
         deployment_frequency_closed_loop_trust_region
         and not closed_loop_guard_roots
@@ -3123,10 +3295,65 @@ def train_mujoco_method(
             "closed-loop guard seeds cannot be supplied while the trust "
             "region is disabled"
         )
+    if (
+        not deployment_frequency_anchor_state_replay
+        and anchor_state_replay_seed_values
+    ):
+        raise ValueError(
+            "anchor-state replay seeds cannot be supplied while replay is "
+            "disabled"
+        )
+    if (
+        str(deployment_frequency_projection_objective)
+        not in DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES
+    ):
+        raise ValueError(
+            "unknown MuJoCo deployment-frequency projection objective"
+        )
+    for feature_name, enabled in (
+        (
+            "deployment-frequency restoration reward-actor freeze",
+            deployment_frequency_restoration_freeze_reward_actor,
+        ),
+        (
+            "deployment-frequency pathwise robustness",
+            deployment_frequency_pathwise_robust,
+        ),
+    ):
+        if not isinstance(enabled, bool):
+            raise TypeError(f"MuJoCo {feature_name} flag must be boolean")
+    if (
+        deployment_frequency_restoration_freeze_reward_actor
+        and not deployment_frequency_closed_loop_restoration_filter
+    ):
+        raise ValueError(
+            "MuJoCo restoration reward-actor freeze requires the "
+            "restoration filter"
+        )
+    if (
+        deployment_frequency_pathwise_robust
+        and not deployment_frequency_groupwise_robust
+    ):
+        raise ValueError(
+            "MuJoCo pathwise frequency robustness requires groupwise "
+            "constraints"
+        )
+    effective_protocol_version = (
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+        if (
+            anchor_state_replay_roots
+            or str(deployment_frequency_projection_objective)
+            != "worst_group"
+            or deployment_frequency_restoration_freeze_reward_actor
+            or deployment_frequency_pathwise_robust
+        )
+        else MUJOCO_CONTROL_PROTOCOL_VERSION
+    )
     seed_roles = {
         "training": set(roots),
         "checkpoint_selection": set(selection),
         "safety_selection": set(safety_selection),
+        "anchor_state_replay": set(anchor_state_replay_roots),
         "closed_loop_guard": set(closed_loop_guard_roots),
         "heldout_test": set(evaluation),
     }
@@ -3633,6 +3860,18 @@ def train_mujoco_method(
     else:
         closed_loop_guard_rollout_seeds = []
         closed_loop_guard_seed_modes = {}
+    if anchor_state_replay_roots:
+        (
+            anchor_state_replay_rollout_seeds,
+            anchor_state_replay_seed_modes,
+        ) = crossed_deployment_frequency_reference_paths(
+            anchor_state_replay_roots,
+            training_modes,
+            env_id=env_id,
+        )
+    else:
+        anchor_state_replay_rollout_seeds = []
+        anchor_state_replay_seed_modes = {}
     evaluation_seed_modes = _assign_seed_modes(evaluation, training_modes)
 
     def register_seed_mode(seed: int, mode: str) -> None:
@@ -3659,6 +3898,8 @@ def train_mujoco_method(
         register_seed_mode(seed, mode)
     for seed, mode in closed_loop_guard_seed_modes.items():
         register_seed_mode(seed, mode)
+    for seed, mode in anchor_state_replay_seed_modes.items():
+        register_seed_mode(seed, mode)
     for seed, mode in evaluation_seed_modes.items():
         register_seed_mode(seed, mode)
     protected_seed_roles = (
@@ -3666,6 +3907,7 @@ def train_mujoco_method(
         | set(selection)
         | set(safety_selection)
         | set(closed_loop_guard_roots)
+        | set(anchor_state_replay_roots)
         | set(evaluation)
     )
     crossed_collisions = sorted(
@@ -3692,6 +3934,20 @@ def train_mujoco_method(
         raise RuntimeError(
             "crossed closed-loop guard paths overlap another seed role: "
             f"{closed_loop_guard_collisions}"
+        )
+    anchor_state_replay_collisions = sorted(
+        set(anchor_state_replay_rollout_seeds)
+        & (
+            protected_seed_roles
+            | derived_training_seeds
+            | set(selection_rollout_seeds)
+            | set(closed_loop_guard_rollout_seeds)
+        )
+    )
+    if anchor_state_replay_collisions:
+        raise RuntimeError(
+            "crossed anchor-state replay paths overlap another seed role: "
+            f"{anchor_state_replay_collisions}"
         )
 
     def assigned_mode(seed: int) -> str:
@@ -4232,6 +4488,12 @@ def train_mujoco_method(
             deployment_frequency_anchor_state_replay=bool(
                 deployment_frequency_anchor_state_replay
             ),
+            deployment_frequency_projection_objective=str(
+                deployment_frequency_projection_objective
+            ),
+            deployment_frequency_restoration_freeze_reward_actor=bool(
+                deployment_frequency_restoration_freeze_reward_actor
+            ),
             deployment_frequency_ppo_trust_region=bool(
                 deployment_frequency_ppo_trust_region
             ),
@@ -4271,6 +4533,7 @@ def train_mujoco_method(
                     effective_router_observe_strength
                 ),
                 expected_responsibility_mode=str(responsibility_mode),
+                expected_protocol_version=effective_protocol_version,
                 reset_upper_deployment_frequency_lambda=(
                     selected_upper_deployment_frequency_lambda_init
                 ),
@@ -4365,6 +4628,9 @@ def train_mujoco_method(
                     upper_power_floor=(
                         float(upper_deployment_frequency_rms_budget) ** 2
                     ),
+                    pathwise_robust=bool(
+                        deployment_frequency_pathwise_robust
+                    ),
                 )
                 snapshot["parameter_sha256"] = parameter_sha256
                 return snapshot
@@ -4401,6 +4667,9 @@ def train_mujoco_method(
                     upper_power_floor=(
                         float(upper_deployment_frequency_rms_budget) ** 2
                     ),
+                    pathwise_robust=bool(
+                        deployment_frequency_pathwise_robust
+                    ),
                 )
             )
             checkpoint_diagnostics_fn = lambda rows: (
@@ -4420,6 +4689,9 @@ def train_mujoco_method(
                     upper_power_floor=(
                         float(upper_deployment_frequency_rms_budget) ** 2
                     ),
+                    pathwise_robust=bool(
+                        deployment_frequency_pathwise_robust
+                    ),
                 )
             )
             checkpoint_rank_names = (
@@ -4428,8 +4700,15 @@ def train_mujoco_method(
                 "worst_reward_floor_slack",
             )
             checkpoint_rank_contract = (
-                "state_aligned_paired_selection_path_reward_floor_and_five_"
-                "frequency_endpoint_relative_feasibility_v1"
+                (
+                    "state_aligned_paired_selection_individual_path_reward_"
+                    "floor_and_five_frequency_endpoint_relative_"
+                    "feasibility_v2"
+                )
+                if deployment_frequency_pathwise_robust else (
+                    "state_aligned_paired_selection_path_reward_floor_and_"
+                    "five_frequency_endpoint_relative_feasibility_v1"
+                )
             )
             checkpoint_score_contract = (
                 "paired_checkpoint_selection_path_relative_feasibility_v1"
@@ -4469,6 +4748,9 @@ def train_mujoco_method(
                     )[0]
                 )
                 if deployment_frequency_anchor_state_replay else None
+            ),
+            deployment_frequency_reference_seeds=(
+                anchor_state_replay_rollout_seeds or None
             ),
             deployment_frequency_closed_loop_guard_fn=closed_loop_guard_fn,
         )
@@ -4538,7 +4820,7 @@ def train_mujoco_method(
             row.update({
                 "training_replicate_seed": int(optimizer_seed),
                 "evaluation_role": "heldout_test",
-                "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+                "protocol_version": effective_protocol_version,
                 "parameter_count": actual_parameters,
                 "training_disturbance_mode": "multi_condition",
                 "training_disturbance_modes": "|".join(training_modes),
@@ -4550,7 +4832,7 @@ def train_mujoco_method(
     payload["summary"] = summarize(evaluation_rows)
     payload["eval_seeds"] = list(evaluation)
     payload.update({
-        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "protocol_version": effective_protocol_version,
         "method": name,
         "optimizer_seed": int(optimizer_seed),
         "environment": str(env_id),
@@ -4589,6 +4871,16 @@ def train_mujoco_method(
         "deployment_frequency_closed_loop_guard_seed_roots": list(
             closed_loop_guard_roots
         ),
+        "deployment_frequency_anchor_state_replay_seed_roots": list(
+            anchor_state_replay_roots
+        ),
+        "deployment_frequency_anchor_state_replay_crossed_path_count": len(
+            anchor_state_replay_rollout_seeds
+        ),
+        "deployment_frequency_anchor_state_replay_condition_assignment": {
+            str(seed): mode
+            for seed, mode in anchor_state_replay_seed_modes.items()
+        },
         "deployment_frequency_closed_loop_guard_path_count": len(
             closed_loop_guard_rollout_seeds
         ),
@@ -4744,6 +5036,19 @@ def train_mujoco_method(
             and deployment_frequency_requested
             and name == "freq_hrl"
         ),
+        "deployment_frequency_projection_objective": str(
+            deployment_frequency_projection_objective
+        ),
+        "deployment_frequency_restoration_freeze_reward_actor": bool(
+            deployment_frequency_restoration_freeze_reward_actor
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_pathwise_robust": bool(
+            deployment_frequency_pathwise_robust
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
         "deployment_frequency_ppo_trust_region": bool(
             deployment_frequency_ppo_trust_region
             and deployment_frequency_requested
@@ -4787,6 +5092,13 @@ def train_mujoco_method(
                 closed_loop_restoration_filter=(
                     deployment_frequency_closed_loop_restoration_filter
                 ),
+                projection_objective=(
+                    deployment_frequency_projection_objective
+                ),
+                restoration_freeze_reward_actor=(
+                    deployment_frequency_restoration_freeze_reward_actor
+                ),
+                pathwise_robust=deployment_frequency_pathwise_robust,
             )
         ),
         "upper_constraint_update_mode": (
@@ -5008,7 +5320,9 @@ def write_cell(
     checkpoint_path = output / "checkpoint.pt"
     torch.save({
         "model_state_dict": model.state_dict(),
-        "protocol_version": MUJOCO_CONTROL_PROTOCOL_VERSION,
+        "protocol_version": payload.get(
+            "protocol_version", MUJOCO_CONTROL_PROTOCOL_VERSION
+        ),
         "method": payload["method"],
         "environment": payload["environment"],
         "disturbance_mode": payload["disturbance_mode"],
@@ -5070,6 +5384,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--deployment-frequency-closed-loop-guard-seeds",
+        type=int,
+        nargs="+",
+    )
+    parser.add_argument(
+        "--deployment-frequency-anchor-state-replay-seeds",
         type=int,
         nargs="+",
     )
@@ -5235,6 +5554,19 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
     )
     parser.add_argument(
+        "--deployment-frequency-projection-objective",
+        choices=DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
+        default="worst_group",
+    )
+    parser.add_argument(
+        "--deployment-frequency-restoration-freeze-reward-actor",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-pathwise-robust",
+        action="store_true",
+    )
+    parser.add_argument(
         "--deployment-frequency-ppo-trust-region",
         action="store_true",
     )
@@ -5327,6 +5659,9 @@ def main() -> None:
         safety_selection_seeds=args.safety_selection_seeds,
         deployment_frequency_closed_loop_guard_seeds=(
             args.deployment_frequency_closed_loop_guard_seeds
+        ),
+        deployment_frequency_anchor_state_replay_seeds=(
+            args.deployment_frequency_anchor_state_replay_seeds
         ),
         eval_seeds=args.eval_seeds,
         steps=args.steps,
@@ -5428,6 +5763,15 @@ def main() -> None:
         ),
         deployment_frequency_anchor_state_replay=(
             args.deployment_frequency_anchor_state_replay
+        ),
+        deployment_frequency_projection_objective=(
+            args.deployment_frequency_projection_objective
+        ),
+        deployment_frequency_restoration_freeze_reward_actor=(
+            args.deployment_frequency_restoration_freeze_reward_actor
+        ),
+        deployment_frequency_pathwise_robust=(
+            args.deployment_frequency_pathwise_robust
         ),
         deployment_frequency_ppo_trust_region=(
             args.deployment_frequency_ppo_trust_region

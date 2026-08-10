@@ -734,6 +734,80 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             2.0,
         )
 
+    def test_smdp_trainer_uses_explicit_independent_reference_paths(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+            lower_deployment_frequency_rms_budget=1.0,
+            lower_deployment_frequency_lambda_init=1.0,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_anchor_state_replay=True,
+        ))
+        calls = []
+
+        def rollout_fn(_model, seed, train):
+            calls.append((int(seed), bool(train)))
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+            )
+            return builder.build(), {"reward_mean": float(seed)}
+
+        payload, _, _ = train_frequency_separated_ppo(
+            model=model,
+            train_seeds=[1],
+            selection_seeds=[10],
+            eval_seeds=[30],
+            iterations=1,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+            training_seed_fn=lambda root, iteration: (
+                int(root) + 100 + int(iteration)
+            ),
+            deployment_frequency_reference_rollout_fn=(
+                lambda replay_model, seed: rollout_fn(
+                    replay_model, seed, False
+                )[0]
+            ),
+            deployment_frequency_reference_seeds=[701, 703],
+        )
+
+        self.assertEqual(calls.count((701, False)), 1)
+        self.assertEqual(calls.count((703, False)), 1)
+        self.assertNotIn((101, False), calls)
+        self.assertEqual(
+            payload["deployment_frequency_anchor_state_replay_seeds"],
+            [701, 703],
+        )
+        self.assertEqual(
+            payload[
+                "deployment_frequency_anchor_state_replay_seed_source"
+            ],
+            "explicit",
+        )
+        self.assertEqual(
+            payload[
+                "deployment_frequency_anchor_state_replay_path_count"
+            ],
+            2,
+        )
+
     def test_smdp_trainer_requires_and_audits_closed_loop_guard(self):
         def make_model():
             return self._closed_loop_model()

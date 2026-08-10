@@ -24,6 +24,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     capacity_matched_flat_hidden_dim,
     crossed_checkpoint_selection_paths,
     crossed_deployment_frequency_guard_paths,
+    crossed_deployment_frequency_reference_paths,
     deployment_frequency_constraint_contract,
     environment_dimensions,
     latent_behavior_feasibility_rank,
@@ -518,6 +519,38 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertFalse(set(guard_paths) & set(selection_paths))
         self.assertEqual(set(assignments.values()), {"standard", "mixed"})
 
+    def test_frequency_reference_paths_have_an_independent_namespace(self):
+        selection_paths, _ = crossed_checkpoint_selection_paths(
+            [101, 103],
+            ["standard", "mixed"],
+            env_id="HalfCheetah-v5",
+        )
+        guard_paths, _ = crossed_deployment_frequency_guard_paths(
+            [101, 103],
+            ["standard", "mixed"],
+            env_id="HalfCheetah-v5",
+        )
+        reference_paths, assignments = (
+            crossed_deployment_frequency_reference_paths(
+                [101, 103],
+                ["standard", "mixed"],
+                env_id="HalfCheetah-v5",
+            )
+        )
+        repeated, repeated_assignments = (
+            crossed_deployment_frequency_reference_paths(
+                [101, 103],
+                ["standard", "mixed"],
+                env_id="HalfCheetah-v5",
+            )
+        )
+        self.assertEqual(reference_paths, repeated)
+        self.assertEqual(assignments, repeated_assignments)
+        self.assertEqual(len(reference_paths), 4)
+        self.assertFalse(set(reference_paths) & set(selection_paths))
+        self.assertFalse(set(reference_paths) & set(guard_paths))
+        self.assertEqual(set(assignments.values()), {"standard", "mixed"})
+
     def test_behavior_robust_checkpoint_score_penalizes_worst_endpoint(self):
         rows = [
             {
@@ -686,6 +719,54 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertTrue(snapshot["contract"].endswith(
             "frequency_endpoints_with_restoration_merit_v2"
         ))
+
+    def test_pathwise_relative_rank_catches_failure_hidden_by_mode_mean(self):
+        baseline = [
+            {
+                "disturbance_mode": "standard",
+                "seed": seed,
+                "reward_mean": 100.0,
+                "LowerLFDriftAbs": 1.0,
+                "RawLowerLFDriftAbs": 1.0,
+                "LatentLowerLFDriftAbs": 1.0,
+                "UpperHFPowerAbs": 1.0,
+                "LatentUpperHFPowerAbs": 1.0,
+            }
+            for seed in (11, 13)
+        ]
+        candidate = []
+        for seed, frequency in ((11, 0.1), (13, 1.7)):
+            candidate.append({
+                "disturbance_mode": "standard",
+                "seed": seed,
+                "reward_mean": 100.0,
+                "LowerLFDriftAbs": frequency,
+                "RawLowerLFDriftAbs": frequency,
+                "LatentLowerLFDriftAbs": frequency,
+                "UpperHFPowerAbs": frequency,
+                "LatentUpperHFPowerAbs": frequency,
+            })
+        common = dict(
+            baseline_rows=baseline,
+            expected_modes=("standard",),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        mode_mean = paired_relative_frequency_feasibility_diagnostics(
+            candidate, **common
+        )
+        pathwise = paired_relative_frequency_feasibility_diagnostics(
+            candidate, pathwise_robust=True, **common
+        )
+        self.assertEqual(mode_mean["rank"][0], 0.0)
+        self.assertLess(pathwise["rank"][0], 0.0)
+        self.assertEqual(mode_mean["constraint_count"], 6)
+        self.assertEqual(pathwise["constraint_count"], 12)
+        self.assertEqual(pathwise["comparison_group_count"], 2)
+        self.assertEqual(pathwise["aggregation"], "pathwise")
+        self.assertEqual(pathwise["worst_constraint"]["seed"], 13)
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)

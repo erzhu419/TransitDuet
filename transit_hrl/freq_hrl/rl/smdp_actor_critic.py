@@ -32,6 +32,10 @@ CONSTRAINT_UPDATE_MODES = (
     "reward_guarded_projection",
     "reward_guarded_adam_projection",
 )
+DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
+    "worst_group",
+    "violation_l2",
+)
 
 
 def _project_constraint_gradients(
@@ -440,6 +444,8 @@ class SMDPPPOConfig:
     lower_deployment_frequency_target_tolerance: float = 0.0
     deployment_frequency_groupwise_robust: bool = False
     deployment_frequency_anchor_state_replay: bool = False
+    deployment_frequency_projection_objective: str = "worst_group"
+    deployment_frequency_restoration_freeze_reward_actor: bool = False
     deployment_frequency_ppo_trust_region: bool = False
     deployment_frequency_ppo_trust_region_backtracks: int = 8
     deployment_frequency_closed_loop_trust_region: bool = False
@@ -1228,8 +1234,16 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "deployment_frequency_groupwise_robust must be boolean"
             )
+        if (
+            str(config.deployment_frequency_projection_objective)
+            not in DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES
+        ):
+            raise ValueError(
+                "unknown deployment_frequency_projection_objective"
+            )
         for name in (
             "deployment_frequency_anchor_state_replay",
+            "deployment_frequency_restoration_freeze_reward_actor",
             "deployment_frequency_ppo_trust_region",
             "deployment_frequency_closed_loop_trust_region",
             "deployment_frequency_closed_loop_restoration_filter",
@@ -1252,6 +1266,14 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "closed-loop restoration filtering requires the closed-loop "
                 "trust region"
+            )
+        if (
+            config.deployment_frequency_restoration_freeze_reward_actor
+            and not config.deployment_frequency_closed_loop_restoration_filter
+        ):
+            raise ValueError(
+                "freezing the reward actor during restoration requires the "
+                "closed-loop restoration filter"
             )
         trust_region_backtracks = (
             config.deployment_frequency_ppo_trust_region_backtracks
@@ -2613,8 +2635,11 @@ class FrequencySeparatedActorCriticPPO:
         value_optimizer: torch.optim.Optimizer,
         cost_value_net: ValueNet | None = None,
         cost_value_optimizer: torch.optim.Optimizer | None = None,
+        actor_updates_enabled: bool = True,
     ) -> dict[str, float]:
         cfg = self.config
+        if not isinstance(actor_updates_enabled, bool):
+            raise TypeError("actor_updates_enabled must be boolean")
         if level == "upper":
             state_dim = cfg.upper_state_dim
             action_dim = cfg.upper_action_dim
@@ -2898,7 +2923,9 @@ class FrequencySeparatedActorCriticPPO:
                     and cost_actor_active
                     and constraint_lambda > 0.0
                 )
-                if guarded_update:
+                if not actor_updates_enabled:
+                    guarded_diagnostics["actor_update_enabled"] = 0.0
+                elif guarded_update:
                     def current_surrogates() -> tuple[
                         torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
                     ]:
@@ -3002,6 +3029,8 @@ class FrequencySeparatedActorCriticPPO:
                         actor.parameters(), max_norm=float(cfg.max_grad_norm)
                     )
                     actor_optimizer.step()
+                if actor_updates_enabled:
+                    guarded_diagnostics["actor_update_enabled"] = 1.0
 
                 value_optimizer.zero_grad()
                 (float(cfg.value_coef) * value_loss).backward()
@@ -3083,6 +3112,9 @@ class FrequencySeparatedActorCriticPPO:
                     "constraint_guard_cost_loss_delta": float(
                         guarded_diagnostics["constraint_loss_delta"]
                     ),
+                    "actor_update_enabled": float(
+                        guarded_diagnostics["actor_update_enabled"]
+                    ),
                 }
                 if level == "promotion":
                     row.update({
@@ -3110,7 +3142,9 @@ class FrequencySeparatedActorCriticPPO:
         }
         out[f"{level}_transitions"] = float(batch.size)
         out[f"{level}_mean_duration"] = float(np.mean(batch.duration))
-        out[f"{level}_actor_optimizer_steps"] = float(len(rows))
+        out[f"{level}_actor_optimizer_steps"] = float(
+            len(rows) if actor_updates_enabled else 0
+        )
         out[f"{level}_value_optimizer_steps"] = float(len(rows))
         out[f"{level}_cost_value_optimizer_steps"] = float(
             len(rows)
@@ -3167,6 +3201,9 @@ class FrequencySeparatedActorCriticPPO:
         target_tolerance = float(getattr(
             cfg, f"{prefix}_target_tolerance"
         ))
+        projection_objective = str(
+            cfg.deployment_frequency_projection_objective
+        )
         groupwise_robust = bool(
             cfg.deployment_frequency_groupwise_robust
         )
@@ -3182,6 +3219,13 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_normalized_signed_excess_after": 0.0,
             f"{prefix}_normalized_violation_before": 0.0,
             f"{prefix}_normalized_violation_after": 0.0,
+            f"{prefix}_projection_objective_violation_l2": float(
+                projection_objective == "violation_l2"
+            ),
+            f"{prefix}_projection_objective_before": 0.0,
+            f"{prefix}_projection_objective_after": 0.0,
+            f"{prefix}_active_violation_groups_before": 0.0,
+            f"{prefix}_active_violation_groups_after": 0.0,
             f"{prefix}_reference_power": 0.0,
             f"{prefix}_target_power": 0.0,
             f"{prefix}_reference_reduction_fraction": reference_reduction,
@@ -3389,14 +3433,27 @@ class FrequencySeparatedActorCriticPPO:
         def reward_guard_loss_fn() -> torch.Tensor:
             return torch.mean(reward_guard_values_fn())
 
-        def constraint_loss_fn() -> torch.Tensor:
-            return (
-                lambda_before
-                * current_stats()["normalized_signed_excess"]
+        def projection_objective_fn() -> torch.Tensor:
+            normalized = current_stats()["normalized_excesses"]
+            if projection_objective == "worst_group":
+                return torch.max(normalized)
+            if projection_objective == "violation_l2":
+                violation = F.relu(normalized)
+                return torch.linalg.vector_norm(violation) / np.sqrt(
+                    float(violation.numel())
+                )
+            raise RuntimeError(
+                "deployment-frequency projection objective was not validated"
             )
+
+        def constraint_loss_fn() -> torch.Tensor:
+            return lambda_before * projection_objective_fn()
 
         with torch.no_grad():
             before = current_stats()
+            projection_objective_before = float(
+                projection_objective_fn().detach().cpu().item()
+            )
             reward_guard_baseline_values = (
                 reward_guard_values_fn().detach()
             )
@@ -3466,6 +3523,9 @@ class FrequencySeparatedActorCriticPPO:
             projection_accepts += 1
         with torch.no_grad():
             after = current_stats()
+            projection_objective_after = float(
+                projection_objective_fn().detach().cpu().item()
+            )
             reward_after_values = reward_guard_values_fn().detach()
             reward_after = float(
                 reward_guard_loss_fn().detach().cpu().item()
@@ -3533,6 +3593,21 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_normalized_violation_after": float(
                 after["normalized_violation"].detach().cpu().item()
             ),
+            f"{prefix}_projection_objective_violation_l2": float(
+                projection_objective == "violation_l2"
+            ),
+            f"{prefix}_projection_objective_before": (
+                projection_objective_before
+            ),
+            f"{prefix}_projection_objective_after": (
+                projection_objective_after
+            ),
+            f"{prefix}_active_violation_groups_before": float(torch.sum(
+                before["normalized_excesses"] > target_tolerance
+            ).cpu().item()),
+            f"{prefix}_active_violation_groups_after": float(torch.sum(
+                after["normalized_excesses"] > target_tolerance
+            ).cpu().item()),
             f"{prefix}_reference_power": float(
                 torch.mean(reference_powers).detach().cpu().item()
             ),
@@ -3619,7 +3694,17 @@ class FrequencySeparatedActorCriticPPO:
         deployment_frequency_reference_batch: (
             HierarchicalTrajectoryBatch | None
         ) = None,
+        deployment_frequency_restoration_mode: bool = False,
     ) -> dict[str, float]:
+        if not isinstance(deployment_frequency_restoration_mode, bool):
+            raise TypeError(
+                "deployment_frequency_restoration_mode must be boolean"
+            )
+        freeze_reward_actor = bool(
+            deployment_frequency_restoration_mode
+            and self.config.
+            deployment_frequency_restoration_freeze_reward_actor
+        )
         upper_reference = (
             None
             if deployment_frequency_reference_batch is None
@@ -3630,12 +3715,16 @@ class FrequencySeparatedActorCriticPPO:
             if deployment_frequency_reference_batch is None
             else deployment_frequency_reference_batch.lower
         )
-        upper_guard = self._capture_deployment_frequency_ppo_guard(
-            level="upper",
-            batch=batch.upper,
-            actor=self.upper_actor,
-            actor_optimizer=self.upper_actor_optimizer,
-            reference_batch=upper_reference,
+        upper_guard = (
+            None
+            if freeze_reward_actor
+            else self._capture_deployment_frequency_ppo_guard(
+                level="upper",
+                batch=batch.upper,
+                actor=self.upper_actor,
+                actor_optimizer=self.upper_actor_optimizer,
+                reference_batch=upper_reference,
+            )
         )
         upper_metrics = self._update_level(
             level="upper",
@@ -3646,6 +3735,7 @@ class FrequencySeparatedActorCriticPPO:
             actor_optimizer=self.upper_actor_optimizer,
             value_optimizer=self.upper_value_optimizer,
             cost_value_optimizer=self.upper_cost_value_optimizer,
+            actor_updates_enabled=not freeze_reward_actor,
         )
         upper_metrics.update(self._apply_deployment_frequency_ppo_guard(
             level="upper",
@@ -3661,12 +3751,16 @@ class FrequencySeparatedActorCriticPPO:
             actor=self.upper_actor,
             reference_batch=upper_reference,
         ))
-        lower_guard = self._capture_deployment_frequency_ppo_guard(
-            level="lower",
-            batch=batch.lower,
-            actor=self.lower_actor,
-            actor_optimizer=self.lower_actor_optimizer,
-            reference_batch=lower_reference,
+        lower_guard = (
+            None
+            if freeze_reward_actor
+            else self._capture_deployment_frequency_ppo_guard(
+                level="lower",
+                batch=batch.lower,
+                actor=self.lower_actor,
+                actor_optimizer=self.lower_actor_optimizer,
+                reference_batch=lower_reference,
+            )
         )
         lower_metrics = self._update_level(
             level="lower",
@@ -3677,6 +3771,7 @@ class FrequencySeparatedActorCriticPPO:
             actor_optimizer=self.lower_actor_optimizer,
             value_optimizer=self.lower_value_optimizer,
             cost_value_optimizer=self.lower_cost_value_optimizer,
+            actor_updates_enabled=not freeze_reward_actor,
         )
         lower_metrics.update(self._apply_deployment_frequency_ppo_guard(
             level="lower",
@@ -3785,4 +3880,10 @@ class FrequencySeparatedActorCriticPPO:
             "lower_constraint_lambda": float(self.constraint_lambda),
             "constraint_mean": cost_mean,
             "constraint_lambda": float(self.constraint_lambda),
+            "deployment_frequency_restoration_mode": float(
+                deployment_frequency_restoration_mode
+            ),
+            "deployment_frequency_reward_actor_frozen": float(
+                freeze_reward_actor
+            ),
         }
