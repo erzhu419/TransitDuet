@@ -769,3 +769,18 @@ limit at episode zero. The context-only control records the same passive
 action-target audit while leaving the objective disabled. These values verify
 scale, direction, and instrumentation only, not efficacy or constraint
 satisfaction after training.
+
+The frozen V10 source is clean detached commit
+`3ae72c3debebdcc15695a17398a60237cfb3d475` at
+`FreqDuet-v6-engineering-v10-snapshot`. The preregistered run name is
+`protocol_v6_actiondual_ep40_s4_e4_v10`. Scheduler tasks `t79679` through
+`t79718` cover exactly the 40 config-by-training-seed jobs, one job per shard,
+round-robin hard-pinned to `node001` through `node006`. All 40 were running
+after dispatch on 2026-08-10. Task `t79711` had one transient SSH handshake
+failure on its first node003 launch attempt and then launched successfully on
+the same node; it was not duplicated. Runtime inspection of a historical
+control, a new action-dual variant, and the retried shard showed live CPU and
+memory use. These launch observations establish execution health only. No V10
+effectiveness, constraint-satisfaction, or promotion conclusion is valid until
+all shard summaries synchronize, strict aggregation succeeds, and the locked
+action-dual screen gate is evaluated.
