@@ -1783,6 +1783,122 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             ))
             self.assertFalse(guard_paths & {619, 631, 641, 643})
 
+    def test_v1416_crossed_pathwise_restoration_runs_end_to_end(self):
+        with tempfile.TemporaryDirectory() as directory:
+            baseline_dir = Path(directory) / "v1416_baseline"
+            common = dict(
+                method="freq_hrl",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                steps=8,
+                episode_horizon=8,
+                iterations=1,
+                optimizer_seed=659,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_observe_strength=True,
+                checkpoint_smoothing_window=1,
+                checkpoint_min_delta=0.0,
+                checkpoint_evaluation_interval=1,
+                training_disturbance_modes=["standard"],
+                evaluation_disturbance_modes=["standard"],
+                control_protocol_version=(
+                    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+                ),
+            )
+            baseline_payload, baseline_rows, baseline_model = (
+                train_mujoco_method(
+                    train_seeds=[607],
+                    selection_seeds=[613],
+                    eval_seeds=[617],
+                    **common,
+                )
+            )
+            write_cell(
+                baseline_dir,
+                baseline_payload,
+                baseline_rows,
+                baseline_model,
+            )
+            candidate_payload, _, _ = train_mujoco_method(
+                train_seeds=[619],
+                selection_seeds=[631],
+                deployment_frequency_anchor_state_replay_seeds=[653],
+                deployment_frequency_closed_loop_guard_seeds=[641],
+                eval_seeds=[643],
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                upper_deployment_frequency_lambda_init=1.0,
+                lower_deployment_frequency_lambda_init=1.0,
+                upper_deployment_frequency_rms_budget=0.001,
+                lower_deployment_frequency_rms_budget=0.001,
+                upper_deployment_frequency_reference_reduction_fraction=0.05,
+                lower_deployment_frequency_reference_reduction_fraction=0.05,
+                deployment_frequency_groupwise_robust=True,
+                deployment_frequency_anchor_state_replay=True,
+                deployment_frequency_projection_objective="violation_l2",
+                deployment_frequency_pathwise_robust=True,
+                deployment_frequency_restoration_freeze_reward_actor=True,
+                deployment_frequency_closed_loop_trust_region=True,
+                deployment_frequency_closed_loop_trust_region_backtracks=2,
+                deployment_frequency_closed_loop_restoration_filter=True,
+                **common,
+            )
+            self.assertEqual(
+                candidate_payload["protocol_version"],
+                MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+            )
+            self.assertEqual(
+                candidate_payload[
+                    "deployment_frequency_anchor_state_replay_seed_roots"
+                ],
+                [653],
+            )
+            self.assertEqual(
+                candidate_payload[
+                    "deployment_frequency_anchor_state_replay_seed_source"
+                ],
+                "explicit",
+            )
+            self.assertEqual(
+                candidate_payload[
+                    "deployment_frequency_anchor_state_replay_path_count"
+                ],
+                1,
+            )
+            self.assertTrue(
+                candidate_payload["deployment_frequency_pathwise_robust"]
+            )
+            self.assertTrue(candidate_payload[
+                "deployment_frequency_restoration_freeze_reward_actor"
+            ])
+            self.assertEqual(
+                candidate_payload[
+                    "deployment_frequency_closed_loop_guard_constraint_count"
+                ],
+                6,
+            )
+            self.assertEqual(
+                candidate_payload["history"][1][
+                    "deployment_frequency_reward_actor_frozen"
+                ],
+                1.0,
+            )
+            self.assertEqual(
+                candidate_payload["history"][1][
+                    "upper_actor_optimizer_steps"
+                ],
+                0.0,
+            )
+            self.assertEqual(
+                candidate_payload["history"][1][
+                    "lower_actor_optimizer_steps"
+                ],
+                0.0,
+            )
+
     def test_conservative_router_continuation_uses_same_hidden_state_contract(self):
         with tempfile.TemporaryDirectory() as directory:
             baseline_dir = Path(directory) / "conservative_baseline"

@@ -79,6 +79,15 @@ def _runtime_deployment_constraint_contract(arm: str) -> str:
         closed_loop_restoration_filter=bool(
             arm_spec["deployment_frequency_closed_loop_restoration_filter"]
         ),
+        projection_objective=str(arm_spec.get(
+            "deployment_frequency_projection_objective", "worst_group"
+        )),
+        restoration_freeze_reward_actor=bool(arm_spec.get(
+            "deployment_frequency_restoration_freeze_reward_actor", False
+        )),
+        pathwise_robust=bool(arm_spec.get(
+            "deployment_frequency_pathwise_robust", False
+        )),
     )
 
 
@@ -108,6 +117,9 @@ def _closed_loop_guard_contract_valid(
     restoration_expected: bool = False,
     restoration_min_reduction: float = spec.RESTORATION_MIN_REDUCTION,
     restoration_funnel_multiplier: float = 3.0,
+    expected_contract: str | None = None,
+    expected_paths: int | None = None,
+    expected_constraints: int | None = None,
 ) -> bool:
     prefix = "deployment_frequency_closed_loop_guard_"
     if not expected:
@@ -128,10 +140,19 @@ def _closed_loop_guard_contract_valid(
         )
     if len(history) != spec.CONTINUATION_ITERATIONS + 1:
         return False
-    contract = spec.EXPECTED_CLOSED_LOOP_GUARD_CONTRACT
+    contract = (
+        spec.EXPECTED_CLOSED_LOOP_GUARD_CONTRACT
+        if expected_contract is None else str(expected_contract)
+    )
     initial = history[0]
-    expected_paths = spec.EXPECTED_CLOSED_LOOP_GUARD_PATH_COUNT
-    expected_constraints = spec.EXPECTED_CLOSED_LOOP_GUARD_CONSTRAINT_COUNT
+    expected_paths = (
+        spec.EXPECTED_CLOSED_LOOP_GUARD_PATH_COUNT
+        if expected_paths is None else int(expected_paths)
+    )
+    expected_constraints = (
+        spec.EXPECTED_CLOSED_LOOP_GUARD_CONSTRAINT_COUNT
+        if expected_constraints is None else int(expected_constraints)
+    )
     initial_merit = float(initial.get(
         f"{prefix}restoration_merit_after", float("nan")
     ))
@@ -740,12 +761,39 @@ def build_training_command(
         "--source-manifest-sha256", frozen_manifest,
         "--output-dir", str(output_dir),
     ]
+    if bool(getattr(
+        spec, "REQUIRE_EXPLICIT_PROTOCOL_SELECTION", False
+    )):
+        command.extend([
+            "--control-protocol-version",
+            str(spec.FROZEN_CORE_PROTOCOL_VERSION),
+            "--deployment-frequency-projection-objective",
+            str(arm_spec.get(
+                "deployment_frequency_projection_objective", "worst_group"
+            )),
+        ])
     if bool(arm_spec["lower_action_router_observe_strength"]):
         command.append("--lower-action-router-observe-strength")
     if bool(arm_spec["deployment_frequency_groupwise_robust"]):
         command.append("--deployment-frequency-groupwise-robust")
     if bool(arm_spec["deployment_frequency_anchor_state_replay"]):
         command.append("--deployment-frequency-anchor-state-replay")
+        replay_seed_roots = tuple(arm_spec.get(
+            "deployment_frequency_anchor_state_replay_seed_roots", ()
+        ))
+        if replay_seed_roots:
+            command.extend([
+                "--deployment-frequency-anchor-state-replay-seeds",
+                *(str(seed) for seed in replay_seed_roots),
+            ])
+    if bool(arm_spec.get(
+        "deployment_frequency_restoration_freeze_reward_actor", False
+    )):
+        command.append(
+            "--deployment-frequency-restoration-freeze-reward-actor"
+        )
+    if bool(arm_spec.get("deployment_frequency_pathwise_robust", False)):
+        command.append("--deployment-frequency-pathwise-robust")
     if bool(arm_spec["deployment_frequency_ppo_trust_region"]):
         command.extend([
             "--deployment-frequency-ppo-trust-region",
@@ -835,9 +883,10 @@ def build_scheduler_spec(
         optimizer_seed=optimizer_seed,
     )
     return {
-        "project": "Freq-HRL-MuJoCo-v14.15-Restoration-Filter-Screen",
+        "project": str(spec.DEVELOPMENT_PROTOCOL_VERSION),
         "description": (
-            f"Freq-HRL MuJoCo v14.15 {phase} {environment} {arm} "
+            f"Freq-HRL MuJoCo {spec.DEVELOPMENT_PROTOCOL_VERSION} "
+            f"{phase} {environment} {arm} "
             f"replicate {optimizer_seed}"
         ),
         "cmd": build_training_command(
@@ -894,7 +943,11 @@ def _write_preregistration(args: argparse.Namespace) -> None:
     path = output / "preregistration.json"
     frozen_revision, frozen_manifest = frozen_execution_identity(args)
     payload: dict[str, Any] = {
-        "status": "frozen_before_v14_15_closed_loop_restoration_filter_outcome_access",
+        "status": getattr(
+            spec,
+            "PREREGISTRATION_STATUS",
+            "frozen_before_v14_15_closed_loop_restoration_filter_outcome_access",
+        ),
         "evidence_role": "development_screen_not_confirmatory",
         "development_protocol_version": spec.DEVELOPMENT_PROTOCOL_VERSION,
         "development_disclosure": spec.DEVELOPMENT_DISCLOSURE,
@@ -1002,6 +1055,24 @@ def _write_preregistration(args: argparse.Namespace) -> None:
             "expected_closed_loop_guard_contract": (
                 spec.EXPECTED_CLOSED_LOOP_GUARD_CONTRACT
             ),
+            "expected_anchor_replay_path_count_by_arm": {
+                arm: int(spec.expected_anchor_replay_path_count(arm))
+                if hasattr(spec, "expected_anchor_replay_path_count")
+                else int(spec.EXPECTED_ANCHOR_REPLAY_PATH_COUNT)
+                for arm in spec.ARMS
+            },
+            "expected_closed_loop_guard_constraint_count_by_arm": {
+                arm: int(spec.expected_closed_loop_guard_constraint_count(arm))
+                if hasattr(spec, "expected_closed_loop_guard_constraint_count")
+                else int(spec.EXPECTED_CLOSED_LOOP_GUARD_CONSTRAINT_COUNT)
+                for arm in spec.ARMS
+            },
+            "expected_closed_loop_guard_contract_by_arm": {
+                arm: str(spec.expected_closed_loop_guard_contract(arm))
+                if hasattr(spec, "expected_closed_loop_guard_contract")
+                else str(spec.EXPECTED_CLOSED_LOOP_GUARD_CONTRACT)
+                for arm in spec.ARMS
+            },
             "restoration_min_reduction": spec.RESTORATION_MIN_REDUCTION,
             "restoration_funnel_multipliers": list(
                 spec.RESTORATION_FUNNEL_MULTIPLIERS
@@ -1186,6 +1257,13 @@ def merge_results(args: argparse.Namespace) -> None:
         common_checks = {
             "protocol": summary.get("protocol_version")
             == spec.FROZEN_CORE_PROTOCOL_VERSION,
+            "protocol_selection": (
+                summary.get("protocol_version_selection")
+                == spec.FROZEN_CORE_PROTOCOL_VERSION
+                if bool(getattr(
+                    spec, "REQUIRE_EXPLICIT_PROTOCOL_SELECTION", False
+                )) else True
+            ),
             "environment": summary.get("environment") == environment,
             "optimizer_seed": int(summary.get("optimizer_seed", -1)) == seed,
             "revision": summary.get("code_revision") == frozen_revision,
@@ -1276,6 +1354,21 @@ def merge_results(args: argparse.Namespace) -> None:
             }
         else:
             arm_spec = spec.ARMS[arm]
+            expected_anchor_replay_paths = (
+                int(spec.expected_anchor_replay_path_count(arm))
+                if hasattr(spec, "expected_anchor_replay_path_count")
+                else int(spec.EXPECTED_ANCHOR_REPLAY_PATH_COUNT)
+            )
+            expected_guard_constraints = (
+                int(spec.expected_closed_loop_guard_constraint_count(arm))
+                if hasattr(spec, "expected_closed_loop_guard_constraint_count")
+                else int(spec.EXPECTED_CLOSED_LOOP_GUARD_CONSTRAINT_COUNT)
+            )
+            expected_guard_contract = (
+                str(spec.expected_closed_loop_guard_contract(arm))
+                if hasattr(spec, "expected_closed_loop_guard_contract")
+                else str(spec.EXPECTED_CLOSED_LOOP_GUARD_CONTRACT)
+            )
             anchor = anchors.get((environment, seed))
             if anchor is None:
                 anchor_path = ROOT / anchor_relative_dir(
@@ -1487,6 +1580,37 @@ def merge_results(args: argparse.Namespace) -> None:
                 )) == bool(arm_spec[
                     "deployment_frequency_groupwise_robust"
                 ]),
+                "control_protocol_selection": (
+                    summary.get("protocol_version_selection")
+                    == spec.FROZEN_CORE_PROTOCOL_VERSION
+                    if bool(getattr(
+                        spec, "REQUIRE_EXPLICIT_PROTOCOL_SELECTION", False
+                    )) else True
+                ),
+                "deployment_projection_objective": (
+                    summary.get("deployment_frequency_projection_objective")
+                    == str(arm_spec.get(
+                        "deployment_frequency_projection_objective",
+                        "worst_group",
+                    ))
+                    if bool(getattr(
+                        spec, "REQUIRE_EXPLICIT_PROTOCOL_SELECTION", False
+                    )) else True
+                ),
+                "deployment_restoration_freeze_reward_actor": bool(
+                    summary.get(
+                        "deployment_frequency_restoration_freeze_reward_actor",
+                        False,
+                    )
+                ) == bool(arm_spec.get(
+                    "deployment_frequency_restoration_freeze_reward_actor",
+                    False,
+                )),
+                "deployment_pathwise_robust": bool(summary.get(
+                    "deployment_frequency_pathwise_robust", False
+                )) == bool(arm_spec.get(
+                    "deployment_frequency_pathwise_robust", False
+                )),
                 "deployment_anchor_state_replay": bool(summary.get(
                     "deployment_frequency_anchor_state_replay", False
                 )) == bool(arm_spec[
@@ -1557,6 +1681,11 @@ def merge_results(args: argparse.Namespace) -> None:
                         restoration_funnel_multiplier=float(arm_spec[
                             "deployment_frequency_closed_loop_restoration_funnel_multiplier"
                         ]),
+                        expected_contract=expected_guard_contract,
+                        expected_paths=(
+                            spec.EXPECTED_CLOSED_LOOP_GUARD_PATH_COUNT
+                        ),
+                        expected_constraints=expected_guard_constraints,
                     )
                 ),
                 "closed_loop_guard_anchor_hash": (
@@ -1575,7 +1704,7 @@ def merge_results(args: argparse.Namespace) -> None:
                     and int(summary.get(
                         "deployment_frequency_anchor_state_replay_path_count",
                         -1,
-                    )) == spec.EXPECTED_ANCHOR_REPLAY_PATH_COUNT
+                    )) == expected_anchor_replay_paths
                     and summary.get(
                         "deployment_frequency_anchor_state_replay_contract"
                     ) == (
@@ -1603,6 +1732,30 @@ def merge_results(args: argparse.Namespace) -> None:
                         "deployment_frequency_anchor_state_replay_contract"
                     ) == "disabled"
                 ),
+                "anchor_replay_seed_root_contract": (
+                    summary.get(
+                        "deployment_frequency_anchor_state_replay_seed_roots"
+                    ) == list(arm_spec.get(
+                        "deployment_frequency_anchor_state_replay_seed_roots",
+                        (),
+                    ))
+                    and summary.get(
+                        "deployment_frequency_anchor_state_replay_seed_source"
+                    ) == (
+                        "explicit"
+                        if arm_spec.get(
+                            "deployment_frequency_anchor_state_replay_seed_roots",
+                            (),
+                        ) else (
+                            "iteration_zero_training_paths"
+                            if arm_spec[
+                                "deployment_frequency_anchor_state_replay"
+                            ] else "disabled"
+                        )
+                    )
+                ) if bool(getattr(
+                    spec, "REQUIRE_EXPLICIT_PROTOCOL_SELECTION", False
+                )) else True,
                 "upper_deployment_budget": math.isclose(
                     float(summary.get(
                         "upper_deployment_frequency_rms_budget", float("nan")
@@ -1647,8 +1800,16 @@ def merge_results(args: argparse.Namespace) -> None:
                     == "state_aligned_lexicographic_validation_v1"
                     and summary.get("checkpoint_rank_contract")
                     == (
-                        "state_aligned_paired_selection_path_reward_floor_and_"
-                        "five_frequency_endpoint_relative_feasibility_v1"
+                        "state_aligned_paired_selection_individual_path_reward_"
+                        "floor_and_five_frequency_endpoint_relative_"
+                        "feasibility_v2"
+                        if arm_spec.get(
+                            "deployment_frequency_pathwise_robust", False
+                        ) else (
+                            "state_aligned_paired_selection_path_reward_floor_"
+                            "and_five_frequency_endpoint_relative_"
+                            "feasibility_v1"
+                        )
                     )
                     and set(dict(summary.get(
                         "checkpoint_selected_rank"
