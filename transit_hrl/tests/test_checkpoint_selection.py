@@ -1,6 +1,8 @@
+import copy
 import unittest
 
 import numpy as np
+import torch
 
 from freq_hrl.rl import (
     FrequencySeparatedActorCriticPPO,
@@ -12,10 +14,165 @@ from freq_hrl.rl import (
     StateAlignedLexicographicCheckpointSelector,
     SMDPPPOConfig,
 )
-from freq_hrl.rl.training import train_frequency_separated_ppo, train_joint_ppo
+from freq_hrl.rl.training import (
+    _apply_closed_loop_actor_guard,
+    train_frequency_separated_ppo,
+    train_joint_ppo,
+)
 
 
 class RobustValidationCheckpointSelectorTest(unittest.TestCase):
+    @staticmethod
+    def _guard_snapshot(
+        rank=(0.0,),
+        *,
+        reward_violations=0,
+        frequency_violations=0,
+    ):
+        return {
+            "contract": "unit_closed_loop_guard_v1",
+            "rank": tuple(rank),
+            "path_count": 1,
+            "constraint_count": 1,
+            "reward_violation_count": int(reward_violations),
+            "frequency_violation_count": int(frequency_violations),
+        }
+
+    @staticmethod
+    def _closed_loop_model():
+        return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+            deployment_frequency_groupwise_robust=True,
+            deployment_frequency_closed_loop_trust_region=True,
+            deployment_frequency_closed_loop_trust_region_backtracks=4,
+        ))
+
+    @staticmethod
+    def _step_actor_optimizer(actor, optimizer):
+        optimizer.zero_grad(set_to_none=True)
+        sum(parameter.sum() for parameter in actor.parameters()).backward()
+        optimizer.step()
+
+    def test_closed_loop_actor_guard_backtracks_both_actors_only(self):
+        model = self._closed_loop_model()
+        self._step_actor_optimizer(model.upper_actor, model.upper_actor_optimizer)
+        self._step_actor_optimizer(model.lower_actor, model.lower_actor_optimizer)
+        before_state = copy.deepcopy(model.state_dict())
+        self._step_actor_optimizer(model.upper_actor, model.upper_actor_optimizer)
+        self._step_actor_optimizer(model.lower_actor, model.lower_actor_optimizer)
+        with torch.no_grad():
+            for parameter in model.upper_actor.parameters():
+                parameter.add_(0.5)
+            for parameter in model.lower_actor.parameters():
+                parameter.add_(0.5)
+            for parameter in model.lower_value.parameters():
+                parameter.add_(3.0)
+        after_state = copy.deepcopy(model.state_dict())
+        actor_key = next(iter(before_state["lower_actor"]))
+        before_value = before_state["lower_actor"][actor_key].flatten()[0]
+        after_value = after_state["lower_actor"][actor_key].flatten()[0]
+
+        def evaluate(policy):
+            current = policy.lower_actor.state_dict()[actor_key].flatten()[0]
+            fraction = float(
+                ((current - before_value) / (after_value - before_value)).item()
+            )
+            return self._guard_snapshot(
+                rank=(0.0,) if fraction <= 0.5 + 1e-6 else (-1.0,),
+                frequency_violations=(0 if fraction <= 0.5 + 1e-6 else 1),
+            )
+
+        metrics, _ = _apply_closed_loop_actor_guard(
+            model,
+            before_state=before_state,
+            after_state=after_state,
+            before_snapshot=self._guard_snapshot(),
+            evaluate_fn=evaluate,
+            max_backtracks=4,
+        )
+
+        self.assertEqual(
+            metrics["deployment_frequency_closed_loop_guard_step_fraction"],
+            0.5,
+        )
+        for actor_name in ("upper_actor", "lower_actor"):
+            installed = getattr(model, actor_name).state_dict()
+            for key in before_state[actor_name]:
+                torch.testing.assert_close(
+                    installed[key],
+                    0.5 * (
+                        before_state[actor_name][key]
+                        + after_state[actor_name][key]
+                    ),
+                )
+        for key, value in model.lower_value.state_dict().items():
+            torch.testing.assert_close(value, after_state["lower_value"][key])
+        installed_optimizer = model.lower_actor_optimizer.state_dict()["state"]
+        before_optimizer = before_state["lower_actor_optimizer"]["state"]
+        self.assertEqual(set(installed_optimizer), set(before_optimizer))
+        for parameter_id in before_optimizer:
+            self.assertEqual(
+                set(installed_optimizer[parameter_id]),
+                set(before_optimizer[parameter_id]),
+            )
+            for key, expected in before_optimizer[parameter_id].items():
+                actual = installed_optimizer[parameter_id][key]
+                if torch.is_tensor(expected):
+                    torch.testing.assert_close(actual, expected)
+                else:
+                    self.assertEqual(actual, expected)
+
+    def test_closed_loop_actor_guard_rolls_back_reward_violations(self):
+        model = self._closed_loop_model()
+        before_state = copy.deepcopy(model.state_dict())
+        with torch.no_grad():
+            for parameter in model.upper_actor.parameters():
+                parameter.add_(1.0)
+            for parameter in model.lower_actor.parameters():
+                parameter.add_(1.0)
+            for parameter in model.upper_value.parameters():
+                parameter.add_(2.0)
+        after_state = copy.deepcopy(model.state_dict())
+        actor_key = next(iter(before_state["upper_actor"]))
+        before_value = before_state["upper_actor"][actor_key].flatten()[0]
+
+        def evaluate(policy):
+            current = policy.upper_actor.state_dict()[actor_key].flatten()[0]
+            changed = not torch.isclose(current, before_value, atol=1e-8)
+            return self._guard_snapshot(
+                reward_violations=int(changed),
+            )
+
+        metrics, _ = _apply_closed_loop_actor_guard(
+            model,
+            before_state=before_state,
+            after_state=after_state,
+            before_snapshot=self._guard_snapshot(),
+            evaluate_fn=evaluate,
+            max_backtracks=2,
+        )
+        self.assertEqual(
+            metrics["deployment_frequency_closed_loop_guard_step_fraction"],
+            0.0,
+        )
+        self.assertEqual(
+            metrics["deployment_frequency_closed_loop_guard_accepted"], 0.0
+        )
+        for actor_name in ("upper_actor", "lower_actor"):
+            installed = getattr(model, actor_name).state_dict()
+            for key in before_state[actor_name]:
+                torch.testing.assert_close(
+                    installed[key], before_state[actor_name][key]
+                )
+        for key, value in model.upper_value.state_dict().items():
+            torch.testing.assert_close(value, after_state["upper_value"][key])
+
     def test_state_aligned_selector_uses_each_states_own_rank(self):
         selector = StateAlignedLexicographicCheckpointSelector(
             initial_score=10.0,
@@ -409,6 +566,67 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
                 "lower_deployment_frequency_group_count"
             ],
             2.0,
+        )
+
+    def test_smdp_trainer_requires_and_audits_closed_loop_guard(self):
+        def make_model():
+            return self._closed_loop_model()
+
+        def rollout_fn(_model, seed, train):
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=1.0,
+                done=True,
+            )
+            return (builder.build() if train else None), {
+                "reward_mean": float(seed),
+            }
+
+        common = dict(
+            train_seeds=[1],
+            selection_seeds=[10],
+            eval_seeds=[20],
+            iterations=1,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+        )
+        with self.assertRaisesRegex(ValueError, "guard evaluation"):
+            train_frequency_separated_ppo(model=make_model(), **common)
+
+        calls = []
+
+        def evaluate(_model):
+            calls.append(1)
+            return self._guard_snapshot()
+
+        payload, _, _ = train_frequency_separated_ppo(
+            model=make_model(),
+            deployment_frequency_closed_loop_guard_fn=evaluate,
+            **common,
+        )
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(
+            payload["deployment_frequency_closed_loop_guard_enabled"]
+        )
+        self.assertEqual(
+            payload["deployment_frequency_closed_loop_guard_evaluation_count"],
+            3,
+        )
+        self.assertEqual(
+            payload["history"][1][
+                "deployment_frequency_closed_loop_guard_attempted"
+            ],
+            1.0,
         )
 
     def test_joint_trainer_uses_the_same_custom_score_contract(self):

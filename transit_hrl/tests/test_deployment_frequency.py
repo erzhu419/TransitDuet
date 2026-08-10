@@ -442,6 +442,23 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
                 lower_action_dim=1,
                 deployment_frequency_anchor_state_replay=True,
             ))
+        with self.assertRaisesRegex(ValueError, "groupwise robust"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                deployment_frequency_closed_loop_trust_region=True,
+            ))
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                deployment_frequency_groupwise_robust=True,
+                deployment_frequency_closed_loop_trust_region_backtracks=0,
+            ))
 
     def test_active_constraint_requires_positive_budget(self):
         with self.assertRaisesRegex(ValueError, "positive RMS budget"):

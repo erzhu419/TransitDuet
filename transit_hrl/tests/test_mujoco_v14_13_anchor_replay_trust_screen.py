@@ -45,7 +45,7 @@ class MujocoV1413AnchorReplayTrustScreenTest(unittest.TestCase):
         self.assertEqual(manifest, spec.FROZEN_SOURCE_MANIFEST_SHA256)
         self.assertIn("v14_13", spec.DEVELOPMENT_PROTOCOL_VERSION)
         self.assertIn("v14_13", spec.FROZEN_CORE_PROTOCOL_VERSION)
-        self.assertEqual(
+        self.assertNotEqual(
             spec.FROZEN_CORE_PROTOCOL_VERSION,
             MUJOCO_CONTROL_PROTOCOL_VERSION,
         )

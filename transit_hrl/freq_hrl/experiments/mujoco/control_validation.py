@@ -50,7 +50,7 @@ from freq_hrl.rl import (
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
-    "freq_hrl_mujoco_shared_core_v14_13_anchor_replay_trust_region"
+    "freq_hrl_mujoco_shared_core_v14_14_closed_loop_actor_guard"
 )
 METHODS = (
     "freq_hrl",
@@ -70,6 +70,7 @@ def deployment_frequency_constraint_contract(
     groupwise: bool,
     anchor_state_replay: bool,
     ppo_trust_region: bool,
+    closed_loop_trust_region: bool = False,
 ) -> str:
     if not requested:
         return "disabled"
@@ -84,6 +85,19 @@ def deployment_frequency_constraint_contract(
         "hold_hpf8_lower_lpf32_per_group_anchor_relative_target_with_"
         "absolute_floor"
     )
+    if closed_loop_trust_region:
+        inner_mechanisms = ""
+        if anchor_state_replay:
+            inner_mechanisms += "frozen_anchor_state_replay_"
+        if ppo_trust_region:
+            inner_mechanisms += "ppo_trust_region_"
+        return (
+            base
+            + "_"
+            + inner_mechanisms
+            + "independent_crossed_closed_loop_reward_floor_and_five_"
+            "frequency_endpoint_joint_actor_backtracking_v7"
+        )
     if anchor_state_replay and ppo_trust_region:
         return (
             "episode_reset_candidate_and_frozen_anchor_state_replay_"
@@ -2298,6 +2312,8 @@ def _hierarchical_model(
     deployment_frequency_anchor_state_replay: bool = False,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
+    deployment_frequency_closed_loop_trust_region: bool = False,
+    deployment_frequency_closed_loop_trust_region_backtracks: int = 8,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2380,6 +2396,12 @@ def _hierarchical_model(
         ),
         deployment_frequency_ppo_trust_region_backtracks=int(
             deployment_frequency_ppo_trust_region_backtracks
+        ),
+        deployment_frequency_closed_loop_trust_region=bool(
+            deployment_frequency_closed_loop_trust_region
+        ),
+        deployment_frequency_closed_loop_trust_region_backtracks=int(
+            deployment_frequency_closed_loop_trust_region_backtracks
         ),
         upper_actor_anchor_coef=float(upper_actor_anchor_coef),
         lower_actor_anchor_coef=float(lower_actor_anchor_coef),
@@ -2464,6 +2486,39 @@ def crossed_checkpoint_selection_paths(
             if path_seed in assignments:
                 raise RuntimeError(
                     "crossed MuJoCo checkpoint path seeds collided"
+                )
+            path_seeds.append(path_seed)
+            assignments[path_seed] = str(mode)
+    return path_seeds, assignments
+
+
+def crossed_deployment_frequency_guard_paths(
+    guard_roots: Iterable[int],
+    modes: Iterable[str],
+    *,
+    env_id: str,
+) -> tuple[list[int], dict[int, str]]:
+    """Expand independent trust-region roots across every disturbance mode."""
+
+    roots = validate_unique_seeds(
+        guard_roots, role="mujoco_deployment_frequency_guard_roots"
+    )
+    condition_registry = _validated_disturbance_modes(
+        modes, role="deployment frequency closed-loop guard"
+    )
+    path_seeds: list[int] = []
+    assignments: dict[int, str] = {}
+    for root in roots:
+        for mode in condition_registry:
+            path_seed = derive_seed(
+                "mujoco_deployment_frequency_closed_loop_guard_crossed_v1",
+                str(env_id),
+                int(root),
+                str(mode),
+            )
+            if path_seed in assignments:
+                raise RuntimeError(
+                    "crossed MuJoCo closed-loop guard path seeds collided"
                 )
             path_seeds.append(path_seed)
             assignments[path_seed] = str(mode)
@@ -2840,6 +2895,56 @@ def paired_relative_frequency_feasibility_rank(
     return tuple(map(float, diagnostics["rank"]))
 
 
+def paired_closed_loop_guard_snapshot(
+    rows: list[dict[str, Any]],
+    *,
+    baseline_rows: list[dict[str, Any]],
+    expected_modes: Iterable[str],
+    lower_reduction_fraction: float,
+    upper_reduction_fraction: float,
+    lower_power_floor: float,
+    upper_power_floor: float,
+    reward_noninferiority_margin_fraction: float = 0.02,
+) -> dict[str, Any]:
+    """Reduce actual paired rollouts to the generic actor-guard contract."""
+
+    diagnostics = paired_relative_frequency_feasibility_diagnostics(
+        rows,
+        baseline_rows=baseline_rows,
+        expected_modes=expected_modes,
+        lower_reduction_fraction=lower_reduction_fraction,
+        upper_reduction_fraction=upper_reduction_fraction,
+        lower_power_floor=lower_power_floor,
+        upper_power_floor=upper_power_floor,
+        reward_noninferiority_margin_fraction=(
+            reward_noninferiority_margin_fraction
+        ),
+    )
+    violation_tolerance = 1e-10
+    reward_violations = sum(
+        float(item["normalized_violation"]) > violation_tolerance
+        for item in diagnostics["constraints"]
+        if str(item["endpoint"]) == "reward_mean"
+    )
+    frequency_violations = sum(
+        float(item["normalized_violation"]) > violation_tolerance
+        for item in diagnostics["constraints"]
+        if str(item["endpoint"]) != "reward_mean"
+    )
+    return {
+        "contract": (
+            "paired_frozen_anchor_actual_closed_loop_reward_floor_and_five_"
+            "frequency_endpoints_v1"
+        ),
+        "rank": tuple(map(float, diagnostics["rank"])),
+        "path_count": len(rows),
+        "constraint_count": int(diagnostics["constraint_count"]),
+        "reward_violation_count": int(reward_violations),
+        "frequency_violation_count": int(frequency_violations),
+        "worst_constraint": dict(diagnostics["worst_constraint"]),
+    }
+
+
 def train_mujoco_method(
     *,
     method: str,
@@ -2849,6 +2954,9 @@ def train_mujoco_method(
     selection_seeds: Iterable[int],
     eval_seeds: Iterable[int],
     safety_selection_seeds: Iterable[int] | None = None,
+    deployment_frequency_closed_loop_guard_seeds: (
+        Iterable[int] | None
+    ) = None,
     steps: int,
     iterations: int,
     optimizer_seed: int,
@@ -2892,6 +3000,8 @@ def train_mujoco_method(
     deployment_frequency_anchor_state_replay: bool = False,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
+    deployment_frequency_closed_loop_trust_region: bool = False,
+    deployment_frequency_closed_loop_trust_region_backtracks: int = 8,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     leakage_cost_mode: str = "ratio_excess_squared",
@@ -2918,6 +3028,16 @@ def train_mujoco_method(
     name = str(method)
     if name not in METHODS:
         raise ValueError(f"unknown MuJoCo method: {name}")
+    if not isinstance(deployment_frequency_closed_loop_trust_region, bool):
+        raise ValueError(
+            "MuJoCo deployment-frequency closed-loop trust-region flag "
+            "must be boolean"
+        )
+    closed_loop_guard_seed_values = (
+        None
+        if deployment_frequency_closed_loop_guard_seeds is None
+        else tuple(map(int, deployment_frequency_closed_loop_guard_seeds))
+    )
     roots = validate_unique_seeds(train_seeds, role="mujoco_train_seeds")
     selection, evaluation = validate_evaluation_seed_roles(
         selection_seeds, eval_seeds
@@ -2930,10 +3050,33 @@ def train_mujoco_method(
         )
         if name == "freq_hrl_safe_selector" else []
     )
+    closed_loop_guard_roots = (
+        validate_unique_seeds(
+            closed_loop_guard_seed_values or (),
+            role="mujoco_deployment_frequency_closed_loop_guard_seeds",
+        )
+        if deployment_frequency_closed_loop_trust_region else []
+    )
+    if (
+        deployment_frequency_closed_loop_trust_region
+        and not closed_loop_guard_roots
+    ):
+        raise ValueError(
+            "closed-loop trust region requires independent guard seeds"
+        )
+    if (
+        not deployment_frequency_closed_loop_trust_region
+        and closed_loop_guard_seed_values
+    ):
+        raise ValueError(
+            "closed-loop guard seeds cannot be supplied while the trust "
+            "region is disabled"
+        )
     seed_roles = {
         "training": set(roots),
         "checkpoint_selection": set(selection),
         "safety_selection": set(safety_selection),
+        "closed_loop_guard": set(closed_loop_guard_roots),
         "heldout_test": set(evaluation),
     }
     role_names = list(seed_roles)
@@ -3105,6 +3248,10 @@ def train_mujoco_method(
             "deployment-frequency PPO trust region",
             deployment_frequency_ppo_trust_region,
         ),
+        (
+            "deployment-frequency closed-loop trust region",
+            deployment_frequency_closed_loop_trust_region,
+        ),
         ):
         if not isinstance(enabled, bool):
             raise ValueError(
@@ -3123,6 +3270,18 @@ def train_mujoco_method(
         raise ValueError(
             "MuJoCo deployment-frequency PPO trust-region backtracks must "
             "be a positive integer"
+        )
+    if (
+        isinstance(
+            deployment_frequency_closed_loop_trust_region_backtracks, bool
+        )
+        or int(deployment_frequency_closed_loop_trust_region_backtracks)
+        != deployment_frequency_closed_loop_trust_region_backtracks
+        or int(deployment_frequency_closed_loop_trust_region_backtracks) < 1
+    ):
+        raise ValueError(
+            "MuJoCo deployment-frequency closed-loop trust-region "
+            "backtracks must be a positive integer"
         )
     for level, value in (
         ("upper", upper_deployment_frequency_rms_budget),
@@ -3158,10 +3317,11 @@ def train_mujoco_method(
     if (
         deployment_frequency_anchor_state_replay
         or deployment_frequency_ppo_trust_region
+        or deployment_frequency_closed_loop_trust_region
     ) and not paired_continuation:
         raise ValueError(
-            "MuJoCo anchor-state replay and PPO trust regions require a "
-            "paired frozen-anchor continuation"
+            "MuJoCo deployment-frequency replay and trust regions require "
+            "a paired frozen-anchor continuation"
         )
     if (
         any(
@@ -3388,6 +3548,18 @@ def train_mujoco_method(
         selection_seed_modes = _assign_seed_modes(
             selection_rollout_seeds, training_modes
         )
+    if deployment_frequency_closed_loop_trust_region:
+        (
+            closed_loop_guard_rollout_seeds,
+            closed_loop_guard_seed_modes,
+        ) = crossed_deployment_frequency_guard_paths(
+            closed_loop_guard_roots,
+            training_modes,
+            env_id=env_id,
+        )
+    else:
+        closed_loop_guard_rollout_seeds = []
+        closed_loop_guard_seed_modes = {}
     evaluation_seed_modes = _assign_seed_modes(evaluation, training_modes)
 
     def register_seed_mode(seed: int, mode: str) -> None:
@@ -3412,12 +3584,15 @@ def train_mujoco_method(
             register_seed_mode(derived, train_root_modes[int(root)])
     for seed, mode in selection_seed_modes.items():
         register_seed_mode(seed, mode)
+    for seed, mode in closed_loop_guard_seed_modes.items():
+        register_seed_mode(seed, mode)
     for seed, mode in evaluation_seed_modes.items():
         register_seed_mode(seed, mode)
     protected_seed_roles = (
         set(roots)
         | set(selection)
         | set(safety_selection)
+        | set(closed_loop_guard_roots)
         | set(evaluation)
     )
     crossed_collisions = sorted(
@@ -3431,6 +3606,19 @@ def train_mujoco_method(
         raise RuntimeError(
             "crossed checkpoint paths overlap a seed-role root: "
             f"{crossed_collisions}"
+        )
+    closed_loop_guard_collisions = sorted(
+        set(closed_loop_guard_rollout_seeds)
+        & (
+            protected_seed_roles
+            | derived_training_seeds
+            | set(selection_rollout_seeds)
+        )
+    )
+    if closed_loop_guard_collisions:
+        raise RuntimeError(
+            "crossed closed-loop guard paths overlap another seed role: "
+            f"{closed_loop_guard_collisions}"
         )
 
     def assigned_mode(seed: int) -> str:
@@ -3454,6 +3642,8 @@ def train_mujoco_method(
     checkpoint_score_contract = "mean_reward_mean_v1"
     paired_relative_baseline_rows: list[dict[str, Any]] = []
     paired_relative_baseline_parameter_sha256 = ""
+    closed_loop_guard_baseline_rows: list[dict[str, Any]] = []
+    closed_loop_guard_baseline_parameter_sha256 = ""
     if str(checkpoint_score_mode) in {
         "behavior_robust",
         "latent_behavior_robust",
@@ -3975,6 +4165,12 @@ def train_mujoco_method(
             deployment_frequency_ppo_trust_region_backtracks=int(
                 deployment_frequency_ppo_trust_region_backtracks
             ),
+            deployment_frequency_closed_loop_trust_region=bool(
+                deployment_frequency_closed_loop_trust_region
+            ),
+            deployment_frequency_closed_loop_trust_region_backtracks=int(
+                deployment_frequency_closed_loop_trust_region_backtracks
+            ),
         )
         if paired_continuation:
             paired_checkpoint_metadata = load_paired_mujoco_checkpoint(
@@ -4042,6 +4238,54 @@ def train_mujoco_method(
                 method=name,
                 episode_horizon=episode_horizon,
             )
+        closed_loop_guard_fn = None
+        if deployment_frequency_closed_loop_trust_region:
+            closed_loop_guard_baseline_parameter_sha256 = (
+                _model_parameter_sha256(model)
+            )
+            closed_loop_guard_baseline_rows = [
+                rollout(model, int(seed), False)[1]
+                for seed in closed_loop_guard_rollout_seeds
+            ]
+            if (
+                closed_loop_guard_baseline_parameter_sha256
+                != _model_parameter_sha256(model)
+            ):
+                raise RuntimeError(
+                    "closed-loop guard baseline evaluation mutated the model"
+                )
+
+            def closed_loop_guard_fn(
+                policy: FrequencySeparatedActorCriticPPO,
+            ) -> dict[str, Any]:
+                parameter_sha256 = _model_parameter_sha256(policy)
+                guard_rows = [
+                    rollout(policy, int(seed), False)[1]
+                    for seed in closed_loop_guard_rollout_seeds
+                ]
+                if parameter_sha256 != _model_parameter_sha256(policy):
+                    raise RuntimeError(
+                        "closed-loop guard evaluation mutated the model"
+                    )
+                snapshot = paired_closed_loop_guard_snapshot(
+                    guard_rows,
+                    baseline_rows=closed_loop_guard_baseline_rows,
+                    expected_modes=training_modes,
+                    lower_reduction_fraction=(
+                        selected_lower_deployment_frequency_reference_reduction
+                    ),
+                    upper_reduction_fraction=(
+                        selected_upper_deployment_frequency_reference_reduction
+                    ),
+                    lower_power_floor=(
+                        float(lower_deployment_frequency_rms_budget) ** 2
+                    ),
+                    upper_power_floor=(
+                        float(upper_deployment_frequency_rms_budget) ** 2
+                    ),
+                )
+                snapshot["parameter_sha256"] = parameter_sha256
+                return snapshot
         if (
             str(checkpoint_score_mode)
             == "paired_relative_frequency_feasibility_first"
@@ -4144,6 +4388,7 @@ def train_mujoco_method(
                 )
                 if deployment_frequency_anchor_state_replay else None
             ),
+            deployment_frequency_closed_loop_guard_fn=closed_loop_guard_fn,
         )
 
     actual_parameters = _module_parameter_count(model)
@@ -4257,6 +4502,36 @@ def train_mujoco_method(
                 summarize(paired_relative_baseline_rows)
                 if paired_relative_baseline_rows else {}
             ),
+            "heldout_rows_used": 0,
+        },
+        "deployment_frequency_closed_loop_guard_seed_roots": list(
+            closed_loop_guard_roots
+        ),
+        "deployment_frequency_closed_loop_guard_path_count": len(
+            closed_loop_guard_rollout_seeds
+        ),
+        "deployment_frequency_closed_loop_guard_condition_assignment": {
+            str(seed): mode
+            for seed, mode in closed_loop_guard_seed_modes.items()
+        },
+        "deployment_frequency_closed_loop_guard_baseline": {
+            "enabled": bool(closed_loop_guard_baseline_rows),
+            "row_count": len(closed_loop_guard_baseline_rows),
+            "parameter_sha256": (
+                closed_loop_guard_baseline_parameter_sha256
+            ),
+            "paths": [
+                {
+                    "disturbance_mode": str(row["disturbance_mode"]),
+                    "seed": int(row["seed"]),
+                }
+                for row in closed_loop_guard_baseline_rows
+            ],
+            "summary": (
+                summarize(closed_loop_guard_baseline_rows)
+                if closed_loop_guard_baseline_rows else {}
+            ),
+            "checkpoint_selection_rows_used": 0,
             "heldout_rows_used": 0,
         },
         "core_evaluation_seed_condition_assignment": {
@@ -4395,6 +4670,14 @@ def train_mujoco_method(
         "deployment_frequency_ppo_trust_region_backtracks": int(
             deployment_frequency_ppo_trust_region_backtracks
         ),
+        "deployment_frequency_closed_loop_trust_region": bool(
+            deployment_frequency_closed_loop_trust_region
+            and deployment_frequency_requested
+            and name == "freq_hrl"
+        ),
+        "deployment_frequency_closed_loop_trust_region_backtracks": int(
+            deployment_frequency_closed_loop_trust_region_backtracks
+        ),
         "deployment_frequency_constraint_contract": (
             deployment_frequency_constraint_contract(
                 requested=(
@@ -4405,6 +4688,9 @@ def train_mujoco_method(
                     deployment_frequency_anchor_state_replay
                 ),
                 ppo_trust_region=deployment_frequency_ppo_trust_region,
+                closed_loop_trust_region=(
+                    deployment_frequency_closed_loop_trust_region
+                ),
             )
         ),
         "upper_constraint_update_mode": (
@@ -4686,6 +4972,11 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         default=list(DEFAULT_SAFETY_SELECTION_SEEDS),
     )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-guard-seeds",
+        type=int,
+        nargs="+",
+    )
     parser.add_argument("--eval-seeds", type=int, nargs="+", default=list(DEFAULT_EVAL_SEEDS))
     parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--episode-horizon", type=int, default=1000)
@@ -4857,6 +5148,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=8,
     )
     parser.add_argument(
+        "--deployment-frequency-closed-loop-trust-region",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-trust-region-backtracks",
+        type=int,
+        default=8,
+    )
+    parser.add_argument(
         "--leakage-cost-mode",
         choices=LEAKAGE_COST_MODES,
         default="ratio_excess_squared",
@@ -4915,6 +5215,9 @@ def main() -> None:
         train_seeds=args.train_seeds,
         selection_seeds=args.selection_seeds,
         safety_selection_seeds=args.safety_selection_seeds,
+        deployment_frequency_closed_loop_guard_seeds=(
+            args.deployment_frequency_closed_loop_guard_seeds
+        ),
         eval_seeds=args.eval_seeds,
         steps=args.steps,
         iterations=args.iterations,
@@ -5021,6 +5324,12 @@ def main() -> None:
         ),
         deployment_frequency_ppo_trust_region_backtracks=(
             args.deployment_frequency_ppo_trust_region_backtracks
+        ),
+        deployment_frequency_closed_loop_trust_region=(
+            args.deployment_frequency_closed_loop_trust_region
+        ),
+        deployment_frequency_closed_loop_trust_region_backtracks=(
+            args.deployment_frequency_closed_loop_trust_region_backtracks
         ),
         upper_constraint_update_mode=args.upper_constraint_update_mode,
         lower_constraint_update_mode=args.lower_constraint_update_mode,

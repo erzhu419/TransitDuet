@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any, Callable, Iterable
 
 import numpy as np
+import torch
 
 from .dual_actor_critic import DualActorCriticPPO, TrajectoryBatch
 from .checkpoint_selection import (
@@ -38,11 +40,252 @@ SMDPReferenceRolloutFn = Callable[
     [FrequencySeparatedActorCriticPPO, int],
     HierarchicalTrajectoryBatch,
 ]
+SMDPClosedLoopGuardFn = Callable[
+    [FrequencySeparatedActorCriticPPO], dict[str, Any]
+]
 TrainingSeedFn = Callable[[int, int], int]
 JointRolloutFn = Callable[
     [JointActorCriticPPO, int, bool],
     tuple[JointTrajectoryBatch | None, dict[str, Any]],
 ]
+
+
+def _validated_closed_loop_guard_snapshot(
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise TypeError("closed-loop guard snapshot must be a mapping")
+    rank = tuple(float(value) for value in payload.get("rank", ()))
+    if not rank or not np.all(np.isfinite(rank)):
+        raise ValueError("closed-loop guard rank must be finite and non-empty")
+    normalized = dict(payload)
+    normalized["rank"] = rank
+    for key in (
+        "path_count",
+        "constraint_count",
+        "reward_violation_count",
+        "frequency_violation_count",
+    ):
+        value = payload.get(key)
+        if (
+            isinstance(value, bool)
+            or value is None
+            or int(value) != value
+            or int(value) < 0
+        ):
+            raise ValueError(f"closed-loop guard {key} must be a non-negative integer")
+        normalized[key] = int(value)
+    if normalized["path_count"] < 1 or normalized["constraint_count"] < 1:
+        raise ValueError("closed-loop guard registry must be non-empty")
+    contract = str(payload.get("contract", "")).strip()
+    if not contract:
+        raise ValueError("closed-loop guard contract must be non-empty")
+    normalized["contract"] = contract
+    return normalized
+
+
+def _lexicographic_rank_not_worse(
+    candidate: tuple[float, ...],
+    baseline: tuple[float, ...],
+    *,
+    tolerance: float = 1e-10,
+) -> bool:
+    if len(candidate) != len(baseline):
+        raise ValueError("closed-loop guard rank dimensions changed")
+    for candidate_value, baseline_value in zip(candidate, baseline, strict=True):
+        if candidate_value > baseline_value + tolerance:
+            return True
+        if candidate_value < baseline_value - tolerance:
+            return False
+    return True
+
+
+def _closed_loop_guard_accepts(
+    candidate: dict[str, Any],
+    baseline: dict[str, Any],
+) -> bool:
+    registry_keys = ("contract", "path_count", "constraint_count")
+    if any(candidate[key] != baseline[key] for key in registry_keys):
+        raise ValueError("closed-loop guard registry changed during training")
+    return bool(
+        int(candidate["reward_violation_count"]) == 0
+        and int(candidate["frequency_violation_count"])
+        <= int(baseline["frequency_violation_count"])
+        and _lexicographic_rank_not_worse(
+            tuple(candidate["rank"]), tuple(baseline["rank"])
+        )
+    )
+
+
+def _actor_state_rms_difference(
+    before_state: dict[str, Any],
+    after_state: dict[str, Any],
+) -> float:
+    squared_sum = 0.0
+    count = 0
+    for actor_name in ("upper_actor", "lower_actor"):
+        before_actor = before_state[actor_name]
+        after_actor = after_state[actor_name]
+        if set(before_actor) != set(after_actor):
+            raise ValueError("closed-loop actor state registry changed")
+        for key, before in before_actor.items():
+            after = after_actor[key]
+            if torch.is_floating_point(before):
+                delta = after.detach().double() - before.detach().double()
+                squared_sum += float(torch.sum(delta * delta).cpu().item())
+                count += int(delta.numel())
+    return float(np.sqrt(squared_sum / max(count, 1)))
+
+
+def _install_closed_loop_actor_fraction(
+    model: FrequencySeparatedActorCriticPPO,
+    *,
+    before_state: dict[str, Any],
+    after_state: dict[str, Any],
+    fraction: float,
+) -> None:
+    value = float(fraction)
+    if not 0.0 <= value <= 1.0:
+        raise ValueError("closed-loop actor fraction must be in [0, 1]")
+    # Preserve the just-trained critics and duals, then replace only actors.
+    model.load_state_dict(copy.deepcopy(after_state))
+    for actor_name, optimizer_name in (
+        ("upper_actor", "upper_actor_optimizer"),
+        ("lower_actor", "lower_actor_optimizer"),
+    ):
+        before_actor = before_state[actor_name]
+        after_actor = after_state[actor_name]
+        blended: dict[str, torch.Tensor] = {}
+        for key, before in before_actor.items():
+            after = after_actor[key]
+            blended[key] = (
+                before + value * (after - before)
+                if torch.is_floating_point(before)
+                else (after if value == 1.0 else before)
+            )
+        getattr(model, actor_name).load_state_dict(blended)
+        optimizer_state = (
+            after_state[optimizer_name]
+            if value == 1.0 else before_state[optimizer_name]
+        )
+        getattr(model, optimizer_name).load_state_dict(
+            copy.deepcopy(optimizer_state)
+        )
+    model.reset_recurrent_inference()
+
+
+def _apply_closed_loop_actor_guard(
+    model: FrequencySeparatedActorCriticPPO,
+    *,
+    before_state: dict[str, Any],
+    after_state: dict[str, Any],
+    before_snapshot: dict[str, Any],
+    evaluate_fn: SMDPClosedLoopGuardFn,
+    max_backtracks: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    prefix = "deployment_frequency_closed_loop_guard_"
+    before = _validated_closed_loop_guard_snapshot(before_snapshot)
+    full = _validated_closed_loop_guard_snapshot(evaluate_fn(model))
+    full_actor_rms = _actor_state_rms_difference(before_state, after_state)
+    selected = full
+    selected_fraction = 1.0
+    backtracks = 0
+    accepted = _closed_loop_guard_accepts(full, before)
+    evaluations = 1
+    if not accepted:
+        for backtrack in range(1, int(max_backtracks) + 1):
+            fraction = 0.5 ** backtrack
+            _install_closed_loop_actor_fraction(
+                model,
+                before_state=before_state,
+                after_state=after_state,
+                fraction=fraction,
+            )
+            candidate = _validated_closed_loop_guard_snapshot(
+                evaluate_fn(model)
+            )
+            evaluations += 1
+            backtracks = backtrack
+            if _closed_loop_guard_accepts(candidate, before):
+                selected = candidate
+                selected_fraction = float(fraction)
+                accepted = True
+                break
+    if not accepted:
+        _install_closed_loop_actor_fraction(
+            model,
+            before_state=before_state,
+            after_state=after_state,
+            fraction=0.0,
+        )
+        selected = _validated_closed_loop_guard_snapshot(evaluate_fn(model))
+        evaluations += 1
+        if not _closed_loop_guard_accepts(selected, before):
+            raise RuntimeError(
+                "closed-loop actor rollback did not restore the guard rank"
+            )
+        selected_fraction = 0.0
+    installed_state = copy.deepcopy(model.state_dict())
+    final_actor_rms = _actor_state_rms_difference(
+        before_state, installed_state
+    )
+    effective_update = bool(
+        selected_fraction > 0.0 and final_actor_rms > 1e-12
+    )
+    return {
+        f"{prefix}enabled": 1.0,
+        f"{prefix}attempted": 1.0,
+        f"{prefix}accepted": float(effective_update),
+        f"{prefix}backtracks": float(backtracks),
+        f"{prefix}step_fraction": float(selected_fraction),
+        f"{prefix}evaluation_count": float(evaluations),
+        f"{prefix}full_actor_rms": float(full_actor_rms),
+        f"{prefix}final_actor_rms": float(final_actor_rms),
+        f"{prefix}optimizer_restored": float(selected_fraction < 1.0),
+        f"{prefix}contract": str(before["contract"]),
+        f"{prefix}path_count": float(before["path_count"]),
+        f"{prefix}constraint_count": float(before["constraint_count"]),
+        f"{prefix}rank_before": list(before["rank"]),
+        f"{prefix}rank_full_step": list(full["rank"]),
+        f"{prefix}rank_after": list(selected["rank"]),
+        f"{prefix}full_step_reward_violation_count": float(
+            full["reward_violation_count"]
+        ),
+        f"{prefix}reward_violation_count": float(
+            selected["reward_violation_count"]
+        ),
+        f"{prefix}full_step_frequency_violation_count": float(
+            full["frequency_violation_count"]
+        ),
+        f"{prefix}frequency_violation_count": float(
+            selected["frequency_violation_count"]
+        ),
+    }, selected
+
+
+def _disabled_closed_loop_guard_metrics() -> dict[str, Any]:
+    prefix = "deployment_frequency_closed_loop_guard_"
+    return {
+        f"{prefix}enabled": 0.0,
+        f"{prefix}attempted": 0.0,
+        f"{prefix}accepted": 0.0,
+        f"{prefix}backtracks": 0.0,
+        f"{prefix}step_fraction": 1.0,
+        f"{prefix}evaluation_count": 0.0,
+        f"{prefix}full_actor_rms": 0.0,
+        f"{prefix}final_actor_rms": 0.0,
+        f"{prefix}optimizer_restored": 0.0,
+        f"{prefix}contract": "disabled",
+        f"{prefix}path_count": 0.0,
+        f"{prefix}constraint_count": 0.0,
+        f"{prefix}rank_before": [],
+        f"{prefix}rank_full_step": [],
+        f"{prefix}rank_after": [],
+        f"{prefix}full_step_reward_violation_count": 0.0,
+        f"{prefix}reward_violation_count": 0.0,
+        f"{prefix}full_step_frequency_violation_count": 0.0,
+        f"{prefix}frequency_violation_count": 0.0,
+    }
 
 
 def _iteration_rollout_seeds(
@@ -505,6 +748,9 @@ def train_frequency_separated_ppo(
     deployment_frequency_reference_rollout_fn: (
         SMDPReferenceRolloutFn | None
     ) = None,
+    deployment_frequency_closed_loop_guard_fn: (
+        SMDPClosedLoopGuardFn | None
+    ) = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -597,6 +843,72 @@ def train_frequency_separated_ppo(
         anchor_state_replay_batch = concat_hierarchical_batches(
             reference_batches
         )
+    closed_loop_guard_enabled = bool(
+        model.config.deployment_frequency_closed_loop_trust_region
+    )
+    if closed_loop_guard_enabled and deployment_frequency_closed_loop_guard_fn is None:
+        raise ValueError(
+            "closed-loop trust region requires an explicit deterministic "
+            "guard evaluation function"
+        )
+    if not closed_loop_guard_enabled and deployment_frequency_closed_loop_guard_fn is not None:
+        raise ValueError(
+            "closed-loop guard evaluation cannot be supplied while the "
+            "trust region is disabled"
+        )
+    initial_closed_loop_guard_snapshot = (
+        _validated_closed_loop_guard_snapshot(
+            deployment_frequency_closed_loop_guard_fn(model)
+        )
+        if deployment_frequency_closed_loop_guard_fn is not None else None
+    )
+    current_closed_loop_guard_snapshot = initial_closed_loop_guard_snapshot
+    closed_loop_guard_evaluation_count = int(closed_loop_guard_enabled)
+    if initial_closed_loop_guard_snapshot is None:
+        initial_closed_loop_guard_metrics = _disabled_closed_loop_guard_metrics()
+    else:
+        guard_prefix = "deployment_frequency_closed_loop_guard_"
+        initial_closed_loop_guard_metrics = {
+            f"{guard_prefix}enabled": 1.0,
+            f"{guard_prefix}attempted": 0.0,
+            f"{guard_prefix}accepted": 0.0,
+            f"{guard_prefix}backtracks": 0.0,
+            f"{guard_prefix}step_fraction": 0.0,
+            f"{guard_prefix}evaluation_count": 1.0,
+            f"{guard_prefix}full_actor_rms": 0.0,
+            f"{guard_prefix}final_actor_rms": 0.0,
+            f"{guard_prefix}optimizer_restored": 0.0,
+            f"{guard_prefix}contract": str(
+                initial_closed_loop_guard_snapshot["contract"]
+            ),
+            f"{guard_prefix}path_count": float(
+                initial_closed_loop_guard_snapshot["path_count"]
+            ),
+            f"{guard_prefix}constraint_count": float(
+                initial_closed_loop_guard_snapshot["constraint_count"]
+            ),
+            f"{guard_prefix}rank_before": list(
+                initial_closed_loop_guard_snapshot["rank"]
+            ),
+            f"{guard_prefix}rank_full_step": list(
+                initial_closed_loop_guard_snapshot["rank"]
+            ),
+            f"{guard_prefix}rank_after": list(
+                initial_closed_loop_guard_snapshot["rank"]
+            ),
+            f"{guard_prefix}full_step_reward_violation_count": float(
+                initial_closed_loop_guard_snapshot["reward_violation_count"]
+            ),
+            f"{guard_prefix}reward_violation_count": float(
+                initial_closed_loop_guard_snapshot["reward_violation_count"]
+            ),
+            f"{guard_prefix}full_step_frequency_violation_count": float(
+                initial_closed_loop_guard_snapshot["frequency_violation_count"]
+            ),
+            f"{guard_prefix}frequency_violation_count": float(
+                initial_closed_loop_guard_snapshot["frequency_violation_count"]
+            ),
+        }
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
@@ -666,6 +978,7 @@ def train_frequency_separated_ppo(
         "deployment_frequency_anchor_state_replay_path_count": float(
             len(anchor_state_replay_seeds)
         ),
+        **initial_closed_loop_guard_metrics,
         **(
             {
                 "checkpoint_selection_diagnostics": (
@@ -689,12 +1002,45 @@ def train_frequency_separated_ppo(
             sampled_rows.append(row)
         if not batches:
             raise RuntimeError("sampled rollouts did not produce an SMDP trajectory")
+        before_update_state = (
+            copy.deepcopy(model.state_dict())
+            if closed_loop_guard_enabled else None
+        )
         metrics = model.update(
             concat_hierarchical_batches(batches),
             deployment_frequency_reference_batch=(
                 anchor_state_replay_batch
             ),
         )
+        if closed_loop_guard_enabled:
+            if (
+                before_update_state is None
+                or current_closed_loop_guard_snapshot is None
+                or deployment_frequency_closed_loop_guard_fn is None
+            ):
+                raise RuntimeError("closed-loop guard transaction was not initialized")
+            after_update_state = copy.deepcopy(model.state_dict())
+            guard_metrics, current_closed_loop_guard_snapshot = (
+                _apply_closed_loop_actor_guard(
+                    model,
+                    before_state=before_update_state,
+                    after_state=after_update_state,
+                    before_snapshot=current_closed_loop_guard_snapshot,
+                    evaluate_fn=deployment_frequency_closed_loop_guard_fn,
+                    max_backtracks=(
+                        model.config.
+                        deployment_frequency_closed_loop_trust_region_backtracks
+                    ),
+                )
+            )
+            closed_loop_guard_evaluation_count += int(
+                guard_metrics[
+                    "deployment_frequency_closed_loop_guard_evaluation_count"
+                ]
+            )
+        else:
+            guard_metrics = _disabled_closed_loop_guard_metrics()
+        metrics.update(guard_metrics)
         evaluate_checkpoint = _checkpoint_evaluation_due(
             iteration,
             total_iterations=total_iterations,
@@ -758,6 +1104,24 @@ def train_frequency_separated_ppo(
     if not selector.has_eligible_selection:
         raise RuntimeError("checkpoint selector produced no eligible checkpoint")
     model.load_state_dict(selector.best_state)
+    selected_closed_loop_guard_snapshot = (
+        _validated_closed_loop_guard_snapshot(
+            deployment_frequency_closed_loop_guard_fn(model)
+        )
+        if deployment_frequency_closed_loop_guard_fn is not None else None
+    )
+    closed_loop_guard_evaluation_count += int(closed_loop_guard_enabled)
+    if (
+        selected_closed_loop_guard_snapshot is not None
+        and initial_closed_loop_guard_snapshot is not None
+        and not _closed_loop_guard_accepts(
+            selected_closed_loop_guard_snapshot,
+            initial_closed_loop_guard_snapshot,
+        )
+    ):
+        raise RuntimeError(
+            "selected checkpoint violates the initial closed-loop guard"
+        )
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     actor_optimizer_steps = int(sum(
         float(row.get("upper_actor_optimizer_steps", 0.0))
@@ -807,6 +1171,50 @@ def train_frequency_separated_ppo(
             0
             if anchor_state_replay_batch is None
             else anchor_state_replay_batch.lower.size
+        ),
+        "deployment_frequency_closed_loop_guard_enabled": (
+            closed_loop_guard_enabled
+        ),
+        "deployment_frequency_closed_loop_guard_contract": (
+            "disabled"
+            if initial_closed_loop_guard_snapshot is None
+            else str(initial_closed_loop_guard_snapshot["contract"])
+        ),
+        "deployment_frequency_closed_loop_guard_path_count": (
+            0
+            if initial_closed_loop_guard_snapshot is None
+            else int(initial_closed_loop_guard_snapshot["path_count"])
+        ),
+        "deployment_frequency_closed_loop_guard_constraint_count": (
+            0
+            if initial_closed_loop_guard_snapshot is None
+            else int(initial_closed_loop_guard_snapshot["constraint_count"])
+        ),
+        "deployment_frequency_closed_loop_guard_initial_rank": (
+            []
+            if initial_closed_loop_guard_snapshot is None
+            else list(initial_closed_loop_guard_snapshot["rank"])
+        ),
+        "deployment_frequency_closed_loop_guard_training_final_rank": (
+            []
+            if current_closed_loop_guard_snapshot is None
+            else list(current_closed_loop_guard_snapshot["rank"])
+        ),
+        "deployment_frequency_closed_loop_guard_selected_rank": (
+            []
+            if selected_closed_loop_guard_snapshot is None
+            else list(selected_closed_loop_guard_snapshot["rank"])
+        ),
+        "deployment_frequency_closed_loop_guard_evaluation_count": int(
+            closed_loop_guard_evaluation_count
+        ),
+        "deployment_frequency_closed_loop_guard_effective_update_count": int(
+            sum(
+                float(row.get(
+                    "deployment_frequency_closed_loop_guard_accepted", 0.0
+                ))
+                for row in history
+            )
         ),
         "best_score": float(selector.best_score),
         "initial_validation_score": initial_validation_score,

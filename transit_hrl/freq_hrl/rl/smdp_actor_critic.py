@@ -442,6 +442,8 @@ class SMDPPPOConfig:
     deployment_frequency_anchor_state_replay: bool = False
     deployment_frequency_ppo_trust_region: bool = False
     deployment_frequency_ppo_trust_region_backtracks: int = 8
+    deployment_frequency_closed_loop_trust_region: bool = False
+    deployment_frequency_closed_loop_trust_region_backtracks: int = 8
     promotion_init_logit: float = -2.0
     upper_cost_target: float = 0.0
     upper_dual_lr: float = 0.0
@@ -1226,12 +1228,14 @@ class FrequencySeparatedActorCriticPPO:
         for name in (
             "deployment_frequency_anchor_state_replay",
             "deployment_frequency_ppo_trust_region",
+            "deployment_frequency_closed_loop_trust_region",
         ):
             if not isinstance(getattr(config, name), bool):
                 raise ValueError(f"{name} must be boolean")
         if (
             config.deployment_frequency_anchor_state_replay
             or config.deployment_frequency_ppo_trust_region
+            or config.deployment_frequency_closed_loop_trust_region
         ) and not config.deployment_frequency_groupwise_robust:
             raise ValueError(
                 "deployment frequency anchor-state replay and PPO trust "
@@ -1248,6 +1252,18 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "deployment_frequency_ppo_trust_region_backtracks must be "
                 "a positive integer"
+            )
+        closed_loop_backtracks = (
+            config.deployment_frequency_closed_loop_trust_region_backtracks
+        )
+        if (
+            isinstance(closed_loop_backtracks, bool)
+            or int(closed_loop_backtracks) != closed_loop_backtracks
+            or int(closed_loop_backtracks) < 1
+        ):
+            raise ValueError(
+                "deployment_frequency_closed_loop_trust_region_backtracks "
+                "must be a positive integer"
             )
         for level in ("upper", "lower"):
             budget = float(getattr(

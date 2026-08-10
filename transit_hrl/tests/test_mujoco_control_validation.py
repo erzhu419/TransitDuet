@@ -23,11 +23,13 @@ from freq_hrl.experiments.mujoco.control_validation import (
     behavior_robust_checkpoint_diagnostics,
     capacity_matched_flat_hidden_dim,
     crossed_checkpoint_selection_paths,
+    crossed_deployment_frequency_guard_paths,
     deployment_frequency_constraint_contract,
     environment_dimensions,
     latent_behavior_feasibility_rank,
     paired_relative_frequency_feasibility_diagnostics,
     paired_relative_frequency_feasibility_rank,
+    paired_closed_loop_guard_snapshot,
     lower_action_router_training_strength,
     load_paired_mujoco_checkpoint,
     mujoco_policy_state_dim,
@@ -53,22 +55,24 @@ def mujoco_available() -> bool:
 
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
-    def test_deployment_constraint_contract_separates_v14_13_ablations(self):
+    def test_deployment_constraint_contract_separates_guard_ablations(self):
         contracts = {
-            (replay, trust): deployment_frequency_constraint_contract(
+            (replay, trust, closed): deployment_frequency_constraint_contract(
                 requested=True,
                 groupwise=True,
                 anchor_state_replay=replay,
                 ppo_trust_region=trust,
+                closed_loop_trust_region=closed,
             )
             for replay in (False, True)
             for trust in (False, True)
+            for closed in (False, True)
         }
-        self.assertEqual(len(set(contracts.values())), 4)
-        self.assertIn("state_replay", contracts[(True, False)])
-        self.assertIn("trust_region", contracts[(False, True)])
-        self.assertIn("state_replay", contracts[(True, True)])
-        self.assertIn("trust_region", contracts[(True, True)])
+        self.assertEqual(len(set(contracts.values())), 8)
+        self.assertIn("state_replay", contracts[(True, False, False)])
+        self.assertIn("trust_region", contracts[(False, True, False)])
+        self.assertIn("state_replay", contracts[(True, True, True)])
+        self.assertIn("joint_actor", contracts[(False, False, True)])
 
     @staticmethod
     def _selector_rows(
@@ -490,6 +494,30 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             {"standard": 2, "mixed": 2, "ood_chirp": 2},
         )
 
+    def test_closed_loop_guard_paths_have_an_independent_namespace(self):
+        selection_paths, _ = crossed_checkpoint_selection_paths(
+            [101, 103],
+            ["standard", "mixed"],
+            env_id="HalfCheetah-v5",
+        )
+        guard_paths, assignments = crossed_deployment_frequency_guard_paths(
+            [101, 103],
+            ["standard", "mixed"],
+            env_id="HalfCheetah-v5",
+        )
+        repeated, repeated_assignments = (
+            crossed_deployment_frequency_guard_paths(
+                [101, 103],
+                ["standard", "mixed"],
+                env_id="HalfCheetah-v5",
+            )
+        )
+        self.assertEqual(guard_paths, repeated)
+        self.assertEqual(assignments, repeated_assignments)
+        self.assertEqual(len(guard_paths), 4)
+        self.assertFalse(set(guard_paths) & set(selection_paths))
+        self.assertEqual(set(assignments.values()), {"standard", "mixed"})
+
     def test_behavior_robust_checkpoint_score_penalizes_worst_endpoint(self):
         rows = [
             {
@@ -639,6 +667,20 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 lower_power_floor=1e-6,
                 upper_power_floor=1e-6,
             )
+
+        snapshot = paired_closed_loop_guard_snapshot(
+            rows(99.0, 0.90),
+            baseline_rows=baseline,
+            expected_modes=("standard", "mixed"),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        self.assertEqual(snapshot["path_count"], 4)
+        self.assertEqual(snapshot["constraint_count"], 12)
+        self.assertEqual(snapshot["reward_violation_count"], 0)
+        self.assertEqual(snapshot["frequency_violation_count"], 0)
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)
@@ -1528,6 +1570,82 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             self.assertEqual(
                 direct_payload["lower_action_router_mode"], "direct"
             )
+
+    def test_closed_loop_guard_uses_disjoint_actual_rollout_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            baseline_dir = Path(directory) / "closed_loop_baseline"
+            common = dict(
+                method="freq_hrl",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                steps=8,
+                episode_horizon=8,
+                iterations=1,
+                optimizer_seed=601,
+                upper_period=4,
+                hidden_dim=8,
+                lower_action_router_observe_strength=True,
+                checkpoint_smoothing_window=1,
+                checkpoint_min_delta=0.0,
+                checkpoint_evaluation_interval=1,
+                training_disturbance_modes=["standard"],
+                evaluation_disturbance_modes=["standard"],
+            )
+            baseline_payload, baseline_rows, baseline_model = (
+                train_mujoco_method(
+                    train_seeds=[607],
+                    selection_seeds=[613],
+                    eval_seeds=[617],
+                    **common,
+                )
+            )
+            write_cell(
+                baseline_dir,
+                baseline_payload,
+                baseline_rows,
+                baseline_model,
+            )
+            candidate_payload, _, _ = train_mujoco_method(
+                train_seeds=[619],
+                selection_seeds=[631],
+                deployment_frequency_closed_loop_guard_seeds=[641],
+                eval_seeds=[643],
+                initial_checkpoint_path=baseline_dir / "checkpoint.pt",
+                initial_checkpoint_summary_path=(
+                    baseline_dir / "cell_summary.json"
+                ),
+                upper_deployment_frequency_lambda_init=1.0,
+                lower_deployment_frequency_lambda_init=1.0,
+                upper_deployment_frequency_rms_budget=1.0,
+                lower_deployment_frequency_rms_budget=1.0,
+                deployment_frequency_groupwise_robust=True,
+                deployment_frequency_closed_loop_trust_region=True,
+                deployment_frequency_closed_loop_trust_region_backtracks=2,
+                **common,
+            )
+
+            self.assertTrue(candidate_payload[
+                "deployment_frequency_closed_loop_trust_region"
+            ])
+            self.assertEqual(candidate_payload[
+                "deployment_frequency_closed_loop_guard_seed_roots"
+            ], [641])
+            self.assertEqual(candidate_payload[
+                "deployment_frequency_closed_loop_guard_path_count"
+            ], 1)
+            self.assertEqual(candidate_payload[
+                "deployment_frequency_closed_loop_guard_baseline"
+            ]["heldout_rows_used"], 0)
+            self.assertGreaterEqual(candidate_payload[
+                "deployment_frequency_closed_loop_guard_evaluation_count"
+            ], 3)
+            guard_paths = set(map(
+                int,
+                candidate_payload[
+                    "deployment_frequency_closed_loop_guard_condition_assignment"
+                ],
+            ))
+            self.assertFalse(guard_paths & {619, 631, 641, 643})
 
     def test_conservative_router_continuation_uses_same_hidden_state_contract(self):
         with tempfile.TemporaryDirectory() as directory:
