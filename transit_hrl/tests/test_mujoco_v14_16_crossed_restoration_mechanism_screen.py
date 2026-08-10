@@ -159,6 +159,12 @@ class MujocoV1416MechanismScreenTest(unittest.TestCase):
             "--deployment-frequency-projection-objective worst_group",
             control,
         )
+        self.assertIn(
+            "--deployment-frequency-anchor-state-replay", control
+        )
+        self.assertNotIn(
+            "--deployment-frequency-anchor-state-replay-seeds", control
+        )
         self.assertNotIn(
             "--deployment-frequency-pathwise-robust", control
         )
