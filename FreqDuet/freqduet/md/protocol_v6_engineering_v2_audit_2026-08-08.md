@@ -879,3 +879,88 @@ constraint-satisfaction, or confirmation conclusion is valid until every task
 has a zero exit status and success marker, all frozen artifacts are
 synchronized, strict aggregation succeeds, and the locked conditional-entropy
 screen is evaluated.
+
+## Engineering-v11 conditional-entropy outcome (2026-08-10)
+
+All scheduler tasks `t80258` through `t80305` completed with exit code zero,
+without a retry or synchronization error. The shared remote workspace contains
+exactly 48 nonempty run manifests, diagnostics files, frozen-evaluation CSVs,
+and frozen-evaluation manifests, with no detected traceback. Strict aggregation
+used only the 144 run-manifest and hash-locked frozen-evaluation artifacts. It
+verifies 48 runs and 192 unique common-random-number rollouts. The frozen
+aggregate hashes are:
+
+- matrix manifest: `6e33bcd06a4b7615b40485025fa733da5349fe1a2439bd2261592a7e645c1bba`;
+- per-evaluation rows: `3d36096473fb6333e60d7b1f25609ccc072063e5a9a3964cdd79e6b90e4e9c69`;
+- summary: `063ec09886a3eca62eb06fad4b6a36038771e1aefa45bcf07e0002ca9e127fb7`;
+- paired deltas: `1d0f1a55c29e987a34572f98ee626c72ef5cb575ecbac0341195ca7eda949470`.
+
+The preregistered V11 screen returns `no_pass`. Conditional entropy works as
+implemented: every candidate uses a lower valid-state temperature, reduces
+valid-state entropy by more than 0.10 nats versus its matched V10 control, keeps
+zero execution adjustment, and significantly improves CV versus `noguard`.
+However, all six candidates violate their frozen action-cost limit. The
+limit-0.002, target-0.25 row improves journey versus `noguard` by `-0.53165 min`
+and CV by `-0.03713` with CI upper bound `-0.01075`, but its mean and maximum
+rollout action costs are `0.00271` and `0.00300`; it is also `+0.00351` worse in
+CV than its same-limit no-entropy control. The limit-0.001, target-0.50 row
+improves CV versus its same-limit control by `-0.01130` while keeping journey
+within `+0.13510 min`, but its mean and maximum action costs are `0.00249` and
+`0.00271`, and its frozen valid-state entropy remains above the registered
+tolerance. Neither row is eligible for confirmation.
+
+The synchronized training traces show a numerical-conditioning failure rather
+than an infeasible discrete target. At episode 39 the regularity penalty is only
+approximately `0.0055--0.0085`, against a lower policy loss of approximately
+`1.8--1.9`; the dual continues to grow and action cost continues to decline,
+but the raw normalized-headway squared cost is too small to condition the actor
+within the 40-episode screen. This motivates an equivalent rescaling of the
+constraint, not a looser limit or an execution-time guard.
+
+## Engineering-v12 normalized-constraint preregistration (2026-08-10)
+
+Engineering-v12 preserves the V11 compact causal state, weight-two incremental
+reward, seven action bins, conditional valid-state entropy, analytic two-sided
+target, cost limits, and zero-adjustment `noguard` execution. It changes only
+the Lagrangian numerical parameterization from `cost <= limit` to the exactly
+equivalent dimensionless inequality `cost / limit <= 1`. The actor and dual use
+the same scaled cost and residual. Historical configurations default to
+`raw_cost_v1`; the new mode is explicit in configuration, diagnostics, training
+and deployment checkpoint contracts, and provenance. Frozen diagnostics also
+record the nearest-bin oracle action cost so the screen can verify that the
+registered limit lies above the discretization floor.
+
+The exploratory matrix is locked to historical main, `noguard`, compact
+context-only, current confirmed-main, no-entropy controls at limits 0.001 and
+0.002, the two promising V11 controls (target 0.50 at limit 0.001 and target
+0.25 at limit 0.002), and six dimensionless candidates crossing initial duals
+`0.05, 0.10, 0.20` on those two routes. It uses 40 episodes, fresh training
+seeds `15013, 15031, 15053, 15077`, and fresh frozen evaluation seeds `48017,
+48041, 48059, 48083`; repository audit finds no prior use of these seeds.
+
+A V12 candidate must pass strict provenance and completeness checks; retain
+zero execution adjustment and at least 50% causal evidence in every rollout;
+report the exact ratio mode, initial dual, and unit scaled limit; keep the
+nearest-bin oracle below one quarter of the cost limit; satisfy the original
+unscaled action-cost limit in every rollout; and reduce mean action cost by at
+least 0.00020 versus its matched V11 entropy control. The V11 entropy, journey,
+CV, holding, denied-dispatch, context, and current-main gates remain. It must
+also improve CV by at least 0.005 versus its matched V11 control without
+worsening journey by more than 0.15 min. Selection prefers the weakest initial
+dual, then the looser 0.002 limit. The screen remains non-claim-eligible and any
+selected row requires disjoint 200-episode confirmation.
+
+The two-episode pre-freeze integration smoke compared the unchanged V11
+limit-0.002, target-0.25 control with the V12 ratio-scaled initial-dual-0.10
+candidate under identical train and evaluation seeds. Both completed training,
+exact checkpointing, frozen restoration, evaluation, common-random-number
+verification, and strict aggregation. The V12 training checkpoint is
+`freqduet-lower-training-v7` and records the exact ratio mode, unit scaled
+limit, initial dual, and conditional-entropy contract. At episode one the V11
+control reports raw/scaled cost `0.00499`, penalty `0.00530`, and dual `1.06169`;
+V12 reports raw cost `0.00469`, scaled cost `2.34723`, penalty `0.24889`, and
+dual `0.10614`. Its nearest-bin oracle floor is approximately `7.2e-6`.
+Frozen execution records zero guard adjustment and an oracle floor of
+approximately `6.1e-6` for both rows. Their actions and outcomes remain
+identical at this horizon. These observations validate conditioning,
+instrumentation, and restoration only, not efficacy.

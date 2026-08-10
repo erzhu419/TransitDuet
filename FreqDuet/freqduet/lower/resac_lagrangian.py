@@ -453,6 +453,9 @@ class RESACLagrangianTrainer:
         self.regularity_policy_enabled = bool(
             regularity_cfg.get('enable', False))
         self.regularity_policy_contract = {'enabled': False}
+        self.regularity_constraint_scale_mode = 'raw_cost_v1'
+        self.regularity_constraint_cost_scale = 1.0
+        self.regularity_initial_lambda = 0.0
         self.log_regularity_lambda = None
         self.regularity_lambda_optimizer = None
         self.regularity_entropy_split_enabled = False
@@ -490,6 +493,9 @@ class RESACLagrangianTrainer:
                 regularity_cfg.get('cost_limit', 0.001))
             self.regularity_cost_cap = float(
                 regularity_cfg.get('cost_cap', 0.25))
+            self.regularity_constraint_scale_mode = str(
+                regularity_cfg.get(
+                    'constraint_scale_mode', 'raw_cost_v1')).strip().lower()
             lambda_lr_regularity = float(
                 regularity_cfg.get('lambda_lr', 1e-3))
             self.regularity_lambda_min = float(
@@ -511,6 +517,17 @@ class RESACLagrangianTrainer:
             if not np.isfinite(self.regularity_cost_cap) or (
                     self.regularity_cost_cap <= 0.0):
                 raise ValueError('regularity cost cap must be positive')
+            if self.regularity_constraint_scale_mode not in {
+                    'raw_cost_v1', 'cost_limit_ratio_v1'}:
+                raise ValueError(
+                    'unknown regularity constraint scale mode')
+            if (self.regularity_constraint_scale_mode
+                    == 'cost_limit_ratio_v1'):
+                if self.regularity_cost_limit <= 0.0:
+                    raise ValueError(
+                        'cost-limit ratio scaling requires a positive limit')
+                self.regularity_constraint_cost_scale = (
+                    self.regularity_cost_limit)
             if not np.isfinite(lambda_lr_regularity) or (
                     lambda_lr_regularity <= 0.0):
                 raise ValueError('regularity lambda_lr must be positive')
@@ -521,6 +538,7 @@ class RESACLagrangianTrainer:
             self.log_regularity_lambda = torch.tensor(
                 [float(np.log(initial_lambda))], dtype=torch.float32,
                 requires_grad=True, device=device)
+            self.regularity_initial_lambda = initial_lambda
             self.regularity_lambda_optimizer = optim.Adam(
                 [self.log_regularity_lambda], lr=lambda_lr_regularity)
             entropy_cfg = dict(
@@ -587,6 +605,8 @@ class RESACLagrangianTrainer:
                 'target_headway_scale_s': self.regularity_headway_scale_s,
                 'cost_limit': self.regularity_cost_limit,
                 'cost_cap': self.regularity_cost_cap,
+                'constraint_scale_mode': (
+                    self.regularity_constraint_scale_mode),
                 'lambda_lr': lambda_lr_regularity,
                 'lambda_min': self.regularity_lambda_min,
                 'lambda_max': self.regularity_lambda_max,
@@ -609,6 +629,17 @@ class RESACLagrangianTrainer:
         if self.log_regularity_alpha is None:
             return 0.0
         return self.log_regularity_alpha.exp().item()
+
+    @property
+    def regularity_scaled_cost_limit(self):
+        if not self.regularity_policy_enabled:
+            return 0.0
+        return (
+            self.regularity_cost_limit
+            / self.regularity_constraint_cost_scale)
+
+    def _scale_regularity_constraint_cost(self, cost):
+        return cost / self.regularity_constraint_cost_scale
 
     def _regularity_evidence_valid(self, state):
         if not self.regularity_policy_enabled:
@@ -832,8 +863,14 @@ class RESACLagrangianTrainer:
             'regularity_policy_enabled': float(
                 self.regularity_policy_enabled),
             'regularity_policy_cost_mean': 0.0,
+            'regularity_policy_oracle_cost_mean': 0.0,
+            'regularity_policy_excess_cost_mean': 0.0,
             'regularity_policy_valid_fraction': 0.0,
             'regularity_policy_constraint_gap': 0.0,
+            'regularity_policy_scaled_cost_mean': 0.0,
+            'regularity_policy_scaled_limit': float(
+                self.regularity_scaled_cost_limit),
+            'regularity_policy_scaled_constraint_gap': 0.0,
             'regularity_policy_penalty': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
@@ -849,6 +886,9 @@ class RESACLagrangianTrainer:
 
             # RE-SAC: ensemble Q statistics
             regularity_cost_mean = None
+            regularity_oracle_cost_mean = None
+            regularity_excess_cost_mean = None
+            regularity_scaled_cost_mean = None
             regularity_valid_fraction = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
@@ -882,7 +922,7 @@ class RESACLagrangianTrainer:
             policy_loss = (policy_terms * w).mean()
             regularity_penalty = torch.zeros((), device=self.device)
             if self.regularity_policy_enabled:
-                regularity_cost, regularity_valid, _ = (
+                regularity_cost, regularity_valid, regularity_action_costs = (
                     self._regularity_policy_cost(state, probs))
                 valid_weights = w * regularity_valid
                 valid_weight_sum = valid_weights.sum()
@@ -890,11 +930,23 @@ class RESACLagrangianTrainer:
                     regularity_cost_mean = (
                         regularity_cost * valid_weights
                     ).sum().div(valid_weight_sum)
+                    regularity_oracle_cost = regularity_action_costs.min(
+                        dim=-1).values
+                    regularity_oracle_cost_mean = (
+                        regularity_oracle_cost * valid_weights
+                    ).sum().div(valid_weight_sum)
+                    regularity_excess_cost_mean = (
+                        (regularity_cost - regularity_oracle_cost)
+                        * valid_weights
+                    ).sum().div(valid_weight_sum)
+                    regularity_scaled_cost_mean = (
+                        self._scale_regularity_constraint_cost(
+                            regularity_cost_mean))
                     regularity_valid_fraction = valid_weight_sum.div(
                         w.sum().clamp_min(1e-8))
                     regularity_penalty = (
                         self.log_regularity_lambda.exp().detach()
-                        * regularity_cost_mean)
+                        * regularity_scaled_cost_mean)
                     policy_loss = policy_loss + regularity_penalty
 
             self.policy_optimizer.zero_grad()
@@ -968,13 +1020,10 @@ class RESACLagrangianTrainer:
 
             # ──── Lambda update ────
             # Constraint: E_mu[c_t] <= cost_limit under the replay approximation
-            # to normalized discounted occupancy. The actor uses Q_c because that
-            # is the policy-gradient continuation value; the dual statistic and
-            # configured threshold both remain in per-decision cost units.
-            #   loss = - λ · (cost - cost_limit)
-            # so that ∂loss/∂(log λ) = -λ·(cost - clim);  Adam minimisation gives
-            # log λ ← log λ + lr·λ·(cost - clim), i.e. λ INCREASES when violated
-            # and DECREASES when slack. (The previous form had this sign reversed.)
+            # to normalized discounted occupancy. The regularity constraint may
+            # divide both sides by the positive cost limit; this leaves its
+            # feasible set unchanged while putting the dual residual near unit
+            # scale. Adam minimisation increases lambda on positive violation.
             weight_sum = w.sum().clamp_min(1e-8)
             batch_cost_mean = (
                 cost.squeeze(-1) * w).sum().div(weight_sum).detach()
@@ -988,8 +1037,8 @@ class RESACLagrangianTrainer:
             if regularity_cost_mean is not None:
                 regularity_lambda_loss = (
                     -self.log_regularity_lambda.exp()
-                    * (regularity_cost_mean.detach()
-                       - self.regularity_cost_limit))
+                    * (regularity_scaled_cost_mean.detach()
+                       - self.regularity_scaled_cost_limit))
                 self.regularity_lambda_optimizer.zero_grad()
                 regularity_lambda_loss.backward()
                 self.regularity_lambda_optimizer.step()
@@ -1011,12 +1060,27 @@ class RESACLagrangianTrainer:
                 'regularity_policy_cost_mean': (
                     regularity_cost_mean.item()
                     if regularity_cost_mean is not None else 0.0),
+                'regularity_policy_oracle_cost_mean': (
+                    regularity_oracle_cost_mean.item()
+                    if regularity_oracle_cost_mean is not None else 0.0),
+                'regularity_policy_excess_cost_mean': (
+                    regularity_excess_cost_mean.item()
+                    if regularity_excess_cost_mean is not None else 0.0),
                 'regularity_policy_valid_fraction': (
                     regularity_valid_fraction.item()
                     if regularity_valid_fraction is not None else 0.0),
                 'regularity_policy_constraint_gap': (
                     regularity_cost_mean.item() - self.regularity_cost_limit
                     if regularity_cost_mean is not None else 0.0),
+                'regularity_policy_scaled_cost_mean': (
+                    regularity_scaled_cost_mean.item()
+                    if regularity_scaled_cost_mean is not None else 0.0),
+                'regularity_policy_scaled_limit': float(
+                    self.regularity_scaled_cost_limit),
+                'regularity_policy_scaled_constraint_gap': (
+                    regularity_scaled_cost_mean.item()
+                    - self.regularity_scaled_cost_limit
+                    if regularity_scaled_cost_mean is not None else 0.0),
                 'regularity_policy_penalty': regularity_penalty.item(),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
@@ -1041,7 +1105,7 @@ class RESACLagrangianTrainer:
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v6',
+            'format': 'freqduet-lower-training-v7',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -1082,7 +1146,8 @@ class RESACLagrangianTrainer:
         if state.get('format') not in {
                 'freqduet-lower-training-v4',
                 'freqduet-lower-training-v5',
-                'freqduet-lower-training-v6'}:
+                'freqduet-lower-training-v6',
+                'freqduet-lower-training-v7'}:
             raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
@@ -1100,6 +1165,11 @@ class RESACLagrangianTrainer:
             saved_regularity_contract = dict(saved_regularity_contract)
             saved_regularity_contract['conditional_entropy'] = {
                 'enabled': False}
+        if (saved_regularity_contract.get('enabled')
+                and 'constraint_scale_mode'
+                not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower regularity-policy contract mismatch')
         self.policy_net.load_state_dict(state['policy'])
@@ -1174,6 +1244,11 @@ class RESACLagrangianTrainer:
             saved_regularity_contract = dict(saved_regularity_contract)
             saved_regularity_contract['conditional_entropy'] = {
                 'enabled': False}
+        if (saved_regularity_contract.get('enabled')
+                and 'constraint_scale_mode'
+                not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower checkpoint regularity-policy mismatch')
         self.policy_net.load_state_dict(ckpt['policy'])

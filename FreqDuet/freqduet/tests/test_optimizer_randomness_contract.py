@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 import unittest
@@ -189,7 +190,9 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertLess(trainer.lambda_param, 1.0)
 
     @staticmethod
-    def _regularity_trainer(cost_limit=0.001, conditional_entropy=False):
+    def _regularity_trainer(
+            cost_limit=0.001, conditional_entropy=False,
+            constraint_scale_mode="raw_cost_v1", initial_lambda=1.0):
         conditional = (
             {
                 "enable": True,
@@ -219,10 +222,11 @@ class OptimizerContractTest(unittest.TestCase):
                 "target_headway_scale_s": 600.0,
                 "cost_limit": cost_limit,
                 "cost_cap": 0.25,
+                "constraint_scale_mode": constraint_scale_mode,
                 "lambda_lr": 1e-2,
                 "lambda_min": 1e-3,
                 "lambda_max": 20.0,
-                "initial_lambda": 1.0,
+                "initial_lambda": initial_lambda,
                 "conditional_entropy": conditional,
             },
         )
@@ -268,6 +272,56 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertEqual(invalid_metrics["regularity_policy_cost_mean"], 0.0)
         self.assertEqual(invalid_trainer.regularity_lambda_param, 1.0)
 
+    def test_causal_regularity_limit_ratio_is_dimensionless(self):
+        trainer = self._regularity_trainer(
+            cost_limit=0.002,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.1,
+        )
+        raw_cost = torch.tensor(0.003, dtype=torch.float32)
+
+        scaled_cost = trainer._scale_regularity_constraint_cost(raw_cost)
+
+        self.assertAlmostEqual(scaled_cost.item(), 1.5, places=6)
+        self.assertAlmostEqual(trainer.regularity_scaled_cost_limit, 1.0)
+        self.assertEqual(
+            trainer.regularity_policy_contract["constraint_scale_mode"],
+            "cost_limit_ratio_v1",
+        )
+
+    def test_causal_regularity_limit_ratio_rejects_zero_limit(self):
+        with self.assertRaisesRegex(ValueError, "positive limit"):
+            self._regularity_trainer(
+                cost_limit=0.0,
+                constraint_scale_mode="cost_limit_ratio_v1",
+            )
+
+    def test_causal_regularity_limit_ratio_drives_actor_and_dual(self):
+        torch.manual_seed(101)
+        trainer = self._regularity_trainer(
+            cost_limit=0.002,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.1,
+        )
+        replay = CostReplayBuffer(64, seed=103)
+        for idx in range(16):
+            state = np.array([0.6, 0.5, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        self.assertAlmostEqual(
+            metrics["regularity_policy_scaled_cost_mean"],
+            metrics["regularity_policy_cost_mean"] / 0.002,
+            places=6,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_policy_penalty"],
+            0.1 * metrics["regularity_policy_scaled_cost_mean"],
+            places=5,
+        )
+        self.assertGreater(trainer.regularity_lambda_param, 0.1)
+
     def test_causal_regularity_dual_round_trips_exact_training_state(self):
         torch.manual_seed(71)
         trainer = self._regularity_trainer(cost_limit=0.0)
@@ -290,6 +344,20 @@ class OptimizerContractTest(unittest.TestCase):
                 trainer.policy_net.parameters(),
                 restored.policy_net.parameters()):
             torch.testing.assert_close(observed, expected)
+
+    def test_legacy_raw_regularity_checkpoint_defaults_scale_contract(self):
+        trainer = self._regularity_trainer()
+        state = copy.deepcopy(trainer.training_state_dict())
+        state["format"] = "freqduet-lower-training-v6"
+        state["regularity_policy_contract"].pop("constraint_scale_mode")
+        restored = self._regularity_trainer()
+
+        restored.load_training_state_dict(state)
+
+        self.assertEqual(
+            restored.regularity_constraint_scale_mode,
+            "raw_cost_v1",
+        )
 
     def test_causal_entropy_split_uses_independent_valid_temperature(self):
         trainer = self._regularity_trainer(conditional_entropy=True)
@@ -338,7 +406,7 @@ class OptimizerContractTest(unittest.TestCase):
         restored = self._regularity_trainer(conditional_entropy=True)
         restored.load_training_state_dict(state)
 
-        self.assertEqual(state["format"], "freqduet-lower-training-v6")
+        self.assertEqual(state["format"], "freqduet-lower-training-v7")
         self.assertAlmostEqual(
             restored.regularity_alpha_param,
             trainer.regularity_alpha_param,

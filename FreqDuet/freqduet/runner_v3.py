@@ -296,9 +296,16 @@ class DiagnosticLog:
         'lower_cost_q_mean', 'lower_cost_q_loss', 'lower_batch_cost_mean',
         'lower_cost_limit',
         'lower_regularity_policy_enabled',
+        'lower_regularity_policy_constraint_scale_mode',
+        'lower_regularity_policy_initial_lambda',
         'lower_regularity_policy_cost_mean',
+        'lower_regularity_policy_oracle_cost_mean',
+        'lower_regularity_policy_excess_cost_mean',
         'lower_regularity_policy_valid_fraction',
         'lower_regularity_policy_constraint_gap',
+        'lower_regularity_policy_scaled_cost_mean',
+        'lower_regularity_policy_scaled_limit',
+        'lower_regularity_policy_scaled_constraint_gap',
         'lower_regularity_policy_penalty',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
@@ -310,6 +317,8 @@ class DiagnosticLog:
         'lower_regularity_policy_entropy_valid_mean',
         'lower_regularity_policy_action_cost_mean',
         'lower_regularity_policy_action_cost_max',
+        'lower_regularity_policy_oracle_action_cost_mean',
+        'lower_regularity_policy_excess_action_cost_mean',
         'lower_regularity_policy_evidence_valid_mean',
         'lower_regularity_policy_target_action_mean_s',
         'lower_regularity_policy_abs_error_mean_s',
@@ -2622,6 +2631,8 @@ class TransitDuetV2Runner:
         self._ep_lower_departure_regularity_baseline_losses = []
         self._ep_lower_departure_regularity_post_losses = []
         self._ep_lower_regularity_policy_action_costs = []
+        self._ep_lower_regularity_policy_oracle_action_costs = []
+        self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
@@ -5703,6 +5714,24 @@ class TransitDuetV2Runner:
             cost_cap=cost_cap,
         )
         self._ep_lower_regularity_policy_action_costs.append(action_cost)
+        action_bins = getattr(self.lower_trainer, 'discrete_actions', None)
+        if action_bins is not None:
+            if hasattr(action_bins, 'detach'):
+                action_bins = action_bins.detach().cpu().numpy()
+            oracle_cost = min(
+                causal_two_sided_action_excess_cost(
+                    action_s=float(candidate_action),
+                    target_action_s=float(target_action),
+                    target_headway_s=float(target_headway),
+                    cost_cap=cost_cap,
+                )
+                for candidate_action in np.asarray(
+                    action_bins, dtype=float).reshape(-1)
+            )
+            self._ep_lower_regularity_policy_oracle_action_costs.append(
+                float(oracle_cost))
+            self._ep_lower_regularity_policy_excess_action_costs.append(
+                max(float(action_cost) - float(oracle_cost), 0.0))
         self._ep_lower_regularity_policy_target_actions.append(
             float(target_action))
         self._ep_lower_regularity_policy_abs_errors.append(
@@ -7761,6 +7790,8 @@ class TransitDuetV2Runner:
         self._ep_lower_departure_regularity_baseline_losses = []
         self._ep_lower_departure_regularity_post_losses = []
         self._ep_lower_regularity_policy_action_costs = []
+        self._ep_lower_regularity_policy_oracle_action_costs = []
+        self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
@@ -8435,6 +8466,10 @@ class TransitDuetV2Runner:
             self._ep_lower_departure_regularity_post_losses)
         lower_regularity_policy_action_cost_stat = _stat(
             self._ep_lower_regularity_policy_action_costs)
+        lower_regularity_policy_oracle_action_cost_stat = _stat(
+            self._ep_lower_regularity_policy_oracle_action_costs)
+        lower_regularity_policy_excess_action_cost_stat = _stat(
+            self._ep_lower_regularity_policy_excess_action_costs)
         lower_regularity_policy_evidence_stat = _stat(
             self._ep_lower_regularity_policy_evidence_valid)
         lower_regularity_policy_target_stat = _stat(
@@ -8902,12 +8937,27 @@ class TransitDuetV2Runner:
             'lower_cost_limit': float(self.lower_trainer.cost_limit),
             'lower_regularity_policy_enabled': int(
                 self.lower_trainer.regularity_policy_enabled),
+            'lower_regularity_policy_constraint_scale_mode': str(
+                self.lower_trainer.regularity_constraint_scale_mode),
+            'lower_regularity_policy_initial_lambda': float(
+                self.lower_trainer.regularity_initial_lambda),
             'lower_regularity_policy_cost_mean': lower_m.get(
                 'regularity_policy_cost_mean', 0.),
+            'lower_regularity_policy_oracle_cost_mean': lower_m.get(
+                'regularity_policy_oracle_cost_mean', 0.),
+            'lower_regularity_policy_excess_cost_mean': lower_m.get(
+                'regularity_policy_excess_cost_mean', 0.),
             'lower_regularity_policy_valid_fraction': lower_m.get(
                 'regularity_policy_valid_fraction', 0.),
             'lower_regularity_policy_constraint_gap': lower_m.get(
                 'regularity_policy_constraint_gap', 0.),
+            'lower_regularity_policy_scaled_cost_mean': lower_m.get(
+                'regularity_policy_scaled_cost_mean', 0.),
+            'lower_regularity_policy_scaled_limit': lower_m.get(
+                'regularity_policy_scaled_limit',
+                self.lower_trainer.regularity_scaled_cost_limit),
+            'lower_regularity_policy_scaled_constraint_gap': lower_m.get(
+                'regularity_policy_scaled_constraint_gap', 0.),
             'lower_regularity_policy_penalty': lower_m.get(
                 'regularity_policy_penalty', 0.),
             'lower_regularity_policy_cost_limit': float(
@@ -8932,6 +8982,10 @@ class TransitDuetV2Runner:
                 lower_regularity_policy_action_cost_stat['mean'], 8),
             'lower_regularity_policy_action_cost_max': round(
                 lower_regularity_policy_action_cost_stat['max'], 8),
+            'lower_regularity_policy_oracle_action_cost_mean': round(
+                lower_regularity_policy_oracle_action_cost_stat['mean'], 8),
+            'lower_regularity_policy_excess_action_cost_mean': round(
+                lower_regularity_policy_excess_action_cost_stat['mean'], 8),
             'lower_regularity_policy_evidence_valid_mean': round(
                 lower_regularity_policy_evidence_stat['mean'], 8),
             'lower_regularity_policy_target_action_mean_s': round(

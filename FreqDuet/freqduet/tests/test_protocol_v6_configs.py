@@ -7,6 +7,7 @@ from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
     CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
+    NORMALIZED_REGULARITY_CONFIGS,
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
     ROOT,
@@ -412,6 +413,44 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(entropy["mode"], "evidence_split_temperature_v1")
         self.assertEqual(entropy["target_fraction"], 0.5)
         self.assertAlmostEqual(trainer.regularity_alpha_param, 0.05)
+
+    def test_normalized_regularity_configs_are_causal_and_fail_closed(self):
+        configs = [CONFIRMED_MAIN, *NORMALIZED_REGULARITY_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(NORMALIZED_REGULARITY_CONFIGS),
+        )
+
+        for name in NORMALIZED_REGULARITY_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            objective = lower["causal_regularity_policy"]
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                objective["constraint_scale_mode"],
+                "cost_limit_ratio_v1",
+            )
+            self.assertIn(objective["initial_lambda"], {0.05, 0.10, 0.20})
+            self.assertIn(objective["cost_limit"], {0.001, 0.002})
+
+    def test_normalized_regularity_runner_resolves_unit_constraint(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_w2adnorm_l010_e25_c0020_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        trainer = runner.lower_trainer
+        self.assertEqual(
+            trainer.regularity_constraint_scale_mode,
+            "cost_limit_ratio_v1",
+        )
+        self.assertAlmostEqual(trainer.regularity_scaled_cost_limit, 1.0)
+        self.assertAlmostEqual(trainer.regularity_lambda_param, 0.10)
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

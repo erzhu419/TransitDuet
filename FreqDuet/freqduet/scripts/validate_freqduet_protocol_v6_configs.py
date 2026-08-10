@@ -48,6 +48,11 @@ CONDITIONAL_ENTROPY_CONFIGS = [
     for limit in ("0010", "0020")
     for fraction in ("25", "50", "75")
 ]
+NORMALIZED_REGULARITY_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adnorm_l{initial}_e{fraction}_c{limit}_hiro"
+    for limit, fraction in (("0010", "50"), ("0020", "25"))
+    for initial in ("005", "010", "020")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -71,6 +76,7 @@ EXPERIMENTAL_CONFIGS = [
     ],
     *REGULARITY_POLICY_CONFIGS,
     *CONDITIONAL_ENTROPY_CONFIGS,
+    *NORMALIZED_REGULARITY_CONFIGS,
 ]
 
 
@@ -209,6 +215,17 @@ def validate(
             if not (0.0 <= cost_limit < cost_cap):
                 raise ValueError(
                     f"{name}: invalid regularity policy cost contract")
+            constraint_scale_mode = regularity_policy.get(
+                "constraint_scale_mode", "raw_cost_v1")
+            if constraint_scale_mode not in {
+                    "raw_cost_v1", "cost_limit_ratio_v1"}:
+                raise ValueError(
+                    f"{name}: invalid regularity constraint scale mode")
+            if (constraint_scale_mode == "cost_limit_ratio_v1"
+                    and cost_limit <= 0.0):
+                raise ValueError(
+                    f"{name}: normalized regularity constraint needs a "
+                    "positive cost limit")
             entropy = regularity_policy.get(
                 "conditional_entropy", {}) or {}
             if bool(entropy.get("enable")):
