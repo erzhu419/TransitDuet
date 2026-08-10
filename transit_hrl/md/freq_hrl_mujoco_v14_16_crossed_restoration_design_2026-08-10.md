@@ -140,6 +140,12 @@ claim or a reliable confidence interval. A positive result only authorizes a
 larger frozen multiseed development screen; it does not authorize manuscript
 language claiming effectiveness.
 
+The engineering gate additionally requires a trained checkpoint at iteration
+7 or later, zero selected reward-floor violations, zero selected frequency
+violations, at least one effective closed-loop restoration update, and exact
+protocol identity. A selector fallback to the initial anchor cannot authorize
+the next screen even when held-out mean effects happen to pass.
+
 ## Verification completed before v2 dispatch
 
 - New and legacy mechanism tests: 76 passed.

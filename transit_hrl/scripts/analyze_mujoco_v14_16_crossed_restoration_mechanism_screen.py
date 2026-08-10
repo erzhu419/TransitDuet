@@ -24,7 +24,7 @@ from scripts import (  # noqa: E402
 )
 
 
-ANALYSIS_VERSION = "mujoco_v14_16_mechanism_screen_analysis_v1"
+ANALYSIS_VERSION = "mujoco_v14_16_mechanism_screen_analysis_v2"
 FREQUENCY_METRICS = (
     "LowerLFDriftAbs",
     "RawLowerLFDriftAbs",
@@ -134,6 +134,53 @@ def _effect_gate(effects: dict[str, float]) -> dict[str, Any]:
     }
 
 
+def _engineering_gate(summary: dict[str, Any]) -> dict[str, Any]:
+    prefix = "deployment_frequency_closed_loop_guard_"
+    selected_reward_violations = int(summary.get(
+        f"{prefix}selected_reward_violation_count", -1
+    ))
+    selected_frequency_violations = int(summary.get(
+        f"{prefix}selected_frequency_violation_count", -1
+    ))
+    effective_updates = int(summary.get(
+        f"{prefix}effective_update_count", 0
+    ))
+    selected_checkpoint_iteration = int(summary.get(
+        "selected_checkpoint_iteration", -2
+    ))
+    checks = {
+        "selected_reward_feasible": bool(
+            0 <= selected_reward_violations
+            <= spec.MAXIMUM_CLOSED_LOOP_REWARD_VIOLATIONS
+        ),
+        "selected_frequency_feasible": bool(
+            0 <= selected_frequency_violations
+            <= spec.MAXIMUM_CLOSED_LOOP_FREQUENCY_VIOLATIONS
+        ),
+        "effective_restoration_update": bool(
+            effective_updates >= spec.MINIMUM_CLOSED_LOOP_EFFECTIVE_UPDATES
+        ),
+        "trained_checkpoint_selected": bool(
+            selected_checkpoint_iteration
+            >= spec.ANALYSIS_TRAINED_CHECKPOINT_MINIMUM_ITERATION
+        ),
+        "protocol_identity": bool(
+            summary.get("protocol_version")
+            == spec.FROZEN_CORE_PROTOCOL_VERSION
+            and summary.get("protocol_version_selection")
+            == spec.FROZEN_CORE_PROTOCOL_VERSION
+        ),
+    }
+    return {
+        "pass": bool(all(checks.values())),
+        "checks": checks,
+        "selected_checkpoint_iteration": selected_checkpoint_iteration,
+        "selected_reward_violation_count": selected_reward_violations,
+        "selected_frequency_violation_count": selected_frequency_violations,
+        "closed_loop_effective_update_count": effective_updates,
+    }
+
+
 def _cell_dir(
     run: Path,
     *,
@@ -227,28 +274,7 @@ def analyze(run_dir: Path) -> dict[str, Any]:
                 )
                 pooled = _pooled_effects(effects)
                 gate = _effect_gate(pooled)
-                selected_reward_violations = int(summary.get(
-                    "deployment_frequency_closed_loop_guard_selected_reward_"
-                    "violation_count",
-                    -1,
-                ))
-                selected_frequency_violations = int(summary.get(
-                    "deployment_frequency_closed_loop_guard_selected_frequency_"
-                    "violation_count",
-                    -1,
-                ))
-                engineering_pass = bool(
-                    selected_reward_violations == 0
-                    and int(summary.get(
-                        "deployment_frequency_closed_loop_guard_effective_"
-                        "update_count",
-                        0,
-                    )) >= 1
-                    and summary.get("protocol_version")
-                    == spec.FROZEN_CORE_PROTOCOL_VERSION
-                    and summary.get("protocol_version_selection")
-                    == spec.FROZEN_CORE_PROTOCOL_VERSION
-                )
+                engineering = _engineering_gate(summary)
                 replicate_rows.append({
                     "environment": environment,
                     "optimizer_seed": int(optimizer_seed),
@@ -256,21 +282,20 @@ def analyze(run_dir: Path) -> dict[str, Any]:
                     **pooled,
                     "endpoint_pass_count": int(gate["pass_count"]),
                     "complete_effect_gate": bool(gate["complete"]),
-                    "engineering_pass": engineering_pass,
-                    "selected_checkpoint_iteration": int(summary.get(
-                        "selected_checkpoint_iteration", -2
-                    )),
-                    "selected_reward_violation_count": (
-                        selected_reward_violations
-                    ),
-                    "selected_frequency_violation_count": (
-                        selected_frequency_violations
-                    ),
-                    "closed_loop_effective_update_count": int(summary.get(
-                        "deployment_frequency_closed_loop_guard_effective_"
-                        "update_count",
-                        0,
-                    )),
+                    "engineering_pass": bool(engineering["pass"]),
+                    "engineering_checks": engineering["checks"],
+                    "selected_checkpoint_iteration": int(engineering[
+                        "selected_checkpoint_iteration"
+                    ]),
+                    "selected_reward_violation_count": int(engineering[
+                        "selected_reward_violation_count"
+                    ]),
+                    "selected_frequency_violation_count": int(engineering[
+                        "selected_frequency_violation_count"
+                    ]),
+                    "closed_loop_effective_update_count": int(engineering[
+                        "closed_loop_effective_update_count"
+                    ]),
                     "restoration_reward_actor_frozen": bool(summary.get(
                         "deployment_frequency_restoration_freeze_reward_actor",
                         False,

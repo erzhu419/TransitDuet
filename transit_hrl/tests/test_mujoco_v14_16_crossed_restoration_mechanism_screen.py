@@ -11,6 +11,7 @@ from scripts import (
 from scripts.analyze_mujoco_v14_16_crossed_restoration_mechanism_screen import (
     EXPECTED_MERGED_MANIFEST_STATUS,
     FREQUENCY_METRICS,
+    _engineering_gate,
     _effect_gate,
     _paired_path_effects,
     _pooled_effects,
@@ -72,6 +73,32 @@ class MujocoV1416MechanismScreenTest(unittest.TestCase):
             EXPECTED_MERGED_MANIFEST_STATUS,
             "development_screen_complete_unanalyzed",
         )
+
+    def test_engineering_gate_requires_feasible_trained_checkpoint(self):
+        summary = {
+            "protocol_version": spec.FROZEN_CORE_PROTOCOL_VERSION,
+            "protocol_version_selection": spec.FROZEN_CORE_PROTOCOL_VERSION,
+            "selected_checkpoint_iteration": (
+                spec.ANALYSIS_TRAINED_CHECKPOINT_MINIMUM_ITERATION
+            ),
+            "deployment_frequency_closed_loop_guard_effective_update_count": 1,
+            "deployment_frequency_closed_loop_guard_selected_reward_"
+            "violation_count": 0,
+            "deployment_frequency_closed_loop_guard_selected_frequency_"
+            "violation_count": 0,
+        }
+        self.assertTrue(_engineering_gate(summary)["pass"])
+
+        frequency_infeasible = dict(summary)
+        frequency_infeasible[
+            "deployment_frequency_closed_loop_guard_selected_frequency_"
+            "violation_count"
+        ] = 1
+        self.assertFalse(_engineering_gate(frequency_infeasible)["pass"])
+
+        initial_checkpoint = dict(summary)
+        initial_checkpoint["selected_checkpoint_iteration"] = -1
+        self.assertFalse(_engineering_gate(initial_checkpoint)["pass"])
 
     def test_cumulative_ablation_chain_is_complete(self):
         observed = [
