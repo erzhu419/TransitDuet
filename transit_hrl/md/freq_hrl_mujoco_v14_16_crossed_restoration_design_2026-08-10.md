@@ -57,13 +57,26 @@ format and source contract without forcing new mechanisms on the controls.
 ## Frozen execution identity
 
 - Algorithm revision:
-  `ffc60268ece9f4acd459bb61726fadcbf4a36d8b`
+  `c9823e22b91d0260ec37ab20457d4c8c411aafd5`
 - Source manifest SHA-256:
-  `b79dcf44898b7128a29d9f647f9e8577de74a45add1e9945159655652435cca4`
+  `df99be84451c01feeb05a68206ba91819db3ea488df13d471f6cb013574d2ea6`
 - Core protocol:
   `freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration`
 - Development protocol:
-  `mujoco_v14_16_crossed_restoration_mechanism_screen_v1`
+  `mujoco_v14_16_crossed_restoration_mechanism_screen_v2`
+
+## Invalidated engineering attempts
+
+The r2 scheduler submission explicitly selected a bare `python3`, which is not
+on the compute-node PATH. It was cancelled without valid continuation output.
+The r3 submission used the verified node interpreter, but training-path replay
+arms exposed an input-validation regression: replay was enabled while the new
+validator incorrectly required independent replay roots. The failure occurred
+at the training entry point, before those cells produced evaluation results.
+All 60 active r3 continuation tasks were killed successfully; the r3 seed
+namespace is permanently retired. Protocol v2 restores the documented
+iteration-zero training-path fallback, retains explicit roots for the crossed
+replay arm, and uses a fresh disjoint seed namespace.
 
 ## Cumulative causal matrix
 
@@ -127,10 +140,12 @@ claim or a reliable confidence interval. A positive result only authorizes a
 larger frozen multiseed development screen; it does not authorize manuscript
 language claiming effectiveness.
 
-## Verification completed before dispatch
+## Verification completed before v2 dispatch
 
 - New and legacy mechanism tests: 76 passed.
 - Shared RL/MuJoCo/launcher regression: 153 passed and 6 subtests passed.
 - End-to-end v14.16 checkpoint write/load, crossed replay, pathwise guard, and
   restoration freeze smoke: passed.
 - Legacy v14.15 launcher/spec tests remain passing.
+- The training-path fallback and explicit crossed-replay paths both pass an
+  end-to-end MuJoCo checkpoint continuation test.

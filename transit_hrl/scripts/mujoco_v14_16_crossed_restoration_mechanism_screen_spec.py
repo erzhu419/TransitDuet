@@ -10,20 +10,20 @@ from scripts import (
 
 
 DEVELOPMENT_PROTOCOL_VERSION = (
-    "mujoco_v14_16_crossed_restoration_mechanism_screen_v1"
+    "mujoco_v14_16_crossed_restoration_mechanism_screen_v2"
 )
 FROZEN_CORE_PROTOCOL_VERSION = (
     "freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration"
 )
 FROZEN_ALGORITHM_REVISION = (
-    "ffc60268ece9f4acd459bb61726fadcbf4a36d8b"
+    "c9823e22b91d0260ec37ab20457d4c8c411aafd5"
 )
 FROZEN_SOURCE_MANIFEST_SHA256 = (
-    "b79dcf44898b7128a29d9f647f9e8577de74a45add1e9945159655652435cca4"
+    "df99be84451c01feeb05a68206ba91819db3ea488df13d471f6cb013574d2ea6"
 )
 REQUIRE_EXPLICIT_PROTOCOL_SELECTION = True
 PREREGISTRATION_STATUS = (
-    "frozen_before_v14_16_crossed_restoration_mechanism_outcome_access"
+    "frozen_before_v14_16_v2_crossed_restoration_outcome_access"
 )
 
 ENVIRONMENTS = predecessor.ENVIRONMENTS
@@ -55,42 +55,54 @@ L2_PATH_TRAIN_REPLAY_ARM = "l2_path_trainreplay"
 L2_PATH_FREEZE_TRAIN_REPLAY_ARM = "l2_path_freeze_trainreplay"
 L2_PATH_FREEZE_CROSSED_REPLAY_ARM = "l2_path_freeze_crossreplay"
 
-OPTIMIZER_SEEDS = (66030672, 1747289615, 2261102359)
-PRETRAIN_SEEDS = (2427260739, 1976957629, 3818387904, 2873153857)
-PRETRAIN_SELECTION_SEEDS = (2411939979, 3140363664)
+RETIRED_ENGINEERING_SEEDS = (
+    66030672, 1747289615, 2261102359,
+    2427260739, 1976957629, 3818387904, 2873153857,
+    2411939979, 3140363664,
+    3129729082, 3425257929, 1586248794, 3437281405,
+    3619375873, 3879066966, 2778113525, 96038920,
+    2509648319, 1086070922, 2035058809, 114106095,
+    1501727607, 713873139, 1384337882, 118404040,
+    3095107190, 285836482, 3578577806, 2097452820,
+    2450247925, 910994775, 1975100367, 4017253568,
+)
+
+OPTIMIZER_SEEDS = (3493980176, 4020259488, 583213049)
+PRETRAIN_SEEDS = (4195437019, 1509618766, 3695692096, 2694076119)
+PRETRAIN_SELECTION_SEEDS = (1816480686, 2948470013)
 CONTINUATION_TRAIN_SEEDS = (
-    3129729082,
-    3425257929,
-    1586248794,
-    3437281405,
+    1318590799,
+    378906977,
+    874061244,
+    2920971131,
 )
 CONTINUATION_SELECTION_SEEDS = (
-    3619375873,
-    3879066966,
-    2778113525,
-    96038920,
+    754438151,
+    4033819361,
+    3680814507,
+    2350542369,
 )
 DEPLOYMENT_FREQUENCY_ANCHOR_STATE_REPLAY_SEEDS = (
-    2509648319,
-    1086070922,
-    2035058809,
-    114106095,
+    1504882304,
+    1528351262,
+    3968189266,
+    1765074794,
 )
 DEPLOYMENT_FREQUENCY_CLOSED_LOOP_GUARD_SEEDS = (
-    1501727607,
-    713873139,
-    1384337882,
-    118404040,
+    3171922821,
+    3848210681,
+    3133178319,
+    939796718,
 )
 DEVELOPMENT_EVALUATION_SEEDS = (
-    3095107190,
-    285836482,
-    3578577806,
-    2097452820,
-    2450247925,
-    910994775,
-    1975100367,
-    4017253568,
+    324724199,
+    98480853,
+    3308987476,
+    4218259887,
+    4010771860,
+    1767642859,
+    2994879384,
+    1045477827,
 )
 
 
@@ -227,7 +239,10 @@ DEVELOPMENT_DISCLOSURE = (
     "frequency feasibility. Five cumulative arms isolate normalized all-active "
     "L2 projection, individual-path guard/selection constraints, restoration-"
     "phase reward-actor freezing, and crossed independent frozen-state replay. "
-    "All arms share one explicit v14.16 checkpoint protocol, source-bound "
+    "The first v14.16 scheduler attempt was invalidated before analysis when "
+    "training-path replay arms exposed an input-validation regression; all "
+    "active tasks were cancelled and its seed namespace was retired. All v2 "
+    "arms share one explicit v14.16 checkpoint protocol, source-bound "
     "anchors, budgets, disturbance registry, optimization budget, and held-out "
     "paths. Optimizer seed is the replication unit. This screen is adaptive "
     "development evidence and cannot support a confirmation claim."
@@ -358,6 +373,8 @@ def validate_frozen_design() -> None:
     }
     if predecessor_seeds & set(flattened):
         raise ValueError("v14.16 reuses a v14.15 seed")
+    if set(RETIRED_ENGINEERING_SEEDS) & set(flattened):
+        raise ValueError("v14.16 v2 reuses a retired engineering seed")
     if len(OPTIMIZER_SEEDS) != 3 or len(ARMS) != 8:
         raise ValueError("v14.16 mechanism matrix is incomplete")
     expected_chain = (

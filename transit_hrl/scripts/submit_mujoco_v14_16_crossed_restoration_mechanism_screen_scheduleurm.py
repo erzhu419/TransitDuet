@@ -21,7 +21,7 @@ SPEC_PATH = Path(spec.__file__).resolve()
 ANALYZER_PATH = LAUNCHER_PATH.with_name(
     "analyze_mujoco_v14_16_crossed_restoration_mechanism_screen.py"
 )
-SIGNATURE_VERSION = "mujoco-v14-16-crossed-restoration-mechanism-screen-v1"
+SIGNATURE_VERSION = "mujoco-v14-16-crossed-restoration-mechanism-screen-v2"
 
 
 def _overrides() -> dict[str, Any]:

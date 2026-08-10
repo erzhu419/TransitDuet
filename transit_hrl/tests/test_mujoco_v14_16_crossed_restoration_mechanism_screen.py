@@ -65,6 +65,7 @@ class MujocoV1416MechanismScreenTest(unittest.TestCase):
             int(seed) for role in predecessor_roles for seed in role
         }
         self.assertFalse(current & previous)
+        self.assertFalse(current & set(spec.RETIRED_ENGINEERING_SEEDS))
 
     def test_analyzer_requires_the_full_screen_merge_status(self):
         self.assertEqual(
