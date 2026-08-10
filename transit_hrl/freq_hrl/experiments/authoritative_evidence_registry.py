@@ -757,6 +757,69 @@ def _mujoco_mechanism_preflight_facts(
     }
 
 
+def _mujoco_v14_15_multiseed_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    primary = _read_csv(paths["primary_contrasts"])
+    replicates = _read_csv(paths["replicate_rows"])
+    report = paths.get("report")
+    environment_gates = list(decision.get("environment_gates") or [])
+    expected_complete = {
+        "HalfCheetah-v5": 0,
+        "Hopper-v5": 7,
+        "Walker2d-v5": 1,
+    }
+    observed_complete = {
+        str(row.get("environment")): int(row.get("complete_gate_count", -1))
+        for row in environment_gates
+    }
+    if (
+        decision.get("status") != "candidate_not_ready_for_confirmation"
+        or decision.get("evidence_role")
+        != "candidate_fixed_multiseed_development_no_confirmation"
+        or decision.get("development_protocol_version")
+        != "mujoco_v14_15_restoration_multiseed_development_screen_v2"
+        or decision.get("primary_contrast_pass") is not False
+        or decision.get("environment_complete_gate_pass") is not False
+        or int(decision.get("optimizer_seed_count", -1)) != 15
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("aggregate_complete_gate_count", -1)) != 8
+        or int(decision.get("aggregate_replicate_count", -1)) != 45
+        or observed_complete != expected_complete
+        or len(primary) != 18
+        or len(replicates) != 45
+        or sum(row.get("candidate_preflight_pass") == "True" for row in replicates)
+        != 8
+        or report is None
+        or "Status: `candidate_not_ready_for_confirmation`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v14.15 multiseed decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "development_protocol_version": str(
+            decision["development_protocol_version"]
+        ),
+        "optimizer_seed_count": int(decision["optimizer_seed_count"]),
+        "environment_count": int(decision["environment_count"]),
+        "primary_contrast_pass": False,
+        "complete_candidate_cells": int(
+            decision["aggregate_complete_gate_count"]
+        ),
+        "candidate_cell_count": int(decision["aggregate_replicate_count"]),
+        "complete_cells_by_environment": expected_complete,
+        "aggregate_complete_fraction_wilson_lower": float(
+            decision["aggregate_complete_gate_fraction_lower"]
+        ),
+        "heldout_paths_are_not_replicates": bool(
+            decision["heldout_paths_are_not_replicates"]
+        ),
+        "input_sha256": str(decision["input_sha256"]),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -772,6 +835,7 @@ PARSERS = {
         _development_preflight_adjudication_facts
     ),
     "mujoco_mechanism_preflight": _mujoco_mechanism_preflight_facts,
+    "mujoco_v14_15_multiseed": _mujoco_v14_15_multiseed_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

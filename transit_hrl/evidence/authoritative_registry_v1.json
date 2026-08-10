@@ -589,6 +589,43 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v14_15_restoration_multiseed_development_r2",
+      "claim_id": "D17_RESTORATION_MULTI_SEED_GENERALIZATION",
+      "claim": "The v14.15 restoration candidate generalizes across optimizer seeds and MuJoCo environments sufficiently to authorize fresh confirmation.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "candidate_not_ready_for_confirmation",
+      "integrity_status": "valid",
+      "selection_access": "frozen_candidate_multiseed_development",
+      "outcome_provenance": "candidate_fixed_15_optimizer_seed_three_environment_development_screen",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_15_multiseed",
+      "allowed_wording": "The repaired v14.15 r2 development screen completed all 450 frozen cells across 15 fresh optimizer seeds and three MuJoCo environments. The preselected restoration arm was not ready for confirmation: only 8 of 45 environment-by-seed candidate cells passed the complete gate (HalfCheetah 0, Hopper 7, Walker2d 1), and the simultaneous primary family failed. Training often restored the independent guard paths, but checkpoint selection exposed poor transfer to disjoint paths, motivating broader frozen-state coverage and restoration-specific regularization.",
+      "forbidden_wording": "MuJoCo v14.15 provides confirmatory evidence, establishes cross-environment learned frequency separation, supports a no-tradeoff claim, or is ready for submission as the final algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_15_multiseed/decision.json",
+          "sha256": "c373c52470b980ace11f0f5dcb459d9f0ffc2e8dab109d00d77ae0ef01587561"
+        },
+        {
+          "role": "primary_contrasts",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_15_multiseed/primary_contrasts.csv",
+          "sha256": "01f6147925f7fc2f6c4d5464eff4fdbb71c3a01cb1dd5429eab757aa5f8fcde3"
+        },
+        {
+          "role": "replicate_rows",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_15_multiseed/replicate_rows.csv",
+          "sha256": "56f38cafd9641e6ee3a0ce37411a0a209306bc215218309538e49f7879d4c9b7"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_15_multiseed/report.md",
+          "sha256": "8d73d55114b14898b8bbb2997369173230dcf7d2e3b5a8540f57996984888a12"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

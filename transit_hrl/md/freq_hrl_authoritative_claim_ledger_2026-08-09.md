@@ -25,6 +25,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development | do_not_expand | development_only | false |
 | mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development | do_not_expand | development_only | false |
 | mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development | expand_to_multiseed_screen | development_only | false |
+| mujoco_v14_15_restoration_multiseed_development_r2 | mujoco_control | development | candidate_not_ready_for_confirmation | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -143,6 +144,12 @@ Forbidden: MuJoCo v14.14 supports an accepted learned checkpoint, reward improve
 The source-bound v14.15 HalfCheetah preflight selected the restoration arm with reward tolerance 0.005, eight backtracks, and funnel multiplier 3. It accepted 22 effective joint actor updates, reduced 20 closed-loop frequency violations and continuous violation merit to zero under the reward floor, and passed all five held-out disturbance gates. This single-seed result authorizes a fresh multiseed development screen only.
 
 Forbidden: MuJoCo v14.15 preflight alone supports statistically reliable reward improvement, robust frequency separation, no-tradeoff behavior, cross-environment generality, confirmatory evidence, or a submission-ready algorithm.
+
+### mujoco_v14_15_restoration_multiseed_development_r2
+
+The repaired v14.15 r2 development screen completed all 450 frozen cells across 15 fresh optimizer seeds and three MuJoCo environments. The preselected restoration arm was not ready for confirmation: only 8 of 45 environment-by-seed candidate cells passed the complete gate (HalfCheetah 0, Hopper 7, Walker2d 1), and the simultaneous primary family failed. Training often restored the independent guard paths, but checkpoint selection exposed poor transfer to disjoint paths, motivating broader frozen-state coverage and restoration-specific regularization.
+
+Forbidden: MuJoCo v14.15 provides confirmatory evidence, establishes cross-environment learned frequency separation, supports a no-tradeoff claim, or is ready for submission as the final algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
