@@ -23,7 +23,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_11_iterative_projection_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
-| mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development_preflight | preregistered_unrun | excluded_until_audited | false |
+| mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -171,15 +171,21 @@ confirmatory evidence, or a submission-ready selected algorithm.
 
 ### mujoco_v14_14_closed_loop_actor_guard_preflight
 
-The source-bound v14.14 protocol is preregistered but has no admitted result.
-It tests an independent closed-loop reward/frequency actor guard against matched
-v14.13 inner-mechanism controls. Scheduler completion, a passing merge, and the
-frozen preflight analyzer are all required before this ledger entry can change.
+The source-bound v14.14 HalfCheetah preflight completed 10 of 10 scheduler cells,
+passed projection calibration, and passed the frozen run-scoped sync and merge.
+The independent closed-loop guard executed 146 evaluations for the `bt=4` arm
+and 242 evaluations for each `bt=8` arm, but accepted zero effective actor
+updates. Full steps often reduced the number of frequency violations while
+preserving reward; the infeasible anchor's lexicographic worst-condition gate
+nevertheless rejected every nonzero fraction. All learned arms selected the
+iteration `-1` fallback, so the full multiseed screen was not launched. This
+outcome identifies a feasible-set maintenance rule applied at an infeasible
+start and motivates a separate feasibility-restoration filter.
 
-Forbidden: the existence of the v14.14 code path, tests, preregistration, queued
-tasks, or smoke outputs establishes an accepted learned checkpoint, held-out
-frequency separation, reward improvement, no-tradeoff behavior, or paper
-evidence.
+Forbidden: v14.14 supports an accepted learned checkpoint, held-out frequency
+separation, reward improvement, no-tradeoff behavior, cross-task generality,
+statistical evidence, confirmatory evidence, or a submission-ready selected
+algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
