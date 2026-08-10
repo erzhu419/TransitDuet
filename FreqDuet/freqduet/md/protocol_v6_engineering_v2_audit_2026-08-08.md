@@ -865,3 +865,17 @@ independently moved from 0.05 to `0.04912`, while its ordinary temperature was
 `0.04934`; the V10 control has no split temperature. Both report causal
 evidence `0.65462`, action cost `0.00442`, and zero execution adjustment. These
 observations validate the mechanism and instrumentation only, not efficacy.
+
+The frozen V11 source is clean detached commit
+`1a1b87517e1f9a8c1e3fd3ba51d80b24ca048eb8` at
+`FreqDuet-v6-engineering-v11-snapshot`. The preregistered run name is
+`protocol_v6_conditional_entropy_ep40_s4_e4_v11`. Scheduler tasks `t80258`
+through `t80305` cover exactly the 48 config-by-training-seed jobs, one job per
+shard, with eight shards hard-pinned to each of `node001` through `node006`.
+The scheduler watcher launched all 48 on 2026-08-10; direct process telemetry
+showed live CPU and memory use and no retries at the first post-launch audit.
+These observations establish execution health only. No V11 effectiveness,
+constraint-satisfaction, or confirmation conclusion is valid until every task
+has a zero exit status and success marker, all frozen artifacts are
+synchronized, strict aggregation succeeds, and the locked conditional-entropy
+screen is evaluated.
