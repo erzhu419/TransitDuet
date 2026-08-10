@@ -24,6 +24,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_12_groupwise_robust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_13_anchor_replay_trust_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
 | mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development_preflight | do_not_expand | negative_development_only | false |
+| mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development_preflight | preregistered_unrun | excluded_until_audited | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -186,6 +187,21 @@ Forbidden: v14.14 supports an accepted learned checkpoint, held-out frequency
 separation, reward improvement, no-tradeoff behavior, cross-task generality,
 statistical evidence, confirmatory evidence, or a submission-ready selected
 algorithm.
+
+### mujoco_v14_15_closed_loop_restoration_filter_preflight
+
+The source-bound v14.15 protocol is preregistered but has no admitted outcome.
+It replaces v14.14's infeasible-start lexicographic maintenance gate with a
+two-phase closed-loop filter: continuous positive-violation merit restoration
+under a fixed worst-endpoint funnel, followed by strict zero-violation
+maintenance. The single-optimizer-seed HalfCheetah preflight may only reject a
+broken mechanism or authorize a larger development screen after frozen merge
+and audit. Until then it is excluded from all manuscript claims.
+
+Forbidden: the v14.15 implementation, tests, preregistration, queued tasks, or
+smoke output supports an accepted learned checkpoint, reward improvement,
+frequency separation, no-tradeoff behavior, robustness, cross-task generality,
+statistical evidence, confirmatory evidence, or a submission-ready algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
