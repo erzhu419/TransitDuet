@@ -1,4 +1,4 @@
-# MuJoCo v14.15 Restoration Multiseed Development Protocol
+# MuJoCo v14.15 Restoration Multiseed Development Protocol v2
 
 Date: 2026-08-10
 
@@ -20,12 +20,18 @@ No multiseed arm may replace this candidate. Other v14.15 arms are retained
 only as frozen controls and ablations.
 
 The executable `freq_hrl` package is frozen at Git revision
-`deb798c56fbb1fce06a8c84bbac84c77d3556703` and source-manifest SHA-256
-`1708dd24b9a7badc641b8b188b111020f5d4dd10e73338d591b032a4f64cfc91`.
-This execution identity includes the authoritative evidence registry added
-after the single-seed run; the v14.15 algorithm implementation itself is
-unchanged. The earlier preflight remains verified against its original
-revision and manifest.
+`825871ebf75f55de1bbf5ae2f9c7c5eb0fa97e7a` and source-manifest SHA-256
+`4ee9217bc9ad52116239157dde0d284a900a930cdd3ca29ca7eb62002302f550`.
+This revision corrects the dimensionally inconsistent restoration-merit
+validator documented in
+`freq_hrl_mujoco_v14_15_multiseed_r1_invalidation_2026-08-10.md`. The earlier
+single-seed preflight remains verified against its original revision and
+manifest.
+
+The predecessor run
+`mujoco_v14_15_restoration_multiseed_development_20260810_r1` is invalid and
+cannot be reused. Protocol v2 requires a new run directory and recomputes all
+45 anchors and 405 continuations under one source identity.
 
 ## Scope
 

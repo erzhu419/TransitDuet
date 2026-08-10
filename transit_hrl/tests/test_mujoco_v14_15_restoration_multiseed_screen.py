@@ -27,6 +27,10 @@ class MujocoV1415RestorationMultiseedScreenTest(unittest.TestCase):
         self.assertNotIn(base.OPTIMIZER_SEEDS[0], spec.OPTIMIZER_SEEDS)
         self.assertEqual(len(spec.OPTIMIZER_SEEDS), 15)
         self.assertEqual(len(spec.PRIMARY_CONTRAST_ORDER), 18)
+        self.assertEqual(
+            spec.INVALIDATED_PREDECESSOR_RUN,
+            "mujoco_v14_15_restoration_multiseed_development_20260810_r1",
+        )
 
     def test_launcher_profile_rejects_seed_or_environment_subsets(self):
         seed_csv = ",".join(map(str, spec.OPTIMIZER_SEEDS))
@@ -58,6 +62,13 @@ class MujocoV1415RestorationMultiseedScreenTest(unittest.TestCase):
                 "--fixed-candidate-multiseed",
                 "--optimizer-seeds", seed_csv,
                 "--environments", spec.ENVIRONMENTS[0],
+                "--python-executable", "python3",
+            ]))
+        with self.assertRaisesRegex(SystemExit, "invalidated r1"):
+            normalize_args(build_parser().parse_args([
+                "--run-name", spec.INVALIDATED_PREDECESSOR_RUN,
+                "--fixed-candidate-multiseed",
+                "--optimizer-seeds", seed_csv,
                 "--python-executable", "python3",
             ]))
 

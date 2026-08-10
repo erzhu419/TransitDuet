@@ -158,6 +158,8 @@ def analyze(run_dir: Path) -> dict[str, Any]:
         == spec.SELECTION_SOURCE_EVIDENCE_ID
         and preregistration.get("selection_source_decision_sha256")
         == spec.SELECTION_SOURCE_DECISION_SHA256
+        and preregistration.get("invalidated_predecessor_run")
+        == spec.INVALIDATED_PREDECESSOR_RUN
         and preregistration.get("dispatched_environment_subset")
         == list(spec.ENVIRONMENTS)
         and preregistration.get("dispatched_optimizer_seed_subset")

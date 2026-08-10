@@ -10,12 +10,15 @@ from scripts import (
 
 
 DEVELOPMENT_PROTOCOL_VERSION = (
-    "mujoco_v14_15_restoration_multiseed_development_screen_v1"
+    "mujoco_v14_15_restoration_multiseed_development_screen_v2"
 )
-ANALYSIS_PROFILE = "fixed_v14_15_restoration_candidate_multiseed_v1"
-FROZEN_EXECUTION_REVISION = "deb798c56fbb1fce06a8c84bbac84c77d3556703"
+ANALYSIS_PROFILE = "fixed_v14_15_restoration_candidate_multiseed_v2"
+FROZEN_EXECUTION_REVISION = "825871ebf75f55de1bbf5ae2f9c7c5eb0fa97e7a"
 FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256 = (
-    "1708dd24b9a7badc641b8b188b111020f5d4dd10e73338d591b032a4f64cfc91"
+    "4ee9217bc9ad52116239157dde0d284a900a930cdd3ca29ca7eb62002302f550"
+)
+INVALIDATED_PREDECESSOR_RUN = (
+    "mujoco_v14_15_restoration_multiseed_development_20260810_r1"
 )
 SELECTION_SOURCE_EVIDENCE_ID = (
     "mujoco_v14_15_closed_loop_restoration_filter_preflight"
@@ -87,6 +90,8 @@ def validate() -> None:
         raise RuntimeError("multiseed execution revision is not frozen")
     if len(FROZEN_EXECUTION_SOURCE_MANIFEST_SHA256) != 64:
         raise RuntimeError("multiseed execution source manifest is not frozen")
+    if not INVALIDATED_PREDECESSOR_RUN.endswith("_r1"):
+        raise RuntimeError("multiseed invalidated predecessor is not frozen")
     if PRESELECTED_CANDIDATE_ARM not in base.AUTHORIZING_ARMS:
         raise RuntimeError("multiseed candidate is not a v14.15 authorizing arm")
     if set(OPTIMIZER_SEEDS) & {base.OPTIMIZER_SEEDS[0]}:

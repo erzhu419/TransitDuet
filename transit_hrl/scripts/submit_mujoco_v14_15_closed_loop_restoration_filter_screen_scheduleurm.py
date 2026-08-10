@@ -1087,6 +1087,9 @@ def _write_preregistration(args: argparse.Namespace) -> None:
             "selection_source_decision_sha256": (
                 multiseed_spec.SELECTION_SOURCE_DECISION_SHA256
             ),
+            "invalidated_predecessor_run": (
+                multiseed_spec.INVALIDATED_PREDECESSOR_RUN
+            ),
             "statistical_unit": "optimizer_seed",
             "optimizer_seed_reuse_policy": (
                 "preflight_selection_seed_excluded"
@@ -1961,6 +1964,8 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     if not 1 <= int(args.sync_workers) <= 8:
         raise SystemExit("v14.15 sync workers must be in [1, 8]")
     if bool(args.fixed_candidate_multiseed):
+        if args.run_name == multiseed_spec.INVALIDATED_PREDECESSOR_RUN:
+            raise SystemExit("multiseed profile cannot reuse the invalidated r1 run")
         if set(args.arms) != set(multiseed_spec.ARMS):
             raise SystemExit("multiseed profile requires the full frozen arm registry")
         if args.environments != list(multiseed_spec.ENVIRONMENTS):
