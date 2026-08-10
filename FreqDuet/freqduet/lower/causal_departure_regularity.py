@@ -37,6 +37,31 @@ def causal_two_sided_holding_target_s(
     return float(np.clip(0.5 * (follower - forward), 0.0, cap))
 
 
+def causal_two_sided_action_excess_cost(
+    *,
+    action_s: float,
+    target_action_s: float,
+    target_headway_s: float,
+    cost_cap: float,
+) -> float:
+    """Return the action-dependent term of the two-sided quadratic loss."""
+    action = float(action_s)
+    target_action = float(target_action_s)
+    target_headway = float(target_headway_s)
+    cap = float(cost_cap)
+    if not all(np.isfinite(value) for value in (
+            action, target_action, target_headway, cap)):
+        raise ValueError("regularity action cost inputs must be finite")
+    if action < 0.0 or target_action < 0.0:
+        raise ValueError("regularity actions must be non-negative")
+    if target_headway <= 0.0 or cap <= 0.0:
+        raise ValueError("target headway and cost cap must be positive")
+    return float(min(
+        ((action - target_action) / target_headway) ** 2,
+        cap,
+    ))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

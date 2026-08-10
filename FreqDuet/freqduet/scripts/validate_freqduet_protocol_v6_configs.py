@@ -38,6 +38,11 @@ CONFIRMATION_CONFIGS = [
 PROMOTED_CONFIGS = [
     "F_freqduet_protocol_v6_confirmed_main_hiro",
 ]
+REGULARITY_POLICY_CONFIGS = [
+    f"F_freqduet_protocol_v6_{prefix}_c{limit}_hiro"
+    for prefix in ("actiondual", "w2actiondual")
+    for limit in ("0005", "0010", "0020")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -59,6 +64,7 @@ EXPERIMENTAL_CONFIGS = [
         f"F_freqduet_protocol_v6_avlcompact_w{weight}_hiro"
         for weight in ("6", "8")
     ],
+    *REGULARITY_POLICY_CONFIGS,
 ]
 
 
@@ -96,8 +102,11 @@ def validate(
             "timetable_planner", {}) or {}
         guard = (config.get("lower", {}) or {}).get(
             "causal_holding_guard", {}) or {}
-        regularity = (config.get("lower", {}) or {}).get(
+        lower = config.get("lower", {}) or {}
+        regularity = lower.get(
             "causal_departure_regularity", {}) or {}
+        regularity_policy = lower.get(
+            "causal_regularity_policy", {}) or {}
         lower_context = (frequency.get("lower_context", {}) or {})
         required = {
             "protocol.version": (
@@ -162,6 +171,38 @@ def validate(
                 raise ValueError(
                     f"{name}: incremental regularity lacks causal state "
                     f"features; requires {required_description}")
+        if bool(regularity_policy.get("enable")):
+            features = set(lower_context.get("features", []))
+            compact_features = {
+                "regularity_hold_target_norm",
+                "regularity_hold_target_valid",
+            }
+            if bool(guard.get("enable")):
+                raise ValueError(
+                    f"{name}: regularity policy must preserve noguard "
+                    "action semantics")
+            if regularity_policy.get(
+                    "evidence_mode") != "compact_causal_target_v7":
+                raise ValueError(
+                    f"{name}: regularity policy uses non-causal evidence")
+            if regularity_policy.get(
+                    "mode") != "analytic_two_sided_target_dual_v1":
+                raise ValueError(
+                    f"{name}: regularity policy objective is not locked")
+            if not compact_features.issubset(features):
+                raise ValueError(
+                    f"{name}: regularity policy lacks compact causal state")
+            if not lower.get("action_bins"):
+                raise ValueError(
+                    f"{name}: regularity policy requires discrete actions")
+            if not bool((lower.get("state_encoder", {}) or {}).get("enable")):
+                raise ValueError(
+                    f"{name}: regularity policy requires physical encoding")
+            cost_limit = float(regularity_policy.get("cost_limit", -1.0))
+            cost_cap = float(regularity_policy.get("cost_cap", -1.0))
+            if not (0.0 <= cost_limit < cost_cap):
+                raise ValueError(
+                    f"{name}: invalid regularity policy cost contract")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
     main = resolved[canonical_main]

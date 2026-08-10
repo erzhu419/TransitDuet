@@ -7,6 +7,7 @@ from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
     CONFIRMATION_CONFIGS,
     PROMOTED_CONFIGS,
+    REGULARITY_POLICY_CONFIGS,
     ROOT,
     validate,
 )
@@ -319,6 +320,61 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         confirmed["protocol"].pop("role")
         selected["protocol"].pop("role")
         self.assertEqual(confirmed, selected)
+
+    def test_action_regularity_dual_is_causal_separate_and_opt_in(self):
+        configs = [CONFIRMED_MAIN, *REGULARITY_POLICY_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(REGULARITY_POLICY_CONFIGS),
+        )
+
+        for name in REGULARITY_POLICY_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            objective = lower["causal_regularity_policy"]
+            features = set(config["frequency"]["lower_context"]["features"])
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                objective["evidence_mode"], "compact_causal_target_v7")
+            self.assertEqual(
+                objective["mode"], "analytic_two_sided_target_dual_v1")
+            self.assertIn(objective["cost_limit"], {0.0005, 0.001, 0.002})
+            self.assertTrue({
+                "regularity_hold_target_norm",
+                "regularity_hold_target_valid",
+            }.issubset(features))
+            reward_objective = lower.get("causal_departure_regularity", {})
+            self.assertEqual(
+                bool(reward_objective.get("enable", False)),
+                "w2actiondual" in name,
+            )
+
+    def test_action_regularity_runner_resolves_encoded_feature_indices(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_actiondual_c0010_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        contract = runner.lower_trainer.regularity_policy_contract
+        base = runner.env._base_state_dim
+        features = runner.env.lower_context_features
+        self.assertTrue(contract["enabled"])
+        self.assertEqual(
+            contract["target_feature_index"],
+            base + features.index("regularity_hold_target_norm"),
+        )
+        self.assertEqual(
+            contract["valid_feature_index"],
+            base + features.index("regularity_hold_target_valid"),
+        )
+        self.assertEqual(contract["target_headway_feature_index"], 0)
+        self.assertEqual(contract["action_target_scale_s"], 45.0)
+        self.assertEqual(contract["target_headway_scale_s"], 600.0)
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

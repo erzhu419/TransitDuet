@@ -671,3 +671,101 @@ run manifests. Its frozen artifact hashes are:
 This closes external-baseline provenance only. Learned-versus-external paired
 effects remain unavailable until all 32 learned tasks complete, synchronize,
 strict-aggregate, and pass the preregistered V9 long-training audit.
+
+## Engineering-v9 long-training outcome (2026-08-10)
+
+All scheduler tasks `t79401` through `t79432` completed. Each of the 32 shards
+contains 200 diagnostic episodes, checkpoint-199 upper, lower, and exact runner
+state, and all eight frozen evaluations. This gives 256 unique common-random-
+number rollouts with no traceback. Aggregate task `t79641` exited with code zero
+and wrote the complete result set, but the scheduler classified its custom
+`V9 aggregate complete` tail as a missing success marker. The artifacts were
+therefore synchronized and audited directly; this scheduler label is not used
+as evidence either for or against the method.
+
+The strict aggregate verifies all run manifests, the preregistered seed grid,
+confirmation stage, checkpoint 199, clean commit `673355cae1`, source
+fingerprint `d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada`,
+and scenario contract
+`45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17`.
+Its frozen artifact hashes are:
+
+- matrix manifest: `272abd5aa35ccf3202803fa29605b81ed416c3217cfca67ba6f39e4a6ba9af04`;
+- per-evaluation rows: `60ef82f3a650fa72faac4af4df0a9d56fa37e87d6ec8cc2bc2c1cdfac0adbc5f`;
+- summary: `dfcc293ad15b75a0336fd31f5972e2a1dd68e3bb7af7960db26a3d0bfc4eeea9`;
+- paired deltas: `070719eb5f2da9dfc964dfec2033bcbc89bd790b9963c9ada4fbc0789f2b1f0b`.
+
+The preregistered V9 gate returns `longtrain_not_confirmed`. Relative to
+same-semantics `noguard`, confirmed-main improves restricted journey by
+`-1.24238 min`, 95% CI `[-2.20444, -0.53635]`, holding by
+`-9862.89 vehicle-s`, and denied dispatch events by `-75868.08`. Its headway-CV
+delta is only `-0.00911`, 95% CI `[-0.02785, 0.00572]`; this misses the locked
+`-0.02` effect threshold and does not exclude zero. Seven of eight training-seed
+CV deltas are negative, and all causal evidence and zero-adjustment mechanism
+checks pass, but those conditions cannot rescue the failed primary gate.
+Against compact context-only, the CV delta is `-0.00777`, also below the locked
+`-0.01` matched-context threshold.
+
+The valid external comparison remains scientifically useful but does not change
+that decision. Learned minus fixed-headway restricted service cost is
+`-0.12194`, 95% CI `[-0.18035, -0.05026]`, and headway CV is `-0.21928`, but
+restricted journey is `+2.47025 min`, 95% CI `[1.87431, 3.18799]`. The learned
+policy is therefore a different service-quality tradeoff, not a passenger-time
+winner over strong fixed headway. It is clearly better than rule holding and
+rule MPC on restricted journey and service cost. The valid external comparison
+manifest hash is
+`0741c4050aae1f46be59134ba2cf847dc6cb32c6b5f695e3473a8ff5499ad76f`.
+
+Training trajectories locate the V9 failure after about episode 100. The
+two-sided reward mechanism remains active, fully causal, and improves its local
+loss, but the candidate CV advantage decays while the long-horizon reward critic
+continues training. This is consistent with dilution of a small additive local
+credit, not failure of the harmonic decomposition or action-time evidence.
+
+## Engineering-v10 analytic action-dual preregistration (2026-08-10)
+
+Engineering-v10 preserves the complete V9 environment, upper planner, compact
+causal state, categorical holding bins, and `noguard` execution semantics. It
+adds no action projection, fallback, or post-policy clipping. Instead, the
+lower actor receives an independent constrained objective derived from the
+same two-sided local regularity loss. If `a*` is the clipped analytic balancing
+action, the action-dependent loss is exactly
+`((a - a*) / target_headway)^2`, up to an action-independent constant. The
+actor evaluates this term for every discrete action and an independent dual
+enforces its conditional expectation only where both predecessor departure and
+same-time follower AVL evidence are valid. The existing safety cost critic and
+dual are unchanged. Frozen evaluations directly report actual action-target
+cost, target action, absolute error, and evidence coverage.
+
+The exploratory matrix is locked to historical hard `main`, `noguard`, compact
+context-only, confirmed-main, three action-dual-only limits `0.0005, 0.001,
+0.002`, and the same three limits combined with the confirmed weight-two
+incremental reward. All use regularity dual learning rate `1e-3`, initial dual
+`1.0`, and bounds `[0.001, 20]`. The matrix uses 40 episodes, fresh training
+seeds `13001, 13007, 13033, 13049`, and fresh evaluation seeds
+`46021, 46027, 46049, 46061`. None overlaps engineering-v5 through v9.
+
+A variant may advance to a disjoint 200-episode confirmation only if the strict
+aggregate is complete and homogeneous, execution adjustment remains zero,
+same-time causal evidence is at least 50% in every rollout, and actual frozen
+action-target cost satisfies its configured limit. It must improve CV versus
+`noguard` by at least `0.02` with the interval fully below zero, preserve the
+locked journey, holding, and dispatch no-harm conditions, improve CV versus
+compact context-only by at least `0.01`, and improve CV versus current
+confirmed-main by at least `0.005` without worsening journey by more than
+`0.15 min`. The exploratory priority is the weakest passing intervention:
+dual-only before reward-plus-dual and, within each family, larger cost limit
+before smaller. Any selected row still requires disjoint-seed long-training
+confirmation; this screen cannot replace V9 or support a paper claim.
+
+The pre-freeze one-episode integration smoke ran compact context-only and
+action-dual limit `0.001` under the same train and evaluation seeds. Both
+completed training, exact checkpointing, frozen evaluation, and strict local
+aggregation. Before meaningful learning they produced identical actions and
+outcomes, as expected from matched initialization. The action-dual row reports
+zero execution adjustment, frozen causal evidence coverage `0.68115`, actual
+action-target cost `0.00460`, and dual `1.03046`; the cost still violates its
+limit at episode zero. The context-only control records the same passive
+action-target audit while leaving the objective disabled. These values verify
+scale, direction, and instrumentation only, not efficacy or constraint
+satisfaction after training.

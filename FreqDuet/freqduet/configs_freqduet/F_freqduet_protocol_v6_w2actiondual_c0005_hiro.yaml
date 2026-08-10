@@ -1,0 +1,17 @@
+_extends: F_freqduet_protocol_v6_confirmed_main_hiro.yaml
+_name: F_freqduet_protocol_v6_w2actiondual_c0005_hiro
+
+protocol:
+  role: exploratory_compact_w2_action_dual_c0005_v6
+
+lower:
+  causal_regularity_policy:
+    enable: true
+    evidence_mode: compact_causal_target_v7
+    mode: analytic_two_sided_target_dual_v1
+    cost_limit: 0.0005
+    cost_cap: 0.25
+    lambda_lr: 0.001
+    lambda_min: 0.001
+    lambda_max: 20.0
+    initial_lambda: 1.0

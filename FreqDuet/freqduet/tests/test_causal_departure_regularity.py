@@ -3,12 +3,36 @@ from types import SimpleNamespace
 
 from lower.causal_departure_regularity import (
     CausalDepartureRegularityCost,
+    causal_two_sided_action_excess_cost,
     causal_two_sided_holding_target_s,
 )
 from runner_v3 import TransitDuetV2Runner
 
 
 class CausalDepartureRegularityCostTest(unittest.TestCase):
+    def test_action_excess_cost_is_zero_at_the_analytic_target(self):
+        target = causal_two_sided_holding_target_s(
+            forward_headway_s=300.0,
+            follower_departure_gap_s=420.0,
+            action_cap_s=90.0,
+        )
+
+        exact = causal_two_sided_action_excess_cost(
+            action_s=target,
+            target_action_s=target,
+            target_headway_s=360.0,
+            cost_cap=0.25,
+        )
+        offset = causal_two_sided_action_excess_cost(
+            action_s=30.0,
+            target_action_s=target,
+            target_headway_s=360.0,
+            cost_cap=0.25,
+        )
+
+        self.assertEqual(exact, 0.0)
+        self.assertAlmostEqual(offset, (30.0 / 360.0) ** 2)
+
     def test_compact_target_is_the_clipped_two_sided_balance_action(self):
         self.assertEqual(causal_two_sided_holding_target_s(
             forward_headway_s=300.0,

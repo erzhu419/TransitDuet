@@ -338,6 +338,7 @@ class RESACLagrangianTrainer:
                  critic_aggregation="ensemble_mean_lcb",
                  policy_sample_seed=None,
                  action_limit_feature_index=None,
+                 regularity_policy_objective=None,
                  device='cpu'):
         self.device = device
         self.gamma = gamma
@@ -368,6 +369,7 @@ class RESACLagrangianTrainer:
         self.action_limit_feature_index = (
             None if action_limit_feature_index is None
             else int(action_limit_feature_index))
+        self.action_range = float(action_range)
         if action_bins is not None:
             bins = np.asarray(action_bins, dtype=np.float32).reshape(-1)
             bins = np.unique(np.clip(bins, 0.0, float(action_range)))
@@ -443,9 +445,125 @@ class RESACLagrangianTrainer:
         self.log_lambda = torch.zeros(1, requires_grad=True, device=device)
         self.lambda_optimizer = optim.Adam([self.log_lambda], lr=lambda_lr)
 
+        # A separate causal action-regularity constraint bypasses the reward
+        # critic. For the two-sided local loss, the action-dependent term is
+        # exactly the squared distance from the analytic balancing action.
+        # Keeping its dual separate avoids mixing regularity with safety cost.
+        regularity_cfg = dict(regularity_policy_objective or {})
+        self.regularity_policy_enabled = bool(
+            regularity_cfg.get('enable', False))
+        self.regularity_policy_contract = {'enabled': False}
+        self.log_regularity_lambda = None
+        self.regularity_lambda_optimizer = None
+        if self.regularity_policy_enabled:
+            mode = str(regularity_cfg.get(
+                'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
+            if mode != 'analytic_two_sided_target_dual_v1':
+                raise ValueError('unknown causal regularity policy objective')
+            if self.discrete_actions is None:
+                raise ValueError(
+                    'causal regularity policy objective requires action_bins')
+            self.regularity_target_feature_index = int(
+                regularity_cfg['target_feature_index'])
+            self.regularity_valid_feature_index = int(
+                regularity_cfg['valid_feature_index'])
+            self.regularity_headway_feature_index = int(
+                regularity_cfg['target_headway_feature_index'])
+            for index in {
+                    self.regularity_target_feature_index,
+                    self.regularity_valid_feature_index,
+                    self.regularity_headway_feature_index}:
+                if index < 0 or index >= int(state_dim):
+                    raise ValueError(
+                        'causal regularity policy feature index is out of range')
+            self.regularity_action_target_scale_s = float(
+                regularity_cfg['action_target_scale_s'])
+            self.regularity_headway_scale_s = float(
+                regularity_cfg['target_headway_scale_s'])
+            self.regularity_cost_limit = float(
+                regularity_cfg.get('cost_limit', 0.001))
+            self.regularity_cost_cap = float(
+                regularity_cfg.get('cost_cap', 0.25))
+            lambda_lr_regularity = float(
+                regularity_cfg.get('lambda_lr', 1e-3))
+            self.regularity_lambda_min = float(
+                regularity_cfg.get('lambda_min', 1e-3))
+            self.regularity_lambda_max = float(
+                regularity_cfg.get('lambda_max', 20.0))
+            initial_lambda = float(
+                regularity_cfg.get('initial_lambda', 1.0))
+            if not np.isfinite(self.regularity_action_target_scale_s) or (
+                    self.regularity_action_target_scale_s <= 0.0):
+                raise ValueError('regularity action-target scale must be positive')
+            if not np.isfinite(self.regularity_headway_scale_s) or (
+                    self.regularity_headway_scale_s <= 0.0):
+                raise ValueError('regularity headway scale must be positive')
+            if not np.isfinite(self.regularity_cost_limit) or not (
+                    0.0 <= self.regularity_cost_limit < self.regularity_cost_cap):
+                raise ValueError(
+                    'regularity cost limit must lie in [0, cost_cap)')
+            if not np.isfinite(self.regularity_cost_cap) or (
+                    self.regularity_cost_cap <= 0.0):
+                raise ValueError('regularity cost cap must be positive')
+            if not np.isfinite(lambda_lr_regularity) or (
+                    lambda_lr_regularity <= 0.0):
+                raise ValueError('regularity lambda_lr must be positive')
+            if not (0.0 < self.regularity_lambda_min
+                    <= initial_lambda <= self.regularity_lambda_max):
+                raise ValueError(
+                    'require 0 < lambda_min <= initial_lambda <= lambda_max')
+            self.log_regularity_lambda = torch.tensor(
+                [float(np.log(initial_lambda))], dtype=torch.float32,
+                requires_grad=True, device=device)
+            self.regularity_lambda_optimizer = optim.Adam(
+                [self.log_regularity_lambda], lr=lambda_lr_regularity)
+            self.regularity_policy_contract = {
+                'enabled': True,
+                'mode': mode,
+                'target_feature_index': self.regularity_target_feature_index,
+                'valid_feature_index': self.regularity_valid_feature_index,
+                'target_headway_feature_index': (
+                    self.regularity_headway_feature_index),
+                'action_target_scale_s': self.regularity_action_target_scale_s,
+                'target_headway_scale_s': self.regularity_headway_scale_s,
+                'cost_limit': self.regularity_cost_limit,
+                'cost_cap': self.regularity_cost_cap,
+                'lambda_lr': lambda_lr_regularity,
+                'lambda_min': self.regularity_lambda_min,
+                'lambda_max': self.regularity_lambda_max,
+                'initial_lambda': initial_lambda,
+            }
+
     @property
     def lambda_param(self):
         return self.log_lambda.exp().item()
+
+    @property
+    def regularity_lambda_param(self):
+        if self.log_regularity_lambda is None:
+            return 0.0
+        return self.log_regularity_lambda.exp().item()
+
+    def _regularity_policy_cost(self, state, action_probs):
+        """Return exact conditional action cost for the compact causal target."""
+        if not self.regularity_policy_enabled:
+            raise RuntimeError('causal regularity policy objective is disabled')
+        target_norm = state[:, self.regularity_target_feature_index].clamp(
+            0.0, 1.0)
+        valid = (
+            state[:, self.regularity_valid_feature_index] >= 0.5).float()
+        target_action_s = (
+            target_norm * self.regularity_action_target_scale_s)
+        target_headway_s = (
+            state[:, self.regularity_headway_feature_index]
+            * self.regularity_headway_scale_s).clamp_min(1.0)
+        actions_s = self.discrete_actions.view(1, -1)
+        action_costs = (
+            (actions_s - target_action_s.unsqueeze(-1))
+            / target_headway_s.unsqueeze(-1)).pow(2)
+        action_costs = action_costs.clamp(0.0, self.regularity_cost_cap)
+        expected_cost = (action_probs * action_costs).sum(dim=-1)
+        return expected_cost, valid, action_costs
 
     def _discrete_q_values(self, q_net, state):
         """Evaluate a scalar-action critic on every configured action bin."""
@@ -619,12 +737,21 @@ class RESACLagrangianTrainer:
             'reward_batch_std': reward.std().item(),
             'action_batch_mean': action.mean().item(),
             'action_batch_std': action.std().item(),
+            'regularity_policy_enabled': float(
+                self.regularity_policy_enabled),
+            'regularity_policy_cost_mean': 0.0,
+            'regularity_policy_valid_fraction': 0.0,
+            'regularity_policy_constraint_gap': 0.0,
+            'regularity_policy_penalty': 0.0,
+            'regularity_lambda': self.regularity_lambda_param,
         }
 
         if update_policy:
             new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
 
             # RE-SAC: ensemble Q statistics
+            regularity_cost_mean = None
+            regularity_valid_fraction = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -653,6 +780,22 @@ class RESACLagrangianTrainer:
                                 - q_lcb
                                 + lam * cost_q_new.squeeze(-1))
             policy_loss = (policy_terms * w).mean()
+            regularity_penalty = torch.zeros((), device=self.device)
+            if self.regularity_policy_enabled:
+                regularity_cost, regularity_valid, _ = (
+                    self._regularity_policy_cost(state, probs))
+                valid_weights = w * regularity_valid
+                valid_weight_sum = valid_weights.sum()
+                if bool(valid_weight_sum.detach().item() > 0.0):
+                    regularity_cost_mean = (
+                        regularity_cost * valid_weights
+                    ).sum().div(valid_weight_sum)
+                    regularity_valid_fraction = valid_weight_sum.div(
+                        w.sum().clamp_min(1e-8))
+                    regularity_penalty = (
+                        self.log_regularity_lambda.exp().detach()
+                        * regularity_cost_mean)
+                    policy_loss = policy_loss + regularity_penalty
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -698,6 +841,19 @@ class RESACLagrangianTrainer:
             self.lambda_optimizer.step()
             self.log_lambda.data.clamp_(min=-5.0, max=1.5)  # λ ∈ [e^-5, e^1.5] ≈ [0.007, 4.5]
 
+            if regularity_cost_mean is not None:
+                regularity_lambda_loss = (
+                    -self.log_regularity_lambda.exp()
+                    * (regularity_cost_mean.detach()
+                       - self.regularity_cost_limit))
+                self.regularity_lambda_optimizer.zero_grad()
+                regularity_lambda_loss.backward()
+                self.regularity_lambda_optimizer.step()
+                self.log_regularity_lambda.data.clamp_(
+                    min=float(np.log(self.regularity_lambda_min)),
+                    max=float(np.log(self.regularity_lambda_max)),
+                )
+
             metrics.update({
                 'policy_loss': policy_loss.item(),
                 'alpha': self.alpha,
@@ -708,6 +864,17 @@ class RESACLagrangianTrainer:
                 'batch_cost_mean': batch_cost_mean.item(),
                 'pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
                 'tpc_ess': ess,
+                'regularity_policy_cost_mean': (
+                    regularity_cost_mean.item()
+                    if regularity_cost_mean is not None else 0.0),
+                'regularity_policy_valid_fraction': (
+                    regularity_valid_fraction.item()
+                    if regularity_valid_fraction is not None else 0.0),
+                'regularity_policy_constraint_gap': (
+                    regularity_cost_mean.item() - self.regularity_cost_limit
+                    if regularity_cost_mean is not None else 0.0),
+                'regularity_policy_penalty': regularity_penalty.item(),
+                'regularity_lambda': self.regularity_lambda_param,
             })
 
         # ──── Soft target update ────
@@ -721,7 +888,7 @@ class RESACLagrangianTrainer:
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v4',
+            'format': 'freqduet-lower-training-v5',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -743,11 +910,20 @@ class RESACLagrangianTrainer:
             'critic_aggregation': self.critic_aggregation,
             'policy_sampling_state': self.policy_net.sampling_state(),
             'action_limit_feature_index': self.action_limit_feature_index,
+            'regularity_policy_contract': self.regularity_policy_contract,
+            'log_regularity_lambda': (
+                self.log_regularity_lambda.detach().clone()
+                if self.regularity_policy_enabled else None),
+            'regularity_lambda_optimizer': (
+                self.regularity_lambda_optimizer.state_dict()
+                if self.regularity_policy_enabled else None),
         }
 
     def load_training_state_dict(self, state):
-        if state.get('format') != 'freqduet-lower-training-v4':
-            raise ValueError('not a FreqDuet v4 lower training checkpoint')
+        if state.get('format') not in {
+                'freqduet-lower-training-v4',
+                'freqduet-lower-training-v5'}:
+            raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
         if state.get('cost_limit_semantics') != self.cost_limit_semantics:
@@ -757,6 +933,10 @@ class RESACLagrangianTrainer:
         if (state.get('action_limit_feature_index')
                 != self.action_limit_feature_index):
             raise ValueError('lower action-limit feature contract mismatch')
+        saved_regularity_contract = state.get(
+            'regularity_policy_contract', {'enabled': False})
+        if saved_regularity_contract != self.regularity_policy_contract:
+            raise ValueError('lower regularity-policy contract mismatch')
         self.policy_net.load_state_dict(state['policy'])
         self.q_net.load_state_dict(state['q_net'])
         self.target_q_net.load_state_dict(state['target_q_net'])
@@ -767,6 +947,14 @@ class RESACLagrangianTrainer:
         self.cost_q_optimizer.load_state_dict(state['cost_q_optimizer'])
         self.log_lambda.data.copy_(state['log_lambda'].to(self.device))
         self.lambda_optimizer.load_state_dict(state['lambda_optimizer'])
+        if self.regularity_policy_enabled:
+            if state.get('log_regularity_lambda') is None:
+                raise ValueError(
+                    'lower checkpoint is missing regularity dual state')
+            self.log_regularity_lambda.data.copy_(
+                state['log_regularity_lambda'].to(self.device))
+            self.regularity_lambda_optimizer.load_state_dict(
+                state['regularity_lambda_optimizer'])
         if self.auto_entropy:
             if state.get('log_alpha') is None:
                 raise ValueError('lower checkpoint is missing entropy state')
@@ -788,6 +976,10 @@ class RESACLagrangianTrainer:
                 self.policy_net, 'entropy_action_coordinates', 'categorical'),
             'policy_sampling_state': self.policy_net.sampling_state(),
             'action_limit_feature_index': self.action_limit_feature_index,
+            'regularity_policy_contract': self.regularity_policy_contract,
+            'log_regularity_lambda': (
+                self.log_regularity_lambda.data
+                if self.regularity_policy_enabled else None),
         }, path)
 
     def load(self, path):
@@ -799,12 +991,22 @@ class RESACLagrangianTrainer:
         if (ckpt.get('action_limit_feature_index')
                 != self.action_limit_feature_index):
             raise ValueError('lower checkpoint action-limit contract mismatch')
+        saved_regularity_contract = ckpt.get(
+            'regularity_policy_contract', {'enabled': False})
+        if saved_regularity_contract != self.regularity_policy_contract:
+            raise ValueError('lower checkpoint regularity-policy mismatch')
         self.policy_net.load_state_dict(ckpt['policy'])
         self.q_net.load_state_dict(ckpt['q_net'])
         self.target_q_net.load_state_dict(ckpt['q_net'])
         self.cost_q_net.load_state_dict(ckpt['cost_q_net'])
         self.target_cost_q_net.load_state_dict(ckpt['cost_q_net'])
         self.log_lambda.data = ckpt['log_lambda']
+        if self.regularity_policy_enabled:
+            if ckpt.get('log_regularity_lambda') is None:
+                raise ValueError(
+                    'lower checkpoint is missing regularity dual state')
+            self.log_regularity_lambda.data.copy_(
+                ckpt['log_regularity_lambda'].to(self.device))
         if ckpt.get('log_alpha') is not None:
             self.log_alpha.data = ckpt['log_alpha']
             if self.temperature_contract == "bounded_log_parameter_v4":

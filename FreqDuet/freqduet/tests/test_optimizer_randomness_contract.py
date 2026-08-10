@@ -188,6 +188,96 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertAlmostEqual(metrics["batch_cost_mean"], 0.1, places=6)
         self.assertLess(trainer.lambda_param, 1.0)
 
+    @staticmethod
+    def _regularity_trainer(cost_limit=0.001):
+        return RESACLagrangianTrainer(
+            state_dim=3,
+            action_range=45.0,
+            action_bins=[0.0, 45.0],
+            ensemble_size=2,
+            hidden_dim=8,
+            auto_entropy=False,
+            regularity_policy_objective={
+                "enable": True,
+                "mode": "analytic_two_sided_target_dual_v1",
+                "target_feature_index": 1,
+                "valid_feature_index": 2,
+                "target_headway_feature_index": 0,
+                "action_target_scale_s": 45.0,
+                "target_headway_scale_s": 600.0,
+                "cost_limit": cost_limit,
+                "cost_cap": 0.25,
+                "lambda_lr": 1e-2,
+                "lambda_min": 1e-3,
+                "lambda_max": 20.0,
+                "initial_lambda": 1.0,
+            },
+        )
+
+    def test_causal_regularity_cost_matches_two_sided_action_term(self):
+        trainer = self._regularity_trainer()
+        state = torch.tensor([[0.6, 1.0, 1.0]], dtype=torch.float32)
+        probs = torch.tensor([[0.5, 0.5]], dtype=torch.float32)
+
+        expected, valid, costs = trainer._regularity_policy_cost(state, probs)
+
+        self.assertAlmostEqual(costs[0, 0].item(), (45.0 / 360.0) ** 2)
+        self.assertEqual(costs[0, 1].item(), 0.0)
+        self.assertAlmostEqual(expected.item(), 0.5 * (45.0 / 360.0) ** 2)
+        self.assertEqual(valid.item(), 1.0)
+
+    def test_causal_regularity_dual_uses_only_valid_evidence(self):
+        torch.manual_seed(53)
+        trainer = self._regularity_trainer(cost_limit=0.0)
+        replay = CostReplayBuffer(64, seed=59)
+        for idx in range(16):
+            state = np.array([0.6, 1.0, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        self.assertEqual(metrics["regularity_policy_valid_fraction"], 1.0)
+        self.assertGreater(metrics["regularity_policy_cost_mean"], 0.0)
+        self.assertGreater(trainer.regularity_lambda_param, 1.0)
+
+        torch.manual_seed(61)
+        invalid_trainer = self._regularity_trainer(cost_limit=0.0)
+        invalid_replay = CostReplayBuffer(64, seed=67)
+        for idx in range(16):
+            state = np.array([0.6, 1.0, 0.0], dtype=np.float32)
+            invalid_replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+
+        invalid_metrics = invalid_trainer.update(
+            invalid_replay, 16, reward_scale=1.0)
+
+        self.assertEqual(
+            invalid_metrics["regularity_policy_valid_fraction"], 0.0)
+        self.assertEqual(invalid_metrics["regularity_policy_cost_mean"], 0.0)
+        self.assertEqual(invalid_trainer.regularity_lambda_param, 1.0)
+
+    def test_causal_regularity_dual_round_trips_exact_training_state(self):
+        torch.manual_seed(71)
+        trainer = self._regularity_trainer(cost_limit=0.0)
+        replay = CostReplayBuffer(64, seed=73)
+        for idx in range(16):
+            state = np.array([0.6, 0.5, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+        trainer.update(replay, 16, reward_scale=1.0)
+
+        state = trainer.training_state_dict()
+        restored = self._regularity_trainer(cost_limit=0.0)
+        restored.load_training_state_dict(state)
+
+        self.assertAlmostEqual(
+            restored.regularity_lambda_param,
+            trainer.regularity_lambda_param,
+            places=7,
+        )
+        for expected, observed in zip(
+                trainer.policy_net.parameters(),
+                restored.policy_net.parameters()):
+            torch.testing.assert_close(observed, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
