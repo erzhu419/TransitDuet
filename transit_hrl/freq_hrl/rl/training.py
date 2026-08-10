@@ -98,17 +98,31 @@ def _validated_closed_loop_guard_snapshot(
         worst = float(normalized["worst_frequency_violation"])
         frequency_count = int(normalized["frequency_violation_count"])
         tolerance = 1e-10
-        if worst * worst > merit + tolerance:
+        merit_tolerance = tolerance * tolerance
+        worst_squared = worst * worst
+        merit_roundoff = (
+            8.0 * np.finfo(np.float64).eps
+            * max(merit, worst_squared, merit_tolerance)
+        )
+        if worst_squared > merit + merit_tolerance + merit_roundoff:
             raise ValueError(
                 "closed-loop guard worst frequency violation exceeds its "
                 "aggregate merit"
             )
-        if frequency_count == 0 and worst > tolerance:
-            raise ValueError(
-                "a frequency-feasible guard snapshot has a positive worst "
-                "violation"
+        if frequency_count == 0 and (
+            worst > tolerance
+            or merit > (
+                normalized["constraint_count"] * merit_tolerance
+                + merit_roundoff
             )
-        if frequency_count > 0 and (worst <= tolerance or merit <= tolerance):
+        ):
+            raise ValueError(
+                "a frequency-feasible guard snapshot has positive continuous "
+                "frequency violations"
+            )
+        if frequency_count > 0 and (
+            worst <= tolerance or merit <= merit_tolerance
+        ):
             raise ValueError(
                 "an infeasible guard snapshot must have positive continuous "
                 "frequency violations"

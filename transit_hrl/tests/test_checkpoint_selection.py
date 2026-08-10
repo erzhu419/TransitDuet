@@ -17,6 +17,7 @@ from freq_hrl.rl import (
 from freq_hrl.rl.training import (
     _apply_closed_loop_actor_guard,
     _closed_loop_guard_accepts,
+    _validated_closed_loop_guard_snapshot,
     train_frequency_separated_ppo,
     train_joint_ppo,
 )
@@ -311,6 +312,32 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             restoration_min_reduction=1e-3,
             restoration_funnel_limit=0.20,
         ))
+
+    def test_restoration_guard_uses_squared_merit_tolerance(self):
+        snapshot = self._guard_snapshot(
+            rank=(-2e-10, -4e-20, 0.02),
+            frequency_violations=1,
+            frequency_merit=4e-20,
+            worst_frequency_violation=2e-10,
+        )
+        validated = _validated_closed_loop_guard_snapshot(
+            snapshot,
+            restoration_filter=True,
+        )
+        self.assertEqual(validated["frequency_violation_count"], 1)
+        self.assertEqual(validated["frequency_violation_merit"], 4e-20)
+
+        inconsistent = self._guard_snapshot(
+            rank=(0.0, 0.0, 0.02),
+            frequency_violations=0,
+            frequency_merit=1e-8,
+            worst_frequency_violation=0.0,
+        )
+        with self.assertRaisesRegex(ValueError, "frequency-feasible"):
+            _validated_closed_loop_guard_snapshot(
+                inconsistent,
+                restoration_filter=True,
+            )
 
     def test_state_aligned_selector_uses_each_states_own_rank(self):
         selector = StateAlignedLexicographicCheckpointSelector(
