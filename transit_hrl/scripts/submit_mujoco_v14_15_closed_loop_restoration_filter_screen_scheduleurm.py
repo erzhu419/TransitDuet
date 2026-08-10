@@ -953,6 +953,7 @@ def _write_preregistration(args: argparse.Namespace) -> None:
         "development_disclosure": spec.DEVELOPMENT_DISCLOSURE,
         "scheduler_contract": {
             "scheduler": "scheduleurm",
+            "python_executable": str(args.python_executable),
             "allowed_nodes": list(args.nodes),
             "require_node": None,
             "cpu_per_task": 1,
