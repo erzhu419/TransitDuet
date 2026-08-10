@@ -784,3 +784,84 @@ memory use. These launch observations establish execution health only. No V10
 effectiveness, constraint-satisfaction, or promotion conclusion is valid until
 all shard summaries synchronize, strict aggregation succeeds, and the locked
 action-dual screen gate is evaluated.
+
+## Engineering-v10 action-dual outcome (2026-08-10)
+
+All scheduler tasks `t79679` through `t79718` completed with exit code zero and
+a success marker. The remote shared workspace contains exactly 40 run
+manifests and 40 diagnostic sets with no traceback. Strict local aggregation
+used only each run manifest plus the hash-locked frozen evaluation CSV and
+evaluation manifest, avoiding transfer of 6.1 GB of suppressed training
+artifacts. It verifies all 40 runs and 160 unique common-random-number
+rollouts. The frozen aggregate hashes are:
+
+- matrix manifest: `6cd03c6ef9368cf9ec27eb2e6cb8e86686abfe14e09dd817e016140565d31e2f`;
+- per-evaluation rows: `bd9aa47fea93bf07f9b6bec971bf0521bc47dc1c97d29253bfff07d86b670caf`;
+- summary: `ba1301ee04a843d8db8d841beb635c410d20bd8e8a91aa79c33742cccb194ceb`;
+- paired deltas: `9b7ad4eed5f291fd853671aa24027629d05f8ee181b71c4ff90ad866348ba976`.
+
+The preregistered V10 screen returns `no_pass`. All six candidates preserve
+the no-guard execution semantics, have causal evidence coverage above 0.823,
+and keep their duals finite, but none satisfies its actual frozen action-cost
+limit and none has a CV interval fully below zero. The dual-only limit-0.001
+row has the largest mean CV improvement over `noguard` (`-0.05020`) and also
+improves over current confirmed-main (`-0.00688`), but its journey delta versus
+confirmed-main is `+0.58775 min`; holding increases by `10699.69 vehicle-s`
+and denied dispatches by `50683.19` versus `noguard`. The reward-plus-dual
+limit-0.0005 row preserves the passenger and resource gains and improves CV
+versus `noguard` by `-0.03373`, but its CV interval has upper bound `+0.02993`,
+it is `+0.00959` worse than current confirmed-main, and its maximum rollout
+mean action cost is `0.00290` against a `0.0005` limit. It is therefore not a
+confirmation candidate.
+
+The training traces identify a structural optimization conflict. Across V10,
+the regularity dual grows from 1.0 to approximately 2.3--3.6 and the replay
+action cost declines toward 0.0023--0.0026. At the same time, the categorical
+SAC temperature rises from approximately 0.05 to 0.077 because its target
+remains 98% of the seven-action maximum entropy. The actor is thus asked to
+concentrate on a causal holding target and remain nearly uniform over the
+holding alphabet at the same states. This explains the action-cost plateau and
+seed-sensitive deterministic argmax without changing the causal-decomposer
+or execution conclusions.
+
+## Engineering-v11 conditional-entropy preregistration (2026-08-10)
+
+Engineering-v11 preserves the V10 action-dual loss, confirmed weight-two
+incremental reward, compact causal state, fixed seven-bin action alphabet, and
+zero-adjustment `noguard` execution. It adds an independent entropy
+temperature only where `regularity_hold_target_valid` is true. Valid-evidence
+states use a lower registered target entropy, while all other states retain
+the original SAC temperature and 0.98 target fraction. The conditional
+temperature is included in exact training and deployment checkpoints and in
+the policy target backup, actor objective, diagnostics, and provenance
+contract. It cannot alter the action after policy selection.
+
+The exploratory matrix is locked to historical main, `noguard`, compact
+context-only, current confirmed-main, the V10 reward-plus-dual controls at cost
+limits 0.001 and 0.002, and six conditional-entropy candidates crossing those
+two limits with valid-state target fractions 0.25, 0.50, and 0.75. It uses 40
+episodes, fresh training seeds `14009, 14029, 14057, 14071`, and fresh frozen
+evaluation seeds `47017, 47041, 47059, 47087`. None overlaps V5--V10.
+
+A V11 candidate must pass strict provenance and completeness checks, retain
+zero execution adjustment and at least 50% causal evidence in every rollout,
+satisfy its actual action-cost limit, use a lower valid-state temperature than
+the ordinary temperature, reduce valid-state policy entropy by at least 0.10
+nats versus its same-limit V10 control, and reach its registered entropy target
+within a 0.15-nat tolerance. The existing journey, holding, denied-dispatch,
+CV-versus-`noguard`, context, and current-main gates remain unchanged. It must
+also improve CV by at least 0.005 versus its same-limit V10 control without
+worsening journey by more than 0.15 min. Selection prefers the weakest passing
+intervention: cost limit 0.002 before 0.001 and target fraction 0.75 before
+0.50 before 0.25. The screen remains non-claim-eligible and any selected row
+requires disjoint 200-episode confirmation.
+
+The two-episode integration smoke compared the unchanged V10 limit-0.002 row
+with the V11 target-fraction-0.50 row under identical train and evaluation
+seeds. Both completed training, `freqduet-lower-training-v6` checkpointing,
+frozen restoration, evaluation, and strict aggregation. Their actions and
+outcomes remain identical at this horizon. The V11 valid-state temperature
+independently moved from 0.05 to `0.04912`, while its ordinary temperature was
+`0.04934`; the V10 control has no split temperature. Both report causal
+evidence `0.65462`, action cost `0.00442`, and zero execution adjustment. These
+observations validate the mechanism and instrumentation only, not efficacy.

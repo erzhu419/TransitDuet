@@ -1,0 +1,16 @@
+_extends: F_freqduet_protocol_v6_w2actiondual_c0010_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adent_e25_c0010_hiro
+
+protocol:
+  role: exploratory_compact_w2_action_dual_entropy_e25_c0010_v6
+
+lower:
+  causal_regularity_policy:
+    conditional_entropy:
+      enable: true
+      mode: evidence_split_temperature_v1
+      target_fraction: 0.25
+      lr: 0.0003
+      minimum_alpha: 0.0001
+      maximum_alpha: 0.1
+      initial_alpha: 0.05

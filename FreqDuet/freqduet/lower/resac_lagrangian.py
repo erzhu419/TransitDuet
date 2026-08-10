@@ -455,6 +455,12 @@ class RESACLagrangianTrainer:
         self.regularity_policy_contract = {'enabled': False}
         self.log_regularity_lambda = None
         self.regularity_lambda_optimizer = None
+        self.regularity_entropy_split_enabled = False
+        self.regularity_entropy_target_fraction = 0.98
+        self.regularity_alpha_min = self.minimum_alpha
+        self.regularity_alpha_max = self.maximum_alpha
+        self.log_regularity_alpha = None
+        self.regularity_alpha_optimizer = None
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -517,6 +523,59 @@ class RESACLagrangianTrainer:
                 requires_grad=True, device=device)
             self.regularity_lambda_optimizer = optim.Adam(
                 [self.log_regularity_lambda], lr=lambda_lr_regularity)
+            entropy_cfg = dict(
+                regularity_cfg.get('conditional_entropy', {}) or {})
+            self.regularity_entropy_split_enabled = bool(
+                entropy_cfg.get('enable', False))
+            entropy_contract = {'enabled': False}
+            if self.regularity_entropy_split_enabled:
+                if not self.auto_entropy:
+                    raise ValueError(
+                        'conditional regularity entropy requires auto_entropy')
+                if self.discrete_actions is None:
+                    raise ValueError(
+                        'conditional regularity entropy requires action_bins')
+                entropy_mode = str(entropy_cfg.get(
+                    'mode', 'evidence_split_temperature_v1')).strip().lower()
+                if entropy_mode != 'evidence_split_temperature_v1':
+                    raise ValueError(
+                        'unknown conditional regularity entropy mode')
+                target_fraction = float(
+                    entropy_cfg.get('target_fraction', 0.5))
+                entropy_lr = float(entropy_cfg.get('lr', lr))
+                alpha_min = float(entropy_cfg.get(
+                    'minimum_alpha', self.minimum_alpha))
+                alpha_max = float(entropy_cfg.get(
+                    'maximum_alpha', self.maximum_alpha))
+                alpha_initial = float(entropy_cfg.get(
+                    'initial_alpha', initial_alpha))
+                if not (0.0 <= target_fraction < 0.98):
+                    raise ValueError(
+                        'conditional entropy target_fraction must be in [0, 0.98)')
+                if not np.isfinite(entropy_lr) or entropy_lr <= 0.0:
+                    raise ValueError(
+                        'conditional entropy learning rate must be positive')
+                if not (0.0 < alpha_min <= alpha_initial <= alpha_max):
+                    raise ValueError(
+                        'require 0 < conditional minimum_alpha <= '
+                        'initial_alpha <= maximum_alpha')
+                self.regularity_entropy_target_fraction = target_fraction
+                self.regularity_alpha_min = alpha_min
+                self.regularity_alpha_max = alpha_max
+                self.log_regularity_alpha = torch.tensor(
+                    [float(np.log(alpha_initial))], dtype=torch.float32,
+                    requires_grad=True, device=device)
+                self.regularity_alpha_optimizer = optim.Adam(
+                    [self.log_regularity_alpha], lr=entropy_lr)
+                entropy_contract = {
+                    'enabled': True,
+                    'mode': entropy_mode,
+                    'target_fraction': target_fraction,
+                    'lr': entropy_lr,
+                    'minimum_alpha': alpha_min,
+                    'maximum_alpha': alpha_max,
+                    'initial_alpha': alpha_initial,
+                }
             self.regularity_policy_contract = {
                 'enabled': True,
                 'mode': mode,
@@ -532,6 +591,7 @@ class RESACLagrangianTrainer:
                 'lambda_min': self.regularity_lambda_min,
                 'lambda_max': self.regularity_lambda_max,
                 'initial_lambda': initial_lambda,
+                'conditional_entropy': entropy_contract,
             }
 
     @property
@@ -543,6 +603,35 @@ class RESACLagrangianTrainer:
         if self.log_regularity_lambda is None:
             return 0.0
         return self.log_regularity_lambda.exp().item()
+
+    @property
+    def regularity_alpha_param(self):
+        if self.log_regularity_alpha is None:
+            return 0.0
+        return self.log_regularity_alpha.exp().item()
+
+    def _regularity_evidence_valid(self, state):
+        if not self.regularity_policy_enabled:
+            return torch.zeros(state.shape[0], device=state.device)
+        return (
+            state[:, self.regularity_valid_feature_index] >= 0.5).float()
+
+    def _entropy_alpha_for_state(self, state):
+        """Return the causal state-conditional entropy temperature."""
+        base = torch.as_tensor(
+            self.alpha, dtype=state.dtype, device=state.device
+        ).expand(state.shape[0])
+        if not self.regularity_entropy_split_enabled:
+            return base
+        valid = self._regularity_evidence_valid(state)
+        regularity_alpha = self.log_regularity_alpha.exp().detach().to(
+            dtype=state.dtype)
+        return base * (1.0 - valid) + regularity_alpha * valid
+
+    def _maximum_discrete_entropy(self, state):
+        feasible_count = self.policy_net.feasible_action_mask(state).sum(
+            dim=-1, keepdim=True).to(dtype=state.dtype)
+        return torch.log(torch.clamp(feasible_count, min=1.0))
 
     def _regularity_policy_cost(self, state, action_probs):
         """Return exact conditional action cost for the compact causal target."""
@@ -663,8 +752,11 @@ class RESACLagrangianTrainer:
                 # Use ensemble MEAN for shared target -> prevents member divergence.
                 target_q_mean = self._aggregate_target_q(
                     target_q_all)  # [B, A]
+                next_entropy_alpha = self._entropy_alpha_for_state(
+                    next_state).unsqueeze(-1)
                 target_q_mean = (next_probs * (
-                    target_q_mean - self.alpha * next_log_probs)).sum(dim=-1)
+                    target_q_mean
+                    - next_entropy_alpha * next_log_probs)).sum(dim=-1)
             else:
                 next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
                 target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
@@ -744,6 +836,12 @@ class RESACLagrangianTrainer:
             'regularity_policy_constraint_gap': 0.0,
             'regularity_policy_penalty': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
+            'regularity_entropy_split_enabled': float(
+                self.regularity_entropy_split_enabled),
+            'regularity_entropy_target_fraction': float(
+                self.regularity_entropy_target_fraction),
+            'regularity_entropy_valid_mean': 0.0,
+            'regularity_alpha': self.regularity_alpha_param,
         }
 
         if update_policy:
@@ -770,8 +868,10 @@ class RESACLagrangianTrainer:
 
             # Weighted policy loss (TPC: emphasize transitions consistent with EMA upper)
             if discrete_policy:
+                entropy_alpha = self._entropy_alpha_for_state(
+                    state).unsqueeze(-1)
                 per_action_terms = (
-                    self.alpha * log_probs
+                    entropy_alpha * log_probs
                     - q_lcb
                     + lam * cost_q_new)
                 policy_terms = (probs * per_action_terms).sum(dim=-1)
@@ -804,15 +904,59 @@ class RESACLagrangianTrainer:
 
             # ──── Alpha update ────
             if self.auto_entropy:
-                target_entropy = self.target_entropy
-                if (discrete_policy
-                        and self.action_limit_feature_index is not None):
-                    target_entropy = self.policy_net.target_entropy(state)
-                alpha_loss = -(self.log_alpha *
-                               (entropy_log_prob + target_entropy).detach()).mean()
-                self.alpha_optimizer.zero_grad()
-                alpha_loss.backward()
-                self.alpha_optimizer.step()
+                if self.regularity_entropy_split_enabled:
+                    valid = self._regularity_evidence_valid(
+                        state).view(-1, 1)
+                    invalid = 1.0 - valid
+                    max_entropy = self._maximum_discrete_entropy(state)
+                    base_target_entropy = 0.98 * max_entropy
+                    valid_target_entropy = (
+                        self.regularity_entropy_target_fraction * max_entropy)
+                    sample_weights = w.view(-1, 1)
+                    invalid_weights = sample_weights * invalid
+                    invalid_weight_sum = invalid_weights.sum()
+                    alpha_loss = torch.zeros((), device=self.device)
+                    if bool(invalid_weight_sum.detach().item() > 0.0):
+                        alpha_signal = (
+                            entropy_log_prob + base_target_entropy).detach()
+                        alpha_loss = -(
+                            self.log_alpha * alpha_signal * invalid_weights
+                        ).sum().div(invalid_weight_sum)
+                        self.alpha_optimizer.zero_grad()
+                        alpha_loss.backward()
+                        self.alpha_optimizer.step()
+
+                    valid_weights_entropy = sample_weights * valid
+                    valid_weight_sum_entropy = valid_weights_entropy.sum()
+                    regularity_alpha_loss = torch.zeros(
+                        (), device=self.device)
+                    if bool(valid_weight_sum_entropy.detach().item() > 0.0):
+                        regularity_alpha_signal = (
+                            entropy_log_prob + valid_target_entropy).detach()
+                        regularity_alpha_loss = -(
+                            self.log_regularity_alpha
+                            * regularity_alpha_signal
+                            * valid_weights_entropy
+                        ).sum().div(valid_weight_sum_entropy)
+                        self.regularity_alpha_optimizer.zero_grad()
+                        regularity_alpha_loss.backward()
+                        self.regularity_alpha_optimizer.step()
+                        self.log_regularity_alpha.data.clamp_(
+                            min=float(np.log(self.regularity_alpha_min)),
+                            max=float(np.log(self.regularity_alpha_max)),
+                        )
+                else:
+                    target_entropy = self.target_entropy
+                    if (discrete_policy
+                            and self.action_limit_feature_index is not None):
+                        target_entropy = self.policy_net.target_entropy(state)
+                    alpha_loss = -(
+                        self.log_alpha
+                        * (entropy_log_prob + target_entropy).detach()
+                    ).mean()
+                    self.alpha_optimizer.zero_grad()
+                    alpha_loss.backward()
+                    self.alpha_optimizer.step()
                 if self.temperature_contract == "bounded_log_parameter_v4":
                     self.log_alpha.data.clamp_(
                         min=float(np.log(self.minimum_alpha)),
@@ -875,6 +1019,15 @@ class RESACLagrangianTrainer:
                     if regularity_cost_mean is not None else 0.0),
                 'regularity_policy_penalty': regularity_penalty.item(),
                 'regularity_lambda': self.regularity_lambda_param,
+                'regularity_entropy_valid_mean': (
+                    float((
+                        -entropy_log_prob.squeeze(-1) * valid_weights
+                    ).sum().div(valid_weight_sum).item())
+                    if (self.regularity_policy_enabled
+                        and valid_weight_sum is not None
+                        and bool(valid_weight_sum.detach().item() > 0.0))
+                    else 0.0),
+                'regularity_alpha': self.regularity_alpha_param,
             })
 
         # ──── Soft target update ────
@@ -888,7 +1041,7 @@ class RESACLagrangianTrainer:
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v5',
+            'format': 'freqduet-lower-training-v6',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -917,12 +1070,19 @@ class RESACLagrangianTrainer:
             'regularity_lambda_optimizer': (
                 self.regularity_lambda_optimizer.state_dict()
                 if self.regularity_policy_enabled else None),
+            'log_regularity_alpha': (
+                self.log_regularity_alpha.detach().clone()
+                if self.regularity_entropy_split_enabled else None),
+            'regularity_alpha_optimizer': (
+                self.regularity_alpha_optimizer.state_dict()
+                if self.regularity_entropy_split_enabled else None),
         }
 
     def load_training_state_dict(self, state):
         if state.get('format') not in {
                 'freqduet-lower-training-v4',
-                'freqduet-lower-training-v5'}:
+                'freqduet-lower-training-v5',
+                'freqduet-lower-training-v6'}:
             raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
@@ -935,6 +1095,11 @@ class RESACLagrangianTrainer:
             raise ValueError('lower action-limit feature contract mismatch')
         saved_regularity_contract = state.get(
             'regularity_policy_contract', {'enabled': False})
+        if (saved_regularity_contract.get('enabled')
+                and 'conditional_entropy' not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['conditional_entropy'] = {
+                'enabled': False}
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower regularity-policy contract mismatch')
         self.policy_net.load_state_dict(state['policy'])
@@ -955,6 +1120,14 @@ class RESACLagrangianTrainer:
                 state['log_regularity_lambda'].to(self.device))
             self.regularity_lambda_optimizer.load_state_dict(
                 state['regularity_lambda_optimizer'])
+        if self.regularity_entropy_split_enabled:
+            if state.get('log_regularity_alpha') is None:
+                raise ValueError(
+                    'lower checkpoint is missing regularity entropy state')
+            self.log_regularity_alpha.data.copy_(
+                state['log_regularity_alpha'].to(self.device))
+            self.regularity_alpha_optimizer.load_state_dict(
+                state['regularity_alpha_optimizer'])
         if self.auto_entropy:
             if state.get('log_alpha') is None:
                 raise ValueError('lower checkpoint is missing entropy state')
@@ -980,6 +1153,9 @@ class RESACLagrangianTrainer:
             'log_regularity_lambda': (
                 self.log_regularity_lambda.data
                 if self.regularity_policy_enabled else None),
+            'log_regularity_alpha': (
+                self.log_regularity_alpha.data
+                if self.regularity_entropy_split_enabled else None),
         }, path)
 
     def load(self, path):
@@ -993,6 +1169,11 @@ class RESACLagrangianTrainer:
             raise ValueError('lower checkpoint action-limit contract mismatch')
         saved_regularity_contract = ckpt.get(
             'regularity_policy_contract', {'enabled': False})
+        if (saved_regularity_contract.get('enabled')
+                and 'conditional_entropy' not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['conditional_entropy'] = {
+                'enabled': False}
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower checkpoint regularity-policy mismatch')
         self.policy_net.load_state_dict(ckpt['policy'])
@@ -1007,6 +1188,16 @@ class RESACLagrangianTrainer:
                     'lower checkpoint is missing regularity dual state')
             self.log_regularity_lambda.data.copy_(
                 ckpt['log_regularity_lambda'].to(self.device))
+        if self.regularity_entropy_split_enabled:
+            if ckpt.get('log_regularity_alpha') is None:
+                raise ValueError(
+                    'lower checkpoint is missing regularity entropy state')
+            self.log_regularity_alpha.data.copy_(
+                ckpt['log_regularity_alpha'].to(self.device))
+            self.log_regularity_alpha.data.clamp_(
+                min=float(np.log(self.regularity_alpha_min)),
+                max=float(np.log(self.regularity_alpha_max)),
+            )
         if ckpt.get('log_alpha') is not None:
             self.log_alpha.data = ckpt['log_alpha']
             if self.temperature_contract == "bounded_log_parameter_v4":

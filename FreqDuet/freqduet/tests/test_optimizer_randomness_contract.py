@@ -189,14 +189,26 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertLess(trainer.lambda_param, 1.0)
 
     @staticmethod
-    def _regularity_trainer(cost_limit=0.001):
+    def _regularity_trainer(cost_limit=0.001, conditional_entropy=False):
+        conditional = (
+            {
+                "enable": True,
+                "mode": "evidence_split_temperature_v1",
+                "target_fraction": 0.25,
+                "lr": 1e-2,
+                "minimum_alpha": 1e-4,
+                "maximum_alpha": 0.1,
+                "initial_alpha": 0.05,
+            }
+            if conditional_entropy else {"enable": False}
+        )
         return RESACLagrangianTrainer(
             state_dim=3,
             action_range=45.0,
             action_bins=[0.0, 45.0],
             ensemble_size=2,
             hidden_dim=8,
-            auto_entropy=False,
+            auto_entropy=conditional_entropy,
             regularity_policy_objective={
                 "enable": True,
                 "mode": "analytic_two_sided_target_dual_v1",
@@ -211,6 +223,7 @@ class OptimizerContractTest(unittest.TestCase):
                 "lambda_min": 1e-3,
                 "lambda_max": 20.0,
                 "initial_lambda": 1.0,
+                "conditional_entropy": conditional,
             },
         )
 
@@ -277,6 +290,60 @@ class OptimizerContractTest(unittest.TestCase):
                 trainer.policy_net.parameters(),
                 restored.policy_net.parameters()):
             torch.testing.assert_close(observed, expected)
+
+    def test_causal_entropy_split_uses_independent_valid_temperature(self):
+        trainer = self._regularity_trainer(conditional_entropy=True)
+        trainer.alpha = 0.08
+        state = torch.tensor([
+            [0.6, 0.5, 0.0],
+            [0.6, 0.5, 1.0],
+        ], dtype=torch.float32)
+
+        temperatures = trainer._entropy_alpha_for_state(state)
+
+        self.assertAlmostEqual(temperatures[0].item(), 0.08, places=6)
+        self.assertAlmostEqual(temperatures[1].item(), 0.05, places=6)
+        self.assertEqual(
+            trainer.regularity_policy_contract["conditional_entropy"]["mode"],
+            "evidence_split_temperature_v1",
+        )
+
+    def test_causal_entropy_split_updates_only_valid_temperature(self):
+        torch.manual_seed(79)
+        trainer = self._regularity_trainer(conditional_entropy=True)
+        replay = CostReplayBuffer(64, seed=83)
+        for idx in range(16):
+            state = np.array([0.6, 0.5, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+        base_before = trainer.log_alpha.detach().clone()
+        valid_before = trainer.regularity_alpha_param
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        torch.testing.assert_close(trainer.log_alpha.detach(), base_before)
+        self.assertLess(trainer.regularity_alpha_param, valid_before)
+        self.assertEqual(metrics["regularity_entropy_split_enabled"], 1.0)
+        self.assertGreater(metrics["regularity_entropy_valid_mean"], 0.0)
+
+    def test_causal_entropy_split_round_trips_exact_training_state(self):
+        torch.manual_seed(89)
+        trainer = self._regularity_trainer(conditional_entropy=True)
+        replay = CostReplayBuffer(64, seed=97)
+        for idx in range(16):
+            state = np.array([0.6, 0.5, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+        trainer.update(replay, 16, reward_scale=1.0)
+
+        state = trainer.training_state_dict()
+        restored = self._regularity_trainer(conditional_entropy=True)
+        restored.load_training_state_dict(state)
+
+        self.assertEqual(state["format"], "freqduet-lower-training-v6")
+        self.assertAlmostEqual(
+            restored.regularity_alpha_param,
+            trainer.regularity_alpha_param,
+            places=7,
+        )
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from runner_v3 import TransitDuetV2Runner
 from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
+    CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
@@ -375,6 +376,42 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(contract["target_headway_feature_index"], 0)
         self.assertEqual(contract["action_target_scale_s"], 45.0)
         self.assertEqual(contract["target_headway_scale_s"], 600.0)
+
+    def test_conditional_entropy_configs_are_causal_and_fail_closed(self):
+        configs = [CONFIRMED_MAIN, *CONDITIONAL_ENTROPY_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(CONDITIONAL_ENTROPY_CONFIGS),
+        )
+
+        for name in CONDITIONAL_ENTROPY_CONFIGS:
+            config = resolved_config(name)
+            objective = config["lower"]["causal_regularity_policy"]
+            entropy = objective["conditional_entropy"]
+            self.assertFalse(
+                config["lower"]["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                entropy["mode"], "evidence_split_temperature_v1")
+            self.assertIn(entropy["target_fraction"], {0.25, 0.5, 0.75})
+            self.assertIn(objective["cost_limit"], {0.001, 0.002})
+
+    def test_conditional_entropy_runner_resolves_independent_temperature(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_w2adent_e50_c0020_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        trainer = runner.lower_trainer
+        entropy = trainer.regularity_policy_contract["conditional_entropy"]
+        self.assertTrue(trainer.regularity_entropy_split_enabled)
+        self.assertEqual(entropy["mode"], "evidence_split_temperature_v1")
+        self.assertEqual(entropy["target_fraction"], 0.5)
+        self.assertAlmostEqual(trainer.regularity_alpha_param, 0.05)
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

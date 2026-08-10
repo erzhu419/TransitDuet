@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_w2adent_e25_c0010_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adent_e75_c0010_hiro
+
+protocol:
+  role: exploratory_compact_w2_action_dual_entropy_e75_c0010_v6
+
+lower:
+  causal_regularity_policy:
+    conditional_entropy:
+      target_fraction: 0.75

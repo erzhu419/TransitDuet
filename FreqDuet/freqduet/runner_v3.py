@@ -302,6 +302,12 @@ class DiagnosticLog:
         'lower_regularity_policy_penalty',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
+        'lower_regularity_entropy_split_enabled',
+        'lower_regularity_entropy_target_fraction',
+        'lower_regularity_entropy_valid_mean',
+        'lower_regularity_alpha',
+        'lower_policy_entropy_mean',
+        'lower_regularity_policy_entropy_valid_mean',
         'lower_regularity_policy_action_cost_mean',
         'lower_regularity_policy_action_cost_max',
         'lower_regularity_policy_evidence_valid_mean',
@@ -2619,6 +2625,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_evidence_valid = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
+        self._ep_lower_policy_entropies = []
+        self._ep_lower_regularity_policy_valid_entropies = []
         self._ep_upper_deltas = []      # all δ_t this episode
         self._ep_trip_records = []      # per-trip detail for step-level diag
         self._ep_dispatch_times = {'up': [], 'down': []}  # actual launch times per dir
@@ -5576,6 +5584,19 @@ class TransitDuetV2Runner:
             return np.asarray([0.0], dtype=np.float32)
         state = self._augment_lower_state(obs, last_action)
         state_tensor = torch.from_numpy(state).float().to(self.device)
+        if self.lower_action_bins is not None:
+            with torch.no_grad():
+                probs, log_probs, _ = self.lower_trainer.policy_net.dist_info(
+                    state_tensor.unsqueeze(0))
+                entropy = float(
+                    -(probs * log_probs).sum(dim=-1).item())
+                self._ep_lower_policy_entropies.append(entropy)
+                if self.lower_trainer.regularity_policy_enabled:
+                    valid = self.lower_trainer._regularity_evidence_valid(
+                        state_tensor.unsqueeze(0))
+                    if bool(valid.item() >= 0.5):
+                        self._ep_lower_regularity_policy_valid_entropies.append(
+                            entropy)
         if self.lower_causal_guard_policy_mask_enabled:
             feasible = self.lower_trainer.policy_net.feasible_action_mask(
                 state_tensor.unsqueeze(0))
@@ -7743,6 +7764,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_evidence_valid = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
+        self._ep_lower_policy_entropies = []
+        self._ep_lower_regularity_policy_valid_entropies = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
         self._ep_upper_demand_action = []
         self._ep_lower_demand_action = []
@@ -8418,6 +8441,10 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_policy_target_actions)
         lower_regularity_policy_error_stat = _stat(
             self._ep_lower_regularity_policy_abs_errors)
+        lower_policy_entropy_stat = _stat(
+            self._ep_lower_policy_entropies)
+        lower_regularity_policy_valid_entropy_stat = _stat(
+            self._ep_lower_regularity_policy_valid_entropies)
         lower_drift_cost_adaptive_gate_stat = _stat(
             self._ep_lower_drift_cost_adaptive_gate)
         upper_hf_stat = _stat(self._ep_upper_hf_penalties)
@@ -8888,6 +8915,19 @@ class TransitDuetV2Runner:
             'lower_regularity_lambda': lower_m.get(
                 'regularity_lambda',
                 self.lower_trainer.regularity_lambda_param),
+            'lower_regularity_entropy_split_enabled': int(
+                self.lower_trainer.regularity_entropy_split_enabled),
+            'lower_regularity_entropy_target_fraction': float(
+                self.lower_trainer.regularity_entropy_target_fraction),
+            'lower_regularity_entropy_valid_mean': lower_m.get(
+                'regularity_entropy_valid_mean', 0.0),
+            'lower_regularity_alpha': lower_m.get(
+                'regularity_alpha',
+                self.lower_trainer.regularity_alpha_param),
+            'lower_policy_entropy_mean': round(
+                lower_policy_entropy_stat['mean'], 8),
+            'lower_regularity_policy_entropy_valid_mean': round(
+                lower_regularity_policy_valid_entropy_stat['mean'], 8),
             'lower_regularity_policy_action_cost_mean': round(
                 lower_regularity_policy_action_cost_stat['mean'], 8),
             'lower_regularity_policy_action_cost_max': round(
@@ -8901,7 +8941,8 @@ class TransitDuetV2Runner:
             'lower_policy_loss': lower_m.get('policy_loss', 0.),
             'lower_pi_grad_norm': lower_m.get('pi_grad_norm', 0.),
             'lower_q_grad_norm': lower_m.get('q_grad_norm', 0.),
-            'lower_alpha': lower_m.get('alpha', 0.),
+            'lower_alpha': lower_m.get(
+                'alpha', float(self.lower_trainer.alpha)),
             'lower_lambda': lower_m.get('lambda', self.lower_trainer.lambda_param),
             'lower_replay_size': len(self.replay_buffer),
             'lower_trip_boundary_resets':
@@ -9378,6 +9419,9 @@ class TransitDuetV2Runner:
                    'lower_lambda', 'lower_alpha', 'lower_q_mean', 'lower_q_std',
                    'lower_regularity_lambda',
                    'lower_regularity_policy_cost_mean',
+                   'lower_regularity_alpha',
+                   'lower_policy_entropy_mean',
+                   'lower_regularity_policy_entropy_valid_mean',
                    'upper_delta_mean', 'upper_q_mean',
                    'hold_fb_mean', 'hold_penalty_mean',
                    'freq_holdfb_same_hold', 'freq_holdfb_same_wait',

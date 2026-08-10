@@ -225,6 +225,7 @@ SOURCE_FIXED_FILES = [
 ANALYSIS_FILES = [
     "scripts/analysis_provenance.py",
     "scripts/audit_protocol_v6_actiondual_screen.py",
+    "scripts/audit_protocol_v6_conditional_entropy_screen.py",
     "scripts/run_freqduet_protocol_v2_matrix.py",
     "scripts/decide_freqduet_protocol_v6_screen.py",
     "scripts/compare_freqduet_external_frozen.py",

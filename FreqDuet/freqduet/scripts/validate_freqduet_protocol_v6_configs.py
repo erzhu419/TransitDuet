@@ -43,6 +43,11 @@ REGULARITY_POLICY_CONFIGS = [
     for prefix in ("actiondual", "w2actiondual")
     for limit in ("0005", "0010", "0020")
 ]
+CONDITIONAL_ENTROPY_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adent_e{fraction}_c{limit}_hiro"
+    for limit in ("0010", "0020")
+    for fraction in ("25", "50", "75")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -65,6 +70,7 @@ EXPERIMENTAL_CONFIGS = [
         for weight in ("6", "8")
     ],
     *REGULARITY_POLICY_CONFIGS,
+    *CONDITIONAL_ENTROPY_CONFIGS,
 ]
 
 
@@ -203,6 +209,26 @@ def validate(
             if not (0.0 <= cost_limit < cost_cap):
                 raise ValueError(
                     f"{name}: invalid regularity policy cost contract")
+            entropy = regularity_policy.get(
+                "conditional_entropy", {}) or {}
+            if bool(entropy.get("enable")):
+                if entropy.get(
+                        "mode") != "evidence_split_temperature_v1":
+                    raise ValueError(
+                        f"{name}: conditional entropy mode is not locked")
+                target_fraction = float(
+                    entropy.get("target_fraction", -1.0))
+                if not (0.0 <= target_fraction < 0.98):
+                    raise ValueError(
+                        f"{name}: invalid conditional entropy target")
+                entropy_lr = float(entropy.get("lr", -1.0))
+                alpha_min = float(entropy.get("minimum_alpha", -1.0))
+                alpha_max = float(entropy.get("maximum_alpha", -1.0))
+                alpha_initial = float(entropy.get("initial_alpha", -1.0))
+                if not (entropy_lr > 0.0 and 0.0 < alpha_min
+                        <= alpha_initial <= alpha_max):
+                    raise ValueError(
+                        f"{name}: invalid conditional entropy optimizer")
         scenario_hashes.add(str(scenario_contract(name)["sha256"]))
 
     main = resolved[canonical_main]
