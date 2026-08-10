@@ -1195,15 +1195,57 @@ def train_frequency_separated_ppo(
             if initial_closed_loop_guard_snapshot is None
             else list(initial_closed_loop_guard_snapshot["rank"])
         ),
+        "deployment_frequency_closed_loop_guard_initial_reward_violation_count": (
+            0
+            if initial_closed_loop_guard_snapshot is None
+            else int(initial_closed_loop_guard_snapshot[
+                "reward_violation_count"
+            ])
+        ),
+        "deployment_frequency_closed_loop_guard_initial_frequency_violation_count": (
+            0
+            if initial_closed_loop_guard_snapshot is None
+            else int(initial_closed_loop_guard_snapshot[
+                "frequency_violation_count"
+            ])
+        ),
         "deployment_frequency_closed_loop_guard_training_final_rank": (
             []
             if current_closed_loop_guard_snapshot is None
             else list(current_closed_loop_guard_snapshot["rank"])
         ),
+        "deployment_frequency_closed_loop_guard_training_final_reward_violation_count": (
+            0
+            if current_closed_loop_guard_snapshot is None
+            else int(current_closed_loop_guard_snapshot[
+                "reward_violation_count"
+            ])
+        ),
+        "deployment_frequency_closed_loop_guard_training_final_frequency_violation_count": (
+            0
+            if current_closed_loop_guard_snapshot is None
+            else int(current_closed_loop_guard_snapshot[
+                "frequency_violation_count"
+            ])
+        ),
         "deployment_frequency_closed_loop_guard_selected_rank": (
             []
             if selected_closed_loop_guard_snapshot is None
             else list(selected_closed_loop_guard_snapshot["rank"])
+        ),
+        "deployment_frequency_closed_loop_guard_selected_reward_violation_count": (
+            0
+            if selected_closed_loop_guard_snapshot is None
+            else int(selected_closed_loop_guard_snapshot[
+                "reward_violation_count"
+            ])
+        ),
+        "deployment_frequency_closed_loop_guard_selected_frequency_violation_count": (
+            0
+            if selected_closed_loop_guard_snapshot is None
+            else int(selected_closed_loop_guard_snapshot[
+                "frequency_violation_count"
+            ])
         ),
         "deployment_frequency_closed_loop_guard_evaluation_count": int(
             closed_loop_guard_evaluation_count

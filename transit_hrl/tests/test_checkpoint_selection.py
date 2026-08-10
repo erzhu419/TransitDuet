@@ -623,6 +623,18 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             3,
         )
         self.assertEqual(
+            payload[
+                "deployment_frequency_closed_loop_guard_selected_reward_violation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            payload[
+                "deployment_frequency_closed_loop_guard_selected_frequency_violation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
             payload["history"][1][
                 "deployment_frequency_closed_loop_guard_attempted"
             ],
