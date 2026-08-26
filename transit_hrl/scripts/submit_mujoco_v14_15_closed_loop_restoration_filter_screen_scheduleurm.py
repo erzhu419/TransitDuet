@@ -1920,7 +1920,74 @@ def merge_results(args: argparse.Namespace) -> None:
     print(f"merged {len(cells)} frozen MuJoCo v14.15 cells")
 
 
-def _scheduler_tasks_for_run(run_name: str) -> dict[str, dict[str, Any]]:
+def _scheduler_attempt_audit_row(task: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": task.get("id"),
+        "status": task.get("status"),
+        "node": task.get("node"),
+        "submitted_at": task.get("submitted_at"),
+        "started_at": task.get("started_at"),
+        "finished_at": task.get("finished_at"),
+        "last_progress_line": task.get("last_progress_line"),
+        "last_block_reason": task.get("last_block_reason"),
+        "snapshot_source": task.get("_scheduler_snapshot_source"),
+    }
+
+
+def _select_scheduler_task_attempt(
+    signature: str,
+    attempts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Select one auditable result producer from scheduler reroute attempts."""
+
+    if not attempts:
+        raise RuntimeError(f"scheduler signature has no attempts: {signature}")
+    unique_by_id: dict[str, dict[str, Any]] = {}
+    for task in attempts:
+        task_id = str(task.get("id", ""))
+        if not task_id:
+            raise RuntimeError(
+                f"scheduler attempt has no task id: {signature}"
+            )
+        # Live status is loaded first and is authoritative over an archived
+        # copy of the same task id.
+        unique_by_id.setdefault(task_id, task)
+    unique = list(unique_by_id.values())
+    successful = [
+        task for task in unique
+        if task.get("status") == "done" and task.get("node")
+    ]
+    if len(successful) > 1:
+        ids = sorted(str(task.get("id")) for task in successful)
+        raise RuntimeError(
+            "multiple successful scheduler attempts make result provenance "
+            f"ambiguous: {signature}; task_ids={ids}"
+        )
+    if len(unique) > 1 and not successful:
+        states = sorted(
+            f"{task.get('id')}:{task.get('status')}" for task in unique
+        )
+        raise RuntimeError(
+            "rerouted scheduler signature has no successful terminal attempt: "
+            f"{signature}; attempts={states}"
+        )
+    selected = successful[0] if successful else unique[0]
+    result = dict(selected)
+    result["_scheduler_attempt_selection"] = (
+        "unique_successful_reroute" if len(unique) > 1 else "only_attempt"
+    )
+    result["_scheduler_attempt_lineage"] = [
+        _scheduler_attempt_audit_row(task)
+        for task in sorted(unique, key=lambda item: str(item.get("id", "")))
+    ]
+    return result
+
+
+def _scheduler_tasks_for_run(
+    run_name: str,
+    *,
+    scheduler_snapshots: list[Path] | None = None,
+) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
     command = [
         sys.executable,
         str(SCHEDULER),
@@ -1949,19 +2016,43 @@ def _scheduler_tasks_for_run(run_name: str) -> dict[str, dict[str, Any]]:
             "v14.15 scheduler snapshot failed after three attempts: "
             + str((completed.stderr if completed else "")[-500:])
         )
-    payload = json.loads(completed.stdout)
-    prefix = f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/"
-    matches: dict[str, dict[str, Any]] = {}
-    for task in payload.get("tasks", []):
-        signature = str(task.get("signature", ""))
-        if not signature.startswith(prefix):
-            continue
-        if signature in matches:
+    payloads: list[tuple[str, dict[str, Any]]] = [
+        ("live_scheduler_status", json.loads(completed.stdout))
+    ]
+    snapshot_audit: list[dict[str, Any]] = []
+    for snapshot in scheduler_snapshots or []:
+        snapshot = Path(snapshot).resolve()
+        if not snapshot.is_file():
+            raise RuntimeError(f"scheduler snapshot does not exist: {snapshot}")
+        archived_payload = json.loads(snapshot.read_text(encoding="utf-8"))
+        if not isinstance(archived_payload, dict) or not isinstance(
+            archived_payload.get("tasks"), list
+        ):
             raise RuntimeError(
-                f"duplicate scheduler signature during v14.15 sync: {signature}"
+                f"scheduler snapshot has no task registry: {snapshot}"
             )
-        matches[signature] = task
-    return matches
+        source = f"archived_scheduler_snapshot:{snapshot}"
+        payloads.append((source, archived_payload))
+        snapshot_audit.append({
+            "path": str(snapshot),
+            "sha256": _sha256(snapshot),
+            "task_record_count": len(archived_payload["tasks"]),
+        })
+    prefix = f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/"
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for source, task_payload in payloads:
+        for raw_task in task_payload.get("tasks", []):
+            signature = str(raw_task.get("signature", ""))
+            if not signature.startswith(prefix):
+                continue
+            task = dict(raw_task)
+            task["_scheduler_snapshot_source"] = source
+            grouped.setdefault(signature, []).append(task)
+    matches = {
+        signature: _select_scheduler_task_attempt(signature, attempts)
+        for signature, attempts in grouped.items()
+    }
+    return matches, snapshot_audit
 
 
 def sync_results(args: argparse.Namespace) -> None:
@@ -1972,7 +2063,10 @@ def sync_results(args: argparse.Namespace) -> None:
         "checkpoint.pt",
     )
     expected: list[tuple[str, Path, dict[str, Any]]] = []
-    scheduler_tasks = _scheduler_tasks_for_run(args.run_name)
+    scheduler_tasks, snapshot_audit = _scheduler_tasks_for_run(
+        args.run_name,
+        scheduler_snapshots=list(args.scheduler_snapshot),
+    )
     cells = selected_experiment_cells(args)
     for phase, environment, arm, seed in cells:
         signature = task_signature(
@@ -2057,6 +2151,15 @@ def sync_results(args: argparse.Namespace) -> None:
         "arms": list(args.arms),
         "phases": list(args.phases),
         "task_ids": [item[2]["id"] for item in expected],
+        "scheduler_snapshots": snapshot_audit,
+        "task_attempt_lineage": {
+            signature: {
+                "selected_task_id": task["id"],
+                "selection": task["_scheduler_attempt_selection"],
+                "attempts": task["_scheduler_attempt_lineage"],
+            }
+            for signature, _, task in expected
+        },
         "node_counts": {
             node: sum(item[2]["node"] == node for item in expected)
             for node in sorted({str(item[2]["node"]) for item in expected})
@@ -2091,6 +2194,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-complete-cells", action="store_true")
     parser.add_argument("--sync-only", action="store_true")
     parser.add_argument("--sync-workers", type=int, default=4)
+    parser.add_argument(
+        "--scheduler-snapshot",
+        action="append",
+        default=[],
+        type=Path,
+        help=(
+            "read-only archived scheduler JSON used only to recover task "
+            "records absent from live status"
+        ),
+    )
     parser.add_argument("--merge-only", action="store_true")
     parser.add_argument(
         "--fixed-candidate-multiseed",

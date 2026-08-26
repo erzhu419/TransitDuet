@@ -23,6 +23,7 @@ from scripts.analyze_mujoco_v14_15_closed_loop_restoration_filter_preflight impo
 from scripts.submit_mujoco_v14_15_closed_loop_restoration_filter_screen_scheduleurm import (
     _closed_loop_guard_contract_valid,
     _runtime_deployment_constraint_contract,
+    _select_scheduler_task_attempt,
     build_scheduler_spec,
     build_training_command,
 )
@@ -52,6 +53,38 @@ class MujocoV1415ClosedLoopRestorationFilterScreenTest(unittest.TestCase):
             spec.FROZEN_CORE_PROTOCOL_VERSION,
             MUJOCO_CONTROL_PROTOCOL_VERSION,
         )
+
+    def test_scheduler_reroute_requires_one_successful_attempt(self):
+        signature = "Freq-HRL/unit/cell"
+        selected = _select_scheduler_task_attempt(signature, [
+            {
+                "id": "t10",
+                "status": "failed",
+                "node": "node006",
+                "_scheduler_snapshot_source": "archive",
+            },
+            {
+                "id": "t11",
+                "status": "done",
+                "node": "node001",
+                "_scheduler_snapshot_source": "live",
+            },
+        ])
+        self.assertEqual(selected["id"], "t11")
+        self.assertEqual(
+            selected["_scheduler_attempt_selection"],
+            "unique_successful_reroute",
+        )
+        self.assertEqual(
+            [row["id"] for row in selected["_scheduler_attempt_lineage"]],
+            ["t10", "t11"],
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "multiple successful"):
+            _select_scheduler_task_attempt(signature, [
+                {"id": "t20", "status": "done", "node": "node001"},
+                {"id": "t21", "status": "done", "node": "node002"},
+            ])
 
     def test_seed_namespace_is_fresh_and_role_disjoint(self):
         current_roles = (
