@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 22)
+        self.assertEqual(len(records), 23)
         by_id = {row["evidence_id"]: row for row in records}
         self.assertTrue(
             by_id["mujoco_v12_responsibility_confirmatory"][
@@ -174,6 +174,19 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 "manuscript_reportable"
             ]
         )
+        v14_16 = by_id[
+            "mujoco_v14_16_crossed_restoration_mechanism_development_r5"
+        ]
+        self.assertEqual(v14_16["decision"], "primary_mechanism_not_ready")
+        self.assertFalse(v14_16["manuscript_reportable"])
+        self.assertEqual(v14_16["facts"]["merged_cell_count"], 81)
+        self.assertEqual(v14_16["facts"]["rerouted_success_count"], 15)
+        self.assertEqual(
+            v14_16["facts"]["primary_engineering_pass_count"], 0
+        )
+        self.assertEqual(
+            v14_16["facts"]["primary_fallback_checkpoint_count"], 8
+        )
 
     def test_hash_tampering_is_rejected(self):
         registry = copy.deepcopy(load_registry(self.registry_path))
@@ -198,11 +211,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 22)
+            self.assertEqual(summary["record_count"], 23)
             self.assertEqual(summary["reportable_record_count"], 3)
             self.assertEqual(summary["positive_supported_record_count"], 1)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 17)
+            self.assertEqual(summary["development_record_count"], 18)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

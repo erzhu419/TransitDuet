@@ -1,5 +1,5 @@
 {
-  "development_record_count": 17,
+  "development_record_count": 18,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 1,
-  "record_count": 22,
+  "record_count": 23,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3329,6 +3329,76 @@
       "selection_access": "frozen_candidate_multiseed_development"
     },
     {
+      "allowed_wording": "The source-bound v14.16 development screen recovered and validated all 81 registered cells. The preregistered crossed-replay arm passed neither the engineering nor complete effect gate in any of nine environment-by-seed cells; eight cells retained the fallback checkpoint. The non-frozen pathwise arm was the best diagnostic variant but completed only the Hopper environment and 2 of 9 cell-level gates. These results reject binary reward-actor freezing and all-path hard feasibility as the next scalable mechanism.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/decision.json",
+          "role": "decision",
+          "sha256": "0f35f5eec6a3409ed2d5bdcb47a2d60936e996f130a04adcbfa5088ff75dbecd"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/arm_ranking.csv",
+          "role": "arm_ranking",
+          "sha256": "cb07b6331931481b071aef2a935e251b47786716eea50f4b461c295a9251a573"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/replicate_rows.csv",
+          "role": "replicate_rows",
+          "sha256": "e4d41881e5569e2ff98918c38262aaa5ea47cc09a56c16d2f2f33022d070ed9f"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/cell_manifest.json",
+          "role": "cell_manifest",
+          "sha256": "8e8d179a21dd75523bf8d5ab6b8f7d91d88188a0d234d5850cf2f641ec7527cd"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/run_scoped_result_sync.json",
+          "role": "result_sync",
+          "sha256": "d4877b18a51091bcfccd61c623fdfc0191b56cc9cdd2a7a04caf7a8ce2646002"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/report.md",
+          "role": "report",
+          "sha256": "93a98f4489d485bc991dd3445243a245276054546c9c255677b4bc4fcb09f749"
+        }
+      ],
+      "claim": "Pathwise restoration, reward-actor freezing, and crossed frozen-state replay produce a stable learned leakage-constrained MuJoCo candidate.",
+      "claim_id": "D18_CROSSED_RESTORATION_MECHANISM",
+      "decision": "primary_mechanism_not_ready",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_16_crossed_restoration_mechanism_development_r5",
+      "evidence_stage": "development",
+      "facts": {
+        "archived_anchor_record_count": 9,
+        "best_diagnostic_arm": "l2_path_trainreplay",
+        "best_engineering_pass_count": 2,
+        "best_environment_complete_count": 1,
+        "decision_status": "primary_mechanism_not_ready",
+        "development_protocol_version": "mujoco_v14_16_crossed_restoration_mechanism_screen_v2",
+        "environment_count": 3,
+        "heldout_paths_are_not_replicates": true,
+        "input_sha256": "c9cd19cca0ef84c9a185e75f3a8bcb29a6b421d19dea82e6a98c178462c4c46f",
+        "integrity_status": "valid",
+        "merged_cell_count": 81,
+        "optimizer_seed_count": 3,
+        "primary_arm": "l2_path_freeze_crossreplay",
+        "primary_complete_effect_gate_count": 0,
+        "primary_engineering_pass_count": 0,
+        "primary_fallback_checkpoint_count": 8,
+        "primary_trained_checkpoint_count": 1,
+        "rerouted_success_count": 15
+      },
+      "forbidden_wording": "MuJoCo v14.16 supports learned cross-environment frequency separation, a no-tradeoff claim, a statistically reliable improvement, or expansion of the preregistered primary arm to confirmation.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "source_bound_81_cell_screen_with_audited_scheduler_reroute_recovery",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_16_mechanism",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_three_seed_mechanism_development"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3387,7 +3457,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "89dbe8d9c17b875e498fc78bcbdc823bc71671c2e876597d5c7048dd8eec583b",
+  "registry_sha256": "469dd60e585ed93e81151a967a82d5c3182f8e5001c6fdc4241fa5ed9b9d2f7c",
   "reportable_record_count": 3,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

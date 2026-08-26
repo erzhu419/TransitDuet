@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-08-10
+Date: 2026-08-26
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -26,6 +26,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_14_closed_loop_actor_guard_preflight | mujoco_control | development | do_not_expand | development_only | false |
 | mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development | expand_to_multiseed_screen | development_only | false |
 | mujoco_v14_15_restoration_multiseed_development_r2 | mujoco_control | development | candidate_not_ready_for_confirmation | development_only | false |
+| mujoco_v14_16_crossed_restoration_mechanism_development_r5 | mujoco_control | development | primary_mechanism_not_ready | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -150,6 +151,12 @@ Forbidden: MuJoCo v14.15 preflight alone supports statistically reliable reward 
 The repaired v14.15 r2 development screen completed all 450 frozen cells across 15 fresh optimizer seeds and three MuJoCo environments. The preselected restoration arm was not ready for confirmation: only 8 of 45 environment-by-seed candidate cells passed the complete gate (HalfCheetah 0, Hopper 7, Walker2d 1), and the simultaneous primary family failed. Training often restored the independent guard paths, but checkpoint selection exposed poor transfer to disjoint paths, motivating broader frozen-state coverage and restoration-specific regularization.
 
 Forbidden: MuJoCo v14.15 provides confirmatory evidence, establishes cross-environment learned frequency separation, supports a no-tradeoff claim, or is ready for submission as the final algorithm.
+
+### mujoco_v14_16_crossed_restoration_mechanism_development_r5
+
+The source-bound v14.16 development screen recovered and validated all 81 registered cells. The preregistered crossed-replay arm passed neither the engineering nor complete effect gate in any of nine environment-by-seed cells; eight cells retained the fallback checkpoint. The non-frozen pathwise arm was the best diagnostic variant but completed only the Hopper environment and 2 of 9 cell-level gates. These results reject binary reward-actor freezing and all-path hard feasibility as the next scalable mechanism.
+
+Forbidden: MuJoCo v14.16 supports learned cross-environment frequency separation, a no-tradeoff claim, a statistically reliable improvement, or expansion of the preregistered primary arm to confirmation.
 
 ### legacy_c1_c9_matrix_snapshot
 

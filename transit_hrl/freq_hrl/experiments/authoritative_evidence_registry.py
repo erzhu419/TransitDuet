@@ -820,6 +820,94 @@ def _mujoco_v14_15_multiseed_facts(
     }
 
 
+def _mujoco_v14_16_mechanism_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    ranking = _read_csv(paths["arm_ranking"])
+    replicates = _read_csv(paths["replicate_rows"])
+    manifest = _read_json(paths["cell_manifest"])
+    sync = _read_json(paths["result_sync"])
+    report = paths.get("report")
+    primary_arm = "l2_path_freeze_crossreplay"
+    best_arm = "l2_path_trainreplay"
+    primary_rows = [row for row in replicates if row.get("arm") == primary_arm]
+    primary_ranking = [row for row in ranking if row.get("arm") == primary_arm]
+    best_ranking = [row for row in ranking if row.get("arm") == best_arm]
+    lineages = sync.get("task_attempt_lineage") or {}
+    reroute_count = sum(
+        row.get("selection") == "unique_successful_reroute"
+        for row in lineages.values()
+        if isinstance(row, dict)
+    )
+    snapshots = sync.get("scheduler_snapshots") or []
+    if (
+        decision.get("status") != "primary_mechanism_not_ready"
+        or decision.get("evidence_role")
+        != "mechanism_screen_development_not_confirmation"
+        or decision.get("development_protocol_version")
+        != "mujoco_v14_16_crossed_restoration_mechanism_screen_v2"
+        or decision.get("primary_candidate_arm") != primary_arm
+        or decision.get("primary_ready") is not False
+        or int(decision.get("optimizer_seed_count", -1)) != 3
+        or len(ranking) != 5
+        or len(replicates) != 45
+        or len(primary_rows) != 9
+        or len(primary_ranking) != 1
+        or int(primary_ranking[0].get("engineering_pass_count", -1)) != 0
+        or int(primary_ranking[0].get("complete_effect_gate_count", -1)) != 0
+        or int(primary_ranking[0].get("environment_complete_count", -1)) != 0
+        or len(best_ranking) != 1
+        or int(best_ranking[0].get("engineering_pass_count", -1)) != 2
+        or int(best_ranking[0].get("complete_effect_gate_count", -1)) != 2
+        or int(best_ranking[0].get("environment_complete_count", -1)) != 1
+        or manifest.get("status") != "development_screen_complete_unanalyzed"
+        or int(manifest.get("cell_count", -1)) != 81
+        or int(manifest.get("anchor_cell_count", -1)) != 9
+        or int(manifest.get("continuation_cell_count", -1)) != 72
+        or sync.get("status") != "run_scoped_result_sync_complete"
+        or int(sync.get("cell_count", -1)) != 81
+        or len(lineages) != 81
+        or reroute_count != 15
+        or len(snapshots) != 1
+        or int(snapshots[0].get("task_record_count", -1)) != 9
+        or report is None
+        or "Status: `primary_mechanism_not_ready`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v14.16 mechanism decision no longer matches")
+    trained_primary = sum(
+        int(row.get("selected_checkpoint_iteration", -1)) >= 7
+        for row in primary_rows
+    )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "development_protocol_version": str(
+            decision["development_protocol_version"]
+        ),
+        "optimizer_seed_count": int(decision["optimizer_seed_count"]),
+        "environment_count": 3,
+        "merged_cell_count": int(manifest["cell_count"]),
+        "rerouted_success_count": int(reroute_count),
+        "archived_anchor_record_count": int(
+            snapshots[0]["task_record_count"]
+        ),
+        "primary_arm": primary_arm,
+        "primary_engineering_pass_count": 0,
+        "primary_complete_effect_gate_count": 0,
+        "primary_trained_checkpoint_count": int(trained_primary),
+        "primary_fallback_checkpoint_count": 9 - int(trained_primary),
+        "best_diagnostic_arm": best_arm,
+        "best_environment_complete_count": 1,
+        "best_engineering_pass_count": 2,
+        "heldout_paths_are_not_replicates": bool(
+            decision["heldout_paths_are_not_replicates"]
+        ),
+        "input_sha256": str(decision["input_sha256"]),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -836,6 +924,7 @@ PARSERS = {
     ),
     "mujoco_mechanism_preflight": _mujoco_mechanism_preflight_facts,
     "mujoco_v14_15_multiseed": _mujoco_v14_15_multiseed_facts,
+    "mujoco_v14_16_mechanism": _mujoco_v14_16_mechanism_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

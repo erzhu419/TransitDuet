@@ -1,6 +1,6 @@
 {
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1",
-  "snapshot_date": "2026-08-10",
+  "snapshot_date": "2026-08-26",
   "policy": {
     "manuscript_source_of_truth": "this_registry_only",
     "unregistered_artifacts": "excluded",
@@ -622,6 +622,53 @@
           "role": "report",
           "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_15_multiseed/report.md",
           "sha256": "8d73d55114b14898b8bbb2997369173230dcf7d2e3b5a8540f57996984888a12"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_16_crossed_restoration_mechanism_development_r5",
+      "claim_id": "D18_CROSSED_RESTORATION_MECHANISM",
+      "claim": "Pathwise restoration, reward-actor freezing, and crossed frozen-state replay produce a stable learned leakage-constrained MuJoCo candidate.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "primary_mechanism_not_ready",
+      "integrity_status": "valid",
+      "selection_access": "frozen_three_seed_mechanism_development",
+      "outcome_provenance": "source_bound_81_cell_screen_with_audited_scheduler_reroute_recovery",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v14_16_mechanism",
+      "allowed_wording": "The source-bound v14.16 development screen recovered and validated all 81 registered cells. The preregistered crossed-replay arm passed neither the engineering nor complete effect gate in any of nine environment-by-seed cells; eight cells retained the fallback checkpoint. The non-frozen pathwise arm was the best diagnostic variant but completed only the Hopper environment and 2 of 9 cell-level gates. These results reject binary reward-actor freezing and all-path hard feasibility as the next scalable mechanism.",
+      "forbidden_wording": "MuJoCo v14.16 supports learned cross-environment frequency separation, a no-tradeoff claim, a statistically reliable improvement, or expansion of the preregistered primary arm to confirmation.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/decision.json",
+          "sha256": "0f35f5eec6a3409ed2d5bdcb47a2d60936e996f130a04adcbfa5088ff75dbecd"
+        },
+        {
+          "role": "arm_ranking",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/arm_ranking.csv",
+          "sha256": "cb07b6331931481b071aef2a935e251b47786716eea50f4b461c295a9251a573"
+        },
+        {
+          "role": "replicate_rows",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/replicate_rows.csv",
+          "sha256": "e4d41881e5569e2ff98918c38262aaa5ea47cc09a56c16d2f2f33022d070ed9f"
+        },
+        {
+          "role": "cell_manifest",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/cell_manifest.json",
+          "sha256": "8e8d179a21dd75523bf8d5ab6b8f7d91d88188a0d234d5850cf2f641ec7527cd"
+        },
+        {
+          "role": "result_sync",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/run_scoped_result_sync.json",
+          "sha256": "d4877b18a51091bcfccd61c623fdfc0191b56cc9cdd2a7a04caf7a8ce2646002"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/report.md",
+          "sha256": "93a98f4489d485bc991dd3445243a245276054546c9c255677b4bc4fcb09f749"
         }
       ]
     },
