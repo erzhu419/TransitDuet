@@ -406,13 +406,14 @@ def load_paired_mujoco_checkpoint(
     expected_source_manifest_sha256: str,
     expected_method: str = "freq_hrl_no_leakage",
     expected_router_mode: str = "direct",
+    expected_router_strength: float = 0.0,
     expected_router_observe_strength: bool = True,
     expected_responsibility_mode: str = "causal_lf_transfer",
     expected_protocol_version: str = MUJOCO_CONTROL_PROTOCOL_VERSION,
     reset_upper_deployment_frequency_lambda: float | None = None,
     reset_lower_deployment_frequency_lambda: float | None = None,
 ) -> dict[str, Any]:
-    """Load and audit a matched zero-strength continuation checkpoint."""
+    """Load and audit a matched continuation checkpoint."""
 
     checkpoint_file = Path(checkpoint_path)
     summary_file = Path(summary_path)
@@ -423,6 +424,9 @@ def load_paired_mujoco_checkpoint(
     summary = json.loads(summary_file.read_text(encoding="utf-8"))
     if not isinstance(summary, dict):
         raise ValueError("paired checkpoint summary must be a JSON object")
+    router_strength = float(expected_router_strength)
+    if not np.isfinite(router_strength) or not 0.0 <= router_strength <= 1.0:
+        raise ValueError("paired checkpoint router strength must be in [0, 1]")
     file_sha256 = _file_sha256(checkpoint_file)
     expected_summary = {
         "protocol_version": str(expected_protocol_version),
@@ -432,7 +436,7 @@ def load_paired_mujoco_checkpoint(
         "code_revision": str(expected_code_revision),
         "source_manifest_sha256": str(expected_source_manifest_sha256),
         "lower_action_router_mode": str(expected_router_mode),
-        "lower_action_router_strength": 0.0,
+        "lower_action_router_strength": router_strength,
         "lower_action_router_observe_strength": bool(
             expected_router_observe_strength
         ),
@@ -474,6 +478,7 @@ def load_paired_mujoco_checkpoint(
         "code_revision": str(expected_code_revision),
         "source_manifest_sha256": str(expected_source_manifest_sha256),
         "lower_action_router_mode": str(expected_router_mode),
+        "lower_action_router_strength": router_strength,
         "lower_action_router_observe_strength": bool(
             expected_router_observe_strength
         ),
@@ -551,6 +556,7 @@ def load_paired_mujoco_checkpoint(
         "checkpoint_environment": str(env_id),
         "checkpoint_protocol_version": str(expected_protocol_version),
         "checkpoint_router_mode": str(expected_router_mode),
+        "checkpoint_router_strength": router_strength,
         "checkpoint_router_observe_strength": bool(
             expected_router_observe_strength
         ),
@@ -3424,6 +3430,7 @@ def train_mujoco_method(
     initial_checkpoint_path: Path | None = None,
     initial_checkpoint_summary_path: Path | None = None,
     initial_checkpoint_router_mode: str = "direct",
+    initial_checkpoint_router_strength: float = 0.0,
     upper_actor_anchor_coef: float = 0.0,
     lower_actor_anchor_coef: float = 0.0,
     checkpoint_selection_mode: str = "assigned_condition",
@@ -3921,6 +3928,13 @@ def train_mujoco_method(
         raise ValueError("unknown MuJoCo lower-action router mode")
     if str(initial_checkpoint_router_mode) not in LOWER_ACTION_ROUTER_MODES:
         raise ValueError("unknown initial-checkpoint lower-action router mode")
+    if (
+        not np.isfinite(float(initial_checkpoint_router_strength))
+        or not 0.0 <= float(initial_checkpoint_router_strength) <= 1.0
+    ):
+        raise ValueError(
+            "initial-checkpoint lower-action router strength must be in [0, 1]"
+        )
     if not 0.0 < float(lower_action_router_alpha) <= 1.0:
         raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
     if not 0.0 <= float(lower_action_router_strength) <= 1.0:
@@ -4816,6 +4830,9 @@ def train_mujoco_method(
                 ),
                 expected_method=name,
                 expected_router_mode=str(initial_checkpoint_router_mode),
+                expected_router_strength=float(
+                    initial_checkpoint_router_strength
+                ),
                 expected_router_observe_strength=bool(
                     effective_router_observe_strength
                 ),
@@ -5674,6 +5691,9 @@ def write_cell(
         "frozen_parameter_sha256": payload["frozen_parameter_sha256"],
         "frozen_checkpoint_sha256": payload["frozen_checkpoint_sha256"],
         "lower_action_router_mode": payload["lower_action_router_mode"],
+        "lower_action_router_strength": payload[
+            "lower_action_router_strength"
+        ],
         "lower_action_router_observe_strength": payload[
             "lower_action_router_observe_strength"
         ],
@@ -5790,6 +5810,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--initial-checkpoint-router-mode",
         choices=LOWER_ACTION_ROUTER_MODES,
         default="direct",
+    )
+    parser.add_argument(
+        "--initial-checkpoint-router-strength",
+        type=float,
+        default=0.0,
     )
     parser.add_argument("--upper-actor-anchor-coef", type=float, default=0.0)
     parser.add_argument("--lower-actor-anchor-coef", type=float, default=0.0)
@@ -6074,6 +6099,9 @@ def main() -> None:
             args.initial_checkpoint_summary_path
         ),
         initial_checkpoint_router_mode=args.initial_checkpoint_router_mode,
+        initial_checkpoint_router_strength=(
+            args.initial_checkpoint_router_strength
+        ),
         upper_actor_anchor_coef=args.upper_actor_anchor_coef,
         lower_actor_anchor_coef=args.lower_actor_anchor_coef,
         leakage_constraint_scope=args.leakage_constraint_scope,

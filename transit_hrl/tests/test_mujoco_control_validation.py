@@ -887,6 +887,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "frozen_parameter_sha256": "a" * 64,
             "frozen_checkpoint_sha256": "a" * 64,
             "lower_action_router_mode": "direct",
+            "lower_action_router_strength": 0.0,
             "lower_action_router_observe_strength": False,
             "responsibility_mode": "additive",
         }
@@ -927,7 +928,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             "code_revision": code_revision,
             "source_manifest_sha256": source_manifest,
             "lower_action_router_mode": "direct",
-            "lower_action_router_strength": 0.0,
+            "lower_action_router_strength": 1.0,
             "lower_action_router_observe_strength": True,
             "responsibility_mode": "causal_lf_transfer",
             "selected_checkpoint_iteration": 3,
@@ -958,6 +959,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 optimizer_seed=409,
                 expected_code_revision=code_revision,
                 expected_source_manifest_sha256=source_manifest,
+                expected_router_strength=1.0,
                 reset_upper_deployment_frequency_lambda=1.25,
                 reset_lower_deployment_frequency_lambda=2.5,
             )
@@ -967,6 +969,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
             self.assertEqual(
                 metadata["checkpoint_parameter_sha256"], parameter_sha256
             )
+            self.assertEqual(metadata["checkpoint_router_strength"], 1.0)
             self.assertEqual(
                 metadata["loaded_upper_deployment_frequency_lambda"], 0.0
             )
@@ -984,6 +987,7 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                     optimizer_seed=409,
                     expected_code_revision=code_revision,
                     expected_source_manifest_sha256=source_manifest,
+                    expected_router_strength=1.0,
                 )
 
 
