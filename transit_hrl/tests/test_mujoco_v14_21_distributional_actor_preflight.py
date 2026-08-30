@@ -1,5 +1,8 @@
 import unittest
 from argparse import Namespace
+from pathlib import Path
+import subprocess
+import sys
 
 from scripts import mujoco_v14_21_distributional_actor_preflight_spec as spec
 from scripts.submit_mujoco_v14_21_distributional_actor_preflight_scheduleurm import (
@@ -41,6 +44,20 @@ class MujocoV1421DistributionalActorPreflightTest(unittest.TestCase):
         self.assertEqual(scheduler["cpu"], spec.CPU_PER_TASK)
         self.assertEqual(scheduler["ram_mb"], spec.RAM_MB_PER_TASK)
         self.assertEqual(set(scheduler["allowed_nodes"]), set(self._args().nodes))
+
+    def test_launcher_is_directly_executable(self):
+        launcher = (
+            Path(__file__).resolve().parents[1] / "scripts"
+            / "submit_mujoco_v14_21_distributional_actor_preflight_scheduleurm.py"
+        )
+        process = subprocess.run(
+            [sys.executable, str(launcher), "--help"],
+            cwd=Path(__file__).resolve().parents[1],
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertIn("--run-name", process.stdout)
 
 
 if __name__ == "__main__":

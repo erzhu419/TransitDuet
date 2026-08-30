@@ -6,9 +6,15 @@ from __future__ import annotations
 import json
 import shlex
 import subprocess
+import sys
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts import mujoco_v14_21_distributional_actor_preflight_spec as spec
 from scripts.analyze_mujoco_v14_21_distributional_actor_preflight import analyze_run
