@@ -65,6 +65,9 @@ MUJOCO_V17_10_HORIZON_RESERVOIR_FIR_SCHEMA_VERSION = (
 MUJOCO_V17_11_FRACTIONAL_RESERVOIR_FIR_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_11_fractional_reservoir_fir_development_v1"
 )
+MUJOCO_V17_12_NEAREST_FEASIBLE_ACTION_ORACLE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_12_nearest_feasible_action_oracle_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2446,6 +2449,103 @@ def _mujoco_v17_11_fractional_reservoir_fir_facts(
     }
 
 
+def _mujoco_v17_12_nearest_feasible_action_oracle_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    scheduler = dict(decision.get("scheduler") or {})
+    correction = dict(
+        decision.get("frequency_only_actor_floor_correction") or {}
+    )
+    deployment = dict(
+        decision.get("deployment_total_box_diagnostic") or {}
+    )
+    gate = dict(decision.get("advancement_gate") or {})
+    targets = dict(decision.get("server_target_policy") or {})
+    expected_gate_keys = {
+        "expected_reference_feasible_path_count",
+        "expected_actor_floor_path_count",
+        "all_frequency_only_targets_feasible",
+        "all_reference_feasible_paths_preserved_exactly",
+        "all_actor_floor_targets_change_total_action",
+        "actor_floor_total_correction_rms_gate",
+        "actor_floor_total_correction_abs_gate",
+        "all_actor_floor_deployment_targets_feasible",
+        "server_target_count_complete",
+    }
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_12_NEAREST_FEASIBLE_ACTION_ORACLE_SCHEMA_VERSION
+        or decision.get("status")
+        != "nearest_feasible_targets_authorize_causal_actor_adapter"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "post_router_boundary_reused_path_actor_target_oracle_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v17_12_nearest_feasible_action_v1"
+        or decision.get("frozen_core_revision")
+        != "3ca8ee6d2709e77af7b7c4d022cbeb83886d0a75"
+        or decision.get("frozen_source_manifest_sha256")
+        != "718a7dd61ea62fa21b52531299a2e0d2e2b22175891f7a7fbdf03b7f58a5410a"
+        or decision.get("source_dataset_run")
+        != "mujoco_v17_8_causal_fir_dataset_20260831_r1"
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("reference_feasible_path_count", -1)) != 113
+        or int(decision.get("actor_floor_path_count", -1)) != 7
+        or int(decision.get("frequency_target_feasible_path_count", -1))
+        != 120
+        or int(decision.get(
+            "deployment_target_feasible_actor_floor_path_count", -1
+        )) != 7
+        or scheduler.get("oracle_task_id") != "t85844"
+        or scheduler.get("oracle_task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or scheduler.get("slurm_used") is not False
+        or float(correction.get("total_action_rms_mean", -1.0))
+        != 0.00234273764738525
+        or float(correction.get("total_action_rms_maximum", -1.0))
+        != 0.008117855266084743
+        or float(correction.get("total_action_abs_maximum", -1.0))
+        != 0.03687370520663191
+        or deployment.get("selects_actor_target") is not False
+        or float(deployment.get("total_action_rms_maximum", -1.0))
+        != 0.08110926566037498
+        or set(gate) != expected_gate_keys
+        or not all(value is True for value in gate.values())
+        or int(targets.get("server_target_count", -1)) != 7
+        or targets.get("server_targets_pulled_locally") is not False
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("causal_actor_adapter_authorized") is not True
+        or decision.get("manuscript_support_gate") is not False
+        or report is None
+        or "`nearest_feasible_targets_authorize_causal_actor_adapter`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.12 actor target oracle decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "reference_feasible_path_count": 113,
+        "actor_floor_path_count": 7,
+        "frequency_target_feasible_path_count": 120,
+        "actor_floor_total_action_rms_mean": float(
+            correction["total_action_rms_mean"]
+        ),
+        "actor_floor_total_action_rms_maximum": float(
+            correction["total_action_rms_maximum"]
+        ),
+        "actor_floor_total_action_abs_maximum": float(
+            correction["total_action_abs_maximum"]
+        ),
+        "server_target_count": 7,
+        "fresh_validation_paths_accessed": False,
+        "causal_actor_adapter_authorized": True,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2500,6 +2600,9 @@ PARSERS = {
     ),
     "mujoco_v17_11_fractional_reservoir_fir": (
         _mujoco_v17_11_fractional_reservoir_fir_facts
+    ),
+    "mujoco_v17_12_nearest_feasible_action_oracle": (
+        _mujoco_v17_12_nearest_feasible_action_oracle_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

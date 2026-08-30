@@ -1,5 +1,5 @@
 {
-  "development_record_count": 32,
+  "development_record_count": 34,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 38,
+  "record_count": 40,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4455,6 +4455,103 @@
       "selection_access": "post_v17_9_reused_rejected_paths_grouped_by_seed"
     },
     {
+      "allowed_wording": "On 120 reused grouped development paths, the frozen v17.11 selector found a fractional reservoir that kept all paths valid and upper-feasible, recovered 62/81 oracle-recoverable failures, and preserved all 32 baseline-feasible Walker2d paths. Hopper recovery was only 14/33; even a one-invalid-path diagnostic reached only 16/33. No candidate passed the gate, no fresh path was accessed, and router-only fixed-total-action development was closed.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_11_fractional_reservoir_fir_development.json",
+          "role": "decision",
+          "sha256": "c1ac9efa9aa277d06ccb87c300dc05d180c354d63ee63b46f17a85094c2e0ff2"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_11_fractional_reservoir_fir_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "dbea54a6ed31a544215c07953328ee43da5abda69c8604586a71e85bc7508f60"
+        }
+      ],
+      "claim": "Fractional release of minimum-horizon upper-energy credit closes the short-episode Hopper responsibility gap while preserving causal feasibility.",
+      "claim_id": "D33_FRACTIONAL_RESERVOIR_FIR",
+      "decision": "fractional_reservoir_fir_stops_router_only_development",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_11_fractional_reservoir_fir_development",
+      "evidence_stage": "development",
+      "facts": {
+        "best_diagnostic_hopper_recovered_failure_count": 16,
+        "best_diagnostic_valid_path_count": 119,
+        "candidate_count": 40,
+        "decision_status": "fractional_reservoir_fir_stops_router_only_development",
+        "eligible_for_fresh_path_validation": false,
+        "fresh_validation_paths_accessed": false,
+        "grouped_seed_fold_count": 8,
+        "integrity_status": "valid",
+        "path_count": 120,
+        "recovered_failures_by_environment": {
+          "HalfCheetah-v5": 40,
+          "Hopper-v5": 14,
+          "Walker2d-v5": 8
+        },
+        "router_only_development_closed": true,
+        "selected_energy_borrow_fraction": 0.75,
+        "selected_energy_reserve_steps": 80,
+        "selected_preserved_baseline_feasible_path_count": 32,
+        "selected_recovered_failure_count": 62,
+        "support_gate": false
+      },
+      "forbidden_wording": "The v17.11 reused-path fractional reservoir validates fresh-seed generalization, the all-environment frequency contract, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_forty_fractional_reservoir_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_11_fractional_reservoir_fir",
+      "positive_claim_supported": false,
+      "selection_access": "post_v17_10_reused_rejected_paths_grouped_by_seed"
+    },
+    {
+      "allowed_wording": "On the unchanged 120-path development panel, v17.12 preserved all 113 reference-feasible paths and constructed feasible targets for all seven Hopper actor-floor paths. Their required total-action correction RMS averaged 0.002343 and was at most 0.008118; this authorizes causal actor-target distillation on reused paths.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_12_nearest_feasible_action_oracle_development.json",
+          "role": "decision",
+          "sha256": "be53940792b37ebea550867f12e874b34593cf16b956ce072ce9b98fbdeed0d9"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_12_nearest_feasible_action_oracle_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "76c422d1c73c7c4ff1158a9b4dcf99a62dcfc2afe34b53615e3de2743d3629fc"
+        }
+      ],
+      "claim": "Router-irreducible responsibility failures admit nearby total-action targets satisfying the registered full-horizon frequency budgets.",
+      "claim_id": "D34_NEAREST_FEASIBLE_ACTION_ORACLE",
+      "decision": "nearest_feasible_targets_authorize_causal_actor_adapter",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_12_nearest_feasible_action_oracle_development",
+      "evidence_stage": "development",
+      "facts": {
+        "actor_floor_path_count": 7,
+        "actor_floor_total_action_abs_maximum": 0.03687370520663191,
+        "actor_floor_total_action_rms_maximum": 0.008117855266084743,
+        "actor_floor_total_action_rms_mean": 0.00234273764738525,
+        "causal_actor_adapter_authorized": true,
+        "decision_status": "nearest_feasible_targets_authorize_causal_actor_adapter",
+        "frequency_target_feasible_path_count": 120,
+        "fresh_validation_paths_accessed": false,
+        "integrity_status": "valid",
+        "path_count": 120,
+        "reference_feasible_path_count": 113,
+        "server_target_count": 7,
+        "support_gate": false
+      },
+      "forbidden_wording": "The acausal v17.12 target oracle establishes an online policy, reward improvement, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_hundred_twenty_reused_paths_exact_convex_projection_and_seven_server_only_actor_targets",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_12_nearest_feasible_action_oracle",
+      "positive_claim_supported": false,
+      "selection_access": "post_v17_11_reused_paths_acausal_target_construction"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4513,7 +4610,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "e5dbb40093daffb1358c1d6bdb7d81d7f88bce85e1c7d083dbeb706399b714f6",
+  "registry_sha256": "1c6a46c4eb508b922e27bdef9d30b234e49e372b91acf01791087d06e338ef9f",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

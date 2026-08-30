@@ -1,6 +1,6 @@
 {
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1",
-  "snapshot_date": "2026-08-30",
+  "snapshot_date": "2026-08-31",
   "policy": {
     "manuscript_source_of_truth": "this_registry_only",
     "unregistered_artifacts": "excluded",
@@ -1116,6 +1116,33 @@
           "role": "report",
           "path": "transit_hrl/md/freq_hrl_mujoco_v17_11_fractional_reservoir_fir_outcome_2026-08-31.md",
           "sha256": "dbea54a6ed31a544215c07953328ee43da5abda69c8604586a71e85bc7508f60"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v17_12_nearest_feasible_action_oracle_development",
+      "claim_id": "D34_NEAREST_FEASIBLE_ACTION_ORACLE",
+      "claim": "Router-irreducible responsibility failures admit nearby total-action targets satisfying the registered full-horizon frequency budgets.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "nearest_feasible_targets_authorize_causal_actor_adapter",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_11_reused_paths_acausal_target_construction",
+      "outcome_provenance": "one_hundred_twenty_reused_paths_exact_convex_projection_and_seven_server_only_actor_targets",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_12_nearest_feasible_action_oracle",
+      "allowed_wording": "On the unchanged 120-path development panel, v17.12 preserved all 113 reference-feasible paths and constructed feasible targets for all seven Hopper actor-floor paths. Their required total-action correction RMS averaged 0.002343 and was at most 0.008118; this authorizes causal actor-target distillation on reused paths.",
+      "forbidden_wording": "The acausal v17.12 target oracle establishes an online policy, reward improvement, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_12_nearest_feasible_action_oracle_development.json",
+          "sha256": "be53940792b37ebea550867f12e874b34593cf16b956ce072ce9b98fbdeed0d9"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_12_nearest_feasible_action_oracle_outcome_2026-08-31.md",
+          "sha256": "76c422d1c73c7c4ff1158a9b4dcf99a62dcfc2afe34b53615e3de2743d3629fc"
         }
       ]
     },
