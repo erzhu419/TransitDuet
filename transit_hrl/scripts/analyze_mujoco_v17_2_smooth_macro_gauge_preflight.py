@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 import statistics
 import sys
@@ -20,12 +21,17 @@ from scripts import (  # noqa: E402
     mujoco_v17_2_smooth_macro_gauge_preflight_spec as spec,
 )
 from scripts.run_mujoco_v17_2_paired_gauge_cell import (  # noqa: E402
-    LATENT_METRICS,
     TRACE_KEYS,
     paired_intervention_audit,
 )
 from scripts.submit_mujoco_v17_2_smooth_macro_gauge_preflight_scheduleurm import (  # noqa: E402
     cell_relative_dir,
+)
+
+
+NUMERIC_LATENT_METRICS = (
+    "LatentUpperHFPowerAbs",
+    "LatentLowerLFDriftAbs",
 )
 
 
@@ -41,6 +47,27 @@ def _path_registry(rows: list[dict[str, Any]]) -> set[tuple[str, int]]:
     return {
         (str(row["disturbance_mode"]), int(row["seed"])) for row in rows
     }
+
+
+def _explicit_protocol_row_valid(row: dict[str, Any]) -> bool:
+    episode_length = int(float(row["episode_length"]))
+    upper_decisions = int(float(row["upper_decision_count"]))
+    upper_transitions = int(float(row["upper_transition_count"]))
+    lower_transitions = int(float(row["lower_transition_count"]))
+    finite_metrics = (
+        "LowerRouterActionReconstructionRMS",
+        "ResponsibilityReconstructionRMS",
+        "UpperHFPowerAbs",
+        "LowerLFDriftAbs",
+        "episode_return",
+    )
+    return bool(
+        episode_length > 0
+        and lower_transitions == episode_length
+        and upper_transitions == upper_decisions
+        and 0 < upper_transitions < lower_transitions
+        and all(math.isfinite(float(row[key])) for key in finite_metrics)
+    )
 
 
 def _load_cell(
@@ -155,7 +182,7 @@ def _validate_cell(
         < spec.CHECKPOINT_MINIMUM_ITERATION
         or int(summary.get("heldout_evaluation_pass_count", -1)) != 2
         or len(rows) != spec.EXPECTED_EVALUATION_ROWS_PER_CELL
-        or not all(bool(int(float(row["protocol_valid"]))) for row in rows)
+        or not all(_explicit_protocol_row_valid(row) for row in rows)
     ):
         raise ValueError(
             "v17.2 cell contract mismatch: "
@@ -208,6 +235,9 @@ def _summarize(rows: list[dict[str, Any]]) -> dict[str, float]:
         "max_additive_clip_excess": max(
             float(row["AdditiveActionClipExcessMax"]) for row in rows
         ),
+        "legacy_protocol_valid_rate": statistics.fmean(
+            float(row["protocol_valid"]) for row in rows
+        ),
     }
 
 
@@ -259,8 +289,7 @@ def analyze(run_name: str, *, root: Path = ROOT) -> dict[str, Any]:
                     "latent_metrics_exact": all(
                         float(metric_differences[key])
                         <= spec.LATENT_METRIC_ABSOLUTE_TOLERANCE
-                        for key in LATENT_METRICS
-                        if key != "episode_return"
+                        for key in NUMERIC_LATENT_METRICS
                     ),
                     "router_reconstruction_exact": (
                         candidate["max_router_reconstruction_rms"]
@@ -273,6 +302,10 @@ def analyze(run_name: str, *, root: Path = ROOT) -> dict[str, Any]:
                     "component_projection_bounded": (
                         candidate["mean_component_clip_rate"]
                         <= spec.MAXIMUM_COMPONENT_CLIP_RATE
+                    ),
+                    "explicit_protocol_structure_valid": all(
+                        _explicit_protocol_row_valid(row)
+                        for row in [*control_rows, *candidate_rows]
                     ),
                     "upper_hf_reduction": (
                         upper_reduction
@@ -353,6 +386,12 @@ def analyze(run_name: str, *, root: Path = ROOT) -> dict[str, Any]:
         "claim_boundary": (
             "development paired intervention only; no reward improvement, "
             "training-seed uncertainty, or confirmatory claim"
+        ),
+        "analysis_repair": (
+            "pre-registered transition structure and reconstruction RMS gates "
+            "are recomputed directly; the legacy aggregate protocol_valid flag "
+            "is retained as a diagnostic because its unregistered float32 max "
+            "threshold is stricter than the frozen RMS gate"
         ),
     }
 

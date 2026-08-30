@@ -40,6 +40,10 @@ def _paired_rows():
                 "LowerRouterHeadroomClipRate": 0.0,
                 "protocol_valid": 1.0,
                 "parameter_count": 100,
+                "episode_length": 512,
+                "upper_decision_count": 32,
+                "upper_transition_count": 32,
+                "lower_transition_count": 512,
             }
             control.append({
                 **common,
@@ -94,6 +98,9 @@ def _write_synthetic_run(root: Path, run_name: str):
         for alpha_arm, alpha in spec.ALPHA_ARMS.items():
             for optimizer_seed in spec.OPTIMIZER_SEEDS:
                 control, candidate = _paired_rows()
+                if environment == "Hopper-v5" and alpha_arm == "alpha_005":
+                    candidate[0]["protocol_valid"] = 0.0
+                    candidate[0]["AdditiveActionClipExcessMax"] = 1e-8
                 audit = paired_intervention_audit(control, candidate)
                 directory = root / cell_relative_dir(
                     run_name, environment, alpha_arm, optimizer_seed
