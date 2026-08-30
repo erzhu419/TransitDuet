@@ -742,6 +742,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v16_gauge_training_development",
+      "claim_id": "D20_TRAINING_TIME_GAUGE",
+      "claim": "A full-strength causal total-action gauge combined with primal-dual training yields cross-environment frequency separation without a reward tradeoff.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "training_time_gauge_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "three_fresh_optimizer_seeds_three_capacity_matched_arms_and_forty_paired_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_gauge_training",
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development preflight, the causal total-action gauge reconstructed the additive action in all nine paired cells, but the EMA gauge did not satisfy the joint frequency and reward gate: canonical frequency reduction passed 0 of 9 cells and reward noninferiority passed 6 of 9.",
+      "forbidden_wording": "The v16 development preflight validates training-time raw separation, leakage no-tradeoff, reward improvement, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v16_gauge_training_development.json",
+          "sha256": "92b95bd193f794766983c730fe49df691627856d5d5caebf5606e808b3239df2"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_gauge_training_development_outcome_2026-08-30.md",
+          "sha256": "b951ca499a94a1f725e9941e8db23b4eafd46a55ea005968356915498a79153a"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

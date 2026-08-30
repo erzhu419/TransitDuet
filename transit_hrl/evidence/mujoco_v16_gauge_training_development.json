@@ -1,0 +1,83 @@
+{
+  "schema_version": "freq_hrl_mujoco_v16_gauge_training_development_v1",
+  "status": "training_time_gauge_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "three_environment_three_optimizer_seed_development_not_confirmatory",
+  "source_run": "mujoco_v16_gauge_training_preflight_20260830_r1",
+  "development_protocol_version": "mujoco_v16_gauge_training_preflight_v1",
+  "frozen_algorithm_revision": "2f9b3fed920261a9bee849488dec4f9f0c2755af",
+  "frozen_source_manifest_sha256": "3726f294f9cd2c975212a613350c04eb14fe2bc0b215ab523b00d4faba061caa",
+  "optimizer_seed_count": 3,
+  "environment_count": 3,
+  "training_cell_count": 27,
+  "paired_analysis_cell_count": 9,
+  "scheduler_task_count": 27,
+  "scheduler_tasks": [
+    "t85102",
+    "t85103",
+    "t85104",
+    "t85105",
+    "t85106",
+    "t85107",
+    "t85108",
+    "t85109",
+    "t85110",
+    "t85111",
+    "t85112",
+    "t85113",
+    "t85114",
+    "t85115",
+    "t85116",
+    "t85117",
+    "t85118",
+    "t85119",
+    "t85120",
+    "t85121",
+    "t85122",
+    "t85123",
+    "t85124",
+    "t85125",
+    "t85126",
+    "t85127",
+    "t85128"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 27,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "gate_counts": {
+    "exact_reconstruction": 9,
+    "reward_noninferiority": 6,
+    "canonical_frequency_reduction": 0,
+    "latent_noninferiority_vs_joint": 4,
+    "latent_constraint_improvement": 5
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "latent_improvement_count": 2,
+      "median_latent_relative_reduction": 0.23127461086090015,
+      "latent_environment_gate": true
+    },
+    "Hopper-v5": {
+      "latent_improvement_count": 1,
+      "median_latent_relative_reduction": -0.07499949641656846,
+      "latent_environment_gate": false
+    },
+    "Walker2d-v5": {
+      "latent_improvement_count": 2,
+      "median_latent_relative_reduction": 0.07098999114841811,
+      "latent_environment_gate": true
+    }
+  },
+  "mechanism_findings": {
+    "identifiability": "The full-strength total-action gauge reconstructed the executed additive action within tolerance in every paired cell.",
+    "frequency_alignment": "The EMA gauge reduced upper high-frequency power but increased lower low-frequency drift relative to the registered joint-band comparator in every paired cell.",
+    "reward": "The feasibility-first constrained checkpoint lost the preregistered reward floor in all three HalfCheetah optimizer replicates.",
+    "constraint_learning": "Primal-dual training improved latent frequency merit over the gauge-only control in five of nine cells, below the frozen six-cell and per-environment gate.",
+    "decision": "Do not expand this EMA-gauge training protocol. Replace its temporal operator with an audit-aligned causal complementary projection and preserve an explicit reward floor during checkpoint selection."
+  }
+}

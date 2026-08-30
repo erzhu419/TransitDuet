@@ -29,6 +29,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_16_crossed_restoration_mechanism_development_r5 | mujoco_control | development | primary_mechanism_not_ready | development_only | false |
 | mujoco_v14_29_restoration_portfolio_confirmatory | mujoco_control | confirmatory | supported | positive_main_or_si | true |
 | mujoco_v15_raw_policy_distillation_development | mujoco_control | development | universal_raw_policy_distillation_not_supported | development_only | false |
+| mujoco_v16_gauge_training_development | mujoco_control | development | training_time_gauge_preflight_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -171,6 +172,12 @@ Forbidden: MuJoCo v14.29 proves reward improvement, universal raw behavioral sep
 Across v15, v15.1, and v15.2 development preflights, Hopper-v5 passed the joint raw-policy and reward-floor validation gate, while HalfCheetah-v5 and Walker2d-v5 did not admit a universally valid candidate. These single-optimizer-seed outcomes do not justify fresh-seed confirmation.
 
 Forbidden: The v15 development sequence validates universal raw behavioral separation, fresh-seed generalization, reward improvement, or a confirmatory Freq-HRL algorithm.
+
+### mujoco_v16_gauge_training_development
+
+In a frozen three-environment, three-optimizer-seed development preflight, the causal total-action gauge reconstructed the additive action in all nine paired cells, but the EMA gauge did not satisfy the joint frequency and reward gate: canonical frequency reduction passed 0 of 9 cells and reward noninferiority passed 6 of 9.
+
+Forbidden: The v16 development preflight validates training-time raw separation, leakage no-tradeoff, reward improvement, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

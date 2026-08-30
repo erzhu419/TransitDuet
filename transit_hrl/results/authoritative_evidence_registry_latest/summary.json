@@ -1,5 +1,5 @@
 {
-  "development_record_count": 19,
+  "development_record_count": 20,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 25,
+  "record_count": 26,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3520,6 +3520,57 @@
       "selection_access": "development_outcomes_visible"
     },
     {
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development preflight, the causal total-action gauge reconstructed the additive action in all nine paired cells, but the EMA gauge did not satisfy the joint frequency and reward gate: canonical frequency reduction passed 0 of 9 cells and reward noninferiority passed 6 of 9.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v16_gauge_training_development.json",
+          "role": "decision",
+          "sha256": "92b95bd193f794766983c730fe49df691627856d5d5caebf5606e808b3239df2"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_gauge_training_development_outcome_2026-08-30.md",
+          "role": "report",
+          "sha256": "b951ca499a94a1f725e9941e8db23b4eafd46a55ea005968356915498a79153a"
+        }
+      ],
+      "claim": "A full-strength causal total-action gauge combined with primal-dual training yields cross-environment frequency separation without a reward tradeoff.",
+      "claim_id": "D20_TRAINING_TIME_GAUGE",
+      "decision": "training_time_gauge_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v16_gauge_training_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "training_time_gauge_preflight_not_supported",
+        "environment_count": 3,
+        "gate_counts": {
+          "canonical_frequency_reduction": 0,
+          "exact_reconstruction": 9,
+          "latent_constraint_improvement": 5,
+          "latent_noninferiority_vs_joint": 4,
+          "reward_noninferiority": 6
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "paired_analysis_cell_count": 9,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 27,
+          "failed": 0
+        },
+        "training_cell_count": 27
+      },
+      "forbidden_wording": "The v16 development preflight validates training-time raw separation, leakage no-tradeoff, reward improvement, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "three_fresh_optimizer_seeds_three_capacity_matched_arms_and_forty_paired_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_gauge_training",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3578,7 +3629,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "43a92b57beceda5354fba42a681acd6e3f06470ab54650657fcc3dac238553fd",
+  "registry_sha256": "14a8cd59b8a0b6f80e28c19628d83b38b973242446a5336ec57591f424ef6cfa",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

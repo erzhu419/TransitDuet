@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 25)
+        self.assertEqual(len(records), 26)
         by_id = {row["evidence_id"]: row for row in records}
         self.assertTrue(
             by_id["mujoco_v12_responsibility_confirmatory"][
@@ -221,6 +221,25 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
             {"v15": 1, "v15.1": 1, "v15.2": 1},
         )
         self.assertFalse(v15["facts"]["universal_supported"])
+        v16 = by_id["mujoco_v16_gauge_training_development"]
+        self.assertFalse(v16["manuscript_reportable"])
+        self.assertEqual(
+            v16["decision"],
+            "training_time_gauge_preflight_not_supported",
+        )
+        self.assertEqual(v16["facts"]["training_cell_count"], 27)
+        self.assertEqual(v16["facts"]["paired_analysis_cell_count"], 9)
+        self.assertEqual(
+            v16["facts"]["gate_counts"],
+            {
+                "exact_reconstruction": 9,
+                "reward_noninferiority": 6,
+                "canonical_frequency_reduction": 0,
+                "latent_noninferiority_vs_joint": 4,
+                "latent_constraint_improvement": 5,
+            },
+        )
+        self.assertFalse(v16["facts"]["support_gate"])
 
     def test_hash_tampering_is_rejected(self):
         registry = copy.deepcopy(load_registry(self.registry_path))
@@ -245,11 +264,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 25)
+            self.assertEqual(summary["record_count"], 26)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 19)
+            self.assertEqual(summary["development_record_count"], 20)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

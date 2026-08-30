@@ -23,6 +23,9 @@ DEVELOPMENT_ADJUDICATION_SCHEMA_VERSION = (
 MUJOCO_V15_DISTILLATION_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v15_distillation_development_v1"
 )
+MUJOCO_V16_GAUGE_TRAINING_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v16_gauge_training_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1114,6 +1117,70 @@ def _mujoco_v15_distillation_facts(
     }
 
 
+def _mujoco_v16_gauge_training_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    gates = dict(decision.get("gate_counts") or {})
+    environments = dict(decision.get("environment_results") or {})
+    expected_gates = {
+        "exact_reconstruction": 9,
+        "reward_noninferiority": 6,
+        "canonical_frequency_reduction": 0,
+        "latent_noninferiority_vs_joint": 4,
+        "latent_constraint_improvement": 5,
+    }
+    expected_environments = {
+        "HalfCheetah-v5",
+        "Hopper-v5",
+        "Walker2d-v5",
+    }
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V16_GAUGE_TRAINING_SCHEMA_VERSION
+        or decision.get("status")
+        != "training_time_gauge_preflight_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "three_environment_three_optimizer_seed_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 3
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 27
+        or int(decision.get("paired_analysis_cell_count", -1)) != 9
+        or int(decision.get("scheduler_task_count", -1)) != 27
+        or len(tasks) != 27
+        or len(set(tasks)) != 27
+        or task_status != {"done": 27, "failed": 0, "cancelled": 0}
+        or gates != expected_gates
+        or set(environments) != expected_environments
+        or environments["Hopper-v5"].get("latent_environment_gate") is not False
+        or any(
+            int(row.get("latent_improvement_count", -1)) < 0
+            for row in environments.values()
+        )
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or report is None
+        or "`training_time_gauge_preflight_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v16 gauge-training decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "environment_count": 3,
+        "training_cell_count": 27,
+        "paired_analysis_cell_count": 9,
+        "gate_counts": expected_gates,
+        "task_status_counts": task_status,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1133,6 +1200,7 @@ PARSERS = {
     "mujoco_v14_16_mechanism": _mujoco_v14_16_mechanism_facts,
     "mujoco_v14_29_portfolio": _mujoco_v14_29_portfolio_facts,
     "mujoco_v15_distillation": _mujoco_v15_distillation_facts,
+    "mujoco_v16_gauge_training": _mujoco_v16_gauge_training_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),
