@@ -96,7 +96,8 @@ def build_scheduler_spec(
     return {
         "project": spec.DEVELOPMENT_PROTOCOL_VERSION,
         "description": (
-            f"Freq-HRL v14.18 router probe {environment} replicate {seed}"
+            f"Freq-HRL {spec.DEVELOPMENT_PROTOCOL_VERSION} "
+            f"{environment} replicate {seed}"
         ),
         "cmd": build_probe_command(args, environment, seed),
         "cwd": str(ROOT),
