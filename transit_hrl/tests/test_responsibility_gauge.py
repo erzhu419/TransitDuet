@@ -2,7 +2,10 @@ import numpy as np
 import pytest
 
 from freq_hrl.core import CausalGaugeFixer, canonical_responsibility_trace
-from freq_hrl.domains.mujoco import CausalLowerActionRouter
+from freq_hrl.domains.mujoco import (
+    CausalLowerActionRouter,
+    lower_action_router_contract,
+)
 
 
 def _trace(upper, lower, *, alpha=0.25, strength=1.0):
@@ -75,6 +78,15 @@ def test_mujoco_total_action_gauge_delegates_to_shared_core():
         atol=1e-7,
     )
     np.testing.assert_allclose(first["transfer_reconstruction_error"], 0.0)
+
+
+def test_total_action_gauge_has_an_explicit_runtime_contract():
+    assert lower_action_router_contract("causal_total_action_gauge") == (
+        "causal_total_action_ema_gauge_fixed_responsibility_with_exact_"
+        "pre_split_action_execution_v1"
+    )
+    with pytest.raises(ValueError, match="unknown"):
+        lower_action_router_contract("missing")
 
 
 def test_gauge_rejects_uninitialized_or_misaligned_inputs():

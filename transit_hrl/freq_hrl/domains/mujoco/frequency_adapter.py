@@ -30,6 +30,35 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_total_action_gauge",
 )
 
+LOWER_ACTION_ROUTER_CONTRACTS = {
+    "direct": "direct_latent_to_effective_lower_action_v1",
+    "causal_ema_high_pass": (
+        "latent_proposal_minus_scaled_prior_only_ema_baseline_with_observed_"
+        "router_state_strength_and_effective_action_clipping_v3"
+    ),
+    "causal_ema_conservative_transfer": (
+        "causal_prior_only_ema_split_with_removed_component_transferred_to_"
+        "upper_and_exact_pre_split_action_execution_v4"
+    ),
+    "causal_joint_band_projection": (
+        "causal_lower_lpf32_minus_upper_hpf8_transfer_and_exact_complement_"
+        "with_pre_split_action_execution_v1"
+    ),
+    "causal_total_action_gauge": (
+        "causal_total_action_ema_gauge_fixed_responsibility_with_exact_"
+        "pre_split_action_execution_v1"
+    ),
+}
+
+
+def lower_action_router_contract(mode: str) -> str:
+    """Return the versioned runtime contract for a supported router."""
+
+    try:
+        return LOWER_ACTION_ROUTER_CONTRACTS[str(mode)]
+    except KeyError as exc:
+        raise ValueError(f"unknown lower-action router mode: {mode}") from exc
+
 
 @dataclass
 class CausalBandDecomposer:

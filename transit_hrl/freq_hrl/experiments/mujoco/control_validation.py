@@ -27,6 +27,7 @@ from freq_hrl.domains.mujoco import (
     RESPONSIBILITY_MODES,
     action_from_unit_box,
     deterministic_actuation_disturbance,
+    lower_action_router_contract,
 )
 from freq_hrl.experiments.reproducibility import (
     derive_seed,
@@ -5505,23 +5506,8 @@ def train_mujoco_method(
             "curriculum_applies_only_to_sampled_training_rollouts_while_"
             "checkpoint_selection_and_heldout_use_frozen_target_v1"
         ),
-        "lower_action_router_contract": (
-            "causal_lower_lpf32_minus_upper_hpf8_transfer_and_exact_"
-            "complement_with_pre_split_action_execution_v1"
-            if effective_lower_action_router_mode
-            == "causal_joint_band_projection"
-            else (
-                "causal_prior_only_ema_split_with_removed_component_transferred_"
-                "to_upper_and_exact_pre_split_action_execution_v4"
-                if effective_lower_action_router_mode
-                == "causal_ema_conservative_transfer"
-                else (
-                    "latent_proposal_minus_scaled_prior_only_ema_baseline_with_"
-                    "observed_router_state_strength_and_effective_action_clipping_v3"
-                    if effective_lower_action_router_mode == "causal_ema_high_pass"
-                    else "direct_latent_to_effective_lower_action_v1"
-                )
-            )
+        "lower_action_router_contract": lower_action_router_contract(
+            effective_lower_action_router_mode
         ),
         "lower_action_router_function_preserving": bool(
             effective_lower_action_router_mode

@@ -9,6 +9,7 @@ from .frequency_adapter import (
     RESPONSIBILITY_MODES,
     action_from_unit_box,
     deterministic_actuation_disturbance,
+    lower_action_router_contract,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "RESPONSIBILITY_MODES",
     "action_from_unit_box",
     "deterministic_actuation_disturbance",
+    "lower_action_router_contract",
 ]
