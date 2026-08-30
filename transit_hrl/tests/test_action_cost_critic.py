@@ -20,6 +20,21 @@ class ActionCostCriticTest(unittest.TestCase):
         )
         np.testing.assert_allclose(returns, [1.5, 2.0, 5.0, 8.0])
 
+    def test_smdp_returns_support_frequency_horizon_truncation(self):
+        returns = discounted_smdp_cost_returns(
+            np.array([1.0, 2.0, 4.0, 8.0]),
+            np.array([2, 1, 3, 1]),
+            np.array([0, 0, 0, 1]),
+            gamma=0.5,
+            max_decisions=2,
+        )
+        np.testing.assert_allclose(returns, [1.5, 4.0, 5.0, 8.0])
+        with self.assertRaises(ValueError):
+            discounted_smdp_cost_returns(
+                np.ones(2), np.ones(2), np.array([0, 1]),
+                gamma=0.9, max_decisions=0,
+            )
+
     def test_action_input_supports_actor_gradients(self):
         critic = ActionCostCritic(3, 2, 8, zero_init_output=False)
         state = torch.ones((4, 3))

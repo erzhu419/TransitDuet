@@ -220,6 +220,7 @@ def _level_arrays(
     gamma: float,
     action_transform: str,
     action_scale: float,
+    max_return_decisions: int | None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     merged = concat_hierarchical_batches(list(batches))
     batch = merged.upper if str(level) == "upper" else merged.lower
@@ -240,6 +241,7 @@ def _level_arrays(
         batch.duration,
         batch.done,
         gamma=float(gamma),
+        max_decisions=max_return_decisions,
     )
     return state, action.astype(np.float32), target
 
@@ -565,6 +567,9 @@ def run_probe(
     cvar_alpha: float,
     episode_horizon: int,
     leakage_cost_mode: str,
+    probe_version: str = PROBE_VERSION,
+    upper_cost_return_horizon_decisions: int = 0,
+    lower_cost_return_horizon_decisions: int = 0,
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -584,6 +589,12 @@ def run_probe(
     flattened_roots = [root for role in role_roots for root in role]
     if len(flattened_roots) != len(set(flattened_roots)):
         raise ValueError("action-cost probe root roles overlap")
+    return_horizons = {
+        "upper": int(upper_cost_return_horizon_decisions),
+        "lower": int(lower_cost_return_horizon_decisions),
+    }
+    if any(value < 0 for value in return_horizons.values()):
+        raise ValueError("action-cost return horizons cannot be negative")
     train_paths = _paths_for_roots(summary["environment"], critic_train_roots)
     holdout_paths = _paths_for_roots(
         summary["environment"], critic_holdout_roots
@@ -654,6 +665,10 @@ def run_probe(
                 baseline_model.config,
                 f"{level}_deployment_frequency_action_scale",
             )),
+            max_return_decisions=(
+                None if return_horizons[level] == 0
+                else return_horizons[level]
+            ),
         )
         holdout_arrays = _level_arrays(
             holdout_batches,
@@ -666,6 +681,10 @@ def run_probe(
                 baseline_model.config,
                 f"{level}_deployment_frequency_action_scale",
             )),
+            max_return_decisions=(
+                None if return_horizons[level] == 0
+                else return_horizons[level]
+            ),
         )
         fits = [
             _fit_critic(
@@ -838,7 +857,7 @@ def run_probe(
         )
         public_selected = public_candidates[selected_index]
     payload = {
-        "probe_version": PROBE_VERSION,
+        "probe_version": str(probe_version),
         "checkpoint": str(checkpoint_path),
         "summary": str(summary_path),
         "environment": str(summary["environment"]),
@@ -860,6 +879,7 @@ def run_probe(
         "critic_epochs": int(critic_epochs),
         "critic_minibatch_size": int(critic_minibatch_size),
         "critic_learning_rate": float(critic_learning_rate),
+        "cost_return_horizon_decisions": return_horizons,
         "critic_minimum_holdout_r2": float(critic_minimum_holdout_r2),
         "critic_minimum_action_permutation_mse_increase": float(
             critic_minimum_action_permutation_mse_increase
@@ -942,6 +962,13 @@ def main() -> None:
     parser.add_argument("--cvar-alpha", type=float, required=True)
     parser.add_argument("--episode-horizon", type=int, required=True)
     parser.add_argument("--leakage-cost-mode", required=True)
+    parser.add_argument("--probe-version", default=PROBE_VERSION)
+    parser.add_argument(
+        "--upper-cost-return-horizon-decisions", type=int, default=0
+    )
+    parser.add_argument(
+        "--lower-cost-return-horizon-decisions", type=int, default=0
+    )
     args = parser.parse_args()
     payload = run_probe(
         checkpoint_path=args.checkpoint,
@@ -970,6 +997,13 @@ def main() -> None:
         cvar_alpha=args.cvar_alpha,
         episode_horizon=args.episode_horizon,
         leakage_cost_mode=args.leakage_cost_mode,
+        probe_version=args.probe_version,
+        upper_cost_return_horizon_decisions=(
+            args.upper_cost_return_horizon_decisions
+        ),
+        lower_cost_return_horizon_decisions=(
+            args.lower_cost_return_horizon_decisions
+        ),
     )
     print(json.dumps({
         "output": str(args.output),

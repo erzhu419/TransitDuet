@@ -73,8 +73,9 @@ def discounted_smdp_cost_returns(
     done: np.ndarray,
     *,
     gamma: float,
+    max_decisions: int | None = None,
 ) -> np.ndarray:
-    """Compute complete-trajectory SMDP returns with episode resets."""
+    """Compute full or decision-truncated SMDP returns with episode resets."""
 
     costs = np.asarray(cost, dtype=np.float64).reshape(-1)
     durations = np.asarray(duration).reshape(-1)
@@ -93,6 +94,22 @@ def discounted_smdp_cost_returns(
     discount = float(gamma)
     if not np.isfinite(discount) or not 0.0 < discount <= 1.0:
         raise ValueError("SMDP cost-return gamma must be in (0, 1]")
+    horizon = None if max_decisions is None else int(max_decisions)
+    if horizon is not None and (
+        horizon < 1 or horizon != max_decisions
+    ):
+        raise ValueError("SMDP cost-return horizon must be a positive integer")
+    if horizon is not None:
+        returns = np.zeros_like(costs)
+        for start in range(costs.size):
+            weight = 1.0
+            stop = min(costs.size, start + horizon)
+            for index in range(start, stop):
+                returns[start] += weight * costs[index]
+                if bool(terminals[index]):
+                    break
+                weight *= discount ** int(durations[index])
+        return returns.astype(np.float32)
     returns = np.zeros_like(costs)
     continuation = 0.0
     for index in range(costs.size - 1, -1, -1):
