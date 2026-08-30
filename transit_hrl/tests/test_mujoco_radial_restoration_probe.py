@@ -6,6 +6,7 @@ from freq_hrl.rl.dual_actor_critic import GaussianActor
 from scripts.probe_mujoco_radial_restoration import (
     _parse_gains,
     _parse_router_strengths,
+    _v14_17_anchor_profile,
     scale_actor_output_head,
 )
 
@@ -37,6 +38,26 @@ class MujocoRadialRestorationProbeTest(unittest.TestCase):
             with self.subTest(invalid=invalid):
                 with self.assertRaises(ValueError):
                     _parse_router_strengths(invalid)
+
+    def test_v14_17_anchor_profile_uses_frozen_crossed_guard(self):
+        configured, paths = _v14_17_anchor_profile({
+            "environment": "HalfCheetah-v5",
+            "lower_action_router_strength": 0.0,
+        })
+        self.assertEqual(configured["lower_action_router_strength"], 0.5)
+        self.assertEqual(
+            configured["deployment_frequency_closed_loop_risk_mode"],
+            "mode_cvar",
+        )
+        self.assertEqual(len(paths), 16)
+        self.assertEqual(
+            {path["disturbance_mode"] for path in paths},
+            {"standard", "low_frequency", "high_frequency", "mixed"},
+        )
+        self.assertEqual(
+            len({(path["disturbance_mode"], path["seed"]) for path in paths}),
+            len(paths),
+        )
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from torch import nn
 
 from freq_hrl.experiments.mujoco.control_validation import (
     _model_parameter_sha256,
+    crossed_deployment_frequency_guard_paths,
     paired_closed_loop_guard_snapshot,
     rollout_hierarchical,
     summarize,
@@ -23,9 +24,11 @@ from freq_hrl.rl.smdp_actor_critic import (
     FrequencySeparatedActorCriticPPO,
     SMDPPPOConfig,
 )
+from scripts import mujoco_v14_17_native_pd_cvar_screen_spec as v14_17_spec
 
 
 PROBE_VERSION = "mujoco_radial_restoration_probe_v1"
+PROFILES = ("summary", "v14_17_anchor")
 
 
 def _parse_gains(value: str) -> tuple[float, ...]:
@@ -93,6 +96,36 @@ def _guard_paths(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return paths
 
 
+def _v14_17_anchor_profile(
+    summary: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    configured = dict(summary)
+    arm = v14_17_spec.ARMS[v14_17_spec.HYBRID_ARM]
+    for key in (
+        "lower_action_router_strength",
+        "lower_deployment_frequency_reference_reduction_fraction",
+        "upper_deployment_frequency_reference_reduction_fraction",
+        "lower_deployment_frequency_rms_budget",
+        "upper_deployment_frequency_rms_budget",
+        "deployment_frequency_closed_loop_risk_mode",
+        "deployment_frequency_closed_loop_cvar_alpha",
+    ):
+        configured[key] = arm[key]
+    seeds, modes = crossed_deployment_frequency_guard_paths(
+        v14_17_spec.DEPLOYMENT_FREQUENCY_CLOSED_LOOP_GUARD_SEEDS,
+        v14_17_spec.TRAINING_DISTURBANCE_MODES,
+        env_id=str(summary["environment"]),
+    )
+    paths = [
+        {
+            "seed": int(seed),
+            "disturbance_mode": str(modes[int(seed)]),
+        }
+        for seed in seeds
+    ]
+    return configured, paths
+
+
 def _evaluate_rows(
     model: FrequencySeparatedActorCriticPPO,
     *,
@@ -146,19 +179,27 @@ def run_probe(
     router_strengths: tuple[float, ...],
     episode_horizon: int,
     leakage_cost_mode: str,
+    profile: str,
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         Path(checkpoint_path), map_location="cpu", weights_only=False
     )
-    summary = json.loads(Path(summary_path).read_text(encoding="utf-8"))
-    paths = _guard_paths(summary)
+    raw_summary = json.loads(Path(summary_path).read_text(encoding="utf-8"))
+    if str(profile) == "summary":
+        summary = raw_summary
+        paths = _guard_paths(summary)
+        registered_baseline = str(
+            summary["deployment_frequency_closed_loop_guard_baseline"][
+                "parameter_sha256"
+            ]
+        )
+    elif str(profile) == "v14_17_anchor":
+        summary, paths = _v14_17_anchor_profile(raw_summary)
+        registered_baseline = str(checkpoint["frozen_parameter_sha256"])
+    else:
+        raise ValueError(f"unknown radial restoration profile: {profile}")
     baseline_model = _load_model(checkpoint)
     baseline_parameter_sha256 = _model_parameter_sha256(baseline_model)
-    registered_baseline = str(
-        summary["deployment_frequency_closed_loop_guard_baseline"][
-            "parameter_sha256"
-        ]
-    )
     if baseline_parameter_sha256 != registered_baseline:
         raise RuntimeError("checkpoint does not reconstruct the registered guard baseline")
     baseline_rows = _evaluate_rows(
@@ -244,6 +285,7 @@ def run_probe(
     ]
     payload = {
         "probe_version": PROBE_VERSION,
+        "profile": str(profile),
         "checkpoint": str(Path(checkpoint_path)),
         "summary": str(Path(summary_path)),
         "checkpoint_code_revision": str(checkpoint.get("code_revision", "")),
@@ -273,6 +315,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--gains", default="1.0,0.99,0.98,0.97,0.95")
     parser.add_argument("--router-strengths", default="0.5")
+    parser.add_argument("--profile", choices=PROFILES, default="summary")
     parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--leakage-cost-mode", default="power_excess")
     return parser
@@ -288,6 +331,7 @@ def main() -> None:
         router_strengths=_parse_router_strengths(args.router_strengths),
         episode_horizon=args.episode_horizon,
         leakage_cost_mode=args.leakage_cost_mode,
+        profile=args.profile,
     )
     print(json.dumps({
         "output": str(args.output),
