@@ -233,7 +233,8 @@ def sync_results(args: argparse.Namespace) -> None:
         )
     result = analyze_run(args.run_name)
     print(
-        f"synced and analyzed {len(expected)} v14.18 cells: "
+        f"synced and analyzed {len(expected)} "
+        f"{spec.DEVELOPMENT_PROTOCOL_VERSION} cells: "
         f"{result['status']}"
     )
 
