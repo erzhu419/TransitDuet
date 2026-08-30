@@ -35,7 +35,21 @@ CONSTRAINT_UPDATE_MODES = (
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
     "violation_l2",
+    "violation_cvar",
 )
+CONSTRAINT_DUAL_NORMALIZATION_MODES = (
+    "none",
+    "ema_abs",
+)
+
+
+def _upper_tail_cvar(values: torch.Tensor, *, alpha: float) -> torch.Tensor:
+    """Return the empirical upper-tail CVaR of a non-empty vector."""
+
+    if values.ndim != 1 or values.numel() < 1:
+        raise ValueError("CVaR values must be a non-empty vector")
+    tail_count = max(1, int(np.ceil((1.0 - float(alpha)) * values.numel())))
+    return torch.mean(torch.topk(values, k=tail_count, largest=True).values)
 
 
 def _project_constraint_gradients(
@@ -445,6 +459,7 @@ class SMDPPPOConfig:
     deployment_frequency_groupwise_robust: bool = False
     deployment_frequency_anchor_state_replay: bool = False
     deployment_frequency_projection_objective: str = "worst_group"
+    deployment_frequency_projection_cvar_alpha: float = 0.5
     deployment_frequency_restoration_freeze_reward_actor: bool = False
     deployment_frequency_ppo_trust_region: bool = False
     deployment_frequency_ppo_trust_region_backtracks: int = 8
@@ -476,6 +491,9 @@ class SMDPPPOConfig:
     lower_constraint_step_scale: float = 1.0
     lower_constraint_max_backtracks: int = 8
     lower_constraint_reward_tolerance: float = 1e-8
+    constraint_dual_normalization: str = "none"
+    constraint_dual_scale_ema_beta: float = 0.95
+    constraint_dual_scale_floor: float = 1e-6
     device: str = "cpu"
 
 
@@ -1241,6 +1259,17 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "unknown deployment_frequency_projection_objective"
             )
+        projection_cvar_alpha = float(
+            config.deployment_frequency_projection_cvar_alpha
+        )
+        if (
+            not np.isfinite(projection_cvar_alpha)
+            or not 0.0 <= projection_cvar_alpha < 1.0
+        ):
+            raise ValueError(
+                "deployment_frequency_projection_cvar_alpha must be finite "
+                "and in [0, 1)"
+            )
         for name in (
             "deployment_frequency_anchor_state_replay",
             "deployment_frequency_restoration_freeze_reward_actor",
@@ -1481,6 +1510,24 @@ class FrequencySeparatedActorCriticPPO:
                 raise ValueError(
                     f"{level}_lambda_init must be finite and in [0, {level}_max_lambda]"
                 )
+        if (
+            str(config.constraint_dual_normalization)
+            not in CONSTRAINT_DUAL_NORMALIZATION_MODES
+        ):
+            raise ValueError("unknown constraint_dual_normalization")
+        dual_scale_ema_beta = float(config.constraint_dual_scale_ema_beta)
+        if (
+            not np.isfinite(dual_scale_ema_beta)
+            or not 0.0 <= dual_scale_ema_beta < 1.0
+        ):
+            raise ValueError(
+                "constraint_dual_scale_ema_beta must be finite and in [0, 1)"
+            )
+        dual_scale_floor = float(config.constraint_dual_scale_floor)
+        if not np.isfinite(dual_scale_floor) or dual_scale_floor <= 0.0:
+            raise ValueError(
+                "constraint_dual_scale_floor must be positive and finite"
+            )
         if (
             not bool(config.upper_cost_critic)
             and (
@@ -1735,6 +1782,10 @@ class FrequencySeparatedActorCriticPPO:
             )
         self.upper_constraint_lambda = float(config.upper_lambda_init)
         self.constraint_lambda = float(config.lower_lambda_init)
+        self.upper_constraint_violation_scale = 0.0
+        self.lower_constraint_violation_scale = 0.0
+        self.upper_constraint_dual_update_count = 0
+        self.lower_constraint_dual_update_count = 0
         self.upper_deployment_frequency_lambda = float(
             config.upper_deployment_frequency_lambda_init
         )
@@ -2250,6 +2301,18 @@ class FrequencySeparatedActorCriticPPO:
             "upper_constraint_lambda": float(
                 self.upper_constraint_lambda
             ),
+            "upper_constraint_violation_scale": float(
+                self.upper_constraint_violation_scale
+            ),
+            "lower_constraint_violation_scale": float(
+                self.lower_constraint_violation_scale
+            ),
+            "upper_constraint_dual_update_count": int(
+                self.upper_constraint_dual_update_count
+            ),
+            "lower_constraint_dual_update_count": int(
+                self.lower_constraint_dual_update_count
+            ),
             "upper_deployment_frequency_lambda": float(
                 self.upper_deployment_frequency_lambda
             ),
@@ -2348,6 +2411,22 @@ class FrequencySeparatedActorCriticPPO:
                 "upper_constraint_lambda", self.upper_constraint_lambda
             )
         )
+        self.upper_constraint_violation_scale = float(payload.get(
+            "upper_constraint_violation_scale",
+            self.upper_constraint_violation_scale,
+        ))
+        self.lower_constraint_violation_scale = float(payload.get(
+            "lower_constraint_violation_scale",
+            self.lower_constraint_violation_scale,
+        ))
+        self.upper_constraint_dual_update_count = int(payload.get(
+            "upper_constraint_dual_update_count",
+            self.upper_constraint_dual_update_count,
+        ))
+        self.lower_constraint_dual_update_count = int(payload.get(
+            "lower_constraint_dual_update_count",
+            self.lower_constraint_dual_update_count,
+        ))
         self.upper_deployment_frequency_lambda = float(payload.get(
             "upper_deployment_frequency_lambda",
             self.upper_deployment_frequency_lambda,
@@ -3172,6 +3251,69 @@ class FrequencySeparatedActorCriticPPO:
             out[f"{level}_cost_actor_active"] = float(cost_actor_active)
         return out
 
+    def _update_native_constraint_dual(
+        self,
+        *,
+        level: str,
+        cost_mean: float,
+    ) -> dict[str, float]:
+        """Apply an optional scale-normalized ascent step to a native cost."""
+
+        cfg = self.config
+        lambda_name = (
+            "upper_constraint_lambda" if level == "upper"
+            else "constraint_lambda"
+        )
+        scale_name = f"{level}_constraint_violation_scale"
+        count_name = f"{level}_constraint_dual_update_count"
+        lambda_before = float(getattr(self, lambda_name))
+        scale_before = float(getattr(self, scale_name))
+        count_before = int(getattr(self, count_name))
+        violation = float(cost_mean) - float(
+            getattr(cfg, f"{level}_cost_target")
+        )
+        mode = str(cfg.constraint_dual_normalization)
+        if mode == "ema_abs":
+            magnitude = abs(violation)
+            if count_before == 0 or scale_before == 0.0:
+                scale_after = magnitude
+            else:
+                beta = float(cfg.constraint_dual_scale_ema_beta)
+                scale_after = beta * scale_before + (1.0 - beta) * magnitude
+            denominator = max(
+                scale_after, float(cfg.constraint_dual_scale_floor)
+            )
+            normalized_violation = violation / denominator
+        else:
+            scale_after = scale_before
+            normalized_violation = violation
+        lambda_after = float(np.clip(
+            lambda_before
+            + float(getattr(cfg, f"{level}_dual_lr"))
+            * normalized_violation,
+            0.0,
+            float(getattr(cfg, f"{level}_max_lambda")),
+        ))
+        setattr(self, lambda_name, lambda_after)
+        setattr(self, scale_name, float(scale_after))
+        setattr(self, count_name, count_before + 1)
+        return {
+            f"{level}_constraint_dual_violation_raw": violation,
+            f"{level}_constraint_dual_violation_normalized": (
+                normalized_violation
+            ),
+            f"{level}_constraint_dual_scale_before": scale_before,
+            f"{level}_constraint_dual_scale_after": float(scale_after),
+            f"{level}_constraint_dual_normalization_ema_abs": float(
+                mode == "ema_abs"
+            ),
+            f"{level}_constraint_dual_update_count": float(
+                count_before + 1
+            ),
+            f"{level}_constraint_lambda_before": lambda_before,
+            f"{level}_constraint_lambda_after": lambda_after,
+        }
+
     def _update_deployment_frequency_constraint(
         self,
         *,
@@ -3204,6 +3346,9 @@ class FrequencySeparatedActorCriticPPO:
         projection_objective = str(
             cfg.deployment_frequency_projection_objective
         )
+        projection_cvar_alpha = float(
+            cfg.deployment_frequency_projection_cvar_alpha
+        )
         groupwise_robust = bool(
             cfg.deployment_frequency_groupwise_robust
         )
@@ -3222,6 +3367,10 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_projection_objective_violation_l2": float(
                 projection_objective == "violation_l2"
             ),
+            f"{prefix}_projection_objective_violation_cvar": float(
+                projection_objective == "violation_cvar"
+            ),
+            f"{prefix}_projection_cvar_alpha": projection_cvar_alpha,
             f"{prefix}_projection_objective_before": 0.0,
             f"{prefix}_projection_objective_after": 0.0,
             f"{prefix}_active_violation_groups_before": 0.0,
@@ -3442,6 +3591,10 @@ class FrequencySeparatedActorCriticPPO:
                 return torch.linalg.vector_norm(violation) / np.sqrt(
                     float(violation.numel())
                 )
+            if projection_objective == "violation_cvar":
+                return _upper_tail_cvar(
+                    normalized, alpha=projection_cvar_alpha
+                )
             raise RuntimeError(
                 "deployment-frequency projection objective was not validated"
             )
@@ -3463,10 +3616,15 @@ class FrequencySeparatedActorCriticPPO:
             constraint_baseline = float(
                 constraint_loss_fn().detach().cpu().item()
             )
-        target_reached_before = bool(
-            float(
+        projection_risk_before = (
+            projection_objective_before
+            if projection_objective == "violation_cvar"
+            else float(
                 before["normalized_signed_excess"].detach().cpu().item()
-            ) <= target_tolerance
+            )
+        )
+        target_reached_before = bool(
+            projection_risk_before <= target_tolerance
         )
         projection_attempts = 0
         projection_accepts = 0
@@ -3480,12 +3638,14 @@ class FrequencySeparatedActorCriticPPO:
         for _ in range(max_projection_steps):
             with torch.no_grad():
                 current = current_stats()
-            if (
-                not correction_active
-                or float(
+            current_projection_risk = (
+                float(projection_objective_fn().detach().cpu().item())
+                if projection_objective == "violation_cvar"
+                else float(
                     current["normalized_signed_excess"].detach().cpu().item()
-                ) <= target_tolerance
-            ):
+                )
+            )
+            if not correction_active or current_projection_risk <= target_tolerance:
                 break
             projection_attempts += 1
             step_diagnostics = _reward_guarded_constraint_step(
@@ -3539,6 +3699,11 @@ class FrequencySeparatedActorCriticPPO:
         normalized_signed_after = float(
             after["normalized_signed_excess"].detach().cpu().item()
         )
+        projection_risk_after = (
+            projection_objective_after
+            if projection_objective == "violation_cvar"
+            else normalized_signed_after
+        )
         group_reward_deltas = (
             reward_after_values - reward_guard_baseline_values
         )
@@ -3555,13 +3720,13 @@ class FrequencySeparatedActorCriticPPO:
             after["normalized_excesses"] <= target_tolerance
         ).cpu().item())
         lambda_after = float(np.clip(
-            lambda_before + dual_lr * normalized_signed_after,
+            lambda_before + dual_lr * projection_risk_after,
             0.0,
             float(getattr(cfg, f"{prefix}_max_lambda")),
         ))
         setattr(self, lambda_name, lambda_after)
         target_reached_after = bool(
-            normalized_signed_after <= target_tolerance
+            projection_risk_after <= target_tolerance
         )
         return {
             f"{prefix}_enabled": 1.0,
@@ -3596,11 +3761,21 @@ class FrequencySeparatedActorCriticPPO:
             f"{prefix}_projection_objective_violation_l2": float(
                 projection_objective == "violation_l2"
             ),
+            f"{prefix}_projection_objective_violation_cvar": float(
+                projection_objective == "violation_cvar"
+            ),
+            f"{prefix}_projection_cvar_alpha": projection_cvar_alpha,
             f"{prefix}_projection_objective_before": (
                 projection_objective_before
             ),
             f"{prefix}_projection_objective_after": (
                 projection_objective_after
+            ),
+            f"{prefix}_projection_risk_signed_excess_before": (
+                projection_risk_before
+            ),
+            f"{prefix}_projection_risk_signed_excess_after": (
+                projection_risk_after
             ),
             f"{prefix}_active_violation_groups_before": float(torch.sum(
                 before["normalized_excesses"] > target_tolerance
@@ -3845,33 +4020,77 @@ class FrequencySeparatedActorCriticPPO:
             float(np.mean(batch.upper.cost))
             if batch.upper.cost is not None else 0.0
         )
+        upper_dual_metrics = {
+            "upper_constraint_dual_violation_raw": (
+                upper_cost_mean - float(self.config.upper_cost_target)
+            ),
+            "upper_constraint_dual_violation_normalized": (
+                upper_cost_mean - float(self.config.upper_cost_target)
+            ),
+            "upper_constraint_dual_scale_before": float(
+                self.upper_constraint_violation_scale
+            ),
+            "upper_constraint_dual_scale_after": float(
+                self.upper_constraint_violation_scale
+            ),
+            "upper_constraint_dual_normalization_ema_abs": float(
+                self.config.constraint_dual_normalization == "ema_abs"
+            ),
+            "upper_constraint_dual_update_count": float(
+                self.upper_constraint_dual_update_count
+            ),
+            "upper_constraint_lambda_before": float(
+                self.upper_constraint_lambda
+            ),
+            "upper_constraint_lambda_after": float(
+                self.upper_constraint_lambda
+            ),
+        }
         if (
             self.upper_cost_value is not None
             and batch.upper.cost is not None
             and float(self.config.upper_dual_lr) > 0.0
         ):
-            updated = (
-                self.upper_constraint_lambda
-                + float(self.config.upper_dual_lr)
-                * (
-                    upper_cost_mean
-                    - float(self.config.upper_cost_target)
-                )
+            upper_dual_metrics = self._update_native_constraint_dual(
+                level="upper", cost_mean=upper_cost_mean
             )
-            self.upper_constraint_lambda = float(np.clip(
-                updated, 0.0, float(self.config.upper_max_lambda)
-            ))
-        cost_mean = float(np.mean(batch.lower.cost)) if batch.lower.cost is not None else 0.0
-        if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:
-            updated = self.constraint_lambda + float(self.config.lower_dual_lr) * (
+        cost_mean = (
+            float(np.mean(batch.lower.cost))
+            if batch.lower.cost is not None else 0.0
+        )
+        lower_dual_metrics = {
+            "lower_constraint_dual_violation_raw": (
                 cost_mean - float(self.config.lower_cost_target)
+            ),
+            "lower_constraint_dual_violation_normalized": (
+                cost_mean - float(self.config.lower_cost_target)
+            ),
+            "lower_constraint_dual_scale_before": float(
+                self.lower_constraint_violation_scale
+            ),
+            "lower_constraint_dual_scale_after": float(
+                self.lower_constraint_violation_scale
+            ),
+            "lower_constraint_dual_normalization_ema_abs": float(
+                self.config.constraint_dual_normalization == "ema_abs"
+            ),
+            "lower_constraint_dual_update_count": float(
+                self.lower_constraint_dual_update_count
+            ),
+            "lower_constraint_lambda_before": float(self.constraint_lambda),
+            "lower_constraint_lambda_after": float(self.constraint_lambda),
+        }
+        if batch.lower.cost is not None and float(self.config.lower_dual_lr) > 0.0:
+            lower_dual_metrics = self._update_native_constraint_dual(
+                level="lower", cost_mean=cost_mean
             )
-            self.constraint_lambda = float(np.clip(updated, 0.0, float(self.config.lower_max_lambda)))
         return {
             **upper_metrics,
             **lower_metrics,
             **hf_metrics,
             **promotion_metrics,
+            **upper_dual_metrics,
+            **lower_dual_metrics,
             "upper_constraint_mean": upper_cost_mean,
             "upper_constraint_lambda": float(
                 self.upper_constraint_lambda

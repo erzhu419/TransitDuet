@@ -18,6 +18,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     SAFE_SELECTOR_BASELINE_BRANCH,
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -75,6 +76,41 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertIn("trust_region", contracts[(False, True, False)])
         self.assertIn("state_replay", contracts[(True, True, True)])
         self.assertIn("joint_actor", contracts[(False, False, True)])
+        cvar = deployment_frequency_constraint_contract(
+            requested=True,
+            groupwise=True,
+            anchor_state_replay=True,
+            ppo_trust_region=True,
+            closed_loop_trust_region=True,
+            projection_objective="violation_cvar",
+            projection_cvar_alpha=0.5,
+            closed_loop_risk_mode="mode_cvar",
+            closed_loop_cvar_alpha=0.5,
+        )
+        self.assertIn("projection_cvar_alpha_0.5", cvar)
+        self.assertIn("mode_cvar_constraints_alpha_0.5", cvar)
+        self.assertTrue(cvar.endswith("v10"))
+
+    def test_v1417_mechanism_cannot_use_the_v1416_protocol_label(self):
+        with self.assertRaisesRegex(ValueError, "v14.17 mechanisms"):
+            train_mujoco_method(
+                method="freq_hrl",
+                env_id="HalfCheetah-v5",
+                disturbance_mode="standard",
+                train_seeds=[11],
+                selection_seeds=[13],
+                eval_seeds=[17],
+                steps=8,
+                iterations=1,
+                optimizer_seed=19,
+                constraint_dual_normalization="ema_abs",
+                control_protocol_version=(
+                    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+                ),
+            )
+        self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17.endswith(
+            "native_pd_cvar"
+        ))
 
     @staticmethod
     def _selector_rows(
@@ -768,6 +804,67 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertEqual(pathwise["comparison_group_count"], 2)
         self.assertEqual(pathwise["aggregation"], "pathwise")
         self.assertEqual(pathwise["worst_constraint"]["seed"], 13)
+
+    def test_mode_cvar_bounds_tail_risk_without_all_path_feasibility(self):
+        baseline = [
+            {
+                "disturbance_mode": "standard",
+                "seed": seed,
+                "reward_mean": 100.0,
+                "LowerLFDriftAbs": 1.0,
+                "RawLowerLFDriftAbs": 1.0,
+                "LatentLowerLFDriftAbs": 1.0,
+                "UpperHFPowerAbs": 1.0,
+                "LatentUpperHFPowerAbs": 1.0,
+            }
+            for seed in (11, 13, 17, 19)
+        ]
+        candidate = []
+        for seed, frequency in zip(
+            (11, 13, 17, 19), (0.5, 0.5, 0.5, 1.1)
+        ):
+            row = dict(baseline[0])
+            row.update({
+                "seed": seed,
+                "LowerLFDriftAbs": frequency,
+                "RawLowerLFDriftAbs": frequency,
+                "LatentLowerLFDriftAbs": frequency,
+                "UpperHFPowerAbs": frequency,
+                "LatentUpperHFPowerAbs": frequency,
+            })
+            candidate.append(row)
+        common = dict(
+            baseline_rows=baseline,
+            expected_modes=("standard",),
+            lower_reduction_fraction=0.05,
+            upper_reduction_fraction=0.05,
+            lower_power_floor=1e-6,
+            upper_power_floor=1e-6,
+        )
+        pathwise = paired_relative_frequency_feasibility_diagnostics(
+            candidate, pathwise_robust=True, **common
+        )
+        cvar_half = paired_relative_frequency_feasibility_diagnostics(
+            candidate, risk_mode="mode_cvar", cvar_alpha=0.5, **common
+        )
+        cvar_top_quartile = paired_relative_frequency_feasibility_diagnostics(
+            candidate, risk_mode="mode_cvar", cvar_alpha=0.75, **common
+        )
+
+        self.assertLess(pathwise["rank"][0], 0.0)
+        self.assertEqual(cvar_half["rank"][0], 0.0)
+        self.assertLess(cvar_top_quartile["rank"][0], 0.0)
+        self.assertEqual(cvar_half["constraint_count"], 6)
+        self.assertEqual(cvar_half["comparison_group_count"], 1)
+        self.assertEqual(cvar_half["aggregation"], "disturbance_mode_cvar")
+        self.assertEqual(cvar_half["risk_mode"], "mode_cvar")
+        self.assertEqual(cvar_half["cvar_alpha"], 0.5)
+
+        snapshot = paired_closed_loop_guard_snapshot(
+            candidate, risk_mode="mode_cvar", cvar_alpha=0.5, **common
+        )
+        self.assertEqual(snapshot["risk_mode"], "mode_cvar")
+        self.assertIn("mode_cvar", snapshot["contract"])
 
     def test_written_checkpoint_has_independent_file_hash(self):
         model = torch.nn.Linear(2, 1)

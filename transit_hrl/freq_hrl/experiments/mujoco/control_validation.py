@@ -56,9 +56,13 @@ MUJOCO_CONTROL_PROTOCOL_VERSION = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16 = (
     "freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17 = (
+    "freq_hrl_mujoco_shared_core_v14_17_native_pd_cvar"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -74,6 +78,37 @@ METHODS = (
 DEFAULT_ENV_IDS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
 DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033, 31039)
 DEFAULT_SELECTION_SEEDS = (32003, 32009, 32027, 32029)
+CLOSED_LOOP_RISK_MODES = (
+    "legacy",
+    "mode_mean",
+    "pathwise_all",
+    "mode_cvar",
+)
+
+
+def _resolve_closed_loop_risk_mode(
+    *, pathwise_robust: bool, risk_mode: str
+) -> str:
+    mode = str(risk_mode)
+    if mode not in CLOSED_LOOP_RISK_MODES:
+        raise ValueError("unknown closed-loop risk mode")
+    if mode == "legacy":
+        return "pathwise_all" if pathwise_robust else "mode_mean"
+    if pathwise_robust and mode != "pathwise_all":
+        raise ValueError(
+            "pathwise_robust conflicts with the explicit closed-loop risk mode"
+        )
+    return mode
+
+
+def _empirical_upper_tail_cvar(
+    values: Iterable[float], *, alpha: float
+) -> float:
+    array = np.asarray(tuple(values), dtype=np.float64)
+    if array.size < 1 or not np.all(np.isfinite(array)):
+        raise ValueError("CVaR values must be finite and non-empty")
+    tail_count = max(1, int(np.ceil((1.0 - float(alpha)) * array.size)))
+    return float(np.mean(np.partition(array, array.size - tail_count)[-tail_count:]))
 
 
 def deployment_frequency_constraint_contract(
@@ -85,18 +120,32 @@ def deployment_frequency_constraint_contract(
     closed_loop_trust_region: bool = False,
     closed_loop_restoration_filter: bool = False,
     projection_objective: str = "worst_group",
+    projection_cvar_alpha: float = 0.5,
     restoration_freeze_reward_actor: bool = False,
     pathwise_robust: bool = False,
+    closed_loop_risk_mode: str = "legacy",
+    closed_loop_cvar_alpha: float = 0.5,
 ) -> str:
     if not requested:
         return "disabled"
     objective = str(projection_objective)
     if objective not in DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES:
         raise ValueError("unknown deployment-frequency projection objective")
+    resolved_risk_mode = _resolve_closed_loop_risk_mode(
+        pathwise_robust=pathwise_robust,
+        risk_mode=closed_loop_risk_mode,
+    )
+    for label, alpha in (
+        ("projection", projection_cvar_alpha),
+        ("closed-loop", closed_loop_cvar_alpha),
+    ):
+        if not np.isfinite(float(alpha)) or not 0.0 <= float(alpha) < 1.0:
+            raise ValueError(f"{label} CVaR alpha must be in [0, 1)")
     if (
         objective != "worst_group"
         or restoration_freeze_reward_actor
         or pathwise_robust
+        or str(closed_loop_risk_mode) != "legacy"
     ):
         mechanisms = [
             "episode_reset",
@@ -113,10 +162,26 @@ def deployment_frequency_constraint_contract(
             "frozen_reward_actor_during_restoration"
             if restoration_freeze_reward_actor
             else "joint_reward_actor_during_restoration",
-            "individual_path_constraints"
-            if pathwise_robust else "mode_mean_constraints",
-            "v9",
         ]
+        new_risk_contract = (
+            objective == "violation_cvar"
+            or resolved_risk_mode == "mode_cvar"
+        )
+        if objective == "violation_cvar":
+            mechanisms.append(
+                f"projection_cvar_alpha_{float(projection_cvar_alpha):.6g}"
+            )
+        mechanisms.extend([
+            {
+                "pathwise_all": "individual_path_constraints",
+                "mode_mean": "mode_mean_constraints",
+                "mode_cvar": (
+                    "mode_cvar_constraints_alpha_"
+                    f"{float(closed_loop_cvar_alpha):.6g}"
+                ),
+            }[resolved_risk_mode],
+            "v10" if new_risk_contract else "v9",
+        ])
         return "_".join(mechanisms)
     if not groupwise:
         return (
@@ -2363,6 +2428,7 @@ def _hierarchical_model(
     deployment_frequency_groupwise_robust: bool = False,
     deployment_frequency_anchor_state_replay: bool = False,
     deployment_frequency_projection_objective: str = "worst_group",
+    deployment_frequency_projection_cvar_alpha: float = 0.5,
     deployment_frequency_restoration_freeze_reward_actor: bool = False,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
@@ -2371,6 +2437,9 @@ def _hierarchical_model(
     deployment_frequency_closed_loop_restoration_filter: bool = False,
     deployment_frequency_closed_loop_restoration_min_reduction: float = 1e-4,
     deployment_frequency_closed_loop_restoration_funnel_multiplier: float = 3.0,
+    constraint_dual_normalization: str = "none",
+    constraint_dual_scale_ema_beta: float = 0.95,
+    constraint_dual_scale_floor: float = 1e-6,
 ) -> FrequencySeparatedActorCriticPPO:
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
@@ -2451,6 +2520,9 @@ def _hierarchical_model(
         deployment_frequency_projection_objective=str(
             deployment_frequency_projection_objective
         ),
+        deployment_frequency_projection_cvar_alpha=float(
+            deployment_frequency_projection_cvar_alpha
+        ),
         deployment_frequency_restoration_freeze_reward_actor=bool(
             deployment_frequency_restoration_freeze_reward_actor
         ),
@@ -2507,6 +2579,13 @@ def _hierarchical_model(
         lower_constraint_step_scale=1.0,
         lower_constraint_max_backtracks=8,
         lower_constraint_reward_tolerance=1e-8,
+        constraint_dual_normalization=str(
+            constraint_dual_normalization
+        ),
+        constraint_dual_scale_ema_beta=float(
+            constraint_dual_scale_ema_beta
+        ),
+        constraint_dual_scale_floor=float(constraint_dual_scale_floor),
     ))
 
 
@@ -2814,6 +2893,8 @@ def paired_relative_frequency_feasibility_diagnostics(
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
     pathwise_robust: bool = False,
+    risk_mode: str = "legacy",
+    cvar_alpha: float = 0.5,
 ) -> dict[str, Any]:
     """Audit paired reward and frequency feasibility by mode and endpoint."""
 
@@ -2857,6 +2938,14 @@ def paired_relative_frequency_feasibility_diagnostics(
         raise ValueError("paired-relative reward margin must be non-negative")
     if not isinstance(pathwise_robust, bool):
         raise TypeError("paired-relative pathwise_robust must be boolean")
+    resolved_risk_mode = _resolve_closed_loop_risk_mode(
+        pathwise_robust=pathwise_robust, risk_mode=risk_mode
+    )
+    if (
+        not np.isfinite(float(cvar_alpha))
+        or not 0.0 <= float(cvar_alpha) < 1.0
+    ):
+        raise ValueError("paired-relative CVaR alpha must be in [0, 1)")
 
     metrics = (
         "reward_mean",
@@ -2905,7 +2994,7 @@ def paired_relative_frequency_feasibility_diagnostics(
     comparison_groups: list[
         tuple[str, int | None, dict[str, float], dict[str, float]]
     ] = []
-    if pathwise_robust:
+    if resolved_risk_mode in {"pathwise_all", "mode_cvar"}:
         for mode in modes:
             mode_keys = sorted(
                 key for key in candidate_keys if key[0] == mode
@@ -3008,9 +3097,63 @@ def paired_relative_frequency_feasibility_diagnostics(
             if path_seed is not None:
                 constraint["seed"] = int(path_seed)
             constraints.append(constraint)
+    if resolved_risk_mode == "mode_cvar":
+        path_constraints = constraints
+        constraints = []
+        violations = []
+        reward_slacks = []
+        for mode in modes:
+            for metric in metrics:
+                selected = [
+                    item for item in path_constraints
+                    if (
+                        str(item["disturbance_mode"]) == mode
+                        and str(item["endpoint"]) == metric
+                    )
+                ]
+                if not selected:
+                    raise ValueError(
+                        "paired-relative CVaR aggregation omitted an endpoint"
+                    )
+                signed_excesses = [
+                    -float(item["normalized_slack"]) for item in selected
+                ]
+                cvar = _empirical_upper_tail_cvar(
+                    signed_excesses, alpha=float(cvar_alpha)
+                )
+                violation = max(cvar, 0.0)
+                aggregate = {
+                    "disturbance_mode": mode,
+                    "endpoint": metric,
+                    "direction": str(selected[0]["direction"]),
+                    "baseline": float(np.mean([
+                        float(item["baseline"]) for item in selected
+                    ])),
+                    "candidate": float(np.mean([
+                        float(item["candidate"]) for item in selected
+                    ])),
+                    "target": float(np.mean([
+                        float(item["target"]) for item in selected
+                    ])),
+                    "normalized_violation": violation,
+                    "normalized_slack": -cvar,
+                    "normalized_signed_excess_cvar": cvar,
+                    "cvar_alpha": float(cvar_alpha),
+                    "path_count": len(selected),
+                    "path_signed_normalized_excesses": signed_excesses,
+                }
+                constraints.append(aggregate)
+                violations.append(violation)
+                if metric == "reward_mean":
+                    reward_slacks.append(-cvar)
     values = np.asarray(violations, dtype=np.float64)
+    comparison_group_count = (
+        len(modes)
+        if resolved_risk_mode == "mode_cvar"
+        else len(comparison_groups)
+    )
     if (
-        values.size != len(comparison_groups) * 6
+        values.size != comparison_group_count * 6
         or not np.all(np.isfinite(values))
     ):
         raise ValueError("paired-relative checkpoint violation registry is invalid")
@@ -3029,10 +3172,14 @@ def paired_relative_frequency_feasibility_diagnostics(
             float(min(reward_slacks)),
         ),
         "constraint_count": len(constraints),
-        "comparison_group_count": len(comparison_groups),
-        "aggregation": (
-            "pathwise" if pathwise_robust else "disturbance_mode_mean"
-        ),
+        "comparison_group_count": comparison_group_count,
+        "aggregation": {
+            "pathwise_all": "pathwise",
+            "mode_mean": "disturbance_mode_mean",
+            "mode_cvar": "disturbance_mode_cvar",
+        }[resolved_risk_mode],
+        "risk_mode": resolved_risk_mode,
+        "cvar_alpha": float(cvar_alpha),
         "constraints": constraints,
         "worst_constraint": worst,
     }
@@ -3049,6 +3196,8 @@ def paired_relative_frequency_feasibility_rank(
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
     pathwise_robust: bool = False,
+    risk_mode: str = "legacy",
+    cvar_alpha: float = 0.5,
 ) -> tuple[float, float, float]:
     """Rank against a paired checkpoint on the same selection paths."""
 
@@ -3064,6 +3213,8 @@ def paired_relative_frequency_feasibility_rank(
             reward_noninferiority_margin_fraction
         ),
         pathwise_robust=pathwise_robust,
+        risk_mode=risk_mode,
+        cvar_alpha=cvar_alpha,
     )
     return tuple(map(float, diagnostics["rank"]))
 
@@ -3079,6 +3230,8 @@ def paired_closed_loop_guard_snapshot(
     upper_power_floor: float,
     reward_noninferiority_margin_fraction: float = 0.02,
     pathwise_robust: bool = False,
+    risk_mode: str = "legacy",
+    cvar_alpha: float = 0.5,
 ) -> dict[str, Any]:
     """Reduce actual paired rollouts to the generic actor-guard contract."""
 
@@ -3094,6 +3247,8 @@ def paired_closed_loop_guard_snapshot(
             reward_noninferiority_margin_fraction
         ),
         pathwise_robust=pathwise_robust,
+        risk_mode=risk_mode,
+        cvar_alpha=cvar_alpha,
     )
     violation_tolerance = 1e-10
     reward_violations = sum(
@@ -3118,16 +3273,25 @@ def paired_closed_loop_guard_snapshot(
     return {
         "contract": (
             (
+                "paired_frozen_anchor_actual_closed_loop_mode_cvar_reward_"
+                "floor_and_five_frequency_endpoints_with_restoration_"
+                f"merit_alpha_{float(cvar_alpha):.6g}_v4"
+            )
+            if diagnostics["risk_mode"] == "mode_cvar" else (
+            (
                 "paired_frozen_anchor_actual_closed_loop_pathwise_reward_"
                 "floor_and_five_frequency_endpoints_with_restoration_"
                 "merit_v3"
             )
-            if pathwise_robust else (
+            if diagnostics["risk_mode"] == "pathwise_all" else (
                 "paired_frozen_anchor_actual_closed_loop_reward_floor_and_"
                 "five_frequency_endpoints_with_restoration_merit_v2"
             )
+            )
         ),
         "rank": tuple(map(float, diagnostics["rank"])),
+        "risk_mode": str(diagnostics["risk_mode"]),
+        "cvar_alpha": float(diagnostics["cvar_alpha"]),
         "path_count": len(rows),
         "constraint_count": int(diagnostics["constraint_count"]),
         "reward_violation_count": int(reward_violations),
@@ -3197,8 +3361,11 @@ def train_mujoco_method(
     deployment_frequency_groupwise_robust: bool = False,
     deployment_frequency_anchor_state_replay: bool = False,
     deployment_frequency_projection_objective: str = "worst_group",
+    deployment_frequency_projection_cvar_alpha: float = 0.5,
     deployment_frequency_restoration_freeze_reward_actor: bool = False,
     deployment_frequency_pathwise_robust: bool = False,
+    deployment_frequency_closed_loop_risk_mode: str = "legacy",
+    deployment_frequency_closed_loop_cvar_alpha: float = 0.5,
     deployment_frequency_ppo_trust_region: bool = False,
     deployment_frequency_ppo_trust_region_backtracks: int = 8,
     deployment_frequency_closed_loop_trust_region: bool = False,
@@ -3208,6 +3375,9 @@ def train_mujoco_method(
     deployment_frequency_closed_loop_restoration_funnel_multiplier: float = 3.0,
     upper_constraint_update_mode: str = "reward_guarded_adam_projection",
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
+    constraint_dual_normalization: str = "none",
+    constraint_dual_scale_ema_beta: float = 0.95,
+    constraint_dual_scale_floor: float = 1e-6,
     leakage_cost_mode: str = "ratio_excess_squared",
     lower_action_router_mode: str = "direct",
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
@@ -3322,6 +3492,28 @@ def train_mujoco_method(
         raise ValueError(
             "unknown MuJoCo deployment-frequency projection objective"
         )
+    resolved_closed_loop_risk_mode = _resolve_closed_loop_risk_mode(
+        pathwise_robust=deployment_frequency_pathwise_robust,
+        risk_mode=deployment_frequency_closed_loop_risk_mode,
+    )
+    for label, alpha in (
+        ("projection", deployment_frequency_projection_cvar_alpha),
+        ("closed-loop", deployment_frequency_closed_loop_cvar_alpha),
+    ):
+        if not np.isfinite(float(alpha)) or not 0.0 <= float(alpha) < 1.0:
+            raise ValueError(f"MuJoCo {label} CVaR alpha must be in [0, 1)")
+    if str(constraint_dual_normalization) not in {"none", "ema_abs"}:
+        raise ValueError("unknown MuJoCo constraint dual normalization")
+    if (
+        not np.isfinite(float(constraint_dual_scale_ema_beta))
+        or not 0.0 <= float(constraint_dual_scale_ema_beta) < 1.0
+    ):
+        raise ValueError("MuJoCo constraint dual EMA beta must be in [0, 1)")
+    if (
+        not np.isfinite(float(constraint_dual_scale_floor))
+        or float(constraint_dual_scale_floor) <= 0.0
+    ):
+        raise ValueError("MuJoCo constraint dual scale floor must be positive")
     for feature_name, enabled in (
         (
             "deployment-frequency restoration reward-actor freeze",
@@ -3343,15 +3535,22 @@ def train_mujoco_method(
             "restoration filter"
         )
     if (
-        deployment_frequency_pathwise_robust
+        resolved_closed_loop_risk_mode in {"pathwise_all", "mode_cvar"}
         and not deployment_frequency_groupwise_robust
     ):
         raise ValueError(
-            "MuJoCo pathwise frequency robustness requires groupwise "
+            "MuJoCo pathwise/CVaR frequency robustness requires groupwise "
             "constraints"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17
+        if (
+            str(deployment_frequency_projection_objective)
+            == "violation_cvar"
+            or resolved_closed_loop_risk_mode == "mode_cvar"
+            or str(constraint_dual_normalization) != "none"
+        )
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
         if (
             anchor_state_replay_roots
             or str(deployment_frequency_projection_objective)
@@ -3365,12 +3564,20 @@ def train_mujoco_method(
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
     if (
-        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+        inferred_protocol_version in {
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
+        }
         and selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION
     ):
         raise ValueError(
             "v14.16 restoration mechanisms cannot be labeled as v14.15"
         )
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17
+        and selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+    ):
+        raise ValueError("v14.17 mechanisms cannot be labeled as v14.16")
     effective_protocol_version = (
         inferred_protocol_version
         if selected_protocol_version == "auto"
@@ -4062,6 +4269,9 @@ def train_mujoco_method(
         lower_dual_lr=lower_dual_lr,
         upper_constraint_update_mode=upper_constraint_update_mode,
         lower_constraint_update_mode=lower_constraint_update_mode,
+        constraint_dual_normalization=constraint_dual_normalization,
+        constraint_dual_scale_ema_beta=constraint_dual_scale_ema_beta,
+        constraint_dual_scale_floor=constraint_dual_scale_floor,
     )
     target_parameters = _module_parameter_count(reference)
     selected_leakage_constraint = name == "freq_hrl"
@@ -4160,6 +4370,9 @@ def train_mujoco_method(
                 lower_dual_lr=lower_dual_lr,
                 upper_constraint_update_mode=upper_constraint_update_mode,
                 lower_constraint_update_mode=branch_update_mode,
+                constraint_dual_normalization=constraint_dual_normalization,
+                constraint_dual_scale_ema_beta=constraint_dual_scale_ema_beta,
+                constraint_dual_scale_floor=constraint_dual_scale_floor,
             )
             initial_hash = _model_parameter_sha256(branch_model)
             initial_hashes.add(initial_hash)
@@ -4518,6 +4731,9 @@ def train_mujoco_method(
             deployment_frequency_projection_objective=str(
                 deployment_frequency_projection_objective
             ),
+            deployment_frequency_projection_cvar_alpha=float(
+                deployment_frequency_projection_cvar_alpha
+            ),
             deployment_frequency_restoration_freeze_reward_actor=bool(
                 deployment_frequency_restoration_freeze_reward_actor
             ),
@@ -4541,6 +4757,15 @@ def train_mujoco_method(
             ),
             deployment_frequency_closed_loop_restoration_funnel_multiplier=float(
                 deployment_frequency_closed_loop_restoration_funnel_multiplier
+            ),
+            constraint_dual_normalization=str(
+                constraint_dual_normalization
+            ),
+            constraint_dual_scale_ema_beta=float(
+                constraint_dual_scale_ema_beta
+            ),
+            constraint_dual_scale_floor=float(
+                constraint_dual_scale_floor
             ),
         )
         if paired_continuation:
@@ -4658,6 +4883,12 @@ def train_mujoco_method(
                     pathwise_robust=bool(
                         deployment_frequency_pathwise_robust
                     ),
+                    risk_mode=str(
+                        deployment_frequency_closed_loop_risk_mode
+                    ),
+                    cvar_alpha=float(
+                        deployment_frequency_closed_loop_cvar_alpha
+                    ),
                 )
                 snapshot["parameter_sha256"] = parameter_sha256
                 return snapshot
@@ -4697,6 +4928,12 @@ def train_mujoco_method(
                     pathwise_robust=bool(
                         deployment_frequency_pathwise_robust
                     ),
+                    risk_mode=str(
+                        deployment_frequency_closed_loop_risk_mode
+                    ),
+                    cvar_alpha=float(
+                        deployment_frequency_closed_loop_cvar_alpha
+                    ),
                 )
             )
             checkpoint_diagnostics_fn = lambda rows: (
@@ -4719,6 +4956,12 @@ def train_mujoco_method(
                     pathwise_robust=bool(
                         deployment_frequency_pathwise_robust
                     ),
+                    risk_mode=str(
+                        deployment_frequency_closed_loop_risk_mode
+                    ),
+                    cvar_alpha=float(
+                        deployment_frequency_closed_loop_cvar_alpha
+                    ),
                 )
             )
             checkpoint_rank_names = (
@@ -4728,17 +4971,26 @@ def train_mujoco_method(
             )
             checkpoint_rank_contract = (
                 (
+                    "state_aligned_paired_selection_mode_cvar_reward_floor_"
+                    "and_five_frequency_endpoint_relative_feasibility_"
+                    f"alpha_{float(deployment_frequency_closed_loop_cvar_alpha):.6g}_v3"
+                )
+                if resolved_closed_loop_risk_mode == "mode_cvar" else (
+                (
                     "state_aligned_paired_selection_individual_path_reward_"
                     "floor_and_five_frequency_endpoint_relative_"
                     "feasibility_v2"
                 )
-                if deployment_frequency_pathwise_robust else (
+                if resolved_closed_loop_risk_mode == "pathwise_all" else (
                     "state_aligned_paired_selection_path_reward_floor_and_"
                     "five_frequency_endpoint_relative_feasibility_v1"
                 )
+                )
             )
             checkpoint_score_contract = (
-                "paired_checkpoint_selection_path_relative_feasibility_v1"
+                "paired_checkpoint_selection_risk_relative_feasibility_v2"
+                if resolved_closed_loop_risk_mode == "mode_cvar"
+                else "paired_checkpoint_selection_path_relative_feasibility_v1"
             )
         payload, rows, model = train_frequency_separated_ppo(
             model=model,
@@ -4984,6 +5236,28 @@ def train_mujoco_method(
         "lower_dual_lr": (
             float(lower_dual_lr) if selected_leakage_constraint else 0.0
         ),
+        "constraint_dual_normalization": (
+            str(constraint_dual_normalization)
+            if selected_leakage_constraint else "disabled"
+        ),
+        "constraint_dual_scale_ema_beta": float(
+            constraint_dual_scale_ema_beta
+        ),
+        "constraint_dual_scale_floor": float(
+            constraint_dual_scale_floor
+        ),
+        "upper_constraint_lambda_final": float(
+            getattr(model, "upper_constraint_lambda", 0.0)
+        ),
+        "lower_constraint_lambda_final": float(
+            getattr(model, "constraint_lambda", 0.0)
+        ),
+        "upper_constraint_violation_scale_final": float(
+            getattr(model, "upper_constraint_violation_scale", 0.0)
+        ),
+        "lower_constraint_violation_scale_final": float(
+            getattr(model, "lower_constraint_violation_scale", 0.0)
+        ),
         "deployment_frequency_constraint_enabled": bool(
             deployment_frequency_requested and name == "freq_hrl"
         ),
@@ -5067,6 +5341,9 @@ def train_mujoco_method(
         "deployment_frequency_projection_objective": str(
             deployment_frequency_projection_objective
         ),
+        "deployment_frequency_projection_cvar_alpha": float(
+            deployment_frequency_projection_cvar_alpha
+        ),
         "deployment_frequency_restoration_freeze_reward_actor": bool(
             deployment_frequency_restoration_freeze_reward_actor
             and deployment_frequency_requested
@@ -5076,6 +5353,14 @@ def train_mujoco_method(
             deployment_frequency_pathwise_robust
             and deployment_frequency_requested
             and name == "freq_hrl"
+        ),
+        "deployment_frequency_closed_loop_risk_mode": (
+            resolved_closed_loop_risk_mode
+            if deployment_frequency_requested and name == "freq_hrl"
+            else "disabled"
+        ),
+        "deployment_frequency_closed_loop_cvar_alpha": float(
+            deployment_frequency_closed_loop_cvar_alpha
         ),
         "deployment_frequency_ppo_trust_region": bool(
             deployment_frequency_ppo_trust_region
@@ -5123,10 +5408,19 @@ def train_mujoco_method(
                 projection_objective=(
                     deployment_frequency_projection_objective
                 ),
+                projection_cvar_alpha=(
+                    deployment_frequency_projection_cvar_alpha
+                ),
                 restoration_freeze_reward_actor=(
                     deployment_frequency_restoration_freeze_reward_actor
                 ),
                 pathwise_robust=deployment_frequency_pathwise_robust,
+                closed_loop_risk_mode=(
+                    deployment_frequency_closed_loop_risk_mode
+                ),
+                closed_loop_cvar_alpha=(
+                    deployment_frequency_closed_loop_cvar_alpha
+                ),
             )
         ),
         "upper_constraint_update_mode": (
@@ -5510,6 +5804,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_LOWER_DUAL_LR,
     )
     parser.add_argument(
+        "--constraint-dual-normalization",
+        choices=("none", "ema_abs"),
+        default="none",
+    )
+    parser.add_argument(
+        "--constraint-dual-scale-ema-beta", type=float, default=0.95
+    )
+    parser.add_argument(
+        "--constraint-dual-scale-floor", type=float, default=1e-6
+    )
+    parser.add_argument(
         "--upper-deployment-frequency-dual-lr", type=float, default=0.0
     )
     parser.add_argument(
@@ -5587,12 +5892,27 @@ def build_parser() -> argparse.ArgumentParser:
         default="worst_group",
     )
     parser.add_argument(
+        "--deployment-frequency-projection-cvar-alpha",
+        type=float,
+        default=0.5,
+    )
+    parser.add_argument(
         "--deployment-frequency-restoration-freeze-reward-actor",
         action="store_true",
     )
     parser.add_argument(
         "--deployment-frequency-pathwise-robust",
         action="store_true",
+    )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-risk-mode",
+        choices=CLOSED_LOOP_RISK_MODES,
+        default="legacy",
+    )
+    parser.add_argument(
+        "--deployment-frequency-closed-loop-cvar-alpha",
+        type=float,
+        default=0.5,
     )
     parser.add_argument(
         "--deployment-frequency-ppo-trust-region",
@@ -5743,6 +6063,11 @@ def main() -> None:
         upper_constraint_mode=args.upper_constraint_mode,
         upper_dual_lr=args.upper_dual_lr,
         lower_dual_lr=args.lower_dual_lr,
+        constraint_dual_normalization=args.constraint_dual_normalization,
+        constraint_dual_scale_ema_beta=(
+            args.constraint_dual_scale_ema_beta
+        ),
+        constraint_dual_scale_floor=args.constraint_dual_scale_floor,
         upper_deployment_frequency_dual_lr=(
             args.upper_deployment_frequency_dual_lr
         ),
@@ -5800,11 +6125,20 @@ def main() -> None:
         deployment_frequency_projection_objective=(
             args.deployment_frequency_projection_objective
         ),
+        deployment_frequency_projection_cvar_alpha=(
+            args.deployment_frequency_projection_cvar_alpha
+        ),
         deployment_frequency_restoration_freeze_reward_actor=(
             args.deployment_frequency_restoration_freeze_reward_actor
         ),
         deployment_frequency_pathwise_robust=(
             args.deployment_frequency_pathwise_robust
+        ),
+        deployment_frequency_closed_loop_risk_mode=(
+            args.deployment_frequency_closed_loop_risk_mode
+        ),
+        deployment_frequency_closed_loop_cvar_alpha=(
+            args.deployment_frequency_closed_loop_cvar_alpha
         ),
         deployment_frequency_ppo_trust_region=(
             args.deployment_frequency_ppo_trust_region

@@ -191,6 +191,76 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertIn("lower_policy_loss", metrics)
         self.assertGreater(metrics["constraint_lambda"], 0.0)
 
+    def test_native_dual_ema_abs_normalizes_cost_scale_and_round_trips(self):
+        config = SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            epochs=1,
+            minibatch_size=8,
+            lower_dual_lr=0.2,
+            lower_cost_target=0.0,
+            constraint_dual_normalization="ema_abs",
+        )
+        small_batch = self._batch(101)
+        large_batch = copy.deepcopy(small_batch)
+        large_batch.lower.cost *= 100.0
+        small = FrequencySeparatedActorCriticPPO(config)
+        large = FrequencySeparatedActorCriticPPO(config)
+
+        small_metrics = small.update(small_batch)
+        large_metrics = large.update(large_batch)
+
+        self.assertAlmostEqual(small.constraint_lambda, 0.2, places=7)
+        self.assertAlmostEqual(large.constraint_lambda, 0.2, places=7)
+        self.assertAlmostEqual(
+            small_metrics["lower_constraint_dual_violation_normalized"],
+            1.0,
+            places=7,
+        )
+        self.assertAlmostEqual(
+            large_metrics["lower_constraint_dual_violation_normalized"],
+            1.0,
+            places=7,
+        )
+        self.assertAlmostEqual(
+            large.lower_constraint_violation_scale,
+            100.0 * small.lower_constraint_violation_scale,
+            places=6,
+        )
+
+        restored = FrequencySeparatedActorCriticPPO(config)
+        restored.load_state_dict(copy.deepcopy(small.state_dict()))
+        self.assertEqual(restored.lower_constraint_dual_update_count, 1)
+        self.assertAlmostEqual(
+            restored.lower_constraint_violation_scale,
+            small.lower_constraint_violation_scale,
+        )
+
+    def test_native_dual_ema_initializes_on_first_nonzero_violation(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            lower_dual_lr=0.2,
+            constraint_dual_normalization="ema_abs",
+        ))
+        zero = model._update_native_constraint_dual(
+            level="lower", cost_mean=0.0
+        )
+        nonzero = model._update_native_constraint_dual(
+            level="lower", cost_mean=10.0
+        )
+
+        self.assertEqual(zero["lower_constraint_dual_scale_after"], 0.0)
+        self.assertEqual(nonzero["lower_constraint_dual_scale_after"], 10.0)
+        self.assertEqual(
+            nonzero["lower_constraint_dual_violation_normalized"], 1.0
+        )
+        self.assertAlmostEqual(model.constraint_lambda, 0.2)
+
     def test_actor_anchor_uses_zeroed_context_and_reports_policy_drift(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=3,

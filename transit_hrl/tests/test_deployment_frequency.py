@@ -406,6 +406,70 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
             l2_metrics[prefix + "projection_objective_violation_l2"], 1.0
         )
 
+    def test_violation_cvar_projection_uses_preregistered_upper_tail(self):
+        common = dict(
+            upper_state_dim=3,
+            lower_state_dim=4,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=0,
+            deployment_action_transform="identity",
+            lower_learning_rate=0.01,
+            lower_deployment_frequency_rms_budget=0.1,
+            lower_deployment_frequency_window=3,
+            lower_deployment_frequency_lambda_init=1.0,
+            lower_deployment_frequency_step_scale=1.0,
+            deployment_frequency_groupwise_robust=True,
+        )
+        state = np.concatenate([
+            np.tile(np.eye(4, dtype=np.float32)[group], (4, 1))
+            for group in range(4)
+        ])
+        batch = LevelTrajectoryBatch(
+            state=state,
+            action=np.zeros((16, 1), dtype=np.float32),
+            reward=np.zeros(16, dtype=np.float32),
+            duration=np.ones(16, dtype=np.int64),
+            done=np.asarray([False, False, False, True] * 4),
+            old_logp=np.zeros(16, dtype=np.float32),
+            old_value=np.zeros(16, dtype=np.float32),
+            deployment_frequency_group=np.repeat(np.arange(4), 4),
+        )
+
+        def objective_before(objective: str, alpha: float):
+            model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                **common,
+                deployment_frequency_projection_objective=objective,
+                deployment_frequency_projection_cvar_alpha=alpha,
+            ))
+            with torch.no_grad():
+                model.lower_actor.net[-1].weight.copy_(
+                    torch.tensor([[1.0, 0.8, 0.4, 0.2]])
+                )
+                model.lower_actor.net[-1].bias.zero_()
+            metrics = model._update_deployment_frequency_constraint(
+                level="lower", batch=batch, actor=model.lower_actor
+            )
+            return metrics
+
+        worst = objective_before("worst_group", 0.5)
+        cvar_half = objective_before("violation_cvar", 0.5)
+        cvar_top_one = objective_before("violation_cvar", 0.75)
+        prefix = "lower_deployment_frequency_"
+        self.assertLess(
+            cvar_half[prefix + "projection_objective_before"],
+            worst[prefix + "projection_objective_before"],
+        )
+        self.assertAlmostEqual(
+            cvar_top_one[prefix + "projection_objective_before"],
+            worst[prefix + "projection_objective_before"],
+            places=5,
+        )
+        self.assertEqual(
+            cvar_half[prefix + "projection_objective_violation_cvar"], 1.0
+        )
+        self.assertEqual(cvar_half[prefix + "projection_cvar_alpha"], 0.5)
+
     def test_restoration_freezes_reward_actors_but_not_critics_or_projection(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=3,
@@ -599,6 +663,14 @@ class DeploymentFrequencyPPOTest(unittest.TestCase):
                 upper_action_dim=1,
                 lower_action_dim=1,
                 deployment_frequency_restoration_freeze_reward_actor=True,
+            ))
+        with self.assertRaisesRegex(ValueError, "cvar_alpha"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                deployment_frequency_projection_cvar_alpha=1.0,
             ))
 
     def test_active_constraint_requires_positive_budget(self):
