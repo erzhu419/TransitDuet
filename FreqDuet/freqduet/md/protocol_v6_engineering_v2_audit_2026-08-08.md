@@ -1205,3 +1205,20 @@ above the formal `0.00025` limit. This is an early-training constraint transient
 not a passing result. The smoke establishes only that V14 is active, causal,
 serialized, restorable, and auditable. The preregistered 40-episode screen still
 rejects any candidate whose regret limit is missed in even one frozen rollout.
+
+### V14 scheduler dispatch (2026-08-30)
+
+The formal exploratory screen is frozen at clean detached source commit
+`4246c7f92aec9f109424b4f7fec3d284bf7b8198` in
+`FreqDuet-v6-engineering-v14-snapshot`. Scheduler tasks `t84745--t84792`
+cover the exact 48 single-training-seed shards under run name
+`protocol_v6_capacity_gain_ep40_s4_e4_v14`. The tasks are distributed evenly
+across `node001--node006` at eight shards per node, use the isolated
+`freqduet-cpu-py310` interpreter, declare four CPU cores and 1270 MB RAM each,
+and retain full training artifacts remotely for one strict node-side aggregate.
+
+Five initial SSH handshakes entered scheduler retry and then recovered without
+changing task identity or node assignment. The early health audit found all 48
+tasks running with nonzero CPU and RAM samples. This dispatch record is not an
+outcome: aggregation, the locked capacity-gain gate, and any candidate decision
+remain pending until every shard completes.
