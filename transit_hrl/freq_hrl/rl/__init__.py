@@ -38,6 +38,13 @@ from .action_cost_critic import (
     discounted_smdp_cost_returns,
     transform_latent_action,
 )
+from .restoration_portfolio import (
+    RestorationPortfolioDecision,
+    fold_guarded_restoration_eligibility,
+    paired_trace_invariance_diagnostics,
+    restoration_snapshot_eligible,
+    select_guarded_restoration_portfolio,
+)
 from .smdp_actor_critic import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     FrequencySeparatedActorCriticPPO,
@@ -100,8 +107,13 @@ __all__ = [
     "concat_level_batches",
     "deployment_frequency_stats",
     "ActionCostCritic",
+    "RestorationPortfolioDecision",
     "discounted_smdp_cost_returns",
     "transform_latent_action",
+    "fold_guarded_restoration_eligibility",
+    "paired_trace_invariance_diagnostics",
+    "restoration_snapshot_eligible",
+    "select_guarded_restoration_portfolio",
     "deterministic_actor_action",
     "summarize_numeric_rows",
     "train_dual_ppo",

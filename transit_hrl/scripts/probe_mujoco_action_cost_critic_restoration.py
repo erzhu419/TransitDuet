@@ -25,6 +25,12 @@ from freq_hrl.rl.action_cost_critic import (
     discounted_smdp_cost_returns,
     transform_latent_action,
 )
+from freq_hrl.rl.restoration_portfolio import (
+    fold_guarded_restoration_eligibility as fold_guarded_design_eligibility,
+    paired_trace_invariance_diagnostics,
+    restoration_snapshot_eligible,
+    select_guarded_restoration_portfolio,
+)
 from freq_hrl.rl.deployment_frequency import deterministic_actor_action
 from freq_hrl.rl.smdp_actor_critic import (
     HierarchicalTrajectoryBatch,
@@ -39,7 +45,6 @@ from scripts.probe_mujoco_radial_restoration import (
     _v14_17_anchor_profile,
 )
 from scripts.probe_mujoco_zeroth_order_actor_restoration import (
-    _eligible,
     _paths_for_roots,
     _snapshot_fn,
 )
@@ -898,37 +903,6 @@ def _evaluate_deltas(
     return grouped
 
 
-def fold_guarded_design_eligibility(
-    snapshot: dict[str, Any],
-    baseline: dict[str, Any],
-    fold_snapshots: list[dict[str, Any]],
-    fold_baselines: list[dict[str, Any]],
-    *,
-    minimum_reduction: float,
-    funnel_multiplier: float,
-) -> tuple[bool, list[bool]]:
-    if len(fold_snapshots) != len(fold_baselines) or not fold_snapshots:
-        raise ValueError("design fold snapshots and baselines must align")
-    fold_flags = [
-        _eligible(
-            fold_snapshot,
-            fold_baseline,
-            minimum_reduction=minimum_reduction,
-            funnel_multiplier=funnel_multiplier,
-        )
-        for fold_snapshot, fold_baseline in zip(
-            fold_snapshots, fold_baselines, strict=True
-        )
-    ]
-    pooled = _eligible(
-        snapshot,
-        baseline,
-        minimum_reduction=minimum_reduction,
-        funnel_multiplier=funnel_multiplier,
-    )
-    return bool(pooled and all(fold_flags)), fold_flags
-
-
 def build_design_fold_contracts(
     baseline_rows: list[dict[str, Any]],
     fold_slices: list[slice],
@@ -1444,13 +1418,9 @@ def run_probe(
                     strict=True,
                 )
             ]
-            design_eligible, fold_eligible = fold_guarded_design_eligibility(
-                snapshot,
-                design_baseline,
-                fold_snapshots,
-                design_fold_baselines,
-                minimum_reduction=minimum_reduction,
-                funnel_multiplier=funnel_multiplier,
+            requires_trace_invariance = bool(
+                specification["source"]
+                == "function_preserving_router_adapter"
             )
             candidate = {
                 "source": str(specification["source"]),
@@ -1458,27 +1428,51 @@ def run_probe(
                 "router_strength": float(result["router_strength"]),
                 "parameter_sha256": result["parameter_sha256"],
                 "snapshot": snapshot,
-                "design_fold_snapshots": fold_snapshots,
-                "design_fold_eligible": fold_eligible,
+                "fold_snapshots": fold_snapshots,
+                "requires_trace_invariance": requires_trace_invariance,
+                "trace_invariance": (
+                    paired_trace_invariance_diagnostics(
+                        result["rows"], design_baseline_rows
+                    )
+                    if requires_trace_invariance else None
+                ),
+                "selection_priority": [
+                    float(specification["step_rms"]),
+                    float(result["router_strength"]),
+                ],
                 "_delta": specification["delta"],
             }
-            candidate["design_eligible"] = design_eligible
             candidates.append(candidate)
-        eligible = [
-            candidate for candidate in candidates
-            if candidate["design_eligible"]
-        ]
-        eligible.sort(key=lambda candidate: (
-            float(candidate["snapshot"]["reward_violation_count"]),
-            float(candidate["snapshot"]["frequency_violation_merit"]),
-            float(candidate["snapshot"]["worst_frequency_violation"]),
-            float(candidate["step_rms"]),
-            float(candidate["router_strength"]),
-        ))
-        selected = eligible[0] if eligible else None
+        decision = select_guarded_restoration_portfolio(
+            candidates,
+            baseline=design_baseline,
+            fold_baselines=design_fold_baselines,
+            minimum_reduction=minimum_reduction,
+            funnel_multiplier=funnel_multiplier,
+        )
+        for index, candidate in enumerate(candidates):
+            candidate["design_fold_snapshots"] = candidate.pop(
+                "fold_snapshots"
+            )
+            candidate["design_fold_eligible"] = list(
+                decision.fold_eligibility[index]
+            )
+            candidate["trace_invariance_eligible"] = bool(
+                decision.trace_invariance_eligibility[index]
+            )
+            candidate["design_eligible"] = bool(
+                decision.design_eligibility[index]
+            )
+        eligible = [candidates[index] for index in decision.eligible_indices]
+        selected = (
+            None
+            if decision.selected_index is None
+            else candidates[decision.selected_index]
+        )
 
     validation_baseline = None
     validation_candidate = None
+    validation_trace_invariance = None
     validation_supported = False
     if selected is not None:
         validation_results = _evaluate_deltas(
@@ -1519,11 +1513,19 @@ def run_probe(
         validation_candidate = validation_snapshot(
             validation_results[1]["rows"]
         )
-        validation_supported = _eligible(
+        if bool(selected["requires_trace_invariance"]):
+            validation_trace_invariance = paired_trace_invariance_diagnostics(
+                validation_results[1]["rows"],
+                validation_baseline_rows,
+            )
+        validation_supported = restoration_snapshot_eligible(
             validation_candidate,
             validation_baseline,
             minimum_reduction=minimum_reduction,
             funnel_multiplier=funnel_multiplier,
+        ) and bool(
+            not selected["requires_trace_invariance"]
+            or validation_trace_invariance["all_traces_invariant"]
         )
 
     public_candidates = [
@@ -1609,6 +1611,7 @@ def run_probe(
         "selected_design_candidate": public_selected,
         "validation_baseline": validation_baseline,
         "validation_candidate": validation_candidate,
+        "validation_trace_invariance": validation_trace_invariance,
         "validation_supported": bool(validation_supported),
         "candidates": public_candidates,
     }
