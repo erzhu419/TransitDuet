@@ -15,6 +15,7 @@ import torch
 
 from freq_hrl.core import (
     CausalRollingBandTracker,
+    CausalSmoothstepMacroPlan,
     LeakageRegularizer,
     evaluate_rms_leakage_budget,
 )
@@ -63,11 +64,15 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2 = (
     "freq_hrl_mujoco_shared_core_v16_2_macro_hold_gauge"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V17 = (
+    "freq_hrl_mujoco_shared_core_v17_zero_dc_plan"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -79,6 +84,10 @@ METHODS = (
     "freq_hrl_no_leakage",
     "generic_hrl",
     "flat_ppo",
+)
+UPPER_ACTION_DECODER_MODES = (
+    "hold",
+    "causal_smoothstep_plan",
 )
 DEFAULT_ENV_IDS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
 DEFAULT_TRAIN_SEEDS = (31013, 31019, 31033, 31039)
@@ -282,6 +291,7 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
+    "causal_macro_zero_dc",
 }
 FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
@@ -838,6 +848,9 @@ def _episode_row(
     lower_router_clip_values: list[float],
     lower_router_audit_alphas: list[float],
     lower_router_audit_imbalances: list[float],
+    lower_router_macro_projection_rates: list[float],
+    lower_router_macro_debt_rms_values: list[float],
+    lower_router_macro_completion_errors: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
     transfer_saturation_values: list[float],
@@ -970,6 +983,15 @@ def _episode_row(
         "LowerRouterAuditAlphaFinal": float(lower_router_audit_alphas[-1]),
         "LowerRouterAuditBandImbalanceMean": float(np.mean(
             lower_router_audit_imbalances
+        )),
+        "LowerRouterMacroProjectionRate": float(np.mean(
+            lower_router_macro_projection_rates
+        )),
+        "LowerRouterMacroDebtRMSMean": float(np.mean(
+            lower_router_macro_debt_rms_values
+        )),
+        "LowerRouterMacroCompletionErrorMax": float(np.max(
+            lower_router_macro_completion_errors
         )),
         "EffectiveToLatentLowerEnergyRatio": float(
             np.mean(np.square(raw_lower))
@@ -1117,6 +1139,7 @@ def rollout_hierarchical(
     collect_trajectory: bool = False,
     upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
+    upper_action_decoder_mode: str = "hold",
     lower_lf_alpha: float = 0.04,
     lower_lf_rms_budget: float = 0.05,
     leakage_constraint_scope: str = "responsibility",
@@ -1140,6 +1163,8 @@ def rollout_hierarchical(
         raise ValueError("unknown MuJoCo leakage constraint cost mode")
     if str(lower_action_router_mode) not in LOWER_ACTION_ROUTER_MODES:
         raise ValueError("unknown MuJoCo lower-action router mode")
+    if str(upper_action_decoder_mode) not in UPPER_ACTION_DECODER_MODES:
+        raise ValueError("unknown MuJoCo upper-action decoder mode")
     if not 0.0 < float(lower_action_router_alpha) <= 1.0:
         raise ValueError("MuJoCo lower-action router alpha must be in (0, 1]")
     if not 0.0 <= float(lower_action_router_strength) <= 1.0:
@@ -1189,8 +1214,11 @@ def rollout_hierarchical(
             strength=float(lower_action_router_strength),
             upper_rms_budget=float(upper_hf_rms_budget),
             lower_rms_budget=float(lower_lf_rms_budget),
+            macro_steps=int(upper_period),
         )
         lower_router.reset(action_dim)
+        upper_plan = CausalSmoothstepMacroPlan(macro_steps=int(upper_period))
+        upper_plan.reset(action_dim)
         responsibility_lf_tracker = CausalRollingBandTracker(window=32)
         responsibility_lf_tracker.reset(action_dim)
         raw_lower_lf_tracker = CausalRollingBandTracker(window=32)
@@ -1230,6 +1258,9 @@ def rollout_hierarchical(
         lower_router_clip_values: list[float] = []
         lower_router_audit_alphas: list[float] = []
         lower_router_audit_imbalances: list[float] = []
+        lower_router_macro_projection_rates: list[float] = []
+        lower_router_macro_debt_rms_values: list[float] = []
+        lower_router_macro_completion_errors: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
         transfer_saturation_values: list[float] = []
@@ -1301,13 +1332,19 @@ def rollout_hierarchical(
                 upper_assignment = responsibility.begin_macro(
                     upper_policy_action
                 )
-                upper_anchor = np.asarray(
+                upper_target = np.asarray(
                     upper_assignment["upper_responsibility"],
                     dtype=np.float32,
                 )
+                upper_anchor = (
+                    upper_plan.activate(upper_target)
+                    if str(upper_action_decoder_mode)
+                    == "causal_smoothstep_plan"
+                    else upper_target.copy()
+                )
                 upper_transition_power = (
                     float(np.mean(np.square(
-                        np.asarray(upper_anchor, dtype=np.float64)
+                        np.asarray(upper_target, dtype=np.float64)
                         - np.asarray(previous_upper_anchor, dtype=np.float64)
                     )))
                     if has_previous_upper_anchor else 0.0
@@ -1315,7 +1352,7 @@ def rollout_hierarchical(
                 upper_transition_delta_rms_values.append(float(
                     np.sqrt(upper_transition_power)
                 ))
-                previous_upper_anchor = upper_anchor.copy()
+                previous_upper_anchor = upper_target.copy()
                 has_previous_upper_anchor = True
                 current_requested_transfer = np.asarray(
                     upper_assignment["requested_transfer"],
@@ -1333,11 +1370,18 @@ def rollout_hierarchical(
                 upper_decisions += 1
                 steps_since_upper = 0
                 require_upper = False
+            elif str(upper_action_decoder_mode) == "causal_smoothstep_plan":
+                upper_anchor = upper_plan.advance()
 
             lower_state = _feature_state(
                 observation,
                 bands,
-                upper_policy_action,
+                (
+                    upper_anchor
+                    if str(upper_action_decoder_mode)
+                    == "causal_smoothstep_plan"
+                    else upper_policy_action
+                ),
                 filter_contexts=actor_filter_contexts(),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
@@ -1404,8 +1448,13 @@ def rollout_hierarchical(
             # Use the pre-split canonical sum once. In conservative mode this
             # is exactly the direct-policy action, while the reported upper and
             # lower responsibilities reconstruct it independently.
+            execution_upper_action = (
+                upper_anchor
+                if str(upper_action_decoder_mode) == "causal_smoothstep_plan"
+                else upper_policy_action
+            )
             nominal = np.clip(
-                upper_policy_action + canonical_lower_action, -1.0, 1.0
+                execution_upper_action + canonical_lower_action, -1.0, 1.0
             )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
@@ -1547,6 +1596,15 @@ def rollout_hierarchical(
             lower_router_audit_imbalances.append(float(
                 routed_lower["audit_normalized_band_imbalance"]
             ))
+            lower_router_macro_projection_rates.append(float(
+                routed_lower["macro_projection_rate"]
+            ))
+            lower_router_macro_debt_rms_values.append(float(
+                routed_lower["macro_debt_rms"]
+            ))
+            lower_router_macro_completion_errors.append(float(
+                routed_lower["macro_completion_error_rms"]
+            ))
             responsibility_transfers.append(np.asarray(
                 responsibility.effective_transfer + router_upper_transfer,
                 dtype=np.float32,
@@ -1558,7 +1616,7 @@ def rollout_hierarchical(
             reconstruction_errors.append(
                 np.asarray(effective_upper_action, dtype=np.float64)
                 + np.asarray(lower_residual, dtype=np.float64)
-                - np.asarray(upper_policy_action, dtype=np.float64)
+                - np.asarray(execution_upper_action, dtype=np.float64)
                 - np.asarray(canonical_lower_action, dtype=np.float64)
             )
             forward_rewards.append(float(info.get("reward_forward", 0.0)))
@@ -1608,10 +1666,25 @@ def rollout_hierarchical(
                             ],
                             dtype=np.float32,
                         )
+                    next_execution_upper = (
+                        (
+                            upper_plan.target
+                            if steps_since_upper >= int(upper_period)
+                            else upper_plan.peek_advance()
+                        )
+                        if str(upper_action_decoder_mode)
+                        == "causal_smoothstep_plan"
+                        else next_upper_anchor
+                    )
                     next_lower_state = _feature_state(
                         next_observation,
                         next_bands,
-                        next_upper_policy_action,
+                        (
+                            next_execution_upper
+                            if str(upper_action_decoder_mode)
+                            == "causal_smoothstep_plan"
+                            else next_upper_policy_action
+                        ),
                         filter_contexts=actor_filter_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
@@ -1625,7 +1698,7 @@ def rollout_hierarchical(
                     next_lower_cost_state = _feature_state(
                         next_observation,
                         next_bands,
-                        next_upper_anchor,
+                        next_execution_upper,
                         filter_contexts=cost_filter_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
@@ -1671,6 +1744,7 @@ def rollout_hierarchical(
                 )
                 responsibility.reset(action_dim)
                 lower_router.reset(action_dim)
+                upper_plan.reset(action_dim)
                 responsibility_lf_tracker.reset(action_dim)
                 raw_lower_lf_tracker.reset(action_dim)
                 latent_lower_lf_tracker.reset(action_dim)
@@ -1733,6 +1807,15 @@ def rollout_hierarchical(
             lower_router_clip_values=lower_router_clip_values,
             lower_router_audit_alphas=lower_router_audit_alphas,
             lower_router_audit_imbalances=lower_router_audit_imbalances,
+            lower_router_macro_projection_rates=(
+                lower_router_macro_projection_rates
+            ),
+            lower_router_macro_debt_rms_values=(
+                lower_router_macro_debt_rms_values
+            ),
+            lower_router_macro_completion_errors=(
+                lower_router_macro_completion_errors
+            ),
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
             transfer_saturation_values=transfer_saturation_values,
@@ -1962,6 +2045,9 @@ def rollout_flat(
             lower_router_clip_values=[0.0 for _ in rewards],
             lower_router_audit_alphas=[0.0 for _ in rewards],
             lower_router_audit_imbalances=[0.0 for _ in rewards],
+            lower_router_macro_projection_rates=[0.0 for _ in rewards],
+            lower_router_macro_debt_rms_values=[0.0 for _ in rewards],
+            lower_router_macro_completion_errors=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
             transfer_saturation_values=[0.0 for _ in rewards],
@@ -2031,6 +2117,9 @@ SUMMARY_KEYS = [
     "LowerRouterAuditAlphaMean",
     "LowerRouterAuditAlphaFinal",
     "LowerRouterAuditBandImbalanceMean",
+    "LowerRouterMacroProjectionRate",
+    "LowerRouterMacroDebtRMSMean",
+    "LowerRouterMacroCompletionErrorMax",
     "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
@@ -3386,6 +3475,7 @@ def train_mujoco_method(
     evaluation_disturbance_modes: Iterable[str] | None = None,
     upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
+    upper_action_decoder_mode: str = "hold",
     responsibility_mode: str = "additive",
     leakage_constraint_scope: str = "joint_behavior",
     upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
@@ -3455,6 +3545,8 @@ def train_mujoco_method(
     name = str(method)
     if name not in METHODS:
         raise ValueError(f"unknown MuJoCo method: {name}")
+    if str(upper_action_decoder_mode) not in UPPER_ACTION_DECODER_MODES:
+        raise ValueError("unknown MuJoCo upper-action decoder mode")
     if not isinstance(deployment_frequency_closed_loop_trust_region, bool):
         raise ValueError(
             "MuJoCo deployment-frequency closed-loop trust-region flag "
@@ -3595,7 +3687,12 @@ def train_mujoco_method(
             "constraints"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V17
+        if (
+            str(upper_action_decoder_mode) == "causal_smoothstep_plan"
+            or str(lower_action_router_mode) == "causal_macro_zero_dc"
+        )
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2
         if str(lower_action_router_mode) == "causal_macro_hold_audit_gauge"
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17
         if (
@@ -3617,6 +3714,12 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V17}
+    ):
+        raise ValueError("v17 mechanisms cannot use an earlier protocol label")
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2
         and selected_protocol_version
@@ -3964,6 +4067,20 @@ def train_mujoco_method(
         not in LOWER_ACTION_ROUTER_TRAINING_SCHEDULES
     ):
         raise ValueError("unknown lower-action router training schedule")
+    if str(lower_action_router_mode) == "causal_macro_zero_dc" and (
+        float(lower_action_router_strength) != 1.0
+        or str(lower_action_router_training_schedule) != "constant"
+        or float(lower_action_router_warmup_fraction) != 0.0
+        or float(lower_action_router_ramp_fraction) != 0.0
+    ):
+        raise ValueError(
+            "zero-DC lower routing requires a full-strength constant schedule"
+        )
+    if (
+        str(upper_action_decoder_mode) != "hold"
+        and not name.startswith("freq_hrl")
+    ):
+        raise ValueError("the smooth upper plan requires a Freq-HRL policy")
     if (
         not np.isfinite(float(lower_action_router_warmup_fraction))
         or not np.isfinite(float(lower_action_router_ramp_fraction))
@@ -4480,6 +4597,7 @@ def train_mujoco_method(
                     lower_action_router_observe_strength=(
                         effective_router_observe_strength
                     ),
+                    upper_action_decoder_mode=upper_action_decoder_mode,
                     sample=sample,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -4545,6 +4663,7 @@ def train_mujoco_method(
                         lower_action_router_observe_strength=(
                             effective_router_observe_strength
                         ),
+                        upper_action_decoder_mode=upper_action_decoder_mode,
                         sample=False,
                         method=name,
                         episode_horizon=episode_horizon,
@@ -4900,6 +5019,7 @@ def train_mujoco_method(
                 lower_action_router_observe_strength=(
                     effective_router_observe_strength
                 ),
+                upper_action_decoder_mode=upper_action_decoder_mode,
                 sample=sample,
                 collect_trajectory=collect_trajectory,
                 method=name,
@@ -5162,6 +5282,7 @@ def train_mujoco_method(
                     lower_action_router_observe_strength=(
                         effective_router_observe_strength
                     ),
+                    upper_action_decoder_mode=upper_action_decoder_mode,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -5520,6 +5641,12 @@ def train_mujoco_method(
         ),
         "upper_action_scale": float(upper_action_scale),
         "lower_action_scale": float(lower_action_scale),
+        "upper_action_decoder_mode": str(upper_action_decoder_mode),
+        "upper_action_decoder_contract": (
+            "boundary_sampled_c1_smoothstep_primitive_execution_v1"
+            if str(upper_action_decoder_mode) == "causal_smoothstep_plan"
+            else "macro_target_zero_order_hold_v1"
+        ),
         "lower_action_router_mode": effective_lower_action_router_mode,
         "lower_action_router_alpha": float(lower_action_router_alpha),
         "lower_action_router_strength": float(
@@ -5783,6 +5910,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--upper-action-scale", type=float, default=1.0)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--upper-action-decoder-mode",
+        choices=UPPER_ACTION_DECODER_MODES,
+        default="hold",
+    )
     parser.add_argument(
         "--responsibility-mode",
         choices=RESPONSIBILITY_MODES,
@@ -6096,6 +6228,7 @@ def main() -> None:
         evaluation_disturbance_modes=args.evaluation_disturbance_modes,
         upper_action_scale=args.upper_action_scale,
         lower_action_scale=args.lower_action_scale,
+        upper_action_decoder_mode=args.upper_action_decoder_mode,
         responsibility_mode=args.responsibility_mode,
         lower_action_router_mode=args.lower_action_router_mode,
         lower_action_router_alpha=args.lower_action_router_alpha,

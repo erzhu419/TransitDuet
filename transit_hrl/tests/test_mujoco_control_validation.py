@@ -20,6 +20,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -122,11 +123,20 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 lower_action_router_mode="causal_macro_hold_audit_gauge",
                 **common,
             )
+        with self.assertRaisesRegex(ValueError, "v17 mechanisms"):
+            train_mujoco_method(
+                lower_action_router_mode="causal_macro_zero_dc",
+                upper_action_decoder_mode="causal_smoothstep_plan",
+                **common,
+            )
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17.endswith(
             "native_pd_cvar"
         ))
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2.endswith(
             "macro_hold_gauge"
+        ))
+        self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V17.endswith(
+            "zero_dc_plan"
         ))
 
     @staticmethod
@@ -1231,6 +1241,68 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertLessEqual(
             projected["ResponsibilityReconstructionRMS"], 1e-7
         )
+
+    def test_zero_dc_plan_changes_behavior_and_enforces_raw_frequency_roles(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=128
+        )
+        torch.manual_seed(1701)
+        np.random.seed(1701)
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=16,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=1709,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=128,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            responsibility_mode="additive",
+            lower_action_router_alpha=0.04,
+            lower_action_router_observe_strength=False,
+            upper_constraint_mode="disabled",
+            sample=False,
+            episode_horizon=128,
+        )
+        _, control = rollout_hierarchical(
+            model,
+            lower_action_router_mode="direct",
+            lower_action_router_strength=1.0,
+            upper_action_decoder_mode="hold",
+            **common,
+        )
+        _, constrained = rollout_hierarchical(
+            model,
+            lower_action_router_mode="causal_macro_zero_dc",
+            lower_action_router_strength=1.0,
+            upper_action_decoder_mode="causal_smoothstep_plan",
+            **common,
+        )
+
+        self.assertNotEqual(
+            control["ExecutedActionTraceSHA256"],
+            constrained["ExecutedActionTraceSHA256"],
+        )
+        self.assertGreater(
+            constrained["LowerRouterMacroProjectionRate"], 0.0
+        )
+        self.assertLessEqual(
+            constrained["LowerRouterMacroCompletionErrorMax"], 1e-7
+        )
+        self.assertLess(
+            constrained["UpperHFPowerAbs"], control["UpperHFPowerAbs"]
+        )
+        self.assertLess(
+            constrained["RawLowerLFDriftAbs"],
+            control["RawLowerLFDriftAbs"],
+        )
+        self.assertEqual(constrained["protocol_valid"], 1.0)
 
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
         observation_dim, action_dim = environment_dimensions(

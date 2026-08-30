@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from ...core.action_decoders import CausalZeroDCMacroProjector
 from ...core.responsibility_gauge import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
@@ -34,6 +35,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
+    "causal_macro_zero_dc",
 )
 
 LOWER_ACTION_ROUTER_CONTRACTS = {
@@ -61,6 +63,10 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
     "causal_macro_hold_audit_gauge": (
         "causal_total_action_gauge_fixed_at_upper_macro_boundaries_with_"
         "adaptive_lpf32_hpf8_feedback_and_exact_pre_split_action_execution_v1"
+    ),
+    "causal_macro_zero_dc": (
+        "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
+        "upper_macro_interval_v1"
     ),
 }
 
@@ -279,6 +285,7 @@ class CausalLowerActionRouter:
     upper_rms_budget: float = 0.075
     lower_rms_budget: float = 0.0475
     audit_adaptation_rate: float = 0.03
+    macro_steps: int = 16
 
     def __post_init__(self) -> None:
         if str(self.mode) not in LOWER_ACTION_ROUTER_MODES:
@@ -307,6 +314,11 @@ class CausalLowerActionRouter:
         self.upper_rms_budget = float(self.upper_rms_budget)
         self.lower_rms_budget = float(self.lower_rms_budget)
         self.audit_adaptation_rate = float(self.audit_adaptation_rate)
+        self.macro_steps = int(self.macro_steps)
+        if self.macro_steps < 2:
+            raise ValueError("lower-action router macro_steps must be at least two")
+        if self.mode == "causal_macro_zero_dc" and self.strength != 1.0:
+            raise ValueError("zero-DC lower routing requires full strength")
         self._baseline: np.ndarray | None = None
         self._previous_effective: np.ndarray | None = None
         self._joint_upper_history: list[np.ndarray] = []
@@ -317,6 +329,7 @@ class CausalLowerActionRouter:
             | CausalMacroHoldAuditGaugeFixer
             | None
         ) = None
+        self._zero_dc_projector: CausalZeroDCMacroProjector | None = None
 
     def reset(self, action_dim: int) -> None:
         if int(action_dim) < 1:
@@ -326,6 +339,7 @@ class CausalLowerActionRouter:
         self._previous_effective = zeros.copy()
         self._joint_upper_history = []
         self._joint_lower_history = []
+        self._zero_dc_projector = None
         if self.mode == "causal_total_action_gauge":
             self._gauge_fixer = CausalGaugeFixer(
                 alpha=self.alpha, strength=self.strength
@@ -350,16 +364,25 @@ class CausalLowerActionRouter:
                 adaptation_rate=self.audit_adaptation_rate,
                 strength=self.strength,
             )
+        elif self.mode == "causal_macro_zero_dc":
+            self._gauge_fixer = None
+            self._zero_dc_projector = CausalZeroDCMacroProjector(
+                macro_steps=self.macro_steps
+            )
         else:
             self._gauge_fixer = None
         if self._gauge_fixer is not None:
             self._gauge_fixer.reset(int(action_dim))
+        if self._zero_dc_projector is not None:
+            self._zero_dc_projector.reset(int(action_dim))
 
     @property
     def context(self) -> np.ndarray:
         self._require_reset()
         if self._gauge_fixer is not None:
             return self._gauge_fixer.context
+        if self._zero_dc_projector is not None:
+            return self._zero_dc_projector.context
         value = (
             self._previous_effective
             if self.mode == "direct"
@@ -390,6 +413,10 @@ class CausalLowerActionRouter:
         audit_alpha_before = 0.0
         audit_alpha_after = 0.0
         audit_band_imbalance = 0.0
+        macro_projection_rate = 0.0
+        macro_debt_rms = 0.0
+        macro_completed = 0.0
+        macro_completion_error_rms = 0.0
         if self.mode in {
             "causal_joint_band_projection",
             "causal_total_action_gauge",
@@ -455,11 +482,29 @@ class CausalLowerActionRouter:
                     "upper_action is only valid for joint-band projection"
                 )
             upper = np.zeros_like(latent)
-            requested = (
-                latent
-                if self.mode == "direct"
-                else latent - self.strength * baseline_before
-            )
+            if self.mode == "causal_macro_zero_dc":
+                if self._zero_dc_projector is None:
+                    raise RuntimeError("zero-DC lower router is not initialized")
+                projected = self._zero_dc_projector.project(
+                    latent,
+                    macro_boundary=bool(macro_boundary),
+                    action_limit=limit,
+                )
+                requested = np.asarray(projected["effective"], dtype=np.float64)
+                macro_projection_rate = float(projected["projection_rate"])
+                macro_debt_rms = float(np.sqrt(np.mean(np.square(
+                    projected["debt_after"]
+                ))))
+                macro_completed = float(projected["macro_completed"])
+                macro_completion_error_rms = float(
+                    projected["macro_completion_error_rms"]
+                )
+            else:
+                requested = (
+                    latent
+                    if self.mode == "direct"
+                    else latent - self.strength * baseline_before
+                )
         effective = np.clip(requested, -limit, limit)
         clipped = np.abs(effective - requested) > 1e-12
         if self.mode == "causal_joint_band_projection":
@@ -473,6 +518,12 @@ class CausalLowerActionRouter:
                 raise RuntimeError("total-action gauge router is not initialized")
             self._baseline = np.asarray(
                 self._gauge_fixer.context, dtype=np.float64
+            )
+        elif self.mode == "causal_macro_zero_dc":
+            if self._zero_dc_projector is None:
+                raise RuntimeError("zero-DC lower router is not initialized")
+            self._baseline = np.asarray(
+                self._zero_dc_projector.context, dtype=np.float64
             )
         elif self.mode != "direct":
             self._baseline += self.alpha * (latent - self._baseline)
@@ -504,6 +555,10 @@ class CausalLowerActionRouter:
             "audit_alpha_before": audit_alpha_before,
             "audit_alpha_after": audit_alpha_after,
             "audit_normalized_band_imbalance": audit_band_imbalance,
+            "macro_projection_rate": macro_projection_rate,
+            "macro_debt_rms": macro_debt_rms,
+            "macro_completed": macro_completed,
+            "macro_completion_error_rms": macro_completion_error_rms,
         }
 
     def _require_reset(self) -> None:

@@ -1,5 +1,9 @@
 """Core domain-agnostic Freq-HRL interfaces and utilities."""
 
+from .action_decoders import (
+    CausalSmoothstepMacroPlan,
+    CausalZeroDCMacroProjector,
+)
 from .diagnostics import FrequencyDiagnostics, binned_mutual_information
 from .leakage import (
     ActionEffectOperator,
@@ -49,6 +53,8 @@ __all__ = [
     "CausalMacroHoldAuditGaugeFixer",
     "CausalLowFrequencyEffectProjector",
     "CausalRollingBandTracker",
+    "CausalSmoothstepMacroPlan",
+    "CausalZeroDCMacroProjector",
     "CumulativeActionEffectOperator",
     "ExogenousBin",
     "FrequencyDiagnostics",

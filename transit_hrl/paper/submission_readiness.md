@@ -60,6 +60,14 @@ line:
    three environments in development. A per-environment post-hoc mechanism is
    insufficient for the domain-general claim.
 
+The v16--v16.2 development sequence has now tested this route and bounded it.
+Primitive adaptive gauge fixing improved joint normalized frequency merit but
+violated the upper temporal contract; macro-held gauge fixing passed all gates
+in only 2 of 9 cells and failed structurally in HalfCheetah. The next active
+line is therefore v17: a boundary-sampled smooth upper action plan combined
+with a causal lower zero-DC macro projector. Unlike the gauge studies, v17
+changes plant actions and must earn its own reward and raw-separation evidence.
+
 This directly targets the v15 failure modes: HalfCheetah requires stable lower
 compensation under an upper change, while Walker requires substantially stronger
 upper smoothing without reintroducing lower drift.
