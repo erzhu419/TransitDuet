@@ -534,7 +534,7 @@ def runtime_identity() -> dict[str, str]:
     if subprocess.run(
         ["git", "-C", str(git_root), "diff", "--quiet", "HEAD", "--", *relatives]
     ).returncode != 0:
-        raise RuntimeError("v14.15 screen launcher/spec do not match HEAD")
+        raise RuntimeError("MuJoCo screen launcher/spec do not match HEAD")
     return {
         "runtime_revision": revision,
         "launcher_sha256": _sha256(LAUNCHER_PATH),
@@ -1206,7 +1206,7 @@ def _write_preregistration(args: argparse.Namespace) -> None:
         })
     rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if path.exists() and path.read_text(encoding="utf-8") != rendered:
-        raise RuntimeError("existing v14.15 preregistration differs")
+        raise RuntimeError("existing MuJoCo screen preregistration differs")
     path.write_text(rendered, encoding="utf-8")
 
 
@@ -1216,7 +1216,7 @@ def _read_cell(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]], list[d
     with (path / "evaluation_rows.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     if not isinstance(summary, dict) or not isinstance(history, list) or not history:
-        raise SystemExit(f"v14.15 cell payload is invalid: {path}")
+        raise SystemExit(f"MuJoCo screen cell payload is invalid: {path}")
     return summary, history, rows
 
 
@@ -1229,14 +1229,14 @@ def merge_results(args: argparse.Namespace) -> None:
         / "run_scoped_result_sync.json"
     )
     if not sync_manifest_path.is_file():
-        raise SystemExit("v14.15 merge requires run-scoped result sync")
+        raise SystemExit("MuJoCo screen merge requires run-scoped result sync")
     sync_manifest = json.loads(sync_manifest_path.read_text(encoding="utf-8"))
     if (
         sync_manifest.get("status") != "run_scoped_result_sync_complete"
         or int(sync_manifest.get("cell_count", -1)) != len(tasks)
         or len(sync_manifest.get("task_ids", [])) != len(tasks)
     ):
-        raise SystemExit("v14.15 run-scoped result sync manifest is invalid")
+        raise SystemExit("MuJoCo run-scoped result sync manifest is invalid")
     expected = [
         (
             phase,
@@ -1259,7 +1259,7 @@ def merge_results(args: argparse.Namespace) -> None:
     ]
     if missing:
         raise SystemExit(
-            f"cannot merge v14.15 screen: {len(missing)} cells missing; first={missing[0]}"
+            f"cannot merge MuJoCo screen: {len(missing)} cells missing; first={missing[0]}"
         )
     expected_selection_paths = (
         len(spec.CONTINUATION_SELECTION_SEEDS)
@@ -1901,7 +1901,7 @@ def merge_results(args: argparse.Namespace) -> None:
             ),
         })
     if issues:
-        raise SystemExit("v14.15 screen merge failed: " + ",".join(issues[:20]))
+        raise SystemExit("MuJoCo screen merge failed: " + ",".join(issues[:20]))
     output = ROOT / "results" / args.run_name / "merged"
     output.mkdir(parents=True, exist_ok=True)
     full_scope = bool(
@@ -1932,7 +1932,7 @@ def merge_results(args: argparse.Namespace) -> None:
         "cell_count": len(cells),
         "cells": cells,
     }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"merged {len(cells)} frozen MuJoCo v14.15 cells")
+    print(f"merged {len(cells)} frozen MuJoCo screen cells")
 
 
 def _scheduler_attempt_audit_row(task: dict[str, Any]) -> dict[str, Any]:
@@ -2028,7 +2028,7 @@ def _scheduler_tasks_for_run(
             time.sleep(float(attempt))
     if completed is None or completed.returncode != 0:
         raise RuntimeError(
-            "v14.15 scheduler snapshot failed after three attempts: "
+            "MuJoCo scheduler snapshot failed after three attempts: "
             + str((completed.stderr if completed else "")[-500:])
         )
     payloads: list[tuple[str, dict[str, Any]]] = [
@@ -2093,10 +2093,10 @@ def sync_results(args: argparse.Namespace) -> None:
         )
         task = scheduler_tasks.get(signature)
         if task is None:
-            raise SystemExit(f"v14.15 sync task missing: {signature}")
+            raise SystemExit(f"MuJoCo sync task missing: {signature}")
         if task.get("status") != "done" or not task.get("node"):
             raise SystemExit(
-                f"v14.15 sync task is not done: {task.get('id')} "
+                f"MuJoCo sync task is not done: {task.get('id')} "
                 f"status={task.get('status')}"
             )
         path = ROOT / task_relative_dir(
@@ -2149,7 +2149,7 @@ def sync_results(args: argparse.Namespace) -> None:
     if pending:
         signature, path, _ = pending[0]
         raise SystemExit(
-            "v14.15 result sync incomplete: "
+            "MuJoCo result sync incomplete: "
             f"{len(pending)} cells; first={signature}; path={path}; "
             f"error={errors.get(signature, 'missing required files')}"
         )
@@ -2185,13 +2185,18 @@ def sync_results(args: argparse.Namespace) -> None:
         encoding="utf-8",
     )
     print(
-        f"synced {len(expected)} MuJoCo v14.15 cells with "
+        f"synced {len(expected)} MuJoCo screen cells with "
         f"{int(args.sync_workers)} workers"
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=(
+            f"Submit frozen {spec.DEVELOPMENT_PROTOCOL_VERSION} through "
+            "scheduleurm."
+        )
+    )
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--arms", default=",".join(spec.ARMS))
     parser.add_argument("--phases", default=",".join(PHASES))
@@ -2240,29 +2245,29 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
             int(seed) for seed in parse_csv(args.optimizer_seeds)
         ]
     except ValueError as exc:
-        raise SystemExit("invalid v14.15 optimizer seed subset") from exc
+        raise SystemExit("invalid MuJoCo optimizer seed subset") from exc
     if not args.arms or not set(args.arms).issubset(spec.ARMS):
-        raise SystemExit("invalid v14.15 screen arm registry")
+        raise SystemExit("invalid MuJoCo screen arm registry")
     if not args.phases or not set(args.phases).issubset(PHASES):
-        raise SystemExit("invalid v14.15 screen phase registry")
+        raise SystemExit("invalid MuJoCo screen phase registry")
     if (
         not args.environments
         or not set(args.environments).issubset(spec.ENVIRONMENTS)
     ):
-        raise SystemExit("invalid v14.15 environment subset")
+        raise SystemExit("invalid MuJoCo environment subset")
     if (
         not args.optimizer_seeds
         or not set(args.optimizer_seeds).issubset(spec.OPTIMIZER_SEEDS)
         or len(args.optimizer_seeds) != len(set(args.optimizer_seeds))
     ):
-        raise SystemExit("invalid v14.15 optimizer seed subset")
+        raise SystemExit("invalid MuJoCo optimizer seed subset")
     unknown_nodes = sorted(set(args.nodes) - set(LINUX_CPU_NODES))
     if unknown_nodes:
-        raise SystemExit(f"invalid v14.15 screen nodes: {unknown_nodes}")
+        raise SystemExit(f"invalid MuJoCo screen nodes: {unknown_nodes}")
     if not args.python_executable.strip():
         args.python_executable = default_python_executable(args.nodes)
     if not 1 <= int(args.sync_workers) <= 8:
-        raise SystemExit("v14.15 sync workers must be in [1, 8]")
+        raise SystemExit("MuJoCo sync workers must be in [1, 8]")
     if bool(args.fixed_candidate_multiseed):
         if args.run_name == multiseed_spec.INVALIDATED_PREDECESSOR_RUN:
             raise SystemExit("multiseed profile cannot reuse the invalidated r1 run")
@@ -2297,7 +2302,7 @@ def main() -> None:
         revision != frozen_revision
         or manifest != frozen_manifest
     ):
-        raise SystemExit("v14.15 frozen algorithm identity mismatch")
+        raise SystemExit("MuJoCo frozen algorithm identity mismatch")
     _write_preregistration(args)
     cells = selected_experiment_cells(args)
     if args.skip_complete_cells:
@@ -2314,7 +2319,7 @@ def main() -> None:
             ).is_file()
         ]
     if not cells:
-        print("no v14.15 screen cells require submission")
+        print("no MuJoCo screen cells require submission")
         return
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)}",
@@ -2330,7 +2335,7 @@ def main() -> None:
         )
         for phase, environment, arm, seed in cells
     ], dry_run=bool(args.dry_run), intent_label=(
-        f"Freq-HRL MuJoCo v14.15 closed-loop restoration-filter screen {args.run_name}"
+        f"Freq-HRL {spec.DEVELOPMENT_PROTOCOL_VERSION} {args.run_name}"
     ))
     if args.dispatch and not args.dry_run:
         execute([sys.executable, str(SCHEDULER), "dispatch"], dry_run=False)
