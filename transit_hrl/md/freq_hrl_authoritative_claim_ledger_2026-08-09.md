@@ -34,6 +34,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v16_2_macro_hold_gauge_development | mujoco_control | development | macro_hold_gauge_screen_not_supported | development_only | false |
 | mujoco_v17_zero_dc_plan_development | mujoco_control | development | zero_dc_plan_screen_not_supported | development_only | false |
 | mujoco_v17_1_headroom_homotopy_development | mujoco_control | development | headroom_homotopy_preflight_not_supported | development_only | false |
+| mujoco_v17_2_smooth_macro_gauge_development | mujoco_control | development | smooth_macro_gauge_preflight_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -206,6 +207,12 @@ Forbidden: The v17 development screen validates reward no-tradeoff, cross-enviro
 In a frozen three-environment, one-optimizer-seed development preflight, every v17.1 candidate enforced the complete-macro zero-DC invariant, exactly reconstructed the registered responsibility sum, and reduced raw lower-LF power relative to smooth direct control and its own latent proposal. No candidate met the reward floor in more than one environment, so no arm advanced to fresh multiseed evaluation.
 
 Forbidden: The v17.1 development preflight validates reward no-tradeoff, cross-environment upper/lower frequency separation, exact plant-level headroom after float32 execution, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v17_2_smooth_macro_gauge_development
+
+In a frozen three-environment paired development preflight, gauge strengths zero and one exactly matched reward, executed-action, and latent-policy traces on all 360 paired paths, validating pathwise function preservation. No alpha achieved the registered lower-LPF32 or joint-merit reduction in any environment, so the naive EMA-target smooth macro gauge was rejected without multiseed expansion.
+
+Forbidden: The v17.2 development preflight validates frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

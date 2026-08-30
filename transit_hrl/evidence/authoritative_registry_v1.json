@@ -877,6 +877,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_2_smooth_macro_gauge_development",
+      "claim_id": "D25_SMOOTH_MACRO_GAUGE",
+      "claim": "A causal endpoint-exact smooth macro gauge yields cross-environment upper/lower frequency responsibility separation while preserving the frozen control path.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "smooth_macro_gauge_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "one_fresh_optimizer_seed_three_alpha_values_nine_training_cells_and_three_hundred_sixty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_2_smooth_macro_gauge",
+      "allowed_wording": "In a frozen three-environment paired development preflight, gauge strengths zero and one exactly matched reward, executed-action, and latent-policy traces on all 360 paired paths, validating pathwise function preservation. No alpha achieved the registered lower-LPF32 or joint-merit reduction in any environment, so the naive EMA-target smooth macro gauge was rejected without multiseed expansion.",
+      "forbidden_wording": "The v17.2 development preflight validates frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_2_smooth_macro_gauge_development.json",
+          "sha256": "25be885102a9e4b03fed079de12d71fe0d97a25da221a84c24a2e4fb26313060"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_2_smooth_macro_gauge_outcome_2026-08-31.md",
+          "sha256": "e5ed72b25409a5ce568b0d1aa319a1cee2b7b546120ade63df1b8e0abf5c2511"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

@@ -428,9 +428,17 @@ development preflights attempted causal output-head distillation, bounded
 distillation, and a multi-source teacher. Only Hopper passed each joint
 development gate; HalfCheetah and Walker2d did not support expansion. These
 outcomes are excluded from confirmatory claims, but they reject a larger search
-over the same post-hoc output-head mechanism. The next learned-policy experiment
-must impose the gauge during training and evaluate raw behavior and return on
-fresh optimizer seeds.
+over the same post-hoc output-head mechanism. The registered v16--v17.2
+development sequence then tested training-time EMA, audit-adaptive, macro-hold,
+zero-DC, headroom-homotopy, and smooth-macro gauges. No design met its frozen
+cross-environment expansion rule. Most diagnostically, v17.2 exactly preserved
+reward, executed-action, and latent-policy traces on all 360 paired paths, yet
+no tested smoothing coefficient reduced the registered lower-LPF32 or joint
+frequency merit in any environment. This rejects the naive causal EMA-target
+smooth gauge as a leakage solution, despite its exact function preservation.
+The next learned-policy experiment must optimize the registered finite-horizon
+frequency objective causally during training and evaluate raw behavior and
+return on fresh optimizer seeds.
 
 ### 7.3 Negative results define the claim boundary
 
@@ -448,8 +456,9 @@ modes and validation roots. The validation paths nested within a seed are not
 independent replicates. Second, most successful transactions were
 function-preserving routers; they do not demonstrate physical control
 improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks, and the v15 distillation sequence used only one development
-optimizer seed. Fourth, Quant is a synthetic time-series control environment and
+MuJoCo tasks, and the v15--v17.2 follow-ups remain development-only; several
+used only one development optimizer seed. Fourth, Quant is a synthetic
+time-series control environment and
 contains one supported performance harm. Fifth, Transit, public passenger data,
 and order-book adapters exist in the repository but currently lack reportable
 records in the authoritative ledger and are therefore excluded from the paper's

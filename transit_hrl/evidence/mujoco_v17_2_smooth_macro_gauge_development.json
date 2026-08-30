@@ -1,0 +1,94 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_2_smooth_macro_gauge_development_v1",
+  "status": "smooth_macro_gauge_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "paired_smooth_macro_gauge_development_not_confirmatory",
+  "source_run": "mujoco_v17_2_smooth_macro_gauge_preflight_20260831_r1",
+  "development_protocol_version": "mujoco_v17_2_smooth_macro_gauge_preflight_v1",
+  "frozen_algorithm_revision": "22b77b5ed820276644e6d512ebff9dd8a6b3fe77",
+  "frozen_source_manifest_sha256": "c7f6a535ff4bd1db0fdf77019882d8d96435e8cead08dc12617a5634fe072b63",
+  "analysis_repair_revision": "8e52f0fc57dcc74958e8d7babf2640e5554c38f0",
+  "optimizer_seed_count": 1,
+  "environment_count": 3,
+  "alpha_count": 3,
+  "training_cell_count": 9,
+  "heldout_path_count_per_intervention": 40,
+  "paired_path_count": 360,
+  "evaluation_row_count": 720,
+  "scheduler_successful_task_count": 9,
+  "scheduler_attempt_count": 9,
+  "scheduler_tasks": [
+    "t85416",
+    "t85417",
+    "t85418",
+    "t85419",
+    "t85420",
+    "t85421",
+    "t85422",
+    "t85423",
+    "t85424"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 9,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "selected_alpha_for_leakage_active_multiseed": null,
+  "paired_mechanics": {
+    "reward_trace_exact_cells": 9,
+    "executed_action_trace_exact_cells": 9,
+    "latent_policy_trace_exact_cells": 9,
+    "reward_numeric_exact_cells": 9,
+    "latent_metrics_exact_cells": 9,
+    "router_reconstruction_exact_cells": 9,
+    "responsibility_reconstruction_exact_cells": 9,
+    "explicit_protocol_structure_valid_cells": 9,
+    "legacy_protocol_invalid_candidate_rows": 2
+  },
+  "alpha_results": {
+    "alpha_005": {
+      "alpha": 0.05,
+      "eligible_for_leakage_active_multiseed": false,
+      "supported_environment_count": 0,
+      "upper_hf_reduction_environment_count": 2,
+      "lower_lf_reduction_environment_count": 0,
+      "joint_merit_reduction_environment_count": 0,
+      "component_projection_bounded_environment_count": 3,
+      "worst_environment_joint_merit_relative_reduction": -1.9197068885840483,
+      "median_joint_merit_relative_reduction": -0.22870312913629576
+    },
+    "alpha_010": {
+      "alpha": 0.1,
+      "eligible_for_leakage_active_multiseed": false,
+      "supported_environment_count": 0,
+      "upper_hf_reduction_environment_count": 1,
+      "lower_lf_reduction_environment_count": 0,
+      "joint_merit_reduction_environment_count": 0,
+      "component_projection_bounded_environment_count": 2,
+      "worst_environment_joint_merit_relative_reduction": -2.0203329019904848,
+      "median_joint_merit_relative_reduction": -1.5128715929051497
+    },
+    "alpha_020": {
+      "alpha": 0.2,
+      "eligible_for_leakage_active_multiseed": false,
+      "supported_environment_count": 0,
+      "upper_hf_reduction_environment_count": 2,
+      "lower_lf_reduction_environment_count": 0,
+      "joint_merit_reduction_environment_count": 0,
+      "component_projection_bounded_environment_count": 3,
+      "worst_environment_joint_merit_relative_reduction": -5.053872750292575,
+      "median_joint_merit_relative_reduction": -1.535431904230654
+    }
+  },
+  "mechanism_findings": {
+    "path_invariance": "All 360 paired development paths exactly matched reward, executed-action, and latent-policy trace hashes at gauge strengths zero and one. All nine cells passed the explicit asynchronous-transition and reconstruction-RMS gates.",
+    "upper_frequency": "The smooth canonical upper coordinate reduced mean upper-HPF8 power in five of nine environment-alpha cells, but every Walker2d alpha increased upper-HPF8 power and Hopper alpha 0.10 also worsened it.",
+    "lower_frequency": "No environment-alpha cell achieved the frozen ten-percent lower-LPF32 reduction. Lower-LF power worsened for every HalfCheetah and Hopper alpha and for two of three Walker2d alphas.",
+    "joint_merit": "No cell achieved the frozen ten-percent normalized joint-merit reduction. Alpha 0.05 was least harmful by the selection criterion but still had a negative median reduction and a worst-environment reduction of -1.92.",
+    "analysis_repair": "The first analysis pass incorrectly required a legacy aggregate protocol_valid flag and classified additive clip excess as a latent metric. The frozen design instead registered transition structure, trace identity, and reconstruction RMS. Revision 8e52f0fc57 recomputed those fields directly, retained the two legacy float32 flag failures as diagnostics, and did not alter any frequency threshold or result.",
+    "decision": "Do not expand the naive EMA-target smooth gauge. The next mechanism must choose a frozen macro curve by directly minimizing the registered causal upper-HPF8 and lower-LPF32 objective under a causal total-action forecast, expose its complete internal state before constraint training, and use fresh development roots."
+  }
+}

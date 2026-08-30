@@ -1,5 +1,5 @@
 {
-  "development_record_count": 24,
+  "development_record_count": 25,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 30,
+  "record_count": 31,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3801,6 +3801,83 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment paired development preflight, gauge strengths zero and one exactly matched reward, executed-action, and latent-policy traces on all 360 paired paths, validating pathwise function preservation. No alpha achieved the registered lower-LPF32 or joint-merit reduction in any environment, so the naive EMA-target smooth macro gauge was rejected without multiseed expansion.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_2_smooth_macro_gauge_development.json",
+          "role": "decision",
+          "sha256": "25be885102a9e4b03fed079de12d71fe0d97a25da221a84c24a2e4fb26313060"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_2_smooth_macro_gauge_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "e5ed72b25409a5ce568b0d1aa319a1cee2b7b546120ade63df1b8e0abf5c2511"
+        }
+      ],
+      "claim": "A causal endpoint-exact smooth macro gauge yields cross-environment upper/lower frequency responsibility separation while preserving the frozen control path.",
+      "claim_id": "D25_SMOOTH_MACRO_GAUGE",
+      "decision": "smooth_macro_gauge_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_2_smooth_macro_gauge_development",
+      "evidence_stage": "development",
+      "facts": {
+        "alpha_count": 3,
+        "decision_status": "smooth_macro_gauge_preflight_not_supported",
+        "environment_count": 3,
+        "frequency_gate_counts": {
+          "alpha_005": {
+            "bounded": 3,
+            "joint": 0,
+            "lower": 0,
+            "upper": 2
+          },
+          "alpha_010": {
+            "bounded": 2,
+            "joint": 0,
+            "lower": 0,
+            "upper": 1
+          },
+          "alpha_020": {
+            "bounded": 3,
+            "joint": 0,
+            "lower": 0,
+            "upper": 2
+          }
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "paired_mechanics": {
+          "executed_action_trace_exact_cells": 9,
+          "explicit_protocol_structure_valid_cells": 9,
+          "latent_metrics_exact_cells": 9,
+          "latent_policy_trace_exact_cells": 9,
+          "legacy_protocol_invalid_candidate_rows": 2,
+          "responsibility_reconstruction_exact_cells": 9,
+          "reward_numeric_exact_cells": 9,
+          "reward_trace_exact_cells": 9,
+          "router_reconstruction_exact_cells": 9
+        },
+        "paired_path_count": 360,
+        "selected_alpha_for_leakage_active_multiseed": null,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 9,
+          "failed": 0
+        },
+        "training_cell_count": 9
+      },
+      "forbidden_wording": "The v17.2 development preflight validates frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_fresh_optimizer_seed_three_alpha_values_nine_training_cells_and_three_hundred_sixty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_2_smooth_macro_gauge",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3859,7 +3936,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "ab423c296fba8e884c7445c3befa9910bda7721d502bdd5729f0e035fea378e3",
+  "registry_sha256": "eb00c522c9da64dc3776d2d3d3fbb563d36f532efe24d398d938172586fde016",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

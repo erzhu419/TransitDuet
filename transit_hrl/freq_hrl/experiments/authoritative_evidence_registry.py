@@ -38,6 +38,9 @@ MUJOCO_V17_ZERO_DC_PLAN_SCHEMA_VERSION = (
 MUJOCO_V17_1_HEADROOM_HOMOTOPY_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_1_headroom_homotopy_development_v1"
 )
+MUJOCO_V17_2_SMOOTH_MACRO_GAUGE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_2_smooth_macro_gauge_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1504,6 +1507,114 @@ def _mujoco_v17_1_headroom_homotopy_facts(
     }
 
 
+def _mujoco_v17_2_smooth_macro_gauge_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    mechanics = dict(decision.get("paired_mechanics") or {})
+    alpha_results = dict(decision.get("alpha_results") or {})
+    expected_frequency_counts = {
+        "alpha_005": {
+            "upper": 2,
+            "lower": 0,
+            "joint": 0,
+            "bounded": 3,
+        },
+        "alpha_010": {
+            "upper": 1,
+            "lower": 0,
+            "joint": 0,
+            "bounded": 2,
+        },
+        "alpha_020": {
+            "upper": 2,
+            "lower": 0,
+            "joint": 0,
+            "bounded": 3,
+        },
+    }
+    valid_alpha_results = bool(
+        set(alpha_results) == set(expected_frequency_counts)
+        and all(
+            row.get("eligible_for_leakage_active_multiseed") is False
+            and int(row.get("supported_environment_count", -1)) == 0
+            and int(row.get("upper_hf_reduction_environment_count", -1))
+            == expected_frequency_counts[name]["upper"]
+            and int(row.get("lower_lf_reduction_environment_count", -1))
+            == expected_frequency_counts[name]["lower"]
+            and int(row.get("joint_merit_reduction_environment_count", -1))
+            == expected_frequency_counts[name]["joint"]
+            and int(
+                row.get("component_projection_bounded_environment_count", -1)
+            ) == expected_frequency_counts[name]["bounded"]
+            for name, row in alpha_results.items()
+        )
+    )
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_2_SMOOTH_MACRO_GAUGE_SCHEMA_VERSION
+        or decision.get("status")
+        != "smooth_macro_gauge_preflight_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "paired_smooth_macro_gauge_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("alpha_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 9
+        or int(decision.get("heldout_path_count_per_intervention", -1)) != 40
+        or int(decision.get("paired_path_count", -1)) != 360
+        or int(decision.get("evaluation_row_count", -1)) != 720
+        or int(decision.get("scheduler_successful_task_count", -1)) != 9
+        or int(decision.get("scheduler_attempt_count", -1)) != 9
+        or len(tasks) != 9
+        or len(set(tasks)) != 9
+        or task_status != {"done": 9, "failed": 0, "cancelled": 0}
+        or decision.get("selected_alpha_for_leakage_active_multiseed")
+        is not None
+        or any(
+            int(mechanics.get(key, -1)) != 9
+            for key in (
+                "reward_trace_exact_cells",
+                "executed_action_trace_exact_cells",
+                "latent_policy_trace_exact_cells",
+                "reward_numeric_exact_cells",
+                "latent_metrics_exact_cells",
+                "router_reconstruction_exact_cells",
+                "responsibility_reconstruction_exact_cells",
+                "explicit_protocol_structure_valid_cells",
+            )
+        )
+        or int(mechanics.get("legacy_protocol_invalid_candidate_rows", -1))
+        != 2
+        or not valid_alpha_results
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or len(str(decision.get("analysis_repair_revision", ""))) != 40
+        or report is None
+        or "`smooth_macro_gauge_preflight_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.2 smooth-macro-gauge decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "alpha_count": 3,
+        "training_cell_count": 9,
+        "paired_path_count": 360,
+        "paired_mechanics": mechanics,
+        "frequency_gate_counts": expected_frequency_counts,
+        "task_status_counts": task_status,
+        "selected_alpha_for_leakage_active_multiseed": None,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1531,6 +1642,9 @@ PARSERS = {
     "mujoco_v17_zero_dc_plan": _mujoco_v17_zero_dc_plan_facts,
     "mujoco_v17_1_headroom_homotopy": (
         _mujoco_v17_1_headroom_homotopy_facts
+    ),
+    "mujoco_v17_2_smooth_macro_gauge": (
+        _mujoco_v17_2_smooth_macro_gauge_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

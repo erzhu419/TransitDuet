@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from freq_hrl.experiments.mujoco import control_validation
 from scripts import mujoco_v17_2_smooth_macro_gauge_preflight_spec as spec
 from scripts.analyze_mujoco_v17_2_smooth_macro_gauge_preflight import analyze
 from scripts.run_mujoco_v17_2_paired_gauge_cell import (
@@ -200,6 +201,17 @@ def test_analysis_supports_only_complete_strict_paired_improvement(tmp_path):
 
 def test_worker_runs_one_real_paired_smoke(monkeypatch):
     pytest.importorskip("gymnasium")
+    monkeypatch.setattr(
+        control_validation,
+        "verify_current_freq_hrl_source_identity",
+        lambda **kwargs: {
+            "code_revision": str(kwargs["code_revision"]),
+            "source_manifest_sha256": str(
+                kwargs["expected_source_manifest_sha256"]
+            ),
+            "source_identity_status": "verified",
+        },
+    )
     monkeypatch.setattr(spec, "STEPS", 16)
     monkeypatch.setattr(spec, "EPISODE_HORIZON", 16)
     monkeypatch.setattr(spec, "ITERATIONS", 1)
