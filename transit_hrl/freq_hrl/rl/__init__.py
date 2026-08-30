@@ -33,6 +33,11 @@ from .deployment_frequency import (
     deployment_frequency_stats,
     deterministic_actor_action,
 )
+from .action_cost_critic import (
+    ActionCostCritic,
+    discounted_smdp_cost_returns,
+    transform_latent_action,
+)
 from .smdp_actor_critic import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     FrequencySeparatedActorCriticPPO,
@@ -94,6 +99,9 @@ __all__ = [
     "concat_joint_batches",
     "concat_level_batches",
     "deployment_frequency_stats",
+    "ActionCostCritic",
+    "discounted_smdp_cost_returns",
+    "transform_latent_action",
     "deterministic_actor_action",
     "summarize_numeric_rows",
     "train_dual_ppo",
