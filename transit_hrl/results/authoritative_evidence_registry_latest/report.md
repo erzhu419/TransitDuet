@@ -44,6 +44,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_10_horizon_reservoir_fir_development | mujoco_control | development | horizon_reservoir_fir_stopped_before_fresh_path_access | development_only | false |
 | mujoco_v17_11_fractional_reservoir_fir_development | mujoco_control | development | fractional_reservoir_fir_stops_router_only_development | development_only | false |
 | mujoco_v17_12_nearest_feasible_action_oracle_development | mujoco_control | development | nearest_feasible_targets_authorize_causal_actor_adapter | development_only | false |
+| mujoco_v17_13_causal_actor_adapter_development | mujoco_control | development | causal_actor_adapter_stops_before_fresh_path_access | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -276,6 +277,12 @@ Forbidden: The v17.11 reused-path fractional reservoir validates fresh-seed gene
 On the unchanged 120-path development panel, v17.12 preserved all 113 reference-feasible paths and constructed feasible targets for all seven Hopper actor-floor paths. Their required total-action correction RMS averaged 0.002343 and was at most 0.008118; this authorizes causal actor-target distillation on reused paths.
 
 Forbidden: The acausal v17.12 target oracle establishes an online policy, reward improvement, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
+
+### mujoco_v17_13_causal_actor_adapter_development
+
+On 120 reused grouped paths, the selected v17.13 causal adapter preserved all 113 reference-feasible paths and changed every actor-floor executed action, but recovered only 3/7 actor-floor paths. The exact-oracle prefilter evaluated 48 gain-0.5/1.0 candidates; gain-1.5/2.0 candidates remained outside this oracle frontier, and no fresh path was accessed.
+
+Forbidden: V17.13 validates actor-level frequency feasibility, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
 
 ### legacy_c1_c9_matrix_snapshot
 
