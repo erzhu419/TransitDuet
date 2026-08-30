@@ -60,6 +60,16 @@ def actor_mean_parameter_vector(model: Any) -> np.ndarray:
     return np.concatenate(values).astype(np.float64, copy=True)
 
 
+def actor_output_bias_vector(model: Any) -> np.ndarray:
+    values = []
+    for actor in (model.upper_actor, model.lower_actor):
+        bias = _actor_output_head(actor).bias
+        if bias is None:
+            raise TypeError("actor output-bias update requires output biases")
+        values.append(bias.detach().cpu().numpy().reshape(-1))
+    return np.concatenate(values).astype(np.float64, copy=True)
+
+
 def apply_actor_mean_parameter_delta(model: Any, delta: np.ndarray) -> None:
     values = np.asarray(delta, dtype=np.float64).reshape(-1)
     expected = actor_mean_parameter_vector(model).size
@@ -81,6 +91,48 @@ def apply_actor_mean_parameter_delta(model: Any, delta: np.ndarray) -> None:
                 offset += count
     if offset != values.size:
         raise RuntimeError("actor mean-parameter delta application was incomplete")
+
+
+def apply_actor_output_bias_delta(model: Any, delta: np.ndarray) -> None:
+    values = np.asarray(delta, dtype=np.float64).reshape(-1)
+    expected = actor_output_bias_vector(model).size
+    if values.size != expected or not np.all(np.isfinite(values)):
+        raise ValueError("actor output-bias delta must be finite and aligned")
+    offset = 0
+    with torch.no_grad():
+        for actor in (model.upper_actor, model.lower_actor):
+            bias = _actor_output_head(actor).bias
+            if bias is None:
+                raise TypeError("actor output-bias update requires output biases")
+            count = int(bias.numel())
+            bias.add_(torch.as_tensor(
+                values[offset:offset + count].reshape(bias.shape),
+                dtype=bias.dtype,
+                device=bias.device,
+            ))
+            offset += count
+    if offset != values.size:
+        raise RuntimeError("actor output-bias delta application was incomplete")
+
+
+def actor_update_parameter_vector(model: Any, *, scope: str) -> np.ndarray:
+    if str(scope) == "full_mean":
+        return actor_mean_parameter_vector(model)
+    if str(scope) == "output_bias":
+        return actor_output_bias_vector(model)
+    raise ValueError(f"unknown actor update scope: {scope}")
+
+
+def apply_actor_update_delta(
+    model: Any, delta: np.ndarray, *, scope: str
+) -> None:
+    if str(scope) == "full_mean":
+        apply_actor_mean_parameter_delta(model, delta)
+        return
+    if str(scope) == "output_bias":
+        apply_actor_output_bias_delta(model, delta)
+        return
+    raise ValueError(f"unknown actor update scope: {scope}")
 
 
 def apply_actor_output_bias_intervention(
@@ -107,12 +159,21 @@ def apply_actor_output_bias_intervention(
             ))
 
 
-def _actor_mean_parameters(actor: torch.nn.Module) -> list[torch.nn.Parameter]:
-    return [
-        parameter
-        for name, parameter in actor.named_parameters()
-        if name != "log_std" and not name.endswith(".log_std")
-    ]
+def _actor_update_parameters(
+    actor: torch.nn.Module, *, scope: str
+) -> list[torch.nn.Parameter]:
+    if str(scope) == "full_mean":
+        return [
+            parameter
+            for name, parameter in actor.named_parameters()
+            if name != "log_std" and not name.endswith(".log_std")
+        ]
+    if str(scope) == "output_bias":
+        bias = _actor_output_head(actor).bias
+        if bias is None:
+            raise TypeError("actor output-bias update requires output biases")
+        return [bias]
+    raise ValueError(f"unknown actor update scope: {scope}")
 
 
 def _rollout_path(
@@ -209,8 +270,10 @@ def _actor_delta_path_job(job: dict[str, Any]) -> dict[str, Any]:
         job["checkpoint_path"], map_location="cpu", weights_only=False
     )
     model = _load_model(checkpoint)
-    apply_actor_mean_parameter_delta(
-        model, np.asarray(job["delta"], dtype=np.float64)
+    apply_actor_update_delta(
+        model,
+        np.asarray(job["delta"], dtype=np.float64),
+        scope=str(job.get("actor_update_scope", "full_mean")),
     )
     row = _evaluate_rows(
         model,
@@ -500,9 +563,12 @@ def _level_actor_directions(
     design_batch: LevelTrajectoryBatch,
     state_limit: int,
     sample_seed: int,
+    actor_update_scope: str,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     actor = getattr(model, f"{level}_actor")
-    parameters = _actor_mean_parameters(actor)
+    parameters = _actor_update_parameters(
+        actor, scope=str(actor_update_scope)
+    )
     indices = _subsample_indices(
         design_batch.size, int(state_limit), seed=int(sample_seed)
     )
@@ -577,6 +643,7 @@ def _evaluate_deltas(
     workers: int,
     episode_horizon: int,
     leakage_cost_mode: str,
+    actor_update_scope: str,
 ) -> list[dict[str, Any]]:
     jobs = [
         {
@@ -588,6 +655,7 @@ def _evaluate_deltas(
             "path_index": path_index,
             "episode_horizon": int(episode_horizon),
             "leakage_cost_mode": str(leakage_cost_mode),
+            "actor_update_scope": str(actor_update_scope),
         }
         for candidate_index, delta in enumerate(deltas)
         for path_index, path in enumerate(paths)
@@ -641,6 +709,7 @@ def run_probe(
     lower_cost_return_horizon_decisions: int = 0,
     critic_collection_mode: str = "stochastic_policy",
     critic_intervention_bias_rms: float = 0.0,
+    actor_update_scope: str = "full_mean",
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -676,6 +745,9 @@ def run_probe(
         not np.isfinite(intervention_rms) or intervention_rms <= 0.0
     ):
         raise ValueError("paired critic collection requires a positive bias RMS")
+    update_scope = str(actor_update_scope)
+    if update_scope not in {"full_mean", "output_bias"}:
+        raise ValueError("unknown action-cost actor update scope")
     train_paths = _paths_for_roots(summary["environment"], critic_train_roots)
     holdout_paths = _paths_for_roots(
         summary["environment"], critic_holdout_roots
@@ -865,6 +937,7 @@ def run_probe(
                     str(summary["environment"]),
                     str(level),
                 ),
+                actor_update_scope=update_scope,
             )
             directions.append(direction)
             gradient_metrics[level] = metrics
@@ -909,6 +982,7 @@ def run_probe(
             workers=workers,
             episode_horizon=episode_horizon,
             leakage_cost_mode=leakage_cost_mode,
+            actor_update_scope=update_scope,
         )
         for step_rms, delta, result in zip(
             actor_step_rms_values, deltas, evaluated, strict=True
@@ -955,6 +1029,7 @@ def run_probe(
             workers=workers,
             episode_horizon=episode_horizon,
             leakage_cost_mode=leakage_cost_mode,
+            actor_update_scope=update_scope,
         )
         if validation_results[0]["parameter_sha256"] != baseline_hash:
             raise RuntimeError("validation baseline changed the frozen actor")
@@ -1000,6 +1075,12 @@ def run_probe(
         "baseline_parameter_sha256": baseline_hash,
         "actor_mean_parameter_count": int(
             actor_mean_parameter_vector(baseline_model).size
+        ),
+        "actor_update_scope": update_scope,
+        "actor_update_parameter_count": int(
+            actor_update_parameter_vector(
+                baseline_model, scope=update_scope
+            ).size
         ),
         "critic_train_roots": list(critic_train_roots),
         "critic_holdout_roots": list(critic_holdout_roots),
@@ -1119,6 +1200,11 @@ def main() -> None:
     parser.add_argument(
         "--critic-intervention-bias-rms", type=float, default=0.0
     )
+    parser.add_argument(
+        "--actor-update-scope",
+        choices=("full_mean", "output_bias"),
+        default="full_mean",
+    )
     args = parser.parse_args()
     payload = run_probe(
         checkpoint_path=args.checkpoint,
@@ -1156,6 +1242,7 @@ def main() -> None:
         ),
         critic_collection_mode=args.critic_collection_mode,
         critic_intervention_bias_rms=args.critic_intervention_bias_rms,
+        actor_update_scope=args.actor_update_scope,
     )
     print(json.dumps({
         "output": str(args.output),
