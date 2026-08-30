@@ -8,6 +8,7 @@ from scripts import mujoco_v14_27_orthogonal_paired_fd_preflight_spec as v14_27
 from scripts import mujoco_v14_28_mechanism_portfolio_preflight_spec as spec
 from scripts.probe_mujoco_action_cost_critic_restoration import (
     _unit_interval_floats,
+    build_design_fold_contracts,
     fold_guarded_design_eligibility,
 )
 from scripts.submit_mujoco_v14_28_mechanism_portfolio_preflight_scheduleurm import (
@@ -60,6 +61,31 @@ class MujocoV1428MechanismPortfolioPreflightTest(unittest.TestCase):
         )
         self.assertTrue(eligible)
         self.assertEqual(flags, [True, True])
+
+    def test_each_fold_builds_a_path_matched_snapshot_contract(self):
+        rows = [{"path": index} for index in range(4)]
+        factory_paths = []
+
+        def factory(baseline_rows):
+            expected = [row["path"] for row in baseline_rows]
+            factory_paths.append(expected)
+
+            def snapshot(candidate_rows):
+                actual = [row["path"] for row in candidate_rows]
+                if actual != expected:
+                    raise ValueError("path mismatch")
+                return _snapshot(1.0)
+
+            return snapshot
+
+        functions, baselines = build_design_fold_contracts(
+            rows, [slice(0, 2), slice(2, 4)], factory
+        )
+        self.assertEqual(factory_paths, [[0, 1], [2, 3]])
+        self.assertEqual(len(functions), 2)
+        self.assertEqual(len(baselines), 2)
+        self.assertEqual(functions[0](rows[:2]), _snapshot(1.0))
+        self.assertEqual(functions[1](rows[2:]), _snapshot(1.0))
 
     def test_router_parser_accepts_zero_and_rejects_duplicates(self):
         self.assertEqual(_unit_interval_floats("0,0.6,1"), (0.0, 0.6, 1.0))

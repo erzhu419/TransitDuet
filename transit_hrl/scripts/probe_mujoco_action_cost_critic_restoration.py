@@ -929,6 +929,23 @@ def fold_guarded_design_eligibility(
     return bool(pooled and all(fold_flags)), fold_flags
 
 
+def build_design_fold_contracts(
+    baseline_rows: list[dict[str, Any]],
+    fold_slices: list[slice],
+    snapshot_factory: Any,
+) -> tuple[list[Any], list[dict[str, Any]]]:
+    snapshot_functions = []
+    baselines = []
+    for selected in fold_slices:
+        fold_rows = baseline_rows[selected]
+        if not fold_rows:
+            raise ValueError("design folds must contain baseline paths")
+        snapshot = snapshot_factory(fold_rows)
+        snapshot_functions.append(snapshot)
+        baselines.append(snapshot(fold_rows))
+    return snapshot_functions, baselines
+
+
 def run_probe(
     *,
     checkpoint_path: Path,
@@ -1193,10 +1210,18 @@ def run_probe(
         selected.stop - selected.start for selected in design_fold_slices
     ) != len(design_paths):
         raise RuntimeError("design fold construction did not cover every path")
-    design_fold_baselines = [
-        design_snapshot(design_baseline_rows[selected])
-        for selected in design_fold_slices
-    ]
+    design_fold_snapshot_functions, design_fold_baselines = (
+        build_design_fold_contracts(
+            design_baseline_rows,
+            design_fold_slices,
+            lambda fold_rows: _snapshot_fn(
+                summary,
+                fold_rows,
+                risk_mode=risk_mode,
+                cvar_alpha=cvar_alpha,
+            ),
+        )
+    )
 
     fits_by_level: dict[str, list[_CriticFit]] = {}
     critic_metrics: dict[str, dict[str, Any]] = {}
@@ -1412,8 +1437,12 @@ def run_probe(
         ):
             snapshot = design_snapshot(result["rows"])
             fold_snapshots = [
-                design_snapshot(result["rows"][selected_slice])
-                for selected_slice in design_fold_slices
+                fold_snapshot(result["rows"][selected_slice])
+                for fold_snapshot, selected_slice in zip(
+                    design_fold_snapshot_functions,
+                    design_fold_slices,
+                    strict=True,
+                )
             ]
             design_eligible, fold_eligible = fold_guarded_design_eligibility(
                 snapshot,
