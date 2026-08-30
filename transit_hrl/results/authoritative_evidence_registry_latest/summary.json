@@ -1,5 +1,5 @@
 {
-  "development_record_count": 25,
+  "development_record_count": 26,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 31,
+  "record_count": 32,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3878,6 +3878,90 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment paired development preflight, v17.3 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 and normalized joint merit in Hopper and Walker2d, but upper-HPF8 worsened in every environment and all three endpoints worsened in HalfCheetah, so the mechanism was rejected without multiseed expansion.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_3_audit_optimal_macro_gauge_development.json",
+          "role": "decision",
+          "sha256": "e0c55df0549428bbdfdf6bf47089866e8f4b33671d935132c18fbbafb6399c65"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_3_audit_optimal_macro_gauge_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "ef74fb84423181e42b225d1ed98e36266105c807a04204cd314a987952c0f3e3"
+        }
+      ],
+      "claim": "A causal macro gauge that directly minimizes the registered HPF8/LPF32 objective yields cross-environment frequency responsibility separation while preserving the frozen control path.",
+      "claim_id": "D26_AUDIT_OPTIMAL_MACRO_GAUGE",
+      "decision": "audit_optimal_macro_gauge_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_3_audit_optimal_macro_gauge_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "audit_optimal_macro_gauge_preflight_not_supported",
+        "eligible_for_leakage_active_multiseed": false,
+        "environment_count": 3,
+        "environment_results": {
+          "HalfCheetah-v5": {
+            "joint_merit_relative_reduction": -2.563558020775433,
+            "lower_lf_relative_reduction": -0.4828350401935079,
+            "reward_difference": 0.0,
+            "supported": false,
+            "upper_hf_relative_reduction": -10.308916864436272
+          },
+          "Hopper-v5": {
+            "joint_merit_relative_reduction": 0.5648472461436531,
+            "lower_lf_relative_reduction": 0.6652080326214834,
+            "reward_difference": 0.0,
+            "supported": false,
+            "upper_hf_relative_reduction": -0.9473236652368211
+          },
+          "Walker2d-v5": {
+            "joint_merit_relative_reduction": 0.72506933330081,
+            "lower_lf_relative_reduction": 0.7264887815443557,
+            "reward_difference": 0.0,
+            "supported": false,
+            "upper_hf_relative_reduction": -7.334877321297106
+          }
+        },
+        "frequency_gate_counts": {
+          "joint_merit_reduction": 2,
+          "lower_lf_reduction": 2,
+          "upper_hf_reduction": 0
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "paired_mechanics": {
+          "component_projection_bounded_cells": 3,
+          "executed_action_trace_exact_cells": 3,
+          "explicit_protocol_structure_valid_cells": 3,
+          "latent_metrics_exact_cells": 3,
+          "latent_policy_trace_exact_cells": 3,
+          "responsibility_reconstruction_exact_cells": 3,
+          "reward_numeric_exact_cells": 3,
+          "reward_trace_exact_cells": 3,
+          "router_reconstruction_exact_cells": 3
+        },
+        "paired_path_count": 120,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 3,
+          "failed": 0
+        },
+        "training_cell_count": 3
+      },
+      "forbidden_wording": "The v17.3 development preflight validates cross-environment frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_fresh_optimizer_seed_three_training_cells_and_one_hundred_twenty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_3_audit_optimal_macro_gauge",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3936,7 +4020,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "eb00c522c9da64dc3776d2d3d3fbb563d36f532efe24d398d938172586fde016",
+  "registry_sha256": "7ec8d7f2652ea2acebb1c0ebc47c9e80179d9d69f71f9dcb5efda83d29b5ffce",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

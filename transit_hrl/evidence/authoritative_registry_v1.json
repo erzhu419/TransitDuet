@@ -904,6 +904,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_3_audit_optimal_macro_gauge_development",
+      "claim_id": "D26_AUDIT_OPTIMAL_MACRO_GAUGE",
+      "claim": "A causal macro gauge that directly minimizes the registered HPF8/LPF32 objective yields cross-environment frequency responsibility separation while preserving the frozen control path.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "audit_optimal_macro_gauge_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "one_fresh_optimizer_seed_three_training_cells_and_one_hundred_twenty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_3_audit_optimal_macro_gauge",
+      "allowed_wording": "In a frozen three-environment paired development preflight, v17.3 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 and normalized joint merit in Hopper and Walker2d, but upper-HPF8 worsened in every environment and all three endpoints worsened in HalfCheetah, so the mechanism was rejected without multiseed expansion.",
+      "forbidden_wording": "The v17.3 development preflight validates cross-environment frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_3_audit_optimal_macro_gauge_development.json",
+          "sha256": "e0c55df0549428bbdfdf6bf47089866e8f4b33671d935132c18fbbafb6399c65"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_3_audit_optimal_macro_gauge_outcome_2026-08-31.md",
+          "sha256": "ef74fb84423181e42b225d1ed98e36266105c807a04204cd314a987952c0f3e3"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

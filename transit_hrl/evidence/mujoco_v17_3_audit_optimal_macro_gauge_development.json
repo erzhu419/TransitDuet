@@ -1,0 +1,78 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_3_audit_optimal_macro_gauge_development_v1",
+  "status": "audit_optimal_macro_gauge_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "paired_audit_optimal_macro_gauge_development_not_confirmatory",
+  "source_run": "mujoco_v17_3_audit_optimal_macro_gauge_preflight_20260831_r1",
+  "development_protocol_version": "mujoco_v17_3_audit_optimal_macro_gauge_preflight_v1",
+  "frozen_algorithm_revision": "3a7e02ed95d89ec38627b5f7a1dc7d16b096896f",
+  "frozen_source_manifest_sha256": "d677c45fa3f869593a0d0e6b8c1420ad3c614804082f22731f661a206e588054",
+  "optimizer_seed_count": 1,
+  "environment_count": 3,
+  "training_cell_count": 3,
+  "heldout_path_count_per_intervention": 40,
+  "paired_path_count": 120,
+  "evaluation_row_count": 240,
+  "scheduler_successful_task_count": 3,
+  "scheduler_attempt_count": 3,
+  "scheduler_tasks": [
+    "t85435",
+    "t85436",
+    "t85437"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 3,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "eligible_for_leakage_active_multiseed": false,
+  "paired_mechanics": {
+    "reward_trace_exact_cells": 3,
+    "executed_action_trace_exact_cells": 3,
+    "latent_policy_trace_exact_cells": 3,
+    "reward_numeric_exact_cells": 3,
+    "latent_metrics_exact_cells": 3,
+    "router_reconstruction_exact_cells": 3,
+    "responsibility_reconstruction_exact_cells": 3,
+    "component_projection_bounded_cells": 3,
+    "explicit_protocol_structure_valid_cells": 3
+  },
+  "frequency_gate_counts": {
+    "upper_hf_reduction": 0,
+    "lower_lf_reduction": 2,
+    "joint_merit_reduction": 2
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "upper_hf_relative_reduction": -10.308916864436272,
+      "lower_lf_relative_reduction": -0.4828350401935079,
+      "joint_merit_relative_reduction": -2.563558020775433,
+      "reward_difference": 0.0,
+      "supported": false
+    },
+    "Hopper-v5": {
+      "upper_hf_relative_reduction": -0.9473236652368211,
+      "lower_lf_relative_reduction": 0.6652080326214834,
+      "joint_merit_relative_reduction": 0.5648472461436531,
+      "reward_difference": 0.0,
+      "supported": false
+    },
+    "Walker2d-v5": {
+      "upper_hf_relative_reduction": -7.334877321297106,
+      "lower_lf_relative_reduction": 0.7264887815443557,
+      "joint_merit_relative_reduction": 0.72506933330081,
+      "reward_difference": 0.0,
+      "supported": false
+    }
+  },
+  "mechanism_findings": {
+    "path_invariance": "All 120 paired development paths exactly matched reward, executed-action, and latent-policy trace hashes at gauge strengths zero and one. All three cells passed the explicit asynchronous-transition, reconstruction-RMS, and component-projection gates.",
+    "lower_frequency": "The audit-optimal gauge reduced realized lower-LPF32 power by 66.5 percent in Hopper and 72.6 percent in Walker2d, but increased it by 48.3 percent in HalfCheetah.",
+    "upper_frequency": "No environment achieved the frozen ten-percent upper-HPF8 reduction. Realized upper-HF power increased by factors of 11.31 in HalfCheetah, 1.95 in Hopper, and 8.33 in Walker2d relative to the function-preserving control.",
+    "joint_merit": "Normalized joint merit improved by 56.5 percent in Hopper and 72.5 percent in Walker2d but worsened by 256.4 percent in HalfCheetah. The registered all-environment expansion gate therefore failed.",
+    "decision": "Do not expand v17.3 to leakage-active multiseed training. The next mechanism must align the online optimization boundary with realized audit windows and constrain upper-coordinate boundary increments directly; a persistence forecast optimized only within the current macro interval is not sufficient."
+  }
+}

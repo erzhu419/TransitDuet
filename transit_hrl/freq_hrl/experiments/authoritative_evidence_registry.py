@@ -41,6 +41,9 @@ MUJOCO_V17_1_HEADROOM_HOMOTOPY_SCHEMA_VERSION = (
 MUJOCO_V17_2_SMOOTH_MACRO_GAUGE_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_2_smooth_macro_gauge_development_v1"
 )
+MUJOCO_V17_3_AUDIT_OPTIMAL_MACRO_GAUGE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_3_audit_optimal_macro_gauge_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1615,6 +1618,120 @@ def _mujoco_v17_2_smooth_macro_gauge_facts(
     }
 
 
+def _mujoco_v17_3_audit_optimal_macro_gauge_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    mechanics = dict(decision.get("paired_mechanics") or {})
+    gate_counts = dict(decision.get("frequency_gate_counts") or {})
+    environment_results = dict(decision.get("environment_results") or {})
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    expected_gate_counts = {
+        "upper_hf_reduction": 0,
+        "lower_lf_reduction": 2,
+        "joint_merit_reduction": 2,
+    }
+    expected_reductions = {
+        "HalfCheetah-v5": (
+            -10.308916864436272,
+            -0.4828350401935079,
+            -2.563558020775433,
+        ),
+        "Hopper-v5": (
+            -0.9473236652368211,
+            0.6652080326214834,
+            0.5648472461436531,
+        ),
+        "Walker2d-v5": (
+            -7.334877321297106,
+            0.7264887815443557,
+            0.72506933330081,
+        ),
+    }
+    valid_environment_results = bool(
+        set(environment_results) == set(expected_reductions)
+        and all(
+            bool(row.get("supported")) is False
+            and abs(
+                float(row.get("upper_hf_relative_reduction", float("inf")))
+                - reductions[0]
+            ) <= 1e-12
+            and abs(
+                float(row.get("lower_lf_relative_reduction", float("inf")))
+                - reductions[1]
+            ) <= 1e-12
+            and abs(
+                float(row.get("joint_merit_relative_reduction", float("inf")))
+                - reductions[2]
+            ) <= 1e-12
+            and float(row.get("reward_difference", float("inf"))) == 0.0
+            for name, reductions in expected_reductions.items()
+            for row in [environment_results[name]]
+        )
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_3_AUDIT_OPTIMAL_MACRO_GAUGE_SCHEMA_VERSION
+        or decision.get("status")
+        != "audit_optimal_macro_gauge_preflight_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "paired_audit_optimal_macro_gauge_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 3
+        or int(decision.get("heldout_path_count_per_intervention", -1)) != 40
+        or int(decision.get("paired_path_count", -1)) != 120
+        or int(decision.get("evaluation_row_count", -1)) != 240
+        or int(decision.get("scheduler_successful_task_count", -1)) != 3
+        or int(decision.get("scheduler_attempt_count", -1)) != 3
+        or len(tasks) != 3
+        or len(set(tasks)) != 3
+        or task_status != {"done": 3, "failed": 0, "cancelled": 0}
+        or decision.get("eligible_for_leakage_active_multiseed") is not False
+        or any(
+            int(mechanics.get(key, -1)) != 3
+            for key in (
+                "reward_trace_exact_cells",
+                "executed_action_trace_exact_cells",
+                "latent_policy_trace_exact_cells",
+                "reward_numeric_exact_cells",
+                "latent_metrics_exact_cells",
+                "router_reconstruction_exact_cells",
+                "responsibility_reconstruction_exact_cells",
+                "component_projection_bounded_cells",
+                "explicit_protocol_structure_valid_cells",
+            )
+        )
+        or gate_counts != expected_gate_counts
+        or not valid_environment_results
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or report is None
+        or "`audit_optimal_macro_gauge_preflight_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError(
+            "MuJoCo v17.3 audit-optimal-macro-gauge decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "training_cell_count": 3,
+        "paired_path_count": 120,
+        "paired_mechanics": mechanics,
+        "frequency_gate_counts": expected_gate_counts,
+        "environment_results": environment_results,
+        "task_status_counts": task_status,
+        "eligible_for_leakage_active_multiseed": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1645,6 +1762,9 @@ PARSERS = {
     ),
     "mujoco_v17_2_smooth_macro_gauge": (
         _mujoco_v17_2_smooth_macro_gauge_facts
+    ),
+    "mujoco_v17_3_audit_optimal_macro_gauge": (
+        _mujoco_v17_3_audit_optimal_macro_gauge_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

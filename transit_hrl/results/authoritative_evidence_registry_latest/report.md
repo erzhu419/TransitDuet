@@ -35,6 +35,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_zero_dc_plan_development | mujoco_control | development | zero_dc_plan_screen_not_supported | development_only | false |
 | mujoco_v17_1_headroom_homotopy_development | mujoco_control | development | headroom_homotopy_preflight_not_supported | development_only | false |
 | mujoco_v17_2_smooth_macro_gauge_development | mujoco_control | development | smooth_macro_gauge_preflight_not_supported | development_only | false |
+| mujoco_v17_3_audit_optimal_macro_gauge_development | mujoco_control | development | audit_optimal_macro_gauge_preflight_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -213,6 +214,12 @@ Forbidden: The v17.1 development preflight validates reward no-tradeoff, cross-e
 In a frozen three-environment paired development preflight, gauge strengths zero and one exactly matched reward, executed-action, and latent-policy traces on all 360 paired paths, validating pathwise function preservation. No alpha achieved the registered lower-LPF32 or joint-merit reduction in any environment, so the naive EMA-target smooth macro gauge was rejected without multiseed expansion.
 
 Forbidden: The v17.2 development preflight validates frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v17_3_audit_optimal_macro_gauge_development
+
+In a frozen three-environment paired development preflight, v17.3 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 and normalized joint merit in Hopper and Walker2d, but upper-HPF8 worsened in every environment and all three endpoints worsened in HalfCheetah, so the mechanism was rejected without multiseed expansion.
+
+Forbidden: The v17.3 development preflight validates cross-environment frequency separation, leakage no-tradeoff, reward improvement, learned constraint improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
