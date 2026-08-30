@@ -60,10 +60,14 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17 = (
     "freq_hrl_mujoco_shared_core_v14_17_native_pd_cvar"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2 = (
+    "freq_hrl_mujoco_shared_core_v16_2_macro_hold_gauge"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -3591,7 +3595,9 @@ def train_mujoco_method(
             "constraints"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2
+        if str(lower_action_router_mode) == "causal_macro_hold_audit_gauge"
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17
         if (
             str(deployment_frequency_projection_objective)
             == "violation_cvar"
@@ -3611,6 +3617,12 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2}
+    ):
+        raise ValueError("v16.2 mechanisms cannot use an earlier protocol label")
     if (
         inferred_protocol_version in {
             MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,

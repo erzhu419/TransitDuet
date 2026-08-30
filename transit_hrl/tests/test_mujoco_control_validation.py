@@ -19,6 +19,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -116,8 +117,16 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 deployment_frequency_closed_loop_risk_mode="mode_cvar",
                 **common,
             )
+        with self.assertRaisesRegex(ValueError, "v16.2 mechanisms"):
+            train_mujoco_method(
+                lower_action_router_mode="causal_macro_hold_audit_gauge",
+                **common,
+            )
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17.endswith(
             "native_pd_cvar"
+        ))
+        self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2.endswith(
+            "macro_hold_gauge"
         ))
 
     @staticmethod
