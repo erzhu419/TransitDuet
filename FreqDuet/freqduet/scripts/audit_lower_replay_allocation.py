@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import torch
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,12 +35,35 @@ def resolve_config_path(value: str | Path) -> Path:
     raise FileNotFoundError(f"config not found: {value}")
 
 
-def _load_config(path: Path) -> dict:
-    if str(ROOT) not in sys.path:
-        sys.path.insert(0, str(ROOT))
-    from runner_v3 import load_config
+def _deep_merge(base: dict, override: dict) -> dict:
+    result = copy.deepcopy(base)
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = _deep_merge(result[key], value)
+        else:
+            result[key] = copy.deepcopy(value)
+    return result
 
-    return load_config(str(path))
+
+def _load_config(path: Path, seen: set[Path] | None = None) -> dict:
+    path = path.resolve()
+    seen = set() if seen is None else set(seen)
+    if path in seen:
+        raise ValueError(f"cyclic config inheritance at {path}")
+    seen.add(path)
+    payload = yaml.safe_load(path.read_text()) or {}
+    if not isinstance(payload, dict):
+        raise ValueError(f"config root must be a mapping: {path}")
+    parent_value = payload.pop("_extends", None)
+    if parent_value is None:
+        return payload
+    parent = Path(str(parent_value))
+    if not parent.is_absolute():
+        candidates = [path.parent / parent, path.parent.parent / parent, ROOT / parent]
+        parent = next((candidate for candidate in candidates if candidate.is_file()), candidates[0])
+    if not parent.is_file():
+        raise FileNotFoundError(f"parent config not found: {parent_value}")
+    return _deep_merge(_load_config(parent, seen), payload)
 
 
 def _finite_vector(value, *, name: str) -> np.ndarray:
