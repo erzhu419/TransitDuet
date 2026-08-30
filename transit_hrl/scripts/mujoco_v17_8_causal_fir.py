@@ -193,6 +193,207 @@ def evaluate_causal_fir_split(
     }
 
 
+def apply_causal_fir_with_prefix_high_frequency_budget(
+    total_action: Any,
+    model: dict[str, Any],
+    *,
+    output_gain: float,
+    upper_action_limit: float,
+    lower_action_limit: float,
+    upper_window: int,
+    upper_rms_budget: float,
+    power_tolerance: float,
+) -> dict[str, Any]:
+    """Project only causal upper innovations onto the prefix HPF budget."""
+
+    base = apply_causal_fir(
+        total_action,
+        model,
+        output_gain=output_gain,
+        upper_action_limit=upper_action_limit,
+        lower_action_limit=lower_action_limit,
+    )
+    total = base["total"]
+    desired = base["raw_upper"]
+    width = int(upper_window)
+    budget = float(upper_rms_budget)
+    tolerance = float(power_tolerance)
+    if width < 2:
+        raise ValueError("prefix upper window must be at least two")
+    if not np.isfinite(budget) or budget <= 0.0:
+        raise ValueError("prefix upper RMS budget must be positive and finite")
+    if not np.isfinite(tolerance) or tolerance <= 0.0:
+        raise ValueError("prefix power tolerance must be positive and finite")
+
+    length, dimension = total.shape
+    upper = np.empty_like(total)
+    residuals = np.empty_like(total)
+    accumulated_energy = 0.0
+    feasible_steps = 0
+    projection_energy = 0.0
+    prefix_powers = []
+    for index in range(length):
+        physical_low = np.maximum(
+            -float(upper_action_limit),
+            total[index] - float(lower_action_limit),
+        )
+        physical_high = np.minimum(
+            float(upper_action_limit),
+            total[index] + float(lower_action_limit),
+        )
+        count = min(index + 1, width)
+        history = upper[max(0, index - width + 1):index]
+        if count == 1:
+            selected_upper = np.clip(
+                desired[index], physical_low, physical_high
+            )
+            residual = np.zeros(dimension, dtype=np.float64)
+            feasible = True
+        else:
+            coefficient = 1.0 - 1.0 / float(count)
+            offset = -np.sum(history, axis=0) / float(count)
+            residual_low = coefficient * physical_low + offset
+            residual_high = coefficient * physical_high + offset
+            low = np.minimum(residual_low, residual_high)
+            high = np.maximum(residual_low, residual_high)
+            target = np.clip(
+                coefficient * desired[index] + offset, low, high
+            )
+            allowed_energy = max(
+                (index + 1) * dimension * budget ** 2
+                - accumulated_energy,
+                0.0,
+            )
+            minimum = np.clip(np.zeros_like(target), low, high)
+            minimum_energy = float(np.sum(np.square(minimum)))
+            feasible = bool(
+                minimum_energy <= allowed_energy + tolerance
+            )
+            if not feasible:
+                selected_residual = minimum
+            elif float(np.sum(np.square(target))) <= allowed_energy:
+                selected_residual = target
+            else:
+                multiplier_low = 0.0
+                multiplier_high = 1.0
+                selected_residual = np.clip(
+                    target / (1.0 + multiplier_high), low, high
+                )
+                while (
+                    float(np.sum(np.square(selected_residual)))
+                    > allowed_energy
+                ):
+                    multiplier_high *= 10.0
+                    selected_residual = np.clip(
+                        target / (1.0 + multiplier_high), low, high
+                    )
+                for _ in range(48):
+                    midpoint = 0.5 * (multiplier_low + multiplier_high)
+                    trial = np.clip(target / (1.0 + midpoint), low, high)
+                    if float(np.sum(np.square(trial))) <= allowed_energy:
+                        multiplier_high = midpoint
+                        selected_residual = trial
+                    else:
+                        multiplier_low = midpoint
+            selected_upper = np.clip(
+                (selected_residual - offset) / coefficient,
+                physical_low,
+                physical_high,
+            )
+            residual = coefficient * selected_upper + offset
+        upper[index] = selected_upper
+        residuals[index] = residual
+        accumulated_energy += float(np.sum(np.square(residual)))
+        feasible_steps += int(feasible)
+        projection_energy += float(np.sum(np.square(
+            selected_upper - np.clip(
+                desired[index], physical_low, physical_high
+            )
+        )))
+        prefix_powers.append(
+            accumulated_energy / float((index + 1) * dimension)
+        )
+    lower = total - upper
+    return {
+        "raw_upper": desired,
+        "upper": upper,
+        "lower": lower,
+        "total": total,
+        "upper_high_frequency_residual": residuals,
+        "prefix_upper_budget_feasible_rate": float(
+            feasible_steps / length
+        ),
+        "prefix_upper_power_max": float(max(prefix_powers)),
+        "projection_rms": float(np.sqrt(
+            projection_energy / float(length * dimension)
+        )),
+    }
+
+
+def evaluate_causal_fir_prefix_split(
+    total_action: Any,
+    model: dict[str, Any],
+    *,
+    output_gain: float,
+    upper_action_limit: float,
+    lower_action_limit: float,
+    upper_window: int,
+    lower_window: int,
+    upper_rms_budget: float,
+    lower_rms_budget: float,
+    power_tolerance: float,
+) -> dict[str, Any]:
+    split = apply_causal_fir_with_prefix_high_frequency_budget(
+        total_action,
+        model,
+        output_gain=output_gain,
+        upper_action_limit=upper_action_limit,
+        lower_action_limit=lower_action_limit,
+        upper_window=upper_window,
+        upper_rms_budget=upper_rms_budget,
+        power_tolerance=power_tolerance,
+    )
+    upper_power, lower_power = responsibility_frequency_powers(
+        split["total"],
+        split["upper"],
+        upper_window=int(upper_window),
+        lower_window=int(lower_window),
+    )
+    reconstruction_error = float(np.max(np.abs(
+        split["upper"] + split["lower"] - split["total"]
+    )))
+    bound_violation = float(max(
+        np.max(np.maximum(np.abs(split["upper"]) - upper_action_limit, 0.0)),
+        np.max(np.maximum(np.abs(split["lower"]) - lower_action_limit, 0.0)),
+    ))
+    finite = bool(
+        np.all(np.isfinite(split["upper"]))
+        and np.all(np.isfinite(split["lower"]))
+        and np.isfinite(upper_power)
+        and np.isfinite(lower_power)
+    )
+    upper_budget = float(upper_rms_budget) ** 2
+    lower_budget = float(lower_rms_budget) ** 2
+    tolerance = float(power_tolerance)
+    upper_pass = bool(finite and upper_power <= upper_budget + tolerance)
+    lower_pass = bool(finite and lower_power <= lower_budget + tolerance)
+    return {
+        "finite": finite,
+        "upper_power": float(upper_power),
+        "lower_power": float(lower_power),
+        "upper_budget_pass": upper_pass,
+        "lower_budget_pass": lower_pass,
+        "joint_budget_pass": bool(upper_pass and lower_pass),
+        "reconstruction_error_max": reconstruction_error,
+        "bound_violation_max": bound_violation,
+        "prefix_upper_budget_feasible_rate": float(
+            split["prefix_upper_budget_feasible_rate"]
+        ),
+        "prefix_upper_power_max": float(split["prefix_upper_power_max"]),
+        "projection_rms": float(split["projection_rms"]),
+    }
+
+
 def candidate_id(window: int, ridge_penalty: float, output_gain: float) -> str:
     return (
         f"fir_w{int(window)}_ridge{float(ridge_penalty):.0e}_"

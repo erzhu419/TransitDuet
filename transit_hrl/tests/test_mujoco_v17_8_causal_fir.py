@@ -6,6 +6,7 @@ from scripts import mujoco_v17_4_streaming_audit_projection_preflight_spec as v1
 from scripts import mujoco_v17_8_causal_fir_distillation_spec as spec
 from scripts.mujoco_v17_8_causal_fir import (
     apply_causal_fir,
+    apply_causal_fir_with_prefix_high_frequency_budget,
     causal_fir_features,
     fit_causal_fir,
 )
@@ -79,6 +80,62 @@ def test_physical_projection_preserves_total_and_both_component_boxes():
     assert np.max(np.abs(split["upper"])) <= 1.0
     assert np.max(np.abs(split["lower"])) <= 1.0
     assert np.array_equal(split["upper"] + split["lower"], total)
+
+
+def test_prefix_hpf_projection_preserves_dc_upper_responsibility():
+    total = np.full((20, 2), 0.8, dtype=np.float64)
+    model = {
+        "window": 1,
+        "action_dimension": 2,
+        "coefficients": np.array([np.eye(2)]),
+    }
+    split = apply_causal_fir_with_prefix_high_frequency_budget(
+        total,
+        model,
+        output_gain=1.0,
+        upper_action_limit=1.0,
+        lower_action_limit=1.0,
+        upper_window=8,
+        upper_rms_budget=0.075,
+        power_tolerance=1e-10,
+    )
+    assert np.allclose(split["upper"], total)
+    assert np.allclose(split["lower"], 0.0)
+    assert split["prefix_upper_power_max"] <= 1e-30
+
+
+def test_prefix_hpf_projection_is_causal_bounded_and_budget_feasible():
+    time = np.arange(40, dtype=np.float64)
+    total = np.stack(
+        (0.4 * np.sin(1.7 * time), 0.4 * np.cos(1.3 * time)), axis=1
+    )
+    model = {
+        "window": 1,
+        "action_dimension": 2,
+        "coefficients": np.array([1.8 * np.eye(2)]),
+    }
+    kwargs = {
+        "output_gain": 1.0,
+        "upper_action_limit": 1.0,
+        "lower_action_limit": 1.0,
+        "upper_window": 8,
+        "upper_rms_budget": 0.075,
+        "power_tolerance": 1e-10,
+    }
+    split = apply_causal_fir_with_prefix_high_frequency_budget(
+        total, model, **kwargs
+    )
+    assert split["prefix_upper_budget_feasible_rate"] == 1.0
+    assert split["prefix_upper_power_max"] <= 0.075 ** 2 + 1e-10
+    assert np.max(np.abs(split["upper"])) <= 1.0
+    assert np.max(np.abs(split["lower"])) <= 1.0
+    assert np.allclose(split["upper"] + split["lower"], total)
+    changed = total.copy()
+    changed[25:] *= -0.7
+    changed_split = apply_causal_fir_with_prefix_high_frequency_budget(
+        changed, model, **kwargs
+    )
+    assert np.allclose(changed_split["upper"][:25], split["upper"][:25])
 
 
 def test_frozen_grid_and_fresh_seed_roles_are_disjoint():
