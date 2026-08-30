@@ -30,6 +30,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_29_restoration_portfolio_confirmatory | mujoco_control | confirmatory | supported | positive_main_or_si | true |
 | mujoco_v15_raw_policy_distillation_development | mujoco_control | development | universal_raw_policy_distillation_not_supported | development_only | false |
 | mujoco_v16_gauge_training_development | mujoco_control | development | training_time_gauge_preflight_not_supported | development_only | false |
+| mujoco_v16_1_audit_gauge_paired_development | mujoco_control | development | audit_gauge_paired_preflight_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -178,6 +179,12 @@ Forbidden: The v15 development sequence validates universal raw behavioral separ
 In a frozen three-environment, three-optimizer-seed development preflight, the causal total-action gauge reconstructed the additive action in all nine paired cells, but the EMA gauge did not satisfy the joint frequency and reward gate: canonical frequency reduction passed 0 of 9 cells and reward noninferiority passed 6 of 9.
 
 Forbidden: The v16 development preflight validates training-time raw separation, leakage no-tradeoff, reward improvement, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v16_1_audit_gauge_paired_development
+
+In a frozen three-environment, three-optimizer-seed development preflight, the audit-adaptive gauge exactly reconstructed the additive action and preserved held-out reward noninferiority in all nine paired cells, but only one cell reached the canonical frequency-reduction gate and no environment reached the required two-of-three replicate gate.
+
+Forbidden: The v16.1 development preflight validates cross-environment raw responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

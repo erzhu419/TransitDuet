@@ -1,5 +1,5 @@
 {
-  "development_record_count": 20,
+  "development_record_count": 21,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 26,
+  "record_count": 27,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3571,6 +3571,59 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development preflight, the audit-adaptive gauge exactly reconstructed the additive action and preserved held-out reward noninferiority in all nine paired cells, but only one cell reached the canonical frequency-reduction gate and no environment reached the required two-of-three replicate gate.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v16_1_audit_gauge_paired_development.json",
+          "role": "decision",
+          "sha256": "0f3fc1a3a52aa291bf9bd8948129ffaf071cee26c5e81ee684fbda1791ae8ab4"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_1_audit_gauge_paired_outcome_2026-08-30.md",
+          "role": "report",
+          "sha256": "8791150a9497981842a3010d6d7719558e0483154f3b5f618fc181ee09b65fcb"
+        }
+      ],
+      "claim": "An audit-adaptive exact total-action gauge combined with paired primal-dual continuation yields cross-environment raw responsibility separation without a reward tradeoff.",
+      "claim_id": "D21_ADAPTIVE_GAUGE_PAIRED_TRAINING",
+      "decision": "audit_gauge_paired_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v16_1_audit_gauge_paired_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "audit_gauge_paired_preflight_not_supported",
+        "environment_count": 3,
+        "gate_counts": {
+          "adaptive_cutoff_active": 9,
+          "candidate_selected_trained_checkpoint": 1,
+          "canonical_frequency_reduction": 1,
+          "exact_reconstruction": 9,
+          "latent_noninferiority_vs_control": 9,
+          "reward_noninferiority": 9,
+          "selection_constraints_feasible": 4
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "paired_analysis_cell_count": 9,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 27,
+          "failed": 0
+        },
+        "training_cell_count": 27
+      },
+      "forbidden_wording": "The v16.1 development preflight validates cross-environment raw responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "three_fresh_optimizer_seeds_paired_anchor_and_continuation_arms_with_forty_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_1_audit_gauge_paired",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3629,7 +3682,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "14a8cd59b8a0b6f80e28c19628d83b38b973242446a5336ec57591f424ef6cfa",
+  "registry_sha256": "c71c129128ba043a5fd29d7a5fb0d4127db64ddfb7a4ce1ebc48a0b9e0083df6",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

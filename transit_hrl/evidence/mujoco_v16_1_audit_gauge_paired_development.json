@@ -1,0 +1,93 @@
+{
+  "schema_version": "freq_hrl_mujoco_v16_1_audit_gauge_paired_development_v1",
+  "status": "audit_gauge_paired_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "paired_training_mechanism_development_not_confirmatory",
+  "source_run": "mujoco_v16_1_audit_gauge_paired_preflight_20260830_r2",
+  "development_protocol_version": "mujoco_v16_1_audit_gauge_paired_preflight_v2",
+  "frozen_algorithm_revision": "d1bc52404e9fa86aea3b8140c26ed87d391438b6",
+  "frozen_source_manifest_sha256": "99d007d108bb5e78f28ad481563ad1e3e89c8a0ff5e6e84497b41f905bffcb51",
+  "optimizer_seed_count": 3,
+  "environment_count": 3,
+  "anchor_training_cell_count": 9,
+  "continuation_training_cell_count": 18,
+  "paired_analysis_cell_count": 9,
+  "scheduler_task_count": 27,
+  "scheduler_tasks": [
+    "t85216",
+    "t85217",
+    "t85218",
+    "t85219",
+    "t85220",
+    "t85221",
+    "t85222",
+    "t85223",
+    "t85224",
+    "t85225",
+    "t85226",
+    "t85227",
+    "t85228",
+    "t85229",
+    "t85230",
+    "t85231",
+    "t85232",
+    "t85233",
+    "t85234",
+    "t85235",
+    "t85236",
+    "t85237",
+    "t85238",
+    "t85239",
+    "t85240",
+    "t85241",
+    "t85242"
+  ],
+  "scheduler_nodes": [
+    "node001",
+    "node002",
+    "node003",
+    "node004",
+    "node005"
+  ],
+  "task_status_counts": {
+    "done": 27,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "gate_counts": {
+    "candidate_selected_trained_checkpoint": 1,
+    "selection_constraints_feasible": 4,
+    "reward_noninferiority": 9,
+    "canonical_frequency_reduction": 1,
+    "latent_noninferiority_vs_control": 9,
+    "exact_reconstruction": 9,
+    "adaptive_cutoff_active": 9
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "canonical_improvement_count": 0,
+      "cell_count": 3,
+      "median_canonical_relative_reduction": 0.0,
+      "environment_gate": false
+    },
+    "Hopper-v5": {
+      "canonical_improvement_count": 1,
+      "cell_count": 3,
+      "median_canonical_relative_reduction": 0.0,
+      "environment_gate": false
+    },
+    "Walker2d-v5": {
+      "canonical_improvement_count": 0,
+      "cell_count": 3,
+      "median_canonical_relative_reduction": 0.0,
+      "environment_gate": false
+    }
+  },
+  "mechanism_findings": {
+    "identifiability": "The adaptive complementary gauge reconstructed the executed additive action within tolerance in all nine paired cells.",
+    "reward": "Anchor fallback preserved the five-percent held-out reward floor in all nine paired cells.",
+    "frequency_alignment": "Only one Hopper optimizer replicate selected a trained checkpoint and exceeded the ten-percent canonical frequency-reduction gate; no environment reached the required two-of-three replicate gate.",
+    "optimization": "Eight of nine candidates fell back to the anchor. Training-batch deployment projections did not provide a closed-loop reward-and-frequency acceptance test, and unconstrained reward actor updates degraded held-out selection paths in HalfCheetah and Walker2d.",
+    "decision": "Do not expand this unguarded paired continuation. Preserve the adaptive gauge, but make deployment-frequency updates transactional against frozen anchor paths and abstain when the anchor is already feasible."
+  }
+}

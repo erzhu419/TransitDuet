@@ -769,6 +769,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v16_1_audit_gauge_paired_development",
+      "claim_id": "D21_ADAPTIVE_GAUGE_PAIRED_TRAINING",
+      "claim": "An audit-adaptive exact total-action gauge combined with paired primal-dual continuation yields cross-environment raw responsibility separation without a reward tradeoff.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "audit_gauge_paired_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "three_fresh_optimizer_seeds_paired_anchor_and_continuation_arms_with_forty_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_1_audit_gauge_paired",
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development preflight, the audit-adaptive gauge exactly reconstructed the additive action and preserved held-out reward noninferiority in all nine paired cells, but only one cell reached the canonical frequency-reduction gate and no environment reached the required two-of-three replicate gate.",
+      "forbidden_wording": "The v16.1 development preflight validates cross-environment raw responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v16_1_audit_gauge_paired_development.json",
+          "sha256": "0f3fc1a3a52aa291bf9bd8948129ffaf071cee26c5e81ee684fbda1791ae8ab4"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_1_audit_gauge_paired_outcome_2026-08-30.md",
+          "sha256": "8791150a9497981842a3010d6d7719558e0483154f3b5f618fc181ee09b65fcb"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
