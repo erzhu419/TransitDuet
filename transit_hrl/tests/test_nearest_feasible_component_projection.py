@@ -19,6 +19,8 @@ def test_feasible_reference_is_an_exact_fixed_point():
     np.testing.assert_allclose(result.lower, lower, atol=1e-12)
     assert result.component_correction_rms == 0.0
     assert result.total_action_correction_rms == 0.0
+    assert result.iteration_count == 0
+    assert result.status == "reference_components_already_feasible"
 
 
 def test_infeasible_constant_lower_is_projected_to_lpf_ball():

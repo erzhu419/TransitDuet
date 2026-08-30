@@ -174,6 +174,50 @@ def project_nearest_feasible_components(
     lower_operator = causal_rolling_operator(length, int(lower_window))
     upper_power_budget = upper_budget ** 2
     lower_power_budget = lower_budget ** 2
+    initial_metrics = _constraint_metrics(
+        reference_u,
+        reference_l,
+        upper_operator=upper_operator,
+        lower_operator=lower_operator,
+        upper_limit=upper_limit,
+        lower_limit=lower_limit,
+        total_limit=total_limit,
+        include_total_action_box=bool(include_total_action_box),
+    )
+    initially_feasible = bool(
+        initial_metrics["upper_power"] <= upper_power_budget + feasibility
+        and initial_metrics["lower_power"] <= lower_power_budget + feasibility
+        and initial_metrics["upper_bound_violation_max"] <= feasibility
+        and initial_metrics["lower_bound_violation_max"] <= feasibility
+        and initial_metrics["total_action_bound_violation_max"] <= feasibility
+    )
+    if initially_feasible:
+        return NearestFeasibleComponentProjectionResult(
+            upper=reference_u.copy(),
+            lower=reference_l.copy(),
+            status="reference_components_already_feasible",
+            feasible=True,
+            include_total_action_box=bool(include_total_action_box),
+            upper_power=float(initial_metrics["upper_power"]),
+            lower_power=float(initial_metrics["lower_power"]),
+            upper_power_budget=upper_power_budget,
+            lower_power_budget=lower_power_budget,
+            component_correction_rms=0.0,
+            total_action_correction_rms=0.0,
+            upper_correction_rms=0.0,
+            lower_correction_rms=0.0,
+            upper_bound_violation_max=float(
+                initial_metrics["upper_bound_violation_max"]
+            ),
+            lower_bound_violation_max=float(
+                initial_metrics["lower_bound_violation_max"]
+            ),
+            total_action_bound_violation_max=float(
+                initial_metrics["total_action_bound_violation_max"]
+            ),
+            convergence_residual_max=0.0,
+            iteration_count=0,
+        )
     upper_ball = _QuadraticBallProjector(
         upper_operator,
         length * dimension * upper_power_budget,
