@@ -1,5 +1,5 @@
 {
-  "development_record_count": 28,
+  "development_record_count": 29,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 34,
+  "record_count": 35,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4163,6 +4163,155 @@
       "selection_access": "reused_rejected_v17_4_paths"
     },
     {
+      "allowed_wording": "On 120 rejected v17.4 development paths, a numerically audited full-horizon oracle recovered 81 paths that the causal online split did not make jointly feasible. Seven Hopper paths remained above the lower-LPF32 budget after imposing the upper-HPF8 budget, separating a router-rebuild target from an actor-level total-action feasibility target.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_6_full_horizon_oracle_development.json",
+          "role": "decision",
+          "sha256": "340180c224e2ce39e30be3a73e88579f26dd59bfca3d1b8faef41626edec252f"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_6_full_horizon_oracle_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "1eb4be2dabfc929de061400351ead6a954eef7edd0637c18f333fb9d9aae6440"
+        }
+      ],
+      "claim": "A bounded full-horizon responsibility oracle distinguishes online-router failures from total-action frequency infeasibility on frozen MuJoCo trajectories.",
+      "claim_id": "D29_FULL_HORIZON_RESPONSIBILITY_ORACLE",
+      "decision": "mixed_router_recoverability_and_actor_floor",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_6_full_horizon_oracle_development",
+      "evidence_stage": "development",
+      "facts": {
+        "actor_floor_case_count": 7,
+        "actor_floor_cases": [
+          {
+            "disturbance_mode": "low_frequency",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 294864529,
+            "lower_power_at_upper_constrained_floor": 0.002371928576505643
+          },
+          {
+            "disturbance_mode": "standard",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 294864529,
+            "lower_power_at_upper_constrained_floor": 0.0022565343564109465
+          },
+          {
+            "disturbance_mode": "high_frequency",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 294864529,
+            "lower_power_at_upper_constrained_floor": 0.0022588105309964733
+          },
+          {
+            "disturbance_mode": "ood_chirp",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 2802248628,
+            "lower_power_at_upper_constrained_floor": 0.0023752597869906907
+          },
+          {
+            "disturbance_mode": "ood_chirp",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 294864529,
+            "lower_power_at_upper_constrained_floor": 0.002644327119567576
+          },
+          {
+            "disturbance_mode": "mixed",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 2802248628,
+            "lower_power_at_upper_constrained_floor": 0.002332785899125572
+          },
+          {
+            "disturbance_mode": "mixed",
+            "environment": "Hopper-v5",
+            "evaluation_seed": 294864529,
+            "lower_power_at_upper_constrained_floor": 0.0023467998383929663
+          }
+        ],
+        "decision_status": "mixed_router_recoverability_and_actor_floor",
+        "disturbance_mode_count": 5,
+        "eligible_for_actor_feasibility_rebuild": true,
+        "eligible_for_causal_router_rebuild": true,
+        "eligible_for_confirmatory_claim": false,
+        "environment_count": 3,
+        "environment_results": {
+          "HalfCheetah-v5": {
+            "baseline_joint_feasible_path_count": 0,
+            "baseline_lower_power_mean": 0.0035564969601090653,
+            "baseline_upper_power_mean": 0.004976757443177608,
+            "oracle_infeasible_path_count": 0,
+            "oracle_joint_feasible_path_count": 40,
+            "oracle_lower_power_mean": 0.0008563590114511304,
+            "oracle_upper_power_mean": 0.005624592795989371,
+            "path_count": 40,
+            "recoverable_path_count": 40,
+            "status": "full_horizon_oracle_supports_online_router_rebuild"
+          },
+          "Hopper-v5": {
+            "baseline_joint_feasible_path_count": 0,
+            "baseline_lower_power_mean": 0.022178732883598302,
+            "baseline_upper_power_mean": 0.00454284863807549,
+            "oracle_infeasible_path_count": 7,
+            "oracle_joint_feasible_path_count": 33,
+            "oracle_lower_power_mean": 0.0017393684440246734,
+            "oracle_upper_power_mean": 0.005624997138209149,
+            "path_count": 40,
+            "recoverable_path_count": 33,
+            "status": "mixed_online_router_and_total_action_limits"
+          },
+          "Walker2d-v5": {
+            "baseline_joint_feasible_path_count": 32,
+            "baseline_lower_power_mean": 0.0016908052682744641,
+            "baseline_upper_power_mean": 0.0010765051333661018,
+            "oracle_infeasible_path_count": 0,
+            "oracle_joint_feasible_path_count": 40,
+            "oracle_lower_power_mean": 7.4496553974154674e-09,
+            "oracle_upper_power_mean": 0.002659863524610711,
+            "path_count": 40,
+            "recoverable_path_count": 8,
+            "status": "full_horizon_oracle_supports_online_router_rebuild"
+          }
+        },
+        "evaluation_seed_count_per_environment_mode": 8,
+        "integrity_status": "valid",
+        "legacy_replay_exact_path_count": 120,
+        "numerical_audit": {
+          "bound_violation_max": 0.0,
+          "kkt_residual_max": 2.1006598724247313e-13,
+          "reconstruction_error_max": 5.551115123125783e-17,
+          "solver_optimality_max": 1.0496630149271768e-13
+        },
+        "overall": {
+          "baseline_joint_feasible_path_count": 32,
+          "baseline_lower_power_mean": 0.009142011703993943,
+          "baseline_upper_power_mean": 0.0035320370715397334,
+          "oracle_infeasible_path_count": 7,
+          "oracle_joint_feasible_path_count": 113,
+          "oracle_lower_power_mean": 0.000865244968377067,
+          "oracle_upper_power_mean": 0.004636484486269744,
+          "recoverable_path_count": 81,
+          "upper_budget_physically_infeasible_path_count": 0
+        },
+        "path_count": 120,
+        "source_checkpoint_optimizer_seed_count": 1,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 120,
+          "failed": 0
+        }
+      },
+      "forbidden_wording": "The v17.6 acausal reused-path oracle validates an online Freq-HRL policy, reward improvement, cross-seed generalization, deployment feasibility, or a final algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_existing_optimizer_seed_three_server_local_checkpoints_and_one_hundred_twenty_reused_paths_with_one_acausal_convex_oracle_per_path",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_6_full_horizon_oracle",
+      "positive_claim_supported": false,
+      "selection_access": "reused_rejected_v17_4_paths"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4221,7 +4370,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "3f2cd860f24980379abab75f1e049ceaee9c8106a68bfcdce9f02cbba68460af",
+  "registry_sha256": "86e92d821600f36125dc6e880592712d4a0f2f07417b5d4d64d997db642ea8b0",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

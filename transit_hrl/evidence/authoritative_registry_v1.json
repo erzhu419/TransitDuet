@@ -985,6 +985,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_6_full_horizon_oracle_development",
+      "claim_id": "D29_FULL_HORIZON_RESPONSIBILITY_ORACLE",
+      "claim": "A bounded full-horizon responsibility oracle distinguishes online-router failures from total-action frequency infeasibility on frozen MuJoCo trajectories.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "mixed_router_recoverability_and_actor_floor",
+      "integrity_status": "valid",
+      "selection_access": "reused_rejected_v17_4_paths",
+      "outcome_provenance": "one_existing_optimizer_seed_three_server_local_checkpoints_and_one_hundred_twenty_reused_paths_with_one_acausal_convex_oracle_per_path",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_6_full_horizon_oracle",
+      "allowed_wording": "On 120 rejected v17.4 development paths, a numerically audited full-horizon oracle recovered 81 paths that the causal online split did not make jointly feasible. Seven Hopper paths remained above the lower-LPF32 budget after imposing the upper-HPF8 budget, separating a router-rebuild target from an actor-level total-action feasibility target.",
+      "forbidden_wording": "The v17.6 acausal reused-path oracle validates an online Freq-HRL policy, reward improvement, cross-seed generalization, deployment feasibility, or a final algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_6_full_horizon_oracle_development.json",
+          "sha256": "340180c224e2ce39e30be3a73e88579f26dd59bfca3d1b8faef41626edec252f"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_6_full_horizon_oracle_outcome_2026-08-31.md",
+          "sha256": "1eb4be2dabfc929de061400351ead6a954eef7edd0637c18f333fb9d9aae6440"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

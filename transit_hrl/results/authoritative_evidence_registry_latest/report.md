@@ -38,6 +38,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_3_audit_optimal_macro_gauge_development | mujoco_control | development | audit_optimal_macro_gauge_preflight_not_supported | development_only | false |
 | mujoco_v17_4_streaming_audit_projection_development | mujoco_control | development | streaming_audit_projection_preflight_not_supported | development_only | false |
 | mujoco_v17_5_feasibility_diagnostic_development | mujoco_control | development | greedy_feasibility_projection_not_advanced | development_only | false |
+| mujoco_v17_6_full_horizon_oracle_development | mujoco_control | development | mixed_router_recoverability_and_actor_floor | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -234,6 +235,12 @@ Forbidden: The v17.4 development preflight validates the all-environment absolut
 On rejected v17.4 development paths, v17.5 eliminated current-step normalized budget regret in all three environments but improved full-trajectory lower-LPF32 in only one and upper-HPF8 in none. This diagnostic motivated a full-horizon frozen-total-action oracle.
 
 Forbidden: The v17.5 diagnostic validates feasibility-normalized projection, reward improvement, full-trajectory leakage improvement, fresh-seed performance, or a final Freq-HRL algorithm.
+
+### mujoco_v17_6_full_horizon_oracle_development
+
+On 120 rejected v17.4 development paths, a numerically audited full-horizon oracle recovered 81 paths that the causal online split did not make jointly feasible. Seven Hopper paths remained above the lower-LPF32 budget after imposing the upper-HPF8 budget, separating a router-rebuild target from an actor-level total-action feasibility target.
+
+Forbidden: The v17.6 acausal reused-path oracle validates an online Freq-HRL policy, reward improvement, cross-seed generalization, deployment feasibility, or a final algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

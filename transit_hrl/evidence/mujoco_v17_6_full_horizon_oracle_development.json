@@ -1,0 +1,141 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_6_full_horizon_oracle_development_v1",
+  "status": "mixed_router_recoverability_and_actor_floor",
+  "integrity_status": "valid",
+  "evidence_role": "rejected_v17_4_frozen_total_path_oracle_not_confirmatory",
+  "source_run": "mujoco_v17_6_full_horizon_oracle_20260831_r1",
+  "development_protocol_version": "mujoco_v17_6_full_horizon_oracle_v1",
+  "oracle_contract": "frozen_total_action_box_constrained_full_horizon_lower_lpf32_minimization_subject_to_upper_hpf8_budget_v1",
+  "frozen_oracle_revision": "5a6efa2dccb441334b55cabd25556fc78b55ad3b",
+  "frozen_source_manifest_sha256": "8d001993b7da2913052ce9ee91ff329410592dede1c8b2aae48da7a1054bc0d1",
+  "source_checkpoint_optimizer_seed_count": 1,
+  "environment_count": 3,
+  "disturbance_mode_count": 5,
+  "evaluation_seed_count_per_environment_mode": 8,
+  "path_count": 120,
+  "legacy_replay_exact_path_count": 120,
+  "scheduler_successful_task_count": 120,
+  "scheduler_attempt_count": 120,
+  "scheduler_task_id_first": "t85559",
+  "scheduler_task_id_last": "t85678",
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 120,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "numerical_audit": {
+    "bound_violation_max": 0.0,
+    "reconstruction_error_max": 5.551115123125783e-17,
+    "kkt_residual_max": 2.1006598724247313e-13,
+    "solver_optimality_max": 1.0496630149271768e-13
+  },
+  "overall": {
+    "baseline_joint_feasible_path_count": 32,
+    "oracle_joint_feasible_path_count": 113,
+    "recoverable_path_count": 81,
+    "oracle_infeasible_path_count": 7,
+    "upper_budget_physically_infeasible_path_count": 0,
+    "baseline_lower_power_mean": 0.009142011703993943,
+    "oracle_lower_power_mean": 0.000865244968377067,
+    "baseline_upper_power_mean": 0.0035320370715397334,
+    "oracle_upper_power_mean": 0.004636484486269744
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "path_count": 40,
+      "baseline_joint_feasible_path_count": 0,
+      "oracle_joint_feasible_path_count": 40,
+      "recoverable_path_count": 40,
+      "oracle_infeasible_path_count": 0,
+      "baseline_lower_power_mean": 0.0035564969601090653,
+      "oracle_lower_power_mean": 0.0008563590114511304,
+      "baseline_upper_power_mean": 0.004976757443177608,
+      "oracle_upper_power_mean": 0.005624592795989371,
+      "status": "full_horizon_oracle_supports_online_router_rebuild"
+    },
+    "Hopper-v5": {
+      "path_count": 40,
+      "baseline_joint_feasible_path_count": 0,
+      "oracle_joint_feasible_path_count": 33,
+      "recoverable_path_count": 33,
+      "oracle_infeasible_path_count": 7,
+      "baseline_lower_power_mean": 0.022178732883598302,
+      "oracle_lower_power_mean": 0.0017393684440246734,
+      "baseline_upper_power_mean": 0.00454284863807549,
+      "oracle_upper_power_mean": 0.005624997138209149,
+      "status": "mixed_online_router_and_total_action_limits"
+    },
+    "Walker2d-v5": {
+      "path_count": 40,
+      "baseline_joint_feasible_path_count": 32,
+      "oracle_joint_feasible_path_count": 40,
+      "recoverable_path_count": 8,
+      "oracle_infeasible_path_count": 0,
+      "baseline_lower_power_mean": 0.0016908052682744641,
+      "oracle_lower_power_mean": 7.4496553974154674e-09,
+      "baseline_upper_power_mean": 0.0010765051333661018,
+      "oracle_upper_power_mean": 0.002659863524610711,
+      "status": "full_horizon_oracle_supports_online_router_rebuild"
+    }
+  },
+  "actor_floor_cases": [
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "low_frequency",
+      "evaluation_seed": 294864529,
+      "lower_power_at_upper_constrained_floor": 0.002371928576505643
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "standard",
+      "evaluation_seed": 294864529,
+      "lower_power_at_upper_constrained_floor": 0.0022565343564109465
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "high_frequency",
+      "evaluation_seed": 294864529,
+      "lower_power_at_upper_constrained_floor": 0.0022588105309964733
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "ood_chirp",
+      "evaluation_seed": 2802248628,
+      "lower_power_at_upper_constrained_floor": 0.0023752597869906907
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "ood_chirp",
+      "evaluation_seed": 294864529,
+      "lower_power_at_upper_constrained_floor": 0.002644327119567576
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "mixed",
+      "evaluation_seed": 2802248628,
+      "lower_power_at_upper_constrained_floor": 0.002332785899125572
+    },
+    {
+      "environment": "Hopper-v5",
+      "disturbance_mode": "mixed",
+      "evaluation_seed": 294864529,
+      "lower_power_at_upper_constrained_floor": 0.0023467998383929663
+    }
+  ],
+  "registered_budgets": {
+    "upper_hpf8_power": 0.005625,
+    "lower_lpf32_power": 0.00225625
+  },
+  "eligible_for_causal_router_rebuild": true,
+  "eligible_for_actor_feasibility_rebuild": true,
+  "eligible_for_confirmatory_claim": false,
+  "mechanism_findings": {
+    "integrity": "All 120 frozen v17.4 paths replayed exactly, and every oracle solution passed the registered reconstruction, box, KKT, and solver-optimality tolerances.",
+    "router": "The acausal full-horizon responsibility split recovered 81 paths that the v17.4 online router did not make jointly feasible, including all 40 HalfCheetah paths and all eight infeasible Walker2d paths.",
+    "actor": "Seven Hopper paths remained above the lower-LPF32 budget at the minimum lower-power point compatible with the upper-HPF8 budget. Their fixed total-action traces therefore require an actor-level spectral feasibility change.",
+    "decision": "Advance both a causal finite-horizon approximation to the oracle responsibility split and an actor-level feasibility objective. Do not use this reused-path acausal diagnostic as performance or generalization evidence."
+  }
+}

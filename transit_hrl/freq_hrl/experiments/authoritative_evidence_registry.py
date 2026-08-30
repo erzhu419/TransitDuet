@@ -50,6 +50,9 @@ MUJOCO_V17_4_STREAMING_AUDIT_PROJECTION_SCHEMA_VERSION = (
 MUJOCO_V17_5_FEASIBILITY_DIAGNOSTIC_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_5_feasibility_diagnostic_development_v1"
 )
+MUJOCO_V17_6_FULL_HORIZON_ORACLE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_6_full_horizon_oracle_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1979,6 +1982,135 @@ def _mujoco_v17_5_feasibility_diagnostic_facts(
     }
 
 
+def _mujoco_v17_6_full_horizon_oracle_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    environment_results = dict(decision.get("environment_results") or {})
+    overall = dict(decision.get("overall") or {})
+    numerical_audit = dict(decision.get("numerical_audit") or {})
+    task_status = dict(decision.get("task_status_counts") or {})
+    actor_floor_cases = list(decision.get("actor_floor_cases") or [])
+    expected_environment_counts = {
+        "HalfCheetah-v5": (40, 0, 40, 40, 0),
+        "Hopper-v5": (40, 0, 33, 33, 7),
+        "Walker2d-v5": (40, 32, 40, 8, 0),
+    }
+    observed_environment_counts = {
+        environment: (
+            int(row.get("path_count", -1)),
+            int(row.get("baseline_joint_feasible_path_count", -1)),
+            int(row.get("oracle_joint_feasible_path_count", -1)),
+            int(row.get("recoverable_path_count", -1)),
+            int(row.get("oracle_infeasible_path_count", -1)),
+        )
+        for environment, row in environment_results.items()
+    }
+    actor_case_keys = {
+        (
+            str(row.get("environment", "")),
+            str(row.get("disturbance_mode", "")),
+            int(row.get("evaluation_seed", -1)),
+        )
+        for row in actor_floor_cases
+    }
+    expected_actor_case_keys = {
+        ("Hopper-v5", "low_frequency", 294864529),
+        ("Hopper-v5", "standard", 294864529),
+        ("Hopper-v5", "high_frequency", 294864529),
+        ("Hopper-v5", "ood_chirp", 2802248628),
+        ("Hopper-v5", "ood_chirp", 294864529),
+        ("Hopper-v5", "mixed", 2802248628),
+        ("Hopper-v5", "mixed", 294864529),
+    }
+    lower_budget = float(
+        dict(decision.get("registered_budgets") or {}).get(
+            "lower_lpf32_power", float("nan")
+        )
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_6_FULL_HORIZON_ORACLE_SCHEMA_VERSION
+        or decision.get("status")
+        != "mixed_router_recoverability_and_actor_floor"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "rejected_v17_4_frozen_total_path_oracle_not_confirmatory"
+        or decision.get("frozen_oracle_revision")
+        != "5a6efa2dccb441334b55cabd25556fc78b55ad3b"
+        or decision.get("frozen_source_manifest_sha256")
+        != "8d001993b7da2913052ce9ee91ff329410592dede1c8b2aae48da7a1054bc0d1"
+        or int(decision.get("source_checkpoint_optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("disturbance_mode_count", -1)) != 5
+        or int(decision.get("evaluation_seed_count_per_environment_mode", -1))
+        != 8
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("legacy_replay_exact_path_count", -1)) != 120
+        or int(decision.get("scheduler_successful_task_count", -1)) != 120
+        or int(decision.get("scheduler_attempt_count", -1)) != 120
+        or decision.get("scheduler_task_id_first") != "t85559"
+        or decision.get("scheduler_task_id_last") != "t85678"
+        or list(decision.get("scheduler_nodes") or []) != ["node003"]
+        or task_status != {"done": 120, "failed": 0, "cancelled": 0}
+        or observed_environment_counts != expected_environment_counts
+        or int(overall.get("baseline_joint_feasible_path_count", -1)) != 32
+        or int(overall.get("oracle_joint_feasible_path_count", -1)) != 113
+        or int(overall.get("recoverable_path_count", -1)) != 81
+        or int(overall.get("oracle_infeasible_path_count", -1)) != 7
+        or int(
+            overall.get("upper_budget_physically_infeasible_path_count", -1)
+        ) != 0
+        or actor_case_keys != expected_actor_case_keys
+        or len(actor_floor_cases) != 7
+        or not all(
+            float(row.get("lower_power_at_upper_constrained_floor", 0.0))
+            > lower_budget
+            for row in actor_floor_cases
+        )
+        or float(numerical_audit.get("bound_violation_max", float("inf")))
+        > 1e-10
+        or float(
+            numerical_audit.get("reconstruction_error_max", float("inf"))
+        ) > 1e-12
+        or float(numerical_audit.get("kkt_residual_max", float("inf")))
+        > 1e-5
+        or float(
+            numerical_audit.get("solver_optimality_max", float("inf"))
+        ) > 1e-5
+        or decision.get("eligible_for_causal_router_rebuild") is not True
+        or decision.get("eligible_for_actor_feasibility_rebuild") is not True
+        or decision.get("eligible_for_confirmatory_claim") is not False
+        or report is None
+        or "`mixed_router_recoverability_and_actor_floor`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError(
+            "MuJoCo v17.6 full-horizon oracle decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "source_checkpoint_optimizer_seed_count": 1,
+        "environment_count": 3,
+        "disturbance_mode_count": 5,
+        "evaluation_seed_count_per_environment_mode": 8,
+        "path_count": 120,
+        "legacy_replay_exact_path_count": 120,
+        "overall": overall,
+        "environment_results": environment_results,
+        "actor_floor_case_count": 7,
+        "actor_floor_cases": actor_floor_cases,
+        "numerical_audit": numerical_audit,
+        "task_status_counts": task_status,
+        "eligible_for_causal_router_rebuild": True,
+        "eligible_for_actor_feasibility_rebuild": True,
+        "eligible_for_confirmatory_claim": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2018,6 +2150,9 @@ PARSERS = {
     ),
     "mujoco_v17_5_feasibility_diagnostic": (
         _mujoco_v17_5_feasibility_diagnostic_facts
+    ),
+    "mujoco_v17_6_full_horizon_oracle": (
+        _mujoco_v17_6_full_horizon_oracle_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
