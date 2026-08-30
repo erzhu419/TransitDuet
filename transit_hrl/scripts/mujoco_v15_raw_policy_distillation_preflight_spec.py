@@ -46,6 +46,13 @@ WORKERS = 18
 CPU_PER_TASK = 18
 RAM_MB_PER_TASK = 8192
 EXPECTED_CELL_COUNT = len(ENVIRONMENTS) * len(OPTIMIZER_SEEDS)
+ANALYSIS_VERSION = "mujoco_v15_raw_policy_distillation_analysis_v1"
+SUPPORTED_ANALYSIS_STATUS = (
+    "raw_policy_distillation_preflight_supported_all_environments"
+)
+NOT_SUPPORTED_ANALYSIS_STATUS = "raw_policy_distillation_preflight_not_supported"
+ANALYSIS_JSON_NAME = "raw_policy_distillation_preflight.json"
+ANALYSIS_CSV_NAME = "raw_policy_distillation_cells.csv"
 
 CANDIDATES = tuple(
     {

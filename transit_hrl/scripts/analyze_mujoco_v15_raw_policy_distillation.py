@@ -130,15 +130,15 @@ def analyze_payloads(
         )
     support_count = sum(bool(cell["validation_supported"]) for cell in cells)
     return {
-        "analysis_version": "mujoco_v15_raw_policy_distillation_analysis_v1",
+        "analysis_version": spec.ANALYSIS_VERSION,
         "evidence_role": spec.EVIDENCE_ROLE,
         "selection_contract": spec.SELECTION_CONTRACT,
         "cell_count": len(cells),
         "validation_supported_count": support_count,
         "status": (
-            "raw_policy_distillation_preflight_supported_all_environments"
+            spec.SUPPORTED_ANALYSIS_STATUS
             if support_count == spec.EXPECTED_CELL_COUNT
-            else "raw_policy_distillation_preflight_not_supported"
+            else spec.NOT_SUPPORTED_ANALYSIS_STATUS
         ),
         "cells": sorted(
             cells, key=lambda item: (item["environment"], item["optimizer_seed"])
@@ -157,10 +157,10 @@ def analyze_run(run_name: str, output_dir: Path | None = None) -> dict[str, Any]
     result = analyze_payloads(payloads)
     target = output_dir or (ROOT / "results" / run_name / "analysis")
     target.mkdir(parents=True, exist_ok=True)
-    (target / "raw_policy_distillation_preflight.json").write_text(
+    (target / spec.ANALYSIS_JSON_NAME).write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    with (target / "raw_policy_distillation_cells.csv").open(
+    with (target / spec.ANALYSIS_CSV_NAME).open(
         "w", newline="", encoding="utf-8"
     ) as handle:
         fields = [

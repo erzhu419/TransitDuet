@@ -151,13 +151,20 @@ def _candidate_job(job: dict[str, Any]) -> dict[str, Any]:
     )
     model = _load_model(checkpoint)
     config = dict(job["config"])
+    distillation_config = {
+        key: value for key, value in config.items()
+        if key != "router_strength"
+    }
+    router_strength = float(config.get(
+        "router_strength", job["summary"]["lower_action_router_strength"]
+    ))
     diagnostics = distill_hierarchical_actor_heads(
         model,
         job["trajectories"],
         upper_action_scale=float(job["summary"]["upper_action_scale"]),
         lower_action_scale=float(job["summary"]["lower_action_scale"]),
         lower_action_context_start=int(job["lower_action_context_start"]),
-        **config,
+        **distillation_config,
     )
     rows = _evaluate_rows(
         model,
@@ -165,13 +172,14 @@ def _candidate_job(job: dict[str, Any]) -> dict[str, Any]:
         paths=job["paths"],
         episode_horizon=int(job["episode_horizon"]),
         leakage_cost_mode=str(job["leakage_cost_mode"]),
-        router_strength=float(job["summary"]["lower_action_router_strength"]),
+        router_strength=router_strength,
     )
     return {
         "candidate_index": int(job["candidate_index"]),
         "config": config,
         "parameter_sha256": _model_parameter_sha256(model),
         "distillation": diagnostics,
+        "evaluation_router_strength": router_strength,
         "rows": rows,
     }
 
@@ -189,13 +197,20 @@ def _evaluate_selected(
 ) -> tuple[str, list[dict[str, Any]]]:
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
     model = _load_model(checkpoint)
+    distillation_config = {
+        key: value for key, value in config.items()
+        if key != "router_strength"
+    }
+    router_strength = float(config.get(
+        "router_strength", summary["lower_action_router_strength"]
+    ))
     distill_hierarchical_actor_heads(
         model,
         trajectories,
         upper_action_scale=float(summary["upper_action_scale"]),
         lower_action_scale=float(summary["lower_action_scale"]),
         lower_action_context_start=int(lower_action_context_start),
-        **config,
+        **distillation_config,
     )
     return _model_parameter_sha256(model), _evaluate_rows(
         model,
@@ -203,7 +218,7 @@ def _evaluate_selected(
         paths=paths,
         episode_horizon=int(episode_horizon),
         leakage_cost_mode=str(leakage_cost_mode),
-        router_strength=float(summary["lower_action_router_strength"]),
+        router_strength=router_strength,
     )
 
 
@@ -392,6 +407,11 @@ def run_probe(
             float(config["blend"]),
             float(config["transfer_strength"]),
             float(config["slow_alpha"]),
+            float(config.get("head_delta_rms_limit", float("inf"))),
+            float(config.get("raw_target_limit", float("inf"))),
+            float(config.get(
+                "router_strength", summary["lower_action_router_strength"]
+            )),
             float(index),
         )
 
