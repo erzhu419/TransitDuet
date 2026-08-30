@@ -3,7 +3,10 @@ import json
 
 from scripts import analyze_mujoco_v17_zero_dc_plan_screen as analyzer
 from scripts import mujoco_v17_zero_dc_plan_screen_spec as spec
-from scripts.run_mujoco_cell_small_export import export_small_cell
+from scripts.run_mujoco_cell_small_export import (
+    export_small_cell,
+    full_cell_complete,
+)
 from scripts.submit_mujoco_v17_zero_dc_plan_screen_scheduleurm import (
     build_scheduler_spec,
     build_training_command,
@@ -60,6 +63,7 @@ def test_small_export_omits_checkpoint_and_training_history(tmp_path):
     (source / "evaluation_rows.csv").write_text("metric\n", encoding="utf-8")
     (source / "checkpoint.pt").write_bytes(b"checkpoint")
     (source / "training_history.json").write_text("[]\n", encoding="utf-8")
+    assert full_cell_complete(source)
     export_small_cell(
         source,
         target,

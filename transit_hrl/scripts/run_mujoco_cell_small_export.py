@@ -16,6 +16,14 @@ EXPORTED_FILES = ("cell_summary.json", "evaluation_rows.csv")
 SERVER_ONLY_FILES = ("checkpoint.pt", "training_history.json")
 
 
+def full_cell_complete(path: Path) -> bool:
+    source = Path(path)
+    return all(
+        (source / name).is_file()
+        for name in (*EXPORTED_FILES, *SERVER_ONLY_FILES)
+    )
+
+
 def export_small_cell(
     full_output_dir: Path,
     export_output_dir: Path,
@@ -66,25 +74,32 @@ def main() -> None:
         control_args = control_args[1:]
     if not control_args or "--output-dir" in control_args:
         raise SystemExit("control arguments must be nonempty and must not set --output-dir")
-    subprocess.run(
-        [
-            sys.executable,
-            "-u",
-            "-m",
-            MODULE,
-            *control_args,
-            "--output-dir",
-            str(args.full_output_dir),
-        ],
-        check=True,
-    )
+    if full_cell_complete(args.full_output_dir):
+        print(
+            "mujoco_small_export reuse=complete_server_cell "
+            f"source={args.full_output_dir}",
+            flush=True,
+        )
+    else:
+        subprocess.run(
+            [
+                sys.executable,
+                "-u",
+                "-m",
+                MODULE,
+                *control_args,
+                "--output-dir",
+                str(args.full_output_dir),
+            ],
+            check=True,
+        )
     export_small_cell(
         args.full_output_dir,
         args.export_output_dir,
         server_full_output_dir=args.server_full_output_dir,
     )
     print(
-        "mujoco_small_export status=valid "
+        "DONE mujoco_small_export status=valid "
         f"output={args.export_output_dir}",
         flush=True,
     )
