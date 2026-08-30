@@ -100,6 +100,43 @@ def test_causal_targets_reduce_both_bands_for_compensating_actions():
     assert _low_power(targets.lower_action, 32) < _low_power(lower_action, 32)
 
 
+def test_upper_source_teacher_smooths_upper_and_reconstructs_total():
+    upper_action = np.asarray(
+        [[0.5], [-0.5], [0.5], [-0.5], [0.5], [-0.5]],
+        dtype=np.float64,
+    )
+    duration = 3
+    lower_action = np.zeros((len(upper_action) * duration, 1), dtype=np.float64)
+    targets = causal_macro_responsibility_targets(
+        _raw(upper_action),
+        _raw(lower_action),
+        np.full(len(upper_action), duration),
+        slow_alpha=0.5,
+        transfer_strength=1.0,
+        slow_source="upper_action",
+    )
+    repeated_upper = np.repeat(upper_action, duration, axis=0)
+    repeated_target = targets.upper_action[targets.macro_index]
+
+    assert _high_power(repeated_target, 8) < _high_power(repeated_upper, 8)
+    np.testing.assert_allclose(
+        repeated_target + targets.lower_action,
+        repeated_upper + lower_action,
+        rtol=0.0,
+        atol=1e-12,
+    )
+
+
+def test_causal_targets_reject_unknown_slow_source():
+    with np.testing.assert_raises_regex(ValueError, "slow_source"):
+        causal_macro_responsibility_targets(
+            np.zeros((1, 1)),
+            np.zeros((1, 1)),
+            np.ones(1),
+            slow_source="future_total",
+        )
+
+
 def test_actor_output_head_ridge_fit_reduces_target_error():
     torch.manual_seed(17)
     rng = np.random.default_rng(19)

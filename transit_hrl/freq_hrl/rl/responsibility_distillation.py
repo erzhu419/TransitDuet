@@ -96,6 +96,7 @@ def causal_macro_responsibility_targets(
     slow_alpha: float = 0.25,
     transfer_strength: float = 1.0,
     raw_target_limit: float | None = None,
+    slow_source: str = "total_action",
 ) -> ResponsibilityDistillationTargets:
     """Build strictly causal, exactly reconstructing upper/lower targets.
 
@@ -119,6 +120,9 @@ def causal_macro_responsibility_targets(
         raise ValueError("slow_alpha must be in (0, 1]")
     if not np.isfinite(strength) or not 0.0 <= strength <= 1.0:
         raise ValueError("transfer_strength must be in [0, 1]")
+    source = str(slow_source)
+    if source not in {"total_action", "upper_action"}:
+        raise ValueError("slow_source must be total_action or upper_action")
 
     action_dim = upper.shape[1]
     upper_scale = _positive_scale(
@@ -134,7 +138,7 @@ def causal_macro_responsibility_targets(
 
     target_upper = np.empty_like(upper_action)
     target_lower = np.empty_like(lower_action)
-    slow_total = upper_action[0].copy()
+    slow_signal = upper_action[0].copy()
     minimum_width = float("inf")
     start = 0
     for macro, duration in enumerate(durations):
@@ -142,7 +146,7 @@ def causal_macro_responsibility_targets(
         macro_total = original_total[start:stop]
         desired = (
             (1.0 - strength) * upper_action[macro]
-            + strength * slow_total
+            + strength * slow_signal
         )
         lower_bound = np.maximum(
             -upper_scale,
@@ -162,9 +166,14 @@ def causal_macro_responsibility_targets(
             raise RuntimeError("projected lower complement exceeds its action scale")
         target_upper[macro] = projected
         target_lower[start:stop] = complement
-        slow_total = (
-            (1.0 - alpha) * slow_total
-            + alpha * np.mean(macro_total, axis=0)
+        completed_signal = (
+            np.mean(macro_total, axis=0)
+            if source == "total_action"
+            else upper_action[macro]
+        )
+        slow_signal = (
+            (1.0 - alpha) * slow_signal
+            + alpha * completed_signal
         )
         start = stop
 
@@ -320,6 +329,7 @@ def distill_hierarchical_actor_heads(
     lower_action_context_start: int | None = None,
     raw_target_limit: float | None = None,
     head_delta_rms_limit: float | None = None,
+    slow_source: str = "total_action",
 ) -> dict[str, Any]:
     """Distill causal responsibility targets from frozen SMDP trajectories."""
 
@@ -342,6 +352,7 @@ def distill_hierarchical_actor_heads(
             slow_alpha=slow_alpha,
             transfer_strength=transfer_strength,
             raw_target_limit=raw_target_limit,
+            slow_source=slow_source,
         )
         upper_states.append(np.asarray(upper_batch.state, dtype=np.float64))
         upper_targets.append(targets.upper_raw)
@@ -428,7 +439,7 @@ def distill_hierarchical_actor_heads(
     return {
         "contract": (
             "causal_macro_raw_policy_counterfactual_context_"
-            "saturation_bounded_trust_region_distillation_v3"
+            "multi_source_saturation_bounded_trust_region_distillation_v4"
         ),
         "trajectory_count": int(len(trajectories)),
         "slow_alpha": float(slow_alpha),
@@ -442,6 +453,7 @@ def distill_hierarchical_actor_heads(
             None if head_delta_rms_limit is None
             else float(head_delta_rms_limit)
         ),
+        "slow_source": str(slow_source),
         "target_reconstruction_rms_max": float(max(
             item.reconstruction_rms for item in target_diagnostics
         )),
