@@ -185,6 +185,19 @@ def _actor_features_and_head(
     return features.detach().cpu().numpy().astype(np.float64), network[-1]
 
 
+def _actor_raw_actions(actor: nn.Module, states: np.ndarray) -> np.ndarray:
+    network = getattr(actor, "net", None)
+    if not isinstance(network, nn.Sequential):
+        raise TypeError("responsibility distillation requires an MLP Gaussian actor")
+    state = _finite_matrix(states, name="actor states")
+    parameter = next(network.parameters())
+    with torch.no_grad():
+        output = network(torch.as_tensor(
+            state, dtype=parameter.dtype, device=parameter.device
+        ))
+    return output.detach().cpu().numpy().astype(np.float64)
+
+
 def fit_actor_output_head(
     actor: nn.Module,
     states: Any,
@@ -255,6 +268,7 @@ def distill_hierarchical_actor_heads(
     transfer_strength: float,
     ridge: float,
     blend: float,
+    lower_action_context_start: int | None = None,
 ) -> dict[str, Any]:
     """Distill causal responsibility targets from frozen SMDP trajectories."""
 
@@ -263,8 +277,8 @@ def distill_hierarchical_actor_heads(
     upper_states: list[np.ndarray] = []
     lower_states: list[np.ndarray] = []
     upper_targets: list[np.ndarray] = []
-    lower_targets: list[np.ndarray] = []
     target_diagnostics: list[ResponsibilityDistillationTargets] = []
+    trajectory_data: list[dict[str, np.ndarray]] = []
     for trajectory in trajectories:
         upper_batch = trajectory.upper
         lower_batch = trajectory.lower
@@ -278,10 +292,15 @@ def distill_hierarchical_actor_heads(
             transfer_strength=transfer_strength,
         )
         upper_states.append(np.asarray(upper_batch.state, dtype=np.float64))
-        lower_states.append(np.asarray(lower_batch.state, dtype=np.float64))
         upper_targets.append(targets.upper_raw)
-        lower_targets.append(targets.lower_raw)
         target_diagnostics.append(targets)
+        trajectory_data.append({
+            "upper_raw": np.asarray(upper_batch.action, dtype=np.float64),
+            "lower_raw": np.asarray(lower_batch.action, dtype=np.float64),
+            "lower_state": np.asarray(lower_batch.state, dtype=np.float64),
+            "macro_index": targets.macro_index,
+            "teacher_upper_action": targets.upper_action,
+        })
 
     upper_fit = fit_actor_output_head(
         model.upper_actor,
@@ -290,6 +309,57 @@ def distill_hierarchical_actor_heads(
         ridge=ridge,
         blend=blend,
     )
+    action_dim = int(target_diagnostics[0].upper_action.shape[1])
+    upper_scale = _positive_scale(
+        upper_action_scale, action_dim, name="upper_action_scale"
+    )
+    lower_scale = _positive_scale(
+        lower_action_scale, action_dim, name="lower_action_scale"
+    )
+    context_start = (
+        None if lower_action_context_start is None
+        else int(lower_action_context_start)
+    )
+    student_reconstruction_errors: list[np.ndarray] = []
+    upper_teacher_errors: list[np.ndarray] = []
+    context_shifts: list[np.ndarray] = []
+    lower_targets: list[np.ndarray] = []
+    for states, data in zip(upper_states, trajectory_data, strict=True):
+        fitted_upper_raw = _actor_raw_actions(model.upper_actor, states)
+        fitted_upper_action = np.tanh(fitted_upper_raw) * upper_scale
+        macro_index = data["macro_index"].astype(np.int64, copy=False)
+        original_total = (
+            np.tanh(data["upper_raw"]) * upper_scale
+        )[macro_index] + np.tanh(data["lower_raw"]) * lower_scale
+        repeated_fitted_upper = fitted_upper_action[macro_index]
+        desired_lower = original_total - repeated_fitted_upper
+        fitted_lower_target = np.minimum(
+            np.maximum(desired_lower, -lower_scale * (1.0 - 1e-7)),
+            lower_scale * (1.0 - 1e-7),
+        )
+        student_reconstruction_errors.append(
+            repeated_fitted_upper + fitted_lower_target - original_total
+        )
+        upper_teacher_errors.append(
+            fitted_upper_action - data["teacher_upper_action"]
+        )
+        lower_state = data["lower_state"].copy()
+        if context_start is not None:
+            context_stop = context_start + action_dim
+            if context_start < 0 or context_stop > lower_state.shape[1]:
+                raise ValueError(
+                    "lower action context slice is outside the lower state"
+                )
+            context_shifts.append(
+                lower_state[:, context_start:context_stop]
+                - repeated_fitted_upper
+            )
+            lower_state[:, context_start:context_stop] = repeated_fitted_upper
+        lower_states.append(lower_state)
+        lower_targets.append(_inverse_squash(
+            fitted_lower_target, lower_scale
+        ))
+
     lower_fit = fit_actor_output_head(
         model.lower_actor,
         np.concatenate(lower_states, axis=0),
@@ -298,7 +368,10 @@ def distill_hierarchical_actor_heads(
         blend=blend,
     )
     return {
-        "contract": "causal_macro_raw_policy_responsibility_distillation_v1",
+        "contract": (
+            "causal_macro_raw_policy_counterfactual_context_"
+            "responsibility_distillation_v2"
+        ),
         "trajectory_count": int(len(trajectories)),
         "slow_alpha": float(slow_alpha),
         "transfer_strength": float(transfer_strength),
@@ -313,6 +386,23 @@ def distill_hierarchical_actor_heads(
         "target_feasible_width_minimum": float(min(
             item.feasible_width_minimum for item in target_diagnostics
         )),
+        "student_upper_teacher_action_mse": float(np.mean(np.square(
+            np.concatenate(upper_teacher_errors, axis=0)
+        ))),
+        "student_target_reconstruction_rms_max": float(max(
+            np.sqrt(np.mean(np.square(error)))
+            for error in student_reconstruction_errors
+        )),
+        "student_target_reconstruction_max_abs": float(max(
+            np.max(np.abs(error)) for error in student_reconstruction_errors
+        )),
+        "lower_action_context_counterfactual": bool(
+            context_start is not None
+        ),
+        "lower_action_context_shift_rms": float(
+            np.sqrt(np.mean(np.square(np.concatenate(context_shifts, axis=0))))
+            if context_shifts else 0.0
+        ),
         "upper_fit": upper_fit,
         "lower_fit": lower_fit,
     }

@@ -121,6 +121,8 @@ def test_hierarchical_distillation_updates_both_heads():
         lower_actor=GaussianActor(3, 1, hidden_dim=4, init_log_std=-1.0),
     )
     rng = np.random.default_rng(29)
+    lower_state = rng.normal(size=(6, 3))
+    lower_state[:, 1] = np.repeat([0.2, -0.2, 0.1], 2)
     trajectory = SimpleNamespace(
         upper=SimpleNamespace(
             state=rng.normal(size=(3, 2)),
@@ -128,7 +130,7 @@ def test_hierarchical_distillation_updates_both_heads():
             duration=np.asarray([2.0, 2.0, 2.0]),
         ),
         lower=SimpleNamespace(
-            state=rng.normal(size=(6, 3)),
+            state=lower_state,
             action=_raw(np.asarray(
                 [[0.1], [0.2], [0.3], [0.1], [-0.2], [0.0]]
             )),
@@ -143,6 +145,7 @@ def test_hierarchical_distillation_updates_both_heads():
         transfer_strength=0.75,
         ridge=1e-3,
         blend=0.5,
+        lower_action_context_start=1,
     )
 
     assert diagnostics["target_reconstruction_max_abs"] <= 1e-12
@@ -152,3 +155,6 @@ def test_hierarchical_distillation_updates_both_heads():
     assert diagnostics["lower_fit"]["target_mse_after"] < diagnostics[
         "lower_fit"
     ]["target_mse_before"]
+    assert diagnostics["lower_action_context_counterfactual"] is True
+    assert diagnostics["lower_action_context_shift_rms"] > 0.0
+    assert diagnostics["student_target_reconstruction_max_abs"] <= 1e-12
