@@ -39,6 +39,20 @@ def _parse_gains(value: str) -> tuple[float, ...]:
     return gains
 
 
+def _parse_router_strengths(value: str) -> tuple[float, ...]:
+    strengths = tuple(
+        float(item.strip()) for item in str(value).split(",") if item.strip()
+    )
+    if not strengths or any(
+        not np.isfinite(strength) or not 0.0 <= strength <= 1.0
+        for strength in strengths
+    ):
+        raise ValueError("router strengths must be finite and in [0, 1]")
+    if len(set(strengths)) != len(strengths):
+        raise ValueError("router strengths must be unique")
+    return strengths
+
+
 def _actor_output_head(actor: nn.Module) -> nn.Linear:
     network = getattr(actor, "net", None)
     if network is None or len(network) < 1 or not isinstance(network[-1], nn.Linear):
@@ -86,6 +100,7 @@ def _evaluate_rows(
     paths: Iterable[dict[str, Any]],
     episode_horizon: int,
     leakage_cost_mode: str,
+    router_strength: float,
 ) -> list[dict[str, Any]]:
     rows = []
     for path in paths:
@@ -110,7 +125,7 @@ def _evaluate_rows(
             leakage_cost_mode=str(leakage_cost_mode),
             lower_action_router_mode=str(summary["lower_action_router_mode"]),
             lower_action_router_alpha=float(summary["lower_action_router_alpha"]),
-            lower_action_router_strength=float(summary["lower_action_router_strength"]),
+            lower_action_router_strength=float(router_strength),
             lower_action_router_observe_strength=bool(
                 summary["lower_action_router_observe_strength"]
             ),
@@ -128,6 +143,7 @@ def run_probe(
     summary_path: Path,
     output_path: Path,
     gains: tuple[float, ...],
+    router_strengths: tuple[float, ...],
     episode_horizon: int,
     leakage_cost_mode: str,
 ) -> dict[str, Any]:
@@ -151,6 +167,7 @@ def run_probe(
         paths=paths,
         episode_horizon=episode_horizon,
         leakage_cost_mode=leakage_cost_mode,
+        router_strength=float(summary["lower_action_router_strength"]),
     )
     modes = tuple(dict.fromkeys(str(item["disturbance_mode"]) for item in paths))
 
@@ -176,39 +193,49 @@ def run_probe(
         )
 
     candidates = []
-    for upper_gain in gains:
-        for lower_gain in gains:
-            model = _load_model(checkpoint)
-            scale_actor_output_head(model.upper_actor, upper_gain)
-            scale_actor_output_head(model.lower_actor, lower_gain)
-            rows = (
-                baseline_rows
-                if upper_gain == 1.0 and lower_gain == 1.0
-                else _evaluate_rows(
-                    model,
-                    summary=summary,
-                    paths=paths,
-                    episode_horizon=episode_horizon,
-                    leakage_cost_mode=leakage_cost_mode,
+    registered_strength = float(summary["lower_action_router_strength"])
+    for router_strength in router_strengths:
+        for upper_gain in gains:
+            for lower_gain in gains:
+                model = _load_model(checkpoint)
+                scale_actor_output_head(model.upper_actor, upper_gain)
+                scale_actor_output_head(model.lower_actor, lower_gain)
+                rows = (
+                    baseline_rows
+                    if (
+                        upper_gain == 1.0
+                        and lower_gain == 1.0
+                        and router_strength == registered_strength
+                    )
+                    else _evaluate_rows(
+                        model,
+                        summary=summary,
+                        paths=paths,
+                        episode_horizon=episode_horizon,
+                        leakage_cost_mode=leakage_cost_mode,
+                        router_strength=router_strength,
+                    )
                 )
-            )
-            guard = snapshot(rows)
-            candidates.append({
-                "upper_gain": float(upper_gain),
-                "lower_gain": float(lower_gain),
-                "parameter_sha256": _model_parameter_sha256(model),
-                "rank": list(guard["rank"]),
-                "reward_violation_count": int(guard["reward_violation_count"]),
-                "frequency_violation_count": int(guard["frequency_violation_count"]),
-                "frequency_violation_merit": float(
-                    guard["frequency_violation_merit"]
-                ),
-                "worst_frequency_violation": float(
-                    guard["worst_frequency_violation"]
-                ),
-                "worst_constraint": dict(guard["worst_constraint"]),
-                "summary": summarize(rows),
-            })
+                guard = snapshot(rows)
+                candidates.append({
+                    "upper_gain": float(upper_gain),
+                    "lower_gain": float(lower_gain),
+                    "router_strength": float(router_strength),
+                    "parameter_sha256": _model_parameter_sha256(model),
+                    "rank": list(guard["rank"]),
+                    "reward_violation_count": int(guard["reward_violation_count"]),
+                    "frequency_violation_count": int(
+                        guard["frequency_violation_count"]
+                    ),
+                    "frequency_violation_merit": float(
+                        guard["frequency_violation_merit"]
+                    ),
+                    "worst_frequency_violation": float(
+                        guard["worst_frequency_violation"]
+                    ),
+                    "worst_constraint": dict(guard["worst_constraint"]),
+                    "summary": summarize(rows),
+                })
     candidates.sort(key=lambda item: tuple(item["rank"]), reverse=True)
     feasible = [
         item for item in candidates
@@ -226,6 +253,7 @@ def run_probe(
         "baseline_parameter_sha256": baseline_parameter_sha256,
         "guard_path_count": len(paths),
         "gains": list(gains),
+        "router_strengths": list(router_strengths),
         "candidate_count": len(candidates),
         "feasible_candidate_count": len(feasible),
         "best_candidate": candidates[0],
@@ -244,6 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--gains", default="1.0,0.99,0.98,0.97,0.95")
+    parser.add_argument("--router-strengths", default="0.5")
     parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--leakage-cost-mode", default="power_excess")
     return parser
@@ -256,6 +285,7 @@ def main() -> None:
         summary_path=args.summary,
         output_path=args.output,
         gains=_parse_gains(args.gains),
+        router_strengths=_parse_router_strengths(args.router_strengths),
         episode_horizon=args.episode_horizon,
         leakage_cost_mode=args.leakage_cost_mode,
     )

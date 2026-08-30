@@ -5,6 +5,7 @@ import torch
 from freq_hrl.rl.dual_actor_critic import GaussianActor
 from scripts.probe_mujoco_radial_restoration import (
     _parse_gains,
+    _parse_router_strengths,
     scale_actor_output_head,
 )
 
@@ -26,6 +27,16 @@ class MujocoRadialRestorationProbeTest(unittest.TestCase):
             with self.subTest(invalid=invalid):
                 with self.assertRaises(ValueError):
                     _parse_gains(invalid)
+
+    def test_router_strength_registry_includes_closed_interval(self):
+        self.assertEqual(
+            _parse_router_strengths("0,.5,1"),
+            (0.0, 0.5, 1.0),
+        )
+        for invalid in ("", "-0.1", "1.1", "nan", ".5,.5"):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ValueError):
+                    _parse_router_strengths(invalid)
 
 
 if __name__ == "__main__":
