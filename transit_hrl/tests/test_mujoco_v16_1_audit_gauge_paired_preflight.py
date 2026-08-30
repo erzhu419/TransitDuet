@@ -63,6 +63,12 @@ def _cell(phase: str, environment: str, arm: str, seed: int):
         "upper_constraint_mode": "primal_dual",
         "upper_dual_lr": arm_spec["upper_dual_lr"],
         "lower_dual_lr": arm_spec["lower_dual_lr"],
+        "upper_deployment_frequency_dual_lr": arm_spec[
+            "upper_deployment_frequency_dual_lr"
+        ],
+        "lower_deployment_frequency_dual_lr": arm_spec[
+            "lower_deployment_frequency_dual_lr"
+        ],
         "checkpoint_score_mode": arm_spec["checkpoint_score_mode"],
         "selected_checkpoint_iteration": 20 if is_anchor else 3,
     }
@@ -73,6 +79,9 @@ def _cell(phase: str, environment: str, arm: str, seed: int):
             "checkpoint_optimizer_seed": seed,
             "checkpoint_router_mode": spec.ANCHOR_SPEC[
                 "lower_action_router_mode"
+            ],
+            "checkpoint_router_strength": spec.ANCHOR_SPEC[
+                "lower_action_router_strength"
             ],
         }
         summary["selected_checkpoint_diagnostics"] = {
@@ -136,15 +145,24 @@ def test_v16_1_design_uses_new_disjoint_roles_and_matched_capacity():
     assert spec.EXPECTED_ANCHOR_CELL_COUNT == 9
     assert spec.EXPECTED_CONTINUATION_CELL_COUNT == 18
     assert spec.ANCHOR_SPEC["upper_constraint_mode"] == "primal_dual"
-    assert spec.ANCHOR_SPEC["upper_dual_lr"] == 0.0
-    assert spec.ARMS[spec.PRIMAL_DUAL_CANDIDATE]["upper_dual_lr"] > 0.0
+    assert spec.ANCHOR_SPEC["upper_deployment_frequency_dual_lr"] == 0.0
+    assert (
+        spec.ARMS[spec.PRIMAL_DUAL_CANDIDATE][
+            "upper_deployment_frequency_dual_lr"
+        ] > 0.0
+    )
 
 
 def test_v16_1_launcher_emits_dependency_gated_dynamic_cells():
     args = _args()
     cells = selected_cells(args)
     assert len(cells) == 27
-    continuation = next(cell for cell in cells if cell[0] == "continuation")
+    continuation = next(
+        cell
+        for cell in cells
+        if cell[0] == "continuation"
+        and cell[2] == spec.PRIMAL_DUAL_CANDIDATE
+    )
     scheduler = build_scheduler_spec(args, *continuation)
     command = build_training_command(args, *continuation)
 
@@ -155,7 +173,9 @@ def test_v16_1_launcher_emits_dependency_gated_dynamic_cells():
     assert "--lower-action-router-mode causal_audit_aligned_gauge" in command
     assert "--lower-action-router-alpha 0.2" in command
     assert "--checkpoint-score-mode paired_relative_frequency_feasibility_first" in command
+    assert "--upper-deployment-frequency-dual-lr 0.03" in command
     assert "--initial-checkpoint-path" in command
+    assert "--initial-checkpoint-router-strength 1.0" in command
     assert f"--code-revision {spec.FROZEN_ALGORITHM_REVISION}" in command
     assert command.endswith("&& echo DONE")
 

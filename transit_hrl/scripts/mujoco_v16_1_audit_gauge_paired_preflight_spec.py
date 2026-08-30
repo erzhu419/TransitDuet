@@ -8,12 +8,14 @@ from scripts import mujoco_v15_2_multisource_distillation_preflight_spec as v15_
 from scripts import mujoco_v16_gauge_training_preflight_spec as v16
 
 
-DEVELOPMENT_PROTOCOL_VERSION = "mujoco_v16_1_audit_gauge_paired_preflight_v1"
+DEVELOPMENT_PROTOCOL_VERSION = "mujoco_v16_1_audit_gauge_paired_preflight_v2"
 EVIDENCE_ROLE = "paired_training_mechanism_development_not_confirmatory"
-PREREGISTRATION_STATUS = "frozen_before_v16_1_training_outcome_access"
-FROZEN_ALGORITHM_REVISION = "8adf34ec37afffcbe25affe3c9a4891a904f8307"
+PREREGISTRATION_STATUS = (
+    "frozen_execution_repair_before_v16_1_training_outcome_access"
+)
+FROZEN_ALGORITHM_REVISION = "d1bc52404e9fa86aea3b8140c26ed87d391438b6"
 FROZEN_SOURCE_MANIFEST_SHA256 = (
-    "bcfd034bba3e9eeeab4c0695adccb30a32179bd43ab336f8ab56e7931906b8aa"
+    "99d007d108bb5e78f28ad481563ad1e3e89c8a0ff5e6e84497b41f905bffcb51"
 )
 FROZEN_CORE_PROTOCOL_VERSION = v14_17.FROZEN_CORE_PROTOCOL_VERSION
 
@@ -68,7 +70,12 @@ PRIMARY_COMPARATOR_ARM = REWARD_CONTINUATION_CONTROL
 PRIMARY_CANDIDATE_ARM = PRIMAL_DUAL_CANDIDATE
 
 
-def _arm(*, role: str, dual_lr: float, checkpoint_score_mode: str) -> dict[str, object]:
+def _arm(
+    *,
+    role: str,
+    deployment_dual_lr: float,
+    checkpoint_score_mode: str,
+) -> dict[str, object]:
     return {
         "method": "freq_hrl",
         "arm_role": str(role),
@@ -85,37 +92,49 @@ def _arm(*, role: str, dual_lr: float, checkpoint_score_mode: str) -> dict[str, 
         # A zero-dual arm retains both cost critics, so capacity is identical.
         "upper_constraint_mode": "primal_dual",
         "upper_hf_penalty_coef": 0.0,
-        "upper_dual_lr": float(dual_lr),
-        "lower_dual_lr": float(dual_lr),
-        "constraint_dual_normalization": (
-            "ema_abs" if float(dual_lr) > 0.0 else "none"
+        "upper_dual_lr": 0.0,
+        "lower_dual_lr": 0.0,
+        "upper_deployment_frequency_dual_lr": float(deployment_dual_lr),
+        "lower_deployment_frequency_dual_lr": float(deployment_dual_lr),
+        "upper_deployment_frequency_lambda_init": (
+            0.1 if float(deployment_dual_lr) > 0.0 else 0.0
         ),
+        "lower_deployment_frequency_lambda_init": (
+            0.1 if float(deployment_dual_lr) > 0.0 else 0.0
+        ),
+        "upper_deployment_frequency_step_scale": 3.0,
+        "lower_deployment_frequency_step_scale": 10.0,
+        "upper_deployment_frequency_max_projection_steps": 8,
+        "lower_deployment_frequency_max_projection_steps": 8,
+        "upper_deployment_frequency_reward_tolerance": 1e-8,
+        "lower_deployment_frequency_reward_tolerance": 1e-8,
+        "constraint_dual_normalization": "none",
         "constraint_dual_scale_ema_beta": 0.95,
         "constraint_dual_scale_floor": 1e-6,
         "checkpoint_score_mode": str(checkpoint_score_mode),
         "upper_deployment_frequency_reference_reduction_fraction": (
-            0.0 if checkpoint_score_mode == "mean_reward" else 0.05
+            0.05 if float(deployment_dual_lr) > 0.0 else 0.0
         ),
         "lower_deployment_frequency_reference_reduction_fraction": (
-            0.0 if checkpoint_score_mode == "mean_reward" else 0.05
+            0.05 if float(deployment_dual_lr) > 0.0 else 0.0
         ),
     }
 
 
 ANCHOR_SPEC = _arm(
     role="reward_compatible_adaptive_gauge_anchor",
-    dual_lr=0.0,
+    deployment_dual_lr=0.0,
     checkpoint_score_mode="mean_reward",
 )
 ARMS = {
     REWARD_CONTINUATION_CONTROL: _arm(
         role="compute_matched_zero_dual_continuation",
-        dual_lr=0.0,
+        deployment_dual_lr=0.0,
         checkpoint_score_mode="paired_relative_frequency_feasibility_first",
     ),
     PRIMAL_DUAL_CANDIDATE: _arm(
         role="adaptive_gauge_primal_dual_with_paired_reward_floor",
-        dual_lr=0.03,
+        deployment_dual_lr=0.03,
         checkpoint_score_mode="paired_relative_frequency_feasibility_first",
     ),
 }
@@ -211,10 +230,28 @@ def validate() -> None:
         for arm in (ANCHOR_SPEC, *ARMS.values())
     ):
         raise RuntimeError("v16.1 must use the full adaptive gauge throughout")
-    if ANCHOR_SPEC["upper_dual_lr"] != 0.0:
-        raise RuntimeError("v16.1 anchor must not update constraint duals")
-    if ARMS[PRIMAL_DUAL_CANDIDATE]["upper_dual_lr"] <= 0.0:
-        raise RuntimeError("v16.1 candidate must enable primal-dual updates")
+    if ANCHOR_SPEC["upper_deployment_frequency_dual_lr"] != 0.0:
+        raise RuntimeError("v16.1 anchor must not update deployment duals")
+    if (
+        ARMS[PRIMAL_DUAL_CANDIDATE][
+            "upper_deployment_frequency_dual_lr"
+        ] <= 0.0
+    ):
+        raise RuntimeError(
+            "v16.1 candidate must enable paired deployment primal-dual updates"
+        )
+    if any(
+        ARMS[REWARD_CONTINUATION_CONTROL][key] != 0.0
+        for key in (
+            "upper_deployment_frequency_dual_lr",
+            "lower_deployment_frequency_dual_lr",
+            "upper_deployment_frequency_reference_reduction_fraction",
+            "lower_deployment_frequency_reference_reduction_fraction",
+        )
+    ):
+        raise RuntimeError(
+            "v16.1 reward continuation control must disable paired targets"
+        )
     if MINIMUM_CANONICAL_IMPROVEMENT_CELLS != (
         len(ENVIRONMENTS) * MINIMUM_ENVIRONMENT_IMPROVEMENT_CELLS
     ):

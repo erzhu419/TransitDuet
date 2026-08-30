@@ -87,6 +87,8 @@ def _validate_cell(
         == int(optimizer_seed)
         and continuation.get("checkpoint_router_mode")
         == spec.ANCHOR_SPEC["lower_action_router_mode"]
+        and float(continuation.get("checkpoint_router_strength", -1.0))
+        == float(spec.ANCHOR_SPEC["lower_action_router_strength"])
     )
     valid = bool(
         summary.get("environment") == environment
@@ -112,6 +114,10 @@ def _validate_cell(
         == float(arm_spec["upper_dual_lr"])
         and float(summary.get("lower_dual_lr", -1.0))
         == float(arm_spec["lower_dual_lr"])
+        and float(summary.get("upper_deployment_frequency_dual_lr", -1.0))
+        == float(arm_spec["upper_deployment_frequency_dual_lr"])
+        and float(summary.get("lower_deployment_frequency_dual_lr", -1.0))
+        == float(arm_spec["lower_deployment_frequency_dual_lr"])
         and summary.get("checkpoint_score_mode")
         == arm_spec["checkpoint_score_mode"]
         and len(rows) == spec.EXPECTED_EVALUATION_ROWS_PER_CELL
@@ -307,7 +313,7 @@ def analyze_cells(
     )
     return {
         "analysis_version": (
-            "mujoco_v16_1_audit_gauge_paired_preflight_analysis_v1"
+            "mujoco_v16_1_audit_gauge_paired_preflight_analysis_v2"
         ),
         "evidence_role": spec.EVIDENCE_ROLE,
         "selection_contract": spec.SELECTION_CONTRACT,

@@ -32,7 +32,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 
 
 MODULE = "freq_hrl.experiments.mujoco.control_validation"
-SIGNATURE_VERSION = "mujoco-v16-1-audit-gauge-paired-preflight-v1"
+SIGNATURE_VERSION = "mujoco-v16-1-audit-gauge-paired-preflight-v2"
 PHASES = ("anchor", "continuation")
 
 
@@ -196,6 +196,26 @@ def build_training_command(
         str(arm_spec["upper_dual_lr"]),
         "--lower-dual-lr",
         str(arm_spec["lower_dual_lr"]),
+        "--upper-deployment-frequency-dual-lr",
+        str(arm_spec["upper_deployment_frequency_dual_lr"]),
+        "--lower-deployment-frequency-dual-lr",
+        str(arm_spec["lower_deployment_frequency_dual_lr"]),
+        "--upper-deployment-frequency-lambda-init",
+        str(arm_spec["upper_deployment_frequency_lambda_init"]),
+        "--lower-deployment-frequency-lambda-init",
+        str(arm_spec["lower_deployment_frequency_lambda_init"]),
+        "--upper-deployment-frequency-step-scale",
+        str(arm_spec["upper_deployment_frequency_step_scale"]),
+        "--lower-deployment-frequency-step-scale",
+        str(arm_spec["lower_deployment_frequency_step_scale"]),
+        "--upper-deployment-frequency-max-projection-steps",
+        str(arm_spec["upper_deployment_frequency_max_projection_steps"]),
+        "--lower-deployment-frequency-max-projection-steps",
+        str(arm_spec["lower_deployment_frequency_max_projection_steps"]),
+        "--upper-deployment-frequency-reward-tolerance",
+        str(arm_spec["upper_deployment_frequency_reward_tolerance"]),
+        "--lower-deployment-frequency-reward-tolerance",
+        str(arm_spec["lower_deployment_frequency_reward_tolerance"]),
         "--constraint-dual-normalization",
         str(arm_spec["constraint_dual_normalization"]),
         "--constraint-dual-scale-ema-beta",
@@ -252,6 +272,8 @@ def build_training_command(
             str(anchor / "cell_summary.json"),
             "--initial-checkpoint-router-mode",
             str(spec.ANCHOR_SPEC["lower_action_router_mode"]),
+            "--initial-checkpoint-router-strength",
+            str(spec.ANCHOR_SPEC["lower_action_router_strength"]),
         ])
     environment_variables = [
         "MUJOCO_GL=egl",
