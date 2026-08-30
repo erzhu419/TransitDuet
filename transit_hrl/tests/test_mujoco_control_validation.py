@@ -1368,10 +1368,12 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             model, lower_action_router_strength=0.0, **common
         )
         responsibility_trace = {}
+        actor_trace = {}
         _, fixed = rollout_hierarchical(
             model,
             lower_action_router_strength=1.0,
             responsibility_trace_output=responsibility_trace,
+            actor_trace_output=actor_trace,
             **common,
         )
 
@@ -1407,6 +1409,35 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             responsibility_trace["total_action"],
             atol=1e-12,
         )
+        trace_length = responsibility_trace["total_action"].shape[0]
+        self.assertEqual(
+            set(actor_trace),
+            {
+                "disturbance",
+                "episode_step",
+                "latent_lower_action",
+                "lower_policy_state",
+                "observation",
+                "upper_decision",
+                "upper_policy_action",
+            },
+        )
+        self.assertTrue(
+            all(
+                value.shape[0] == trace_length
+                for value in actor_trace.values()
+            )
+        )
+        self.assertEqual(
+            actor_trace["lower_policy_state"].shape[1],
+            model.config.lower_state_dim,
+        )
+        self.assertEqual(
+            actor_trace["upper_policy_action"].shape,
+            responsibility_trace["upper_action"].shape,
+        )
+        self.assertEqual(actor_trace["episode_step"][0], 0)
+        self.assertTrue(actor_trace["upper_decision"][0])
 
     def test_audit_optimal_macro_gauge_preserves_closed_loop_with_full_state(self):
         observation_dim, action_dim = environment_dimensions(

@@ -1285,6 +1285,7 @@ def rollout_hierarchical(
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
     responsibility_trace_output: dict[str, np.ndarray] | None = None,
+    actor_trace_output: dict[str, np.ndarray] | None = None,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
@@ -1531,6 +1532,11 @@ def rollout_hierarchical(
         lower_router_budget_excess_regret_rms_values: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
+        actor_observations: list[np.ndarray] = []
+        actor_lower_states: list[np.ndarray] = []
+        actor_disturbances: list[np.ndarray] = []
+        actor_upper_decision_flags: list[bool] = []
+        actor_episode_steps: list[int] = []
         transfer_saturation_values: list[float] = []
         reconstruction_errors: list[np.ndarray] = []
         forward_rewards: list[float] = []
@@ -1689,6 +1695,18 @@ def rollout_hierarchical(
             latent_lower_residual = (
                 float(lower_action_scale) * np.tanh(lower_raw)
             )
+            if actor_trace_output is not None:
+                actor_observations.append(
+                    np.asarray(observation, dtype=np.float32).copy()
+                )
+                actor_lower_states.append(
+                    np.asarray(lower_state, dtype=np.float32).copy()
+                )
+                actor_disturbances.append(
+                    np.asarray(disturbance, dtype=np.float32).copy()
+                )
+                actor_upper_decision_flags.append(bool(upper_decision_now))
+                actor_episode_steps.append(int(episode_step))
             routed_lower = lower_router.route(
                 latent_lower_residual,
                 upper_action=(
@@ -2255,6 +2273,43 @@ def rollout_hierarchical(
                 ),
                 "executed_action": np.asarray(
                     executed_actions, dtype=np.float64
+                ),
+            })
+        if actor_trace_output is not None:
+            trace_length = len(rewards)
+            actor_lengths = {
+                len(actor_observations),
+                len(actor_lower_states),
+                len(actor_disturbances),
+                len(actor_upper_decision_flags),
+                len(actor_episode_steps),
+                len(upper_policy_actions),
+                len(latent_lower_actions),
+            }
+            if actor_lengths != {trace_length}:
+                raise RuntimeError("MuJoCo actor trace arrays are misaligned")
+            actor_trace_output.clear()
+            actor_trace_output.update({
+                "observation": np.asarray(
+                    actor_observations, dtype=np.float32
+                ),
+                "lower_policy_state": np.asarray(
+                    actor_lower_states, dtype=np.float32
+                ),
+                "disturbance": np.asarray(
+                    actor_disturbances, dtype=np.float32
+                ),
+                "upper_policy_action": np.asarray(
+                    upper_policy_actions, dtype=np.float32
+                ),
+                "latent_lower_action": np.asarray(
+                    latent_lower_actions, dtype=np.float32
+                ),
+                "upper_decision": np.asarray(
+                    actor_upper_decision_flags, dtype=np.bool_
+                ),
+                "episode_step": np.asarray(
+                    actor_episode_steps, dtype=np.int64
                 ),
             })
         return (
