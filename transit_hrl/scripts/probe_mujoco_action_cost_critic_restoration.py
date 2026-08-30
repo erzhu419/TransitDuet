@@ -548,6 +548,111 @@ def _critic_metrics(
     }
 
 
+def _cost_target_mean(
+    batch: HierarchicalTrajectoryBatch,
+    *,
+    level: str,
+    gamma: float,
+    max_return_decisions: int | None,
+) -> float:
+    level_batch = batch.upper if str(level) == "upper" else batch.lower
+    if level_batch.cost is None:
+        raise RuntimeError(f"{level} trajectory lacks native cost labels")
+    target = discounted_smdp_cost_returns(
+        level_batch.cost,
+        level_batch.duration,
+        level_batch.done,
+        gamma=float(gamma),
+        max_decisions=max_return_decisions,
+    )
+    return float(np.mean(target, dtype=np.float64))
+
+
+def _cosine(left: np.ndarray, right: np.ndarray) -> float:
+    denominator = float(np.linalg.norm(left) * np.linalg.norm(right))
+    if not np.isfinite(denominator) or denominator <= 1e-12:
+        raise RuntimeError("paired finite-difference direction is degenerate")
+    return float(np.dot(left, right) / denominator)
+
+
+def _paired_finite_difference_estimate(
+    results: list[dict[str, Any]],
+    jobs: list[dict[str, Any]],
+    *,
+    level: str,
+    gamma: float,
+    max_return_decisions: int | None,
+) -> tuple[np.ndarray, dict[str, np.ndarray], dict[str, Any]]:
+    if len(results) != len(jobs):
+        raise ValueError("paired intervention results and jobs are misaligned")
+    groups: dict[tuple[int, str], dict[str, tuple[Any, Any]]] = {}
+    for result, job in zip(results, jobs, strict=True):
+        path = job["path"]
+        intervention = dict(job.get("intervention") or {})
+        variant = str(result["intervention_variant"])
+        key = (int(path["seed"]), str(path["disturbance_mode"]))
+        groups.setdefault(key, {})[variant] = (result["batch"], intervention)
+    gradients = []
+    modes = []
+    required = {"control", f"{level}_plus", f"{level}_minus"}
+    for (_, mode), variants in sorted(groups.items()):
+        if not required.issubset(variants):
+            raise RuntimeError("paired intervention group is incomplete")
+        plus_batch, plus_intervention = variants[f"{level}_plus"]
+        minus_batch, minus_intervention = variants[f"{level}_minus"]
+        plus_bias = np.asarray(
+            plus_intervention[f"{level}_bias"], dtype=np.float64
+        ).reshape(-1)
+        minus_bias = np.asarray(
+            minus_intervention[f"{level}_bias"], dtype=np.float64
+        ).reshape(-1)
+        if not np.allclose(plus_bias, -minus_bias, rtol=0.0, atol=1e-12):
+            raise RuntimeError("paired actor interventions are not antithetic")
+        amplitude = float(np.sqrt(np.mean(np.square(plus_bias))))
+        if not np.isfinite(amplitude) or amplitude <= 0.0:
+            raise RuntimeError("paired actor intervention has zero amplitude")
+        plus_cost = _cost_target_mean(
+            plus_batch,
+            level=level,
+            gamma=gamma,
+            max_return_decisions=max_return_decisions,
+        )
+        minus_cost = _cost_target_mean(
+            minus_batch,
+            level=level,
+            gamma=gamma,
+            max_return_decisions=max_return_decisions,
+        )
+        gradient = (
+            (plus_cost - minus_cost) / (2.0 * amplitude)
+        ) * (plus_bias / amplitude)
+        if not np.all(np.isfinite(gradient)):
+            raise RuntimeError("paired finite-difference gradient is non-finite")
+        gradients.append(gradient)
+        modes.append(str(mode))
+    matrix = np.stack(gradients, axis=0)
+    direction = np.median(matrix, axis=0)
+    per_mode = {
+        mode: np.median(matrix[np.asarray(modes) == mode], axis=0)
+        for mode in sorted(set(modes))
+    }
+    rms = float(np.sqrt(np.mean(np.square(direction))))
+    if not np.isfinite(rms) or rms <= 1e-12:
+        raise RuntimeError("robust paired finite-difference direction is degenerate")
+    norms = np.linalg.norm(matrix, axis=1)
+    return direction / rms, per_mode, {
+        "path_count": int(matrix.shape[0]),
+        "parameter_count": int(matrix.shape[1]),
+        "path_gradient_norm_median": float(np.median(norms)),
+        "path_gradient_norm_maximum": float(np.max(norms)),
+        "coordinate_gradient_iqr_mean": float(np.mean(
+            np.quantile(matrix, 0.75, axis=0)
+            - np.quantile(matrix, 0.25, axis=0)
+        )),
+        "disturbance_modes": sorted(set(modes)),
+    }
+
+
 def _subsample_indices(size: int, limit: int, *, seed: int) -> np.ndarray:
     if int(size) <= int(limit):
         return np.arange(int(size), dtype=np.int64)
@@ -710,6 +815,8 @@ def run_probe(
     critic_collection_mode: str = "stochastic_policy",
     critic_intervention_bias_rms: float = 0.0,
     actor_update_scope: str = "full_mean",
+    actor_direction_source: str = "critic_gradient",
+    minimum_paired_holdout_cosine: float = 0.0,
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -748,6 +855,15 @@ def run_probe(
     update_scope = str(actor_update_scope)
     if update_scope not in {"full_mean", "output_bias"}:
         raise ValueError("unknown action-cost actor update scope")
+    direction_source = str(actor_direction_source)
+    if direction_source not in {"critic_gradient", "paired_finite_difference"}:
+        raise ValueError("unknown action-cost actor direction source")
+    if direction_source == "paired_finite_difference" and (
+        collection_mode != "paired_output_bias" or update_scope != "output_bias"
+    ):
+        raise ValueError(
+            "paired finite differences require paired collection and bias updates"
+        )
     train_paths = _paths_for_roots(summary["environment"], critic_train_roots)
     holdout_paths = _paths_for_roots(
         summary["environment"], critic_holdout_roots
@@ -917,30 +1033,75 @@ def run_probe(
         fits_by_level[level] = fits
         critic_metrics[level] = metrics
 
-    merged_design = concat_hierarchical_batches(design_batches)
     gradient_metrics: dict[str, Any] = {}
     directions = []
     gradient_error = None
     try:
-        for level, batch in (
-            ("upper", merged_design.upper),
-            ("lower", merged_design.lower),
-        ):
-            direction, metrics = _level_actor_directions(
-                baseline_model,
-                level=level,
-                fits=fits_by_level[level],
-                design_batch=batch,
-                state_limit=actor_state_limit,
-                sample_seed=derive_seed(
-                    "mujoco_v14_22_actor_state_sample_v1",
-                    str(summary["environment"]),
-                    str(level),
-                ),
-                actor_update_scope=update_scope,
-            )
-            directions.append(direction)
-            gradient_metrics[level] = metrics
+        if direction_source == "critic_gradient":
+            merged_design = concat_hierarchical_batches(design_batches)
+            for level, batch in (
+                ("upper", merged_design.upper),
+                ("lower", merged_design.lower),
+            ):
+                direction, metrics = _level_actor_directions(
+                    baseline_model,
+                    level=level,
+                    fits=fits_by_level[level],
+                    design_batch=batch,
+                    state_limit=actor_state_limit,
+                    sample_seed=derive_seed(
+                        "mujoco_v14_22_actor_state_sample_v1",
+                        str(summary["environment"]),
+                        str(level),
+                    ),
+                    actor_update_scope=update_scope,
+                )
+                directions.append(direction)
+                gradient_metrics[level] = metrics
+        else:
+            for level in ("upper", "lower"):
+                horizon = (
+                    None if return_horizons[level] == 0
+                    else return_horizons[level]
+                )
+                train_direction, train_modes, train_metrics = (
+                    _paired_finite_difference_estimate(
+                        critic_results[:train_count],
+                        train_jobs,
+                        level=level,
+                        gamma=float(baseline_model.config.gamma),
+                        max_return_decisions=horizon,
+                    )
+                )
+                holdout_direction, holdout_modes, holdout_metrics = (
+                    _paired_finite_difference_estimate(
+                        critic_results[train_count:],
+                        holdout_jobs,
+                        level=level,
+                        gamma=float(baseline_model.config.gamma),
+                        max_return_decisions=horizon,
+                    )
+                )
+                if set(train_modes) != set(holdout_modes):
+                    raise RuntimeError(
+                        "paired finite-difference disturbance modes are misaligned"
+                    )
+                mode_cosines = {
+                    mode: _cosine(train_modes[mode], holdout_modes[mode])
+                    for mode in sorted(train_modes)
+                }
+                directions.append(train_direction)
+                gradient_metrics[level] = {
+                    "train": train_metrics,
+                    "holdout": holdout_metrics,
+                    "holdout_direction_cosine": _cosine(
+                        train_direction, holdout_direction
+                    ),
+                    "holdout_mode_direction_cosines": mode_cosines,
+                    "minimum_holdout_mode_direction_cosine": float(
+                        min(mode_cosines.values())
+                    ),
+                }
     except RuntimeError as exc:
         gradient_error = str(exc)
     critic_gate = bool(
@@ -956,10 +1117,21 @@ def run_probe(
             ]) > float(critic_minimum_action_permutation_mse_increase)
             for level in ("upper", "lower")
         )
-        and all(
-            float(gradient_metrics[level]["median_gradient_cosine"])
-            > float(minimum_gradient_median_cosine)
-            for level in ("upper", "lower")
+        and (
+            all(
+                float(gradient_metrics[level]["median_gradient_cosine"])
+                > float(minimum_gradient_median_cosine)
+                for level in ("upper", "lower")
+            )
+            if direction_source == "critic_gradient"
+            else all(
+                float(gradient_metrics[level]["holdout_direction_cosine"])
+                > float(minimum_paired_holdout_cosine)
+                and float(gradient_metrics[level][
+                    "minimum_holdout_mode_direction_cosine"
+                ]) > float(minimum_paired_holdout_cosine)
+                for level in ("upper", "lower")
+            )
         )
     )
     candidates = []
@@ -989,7 +1161,7 @@ def run_probe(
         ):
             snapshot = design_snapshot(result["rows"])
             candidate = {
-                "source": "ensemble_action_cost_gradient",
+                "source": str(direction_source),
                 "step_rms": float(step_rms),
                 "parameter_sha256": result["parameter_sha256"],
                 "snapshot": snapshot,
@@ -1077,6 +1249,10 @@ def run_probe(
             actor_mean_parameter_vector(baseline_model).size
         ),
         "actor_update_scope": update_scope,
+        "actor_direction_source": direction_source,
+        "minimum_paired_holdout_cosine": float(
+            minimum_paired_holdout_cosine
+        ),
         "actor_update_parameter_count": int(
             actor_update_parameter_vector(
                 baseline_model, scope=update_scope
@@ -1205,6 +1381,14 @@ def main() -> None:
         choices=("full_mean", "output_bias"),
         default="full_mean",
     )
+    parser.add_argument(
+        "--actor-direction-source",
+        choices=("critic_gradient", "paired_finite_difference"),
+        default="critic_gradient",
+    )
+    parser.add_argument(
+        "--minimum-paired-holdout-cosine", type=float, default=0.0
+    )
     args = parser.parse_args()
     payload = run_probe(
         checkpoint_path=args.checkpoint,
@@ -1243,6 +1427,8 @@ def main() -> None:
         critic_collection_mode=args.critic_collection_mode,
         critic_intervention_bias_rms=args.critic_intervention_bias_rms,
         actor_update_scope=args.actor_update_scope,
+        actor_direction_source=args.actor_direction_source,
+        minimum_paired_holdout_cosine=args.minimum_paired_holdout_cosine,
     )
     print(json.dumps({
         "output": str(args.output),
