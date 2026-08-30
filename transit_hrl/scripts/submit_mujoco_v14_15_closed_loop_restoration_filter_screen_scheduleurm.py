@@ -772,6 +772,21 @@ def build_training_command(
                 "deployment_frequency_projection_objective", "worst_group"
             )),
         ])
+    if "deployment_frequency_projection_cvar_alpha" in arm_spec:
+        command.extend([
+            "--deployment-frequency-projection-cvar-alpha",
+            str(arm_spec["deployment_frequency_projection_cvar_alpha"]),
+            "--deployment-frequency-closed-loop-risk-mode",
+            str(arm_spec["deployment_frequency_closed_loop_risk_mode"]),
+            "--deployment-frequency-closed-loop-cvar-alpha",
+            str(arm_spec["deployment_frequency_closed_loop_cvar_alpha"]),
+            "--constraint-dual-normalization",
+            str(arm_spec["constraint_dual_normalization"]),
+            "--constraint-dual-scale-ema-beta",
+            str(arm_spec["constraint_dual_scale_ema_beta"]),
+            "--constraint-dual-scale-floor",
+            str(arm_spec["constraint_dual_scale_floor"]),
+        ])
     if bool(arm_spec["lower_action_router_observe_strength"]):
         command.append("--lower-action-router-observe-strength")
     if bool(arm_spec["deployment_frequency_groupwise_robust"]):
