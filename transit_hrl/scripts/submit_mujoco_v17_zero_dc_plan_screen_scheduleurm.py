@@ -458,6 +458,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dispatch", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--sync-only", action="store_true")
+    parser.add_argument(
+        "--recovery-only",
+        action="store_true",
+        help=(
+            "resubmit failed signatures without rewriting the frozen "
+            "preregistration; completed server cells are reused"
+        ),
+    )
     parser.add_argument("--sync-workers", type=int, default=6)
     return parser
 
@@ -502,10 +510,12 @@ def main() -> None:
     if args.sync_only:
         sync_results(args)
         return
-    _write_preregistration(args)
+    if not args.recovery_only:
+        _write_preregistration(args)
     cells = selected_cells(args)
     print(
-        f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)}",
+        f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)} "
+        f"recovery_only={bool(args.recovery_only)}",
         flush=True,
     )
     execute_bulk(

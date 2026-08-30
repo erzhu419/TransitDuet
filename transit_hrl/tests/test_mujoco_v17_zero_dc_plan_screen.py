@@ -23,6 +23,7 @@ def _args():
         optimizer_seeds=list(spec.OPTIMIZER_SEEDS),
         python_executable="python3",
         priority="normal",
+        recovery_only=False,
     )
 
 
