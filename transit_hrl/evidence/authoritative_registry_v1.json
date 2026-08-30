@@ -931,6 +931,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_4_streaming_audit_projection_development",
+      "claim_id": "D27_STREAMING_AUDIT_PROJECTION",
+      "claim": "A causal receding projection with complete streaming HPF8/LPF32 state attains fixed upper and lower frequency budgets across MuJoCo while preserving the frozen control path.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "streaming_audit_projection_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "one_fresh_optimizer_seed_three_training_cells_and_one_hundred_twenty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_4_streaming_audit_projection",
+      "allowed_wording": "In a frozen three-environment paired development preflight, v17.4 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 by 60.3--90.4% and normalized joint merit by 41.2--88.0% in every environment, while all three candidate upper-HPF8 powers met the absolute budget. The strict expansion rule still failed because only Walker2d met the absolute lower-LPF32 budget and HalfCheetah missed the upper-budget feasibility threshold.",
+      "forbidden_wording": "The v17.4 development preflight validates the all-environment absolute frequency contract, leakage no-tradeoff, reward improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_4_streaming_audit_projection_development.json",
+          "sha256": "24bca2071f414c8c11e0fb7ff1cc97d1c043c4b71b03172e7c6f326a932f7b71"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_4_streaming_audit_projection_outcome_2026-08-31.md",
+          "sha256": "2bfbd0831d7b7f7b40a9fce707b924fb9c168b55c23a96a60947d389bb7fc8df"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

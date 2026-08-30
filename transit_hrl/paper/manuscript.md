@@ -428,9 +428,10 @@ development preflights attempted causal output-head distillation, bounded
 distillation, and a multi-source teacher. Only Hopper passed each joint
 development gate; HalfCheetah and Walker2d did not support expansion. These
 outcomes are excluded from confirmatory claims, but they reject a larger search
-over the same post-hoc output-head mechanism. The registered v16--v17.3
+over the same post-hoc output-head mechanism. The registered v16--v17.4
 development sequence then tested training-time EMA, audit-adaptive, macro-hold,
-zero-DC, headroom-homotopy, smooth-macro, and audit-optimal macro gauges. No
+zero-DC, headroom-homotopy, smooth-macro, audit-optimal macro, and streaming
+audit gauges. No
 design met its frozen cross-environment expansion rule. Most diagnostically,
 v17.2 exactly preserved reward, executed-action, and latent-policy traces on all
 360 paired paths, yet no tested smoothing coefficient reduced the registered
@@ -440,9 +441,16 @@ all 120 paired paths. It reduced lower-LPF32 and joint merit in Hopper and
 Walker2d, but increased upper-HPF8 in all three environments and worsened every
 frequency endpoint in HalfCheetah. Together these results reject both the naive
 EMA target and the reset finite-horizon persistence surrogate as general
-leakage solutions. The next learned-policy experiment must carry streaming
-audit state across macro boundaries, constrain boundary increments, and
-evaluate raw behavior and return on fresh optimizer seeds.
+leakage solutions. V17.4 then carried the complete HPF8/LPF32 state across macro
+boundaries and replanned after every realized total action. It exactly preserved
+all 120 paired paths, reduced lower-LPF32 by 60.3--90.4% and normalized joint
+merit by 41.2--88.0% in all three environments, and met the absolute upper-HPF8
+budget in all three. The strict rule still rejected expansion: only Walker2d
+met the absolute lower-LPF32 budget, and HalfCheetah missed the registered
+upper-budget feasibility threshold. This identifies the next issue more
+precisely. A learned-policy experiment must model the joint physical feasible
+envelope and penalize excess above its unavoidable floor rather than assume
+that two fixed absolute component budgets are jointly attainable.
 
 ### 7.3 Negative results define the claim boundary
 
@@ -460,7 +468,7 @@ modes and validation roots. The validation paths nested within a seed are not
 independent replicates. Second, most successful transactions were
 function-preserving routers; they do not demonstrate physical control
 improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks, and the v15--v17.3 follow-ups remain development-only; several
+MuJoCo tasks, and the v15--v17.4 follow-ups remain development-only; several
 used only one development optimizer seed. Fourth, Quant is a synthetic
 time-series control environment and
 contains one supported performance harm. Fifth, Transit, public passenger data,

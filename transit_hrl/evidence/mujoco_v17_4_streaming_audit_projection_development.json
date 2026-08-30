@@ -1,0 +1,97 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_4_streaming_audit_projection_development_v1",
+  "status": "streaming_audit_projection_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "paired_streaming_audit_projection_development_not_confirmatory",
+  "source_run": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "development_protocol_version": "mujoco_v17_4_streaming_audit_projection_preflight_v1",
+  "frozen_algorithm_revision": "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c",
+  "frozen_source_manifest_sha256": "f371ecffe5182d83c778ba42033ae7f44f50881aa635924ff8f406eaa7927ab6",
+  "optimizer_seed_count": 1,
+  "environment_count": 3,
+  "training_cell_count": 3,
+  "heldout_path_count_per_intervention": 40,
+  "paired_path_count": 120,
+  "evaluation_row_count": 240,
+  "scheduler_successful_task_count": 3,
+  "scheduler_attempt_count": 3,
+  "scheduler_tasks": [
+    "t85521",
+    "t85522",
+    "t85523"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 3,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "eligible_for_streaming_projection_multiseed": false,
+  "paired_mechanics": {
+    "reward_trace_exact_cells": 3,
+    "executed_action_trace_exact_cells": 3,
+    "latent_policy_trace_exact_cells": 3,
+    "reward_numeric_exact_cells": 3,
+    "latent_metrics_exact_cells": 3,
+    "router_reconstruction_exact_cells": 3,
+    "responsibility_reconstruction_exact_cells": 3,
+    "explicit_protocol_structure_valid_cells": 3
+  },
+  "frequency_gate_counts": {
+    "upper_hf_absolute_budget": 3,
+    "lower_lf_absolute_budget": 1,
+    "upper_budget_feasibility": 2,
+    "lower_lf_reduction": 3,
+    "joint_merit_reduction": 3
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "control_upper_hf_power": 0.0012511922691996196,
+      "candidate_upper_hf_power": 0.0049767574431776075,
+      "control_lower_lf_power": 0.00894753176621209,
+      "candidate_lower_lf_power": 0.0035564969601090657,
+      "upper_hf_relative_reduction": -2.977612047076674,
+      "lower_lf_relative_reduction": 0.6025164198310862,
+      "joint_merit_relative_reduction": 0.41237218007554444,
+      "mean_upper_budget_feasible_rate": 0.9755083333333333,
+      "mean_lower_budget_satisfied_rate": 0.6462874999999999,
+      "reward_difference": 0.0,
+      "supported": false
+    },
+    "Hopper-v5": {
+      "control_upper_hf_power": 0.009774690046568857,
+      "candidate_upper_hf_power": 0.00454284863807549,
+      "control_lower_lf_power": 0.0607934625113658,
+      "candidate_lower_lf_power": 0.0221787328835983,
+      "upper_hf_relative_reduction": 0.5352437144878947,
+      "lower_lf_relative_reduction": 0.6351789819595847,
+      "joint_merit_relative_reduction": 0.6291243620525505,
+      "mean_upper_budget_feasible_rate": 1.0,
+      "mean_lower_budget_satisfied_rate": 0.2827287197570771,
+      "reward_difference": 0.0,
+      "supported": false
+    },
+    "Walker2d-v5": {
+      "control_upper_hf_power": 0.00017910787017102884,
+      "candidate_upper_hf_power": 0.0010765051333661018,
+      "control_lower_lf_power": 0.0176855280861979,
+      "candidate_lower_lf_power": 0.0016908052682744641,
+      "upper_hf_relative_reduction": -5.010373147411974,
+      "lower_lf_relative_reduction": 0.9043961107616572,
+      "joint_merit_relative_reduction": 0.8804663410523197,
+      "mean_upper_budget_feasible_rate": 1.0,
+      "mean_lower_budget_satisfied_rate": 0.9026213838434728,
+      "reward_difference": 0.0,
+      "supported": true
+    }
+  },
+  "mechanism_findings": {
+    "path_invariance": "All 120 paired development paths exactly matched reward, executed-action, and latent-policy trace hashes at projection strengths zero and one. All three cells passed the explicit asynchronous-transition and reconstruction gates.",
+    "relative_frequency": "The streaming projection reduced lower-LPF32 power by 60.3, 63.5, and 90.4 percent and normalized joint merit by 41.2, 62.9, and 88.0 percent in HalfCheetah, Hopper, and Walker2d, respectively.",
+    "absolute_frequency": "All three environments met the frozen absolute upper-HPF8 budget. Only Walker2d met the absolute lower-LPF32 budget; HalfCheetah and Hopper remained above it despite their large paired reductions.",
+    "feasibility": "Hopper and Walker2d met the upper-budget feasibility gate. HalfCheetah reported a 0.9755 mean feasibility rate and therefore failed the frozen 0.99 gate because the current upper audit interval did not always intersect the physical component interval.",
+    "decision": "Do not expand v17.4 to optimizer multiseed under the frozen absolute-budget claim. The next mechanism must report the joint upper/lower feasible envelope, enforce both current budgets whenever jointly feasible, and optimize normalized excess above the unavoidable physical floor when they are not."
+  }
+}

@@ -44,6 +44,9 @@ MUJOCO_V17_2_SMOOTH_MACRO_GAUGE_SCHEMA_VERSION = (
 MUJOCO_V17_3_AUDIT_OPTIMAL_MACRO_GAUGE_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_3_audit_optimal_macro_gauge_development_v1"
 )
+MUJOCO_V17_4_STREAMING_AUDIT_PROJECTION_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_4_streaming_audit_projection_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1732,6 +1735,148 @@ def _mujoco_v17_3_audit_optimal_macro_gauge_facts(
     }
 
 
+def _mujoco_v17_4_streaming_audit_projection_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    mechanics = dict(decision.get("paired_mechanics") or {})
+    gate_counts = dict(decision.get("frequency_gate_counts") or {})
+    environment_results = dict(decision.get("environment_results") or {})
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    expected_gate_counts = {
+        "upper_hf_absolute_budget": 3,
+        "lower_lf_absolute_budget": 1,
+        "upper_budget_feasibility": 2,
+        "lower_lf_reduction": 3,
+        "joint_merit_reduction": 3,
+    }
+    expected_results = {
+        "HalfCheetah-v5": (
+            0.0012511922691996196,
+            0.0049767574431776075,
+            0.00894753176621209,
+            0.0035564969601090657,
+            -2.977612047076674,
+            0.6025164198310862,
+            0.41237218007554444,
+            0.9755083333333333,
+            0.6462874999999999,
+            False,
+        ),
+        "Hopper-v5": (
+            0.009774690046568857,
+            0.00454284863807549,
+            0.0607934625113658,
+            0.0221787328835983,
+            0.5352437144878947,
+            0.6351789819595847,
+            0.6291243620525505,
+            1.0,
+            0.2827287197570771,
+            False,
+        ),
+        "Walker2d-v5": (
+            0.00017910787017102884,
+            0.0010765051333661018,
+            0.0176855280861979,
+            0.0016908052682744641,
+            -5.010373147411974,
+            0.9043961107616572,
+            0.8804663410523197,
+            1.0,
+            0.9026213838434728,
+            True,
+        ),
+    }
+    metric_keys = (
+        "control_upper_hf_power",
+        "candidate_upper_hf_power",
+        "control_lower_lf_power",
+        "candidate_lower_lf_power",
+        "upper_hf_relative_reduction",
+        "lower_lf_relative_reduction",
+        "joint_merit_relative_reduction",
+        "mean_upper_budget_feasible_rate",
+        "mean_lower_budget_satisfied_rate",
+    )
+    valid_environment_results = bool(
+        set(environment_results) == set(expected_results)
+        and all(
+            all(
+                abs(float(row.get(key, float("inf"))) - expected[index])
+                <= 1e-12
+                for index, key in enumerate(metric_keys)
+            )
+            and bool(row.get("supported")) is expected[-1]
+            and float(row.get("reward_difference", float("inf"))) == 0.0
+            for name, expected in expected_results.items()
+            for row in [environment_results[name]]
+        )
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_4_STREAMING_AUDIT_PROJECTION_SCHEMA_VERSION
+        or decision.get("status")
+        != "streaming_audit_projection_preflight_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "paired_streaming_audit_projection_development_not_confirmatory"
+        or decision.get("frozen_algorithm_revision")
+        != "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c"
+        or decision.get("frozen_source_manifest_sha256")
+        != "f371ecffe5182d83c778ba42033ae7f44f50881aa635924ff8f406eaa7927ab6"
+        or int(decision.get("optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 3
+        or int(decision.get("heldout_path_count_per_intervention", -1)) != 40
+        or int(decision.get("paired_path_count", -1)) != 120
+        or int(decision.get("evaluation_row_count", -1)) != 240
+        or int(decision.get("scheduler_successful_task_count", -1)) != 3
+        or int(decision.get("scheduler_attempt_count", -1)) != 3
+        or tasks != ["t85521", "t85522", "t85523"]
+        or task_status != {"done": 3, "failed": 0, "cancelled": 0}
+        or decision.get("eligible_for_streaming_projection_multiseed")
+        is not False
+        or any(
+            int(mechanics.get(key, -1)) != 3
+            for key in (
+                "reward_trace_exact_cells",
+                "executed_action_trace_exact_cells",
+                "latent_policy_trace_exact_cells",
+                "reward_numeric_exact_cells",
+                "latent_metrics_exact_cells",
+                "router_reconstruction_exact_cells",
+                "responsibility_reconstruction_exact_cells",
+                "explicit_protocol_structure_valid_cells",
+            )
+        )
+        or gate_counts != expected_gate_counts
+        or not valid_environment_results
+        or report is None
+        or "`streaming_audit_projection_preflight_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError(
+            "MuJoCo v17.4 streaming-audit-projection decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "training_cell_count": 3,
+        "paired_path_count": 120,
+        "paired_mechanics": mechanics,
+        "frequency_gate_counts": expected_gate_counts,
+        "environment_results": environment_results,
+        "task_status_counts": task_status,
+        "eligible_for_streaming_projection_multiseed": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1765,6 +1910,9 @@ PARSERS = {
     ),
     "mujoco_v17_3_audit_optimal_macro_gauge": (
         _mujoco_v17_3_audit_optimal_macro_gauge_facts
+    ),
+    "mujoco_v17_4_streaming_audit_projection": (
+        _mujoco_v17_4_streaming_audit_projection_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

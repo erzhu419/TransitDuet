@@ -1,5 +1,5 @@
 {
-  "development_record_count": 26,
+  "development_record_count": 27,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 32,
+  "record_count": 33,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3962,6 +3962,109 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment paired development preflight, v17.4 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 by 60.3--90.4% and normalized joint merit by 41.2--88.0% in every environment, while all three candidate upper-HPF8 powers met the absolute budget. The strict expansion rule still failed because only Walker2d met the absolute lower-LPF32 budget and HalfCheetah missed the upper-budget feasibility threshold.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_4_streaming_audit_projection_development.json",
+          "role": "decision",
+          "sha256": "24bca2071f414c8c11e0fb7ff1cc97d1c043c4b71b03172e7c6f326a932f7b71"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_4_streaming_audit_projection_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "2bfbd0831d7b7f7b40a9fce707b924fb9c168b55c23a96a60947d389bb7fc8df"
+        }
+      ],
+      "claim": "A causal receding projection with complete streaming HPF8/LPF32 state attains fixed upper and lower frequency budgets across MuJoCo while preserving the frozen control path.",
+      "claim_id": "D27_STREAMING_AUDIT_PROJECTION",
+      "decision": "streaming_audit_projection_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_4_streaming_audit_projection_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "streaming_audit_projection_preflight_not_supported",
+        "eligible_for_streaming_projection_multiseed": false,
+        "environment_count": 3,
+        "environment_results": {
+          "HalfCheetah-v5": {
+            "candidate_lower_lf_power": 0.0035564969601090657,
+            "candidate_upper_hf_power": 0.0049767574431776075,
+            "control_lower_lf_power": 0.00894753176621209,
+            "control_upper_hf_power": 0.0012511922691996196,
+            "joint_merit_relative_reduction": 0.41237218007554444,
+            "lower_lf_relative_reduction": 0.6025164198310862,
+            "mean_lower_budget_satisfied_rate": 0.6462874999999999,
+            "mean_upper_budget_feasible_rate": 0.9755083333333333,
+            "reward_difference": 0.0,
+            "supported": false,
+            "upper_hf_relative_reduction": -2.977612047076674
+          },
+          "Hopper-v5": {
+            "candidate_lower_lf_power": 0.0221787328835983,
+            "candidate_upper_hf_power": 0.00454284863807549,
+            "control_lower_lf_power": 0.0607934625113658,
+            "control_upper_hf_power": 0.009774690046568857,
+            "joint_merit_relative_reduction": 0.6291243620525505,
+            "lower_lf_relative_reduction": 0.6351789819595847,
+            "mean_lower_budget_satisfied_rate": 0.2827287197570771,
+            "mean_upper_budget_feasible_rate": 1.0,
+            "reward_difference": 0.0,
+            "supported": false,
+            "upper_hf_relative_reduction": 0.5352437144878947
+          },
+          "Walker2d-v5": {
+            "candidate_lower_lf_power": 0.0016908052682744641,
+            "candidate_upper_hf_power": 0.0010765051333661018,
+            "control_lower_lf_power": 0.0176855280861979,
+            "control_upper_hf_power": 0.00017910787017102884,
+            "joint_merit_relative_reduction": 0.8804663410523197,
+            "lower_lf_relative_reduction": 0.9043961107616572,
+            "mean_lower_budget_satisfied_rate": 0.9026213838434728,
+            "mean_upper_budget_feasible_rate": 1.0,
+            "reward_difference": 0.0,
+            "supported": true,
+            "upper_hf_relative_reduction": -5.010373147411974
+          }
+        },
+        "frequency_gate_counts": {
+          "joint_merit_reduction": 3,
+          "lower_lf_absolute_budget": 1,
+          "lower_lf_reduction": 3,
+          "upper_budget_feasibility": 2,
+          "upper_hf_absolute_budget": 3
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "paired_mechanics": {
+          "executed_action_trace_exact_cells": 3,
+          "explicit_protocol_structure_valid_cells": 3,
+          "latent_metrics_exact_cells": 3,
+          "latent_policy_trace_exact_cells": 3,
+          "responsibility_reconstruction_exact_cells": 3,
+          "reward_numeric_exact_cells": 3,
+          "reward_trace_exact_cells": 3,
+          "router_reconstruction_exact_cells": 3
+        },
+        "paired_path_count": 120,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 3,
+          "failed": 0
+        },
+        "training_cell_count": 3
+      },
+      "forbidden_wording": "The v17.4 development preflight validates the all-environment absolute frequency contract, leakage no-tradeoff, reward improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_fresh_optimizer_seed_three_training_cells_and_one_hundred_twenty_same_checkpoint_paired_heldout_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_4_streaming_audit_projection",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4020,7 +4123,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "7ec8d7f2652ea2acebb1c0ebc47c9e80179d9d69f71f9dcb5efda83d29b5ffce",
+  "registry_sha256": "a25854364a61dff786501e8669c0306aab4c899b408e09d73548f3767979c1e6",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }
