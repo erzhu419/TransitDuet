@@ -8,17 +8,19 @@ import csv
 import json
 from pathlib import Path
 import statistics
+import sys
 from typing import Any, Iterable
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from freq_hrl.domains.mujoco import lower_action_router_contract
 from scripts import mujoco_v16_gauge_training_preflight_spec as spec
 from scripts.submit_mujoco_v16_gauge_training_preflight_scheduleurm import (
     cell_relative_dir,
 )
-
-
-ROOT = Path(__file__).resolve().parents[1]
-
 
 def _mean(rows: list[dict[str, Any]], key: str) -> float:
     return statistics.fmean(float(row[key]) for row in rows)
