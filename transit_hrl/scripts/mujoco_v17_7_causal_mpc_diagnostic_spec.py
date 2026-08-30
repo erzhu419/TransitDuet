@@ -9,9 +9,9 @@ from scripts import (  # noqa: F401
 
 DEVELOPMENT_PROTOCOL_VERSION = "mujoco_v17_7_causal_mpc_diagnostic_v1"
 EVIDENCE_ROLE = "reused_v17_4_path_causal_router_selection_not_confirmatory"
-FROZEN_CORE_REVISION = "77aa6c910e558091ce41d3208e2357e405d12df2"
+FROZEN_CORE_REVISION = "61b8d6535cadb88f46740af65f8c5e7d0ce84fce"
 FROZEN_SOURCE_MANIFEST_SHA256 = (
-    "1ad935bd7527f6655ce327b92d155d920d5281c1185a56821c8af48b166d430d"
+    "e6819fe80ae428755ffd355dbb8c22eece71a7dff9a7da8c750b8029d4b072c7"
 )
 SOURCE_RUN_NAME = (
     "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1"
