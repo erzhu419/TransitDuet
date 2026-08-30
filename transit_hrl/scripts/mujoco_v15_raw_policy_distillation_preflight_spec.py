@@ -8,6 +8,7 @@ from scripts import mujoco_v14_29_fresh_anchor_spec as anchors
 
 DEVELOPMENT_PROTOCOL_VERSION = "mujoco_v15_raw_policy_distillation_preflight_v3"
 EVIDENCE_ROLE = "post_v14_29_raw_policy_distillation_development_not_confirmatory"
+FROZEN_ALGORITHM_REVISION = "2b83e63b652c502001bdc1a4107d00193e95965d"
 ANCHOR_RUN_NAME = "mujoco_v14_29_fresh_anchor_bank_20260830_r1"
 ENVIRONMENTS = anchors.ENVIRONMENTS
 OPTIMIZER_SEEDS = (anchors.OPTIMIZER_SEEDS[0],)
@@ -41,7 +42,10 @@ CVAR_ALPHA = 0.5
 MINIMUM_MERIT_REDUCTION = 0.01
 FUNNEL_MULTIPLIER = 1.0
 RIDGE = 1e-2
-WORKERS = 12
+WORKERS = 18
+CPU_PER_TASK = 18
+RAM_MB_PER_TASK = 8192
+EXPECTED_CELL_COUNT = len(ENVIRONMENTS) * len(OPTIMIZER_SEEDS)
 
 CANDIDATES = tuple(
     {
