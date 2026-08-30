@@ -274,10 +274,12 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_high_pass",
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
+    "causal_total_action_gauge",
 }
 FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
+    "causal_total_action_gauge",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -1335,7 +1337,10 @@ def rollout_hierarchical(
                 upper_action=(
                     upper_anchor
                     if str(lower_action_router_mode)
-                    == "causal_joint_band_projection"
+                    in {
+                        "causal_joint_band_projection",
+                        "causal_total_action_gauge",
+                    }
                     else None
                 ),
                 action_limit=float(lower_action_scale),

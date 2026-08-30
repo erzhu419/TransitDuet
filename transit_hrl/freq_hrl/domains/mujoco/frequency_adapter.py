@@ -6,6 +6,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from ...core.responsibility_gauge import CausalGaugeFixer
+
 
 DISTURBANCE_MODES = (
     "standard",
@@ -25,6 +27,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_ema_high_pass",
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
+    "causal_total_action_gauge",
 )
 
 
@@ -221,6 +224,8 @@ class CausalLowerActionRouter:
     proposal even when the effective branch clips.  Joint-band projection uses
     the same causal windows as the audit: it transfers lower LPF32 minus upper
     HPF8, then assigns the exact complement to the lower responsibility.
+    Total-action gauge mode instead computes a causal low-pass of the additive
+    total and is invariant to the raw upper/lower factorization at full strength.
     """
 
     mode: str = "direct"
@@ -241,6 +246,7 @@ class CausalLowerActionRouter:
         self._previous_effective: np.ndarray | None = None
         self._joint_upper_history: list[np.ndarray] = []
         self._joint_lower_history: list[np.ndarray] = []
+        self._gauge_fixer: CausalGaugeFixer | None = None
 
     def reset(self, action_dim: int) -> None:
         if int(action_dim) < 1:
@@ -250,10 +256,19 @@ class CausalLowerActionRouter:
         self._previous_effective = zeros.copy()
         self._joint_upper_history = []
         self._joint_lower_history = []
+        self._gauge_fixer = (
+            CausalGaugeFixer(alpha=self.alpha, strength=self.strength)
+            if self.mode == "causal_total_action_gauge"
+            else None
+        )
+        if self._gauge_fixer is not None:
+            self._gauge_fixer.reset(int(action_dim))
 
     @property
     def context(self) -> np.ndarray:
         self._require_reset()
+        if self._gauge_fixer is not None:
+            return self._gauge_fixer.context
         value = (
             self._previous_effective
             if self.mode == "direct"
@@ -280,26 +295,45 @@ class CausalLowerActionRouter:
             raise ValueError("lower-action router limit must be positive")
 
         baseline_before = self._baseline.copy()
-        if self.mode == "causal_joint_band_projection":
+        if self.mode in {
+            "causal_joint_band_projection",
+            "causal_total_action_gauge",
+        }:
             if upper_action is None:
                 raise ValueError(
-                    "joint-band projection requires the current upper action"
+                    "selected responsibility router requires the current upper action"
                 )
             upper = np.asarray(upper_action, dtype=np.float64).reshape(-1)
             if upper.shape != latent.shape or not np.all(np.isfinite(upper)):
                 raise ValueError(
                     "joint-band upper action must be finite and aligned"
                 )
-            self._joint_upper_history.append(upper.copy())
-            self._joint_lower_history.append(latent.copy())
-            self._joint_upper_history = self._joint_upper_history[-8:]
-            self._joint_lower_history = self._joint_lower_history[-32:]
-            upper_low = np.mean(self._joint_upper_history, axis=0)
-            upper_high = upper - upper_low
-            lower_low = np.mean(self._joint_lower_history, axis=0)
-            transfer_target = lower_low - upper_high
-            requested_transfer = self.strength * transfer_target
-            requested = latent - requested_transfer
+            if self.mode == "causal_total_action_gauge":
+                if self._gauge_fixer is None:
+                    raise RuntimeError("total-action gauge router is not initialized")
+                fixed = self._gauge_fixer.split(
+                    upper,
+                    latent,
+                    lower_limit=limit,
+                )
+                transfer_target = np.asarray(
+                    fixed["canonical_upper"], dtype=np.float64
+                ) - upper
+                requested_transfer = np.asarray(
+                    fixed["transfer"], dtype=np.float64
+                )
+                requested = np.asarray(fixed["lower"], dtype=np.float64)
+            else:
+                self._joint_upper_history.append(upper.copy())
+                self._joint_lower_history.append(latent.copy())
+                self._joint_upper_history = self._joint_upper_history[-8:]
+                self._joint_lower_history = self._joint_lower_history[-32:]
+                upper_low = np.mean(self._joint_upper_history, axis=0)
+                upper_high = upper - upper_low
+                lower_low = np.mean(self._joint_lower_history, axis=0)
+                transfer_target = lower_low - upper_high
+                requested_transfer = self.strength * transfer_target
+                requested = latent - requested_transfer
         else:
             if upper_action is not None:
                 raise ValueError(
@@ -315,6 +349,12 @@ class CausalLowerActionRouter:
         clipped = np.abs(effective - requested) > 1e-12
         if self.mode == "causal_joint_band_projection":
             self._baseline = transfer_target.copy()
+        elif self.mode == "causal_total_action_gauge":
+            if self._gauge_fixer is None:
+                raise RuntimeError("total-action gauge router is not initialized")
+            self._baseline = np.asarray(
+                self._gauge_fixer.context, dtype=np.float64
+            )
         elif self.mode != "direct":
             self._baseline += self.alpha * (latent - self._baseline)
         removed = latent - effective
@@ -323,6 +363,7 @@ class CausalLowerActionRouter:
             if self.mode in {
                 "causal_ema_conservative_transfer",
                 "causal_joint_band_projection",
+                "causal_total_action_gauge",
             }
             else np.zeros_like(removed)
         )

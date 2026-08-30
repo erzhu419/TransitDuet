@@ -19,6 +19,10 @@ from .phase0 import (
 )
 from .promotion_gate import CausalPromotionGate
 from .reward import RewardAttributionAccumulator
+from .responsibility_gauge import (
+    CausalGaugeFixer,
+    canonical_responsibility_trace,
+)
 from .router import FrequencyRouter
 from .shared_core_audit import audit_shared_training_core
 from .spec import (
@@ -38,6 +42,7 @@ __all__ = [
     "BinnedExogenousStreamAdapter",
     "CausalPromotionGate",
     "CausalLeakageRewardShaper",
+    "CausalGaugeFixer",
     "CausalLowFrequencyEffectProjector",
     "CausalRollingBandTracker",
     "CumulativeActionEffectOperator",
@@ -55,6 +60,7 @@ __all__ = [
     "RewardAttributionAccumulator",
     "audit_shared_training_core",
     "binned_mutual_information",
+    "canonical_responsibility_trace",
     "default_spec",
     "evaluate_rms_leakage_budget",
     "load_phase0_records",
