@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 29)
+        self.assertEqual(len(records), 30)
         by_id = {row["evidence_id"]: row for row in records}
         v17 = by_id["mujoco_v17_zero_dc_plan_development"]
         self.assertEqual(v17["facts"]["gate_counts"]["all_cell_gates"], 1)
@@ -32,6 +32,20 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
             9,
         )
         self.assertTrue(v17["facts"]["all_failed_attempts_exit_zero"])
+        v17_1 = by_id["mujoco_v17_1_headroom_homotopy_development"]
+        self.assertEqual(
+            v17_1["facts"]["reward_noninferiority_counts"],
+            {
+                "headroom_exact": 0,
+                "headroom_homotopy": 1,
+                "headroom_homotopy_promotion_05": 1,
+                "headroom_homotopy_promotion_10": 1,
+            },
+        )
+        self.assertIsNone(
+            v17_1["facts"]["selected_arm_for_fresh_multiseed"]
+        )
+        self.assertFalse(v17_1["facts"]["support_gate"])
         self.assertEqual(
             by_id["mujoco_v16_2_macro_hold_gauge_development"]["facts"][
                 "gate_counts"
@@ -299,11 +313,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 29)
+            self.assertEqual(summary["record_count"], 30)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 23)
+            self.assertEqual(summary["development_record_count"], 24)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

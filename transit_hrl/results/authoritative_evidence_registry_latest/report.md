@@ -33,6 +33,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v16_1_audit_gauge_paired_development | mujoco_control | development | audit_gauge_paired_preflight_not_supported | development_only | false |
 | mujoco_v16_2_macro_hold_gauge_development | mujoco_control | development | macro_hold_gauge_screen_not_supported | development_only | false |
 | mujoco_v17_zero_dc_plan_development | mujoco_control | development | zero_dc_plan_screen_not_supported | development_only | false |
+| mujoco_v17_1_headroom_homotopy_development | mujoco_control | development | headroom_homotopy_preflight_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -199,6 +200,12 @@ Forbidden: The v16.2 development screen validates cross-environment responsibili
 In a frozen three-environment, three-optimizer-seed development screen, exact causal zero-DC projection enforced the complete-macro lower invariant and reduced both pre-saturation raw lower-LF power and normalized raw joint frequency merit in all nine cells. The joint no-tradeoff claim failed: held-out reward noninferiority passed only three cells, candidate upper-HF reduction passed five, only one cell passed every gate, and no environment reached the required two-of-three replicate gate.
 
 Forbidden: The v17 development screen validates reward no-tradeoff, cross-environment upper/lower frequency separation, plant-level separation after saturation, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v17_1_headroom_homotopy_development
+
+In a frozen three-environment, one-optimizer-seed development preflight, every v17.1 candidate enforced the complete-macro zero-DC invariant, exactly reconstructed the registered responsibility sum, and reduced raw lower-LF power relative to smooth direct control and its own latent proposal. No candidate met the reward floor in more than one environment, so no arm advanced to fresh multiseed evaluation.
+
+Forbidden: The v17.1 development preflight validates reward no-tradeoff, cross-environment upper/lower frequency separation, exact plant-level headroom after float32 execution, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

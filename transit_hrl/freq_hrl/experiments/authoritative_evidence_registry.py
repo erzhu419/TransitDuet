@@ -35,6 +35,9 @@ MUJOCO_V16_2_MACRO_HOLD_GAUGE_SCHEMA_VERSION = (
 MUJOCO_V17_ZERO_DC_PLAN_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_zero_dc_plan_development_v1"
 )
+MUJOCO_V17_1_HEADROOM_HOMOTOPY_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_1_headroom_homotopy_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1399,6 +1402,108 @@ def _mujoco_v17_zero_dc_plan_facts(
     }
 
 
+def _mujoco_v17_1_headroom_homotopy_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    candidates = dict(decision.get("candidate_results") or {})
+    expected_reward_counts = {
+        "headroom_exact": 0,
+        "headroom_homotopy": 1,
+        "headroom_homotopy_promotion_05": 1,
+        "headroom_homotopy_promotion_10": 1,
+    }
+    expected_upper_counts = {
+        "headroom_exact": 1,
+        "headroom_homotopy": 0,
+        "headroom_homotopy_promotion_05": 2,
+        "headroom_homotopy_promotion_10": 0,
+    }
+    expected_joint_counts = {
+        "headroom_exact": 3,
+        "headroom_homotopy": 3,
+        "headroom_homotopy_promotion_05": 2,
+        "headroom_homotopy_promotion_10": 2,
+    }
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    valid_candidates = bool(
+        set(candidates) == set(expected_reward_counts)
+        and all(
+            row.get("eligible_for_fresh_multiseed") is False
+            and dict(row.get("gate_counts") or {}).get(
+                "trained_checkpoint"
+            ) == 3
+            and dict(row.get("gate_counts") or {}).get(
+                "reward_noninferior"
+            ) == expected_reward_counts[name]
+            and dict(row.get("gate_counts") or {}).get(
+                "upper_hf_nonworsening"
+            ) == expected_upper_counts[name]
+            and dict(row.get("gate_counts") or {}).get(
+                "raw_lower_lf_reduction"
+            ) == 3
+            and dict(row.get("gate_counts") or {}).get(
+                "raw_lower_lf_reduction_vs_latent"
+            ) == 3
+            and dict(row.get("gate_counts") or {}).get(
+                "raw_joint_merit_reduction"
+            ) == expected_joint_counts[name]
+            and dict(row.get("gate_counts") or {}).get(
+                "complete_macro_zero_sum"
+            ) == 3
+            and dict(row.get("gate_counts") or {}).get(
+                "projection_active"
+            ) == 3
+            and dict(row.get("gate_counts") or {}).get(
+                "responsibility_reconstruction_exact"
+            ) == 3
+            for name, row in candidates.items()
+        )
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_1_HEADROOM_HOMOTOPY_SCHEMA_VERSION
+        or decision.get("status")
+        != "headroom_homotopy_preflight_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "headroom_homotopy_architecture_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 15
+        or int(decision.get("paired_candidate_cell_count", -1)) != 12
+        or int(decision.get("scheduler_successful_task_count", -1)) != 15
+        or int(decision.get("scheduler_attempt_count", -1)) != 15
+        or len(tasks) != 15
+        or len(set(tasks)) != 15
+        or task_status != {"done": 15, "failed": 0, "cancelled": 0}
+        or decision.get("selected_arm_for_fresh_multiseed") is not None
+        or not valid_candidates
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or report is None
+        or "`headroom_homotopy_preflight_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.1 headroom-homotopy decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "training_cell_count": 15,
+        "paired_candidate_cell_count": 12,
+        "reward_noninferiority_counts": expected_reward_counts,
+        "upper_hf_nonworsening_counts": expected_upper_counts,
+        "joint_merit_reduction_counts": expected_joint_counts,
+        "task_status_counts": task_status,
+        "selected_arm_for_fresh_multiseed": None,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1424,6 +1529,9 @@ PARSERS = {
     ),
     "mujoco_v16_2_macro_hold_gauge": _mujoco_v16_2_macro_hold_gauge_facts,
     "mujoco_v17_zero_dc_plan": _mujoco_v17_zero_dc_plan_facts,
+    "mujoco_v17_1_headroom_homotopy": (
+        _mujoco_v17_1_headroom_homotopy_facts
+    ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

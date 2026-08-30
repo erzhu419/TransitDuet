@@ -1,5 +1,5 @@
 {
-  "development_record_count": 23,
+  "development_record_count": 24,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 29,
+  "record_count": 30,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3738,6 +3738,69 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment, one-optimizer-seed development preflight, every v17.1 candidate enforced the complete-macro zero-DC invariant, exactly reconstructed the registered responsibility sum, and reduced raw lower-LF power relative to smooth direct control and its own latent proposal. No candidate met the reward floor in more than one environment, so no arm advanced to fresh multiseed evaluation.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_1_headroom_homotopy_development.json",
+          "role": "decision",
+          "sha256": "767dbee964bdb669c792d7a383b4d5e794395c2e3effe5ba1125963bcba8533c"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_1_headroom_homotopy_outcome_2026-08-30.md",
+          "role": "report",
+          "sha256": "97ecc99c245104cf30f98e8984ceda325aa58694297ebc9c0c2060f7bfd77c3b"
+        }
+      ],
+      "claim": "Headroom-feasible zero-DC training with a continuous homotopy and causal upper promotion yields cross-environment frequency separation without a reward tradeoff.",
+      "claim_id": "D24_HEADROOM_HOMOTOPY_PROMOTION",
+      "decision": "headroom_homotopy_preflight_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_1_headroom_homotopy_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "headroom_homotopy_preflight_not_supported",
+        "environment_count": 3,
+        "integrity_status": "valid",
+        "joint_merit_reduction_counts": {
+          "headroom_exact": 3,
+          "headroom_homotopy": 3,
+          "headroom_homotopy_promotion_05": 2,
+          "headroom_homotopy_promotion_10": 2
+        },
+        "optimizer_seed_count": 1,
+        "paired_candidate_cell_count": 12,
+        "reward_noninferiority_counts": {
+          "headroom_exact": 0,
+          "headroom_homotopy": 1,
+          "headroom_homotopy_promotion_05": 1,
+          "headroom_homotopy_promotion_10": 1
+        },
+        "selected_arm_for_fresh_multiseed": null,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 15,
+          "failed": 0
+        },
+        "training_cell_count": 15,
+        "upper_hf_nonworsening_counts": {
+          "headroom_exact": 1,
+          "headroom_homotopy": 0,
+          "headroom_homotopy_promotion_05": 2,
+          "headroom_homotopy_promotion_10": 0
+        }
+      },
+      "forbidden_wording": "The v17.1 development preflight validates reward no-tradeoff, cross-environment upper/lower frequency separation, exact plant-level headroom after float32 execution, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_fresh_optimizer_seed_five_capacity_matched_arms_forty_paired_heldout_paths_per_cell_and_fifteen_successful_scheduler_tasks",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_1_headroom_homotopy",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3796,7 +3859,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "9647c744d0208c4e4921a69624b91385562a4aebc91aa888e1316d8c8292177b",
+  "registry_sha256": "ab423c296fba8e884c7445c3befa9910bda7721d502bdd5729f0e035fea378e3",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

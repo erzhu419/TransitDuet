@@ -850,6 +850,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_1_headroom_homotopy_development",
+      "claim_id": "D24_HEADROOM_HOMOTOPY_PROMOTION",
+      "claim": "Headroom-feasible zero-DC training with a continuous homotopy and causal upper promotion yields cross-environment frequency separation without a reward tradeoff.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "headroom_homotopy_preflight_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "one_fresh_optimizer_seed_five_capacity_matched_arms_forty_paired_heldout_paths_per_cell_and_fifteen_successful_scheduler_tasks",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_1_headroom_homotopy",
+      "allowed_wording": "In a frozen three-environment, one-optimizer-seed development preflight, every v17.1 candidate enforced the complete-macro zero-DC invariant, exactly reconstructed the registered responsibility sum, and reduced raw lower-LF power relative to smooth direct control and its own latent proposal. No candidate met the reward floor in more than one environment, so no arm advanced to fresh multiseed evaluation.",
+      "forbidden_wording": "The v17.1 development preflight validates reward no-tradeoff, cross-environment upper/lower frequency separation, exact plant-level headroom after float32 execution, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_1_headroom_homotopy_development.json",
+          "sha256": "767dbee964bdb669c792d7a383b4d5e794395c2e3effe5ba1125963bcba8533c"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_1_headroom_homotopy_outcome_2026-08-30.md",
+          "sha256": "97ecc99c245104cf30f98e8984ceda325aa58694297ebc9c0c2060f7bfd77c3b"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

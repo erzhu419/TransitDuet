@@ -1,0 +1,124 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_1_headroom_homotopy_development_v1",
+  "status": "headroom_homotopy_preflight_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "headroom_homotopy_architecture_development_not_confirmatory",
+  "source_run": "mujoco_v17_1_headroom_homotopy_preflight_20260830_r1",
+  "development_protocol_version": "mujoco_v17_1_headroom_homotopy_preflight_v1",
+  "frozen_algorithm_revision": "c732391d5f1ebb494f8c082c668a6fe24e197b13",
+  "frozen_source_manifest_sha256": "a4e3a63e04d170e8f07f44df8b330c6a0fa24454a79da44ddd25926b621c280a",
+  "optimizer_seed_count": 1,
+  "environment_count": 3,
+  "training_cell_count": 15,
+  "paired_candidate_cell_count": 12,
+  "heldout_path_count_per_arm": 40,
+  "scheduler_successful_task_count": 15,
+  "scheduler_attempt_count": 15,
+  "scheduler_tasks": [
+    "t85390",
+    "t85391",
+    "t85392",
+    "t85393",
+    "t85394",
+    "t85395",
+    "t85396",
+    "t85397",
+    "t85398",
+    "t85399",
+    "t85400",
+    "t85401",
+    "t85402",
+    "t85403",
+    "t85404"
+  ],
+  "scheduler_nodes": [
+    "node004"
+  ],
+  "task_status_counts": {
+    "done": 15,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "selected_arm_for_fresh_multiseed": null,
+  "candidate_results": {
+    "headroom_exact": {
+      "eligible_for_fresh_multiseed": false,
+      "worst_environment_reward_margin_above_floor": -0.35409287839460346,
+      "median_raw_joint_merit_relative_reduction": 0.8331035024451015,
+      "gate_counts": {
+        "trained_checkpoint": 3,
+        "reward_noninferior": 0,
+        "upper_hf_nonworsening": 1,
+        "raw_lower_lf_reduction": 3,
+        "raw_lower_lf_reduction_vs_latent": 3,
+        "raw_joint_merit_reduction": 3,
+        "complete_macro_zero_sum": 3,
+        "projection_active": 3,
+        "responsibility_reconstruction_exact": 3,
+        "nominal_action_headroom_exact": 1,
+        "promotion_contract_active": 3
+      }
+    },
+    "headroom_homotopy": {
+      "eligible_for_fresh_multiseed": false,
+      "worst_environment_reward_margin_above_floor": -0.3412831119011988,
+      "median_raw_joint_merit_relative_reduction": 0.7795093940184008,
+      "gate_counts": {
+        "trained_checkpoint": 3,
+        "reward_noninferior": 1,
+        "upper_hf_nonworsening": 0,
+        "raw_lower_lf_reduction": 3,
+        "raw_lower_lf_reduction_vs_latent": 3,
+        "raw_joint_merit_reduction": 3,
+        "complete_macro_zero_sum": 3,
+        "projection_active": 3,
+        "responsibility_reconstruction_exact": 3,
+        "nominal_action_headroom_exact": 0,
+        "promotion_contract_active": 3
+      }
+    },
+    "headroom_homotopy_promotion_05": {
+      "eligible_for_fresh_multiseed": false,
+      "worst_environment_reward_margin_above_floor": -0.15500021970875572,
+      "median_raw_joint_merit_relative_reduction": 0.8469433548967475,
+      "gate_counts": {
+        "trained_checkpoint": 3,
+        "reward_noninferior": 1,
+        "upper_hf_nonworsening": 2,
+        "raw_lower_lf_reduction": 3,
+        "raw_lower_lf_reduction_vs_latent": 3,
+        "raw_joint_merit_reduction": 2,
+        "complete_macro_zero_sum": 3,
+        "projection_active": 3,
+        "responsibility_reconstruction_exact": 3,
+        "nominal_action_headroom_exact": 0,
+        "promotion_contract_active": 3
+      }
+    },
+    "headroom_homotopy_promotion_10": {
+      "eligible_for_fresh_multiseed": false,
+      "worst_environment_reward_margin_above_floor": -0.38980818463074035,
+      "median_raw_joint_merit_relative_reduction": 0.8418046203556202,
+      "gate_counts": {
+        "trained_checkpoint": 3,
+        "reward_noninferior": 1,
+        "upper_hf_nonworsening": 0,
+        "raw_lower_lf_reduction": 3,
+        "raw_lower_lf_reduction_vs_latent": 3,
+        "raw_joint_merit_reduction": 2,
+        "complete_macro_zero_sum": 3,
+        "projection_active": 3,
+        "responsibility_reconstruction_exact": 3,
+        "nominal_action_headroom_exact": 0,
+        "promotion_contract_active": 3
+      }
+    }
+  },
+  "mechanism_findings": {
+    "zero_dc_and_lower_frequency": "All twelve candidate cells activated the projection, closed each complete lower macro to numerical zero, exactly reconstructed the registered responsibility sum, and reduced raw lower-LF power by at least ten percent versus both smooth direct control and the candidate latent proposal.",
+    "reward": "The five-percent held-out reward floor passed zero of three environments for constant exact headroom and only Walker2d for each homotopy variant. The half-gain promotion arm was best among the candidates but remained below the floor in HalfCheetah and Hopper.",
+    "upper_compensation": "Half-gain promotion bounded upper-HF nonworsening in Hopper and Walker2d, but HalfCheetah upper-HF power increased by 489 percent relative to smooth direct control and its joint frequency merit did not improve.",
+    "headroom_diagnostic": "The existing AdditiveActionClipRate counts any float32 sum above exactly one and failed in eleven of twelve candidate cells. The run did not record excess magnitude, so this screen cannot distinguish unit-roundoff boundary hits from material nominal saturation. This diagnostic failure does not alter the independent reward rejection.",
+    "decision": "Do not expand strict per-macro zero-DC control. The next mechanism must preserve the total executed control path while moving a smooth causal DC responsibility from lower to upper, report clip excess magnitude rather than only a zero-tolerance rate, and keep latent-policy diagnostics separate from canonical responsibility diagnostics."
+  }
+}
