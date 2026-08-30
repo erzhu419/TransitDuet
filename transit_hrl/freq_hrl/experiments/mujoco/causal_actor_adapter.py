@@ -124,7 +124,7 @@ def fit_causal_actor_adapter(
         "action_dimension": dimension,
         "proposal_dimension": 2 * dimension,
         "fit_path_count": len(totals),
-        "fit_actor_floor_weight": float(np.sum(weights)),
+        "fit_total_path_weight": float(np.sum(weights)),
         "coefficients": coefficients.reshape(
             width, 2 * dimension, dimension
         ),
