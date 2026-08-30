@@ -1222,3 +1222,45 @@ changing task identity or node assignment. The early health audit found all 48
 tasks running with nonzero CPU and RAM samples. This dispatch record is not an
 outcome: aggregation, the locked capacity-gain gate, and any candidate decision
 remain pending until every shard completes.
+
+### V14 capacity-gain screen outcome (2026-08-30)
+
+All 48 scheduler shards completed. The node-side strict aggregate verified the
+exact clean source commit, 12 configurations, four training seeds, four common
+evaluation seeds, checkpoint 39, complete run manifests, and 192 unique frozen
+rollouts. Only `w=0.02,p=1` passes the preregistered mechanism, outcome, and
+resource gates. It improves headway CV by `0.02625` relative to the V13 tight
+anchor, with paired confidence-interval upper bound `-0.01321`, while increasing
+restricted journey by `0.19028 min`. Relative to confirmed main it improves
+journey by `0.62128 min` with CV delta `+0.00194`; relative to V11 it improves
+journey by `0.71567 min` with CV delta `+0.00449`; and relative to `noguard` it
+improves journey by `1.95547 min` and CV by `0.07047`.
+
+Every frozen rollout satisfies the `0.00025` mean zero-hold-regret limit and
+the causal-evidence threshold. Realized capacity gain is positive in every
+rollout, its normalization and bonus arithmetic are exact within CSV rounding,
+and execution adjustment remains zero. The selected row averages
+`45138.75` holding-vehicle seconds and `34623.69` denied-dispatch events, both
+inside the locked resource limits. The exploratory gate therefore returns
+`exploratory_candidate_selected`, not a paper-eligible confirmation.
+
+### V14 200-episode independent confirmation preregistration (2026-08-30)
+
+The confirmation freezes the exact selected configuration and the same V14
+behavior source; it performs no further candidate search. Controls are
+historical main, `noguard`, compact context-only, confirmed main, V11
+same-entropy, and the V13 tight anchor. Eight fresh training seeds are
+`18013,18031,18053,18077,18097,18109,18143,18161`; eight fresh frozen evaluation
+seeds are `51017,51041,51059,51083,51101,51119,51143,51167`. Exact scheduler
+command-field search found no prior use. At 200 episodes this design contains
+56 independent training shards and 448 frozen common-random-number rollouts.
+
+The confirmation requires the exact screen-selected candidate, unchanged clean
+behavior source and scenario contract, disjoint seeds, checkpoint 199, complete
+manifests, and the same causal mechanism, regret, realized-gain, and resource
+checks. It additionally requires CV improvement of at least `0.010` versus V13
+with paired CI upper bound below zero, negative CV delta on at least 75 percent
+of training seeds, and journey noninferiority versus V13 with paired CI upper
+bound at or below `+0.20 min`. The original noguard/current/V11 effect margins
+remain locked. Failure of any condition yields `capacity_gain_not_confirmed`;
+there is no fallback candidate or post-hoc threshold change.
