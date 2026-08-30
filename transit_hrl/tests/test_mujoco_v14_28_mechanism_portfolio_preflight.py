@@ -129,6 +129,9 @@ class MujocoV1428MechanismPortfolioPreflightTest(unittest.TestCase):
         self.assertEqual(scheduler["cpu"], 24)
         self.assertEqual(scheduler["ram_mb"], 16384)
         self.assertEqual(set(scheduler["allowed_nodes"]), set(self._args().nodes))
+        staged = {Path(path).name for path in scheduler["stage_input_paths"]}
+        self.assertIn("scripts", staged)
+        self.assertIn("freq_hrl", staged)
 
     def test_launcher_is_directly_executable(self):
         launcher = (

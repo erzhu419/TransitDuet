@@ -23,6 +23,7 @@ from scripts import submit_mujoco_v14_18_router_probe_scheduleurm as base
 
 LAUNCHER_PATH = Path(__file__).resolve()
 SIGNATURE_VERSION = "mujoco-v14-28-mechanism-portfolio-preflight-v1"
+BASE_BUILD_SCHEDULER_SPEC = base.build_scheduler_spec
 
 
 def _build_probe_command(args, environment: str, seed: int) -> str:
@@ -150,11 +151,22 @@ def _write_preregistration(args) -> None:
     )
 
 
+def _build_scheduler_spec(args, environment, seed):
+    scheduler = BASE_BUILD_SCHEDULER_SPEC(args, environment, seed)
+    scheduler["stage_input_paths"] = list(dict.fromkeys([
+        *scheduler["stage_input_paths"],
+        str((ROOT / "scripts").resolve()),
+        str((ROOT / "freq_hrl").resolve()),
+    ]))
+    return scheduler
+
+
 def _overrides() -> dict[str, Any]:
     return {
         "spec": spec,
         "analyze_run": analyze_run,
         "build_probe_command": _build_probe_command,
+        "build_scheduler_spec": _build_scheduler_spec,
         "_write_preregistration": _write_preregistration,
         "SIGNATURE_VERSION": SIGNATURE_VERSION,
         "LAUNCHER_PATH": LAUNCHER_PATH,
