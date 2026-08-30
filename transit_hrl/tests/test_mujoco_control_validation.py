@@ -1367,8 +1367,12 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         _, control = rollout_hierarchical(
             model, lower_action_router_strength=0.0, **common
         )
+        responsibility_trace = {}
         _, fixed = rollout_hierarchical(
-            model, lower_action_router_strength=1.0, **common
+            model,
+            lower_action_router_strength=1.0,
+            responsibility_trace_output=responsibility_trace,
+            **common,
         )
 
         for trace in (
@@ -1393,6 +1397,16 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertLessEqual(fixed["ResponsibilityReconstructionRMS"], 1e-7)
         self.assertEqual(fixed["protocol_valid"], 1.0)
+        self.assertEqual(
+            responsibility_trace["total_action"].shape,
+            responsibility_trace["upper_action"].shape,
+        )
+        np.testing.assert_allclose(
+            responsibility_trace["upper_action"]
+            + responsibility_trace["lower_action"],
+            responsibility_trace["total_action"],
+            atol=1e-12,
+        )
 
     def test_audit_optimal_macro_gauge_preserves_closed_loop_with_full_state(self):
         observation_dim, action_dim = environment_dimensions(

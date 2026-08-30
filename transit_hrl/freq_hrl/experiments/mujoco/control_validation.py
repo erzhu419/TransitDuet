@@ -1284,6 +1284,7 @@ def rollout_hierarchical(
     upper_promotion_gain: float = 0.0,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
+    responsibility_trace_output: dict[str, np.ndarray] | None = None,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
@@ -2239,6 +2240,23 @@ def rollout_hierarchical(
             ),
             upper_promotion_gain=effective_upper_promotion_gain,
         )
+        if responsibility_trace_output is not None:
+            responsibility_trace_output.clear()
+            responsibility_trace_output.update({
+                "total_action": (
+                    np.asarray(upper_actions, dtype=np.float64)
+                    + np.asarray(lower_actions, dtype=np.float64)
+                ),
+                "upper_action": np.asarray(
+                    upper_actions, dtype=np.float64
+                ),
+                "lower_action": np.asarray(
+                    lower_actions, dtype=np.float64
+                ),
+                "executed_action": np.asarray(
+                    executed_actions, dtype=np.float64
+                ),
+            })
         return (
             trajectory if sample or collect_trajectory else None
         ), row
