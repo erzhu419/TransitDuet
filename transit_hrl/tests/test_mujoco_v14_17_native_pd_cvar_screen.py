@@ -2,6 +2,7 @@ import math
 import unittest
 from pathlib import Path
 
+from freq_hrl.experiments.reproducibility import git_source_manifest_sha256
 from scripts import (
     mujoco_v14_16_crossed_restoration_mechanism_screen_spec as predecessor,
 )
@@ -69,6 +70,17 @@ class MujocoV1417NativePDCVaRScreenTest(unittest.TestCase):
         }
         self.assertEqual(len(current), sum(map(len, current_roles)))
         self.assertFalse(current & previous)
+
+    def test_frozen_manifest_matches_registered_algorithm_revision(self):
+        root = Path(__file__).resolve().parents[1]
+        self.assertEqual(
+            git_source_manifest_sha256(
+                root,
+                Path("freq_hrl"),
+                revision=spec.FROZEN_ALGORITHM_REVISION,
+            ),
+            spec.FROZEN_SOURCE_MANIFEST_SHA256,
+        )
 
     def test_matrix_is_capacity_matched_and_factorial(self):
         self.assertEqual(len(spec.ARMS), 7)
