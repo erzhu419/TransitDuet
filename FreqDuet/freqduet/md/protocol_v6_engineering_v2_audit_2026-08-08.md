@@ -998,3 +998,44 @@ This establishes source lineage, live execution, and the intended numerical
 conditioning only. It does not establish action-cost satisfaction, control
 benefit, or eligibility for confirmation; those require all 56 tasks to finish
 successfully, strict frozen aggregation, and the locked V12 screen.
+
+## Engineering-v12 normalized-constraint outcome (2026-08-30)
+
+The original scheduler records `t81852` through `t81907` remained disconnected
+from the compute nodes for approximately 16 days and were eventually marked
+failed from empty scheduler logs. Each record was requeued exactly once as one
+of `t84027` through `t84086`. All 56 retry records completed with exit code zero
+and a `DONE` marker. The shared result directory contains exactly 56 nonempty
+run manifests, diagnostics files, checkpoints, frozen evaluation CSVs, and
+frozen evaluation manifests, with no detected traceback. The strict aggregate
+verifies all 56 runs, 224 unique common-random-number rollouts, checkpoint 39,
+the clean frozen source commit, and the preregistered config and seed grid.
+
+The locked V12 screen returns `no_pass`. Ratio scaling fixes the V11 numerical
+conditioning failure: mean frozen absolute action cost falls from approximately
+`0.00243` in the matched V11 controls to `0.00059--0.00088` in all six V12
+candidates, although one candidate still violates its per-rollout maximum
+limit. It does not recover the control tradeoff. The limit-0.002,
+initial-dual-0.05 candidate has the strongest CV result (`-0.04295` versus
+`noguard` and `-0.00719` versus its V11 control), but worsens journey by
+`+0.8510 min` versus `noguard` and fails the holding, denied-dispatch, journey,
+and conditional-entropy gates. The limit-0.001, initial-dual-0.05 candidate
+keeps a significant CV gain versus `noguard` (`-0.02622`) but worsens journey
+by `+0.4237 min`, reverses CV relative to its matched V11 control, and also
+fails the holding and denied-dispatch gates.
+
+Training traces explain the tradeoff. Ratio-scaled candidates incur a
+regularity penalty of approximately `0.13--1.01` in episode zero, compared with
+approximately `0.005` for the raw-cost controls. They rapidly concentrate on
+the analytic two-sided balancing action. This improves local headway CV but
+forces holding even where its passenger and dispatch cost outweighs the
+additional regularity gain. The next objective must therefore constrain only
+action-dependent regularity regret relative to zero holding, leaving actions
+that already improve on the zero-hold baseline to the reward critic. Further
+increases in the absolute-target dual are ruled out by this result.
+
+The strict aggregation command itself exited successfully but printed no
+scheduler success marker, causing three unnecessary automatic retries before
+the retry cap. The matrix runner now prints `DONE aggregate` after a successful
+aggregate. This changes scheduler observability only; it does not alter model,
+simulation, or analysis results.

@@ -1300,6 +1300,7 @@ def main() -> None:
             args.train_episodes,
             args.stage,
         )
+        print(f"DONE aggregate: {Path(args.out_dir).resolve()}")
 
 
 if __name__ == "__main__":
