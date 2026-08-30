@@ -146,6 +146,9 @@ def _summarize(
             float(row["ResponsibilityReconstructionRMS"]) for row in rows
         ),
         "mean_router_clip_rate": _mean(rows, "LowerRouterClipRate"),
+        "mean_additive_action_clip_rate": _mean(
+            rows, "AdditiveActionClipRate"
+        ),
         "selected_checkpoint_iteration": int(
             summary["selected_checkpoint_iteration"]
         ),
@@ -263,6 +266,9 @@ def analyze(run_name: str) -> dict[str, Any]:
                 "candidate_raw_joint_merit_relative_reduction_vs_hold": (
                     joint_reduction
                 ),
+                "candidate_mean_additive_action_clip_rate": candidate[
+                    "mean_additive_action_clip_rate"
+                ],
                 "gates": gates,
                 "supported": bool(all(gates.values())),
             })
@@ -345,6 +351,7 @@ def main() -> None:
         "candidate_raw_lower_lf_relative_reduction_vs_smooth",
         "candidate_raw_lower_lf_relative_reduction_vs_latent",
         "candidate_raw_joint_merit_relative_reduction_vs_hold",
+        "candidate_mean_additive_action_clip_rate",
     )
     with (target / "zero_dc_plan_cells.csv").open(
         "w", newline="", encoding="utf-8"

@@ -139,6 +139,7 @@ def _fake_cell(_run_name, environment, arm, optimizer_seed):
                 "LowerRouterMacroCompletionErrorMax": 0.0,
                 "ResponsibilityReconstructionRMS": 0.0,
                 "LowerRouterClipRate": projection,
+                "AdditiveActionClipRate": 0.02,
             })
     return summary, rows
 
