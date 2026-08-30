@@ -908,6 +908,144 @@ def _mujoco_v14_16_mechanism_facts(
     }
 
 
+def _mujoco_v14_29_portfolio_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    cell_rows = _read_csv(paths["cell_rows"])
+    preregistration = _read_json(paths["preregistration"])
+    qualification = _read_json(paths["anchor_qualification"])
+    report = paths.get("report")
+    environment_rows = list(decision.get("environment_results") or [])
+    cells = list(decision.get("cells") or [])
+    anchors = list(qualification.get("anchors") or [])
+    expected_support = {
+        "HalfCheetah-v5": 16,
+        "Hopper-v5": 16,
+        "Walker2d-v5": 15,
+    }
+    observed_support = {
+        str(row.get("environment")): int(row.get("supported_count", -1))
+        for row in environment_rows
+    }
+    frozen_revision = str(preregistration.get("frozen_algorithm_revision", ""))
+    frozen_manifest = str(
+        preregistration.get("frozen_source_manifest_sha256", "")
+    )
+    router_rows = [
+        row for row in cells
+        if row.get("selected_source") == "function_preserving_router_adapter"
+    ]
+    actor_rows = [
+        row for row in cells
+        if str(row.get("selected_source", "")).startswith(
+            "paired_finite_difference:"
+        )
+    ]
+    abstentions = [row for row in cells if row.get("selected_source") is None]
+    csv_index = {
+        (str(row.get("environment")), int(row.get("optimizer_seed", -1))): row
+        for row in cell_rows
+    }
+    cell_index = {
+        (str(row.get("environment")), int(row.get("optimizer_seed", -1))): row
+        for row in cells
+    }
+    unique_parameters = {
+        environment: len({
+            str(row.get("parameter_sha256"))
+            for row in anchors
+            if row.get("environment") == environment
+        })
+        for environment in expected_support
+    }
+    if (
+        preregistration.get("status")
+        != "frozen_before_v14_29_confirmatory_outcome_access"
+        or preregistration.get("development_protocol_version")
+        != "mujoco_v14_29_portfolio_confirmatory_v1"
+        or preregistration.get("evidence_role")
+        != "fresh_optimizer_seed_mechanism_portfolio_confirmation"
+        or len(preregistration.get("optimizer_seeds") or []) != 16
+        or len(preregistration.get("validation_roots") or []) != 32
+        or preregistration.get("scheduler_contract", {}).get("scheduler")
+        != "scheduleurm"
+        or preregistration.get("scheduler_contract", {}).get("require_node")
+        is not None
+        or preregistration.get("scheduler_contract", {}).get("slurm_used")
+        is not False
+        or len(frozen_revision) != 40
+        or len(frozen_manifest) != 64
+        or qualification.get("status") != "fresh_anchor_bank_qualified"
+        or int(qualification.get("anchor_count", -1)) != 48
+        or int(qualification.get("qualified_anchor_count", -1)) != 48
+        or len(anchors) != 48
+        or not all(row.get("qualified") is True for row in anchors)
+        or qualification.get("frozen_algorithm_revision") != frozen_revision
+        or qualification.get("frozen_source_manifest_sha256") != frozen_manifest
+        or any(count != 16 for count in unique_parameters.values())
+        or decision.get("status") != "mechanism_portfolio_confirmed"
+        or decision.get("analysis_version")
+        != "mujoco_v14_29_portfolio_confirmatory_v1"
+        or decision.get("statistical_unit") != "optimizer_seed"
+        or decision.get("inference_scope")
+        != "fresh_optimizer_seeds_conditional_on_frozen_validation_path_panel"
+        or decision.get("frozen_algorithm_revision") != frozen_revision
+        or decision.get("frozen_source_manifest_sha256") != frozen_manifest
+        or int(decision.get("cell_count", -1)) != 48
+        or int(decision.get("supported_cell_count", -1)) != 47
+        or len(environment_rows) != 3
+        or observed_support != expected_support
+        or any(int(row.get("optimizer_seed_count", -1)) != 16 for row in environment_rows)
+        or any(row.get("confirmatory_gate_pass") is not True for row in environment_rows)
+        or any(float(row.get("success_rate_wilson_lower", 0.0)) <= 0.5 for row in environment_rows)
+        or len(cells) != 48
+        or len(cell_rows) != 48
+        or csv_index.keys() != cell_index.keys()
+        or any(
+            (csv_index[key].get("validation_supported") == "True")
+            != bool(cell_index[key].get("validation_supported"))
+            for key in cell_index
+        )
+        or len(router_rows) != 38
+        or len(actor_rows) != 9
+        or len(abstentions) != 1
+        or any(row.get("selected_router_trace_invariant") is not True for row in router_rows)
+        or any(
+            float(row.get("validation_reward_violation_count", 1.0)) != 0.0
+            for row in cells if row.get("validation_supported") is True
+        )
+        or report is None
+        or "`mechanism_portfolio_confirmed`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v14.29 portfolio decision no longer matches")
+    return {
+        "decision_status": "supported",
+        "integrity_status": "valid",
+        "development_protocol_version": str(
+            preregistration["development_protocol_version"]
+        ),
+        "frozen_algorithm_revision": frozen_revision,
+        "frozen_source_manifest_sha256": frozen_manifest,
+        "optimizer_seed_count_per_environment": 16,
+        "environment_count": 3,
+        "cell_count": 48,
+        "supported_cell_count": 47,
+        "supported_count_by_environment": expected_support,
+        "wilson_lower_by_environment": {
+            str(row["environment"]): float(row["success_rate_wilson_lower"])
+            for row in environment_rows
+        },
+        "router_selection_count": len(router_rows),
+        "actor_selection_count": len(actor_rows),
+        "abstention_count": len(abstentions),
+        "all_selected_router_traces_invariant": True,
+        "all_supported_cells_respect_reward_floor": True,
+        "inference_scope": str(decision["inference_scope"]),
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -925,6 +1063,7 @@ PARSERS = {
     "mujoco_mechanism_preflight": _mujoco_mechanism_preflight_facts,
     "mujoco_v14_15_multiseed": _mujoco_v14_15_multiseed_facts,
     "mujoco_v14_16_mechanism": _mujoco_v14_16_mechanism_facts,
+    "mujoco_v14_29_portfolio": _mujoco_v14_29_portfolio_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

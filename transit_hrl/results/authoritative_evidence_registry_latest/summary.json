@@ -10,8 +10,8 @@
     "negative_confirmatory_results": "mandatory_to_report",
     "unregistered_artifacts": "excluded"
   },
-  "positive_supported_record_count": 1,
-  "record_count": 23,
+  "positive_supported_record_count": 2,
+  "record_count": 24,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3399,6 +3399,78 @@
       "selection_access": "frozen_three_seed_mechanism_development"
     },
     {
+      "allowed_wording": "On the preregistered v14.29 protocol, the guarded restoration portfolio was supported for 16 of 16 fresh optimizer seeds in HalfCheetah-v5, 16 of 16 in Hopper-v5, and 15 of 16 in Walker2d-v5; the corresponding two-sided 95% Wilson lower bounds were 0.8064, 0.8064, and 0.7167. Thirty-eight cells selected function-preserving routers with exact paired action, reward, and latent-policy trace invariance, nine Walker2d cells selected guarded actor updates, and one Walker2d cell abstained and counted as failure. All supported cells respected the held-out reward floor.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/portfolio_confirmatory.json",
+          "role": "decision",
+          "sha256": "69ced90b7272daf0eb0128d6330b866100ecc60a3c1cc3a601afdfaac2314cf3"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/portfolio_confirmatory.csv",
+          "role": "cell_rows",
+          "sha256": "7e63e5abab6e8e58328c17de596f42978aeb22524106b5ef91101e0c5e636c1b"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/preregistration.json",
+          "role": "preregistration",
+          "sha256": "23ef18b1e6e878b996be960517cbe3ebb9aeae444cf9a38d393f98e7620cbce3"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/fresh_anchor_qualification.json",
+          "role": "anchor_qualification",
+          "sha256": "8531a85159af953a5eb9d39038aef6f813205ce3b60617d879968d3212b17b15"
+        },
+        {
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/report.md",
+          "role": "report",
+          "sha256": "c13e2b31fb5c7ee3665294c78c58d3d6411e60ce16e795675bb0cc8c030777bb"
+        }
+      ],
+      "claim": "A frozen guarded restoration portfolio restores frequency responsibility under a reward floor across fresh optimizer seeds in the registered MuJoCo tasks.",
+      "claim_id": "M3_GUARDED_RESTORATION_PORTFOLIO",
+      "decision": "supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v14_29_restoration_portfolio_confirmatory",
+      "evidence_stage": "confirmatory",
+      "facts": {
+        "abstention_count": 1,
+        "actor_selection_count": 9,
+        "all_selected_router_traces_invariant": true,
+        "all_supported_cells_respect_reward_floor": true,
+        "cell_count": 48,
+        "decision_status": "supported",
+        "development_protocol_version": "mujoco_v14_29_portfolio_confirmatory_v1",
+        "environment_count": 3,
+        "frozen_algorithm_revision": "fc7fa8d8c1e55325af9cb32efece3e0cfc2bbd3c",
+        "frozen_source_manifest_sha256": "02f3ba95376021dff0aa11f30d46dd6159e63b55a1d2678d6011ea350745af39",
+        "inference_scope": "fresh_optimizer_seeds_conditional_on_frozen_validation_path_panel",
+        "integrity_status": "valid",
+        "optimizer_seed_count_per_environment": 16,
+        "router_selection_count": 38,
+        "supported_cell_count": 47,
+        "supported_count_by_environment": {
+          "HalfCheetah-v5": 16,
+          "Hopper-v5": 16,
+          "Walker2d-v5": 15
+        },
+        "wilson_lower_by_environment": {
+          "HalfCheetah-v5": 0.8063923194655636,
+          "Hopper-v5": 0.8063923194655636,
+          "Walker2d-v5": 0.7167126242970108
+        }
+      },
+      "forbidden_wording": "MuJoCo v14.29 proves reward improvement, universal raw behavioral separation, that every environment is restored solely by function-preserving routing, or success beyond the frozen validation-path panel.",
+      "integrity_status": "valid",
+      "manuscript_reportable": true,
+      "outcome_provenance": "fresh_optimizer_seed_observed_frequency_diagnostics_reward_floor_and_exact_behavior_trace_gates",
+      "paper_disposition": "positive_main_or_si",
+      "parser": "mujoco_v14_29_portfolio",
+      "positive_claim_supported": true,
+      "selection_access": "frozen_before_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3457,7 +3529,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "469dd60e585ed93e81151a967a82d5c3182f8e5001c6fdc4241fa5ed9b9d2f7c",
-  "reportable_record_count": 3,
+  "registry_sha256": "2bb29facb9b28ec6254ee86f6ededa9ee9096372a9798ad8d5bc50b575d1c3af",
+  "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-08-26
+Date: 2026-08-30
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -27,6 +27,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_15_closed_loop_restoration_filter_preflight | mujoco_control | development | expand_to_multiseed_screen | development_only | false |
 | mujoco_v14_15_restoration_multiseed_development_r2 | mujoco_control | development | candidate_not_ready_for_confirmation | development_only | false |
 | mujoco_v14_16_crossed_restoration_mechanism_development_r5 | mujoco_control | development | primary_mechanism_not_ready | development_only | false |
+| mujoco_v14_29_restoration_portfolio_confirmatory | mujoco_control | confirmatory | supported | positive_main_or_si | true |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -157,6 +158,12 @@ Forbidden: MuJoCo v14.15 provides confirmatory evidence, establishes cross-envir
 The source-bound v14.16 development screen recovered and validated all 81 registered cells. The preregistered crossed-replay arm passed neither the engineering nor complete effect gate in any of nine environment-by-seed cells; eight cells retained the fallback checkpoint. The non-frozen pathwise arm was the best diagnostic variant but completed only the Hopper environment and 2 of 9 cell-level gates. These results reject binary reward-actor freezing and all-path hard feasibility as the next scalable mechanism.
 
 Forbidden: MuJoCo v14.16 supports learned cross-environment frequency separation, a no-tradeoff claim, a statistically reliable improvement, or expansion of the preregistered primary arm to confirmation.
+
+### mujoco_v14_29_restoration_portfolio_confirmatory
+
+On the preregistered v14.29 protocol, the guarded restoration portfolio was supported for 16 of 16 fresh optimizer seeds in HalfCheetah-v5, 16 of 16 in Hopper-v5, and 15 of 16 in Walker2d-v5; the corresponding two-sided 95% Wilson lower bounds were 0.8064, 0.8064, and 0.7167. Thirty-eight cells selected function-preserving routers with exact paired action, reward, and latent-policy trace invariance, nine Walker2d cells selected guarded actor updates, and one Walker2d cell abstained and counted as failure. All supported cells respected the held-out reward floor.
+
+Forbidden: MuJoCo v14.29 proves reward improvement, universal raw behavioral separation, that every environment is restored solely by function-preserving routing, or success beyond the frozen validation-path panel.
 
 ### legacy_c1_c9_matrix_snapshot
 

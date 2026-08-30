@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 23)
+        self.assertEqual(len(records), 24)
         by_id = {row["evidence_id"]: row for row in records}
         self.assertTrue(
             by_id["mujoco_v12_responsibility_confirmatory"][
@@ -187,6 +187,25 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         self.assertEqual(
             v14_16["facts"]["primary_fallback_checkpoint_count"], 8
         )
+        v14_29 = by_id[
+            "mujoco_v14_29_restoration_portfolio_confirmatory"
+        ]
+        self.assertTrue(v14_29["positive_claim_supported"])
+        self.assertEqual(v14_29["facts"]["supported_cell_count"], 47)
+        self.assertEqual(
+            v14_29["facts"]["supported_count_by_environment"],
+            {
+                "HalfCheetah-v5": 16,
+                "Hopper-v5": 16,
+                "Walker2d-v5": 15,
+            },
+        )
+        self.assertEqual(v14_29["facts"]["router_selection_count"], 38)
+        self.assertEqual(v14_29["facts"]["actor_selection_count"], 9)
+        self.assertEqual(v14_29["facts"]["abstention_count"], 1)
+        self.assertTrue(
+            v14_29["facts"]["all_selected_router_traces_invariant"]
+        )
 
     def test_hash_tampering_is_rejected(self):
         registry = copy.deepcopy(load_registry(self.registry_path))
@@ -211,9 +230,9 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 23)
-            self.assertEqual(summary["reportable_record_count"], 3)
-            self.assertEqual(summary["positive_supported_record_count"], 1)
+            self.assertEqual(summary["record_count"], 24)
+            self.assertEqual(summary["reportable_record_count"], 4)
+            self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
             self.assertEqual(summary["development_record_count"], 18)
             self.assertTrue((root / "results" / "summary.json").is_file())

@@ -1,6 +1,6 @@
 {
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1",
-  "snapshot_date": "2026-08-26",
+  "snapshot_date": "2026-08-30",
   "policy": {
     "manuscript_source_of_truth": "this_registry_only",
     "unregistered_artifacts": "excluded",
@@ -669,6 +669,48 @@
           "role": "report",
           "path": "transit_hrl/results/authoritative_evidence_sources_20260810/mujoco_v14_16_mechanism_screen/report.md",
           "sha256": "93a98f4489d485bc991dd3445243a245276054546c9c255677b4bc4fcb09f749"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v14_29_restoration_portfolio_confirmatory",
+      "claim_id": "M3_GUARDED_RESTORATION_PORTFOLIO",
+      "claim": "A frozen guarded restoration portfolio restores frequency responsibility under a reward floor across fresh optimizer seeds in the registered MuJoCo tasks.",
+      "domain": "mujoco_control",
+      "evidence_stage": "confirmatory",
+      "decision": "supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_heldout",
+      "outcome_provenance": "fresh_optimizer_seed_observed_frequency_diagnostics_reward_floor_and_exact_behavior_trace_gates",
+      "paper_disposition": "positive_main_or_si",
+      "parser": "mujoco_v14_29_portfolio",
+      "allowed_wording": "On the preregistered v14.29 protocol, the guarded restoration portfolio was supported for 16 of 16 fresh optimizer seeds in HalfCheetah-v5, 16 of 16 in Hopper-v5, and 15 of 16 in Walker2d-v5; the corresponding two-sided 95% Wilson lower bounds were 0.8064, 0.8064, and 0.7167. Thirty-eight cells selected function-preserving routers with exact paired action, reward, and latent-policy trace invariance, nine Walker2d cells selected guarded actor updates, and one Walker2d cell abstained and counted as failure. All supported cells respected the held-out reward floor.",
+      "forbidden_wording": "MuJoCo v14.29 proves reward improvement, universal raw behavioral separation, that every environment is restored solely by function-preserving routing, or success beyond the frozen validation-path panel.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/portfolio_confirmatory.json",
+          "sha256": "69ced90b7272daf0eb0128d6330b866100ecc60a3c1cc3a601afdfaac2314cf3"
+        },
+        {
+          "role": "cell_rows",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/portfolio_confirmatory.csv",
+          "sha256": "7e63e5abab6e8e58328c17de596f42978aeb22524106b5ef91101e0c5e636c1b"
+        },
+        {
+          "role": "preregistration",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/preregistration.json",
+          "sha256": "23ef18b1e6e878b996be960517cbe3ebb9aeae444cf9a38d393f98e7620cbce3"
+        },
+        {
+          "role": "anchor_qualification",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/fresh_anchor_qualification.json",
+          "sha256": "8531a85159af953a5eb9d39038aef6f813205ce3b60617d879968d3212b17b15"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/report.md",
+          "sha256": "c13e2b31fb5c7ee3665294c78c58d3d6411e60ce16e795675bb0cc8c030777bb"
         }
       ]
     },
