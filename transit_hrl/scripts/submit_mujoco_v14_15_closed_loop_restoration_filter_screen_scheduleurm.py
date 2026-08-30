@@ -82,12 +82,51 @@ def _runtime_deployment_constraint_contract(arm: str) -> str:
         projection_objective=str(arm_spec.get(
             "deployment_frequency_projection_objective", "worst_group"
         )),
+        projection_cvar_alpha=float(arm_spec.get(
+            "deployment_frequency_projection_cvar_alpha", 0.5
+        )),
         restoration_freeze_reward_actor=bool(arm_spec.get(
             "deployment_frequency_restoration_freeze_reward_actor", False
         )),
         pathwise_robust=bool(arm_spec.get(
             "deployment_frequency_pathwise_robust", False
         )),
+        closed_loop_risk_mode=str(arm_spec.get(
+            "deployment_frequency_closed_loop_risk_mode", "legacy"
+        )),
+        closed_loop_cvar_alpha=float(arm_spec.get(
+            "deployment_frequency_closed_loop_cvar_alpha", 0.5
+        )),
+    )
+
+
+def _runtime_checkpoint_rank_contract(arm: str) -> str:
+    """Rebuild the paired selector contract emitted by the frozen core."""
+
+    arm_spec = spec.ARMS[str(arm)]
+    risk_mode = str(arm_spec.get(
+        "deployment_frequency_closed_loop_risk_mode", "legacy"
+    ))
+    if risk_mode == "mode_cvar":
+        alpha = float(arm_spec.get(
+            "deployment_frequency_closed_loop_cvar_alpha", 0.5
+        ))
+        return (
+            "state_aligned_paired_selection_mode_cvar_reward_floor_and_five_"
+            "frequency_endpoint_relative_feasibility_"
+            f"alpha_{alpha:.6g}_v3"
+        )
+    if (
+        risk_mode == "pathwise_all"
+        or bool(arm_spec.get("deployment_frequency_pathwise_robust", False))
+    ):
+        return (
+            "state_aligned_paired_selection_individual_path_reward_floor_and_"
+            "five_frequency_endpoint_relative_feasibility_v2"
+        )
+    return (
+        "state_aligned_paired_selection_path_reward_floor_and_five_frequency_"
+        "endpoint_relative_feasibility_v1"
     )
 
 
@@ -1825,18 +1864,7 @@ def merge_results(args: argparse.Namespace) -> None:
                     summary.get("checkpoint_selection_protocol")
                     == "state_aligned_lexicographic_validation_v1"
                     and summary.get("checkpoint_rank_contract")
-                    == (
-                        "state_aligned_paired_selection_individual_path_reward_"
-                        "floor_and_five_frequency_endpoint_relative_"
-                        "feasibility_v2"
-                        if arm_spec.get(
-                            "deployment_frequency_pathwise_robust", False
-                        ) else (
-                            "state_aligned_paired_selection_path_reward_floor_"
-                            "and_five_frequency_endpoint_relative_"
-                            "feasibility_v1"
-                        )
-                    )
+                    == _runtime_checkpoint_rank_contract(arm)
                     and set(dict(summary.get(
                         "checkpoint_selected_rank"
                     ) or {})) == {

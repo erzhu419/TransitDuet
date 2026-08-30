@@ -21,6 +21,7 @@ from scripts.submit_mujoco_v14_17_native_pd_cvar_screen_scheduleurm import (
     build_parser,
     build_scheduler_spec,
     build_training_command,
+    configured_base,
     frozen_execution_identity,
     normalize_args,
     selected_experiment_cells,
@@ -188,6 +189,26 @@ class MujocoV1417NativePDCVaRScreenTest(unittest.TestCase):
         self.assertIn(
             "--deployment-frequency-projection-objective violation_l2",
             legacy,
+        )
+
+    def test_runtime_contracts_include_cvar_semantics(self):
+        with configured_base() as launcher:
+            projection_contract = (
+                launcher._runtime_deployment_constraint_contract(
+                    spec.HYBRID_ARM
+                )
+            )
+            rank_contract = launcher._runtime_checkpoint_rank_contract(
+                spec.HYBRID_ARM
+            )
+        self.assertIn("violation_cvar", projection_contract)
+        self.assertIn("projection_cvar_alpha_0.5", projection_contract)
+        self.assertIn("mode_cvar_constraints_alpha_0.5", projection_contract)
+        self.assertTrue(projection_contract.endswith("_v10"))
+        self.assertEqual(
+            rank_contract,
+            "state_aligned_paired_selection_mode_cvar_reward_floor_and_five_"
+            "frequency_endpoint_relative_feasibility_alpha_0.5_v3",
         )
 
     def test_engineering_gate_is_arm_specific(self):
