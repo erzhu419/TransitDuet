@@ -45,6 +45,12 @@ from .restoration_portfolio import (
     restoration_snapshot_eligible,
     select_guarded_restoration_portfolio,
 )
+from .responsibility_distillation import (
+    ResponsibilityDistillationTargets,
+    causal_macro_responsibility_targets,
+    distill_hierarchical_actor_heads,
+    fit_actor_output_head,
+)
 from .smdp_actor_critic import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     FrequencySeparatedActorCriticPPO,
@@ -108,9 +114,13 @@ __all__ = [
     "deployment_frequency_stats",
     "ActionCostCritic",
     "RestorationPortfolioDecision",
+    "ResponsibilityDistillationTargets",
+    "causal_macro_responsibility_targets",
+    "distill_hierarchical_actor_heads",
     "discounted_smdp_cost_returns",
     "transform_latent_action",
     "fold_guarded_restoration_eligibility",
+    "fit_actor_output_head",
     "paired_trace_invariance_diagnostics",
     "restoration_snapshot_eligible",
     "select_guarded_restoration_portfolio",
