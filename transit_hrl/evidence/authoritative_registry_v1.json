@@ -1012,6 +1012,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_8_causal_fir_distillation_development",
+      "claim_id": "D30_CAUSAL_FIR_DISTILLATION",
+      "claim": "A multivariate causal FIR distilled from full-horizon responsibility oracles generalizes across held-out MuJoCo seeds while satisfying both registered frequency budgets.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "grouped_causal_fir_stopped_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "reused_rejected_v17_4_paths_grouped_by_seed",
+      "outcome_provenance": "one_existing_optimizer_seed_one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_eighty_frozen_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_8_causal_fir_distillation",
+      "allowed_wording": "On 120 reused fixed-total-action development paths, v17.8 used eight leave-one-seed-out folds and selected a causal multivariate FIR that met the upper budget on every path but recovered only 7 of 81 oracle-recoverable failures and preserved 0 of 32 baseline-feasible Walker2d paths. The fresh validation panel was not accessed. A diagnostic gain-one candidate recovered 58 failures and preserved all 32 Walker2d paths but met the upper budget on only 90 paths, motivating high-frequency innovation projection rather than global gain reduction.",
+      "forbidden_wording": "The v17.8 reused-path distillation validates fresh-seed generalization, both frequency budgets, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_8_causal_fir_distillation_development.json",
+          "sha256": "1fda8c4b84bedaa1a4d61167f0514eac4f74078f3aff7e046e1ce34bb28460e7"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_8_causal_fir_distillation_outcome_2026-08-31.md",
+          "sha256": "c2572863e3cac13b90019b1bb175dd65e0c0c5f58d29e958d22c6fa47f5223c2"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

@@ -39,6 +39,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_4_streaming_audit_projection_development | mujoco_control | development | streaming_audit_projection_preflight_not_supported | development_only | false |
 | mujoco_v17_5_feasibility_diagnostic_development | mujoco_control | development | greedy_feasibility_projection_not_advanced | development_only | false |
 | mujoco_v17_6_full_horizon_oracle_development | mujoco_control | development | mixed_router_recoverability_and_actor_floor | development_only | false |
+| mujoco_v17_8_causal_fir_distillation_development | mujoco_control | development | grouped_causal_fir_stopped_before_fresh_path_access | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -241,6 +242,12 @@ Forbidden: The v17.5 diagnostic validates feasibility-normalized projection, rew
 On 120 rejected v17.4 development paths, a numerically audited full-horizon oracle recovered 81 paths that the causal online split did not make jointly feasible. Seven Hopper paths remained above the lower-LPF32 budget after imposing the upper-HPF8 budget, separating a router-rebuild target from an actor-level total-action feasibility target.
 
 Forbidden: The v17.6 acausal reused-path oracle validates an online Freq-HRL policy, reward improvement, cross-seed generalization, deployment feasibility, or a final algorithm.
+
+### mujoco_v17_8_causal_fir_distillation_development
+
+On 120 reused fixed-total-action development paths, v17.8 used eight leave-one-seed-out folds and selected a causal multivariate FIR that met the upper budget on every path but recovered only 7 of 81 oracle-recoverable failures and preserved 0 of 32 baseline-feasible Walker2d paths. The fresh validation panel was not accessed. A diagnostic gain-one candidate recovered 58 failures and preserved all 32 Walker2d paths but met the upper budget on only 90 paths, motivating high-frequency innovation projection rather than global gain reduction.
+
+Forbidden: The v17.8 reused-path distillation validates fresh-seed generalization, both frequency budgets, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

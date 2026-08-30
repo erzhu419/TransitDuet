@@ -1,0 +1,93 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_8_causal_fir_distillation_development_v1",
+  "status": "grouped_causal_fir_stopped_before_fresh_path_access",
+  "integrity_status": "valid",
+  "evidence_role": "reused_path_grouped_selection_then_fresh_path_validation_not_confirmatory",
+  "development_protocol_version": "mujoco_v17_8_causal_fir_distillation_v1",
+  "frozen_core_revision": "a120651572e7a35614527bd2be18bd3b52f0c14f",
+  "frozen_source_manifest_sha256": "e6819fe80ae428755ffd355dbb8c22eece71a7dff9a7da8c750b8029d4b072c7",
+  "dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "selection_run": "mujoco_v17_8_causal_fir_selection_20260831_r2",
+  "source_checkpoint_optimizer_seed_count": 1,
+  "environment_count": 3,
+  "disturbance_mode_count": 5,
+  "grouped_seed_fold_count": 8,
+  "path_count": 120,
+  "candidate_count": 80,
+  "scheduler": {
+    "dataset_task_id_first": "t85715",
+    "dataset_task_id_last": "t85834",
+    "dataset_successful_task_count": 120,
+    "selection_task_id": "t85836",
+    "selection_task_status": "done",
+    "cancelled_prelaunch_accounting_task_id": "t85835",
+    "nodes": [
+      "node003"
+    ],
+    "slurm_used": false
+  },
+  "selected_candidate": {
+    "candidate_id": "fir_w64_ridge1e-05_gain0.80",
+    "window": 64,
+    "ridge_penalty": 0.00001,
+    "output_gain": 0.8,
+    "valid_path_count": 120,
+    "upper_budget_path_count": 120,
+    "joint_budget_path_count": 7,
+    "oracle_recoverable_failure_count": 81,
+    "recovered_failure_count": 7,
+    "baseline_feasible_path_count": 32,
+    "preserved_baseline_feasible_path_count": 0,
+    "environment_results": {
+      "HalfCheetah-v5": {
+        "recovered_failure_count": 7,
+        "oracle_recoverable_failure_count": 40,
+        "upper_budget_path_count": 40,
+        "joint_budget_path_count": 7,
+        "mean_lower_power_ratio": 0.6851139142400124
+      },
+      "Hopper-v5": {
+        "recovered_failure_count": 0,
+        "oracle_recoverable_failure_count": 33,
+        "upper_budget_path_count": 40,
+        "joint_budget_path_count": 0,
+        "mean_lower_power_ratio": 0.7852657176768049
+      },
+      "Walker2d-v5": {
+        "recovered_failure_count": 0,
+        "oracle_recoverable_failure_count": 8,
+        "upper_budget_path_count": 40,
+        "joint_budget_path_count": 0,
+        "mean_lower_power_ratio": 9.896095494636949
+      }
+    }
+  },
+  "unconstrained_gain_one_diagnostic": {
+    "candidate_id": "fir_w48_ridge1e-05_gain1.00",
+    "upper_budget_path_count": 90,
+    "joint_budget_path_count": 90,
+    "recovered_failure_count": 58,
+    "preserved_baseline_feasible_path_count": 32,
+    "recovered_failure_count_by_environment": {
+      "HalfCheetah-v5": 36,
+      "Hopper-v5": 14,
+      "Walker2d-v5": 8
+    }
+  },
+  "advancement_gate": {
+    "all_paths_numerically_and_physically_valid": true,
+    "all_paths_meet_endpoint_upper_budget": true,
+    "expected_oracle_recoverable_denominator": true,
+    "expected_walker_baseline_feasible_denominator": true,
+    "environment_recovery_gates": false,
+    "mean_lower_power_no_worse_each_environment": false,
+    "total_recovery_gate": false,
+    "walker_baseline_feasible_preservation_gate": false
+  },
+  "fresh_validation_seed_count": 8,
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "next_mechanism": "project_only_the_predicted_upper_high_frequency_innovation_instead_of_scaling_the_full_upper_signal",
+  "support_gate": false,
+  "claim_boundary": "Grouped out-of-fold development evidence on reused rejected fixed-total-action paths; no fresh-path, reward, closed-loop learning, or manuscript performance claim."
+}

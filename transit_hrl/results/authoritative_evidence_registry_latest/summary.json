@@ -1,5 +1,5 @@
 {
-  "development_record_count": 29,
+  "development_record_count": 30,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 35,
+  "record_count": 36,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4312,6 +4312,55 @@
       "selection_access": "reused_rejected_v17_4_paths"
     },
     {
+      "allowed_wording": "On 120 reused fixed-total-action development paths, v17.8 used eight leave-one-seed-out folds and selected a causal multivariate FIR that met the upper budget on every path but recovered only 7 of 81 oracle-recoverable failures and preserved 0 of 32 baseline-feasible Walker2d paths. The fresh validation panel was not accessed. A diagnostic gain-one candidate recovered 58 failures and preserved all 32 Walker2d paths but met the upper budget on only 90 paths, motivating high-frequency innovation projection rather than global gain reduction.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_8_causal_fir_distillation_development.json",
+          "role": "decision",
+          "sha256": "1fda8c4b84bedaa1a4d61167f0514eac4f74078f3aff7e046e1ce34bb28460e7"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_8_causal_fir_distillation_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "c2572863e3cac13b90019b1bb175dd65e0c0c5f58d29e958d22c6fa47f5223c2"
+        }
+      ],
+      "claim": "A multivariate causal FIR distilled from full-horizon responsibility oracles generalizes across held-out MuJoCo seeds while satisfying both registered frequency budgets.",
+      "claim_id": "D30_CAUSAL_FIR_DISTILLATION",
+      "decision": "grouped_causal_fir_stopped_before_fresh_path_access",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_8_causal_fir_distillation_development",
+      "evidence_stage": "development",
+      "facts": {
+        "candidate_count": 80,
+        "decision_status": "grouped_causal_fir_stopped_before_fresh_path_access",
+        "diagnostic_gain_one_preserved_baseline_feasible_path_count": 32,
+        "diagnostic_gain_one_recovered_failure_count": 58,
+        "diagnostic_gain_one_upper_budget_path_count": 90,
+        "eligible_for_fresh_path_validation": false,
+        "environment_count": 3,
+        "fresh_validation_paths_accessed": false,
+        "grouped_seed_fold_count": 8,
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "path_count": 120,
+        "selected_candidate_id": "fir_w64_ridge1e-05_gain0.80",
+        "selected_preserved_baseline_feasible_path_count": 0,
+        "selected_recovered_failure_count": 7,
+        "selected_upper_budget_path_count": 120,
+        "support_gate": false
+      },
+      "forbidden_wording": "The v17.8 reused-path distillation validates fresh-seed generalization, both frequency budgets, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_existing_optimizer_seed_one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_eighty_frozen_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_8_causal_fir_distillation",
+      "positive_claim_supported": false,
+      "selection_access": "reused_rejected_v17_4_paths_grouped_by_seed"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4370,7 +4419,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "86e92d821600f36125dc6e880592712d4a0f2f07417b5d4d64d997db642ea8b0",
+  "registry_sha256": "42fd07d5c41db3b7fb4b2bfdb08eb9bae4d9351cef34d5817f97f0616e2538da",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

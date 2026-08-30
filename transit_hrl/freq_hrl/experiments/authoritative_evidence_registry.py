@@ -53,6 +53,9 @@ MUJOCO_V17_5_FEASIBILITY_DIAGNOSTIC_SCHEMA_VERSION = (
 MUJOCO_V17_6_FULL_HORIZON_ORACLE_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_6_full_horizon_oracle_development_v1"
 )
+MUJOCO_V17_8_CAUSAL_FIR_DISTILLATION_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_8_causal_fir_distillation_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2111,6 +2114,104 @@ def _mujoco_v17_6_full_horizon_oracle_facts(
     }
 
 
+def _mujoco_v17_8_causal_fir_distillation_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    selected = dict(decision.get("selected_candidate") or {})
+    diagnostic = dict(
+        decision.get("unconstrained_gain_one_diagnostic") or {}
+    )
+    scheduler = dict(decision.get("scheduler") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    environment_results = dict(selected.get("environment_results") or {})
+    observed_recovery = {
+        environment: int(row.get("recovered_failure_count", -1))
+        for environment, row in environment_results.items()
+    }
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_8_CAUSAL_FIR_DISTILLATION_SCHEMA_VERSION
+        or decision.get("status")
+        != "grouped_causal_fir_stopped_before_fresh_path_access"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != (
+            "reused_path_grouped_selection_then_fresh_path_validation_"
+            "not_confirmatory"
+        )
+        or decision.get("frozen_core_revision")
+        != "a120651572e7a35614527bd2be18bd3b52f0c14f"
+        or decision.get("frozen_source_manifest_sha256")
+        != "e6819fe80ae428755ffd355dbb8c22eece71a7dff9a7da8c750b8029d4b072c7"
+        or int(decision.get("source_checkpoint_optimizer_seed_count", -1))
+        != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("disturbance_mode_count", -1)) != 5
+        or int(decision.get("grouped_seed_fold_count", -1)) != 8
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 80
+        or scheduler.get("dataset_task_id_first") != "t85715"
+        or scheduler.get("dataset_task_id_last") != "t85834"
+        or int(scheduler.get("dataset_successful_task_count", -1)) != 120
+        or scheduler.get("selection_task_id") != "t85836"
+        or scheduler.get("selection_task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "fir_w64_ridge1e-05_gain0.80"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("upper_budget_path_count", -1)) != 120
+        or int(selected.get("oracle_recoverable_failure_count", -1)) != 81
+        or int(selected.get("recovered_failure_count", -1)) != 7
+        or int(selected.get("baseline_feasible_path_count", -1)) != 32
+        or int(selected.get("preserved_baseline_feasible_path_count", -1))
+        != 0
+        or observed_recovery
+        != {"HalfCheetah-v5": 7, "Hopper-v5": 0, "Walker2d-v5": 0}
+        or diagnostic.get("candidate_id")
+        != "fir_w48_ridge1e-05_gain1.00"
+        or int(diagnostic.get("upper_budget_path_count", -1)) != 90
+        or int(diagnostic.get("recovered_failure_count", -1)) != 58
+        or int(diagnostic.get("preserved_baseline_feasible_path_count", -1))
+        != 32
+        or gate.get("all_paths_numerically_and_physically_valid") is not True
+        or gate.get("all_paths_meet_endpoint_upper_budget") is not True
+        or gate.get("total_recovery_gate") is not False
+        or gate.get("walker_baseline_feasible_preservation_gate") is not False
+        or int(decision.get("fresh_validation_seed_count", -1)) != 8
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`grouped_causal_fir_stopped_before_fresh_path_access`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError(
+            "MuJoCo v17.8 causal FIR decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "grouped_seed_fold_count": 8,
+        "path_count": 120,
+        "candidate_count": 80,
+        "selected_candidate_id": str(selected["candidate_id"]),
+        "selected_upper_budget_path_count": 120,
+        "selected_recovered_failure_count": 7,
+        "selected_preserved_baseline_feasible_path_count": 0,
+        "diagnostic_gain_one_upper_budget_path_count": 90,
+        "diagnostic_gain_one_recovered_failure_count": 58,
+        "diagnostic_gain_one_preserved_baseline_feasible_path_count": 32,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2153,6 +2254,9 @@ PARSERS = {
     ),
     "mujoco_v17_6_full_horizon_oracle": (
         _mujoco_v17_6_full_horizon_oracle_facts
+    ),
+    "mujoco_v17_8_causal_fir_distillation": (
+        _mujoco_v17_8_causal_fir_distillation_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
