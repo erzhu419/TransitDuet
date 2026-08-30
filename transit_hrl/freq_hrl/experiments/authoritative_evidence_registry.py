@@ -29,6 +29,9 @@ MUJOCO_V16_GAUGE_TRAINING_SCHEMA_VERSION = (
 MUJOCO_V16_1_AUDIT_GAUGE_PAIRED_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v16_1_audit_gauge_paired_development_v1"
 )
+MUJOCO_V16_2_MACRO_HOLD_GAUGE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v16_2_macro_hold_gauge_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1251,6 +1254,73 @@ def _mujoco_v16_1_audit_gauge_paired_facts(
     }
 
 
+def _mujoco_v16_2_macro_hold_gauge_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    gates = dict(decision.get("gate_counts") or {})
+    environments = dict(decision.get("environment_results") or {})
+    expected_gates = {
+        "trained_checkpoint": 9,
+        "reward_noninferiority": 5,
+        "exact_reconstruction": 9,
+        "zero_router_clipping": 9,
+        "upper_hf_budget": 4,
+        "lower_lf_reduction": 6,
+        "joint_merit_reduction": 6,
+        "all_cell_gates": 2,
+    }
+    expected_supported = {
+        "HalfCheetah-v5": 0,
+        "Hopper-v5": 1,
+        "Walker2d-v5": 1,
+    }
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V16_2_MACRO_HOLD_GAUGE_SCHEMA_VERSION
+        or decision.get("status") != "macro_hold_gauge_screen_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "macro_rate_gauge_mechanism_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 3
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 27
+        or int(decision.get("paired_analysis_cell_count", -1)) != 9
+        or int(decision.get("scheduler_task_count", -1)) != 27
+        or len(tasks) != 27
+        or len(set(tasks)) != 27
+        or task_status != {"done": 27, "failed": 0, "cancelled": 0}
+        or gates != expected_gates
+        or set(environments) != set(expected_supported)
+        or any(
+            row.get("environment_gate") is not False
+            or int(row.get("cell_count", -1)) != 3
+            or int(row.get("supported_count", -1)) != expected_supported[name]
+            for name, row in environments.items()
+        )
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or report is None
+        or "`macro_hold_gauge_screen_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v16.2 macro-hold decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "environment_count": 3,
+        "training_cell_count": 27,
+        "paired_analysis_cell_count": 9,
+        "gate_counts": expected_gates,
+        "task_status_counts": task_status,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1274,6 +1344,7 @@ PARSERS = {
     "mujoco_v16_1_audit_gauge_paired": (
         _mujoco_v16_1_audit_gauge_paired_facts
     ),
+    "mujoco_v16_2_macro_hold_gauge": _mujoco_v16_2_macro_hold_gauge_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

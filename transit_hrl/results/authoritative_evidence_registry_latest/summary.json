@@ -1,5 +1,5 @@
 {
-  "development_record_count": 21,
+  "development_record_count": 22,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 27,
+  "record_count": 28,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3624,6 +3624,60 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development screen, the macro-hold gauge exactly reconstructed the additive action in all nine cells, but only two cells passed the joint reward-and-frequency gate and no environment reached the required two-of-three replicate gate. The piecewise-constant upper responsibility improved lower-frequency separation in Hopper and Walker2d but failed structurally in HalfCheetah and exceeded the upper-frequency budget in five cells.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v16_2_macro_hold_gauge_development.json",
+          "role": "decision",
+          "sha256": "cde8fb4600a7afd85c7b817205b87363b3b45ff9e2ebf6f838ef7fe9bf7c5f38"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_2_macro_hold_outcome_2026-08-30.md",
+          "role": "report",
+          "sha256": "46b4ee88d58668c6b00faf547570b270a9d13faa339b78eafd46693335256c1f"
+        }
+      ],
+      "claim": "A macro-held exact total-action gauge yields cross-environment responsibility separation without a reward tradeoff while preserving the upper decision rate.",
+      "claim_id": "D22_MACRO_HOLD_GAUGE",
+      "decision": "macro_hold_gauge_screen_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v16_2_macro_hold_gauge_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "macro_hold_gauge_screen_not_supported",
+        "environment_count": 3,
+        "gate_counts": {
+          "all_cell_gates": 2,
+          "exact_reconstruction": 9,
+          "joint_merit_reduction": 6,
+          "lower_lf_reduction": 6,
+          "reward_noninferiority": 5,
+          "trained_checkpoint": 9,
+          "upper_hf_budget": 4,
+          "zero_router_clipping": 9
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "paired_analysis_cell_count": 9,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 27,
+          "failed": 0
+        },
+        "training_cell_count": 27
+      },
+      "forbidden_wording": "The v16.2 development screen validates cross-environment responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "three_fresh_optimizer_seeds_three_capacity_matched_arms_and_forty_paired_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_2_macro_hold_gauge",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3682,7 +3736,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "c71c129128ba043a5fd29d7a5fb0d4127db64ddfb7a4ce1ebc48a0b9e0083df6",
+  "registry_sha256": "afb9ab094e5c7587b44ee566a169778f711a5bc361ca651d5b202375aa5a181e",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

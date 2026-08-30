@@ -56,13 +56,17 @@ def _fake_cell(_run_name, environment, arm, optimizer_seed):
         "responsibility_mode": arm_spec["responsibility_mode"],
         "lower_action_router_mode": arm_spec["lower_action_router_mode"],
         "lower_action_router_alpha": arm_spec["lower_action_router_alpha"],
-        "lower_action_router_strength": arm_spec["lower_action_router_strength"],
+        "lower_action_router_strength": (
+            0.0
+            if arm_spec["lower_action_router_mode"] == "direct"
+            else arm_spec["lower_action_router_strength"]
+        ),
         "lower_action_router_observe_strength": False,
         "leakage_constraint_scope": arm_spec["leakage_constraint_scope"],
         "leakage_constraint_cost_mode": arm_spec["leakage_cost_mode"],
         "checkpoint_score_mode": spec.CHECKPOINT_SCORE_MODE,
         "selected_checkpoint_iteration": 20,
-        "parameter_count": 1234,
+        "capacity_actual_parameter_count": 1234,
     }
     if arm == spec.PRIMITIVE_GAUGE_CONTROL:
         upper, lower, latent_upper, latent_lower = 0.006, 0.002, 0.004, 0.004
@@ -96,6 +100,15 @@ def test_analyzer_requires_all_component_gates(monkeypatch):
     result = analyzer.analyze("synthetic")
     assert result["status"] == spec.SUPPORTED_STATUS
     assert result["supported_cell_count"] == 9
+    assert result["gate_counts"] == {
+        "trained_checkpoint": 9,
+        "reward_noninferior": 9,
+        "reconstruction_exact": 9,
+        "router_clip_free": 9,
+        "upper_hf_budget": 9,
+        "lower_lf_reduction": 9,
+        "joint_merit_reduction": 9,
+    }
     assert all(row["environment_gate"] for row in result["environment_results"])
     for row in result["cells"]:
         assert row["supported"]

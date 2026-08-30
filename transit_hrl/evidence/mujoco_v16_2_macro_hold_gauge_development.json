@@ -1,0 +1,93 @@
+{
+  "schema_version": "freq_hrl_mujoco_v16_2_macro_hold_gauge_development_v1",
+  "status": "macro_hold_gauge_screen_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "macro_rate_gauge_mechanism_development_not_confirmatory",
+  "source_run": "mujoco_v16_2_macro_hold_gauge_screen_20260830_r1",
+  "development_protocol_version": "mujoco_v16_2_macro_hold_gauge_screen_v1",
+  "frozen_algorithm_revision": "9d57aaeb96ed62a06c5145dfe351e69fda623bc2",
+  "frozen_source_manifest_sha256": "e75a5e351432457cbea3e61e40de46da8369359c87c24e114269d90a078d2f88",
+  "optimizer_seed_count": 3,
+  "environment_count": 3,
+  "training_cell_count": 27,
+  "paired_analysis_cell_count": 9,
+  "heldout_path_count_per_arm": 40,
+  "scheduler_task_count": 27,
+  "scheduler_tasks": [
+    "t85258",
+    "t85259",
+    "t85260",
+    "t85261",
+    "t85262",
+    "t85263",
+    "t85264",
+    "t85265",
+    "t85266",
+    "t85267",
+    "t85268",
+    "t85269",
+    "t85270",
+    "t85271",
+    "t85272",
+    "t85273",
+    "t85274",
+    "t85275",
+    "t85276",
+    "t85277",
+    "t85278",
+    "t85279",
+    "t85280",
+    "t85281",
+    "t85282",
+    "t85283",
+    "t85284"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 27,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "gate_counts": {
+    "trained_checkpoint": 9,
+    "reward_noninferiority": 5,
+    "exact_reconstruction": 9,
+    "zero_router_clipping": 9,
+    "upper_hf_budget": 4,
+    "lower_lf_reduction": 6,
+    "joint_merit_reduction": 6,
+    "all_cell_gates": 2
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "supported_count": 0,
+      "cell_count": 3,
+      "median_lower_lf_relative_reduction": -13.78124619179465,
+      "median_joint_merit_relative_reduction": -7.645726435033923,
+      "environment_gate": false
+    },
+    "Hopper-v5": {
+      "supported_count": 1,
+      "cell_count": 3,
+      "median_lower_lf_relative_reduction": 0.5256508705648179,
+      "median_joint_merit_relative_reduction": 0.4824374611893232,
+      "environment_gate": false
+    },
+    "Walker2d-v5": {
+      "supported_count": 1,
+      "cell_count": 3,
+      "median_lower_lf_relative_reduction": 0.8041869948837627,
+      "median_joint_merit_relative_reduction": 0.7921784961705985,
+      "environment_gate": false
+    }
+  },
+  "mechanism_findings": {
+    "identifiability": "The macro-hold gauge exactly reconstructed the additive action and avoided router clipping in all nine paired cells.",
+    "reward": "The five-percent held-out reward floor passed five of nine cells, including all three Hopper cells but only one cell in each of HalfCheetah and Walker2d.",
+    "frequency_alignment": "Lower-LF and joint-merit reduction passed six of nine cells, but the absolute upper-HF budget passed only four. Two cells passed every gate and no environment reached the required two-of-three replicate gate.",
+    "failure_mode": "A piecewise-constant upper responsibility creates boundary steps measured by HPF8 and cannot represent within-macro slow evolution. This was catastrophic in HalfCheetah, where the median lower-LF and joint merits were worse than the candidate latent split.",
+    "decision": "Do not expand the constant-hold mechanism. Replace the hold with a continuous causal macro-plan curve whose parameters are fixed only at upper decision boundaries, preserving exact additive execution while separating decision rate from generated-action rate."
+  }
+}

@@ -31,6 +31,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v15_raw_policy_distillation_development | mujoco_control | development | universal_raw_policy_distillation_not_supported | development_only | false |
 | mujoco_v16_gauge_training_development | mujoco_control | development | training_time_gauge_preflight_not_supported | development_only | false |
 | mujoco_v16_1_audit_gauge_paired_development | mujoco_control | development | audit_gauge_paired_preflight_not_supported | development_only | false |
+| mujoco_v16_2_macro_hold_gauge_development | mujoco_control | development | macro_hold_gauge_screen_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -185,6 +186,12 @@ Forbidden: The v16 development preflight validates training-time raw separation,
 In a frozen three-environment, three-optimizer-seed development preflight, the audit-adaptive gauge exactly reconstructed the additive action and preserved held-out reward noninferiority in all nine paired cells, but only one cell reached the canonical frequency-reduction gate and no environment reached the required two-of-three replicate gate.
 
 Forbidden: The v16.1 development preflight validates cross-environment raw responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v16_2_macro_hold_gauge_development
+
+In a frozen three-environment, three-optimizer-seed development screen, the macro-hold gauge exactly reconstructed the additive action in all nine cells, but only two cells passed the joint reward-and-frequency gate and no environment reached the required two-of-three replicate gate. The piecewise-constant upper responsibility improved lower-frequency separation in Hopper and Walker2d but failed structurally in HalfCheetah and exceeded the upper-frequency budget in five cells.
+
+Forbidden: The v16.2 development screen validates cross-environment responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

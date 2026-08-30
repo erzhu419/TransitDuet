@@ -64,6 +64,11 @@ def _validate_cell(
     rows: list[dict[str, Any]],
 ) -> None:
     arm_spec = spec.ARMS[str(arm)]
+    expected_router_strength = (
+        0.0
+        if arm_spec["lower_action_router_mode"] == "direct"
+        else float(arm_spec["lower_action_router_strength"])
+    )
     if (
         summary.get("protocol_version") != spec.FROZEN_CORE_PROTOCOL_VERSION
         or summary.get("code_revision") != spec.FROZEN_ALGORITHM_REVISION
@@ -79,7 +84,7 @@ def _validate_cell(
         or float(summary.get("lower_action_router_alpha", -1.0))
         != float(arm_spec["lower_action_router_alpha"])
         or float(summary.get("lower_action_router_strength", -1.0))
-        != float(arm_spec["lower_action_router_strength"])
+        != expected_router_strength
         or bool(summary.get("lower_action_router_observe_strength"))
         != bool(arm_spec["lower_action_router_observe_strength"])
         or summary.get("leakage_constraint_scope")
@@ -145,7 +150,7 @@ def _summarize(
         "selected_checkpoint_iteration": int(
             summary["selected_checkpoint_iteration"]
         ),
-        "parameter_count": int(summary["parameter_count"]),
+        "parameter_count": int(summary["capacity_actual_parameter_count"]),
     }
 
 
@@ -276,12 +281,17 @@ def analyze(run_name: str) -> dict[str, Any]:
             ),
         })
     support_gate = bool(all(row["environment_gate"] for row in environment_results))
+    gate_counts = {
+        gate: sum(bool(row["gates"][gate]) for row in cells)
+        for gate in cells[0]["gates"]
+    }
     return {
         "analysis_version": "mujoco_v16_2_macro_hold_gauge_screen_analysis_v1",
         "evidence_role": spec.EVIDENCE_ROLE,
         "selection_contract": spec.SELECTION_CONTRACT,
         "cell_count": len(cells),
         "supported_cell_count": sum(bool(row["supported"]) for row in cells),
+        "gate_counts": gate_counts,
         "cells": cells,
         "environment_results": environment_results,
         "support_gate": support_gate,

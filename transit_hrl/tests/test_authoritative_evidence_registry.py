@@ -22,8 +22,14 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 27)
+        self.assertEqual(len(records), 28)
         by_id = {row["evidence_id"]: row for row in records}
+        self.assertEqual(
+            by_id["mujoco_v16_2_macro_hold_gauge_development"]["facts"][
+                "gate_counts"
+            ]["all_cell_gates"],
+            2,
+        )
         self.assertTrue(
             by_id["mujoco_v12_responsibility_confirmatory"][
                 "positive_claim_supported"
@@ -285,11 +291,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 27)
+            self.assertEqual(summary["record_count"], 28)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 21)
+            self.assertEqual(summary["development_record_count"], 22)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

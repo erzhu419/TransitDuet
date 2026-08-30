@@ -796,6 +796,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v16_2_macro_hold_gauge_development",
+      "claim_id": "D22_MACRO_HOLD_GAUGE",
+      "claim": "A macro-held exact total-action gauge yields cross-environment responsibility separation without a reward tradeoff while preserving the upper decision rate.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "macro_hold_gauge_screen_not_supported",
+      "integrity_status": "valid",
+      "selection_access": "frozen_before_development_heldout",
+      "outcome_provenance": "three_fresh_optimizer_seeds_three_capacity_matched_arms_and_forty_paired_heldout_paths_per_cell",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v16_2_macro_hold_gauge",
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development screen, the macro-hold gauge exactly reconstructed the additive action in all nine cells, but only two cells passed the joint reward-and-frequency gate and no environment reached the required two-of-three replicate gate. The piecewise-constant upper responsibility improved lower-frequency separation in Hopper and Walker2d but failed structurally in HalfCheetah and exceeded the upper-frequency budget in five cells.",
+      "forbidden_wording": "The v16.2 development screen validates cross-environment responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v16_2_macro_hold_gauge_development.json",
+          "sha256": "cde8fb4600a7afd85c7b817205b87363b3b45ff9e2ebf6f838ef7fe9bf7c5f38"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v16_2_macro_hold_outcome_2026-08-30.md",
+          "sha256": "46b4ee88d58668c6b00faf547570b270a9d13faa339b78eafd46693335256c1f"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
