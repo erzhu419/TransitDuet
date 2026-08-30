@@ -1264,3 +1264,20 @@ of training seeds, and journey noninferiority versus V13 with paired CI upper
 bound at or below `+0.20 min`. The original noguard/current/V11 effect margins
 remain locked. Failure of any condition yields `capacity_gain_not_confirmed`;
 there is no fallback candidate or post-hoc threshold change.
+
+### V14 200-episode independent confirmation dispatch (2026-08-30)
+
+The locked confirmation was submitted through scheduler as tasks `t85021` to
+`t85076` under run name
+`protocol_v6_capacity_gain_confirm_ep200_s8_e8_v14`. All 56 one-job shards use
+the unchanged clean behavior snapshot at commit
+`4246c7f92aec9f109424b4f7fec3d284bf7b8198`, stage `confirmation`, 200 training
+episodes, and the preregistered eight training and eight evaluation seeds.
+Tasks are pinned across `node001` through `node006` with distribution
+`10/10/9/9/9/9`, four declared CPU cores and 1270 MB RAM per shard. Results
+remain on the HPC nodes; no checkpoint or shard CSV is synchronized locally.
+
+The post-dispatch health probe found all 56 tasks running with nonzero CPU and
+RAM samples. This record establishes execution identity only. Confirmation,
+claim eligibility, aggregation, and effect estimates remain pending until every
+shard completes and the locked confirmation gate passes.
