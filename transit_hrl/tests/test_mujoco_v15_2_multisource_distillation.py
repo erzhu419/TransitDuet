@@ -94,7 +94,7 @@ def test_v15_2_launcher_is_dynamic_and_respects_node_headroom():
     scheduler = build_scheduler_spec(_args(), environment, seed)
 
     assert scheduler["require_node"] is None
-    assert scheduler["cpu"] == spec.WORKERS == 168
+    assert scheduler["cpu"] == spec.WORKERS == 160
     assert scheduler["ram_mb"] == spec.RAM_MB_PER_TASK
     assert set(scheduler["allowed_nodes"]) == set(_args().nodes)
 
