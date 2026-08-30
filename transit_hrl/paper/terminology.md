@@ -11,6 +11,8 @@ drafts are not interchangeable with the definitions below.
 | upper policy | The policy acting once per macro interval. | Slow policy, planner, and manager as unqualified synonyms. |
 | lower policy | The policy acting at each environment step on residual control. | Fast policy and worker as unqualified synonyms. |
 | frequency responsibility | The assignment of low-frequency control effects to the upper level and high-frequency residual effects to the lower level. | Physical frequency separation; these are different claims. |
+| additive gauge transform | A causal transfer `(u, l) -> (u + g, l - g)` that leaves the additive total action unchanged. | A policy improvement or a change in physical behavior. |
+| gauge-fixed responsibility | The full-strength causal split computed only from total action; it is invariant to the raw additive factorization and reconstructs the total exactly. | Raw upper/lower policy output. |
 | responsibility-space lower-LF drift | Low-frequency power computed after the registered causal responsibility operator. | Raw lower-LF drift. |
 | raw lower-LF drift | Low-frequency power of the pre-routing lower action/effect. | Responsibility-space drift. |
 | upper-HF action power | High-frequency power of the upper action/effect under the registered causal filter. | Upper instability or noise without a metric definition. |

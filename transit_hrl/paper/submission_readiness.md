@@ -21,6 +21,8 @@ impact bar.
   pseudoreplication, and reports all 12 multiplicity-controlled contrasts.
 - The authoritative registry separates confirmatory, development, legacy, and
   excluded evidence and now supplies one manuscript source of truth.
+- Additive raw-policy gauge non-identifiability and causal canonical
+  responsibility fixing are now explicit in both code and the method.
 
 ## Blocking scientific issue
 
@@ -30,34 +32,37 @@ preserved executed actions, rewards, and latent policies. This is excellent
 mechanism isolation, but it means the result can be interpreted as correcting
 responsibility bookkeeping rather than learning better hierarchical control.
 The interpretation is strengthened by v13, where the universal raw-action claim
-failed, and by Quant v7.4, where generic HRL-GRU-PPO has significantly better
-return.
+failed, by the v15--v15.2 development sequence, where post-hoc raw-policy
+distillation passed only Hopper, and by Quant v7.4, where generic HRL-GRU-PPO
+has significantly better return.
 
-No amount of additional v14.29 seeds resolves this issue. The next experiment
-must change the estimand from responsibility coordinates to raw upper/lower
-behavior.
+No amount of additional v14.29 seeds or expansion of the same output-head grid
+resolves this issue. The next experiment must change the training architecture,
+not only the post-training coordinate.
 
 ## Required algorithmic advance
 
-Implement **behavior-preserving responsibility distillation** as the next frozen
-development line:
+Implement **training-time gauge-fixed Freq-HRL** as the next frozen development
+line:
 
-1. On anchor trajectories, causally decompose the executed total action into a
-   smooth upper plan curve and a high-pass lower residual.
-2. Distill those targets into the raw upper and lower actor outputs, not only the
-   responsibility reporter.
-3. Penalize total-action reconstruction error and upper boundary jumps during
-   distillation; retain the paired reward floor in closed-loop selection.
-4. Gate candidates on raw lower-LF reduction, upper-HF power, reconstruction,
-   and reward simultaneously on every design fold.
-5. Validate once on disjoint paths and count abstention as failure.
-6. Expand to fresh-seed confirmation only if one fixed algorithm passes all
+1. Place the shared causal gauge layer inside rollout and training so every
+   auxiliary frequency cost is computed in an identifiable coordinate.
+2. Route endogenous state causally by level rather than sending the complete raw
+   observation to both actors unchanged; retain only the Markov context required
+   for stable control.
+3. Use separate upper and lower optimization/trust controls. The v15 shared head
+   radius coupled HalfCheetah compensation to Walker upper smoothing.
+4. Train from fresh optimizer seeds that exclude `2978317753`; v15 trajectory
+   roots cannot be recycled as a new confirmation panel.
+5. Gate candidates on raw lower-LF drift, raw and responsibility upper-HF power,
+   exact total reconstruction, and return on every design fold.
+6. Expand to fresh-seed confirmation only if one fixed architecture passes all
    three environments in development. A per-environment post-hoc mechanism is
    insufficient for the domain-general claim.
 
-This directly targets the v13 failure modes: HalfCheetah's lower actor must lose
-its slow bias, while Hopper's upper transfer must become smooth enough to remain
-inside the high-frequency budget.
+This directly targets the v15 failure modes: HalfCheetah requires stable lower
+compensation under an upper change, while Walker requires substantially stronger
+upper smoothing without reintroducing lower drift.
 
 ## Evidence still needed after the algorithmic advance
 
@@ -68,11 +73,11 @@ inside the high-frequency budget.
 - One authoritative non-synthetic second-domain result. Current Transit and
   order-book artifacts cannot be used until registered with valid inferential
   units and outcome-level control endpoints.
-- An ablation that separates the causal encoder, two-rate policy, raw
-  distillation, reward guard, and abstention rule.
-- A formal proposition stating when exact total-action reconstruction preserves
-  return pathwise and why that does not imply raw policy equivalence; a global
-  RL convergence theorem is not required.
+- An ablation that separates the causal encoder, two-rate policy, gauge layer,
+  reward guard, and abstention rule.
+- Empirical tests of gauge invariance and pathwise reconstruction across real
+  policy traces. The formal propositions are now in the manuscript; a global RL
+  convergence theorem is neither established nor required for the bounded claim.
 - Replacement figures generated only from the authoritative ledger. The current
   `manuscript_figures_latest` package predates v14.29 and includes evidence that
   is not reportable under the current registry.

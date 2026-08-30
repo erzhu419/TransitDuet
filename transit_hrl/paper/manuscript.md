@@ -61,17 +61,27 @@ policy improvement [@achiam2017cpo] than to an unconstrained auxiliary loss,
 while retaining an empirical, path-conditional guarantee rather than claiming a
 global safety theorem.
 
+An additive hierarchy also has a structural identification problem. If the
+environment sees only the sum of upper and lower effects, transferring any
+causal signal from one level to the other leaves behavior unchanged. We make
+this gauge freedom explicit and define a causal gauge-fixed responsibility
+coordinate from the total action. This separates what can be identified from
+behavior from what requires an architectural convention.
+
 Our contributions are:
 
 1. We define and implement a causal distinction between raw lower-frequency
    behavior, responsibility-space lower-frequency drift, and upper-policy
    high-frequency power. This prevents a representation result from being
    reported as a behavioral result.
-2. We introduce a domain-neutral guarded restoration portfolio with disjoint
+2. We formalize the non-identifiability of raw additive upper/lower
+   factorizations and provide a causal, exactly reconstructing gauge-fixed
+   responsibility layer whose full-strength output depends only on total action.
+3. We introduce a domain-neutral guarded restoration portfolio with disjoint
    design and validation paths, fold-wise eligibility, a paired reward floor,
    exact trace-invariance requirements for function-preserving candidates, and
    counted abstention.
-3. We report preregistered fresh-seed evidence together with the negative and
+4. We report preregistered fresh-seed evidence together with the negative and
    mixed results that bound the claim: responsibility restoration is reliable on
    the frozen MuJoCo protocol, raw separation is not universal, and return does
    not uniformly exceed matched learned baselines.
@@ -160,7 +170,60 @@ The distinction is substantive. A responsibility router can lower
 repairs attribution, not physical behavior. Raw separation requires improvement
 in (D^{\mathrm{raw}}_L) and the upper high-frequency budget as separate gates.
 
-### 3.3 Violation snapshots
+### 3.3 Additive gauge non-identifiability
+
+Assume the domain adapter and transition kernel depend on the hierarchy through
+the additive total effect (a_t=e^U_t+e^L_t). For any causal transfer (g_t) that
+keeps the component actions feasible, define
+
+\[
+e^{U\prime}_t=e^U_t+g_t,\qquad
+e^{L\prime}_t=e^L_t-g_t.
+\]
+
+**Proposition 1 (raw factorization is not behaviorally identifiable).** Under
+shared initial state and environment randomness, the original and transformed
+hierarchies induce identical state, executed-action, and reward trajectories.
+Consequently, an objective or diagnostic that observes only environment
+trajectories cannot identify the raw upper/lower factorization.
+
+*Proof.* At every (t), the transformed total equals the original total. The
+domain adapter therefore emits the same executed action. Induction through the
+shared transition randomness gives the same next state and reward, completing
+the trajectory-wise argument. (\square)
+
+This proposition explains why responsibility restoration and raw policy
+distillation are different estimands. Successful responsibility routing cannot
+by itself imply improvement in either raw diagnostic.
+
+### 3.4 Causal gauge fixing
+
+Let (P) be any deterministic causal operator on the total action history; the
+implementation uses a causal exponential low pass followed, when configured,
+by a lower-component feasibility projection. Define
+
+\[
+r^U_t=P(a_{1:t})_t,\qquad r^L_t=a_t-r^U_t.
+\]
+
+**Proposition 2 (canonical responsibility coordinate).** The map above is
+causal, reconstructs (a_t) exactly, and is invariant to every additive gauge
+transform of Proposition 1. If the environment consumes only (r^U_t+r^L_t), it
+also preserves return pathwise.
+
+*Proof.* Causality follows from (P)'s input restriction to (a_{1:t}). Exact
+reconstruction is immediate by definition. Gauge-transformed components have
+the same total (a), so both responsibility outputs are unchanged. Their sum is
+the original total; Proposition 1 then gives pathwise return invariance.
+(\square)
+
+The shared implementation exposes this operator as `CausalGaugeFixer`. A
+partial-strength transaction interpolates toward the canonical coordinate while
+preserving the total; only full strength is called gauge fixed. This layer was
+implemented after the frozen v14.29 study and is not part of that confirmatory
+claim.
+
+### 3.5 Violation snapshots
 
 For each frozen path panel, the implementation converts the registered
 frequency endpoints and reward floor into three diagnostics: a non-negative
@@ -360,10 +423,14 @@ It also exposes the central limitation of the current algorithm. In 32 of 32
 HalfCheetah and Hopper cells, the selected transaction changed attribution but
 not behavior. A reviewer interested in control improvement can reasonably view
 this as reparameterization rather than policy learning. The v13 raw-behavior
-failure reinforces that concern. The next algorithmic step must distill the
-restored decomposition into raw upper and lower policy outputs, while retaining
-the reward-floor and abstention contract; more replications of the same router
-protocol would narrow the wrong uncertainty.
+failure reinforces that concern. Three subsequent single-optimizer-seed
+development preflights attempted causal output-head distillation, bounded
+distillation, and a multi-source teacher. Only Hopper passed each joint
+development gate; HalfCheetah and Walker2d did not support expansion. These
+outcomes are excluded from confirmatory claims, but they reject a larger search
+over the same post-hoc output-head mechanism. The next learned-policy experiment
+must impose the gauge during training and evaluate raw behavior and return on
+fresh optimizer seeds.
 
 ### 7.3 Negative results define the claim boundary
 
@@ -381,7 +448,8 @@ modes and validation roots. The validation paths nested within a seed are not
 independent replicates. Second, most successful transactions were
 function-preserving routers; they do not demonstrate physical control
 improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks. Fourth, Quant is a synthetic time-series control environment and
+MuJoCo tasks, and the v15 distillation sequence used only one development
+optimizer seed. Fourth, Quant is a synthetic time-series control environment and
 contains one supported performance harm. Fifth, Transit, public passenger data,
 and order-book adapters exist in the repository but currently lack reportable
 records in the authoritative ledger and are therefore excluded from the paper's
@@ -416,5 +484,5 @@ restoration across fresh MuJoCo optimizer seeds. They also show where the method
 does not yet hold: raw physical separation fails in two tasks, and synthetic
 time-series performance is mixed. The defensible contribution is therefore an
 auditable responsibility contract and guarded restoration protocol. Converting
-that contract into consistently improved raw hierarchical behavior remains the
-primary algorithmic problem.
+that contract into a training-time gauge-fixed hierarchy with competitive raw
+behavior and return remains the primary algorithmic problem.
