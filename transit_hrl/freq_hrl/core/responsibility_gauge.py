@@ -663,6 +663,396 @@ class CausalSmoothMacroGaugeFixer:
             raise RuntimeError("smooth macro gauge fixer must be reset")
 
 
+@dataclass
+class CausalAuditOptimalMacroGaugeFixer:
+    """Choose a causal macro responsibility plan against HPF8/LPF32.
+
+    At each macro boundary, the current total action is known and is used as a
+    persistence forecast for the remaining primitive steps. A deterministic
+    box-constrained quadratic solve chooses the upper responsibility sequence
+    that minimizes the registered normalized upper high-pass and lower low-pass
+    residuals over that horizon. Between boundaries the plan is frozen. The
+    requested upper responsibility is projected onto the component-feasibility
+    interval induced by the realized total, and the lower responsibility is its
+    exact complement.
+
+    Planning histories contain canonical responsibilities only. They therefore
+    depend on the total action but not on ``strength`` or the supplied additive
+    factorization, preserving pathwise function equivalence across interventions.
+    """
+
+    macro_steps: int = 16
+    upper_window: int = 8
+    lower_window: int = 32
+    upper_rms_budget: float = 0.075
+    lower_rms_budget: float = 0.0475
+    low_pass_alpha: float = 0.20
+    coordinate_sweeps: int = 128
+    strength: float = 1.0
+
+    def __post_init__(self) -> None:
+        self.macro_steps = int(self.macro_steps)
+        self.upper_window = int(self.upper_window)
+        self.lower_window = int(self.lower_window)
+        self.upper_rms_budget = float(self.upper_rms_budget)
+        self.lower_rms_budget = float(self.lower_rms_budget)
+        self.low_pass_alpha = float(self.low_pass_alpha)
+        self.coordinate_sweeps = int(self.coordinate_sweeps)
+        self.strength = float(self.strength)
+        if self.macro_steps < 2:
+            raise ValueError("audit-optimal gauge requires at least two steps")
+        if self.upper_window < 2 or self.lower_window < 2:
+            raise ValueError("audit-optimal gauge windows must be at least two")
+        if (
+            not np.isfinite(self.upper_rms_budget)
+            or self.upper_rms_budget <= 0.0
+            or not np.isfinite(self.lower_rms_budget)
+            or self.lower_rms_budget <= 0.0
+        ):
+            raise ValueError("audit-optimal gauge budgets must be positive")
+        if (
+            not np.isfinite(self.low_pass_alpha)
+            or not 0.0 < self.low_pass_alpha <= 1.0
+        ):
+            raise ValueError("audit-optimal low-pass alpha must be in (0, 1]")
+        if self.coordinate_sweeps < 1:
+            raise ValueError("audit-optimal coordinate_sweeps must be positive")
+        if not np.isfinite(self.strength) or not 0.0 <= self.strength <= 1.0:
+            raise ValueError("audit-optimal gauge strength must be in [0, 1]")
+        self._dimension = 0
+        self._low_pass = np.zeros(0, dtype=np.float64)
+        self._plan = np.zeros((self.macro_steps, 0), dtype=np.float64)
+        self._current = np.zeros(0, dtype=np.float64)
+        self._phase = 0
+        self._active = False
+        self._has_total = False
+        self._upper_history: list[np.ndarray] = []
+        self._lower_history: list[np.ndarray] = []
+        self._predicted_baseline_objective = 0.0
+        self._predicted_optimal_objective = 0.0
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("audit-optimal gauge action_dim must be positive")
+        self._dimension = int(action_dim)
+        self._low_pass = np.zeros(self._dimension, dtype=np.float64)
+        self._plan = np.zeros(
+            (self.macro_steps, self._dimension), dtype=np.float64
+        )
+        self._current = np.zeros(self._dimension, dtype=np.float64)
+        self._phase = 0
+        self._active = False
+        self._has_total = False
+        self._upper_history = []
+        self._lower_history = []
+        self._predicted_baseline_objective = 0.0
+        self._predicted_optimal_objective = 0.0
+
+    @property
+    def context(self) -> np.ndarray:
+        self._require_reset()
+        return self._low_pass.astype(np.float32, copy=True)
+
+    @property
+    def policy_context(self) -> tuple[tuple[np.ndarray, ...], tuple[float, ...]]:
+        """Return all compact plan state consumed by a feed-forward policy."""
+
+        self._require_reset()
+        target = self._plan[-1] if self._active else np.zeros(self._dimension)
+        phase = (
+            float(self._phase / (self.macro_steps - 1))
+            if self._active else 0.0
+        )
+        return (
+            (
+                self._low_pass.astype(np.float32, copy=True),
+                self._current.astype(np.float32, copy=True),
+                np.asarray(target, dtype=np.float32).copy(),
+            ),
+            (phase,),
+        )
+
+    def split(
+        self,
+        upper: Any,
+        lower: Any,
+        *,
+        macro_boundary: bool,
+        upper_limit: float = 1.0,
+        lower_limit: float = 1.0,
+    ) -> dict[str, np.ndarray | float]:
+        """Return a bounded audit-optimized split with exact reconstruction."""
+
+        self._require_reset()
+        upper_value = _finite_vector(upper, name="upper action")
+        lower_value = _finite_vector(lower, name="lower action")
+        if (
+            upper_value.shape != (self._dimension,)
+            or lower_value.shape != upper_value.shape
+        ):
+            raise ValueError(
+                "audit-optimal gauge actions must align with reset action_dim"
+            )
+        if not isinstance(macro_boundary, (bool, np.bool_)):
+            raise ValueError("macro_boundary must be boolean")
+        upper_bound = float(upper_limit)
+        lower_bound = float(lower_limit)
+        if not np.isfinite(upper_bound) or upper_bound <= 0.0:
+            raise ValueError("audit-optimal upper_limit must be positive")
+        if not np.isfinite(lower_bound) or lower_bound <= 0.0:
+            raise ValueError("audit-optimal lower_limit must be positive")
+        if not self._active and not bool(macro_boundary):
+            raise RuntimeError(
+                "audit-optimal gauge requires a boundary on its first split"
+            )
+
+        total = upper_value + lower_value
+        low_pass_before = self._low_pass.copy()
+        if bool(macro_boundary):
+            forecast = np.repeat(
+                total.reshape(1, -1), self.macro_steps, axis=0
+            )
+            plan_rows: list[np.ndarray] = []
+            baseline_objectives: list[float] = []
+            optimal_objectives: list[float] = []
+            past_upper = self._history_matrix(
+                self._upper_history, self.upper_window - 1
+            )
+            past_lower = self._history_matrix(
+                self._lower_history, self.lower_window - 1
+            )
+            for dimension in range(self._dimension):
+                feasible_low = np.maximum(
+                    -upper_bound, forecast[:, dimension] - lower_bound
+                )
+                feasible_high = np.minimum(
+                    upper_bound, forecast[:, dimension] + lower_bound
+                )
+                if np.any(feasible_low > feasible_high + 1e-10):
+                    raise RuntimeError(
+                        "audit-optimal forecast has no feasible component split"
+                    )
+                plan, baseline_objective, optimal_objective = (
+                    self._solve_dimension(
+                        forecast=forecast[:, dimension],
+                        past_upper=past_upper[:, dimension],
+                        past_lower=past_lower[:, dimension],
+                        feasible_low=np.minimum(feasible_low, feasible_high),
+                        feasible_high=feasible_high,
+                    )
+                )
+                plan_rows.append(plan)
+                baseline_objectives.append(baseline_objective)
+                optimal_objectives.append(optimal_objective)
+            self._plan = np.stack(plan_rows, axis=1)
+            self._phase = 0
+            self._active = True
+            self._predicted_baseline_objective = float(
+                np.mean(baseline_objectives)
+            )
+            self._predicted_optimal_objective = float(
+                np.mean(optimal_objectives)
+            )
+        else:
+            self._phase = min(self._phase + 1, self.macro_steps - 1)
+
+        requested_upper = self._plan[self._phase].copy()
+        feasible_low = np.maximum(-upper_bound, total - lower_bound)
+        feasible_high = np.minimum(upper_bound, total + lower_bound)
+        if np.any(feasible_low > feasible_high + 1e-10):
+            raise RuntimeError(
+                "audit-optimal gauge has no feasible realized component split"
+            )
+        feasible_low = np.minimum(feasible_low, feasible_high)
+        canonical_upper = np.clip(
+            requested_upper, feasible_low, feasible_high
+        )
+        canonical_lower = total - canonical_upper
+        canonical_transfer = canonical_upper - upper_value
+        transfer = self.strength * canonical_transfer
+        fixed_upper = upper_value + transfer
+        fixed_lower = lower_value - transfer
+        reconstruction_error = fixed_upper + fixed_lower - total
+        component_clip = canonical_upper - requested_upper
+
+        self._current = canonical_upper.copy()
+        self._upper_history.append(canonical_upper.copy())
+        self._lower_history.append(canonical_lower.copy())
+        self._upper_history = self._upper_history[-(self.upper_window - 1):]
+        self._lower_history = self._lower_history[-(self.lower_window - 1):]
+        if not self._has_total:
+            self._low_pass = total.copy()
+            self._has_total = True
+        else:
+            self._low_pass += self.low_pass_alpha * (total - self._low_pass)
+
+        return {
+            "upper": fixed_upper.astype(np.float32, copy=True),
+            "lower": fixed_lower.astype(np.float32, copy=True),
+            "total": total.astype(np.float32, copy=True),
+            "transfer": transfer.astype(np.float32, copy=True),
+            "canonical_upper": canonical_upper.astype(np.float32, copy=True),
+            "canonical_lower": canonical_lower.astype(np.float32, copy=True),
+            "low_pass_before": low_pass_before.astype(np.float32, copy=True),
+            "low_pass_after": self._low_pass.astype(np.float32, copy=True),
+            "audit_requested": requested_upper.astype(np.float32, copy=True),
+            "audit_target": self._plan[-1].astype(np.float32, copy=True),
+            "audit_progress": float(self._phase / (self.macro_steps - 1)),
+            "predicted_baseline_objective": (
+                self._predicted_baseline_objective
+            ),
+            "predicted_optimal_objective": self._predicted_optimal_objective,
+            "feasible_upper_low": feasible_low.astype(np.float32, copy=True),
+            "feasible_upper_high": feasible_high.astype(np.float32, copy=True),
+            "alpha_before": self.low_pass_alpha,
+            "alpha_after": self.low_pass_alpha,
+            "normalized_band_imbalance": 0.0,
+            "macro_boundary": float(bool(macro_boundary)),
+            "reconstruction_error": reconstruction_error.astype(
+                np.float64, copy=True
+            ),
+            "canonical_component_clip_rate": float(np.mean(
+                np.abs(component_clip) > 1e-12
+            )),
+            "canonical_component_clip_rms": float(np.sqrt(np.mean(
+                np.square(component_clip)
+            ))),
+            "canonical_lower_clip_rate": float(np.mean(
+                np.abs(component_clip) > 1e-12
+            )),
+            "gauge_fixed": float(self.strength == 1.0),
+        }
+
+    def _solve_dimension(
+        self,
+        *,
+        forecast: np.ndarray,
+        past_upper: np.ndarray,
+        past_lower: np.ndarray,
+        feasible_low: np.ndarray,
+        feasible_high: np.ndarray,
+    ) -> tuple[np.ndarray, float, float]:
+        horizon = self.macro_steps
+        zeros = np.zeros(horizon, dtype=np.float64)
+        offset = self._audit_residuals(
+            zeros, forecast, past_upper, past_lower
+        )
+        design = np.empty((offset.size, horizon), dtype=np.float64)
+        for index in range(horizon):
+            basis = zeros.copy()
+            basis[index] = 1.0
+            design[:, index] = (
+                self._audit_residuals(
+                    basis, forecast, past_upper, past_lower
+                )
+                - offset
+            )
+
+        reference = (
+            float(past_upper[-1]) if past_upper.size else float(forecast[0])
+        )
+        baseline = np.clip(
+            np.full(horizon, reference, dtype=np.float64),
+            feasible_low,
+            feasible_high,
+        )
+        gram = design.T @ design
+        linear = design.T @ offset
+        diagonal_scale = max(float(np.max(np.diag(gram))), 1.0)
+        tie_break = 1e-10 * diagonal_scale
+        gram = gram + tie_break * np.eye(horizon, dtype=np.float64)
+        linear = linear - tie_break * baseline
+        candidate = baseline.copy()
+        for _ in range(self.coordinate_sweeps):
+            largest_change = 0.0
+            for index in range(horizon):
+                gradient = float(gram[index] @ candidate + linear[index])
+                updated = float(np.clip(
+                    candidate[index] - gradient / gram[index, index],
+                    feasible_low[index],
+                    feasible_high[index],
+                ))
+                largest_change = max(
+                    largest_change, abs(updated - candidate[index])
+                )
+                candidate[index] = updated
+            if largest_change <= 1e-11:
+                break
+
+        baseline_objective = self._audit_objective(
+            baseline, forecast, past_upper, past_lower
+        )
+        candidate_objective = self._audit_objective(
+            candidate, forecast, past_upper, past_lower
+        )
+        if candidate_objective > baseline_objective:
+            return baseline, baseline_objective, baseline_objective
+        return candidate, baseline_objective, candidate_objective
+
+    def _audit_objective(
+        self,
+        upper_plan: np.ndarray,
+        forecast: np.ndarray,
+        past_upper: np.ndarray,
+        past_lower: np.ndarray,
+    ) -> float:
+        residuals = self._audit_residuals(
+            upper_plan, forecast, past_upper, past_lower
+        )
+        return float(np.mean(np.square(residuals)))
+
+    def _audit_residuals(
+        self,
+        upper_plan: np.ndarray,
+        forecast: np.ndarray,
+        past_upper: np.ndarray,
+        past_lower: np.ndarray,
+    ) -> np.ndarray:
+        future_upper = np.asarray(upper_plan, dtype=np.float64).reshape(-1)
+        future_total = np.asarray(forecast, dtype=np.float64).reshape(-1)
+        if (
+            future_upper.shape != (self.macro_steps,)
+            or future_total.shape != future_upper.shape
+        ):
+            raise ValueError("audit-optimal plan and forecast must align")
+        upper_values = np.concatenate((past_upper, future_upper))
+        lower_values = np.concatenate((past_lower, future_total - future_upper))
+        upper_offset = int(past_upper.size)
+        lower_offset = int(past_lower.size)
+        upper_residuals = []
+        lower_residuals = []
+        for index in range(self.macro_steps):
+            upper_end = upper_offset + index + 1
+            upper_start = max(0, upper_end - self.upper_window)
+            upper_mean = float(np.mean(
+                upper_values[upper_start:upper_end]
+            ))
+            upper_residuals.append(
+                (future_upper[index] - upper_mean) / self.upper_rms_budget
+            )
+            lower_end = lower_offset + index + 1
+            lower_start = max(0, lower_end - self.lower_window)
+            lower_residuals.append(
+                float(np.mean(lower_values[lower_start:lower_end]))
+                / self.lower_rms_budget
+            )
+        return np.asarray(
+            [*upper_residuals, *lower_residuals], dtype=np.float64
+        )
+
+    def _history_matrix(
+        self, history: list[np.ndarray], maximum_rows: int
+    ) -> np.ndarray:
+        rows = history[-int(maximum_rows):]
+        if not rows:
+            return np.empty((0, self._dimension), dtype=np.float64)
+        return np.stack(rows, axis=0).astype(np.float64, copy=False)
+
+    def _require_reset(self) -> None:
+        if self._dimension < 1:
+            raise RuntimeError("audit-optimal gauge fixer must be reset")
+
+
 def canonical_responsibility_trace(
     total_actions: Any,
     *,

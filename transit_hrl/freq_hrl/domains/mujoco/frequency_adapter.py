@@ -9,6 +9,7 @@ import numpy as np
 from ...core.action_decoders import CausalZeroDCMacroProjector
 from ...core.responsibility_gauge import (
     CausalAuditAlignedGaugeFixer,
+    CausalAuditOptimalMacroGaugeFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
     CausalSmoothMacroGaugeFixer,
@@ -37,6 +38,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
+    "causal_audit_optimal_macro_gauge",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 )
@@ -70,6 +72,11 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
     "causal_smooth_macro_gauge": (
         "causal_prior_total_low_pass_macro_target_with_frozen_smooth_curve_"
         "bounded_components_and_exact_pre_split_action_execution_v1"
+    ),
+    "causal_audit_optimal_macro_gauge": (
+        "causal_current_total_persistence_forecast_with_box_constrained_"
+        "finite_horizon_hpf8_lpf32_macro_plan_bounded_components_and_exact_"
+        "pre_split_action_execution_v1"
     ),
     "causal_macro_zero_dc": (
         "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
@@ -339,6 +346,7 @@ class CausalLowerActionRouter:
             | CausalAuditAlignedGaugeFixer
             | CausalMacroHoldAuditGaugeFixer
             | CausalSmoothMacroGaugeFixer
+            | CausalAuditOptimalMacroGaugeFixer
             | None
         ) = None
         self._zero_dc_projector: CausalZeroDCMacroProjector | None = None
@@ -390,6 +398,16 @@ class CausalLowerActionRouter:
                 alpha=self.alpha,
                 strength=self.strength,
             )
+        elif self.mode == "causal_audit_optimal_macro_gauge":
+            self._gauge_fixer = CausalAuditOptimalMacroGaugeFixer(
+                macro_steps=self.macro_steps,
+                upper_window=8,
+                lower_window=32,
+                upper_rms_budget=self.upper_rms_budget,
+                lower_rms_budget=self.lower_rms_budget,
+                low_pass_alpha=self.alpha,
+                strength=self.strength,
+            )
         elif self.mode in {
             "causal_macro_zero_dc",
             "causal_macro_zero_dc_headroom",
@@ -418,6 +436,20 @@ class CausalLowerActionRouter:
             else self._baseline
         )
         return value.astype(np.float32, copy=True)
+
+    @property
+    def policy_context(self) -> tuple[tuple[np.ndarray, ...], tuple[float, ...]]:
+        """Return the action-vector and scalar state exposed to policies."""
+
+        self._require_reset()
+        if self.mode == "causal_audit_optimal_macro_gauge":
+            if not isinstance(
+                self._gauge_fixer, CausalAuditOptimalMacroGaugeFixer
+            ):
+                raise RuntimeError("audit-optimal gauge router is not initialized")
+            return self._gauge_fixer.policy_context
+        context = self.context
+        return (context, context), ()
 
     @property
     def promotion_context(self) -> np.ndarray:
@@ -459,6 +491,8 @@ class CausalLowerActionRouter:
         macro_completed = 0.0
         macro_completion_error_rms = 0.0
         headroom_clip_rate = 0.0
+        predicted_audit_baseline = 0.0
+        predicted_audit_optimal = 0.0
         if (
             self._promotion_sum is None
             or self._promotion_context is None
@@ -480,6 +514,7 @@ class CausalLowerActionRouter:
             "causal_audit_aligned_gauge",
             "causal_macro_hold_audit_gauge",
             "causal_smooth_macro_gauge",
+            "causal_audit_optimal_macro_gauge",
         }:
             if upper_action is None:
                 raise ValueError(
@@ -495,10 +530,14 @@ class CausalLowerActionRouter:
                 "causal_audit_aligned_gauge",
                 "causal_macro_hold_audit_gauge",
                 "causal_smooth_macro_gauge",
+                "causal_audit_optimal_macro_gauge",
             }:
                 if self._gauge_fixer is None:
                     raise RuntimeError("total-action gauge router is not initialized")
-                if self.mode == "causal_smooth_macro_gauge":
+                if self.mode in {
+                    "causal_smooth_macro_gauge",
+                    "causal_audit_optimal_macro_gauge",
+                }:
                     fixed = self._gauge_fixer.split(
                         upper,
                         latent,
@@ -526,6 +565,12 @@ class CausalLowerActionRouter:
                 ))
                 headroom_clip_rate = float(fixed.get(
                     "canonical_component_clip_rate", 0.0
+                ))
+                predicted_audit_baseline = float(fixed.get(
+                    "predicted_baseline_objective", 0.0
+                ))
+                predicted_audit_optimal = float(fixed.get(
+                    "predicted_optimal_objective", 0.0
                 ))
                 transfer_target = np.asarray(
                     fixed["canonical_upper"], dtype=np.float64
@@ -615,6 +660,7 @@ class CausalLowerActionRouter:
             "causal_audit_aligned_gauge",
             "causal_macro_hold_audit_gauge",
             "causal_smooth_macro_gauge",
+            "causal_audit_optimal_macro_gauge",
         }:
             if self._gauge_fixer is None:
                 raise RuntimeError("total-action gauge router is not initialized")
@@ -642,6 +688,7 @@ class CausalLowerActionRouter:
                 "causal_audit_aligned_gauge",
                 "causal_macro_hold_audit_gauge",
                 "causal_smooth_macro_gauge",
+                "causal_audit_optimal_macro_gauge",
             }
             else np.zeros_like(removed)
         )
@@ -666,6 +713,8 @@ class CausalLowerActionRouter:
             "macro_completed": macro_completed,
             "macro_completion_error_rms": macro_completion_error_rms,
             "headroom_clip_rate": headroom_clip_rate,
+            "predicted_audit_baseline": predicted_audit_baseline,
+            "predicted_audit_optimal": predicted_audit_optimal,
             "promotion_context": self._promotion_context.astype(
                 np.float32, copy=True
             ),

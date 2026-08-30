@@ -73,6 +73,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2 = (
     "freq_hrl_mujoco_shared_core_v17_2_smooth_macro_gauge"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3 = (
+    "freq_hrl_mujoco_shared_core_v17_3_audit_optimal_macro_gauge"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -81,6 +84,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -300,6 +304,7 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
+    "causal_audit_optimal_macro_gauge",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 }
@@ -310,6 +315,7 @@ FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
+    "causal_audit_optimal_macro_gauge",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -734,12 +740,23 @@ def mujoco_policy_state_dim(
     action_dim: int,
     *,
     observe_router_strength: bool = False,
+    lower_action_router_mode: str = "direct",
 ) -> int:
     if int(observation_dim) < 1 or int(action_dim) < 1:
         raise ValueError("MuJoCo observation and action dimensions must be positive")
+    mode = str(lower_action_router_mode)
+    if mode not in LOWER_ACTION_ROUTER_MODES:
+        raise ValueError("unknown MuJoCo lower-action router mode")
+    filter_context_count = (
+        3 if mode == "causal_audit_optimal_macro_gauge" else 2
+    )
+    router_scalar_count = (
+        1 if mode == "causal_audit_optimal_macro_gauge" else 0
+    )
     return (
         int(observation_dim)
-        + 5 * int(action_dim)
+        + (3 + filter_context_count) * int(action_dim)
+        + router_scalar_count
         + int(bool(observe_router_strength))
     )
 
@@ -789,7 +806,8 @@ def _feature_state(
     bands: dict[str, np.ndarray],
     action_context: np.ndarray,
     *,
-    filter_contexts: tuple[np.ndarray, np.ndarray] | None = None,
+    filter_contexts: tuple[np.ndarray, ...] | None = None,
+    router_scalar_contexts: tuple[float, ...] = (),
     router_strength_context: float | None = None,
     frequency_routing: bool,
     level: str,
@@ -803,7 +821,9 @@ def _feature_state(
             np.asarray(value, dtype=np.float32).reshape(-1)
             for value in filter_contexts
         )
-        if len(filters) != 2 or any(value.shape != context.shape for value in filters):
+        if len(filters) < 1 or any(
+            value.shape != context.shape for value in filters
+        ):
             raise ValueError("MuJoCo filter contexts must match the action context")
     if frequency_routing and level == "upper":
         exogenous = (bands["slow"], bands["mid"])
@@ -816,7 +836,20 @@ def _feature_state(
         if router_strength_context is None
         else (np.asarray([router_strength_context], dtype=np.float32),)
     )
-    pieces = (endogenous, *exogenous, context, *filters, *strength)
+    router_scalars = tuple(
+        np.asarray([float(value)], dtype=np.float32)
+        for value in router_scalar_contexts
+    )
+    if any(not np.all(np.isfinite(value)) for value in router_scalars):
+        raise ValueError("MuJoCo router scalar contexts must be finite")
+    pieces = (
+        endogenous,
+        *exogenous,
+        context,
+        *filters,
+        *router_scalars,
+        *strength,
+    )
     return np.concatenate(pieces).astype(np.float32, copy=False)
 
 
@@ -1225,6 +1258,10 @@ def rollout_hierarchical(
     smooth_macro_gauge_router = (
         str(lower_action_router_mode) == "causal_smooth_macro_gauge"
     )
+    audit_optimal_macro_gauge_router = (
+        str(lower_action_router_mode)
+        == "causal_audit_optimal_macro_gauge"
+    )
     if headroom_zero_dc_router and (
         str(upper_action_decoder_mode) != "causal_smoothstep_plan"
     ):
@@ -1244,6 +1281,19 @@ def rollout_hierarchical(
     if smooth_macro_gauge_router and str(responsibility_mode) != "additive":
         raise ValueError(
             "smooth macro gauge routing requires additive responsibility"
+        )
+    if audit_optimal_macro_gauge_router and (
+        str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "audit-optimal macro gauge routing requires a frozen smooth upper plan"
+        )
+    if (
+        audit_optimal_macro_gauge_router
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "audit-optimal macro gauge routing requires additive responsibility"
         )
     if float(upper_promotion_gain) > 0.0 and not headroom_zero_dc_router:
         raise ValueError(
@@ -1321,7 +1371,10 @@ def rollout_hierarchical(
 
         def actor_filter_contexts(
             level: str,
-        ) -> tuple[np.ndarray, np.ndarray]:
+        ) -> tuple[np.ndarray, ...]:
+            if audit_optimal_macro_gauge_router:
+                action_blocks, _ = lower_router.policy_context
+                return action_blocks
             if headroom_zero_dc_router:
                 strength = float(lower_action_router_strength)
                 baseline = (
@@ -1351,11 +1404,20 @@ def rollout_hierarchical(
                 return context, context
             return responsibility.raw_lower_lf, lower_router.context
 
-        def cost_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
+        def cost_filter_contexts() -> tuple[np.ndarray, ...]:
+            if audit_optimal_macro_gauge_router:
+                action_blocks, _ = lower_router.policy_context
+                return action_blocks
             if function_preserving_router:
                 context = latent_lower_lf_tracker.low
                 return context, context
             return raw_lower_lf_tracker.low, responsibility_lf_tracker.low
+
+        def router_scalar_contexts() -> tuple[float, ...]:
+            if audit_optimal_macro_gauge_router:
+                _, scalars = lower_router.policy_context
+                return scalars
+            return ()
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
@@ -1434,6 +1496,7 @@ def rollout_hierarchical(
                     bands,
                     previous_action,
                     filter_contexts=actor_filter_contexts("upper"),
+                    router_scalar_contexts=router_scalar_contexts(),
                     router_strength_context=router_strength_context,
                     frequency_routing=frequency_routing,
                     level="upper",
@@ -1509,6 +1572,7 @@ def rollout_hierarchical(
                     else upper_policy_action
                 ),
                 filter_contexts=actor_filter_contexts("lower"),
+                router_scalar_contexts=router_scalar_contexts(),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -1518,6 +1582,7 @@ def rollout_hierarchical(
                 bands,
                 upper_anchor,
                 filter_contexts=cost_filter_contexts(),
+                router_scalar_contexts=router_scalar_contexts(),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -1543,6 +1608,7 @@ def rollout_hierarchical(
                         "causal_audit_aligned_gauge",
                         "causal_macro_hold_audit_gauge",
                         "causal_smooth_macro_gauge",
+                        "causal_audit_optimal_macro_gauge",
                         "causal_macro_zero_dc_headroom",
                     }
                     else None
@@ -1787,6 +1853,7 @@ def rollout_hierarchical(
                         next_bands,
                         executed,
                         filter_contexts=actor_filter_contexts("upper"),
+                        router_scalar_contexts=router_scalar_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="upper",
@@ -1837,6 +1904,7 @@ def rollout_hierarchical(
                             else next_upper_policy_action
                         ),
                         filter_contexts=actor_filter_contexts("lower"),
+                        router_scalar_contexts=router_scalar_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -1851,6 +1919,7 @@ def rollout_hierarchical(
                         next_bands,
                         next_execution_upper,
                         filter_contexts=cost_filter_contexts(),
+                        router_scalar_contexts=router_scalar_contexts(),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -3901,6 +3970,20 @@ def train_mujoco_method(
             "smooth macro gauge routing requires additive responsibility"
         )
     if (
+        str(lower_action_router_mode) == "causal_audit_optimal_macro_gauge"
+        and str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "audit-optimal macro gauge routing requires a frozen smooth upper plan"
+        )
+    if (
+        str(lower_action_router_mode) == "causal_audit_optimal_macro_gauge"
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "audit-optimal macro gauge routing requires additive responsibility"
+        )
+    if (
         float(upper_promotion_gain) > 0.0
         and str(lower_action_router_mode)
         != "causal_macro_zero_dc_headroom"
@@ -3909,7 +3992,10 @@ def train_mujoco_method(
             "upper promotion requires headroom zero-DC lower routing"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
+        if str(lower_action_router_mode)
+        == "causal_audit_optimal_macro_gauge"
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
         if str(lower_action_router_mode) == "causal_smooth_macro_gauge"
         else
         MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
@@ -3941,6 +4027,19 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3}
+    ):
+        raise ValueError("v17.3 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
+        and inferred_protocol_version != MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
+    ):
+        raise ValueError(
+            "the v17.3 protocol label requires audit-optimal macro gauge routing"
+        )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
         and selected_protocol_version
@@ -4450,7 +4549,10 @@ def train_mujoco_method(
         effective_router_training_schedule != "constant"
         and not effective_router_observe_strength
         and effective_lower_action_router_mode
-        != "causal_smooth_macro_gauge"
+        not in {
+            "causal_smooth_macro_gauge",
+            "causal_audit_optimal_macro_gauge",
+        }
     ):
         raise ValueError(
             "a router curriculum must expose its strength in policy state"
@@ -4486,6 +4588,7 @@ def train_mujoco_method(
         observation_dim,
         action_dim,
         observe_router_strength=effective_router_observe_strength,
+        lower_action_router_mode=effective_lower_action_router_mode,
     )
     actor_anchor_zero_state_indices = (
         (int(state_dim) - 1,)
@@ -5969,8 +6072,10 @@ def train_mujoco_method(
         "lower_action_router_schedule_contract": (
             "strength_independent_total_action_state_allows_unobserved_"
             "training_homotopy_with_frozen_target_evaluation_v2"
-            if effective_lower_action_router_mode
-            == "causal_smooth_macro_gauge"
+            if effective_lower_action_router_mode in {
+                "causal_smooth_macro_gauge",
+                "causal_audit_optimal_macro_gauge",
+            }
             else "curriculum_applies_only_to_sampled_training_rollouts_while_"
             "checkpoint_selection_and_heldout_use_frozen_target_v1"
         ),
@@ -5985,6 +6090,11 @@ def train_mujoco_method(
             "latent_and_effective_lower_actions_both_reported_v1"
         ),
         "lower_action_headroom_contract": (
+            "audit_optimal_requested_upper_projected_to_exact_joint_component_"
+            "feasibility_interval_each_step_v1"
+            if effective_lower_action_router_mode
+            == "causal_audit_optimal_macro_gauge"
+            else
             "smooth_canonical_upper_projected_to_exact_joint_component_"
             "feasibility_interval_each_step_v1"
             if effective_lower_action_router_mode
@@ -6020,6 +6130,11 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
+            "causal_total_low_pass_current_audit_plan_terminal_target_and_"
+            "normalized_macro_phase_independent_of_gauge_strength_v1"
+            if effective_lower_action_router_mode
+            == "causal_audit_optimal_macro_gauge"
+            else
             "causal_total_action_low_pass_context_independent_of_gauge_"
             "strength_v1"
             if effective_lower_action_router_mode

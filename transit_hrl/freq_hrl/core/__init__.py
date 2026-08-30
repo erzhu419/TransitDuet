@@ -24,6 +24,7 @@ from .phase0 import (
 from .promotion_gate import CausalPromotionGate
 from .reward import RewardAttributionAccumulator
 from .responsibility_gauge import (
+    CausalAuditOptimalMacroGaugeFixer,
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
@@ -50,6 +51,7 @@ __all__ = [
     "CausalPromotionGate",
     "CausalLeakageRewardShaper",
     "CausalGaugeFixer",
+    "CausalAuditOptimalMacroGaugeFixer",
     "CausalAuditAlignedGaugeFixer",
     "CausalMacroHoldAuditGaugeFixer",
     "CausalSmoothMacroGaugeFixer",

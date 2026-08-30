@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from freq_hrl.core import (
+    CausalAuditOptimalMacroGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
     CausalSmoothMacroGaugeFixer,
     CausalSmoothstepMacroPlan,
@@ -198,6 +199,198 @@ def test_mujoco_smooth_macro_gauge_router_preserves_additive_action():
     assert lower_action_router_contract("causal_smooth_macro_gauge") == (
         "causal_prior_total_low_pass_macro_target_with_frozen_smooth_curve_"
         "bounded_components_and_exact_pre_split_action_execution_v1"
+    )
+
+
+def _run_audit_optimal_gauge(totals, *, strength, upper_fraction=0.35):
+    totals = np.asarray(totals, dtype=np.float64)
+    supplied_upper = upper_fraction * totals
+    supplied_lower = totals - supplied_upper
+    fixer = CausalAuditOptimalMacroGaugeFixer(
+        macro_steps=8,
+        upper_window=8,
+        lower_window=32,
+        upper_rms_budget=0.075,
+        lower_rms_budget=0.0475,
+        strength=strength,
+    )
+    fixer.reset(totals.shape[1])
+    rows = []
+    contexts = []
+    for index, (upper, lower) in enumerate(zip(supplied_upper, supplied_lower)):
+        rows.append(fixer.split(
+            upper,
+            lower,
+            macro_boundary=index % 8 == 0,
+            upper_limit=1.0,
+            lower_limit=1.0,
+        ))
+        action_blocks, scalars = fixer.policy_context
+        contexts.append(np.concatenate((
+            *(np.asarray(value).reshape(-1) for value in action_blocks),
+            np.asarray(scalars, dtype=np.float32),
+        )))
+    return rows, np.asarray(contexts), supplied_upper, supplied_lower
+
+
+def test_audit_optimal_macro_gauge_is_function_preserving_and_identifiable():
+    rng = np.random.default_rng(1731)
+    totals = rng.uniform(-0.8, 0.8, size=(32, 2))
+    control, control_context, supplied_upper, supplied_lower = (
+        _run_audit_optimal_gauge(totals, strength=0.0)
+    )
+    fixed, fixed_context, _, _ = _run_audit_optimal_gauge(
+        totals, strength=1.0
+    )
+
+    gauge_shift = rng.uniform(-0.2, 0.2, size=totals.shape)
+    shifted_fixer = CausalAuditOptimalMacroGaugeFixer(
+        macro_steps=8, strength=1.0
+    )
+    shifted_fixer.reset(2)
+    shifted = []
+    shifted_context = []
+    for index, (upper, lower) in enumerate(zip(
+        supplied_upper + gauge_shift,
+        supplied_lower - gauge_shift,
+    )):
+        shifted.append(shifted_fixer.split(
+            upper,
+            lower,
+            macro_boundary=index % 8 == 0,
+            upper_limit=1.0,
+            lower_limit=1.0,
+        ))
+        blocks, scalars = shifted_fixer.policy_context
+        shifted_context.append(np.concatenate((
+            *(np.asarray(value).reshape(-1) for value in blocks),
+            np.asarray(scalars, dtype=np.float32),
+        )))
+
+    control_upper = np.asarray([row["upper"] for row in control])
+    control_lower = np.asarray([row["lower"] for row in control])
+    fixed_upper = np.asarray([row["upper"] for row in fixed])
+    fixed_lower = np.asarray([row["lower"] for row in fixed])
+    shifted_upper = np.asarray([row["upper"] for row in shifted])
+    shifted_lower = np.asarray([row["lower"] for row in shifted])
+    np.testing.assert_allclose(control_upper, supplied_upper, atol=3e-8)
+    np.testing.assert_allclose(control_lower, supplied_lower, atol=3e-8)
+    np.testing.assert_allclose(control_context, fixed_context, atol=0.0)
+    np.testing.assert_allclose(fixed_context, shifted_context, atol=0.0)
+    np.testing.assert_allclose(fixed_upper, shifted_upper, atol=0.0)
+    np.testing.assert_allclose(fixed_lower, shifted_lower, atol=0.0)
+    np.testing.assert_allclose(fixed_upper + fixed_lower, totals, atol=1e-7)
+    assert fixed_context.shape == (32, 3 * totals.shape[1] + 1)
+    boundary_rows = fixed[::8]
+    assert all(
+        row["predicted_optimal_objective"]
+        <= row["predicted_baseline_objective"] + 1e-12
+        for row in boundary_rows
+    )
+    assert any(
+        row["predicted_optimal_objective"]
+        < row["predicted_baseline_objective"] - 1e-6
+        for row in boundary_rows[1:]
+    )
+
+
+def test_audit_optimal_macro_gauge_is_prefix_causal():
+    prefix = np.linspace(-0.5, 0.6, 20).reshape(-1, 1)
+    totals_a = np.concatenate((prefix, np.full((12, 1), 0.9)))
+    totals_b = np.concatenate((prefix, np.full((12, 1), -0.9)))
+    rows_a, contexts_a, _, _ = _run_audit_optimal_gauge(
+        totals_a, strength=1.0
+    )
+    rows_b, contexts_b, _, _ = _run_audit_optimal_gauge(
+        totals_b, strength=1.0
+    )
+    np.testing.assert_allclose(
+        [row["upper"] for row in rows_a[:20]],
+        [row["upper"] for row in rows_b[:20]],
+        atol=0.0,
+    )
+    np.testing.assert_allclose(contexts_a[:20], contexts_b[:20], atol=0.0)
+
+
+def test_audit_optimal_macro_gauge_improves_registered_synthetic_objective():
+    totals = np.repeat(
+        np.asarray([0.0, 0.75, -0.5, 0.65, -0.25], dtype=np.float64),
+        16,
+    ).reshape(-1, 1)
+    zeros = np.zeros_like(totals)
+    smooth = CausalSmoothMacroGaugeFixer(
+        macro_steps=16, alpha=0.2, strength=1.0
+    )
+    optimal = CausalAuditOptimalMacroGaugeFixer(
+        macro_steps=16, strength=1.0
+    )
+    smooth.reset(1)
+    optimal.reset(1)
+    smooth_upper, smooth_lower = [], []
+    optimal_upper, optimal_lower = [], []
+    for index, total in enumerate(totals):
+        boundary = index % 16 == 0
+        smooth_row = smooth.split(
+            zeros[index],
+            total,
+            macro_boundary=boundary,
+            upper_limit=1.0,
+            lower_limit=1.0,
+        )
+        optimal_row = optimal.split(
+            zeros[index],
+            total,
+            macro_boundary=boundary,
+            upper_limit=1.0,
+            lower_limit=1.0,
+        )
+        smooth_upper.append(smooth_row["upper"])
+        smooth_lower.append(smooth_row["lower"])
+        optimal_upper.append(optimal_row["upper"])
+        optimal_lower.append(optimal_row["lower"])
+    metric = LeakageRegularizer(upper_hf_window=8, lower_lf_window=32)
+    smooth_metrics = metric.compute(smooth_upper, smooth_lower)
+    optimal_metrics = metric.compute(optimal_upper, optimal_lower)
+    assert (
+        optimal_metrics["UpperHFPowerAbs"]
+        < smooth_metrics["UpperHFPowerAbs"]
+    )
+    assert (
+        optimal_metrics["LowerLFDriftAbs"]
+        < smooth_metrics["LowerLFDriftAbs"]
+    )
+
+
+def test_mujoco_audit_optimal_router_exposes_complete_plan_state():
+    router = CausalLowerActionRouter(
+        mode="causal_audit_optimal_macro_gauge",
+        strength=1.0,
+        macro_steps=4,
+    )
+    router.reset(2)
+    row = router.route(
+        np.asarray([0.2, -0.1]),
+        upper_action=np.asarray([0.1, 0.3]),
+        macro_boundary=True,
+    )
+    action_blocks, scalars = router.policy_context
+    assert len(action_blocks) == 3
+    assert all(np.asarray(value).shape == (2,) for value in action_blocks)
+    assert scalars == (0.0,)
+    np.testing.assert_allclose(
+        np.asarray(row["upper_transfer"]) + np.asarray(row["effective"]),
+        [0.2, -0.1],
+        atol=1e-7,
+    )
+    assert row["predicted_audit_optimal"] <= row[
+        "predicted_audit_baseline"
+    ] + 1e-12
+    assert lower_action_router_contract(
+        "causal_audit_optimal_macro_gauge"
+    ) == (
+        "causal_current_total_persistence_forecast_with_box_constrained_"
+        "finite_horizon_hpf8_lpf32_macro_plan_bounded_components_and_exact_"
+        "pre_split_action_execution_v1"
     )
 
 
