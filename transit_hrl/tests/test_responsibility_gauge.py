@@ -5,9 +5,11 @@ from freq_hrl.core import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
+    CausalStreamingAuditProjectionFixer,
     LeakageRegularizer,
     canonical_responsibility_trace,
 )
+from freq_hrl.core.leakage import causal_rolling_mean, high_pass
 from freq_hrl.domains.mujoco import (
     CausalLowerActionRouter,
     lower_action_router_contract,
@@ -300,6 +302,119 @@ def test_mujoco_macro_hold_gauge_requires_and_records_macro_boundaries():
         "causal_total_action_gauge_fixed_at_upper_macro_boundaries_with_"
         "adaptive_lpf32_hpf8_feedback_and_exact_pre_split_action_execution_v1"
     )
+
+
+def test_streaming_audit_projection_matches_batch_filters_and_budgets():
+    steps = np.arange(512, dtype=np.float64)
+    total = (
+        0.35 * np.sin(2.0 * np.pi * steps / 160.0)
+        + 0.08 * np.sin(2.0 * np.pi * steps / 5.0)
+        + 0.15 * (steps >= 256)
+    ).reshape(-1, 1)
+    fixer = CausalStreamingAuditProjectionFixer(
+        planning_horizon=16,
+        upper_rms_budget=0.075,
+        lower_rms_budget=0.0475,
+    )
+    fixer.reset(1)
+    rows = [fixer.split([0.0], value) for value in total]
+    upper = np.asarray([row["upper"] for row in rows]).reshape(-1, 1)
+    lower = np.asarray([row["lower"] for row in rows]).reshape(-1, 1)
+    online_upper = np.asarray([
+        row["streaming_upper_high"] for row in rows
+    ]).reshape(-1, 1)
+    online_lower = np.asarray([
+        row["streaming_lower_low"] for row in rows
+    ]).reshape(-1, 1)
+    metrics = LeakageRegularizer(
+        upper_hf_window=8, lower_lf_window=32
+    ).compute(upper, lower)
+
+    np.testing.assert_allclose(online_upper, high_pass(upper, 8), atol=1e-7)
+    np.testing.assert_allclose(
+        online_lower, causal_rolling_mean(lower, 32), atol=1e-7
+    )
+    np.testing.assert_allclose(upper + lower, total, atol=1e-7)
+    assert metrics["UpperHFPowerAbs"] <= 0.075 ** 2
+    assert metrics["LowerLFDriftAbs"] <= 0.0475 ** 2
+    assert all(row["upper_budget_feasible_rate"] == 1.0 for row in rows)
+    action_blocks, scalars = fixer.policy_context
+    assert len(action_blocks) == 38
+    assert scalars == (1.0, 1.0)
+
+
+def test_streaming_audit_projection_is_factorization_invariant_and_causal():
+    rng = np.random.default_rng(17401)
+    prefix = rng.normal(scale=0.15, size=(48, 2))
+    suffix_left = rng.normal(scale=0.15, size=(16, 2))
+    suffix_right = rng.normal(scale=0.15, size=(16, 2))
+    total_left = np.concatenate((prefix, suffix_left), axis=0)
+    total_right = np.concatenate((prefix, suffix_right), axis=0)
+
+    def trace(total, gauge_shift):
+        fixer = CausalStreamingAuditProjectionFixer(strength=1.0)
+        fixer.reset(2)
+        rows = [
+            fixer.split(shift, value - shift)
+            for value, shift in zip(total, gauge_shift, strict=True)
+        ]
+        return np.asarray([row["upper"] for row in rows]), rows
+
+    shift_a = rng.normal(scale=0.10, size=total_left.shape)
+    shift_b = rng.normal(scale=0.10, size=total_left.shape)
+    factor_a, rows_a = trace(total_left, shift_a)
+    factor_b, _ = trace(total_left, shift_b)
+    future_changed, _ = trace(total_right, shift_a)
+
+    np.testing.assert_allclose(factor_a, factor_b, atol=1e-7)
+    np.testing.assert_allclose(factor_a[:48], future_changed[:48], atol=1e-7)
+    np.testing.assert_allclose(
+        np.asarray([row["reconstruction_error"] for row in rows_a]),
+        0.0,
+        atol=1e-12,
+    )
+
+
+def test_streaming_audit_projection_state_is_strength_invariant():
+    rng = np.random.default_rng(17402)
+    upper = rng.uniform(-0.35, 0.35, size=(64, 3))
+    lower = rng.uniform(-0.35, 0.35, size=(64, 3))
+    control = CausalStreamingAuditProjectionFixer(strength=0.0)
+    projected = CausalStreamingAuditProjectionFixer(strength=1.0)
+    control.reset(3)
+    projected.reset(3)
+
+    for upper_row, lower_row in zip(upper, lower, strict=True):
+        control_blocks, control_scalars = control.policy_context
+        projected_blocks, projected_scalars = projected.policy_context
+        np.testing.assert_allclose(control_blocks, projected_blocks, atol=0.0)
+        np.testing.assert_allclose(control_scalars, projected_scalars, atol=0.0)
+        control_row = control.split(upper_row, lower_row)
+        projected_row = projected.split(upper_row, lower_row)
+        np.testing.assert_allclose(
+            control_row["canonical_upper"],
+            projected_row["canonical_upper"],
+            atol=0.0,
+        )
+        np.testing.assert_allclose(
+            control_row["canonical_lower"],
+            projected_row["canonical_lower"],
+            atol=0.0,
+        )
+
+
+def test_streaming_audit_projection_reports_physical_budget_infeasibility():
+    fixer = CausalStreamingAuditProjectionFixer(upper_rms_budget=0.075)
+    fixer.reset(1)
+    for _ in range(7):
+        fixer.split([0.0], [0.0])
+    row = fixer.split([1.0], [1.0], upper_limit=1.0, lower_limit=1.0)
+
+    assert row["upper_budget_feasible_rate"] == 0.0
+    assert row["upper_budget_violation_rms"] > 0.0
+    np.testing.assert_allclose(row["canonical_upper"], [1.0], atol=1e-12)
+    np.testing.assert_allclose(row["canonical_lower"], [1.0], atol=1e-12)
+    np.testing.assert_allclose(row["reconstruction_error"], 0.0, atol=1e-12)
 
 
 def test_gauge_rejects_uninitialized_or_misaligned_inputs():

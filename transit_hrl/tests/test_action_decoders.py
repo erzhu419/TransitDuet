@@ -394,6 +394,38 @@ def test_mujoco_audit_optimal_router_exposes_complete_plan_state():
     )
 
 
+def test_mujoco_streaming_projection_exposes_complete_fir_state():
+    router = CausalLowerActionRouter(
+        mode="causal_streaming_audit_projection",
+        strength=1.0,
+        macro_steps=16,
+    )
+    router.reset(2)
+    row = router.route(
+        np.asarray([0.2, -0.1]),
+        upper_action=np.asarray([0.1, 0.3]),
+    )
+    action_blocks, scalars = router.policy_context
+
+    assert len(action_blocks) == 38
+    assert all(np.asarray(value).shape == (2,) for value in action_blocks)
+    assert scalars == pytest.approx((1.0 / 7.0, 1.0 / 31.0))
+    np.testing.assert_allclose(
+        np.asarray(row["upper_transfer"]) + np.asarray(row["effective"]),
+        [0.2, -0.1],
+        atol=1e-7,
+    )
+    assert row["upper_budget_feasible_rate"] == 1.0
+    assert row["upper_budget_violation_rms"] == 0.0
+    assert lower_action_router_contract(
+        "causal_streaming_audit_projection"
+    ) == (
+        "causal_realized_total_receding_constant_tail_hpf8_lpf32_projection_"
+        "with_complete_fir_state_bounded_components_and_exact_pre_split_"
+        "action_execution_v1"
+    )
+
+
 def test_zero_dc_projector_is_causal_bounded_and_exact_per_macro():
     rng = np.random.default_rng(71)
     proposals = rng.normal(scale=0.9, size=(48, 3))

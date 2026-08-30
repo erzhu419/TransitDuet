@@ -76,6 +76,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3 = (
     "freq_hrl_mujoco_shared_core_v17_3_audit_optimal_macro_gauge"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4 = (
+    "freq_hrl_mujoco_shared_core_v17_4_streaming_audit_projection"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -85,6 +88,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -305,6 +309,7 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
     "causal_audit_optimal_macro_gauge",
+    "causal_streaming_audit_projection",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 }
@@ -316,6 +321,7 @@ FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
     "causal_audit_optimal_macro_gauge",
+    "causal_streaming_audit_projection",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -747,12 +753,15 @@ def mujoco_policy_state_dim(
     mode = str(lower_action_router_mode)
     if mode not in LOWER_ACTION_ROUTER_MODES:
         raise ValueError("unknown MuJoCo lower-action router mode")
-    filter_context_count = (
-        3 if mode == "causal_audit_optimal_macro_gauge" else 2
-    )
-    router_scalar_count = (
-        1 if mode == "causal_audit_optimal_macro_gauge" else 0
-    )
+    if mode == "causal_audit_optimal_macro_gauge":
+        filter_context_count = 3
+        router_scalar_count = 1
+    elif mode == "causal_streaming_audit_projection":
+        filter_context_count = 38
+        router_scalar_count = 2
+    else:
+        filter_context_count = 2
+        router_scalar_count = 0
     return (
         int(observation_dim)
         + (3 + filter_context_count) * int(action_dim)
@@ -898,6 +907,10 @@ def _episode_row(
     lower_router_macro_debt_rms_values: list[float],
     lower_router_macro_completion_errors: list[float],
     lower_router_headroom_clip_values: list[float],
+    lower_router_upper_budget_feasible_rates: list[float],
+    lower_router_lower_budget_satisfied_rates: list[float],
+    lower_router_upper_budget_violation_rms_values: list[float],
+    lower_router_lower_budget_violation_rms_values: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
     transfer_saturation_values: list[float],
@@ -1062,6 +1075,18 @@ def _episode_row(
         "LowerRouterHeadroomClipRate": float(np.mean(
             lower_router_headroom_clip_values
         )),
+        "LowerRouterUpperBudgetFeasibleRate": float(np.mean(
+            lower_router_upper_budget_feasible_rates
+        )),
+        "LowerRouterLowerBudgetSatisfiedRate": float(np.mean(
+            lower_router_lower_budget_satisfied_rates
+        )),
+        "LowerRouterUpperBudgetViolationRMS": float(np.sqrt(np.mean(
+            np.square(lower_router_upper_budget_violation_rms_values)
+        ))),
+        "LowerRouterLowerBudgetViolationRMS": float(np.sqrt(np.mean(
+            np.square(lower_router_lower_budget_violation_rms_values)
+        ))),
         "EffectiveToLatentLowerEnergyRatio": float(
             np.mean(np.square(raw_lower))
             / max(float(np.mean(np.square(latent_lower))), 1e-12)
@@ -1262,6 +1287,10 @@ def rollout_hierarchical(
         str(lower_action_router_mode)
         == "causal_audit_optimal_macro_gauge"
     )
+    streaming_audit_projection_router = (
+        str(lower_action_router_mode)
+        == "causal_streaming_audit_projection"
+    )
     if headroom_zero_dc_router and (
         str(upper_action_decoder_mode) != "causal_smoothstep_plan"
     ):
@@ -1294,6 +1323,19 @@ def rollout_hierarchical(
     ):
         raise ValueError(
             "audit-optimal macro gauge routing requires additive responsibility"
+        )
+    if streaming_audit_projection_router and (
+        str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "streaming audit projection requires a frozen smooth upper plan"
+        )
+    if (
+        streaming_audit_projection_router
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "streaming audit projection requires additive responsibility"
         )
     if float(upper_promotion_gain) > 0.0 and not headroom_zero_dc_router:
         raise ValueError(
@@ -1372,7 +1414,10 @@ def rollout_hierarchical(
         def actor_filter_contexts(
             level: str,
         ) -> tuple[np.ndarray, ...]:
-            if audit_optimal_macro_gauge_router:
+            if (
+                audit_optimal_macro_gauge_router
+                or streaming_audit_projection_router
+            ):
                 action_blocks, _ = lower_router.policy_context
                 return action_blocks
             if headroom_zero_dc_router:
@@ -1405,7 +1450,10 @@ def rollout_hierarchical(
             return responsibility.raw_lower_lf, lower_router.context
 
         def cost_filter_contexts() -> tuple[np.ndarray, ...]:
-            if audit_optimal_macro_gauge_router:
+            if (
+                audit_optimal_macro_gauge_router
+                or streaming_audit_projection_router
+            ):
                 action_blocks, _ = lower_router.policy_context
                 return action_blocks
             if function_preserving_router:
@@ -1414,7 +1462,10 @@ def rollout_hierarchical(
             return raw_lower_lf_tracker.low, responsibility_lf_tracker.low
 
         def router_scalar_contexts() -> tuple[float, ...]:
-            if audit_optimal_macro_gauge_router:
+            if (
+                audit_optimal_macro_gauge_router
+                or streaming_audit_projection_router
+            ):
                 _, scalars = lower_router.policy_context
                 return scalars
             return ()
@@ -1437,6 +1488,10 @@ def rollout_hierarchical(
         lower_router_macro_debt_rms_values: list[float] = []
         lower_router_macro_completion_errors: list[float] = []
         lower_router_headroom_clip_values: list[float] = []
+        lower_router_upper_budget_feasible_rates: list[float] = []
+        lower_router_lower_budget_satisfied_rates: list[float] = []
+        lower_router_upper_budget_violation_rms_values: list[float] = []
+        lower_router_lower_budget_violation_rms_values: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
         transfer_saturation_values: list[float] = []
@@ -1609,6 +1664,7 @@ def rollout_hierarchical(
                         "causal_macro_hold_audit_gauge",
                         "causal_smooth_macro_gauge",
                         "causal_audit_optimal_macro_gauge",
+                        "causal_streaming_audit_projection",
                         "causal_macro_zero_dc_headroom",
                     }
                     else None
@@ -1814,6 +1870,18 @@ def rollout_hierarchical(
             ))
             lower_router_headroom_clip_values.append(float(
                 routed_lower["headroom_clip_rate"]
+            ))
+            lower_router_upper_budget_feasible_rates.append(float(
+                routed_lower["upper_budget_feasible_rate"]
+            ))
+            lower_router_lower_budget_satisfied_rates.append(float(
+                routed_lower["lower_budget_satisfied_rate"]
+            ))
+            lower_router_upper_budget_violation_rms_values.append(float(
+                routed_lower["upper_budget_violation_rms"]
+            ))
+            lower_router_lower_budget_violation_rms_values.append(float(
+                routed_lower["lower_budget_violation_rms"]
             ))
             responsibility_transfers.append(np.asarray(
                 responsibility.effective_transfer + router_upper_transfer,
@@ -2053,6 +2121,18 @@ def rollout_hierarchical(
             lower_router_headroom_clip_values=(
                 lower_router_headroom_clip_values
             ),
+            lower_router_upper_budget_feasible_rates=(
+                lower_router_upper_budget_feasible_rates
+            ),
+            lower_router_lower_budget_satisfied_rates=(
+                lower_router_lower_budget_satisfied_rates
+            ),
+            lower_router_upper_budget_violation_rms_values=(
+                lower_router_upper_budget_violation_rms_values
+            ),
+            lower_router_lower_budget_violation_rms_values=(
+                lower_router_lower_budget_violation_rms_values
+            ),
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
             transfer_saturation_values=transfer_saturation_values,
@@ -2289,6 +2369,10 @@ def rollout_flat(
             lower_router_macro_debt_rms_values=[0.0 for _ in rewards],
             lower_router_macro_completion_errors=[0.0 for _ in rewards],
             lower_router_headroom_clip_values=[0.0 for _ in rewards],
+            lower_router_upper_budget_feasible_rates=[0.0 for _ in rewards],
+            lower_router_lower_budget_satisfied_rates=[0.0 for _ in rewards],
+            lower_router_upper_budget_violation_rms_values=[0.0 for _ in rewards],
+            lower_router_lower_budget_violation_rms_values=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
             transfer_saturation_values=[0.0 for _ in rewards],
@@ -2367,6 +2451,10 @@ SUMMARY_KEYS = [
     "LowerRouterMacroDebtRMSMean",
     "LowerRouterMacroCompletionErrorMax",
     "LowerRouterHeadroomClipRate",
+    "LowerRouterUpperBudgetFeasibleRate",
+    "LowerRouterLowerBudgetSatisfiedRate",
+    "LowerRouterUpperBudgetViolationRMS",
+    "LowerRouterLowerBudgetViolationRMS",
     "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
@@ -3984,6 +4072,20 @@ def train_mujoco_method(
             "audit-optimal macro gauge routing requires additive responsibility"
         )
     if (
+        str(lower_action_router_mode) == "causal_streaming_audit_projection"
+        and str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "streaming audit projection requires a frozen smooth upper plan"
+        )
+    if (
+        str(lower_action_router_mode) == "causal_streaming_audit_projection"
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "streaming audit projection requires additive responsibility"
+        )
+    if (
         float(upper_promotion_gain) > 0.0
         and str(lower_action_router_mode)
         != "causal_macro_zero_dc_headroom"
@@ -3992,7 +4094,10 @@ def train_mujoco_method(
             "upper promotion requires headroom zero-DC lower routing"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4
+        if str(lower_action_router_mode)
+        == "causal_streaming_audit_projection"
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
         if str(lower_action_router_mode)
         == "causal_audit_optimal_macro_gauge"
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
@@ -4027,6 +4132,19 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4}
+    ):
+        raise ValueError("v17.4 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4
+        and inferred_protocol_version != MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4
+    ):
+        raise ValueError(
+            "the v17.4 protocol label requires streaming audit projection"
+        )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3
         and selected_protocol_version
@@ -6130,6 +6248,11 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
+            "complete_right_aligned_upper_hpf8_and_lower_lpf32_fir_histories_"
+            "with_valid_counts_independent_of_gauge_strength_v1"
+            if effective_lower_action_router_mode
+            == "causal_streaming_audit_projection"
+            else
             "causal_total_low_pass_current_audit_plan_terminal_target_and_"
             "normalized_macro_phase_independent_of_gauge_strength_v1"
             if effective_lower_action_router_mode

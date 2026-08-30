@@ -1053,6 +1053,342 @@ class CausalAuditOptimalMacroGaugeFixer:
             raise RuntimeError("audit-optimal gauge fixer must be reset")
 
 
+@dataclass
+class CausalStreamingAuditProjectionFixer:
+    """Project each causal split against the exact streaming audit state.
+
+    The registered HPF and LPF diagnostics are sums of primitive-step rolling
+    residuals.  At each step this fixer uses the realized total action as a
+    constant-tail forecast, analytically minimizes the normalized audit over one
+    receding macro horizon, executes only the first projected coordinate, and
+    replans after the next realized total.  This accounts for the delayed effect
+    of the current split on the lower rolling mean without freezing a stale
+    macro plan.  The physical component bounds are hard.  The current upper HPF
+    budget is also hard whenever its intersection with the physical interval is
+    nonempty.  If it is physically infeasible, the selected component minimizes
+    the unavoidable upper residual.
+
+    Canonical histories depend only on the total action.  They are updated
+    independently of ``strength`` and the supplied additive factorization, so
+    full-strength coordinates remain gauge invariant and paired interventions
+    receive identical policy state.
+    """
+
+    upper_window: int = 8
+    lower_window: int = 32
+    upper_rms_budget: float = 0.075
+    lower_rms_budget: float = 0.0475
+    planning_horizon: int = 16
+    strength: float = 1.0
+
+    def __post_init__(self) -> None:
+        self.upper_window = int(self.upper_window)
+        self.lower_window = int(self.lower_window)
+        self.upper_rms_budget = float(self.upper_rms_budget)
+        self.lower_rms_budget = float(self.lower_rms_budget)
+        self.planning_horizon = int(self.planning_horizon)
+        self.strength = float(self.strength)
+        if self.upper_window < 2 or self.lower_window < 2:
+            raise ValueError("streaming audit windows must be at least two")
+        if (
+            not np.isfinite(self.upper_rms_budget)
+            or self.upper_rms_budget <= 0.0
+            or not np.isfinite(self.lower_rms_budget)
+            or self.lower_rms_budget <= 0.0
+        ):
+            raise ValueError("streaming audit budgets must be positive")
+        if self.planning_horizon < 1:
+            raise ValueError("streaming audit planning_horizon must be positive")
+        if not np.isfinite(self.strength) or not 0.0 <= self.strength <= 1.0:
+            raise ValueError("streaming audit strength must be in [0, 1]")
+        self._dimension = 0
+        self._current = np.zeros(0, dtype=np.float64)
+        self._upper_history: list[np.ndarray] = []
+        self._lower_history: list[np.ndarray] = []
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("streaming audit action_dim must be positive")
+        self._dimension = int(action_dim)
+        self._current = np.zeros(self._dimension, dtype=np.float64)
+        self._upper_history = []
+        self._lower_history = []
+
+    @property
+    def context(self) -> np.ndarray:
+        self._require_reset()
+        return self._current.astype(np.float32, copy=True)
+
+    @property
+    def policy_context(self) -> tuple[tuple[np.ndarray, ...], tuple[float, ...]]:
+        """Return the complete finite-memory state used by the projection."""
+
+        self._require_reset()
+        upper_rows = self._padded_history(
+            self._upper_history, self.upper_window - 1
+        )
+        lower_rows = self._padded_history(
+            self._lower_history, self.lower_window - 1
+        )
+        return (
+            tuple(
+                row.astype(np.float32, copy=True)
+                for row in np.concatenate((upper_rows, lower_rows), axis=0)
+            ),
+            (
+                float(len(self._upper_history) / (self.upper_window - 1)),
+                float(len(self._lower_history) / (self.lower_window - 1)),
+            ),
+        )
+
+    def split(
+        self,
+        upper: Any,
+        lower: Any,
+        *,
+        upper_limit: float = 1.0,
+        lower_limit: float = 1.0,
+    ) -> dict[str, np.ndarray | float]:
+        """Return the exact streaming-audit projection and complement."""
+
+        self._require_reset()
+        upper_value = _finite_vector(upper, name="upper action")
+        lower_value = _finite_vector(lower, name="lower action")
+        if (
+            upper_value.shape != (self._dimension,)
+            or lower_value.shape != upper_value.shape
+        ):
+            raise ValueError(
+                "streaming audit actions must align with reset action_dim"
+            )
+        upper_bound = float(upper_limit)
+        lower_bound = float(lower_limit)
+        if not np.isfinite(upper_bound) or upper_bound <= 0.0:
+            raise ValueError("streaming audit upper_limit must be positive")
+        if not np.isfinite(lower_bound) or lower_bound <= 0.0:
+            raise ValueError("streaming audit lower_limit must be positive")
+
+        total = upper_value + lower_value
+        physical_low = np.maximum(-upper_bound, total - lower_bound)
+        physical_high = np.minimum(upper_bound, total + lower_bound)
+        if np.any(physical_low > physical_high + 1e-10):
+            raise RuntimeError(
+                "streaming audit has no feasible component split"
+            )
+        physical_low = np.minimum(physical_low, physical_high)
+
+        upper_count = len(self._upper_history)
+        lower_count = len(self._lower_history)
+        upper_sum = (
+            np.sum(self._upper_history, axis=0)
+            if self._upper_history else np.zeros(self._dimension)
+        )
+        lower_sum = (
+            np.sum(self._lower_history, axis=0)
+            if self._lower_history else np.zeros(self._dimension)
+        )
+        upper_denominator = float(upper_count + 1)
+        lower_denominator = float(lower_count + 1)
+        zeros = np.zeros(self._dimension, dtype=np.float64)
+        ones = np.ones(self._dimension, dtype=np.float64)
+        offset = self._constant_tail_residuals(
+            zeros, total, self._upper_history, self._lower_history
+        )
+        response = (
+            self._constant_tail_residuals(
+                ones, zeros, self._zero_history(upper_count),
+                self._zero_history(lower_count),
+            )
+            - self._constant_tail_residuals(
+                zeros, zeros, self._zero_history(upper_count),
+                self._zero_history(lower_count),
+            )
+        )
+        quadratic = np.sum(np.square(response), axis=0)
+        linear = np.sum(response * offset, axis=0)
+        unconstrained = -linear / quadratic
+
+        if upper_count:
+            upper_audit_low = (
+                upper_sum - upper_denominator * self.upper_rms_budget
+            ) / float(upper_count)
+            upper_audit_high = (
+                upper_sum + upper_denominator * self.upper_rms_budget
+            ) / float(upper_count)
+        else:
+            upper_audit_low = np.full(self._dimension, -np.inf)
+            upper_audit_high = np.full(self._dimension, np.inf)
+        upper_low = np.maximum(physical_low, upper_audit_low)
+        upper_high = np.minimum(physical_high, upper_audit_high)
+        upper_feasible = upper_low <= upper_high + 1e-12
+        upper_low = np.minimum(upper_low, upper_high)
+
+        canonical_upper = np.empty(self._dimension, dtype=np.float64)
+        canonical_upper[upper_feasible] = np.clip(
+            unconstrained[upper_feasible],
+            upper_low[upper_feasible],
+            upper_high[upper_feasible],
+        )
+        upper_infeasible = ~upper_feasible
+        upper_zero_residual = (
+            upper_sum / float(upper_count)
+            if upper_count else unconstrained
+        )
+        canonical_upper[upper_infeasible] = np.clip(
+            upper_zero_residual[upper_infeasible],
+            physical_low[upper_infeasible],
+            physical_high[upper_infeasible],
+        )
+        canonical_lower = total - canonical_upper
+
+        upper_mean = (
+            upper_sum + canonical_upper
+        ) / upper_denominator
+        upper_high_residual = canonical_upper - upper_mean
+        lower_low_residual = (
+            lower_sum + canonical_lower
+        ) / lower_denominator
+        normalized_upper = float(np.mean(np.square(
+            upper_high_residual / self.upper_rms_budget
+        )))
+        normalized_lower = float(np.mean(np.square(
+            lower_low_residual / self.lower_rms_budget
+        )))
+        raw_residuals = offset + response * upper_value.reshape(1, -1)
+        optimal_residuals = offset + response * canonical_upper.reshape(1, -1)
+        raw_objective = float(np.mean(np.square(raw_residuals)))
+        optimal_objective = float(np.mean(np.square(optimal_residuals)))
+        canonical_objective = normalized_upper + normalized_lower
+
+        canonical_transfer = canonical_upper - upper_value
+        transfer = self.strength * canonical_transfer
+        fixed_upper = upper_value + transfer
+        fixed_lower = lower_value - transfer
+        reconstruction_error = fixed_upper + fixed_lower - total
+        self._current = canonical_upper.copy()
+        self._upper_history.append(canonical_upper.copy())
+        self._lower_history.append(canonical_lower.copy())
+        self._upper_history = self._upper_history[-(self.upper_window - 1):]
+        self._lower_history = self._lower_history[-(self.lower_window - 1):]
+
+        upper_violation = np.maximum(
+            np.abs(upper_high_residual) - self.upper_rms_budget, 0.0
+        )
+        lower_violation = np.maximum(
+            np.abs(lower_low_residual) - self.lower_rms_budget, 0.0
+        )
+        return {
+            "upper": fixed_upper.astype(np.float32, copy=True),
+            "lower": fixed_lower.astype(np.float32, copy=True),
+            "total": total.astype(np.float32, copy=True),
+            "transfer": transfer.astype(np.float32, copy=True),
+            "canonical_upper": canonical_upper.astype(np.float32, copy=True),
+            "canonical_lower": canonical_lower.astype(np.float32, copy=True),
+            "streaming_upper_high": upper_high_residual.astype(
+                np.float32, copy=True
+            ),
+            "streaming_lower_low": lower_low_residual.astype(
+                np.float32, copy=True
+            ),
+            "normalized_upper_hf": normalized_upper,
+            "normalized_lower_lf": normalized_lower,
+            "normalized_local_objective": canonical_objective,
+            "normalized_band_imbalance": normalized_lower - normalized_upper,
+            "predicted_baseline_objective": raw_objective,
+            "predicted_optimal_objective": optimal_objective,
+            "upper_budget_feasible_rate": float(np.mean(upper_feasible)),
+            "lower_budget_satisfied_rate": float(np.mean(
+                np.abs(lower_low_residual) <= self.lower_rms_budget + 1e-12
+            )),
+            "upper_budget_violation_rms": float(np.sqrt(np.mean(
+                np.square(upper_violation)
+            ))),
+            "lower_budget_violation_rms": float(np.sqrt(np.mean(
+                np.square(lower_violation)
+            ))),
+            "feasible_upper_low": physical_low.astype(np.float32, copy=True),
+            "feasible_upper_high": physical_high.astype(np.float32, copy=True),
+            "alpha_before": 0.0,
+            "alpha_after": 0.0,
+            "reconstruction_error": reconstruction_error.astype(
+                np.float64, copy=True
+            ),
+            "canonical_component_clip_rate": 0.0,
+            "canonical_component_clip_rms": 0.0,
+            "canonical_lower_clip_rate": 0.0,
+            "gauge_fixed": float(self.strength == 1.0),
+        }
+
+    def _constant_tail_residuals(
+        self,
+        upper_tail: np.ndarray,
+        total_tail: np.ndarray,
+        upper_history: list[np.ndarray],
+        lower_history: list[np.ndarray],
+    ) -> np.ndarray:
+        future_upper = np.repeat(
+            np.asarray(upper_tail, dtype=np.float64).reshape(1, -1),
+            self.planning_horizon,
+            axis=0,
+        )
+        future_total = np.repeat(
+            np.asarray(total_tail, dtype=np.float64).reshape(1, -1),
+            self.planning_horizon,
+            axis=0,
+        )
+        past_upper = (
+            np.stack(upper_history, axis=0)
+            if upper_history else np.empty((0, self._dimension))
+        )
+        past_lower = (
+            np.stack(lower_history, axis=0)
+            if lower_history else np.empty((0, self._dimension))
+        )
+        upper_values = np.concatenate((past_upper, future_upper), axis=0)
+        lower_values = np.concatenate(
+            (past_lower, future_total - future_upper), axis=0
+        )
+        residuals: list[np.ndarray] = []
+        for index in range(self.planning_horizon):
+            upper_end = len(upper_history) + index + 1
+            upper_start = max(0, upper_end - self.upper_window)
+            upper_mean = np.mean(
+                upper_values[upper_start:upper_end], axis=0
+            )
+            residuals.append(
+                (future_upper[index] - upper_mean) / self.upper_rms_budget
+            )
+            lower_end = len(lower_history) + index + 1
+            lower_start = max(0, lower_end - self.lower_window)
+            lower_mean = np.mean(
+                lower_values[lower_start:lower_end], axis=0
+            )
+            residuals.append(lower_mean / self.lower_rms_budget)
+        return np.stack(residuals, axis=0)
+
+    def _zero_history(self, row_count: int) -> list[np.ndarray]:
+        return [
+            np.zeros(self._dimension, dtype=np.float64)
+            for _ in range(int(row_count))
+        ]
+
+    def _padded_history(
+        self, history: list[np.ndarray], maximum_rows: int
+    ) -> np.ndarray:
+        target = int(maximum_rows)
+        rows = history[-target:]
+        padding = np.zeros(
+            (target - len(rows), self._dimension), dtype=np.float64
+        )
+        if not rows:
+            return padding
+        return np.concatenate((padding, np.stack(rows, axis=0)), axis=0)
+
+    def _require_reset(self) -> None:
+        if self._dimension < 1:
+            raise RuntimeError("streaming audit fixer must be reset")
+
+
 def canonical_responsibility_trace(
     total_actions: Any,
     *,

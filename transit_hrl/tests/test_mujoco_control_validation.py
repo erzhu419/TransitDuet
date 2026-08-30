@@ -24,6 +24,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -150,6 +151,12 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 upper_action_decoder_mode="causal_smoothstep_plan",
                 **common,
             )
+        with self.assertRaisesRegex(ValueError, "v17.4 mechanisms"):
+            train_mujoco_method(
+                lower_action_router_mode="causal_streaming_audit_projection",
+                upper_action_decoder_mode="causal_smoothstep_plan",
+                **common,
+            )
         with self.assertRaisesRegex(ValueError, "v17.1 protocol label"):
             train_mujoco_method(
                 control_protocol_version=(
@@ -177,6 +184,9 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         ))
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3.endswith(
             "audit_optimal_macro_gauge"
+        ))
+        self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4.endswith(
+            "streaming_audit_projection"
         ))
 
     @staticmethod
@@ -268,6 +278,16 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 ),
             ),
             mujoco_policy_state_dim(17, 6) + 7,
+        )
+        self.assertEqual(
+            mujoco_policy_state_dim(
+                17,
+                6,
+                lower_action_router_mode=(
+                    "causal_streaming_audit_projection"
+                ),
+            ),
+            mujoco_policy_state_dim(17, 6) + 218,
         )
 
     def test_safe_selector_falls_back_when_no_candidate_is_pareto_safe(self):
@@ -1461,6 +1481,123 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             payload["policy_filter_state_contract"],
             "causal_total_low_pass_current_audit_plan_terminal_target_and_"
             "normalized_macro_phase_independent_of_gauge_strength_v1",
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["protocol_valid"], 1.0)
+        self.assertEqual(rows[0]["LowerRouterFunctionPreserving"], 1.0)
+
+    def test_streaming_audit_projection_preserves_closed_loop_with_full_state(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=128
+        )
+        router_mode = "causal_streaming_audit_projection"
+        torch.manual_seed(17401)
+        np.random.seed(17401)
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(
+                observation_dim,
+                action_dim,
+                lower_action_router_mode=router_mode,
+            ),
+            action_dim=action_dim,
+            hidden_dim=16,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=17403,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=128,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            responsibility_mode="additive",
+            lower_action_router_mode=router_mode,
+            lower_action_router_alpha=0.20,
+            lower_action_router_observe_strength=False,
+            upper_action_decoder_mode="causal_smoothstep_plan",
+            upper_constraint_mode="disabled",
+            sample=False,
+            episode_horizon=128,
+        )
+        _, control = rollout_hierarchical(
+            model, lower_action_router_strength=0.0, **common
+        )
+        _, fixed = rollout_hierarchical(
+            model, lower_action_router_strength=1.0, **common
+        )
+
+        for trace in (
+            "RewardTraceSHA256",
+            "ExecutedActionTraceSHA256",
+            "LatentPolicyTraceSHA256",
+        ):
+            self.assertEqual(control[trace], fixed[trace], trace)
+        for metric in (
+            "episode_return",
+            "LatentUpperHFPowerAbs",
+            "LatentLowerLFDriftAbs",
+            "AdditiveActionClipExcessMax",
+            "AdditiveActionClipExcessRMS",
+        ):
+            self.assertEqual(control[metric], fixed[metric], metric)
+        self.assertGreater(fixed["LowerRouterRemovedRMS"], 0.0)
+        self.assertEqual(fixed["LowerRouterFunctionPreserving"], 1.0)
+        self.assertGreater(
+            fixed["LowerRouterUpperBudgetFeasibleRate"], 0.99
+        )
+        self.assertLessEqual(
+            fixed["LowerRouterActionReconstructionRMS"], 1e-7
+        )
+        self.assertLessEqual(fixed["ResponsibilityReconstructionRMS"], 1e-7)
+        self.assertEqual(fixed["protocol_valid"], 1.0)
+
+    def test_streaming_audit_projection_trains_with_complete_fir_state(self):
+        payload, rows, _ = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=(17411,),
+            selection_seeds=(17413,),
+            eval_seeds=(17417,),
+            steps=8,
+            iterations=1,
+            optimizer_seed=17419,
+            episode_horizon=8,
+            upper_period=4,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            lower_lf_rms_budget=0.0475,
+            checkpoint_minimum_iteration=0,
+            checkpoint_evaluation_interval=1,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            training_disturbance_modes=("standard",),
+            evaluation_disturbance_modes=("standard",),
+            upper_action_decoder_mode="causal_smoothstep_plan",
+            responsibility_mode="additive",
+            leakage_constraint_scope="joint_behavior_latent",
+            upper_hf_rms_budget=0.075,
+            upper_constraint_mode="primal_dual",
+            upper_dual_lr=0.0,
+            lower_dual_lr=0.0,
+            lower_action_router_mode="causal_streaming_audit_projection",
+            lower_action_router_alpha=0.20,
+            lower_action_router_strength=0.0,
+            lower_action_router_observe_strength=False,
+            checkpoint_selection_mode="crossed_conditions",
+            checkpoint_score_mode="mean_reward",
+            control_protocol_version="auto",
+        )
+        self.assertEqual(
+            payload["protocol_version"],
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
+        )
+        self.assertEqual(
+            payload["policy_filter_state_contract"],
+            "complete_right_aligned_upper_hpf8_and_lower_lpf32_fir_histories_"
+            "with_valid_counts_independent_of_gauge_strength_v1",
         )
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["protocol_valid"], 1.0)

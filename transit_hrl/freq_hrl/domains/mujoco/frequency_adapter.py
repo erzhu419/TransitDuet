@@ -13,6 +13,7 @@ from ...core.responsibility_gauge import (
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
     CausalSmoothMacroGaugeFixer,
+    CausalStreamingAuditProjectionFixer,
 )
 
 
@@ -39,6 +40,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_macro_hold_audit_gauge",
     "causal_smooth_macro_gauge",
     "causal_audit_optimal_macro_gauge",
+    "causal_streaming_audit_projection",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 )
@@ -77,6 +79,11 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
         "causal_current_total_persistence_forecast_with_box_constrained_"
         "finite_horizon_hpf8_lpf32_macro_plan_bounded_components_and_exact_"
         "pre_split_action_execution_v1"
+    ),
+    "causal_streaming_audit_projection": (
+        "causal_realized_total_receding_constant_tail_hpf8_lpf32_projection_"
+        "with_complete_fir_state_bounded_components_and_exact_pre_split_"
+        "action_execution_v1"
     ),
     "causal_macro_zero_dc": (
         "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
@@ -347,6 +354,7 @@ class CausalLowerActionRouter:
             | CausalMacroHoldAuditGaugeFixer
             | CausalSmoothMacroGaugeFixer
             | CausalAuditOptimalMacroGaugeFixer
+            | CausalStreamingAuditProjectionFixer
             | None
         ) = None
         self._zero_dc_projector: CausalZeroDCMacroProjector | None = None
@@ -408,6 +416,15 @@ class CausalLowerActionRouter:
                 low_pass_alpha=self.alpha,
                 strength=self.strength,
             )
+        elif self.mode == "causal_streaming_audit_projection":
+            self._gauge_fixer = CausalStreamingAuditProjectionFixer(
+                upper_window=8,
+                lower_window=32,
+                upper_rms_budget=self.upper_rms_budget,
+                lower_rms_budget=self.lower_rms_budget,
+                planning_horizon=self.macro_steps,
+                strength=self.strength,
+            )
         elif self.mode in {
             "causal_macro_zero_dc",
             "causal_macro_zero_dc_headroom",
@@ -447,6 +464,14 @@ class CausalLowerActionRouter:
                 self._gauge_fixer, CausalAuditOptimalMacroGaugeFixer
             ):
                 raise RuntimeError("audit-optimal gauge router is not initialized")
+            return self._gauge_fixer.policy_context
+        if self.mode == "causal_streaming_audit_projection":
+            if not isinstance(
+                self._gauge_fixer, CausalStreamingAuditProjectionFixer
+            ):
+                raise RuntimeError(
+                    "streaming audit projection router is not initialized"
+                )
             return self._gauge_fixer.policy_context
         context = self.context
         return (context, context), ()
@@ -493,6 +518,10 @@ class CausalLowerActionRouter:
         headroom_clip_rate = 0.0
         predicted_audit_baseline = 0.0
         predicted_audit_optimal = 0.0
+        upper_budget_feasible_rate = 0.0
+        lower_budget_satisfied_rate = 0.0
+        upper_budget_violation_rms = 0.0
+        lower_budget_violation_rms = 0.0
         if (
             self._promotion_sum is None
             or self._promotion_context is None
@@ -515,6 +544,7 @@ class CausalLowerActionRouter:
             "causal_macro_hold_audit_gauge",
             "causal_smooth_macro_gauge",
             "causal_audit_optimal_macro_gauge",
+            "causal_streaming_audit_projection",
         }:
             if upper_action is None:
                 raise ValueError(
@@ -531,6 +561,7 @@ class CausalLowerActionRouter:
                 "causal_macro_hold_audit_gauge",
                 "causal_smooth_macro_gauge",
                 "causal_audit_optimal_macro_gauge",
+                "causal_streaming_audit_projection",
             }:
                 if self._gauge_fixer is None:
                     raise RuntimeError("total-action gauge router is not initialized")
@@ -542,6 +573,13 @@ class CausalLowerActionRouter:
                         upper,
                         latent,
                         macro_boundary=bool(macro_boundary),
+                        upper_limit=upper_limit,
+                        lower_limit=limit,
+                    )
+                elif self.mode == "causal_streaming_audit_projection":
+                    fixed = self._gauge_fixer.split(
+                        upper,
+                        latent,
                         upper_limit=upper_limit,
                         lower_limit=limit,
                     )
@@ -571,6 +609,18 @@ class CausalLowerActionRouter:
                 ))
                 predicted_audit_optimal = float(fixed.get(
                     "predicted_optimal_objective", 0.0
+                ))
+                upper_budget_feasible_rate = float(fixed.get(
+                    "upper_budget_feasible_rate", 0.0
+                ))
+                lower_budget_satisfied_rate = float(fixed.get(
+                    "lower_budget_satisfied_rate", 0.0
+                ))
+                upper_budget_violation_rms = float(fixed.get(
+                    "upper_budget_violation_rms", 0.0
+                ))
+                lower_budget_violation_rms = float(fixed.get(
+                    "lower_budget_violation_rms", 0.0
                 ))
                 transfer_target = np.asarray(
                     fixed["canonical_upper"], dtype=np.float64
@@ -661,6 +711,7 @@ class CausalLowerActionRouter:
             "causal_macro_hold_audit_gauge",
             "causal_smooth_macro_gauge",
             "causal_audit_optimal_macro_gauge",
+            "causal_streaming_audit_projection",
         }:
             if self._gauge_fixer is None:
                 raise RuntimeError("total-action gauge router is not initialized")
@@ -689,6 +740,7 @@ class CausalLowerActionRouter:
                 "causal_macro_hold_audit_gauge",
                 "causal_smooth_macro_gauge",
                 "causal_audit_optimal_macro_gauge",
+                "causal_streaming_audit_projection",
             }
             else np.zeros_like(removed)
         )
@@ -715,6 +767,10 @@ class CausalLowerActionRouter:
             "headroom_clip_rate": headroom_clip_rate,
             "predicted_audit_baseline": predicted_audit_baseline,
             "predicted_audit_optimal": predicted_audit_optimal,
+            "upper_budget_feasible_rate": upper_budget_feasible_rate,
+            "lower_budget_satisfied_rate": lower_budget_satisfied_rate,
+            "upper_budget_violation_rms": upper_budget_violation_rms,
+            "lower_budget_violation_rms": lower_budget_violation_rms,
             "promotion_context": self._promotion_context.astype(
                 np.float32, copy=True
             ),
