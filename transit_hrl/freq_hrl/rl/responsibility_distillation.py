@@ -22,6 +22,8 @@ class ResponsibilityDistillationTargets:
     reconstruction_rms: float
     reconstruction_max_abs: float
     feasible_width_minimum: float
+    raw_target_limit: float | None
+    raw_target_clip_fraction: float
 
 
 def _finite_matrix(value: Any, *, name: str) -> np.ndarray:
@@ -64,13 +66,24 @@ def _macro_index(durations: Any, lower_count: int) -> tuple[np.ndarray, np.ndarr
     return np.repeat(np.arange(values.size, dtype=np.int64), rounded), rounded
 
 
-def _inverse_squash(action: np.ndarray, scale: np.ndarray) -> np.ndarray:
+def _inverse_squash(
+    action: np.ndarray,
+    scale: np.ndarray,
+    *,
+    raw_limit: float | None = None,
+) -> np.ndarray:
     ratio = np.asarray(action, dtype=np.float64) / np.asarray(
         scale, dtype=np.float64
     )
     if np.any(np.abs(ratio) > 1.0 + 1e-9):
         raise ValueError("distillation action exceeds its actor scale")
-    return np.arctanh(np.clip(ratio, -1.0 + 1e-7, 1.0 - 1e-7))
+    raw = np.arctanh(np.clip(ratio, -1.0 + 1e-7, 1.0 - 1e-7))
+    if raw_limit is None:
+        return raw
+    limit = float(raw_limit)
+    if not np.isfinite(limit) or limit <= 0.0:
+        raise ValueError("raw target limit must be positive and finite")
+    return np.clip(raw, -limit, limit)
 
 
 def causal_macro_responsibility_targets(
@@ -82,6 +95,7 @@ def causal_macro_responsibility_targets(
     lower_action_scale: Any = 1.0,
     slow_alpha: float = 0.25,
     transfer_strength: float = 1.0,
+    raw_target_limit: float | None = None,
 ) -> ResponsibilityDistillationTargets:
     """Build strictly causal, exactly reconstructing upper/lower targets.
 
@@ -156,15 +170,31 @@ def causal_macro_responsibility_targets(
 
     reconstructed = target_upper[macro_index] + target_lower
     error = reconstructed - original_total
+    unlimited_upper_raw = _inverse_squash(target_upper, upper_scale)
+    unlimited_lower_raw = _inverse_squash(target_lower, lower_scale)
+    target_upper_raw = _inverse_squash(
+        target_upper, upper_scale, raw_limit=raw_target_limit
+    )
+    target_lower_raw = _inverse_squash(
+        target_lower, lower_scale, raw_limit=raw_target_limit
+    )
+    clipped_count = int(np.count_nonzero(
+        target_upper_raw != unlimited_upper_raw
+    )) + int(np.count_nonzero(target_lower_raw != unlimited_lower_raw))
+    raw_count = int(target_upper_raw.size + target_lower_raw.size)
     return ResponsibilityDistillationTargets(
-        upper_raw=_inverse_squash(target_upper, upper_scale),
-        lower_raw=_inverse_squash(target_lower, lower_scale),
+        upper_raw=target_upper_raw,
+        lower_raw=target_lower_raw,
         upper_action=target_upper,
         lower_action=target_lower,
         macro_index=macro_index,
         reconstruction_rms=float(np.sqrt(np.mean(np.square(error)))),
         reconstruction_max_abs=float(np.max(np.abs(error))),
         feasible_width_minimum=float(minimum_width),
+        raw_target_limit=(
+            None if raw_target_limit is None else float(raw_target_limit)
+        ),
+        raw_target_clip_fraction=float(clipped_count / raw_count),
     )
 
 
@@ -205,7 +235,8 @@ def fit_actor_output_head(
     *,
     ridge: float = 1e-3,
     blend: float = 1.0,
-) -> dict[str, float]:
+    parameter_delta_rms_limit: float | None = None,
+) -> dict[str, float | None]:
     """Fit one MLP actor output head toward raw-action targets."""
 
     target = _finite_matrix(target_raw_actions, name="target_raw_actions")
@@ -220,6 +251,14 @@ def fit_actor_output_head(
         raise ValueError("ridge must be finite and non-negative")
     if not np.isfinite(fraction) or not 0.0 <= fraction <= 1.0:
         raise ValueError("blend must be in [0, 1]")
+    delta_limit = (
+        None if parameter_delta_rms_limit is None
+        else float(parameter_delta_rms_limit)
+    )
+    if delta_limit is not None and (
+        not np.isfinite(delta_limit) or delta_limit <= 0.0
+    ):
+        raise ValueError("parameter delta RMS limit must be positive and finite")
 
     design = np.concatenate(
         [features, np.ones((features.shape[0], 1), dtype=np.float64)], axis=1
@@ -237,7 +276,13 @@ def fit_actor_output_head(
         gram = gram + penalty * np.eye(gram.shape[0], dtype=np.float64)
         rhs = rhs + penalty * prior
     fitted = np.linalg.lstsq(gram, rhs, rcond=None)[0]
-    candidate = prior + fraction * (fitted - prior)
+    requested_delta = fraction * (fitted - prior)
+    requested_delta_rms = float(np.sqrt(np.mean(np.square(requested_delta))))
+    trust_scale = (
+        1.0 if delta_limit is None or requested_delta_rms <= delta_limit
+        else delta_limit / requested_delta_rms
+    )
+    candidate = prior + trust_scale * requested_delta
     before = design @ prior
     after = design @ candidate
     with torch.no_grad():
@@ -251,9 +296,13 @@ def fit_actor_output_head(
         "sample_count": float(features.shape[0]),
         "target_mse_before": float(np.mean(np.square(before - target))),
         "target_mse_after": float(np.mean(np.square(after - target))),
+        "requested_parameter_delta_rms": requested_delta_rms,
         "parameter_delta_rms": float(
             np.sqrt(np.mean(np.square(candidate - prior)))
         ),
+        "parameter_delta_rms_limit": delta_limit,
+        "trust_region_scale": float(trust_scale),
+        "applied_blend": float(fraction * trust_scale),
         "design_rank": float(np.linalg.matrix_rank(design)),
     }
 
@@ -269,6 +318,8 @@ def distill_hierarchical_actor_heads(
     ridge: float,
     blend: float,
     lower_action_context_start: int | None = None,
+    raw_target_limit: float | None = None,
+    head_delta_rms_limit: float | None = None,
 ) -> dict[str, Any]:
     """Distill causal responsibility targets from frozen SMDP trajectories."""
 
@@ -290,6 +341,7 @@ def distill_hierarchical_actor_heads(
             lower_action_scale=lower_action_scale,
             slow_alpha=slow_alpha,
             transfer_strength=transfer_strength,
+            raw_target_limit=raw_target_limit,
         )
         upper_states.append(np.asarray(upper_batch.state, dtype=np.float64))
         upper_targets.append(targets.upper_raw)
@@ -308,6 +360,7 @@ def distill_hierarchical_actor_heads(
         np.concatenate(upper_targets, axis=0),
         ridge=ridge,
         blend=blend,
+        parameter_delta_rms_limit=head_delta_rms_limit,
     )
     action_dim = int(target_diagnostics[0].upper_action.shape[1])
     upper_scale = _positive_scale(
@@ -337,9 +390,6 @@ def distill_hierarchical_actor_heads(
             np.maximum(desired_lower, -lower_scale * (1.0 - 1e-7)),
             lower_scale * (1.0 - 1e-7),
         )
-        student_reconstruction_errors.append(
-            repeated_fitted_upper + fitted_lower_target - original_total
-        )
         upper_teacher_errors.append(
             fitted_upper_action - data["teacher_upper_action"]
         )
@@ -356,9 +406,16 @@ def distill_hierarchical_actor_heads(
             )
             lower_state[:, context_start:context_stop] = repeated_fitted_upper
         lower_states.append(lower_state)
-        lower_targets.append(_inverse_squash(
-            fitted_lower_target, lower_scale
-        ))
+        lower_target_raw = _inverse_squash(
+            fitted_lower_target,
+            lower_scale,
+            raw_limit=raw_target_limit,
+        )
+        realized_lower_target = np.tanh(lower_target_raw) * lower_scale
+        student_reconstruction_errors.append(
+            repeated_fitted_upper + realized_lower_target - original_total
+        )
+        lower_targets.append(lower_target_raw)
 
     lower_fit = fit_actor_output_head(
         model.lower_actor,
@@ -366,17 +423,25 @@ def distill_hierarchical_actor_heads(
         np.concatenate(lower_targets, axis=0),
         ridge=ridge,
         blend=blend,
+        parameter_delta_rms_limit=head_delta_rms_limit,
     )
     return {
         "contract": (
             "causal_macro_raw_policy_counterfactual_context_"
-            "responsibility_distillation_v2"
+            "saturation_bounded_trust_region_distillation_v3"
         ),
         "trajectory_count": int(len(trajectories)),
         "slow_alpha": float(slow_alpha),
         "transfer_strength": float(transfer_strength),
         "ridge": float(ridge),
         "blend": float(blend),
+        "raw_target_limit": (
+            None if raw_target_limit is None else float(raw_target_limit)
+        ),
+        "head_delta_rms_limit": (
+            None if head_delta_rms_limit is None
+            else float(head_delta_rms_limit)
+        ),
         "target_reconstruction_rms_max": float(max(
             item.reconstruction_rms for item in target_diagnostics
         )),
@@ -385,6 +450,9 @@ def distill_hierarchical_actor_heads(
         )),
         "target_feasible_width_minimum": float(min(
             item.feasible_width_minimum for item in target_diagnostics
+        )),
+        "teacher_raw_target_clip_fraction_max": float(max(
+            item.raw_target_clip_fraction for item in target_diagnostics
         )),
         "student_upper_teacher_action_mse": float(np.mean(np.square(
             np.concatenate(upper_teacher_errors, axis=0)

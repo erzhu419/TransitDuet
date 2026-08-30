@@ -114,6 +114,42 @@ def test_actor_output_head_ridge_fit_reduces_target_error():
     assert diagnostics["target_mse_after"] < diagnostics["target_mse_before"]
 
 
+def test_actor_output_head_parameter_trust_region_caps_the_update():
+    torch.manual_seed(31)
+    actor = GaussianActor(2, 1, hidden_dim=0, init_log_std=-1.0)
+    states = np.asarray(
+        [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [-1.0, 1.0]],
+        dtype=np.float64,
+    )
+    target = np.full((4, 1), 20.0, dtype=np.float64)
+    diagnostics = fit_actor_output_head(
+        actor,
+        states,
+        target,
+        ridge=0.0,
+        blend=1.0,
+        parameter_delta_rms_limit=0.05,
+    )
+
+    assert diagnostics["requested_parameter_delta_rms"] > 0.05
+    assert diagnostics["parameter_delta_rms"] <= 0.05 + 1e-12
+    assert diagnostics["trust_region_scale"] < 1.0
+
+
+def test_causal_targets_limit_saturated_raw_logits():
+    upper_action = np.asarray([[0.9999]], dtype=np.float64)
+    lower_action = np.asarray([[0.0]], dtype=np.float64)
+    targets = causal_macro_responsibility_targets(
+        _raw(upper_action),
+        _raw(lower_action),
+        np.asarray([1.0]),
+        raw_target_limit=2.5,
+    )
+
+    assert float(np.max(np.abs(targets.upper_raw))) == 2.5
+    assert targets.raw_target_clip_fraction > 0.0
+
+
 def test_hierarchical_distillation_updates_both_heads():
     torch.manual_seed(23)
     model = SimpleNamespace(
