@@ -277,12 +277,14 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_joint_band_projection",
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
+    "causal_macro_hold_audit_gauge",
 }
 FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
+    "causal_macro_hold_audit_gauge",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -1261,6 +1263,7 @@ def rollout_hierarchical(
         require_upper = True
 
         for step in range(transition_budget):
+            upper_decision_now = False
             disturbance = deterministic_actuation_disturbance(
                 mode=disturbance_mode,
                 step=episode_step,
@@ -1275,6 +1278,7 @@ def rollout_hierarchical(
             )
             reset_exogenous = False
             if require_upper or steps_since_upper >= int(upper_period):
+                upper_decision_now = True
                 upper_state = _feature_state(
                     observation,
                     bands,
@@ -1363,10 +1367,12 @@ def rollout_hierarchical(
                         "causal_joint_band_projection",
                         "causal_total_action_gauge",
                         "causal_audit_aligned_gauge",
+                        "causal_macro_hold_audit_gauge",
                     }
                     else None
                 ),
                 action_limit=float(lower_action_scale),
+                macro_boundary=upper_decision_now,
             )
             raw_lower_residual = np.asarray(
                 routed_lower["effective"], dtype=np.float32

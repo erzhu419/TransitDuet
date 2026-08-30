@@ -4,6 +4,7 @@ import pytest
 from freq_hrl.core import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
+    CausalMacroHoldAuditGaugeFixer,
     LeakageRegularizer,
     canonical_responsibility_trace,
 )
@@ -183,6 +184,121 @@ def test_mujoco_audit_aligned_gauge_uses_the_shared_projection():
     assert lower_action_router_contract("causal_audit_aligned_gauge") == (
         "causal_total_action_gauge_fixed_adaptive_lpf32_hpf8_feedback_with_"
         "exact_pre_split_action_execution_v1"
+    )
+
+
+def test_macro_hold_gauge_is_exact_invariant_and_upper_rate_compatible():
+    rng = np.random.default_rng(303)
+    upper = rng.normal(scale=0.15, size=(48, 2))
+    lower = rng.normal(scale=0.20, size=(48, 2))
+    transfer = rng.normal(scale=0.10, size=(48, 2))
+    boundaries = [index % 8 == 0 for index in range(48)]
+
+    def trace(left, right):
+        fixer = CausalMacroHoldAuditGaugeFixer(strength=1.0)
+        fixer.reset(2)
+        return [
+            fixer.split(
+                u,
+                l,
+                macro_boundary=boundary,
+                lower_limit=None,
+            )
+            for u, l, boundary in zip(
+                left, right, boundaries, strict=True
+            )
+        ]
+
+    original = trace(upper, lower)
+    transformed = trace(upper + transfer, lower - transfer)
+    for index, (lhs, rhs, total) in enumerate(zip(
+        original, transformed, upper + lower, strict=True
+    )):
+        np.testing.assert_allclose(lhs["upper"], rhs["upper"], atol=1e-6)
+        np.testing.assert_allclose(lhs["lower"], rhs["lower"], atol=1e-6)
+        np.testing.assert_allclose(
+            np.asarray(lhs["upper"]) + np.asarray(lhs["lower"]),
+            total,
+            atol=2e-6,
+        )
+        if index % 8:
+            np.testing.assert_allclose(
+                lhs["upper"], original[index - 1]["upper"], atol=1e-7
+            )
+
+
+def test_macro_hold_gauge_preserves_a_synthetic_upper_hf_budget():
+    steps = np.arange(512, dtype=np.float64)
+    total = (
+        0.35 * np.sin(2.0 * np.pi * steps / 160.0)
+        + 0.08 * np.sin(2.0 * np.pi * steps / 5.0)
+        + 0.15 * (steps >= 256)
+    ).reshape(-1, 1)
+    boundary_steps = np.arange(0, 512, 16, dtype=np.float64)
+    latent_upper = np.repeat(
+        0.30 * np.sin(2.0 * np.pi * boundary_steps / 160.0)
+        + 0.07 * np.sin(2.0 * np.pi * boundary_steps / 17.0),
+        16,
+    )[:512].reshape(-1, 1)
+    latent_lower = total - latent_upper
+    fixer = CausalMacroHoldAuditGaugeFixer()
+    fixer.reset(1)
+    rows = [
+        fixer.split(
+            upper,
+            lower,
+            macro_boundary=index % 16 == 0,
+            lower_limit=None,
+        )
+        for index, (upper, lower) in enumerate(zip(
+            latent_upper, latent_lower, strict=True
+        ))
+    ]
+    fixed_upper = np.asarray([row["upper"] for row in rows]).reshape(-1, 1)
+    fixed_lower = np.asarray([row["lower"] for row in rows]).reshape(-1, 1)
+    metrics = LeakageRegularizer(
+        upper_hf_window=8,
+        lower_lf_window=32,
+    ).compute(fixed_upper, fixed_lower)
+    latent_metrics = LeakageRegularizer(
+        upper_hf_window=8,
+        lower_lf_window=32,
+    ).compute(latent_upper, latent_lower)
+
+    assert metrics["UpperHFPowerAbs"] < 0.075 ** 2
+    assert metrics["LowerLFDriftAbs"] < latent_metrics["LowerLFDriftAbs"]
+
+
+def test_mujoco_macro_hold_gauge_requires_and_records_macro_boundaries():
+    router = CausalLowerActionRouter(
+        mode="causal_macro_hold_audit_gauge",
+        alpha=0.20,
+        strength=1.0,
+    )
+    router.reset(1)
+    with pytest.raises(RuntimeError, match="boundary"):
+        router.route(
+            np.asarray([0.4]),
+            upper_action=np.asarray([0.3]),
+            action_limit=1.0,
+        )
+    first = router.route(
+        np.asarray([0.4]),
+        upper_action=np.asarray([0.3]),
+        action_limit=1.0,
+        macro_boundary=True,
+    )
+    second = router.route(
+        np.asarray([0.2]),
+        upper_action=np.asarray([0.3]),
+        action_limit=1.0,
+        macro_boundary=False,
+    )
+    np.testing.assert_allclose(first["transfer_reconstruction_error"], 0.0)
+    np.testing.assert_allclose(second["transfer_reconstruction_error"], 0.0)
+    assert lower_action_router_contract("causal_macro_hold_audit_gauge") == (
+        "causal_total_action_gauge_fixed_at_upper_macro_boundaries_with_"
+        "adaptive_lpf32_hpf8_feedback_and_exact_pre_split_action_execution_v1"
     )
 
 

@@ -22,6 +22,7 @@ from .reward import RewardAttributionAccumulator
 from .responsibility_gauge import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
+    CausalMacroHoldAuditGaugeFixer,
     canonical_responsibility_trace,
 )
 from .router import FrequencyRouter
@@ -45,6 +46,7 @@ __all__ = [
     "CausalLeakageRewardShaper",
     "CausalGaugeFixer",
     "CausalAuditAlignedGaugeFixer",
+    "CausalMacroHoldAuditGaugeFixer",
     "CausalLowFrequencyEffectProjector",
     "CausalRollingBandTracker",
     "CumulativeActionEffectOperator",
