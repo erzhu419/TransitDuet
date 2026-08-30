@@ -26,6 +26,7 @@ from .reward import RewardAttributionAccumulator
 from .responsibility_gauge import (
     CausalAuditOptimalMacroGaugeFixer,
     CausalAuditAlignedGaugeFixer,
+    CausalFeasibilityNormalizedAuditProjectionFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
     CausalSmoothMacroGaugeFixer,
@@ -54,6 +55,7 @@ __all__ = [
     "CausalGaugeFixer",
     "CausalAuditOptimalMacroGaugeFixer",
     "CausalAuditAlignedGaugeFixer",
+    "CausalFeasibilityNormalizedAuditProjectionFixer",
     "CausalMacroHoldAuditGaugeFixer",
     "CausalSmoothMacroGaugeFixer",
     "CausalStreamingAuditProjectionFixer",

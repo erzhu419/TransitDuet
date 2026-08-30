@@ -1208,37 +1208,18 @@ class CausalStreamingAuditProjectionFixer:
         linear = np.sum(response * offset, axis=0)
         unconstrained = -linear / quadratic
 
-        if upper_count:
-            upper_audit_low = (
-                upper_sum - upper_denominator * self.upper_rms_budget
-            ) / float(upper_count)
-            upper_audit_high = (
-                upper_sum + upper_denominator * self.upper_rms_budget
-            ) / float(upper_count)
-        else:
-            upper_audit_low = np.full(self._dimension, -np.inf)
-            upper_audit_high = np.full(self._dimension, np.inf)
-        upper_low = np.maximum(physical_low, upper_audit_low)
-        upper_high = np.minimum(physical_high, upper_audit_high)
-        upper_feasible = upper_low <= upper_high + 1e-12
-        upper_low = np.minimum(upper_low, upper_high)
-
-        canonical_upper = np.empty(self._dimension, dtype=np.float64)
-        canonical_upper[upper_feasible] = np.clip(
-            unconstrained[upper_feasible],
-            upper_low[upper_feasible],
-            upper_high[upper_feasible],
+        selection = self._select_canonical_upper(
+            unconstrained=unconstrained,
+            total=total,
+            physical_low=physical_low,
+            physical_high=physical_high,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
         )
-        upper_infeasible = ~upper_feasible
-        upper_zero_residual = (
-            upper_sum / float(upper_count)
-            if upper_count else unconstrained
-        )
-        canonical_upper[upper_infeasible] = np.clip(
-            upper_zero_residual[upper_infeasible],
-            physical_low[upper_infeasible],
-            physical_high[upper_infeasible],
-        )
+        canonical_upper = selection["canonical_upper"]
+        upper_feasible = selection["upper_budget_feasible"]
         canonical_lower = total - canonical_upper
 
         upper_mean = (
@@ -1306,6 +1287,22 @@ class CausalStreamingAuditProjectionFixer:
             "lower_budget_violation_rms": float(np.sqrt(np.mean(
                 np.square(lower_violation)
             ))),
+            "joint_budget_feasible_rate": float(np.mean(
+                selection["joint_budget_feasible"]
+            )),
+            "unavoidable_upper_budget_violation_rms": float(np.sqrt(
+                np.mean(np.square(
+                    selection["unavoidable_upper_budget_violation"]
+                ))
+            )),
+            "unavoidable_lower_budget_violation_rms": float(np.sqrt(
+                np.mean(np.square(
+                    selection["unavoidable_lower_budget_violation"]
+                ))
+            )),
+            "budget_excess_regret_rms": float(np.sqrt(np.mean(
+                np.square(selection["budget_excess_regret"])
+            ))),
             "feasible_upper_low": physical_low.astype(np.float32, copy=True),
             "feasible_upper_high": physical_high.astype(np.float32, copy=True),
             "alpha_before": 0.0,
@@ -1318,6 +1315,192 @@ class CausalStreamingAuditProjectionFixer:
             "canonical_lower_clip_rate": 0.0,
             "gauge_fixed": float(self.strength == 1.0),
         }
+
+    def _select_canonical_upper(
+        self,
+        *,
+        unconstrained: np.ndarray,
+        total: np.ndarray,
+        physical_low: np.ndarray,
+        physical_high: np.ndarray,
+        upper_sum: np.ndarray,
+        upper_count: int,
+        lower_sum: np.ndarray,
+        lower_count: int,
+    ) -> dict[str, np.ndarray]:
+        envelope = self._budget_envelope(
+            unconstrained=unconstrained,
+            total=total,
+            physical_low=physical_low,
+            physical_high=physical_high,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+        canonical_upper = np.clip(
+            unconstrained,
+            envelope["upper_domain_low"],
+            envelope["upper_domain_high"],
+        )
+        return self._selection_result(
+            canonical_upper=canonical_upper,
+            envelope=envelope,
+            total=total,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+
+    def _budget_envelope(
+        self,
+        *,
+        unconstrained: np.ndarray,
+        total: np.ndarray,
+        physical_low: np.ndarray,
+        physical_high: np.ndarray,
+        upper_sum: np.ndarray,
+        upper_count: int,
+        lower_sum: np.ndarray,
+        lower_count: int,
+    ) -> dict[str, np.ndarray]:
+        upper_denominator = float(upper_count + 1)
+        if upper_count:
+            upper_center = upper_sum / float(upper_count)
+            upper_radius = (
+                upper_denominator * self.upper_rms_budget
+                / float(upper_count)
+            )
+            upper_audit_low = upper_center - upper_radius
+            upper_audit_high = upper_center + upper_radius
+        else:
+            upper_center = unconstrained
+            upper_audit_low = np.full(self._dimension, -np.inf)
+            upper_audit_high = np.full(self._dimension, np.inf)
+        feasible_upper_low = np.maximum(physical_low, upper_audit_low)
+        feasible_upper_high = np.minimum(physical_high, upper_audit_high)
+        upper_feasible = feasible_upper_low <= feasible_upper_high + 1e-12
+        feasible_upper_low = np.minimum(
+            feasible_upper_low, feasible_upper_high
+        )
+        upper_floor_point = np.clip(
+            upper_center, physical_low, physical_high
+        )
+        upper_domain_low = np.where(
+            upper_feasible, feasible_upper_low, upper_floor_point
+        )
+        upper_domain_high = np.where(
+            upper_feasible, feasible_upper_high, upper_floor_point
+        )
+
+        lower_denominator = float(lower_count + 1)
+        lower_center = lower_sum + total
+        lower_radius = lower_denominator * self.lower_rms_budget
+        lower_audit_low = lower_center - lower_radius
+        lower_audit_high = lower_center + lower_radius
+        joint_low = np.maximum(upper_domain_low, lower_audit_low)
+        joint_high = np.minimum(upper_domain_high, lower_audit_high)
+        joint_feasible = upper_feasible & (joint_low <= joint_high + 1e-12)
+        lower_floor_point = np.clip(
+            lower_center, upper_domain_low, upper_domain_high
+        )
+        return {
+            "upper_budget_feasible": upper_feasible,
+            "joint_budget_feasible": joint_feasible,
+            "upper_domain_low": upper_domain_low,
+            "upper_domain_high": upper_domain_high,
+            "joint_domain_low": np.minimum(joint_low, joint_high),
+            "joint_domain_high": joint_high,
+            "upper_floor_point": upper_floor_point,
+            "lower_floor_point": lower_floor_point,
+        }
+
+    def _selection_result(
+        self,
+        *,
+        canonical_upper: np.ndarray,
+        envelope: dict[str, np.ndarray],
+        total: np.ndarray,
+        upper_sum: np.ndarray,
+        upper_count: int,
+        lower_sum: np.ndarray,
+        lower_count: int,
+    ) -> dict[str, np.ndarray]:
+        upper_residual, lower_residual = self._current_budget_residuals(
+            canonical_upper,
+            total=total,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+        upper_floor_residual, _ = self._current_budget_residuals(
+            envelope["upper_floor_point"],
+            total=total,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+        _, lower_floor_residual = self._current_budget_residuals(
+            envelope["lower_floor_point"],
+            total=total,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+        upper_violation = np.maximum(
+            np.abs(upper_residual) - self.upper_rms_budget, 0.0
+        )
+        lower_violation = np.maximum(
+            np.abs(lower_residual) - self.lower_rms_budget, 0.0
+        )
+        unavoidable_upper = np.maximum(
+            np.abs(upper_floor_residual) - self.upper_rms_budget, 0.0
+        )
+        unavoidable_lower = np.maximum(
+            np.abs(lower_floor_residual) - self.lower_rms_budget, 0.0
+        )
+        realized_excess = (
+            np.square(upper_violation / self.upper_rms_budget)
+            + np.square(lower_violation / self.lower_rms_budget)
+        )
+        unavoidable_excess = (
+            np.square(unavoidable_upper / self.upper_rms_budget)
+            + np.square(unavoidable_lower / self.lower_rms_budget)
+        )
+        return {
+            "canonical_upper": canonical_upper,
+            "upper_budget_feasible": envelope["upper_budget_feasible"],
+            "joint_budget_feasible": envelope["joint_budget_feasible"],
+            "unavoidable_upper_budget_violation": unavoidable_upper,
+            "unavoidable_lower_budget_violation": unavoidable_lower,
+            "budget_excess_regret": np.sqrt(np.maximum(
+                realized_excess - unavoidable_excess, 0.0
+            )),
+        }
+
+    def _current_budget_residuals(
+        self,
+        upper: np.ndarray,
+        *,
+        total: np.ndarray,
+        upper_sum: np.ndarray,
+        upper_count: int,
+        lower_sum: np.ndarray,
+        lower_count: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        upper_residual = (
+            (float(upper_count) * upper - upper_sum)
+            / float(upper_count + 1)
+            if upper_count else np.zeros(self._dimension, dtype=np.float64)
+        )
+        lower_residual = (
+            lower_sum + total - upper
+        ) / float(lower_count + 1)
+        return upper_residual, lower_residual
 
     def _constant_tail_residuals(
         self,
@@ -1387,6 +1570,57 @@ class CausalStreamingAuditProjectionFixer:
     def _require_reset(self) -> None:
         if self._dimension < 1:
             raise RuntimeError("streaming audit fixer must be reset")
+
+
+class CausalFeasibilityNormalizedAuditProjectionFixer(
+    CausalStreamingAuditProjectionFixer
+):
+    """Enforce both audit budgets or attain their causal physical floor."""
+
+    def _select_canonical_upper(
+        self,
+        *,
+        unconstrained: np.ndarray,
+        total: np.ndarray,
+        physical_low: np.ndarray,
+        physical_high: np.ndarray,
+        upper_sum: np.ndarray,
+        upper_count: int,
+        lower_sum: np.ndarray,
+        lower_count: int,
+    ) -> dict[str, np.ndarray]:
+        envelope = self._budget_envelope(
+            unconstrained=unconstrained,
+            total=total,
+            physical_low=physical_low,
+            physical_high=physical_high,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
+        selected_low = np.where(
+            envelope["joint_budget_feasible"],
+            envelope["joint_domain_low"],
+            envelope["lower_floor_point"],
+        )
+        selected_high = np.where(
+            envelope["joint_budget_feasible"],
+            envelope["joint_domain_high"],
+            envelope["lower_floor_point"],
+        )
+        canonical_upper = np.clip(
+            unconstrained, selected_low, selected_high
+        )
+        return self._selection_result(
+            canonical_upper=canonical_upper,
+            envelope=envelope,
+            total=total,
+            upper_sum=upper_sum,
+            upper_count=upper_count,
+            lower_sum=lower_sum,
+            lower_count=lower_count,
+        )
 
 
 def canonical_responsibility_trace(

@@ -426,6 +426,40 @@ def test_mujoco_streaming_projection_exposes_complete_fir_state():
     )
 
 
+def test_mujoco_feasibility_projection_exposes_floor_diagnostics():
+    router = CausalLowerActionRouter(
+        mode="causal_feasibility_normalized_audit_projection",
+        strength=1.0,
+        macro_steps=16,
+    )
+    router.reset(1)
+    row = router.route(
+        np.asarray([1.0]),
+        upper_action=np.asarray([1.0]),
+    )
+    action_blocks, scalars = router.policy_context
+
+    assert len(action_blocks) == 38
+    assert scalars == pytest.approx((1.0 / 7.0, 1.0 / 31.0))
+    assert row["upper_budget_feasible_rate"] == 1.0
+    assert row["joint_budget_feasible_rate"] == 0.0
+    assert row["unavoidable_upper_budget_violation_rms"] == 0.0
+    assert row["unavoidable_lower_budget_violation_rms"] > 0.0
+    assert row["budget_excess_regret_rms"] == pytest.approx(0.0)
+    np.testing.assert_allclose(
+        np.asarray(row["upper_transfer"]) + np.asarray(row["effective"]),
+        [1.0],
+        atol=1e-7,
+    )
+    assert lower_action_router_contract(
+        "causal_feasibility_normalized_audit_projection"
+    ) == (
+        "causal_joint_hpf8_lpf32_budget_intersection_or_lexicographic_"
+        "physical_floor_with_complete_fir_state_and_exact_pre_split_action_"
+        "execution_v1"
+    )
+
+
 def test_zero_dc_projector_is_causal_bounded_and_exact_per_macro():
     rng = np.random.default_rng(71)
     proposals = rng.normal(scale=0.9, size=(48, 3))

@@ -3,6 +3,7 @@ import pytest
 
 from freq_hrl.core import (
     CausalAuditAlignedGaugeFixer,
+    CausalFeasibilityNormalizedAuditProjectionFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
     CausalStreamingAuditProjectionFixer,
@@ -375,12 +376,16 @@ def test_streaming_audit_projection_is_factorization_invariant_and_causal():
     )
 
 
-def test_streaming_audit_projection_state_is_strength_invariant():
+@pytest.mark.parametrize("fixer_class", [
+    CausalStreamingAuditProjectionFixer,
+    CausalFeasibilityNormalizedAuditProjectionFixer,
+])
+def test_streaming_audit_projection_state_is_strength_invariant(fixer_class):
     rng = np.random.default_rng(17402)
     upper = rng.uniform(-0.35, 0.35, size=(64, 3))
     lower = rng.uniform(-0.35, 0.35, size=(64, 3))
-    control = CausalStreamingAuditProjectionFixer(strength=0.0)
-    projected = CausalStreamingAuditProjectionFixer(strength=1.0)
+    control = fixer_class(strength=0.0)
+    projected = fixer_class(strength=1.0)
     control.reset(3)
     projected.reset(3)
 
@@ -415,6 +420,143 @@ def test_streaming_audit_projection_reports_physical_budget_infeasibility():
     np.testing.assert_allclose(row["canonical_upper"], [1.0], atol=1e-12)
     np.testing.assert_allclose(row["canonical_lower"], [1.0], atol=1e-12)
     np.testing.assert_allclose(row["reconstruction_error"], 0.0, atol=1e-12)
+
+
+def test_feasibility_normalized_projection_enforces_joint_budget_intersection():
+    fixer = CausalFeasibilityNormalizedAuditProjectionFixer(strength=1.0)
+    fixer.reset(1)
+    row = fixer.split([0.5], [0.5])
+
+    assert row["upper_budget_feasible_rate"] == 1.0
+    assert row["joint_budget_feasible_rate"] == 1.0
+    assert row["upper_budget_violation_rms"] == 0.0
+    assert row["lower_budget_violation_rms"] == 0.0
+    assert row["unavoidable_upper_budget_violation_rms"] == 0.0
+    assert row["unavoidable_lower_budget_violation_rms"] == 0.0
+    assert row["budget_excess_regret_rms"] == 0.0
+    np.testing.assert_allclose(row["upper"] + row["lower"], [1.0])
+
+
+def test_feasibility_normalized_projection_reports_conditional_lower_floor():
+    fixer = CausalFeasibilityNormalizedAuditProjectionFixer(strength=1.0)
+    fixer.reset(1)
+    row = fixer.split([1.0], [1.0], upper_limit=1.0, lower_limit=1.0)
+
+    assert row["upper_budget_feasible_rate"] == 1.0
+    assert row["joint_budget_feasible_rate"] == 0.0
+    assert row["unavoidable_upper_budget_violation_rms"] == 0.0
+    assert row["unavoidable_lower_budget_violation_rms"] == pytest.approx(
+        1.0 - fixer.lower_rms_budget
+    )
+    assert row["lower_budget_violation_rms"] == pytest.approx(
+        row["unavoidable_lower_budget_violation_rms"]
+    )
+    assert row["budget_excess_regret_rms"] == pytest.approx(0.0)
+    np.testing.assert_allclose(row["canonical_upper"], [1.0])
+    np.testing.assert_allclose(row["canonical_lower"], [1.0])
+
+
+def test_feasibility_normalized_projection_reports_upper_physical_floor():
+    fixer = CausalFeasibilityNormalizedAuditProjectionFixer(strength=1.0)
+    fixer.reset(1)
+    for _ in range(7):
+        fixer.split([0.0], [0.0])
+    row = fixer.split([1.0], [1.0], upper_limit=1.0, lower_limit=1.0)
+
+    assert row["upper_budget_feasible_rate"] == 0.0
+    assert row["joint_budget_feasible_rate"] == 0.0
+    assert row["upper_budget_violation_rms"] == pytest.approx(
+        row["unavoidable_upper_budget_violation_rms"]
+    )
+    assert row["budget_excess_regret_rms"] == pytest.approx(0.0)
+    np.testing.assert_allclose(row["reconstruction_error"], 0.0, atol=1e-12)
+
+
+def test_feasibility_projection_matches_independent_interval_construction():
+    rng = np.random.default_rng(17521)
+    totals = rng.uniform(-2.0, 2.0, size=(192, 2))
+    fixer = CausalFeasibilityNormalizedAuditProjectionFixer(strength=1.0)
+    fixer.reset(2)
+    upper_history = []
+    lower_history = []
+
+    for total in totals:
+        upper_count = len(upper_history)
+        lower_count = len(lower_history)
+        upper_sum = (
+            np.sum(upper_history, axis=0) if upper_history else np.zeros(2)
+        )
+        lower_sum = (
+            np.sum(lower_history, axis=0) if lower_history else np.zeros(2)
+        )
+        physical_low = np.maximum(-1.0, total - 1.0)
+        physical_high = np.minimum(1.0, total + 1.0)
+        if upper_count:
+            upper_center = upper_sum / upper_count
+            upper_radius = (
+                (upper_count + 1) * fixer.upper_rms_budget / upper_count
+            )
+            upper_low = np.maximum(
+                physical_low, upper_center - upper_radius
+            )
+            upper_high = np.minimum(
+                physical_high, upper_center + upper_radius
+            )
+            upper_feasible = upper_low <= upper_high + 1e-12
+            upper_floor = np.clip(
+                upper_center, physical_low, physical_high
+            )
+        else:
+            upper_low = physical_low
+            upper_high = physical_high
+            upper_feasible = np.ones(2, dtype=bool)
+            upper_floor = np.zeros(2)
+        upper_domain_low = np.where(
+            upper_feasible, upper_low, upper_floor
+        )
+        upper_domain_high = np.where(
+            upper_feasible, upper_high, upper_floor
+        )
+        lower_center = lower_sum + total
+        lower_radius = (lower_count + 1) * fixer.lower_rms_budget
+        joint_low = np.maximum(
+            upper_domain_low, lower_center - lower_radius
+        )
+        joint_high = np.minimum(
+            upper_domain_high, lower_center + lower_radius
+        )
+        joint_feasible = upper_feasible & (joint_low <= joint_high + 1e-12)
+        lower_floor = np.clip(
+            lower_center, upper_domain_low, upper_domain_high
+        )
+
+        raw_upper = total / 2.0
+        row = fixer.split(raw_upper, total - raw_upper)
+        canonical_upper = np.asarray(row["canonical_upper"], dtype=np.float64)
+        assert row["upper_budget_feasible_rate"] == pytest.approx(
+            np.mean(upper_feasible)
+        )
+        assert row["joint_budget_feasible_rate"] == pytest.approx(
+            np.mean(joint_feasible)
+        )
+        np.testing.assert_allclose(
+            canonical_upper[~joint_feasible],
+            lower_floor[~joint_feasible],
+            atol=1e-7,
+        )
+        assert np.all(
+            canonical_upper[joint_feasible]
+            >= joint_low[joint_feasible] - 1e-7
+        )
+        assert np.all(
+            canonical_upper[joint_feasible]
+            <= joint_high[joint_feasible] + 1e-7
+        )
+        assert row["budget_excess_regret_rms"] <= 1e-7
+        upper_history.append(canonical_upper)
+        lower_history.append(total - canonical_upper)
+        upper_history = upper_history[-7:]
+        lower_history = lower_history[-31:]
 
 
 def test_gauge_rejects_uninitialized_or_misaligned_inputs():
