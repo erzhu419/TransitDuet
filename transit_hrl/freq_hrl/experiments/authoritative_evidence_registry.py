@@ -47,6 +47,9 @@ MUJOCO_V17_3_AUDIT_OPTIMAL_MACRO_GAUGE_SCHEMA_VERSION = (
 MUJOCO_V17_4_STREAMING_AUDIT_PROJECTION_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_4_streaming_audit_projection_development_v1"
 )
+MUJOCO_V17_5_FEASIBILITY_DIAGNOSTIC_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_5_feasibility_diagnostic_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1877,6 +1880,105 @@ def _mujoco_v17_4_streaming_audit_projection_facts(
     }
 
 
+def _mujoco_v17_5_feasibility_diagnostic_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    environment_results = dict(decision.get("environment_results") or {})
+    improvement_counts = dict(
+        decision.get("endpoint_improvement_counts") or {}
+    )
+    task_status = dict(decision.get("task_status_counts") or {})
+    expected_counts = {
+        "episode_return": 3,
+        "upper_hf_power": 0,
+        "lower_lf_drift": 1,
+        "lower_budget_violation": 1,
+        "joint_budget_feasible_rate": 0,
+    }
+    required_metrics = (
+        "v17_4_episode_return",
+        "v17_5_episode_return",
+        "v17_4_upper_hf_power",
+        "v17_5_upper_hf_power",
+        "v17_4_lower_lf_drift",
+        "v17_5_lower_lf_drift",
+        "v17_4_lower_budget_violation_rms",
+        "v17_5_lower_budget_violation_rms",
+        "v17_4_joint_budget_feasible_rate",
+        "v17_5_joint_budget_feasible_rate",
+        "v17_4_local_budget_regret_rms",
+        "v17_5_local_budget_regret_rms",
+    )
+    valid_results = bool(
+        set(environment_results)
+        == {"HalfCheetah-v5", "Hopper-v5", "Walker2d-v5"}
+        and all(
+            all(
+                key in row and float(row[key]) == float(row[key])
+                for key in required_metrics
+            )
+            for row in environment_results.values()
+        )
+        and all(
+            float(row["v17_5_local_budget_regret_rms"]) <= 1e-12
+            for row in environment_results.values()
+        )
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_5_FEASIBILITY_DIAGNOSTIC_SCHEMA_VERSION
+        or decision.get("status")
+        != "greedy_feasibility_projection_not_advanced"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "rejected_v17_4_path_reuse_development_diagnostic_not_confirmatory"
+        or decision.get("diagnostic_code_revision")
+        != "50fa967174d49ccdf8134df9471d636c3cc7d30b"
+        or decision.get("diagnostic_source_manifest_sha256")
+        != "e1870eb33ddb034120eb0c42e5b1164845cd8f5a777edbc1961bf9d947f75357"
+        or int(decision.get("optimizer_seed_count", -1)) != 1
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("reused_path_count_per_router", -1)) != 120
+        or int(decision.get("evaluation_row_count", -1)) != 240
+        or list(decision.get("scheduler_tasks") or [])
+        != ["t85547", "t85548", "t85549"]
+        or task_status != {"done": 3, "failed": 0, "cancelled": 0}
+        or int(decision.get("legacy_replay_exact_environment_count", -1)) != 3
+        or int(
+            decision.get("cross_router_trace_divergent_environment_count", -1)
+        ) != 3
+        or int(
+            decision.get("local_budget_regret_eliminated_environment_count", -1)
+        ) != 3
+        or improvement_counts != expected_counts
+        or decision.get("eligible_for_fresh_v17_5_preflight") is not False
+        or not valid_results
+        or report is None
+        or "`greedy_feasibility_projection_not_advanced`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError(
+            "MuJoCo v17.5 feasibility diagnostic decision no longer matches"
+        )
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "reused_path_count_per_router": 120,
+        "legacy_replay_exact_environment_count": 3,
+        "cross_router_trace_divergent_environment_count": 3,
+        "local_budget_regret_eliminated_environment_count": 3,
+        "endpoint_improvement_counts": expected_counts,
+        "environment_results": environment_results,
+        "task_status_counts": task_status,
+        "eligible_for_fresh_v17_5_preflight": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1913,6 +2015,9 @@ PARSERS = {
     ),
     "mujoco_v17_4_streaming_audit_projection": (
         _mujoco_v17_4_streaming_audit_projection_facts
+    ),
+    "mujoco_v17_5_feasibility_diagnostic": (
+        _mujoco_v17_5_feasibility_diagnostic_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

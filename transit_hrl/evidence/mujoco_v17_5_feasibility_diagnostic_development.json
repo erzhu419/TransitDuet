@@ -1,0 +1,92 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_5_feasibility_diagnostic_development_v1",
+  "status": "greedy_feasibility_projection_not_advanced",
+  "integrity_status": "valid",
+  "evidence_role": "rejected_v17_4_path_reuse_development_diagnostic_not_confirmatory",
+  "source_run": "mujoco_v17_5_feasibility_diagnostic_20260831_r1",
+  "diagnostic_protocol_version": "mujoco_v17_5_feasibility_normalized_projection_diagnostic_v1",
+  "diagnostic_code_revision": "50fa967174d49ccdf8134df9471d636c3cc7d30b",
+  "diagnostic_source_manifest_sha256": "e1870eb33ddb034120eb0c42e5b1164845cd8f5a777edbc1961bf9d947f75357",
+  "source_checkpoint_algorithm_revision": "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c",
+  "optimizer_seed_count": 1,
+  "environment_count": 3,
+  "reused_path_count_per_router": 120,
+  "evaluation_row_count": 240,
+  "scheduler_successful_task_count": 3,
+  "scheduler_attempt_count": 3,
+  "scheduler_tasks": [
+    "t85547",
+    "t85548",
+    "t85549"
+  ],
+  "scheduler_nodes": [
+    "node003"
+  ],
+  "task_status_counts": {
+    "done": 3,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "legacy_replay_exact_environment_count": 3,
+  "cross_router_trace_divergent_environment_count": 3,
+  "local_budget_regret_eliminated_environment_count": 3,
+  "endpoint_improvement_counts": {
+    "episode_return": 3,
+    "upper_hf_power": 0,
+    "lower_lf_drift": 1,
+    "lower_budget_violation": 1,
+    "joint_budget_feasible_rate": 0
+  },
+  "eligible_for_fresh_v17_5_preflight": false,
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "v17_4_episode_return": 739.8031656381512,
+      "v17_5_episode_return": 755.283579388905,
+      "v17_4_upper_hf_power": 0.0049767574431776075,
+      "v17_5_upper_hf_power": 0.005026884105068932,
+      "v17_4_lower_lf_drift": 0.0035564969601090653,
+      "v17_5_lower_lf_drift": 0.0035327756078966086,
+      "v17_4_lower_budget_violation_rms": 0.03221719057658932,
+      "v17_5_lower_budget_violation_rms": 0.031963224271647134,
+      "v17_4_joint_budget_feasible_rate": 0.6575624999999999,
+      "v17_5_joint_budget_feasible_rate": 0.6511958333333334,
+      "v17_4_local_budget_regret_rms": 0.12307782526206736,
+      "v17_5_local_budget_regret_rms": 1.110906843601907e-16
+    },
+    "Hopper-v5": {
+      "v17_4_episode_return": 179.5529798970264,
+      "v17_5_episode_return": 179.82288770939743,
+      "v17_4_upper_hf_power": 0.00454284863807549,
+      "v17_5_upper_hf_power": 0.004946459070187041,
+      "v17_4_lower_lf_drift": 0.0221787328835983,
+      "v17_5_lower_lf_drift": 0.03215536598475135,
+      "v17_4_lower_budget_violation_rms": 0.1141334482408883,
+      "v17_5_lower_budget_violation_rms": 0.14312424680145208,
+      "v17_4_joint_budget_feasible_rate": 0.2948771611691008,
+      "v17_5_joint_budget_feasible_rate": 0.2825532710880414,
+      "v17_4_local_budget_regret_rms": 0.2462180965105933,
+      "v17_5_local_budget_regret_rms": 1.822648789806735e-16
+    },
+    "Walker2d-v5": {
+      "v17_4_episode_return": 282.27906558508886,
+      "v17_5_episode_return": 282.2859508752523,
+      "v17_4_upper_hf_power": 0.0010765051333661018,
+      "v17_5_upper_hf_power": 0.0013077070978353186,
+      "v17_4_lower_lf_drift": 0.0016908052682744641,
+      "v17_5_lower_lf_drift": 0.0022140087640832493,
+      "v17_4_lower_budget_violation_rms": 0.027866768302517973,
+      "v17_5_lower_budget_violation_rms": 0.03243409100651538,
+      "v17_4_joint_budget_feasible_rate": 0.9052993327007741,
+      "v17_5_joint_budget_feasible_rate": 0.8926768844276516,
+      "v17_4_local_budget_regret_rms": 0.05839861796398769,
+      "v17_5_local_budget_regret_rms": 1.4156941132212036e-16
+    }
+  },
+  "mechanism_findings": {
+    "integrity": "The refactored v17.4 router exactly reproduced all reward, executed-action, and latent-policy trace hashes and all audited numeric endpoints on all 120 reused paths.",
+    "local_objective": "The v17.5 greedy feasibility projection reduced its per-step normalized excess above the current physical floor to numerical zero in all three environments.",
+    "closed_loop": "Changing the responsibility history changed the learned policy context, so all 120 v17.5 paths diverged from v17.4 in reward, executed-action, and latent-policy traces.",
+    "endpoint": "The v17.5 router improved lower-LPF32 and lower-budget violation only in HalfCheetah. Hopper and Walker2d worsened both, and upper-HPF8 worsened in all three environments.",
+    "decision": "Do not run a fresh v17.5 preflight. A current-step physical floor is not a valid proxy for the full-trajectory frequency objective; establish a frozen-total-action full-horizon convex oracle before choosing another online projection or an actor constraint."
+  }
+}

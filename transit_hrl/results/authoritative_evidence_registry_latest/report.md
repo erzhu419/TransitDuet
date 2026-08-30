@@ -37,6 +37,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_2_smooth_macro_gauge_development | mujoco_control | development | smooth_macro_gauge_preflight_not_supported | development_only | false |
 | mujoco_v17_3_audit_optimal_macro_gauge_development | mujoco_control | development | audit_optimal_macro_gauge_preflight_not_supported | development_only | false |
 | mujoco_v17_4_streaming_audit_projection_development | mujoco_control | development | streaming_audit_projection_preflight_not_supported | development_only | false |
+| mujoco_v17_5_feasibility_diagnostic_development | mujoco_control | development | greedy_feasibility_projection_not_advanced | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -227,6 +228,12 @@ Forbidden: The v17.3 development preflight validates cross-environment frequency
 In a frozen three-environment paired development preflight, v17.4 exactly preserved reward, executed-action, and latent-policy traces on all 120 paired paths. It reduced lower-LPF32 by 60.3--90.4% and normalized joint merit by 41.2--88.0% in every environment, while all three candidate upper-HPF8 powers met the absolute budget. The strict expansion rule still failed because only Walker2d met the absolute lower-LPF32 budget and HalfCheetah missed the upper-budget feasibility threshold.
 
 Forbidden: The v17.4 development preflight validates the all-environment absolute frequency contract, leakage no-tradeoff, reward improvement, optimizer-seed robustness, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v17_5_feasibility_diagnostic_development
+
+On rejected v17.4 development paths, v17.5 eliminated current-step normalized budget regret in all three environments but improved full-trajectory lower-LPF32 in only one and upper-HPF8 in none. This diagnostic motivated a full-horizon frozen-total-action oracle.
+
+Forbidden: The v17.5 diagnostic validates feasibility-normalized projection, reward improvement, full-trajectory leakage improvement, fresh-seed performance, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

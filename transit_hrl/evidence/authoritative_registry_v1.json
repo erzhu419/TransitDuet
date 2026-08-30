@@ -958,6 +958,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_5_feasibility_diagnostic_development",
+      "claim_id": "D28_FEASIBILITY_NORMALIZED_PROJECTION",
+      "claim": "A current-step feasibility-normalized projection improves full-trajectory upper and lower frequency endpoints across MuJoCo.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "greedy_feasibility_projection_not_advanced",
+      "integrity_status": "valid",
+      "selection_access": "reused_rejected_v17_4_paths",
+      "outcome_provenance": "one_existing_optimizer_seed_three_server_local_checkpoints_and_one_hundred_twenty_reused_paths_per_router",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_5_feasibility_diagnostic",
+      "allowed_wording": "On rejected v17.4 development paths, v17.5 eliminated current-step normalized budget regret in all three environments but improved full-trajectory lower-LPF32 in only one and upper-HPF8 in none. This diagnostic motivated a full-horizon frozen-total-action oracle.",
+      "forbidden_wording": "The v17.5 diagnostic validates feasibility-normalized projection, reward improvement, full-trajectory leakage improvement, fresh-seed performance, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_5_feasibility_diagnostic_development.json",
+          "sha256": "f240f6dca8f45207fc52f152e05c12d633d424a1cc0285cf59cd289126500f15"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_5_feasibility_diagnostic_outcome_2026-08-31.md",
+          "sha256": "a832da56904e0f0d6d0ebc9161b5c44fa55c41dd1e57e55c39e7790bb61e88bc"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

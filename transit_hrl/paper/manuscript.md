@@ -451,6 +451,15 @@ upper-budget feasibility threshold. This identifies the next issue more
 precisely. A learned-policy experiment must model the joint physical feasible
 envelope and penalize excess above its unavoidable floor rather than assume
 that two fixed absolute component budgets are jointly attainable.
+The subsequent v17.5 development diagnostic tested that current-step floor on
+the rejected v17.4 paths. Although it eliminated local normalized regret in all
+three environments, it improved full-trajectory lower-LPF32 in only one and
+upper-HPF8 in none; Hopper and Walker2d lower drift increased by 45.0% and
+30.9%, respectively. All v17.5 closed-loop traces diverged because responsibility
+history enters the policy state. We therefore do not advance v17.5 or treat a
+greedy current-step floor as evidence of trajectory-level feasibility. The next
+mechanism requires a frozen-total-action full-horizon oracle before another
+online router or learned constraint is selected.
 
 ### 7.3 Negative results define the claim boundary
 
@@ -468,7 +477,7 @@ modes and validation roots. The validation paths nested within a seed are not
 independent replicates. Second, most successful transactions were
 function-preserving routers; they do not demonstrate physical control
 improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks, and the v15--v17.4 follow-ups remain development-only; several
+MuJoCo tasks, and the v15--v17.5 follow-ups remain development-only; several
 used only one development optimizer seed. Fourth, Quant is a synthetic
 time-series control environment and
 contains one supported performance harm. Fifth, Transit, public passenger data,

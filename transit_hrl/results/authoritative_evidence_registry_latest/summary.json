@@ -1,5 +1,5 @@
 {
-  "development_record_count": 27,
+  "development_record_count": 28,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 33,
+  "record_count": 34,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4065,6 +4065,104 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "On rejected v17.4 development paths, v17.5 eliminated current-step normalized budget regret in all three environments but improved full-trajectory lower-LPF32 in only one and upper-HPF8 in none. This diagnostic motivated a full-horizon frozen-total-action oracle.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_5_feasibility_diagnostic_development.json",
+          "role": "decision",
+          "sha256": "f240f6dca8f45207fc52f152e05c12d633d424a1cc0285cf59cd289126500f15"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_5_feasibility_diagnostic_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "a832da56904e0f0d6d0ebc9161b5c44fa55c41dd1e57e55c39e7790bb61e88bc"
+        }
+      ],
+      "claim": "A current-step feasibility-normalized projection improves full-trajectory upper and lower frequency endpoints across MuJoCo.",
+      "claim_id": "D28_FEASIBILITY_NORMALIZED_PROJECTION",
+      "decision": "greedy_feasibility_projection_not_advanced",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_5_feasibility_diagnostic_development",
+      "evidence_stage": "development",
+      "facts": {
+        "cross_router_trace_divergent_environment_count": 3,
+        "decision_status": "greedy_feasibility_projection_not_advanced",
+        "eligible_for_fresh_v17_5_preflight": false,
+        "endpoint_improvement_counts": {
+          "episode_return": 3,
+          "joint_budget_feasible_rate": 0,
+          "lower_budget_violation": 1,
+          "lower_lf_drift": 1,
+          "upper_hf_power": 0
+        },
+        "environment_count": 3,
+        "environment_results": {
+          "HalfCheetah-v5": {
+            "v17_4_episode_return": 739.8031656381512,
+            "v17_4_joint_budget_feasible_rate": 0.6575624999999999,
+            "v17_4_local_budget_regret_rms": 0.12307782526206736,
+            "v17_4_lower_budget_violation_rms": 0.03221719057658932,
+            "v17_4_lower_lf_drift": 0.0035564969601090653,
+            "v17_4_upper_hf_power": 0.0049767574431776075,
+            "v17_5_episode_return": 755.283579388905,
+            "v17_5_joint_budget_feasible_rate": 0.6511958333333334,
+            "v17_5_local_budget_regret_rms": 1.110906843601907e-16,
+            "v17_5_lower_budget_violation_rms": 0.031963224271647134,
+            "v17_5_lower_lf_drift": 0.0035327756078966086,
+            "v17_5_upper_hf_power": 0.005026884105068932
+          },
+          "Hopper-v5": {
+            "v17_4_episode_return": 179.5529798970264,
+            "v17_4_joint_budget_feasible_rate": 0.2948771611691008,
+            "v17_4_local_budget_regret_rms": 0.2462180965105933,
+            "v17_4_lower_budget_violation_rms": 0.1141334482408883,
+            "v17_4_lower_lf_drift": 0.0221787328835983,
+            "v17_4_upper_hf_power": 0.00454284863807549,
+            "v17_5_episode_return": 179.82288770939743,
+            "v17_5_joint_budget_feasible_rate": 0.2825532710880414,
+            "v17_5_local_budget_regret_rms": 1.822648789806735e-16,
+            "v17_5_lower_budget_violation_rms": 0.14312424680145208,
+            "v17_5_lower_lf_drift": 0.03215536598475135,
+            "v17_5_upper_hf_power": 0.004946459070187041
+          },
+          "Walker2d-v5": {
+            "v17_4_episode_return": 282.27906558508886,
+            "v17_4_joint_budget_feasible_rate": 0.9052993327007741,
+            "v17_4_local_budget_regret_rms": 0.05839861796398769,
+            "v17_4_lower_budget_violation_rms": 0.027866768302517973,
+            "v17_4_lower_lf_drift": 0.0016908052682744641,
+            "v17_4_upper_hf_power": 0.0010765051333661018,
+            "v17_5_episode_return": 282.2859508752523,
+            "v17_5_joint_budget_feasible_rate": 0.8926768844276516,
+            "v17_5_local_budget_regret_rms": 1.4156941132212036e-16,
+            "v17_5_lower_budget_violation_rms": 0.03243409100651538,
+            "v17_5_lower_lf_drift": 0.0022140087640832493,
+            "v17_5_upper_hf_power": 0.0013077070978353186
+          }
+        },
+        "integrity_status": "valid",
+        "legacy_replay_exact_environment_count": 3,
+        "local_budget_regret_eliminated_environment_count": 3,
+        "optimizer_seed_count": 1,
+        "reused_path_count_per_router": 120,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 3,
+          "failed": 0
+        }
+      },
+      "forbidden_wording": "The v17.5 diagnostic validates feasibility-normalized projection, reward improvement, full-trajectory leakage improvement, fresh-seed performance, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_existing_optimizer_seed_three_server_local_checkpoints_and_one_hundred_twenty_reused_paths_per_router",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_5_feasibility_diagnostic",
+      "positive_claim_supported": false,
+      "selection_access": "reused_rejected_v17_4_paths"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4123,7 +4221,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "a25854364a61dff786501e8669c0306aab4c899b408e09d73548f3767979c1e6",
+  "registry_sha256": "3f2cd860f24980379abab75f1e049ceaee9c8106a68bfcdce9f02cbba68460af",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }
