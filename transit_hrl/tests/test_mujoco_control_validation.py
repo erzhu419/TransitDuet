@@ -92,21 +92,29 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         self.assertTrue(cvar.endswith("v10"))
 
     def test_v1417_mechanism_cannot_use_the_v1416_protocol_label(self):
+        common = dict(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[11],
+            selection_seeds=[13],
+            eval_seeds=[17],
+            steps=8,
+            iterations=1,
+            optimizer_seed=19,
+            control_protocol_version=(
+                MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
+            ),
+        )
         with self.assertRaisesRegex(ValueError, "v14.17 mechanisms"):
             train_mujoco_method(
-                method="freq_hrl",
-                env_id="HalfCheetah-v5",
-                disturbance_mode="standard",
-                train_seeds=[11],
-                selection_seeds=[13],
-                eval_seeds=[17],
-                steps=8,
-                iterations=1,
-                optimizer_seed=19,
                 constraint_dual_normalization="ema_abs",
-                control_protocol_version=(
-                    MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16
-                ),
+                **common,
+            )
+        with self.assertRaisesRegex(ValueError, "v14.17 mechanisms"):
+            train_mujoco_method(
+                deployment_frequency_closed_loop_risk_mode="mode_cvar",
+                **common,
             )
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17.endswith(
             "native_pd_cvar"

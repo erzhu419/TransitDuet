@@ -3535,11 +3535,11 @@ def train_mujoco_method(
             "restoration filter"
         )
     if (
-        resolved_closed_loop_risk_mode in {"pathwise_all", "mode_cvar"}
+        deployment_frequency_pathwise_robust
         and not deployment_frequency_groupwise_robust
     ):
         raise ValueError(
-            "MuJoCo pathwise/CVaR frequency robustness requires groupwise "
+            "MuJoCo pathwise frequency robustness requires groupwise "
             "constraints"
         )
     inferred_protocol_version = (
