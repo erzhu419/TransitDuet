@@ -33,6 +33,7 @@ from freq_hrl.rl.smdp_actor_critic import (
 )
 from scripts import mujoco_v14_17_native_pd_cvar_screen_spec as v14_17_spec
 from scripts.probe_mujoco_radial_restoration import (
+    _actor_output_head,
     _evaluate_rows,
     _load_model,
     _v14_17_anchor_profile,
@@ -80,6 +81,30 @@ def apply_actor_mean_parameter_delta(model: Any, delta: np.ndarray) -> None:
                 offset += count
     if offset != values.size:
         raise RuntimeError("actor mean-parameter delta application was incomplete")
+
+
+def apply_actor_output_bias_intervention(
+    model: Any,
+    *,
+    upper_bias: np.ndarray | None = None,
+    lower_bias: np.ndarray | None = None,
+) -> None:
+    """Apply a temporary additive intervention to actor mean outputs."""
+
+    for level, values in (("upper", upper_bias), ("lower", lower_bias)):
+        if values is None:
+            continue
+        actor = getattr(model, f"{level}_actor")
+        head = _actor_output_head(actor)
+        if head.bias is None:
+            raise TypeError("paired actor intervention requires output biases")
+        bias = np.asarray(values, dtype=np.float64).reshape(-1)
+        if bias.size != int(head.out_features) or not np.all(np.isfinite(bias)):
+            raise ValueError(f"{level} actor intervention bias is misaligned")
+        with torch.no_grad():
+            head.bias.add_(torch.as_tensor(
+                bias, dtype=head.bias.dtype, device=head.bias.device
+            ))
 
 
 def _actor_mean_parameters(actor: torch.nn.Module) -> list[torch.nn.Parameter]:
@@ -141,6 +166,21 @@ def _trajectory_job(job: dict[str, Any]) -> dict[str, Any]:
         job["checkpoint_path"], map_location="cpu", weights_only=False
     )
     model = _load_model(checkpoint)
+    source_hash = _model_parameter_sha256(model)
+    intervention = dict(job.get("intervention") or {})
+    if intervention:
+        apply_actor_output_bias_intervention(
+            model,
+            upper_bias=(
+                None if intervention.get("upper_bias") is None
+                else np.asarray(intervention["upper_bias"], dtype=np.float64)
+            ),
+            lower_bias=(
+                None if intervention.get("lower_bias") is None
+                else np.asarray(intervention["lower_bias"], dtype=np.float64)
+            ),
+        )
+    rollout_hash = _model_parameter_sha256(model)
     batch, row = _rollout_path(
         model,
         summary=job["summary"],
@@ -155,7 +195,11 @@ def _trajectory_job(job: dict[str, Any]) -> dict[str, Any]:
     return {
         "batch": batch,
         "row": row,
-        "parameter_sha256": _model_parameter_sha256(model),
+        "parameter_sha256": source_hash,
+        "rollout_parameter_sha256": rollout_hash,
+        "intervention_variant": str(
+            intervention.get("variant", "stochastic_policy")
+        ),
     }
 
 
@@ -199,6 +243,31 @@ def _parallel_map(
         mp_context=multiprocessing.get_context("spawn"),
     ) as executor:
         return list(executor.map(worker, jobs))
+
+
+def paired_output_bias_interventions(
+    model: Any,
+    *,
+    seed: int,
+    bias_rms: float,
+) -> list[dict[str, Any]]:
+    """Create control and level-isolated antithetic actor interventions."""
+
+    amplitude = float(bias_rms)
+    if not np.isfinite(amplitude) or amplitude <= 0.0:
+        raise ValueError("paired actor intervention RMS must be positive")
+    rng = np.random.default_rng(int(seed))
+    upper_dim = int(_actor_output_head(model.upper_actor).out_features)
+    lower_dim = int(_actor_output_head(model.lower_actor).out_features)
+    upper = amplitude * rng.choice((-1.0, 1.0), size=upper_dim)
+    lower = amplitude * rng.choice((-1.0, 1.0), size=lower_dim)
+    return [
+        {"variant": "control", "upper_bias": None, "lower_bias": None},
+        {"variant": "upper_plus", "upper_bias": upper, "lower_bias": None},
+        {"variant": "upper_minus", "upper_bias": -upper, "lower_bias": None},
+        {"variant": "lower_plus", "upper_bias": None, "lower_bias": lower},
+        {"variant": "lower_minus", "upper_bias": None, "lower_bias": -lower},
+    ]
 
 
 @dataclass
@@ -570,6 +639,8 @@ def run_probe(
     probe_version: str = PROBE_VERSION,
     upper_cost_return_horizon_decisions: int = 0,
     lower_cost_return_horizon_decisions: int = 0,
+    critic_collection_mode: str = "stochastic_policy",
+    critic_intervention_bias_rms: float = 0.0,
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -595,6 +666,16 @@ def run_probe(
     }
     if any(value < 0 for value in return_horizons.values()):
         raise ValueError("action-cost return horizons cannot be negative")
+    collection_mode = str(critic_collection_mode)
+    if collection_mode not in {"stochastic_policy", "paired_output_bias"}:
+        raise ValueError("unknown action-cost critic collection mode")
+    intervention_rms = float(critic_intervention_bias_rms)
+    if collection_mode == "stochastic_policy" and intervention_rms != 0.0:
+        raise ValueError("stochastic critic collection cannot use interventions")
+    if collection_mode == "paired_output_bias" and (
+        not np.isfinite(intervention_rms) or intervention_rms <= 0.0
+    ):
+        raise ValueError("paired critic collection requires a positive bias RMS")
     train_paths = _paths_for_roots(summary["environment"], critic_train_roots)
     holdout_paths = _paths_for_roots(
         summary["environment"], critic_holdout_roots
@@ -605,34 +686,88 @@ def run_probe(
     )
 
     def trajectory_jobs(
-        paths: list[dict[str, Any]], *, sample: bool, role: str
+        paths: list[dict[str, Any]],
+        *,
+        sample: bool,
+        role: str,
+        paired_interventions: bool = False,
     ) -> list[dict[str, Any]]:
-        return [{
-            "checkpoint_path": str(checkpoint_path.resolve()),
-            "summary": summary,
-            "path": path,
-            "sample": bool(sample),
-            "policy_seed": derive_seed(
-                "mujoco_v14_22_policy_sampling_v1",
+        jobs = []
+        for path in paths:
+            intervention_seed = derive_seed(
+                "mujoco_paired_output_bias_intervention_v1",
                 str(summary["environment"]),
                 str(role),
                 int(path["seed"]),
-            ),
-            "episode_horizon": int(episode_horizon),
-            "leakage_cost_mode": str(leakage_cost_mode),
-        } for path in paths]
+                str(path["disturbance_mode"]),
+            )
+            interventions = (
+                paired_output_bias_interventions(
+                    baseline_model,
+                    seed=intervention_seed,
+                    bias_rms=intervention_rms,
+                )
+                if paired_interventions else [None]
+            )
+            for intervention in interventions:
+                variant = (
+                    "stochastic_policy" if intervention is None
+                    else str(intervention["variant"])
+                )
+                jobs.append({
+                    "checkpoint_path": str(checkpoint_path.resolve()),
+                    "summary": summary,
+                    "path": path,
+                    "sample": bool(sample),
+                    "intervention": intervention,
+                    "policy_seed": derive_seed(
+                        "mujoco_action_cost_policy_sampling_v2",
+                        str(summary["environment"]),
+                        str(role),
+                        int(path["seed"]),
+                        str(variant),
+                    ),
+                    "episode_horizon": int(episode_horizon),
+                    "leakage_cost_mode": str(leakage_cost_mode),
+                })
+        return jobs
 
+    paired_collection = collection_mode == "paired_output_bias"
+    train_jobs = trajectory_jobs(
+        train_paths,
+        sample=not paired_collection,
+        role="critic_train",
+        paired_interventions=paired_collection,
+    )
+    holdout_jobs = trajectory_jobs(
+        holdout_paths,
+        sample=not paired_collection,
+        role="critic_holdout",
+        paired_interventions=paired_collection,
+    )
     critic_results = _parallel_map(
         _trajectory_job,
-        trajectory_jobs(train_paths, sample=True, role="critic_train")
-        + trajectory_jobs(holdout_paths, sample=True, role="critic_holdout"),
+        train_jobs + holdout_jobs,
         workers=workers,
     )
-    train_count = len(train_paths)
+    train_count = len(train_jobs)
     train_batches = [result["batch"] for result in critic_results[:train_count]]
     holdout_batches = [result["batch"] for result in critic_results[train_count:]]
     if any(result["parameter_sha256"] != baseline_hash for result in critic_results):
         raise RuntimeError("critic trajectory collection mutated the frozen actor")
+    if paired_collection:
+        if any(
+            (
+                result["rollout_parameter_sha256"] == baseline_hash
+            ) != (result["intervention_variant"] == "control")
+            for result in critic_results
+        ):
+            raise RuntimeError("paired actor interventions were not isolated")
+    elif any(
+        result["rollout_parameter_sha256"] != baseline_hash
+        for result in critic_results
+    ):
+        raise RuntimeError("stochastic critic collection changed actor parameters")
 
     design_results = _parallel_map(
         _trajectory_job,
@@ -870,8 +1005,10 @@ def run_probe(
         "critic_holdout_roots": list(critic_holdout_roots),
         "design_roots": list(design_roots),
         "validation_roots": list(validation_roots),
-        "critic_train_path_count": len(train_paths),
-        "critic_holdout_path_count": len(holdout_paths),
+        "critic_train_base_path_count": len(train_paths),
+        "critic_holdout_base_path_count": len(holdout_paths),
+        "critic_train_path_count": len(train_jobs),
+        "critic_holdout_path_count": len(holdout_jobs),
         "design_path_count": len(design_paths),
         "validation_path_count": len(validation_paths),
         "critic_seeds": list(critic_seeds),
@@ -879,6 +1016,11 @@ def run_probe(
         "critic_epochs": int(critic_epochs),
         "critic_minibatch_size": int(critic_minibatch_size),
         "critic_learning_rate": float(critic_learning_rate),
+        "critic_collection_mode": collection_mode,
+        "critic_intervention_bias_rms": intervention_rms,
+        "critic_intervention_variants": sorted({
+            result["intervention_variant"] for result in critic_results
+        }),
         "cost_return_horizon_decisions": return_horizons,
         "critic_minimum_holdout_r2": float(critic_minimum_holdout_r2),
         "critic_minimum_action_permutation_mse_increase": float(
@@ -969,6 +1111,14 @@ def main() -> None:
     parser.add_argument(
         "--lower-cost-return-horizon-decisions", type=int, default=0
     )
+    parser.add_argument(
+        "--critic-collection-mode",
+        choices=("stochastic_policy", "paired_output_bias"),
+        default="stochastic_policy",
+    )
+    parser.add_argument(
+        "--critic-intervention-bias-rms", type=float, default=0.0
+    )
     args = parser.parse_args()
     payload = run_probe(
         checkpoint_path=args.checkpoint,
@@ -1004,6 +1154,8 @@ def main() -> None:
         lower_cost_return_horizon_decisions=(
             args.lower_cost_return_horizon_decisions
         ),
+        critic_collection_mode=args.critic_collection_mode,
+        critic_intervention_bias_rms=args.critic_intervention_bias_rms,
     )
     print(json.dumps({
         "output": str(args.output),
