@@ -1,0 +1,76 @@
+{
+  "schema_version": "freq_hrl_mujoco_v15_distillation_development_v1",
+  "status": "universal_raw_policy_distillation_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "three_stage_single_optimizer_seed_development_not_confirmatory",
+  "anchor_run_name": "mujoco_v14_29_fresh_anchor_bank_20260830_r1",
+  "optimizer_seed": 2978317753,
+  "environment_count": 3,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "universal_supported": false,
+  "supported_environment_in_every_run": "Hopper-v5",
+  "runs": [
+    {
+      "label": "v15",
+      "source_run": "mujoco_v15_raw_policy_distillation_preflight_20260830_r1",
+      "development_protocol_version": "mujoco_v15_raw_policy_distillation_preflight_v3",
+      "frozen_algorithm_revision": "2b83e63b652c502001bdc1a4107d00193e95965d",
+      "analysis_status": "raw_policy_distillation_preflight_not_supported",
+      "candidate_count": 12,
+      "validation_supported_count": 1,
+      "environment_status": {
+        "HalfCheetah-v5": "validation_reward_floor_failed",
+        "Hopper-v5": "supported",
+        "Walker2d-v5": "no_design_candidate"
+      }
+    },
+    {
+      "label": "v15.1",
+      "source_run": "mujoco_v15_1_bounded_distillation_preflight_20260830_r1",
+      "development_protocol_version": "mujoco_v15_1_saturation_bounded_raw_policy_preflight_v1",
+      "frozen_algorithm_revision": "d80b364053f0c205be04131390ea352bda3afe00",
+      "analysis_status": "bounded_raw_policy_preflight_not_supported",
+      "candidate_count": 108,
+      "validation_supported_count": 1,
+      "environment_status": {
+        "HalfCheetah-v5": "no_design_candidate",
+        "Hopper-v5": "supported",
+        "Walker2d-v5": "no_design_candidate"
+      }
+    },
+    {
+      "label": "v15.2",
+      "source_run": "mujoco_v15_2_multisource_distillation_preflight_20260830_r4",
+      "development_protocol_version": "mujoco_v15_2_multisource_raw_policy_preflight_v1",
+      "frozen_algorithm_revision": "68cdc2aad1ad49d81165658809b7300273c0d137",
+      "analysis_status": "multisource_raw_policy_preflight_not_supported",
+      "candidate_count": 216,
+      "validation_supported_count": 1,
+      "environment_status": {
+        "HalfCheetah-v5": "no_design_candidate",
+        "Hopper-v5": "supported",
+        "Walker2d-v5": "no_design_candidate"
+      },
+      "scheduler_tasks": [
+        "t85088",
+        "t85089",
+        "t85090"
+      ],
+      "scheduler_nodes": [
+        "node003",
+        "node005",
+        "node004"
+      ]
+    }
+  ],
+  "mechanism_findings": {
+    "halfcheetah": "Raw lower-LF drift and the reward floor could not be satisfied jointly.",
+    "hopper": "One fixed candidate passed all five frequency endpoints and the reward floor on disjoint validation roots in all three development versions.",
+    "walker2d": "Larger upper-head steps reduced latent upper-HF violation, but no candidate met the raw upper-HF gate jointly with all other endpoints.",
+    "interpretation": "Post-hoc output-head distillation does not identify a universal raw upper/lower factorization. The function-preserving responsibility coordinate remains the supported estimand."
+  }
+}

@@ -20,6 +20,9 @@ SCHEMA_VERSION = "freq_hrl_authoritative_evidence_registry_v1"
 DEVELOPMENT_ADJUDICATION_SCHEMA_VERSION = (
     "freq_hrl_development_preflight_adjudication_v1"
 )
+MUJOCO_V15_DISTILLATION_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v15_distillation_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1046,6 +1049,71 @@ def _mujoco_v14_29_portfolio_facts(
     }
 
 
+def _mujoco_v15_distillation_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    runs = list(decision.get("runs") or [])
+    expected_labels = ["v15", "v15.1", "v15.2"]
+    expected_statuses = [
+        "raw_policy_distillation_preflight_not_supported",
+        "bounded_raw_policy_preflight_not_supported",
+        "multisource_raw_policy_preflight_not_supported",
+    ]
+    expected_environment_status = {
+        "HalfCheetah-v5",
+        "Hopper-v5",
+        "Walker2d-v5",
+    }
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V15_DISTILLATION_SCHEMA_VERSION
+        or decision.get("status")
+        != "universal_raw_policy_distillation_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "three_stage_single_optimizer_seed_development_not_confirmatory"
+        or int(decision.get("optimizer_seed", -1)) != 2978317753
+        or int(decision.get("environment_count", -1)) != 3
+        or set(decision.get("environments") or []) != expected_environment_status
+        or decision.get("universal_supported") is not False
+        or decision.get("supported_environment_in_every_run") != "Hopper-v5"
+        or [row.get("label") for row in runs] != expected_labels
+        or [row.get("analysis_status") for row in runs] != expected_statuses
+        or any(int(row.get("validation_supported_count", -1)) != 1 for row in runs)
+        or any(len(str(row.get("frozen_algorithm_revision", ""))) != 40 for row in runs)
+        or any(
+            set((row.get("environment_status") or {}).keys())
+            != expected_environment_status
+            or (row.get("environment_status") or {}).get("Hopper-v5")
+            != "supported"
+            for row in runs
+        )
+        or report is None
+        or "`universal_raw_policy_distillation_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v15 distillation decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 1,
+        "environment_count": 3,
+        "run_count": 3,
+        "candidate_counts": {
+            str(row["label"]): int(row["candidate_count"])
+            for row in runs
+        },
+        "validation_supported_count_by_run": {
+            str(row["label"]): int(row["validation_supported_count"])
+            for row in runs
+        },
+        "supported_environment_in_every_run": "Hopper-v5",
+        "universal_supported": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1064,6 +1132,7 @@ PARSERS = {
     "mujoco_v14_15_multiseed": _mujoco_v14_15_multiseed_facts,
     "mujoco_v14_16_mechanism": _mujoco_v14_16_mechanism_facts,
     "mujoco_v14_29_portfolio": _mujoco_v14_29_portfolio_facts,
+    "mujoco_v15_distillation": _mujoco_v15_distillation_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),

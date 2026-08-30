@@ -28,6 +28,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v14_15_restoration_multiseed_development_r2 | mujoco_control | development | candidate_not_ready_for_confirmation | development_only | false |
 | mujoco_v14_16_crossed_restoration_mechanism_development_r5 | mujoco_control | development | primary_mechanism_not_ready | development_only | false |
 | mujoco_v14_29_restoration_portfolio_confirmatory | mujoco_control | confirmatory | supported | positive_main_or_si | true |
+| mujoco_v15_raw_policy_distillation_development | mujoco_control | development | universal_raw_policy_distillation_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -164,6 +165,12 @@ Forbidden: MuJoCo v14.16 supports learned cross-environment frequency separation
 On the preregistered v14.29 protocol, the guarded restoration portfolio was supported for 16 of 16 fresh optimizer seeds in HalfCheetah-v5, 16 of 16 in Hopper-v5, and 15 of 16 in Walker2d-v5; the corresponding two-sided 95% Wilson lower bounds were 0.8064, 0.8064, and 0.7167. Thirty-eight cells selected function-preserving routers with exact paired action, reward, and latent-policy trace invariance, nine Walker2d cells selected guarded actor updates, and one Walker2d cell abstained and counted as failure. All supported cells respected the held-out reward floor.
 
 Forbidden: MuJoCo v14.29 proves reward improvement, universal raw behavioral separation, that every environment is restored solely by function-preserving routing, or success beyond the frozen validation-path panel.
+
+### mujoco_v15_raw_policy_distillation_development
+
+Across v15, v15.1, and v15.2 development preflights, Hopper-v5 passed the joint raw-policy and reward-floor validation gate, while HalfCheetah-v5 and Walker2d-v5 did not admit a universally valid candidate. These single-optimizer-seed outcomes do not justify fresh-seed confirmation.
+
+Forbidden: The v15 development sequence validates universal raw behavioral separation, fresh-seed generalization, reward improvement, or a confirmatory Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 
