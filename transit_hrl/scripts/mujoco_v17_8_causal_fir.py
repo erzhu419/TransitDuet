@@ -204,6 +204,7 @@ def apply_causal_fir_with_prefix_high_frequency_budget(
     upper_rms_budget: float,
     power_tolerance: float,
     energy_reserve_steps: int = 0,
+    energy_borrow_fraction: float = 1.0,
 ) -> dict[str, Any]:
     """Project only causal upper innovations onto the prefix HPF budget."""
 
@@ -220,6 +221,7 @@ def apply_causal_fir_with_prefix_high_frequency_budget(
     budget = float(upper_rms_budget)
     tolerance = float(power_tolerance)
     reserve_steps = int(energy_reserve_steps)
+    borrow_fraction = float(energy_borrow_fraction)
     if width < 2:
         raise ValueError("prefix upper window must be at least two")
     if not np.isfinite(budget) or budget <= 0.0:
@@ -228,6 +230,11 @@ def apply_causal_fir_with_prefix_high_frequency_budget(
         raise ValueError("prefix power tolerance must be positive and finite")
     if reserve_steps < 0:
         raise ValueError("upper energy reserve steps must be non-negative")
+    if (
+        not np.isfinite(borrow_fraction)
+        or not 0.0 <= borrow_fraction <= 1.0
+    ):
+        raise ValueError("upper energy borrow fraction must lie in [0, 1]")
 
     length, dimension = total.shape
     upper = np.empty_like(total)
@@ -263,8 +270,13 @@ def apply_causal_fir_with_prefix_high_frequency_budget(
             target = np.clip(
                 coefficient * desired[index] + offset, low, high
             )
+            elapsed_steps = index + 1
+            remaining_reserve = max(reserve_steps - elapsed_steps, 0)
+            energy_envelope_steps = (
+                elapsed_steps + borrow_fraction * remaining_reserve
+            )
             allowed_energy = max(
-                max(index + 1, reserve_steps) * dimension * budget ** 2
+                energy_envelope_steps * dimension * budget ** 2
                 - accumulated_energy,
                 0.0,
             )
@@ -332,6 +344,7 @@ def apply_causal_fir_with_prefix_high_frequency_budget(
             projection_energy / float(length * dimension)
         )),
         "energy_reserve_steps": reserve_steps,
+        "energy_borrow_fraction": borrow_fraction,
         "minimum_horizon_certified": bool(length >= reserve_steps),
     }
 
@@ -349,6 +362,7 @@ def evaluate_causal_fir_prefix_split(
     lower_rms_budget: float,
     power_tolerance: float,
     energy_reserve_steps: int = 0,
+    energy_borrow_fraction: float = 1.0,
 ) -> dict[str, Any]:
     split = apply_causal_fir_with_prefix_high_frequency_budget(
         total_action,
@@ -360,6 +374,7 @@ def evaluate_causal_fir_prefix_split(
         upper_rms_budget=upper_rms_budget,
         power_tolerance=power_tolerance,
         energy_reserve_steps=energy_reserve_steps,
+        energy_borrow_fraction=energy_borrow_fraction,
     )
     upper_power, lower_power = responsibility_frequency_powers(
         split["total"],
@@ -400,6 +415,7 @@ def evaluate_causal_fir_prefix_split(
         "prefix_upper_power_max": float(split["prefix_upper_power_max"]),
         "projection_rms": float(split["projection_rms"]),
         "energy_reserve_steps": int(split["energy_reserve_steps"]),
+        "energy_borrow_fraction": float(split["energy_borrow_fraction"]),
         "minimum_horizon_certified": bool(
             split["minimum_horizon_certified"]
         ),
