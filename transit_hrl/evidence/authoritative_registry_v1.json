@@ -1066,6 +1066,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_10_horizon_reservoir_fir_development",
+      "claim_id": "D32_HORIZON_RESERVOIR_FIR",
+      "claim": "A causal minimum-horizon upper-energy reservoir closes the short-episode Hopper responsibility gap without violating endpoint budgets.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "horizon_reservoir_fir_stopped_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_9_reused_rejected_paths_grouped_by_seed",
+      "outcome_provenance": "one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_thirty_two_horizon_reservoir_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_10_horizon_reservoir_fir",
+      "allowed_wording": "On reused grouped development paths, the frozen v17.10 selector retained the zero-reserve 48/81 solution. An 82-step reservoir diagnostic reached 63/81 recovery and 120/120 endpoint upper compliance, but only 113/120 paths maintained the causal envelope and Hopper recovery was 15/33; no fresh path was accessed.",
+      "forbidden_wording": "The v17.10 reused-path reservoir validates fresh-seed generalization, short-horizon endpoint certification, the all-environment frequency contract, reward improvement, closed-loop learning, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_10_horizon_reservoir_fir_development.json",
+          "sha256": "65194b82ea4a88dc2ca03ba576413c768ed06bac70a3d88c934a06b2e9be12f5"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_10_horizon_reservoir_fir_outcome_2026-08-31.md",
+          "sha256": "d5f9e6082beb5a37f2b3493c44d980e18bbc3e02ce6fedccdba6f57b988317b0"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

@@ -1,5 +1,5 @@
 {
-  "development_record_count": 31,
+  "development_record_count": 32,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 37,
+  "record_count": 38,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4410,6 +4410,51 @@
       "selection_access": "post_v17_8_reused_rejected_paths_grouped_by_seed"
     },
     {
+      "allowed_wording": "On reused grouped development paths, the frozen v17.10 selector retained the zero-reserve 48/81 solution. An 82-step reservoir diagnostic reached 63/81 recovery and 120/120 endpoint upper compliance, but only 113/120 paths maintained the causal envelope and Hopper recovery was 15/33; no fresh path was accessed.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_10_horizon_reservoir_fir_development.json",
+          "role": "decision",
+          "sha256": "65194b82ea4a88dc2ca03ba576413c768ed06bac70a3d88c934a06b2e9be12f5"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_10_horizon_reservoir_fir_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "d5f9e6082beb5a37f2b3493c44d980e18bbc3e02ce6fedccdba6f57b988317b0"
+        }
+      ],
+      "claim": "A causal minimum-horizon upper-energy reservoir closes the short-episode Hopper responsibility gap without violating endpoint budgets.",
+      "claim_id": "D32_HORIZON_RESERVOIR_FIR",
+      "decision": "horizon_reservoir_fir_stopped_before_fresh_path_access",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_10_horizon_reservoir_fir_development",
+      "evidence_stage": "development",
+      "facts": {
+        "candidate_count": 32,
+        "decision_status": "horizon_reservoir_fir_stopped_before_fresh_path_access",
+        "eligible_for_fresh_path_validation": false,
+        "fresh_validation_paths_accessed": false,
+        "grouped_seed_fold_count": 8,
+        "integrity_status": "valid",
+        "largest_reservoir_recovered_failure_count": 63,
+        "largest_reservoir_steps": 82,
+        "largest_reservoir_valid_path_count": 113,
+        "path_count": 120,
+        "selected_energy_reserve_steps": 0,
+        "selected_recovered_failure_count": 48,
+        "support_gate": false
+      },
+      "forbidden_wording": "The v17.10 reused-path reservoir validates fresh-seed generalization, short-horizon endpoint certification, the all-environment frequency contract, reward improvement, closed-loop learning, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_thirty_two_horizon_reservoir_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_10_horizon_reservoir_fir",
+      "positive_claim_supported": false,
+      "selection_access": "post_v17_9_reused_rejected_paths_grouped_by_seed"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4468,7 +4513,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "cf07bc599a259a0d73b21b578bff72e871324bbacab2171b65ab2a19472fc475",
+  "registry_sha256": "e5dbb40093daffb1358c1d6bdb7d81d7f88bce85e1c7d083dbeb706399b714f6",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

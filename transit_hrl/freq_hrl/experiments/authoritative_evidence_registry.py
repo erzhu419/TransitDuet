@@ -59,6 +59,9 @@ MUJOCO_V17_8_CAUSAL_FIR_DISTILLATION_SCHEMA_VERSION = (
 MUJOCO_V17_9_PREFIX_HPF_FIR_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_9_prefix_hpf_fir_development_v1"
 )
+MUJOCO_V17_10_HORIZON_RESERVOIR_FIR_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_10_horizon_reservoir_fir_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2291,6 +2294,74 @@ def _mujoco_v17_9_prefix_hpf_fir_facts(
     }
 
 
+def _mujoco_v17_10_horizon_reservoir_fir_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    selected = dict(decision.get("selected_candidate") or {})
+    diagnostic = dict(decision.get("largest_reservoir_diagnostic") or {})
+    scheduler = dict(decision.get("scheduler") or {})
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_10_HORIZON_RESERVOIR_FIR_SCHEMA_VERSION
+        or decision.get("status")
+        != "horizon_reservoir_fir_stopped_before_fresh_path_access"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != (
+            "post_v17_9_reused_path_horizon_reservoir_selection_"
+            "not_confirmatory"
+        )
+        or decision.get("frozen_core_revision")
+        != "f849d15c0b8c7f8c0f99e0bdf69f9b892d20da36"
+        or decision.get("frozen_source_manifest_sha256")
+        != "9e78071e94f6bba8c589fb765dc4378ad9be7268662defd91e9bfc231457c892"
+        or int(decision.get("grouped_seed_fold_count", -1)) != 8
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 32
+        or scheduler.get("selection_task_id") != "t85840"
+        or scheduler.get("selection_task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "reservoir0_fir_w64_ridge1e-03_gain1.00"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("upper_budget_path_count", -1)) != 120
+        or int(selected.get("recovered_failure_count", -1)) != 48
+        or int(selected.get("preserved_baseline_feasible_path_count", -1))
+        != 32
+        or int(diagnostic.get("energy_reserve_steps", -1)) != 82
+        or int(diagnostic.get("valid_path_count", -1)) != 113
+        or int(diagnostic.get("upper_budget_path_count", -1)) != 120
+        or int(diagnostic.get("recovered_failure_count", -1)) != 63
+        or diagnostic.get("recovered_failure_count_by_environment")
+        != {"HalfCheetah-v5": 40, "Hopper-v5": 15, "Walker2d-v5": 8}
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`horizon_reservoir_fir_stopped_before_fresh_path_access`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.10 reservoir decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "grouped_seed_fold_count": 8,
+        "path_count": 120,
+        "candidate_count": 32,
+        "selected_energy_reserve_steps": 0,
+        "selected_recovered_failure_count": 48,
+        "largest_reservoir_steps": 82,
+        "largest_reservoir_valid_path_count": 113,
+        "largest_reservoir_recovered_failure_count": 63,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2339,6 +2410,9 @@ PARSERS = {
     ),
     "mujoco_v17_9_prefix_hpf_fir": (
         _mujoco_v17_9_prefix_hpf_fir_facts
+    ),
+    "mujoco_v17_10_horizon_reservoir_fir": (
+        _mujoco_v17_10_horizon_reservoir_fir_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
