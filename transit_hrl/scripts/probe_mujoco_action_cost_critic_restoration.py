@@ -275,18 +275,22 @@ def _actor_delta_path_job(job: dict[str, Any]) -> dict[str, Any]:
         np.asarray(job["delta"], dtype=np.float64),
         scope=str(job.get("actor_update_scope", "full_mean")),
     )
+    router_strength = float(job.get(
+        "router_strength", job["summary"]["lower_action_router_strength"]
+    ))
     row = _evaluate_rows(
         model,
         summary=job["summary"],
         paths=[job["path"]],
         episode_horizon=int(job["episode_horizon"]),
         leakage_cost_mode=str(job["leakage_cost_mode"]),
-        router_strength=float(job["summary"]["lower_action_router_strength"]),
+        router_strength=router_strength,
     )[0]
     return {
         "candidate_index": int(job["candidate_index"]),
         "path_index": int(job["path_index"]),
         "parameter_sha256": _model_parameter_sha256(model),
+        "router_strength": router_strength,
         "row": row,
     }
 
@@ -845,7 +849,15 @@ def _evaluate_deltas(
     episode_horizon: int,
     leakage_cost_mode: str,
     actor_update_scope: str,
+    router_strengths: list[float] | None = None,
 ) -> list[dict[str, Any]]:
+    baseline_router_strength = float(summary["lower_action_router_strength"])
+    strengths = (
+        [baseline_router_strength] * len(deltas)
+        if router_strengths is None else list(map(float, router_strengths))
+    )
+    if len(strengths) != len(deltas) or not np.all(np.isfinite(strengths)):
+        raise ValueError("actor deltas and router strengths must be aligned")
     jobs = [
         {
             "checkpoint_path": str(checkpoint_path.resolve()),
@@ -857,6 +869,7 @@ def _evaluate_deltas(
             "episode_horizon": int(episode_horizon),
             "leakage_cost_mode": str(leakage_cost_mode),
             "actor_update_scope": str(actor_update_scope),
+            "router_strength": strengths[candidate_index],
         }
         for candidate_index, delta in enumerate(deltas)
         for path_index, path in enumerate(paths)
@@ -870,13 +883,50 @@ def _evaluate_deltas(
         ]
         selected.sort(key=lambda result: result["path_index"])
         hashes = {result["parameter_sha256"] for result in selected}
-        if len(selected) != len(paths) or len(hashes) != 1:
+        routed = {float(result["router_strength"]) for result in selected}
+        if (
+            len(selected) != len(paths)
+            or len(hashes) != 1
+            or routed != {strengths[candidate_index]}
+        ):
             raise RuntimeError("parallel actor candidate evaluation is incomplete")
         grouped.append({
             "parameter_sha256": hashes.pop(),
+            "router_strength": routed.pop(),
             "rows": [result["row"] for result in selected],
         })
     return grouped
+
+
+def fold_guarded_design_eligibility(
+    snapshot: dict[str, Any],
+    baseline: dict[str, Any],
+    fold_snapshots: list[dict[str, Any]],
+    fold_baselines: list[dict[str, Any]],
+    *,
+    minimum_reduction: float,
+    funnel_multiplier: float,
+) -> tuple[bool, list[bool]]:
+    if len(fold_snapshots) != len(fold_baselines) or not fold_snapshots:
+        raise ValueError("design fold snapshots and baselines must align")
+    fold_flags = [
+        _eligible(
+            fold_snapshot,
+            fold_baseline,
+            minimum_reduction=minimum_reduction,
+            funnel_multiplier=funnel_multiplier,
+        )
+        for fold_snapshot, fold_baseline in zip(
+            fold_snapshots, fold_baselines, strict=True
+        )
+    ]
+    pooled = _eligible(
+        snapshot,
+        baseline,
+        minimum_reduction=minimum_reduction,
+        funnel_multiplier=funnel_multiplier,
+    )
+    return bool(pooled and all(fold_flags)), fold_flags
 
 
 def run_probe(
@@ -916,6 +966,8 @@ def run_probe(
     critic_intervention_direction_scheme: str = "random_rademacher",
     critic_intervention_hadamard_order: int = 0,
     paired_direction_estimator: str = "coordinate_median_spsa",
+    router_strength_values: tuple[float, ...] = (),
+    design_fold_count: int = 1,
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -935,6 +987,20 @@ def run_probe(
     flattened_roots = [root for role in role_roots for root in role]
     if len(flattened_roots) != len(set(flattened_roots)):
         raise ValueError("action-cost probe root roles overlap")
+    router_registry = tuple(map(float, router_strength_values))
+    if (
+        len(router_registry) != len(set(router_registry))
+        or any(not np.isfinite(value) or value < 0.0 or value > 1.0
+               for value in router_registry)
+    ):
+        raise ValueError("router strength registry must be unique and in [0, 1]")
+    fold_count = int(design_fold_count)
+    if (
+        fold_count < 1
+        or fold_count > len(design_roots)
+        or len(design_roots) % fold_count
+    ):
+        raise ValueError("design roots must divide evenly into nonempty folds")
     return_horizons = {
         "upper": int(upper_cost_return_horizon_decisions),
         "lower": int(lower_cost_return_horizon_decisions),
@@ -1114,6 +1180,23 @@ def run_probe(
         cvar_alpha=cvar_alpha,
     )
     design_baseline = design_snapshot(design_baseline_rows)
+    paths_per_root = len(design_paths) // len(design_roots)
+    roots_per_fold = len(design_roots) // fold_count
+    design_fold_slices = [
+        slice(
+            fold * roots_per_fold * paths_per_root,
+            (fold + 1) * roots_per_fold * paths_per_root,
+        )
+        for fold in range(fold_count)
+    ]
+    if sum(
+        selected.stop - selected.start for selected in design_fold_slices
+    ) != len(design_paths):
+        raise RuntimeError("design fold construction did not cover every path")
+    design_fold_baselines = [
+        design_snapshot(design_baseline_rows[selected])
+        for selected in design_fold_slices
+    ]
 
     fits_by_level: dict[str, list[_CriticFit]] = {}
     critic_metrics: dict[str, dict[str, Any]] = {}
@@ -1281,45 +1364,76 @@ def run_probe(
     eligible: list[dict[str, Any]] = []
     selected = None
     joint_direction = None
+    baseline_router_strength = float(summary["lower_action_router_strength"])
+    candidate_specs: list[dict[str, Any]] = []
     if critic_gate:
         joint_direction = np.concatenate(directions)
         direction_rms = float(np.sqrt(np.mean(np.square(joint_direction))))
         joint_direction /= direction_rms
-        deltas = [
-            -float(step_rms) * joint_direction
-            for step_rms in actor_step_rms_values
-        ]
-        evaluated = _evaluate_deltas(
-            checkpoint_path=checkpoint_path,
-            summary=summary,
-            paths=design_paths,
-            deltas=deltas,
-            workers=workers,
-            episode_horizon=episode_horizon,
-            leakage_cost_mode=leakage_cost_mode,
-            actor_update_scope=update_scope,
-        )
-        for step_rms, delta, result in zip(
-            actor_step_rms_values, deltas, evaluated, strict=True
-        ):
-            snapshot = design_snapshot(result["rows"])
-            candidate = {
+        for step_rms in actor_step_rms_values:
+            candidate_specs.append({
                 "source": (
                     str(direction_source)
                     if direction_source == "critic_gradient"
                     else f"{direction_source}:{direction_estimator}"
                 ),
                 "step_rms": float(step_rms),
-                "parameter_sha256": result["parameter_sha256"],
-                "snapshot": snapshot,
-                "_delta": delta,
-            }
-            candidate["design_eligible"] = _eligible(
+                "router_strength": baseline_router_strength,
+                "delta": -float(step_rms) * joint_direction,
+            })
+    zero_delta = np.zeros(
+        actor_update_parameter_vector(baseline_model, scope=update_scope).size,
+        dtype=np.float64,
+    )
+    for router_strength in router_registry:
+        candidate_specs.append({
+            "source": "function_preserving_router_adapter",
+            "step_rms": 0.0,
+            "router_strength": float(router_strength),
+            "delta": zero_delta.copy(),
+        })
+    if candidate_specs:
+        evaluated = _evaluate_deltas(
+            checkpoint_path=checkpoint_path,
+            summary=summary,
+            paths=design_paths,
+            deltas=[specification["delta"] for specification in candidate_specs],
+            workers=workers,
+            episode_horizon=episode_horizon,
+            leakage_cost_mode=leakage_cost_mode,
+            actor_update_scope=update_scope,
+            router_strengths=[
+                specification["router_strength"]
+                for specification in candidate_specs
+            ],
+        )
+        for specification, result in zip(
+            candidate_specs, evaluated, strict=True
+        ):
+            snapshot = design_snapshot(result["rows"])
+            fold_snapshots = [
+                design_snapshot(result["rows"][selected_slice])
+                for selected_slice in design_fold_slices
+            ]
+            design_eligible, fold_eligible = fold_guarded_design_eligibility(
                 snapshot,
                 design_baseline,
+                fold_snapshots,
+                design_fold_baselines,
                 minimum_reduction=minimum_reduction,
                 funnel_multiplier=funnel_multiplier,
             )
+            candidate = {
+                "source": str(specification["source"]),
+                "step_rms": float(specification["step_rms"]),
+                "router_strength": float(result["router_strength"]),
+                "parameter_sha256": result["parameter_sha256"],
+                "snapshot": snapshot,
+                "design_fold_snapshots": fold_snapshots,
+                "design_fold_eligible": fold_eligible,
+                "_delta": specification["delta"],
+            }
+            candidate["design_eligible"] = design_eligible
             candidates.append(candidate)
         eligible = [
             candidate for candidate in candidates
@@ -1330,6 +1444,7 @@ def run_probe(
             float(candidate["snapshot"]["frequency_violation_merit"]),
             float(candidate["snapshot"]["worst_frequency_violation"]),
             float(candidate["step_rms"]),
+            float(candidate["router_strength"]),
         ))
         selected = eligible[0] if eligible else None
 
@@ -1349,6 +1464,10 @@ def run_probe(
             episode_horizon=episode_horizon,
             leakage_cost_mode=leakage_cost_mode,
             actor_update_scope=update_scope,
+            router_strengths=[
+                baseline_router_strength,
+                float(selected["router_strength"]),
+            ],
         )
         if validation_results[0]["parameter_sha256"] != baseline_hash:
             raise RuntimeError("validation baseline changed the frozen actor")
@@ -1356,6 +1475,10 @@ def run_probe(
             selected["parameter_sha256"]
         ):
             raise RuntimeError("validation actor delta was not reconstructed")
+        if float(validation_results[1]["router_strength"]) != float(
+            selected["router_strength"]
+        ):
+            raise RuntimeError("validation router strength was not reconstructed")
         validation_baseline_rows = validation_results[0]["rows"]
         validation_snapshot = _snapshot_fn(
             summary,
@@ -1400,6 +1523,9 @@ def run_probe(
         "minimum_paired_holdout_cosine": float(
             minimum_paired_holdout_cosine
         ),
+        "baseline_router_strength": baseline_router_strength,
+        "router_strength_values": list(router_registry),
+        "design_fold_count": fold_count,
         "actor_update_parameter_count": int(
             actor_update_parameter_vector(
                 baseline_model, scope=update_scope
@@ -1448,6 +1574,7 @@ def run_probe(
         "gradient_error": gradient_error,
         "critic_gate_pass": bool(critic_gate),
         "design_baseline": design_baseline,
+        "design_fold_baselines": design_fold_baselines,
         "candidate_count": len(candidates),
         "design_eligible_candidate_count": len(eligible),
         "selected_design_candidate": public_selected,
@@ -1476,6 +1603,16 @@ def _positive_floats(value: str) -> tuple[float, ...]:
         not np.isfinite(item) or item <= 0.0 for item in values
     ):
         raise ValueError("float registry must be unique, positive, and finite")
+    return values
+
+
+def _unit_interval_floats(value: str) -> tuple[float, ...]:
+    values = tuple(float(item.strip()) for item in value.split(",") if item.strip())
+    if len(values) != len(set(values)) or any(
+        not np.isfinite(item) or item < 0.0 or item > 1.0
+        for item in values
+    ):
+        raise ValueError("router strengths must be unique, finite, and in [0, 1]")
     return values
 
 
@@ -1552,6 +1689,8 @@ def main() -> None:
         choices=("coordinate_median_spsa", "orthogonal_least_squares"),
         default="coordinate_median_spsa",
     )
+    parser.add_argument("--router-strength-values", default="")
+    parser.add_argument("--design-fold-count", type=int, default=1)
     args = parser.parse_args()
     payload = run_probe(
         checkpoint_path=args.checkpoint,
@@ -1599,6 +1738,10 @@ def main() -> None:
             args.critic_intervention_hadamard_order
         ),
         paired_direction_estimator=args.paired_direction_estimator,
+        router_strength_values=_unit_interval_floats(
+            args.router_strength_values
+        ),
+        design_fold_count=args.design_fold_count,
     )
     print(json.dumps({
         "output": str(args.output),
