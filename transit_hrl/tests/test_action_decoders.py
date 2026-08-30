@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 
 from freq_hrl.core import (
+    CausalMacroHoldAuditGaugeFixer,
+    CausalSmoothMacroGaugeFixer,
     CausalSmoothstepMacroPlan,
     CausalZeroDCMacroProjector,
     LeakageRegularizer,
@@ -19,6 +21,7 @@ def test_smoothstep_macro_plan_is_continuous_and_boundary_frozen():
     first_macro = [plan.current.copy()]
     first_macro.extend(plan.advance() for _ in range(7))
     before_boundary = first_macro[-1].copy()
+    np.testing.assert_allclose(before_boundary, [0.2], atol=0.0)
     at_boundary = plan.activate([0.8])
 
     assert float(at_boundary[0]) >= float(before_boundary[0])
@@ -26,7 +29,7 @@ def test_smoothstep_macro_plan_is_continuous_and_boundary_frozen():
     np.testing.assert_allclose(plan.target, [0.8])
     assert plan.progress == 0.0
     second_macro = [at_boundary]
-    second_macro.extend(plan.advance() for _ in range(8))
+    second_macro.extend(plan.advance() for _ in range(7))
     assert np.all(np.diff(np.asarray(second_macro).reshape(-1)) >= -1e-12)
     np.testing.assert_allclose(second_macro[-1], [0.8], atol=1e-7)
 
@@ -59,6 +62,143 @@ def test_smoothstep_plan_exposes_only_the_frozen_macro_suffix():
     assert np.all(np.diff(future) > 0.0)
     plan.advance()
     np.testing.assert_allclose(plan.future_values().reshape(-1), future[1:])
+
+
+def test_smooth_macro_gauge_is_function_preserving_and_identifiable():
+    totals = np.asarray(
+        [[0.2], [0.5], [-0.1], [0.4], [0.7], [0.0], [-0.4], [0.1]],
+        dtype=np.float64,
+    )
+    supplied_upper = 0.35 * totals
+    supplied_lower = totals - supplied_upper
+    gauge_shift = np.asarray(
+        [[0.15], [-0.2], [0.1], [0.05], [-0.1], [0.2], [-0.15], [0.0]],
+        dtype=np.float64,
+    )
+
+    def run(strength, upper, lower):
+        fixer = CausalSmoothMacroGaugeFixer(
+            macro_steps=4, alpha=0.2, strength=strength
+        )
+        fixer.reset(1)
+        rows = []
+        contexts = []
+        for index, (upper_row, lower_row) in enumerate(zip(upper, lower)):
+            rows.append(fixer.split(
+                upper_row,
+                lower_row,
+                macro_boundary=index % 4 == 0,
+                upper_limit=1.0,
+                lower_limit=1.0,
+            ))
+            contexts.append(fixer.context)
+        return rows, np.asarray(contexts)
+
+    control, control_context = run(0.0, supplied_upper, supplied_lower)
+    fixed, fixed_context = run(1.0, supplied_upper, supplied_lower)
+    shifted, shifted_context = run(
+        1.0,
+        supplied_upper + gauge_shift,
+        supplied_lower - gauge_shift,
+    )
+
+    control_upper = np.asarray([row["upper"] for row in control])
+    control_lower = np.asarray([row["lower"] for row in control])
+    fixed_upper = np.asarray([row["upper"] for row in fixed])
+    fixed_lower = np.asarray([row["lower"] for row in fixed])
+    shifted_upper = np.asarray([row["upper"] for row in shifted])
+    shifted_lower = np.asarray([row["lower"] for row in shifted])
+    np.testing.assert_allclose(control_upper, supplied_upper, atol=0.0)
+    np.testing.assert_allclose(control_lower, supplied_lower, atol=0.0)
+    np.testing.assert_allclose(control_context, fixed_context, atol=0.0)
+    np.testing.assert_allclose(fixed_context, shifted_context, atol=0.0)
+    np.testing.assert_allclose(fixed_upper, shifted_upper, atol=0.0)
+    np.testing.assert_allclose(fixed_lower, shifted_lower, atol=0.0)
+    np.testing.assert_allclose(fixed_upper + fixed_lower, totals, atol=1e-7)
+    assert np.max(np.abs(fixed_upper)) <= 1.0
+    assert np.max(np.abs(fixed_lower)) <= 1.0
+    assert max(float(row["canonical_component_clip_rate"]) for row in fixed) == 0.0
+    np.testing.assert_allclose(
+        fixed[3]["smooth_requested"], fixed[3]["smooth_target"], atol=0.0
+    )
+
+
+def test_smooth_macro_gauge_reduces_upper_hpf_against_macro_hold_gauge():
+    totals = np.repeat(
+        np.asarray([0.0, 0.75, -0.5, 0.65, -0.25], dtype=np.float64), 16
+    ).reshape(-1, 1)
+    zeros = np.zeros_like(totals)
+    held = CausalMacroHoldAuditGaugeFixer(
+        initial_alpha=0.2, adaptation_rate=0.0, strength=1.0
+    )
+    smooth = CausalSmoothMacroGaugeFixer(
+        macro_steps=16, alpha=0.2, strength=1.0
+    )
+    held.reset(1)
+    smooth.reset(1)
+    held_upper = []
+    smooth_upper = []
+    for index, total in enumerate(totals):
+        boundary = index % 16 == 0
+        held_upper.append(held.split(
+            zeros[index], total, macro_boundary=boundary, lower_limit=1.0
+        )["upper"])
+        smooth_upper.append(smooth.split(
+            zeros[index],
+            total,
+            macro_boundary=boundary,
+            upper_limit=1.0,
+            lower_limit=1.0,
+        )["upper"])
+    metric = LeakageRegularizer(upper_hf_window=8, lower_lf_window=32)
+    held_hf = metric.compute(
+        np.asarray(held_upper), zeros
+    )["UpperHFPowerAbs"]
+    smooth_hf = metric.compute(
+        np.asarray(smooth_upper), zeros
+    )["UpperHFPowerAbs"]
+    assert smooth_hf < held_hf
+
+
+def test_mujoco_smooth_macro_gauge_router_preserves_additive_action():
+    upper = np.asarray([[0.2], [0.3], [0.4], [0.5], [-0.2], [-0.1], [0.0], [0.1]])
+    lower = np.asarray([[0.1], [-0.2], [0.15], [-0.1], [0.2], [0.3], [-0.2], [0.0]])
+
+    def run(strength):
+        router = CausalLowerActionRouter(
+            mode="causal_smooth_macro_gauge",
+            alpha=0.2,
+            strength=strength,
+            macro_steps=4,
+        )
+        router.reset(1)
+        rows = []
+        contexts = []
+        for index, (upper_row, lower_row) in enumerate(zip(upper, lower)):
+            rows.append(router.route(
+                lower_row,
+                upper_action=upper_row,
+                action_limit=1.0,
+                macro_boundary=index % 4 == 0,
+            ))
+            contexts.append(router.context)
+        return rows, np.asarray(contexts)
+
+    control, control_context = run(0.0)
+    fixed, fixed_context = run(1.0)
+    control_lower = np.asarray([row["effective"] for row in control])
+    fixed_lower = np.asarray([row["effective"] for row in fixed])
+    fixed_transfer = np.asarray([row["upper_transfer"] for row in fixed])
+    np.testing.assert_allclose(control_lower, lower, atol=0.0)
+    np.testing.assert_allclose(control_context, fixed_context, atol=0.0)
+    np.testing.assert_allclose(
+        upper + fixed_transfer + fixed_lower, upper + lower, atol=1e-7
+    )
+    assert max(float(row["headroom_clip_rate"]) for row in fixed) == 0.0
+    assert lower_action_router_contract("causal_smooth_macro_gauge") == (
+        "causal_prior_total_low_pass_macro_target_with_frozen_smooth_curve_"
+        "bounded_components_and_exact_pre_split_action_execution_v1"
+    )
 
 
 def test_zero_dc_projector_is_causal_bounded_and_exact_per_macro():

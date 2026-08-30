@@ -56,7 +56,7 @@ class CausalSmoothstepMacroPlan:
     @property
     def progress(self) -> float:
         self._require_active()
-        return float(min(self._phase / self.macro_steps, 1.0))
+        return float(min(self._phase / (self.macro_steps - 1), 1.0))
 
     def activate(self, target: Any) -> np.ndarray:
         """Activate a target at a macro boundary without a target jump."""
@@ -79,8 +79,8 @@ class CausalSmoothstepMacroPlan:
         """Evaluate the frozen active plan at the next primitive step."""
 
         self._require_active()
-        self._phase = min(self._phase + 1, self.macro_steps)
-        weight = self._smoothstep(self._phase / self.macro_steps)
+        self._phase = min(self._phase + 1, self.macro_steps - 1)
+        weight = self._smoothstep(self._phase / (self.macro_steps - 1))
         self._current = self._start + weight * (self._target - self._start)
         return self.current
 
@@ -88,8 +88,8 @@ class CausalSmoothstepMacroPlan:
         """Return the next primitive value without mutating plan state."""
 
         self._require_active()
-        phase = min(self._phase + 1, self.macro_steps)
-        weight = self._smoothstep(phase / self.macro_steps)
+        phase = min(self._phase + 1, self.macro_steps - 1)
+        weight = self._smoothstep(phase / (self.macro_steps - 1))
         value = self._start + weight * (self._target - self._start)
         return value.astype(np.float32, copy=True)
 
@@ -100,7 +100,7 @@ class CausalSmoothstepMacroPlan:
         phases = range(self._phase + 1, self.macro_steps)
         values = [
             self._start
-            + self._smoothstep(phase / self.macro_steps)
+            + self._smoothstep(phase / (self.macro_steps - 1))
             * (self._target - self._start)
             for phase in phases
         ]

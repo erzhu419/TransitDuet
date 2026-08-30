@@ -11,6 +11,7 @@ from ...core.responsibility_gauge import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
+    CausalSmoothMacroGaugeFixer,
 )
 
 
@@ -35,6 +36,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
+    "causal_smooth_macro_gauge",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 )
@@ -64,6 +66,10 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
     "causal_macro_hold_audit_gauge": (
         "causal_total_action_gauge_fixed_at_upper_macro_boundaries_with_"
         "adaptive_lpf32_hpf8_feedback_and_exact_pre_split_action_execution_v1"
+    ),
+    "causal_smooth_macro_gauge": (
+        "causal_prior_total_low_pass_macro_target_with_frozen_smooth_curve_"
+        "bounded_components_and_exact_pre_split_action_execution_v1"
     ),
     "causal_macro_zero_dc": (
         "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
@@ -332,6 +338,7 @@ class CausalLowerActionRouter:
             CausalGaugeFixer
             | CausalAuditAlignedGaugeFixer
             | CausalMacroHoldAuditGaugeFixer
+            | CausalSmoothMacroGaugeFixer
             | None
         ) = None
         self._zero_dc_projector: CausalZeroDCMacroProjector | None = None
@@ -377,6 +384,12 @@ class CausalLowerActionRouter:
                 adaptation_rate=self.audit_adaptation_rate,
                 strength=self.strength,
             )
+        elif self.mode == "causal_smooth_macro_gauge":
+            self._gauge_fixer = CausalSmoothMacroGaugeFixer(
+                macro_steps=self.macro_steps,
+                alpha=self.alpha,
+                strength=self.strength,
+            )
         elif self.mode in {
             "causal_macro_zero_dc",
             "causal_macro_zero_dc_headroom",
@@ -420,11 +433,13 @@ class CausalLowerActionRouter:
         upper_action: np.ndarray | None = None,
         future_upper_actions: np.ndarray | None = None,
         action_limit: float = 1.0,
+        upper_action_limit: float = 1.0,
         macro_boundary: bool = False,
     ) -> dict[str, np.ndarray | float]:
         self._require_reset()
         latent = np.asarray(latent_action, dtype=np.float64).reshape(-1)
         limit = float(action_limit)
+        upper_limit = float(upper_action_limit)
         if (
             latent.shape != self._baseline.shape
             or not np.all(np.isfinite(latent))
@@ -432,6 +447,8 @@ class CausalLowerActionRouter:
             raise ValueError("latent lower action must be finite and aligned")
         if not np.isfinite(limit) or limit <= 0.0:
             raise ValueError("lower-action router limit must be positive")
+        if not np.isfinite(upper_limit) or upper_limit <= 0.0:
+            raise ValueError("upper-action router limit must be positive")
 
         baseline_before = self._baseline.copy()
         audit_alpha_before = 0.0
@@ -462,6 +479,7 @@ class CausalLowerActionRouter:
             "causal_total_action_gauge",
             "causal_audit_aligned_gauge",
             "causal_macro_hold_audit_gauge",
+            "causal_smooth_macro_gauge",
         }:
             if upper_action is None:
                 raise ValueError(
@@ -476,27 +494,38 @@ class CausalLowerActionRouter:
                 "causal_total_action_gauge",
                 "causal_audit_aligned_gauge",
                 "causal_macro_hold_audit_gauge",
+                "causal_smooth_macro_gauge",
             }:
                 if self._gauge_fixer is None:
                     raise RuntimeError("total-action gauge router is not initialized")
-                fixed = (
-                    self._gauge_fixer.split(
+                if self.mode == "causal_smooth_macro_gauge":
+                    fixed = self._gauge_fixer.split(
+                        upper,
+                        latent,
+                        macro_boundary=bool(macro_boundary),
+                        upper_limit=upper_limit,
+                        lower_limit=limit,
+                    )
+                elif self.mode == "causal_macro_hold_audit_gauge":
+                    fixed = self._gauge_fixer.split(
                         upper,
                         latent,
                         macro_boundary=bool(macro_boundary),
                         lower_limit=limit,
                     )
-                    if self.mode == "causal_macro_hold_audit_gauge"
-                    else self._gauge_fixer.split(
+                else:
+                    fixed = self._gauge_fixer.split(
                         upper,
                         latent,
                         lower_limit=limit,
                     )
-                )
                 audit_alpha_before = float(fixed.get("alpha_before", 0.0))
                 audit_alpha_after = float(fixed.get("alpha_after", 0.0))
                 audit_band_imbalance = float(fixed.get(
                     "normalized_band_imbalance", 0.0
+                ))
+                headroom_clip_rate = float(fixed.get(
+                    "canonical_component_clip_rate", 0.0
                 ))
                 transfer_target = np.asarray(
                     fixed["canonical_upper"], dtype=np.float64
@@ -585,6 +614,7 @@ class CausalLowerActionRouter:
             "causal_total_action_gauge",
             "causal_audit_aligned_gauge",
             "causal_macro_hold_audit_gauge",
+            "causal_smooth_macro_gauge",
         }:
             if self._gauge_fixer is None:
                 raise RuntimeError("total-action gauge router is not initialized")
@@ -611,6 +641,7 @@ class CausalLowerActionRouter:
                 "causal_total_action_gauge",
                 "causal_audit_aligned_gauge",
                 "causal_macro_hold_audit_gauge",
+                "causal_smooth_macro_gauge",
             }
             else np.zeros_like(removed)
         )

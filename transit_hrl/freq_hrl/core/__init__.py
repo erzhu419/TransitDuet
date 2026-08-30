@@ -27,6 +27,7 @@ from .responsibility_gauge import (
     CausalAuditAlignedGaugeFixer,
     CausalGaugeFixer,
     CausalMacroHoldAuditGaugeFixer,
+    CausalSmoothMacroGaugeFixer,
     canonical_responsibility_trace,
 )
 from .router import FrequencyRouter
@@ -51,6 +52,7 @@ __all__ = [
     "CausalGaugeFixer",
     "CausalAuditAlignedGaugeFixer",
     "CausalMacroHoldAuditGaugeFixer",
+    "CausalSmoothMacroGaugeFixer",
     "CausalLowFrequencyEffectProjector",
     "CausalRollingBandTracker",
     "CausalSmoothstepMacroPlan",

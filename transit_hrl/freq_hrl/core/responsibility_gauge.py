@@ -7,6 +7,8 @@ from typing import Any
 
 import numpy as np
 
+from .action_decoders import CausalSmoothstepMacroPlan
+
 
 def _finite_vector(value: Any, *, name: str) -> np.ndarray:
     vector = np.asarray(value, dtype=np.float64).reshape(-1)
@@ -500,6 +502,165 @@ class CausalMacroHoldAuditGaugeFixer:
     def _require_reset(self) -> None:
         if self._dimension < 1:
             raise RuntimeError("macro-hold gauge fixer must be reset")
+
+
+@dataclass
+class CausalSmoothMacroGaugeFixer:
+    """Gauge-fix additive responsibilities with a frozen smooth macro plan.
+
+    The canonical target is the prior-step causal low-pass estimate of the
+    total action, sampled only at an upper-policy boundary. A smoothstep curve
+    connects consecutive targets over the primitive steps of that macro
+    interval. The requested curve is projected onto the exact per-step
+    component-feasibility interval, and the lower responsibility is its
+    additive complement.
+
+    The low-pass state and frozen curve depend only on the total action, never
+    on ``strength`` or the supplied responsibility split. Thus a strength-zero
+    control and a full-strength gauge follow exactly the same environment path
+    while exposing different, identifiable upper/lower coordinates.
+    """
+
+    macro_steps: int = 16
+    alpha: float = 0.10
+    strength: float = 1.0
+
+    def __post_init__(self) -> None:
+        self.macro_steps = int(self.macro_steps)
+        self.alpha = float(self.alpha)
+        self.strength = float(self.strength)
+        if self.macro_steps < 2:
+            raise ValueError("smooth macro gauge requires at least two steps")
+        if not np.isfinite(self.alpha) or not 0.0 < self.alpha <= 1.0:
+            raise ValueError("smooth macro gauge alpha must be in (0, 1]")
+        if not np.isfinite(self.strength) or not 0.0 <= self.strength <= 1.0:
+            raise ValueError("smooth macro gauge strength must be in [0, 1]")
+        self._dimension = 0
+        self._low_pass = np.zeros(0, dtype=np.float64)
+        self._plan = CausalSmoothstepMacroPlan(self.macro_steps)
+        self._has_total = False
+        self._has_macro = False
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("smooth macro gauge action_dim must be positive")
+        self._dimension = int(action_dim)
+        self._low_pass = np.zeros(self._dimension, dtype=np.float64)
+        self._plan.reset(self._dimension)
+        self._has_total = False
+        self._has_macro = False
+
+    @property
+    def context(self) -> np.ndarray:
+        self._require_reset()
+        return self._low_pass.astype(np.float32, copy=True)
+
+    def split(
+        self,
+        upper: Any,
+        lower: Any,
+        *,
+        macro_boundary: bool,
+        upper_limit: float = 1.0,
+        lower_limit: float = 1.0,
+    ) -> dict[str, np.ndarray | float]:
+        """Return a bounded smooth split with exact additive reconstruction."""
+
+        self._require_reset()
+        upper_value = _finite_vector(upper, name="upper action")
+        lower_value = _finite_vector(lower, name="lower action")
+        if (
+            upper_value.shape != (self._dimension,)
+            or lower_value.shape != upper_value.shape
+        ):
+            raise ValueError(
+                "smooth macro gauge actions must align with reset action_dim"
+            )
+        if not isinstance(macro_boundary, (bool, np.bool_)):
+            raise ValueError("macro_boundary must be boolean")
+        upper_bound = float(upper_limit)
+        lower_bound = float(lower_limit)
+        if not np.isfinite(upper_bound) or upper_bound <= 0.0:
+            raise ValueError("smooth macro gauge upper_limit must be positive")
+        if not np.isfinite(lower_bound) or lower_bound <= 0.0:
+            raise ValueError("smooth macro gauge lower_limit must be positive")
+        if not self._has_macro and not bool(macro_boundary):
+            raise RuntimeError(
+                "smooth macro gauge requires a boundary on its first split"
+            )
+
+        total = upper_value + lower_value
+        low_pass_before = self._low_pass.copy()
+        if bool(macro_boundary):
+            smooth_requested = np.asarray(
+                self._plan.activate(low_pass_before), dtype=np.float64
+            )
+            self._has_macro = True
+        else:
+            smooth_requested = np.asarray(
+                self._plan.advance(), dtype=np.float64
+            )
+
+        if not self._has_total:
+            self._low_pass = total.copy()
+            self._has_total = True
+        else:
+            self._low_pass += self.alpha * (total - self._low_pass)
+
+        feasible_low = np.maximum(-upper_bound, total - lower_bound)
+        feasible_high = np.minimum(upper_bound, total + lower_bound)
+        if np.any(feasible_low > feasible_high + 1e-10):
+            raise RuntimeError(
+                "smooth macro gauge has no feasible bounded component split"
+            )
+        feasible_low = np.minimum(feasible_low, feasible_high)
+        canonical_upper = np.clip(
+            smooth_requested, feasible_low, feasible_high
+        )
+        canonical_lower = total - canonical_upper
+        canonical_transfer = canonical_upper - upper_value
+        transfer = self.strength * canonical_transfer
+        fixed_upper = upper_value + transfer
+        fixed_lower = lower_value - transfer
+        reconstruction_error = fixed_upper + fixed_lower - total
+        component_clip = canonical_upper - smooth_requested
+
+        return {
+            "upper": fixed_upper.astype(np.float32, copy=True),
+            "lower": fixed_lower.astype(np.float32, copy=True),
+            "total": total.astype(np.float32, copy=True),
+            "transfer": transfer.astype(np.float32, copy=True),
+            "canonical_upper": canonical_upper.astype(np.float32, copy=True),
+            "canonical_lower": canonical_lower.astype(np.float32, copy=True),
+            "low_pass_before": low_pass_before.astype(np.float32, copy=True),
+            "low_pass_after": self._low_pass.astype(np.float32, copy=True),
+            "smooth_requested": smooth_requested.astype(np.float32, copy=True),
+            "smooth_target": self._plan.target,
+            "smooth_progress": self._plan.progress,
+            "feasible_upper_low": feasible_low.astype(np.float32, copy=True),
+            "feasible_upper_high": feasible_high.astype(np.float32, copy=True),
+            "alpha_before": self.alpha,
+            "alpha_after": self.alpha,
+            "normalized_band_imbalance": 0.0,
+            "macro_boundary": float(bool(macro_boundary)),
+            "reconstruction_error": reconstruction_error.astype(
+                np.float64, copy=True
+            ),
+            "canonical_component_clip_rate": float(np.mean(
+                np.abs(component_clip) > 1e-12
+            )),
+            "canonical_component_clip_rms": float(np.sqrt(np.mean(
+                np.square(component_clip)
+            ))),
+            "canonical_lower_clip_rate": float(np.mean(
+                np.abs(component_clip) > 1e-12
+            )),
+            "gauge_fixed": float(self.strength == 1.0),
+        }
+
+    def _require_reset(self) -> None:
+        if self._dimension < 1:
+            raise RuntimeError("smooth macro gauge fixer must be reset")
 
 
 def canonical_responsibility_trace(

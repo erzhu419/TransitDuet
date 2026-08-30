@@ -70,6 +70,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V17 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1 = (
     "freq_hrl_mujoco_shared_core_v17_1_headroom_homotopy_promotion"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2 = (
+    "freq_hrl_mujoco_shared_core_v17_2_smooth_macro_gauge"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -77,6 +80,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -295,6 +299,7 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
+    "causal_smooth_macro_gauge",
     "causal_macro_zero_dc",
     "causal_macro_zero_dc_headroom",
 }
@@ -304,6 +309,7 @@ FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_total_action_gauge",
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
+    "causal_smooth_macro_gauge",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -937,6 +943,10 @@ def _episode_row(
         float(np.mean(np.square(np.diff(executed, axis=0))))
         if executed.shape[0] > 1 else 0.0
     )
+    additive_action = upper + lower
+    additive_clip_excess = np.maximum(
+        np.abs(additive_action) - 1.0, 0.0
+    )
     return {
         "seed": int(seed),
         "environment": str(env_id),
@@ -1028,8 +1038,14 @@ def _episode_row(
             if responsibility_energy > 0.0 else 0.0
         ),
         "AdditiveActionClipRate": float(np.mean(
-            np.abs(upper + lower) > 1.0
+            additive_clip_excess > 1e-7
         )),
+        "AdditiveActionClipExcessMax": float(np.max(
+            additive_clip_excess
+        )),
+        "AdditiveActionClipExcessRMS": float(np.sqrt(np.mean(
+            np.square(additive_clip_excess)
+        ))),
         "UpperHFPower": float(leakage["UpperHFPower"]),
         "UpperHFPowerAbs": float(leakage["UpperHFPowerAbs"]),
         "LatentUpperHFPower": float(latent_leakage["UpperHFPower"]),
@@ -1206,6 +1222,9 @@ def rollout_hierarchical(
     headroom_zero_dc_router = (
         str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
     )
+    smooth_macro_gauge_router = (
+        str(lower_action_router_mode) == "causal_smooth_macro_gauge"
+    )
     if headroom_zero_dc_router and (
         str(upper_action_decoder_mode) != "causal_smoothstep_plan"
     ):
@@ -1215,6 +1234,16 @@ def rollout_hierarchical(
     if headroom_zero_dc_router and str(responsibility_mode) != "additive":
         raise ValueError(
             "headroom zero-DC routing requires additive responsibility"
+        )
+    if smooth_macro_gauge_router and (
+        str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "smooth macro gauge routing requires a frozen smooth upper plan"
+        )
+    if smooth_macro_gauge_router and str(responsibility_mode) != "additive":
+        raise ValueError(
+            "smooth macro gauge routing requires additive responsibility"
         )
     if float(upper_promotion_gain) > 0.0 and not headroom_zero_dc_router:
         raise ValueError(
@@ -1513,6 +1542,7 @@ def rollout_hierarchical(
                         "causal_total_action_gauge",
                         "causal_audit_aligned_gauge",
                         "causal_macro_hold_audit_gauge",
+                        "causal_smooth_macro_gauge",
                         "causal_macro_zero_dc_headroom",
                     }
                     else None
@@ -1522,6 +1552,7 @@ def rollout_hierarchical(
                     if headroom_zero_dc_router else None
                 ),
                 action_limit=float(lower_action_scale),
+                upper_action_limit=float(upper_action_scale),
                 macro_boundary=upper_decision_now,
             )
             raw_lower_residual = np.asarray(
@@ -2271,6 +2302,8 @@ SUMMARY_KEYS = [
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
     "AdditiveActionClipRate",
+    "AdditiveActionClipExcessMax",
+    "AdditiveActionClipExcessRMS",
     "UpperHFPower",
     "UpperHFPowerAbs",
     "LatentUpperHFPower",
@@ -3854,6 +3887,20 @@ def train_mujoco_method(
             "headroom zero-DC routing requires additive responsibility"
         )
     if (
+        str(lower_action_router_mode) == "causal_smooth_macro_gauge"
+        and str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "smooth macro gauge routing requires a frozen smooth upper plan"
+        )
+    if (
+        str(lower_action_router_mode) == "causal_smooth_macro_gauge"
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "smooth macro gauge routing requires additive responsibility"
+        )
+    if (
         float(upper_promotion_gain) > 0.0
         and str(lower_action_router_mode)
         != "causal_macro_zero_dc_headroom"
@@ -3862,6 +3909,9 @@ def train_mujoco_method(
             "upper promotion requires headroom zero-DC lower routing"
         )
     inferred_protocol_version = (
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
+        if str(lower_action_router_mode) == "causal_smooth_macro_gauge"
+        else
         MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
         if str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V17
@@ -3891,6 +3941,19 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2}
+    ):
+        raise ValueError("v17.2 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
+        and inferred_protocol_version != MUJOCO_CONTROL_PROTOCOL_VERSION_V17_2
+    ):
+        raise ValueError(
+            "the v17.2 protocol label requires smooth macro gauge routing"
+        )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
         and selected_protocol_version
@@ -4386,6 +4449,8 @@ def train_mujoco_method(
     if (
         effective_router_training_schedule != "constant"
         and not effective_router_observe_strength
+        and effective_lower_action_router_mode
+        != "causal_smooth_macro_gauge"
     ):
         raise ValueError(
             "a router curriculum must expose its strength in policy state"
@@ -5844,7 +5909,8 @@ def train_mujoco_method(
         "lower_action_scale": float(lower_action_scale),
         "upper_action_decoder_mode": str(upper_action_decoder_mode),
         "upper_action_decoder_contract": (
-            "boundary_sampled_c1_smoothstep_primitive_execution_v1"
+            "boundary_sampled_endpoint_exact_c1_smoothstep_primitive_"
+            "execution_v2"
             if str(upper_action_decoder_mode) == "causal_smoothstep_plan"
             else "macro_target_zero_order_hold_v1"
         ),
@@ -5901,7 +5967,11 @@ def train_mujoco_method(
             float(value) for value in router_training_strengths_by_iteration
         ],
         "lower_action_router_schedule_contract": (
-            "curriculum_applies_only_to_sampled_training_rollouts_while_"
+            "strength_independent_total_action_state_allows_unobserved_"
+            "training_homotopy_with_frozen_target_evaluation_v2"
+            if effective_lower_action_router_mode
+            == "causal_smooth_macro_gauge"
+            else "curriculum_applies_only_to_sampled_training_rollouts_while_"
             "checkpoint_selection_and_heldout_use_frozen_target_v1"
         ),
         "lower_action_router_contract": lower_action_router_contract(
@@ -5915,6 +5985,11 @@ def train_mujoco_method(
             "latent_and_effective_lower_actions_both_reported_v1"
         ),
         "lower_action_headroom_contract": (
+            "smooth_canonical_upper_projected_to_exact_joint_component_"
+            "feasibility_interval_each_step_v1"
+            if effective_lower_action_router_mode
+            == "causal_smooth_macro_gauge"
+            else
             "frozen_upper_macro_suffix_reserves_per_step_total_action_"
             "headroom_before_environment_disturbance_v1"
             if effective_lower_action_router_mode
@@ -5945,6 +6020,11 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
+            "causal_total_action_low_pass_context_independent_of_gauge_"
+            "strength_v1"
+            if effective_lower_action_router_mode
+            == "causal_smooth_macro_gauge"
+            else
             "causal_previous_macro_lower_mean_for_upper_replanning_and_"
             "running_raw_lower_lf_with_zero_dc_debt_for_lower_control_v1"
             if effective_lower_action_router_mode
