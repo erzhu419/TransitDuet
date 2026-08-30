@@ -1088,3 +1088,43 @@ regret `0.000090`, while absolute target cost remained `0.00569`. This confirms
 that the new objective and diagnostics execute as designed without forcing
 absolute target tracking. The smoke is not an efficacy result and does not
 change the locked 40-episode screen.
+
+## Engineering-v13 zero-hold regret outcome (2026-08-30)
+
+All 48 scheduler shards completed across `node001` through `node006`. The
+strict aggregate verifies the exact 12-config matrix, four training seeds,
+four common-random-number evaluation seeds, 192 unique checkpoint-39
+rollouts, complete run manifests, and clean source commit
+`0d08c2e2449bdf9c94d8c178a54ca999dc6b2bc6`. The locked V13 gate returns
+`no_pass`; no candidate is eligible for confirmation or a paper claim.
+
+The failure is an outcome tradeoff, not a broken regret constraint. Every V13
+candidate satisfies its registered positive-regret limit, reduces regret from
+the same-entropy V11 control, recovers journey time from V12, retains zero
+execution adjustment, and exceeds the causal-evidence threshold. None reaches
+the preregistered valid-state entropy target within 40 episodes. More
+importantly, no row satisfies all journey, CV, holding, denied-dispatch, and
+matched-control gates.
+
+The weakest-dual, tightest-limit row (`l001/e25/r00025`) has mean action regret
+`7.25e-6`; it improves journey by `0.5160 min` and CV by `0.02436` versus
+`noguard`, with both confidence-interval upper bounds below zero. It nevertheless
+worsens CV by `0.01659` versus confirmed main and by `0.01180` versus the
+same-entropy V11 control. The looser `l001/e25/r0010` row is the closest V13
+frontier point to V11: it improves journey by `0.3802 min` versus V11 while
+worsening CV by only `0.00265`, but it adds `4655.9` holding-vehicle seconds
+versus `noguard` and misses the journey and CV confidence gates against that
+reference. Stronger initial duals reduce holding and journey further but lose
+CV. Mean valid-state entropy spans approximately `0.896--1.191`, rather than
+the target `0.4865`.
+
+Synchronized episode traces show that the conditional-temperature optimizer is
+active: regularity alpha falls from about `0.0496` to `0.038--0.040`, entropy
+falls, and action regret responds monotonically to the configured limit and
+dual. The remaining frontier is driven chiefly by average holding allocation.
+A further global lambda or regret-limit sweep would move along the same
+journey--CV curve rather than resolve it. V14 must therefore use the existing
+deployable APC/AVL load, capacity, queue, and causal balancing target to allocate
+regularity-improving holding selectively across states while retaining the
+zero-hold regret constraint. Replay-level target-by-load allocation is audited
+before that objective is implemented.
