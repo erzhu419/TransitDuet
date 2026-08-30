@@ -106,8 +106,8 @@ def build_scheduler_spec(
             f"Freq-HRL/{SIGNATURE_VERSION}/{environment}/single-cell"
         ),
         "vram": 0,
-        "ram_mb": 768,
-        "cpu": 1,
+        "ram_mb": int(getattr(spec, "RAM_MB_PER_TASK", 768)),
+        "cpu": int(getattr(spec, "CPU_PER_TASK", 1)),
         "priority": str(args.priority),
         "ckpt_dir": str(output),
         "ckpt_glob": "probe.json",
@@ -120,7 +120,7 @@ def build_scheduler_spec(
         ],
         "allow_cpu_training": True,
         "cpu_training_justification": (
-            "Independent deterministic MuJoCo guard probes use one CPU core."
+            "Independent deterministic MuJoCo guard probes use declared CPU cores."
         ),
         "reroute_on_node_down": True,
         "node_down_requeue_s": 600,

@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
+import multiprocessing
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -25,7 +27,9 @@ from scripts.probe_mujoco_radial_restoration import (
 )
 
 
-PROBE_VERSION = "mujoco_zeroth_order_actor_restoration_probe_v1"
+LEGACY_PROBE_VERSION = "mujoco_zeroth_order_actor_restoration_probe_v1"
+DISTRIBUTIONAL_PROBE_VERSION = "mujoco_zeroth_order_actor_restoration_probe_v2"
+PROBE_VERSIONS = {LEGACY_PROBE_VERSION, DISTRIBUTIONAL_PROBE_VERSION}
 
 
 def _parse_positive_floats(value: str) -> tuple[float, ...]:
@@ -137,8 +141,36 @@ def _paths_for_roots(env_id: str, roots: Iterable[int]) -> list[dict[str, Any]]:
     ]
 
 
+def _evaluate_delta_job(job: dict[str, Any]) -> dict[str, Any]:
+    """Evaluate one actor-head delta on all paths assigned to a worker."""
+    torch.set_num_threads(1)
+    checkpoint = torch.load(
+        job["checkpoint_path"], map_location="cpu", weights_only=False
+    )
+    model = _load_model(checkpoint)
+    apply_actor_output_head_delta(
+        model, np.asarray(job["delta"], dtype=np.float64)
+    )
+    rows = _evaluate_rows(
+        model,
+        summary=job["summary"],
+        paths=job["paths"],
+        episode_horizon=int(job["episode_horizon"]),
+        leakage_cost_mode=str(job["leakage_cost_mode"]),
+        router_strength=float(job["router_strength"]),
+    )
+    return {
+        "parameter_sha256": _model_parameter_sha256(model),
+        "rows": rows,
+    }
+
+
 def _snapshot_fn(
-    summary: dict[str, Any], baseline_rows: list[dict[str, Any]]
+    summary: dict[str, Any],
+    baseline_rows: list[dict[str, Any]],
+    *,
+    risk_mode: str,
+    cvar_alpha: float,
 ):
     modes = tuple(v14_17_spec.TRAINING_DISTURBANCE_MODES)
 
@@ -159,10 +191,8 @@ def _snapshot_fn(
             upper_power_floor=float(
                 summary["upper_deployment_frequency_rms_budget"]
             ) ** 2,
-            risk_mode=str(summary["deployment_frequency_closed_loop_risk_mode"]),
-            cvar_alpha=float(
-                summary["deployment_frequency_closed_loop_cvar_alpha"]
-            ),
+            risk_mode=str(risk_mode),
+            cvar_alpha=float(cvar_alpha),
         )
 
     return snapshot
@@ -201,7 +231,15 @@ def run_probe(
     funnel_multiplier: float,
     episode_horizon: int,
     leakage_cost_mode: str,
+    workers: int = 1,
+    risk_mode: str | None = None,
+    cvar_alpha: float | None = None,
+    probe_version: str = LEGACY_PROBE_VERSION,
 ) -> dict[str, Any]:
+    if int(workers) < 1:
+        raise ValueError("zeroth-order probe requires at least one worker")
+    if str(probe_version) not in PROBE_VERSIONS:
+        raise ValueError(f"unsupported zeroth-order probe version: {probe_version}")
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
     )
@@ -211,6 +249,16 @@ def run_probe(
     baseline_hash = _model_parameter_sha256(baseline_model)
     if baseline_hash != str(checkpoint["frozen_parameter_sha256"]):
         raise RuntimeError("zeroth-order probe did not reconstruct the frozen actor")
+    resolved_risk_mode = str(
+        risk_mode
+        if risk_mode is not None
+        else summary["deployment_frequency_closed_loop_risk_mode"]
+    )
+    resolved_cvar_alpha = float(
+        cvar_alpha
+        if cvar_alpha is not None
+        else summary["deployment_frequency_closed_loop_cvar_alpha"]
+    )
     design_paths = _paths_for_roots(summary["environment"], design_roots)
     validation_paths = _paths_for_roots(
         summary["environment"], validation_roots
@@ -222,111 +270,174 @@ def run_probe(
     }:
         raise RuntimeError("zeroth-order design and validation paths overlap")
 
-    def evaluate(model: Any, paths: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        return _evaluate_rows(
-            model,
-            summary=summary,
-            paths=paths,
-            episode_horizon=episode_horizon,
-            leakage_cost_mode=leakage_cost_mode,
-            router_strength=float(summary["lower_action_router_strength"]),
-        )
-
-    design_baseline_rows = evaluate(baseline_model, design_paths)
-    design_snapshot = _snapshot_fn(summary, design_baseline_rows)
-    design_baseline = design_snapshot(design_baseline_rows)
     dimension = actor_output_head_vector(baseline_model).size
     directions = antithetic_directions(dimension, direction_count, direction_seed)
-    pair_snapshots = []
-    direct_candidates = []
-    for index, direction in enumerate(directions):
-        pair = []
-        for sign in (1.0, -1.0):
-            model = _load_model(checkpoint)
-            apply_actor_output_head_delta(
-                model, sign * float(perturb_rms) * direction
-            )
-            snapshot = design_snapshot(evaluate(model, design_paths))
-            pair.append(snapshot)
-            direct_candidates.append({
-                "source": "antithetic_direction",
-                "direction_index": int(index),
-                "orientation": float(sign),
-                "step_rms": float(perturb_rms),
-                "parameter_sha256": _model_parameter_sha256(model),
-                "snapshot": snapshot,
-            })
-        pair_snapshots.append((pair[0], pair[1]))
-    gradient = ranked_antithetic_gradient(directions, pair_snapshots)
-    gradient_candidates = []
-    for step_rms in step_rms_values:
-        for orientation in (-1.0, 1.0):
-            model = _load_model(checkpoint)
-            apply_actor_output_head_delta(
-                model, orientation * float(step_rms) * gradient
-            )
+    checkpoint_absolute = str(checkpoint_path.resolve())
+
+    executor = None
+    if int(workers) > 1:
+        executor = concurrent.futures.ProcessPoolExecutor(
+            max_workers=int(workers),
+            mp_context=multiprocessing.get_context("spawn"),
+        )
+
+    def evaluate_deltas(
+        deltas: list[np.ndarray], paths: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        jobs = [{
+            "checkpoint_path": checkpoint_absolute,
+            "summary": summary,
+            "paths": paths,
+            "episode_horizon": int(episode_horizon),
+            "leakage_cost_mode": str(leakage_cost_mode),
+            "router_strength": float(summary["lower_action_router_strength"]),
+            "delta": np.asarray(delta, dtype=np.float64),
+        } for delta in deltas]
+        if executor is None:
+            return [_evaluate_delta_job(job) for job in jobs]
+        return list(executor.map(_evaluate_delta_job, jobs))
+
+    try:
+        direct_specs = [
+            (index, sign, sign * float(perturb_rms) * direction)
+            for index, direction in enumerate(directions)
+            for sign in (1.0, -1.0)
+        ]
+        design_results = evaluate_deltas(
+            [np.zeros(dimension, dtype=np.float64)]
+            + [row[2] for row in direct_specs],
+            design_paths,
+        )
+        if design_results[0]["parameter_sha256"] != baseline_hash:
+            raise RuntimeError("parallel baseline reconstruction changed the actor")
+        design_baseline_rows = design_results[0]["rows"]
+        design_snapshot = _snapshot_fn(
+            summary,
+            design_baseline_rows,
+            risk_mode=resolved_risk_mode,
+            cvar_alpha=resolved_cvar_alpha,
+        )
+        design_baseline = design_snapshot(design_baseline_rows)
+        direct_candidates = []
+        pair_snapshots = []
+        for pair_index in range(len(directions)):
+            pair = []
+            for orientation_index in range(2):
+                result_index = 1 + 2 * pair_index + orientation_index
+                index, orientation, delta = direct_specs[
+                    2 * pair_index + orientation_index
+                ]
+                result = design_results[result_index]
+                snapshot = design_snapshot(result["rows"])
+                pair.append(snapshot)
+                direct_candidates.append({
+                    "source": "antithetic_direction",
+                    "direction_index": int(index),
+                    "orientation": float(orientation),
+                    "step_rms": float(perturb_rms),
+                    "parameter_sha256": result["parameter_sha256"],
+                    "snapshot": snapshot,
+                    "_delta": delta,
+                })
+            pair_snapshots.append((pair[0], pair[1]))
+        gradient = ranked_antithetic_gradient(directions, pair_snapshots)
+        gradient_specs = [
+            (orientation, step_rms, orientation * float(step_rms) * gradient)
+            for step_rms in step_rms_values
+            for orientation in (-1.0, 1.0)
+        ]
+        gradient_results = evaluate_deltas(
+            [row[2] for row in gradient_specs], design_paths
+        )
+        gradient_candidates = []
+        for (orientation, step_rms, delta), result in zip(
+            gradient_specs, gradient_results, strict=True
+        ):
             gradient_candidates.append({
                 "source": "ranked_antithetic_gradient",
                 "direction_index": None,
                 "orientation": float(orientation),
                 "step_rms": float(step_rms),
-                "parameter_sha256": _model_parameter_sha256(model),
-                "snapshot": design_snapshot(evaluate(model, design_paths)),
+                "parameter_sha256": result["parameter_sha256"],
+                "snapshot": design_snapshot(result["rows"]),
+                "_delta": delta,
             })
-    candidates = direct_candidates + gradient_candidates
-    for candidate in candidates:
-        candidate["design_eligible"] = _eligible(
-            candidate["snapshot"],
-            design_baseline,
-            minimum_reduction=minimum_reduction,
-            funnel_multiplier=funnel_multiplier,
-        )
-    eligible = [candidate for candidate in candidates if candidate["design_eligible"]]
-    eligible.sort(key=lambda candidate: (
-        _fitness_key(candidate["snapshot"]),
-        float(candidate["step_rms"]),
-        str(candidate["source"]),
-        float(candidate["orientation"]),
-    ))
-    selected = eligible[0] if eligible else None
-    validation_baseline = None
-    validation_candidate = None
-    validation_supported = False
+        candidates = direct_candidates + gradient_candidates
+        for candidate in candidates:
+            candidate["design_eligible"] = _eligible(
+                candidate["snapshot"],
+                design_baseline,
+                minimum_reduction=minimum_reduction,
+                funnel_multiplier=funnel_multiplier,
+            )
+        eligible = [
+            candidate for candidate in candidates
+            if candidate["design_eligible"]
+        ]
+        eligible.sort(key=lambda candidate: (
+            _fitness_key(candidate["snapshot"]),
+            float(candidate["step_rms"]),
+            str(candidate["source"]),
+            float(candidate["orientation"]),
+        ))
+        selected = eligible[0] if eligible else None
+        validation_baseline = None
+        validation_candidate = None
+        validation_supported = False
+        if selected is not None:
+            validation_results = evaluate_deltas(
+                [
+                    np.zeros(dimension, dtype=np.float64),
+                    np.asarray(selected["_delta"], dtype=np.float64),
+                ],
+                validation_paths,
+            )
+            if validation_results[0]["parameter_sha256"] != baseline_hash:
+                raise RuntimeError(
+                    "parallel validation baseline changed the actor"
+                )
+            if validation_results[1]["parameter_sha256"] != str(
+                selected["parameter_sha256"]
+            ):
+                raise RuntimeError(
+                    "selected zeroth-order actor delta was not reconstructed exactly"
+                )
+            validation_baseline_rows = validation_results[0]["rows"]
+            validation_snapshot = _snapshot_fn(
+                summary,
+                validation_baseline_rows,
+                risk_mode=resolved_risk_mode,
+                cvar_alpha=resolved_cvar_alpha,
+            )
+            validation_baseline = validation_snapshot(
+                validation_baseline_rows
+            )
+            validation_candidate = validation_snapshot(
+                validation_results[1]["rows"]
+            )
+            validation_supported = _eligible(
+                validation_candidate,
+                validation_baseline,
+                minimum_reduction=minimum_reduction,
+                funnel_multiplier=funnel_multiplier,
+            )
+    finally:
+        if executor is not None:
+            executor.shutdown(wait=True, cancel_futures=False)
+
+    public_candidates = [
+        {key: value for key, value in candidate.items() if key != "_delta"}
+        for candidate in candidates
+    ]
+    public_selected = None
     if selected is not None:
-        validation_baseline_rows = evaluate(baseline_model, validation_paths)
-        validation_snapshot = _snapshot_fn(summary, validation_baseline_rows)
-        validation_baseline = validation_snapshot(validation_baseline_rows)
-        selected_model = _load_model(checkpoint)
-        if selected["source"] == "antithetic_direction":
-            delta = (
-                float(selected["orientation"])
-                * float(selected["step_rms"])
-                * directions[int(selected["direction_index"])]
-            )
-        else:
-            delta = (
-                float(selected["orientation"])
-                * float(selected["step_rms"])
-                * gradient
-            )
-        apply_actor_output_head_delta(selected_model, delta)
-        if _model_parameter_sha256(selected_model) != str(
-            selected["parameter_sha256"]
-        ):
-            raise RuntimeError(
-                "selected zeroth-order actor delta was not reconstructed exactly"
-            )
-        validation_candidate = validation_snapshot(
-            evaluate(selected_model, validation_paths)
+        selected_index = next(
+            index for index, candidate in enumerate(candidates)
+            if candidate is selected
         )
-        validation_supported = _eligible(
-            validation_candidate,
-            validation_baseline,
-            minimum_reduction=minimum_reduction,
-            funnel_multiplier=funnel_multiplier,
-        )
+        public_selected = public_candidates[selected_index]
     payload = {
-        "probe_version": PROBE_VERSION,
+        "probe_version": str(probe_version),
         "checkpoint": str(checkpoint_path),
         "summary": str(summary_path),
         "environment": str(summary["environment"]),
@@ -343,14 +454,17 @@ def run_probe(
         "validation_path_count": len(validation_paths),
         "minimum_reduction": float(minimum_reduction),
         "funnel_multiplier": float(funnel_multiplier),
+        "workers": int(workers),
+        "risk_mode": resolved_risk_mode,
+        "cvar_alpha": resolved_cvar_alpha,
         "design_baseline": design_baseline,
         "candidate_count": len(candidates),
         "design_eligible_candidate_count": len(eligible),
-        "selected_design_candidate": selected,
+        "selected_design_candidate": public_selected,
         "validation_baseline": validation_baseline,
         "validation_candidate": validation_candidate,
         "validation_supported": bool(validation_supported),
-        "candidates": candidates,
+        "candidates": public_candidates,
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -376,6 +490,13 @@ def main() -> None:
     parser.add_argument("--funnel-multiplier", type=float, default=3.0)
     parser.add_argument("--episode-horizon", type=int, default=1000)
     parser.add_argument("--leakage-cost-mode", default="power_excess")
+    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--risk-mode")
+    parser.add_argument("--cvar-alpha", type=float)
+    parser.add_argument(
+        "--probe-version", choices=sorted(PROBE_VERSIONS),
+        default=LEGACY_PROBE_VERSION,
+    )
     args = parser.parse_args()
     roots = lambda value: tuple(  # noqa: E731
         int(item.strip()) for item in value.split(",") if item.strip()
@@ -394,6 +515,10 @@ def main() -> None:
         funnel_multiplier=args.funnel_multiplier,
         episode_horizon=args.episode_horizon,
         leakage_cost_mode=args.leakage_cost_mode,
+        workers=args.workers,
+        risk_mode=args.risk_mode,
+        cvar_alpha=args.cvar_alpha,
+        probe_version=args.probe_version,
     )
     print(json.dumps({
         "output": str(args.output),
