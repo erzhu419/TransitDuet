@@ -1,0 +1,113 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_zero_dc_plan_development_v1",
+  "status": "zero_dc_plan_screen_not_supported",
+  "integrity_status": "valid",
+  "evidence_role": "raw_action_frequency_architecture_development_not_confirmatory",
+  "source_run": "mujoco_v17_zero_dc_plan_screen_20260830_r1",
+  "development_protocol_version": "mujoco_v17_zero_dc_plan_screen_v1",
+  "frozen_algorithm_revision": "62c4cbf5dbc44bf1873c198a2cdd4cfeefbcb30a",
+  "frozen_source_manifest_sha256": "4c779fa40701eeefacc20791100be2dd4392c4946fa6db90d41b14ea0a2f742c",
+  "optimizer_seed_count": 3,
+  "environment_count": 3,
+  "training_cell_count": 27,
+  "paired_analysis_cell_count": 9,
+  "heldout_path_count_per_arm": 40,
+  "scheduler_successful_task_count": 27,
+  "scheduler_attempt_count": 63,
+  "scheduler_tasks": [
+    "t85337",
+    "t85338",
+    "t85339",
+    "t85340",
+    "t85341",
+    "t85342",
+    "t85343",
+    "t85344",
+    "t85345",
+    "t85347",
+    "t85348",
+    "t85349",
+    "t85351",
+    "t85352",
+    "t85353",
+    "t85354",
+    "t85355",
+    "t85356",
+    "t85357",
+    "t85358",
+    "t85359",
+    "t85361",
+    "t85362",
+    "t85363",
+    "t85364",
+    "t85365",
+    "t85366"
+  ],
+  "scheduler_nodes": [
+    "node001",
+    "node002",
+    "node003",
+    "node004",
+    "node005"
+  ],
+  "task_status_counts": {
+    "done": 27,
+    "failed": 36,
+    "cancelled": 0
+  },
+  "failed_attempt_exit_codes": {
+    "0": 36
+  },
+  "scheduler_recovery_contract": "missing_success_marker_false_negative_then_artifact_reuse_with_done_marker_v1",
+  "gate_counts": {
+    "trained_checkpoint": 9,
+    "reward_noninferior": 3,
+    "smooth_upper_ablation": 7,
+    "candidate_upper_hf_reduction": 5,
+    "candidate_upper_hf_budget": 6,
+    "raw_lower_lf_reduction_vs_smooth": 9,
+    "raw_lower_lf_reduction_vs_latent": 9,
+    "raw_joint_merit_reduction": 9,
+    "complete_macro_zero_sum": 9,
+    "projection_active": 9,
+    "responsibility_reconstruction_exact": 9,
+    "all_cell_gates": 1
+  },
+  "environment_results": {
+    "HalfCheetah-v5": {
+      "supported_count": 1,
+      "cell_count": 3,
+      "median_upper_hf_relative_reduction": 0.7501265243348193,
+      "median_raw_lower_lf_relative_reduction": 0.852467091479802,
+      "median_raw_joint_merit_relative_reduction": 0.8741612973851969,
+      "median_candidate_additive_action_clip_rate": 0.056320833333333334,
+      "environment_gate": false
+    },
+    "Hopper-v5": {
+      "supported_count": 0,
+      "cell_count": 3,
+      "median_upper_hf_relative_reduction": -1.6931115319212735,
+      "median_raw_lower_lf_relative_reduction": 0.7374224723601468,
+      "median_raw_joint_merit_relative_reduction": 0.8077035523816507,
+      "median_candidate_additive_action_clip_rate": 0.07945270143369818,
+      "environment_gate": false
+    },
+    "Walker2d-v5": {
+      "supported_count": 0,
+      "cell_count": 3,
+      "median_upper_hf_relative_reduction": -0.323494798017898,
+      "median_raw_lower_lf_relative_reduction": 0.9289285102445879,
+      "median_raw_joint_merit_relative_reduction": 0.9262731682337046,
+      "median_candidate_additive_action_clip_rate": 0.15496673268658553,
+      "environment_gate": false
+    }
+  },
+  "mechanism_findings": {
+    "frequency_separation": "The exact zero-DC lower projector reduced raw lower LPF32 power versus both the smooth direct arm and its own latent proposal in all nine cells. Raw normalized joint merit improved in all nine cells.",
+    "structural_invariant": "Every candidate cell activated the projector, achieved zero completion error on every complete 16-step macro, and exactly reconstructed the registered responsibility sum.",
+    "reward": "The five-percent held-out reward floor passed only three of nine cells. Hopper passed zero reward floors and two HalfCheetah seeds lost more than forty percent of direct-control return.",
+    "upper_compensation": "Candidate upper HPF8 reduction passed only five cells even though the smooth-upper ablation passed seven. The hard lower constraint caused upper-policy compensation and high-frequency responsibility to flow back upward, especially in Hopper and Walker2d.",
+    "saturation_boundary": "Candidate median additive command saturation was 5.6 percent in HalfCheetah, 7.9 percent in Hopper, and 15.5 percent in Walker2d. The result supports pre-saturation command diagnostics only, not plant-level frequency separation.",
+    "decision": "Do not expand constant full-strength zero-DC training. Introduce a training-time projection homotopy, expose projection strength and debt to the policy, keep exact zero-DC only at evaluation, and promote persistent lower demand into causal upper replanning. Add joint upper-headroom feasibility before any plant-level claim."
+  }
+}

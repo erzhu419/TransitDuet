@@ -22,8 +22,16 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 28)
+        self.assertEqual(len(records), 29)
         by_id = {row["evidence_id"]: row for row in records}
+        v17 = by_id["mujoco_v17_zero_dc_plan_development"]
+        self.assertEqual(v17["facts"]["gate_counts"]["all_cell_gates"], 1)
+        self.assertEqual(v17["facts"]["gate_counts"]["reward_noninferior"], 3)
+        self.assertEqual(
+            v17["facts"]["gate_counts"]["raw_lower_lf_reduction_vs_smooth"],
+            9,
+        )
+        self.assertTrue(v17["facts"]["all_failed_attempts_exit_zero"])
         self.assertEqual(
             by_id["mujoco_v16_2_macro_hold_gauge_development"]["facts"][
                 "gate_counts"
@@ -291,11 +299,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 28)
+            self.assertEqual(summary["record_count"], 29)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 22)
+            self.assertEqual(summary["development_record_count"], 23)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

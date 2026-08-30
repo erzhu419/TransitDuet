@@ -1,5 +1,5 @@
 {
-  "development_record_count": 22,
+  "development_record_count": 23,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 28,
+  "record_count": 29,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -3678,6 +3678,66 @@
       "selection_access": "frozen_before_development_heldout"
     },
     {
+      "allowed_wording": "In a frozen three-environment, three-optimizer-seed development screen, exact causal zero-DC projection enforced the complete-macro lower invariant and reduced both pre-saturation raw lower-LF power and normalized raw joint frequency merit in all nine cells. The joint no-tradeoff claim failed: held-out reward noninferiority passed only three cells, candidate upper-HF reduction passed five, only one cell passed every gate, and no environment reached the required two-of-three replicate gate.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_zero_dc_plan_development.json",
+          "role": "decision",
+          "sha256": "c7be8e525887c49c99efe8829e953f641c69318be817a89b4f8069276116400a"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_zero_dc_plan_outcome_2026-08-30.md",
+          "role": "report",
+          "sha256": "cd9776ba0489e34824b360a6f4273d54c0a79c70b14a543e85ce220c74f880c6"
+        }
+      ],
+      "claim": "A smooth macro upper plan and causal exact zero-DC lower projector yield cross-environment pre-saturation frequency separation without a reward tradeoff.",
+      "claim_id": "D23_ZERO_DC_RAW_ACTION_ARCHITECTURE",
+      "decision": "zero_dc_plan_screen_not_supported",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_zero_dc_plan_development",
+      "evidence_stage": "development",
+      "facts": {
+        "all_failed_attempts_exit_zero": true,
+        "decision_status": "zero_dc_plan_screen_not_supported",
+        "environment_count": 3,
+        "gate_counts": {
+          "all_cell_gates": 1,
+          "candidate_upper_hf_budget": 6,
+          "candidate_upper_hf_reduction": 5,
+          "complete_macro_zero_sum": 9,
+          "projection_active": 9,
+          "raw_joint_merit_reduction": 9,
+          "raw_lower_lf_reduction_vs_latent": 9,
+          "raw_lower_lf_reduction_vs_smooth": 9,
+          "responsibility_reconstruction_exact": 9,
+          "reward_noninferior": 3,
+          "smooth_upper_ablation": 7,
+          "trained_checkpoint": 9
+        },
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "paired_analysis_cell_count": 9,
+        "scheduler_attempt_count": 63,
+        "support_gate": false,
+        "task_status_counts": {
+          "cancelled": 0,
+          "done": 27,
+          "failed": 36
+        },
+        "training_cell_count": 27
+      },
+      "forbidden_wording": "The v17 development screen validates reward no-tradeoff, cross-environment upper/lower frequency separation, plant-level separation after saturation, fresh-seed confirmation, or a final Freq-HRL algorithm.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "three_fresh_optimizer_seeds_three_capacity_matched_arms_forty_paired_heldout_paths_per_cell_and_recovered_scheduler_success_markers",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_zero_dc_plan",
+      "positive_claim_supported": false,
+      "selection_access": "frozen_before_development_heldout"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -3736,7 +3796,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "afb9ab094e5c7587b44ee566a169778f711a5bc361ca651d5b202375aa5a181e",
+  "registry_sha256": "9647c744d0208c4e4921a69624b91385562a4aebc91aa888e1316d8c8292177b",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

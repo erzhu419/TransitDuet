@@ -32,6 +32,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v16_gauge_training_development | mujoco_control | development | training_time_gauge_preflight_not_supported | development_only | false |
 | mujoco_v16_1_audit_gauge_paired_development | mujoco_control | development | audit_gauge_paired_preflight_not_supported | development_only | false |
 | mujoco_v16_2_macro_hold_gauge_development | mujoco_control | development | macro_hold_gauge_screen_not_supported | development_only | false |
+| mujoco_v17_zero_dc_plan_development | mujoco_control | development | zero_dc_plan_screen_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -192,6 +193,12 @@ Forbidden: The v16.1 development preflight validates cross-environment raw respo
 In a frozen three-environment, three-optimizer-seed development screen, the macro-hold gauge exactly reconstructed the additive action in all nine cells, but only two cells passed the joint reward-and-frequency gate and no environment reached the required two-of-three replicate gate. The piecewise-constant upper responsibility improved lower-frequency separation in Hopper and Walker2d but failed structurally in HalfCheetah and exceeded the upper-frequency budget in five cells.
 
 Forbidden: The v16.2 development screen validates cross-environment responsibility separation, reward improvement, leakage no-tradeoff, fresh-seed confirmation, or a final Freq-HRL algorithm.
+
+### mujoco_v17_zero_dc_plan_development
+
+In a frozen three-environment, three-optimizer-seed development screen, exact causal zero-DC projection enforced the complete-macro lower invariant and reduced both pre-saturation raw lower-LF power and normalized raw joint frequency merit in all nine cells. The joint no-tradeoff claim failed: held-out reward noninferiority passed only three cells, candidate upper-HF reduction passed five, only one cell passed every gate, and no environment reached the required two-of-three replicate gate.
+
+Forbidden: The v17 development screen validates reward no-tradeoff, cross-environment upper/lower frequency separation, plant-level separation after saturation, fresh-seed confirmation, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

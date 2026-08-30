@@ -390,7 +390,7 @@ def sync_results(args: argparse.Namespace) -> None:
         signature, path, task = item
         ok, message = scheduler_runtime._sync_one_result({
             "node": task["node"],
-            "result_dir": str(task["result_dir"]),
+            "result_dir": str(path),
             "local_result_dir": str(path),
         })
         return signature, bool(ok), str(message)

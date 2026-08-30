@@ -32,6 +32,9 @@ MUJOCO_V16_1_AUDIT_GAUGE_PAIRED_SCHEMA_VERSION = (
 MUJOCO_V16_2_MACRO_HOLD_GAUGE_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v16_2_macro_hold_gauge_development_v1"
 )
+MUJOCO_V17_ZERO_DC_PLAN_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_zero_dc_plan_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -1321,6 +1324,81 @@ def _mujoco_v16_2_macro_hold_gauge_facts(
     }
 
 
+def _mujoco_v17_zero_dc_plan_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    gates = dict(decision.get("gate_counts") or {})
+    environments = dict(decision.get("environment_results") or {})
+    expected_gates = {
+        "trained_checkpoint": 9,
+        "reward_noninferior": 3,
+        "smooth_upper_ablation": 7,
+        "candidate_upper_hf_reduction": 5,
+        "candidate_upper_hf_budget": 6,
+        "raw_lower_lf_reduction_vs_smooth": 9,
+        "raw_lower_lf_reduction_vs_latent": 9,
+        "raw_joint_merit_reduction": 9,
+        "complete_macro_zero_sum": 9,
+        "projection_active": 9,
+        "responsibility_reconstruction_exact": 9,
+        "all_cell_gates": 1,
+    }
+    expected_supported = {
+        "HalfCheetah-v5": 1,
+        "Hopper-v5": 0,
+        "Walker2d-v5": 0,
+    }
+    task_status = dict(decision.get("task_status_counts") or {})
+    tasks = list(decision.get("scheduler_tasks") or [])
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_ZERO_DC_PLAN_SCHEMA_VERSION
+        or decision.get("status") != "zero_dc_plan_screen_not_supported"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "raw_action_frequency_architecture_development_not_confirmatory"
+        or int(decision.get("optimizer_seed_count", -1)) != 3
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("training_cell_count", -1)) != 27
+        or int(decision.get("paired_analysis_cell_count", -1)) != 9
+        or int(decision.get("scheduler_successful_task_count", -1)) != 27
+        or int(decision.get("scheduler_attempt_count", -1)) != 63
+        or len(tasks) != 27
+        or len(set(tasks)) != 27
+        or task_status != {"done": 27, "failed": 36, "cancelled": 0}
+        or decision.get("failed_attempt_exit_codes") != {"0": 36}
+        or gates != expected_gates
+        or set(environments) != set(expected_supported)
+        or any(
+            row.get("environment_gate") is not False
+            or int(row.get("cell_count", -1)) != 3
+            or int(row.get("supported_count", -1)) != expected_supported[name]
+            for name, row in environments.items()
+        )
+        or len(str(decision.get("frozen_algorithm_revision", ""))) != 40
+        or len(str(decision.get("frozen_source_manifest_sha256", ""))) != 64
+        or report is None
+        or "`zero_dc_plan_screen_not_supported`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17 zero-DC plan decision no longer matches")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "optimizer_seed_count": 3,
+        "environment_count": 3,
+        "training_cell_count": 27,
+        "paired_analysis_cell_count": 9,
+        "gate_counts": expected_gates,
+        "task_status_counts": task_status,
+        "scheduler_attempt_count": 63,
+        "all_failed_attempts_exit_zero": True,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -1345,6 +1423,7 @@ PARSERS = {
         _mujoco_v16_1_audit_gauge_paired_facts
     ),
     "mujoco_v16_2_macro_hold_gauge": _mujoco_v16_2_macro_hold_gauge_facts,
+    "mujoco_v17_zero_dc_plan": _mujoco_v17_zero_dc_plan_facts,
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
         "artifact_count": len(paths),
