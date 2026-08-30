@@ -40,6 +40,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_5_feasibility_diagnostic_development | mujoco_control | development | greedy_feasibility_projection_not_advanced | development_only | false |
 | mujoco_v17_6_full_horizon_oracle_development | mujoco_control | development | mixed_router_recoverability_and_actor_floor | development_only | false |
 | mujoco_v17_8_causal_fir_distillation_development | mujoco_control | development | grouped_causal_fir_stopped_before_fresh_path_access | development_only | false |
+| mujoco_v17_9_prefix_hpf_fir_development | mujoco_control | development | prefix_hpf_fir_stopped_before_fresh_path_access | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -248,6 +249,12 @@ Forbidden: The v17.6 acausal reused-path oracle validates an online Freq-HRL pol
 On 120 reused fixed-total-action development paths, v17.8 used eight leave-one-seed-out folds and selected a causal multivariate FIR that met the upper budget on every path but recovered only 7 of 81 oracle-recoverable failures and preserved 0 of 32 baseline-feasible Walker2d paths. The fresh validation panel was not accessed. A diagnostic gain-one candidate recovered 58 failures and preserved all 32 Walker2d paths but met the upper budget on only 90 paths, motivating high-frequency innovation projection rather than global gain reduction.
 
 Forbidden: The v17.8 reused-path distillation validates fresh-seed generalization, both frequency budgets, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.
+
+### mujoco_v17_9_prefix_hpf_fir_development
+
+On 120 reused grouped out-of-fold development paths, v17.9 met the upper budget everywhere, improved mean lower power in every environment, recovered all 40 HalfCheetah and all 8 Walker2d oracle-recoverable failures, and preserved all 32 baseline-feasible Walker2d paths. It recovered 0 of 33 Hopper failures, so the 48/81 total missed the frozen advancement gate and no fresh path was accessed.
+
+Forbidden: The v17.9 reused-path prefix projection validates fresh-seed generalization, the all-environment frequency contract, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

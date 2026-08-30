@@ -1039,6 +1039,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_9_prefix_hpf_fir_development",
+      "claim_id": "D31_PREFIX_HPF_FIR",
+      "claim": "Projecting only a distilled causal FIR router's upper high-frequency innovation satisfies both responsibility budgets across MuJoCo.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "prefix_hpf_fir_stopped_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_8_reused_rejected_paths_grouped_by_seed",
+      "outcome_provenance": "one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_eight_prefix_hpf_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_9_prefix_hpf_fir",
+      "allowed_wording": "On 120 reused grouped out-of-fold development paths, v17.9 met the upper budget everywhere, improved mean lower power in every environment, recovered all 40 HalfCheetah and all 8 Walker2d oracle-recoverable failures, and preserved all 32 baseline-feasible Walker2d paths. It recovered 0 of 33 Hopper failures, so the 48/81 total missed the frozen advancement gate and no fresh path was accessed.",
+      "forbidden_wording": "The v17.9 reused-path prefix projection validates fresh-seed generalization, the all-environment frequency contract, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_9_prefix_hpf_fir_development.json",
+          "sha256": "8a8cfdf5836a85014cbb2ee12a25a5674714c9edb71487001be6c8c578c433a2"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_9_prefix_hpf_fir_outcome_2026-08-31.md",
+          "sha256": "551485b3c50968ada7d36adc53a9c37cf36e999fd982f9e2d288cb29fd83f4aa"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

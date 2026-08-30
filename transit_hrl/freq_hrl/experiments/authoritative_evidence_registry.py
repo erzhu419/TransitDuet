@@ -56,6 +56,9 @@ MUJOCO_V17_6_FULL_HORIZON_ORACLE_SCHEMA_VERSION = (
 MUJOCO_V17_8_CAUSAL_FIR_DISTILLATION_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_8_causal_fir_distillation_development_v1"
 )
+MUJOCO_V17_9_PREFIX_HPF_FIR_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_9_prefix_hpf_fir_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2212,6 +2215,82 @@ def _mujoco_v17_8_causal_fir_distillation_facts(
     }
 
 
+def _mujoco_v17_9_prefix_hpf_fir_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    selected = dict(decision.get("selected_candidate") or {})
+    scheduler = dict(decision.get("scheduler") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    environment_results = dict(selected.get("environment_results") or {})
+    observed_recovery = {
+        environment: int(row.get("recovered_failure_count", -1))
+        for environment, row in environment_results.items()
+    }
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_9_PREFIX_HPF_FIR_SCHEMA_VERSION
+        or decision.get("status")
+        != "prefix_hpf_fir_stopped_before_fresh_path_access"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "post_v17_8_reused_path_prefix_hpf_projection_not_confirmatory"
+        or decision.get("frozen_core_revision")
+        != "85dc42eaa1518727d6975d8c09faf1345763f28a"
+        or decision.get("frozen_source_manifest_sha256")
+        != "24d5649b51b7d2ce30d20c7a4b991f70809ee8a92586c20c30d321a3032a44e2"
+        or int(decision.get("environment_count", -1)) != 3
+        or int(decision.get("disturbance_mode_count", -1)) != 5
+        or int(decision.get("grouped_seed_fold_count", -1)) != 8
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 8
+        or scheduler.get("selection_task_id") != "t85838"
+        or scheduler.get("selection_task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "prefix_hpf_fir_w64_ridge1e-03_gain1.00"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("upper_budget_path_count", -1)) != 120
+        or int(selected.get("oracle_recoverable_failure_count", -1)) != 81
+        or int(selected.get("recovered_failure_count", -1)) != 48
+        or int(selected.get("preserved_baseline_feasible_path_count", -1))
+        != 32
+        or int(selected.get("prefix_infeasible_path_count", -1)) != 0
+        or observed_recovery
+        != {"HalfCheetah-v5": 40, "Hopper-v5": 0, "Walker2d-v5": 8}
+        or gate.get("all_paths_numerically_and_physically_valid") is not True
+        or gate.get("all_paths_meet_endpoint_upper_budget") is not True
+        or gate.get("mean_lower_power_no_worse_each_environment") is not True
+        or gate.get("walker_baseline_feasible_preservation_gate") is not True
+        or gate.get("total_recovery_gate") is not False
+        or gate.get("environment_recovery_gates") is not False
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`prefix_hpf_fir_stopped_before_fresh_path_access`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.9 prefix-HPF FIR decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "grouped_seed_fold_count": 8,
+        "path_count": 120,
+        "candidate_count": 8,
+        "selected_upper_budget_path_count": 120,
+        "selected_recovered_failure_count": 48,
+        "selected_preserved_baseline_feasible_path_count": 32,
+        "selected_prefix_infeasible_path_count": 0,
+        "recovered_failures_by_environment": observed_recovery,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2257,6 +2336,9 @@ PARSERS = {
     ),
     "mujoco_v17_8_causal_fir_distillation": (
         _mujoco_v17_8_causal_fir_distillation_facts
+    ),
+    "mujoco_v17_9_prefix_hpf_fir": (
+        _mujoco_v17_9_prefix_hpf_fir_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
