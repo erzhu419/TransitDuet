@@ -156,6 +156,25 @@ class RecedingHorizonResponsibilityTest(unittest.TestCase):
         _, scalars = planner.policy_context
         self.assertEqual(scalars, (1.0 / 7.0, 1.0 / 31.0))
 
+    def test_exhausted_lower_ledger_keeps_actor_diagnostics_finite(self):
+        planner = CausalRecedingHorizonResponsibilityPlanner(
+            planning_horizon=8,
+            lower_rms_budget=1e-5,
+            coordinate_sweeps=16,
+            multiplier_bisection_steps=6,
+        )
+        planner.reset(1)
+        rows = [
+            planner.split(np.asarray([0.95 if index % 2 else -0.95]))
+            for index in range(40)
+        ]
+        self.assertTrue(any(
+            row["lower_budget_power_forecast"] == 0.0 for row in rows
+        ))
+        self.assertTrue(all(np.isfinite(
+            row["actor_floor_ratio_excess_squared"]
+        ) for row in rows))
+
     def test_invalid_configuration_and_unreset_use_fail_closed(self):
         with self.assertRaises(ValueError):
             CausalRecedingHorizonResponsibilityPlanner(

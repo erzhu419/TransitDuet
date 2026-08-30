@@ -323,7 +323,7 @@ class CausalRecedingHorizonResponsibilityPlanner:
         lower_ratio_excess_squared = max(
             np.sqrt(
                 float(solution["lower_power"])
-                / max(lower_budget_power, np.finfo(np.float64).tiny)
+                / (self.lower_rms_budget ** 2)
             ) - 1.0,
             0.0,
         ) ** 2
