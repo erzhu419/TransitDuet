@@ -105,6 +105,193 @@ class CausalGaugeFixer:
             raise RuntimeError("gauge fixer must be reset before use")
 
 
+@dataclass
+class CausalAuditAlignedGaugeFixer:
+    """Adapt a causal complementary split to the registered leakage audit.
+
+    A causal EMA assigns the low-pass total action to the upper controller and
+    its exact complement to the lower controller. After every split, the EMA
+    cutoff is updated from the normalized HPF(upper) versus LPF(lower) budget
+    imbalance measured with the registered audit windows. This feedback avoids
+    the unstable horizon-myopia of minimizing only the current rolling-window
+    endpoint. At full strength the result depends only on the total action and
+    canonical history, so additive gauge transforms of the supplied policy
+    outputs are immaterial.
+    """
+
+    upper_window: int = 8
+    lower_window: int = 32
+    upper_rms_budget: float = 0.075
+    lower_rms_budget: float = 0.0475
+    initial_alpha: float = 0.20
+    adaptation_rate: float = 0.03
+    minimum_logit: float = -4.0
+    maximum_logit: float = 4.0
+    strength: float = 1.0
+
+    def __post_init__(self) -> None:
+        self.upper_window = int(self.upper_window)
+        self.lower_window = int(self.lower_window)
+        self.upper_rms_budget = float(self.upper_rms_budget)
+        self.lower_rms_budget = float(self.lower_rms_budget)
+        self.initial_alpha = float(self.initial_alpha)
+        self.adaptation_rate = float(self.adaptation_rate)
+        self.minimum_logit = float(self.minimum_logit)
+        self.maximum_logit = float(self.maximum_logit)
+        self.strength = float(self.strength)
+        if self.upper_window < 2 or self.lower_window < 2:
+            raise ValueError("audit-aligned gauge windows must be at least two")
+        if (
+            not np.isfinite(self.upper_rms_budget)
+            or self.upper_rms_budget <= 0.0
+            or not np.isfinite(self.lower_rms_budget)
+            or self.lower_rms_budget <= 0.0
+        ):
+            raise ValueError("audit-aligned gauge budgets must be positive")
+        if (
+            not np.isfinite(self.initial_alpha)
+            or not 0.0 < self.initial_alpha < 1.0
+        ):
+            raise ValueError("audit-aligned gauge initial_alpha must be in (0, 1)")
+        if (
+            not np.isfinite(self.adaptation_rate)
+            or self.adaptation_rate < 0.0
+        ):
+            raise ValueError(
+                "audit-aligned gauge adaptation_rate must be non-negative"
+            )
+        if (
+            not np.isfinite(self.minimum_logit)
+            or not np.isfinite(self.maximum_logit)
+            or self.minimum_logit >= self.maximum_logit
+        ):
+            raise ValueError("audit-aligned gauge logit bounds are invalid")
+        if not np.isfinite(self.strength) or not 0.0 <= self.strength <= 1.0:
+            raise ValueError("audit-aligned gauge strength must be in [0, 1]")
+        self._dimension = 0
+        self._low_pass = np.zeros(0, dtype=np.float64)
+        self._upper_history: list[np.ndarray] = []
+        self._lower_history: list[np.ndarray] = []
+        self._context = np.zeros(0, dtype=np.float64)
+        self._logit_alpha = 0.0
+
+    def reset(self, action_dim: int) -> None:
+        if int(action_dim) < 1:
+            raise ValueError("audit-aligned gauge action_dim must be positive")
+        self._dimension = int(action_dim)
+        self._low_pass = np.zeros(self._dimension, dtype=np.float64)
+        self._upper_history = []
+        self._lower_history = []
+        self._context = np.zeros(self._dimension, dtype=np.float64)
+        self._logit_alpha = float(np.log(
+            self.initial_alpha / (1.0 - self.initial_alpha)
+        ))
+
+    @property
+    def context(self) -> np.ndarray:
+        self._require_reset()
+        return self._context.astype(np.float32, copy=True)
+
+    def split(
+        self,
+        upper: Any,
+        lower: Any,
+        *,
+        lower_limit: float | None = None,
+    ) -> dict[str, np.ndarray | float]:
+        """Return the causal audit-aligned responsibility split."""
+
+        self._require_reset()
+        upper_value = _finite_vector(upper, name="upper action")
+        lower_value = _finite_vector(lower, name="lower action")
+        if (
+            upper_value.shape != (self._dimension,)
+            or lower_value.shape != upper_value.shape
+        ):
+            raise ValueError(
+                "audit-aligned gauge actions must align with reset action_dim"
+            )
+        limit = None if lower_limit is None else float(lower_limit)
+        if limit is not None and (not np.isfinite(limit) or limit <= 0.0):
+            raise ValueError(
+                "audit-aligned gauge lower_limit must be positive and finite"
+            )
+
+        total = upper_value + lower_value
+        alpha_before = self._alpha()
+        low_pass_before = self._low_pass.copy()
+        self._low_pass += alpha_before * (total - self._low_pass)
+        canonical_upper = self._low_pass.copy()
+        canonical_lower_requested = total - canonical_upper
+        canonical_lower = (
+            canonical_lower_requested
+            if limit is None
+            else np.clip(canonical_lower_requested, -limit, limit)
+        )
+        canonical_upper = total - canonical_lower
+        self._low_pass = canonical_upper.copy()
+        transfer = self.strength * (canonical_upper - upper_value)
+        fixed_upper = upper_value + transfer
+        fixed_lower = lower_value - transfer
+
+        self._upper_history.append(fixed_upper.copy())
+        self._lower_history.append(fixed_lower.copy())
+        self._upper_history = self._upper_history[-self.upper_window:]
+        self._lower_history = self._lower_history[-self.lower_window:]
+        upper_low = np.mean(self._upper_history, axis=0)
+        upper_high = fixed_upper - upper_low
+        lower_low = np.mean(self._lower_history, axis=0)
+        normalized_upper = float(np.mean(np.square(
+            upper_high / self.upper_rms_budget
+        )))
+        normalized_lower = float(np.mean(np.square(
+            lower_low / self.lower_rms_budget
+        )))
+        objective = normalized_upper + normalized_lower
+        normalized_imbalance = normalized_lower - normalized_upper
+        self._logit_alpha = float(np.clip(
+            self._logit_alpha
+            + self.adaptation_rate * np.clip(normalized_imbalance, -1.0, 1.0),
+            self.minimum_logit,
+            self.maximum_logit,
+        ))
+        alpha_after = self._alpha()
+        reconstruction_error = fixed_upper + fixed_lower - total
+        self._context = fixed_upper.copy()
+        return {
+            "upper": fixed_upper.astype(np.float32, copy=True),
+            "lower": fixed_lower.astype(np.float32, copy=True),
+            "total": total.astype(np.float32, copy=True),
+            "transfer": transfer.astype(np.float32, copy=True),
+            "canonical_upper": canonical_upper.astype(np.float32, copy=True),
+            "canonical_lower": canonical_lower.astype(np.float32, copy=True),
+            "low_pass_before": low_pass_before.astype(np.float32, copy=True),
+            "low_pass_after": self._low_pass.astype(np.float32, copy=True),
+            "upper_high": upper_high.astype(np.float32, copy=True),
+            "lower_low": lower_low.astype(np.float32, copy=True),
+            "normalized_upper_hf": normalized_upper,
+            "normalized_lower_lf": normalized_lower,
+            "normalized_band_imbalance": normalized_imbalance,
+            "normalized_local_objective": objective,
+            "alpha_before": alpha_before,
+            "alpha_after": alpha_after,
+            "reconstruction_error": reconstruction_error.astype(
+                np.float64, copy=True
+            ),
+            "canonical_lower_clip_rate": float(np.mean(
+                np.abs(canonical_lower - canonical_lower_requested) > 1e-12
+            )),
+            "gauge_fixed": float(self.strength == 1.0),
+        }
+
+    def _alpha(self) -> float:
+        return float(1.0 / (1.0 + np.exp(-self._logit_alpha)))
+
+    def _require_reset(self) -> None:
+        if self._dimension < 1:
+            raise RuntimeError("audit-aligned gauge fixer must be reset")
+
+
 def canonical_responsibility_trace(
     total_actions: Any,
     *,

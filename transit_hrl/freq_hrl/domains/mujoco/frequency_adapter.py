@@ -6,7 +6,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ...core.responsibility_gauge import CausalGaugeFixer
+from ...core.responsibility_gauge import (
+    CausalAuditAlignedGaugeFixer,
+    CausalGaugeFixer,
+)
 
 
 DISTURBANCE_MODES = (
@@ -28,6 +31,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
     "causal_total_action_gauge",
+    "causal_audit_aligned_gauge",
 )
 
 LOWER_ACTION_ROUTER_CONTRACTS = {
@@ -47,6 +51,10 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
     "causal_total_action_gauge": (
         "causal_total_action_ema_gauge_fixed_responsibility_with_exact_"
         "pre_split_action_execution_v1"
+    ),
+    "causal_audit_aligned_gauge": (
+        "causal_total_action_gauge_fixed_adaptive_lpf32_hpf8_feedback_with_"
+        "exact_pre_split_action_execution_v1"
     ),
 }
 
@@ -255,11 +263,16 @@ class CausalLowerActionRouter:
     HPF8, then assigns the exact complement to the lower responsibility.
     Total-action gauge mode instead computes a causal low-pass of the additive
     total and is invariant to the raw upper/lower factorization at full strength.
+    Audit-aligned gauge mode adapts that low-pass cutoff from the registered
+    upper-HPF and lower-LPF budget imbalance.
     """
 
     mode: str = "direct"
     alpha: float = 0.10
     strength: float = 1.0
+    upper_rms_budget: float = 0.075
+    lower_rms_budget: float = 0.0475
+    audit_adaptation_rate: float = 0.03
 
     def __post_init__(self) -> None:
         if str(self.mode) not in LOWER_ACTION_ROUTER_MODES:
@@ -268,14 +281,33 @@ class CausalLowerActionRouter:
             raise ValueError("lower-action router alpha must be in (0, 1]")
         if not 0.0 <= float(self.strength) <= 1.0:
             raise ValueError("lower-action router strength must be in [0, 1]")
+        if (
+            not np.isfinite(float(self.upper_rms_budget))
+            or float(self.upper_rms_budget) <= 0.0
+            or not np.isfinite(float(self.lower_rms_budget))
+            or float(self.lower_rms_budget) <= 0.0
+        ):
+            raise ValueError("lower-action router RMS budgets must be positive")
+        if (
+            not np.isfinite(float(self.audit_adaptation_rate))
+            or float(self.audit_adaptation_rate) < 0.0
+        ):
+            raise ValueError(
+                "lower-action router audit adaptation rate must be non-negative"
+            )
         self.mode = str(self.mode)
         self.alpha = float(self.alpha)
         self.strength = float(self.strength)
+        self.upper_rms_budget = float(self.upper_rms_budget)
+        self.lower_rms_budget = float(self.lower_rms_budget)
+        self.audit_adaptation_rate = float(self.audit_adaptation_rate)
         self._baseline: np.ndarray | None = None
         self._previous_effective: np.ndarray | None = None
         self._joint_upper_history: list[np.ndarray] = []
         self._joint_lower_history: list[np.ndarray] = []
-        self._gauge_fixer: CausalGaugeFixer | None = None
+        self._gauge_fixer: (
+            CausalGaugeFixer | CausalAuditAlignedGaugeFixer | None
+        ) = None
 
     def reset(self, action_dim: int) -> None:
         if int(action_dim) < 1:
@@ -285,11 +317,22 @@ class CausalLowerActionRouter:
         self._previous_effective = zeros.copy()
         self._joint_upper_history = []
         self._joint_lower_history = []
-        self._gauge_fixer = (
-            CausalGaugeFixer(alpha=self.alpha, strength=self.strength)
-            if self.mode == "causal_total_action_gauge"
-            else None
-        )
+        if self.mode == "causal_total_action_gauge":
+            self._gauge_fixer = CausalGaugeFixer(
+                alpha=self.alpha, strength=self.strength
+            )
+        elif self.mode == "causal_audit_aligned_gauge":
+            self._gauge_fixer = CausalAuditAlignedGaugeFixer(
+                upper_window=8,
+                lower_window=32,
+                upper_rms_budget=self.upper_rms_budget,
+                lower_rms_budget=self.lower_rms_budget,
+                initial_alpha=self.alpha,
+                adaptation_rate=self.audit_adaptation_rate,
+                strength=self.strength,
+            )
+        else:
+            self._gauge_fixer = None
         if self._gauge_fixer is not None:
             self._gauge_fixer.reset(int(action_dim))
 
@@ -324,9 +367,13 @@ class CausalLowerActionRouter:
             raise ValueError("lower-action router limit must be positive")
 
         baseline_before = self._baseline.copy()
+        audit_alpha_before = 0.0
+        audit_alpha_after = 0.0
+        audit_band_imbalance = 0.0
         if self.mode in {
             "causal_joint_band_projection",
             "causal_total_action_gauge",
+            "causal_audit_aligned_gauge",
         }:
             if upper_action is None:
                 raise ValueError(
@@ -337,7 +384,10 @@ class CausalLowerActionRouter:
                 raise ValueError(
                     "joint-band upper action must be finite and aligned"
                 )
-            if self.mode == "causal_total_action_gauge":
+            if self.mode in {
+                "causal_total_action_gauge",
+                "causal_audit_aligned_gauge",
+            }:
                 if self._gauge_fixer is None:
                     raise RuntimeError("total-action gauge router is not initialized")
                 fixed = self._gauge_fixer.split(
@@ -345,6 +395,11 @@ class CausalLowerActionRouter:
                     latent,
                     lower_limit=limit,
                 )
+                audit_alpha_before = float(fixed.get("alpha_before", 0.0))
+                audit_alpha_after = float(fixed.get("alpha_after", 0.0))
+                audit_band_imbalance = float(fixed.get(
+                    "normalized_band_imbalance", 0.0
+                ))
                 transfer_target = np.asarray(
                     fixed["canonical_upper"], dtype=np.float64
                 ) - upper
@@ -378,7 +433,10 @@ class CausalLowerActionRouter:
         clipped = np.abs(effective - requested) > 1e-12
         if self.mode == "causal_joint_band_projection":
             self._baseline = transfer_target.copy()
-        elif self.mode == "causal_total_action_gauge":
+        elif self.mode in {
+            "causal_total_action_gauge",
+            "causal_audit_aligned_gauge",
+        }:
             if self._gauge_fixer is None:
                 raise RuntimeError("total-action gauge router is not initialized")
             self._baseline = np.asarray(
@@ -393,6 +451,7 @@ class CausalLowerActionRouter:
                 "causal_ema_conservative_transfer",
                 "causal_joint_band_projection",
                 "causal_total_action_gauge",
+                "causal_audit_aligned_gauge",
             }
             else np.zeros_like(removed)
         )
@@ -409,6 +468,9 @@ class CausalLowerActionRouter:
                 upper_transfer + effective - latent
             ).astype(np.float64, copy=True),
             "clip_rate": float(np.mean(clipped)),
+            "audit_alpha_before": audit_alpha_before,
+            "audit_alpha_after": audit_alpha_after,
+            "audit_normalized_band_imbalance": audit_band_imbalance,
         }
 
     def _require_reset(self) -> None:

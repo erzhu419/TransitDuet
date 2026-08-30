@@ -276,11 +276,13 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
     "causal_total_action_gauge",
+    "causal_audit_aligned_gauge",
 }
 FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
     "causal_joint_band_projection",
     "causal_total_action_gauge",
+    "causal_audit_aligned_gauge",
 }
 LEAKAGE_CONSTRAINT_SCOPES = (
     "responsibility",
@@ -822,6 +824,8 @@ def _episode_row(
     lower_router_removed_actions: list[np.ndarray],
     lower_router_reconstruction_errors: list[np.ndarray],
     lower_router_clip_values: list[float],
+    lower_router_audit_alphas: list[float],
+    lower_router_audit_imbalances: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
     transfer_saturation_values: list[float],
@@ -948,6 +952,13 @@ def _episode_row(
             np.sqrt(np.mean(np.square(router_reconstruction)))
         ),
         "LowerRouterClipRate": float(np.mean(lower_router_clip_values)),
+        "LowerRouterAuditAlphaMean": float(np.mean(
+            lower_router_audit_alphas
+        )),
+        "LowerRouterAuditAlphaFinal": float(lower_router_audit_alphas[-1]),
+        "LowerRouterAuditBandImbalanceMean": float(np.mean(
+            lower_router_audit_imbalances
+        )),
         "EffectiveToLatentLowerEnergyRatio": float(
             np.mean(np.square(raw_lower))
             / max(float(np.mean(np.square(latent_lower))), 1e-12)
@@ -1164,6 +1175,8 @@ def rollout_hierarchical(
             mode=str(lower_action_router_mode),
             alpha=float(lower_action_router_alpha),
             strength=float(lower_action_router_strength),
+            upper_rms_budget=float(upper_hf_rms_budget),
+            lower_rms_budget=float(lower_lf_rms_budget),
         )
         lower_router.reset(action_dim)
         responsibility_lf_tracker = CausalRollingBandTracker(window=32)
@@ -1203,6 +1216,8 @@ def rollout_hierarchical(
         lower_router_removed_actions: list[np.ndarray] = []
         lower_router_reconstruction_errors: list[np.ndarray] = []
         lower_router_clip_values: list[float] = []
+        lower_router_audit_alphas: list[float] = []
+        lower_router_audit_imbalances: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
         transfer_saturation_values: list[float] = []
@@ -1341,6 +1356,7 @@ def rollout_hierarchical(
                     in {
                         "causal_joint_band_projection",
                         "causal_total_action_gauge",
+                        "causal_audit_aligned_gauge",
                     }
                     else None
                 ),
@@ -1509,6 +1525,12 @@ def rollout_hierarchical(
                 dtype=np.float64,
             ))
             lower_router_clip_values.append(float(routed_lower["clip_rate"]))
+            lower_router_audit_alphas.append(float(
+                routed_lower["audit_alpha_after"]
+            ))
+            lower_router_audit_imbalances.append(float(
+                routed_lower["audit_normalized_band_imbalance"]
+            ))
             responsibility_transfers.append(np.asarray(
                 responsibility.effective_transfer + router_upper_transfer,
                 dtype=np.float32,
@@ -1693,6 +1715,8 @@ def rollout_hierarchical(
                 lower_router_reconstruction_errors
             ),
             lower_router_clip_values=lower_router_clip_values,
+            lower_router_audit_alphas=lower_router_audit_alphas,
+            lower_router_audit_imbalances=lower_router_audit_imbalances,
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
             transfer_saturation_values=transfer_saturation_values,
@@ -1920,6 +1944,8 @@ def rollout_flat(
             lower_router_removed_actions=zeros,
             lower_router_reconstruction_errors=zeros,
             lower_router_clip_values=[0.0 for _ in rewards],
+            lower_router_audit_alphas=[0.0 for _ in rewards],
+            lower_router_audit_imbalances=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
             transfer_saturation_values=[0.0 for _ in rewards],
@@ -1986,6 +2012,9 @@ SUMMARY_KEYS = [
     "LowerRouterFunctionPreserving",
     "LowerRouterActionReconstructionRMS",
     "LowerRouterClipRate",
+    "LowerRouterAuditAlphaMean",
+    "LowerRouterAuditAlphaFinal",
+    "LowerRouterAuditBandImbalanceMean",
     "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
