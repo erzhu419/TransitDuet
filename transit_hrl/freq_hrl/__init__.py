@@ -8,6 +8,9 @@ these interfaces instead of importing transit-specific simulator objects here.
 from .core.leakage import CausalLeakageRewardShaper, LeakageRegularizer
 from .core.phase0 import Phase0TraceLogger
 from .core.promotion_gate import CausalPromotionGate
+from .core.receding_horizon_responsibility import (
+    CausalRecedingHorizonResponsibilityPlanner,
+)
 from .core.reward import RewardAttributionAccumulator
 from .core.router import FrequencyRouter
 from .core.stream_adapter import BinnedExogenousStreamAdapter
@@ -20,6 +23,7 @@ __all__ = [
     "CausalFourierEncoder",
     "CausalLeakageRewardShaper",
     "CausalPromotionGate",
+    "CausalRecedingHorizonResponsibilityPlanner",
     "FrequencyRouter",
     "LeakageRegularizer",
     "Phase0TraceLogger",

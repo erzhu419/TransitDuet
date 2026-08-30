@@ -22,6 +22,10 @@ from .phase0 import (
     validate_phase0_record_schema,
 )
 from .promotion_gate import CausalPromotionGate
+from .receding_horizon_responsibility import (
+    CausalRecedingHorizonResponsibilityPlanner,
+    future_rolling_mean_system,
+)
 from .reward import RewardAttributionAccumulator
 from .responsibility_gauge import (
     CausalAuditOptimalMacroGaugeFixer,
@@ -51,6 +55,7 @@ __all__ = [
     "ActionEffectOperator",
     "BinnedExogenousStreamAdapter",
     "CausalPromotionGate",
+    "CausalRecedingHorizonResponsibilityPlanner",
     "CausalLeakageRewardShaper",
     "CausalGaugeFixer",
     "CausalAuditOptimalMacroGaugeFixer",
@@ -81,6 +86,7 @@ __all__ = [
     "canonical_responsibility_trace",
     "default_spec",
     "evaluate_rms_leakage_budget",
+    "future_rolling_mean_system",
     "load_phase0_records",
     "validate_claim_freeze",
     "validate_frequency_features",
