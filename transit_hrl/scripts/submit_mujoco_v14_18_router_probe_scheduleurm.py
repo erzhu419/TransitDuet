@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit and synchronize the frozen MuJoCo v14.18 router probe screen."""
+"""Submit and synchronize a frozen MuJoCo router-probe protocol."""
 
 from __future__ import annotations
 
@@ -190,10 +190,14 @@ def sync_results(args: argparse.Namespace) -> None:
         signature = task_signature(args.run_name, environment, seed)
         task = tasks.get(signature)
         if task is None:
-            raise SystemExit(f"v14.18 scheduler task missing: {signature}")
+            raise SystemExit(
+                f"{spec.DEVELOPMENT_PROTOCOL_VERSION} scheduler task missing: "
+                f"{signature}"
+            )
         if task.get("status") != "done" or not task.get("node"):
             raise SystemExit(
-                f"v14.18 task is not done: {task.get('id')} "
+                f"{spec.DEVELOPMENT_PROTOCOL_VERSION} task is not done: "
+                f"{task.get('id')} "
                 f"status={task.get('status')}"
             )
         expected.append((
@@ -229,7 +233,8 @@ def sync_results(args: argparse.Namespace) -> None:
             time.sleep(float(attempt))
     if pending:
         raise SystemExit(
-            f"v14.18 result sync incomplete: {len(pending)} cells; "
+            f"{spec.DEVELOPMENT_PROTOCOL_VERSION} result sync incomplete: "
+            f"{len(pending)} cells; "
             f"last_outcomes={outcomes}"
         )
     result = analyze_run(args.run_name)
@@ -241,7 +246,12 @@ def sync_results(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=(
+            "Submit and synchronize frozen MuJoCo router probes for "
+            f"{spec.DEVELOPMENT_PROTOCOL_VERSION}."
+        )
+    )
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--anchor-run-name", default=spec.ANCHOR_RUN_NAME)
     parser.add_argument("--nodes", default=",".join(LINUX_CPU_NODES))
@@ -262,11 +272,16 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
     args.nodes = parse_csv(args.nodes)
     unknown_nodes = sorted(set(args.nodes) - set(LINUX_CPU_NODES))
     if not args.nodes or unknown_nodes:
-        raise SystemExit(f"invalid v14.18 scheduler nodes: {unknown_nodes}")
+        raise SystemExit(
+            f"invalid {spec.DEVELOPMENT_PROTOCOL_VERSION} scheduler nodes: "
+            f"{unknown_nodes}"
+        )
     if not args.python_executable.strip():
         args.python_executable = default_python_executable(args.nodes)
     if not 1 <= int(args.sync_workers) <= 8:
-        raise SystemExit("v14.18 sync workers must be in [1, 8]")
+        raise SystemExit(
+            f"{spec.DEVELOPMENT_PROTOCOL_VERSION} sync workers must be in [1, 8]"
+        )
     for environment, seed in selected_cells():
         anchor = ROOT / anchor_relative_dir(args.anchor_run_name, environment, seed)
         missing = [
@@ -274,7 +289,10 @@ def normalize_args(args: argparse.Namespace) -> argparse.Namespace:
             if not (anchor / name).is_file()
         ]
         if missing:
-            raise SystemExit(f"v14.18 anchor incomplete: {anchor}: {missing}")
+            raise SystemExit(
+                f"{spec.DEVELOPMENT_PROTOCOL_VERSION} anchor incomplete: "
+                f"{anchor}: {missing}"
+            )
     return args
 
 
@@ -298,7 +316,10 @@ def main() -> None:
             ).is_file()
         ]
     if not cells:
-        print("no v14.18 router probes require submission")
+        print(
+            f"no {spec.DEVELOPMENT_PROTOCOL_VERSION} router probes "
+            "require submission"
+        )
         return
     print(
         f"run={args.run_name} cells={len(cells)} nodes={','.join(args.nodes)}",

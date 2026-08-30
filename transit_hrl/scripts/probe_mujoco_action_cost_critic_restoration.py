@@ -1600,6 +1600,8 @@ def run_probe(
         "workers": int(workers),
         "risk_mode": str(risk_mode),
         "cvar_alpha": float(cvar_alpha),
+        "episode_horizon": int(episode_horizon),
+        "leakage_cost_mode": str(leakage_cost_mode),
         "critic_metrics": critic_metrics,
         "gradient_metrics": gradient_metrics,
         "gradient_error": gradient_error,
