@@ -35,6 +35,7 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 
 
 SIGNATURE_VERSION = "mujoco-v14-18-router-mechanism-screen-v1"
+LAUNCHER_PATH = Path(__file__).resolve()
 
 
 def anchor_relative_dir(anchor_run_name: str, environment: str, seed: int) -> Path:
@@ -312,7 +313,7 @@ def main() -> None:
     print(
         "sync after completion: "
         + shlex.join([
-            sys.executable, str(Path(__file__).resolve()),
+            sys.executable, str(LAUNCHER_PATH),
             "--run-name", args.run_name,
             "--anchor-run-name", args.anchor_run_name,
             "--sync-only",
