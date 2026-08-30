@@ -1,5 +1,5 @@
 {
-  "development_record_count": 35,
+  "development_record_count": 36,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 41,
+  "record_count": 42,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4605,6 +4605,53 @@
       "selection_access": "post_v17_12_reused_paths_grouped_by_seed"
     },
     {
+      "allowed_wording": "On the unchanged 120-path development panel, all 900 members of the frozen linear causal FIR grid received exact responsibility oracles. Every candidate preserved all 113 reference-feasible paths; the best recovered 6/7 actor-floor paths, leaving one Hopper ood_chirp path unresolved. No candidate passed the advancement gate, so this grid was closed without fresh-path access.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v17_14_exhaustive_actor_oracle_development.json",
+          "role": "decision",
+          "sha256": "a65bae8ad77e1ece446d35f943747f3647c1d2bb98096a1e7bc11a88852b8aa1"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_14_exhaustive_actor_oracle_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "e4ba44c19d78d818d0aeaf495757200ec453c828379b666edefbbdfabf503e86"
+        }
+      ],
+      "claim": "A complete exact-oracle audit determines whether the frozen linear causal FIR actor grid can recover every actor-floor responsibility failure while preserving feasible paths.",
+      "claim_id": "D36_EXHAUSTIVE_ACTOR_ORACLE",
+      "decision": "exhaustive_actor_oracle_closes_frozen_linear_fir_grid",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v17_14_exhaustive_actor_oracle_development",
+      "evidence_stage": "development",
+      "facts": {
+        "combined_exact_candidate_count": 900,
+        "decision_status": "exhaustive_actor_oracle_closes_frozen_linear_fir_grid",
+        "eligible_for_fresh_path_validation": false,
+        "fresh_validation_paths_accessed": false,
+        "frozen_linear_fir_grid_closed": true,
+        "integrity_status": "valid",
+        "maximum_actor_floor_recovered_path_count": 6,
+        "passing_candidate_count": 0,
+        "path_count": 120,
+        "selected_actor_floor_recovered_path_count": 6,
+        "selected_reference_feasible_preserved_path_count": 113,
+        "support_gate": false,
+        "unresolved_disturbance_mode": "ood_chirp",
+        "unresolved_environment": "Hopper-v5",
+        "unresolved_evaluation_seed": 294864529
+      },
+      "forbidden_wording": "V17.14 proves a universal actor impossibility or establishes reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "nine_hundred_exact_oracle_candidates_on_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_14_exhaustive_actor_oracle",
+      "positive_claim_supported": false,
+      "selection_access": "post_v17_13_reused_paths_complete_frozen_grid"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4663,7 +4710,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "a953c878459b903286c03060c191e5a384af4f14d18604fa5b1949794b906869",
+  "registry_sha256": "90566fa4268eb2a309df2295cc38386ee9d459c4f3ead12ce555db3e6e2eef88",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

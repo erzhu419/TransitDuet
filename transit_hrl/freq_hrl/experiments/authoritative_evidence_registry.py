@@ -71,6 +71,9 @@ MUJOCO_V17_12_NEAREST_FEASIBLE_ACTION_ORACLE_SCHEMA_VERSION = (
 MUJOCO_V17_13_CAUSAL_ACTOR_ADAPTER_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_13_causal_actor_adapter_development_v1"
 )
+MUJOCO_V17_14_EXHAUSTIVE_ACTOR_ORACLE_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_14_exhaustive_actor_oracle_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2670,6 +2673,147 @@ def _mujoco_v17_13_causal_actor_adapter_facts(
     }
 
 
+def _mujoco_v17_14_exhaustive_actor_oracle_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    audit = dict(decision.get("candidate_audit") or {})
+    scheduler = dict(decision.get("scheduler") or {})
+    selected = dict(decision.get("selected_candidate") or {})
+    recovery = dict(selected.get("actor_floor_recovery_by_seed") or {})
+    frontier = dict(decision.get("full_grid_frontier") or {})
+    distribution = dict(
+        frontier.get("candidate_count_by_actor_floor_recovery") or {}
+    )
+    by_gain = dict(frontier.get("by_output_gain") or {})
+    unresolved = dict(decision.get("unresolved_path") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    expected_gate_keys = {
+        "actor_floor_target_fidelity_gate",
+        "all_actor_floor_paths_change_executed_action",
+        "all_actor_floor_paths_recovered",
+        "all_actor_floor_seed_groups_recovered",
+        "all_actor_floor_targets_change_executed_action",
+        "all_paths_valid",
+        "all_reference_feasible_paths_preserved",
+        "expected_actor_floor_path_count",
+        "expected_path_count",
+        "expected_reference_feasible_path_count",
+        "reference_feasible_trust_region_gate",
+    }
+    false_gates = {key for key, value in gate.items() if value is False}
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_14_EXHAUSTIVE_ACTOR_ORACLE_SCHEMA_VERSION
+        or decision.get("status")
+        != "exhaustive_actor_oracle_closes_frozen_linear_fir_grid"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "exhaustive_reused_path_full_grid_exact_oracle_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v17_14_exhaustive_actor_oracle_v1"
+        or decision.get("frozen_core_revision")
+        != "5c382979eeffaf7fde19be99835ee0ddc9e9b986"
+        or decision.get("frozen_source_manifest_sha256")
+        != "32dadb19d67f9b5bea6be95043d01a36ef1f4a6d39df3bdb8925c781d7f4b41d"
+        or int(decision.get("path_count", -1)) != 120
+        or audit
+        != {
+            "v17_13_exact_candidate_count": 48,
+            "new_exact_candidate_count": 852,
+            "combined_exact_candidate_count": 900,
+            "passing_candidate_count": 0,
+            "frozen_linear_fir_grid_closed": True,
+        }
+        or scheduler.get("task_id") != "t85847"
+        or scheduler.get("task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or int(scheduler.get("cpu_cores", -1)) != 32
+        or int(scheduler.get("oracle_workers", -1)) != 32
+        or int(scheduler.get("peak_ram_mb", -1)) != 3063
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "actor_fir_w8_ridge1e-04_floorw256_gain1.50_cap0.010"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("corrected_joint_feasible_path_count", -1))
+        != 119
+        or int(selected.get("reference_feasible_path_count", -1)) != 113
+        or int(selected.get(
+            "reference_feasible_preserved_path_count", -1
+        ))
+        != 113
+        or int(selected.get("actor_floor_path_count", -1)) != 7
+        or int(selected.get("actor_floor_recovered_path_count", -1)) != 6
+        or int(selected.get(
+            "actor_floor_executed_nonzero_path_count", -1
+        ))
+        != 7
+        or float(selected.get("actor_floor_target_normalized_mse", -1.0))
+        != 0.639795865064592
+        or recovery
+        != {
+            "2802248628": {"recovered": 2, "total": 2},
+            "294864529": {"recovered": 4, "total": 5},
+        }
+        or int(frontier.get(
+            "all_reference_feasible_preserved_candidate_count", -1
+        ))
+        != 900
+        or int(frontier.get(
+            "maximum_actor_floor_recovered_path_count", -1
+        ))
+        != 6
+        or int(frontier.get(
+            "maximum_corrected_joint_feasible_path_count", -1
+        ))
+        != 119
+        or distribution
+        != {"2": 497, "3": 207, "4": 71, "5": 48, "6": 77}
+        or {
+            gain: int(values.get("maximum_actor_floor_recovered_path_count", -1))
+            for gain, values in by_gain.items()
+        }
+        != {"0.5": 2, "1.0": 3, "1.5": 6, "2.0": 6}
+        or unresolved.get("environment") != "Hopper-v5"
+        or unresolved.get("disturbance_mode") != "ood_chirp"
+        or int(unresolved.get("evaluation_seed", -1)) != 294864529
+        or float(unresolved.get("corrected_lower_power", -1.0))
+        != 0.0025170921934271812
+        or float(unresolved.get("lower_power_budget", -1.0)) != 0.00225625
+        or set(gate) != expected_gate_keys
+        or false_gates
+        != {
+            "all_actor_floor_paths_recovered",
+            "all_actor_floor_seed_groups_recovered",
+        }
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`exhaustive_actor_oracle_closes_frozen_linear_fir_grid`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.14 exhaustive actor decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "combined_exact_candidate_count": 900,
+        "passing_candidate_count": 0,
+        "selected_actor_floor_recovered_path_count": 6,
+        "selected_reference_feasible_preserved_path_count": 113,
+        "maximum_actor_floor_recovered_path_count": 6,
+        "unresolved_environment": "Hopper-v5",
+        "unresolved_disturbance_mode": "ood_chirp",
+        "unresolved_evaluation_seed": 294864529,
+        "frozen_linear_fir_grid_closed": True,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2730,6 +2874,9 @@ PARSERS = {
     ),
     "mujoco_v17_13_causal_actor_adapter": (
         _mujoco_v17_13_causal_actor_adapter_facts
+    ),
+    "mujoco_v17_14_exhaustive_actor_oracle": (
+        _mujoco_v17_14_exhaustive_actor_oracle_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

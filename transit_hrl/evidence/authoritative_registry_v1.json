@@ -1174,6 +1174,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_14_exhaustive_actor_oracle_development",
+      "claim_id": "D36_EXHAUSTIVE_ACTOR_ORACLE",
+      "claim": "A complete exact-oracle audit determines whether the frozen linear causal FIR actor grid can recover every actor-floor responsibility failure while preserving feasible paths.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "exhaustive_actor_oracle_closes_frozen_linear_fir_grid",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_13_reused_paths_complete_frozen_grid",
+      "outcome_provenance": "nine_hundred_exact_oracle_candidates_on_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_14_exhaustive_actor_oracle",
+      "allowed_wording": "On the unchanged 120-path development panel, all 900 members of the frozen linear causal FIR grid received exact responsibility oracles. Every candidate preserved all 113 reference-feasible paths; the best recovered 6/7 actor-floor paths, leaving one Hopper ood_chirp path unresolved. No candidate passed the advancement gate, so this grid was closed without fresh-path access.",
+      "forbidden_wording": "V17.14 proves a universal actor impossibility or establishes reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_14_exhaustive_actor_oracle_development.json",
+          "sha256": "a65bae8ad77e1ece446d35f943747f3647c1d2bb98096a1e7bc11a88852b8aa1"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_14_exhaustive_actor_oracle_outcome_2026-08-31.md",
+          "sha256": "e4ba44c19d78d818d0aeaf495757200ec453c828379b666edefbbdfabf503e86"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

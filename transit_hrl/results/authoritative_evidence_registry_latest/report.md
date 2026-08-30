@@ -45,6 +45,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_11_fractional_reservoir_fir_development | mujoco_control | development | fractional_reservoir_fir_stops_router_only_development | development_only | false |
 | mujoco_v17_12_nearest_feasible_action_oracle_development | mujoco_control | development | nearest_feasible_targets_authorize_causal_actor_adapter | development_only | false |
 | mujoco_v17_13_causal_actor_adapter_development | mujoco_control | development | causal_actor_adapter_stops_before_fresh_path_access | development_only | false |
+| mujoco_v17_14_exhaustive_actor_oracle_development | mujoco_control | development | exhaustive_actor_oracle_closes_frozen_linear_fir_grid | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -283,6 +284,12 @@ Forbidden: The acausal v17.12 target oracle establishes an online policy, reward
 On 120 reused grouped paths, the selected v17.13 causal adapter preserved all 113 reference-feasible paths and changed every actor-floor executed action, but recovered only 3/7 actor-floor paths. The exact-oracle prefilter evaluated 48 gain-0.5/1.0 candidates; gain-1.5/2.0 candidates remained outside this oracle frontier, and no fresh path was accessed.
 
 Forbidden: V17.13 validates actor-level frequency feasibility, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
+
+### mujoco_v17_14_exhaustive_actor_oracle_development
+
+On the unchanged 120-path development panel, all 900 members of the frozen linear causal FIR grid received exact responsibility oracles. Every candidate preserved all 113 reference-feasible paths; the best recovered 6/7 actor-floor paths, leaving one Hopper ood_chirp path unresolved. No candidate passed the advancement gate, so this grid was closed without fresh-path access.
+
+Forbidden: V17.14 proves a universal actor impossibility or establishes reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
 
 ### legacy_c1_c9_matrix_snapshot
 

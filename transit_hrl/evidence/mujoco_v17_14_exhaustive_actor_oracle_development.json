@@ -1,0 +1,121 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_14_exhaustive_actor_oracle_development_v1",
+  "status": "exhaustive_actor_oracle_closes_frozen_linear_fir_grid",
+  "integrity_status": "valid",
+  "evidence_role": "exhaustive_reused_path_full_grid_exact_oracle_not_confirmatory",
+  "development_protocol_version": "mujoco_v17_14_exhaustive_actor_oracle_v1",
+  "frozen_core_revision": "5c382979eeffaf7fde19be99835ee0ddc9e9b986",
+  "frozen_source_manifest_sha256": "32dadb19d67f9b5bea6be95043d01a36ef1f4a6d39df3bdb8925c781d7f4b41d",
+  "source_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "source_target_run": "mujoco_v17_12_nearest_feasible_action_oracle_20260831_r1",
+  "source_v17_13_selection_run": "mujoco_v17_13_causal_actor_adapter_selection_20260831_r1",
+  "path_count": 120,
+  "candidate_audit": {
+    "v17_13_exact_candidate_count": 48,
+    "new_exact_candidate_count": 852,
+    "combined_exact_candidate_count": 900,
+    "passing_candidate_count": 0,
+    "frozen_linear_fir_grid_closed": true
+  },
+  "scheduler": {
+    "task_id": "t85847",
+    "task_status": "done",
+    "nodes": [
+      "node003"
+    ],
+    "cpu_cores": 32,
+    "oracle_workers": 32,
+    "scheduler_runtime_seconds": 360.4709544181824,
+    "worker_runtime_seconds": 335.0326845360105,
+    "peak_ram_mb": 3063,
+    "slurm_used": false
+  },
+  "selected_candidate": {
+    "candidate_id": "actor_fir_w8_ridge1e-04_floorw256_gain1.50_cap0.010",
+    "valid_path_count": 120,
+    "corrected_joint_feasible_path_count": 119,
+    "reference_feasible_path_count": 113,
+    "reference_feasible_preserved_path_count": 113,
+    "actor_floor_path_count": 7,
+    "actor_floor_recovered_path_count": 6,
+    "actor_floor_executed_nonzero_path_count": 7,
+    "actor_floor_target_normalized_mse": 0.639795865064592,
+    "reference_feasible_correction_rms_mean": 0.0008962943710006196,
+    "reference_feasible_correction_rms_maximum": 0.003238325385662556,
+    "correction_abs_maximum": 0.010000000000000009,
+    "actor_floor_recovery_by_seed": {
+      "2802248628": {
+        "recovered": 2,
+        "total": 2
+      },
+      "294864529": {
+        "recovered": 4,
+        "total": 5
+      }
+    }
+  },
+  "full_grid_frontier": {
+    "all_reference_feasible_preserved_candidate_count": 900,
+    "maximum_actor_floor_recovered_path_count": 6,
+    "maximum_corrected_joint_feasible_path_count": 119,
+    "candidate_count_by_actor_floor_recovery": {
+      "2": 497,
+      "3": 207,
+      "4": 71,
+      "5": 48,
+      "6": 77
+    },
+    "by_output_gain": {
+      "0.5": {
+        "candidate_count": 225,
+        "maximum_actor_floor_recovered_path_count": 2,
+        "maximum_corrected_joint_feasible_path_count": 115
+      },
+      "1.0": {
+        "candidate_count": 225,
+        "maximum_actor_floor_recovered_path_count": 3,
+        "maximum_corrected_joint_feasible_path_count": 116
+      },
+      "1.5": {
+        "candidate_count": 225,
+        "maximum_actor_floor_recovered_path_count": 6,
+        "maximum_corrected_joint_feasible_path_count": 119
+      },
+      "2.0": {
+        "candidate_count": 225,
+        "maximum_actor_floor_recovered_path_count": 6,
+        "maximum_corrected_joint_feasible_path_count": 119
+      }
+    }
+  },
+  "unresolved_path": {
+    "environment": "Hopper-v5",
+    "disturbance_mode": "ood_chirp",
+    "evaluation_seed": 294864529,
+    "corrected_lower_power": 0.0025170921934271812,
+    "lower_power_budget": 0.00225625,
+    "corrected_upper_power": 0.005624985395107808,
+    "correction_rms": 0.002593303069158046,
+    "executed_correction_rms": 0.0022989777399077256,
+    "target_squared_energy": 0.016211295233790564,
+    "target_squared_error": 0.008046705694080818
+  },
+  "advancement_gate": {
+    "actor_floor_target_fidelity_gate": true,
+    "all_actor_floor_paths_change_executed_action": true,
+    "all_actor_floor_paths_recovered": false,
+    "all_actor_floor_seed_groups_recovered": false,
+    "all_actor_floor_targets_change_executed_action": true,
+    "all_paths_valid": true,
+    "all_reference_feasible_paths_preserved": true,
+    "expected_actor_floor_path_count": true,
+    "expected_path_count": true,
+    "expected_reference_feasible_path_count": true,
+    "reference_feasible_trust_region_gate": true
+  },
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "support_gate": false,
+  "next_mechanism": "state_conditioned_causal_actor_policy_with_observation_and_regime_context",
+  "claim_boundary": "Complete exact-oracle audit of the frozen 900-member reused-path linear FIR grid only; no universal impossibility, reward, online learning, fresh-seed, or manuscript performance claim."
+}
