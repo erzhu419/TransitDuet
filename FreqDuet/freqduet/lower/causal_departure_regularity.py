@@ -62,6 +62,35 @@ def causal_two_sided_action_excess_cost(
     ))
 
 
+def causal_two_sided_zero_hold_regret_cost(
+    *,
+    action_s: float,
+    target_action_s: float,
+    target_headway_s: float,
+    cost_cap: float,
+) -> float:
+    """Return positive regularity regret relative to taking no hold action.
+
+    Actions that are at least as close to the causal balancing target as zero
+    holding have no constraint cost. This leaves their passenger and dispatch
+    tradeoff to the reward critic while penalizing actions that make the local
+    two-sided regularity term worse than no intervention.
+    """
+    action_cost = causal_two_sided_action_excess_cost(
+        action_s=action_s,
+        target_action_s=target_action_s,
+        target_headway_s=target_headway_s,
+        cost_cap=cost_cap,
+    )
+    zero_hold_cost = causal_two_sided_action_excess_cost(
+        action_s=0.0,
+        target_action_s=target_action_s,
+        target_headway_s=target_headway_s,
+        cost_cap=cost_cap,
+    )
+    return float(max(action_cost - zero_hold_cost, 0.0))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

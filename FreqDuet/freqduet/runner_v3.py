@@ -91,6 +91,7 @@ from lower.causal_departure_regularity import (
     DepartureRegularityContext,
     causal_two_sided_action_excess_cost,
     causal_two_sided_holding_target_s,
+    causal_two_sided_zero_hold_regret_cost,
 )
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
@@ -296,6 +297,7 @@ class DiagnosticLog:
         'lower_cost_q_mean', 'lower_cost_q_loss', 'lower_batch_cost_mean',
         'lower_cost_limit',
         'lower_regularity_policy_enabled',
+        'lower_regularity_policy_mode',
         'lower_regularity_policy_constraint_scale_mode',
         'lower_regularity_policy_initial_lambda',
         'lower_regularity_policy_cost_mean',
@@ -317,6 +319,9 @@ class DiagnosticLog:
         'lower_regularity_policy_entropy_valid_mean',
         'lower_regularity_policy_action_cost_mean',
         'lower_regularity_policy_action_cost_max',
+        'lower_regularity_policy_zero_hold_action_cost_mean',
+        'lower_regularity_policy_action_regret_mean',
+        'lower_regularity_policy_action_regret_max',
         'lower_regularity_policy_oracle_action_cost_mean',
         'lower_regularity_policy_excess_action_cost_mean',
         'lower_regularity_policy_evidence_valid_mean',
@@ -2631,6 +2636,8 @@ class TransitDuetV2Runner:
         self._ep_lower_departure_regularity_baseline_losses = []
         self._ep_lower_departure_regularity_post_losses = []
         self._ep_lower_regularity_policy_action_costs = []
+        self._ep_lower_regularity_policy_zero_hold_action_costs = []
+        self._ep_lower_regularity_policy_action_regrets = []
         self._ep_lower_regularity_policy_oracle_action_costs = []
         self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
@@ -5713,7 +5720,22 @@ class TransitDuetV2Runner:
             target_headway_s=float(target_headway),
             cost_cap=cost_cap,
         )
+        zero_hold_action_cost = causal_two_sided_action_excess_cost(
+            action_s=0.0,
+            target_action_s=float(target_action),
+            target_headway_s=float(target_headway),
+            cost_cap=cost_cap,
+        )
+        action_regret = causal_two_sided_zero_hold_regret_cost(
+            action_s=float(action_s),
+            target_action_s=float(target_action),
+            target_headway_s=float(target_headway),
+            cost_cap=cost_cap,
+        )
         self._ep_lower_regularity_policy_action_costs.append(action_cost)
+        self._ep_lower_regularity_policy_zero_hold_action_costs.append(
+            zero_hold_action_cost)
+        self._ep_lower_regularity_policy_action_regrets.append(action_regret)
         action_bins = getattr(self.lower_trainer, 'discrete_actions', None)
         if action_bins is not None:
             if hasattr(action_bins, 'detach'):
@@ -7790,6 +7812,8 @@ class TransitDuetV2Runner:
         self._ep_lower_departure_regularity_baseline_losses = []
         self._ep_lower_departure_regularity_post_losses = []
         self._ep_lower_regularity_policy_action_costs = []
+        self._ep_lower_regularity_policy_zero_hold_action_costs = []
+        self._ep_lower_regularity_policy_action_regrets = []
         self._ep_lower_regularity_policy_oracle_action_costs = []
         self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
@@ -8466,6 +8490,10 @@ class TransitDuetV2Runner:
             self._ep_lower_departure_regularity_post_losses)
         lower_regularity_policy_action_cost_stat = _stat(
             self._ep_lower_regularity_policy_action_costs)
+        lower_regularity_policy_zero_hold_action_cost_stat = _stat(
+            self._ep_lower_regularity_policy_zero_hold_action_costs)
+        lower_regularity_policy_action_regret_stat = _stat(
+            self._ep_lower_regularity_policy_action_regrets)
         lower_regularity_policy_oracle_action_cost_stat = _stat(
             self._ep_lower_regularity_policy_oracle_action_costs)
         lower_regularity_policy_excess_action_cost_stat = _stat(
@@ -8937,6 +8965,8 @@ class TransitDuetV2Runner:
             'lower_cost_limit': float(self.lower_trainer.cost_limit),
             'lower_regularity_policy_enabled': int(
                 self.lower_trainer.regularity_policy_enabled),
+            'lower_regularity_policy_mode': str(
+                self.lower_trainer.regularity_policy_mode),
             'lower_regularity_policy_constraint_scale_mode': str(
                 self.lower_trainer.regularity_constraint_scale_mode),
             'lower_regularity_policy_initial_lambda': float(
@@ -8982,6 +9012,12 @@ class TransitDuetV2Runner:
                 lower_regularity_policy_action_cost_stat['mean'], 8),
             'lower_regularity_policy_action_cost_max': round(
                 lower_regularity_policy_action_cost_stat['max'], 8),
+            'lower_regularity_policy_zero_hold_action_cost_mean': round(
+                lower_regularity_policy_zero_hold_action_cost_stat['mean'], 8),
+            'lower_regularity_policy_action_regret_mean': round(
+                lower_regularity_policy_action_regret_stat['mean'], 8),
+            'lower_regularity_policy_action_regret_max': round(
+                lower_regularity_policy_action_regret_stat['max'], 8),
             'lower_regularity_policy_oracle_action_cost_mean': round(
                 lower_regularity_policy_oracle_action_cost_stat['mean'], 8),
             'lower_regularity_policy_excess_action_cost_mean': round(

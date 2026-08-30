@@ -1039,3 +1039,52 @@ scheduler success marker, causing three unnecessary automatic retries before
 the retry cap. The matrix runner now prints `DONE aggregate` after a successful
 aggregate. This changes scheduler observability only; it does not alter model,
 simulation, or analysis results.
+
+## Engineering-v13 zero-hold regret preregistration (2026-08-30)
+
+V13 replaces the failed absolute-target constraint, not the causal state or
+action semantics. Let `d` be the compact causal two-sided balancing action,
+`a` the discrete holding action, and `h` the target headway. V12 constrained
+`((a-d)/h)^2`. V13 constrains only
+`max(((a-d)/h)^2 - (d/h)^2, 0)`, after applying the same bounded cost
+contract. Zero holding therefore has zero regret. Actions at least as close to
+the balancing target as zero holding also have zero regret and remain ordered
+by the learned passenger, load, and dispatch value. Only actions that make the
+local two-sided regularity term worse than no intervention are penalized.
+
+The implementation preserves the seven discrete holding bins, compact causal
+AVL/APC target features, historical demand prior, conditional entropy target
+`0.25`, and zero execution adjustment. Frozen evaluation reports absolute
+target cost, zero-hold baseline cost, and positive regret separately. The
+training objective and gate use regret; absolute target cost is descriptive and
+cannot make a candidate pass.
+
+The exploratory matrix crosses initial regularity duals `0.01` and `0.05` with
+regret limits `0.00025`, `0.0005`, and `0.001`, for six candidates. Controls are
+historical main, `noguard`, matched `avlcompact`, confirmed main, the V11
+same-entropy action-dual baseline, and the best-CV V12 absolute-target
+candidate. Training seeds are `16013,16031,16053,16077`; evaluation seeds are
+`49017,49041,49059,49083`. At 40 training episodes this is 48 independent
+training jobs and 192 frozen common-random-number rollouts.
+
+The locked V13 screen requires complete clean-source manifests, exact configs
+and seeds, causal evidence coverage of at least `0.50`, zero execution
+adjustment, the exact regret mode and dimensionless scale, every rollout's mean
+regret at or below its configured limit, and at least 20 percent mean regret
+reduction relative to the V11 same-entropy control. Outcome gates preserve the
+V12 resource and `noguard` journey/CV requirements, require noninferiority to
+the V11 same-entropy control, and require at least `0.25 min` journey recovery
+from V12 without more than `0.02` CV reversal. Selection priority is fixed from
+the weakest intervention (initial dual `0.01`, largest limit) to the strongest.
+Any selected result remains exploratory and ineligible for a paper claim until
+an independent long-run confirmation passes.
+
+A two-episode engineering smoke of the middle `initial=0.01, limit=0.0005`
+candidate completed training and frozen evaluation without runtime failure.
+The episode-zero policy penalty was `0.04047`, below the `0.13--1.01` initial
+range observed in V12, and the dual moved gradually from `0.01` to `0.01055`.
+The frozen rollout had causal evidence coverage `0.78231` and mean executed
+regret `0.000090`, while absolute target cost remained `0.00569`. This confirms
+that the new objective and diagnostics execute as designed without forcing
+absolute target tracking. The smoke is not an efficacy result and does not
+change the locked 40-episode screen.

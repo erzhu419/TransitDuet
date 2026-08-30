@@ -53,6 +53,11 @@ NORMALIZED_REGULARITY_CONFIGS = [
     for limit, fraction in (("0010", "50"), ("0020", "25"))
     for initial in ("005", "010", "020")
 ]
+ZERO_HOLD_REGRET_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adregret_l{initial}_e25_r{limit}_hiro"
+    for initial in ("001", "005")
+    for limit in ("00025", "0005", "0010")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -77,6 +82,7 @@ EXPERIMENTAL_CONFIGS = [
     *REGULARITY_POLICY_CONFIGS,
     *CONDITIONAL_ENTROPY_CONFIGS,
     *NORMALIZED_REGULARITY_CONFIGS,
+    *ZERO_HOLD_REGRET_CONFIGS,
 ]
 
 
@@ -197,8 +203,11 @@ def validate(
                     "evidence_mode") != "compact_causal_target_v7":
                 raise ValueError(
                     f"{name}: regularity policy uses non-causal evidence")
-            if regularity_policy.get(
-                    "mode") != "analytic_two_sided_target_dual_v1":
+            expected_policy_mode = (
+                "analytic_two_sided_zero_hold_regret_dual_v2"
+                if name in ZERO_HOLD_REGRET_CONFIGS
+                else "analytic_two_sided_target_dual_v1")
+            if regularity_policy.get("mode") != expected_policy_mode:
                 raise ValueError(
                     f"{name}: regularity policy objective is not locked")
             if not compact_features.issubset(features):

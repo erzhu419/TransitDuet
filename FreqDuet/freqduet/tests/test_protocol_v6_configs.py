@@ -11,6 +11,7 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
     ROOT,
+    ZERO_HOLD_REGRET_CONFIGS,
     validate,
 )
 
@@ -451,6 +452,51 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         )
         self.assertAlmostEqual(trainer.regularity_scaled_cost_limit, 1.0)
         self.assertAlmostEqual(trainer.regularity_lambda_param, 0.10)
+
+    def test_zero_hold_regret_configs_lock_only_the_new_objective(self):
+        configs = [CONFIRMED_MAIN, *ZERO_HOLD_REGRET_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(ZERO_HOLD_REGRET_CONFIGS),
+        )
+
+        for name in ZERO_HOLD_REGRET_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            objective = lower["causal_regularity_policy"]
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_zero_hold_regret_dual_v2",
+            )
+            self.assertEqual(
+                objective["constraint_scale_mode"],
+                "cost_limit_ratio_v1",
+            )
+            self.assertEqual(
+                objective["conditional_entropy"]["target_fraction"], 0.25)
+            self.assertIn(objective["initial_lambda"], {0.01, 0.05})
+            self.assertIn(
+                objective["cost_limit"], {0.00025, 0.0005, 0.001})
+
+    def test_zero_hold_regret_runner_resolves_the_new_mode(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_w2adregret_l001_e25_r0005_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        trainer = runner.lower_trainer
+        self.assertEqual(
+            trainer.regularity_policy_mode,
+            "analytic_two_sided_zero_hold_regret_dual_v2",
+        )
+        self.assertAlmostEqual(trainer.regularity_scaled_cost_limit, 1.0)
+        self.assertAlmostEqual(trainer.regularity_lambda_param, 0.01)
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

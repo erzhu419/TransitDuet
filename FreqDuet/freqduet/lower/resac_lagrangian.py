@@ -453,6 +453,7 @@ class RESACLagrangianTrainer:
         self.regularity_policy_enabled = bool(
             regularity_cfg.get('enable', False))
         self.regularity_policy_contract = {'enabled': False}
+        self.regularity_policy_mode = 'disabled'
         self.regularity_constraint_scale_mode = 'raw_cost_v1'
         self.regularity_constraint_cost_scale = 1.0
         self.regularity_initial_lambda = 0.0
@@ -467,8 +468,11 @@ class RESACLagrangianTrainer:
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
-            if mode != 'analytic_two_sided_target_dual_v1':
+            if mode not in {
+                    'analytic_two_sided_target_dual_v1',
+                    'analytic_two_sided_zero_hold_regret_dual_v2'}:
                 raise ValueError('unknown causal regularity policy objective')
+            self.regularity_policy_mode = mode
             if self.discrete_actions is None:
                 raise ValueError(
                     'causal regularity policy objective requires action_bins')
@@ -678,10 +682,21 @@ class RESACLagrangianTrainer:
             state[:, self.regularity_headway_feature_index]
             * self.regularity_headway_scale_s).clamp_min(1.0)
         actions_s = self.discrete_actions.view(1, -1)
-        action_costs = (
+        absolute_action_costs = (
             (actions_s - target_action_s.unsqueeze(-1))
             / target_headway_s.unsqueeze(-1)).pow(2)
-        action_costs = action_costs.clamp(0.0, self.regularity_cost_cap)
+        absolute_action_costs = absolute_action_costs.clamp(
+            0.0, self.regularity_cost_cap)
+        if (self.regularity_policy_mode
+                == 'analytic_two_sided_zero_hold_regret_dual_v2'):
+            zero_hold_cost = (
+                target_action_s / target_headway_s
+            ).pow(2).clamp(
+                0.0, self.regularity_cost_cap).unsqueeze(-1)
+            action_costs = (
+                absolute_action_costs - zero_hold_cost).clamp_min(0.0)
+        else:
+            action_costs = absolute_action_costs
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, action_costs
 

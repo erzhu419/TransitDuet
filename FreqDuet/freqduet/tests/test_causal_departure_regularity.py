@@ -5,6 +5,7 @@ from lower.causal_departure_regularity import (
     CausalDepartureRegularityCost,
     causal_two_sided_action_excess_cost,
     causal_two_sided_holding_target_s,
+    causal_two_sided_zero_hold_regret_cost,
 )
 from runner_v3 import TransitDuetV2Runner
 
@@ -32,6 +33,25 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
 
         self.assertEqual(exact, 0.0)
         self.assertAlmostEqual(offset, (30.0 / 360.0) ** 2)
+
+    def test_zero_hold_regret_only_penalizes_worse_actions(self):
+        kwargs = {
+            'target_action_s': 30.0,
+            'target_headway_s': 600.0,
+            'cost_cap': 0.25,
+        }
+
+        self.assertEqual(causal_two_sided_zero_hold_regret_cost(
+            action_s=0.0, **kwargs), 0.0)
+        self.assertEqual(causal_two_sided_zero_hold_regret_cost(
+            action_s=30.0, **kwargs), 0.0)
+        self.assertEqual(causal_two_sided_zero_hold_regret_cost(
+            action_s=60.0, **kwargs), 0.0)
+        self.assertAlmostEqual(
+            causal_two_sided_zero_hold_regret_cost(
+                action_s=75.0, **kwargs),
+            ((75.0 - 30.0) / 600.0) ** 2 - (30.0 / 600.0) ** 2,
+        )
 
     def test_compact_target_is_the_clipped_two_sided_balance_action(self):
         self.assertEqual(causal_two_sided_holding_target_s(

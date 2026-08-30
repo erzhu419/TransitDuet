@@ -192,7 +192,8 @@ class OptimizerContractTest(unittest.TestCase):
     @staticmethod
     def _regularity_trainer(
             cost_limit=0.001, conditional_entropy=False,
-            constraint_scale_mode="raw_cost_v1", initial_lambda=1.0):
+            constraint_scale_mode="raw_cost_v1", initial_lambda=1.0,
+            policy_mode="analytic_two_sided_target_dual_v1"):
         conditional = (
             {
                 "enable": True,
@@ -214,7 +215,7 @@ class OptimizerContractTest(unittest.TestCase):
             auto_entropy=conditional_entropy,
             regularity_policy_objective={
                 "enable": True,
-                "mode": "analytic_two_sided_target_dual_v1",
+                "mode": policy_mode,
                 "target_feature_index": 1,
                 "valid_feature_index": 2,
                 "target_headway_feature_index": 0,
@@ -242,6 +243,30 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertEqual(costs[0, 1].item(), 0.0)
         self.assertAlmostEqual(expected.item(), 0.5 * (45.0 / 360.0) ** 2)
         self.assertEqual(valid.item(), 1.0)
+
+    def test_causal_regularity_regret_is_relative_to_zero_holding(self):
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_zero_hold_regret_dual_v2")
+        state = torch.tensor([
+            [0.6, 1.0 / 3.0, 1.0],
+        ], dtype=torch.float32)
+        probs = torch.tensor([[0.5, 0.5]], dtype=torch.float32)
+
+        expected, valid, regrets = trainer._regularity_policy_cost(
+            state, probs)
+
+        expected_action_regret = (
+            (30.0 / 360.0) ** 2 - (15.0 / 360.0) ** 2)
+        self.assertEqual(regrets[0, 0].item(), 0.0)
+        self.assertAlmostEqual(
+            regrets[0, 1].item(), expected_action_regret, places=7)
+        self.assertAlmostEqual(
+            expected.item(), 0.5 * expected_action_regret, places=7)
+        self.assertEqual(valid.item(), 1.0)
+        self.assertEqual(
+            trainer.regularity_policy_contract["mode"],
+            "analytic_two_sided_zero_hold_regret_dual_v2",
+        )
 
     def test_causal_regularity_dual_uses_only_valid_evidence(self):
         torch.manual_seed(53)

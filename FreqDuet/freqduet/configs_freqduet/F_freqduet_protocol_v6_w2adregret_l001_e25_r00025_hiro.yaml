@@ -1,0 +1,14 @@
+_extends: F_freqduet_protocol_v6_w2adent_e25_c0020_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro
+
+protocol:
+  role: exploratory_compact_w2_zero_hold_regret_l001_e25_r00025_v6
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_zero_hold_regret_dual_v2
+    cost_limit: 0.00025
+    constraint_scale_mode: cost_limit_ratio_v1
+    lambda_min: 0.0001
+    lambda_max: 2.0
+    initial_lambda: 0.01
