@@ -15,6 +15,9 @@ from scripts.submit_mujoco_v17_8_dataset_scheduleurm import (
     build_scheduler_spec,
     selected_paths,
 )
+from scripts.submit_mujoco_v17_8_selection_scheduleurm import (
+    build_scheduler_spec as build_selection_scheduler_spec,
+)
 from scripts.train_mujoco_v17_8_causal_fir import (
     candidate_configs,
     reused_advancement_gate,
@@ -146,3 +149,20 @@ def test_dataset_tasks_keep_arrays_server_only_on_checkpoint_node():
     assert ".server_artifacts" in artifact.parts
     assert ".server_artifacts" not in task["result_dir"]
     assert ".server_artifacts" in task["stage_excludes"]
+
+
+def test_selection_task_explicitly_registers_cpu_only_ridge_workload():
+    args = SimpleNamespace(
+        dataset_run_name="v17_8_dataset_test",
+        run_name="v17_8_selection_test",
+        python_executable="python3",
+        cpu=8,
+        ram_mb=8192,
+        priority="normal",
+    )
+    task = build_selection_scheduler_spec(args)
+    assert task["require_node"] == DATA_LOCAL_NODE
+    assert task["vram"] == 0
+    assert task["cpu"] == 8
+    assert task["allow_cpu_training"]
+    assert "NumPy ridge" in task["cpu_training_justification"]

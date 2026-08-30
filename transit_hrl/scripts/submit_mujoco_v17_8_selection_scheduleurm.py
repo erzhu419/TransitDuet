@@ -29,6 +29,10 @@ from scripts.submit_hyperparameter_pilot_scheduleurm import (  # noqa: E402
 WORKER = Path("scripts/train_mujoco_v17_8_causal_fir.py")
 SIGNATURE_VERSION = "mujoco-v17-8-causal-fir-selection-v1"
 DATA_LOCAL_NODE = "node003"
+CPU_JUSTIFICATION = (
+    "The v17.8 selector performs deterministic NumPy ridge solves over "
+    "server-local action arrays; it has no GPU training workload."
+)
 
 
 def build_command(args: argparse.Namespace) -> str:
@@ -73,7 +77,8 @@ def build_scheduler_spec(args: argparse.Namespace) -> dict[str, object]:
         "result_dir": str(output),
         "local_result_dir": str(output),
         "wait_for_files": [],
-        "allow_cpu_training": False,
+        "allow_cpu_training": True,
+        "cpu_training_justification": CPU_JUSTIFICATION,
         "reroute_on_node_down": False,
         "allowed_nodes": [DATA_LOCAL_NODE],
         "require_node": DATA_LOCAL_NODE,
