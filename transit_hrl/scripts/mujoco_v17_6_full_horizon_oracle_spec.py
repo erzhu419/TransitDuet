@@ -1,0 +1,35 @@
+"""Frozen development design for the MuJoCo v17.6 full-horizon oracle."""
+
+from __future__ import annotations
+
+from scripts import (  # noqa: F401
+    mujoco_v17_4_streaming_audit_projection_preflight_spec as v17_4,
+)
+
+
+DEVELOPMENT_PROTOCOL_VERSION = "mujoco_v17_6_full_horizon_oracle_v1"
+EVIDENCE_ROLE = "rejected_v17_4_frozen_total_path_oracle_not_confirmatory"
+FROZEN_ORACLE_REVISION = "5a6efa2dccb441334b55cabd25556fc78b55ad3b"
+FROZEN_SOURCE_MANIFEST_SHA256 = (
+    "8d001993b7da2913052ce9ee91ff329410592dede1c8b2aae48da7a1054bc0d1"
+)
+SOURCE_RUN_NAME = (
+    "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1"
+)
+ENVIRONMENTS = v17_4.ENVIRONMENTS
+DISTURBANCE_MODES = v17_4.EVALUATION_DISTURBANCE_MODES
+EVALUATION_SEEDS = v17_4.EVALUATION_SEEDS
+OPTIMIZER_SEED = v17_4.OPTIMIZER_SEEDS[0]
+UPPER_RMS_BUDGET = v17_4.UPPER_HF_RMS_BUDGET
+LOWER_RMS_BUDGET = v17_4.LOWER_LF_RMS_BUDGET
+SOLVER_TOLERANCE = 1e-9
+POWER_TOLERANCE = 1e-8
+MULTIPLIER_BISECTION_STEPS = 18
+LEGACY_NUMERIC_TOLERANCE = 1e-12
+SOLVER_OPTIMALITY_TOLERANCE = 1e-5
+KKT_RESIDUAL_TOLERANCE = 1e-5
+BOUND_TOLERANCE = 1e-10
+RECONSTRUCTION_TOLERANCE = 1e-12
+EXPECTED_PATH_COUNT = (
+    len(ENVIRONMENTS) * len(DISTURBANCE_MODES) * len(EVALUATION_SEEDS)
+)

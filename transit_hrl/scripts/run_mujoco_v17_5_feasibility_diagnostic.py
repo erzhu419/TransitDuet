@@ -130,6 +130,7 @@ def _rollout(
     disturbance_mode: str,
     seed: int,
     router_mode: str,
+    responsibility_trace_output: dict[str, np.ndarray] | None = None,
 ) -> dict[str, Any]:
     _, row = rollout_hierarchical(
         model,
@@ -159,6 +160,7 @@ def _rollout(
         upper_promotion_gain=0.0,
         method="freq_hrl",
         episode_horizon=v17_4.EPISODE_HORIZON,
+        responsibility_trace_output=responsibility_trace_output,
     )
     row.update({
         "diagnostic_protocol_version": DIAGNOSTIC_PROTOCOL_VERSION,
