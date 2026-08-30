@@ -42,6 +42,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_8_causal_fir_distillation_development | mujoco_control | development | grouped_causal_fir_stopped_before_fresh_path_access | development_only | false |
 | mujoco_v17_9_prefix_hpf_fir_development | mujoco_control | development | prefix_hpf_fir_stopped_before_fresh_path_access | development_only | false |
 | mujoco_v17_10_horizon_reservoir_fir_development | mujoco_control | development | horizon_reservoir_fir_stopped_before_fresh_path_access | development_only | false |
+| mujoco_v17_11_fractional_reservoir_fir_development | mujoco_control | development | fractional_reservoir_fir_stops_router_only_development | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -262,6 +263,12 @@ Forbidden: The v17.9 reused-path prefix projection validates fresh-seed generali
 On reused grouped development paths, the frozen v17.10 selector retained the zero-reserve 48/81 solution. An 82-step reservoir diagnostic reached 63/81 recovery and 120/120 endpoint upper compliance, but only 113/120 paths maintained the causal envelope and Hopper recovery was 15/33; no fresh path was accessed.
 
 Forbidden: The v17.10 reused-path reservoir validates fresh-seed generalization, short-horizon endpoint certification, the all-environment frequency contract, reward improvement, closed-loop learning, or a final Freq-HRL algorithm.
+
+### mujoco_v17_11_fractional_reservoir_fir_development
+
+On 120 reused grouped development paths, the frozen v17.11 selector found a fractional reservoir that kept all paths valid and upper-feasible, recovered 62/81 oracle-recoverable failures, and preserved all 32 baseline-feasible Walker2d paths. Hopper recovery was only 14/33; even a one-invalid-path diagnostic reached only 16/33. No candidate passed the gate, no fresh path was accessed, and router-only fixed-total-action development was closed.
+
+Forbidden: The v17.11 reused-path fractional reservoir validates fresh-seed generalization, the all-environment frequency contract, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.
 
 ### legacy_c1_c9_matrix_snapshot
 

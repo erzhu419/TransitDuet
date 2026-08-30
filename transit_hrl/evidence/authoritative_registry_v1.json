@@ -1093,6 +1093,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v17_11_fractional_reservoir_fir_development",
+      "claim_id": "D33_FRACTIONAL_RESERVOIR_FIR",
+      "claim": "Fractional release of minimum-horizon upper-energy credit closes the short-episode Hopper responsibility gap while preserving causal feasibility.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "fractional_reservoir_fir_stops_router_only_development",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_10_reused_rejected_paths_grouped_by_seed",
+      "outcome_provenance": "one_hundred_twenty_reused_paths_eight_leave_one_seed_out_folds_and_forty_fractional_reservoir_candidates",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v17_11_fractional_reservoir_fir",
+      "allowed_wording": "On 120 reused grouped development paths, the frozen v17.11 selector found a fractional reservoir that kept all paths valid and upper-feasible, recovered 62/81 oracle-recoverable failures, and preserved all 32 baseline-feasible Walker2d paths. Hopper recovery was only 14/33; even a one-invalid-path diagnostic reached only 16/33. No candidate passed the gate, no fresh path was accessed, and router-only fixed-total-action development was closed.",
+      "forbidden_wording": "The v17.11 reused-path fractional reservoir validates fresh-seed generalization, the all-environment frequency contract, reward improvement, closed-loop learning, leakage no-tradeoff, or a final Freq-HRL algorithm.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v17_11_fractional_reservoir_fir_development.json",
+          "sha256": "c1ac9efa9aa277d06ccb87c300dc05d180c354d63ee63b46f17a85094c2e0ff2"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v17_11_fractional_reservoir_fir_outcome_2026-08-31.md",
+          "sha256": "dbea54a6ed31a544215c07953328ee43da5abda69c8604586a71e85bc7508f60"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

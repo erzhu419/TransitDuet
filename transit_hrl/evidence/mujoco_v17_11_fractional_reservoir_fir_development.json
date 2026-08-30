@@ -1,0 +1,66 @@
+{
+  "schema_version": "freq_hrl_mujoco_v17_11_fractional_reservoir_fir_development_v1",
+  "status": "fractional_reservoir_fir_stops_router_only_development",
+  "integrity_status": "valid",
+  "evidence_role": "final_router_only_reused_path_fractional_reservoir_not_confirmatory",
+  "development_protocol_version": "mujoco_v17_11_fractional_reservoir_fir_v1",
+  "frozen_core_revision": "1578e24ecc75bc480f1d41803dc13a19e49b5c5f",
+  "frozen_source_manifest_sha256": "06557c3f016fc7cbd7cd7f9f4f730f9d6700be7f1dfa07ad0f567ac72e83e8c6",
+  "source_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "selection_run": "mujoco_v17_11_fractional_reservoir_fir_selection_20260831_r1",
+  "grouped_seed_fold_count": 8,
+  "path_count": 120,
+  "candidate_count": 40,
+  "scheduler": {
+    "selection_task_id": "t85842",
+    "selection_task_status": "done",
+    "nodes": [
+      "node003"
+    ],
+    "slurm_used": false
+  },
+  "selected_candidate": {
+    "candidate_id": "fractional_reservoir80_rho0.75_fir_w64_ridge1e-03_gain1.00",
+    "energy_reserve_steps": 80,
+    "energy_borrow_fraction": 0.75,
+    "valid_path_count": 120,
+    "upper_budget_path_count": 120,
+    "joint_budget_path_count": 94,
+    "oracle_recoverable_failure_count": 81,
+    "recovered_failure_count": 62,
+    "preserved_baseline_feasible_path_count": 32,
+    "recovered_failure_count_by_environment": {
+      "HalfCheetah-v5": 40,
+      "Hopper-v5": 14,
+      "Walker2d-v5": 8
+    }
+  },
+  "best_hopper_diagnostic": {
+    "candidate_id": "fractional_reservoir82_rho0.75_fir_w64_ridge1e-03_gain1.00",
+    "energy_reserve_steps": 82,
+    "energy_borrow_fraction": 0.75,
+    "valid_path_count": 119,
+    "upper_budget_path_count": 120,
+    "recovered_failure_count": 64,
+    "hopper_recovered_failure_count": 16,
+    "preserved_baseline_feasible_path_count": 32
+  },
+  "advancement_gate": {
+    "all_paths_numerically_and_physically_valid": true,
+    "all_paths_meet_endpoint_upper_budget": true,
+    "expected_oracle_recoverable_denominator": true,
+    "expected_walker_baseline_feasible_denominator": true,
+    "fractional_envelope_feasible_on_all_paths": true,
+    "mean_lower_power_no_worse_each_environment": true,
+    "minimum_horizon_certified_on_all_paths": true,
+    "walker_baseline_feasible_preservation_gate": true,
+    "environment_recovery_gates": false,
+    "total_recovery_gate": false
+  },
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "router_only_development_closed": true,
+  "next_mechanism": "actor_level_total_action_feasibility_with_endpoint_frequency_constraints",
+  "support_gate": false,
+  "claim_boundary": "Final reused-path router-only mechanism evidence with fixed total action; no fresh-path, reward, closed-loop learning, or manuscript performance claim."
+}

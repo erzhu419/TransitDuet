@@ -62,6 +62,9 @@ MUJOCO_V17_9_PREFIX_HPF_FIR_SCHEMA_VERSION = (
 MUJOCO_V17_10_HORIZON_RESERVOIR_FIR_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_10_horizon_reservoir_fir_development_v1"
 )
+MUJOCO_V17_11_FRACTIONAL_RESERVOIR_FIR_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v17_11_fractional_reservoir_fir_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2362,6 +2365,87 @@ def _mujoco_v17_10_horizon_reservoir_fir_facts(
     }
 
 
+def _mujoco_v17_11_fractional_reservoir_fir_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    selected = dict(decision.get("selected_candidate") or {})
+    diagnostic = dict(decision.get("best_hopper_diagnostic") or {})
+    scheduler = dict(decision.get("scheduler") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    observed_recovery = dict(
+        selected.get("recovered_failure_count_by_environment") or {}
+    )
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V17_11_FRACTIONAL_RESERVOIR_FIR_SCHEMA_VERSION
+        or decision.get("status")
+        != "fractional_reservoir_fir_stops_router_only_development"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "final_router_only_reused_path_fractional_reservoir_not_confirmatory"
+        or decision.get("frozen_core_revision")
+        != "1578e24ecc75bc480f1d41803dc13a19e49b5c5f"
+        or decision.get("frozen_source_manifest_sha256")
+        != "06557c3f016fc7cbd7cd7f9f4f730f9d6700be7f1dfa07ad0f567ac72e83e8c6"
+        or int(decision.get("grouped_seed_fold_count", -1)) != 8
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 40
+        or scheduler.get("selection_task_id") != "t85842"
+        or scheduler.get("selection_task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "fractional_reservoir80_rho0.75_fir_w64_ridge1e-03_gain1.00"
+        or int(selected.get("energy_reserve_steps", -1)) != 80
+        or float(selected.get("energy_borrow_fraction", -1.0)) != 0.75
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("upper_budget_path_count", -1)) != 120
+        or int(selected.get("oracle_recoverable_failure_count", -1)) != 81
+        or int(selected.get("recovered_failure_count", -1)) != 62
+        or int(selected.get("preserved_baseline_feasible_path_count", -1))
+        != 32
+        or observed_recovery
+        != {"HalfCheetah-v5": 40, "Hopper-v5": 14, "Walker2d-v5": 8}
+        or int(diagnostic.get("valid_path_count", -1)) != 119
+        or int(diagnostic.get("recovered_failure_count", -1)) != 64
+        or int(diagnostic.get("hopper_recovered_failure_count", -1)) != 16
+        or gate.get("all_paths_numerically_and_physically_valid") is not True
+        or gate.get("all_paths_meet_endpoint_upper_budget") is not True
+        or gate.get("fractional_envelope_feasible_on_all_paths") is not True
+        or gate.get("minimum_horizon_certified_on_all_paths") is not True
+        or gate.get("total_recovery_gate") is not False
+        or gate.get("environment_recovery_gates") is not False
+        or decision.get("router_only_development_closed") is not True
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`fractional_reservoir_fir_stops_router_only_development`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v17.11 fractional reservoir decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "grouped_seed_fold_count": 8,
+        "path_count": 120,
+        "candidate_count": 40,
+        "selected_energy_reserve_steps": 80,
+        "selected_energy_borrow_fraction": 0.75,
+        "selected_recovered_failure_count": 62,
+        "selected_preserved_baseline_feasible_path_count": 32,
+        "recovered_failures_by_environment": observed_recovery,
+        "best_diagnostic_valid_path_count": 119,
+        "best_diagnostic_hopper_recovered_failure_count": 16,
+        "router_only_development_closed": True,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2413,6 +2497,9 @@ PARSERS = {
     ),
     "mujoco_v17_10_horizon_reservoir_fir": (
         _mujoco_v17_10_horizon_reservoir_fir_facts
+    ),
+    "mujoco_v17_11_fractional_reservoir_fir": (
+        _mujoco_v17_11_fractional_reservoir_fir_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
