@@ -313,24 +313,71 @@ def paired_output_bias_interventions(
     *,
     seed: int,
     bias_rms: float,
+    direction_scheme: str = "random_rademacher",
+    direction_index: int = 0,
+    hadamard_order: int = 0,
 ) -> list[dict[str, Any]]:
     """Create control and level-isolated antithetic actor interventions."""
 
     amplitude = float(bias_rms)
     if not np.isfinite(amplitude) or amplitude <= 0.0:
         raise ValueError("paired actor intervention RMS must be positive")
-    rng = np.random.default_rng(int(seed))
     upper_dim = int(_actor_output_head(model.upper_actor).out_features)
     lower_dim = int(_actor_output_head(model.lower_actor).out_features)
-    upper = amplitude * rng.choice((-1.0, 1.0), size=upper_dim)
-    lower = amplitude * rng.choice((-1.0, 1.0), size=lower_dim)
+    scheme = str(direction_scheme)
+    if scheme == "random_rademacher":
+        rng = np.random.default_rng(int(seed))
+        upper = amplitude * rng.choice((-1.0, 1.0), size=upper_dim)
+        lower = amplitude * rng.choice((-1.0, 1.0), size=lower_dim)
+    elif scheme == "balanced_hadamard":
+        upper = amplitude * balanced_hadamard_direction(
+            upper_dim, index=direction_index, order=hadamard_order
+        )
+        lower = amplitude * balanced_hadamard_direction(
+            lower_dim, index=direction_index, order=hadamard_order
+        )
+    else:
+        raise ValueError("unknown paired actor intervention direction scheme")
     return [
-        {"variant": "control", "upper_bias": None, "lower_bias": None},
-        {"variant": "upper_plus", "upper_bias": upper, "lower_bias": None},
-        {"variant": "upper_minus", "upper_bias": -upper, "lower_bias": None},
-        {"variant": "lower_plus", "upper_bias": None, "lower_bias": lower},
-        {"variant": "lower_minus", "upper_bias": None, "lower_bias": -lower},
+        {
+            "variant": "control", "upper_bias": None, "lower_bias": None,
+            "direction_scheme": scheme, "direction_index": int(direction_index),
+        },
+        {
+            "variant": "upper_plus", "upper_bias": upper, "lower_bias": None,
+            "direction_scheme": scheme, "direction_index": int(direction_index),
+        },
+        {
+            "variant": "upper_minus", "upper_bias": -upper, "lower_bias": None,
+            "direction_scheme": scheme, "direction_index": int(direction_index),
+        },
+        {
+            "variant": "lower_plus", "upper_bias": None, "lower_bias": lower,
+            "direction_scheme": scheme, "direction_index": int(direction_index),
+        },
+        {
+            "variant": "lower_minus", "upper_bias": None, "lower_bias": -lower,
+            "direction_scheme": scheme, "direction_index": int(direction_index),
+        },
     ]
+
+
+def balanced_hadamard_direction(
+    dimension: int, *, index: int, order: int
+) -> np.ndarray:
+    """Return one row from a balanced orthogonal intervention design."""
+
+    width = int(order)
+    if width < 1 or width & (width - 1):
+        raise ValueError("Hadamard order must be a positive power of two")
+    if int(dimension) < 1 or int(dimension) > width:
+        raise ValueError("Hadamard order must cover the actor output dimension")
+    if int(index) < 0 or int(index) >= width:
+        raise ValueError("Hadamard direction index is outside the design")
+    matrix = np.ones((1, 1), dtype=np.float64)
+    while matrix.shape[0] < width:
+        matrix = np.block([[matrix, matrix], [matrix, -matrix]])
+    return matrix[int(index), :int(dimension)].copy()
 
 
 @dataclass
@@ -582,6 +629,7 @@ def _paired_finite_difference_estimate(
     level: str,
     gamma: float,
     max_return_decisions: int | None,
+    estimator: str = "coordinate_median_spsa",
 ) -> tuple[np.ndarray, dict[str, np.ndarray], dict[str, Any]]:
     if len(results) != len(jobs):
         raise ValueError("paired intervention results and jobs are misaligned")
@@ -593,6 +641,8 @@ def _paired_finite_difference_estimate(
         key = (int(path["seed"]), str(path["disturbance_mode"]))
         groups.setdefault(key, {})[variant] = (result["batch"], intervention)
     gradients = []
+    direction_rows = []
+    directional_derivatives = []
     modes = []
     required = {"control", f"{level}_plus", f"{level}_minus"}
     for (_, mode), variants in sorted(groups.items()):
@@ -623,24 +673,69 @@ def _paired_finite_difference_estimate(
             gamma=gamma,
             max_return_decisions=max_return_decisions,
         )
-        gradient = (
-            (plus_cost - minus_cost) / (2.0 * amplitude)
-        ) * (plus_bias / amplitude)
+        unit_direction = plus_bias / amplitude
+        directional_derivative = (
+            plus_cost - minus_cost
+        ) / (2.0 * amplitude)
+        gradient = directional_derivative * unit_direction
         if not np.all(np.isfinite(gradient)):
             raise RuntimeError("paired finite-difference gradient is non-finite")
         gradients.append(gradient)
+        direction_rows.append(unit_direction)
+        directional_derivatives.append(directional_derivative)
         modes.append(str(mode))
     matrix = np.stack(gradients, axis=0)
-    direction = np.median(matrix, axis=0)
-    per_mode = {
-        mode: np.median(matrix[np.asarray(modes) == mode], axis=0)
-        for mode in sorted(set(modes))
-    }
+    design = np.stack(direction_rows, axis=0)
+    response = np.asarray(directional_derivatives, dtype=np.float64)
+    modes_array = np.asarray(modes)
+    estimator_name = str(estimator)
+    design_metrics: dict[str, Any] = {}
+    if estimator_name == "coordinate_median_spsa":
+        direction = np.median(matrix, axis=0)
+        per_mode = {
+            mode: np.median(matrix[modes_array == mode], axis=0)
+            for mode in sorted(set(modes))
+        }
+    elif estimator_name == "orthogonal_least_squares":
+        direction, _, global_rank, _ = np.linalg.lstsq(
+            design, response, rcond=None
+        )
+        per_mode = {}
+        per_mode_rank = {}
+        per_mode_condition = {}
+        for mode in sorted(set(modes)):
+            selected = modes_array == mode
+            mode_design = design[selected]
+            mode_response = response[selected]
+            estimate, _, rank, _ = np.linalg.lstsq(
+                mode_design, mode_response, rcond=None
+            )
+            per_mode[mode] = estimate
+            per_mode_rank[mode] = int(rank)
+            per_mode_condition[mode] = float(np.linalg.cond(mode_design))
+        parameter_count = int(design.shape[1])
+        if int(global_rank) != parameter_count or any(
+            rank != parameter_count for rank in per_mode_rank.values()
+        ):
+            raise RuntimeError("paired orthogonal direction design is rank deficient")
+        residual = response - design @ direction
+        design_metrics = {
+            "global_design_rank": int(global_rank),
+            "global_design_condition": float(np.linalg.cond(design)),
+            "global_directional_residual_rms": float(
+                np.sqrt(np.mean(np.square(residual)))
+            ),
+            "per_mode_design_rank": per_mode_rank,
+            "per_mode_design_condition": per_mode_condition,
+        }
+    else:
+        raise ValueError("unknown paired finite-difference estimator")
     rms = float(np.sqrt(np.mean(np.square(direction))))
     if not np.isfinite(rms) or rms <= 1e-12:
         raise RuntimeError("robust paired finite-difference direction is degenerate")
     norms = np.linalg.norm(matrix, axis=1)
     return direction / rms, per_mode, {
+        "estimator": estimator_name,
         "path_count": int(matrix.shape[0]),
         "parameter_count": int(matrix.shape[1]),
         "path_gradient_norm_median": float(np.median(norms)),
@@ -650,6 +745,7 @@ def _paired_finite_difference_estimate(
             - np.quantile(matrix, 0.25, axis=0)
         )),
         "disturbance_modes": sorted(set(modes)),
+        **design_metrics,
     }
 
 
@@ -817,6 +913,9 @@ def run_probe(
     actor_update_scope: str = "full_mean",
     actor_direction_source: str = "critic_gradient",
     minimum_paired_holdout_cosine: float = 0.0,
+    critic_intervention_direction_scheme: str = "random_rademacher",
+    critic_intervention_hadamard_order: int = 0,
+    paired_direction_estimator: str = "coordinate_median_spsa",
 ) -> dict[str, Any]:
     checkpoint = torch.load(
         checkpoint_path, map_location="cpu", weights_only=False
@@ -864,6 +963,39 @@ def run_probe(
         raise ValueError(
             "paired finite differences require paired collection and bias updates"
         )
+    intervention_direction_scheme = str(critic_intervention_direction_scheme)
+    if intervention_direction_scheme not in {
+        "random_rademacher", "balanced_hadamard",
+    }:
+        raise ValueError("unknown paired intervention direction scheme")
+    hadamard_order = int(critic_intervention_hadamard_order)
+    if intervention_direction_scheme == "random_rademacher":
+        if hadamard_order != 0:
+            raise ValueError("random interventions cannot declare a Hadamard order")
+    else:
+        if collection_mode != "paired_output_bias":
+            raise ValueError("balanced interventions require paired collection")
+        dimensions = (
+            int(_actor_output_head(baseline_model.upper_actor).out_features),
+            int(_actor_output_head(baseline_model.lower_actor).out_features),
+        )
+        if (
+            hadamard_order < max(dimensions)
+            or hadamard_order & (hadamard_order - 1)
+        ):
+            raise ValueError("Hadamard order must be a power of two covering both actors")
+    direction_estimator = str(paired_direction_estimator)
+    if direction_estimator not in {
+        "coordinate_median_spsa", "orthogonal_least_squares",
+    }:
+        raise ValueError("unknown paired finite-difference estimator")
+    if direction_estimator == "orthogonal_least_squares" and (
+        direction_source != "paired_finite_difference"
+        or intervention_direction_scheme != "balanced_hadamard"
+    ):
+        raise ValueError(
+            "orthogonal least squares requires paired Hadamard directions"
+        )
     train_paths = _paths_for_roots(summary["environment"], critic_train_roots)
     holdout_paths = _paths_for_roots(
         summary["environment"], critic_holdout_roots
@@ -881,7 +1013,13 @@ def run_probe(
         paired_interventions: bool = False,
     ) -> list[dict[str, Any]]:
         jobs = []
+        mode_occurrences: dict[str, int] = {}
         for path in paths:
+            mode = str(path["disturbance_mode"])
+            direction_index = mode_occurrences.get(mode, 0)
+            mode_occurrences[mode] = direction_index + 1
+            if intervention_direction_scheme == "balanced_hadamard":
+                direction_index %= hadamard_order
             intervention_seed = derive_seed(
                 "mujoco_paired_output_bias_intervention_v1",
                 str(summary["environment"]),
@@ -894,6 +1032,9 @@ def run_probe(
                     baseline_model,
                     seed=intervention_seed,
                     bias_rms=intervention_rms,
+                    direction_scheme=intervention_direction_scheme,
+                    direction_index=direction_index,
+                    hadamard_order=hadamard_order,
                 )
                 if paired_interventions else [None]
             )
@@ -1071,6 +1212,7 @@ def run_probe(
                         level=level,
                         gamma=float(baseline_model.config.gamma),
                         max_return_decisions=horizon,
+                        estimator=direction_estimator,
                     )
                 )
                 holdout_direction, holdout_modes, holdout_metrics = (
@@ -1080,6 +1222,7 @@ def run_probe(
                         level=level,
                         gamma=float(baseline_model.config.gamma),
                         max_return_decisions=horizon,
+                        estimator=direction_estimator,
                     )
                 )
                 if set(train_modes) != set(holdout_modes):
@@ -1161,7 +1304,11 @@ def run_probe(
         ):
             snapshot = design_snapshot(result["rows"])
             candidate = {
-                "source": str(direction_source),
+                "source": (
+                    str(direction_source)
+                    if direction_source == "critic_gradient"
+                    else f"{direction_source}:{direction_estimator}"
+                ),
                 "step_rms": float(step_rms),
                 "parameter_sha256": result["parameter_sha256"],
                 "snapshot": snapshot,
@@ -1275,6 +1422,9 @@ def run_probe(
         "critic_learning_rate": float(critic_learning_rate),
         "critic_collection_mode": collection_mode,
         "critic_intervention_bias_rms": intervention_rms,
+        "critic_intervention_direction_scheme": intervention_direction_scheme,
+        "critic_intervention_hadamard_order": hadamard_order,
+        "paired_direction_estimator": direction_estimator,
         "critic_intervention_variants": sorted({
             result["intervention_variant"] for result in critic_results
         }),
@@ -1377,6 +1527,14 @@ def main() -> None:
         "--critic-intervention-bias-rms", type=float, default=0.0
     )
     parser.add_argument(
+        "--critic-intervention-direction-scheme",
+        choices=("random_rademacher", "balanced_hadamard"),
+        default="random_rademacher",
+    )
+    parser.add_argument(
+        "--critic-intervention-hadamard-order", type=int, default=0
+    )
+    parser.add_argument(
         "--actor-update-scope",
         choices=("full_mean", "output_bias"),
         default="full_mean",
@@ -1388,6 +1546,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--minimum-paired-holdout-cosine", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--paired-direction-estimator",
+        choices=("coordinate_median_spsa", "orthogonal_least_squares"),
+        default="coordinate_median_spsa",
     )
     args = parser.parse_args()
     payload = run_probe(
@@ -1429,6 +1592,13 @@ def main() -> None:
         actor_update_scope=args.actor_update_scope,
         actor_direction_source=args.actor_direction_source,
         minimum_paired_holdout_cosine=args.minimum_paired_holdout_cosine,
+        critic_intervention_direction_scheme=(
+            args.critic_intervention_direction_scheme
+        ),
+        critic_intervention_hadamard_order=(
+            args.critic_intervention_hadamard_order
+        ),
+        paired_direction_estimator=args.paired_direction_estimator,
     )
     print(json.dumps({
         "output": str(args.output),
