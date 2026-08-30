@@ -1,0 +1,15 @@
+_extends: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0005_x1_hiro
+
+protocol:
+  role: exploratory_compact_w2_capacity_gain_l001_e25_r00025_w0005_x1_v6
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_capacity_gain_regret_dual_v3
+    capacity_gated_gain:
+      enable: true
+      mode: positive_zero_hold_gain_v1
+      weight: 0.005
+      gain_scale: 0.002
+      capacity_exponent: 1.0

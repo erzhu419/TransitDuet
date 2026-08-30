@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0005_x1_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_hiro
+
+protocol:
+  role: exploratory_compact_w2_capacity_gain_l001_e25_r00025_w0020_x1_v6
+
+lower:
+  causal_regularity_policy:
+    capacity_gated_gain:
+      weight: 0.02

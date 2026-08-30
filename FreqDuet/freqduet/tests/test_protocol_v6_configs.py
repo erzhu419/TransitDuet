@@ -5,6 +5,7 @@ from runner_v3 import TransitDuetV2Runner
 from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
+    CAPACITY_GAIN_CONFIGS,
     CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
     NORMALIZED_REGULARITY_CONFIGS,
@@ -497,6 +498,66 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         )
         self.assertAlmostEqual(trainer.regularity_scaled_cost_limit, 1.0)
         self.assertAlmostEqual(trainer.regularity_lambda_param, 0.01)
+
+    def test_capacity_gain_runner_resolves_causal_capacity_index(self):
+        config = load_config(
+            ROOT / "configs_freqduet"
+            / "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0010_x1_hiro.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        trainer = runner.lower_trainer
+        contract = trainer.regularity_policy_contract
+        expected_index = (
+            runner.env._base_state_dim
+            + runner.env.lower_context_features.index("capacity"))
+        self.assertTrue(trainer.regularity_capacity_gain_enabled)
+        self.assertEqual(
+            contract["capacity_gated_gain"]["capacity_feature_index"],
+            expected_index,
+        )
+        self.assertAlmostEqual(
+            contract["capacity_gated_gain"]["weight"], 0.01)
+
+    def test_capacity_gain_configs_lock_v13_anchor_and_registered_grid(self):
+        configs = [CONFIRMED_MAIN, *CAPACITY_GAIN_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(CAPACITY_GAIN_CONFIGS),
+        )
+
+        observed = set()
+        for name in CAPACITY_GAIN_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            objective = lower["causal_regularity_policy"]
+            gain = objective["capacity_gated_gain"]
+            features = set(
+                config["frequency"]["lower_context"]["features"])
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_capacity_gain_regret_dual_v3",
+            )
+            self.assertEqual(objective["cost_limit"], 0.00025)
+            self.assertEqual(objective["initial_lambda"], 0.01)
+            self.assertEqual(
+                objective["constraint_scale_mode"], "cost_limit_ratio_v1")
+            self.assertEqual(
+                objective["conditional_entropy"]["target_fraction"], 0.25)
+            self.assertEqual(gain["mode"], "positive_zero_hold_gain_v1")
+            self.assertEqual(gain["gain_scale"], 0.002)
+            self.assertIn("capacity", features)
+            observed.add((gain["weight"], gain["capacity_exponent"]))
+        self.assertEqual(observed, {
+            (weight, exponent)
+            for weight in (0.005, 0.01, 0.02)
+            for exponent in (1.0, 2.0)
+        })
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
         config = load_config(

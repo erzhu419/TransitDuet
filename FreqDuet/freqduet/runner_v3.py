@@ -309,6 +309,18 @@ class DiagnosticLog:
         'lower_regularity_policy_scaled_limit',
         'lower_regularity_policy_scaled_constraint_gap',
         'lower_regularity_policy_penalty',
+        'lower_regularity_policy_capacity_gain_enabled',
+        'lower_regularity_policy_capacity_gain_weight',
+        'lower_regularity_policy_capacity_gain_scale',
+        'lower_regularity_policy_capacity_exponent',
+        'lower_regularity_policy_actor_capacity_gain_mean',
+        'lower_regularity_policy_actor_scaled_capacity_gain_mean',
+        'lower_regularity_policy_actor_capacity_gain_bonus',
+        'lower_regularity_policy_actor_capacity_gate_mean',
+        'lower_regularity_policy_capacity_gain_mean',
+        'lower_regularity_policy_scaled_capacity_gain_mean',
+        'lower_regularity_policy_capacity_gain_bonus',
+        'lower_regularity_policy_capacity_gate_mean',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
         'lower_regularity_entropy_split_enabled',
@@ -2113,6 +2125,23 @@ class TransitDuetV2Runner:
                 'target_headway_scale_s': float(
                     self.lower_state_encoder.headway_norm_s),
             })
+            regularity_mode = str(regularity_policy_cfg.get(
+                'mode', 'analytic_two_sided_target_dual_v1'
+            )).strip().lower()
+            if (regularity_mode
+                    == 'analytic_two_sided_capacity_gain_regret_dual_v3'):
+                if 'capacity' not in self.env.lower_context_features:
+                    raise ValueError(
+                        'capacity-gated regularity gain requires the capacity '
+                        'lower-context feature')
+                capacity_gain_cfg = copy.deepcopy(
+                    regularity_policy_cfg.get(
+                        'capacity_gated_gain', {}) or {})
+                capacity_gain_cfg['capacity_feature_index'] = (
+                    base_state_dim
+                    + self.env.lower_context_features.index('capacity'))
+                regularity_policy_cfg[
+                    'capacity_gated_gain'] = capacity_gain_cfg
         if self.decouple_init_seeds and not self.randomness.isolated:
             torch.manual_seed(self.base_seed + 2001)
         with self.randomness.torch_initialization('lower_init'):
@@ -2641,6 +2670,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_oracle_action_costs = []
         self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
+        self._ep_lower_regularity_policy_capacity_gains = []
+        self._ep_lower_regularity_policy_capacity_gates = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_policy_entropies = []
@@ -5686,7 +5717,7 @@ class TransitDuetV2Runner:
 
     def _record_causal_regularity_policy_execution(
             self, context: DepartureRegularityContext | None,
-            action_s: float) -> None:
+            action_s: float, state: np.ndarray) -> None:
         compact_features = {
             'regularity_hold_target_norm',
             'regularity_hold_target_valid',
@@ -5736,6 +5767,23 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_zero_hold_action_costs.append(
             zero_hold_action_cost)
         self._ep_lower_regularity_policy_action_regrets.append(action_regret)
+        if self.lower_trainer.regularity_capacity_gain_enabled:
+            feature_index = int(
+                self.lower_trainer.regularity_capacity_feature_index)
+            encoded_state = np.asarray(state, dtype=np.float32).reshape(-1)
+            if not 0 <= feature_index < encoded_state.size:
+                raise RuntimeError(
+                    'capacity-gated regularity feature index is out of range '
+                    'during action execution')
+            capacity_gate = float(np.clip(
+                encoded_state[feature_index], 0.0, 1.0)) ** float(
+                    self.lower_trainer.regularity_capacity_exponent)
+            capacity_gain = capacity_gate * max(
+                float(zero_hold_action_cost) - float(action_cost), 0.0)
+            self._ep_lower_regularity_policy_capacity_gates.append(
+                capacity_gate)
+            self._ep_lower_regularity_policy_capacity_gains.append(
+                capacity_gain)
         action_bins = getattr(self.lower_trainer, 'discrete_actions', None)
         if action_bins is not None:
             if hasattr(action_bins, 'detach'):
@@ -5847,7 +5895,7 @@ class TransitDuetV2Runner:
         departure_regularity = self.lower_departure_regularity.evaluate(
             departure_context, act_val)
         self._record_causal_regularity_policy_execution(
-            departure_context, act_val)
+            departure_context, act_val, state)
         departure_regularity_cost = float(departure_regularity.cost)
         departure_regularity_reward = float(
             departure_regularity.reward_adjustment)
@@ -7817,6 +7865,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_oracle_action_costs = []
         self._ep_lower_regularity_policy_excess_action_costs = []
         self._ep_lower_regularity_policy_evidence_valid = []
+        self._ep_lower_regularity_policy_capacity_gains = []
+        self._ep_lower_regularity_policy_capacity_gates = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_policy_entropies = []
@@ -8500,6 +8550,10 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_policy_excess_action_costs)
         lower_regularity_policy_evidence_stat = _stat(
             self._ep_lower_regularity_policy_evidence_valid)
+        lower_regularity_policy_capacity_gain_stat = _stat(
+            self._ep_lower_regularity_policy_capacity_gains)
+        lower_regularity_policy_capacity_gate_stat = _stat(
+            self._ep_lower_regularity_policy_capacity_gates)
         lower_regularity_policy_target_stat = _stat(
             self._ep_lower_regularity_policy_target_actions)
         lower_regularity_policy_error_stat = _stat(
@@ -8990,6 +9044,39 @@ class TransitDuetV2Runner:
                 'regularity_policy_scaled_constraint_gap', 0.),
             'lower_regularity_policy_penalty': lower_m.get(
                 'regularity_policy_penalty', 0.),
+            'lower_regularity_policy_capacity_gain_enabled': int(
+                self.lower_trainer.regularity_capacity_gain_enabled),
+            'lower_regularity_policy_capacity_gain_weight': float(
+                self.lower_trainer.regularity_capacity_gain_weight),
+            'lower_regularity_policy_capacity_gain_scale': float(
+                self.lower_trainer.regularity_capacity_gain_scale),
+            'lower_regularity_policy_capacity_exponent': float(
+                self.lower_trainer.regularity_capacity_exponent),
+            'lower_regularity_policy_actor_capacity_gain_mean': lower_m.get(
+                'regularity_policy_capacity_gain_mean', 0.),
+            'lower_regularity_policy_actor_scaled_capacity_gain_mean': lower_m.get(
+                'regularity_policy_scaled_capacity_gain_mean', 0.),
+            'lower_regularity_policy_actor_capacity_gain_bonus': lower_m.get(
+                'regularity_policy_capacity_gain_bonus', 0.),
+            'lower_regularity_policy_actor_capacity_gate_mean': lower_m.get(
+                'regularity_policy_capacity_gate_mean', 0.),
+            'lower_regularity_policy_capacity_gain_mean': round(
+                lower_regularity_policy_capacity_gain_stat['mean'], 8),
+            'lower_regularity_policy_scaled_capacity_gain_mean': round(
+                lower_regularity_policy_capacity_gain_stat['mean']
+                / self.lower_trainer.regularity_capacity_gain_scale
+                if self.lower_trainer.regularity_capacity_gain_enabled
+                else 0.0,
+                8),
+            'lower_regularity_policy_capacity_gain_bonus': round(
+                self.lower_trainer.regularity_capacity_gain_weight
+                * lower_regularity_policy_capacity_gain_stat['mean']
+                / self.lower_trainer.regularity_capacity_gain_scale
+                if self.lower_trainer.regularity_capacity_gain_enabled
+                else 0.0,
+                8),
+            'lower_regularity_policy_capacity_gate_mean': round(
+                lower_regularity_policy_capacity_gate_stat['mean'], 8),
             'lower_regularity_policy_cost_limit': float(
                 getattr(self.lower_trainer, 'regularity_cost_limit', 0.0)),
             'lower_regularity_lambda': lower_m.get(
@@ -9509,6 +9596,10 @@ class TransitDuetV2Runner:
                    'lower_lambda', 'lower_alpha', 'lower_q_mean', 'lower_q_std',
                    'lower_regularity_lambda',
                    'lower_regularity_policy_cost_mean',
+                   'lower_regularity_policy_actor_capacity_gain_mean',
+                   'lower_regularity_policy_actor_capacity_gain_bonus',
+                   'lower_regularity_policy_capacity_gain_mean',
+                   'lower_regularity_policy_capacity_gain_bonus',
                    'lower_regularity_alpha',
                    'lower_policy_entropy_mean',
                    'lower_regularity_policy_entropy_valid_mean',

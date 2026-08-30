@@ -1128,3 +1128,80 @@ deployable APC/AVL load, capacity, queue, and causal balancing target to allocat
 regularity-improving holding selectively across states while retaining the
 zero-hold regret constraint. Replay-level target-by-load allocation is audited
 before that objective is implemented.
+
+## Engineering-v14 capacity-gated gain preregistration (2026-08-30)
+
+The V13 replay allocation audit reads the exact episode-39 training replay from
+V11, V12, and all six V13 candidates: 32 checkpoints, 6,656,000 transitions,
+and approximately 78--81 percent valid compact causal target observations. It
+recomputes the bounded absolute target cost, zero-hold baseline, positive
+regularity gain, and positive zero-hold regret using the checkpoint's own
+feature indices and scales. At matched target-severity bands, V13 already holds
+high-load buses approximately 3--5 seconds less than low-load buses; the learned
+critic is therefore load-sensitive and the V13 failure is not attributable to
+an absent load feature. High-load states nevertheless constitute approximately
+43 percent of valid replay events and 34 percent of holding and positive-gain
+mass. The tight `l001/r00025` anchor has the strongest journey/resource result,
+but lacks enough selective regularity gain to recover CV.
+
+V14 starts only from that tight V13 anchor. It retains the positive zero-hold
+regret constraint and adds an actor-only benefit
+`w * E[c^p * max(C(0)-C(a), 0)] / 0.002`, where `C(a)` is the same bounded
+two-sided action cost, `c` is the current deployable remaining-capacity feature,
+and causal-invalid states receive zero weight. The benefit can reward only an
+action that improves regularity relative to zero holding; it cannot reward
+overshoot, cannot force an execution-time adjustment, and uses no future or
+latent state. Its fixed normalization is close to the observed valid-replay
+regularity-gain scale and makes `w` interpretable in actor-loss units.
+
+The exploratory grid crosses gain weights `0.005, 0.01, 0.02` with capacity
+exponents `1, 2`. All six candidates preserve initial regularity dual `0.01`,
+regret limit `0.00025`, dimensionless regret scaling, conditional-entropy
+target `0.25`, seven discrete holding bins, compact APC/AVL context, and zero
+execution guard. Controls are historical main, `noguard`, compact context-only,
+confirmed main, V11 same-entropy absolute target, and the V13 tight anchor.
+Fresh training seeds are `17013,17031,17053,17077`; frozen evaluation seeds are
+`50017,50041,50059,50083`. Exact experiment-field and result-filename search
+found no prior use of these seeds. At 40 episodes the matrix contains 48
+independent training jobs and 192 frozen common-random-number rollouts, with the
+V13 tight anchor as the paired aggregate reference.
+
+The locked V14 mechanism gate requires complete clean-source manifests; exact
+configs, seeds, checkpoint 39, and common random numbers; zero execution
+adjustment; the exact V3 capacity-gain contract; initial dual `0.01`; raw regret
+limit `0.00025` and unit scaled limit; every rollout's mean regret at or below
+`0.00025`; causal evidence coverage of at least `0.50`; positive realized
+capacity-gated gain and capacity-gate coverage in every rollout; and exact
+agreement, up to the registered CSV rounding tolerance, among realized gain,
+its `0.002` normalization, the configured weight, and the reported bonus. The
+outcome gate requires CV improvement of at least `0.010` versus the V13 anchor with its
+paired confidence-interval upper bound below zero, no more than `0.20 min`
+journey worsening versus that anchor, at least `0.25 min` journey and `0.030`
+CV improvement versus `noguard`, at least `0.50 min` journey improvement and no
+more than `0.005` CV reversal versus confirmed main, and at least `0.25 min`
+journey improvement and no more than `0.005` CV reversal versus V11. Holding
+and denied-dispatch limits remain `noguard + 10%` of the adverse historical-main
+gap. Selection prefers the smallest effective intervention: lower weight first
+and exponent two before exponent one at equal weight. A selected row remains
+exploratory and requires disjoint 200-episode confirmation; `no_pass` rules out
+this fixed capacity-gain family rather than licensing a post-hoc threshold.
+
+### V14 implementation smoke (2026-08-30)
+
+A local two-episode smoke used one disjoint engineering seed and one frozen
+evaluation seed for the V13 anchor, the weakest linear-gate V14 candidate, and
+the strongest squared-gate V14 candidate. All three jobs completed checkpoint
+1, strict aggregation, and checkpoint-restored frozen evaluation. The V13
+control reports exactly zero realized capacity gain, scaled gain, bonus, and
+capacity gate. The `w=0.005,p=1` candidate reports frozen realized gain
+`0.00170836`, mean capacity gate `0.43032956`, and bonus `0.00427090`; the
+`w=0.02,p=2` candidate reports `0.00125604`, `0.30484511`, and `0.01256042`.
+Both rows satisfy the registered normalization and bonus identities after
+eight-decimal CSV rounding. Targeted mechanism, optimizer, checkpoint, and
+fail-closed gate tests pass.
+
+The two-episode frozen mean action regret is `0.00096267` for all three rows,
+above the formal `0.00025` limit. This is an early-training constraint transient,
+not a passing result. The smoke establishes only that V14 is active, causal,
+serialized, restorable, and auditable. The preregistered 40-episode screen still
+rejects any candidate whose regret limit is missed in even one frozen rollout.

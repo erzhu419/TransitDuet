@@ -58,6 +58,11 @@ ZERO_HOLD_REGRET_CONFIGS = [
     for initial in ("001", "005")
     for limit in ("00025", "0005", "0010")
 ]
+CAPACITY_GAIN_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w{weight}_x{exponent}_hiro"
+    for exponent in ("1", "2")
+    for weight in ("0005", "0010", "0020")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -83,6 +88,7 @@ EXPERIMENTAL_CONFIGS = [
     *CONDITIONAL_ENTROPY_CONFIGS,
     *NORMALIZED_REGULARITY_CONFIGS,
     *ZERO_HOLD_REGRET_CONFIGS,
+    *CAPACITY_GAIN_CONFIGS,
 ]
 
 
@@ -204,7 +210,9 @@ def validate(
                 raise ValueError(
                     f"{name}: regularity policy uses non-causal evidence")
             expected_policy_mode = (
-                "analytic_two_sided_zero_hold_regret_dual_v2"
+                "analytic_two_sided_capacity_gain_regret_dual_v3"
+                if name in CAPACITY_GAIN_CONFIGS
+                else "analytic_two_sided_zero_hold_regret_dual_v2"
                 if name in ZERO_HOLD_REGRET_CONFIGS
                 else "analytic_two_sided_target_dual_v1")
             if regularity_policy.get("mode") != expected_policy_mode:
@@ -213,6 +221,34 @@ def validate(
             if not compact_features.issubset(features):
                 raise ValueError(
                     f"{name}: regularity policy lacks compact causal state")
+            if name in CAPACITY_GAIN_CONFIGS:
+                gain = regularity_policy.get(
+                    "capacity_gated_gain", {}) or {}
+                if "capacity" not in features:
+                    raise ValueError(
+                        f"{name}: capacity gain lacks causal capacity state")
+                if (gain.get("enable") is not True
+                        or gain.get("mode")
+                        != "positive_zero_hold_gain_v1"):
+                    raise ValueError(
+                        f"{name}: capacity gain contract is not locked")
+                if float(gain.get("weight", -1.0)) not in {
+                        0.005, 0.01, 0.02}:
+                    raise ValueError(
+                        f"{name}: capacity gain weight is not registered")
+                if float(gain.get("gain_scale", -1.0)) != 0.002:
+                    raise ValueError(
+                        f"{name}: capacity gain scale is not locked")
+                if float(gain.get("capacity_exponent", -1.0)) not in {
+                        1.0, 2.0}:
+                    raise ValueError(
+                        f"{name}: capacity gain exponent is not registered")
+                if (float(regularity_policy.get("cost_limit", -1.0))
+                        != 0.00025
+                        or float(regularity_policy.get(
+                            "initial_lambda", -1.0)) != 0.01):
+                    raise ValueError(
+                        f"{name}: capacity gain changed the V13 anchor")
             if not lower.get("action_bins"):
                 raise ValueError(
                     f"{name}: regularity policy requires discrete actions")

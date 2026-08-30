@@ -193,7 +193,8 @@ class OptimizerContractTest(unittest.TestCase):
     def _regularity_trainer(
             cost_limit=0.001, conditional_entropy=False,
             constraint_scale_mode="raw_cost_v1", initial_lambda=1.0,
-            policy_mode="analytic_two_sided_target_dual_v1"):
+            policy_mode="analytic_two_sided_target_dual_v1",
+            capacity_gain_weight=0.02, capacity_exponent=1.0):
         conditional = (
             {
                 "enable": True,
@@ -206,30 +207,43 @@ class OptimizerContractTest(unittest.TestCase):
             }
             if conditional_entropy else {"enable": False}
         )
+        capacity_mode = (
+            policy_mode
+            == "analytic_two_sided_capacity_gain_regret_dual_v3")
+        regularity = {
+            "enable": True,
+            "mode": policy_mode,
+            "target_feature_index": 1,
+            "valid_feature_index": 2,
+            "target_headway_feature_index": 0,
+            "action_target_scale_s": 45.0,
+            "target_headway_scale_s": 600.0,
+            "cost_limit": cost_limit,
+            "cost_cap": 0.25,
+            "constraint_scale_mode": constraint_scale_mode,
+            "lambda_lr": 1e-2,
+            "lambda_min": 1e-3,
+            "lambda_max": 20.0,
+            "initial_lambda": initial_lambda,
+            "conditional_entropy": conditional,
+        }
+        if capacity_mode:
+            regularity["capacity_gated_gain"] = {
+                "enable": True,
+                "mode": "positive_zero_hold_gain_v1",
+                "capacity_feature_index": 3,
+                "weight": capacity_gain_weight,
+                "gain_scale": 0.002,
+                "capacity_exponent": capacity_exponent,
+            }
         return RESACLagrangianTrainer(
-            state_dim=3,
+            state_dim=4 if capacity_mode else 3,
             action_range=45.0,
             action_bins=[0.0, 45.0],
             ensemble_size=2,
             hidden_dim=8,
             auto_entropy=conditional_entropy,
-            regularity_policy_objective={
-                "enable": True,
-                "mode": policy_mode,
-                "target_feature_index": 1,
-                "valid_feature_index": 2,
-                "target_headway_feature_index": 0,
-                "action_target_scale_s": 45.0,
-                "target_headway_scale_s": 600.0,
-                "cost_limit": cost_limit,
-                "cost_cap": 0.25,
-                "constraint_scale_mode": constraint_scale_mode,
-                "lambda_lr": 1e-2,
-                "lambda_min": 1e-3,
-                "lambda_max": 20.0,
-                "initial_lambda": initial_lambda,
-                "conditional_entropy": conditional,
-            },
+            regularity_policy_objective=regularity,
         )
 
     def test_causal_regularity_cost_matches_two_sided_action_term(self):
@@ -267,6 +281,75 @@ class OptimizerContractTest(unittest.TestCase):
             trainer.regularity_policy_contract["mode"],
             "analytic_two_sided_zero_hold_regret_dual_v2",
         )
+
+    def test_capacity_gain_rewards_only_positive_low_load_improvement(self):
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_capacity_gain_regret_dual_v3")
+        state = torch.tensor([
+            [0.6, 1.0, 1.0, 1.0],
+            [0.6, 1.0, 1.0, 0.0],
+        ], dtype=torch.float32)
+        probs = torch.tensor([[0.5, 0.5], [0.5, 0.5]], dtype=torch.float32)
+
+        expected, valid, gains = trainer._regularity_policy_capacity_gain(
+            state, probs)
+
+        zero_hold_cost = (45.0 / 360.0) ** 2
+        self.assertAlmostEqual(
+            gains[0, 1].item(), zero_hold_cost, places=7)
+        self.assertAlmostEqual(
+            expected[0].item(), 0.5 * zero_hold_cost, places=7)
+        self.assertEqual(expected[1].item(), 0.0)
+        self.assertTrue(torch.equal(valid, torch.ones_like(valid)))
+
+    def test_capacity_gain_bonus_uses_only_valid_evidence_and_round_trips(self):
+        torch.manual_seed(109)
+        trainer = self._regularity_trainer(
+            cost_limit=0.00025,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            policy_mode="analytic_two_sided_capacity_gain_regret_dual_v3",
+            capacity_gain_weight=0.02,
+            capacity_exponent=2.0,
+        )
+        replay = CostReplayBuffer(64, seed=113)
+        for idx in range(16):
+            state = np.array([0.6, 1.0, 1.0, 1.0], dtype=np.float32)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        self.assertGreater(
+            metrics["regularity_policy_capacity_gain_mean"], 0.0)
+        self.assertAlmostEqual(
+            metrics["regularity_policy_capacity_gain_bonus"],
+            0.02 * metrics[
+                "regularity_policy_scaled_capacity_gain_mean"],
+            places=6,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_policy_capacity_gate_mean"], 1.0)
+        restored = self._regularity_trainer(
+            cost_limit=0.00025,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            policy_mode="analytic_two_sided_capacity_gain_regret_dual_v3",
+            capacity_gain_weight=0.02,
+            capacity_exponent=2.0,
+        )
+        restored.load_training_state_dict(trainer.training_state_dict())
+        self.assertEqual(
+            restored.regularity_policy_contract,
+            trainer.regularity_policy_contract)
+
+        invalid_replay = CostReplayBuffer(64, seed=127)
+        for idx in range(16):
+            state = np.array([0.6, 1.0, 0.0, 1.0], dtype=np.float32)
+            invalid_replay.push(state, 0.0, 0.0, 0.0, state, True, idx)
+        invalid_metrics = restored.update(
+            invalid_replay, 16, reward_scale=1.0)
+        self.assertEqual(
+            invalid_metrics["regularity_policy_capacity_gain_bonus"], 0.0)
 
     def test_causal_regularity_dual_uses_only_valid_evidence(self):
         torch.manual_seed(53)

@@ -465,12 +465,18 @@ class RESACLagrangianTrainer:
         self.regularity_alpha_max = self.maximum_alpha
         self.log_regularity_alpha = None
         self.regularity_alpha_optimizer = None
+        self.regularity_capacity_gain_enabled = False
+        self.regularity_capacity_feature_index = None
+        self.regularity_capacity_gain_weight = 0.0
+        self.regularity_capacity_gain_scale = 1.0
+        self.regularity_capacity_exponent = 1.0
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
             if mode not in {
                     'analytic_two_sided_target_dual_v1',
-                    'analytic_two_sided_zero_hold_regret_dual_v2'}:
+                    'analytic_two_sided_zero_hold_regret_dual_v2',
+                    'analytic_two_sided_capacity_gain_regret_dual_v3'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             if self.discrete_actions is None:
@@ -598,6 +604,57 @@ class RESACLagrangianTrainer:
                     'maximum_alpha': alpha_max,
                     'initial_alpha': alpha_initial,
                 }
+            capacity_gain_cfg = dict(
+                regularity_cfg.get('capacity_gated_gain', {}) or {})
+            capacity_gain_enabled = bool(
+                capacity_gain_cfg.get('enable', False))
+            if (mode == 'analytic_two_sided_capacity_gain_regret_dual_v3'):
+                if not capacity_gain_enabled:
+                    raise ValueError(
+                        'capacity-gain regularity mode requires an enabled '
+                        'capacity_gated_gain contract')
+                gain_mode = str(capacity_gain_cfg.get(
+                    'mode', 'positive_zero_hold_gain_v1')).strip().lower()
+                if gain_mode != 'positive_zero_hold_gain_v1':
+                    raise ValueError('unknown capacity-gated regularity gain mode')
+                capacity_feature_index = int(
+                    capacity_gain_cfg['capacity_feature_index'])
+                if not 0 <= capacity_feature_index < int(state_dim):
+                    raise ValueError(
+                        'capacity-gated gain feature index is out of range')
+                gain_weight = float(capacity_gain_cfg.get('weight', 0.0))
+                gain_scale = float(capacity_gain_cfg.get('gain_scale', 0.002))
+                capacity_exponent = float(
+                    capacity_gain_cfg.get('capacity_exponent', 1.0))
+                if not np.isfinite(gain_weight) or gain_weight <= 0.0:
+                    raise ValueError(
+                        'capacity-gated gain weight must be positive')
+                if not np.isfinite(gain_scale) or gain_scale <= 0.0:
+                    raise ValueError(
+                        'capacity-gated gain scale must be positive')
+                if (not np.isfinite(capacity_exponent)
+                        or capacity_exponent <= 0.0):
+                    raise ValueError(
+                        'capacity-gated gain exponent must be positive')
+                self.regularity_capacity_gain_enabled = True
+                self.regularity_capacity_feature_index = (
+                    capacity_feature_index)
+                self.regularity_capacity_gain_weight = gain_weight
+                self.regularity_capacity_gain_scale = gain_scale
+                self.regularity_capacity_exponent = capacity_exponent
+                capacity_gain_contract = {
+                    'enabled': True,
+                    'mode': gain_mode,
+                    'capacity_feature_index': capacity_feature_index,
+                    'weight': gain_weight,
+                    'gain_scale': gain_scale,
+                    'capacity_exponent': capacity_exponent,
+                }
+            else:
+                if capacity_gain_enabled:
+                    raise ValueError(
+                        'capacity_gated_gain requires the V3 regularity mode')
+                capacity_gain_contract = None
             self.regularity_policy_contract = {
                 'enabled': True,
                 'mode': mode,
@@ -617,6 +674,9 @@ class RESACLagrangianTrainer:
                 'initial_lambda': initial_lambda,
                 'conditional_entropy': entropy_contract,
             }
+            if capacity_gain_contract is not None:
+                self.regularity_policy_contract[
+                    'capacity_gated_gain'] = capacity_gain_contract
 
     @property
     def lambda_param(self):
@@ -668,8 +728,8 @@ class RESACLagrangianTrainer:
             dim=-1, keepdim=True).to(dtype=state.dtype)
         return torch.log(torch.clamp(feasible_count, min=1.0))
 
-    def _regularity_policy_cost(self, state, action_probs):
-        """Return exact conditional action cost for the compact causal target."""
+    def _regularity_policy_action_terms(self, state):
+        """Return causal validity, absolute action cost, and zero-hold cost."""
         if not self.regularity_policy_enabled:
             raise RuntimeError('causal regularity policy objective is disabled')
         target_norm = state[:, self.regularity_target_feature_index].clamp(
@@ -687,18 +747,40 @@ class RESACLagrangianTrainer:
             / target_headway_s.unsqueeze(-1)).pow(2)
         absolute_action_costs = absolute_action_costs.clamp(
             0.0, self.regularity_cost_cap)
-        if (self.regularity_policy_mode
-                == 'analytic_two_sided_zero_hold_regret_dual_v2'):
-            zero_hold_cost = (
-                target_action_s / target_headway_s
-            ).pow(2).clamp(
-                0.0, self.regularity_cost_cap).unsqueeze(-1)
+        zero_hold_cost = (
+            target_action_s / target_headway_s
+        ).pow(2).clamp(
+            0.0, self.regularity_cost_cap).unsqueeze(-1)
+        return valid, absolute_action_costs, zero_hold_cost
+
+    def _regularity_policy_cost(self, state, action_probs):
+        """Return exact conditional action cost for the compact causal target."""
+        valid, absolute_action_costs, zero_hold_cost = (
+            self._regularity_policy_action_terms(state))
+        if self.regularity_policy_mode in {
+                'analytic_two_sided_zero_hold_regret_dual_v2',
+                'analytic_two_sided_capacity_gain_regret_dual_v3'}:
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
         else:
             action_costs = absolute_action_costs
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, action_costs
+
+    def _regularity_policy_capacity_gain(self, state, action_probs):
+        """Reward regularity improvement only where spare capacity is causal."""
+        if not self.regularity_capacity_gain_enabled:
+            raise RuntimeError('capacity-gated regularity gain is disabled')
+        valid, absolute_action_costs, zero_hold_cost = (
+            self._regularity_policy_action_terms(state))
+        capacity = state[
+            :, self.regularity_capacity_feature_index
+        ].clamp(0.0, 1.0).pow(self.regularity_capacity_exponent)
+        action_gains = (
+            zero_hold_cost - absolute_action_costs
+        ).clamp_min(0.0) * capacity.unsqueeze(-1)
+        expected_gain = (action_probs * action_gains).sum(dim=-1)
+        return expected_gain, valid, action_gains
 
     def _discrete_q_values(self, q_net, state):
         """Evaluate a scalar-action critic on every configured action bin."""
@@ -887,6 +969,10 @@ class RESACLagrangianTrainer:
                 self.regularity_scaled_cost_limit),
             'regularity_policy_scaled_constraint_gap': 0.0,
             'regularity_policy_penalty': 0.0,
+            'regularity_policy_capacity_gain_mean': 0.0,
+            'regularity_policy_scaled_capacity_gain_mean': 0.0,
+            'regularity_policy_capacity_gain_bonus': 0.0,
+            'regularity_policy_capacity_gate_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
@@ -905,6 +991,9 @@ class RESACLagrangianTrainer:
             regularity_excess_cost_mean = None
             regularity_scaled_cost_mean = None
             regularity_valid_fraction = None
+            regularity_capacity_gain_mean = None
+            regularity_scaled_capacity_gain_mean = None
+            regularity_capacity_gate_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -936,6 +1025,8 @@ class RESACLagrangianTrainer:
                                 + lam * cost_q_new.squeeze(-1))
             policy_loss = (policy_terms * w).mean()
             regularity_penalty = torch.zeros((), device=self.device)
+            regularity_capacity_gain_bonus = torch.zeros(
+                (), device=self.device)
             if self.regularity_policy_enabled:
                 regularity_cost, regularity_valid, regularity_action_costs = (
                     self._regularity_policy_cost(state, probs))
@@ -963,6 +1054,31 @@ class RESACLagrangianTrainer:
                         self.log_regularity_lambda.exp().detach()
                         * regularity_scaled_cost_mean)
                     policy_loss = policy_loss + regularity_penalty
+                    if self.regularity_capacity_gain_enabled:
+                        capacity_gain, gain_valid, _ = (
+                            self._regularity_policy_capacity_gain(
+                                state, probs))
+                        if not torch.equal(gain_valid, regularity_valid):
+                            raise RuntimeError(
+                                'regularity cost and gain validity diverged')
+                        regularity_capacity_gain_mean = (
+                            capacity_gain * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_scaled_capacity_gain_mean = (
+                            regularity_capacity_gain_mean
+                            / self.regularity_capacity_gain_scale)
+                        capacity_gate = state[
+                            :, self.regularity_capacity_feature_index
+                        ].clamp(0.0, 1.0).pow(
+                            self.regularity_capacity_exponent)
+                        regularity_capacity_gate_mean = (
+                            capacity_gate * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_capacity_gain_bonus = (
+                            self.regularity_capacity_gain_weight
+                            * regularity_scaled_capacity_gain_mean)
+                        policy_loss = (
+                            policy_loss - regularity_capacity_gain_bonus)
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -1097,6 +1213,18 @@ class RESACLagrangianTrainer:
                     - self.regularity_scaled_cost_limit
                     if regularity_scaled_cost_mean is not None else 0.0),
                 'regularity_policy_penalty': regularity_penalty.item(),
+                'regularity_policy_capacity_gain_mean': (
+                    regularity_capacity_gain_mean.item()
+                    if regularity_capacity_gain_mean is not None else 0.0),
+                'regularity_policy_scaled_capacity_gain_mean': (
+                    regularity_scaled_capacity_gain_mean.item()
+                    if regularity_scaled_capacity_gain_mean is not None
+                    else 0.0),
+                'regularity_policy_capacity_gain_bonus': (
+                    regularity_capacity_gain_bonus.item()),
+                'regularity_policy_capacity_gate_mean': (
+                    regularity_capacity_gate_mean.item()
+                    if regularity_capacity_gate_mean is not None else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
                     float((

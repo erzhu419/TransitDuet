@@ -1,6 +1,8 @@
 import unittest
 from types import SimpleNamespace
 
+import numpy as np
+
 from lower.causal_departure_regularity import (
     CausalDepartureRegularityCost,
     causal_two_sided_action_excess_cost,
@@ -224,6 +226,59 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
         self.assertEqual(result.predicted_headway_s, 360.0)
         self.assertEqual(result.cost, 0.0)
         self.assertNotIn(7, runner._pending_lower_action_context)
+
+    def test_runner_records_realized_capacity_gated_gain(self):
+        runner = TransitDuetV2Runner.__new__(TransitDuetV2Runner)
+        runner.env = SimpleNamespace(
+            lower_context_features={
+                "regularity_hold_target_norm",
+                "regularity_hold_target_valid",
+                "capacity",
+            },
+            lower_causal_holding_action_scale_s=90.0,
+        )
+        runner.lower_trainer = SimpleNamespace(
+            regularity_policy_contract={
+                "action_target_scale_s": 90.0,
+                "cost_cap": 0.25,
+            },
+            regularity_capacity_gain_enabled=True,
+            regularity_capacity_feature_index=2,
+            regularity_capacity_exponent=2.0,
+            discrete_actions=None,
+        )
+        runner._ep_lower_regularity_policy_evidence_valid = []
+        runner._ep_lower_regularity_policy_action_costs = []
+        runner._ep_lower_regularity_policy_zero_hold_action_costs = []
+        runner._ep_lower_regularity_policy_action_regrets = []
+        runner._ep_lower_regularity_policy_capacity_gates = []
+        runner._ep_lower_regularity_policy_capacity_gains = []
+        runner._ep_lower_regularity_policy_oracle_action_costs = []
+        runner._ep_lower_regularity_policy_excess_action_costs = []
+        runner._ep_lower_regularity_policy_target_actions = []
+        runner._ep_lower_regularity_policy_abs_errors = []
+        regularity = CausalDepartureRegularityCost(enabled=False)
+        context = regularity.capture(
+            forward_headway_s=300.0,
+            target_headway_s=360.0,
+            evidence_source="matched_departure_event",
+            follower_departure_gap_s=420.0,
+            follower_evidence_source="same_time_avl_journey_speed_eta",
+        )
+
+        runner._record_causal_regularity_policy_execution(
+            context,
+            action_s=60.0,
+            state=np.asarray([0.0, 0.0, 0.5], dtype=np.float32),
+        )
+
+        expected_zero_hold_cost = (60.0 / 360.0) ** 2
+        self.assertEqual(runner._ep_lower_regularity_policy_evidence_valid, [1.0])
+        self.assertEqual(runner._ep_lower_regularity_policy_capacity_gates, [0.25])
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_policy_capacity_gains[0],
+            0.25 * expected_zero_hold_cost,
+        )
 
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):
