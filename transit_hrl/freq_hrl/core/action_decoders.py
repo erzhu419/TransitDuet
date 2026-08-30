@@ -93,6 +93,21 @@ class CausalSmoothstepMacroPlan:
         value = self._start + weight * (self._target - self._start)
         return value.astype(np.float32, copy=True)
 
+    def future_values(self) -> np.ndarray:
+        """Return the frozen values after the current step in this macro."""
+
+        self._require_active()
+        phases = range(self._phase + 1, self.macro_steps)
+        values = [
+            self._start
+            + self._smoothstep(phase / self.macro_steps)
+            * (self._target - self._start)
+            for phase in phases
+        ]
+        if not values:
+            return np.empty((0, self._dimension), dtype=np.float32)
+        return np.asarray(values, dtype=np.float32)
+
     @staticmethod
     def _smoothstep(progress: float) -> float:
         value = float(np.clip(progress, 0.0, 1.0))
@@ -155,6 +170,9 @@ class CausalZeroDCMacroProjector:
         *,
         macro_boundary: bool,
         action_limit: float,
+        current_upper_action: Any | None = None,
+        future_upper_actions: Any | None = None,
+        total_action_limit: float = 1.0,
     ) -> dict[str, np.ndarray | float]:
         """Return the nearest bounded action that preserves zero-sum feasibility."""
 
@@ -165,6 +183,9 @@ class CausalZeroDCMacroProjector:
         limit = float(action_limit)
         if not np.isfinite(limit) or limit <= 0.0:
             raise ValueError("zero-DC action_limit must be positive and finite")
+        total_limit = float(total_action_limit)
+        if not np.isfinite(total_limit) or total_limit <= 0.0:
+            raise ValueError("zero-DC total_action_limit must be positive")
         if not isinstance(macro_boundary, (bool, np.bool_)):
             raise ValueError("macro_boundary must be boolean")
         if bool(macro_boundary):
@@ -187,9 +208,47 @@ class CausalZeroDCMacroProjector:
 
         remaining = self.macro_steps - self._phase
         debt_before = self._debt.copy()
-        future_capacity = float(remaining - 1) * limit
-        feasible_low = np.maximum(-limit, -debt_before - future_capacity)
-        feasible_high = np.minimum(limit, -debt_before + future_capacity)
+        if (current_upper_action is None) != (future_upper_actions is None):
+            raise ValueError(
+                "zero-DC headroom requires current and future upper actions"
+            )
+        if current_upper_action is None:
+            current_low = np.full(self._dimension, -limit, dtype=np.float64)
+            current_high = np.full(self._dimension, limit, dtype=np.float64)
+            future_low_sum = float(remaining - 1) * current_low
+            future_high_sum = float(remaining - 1) * current_high
+        else:
+            upper = _finite_action(
+                current_upper_action,
+                dimension=self._dimension,
+                name="current upper action",
+            )
+            future = np.asarray(future_upper_actions, dtype=np.float64)
+            expected_shape = (remaining - 1, self._dimension)
+            if future.shape != expected_shape or not np.all(np.isfinite(future)):
+                raise ValueError(
+                    "future upper actions must match the remaining frozen macro"
+                )
+            current_low = np.maximum(-limit, -total_limit - upper)
+            current_high = np.minimum(limit, total_limit - upper)
+            if future.shape[0]:
+                future_lows = np.maximum(-limit, -total_limit - future)
+                future_highs = np.minimum(limit, total_limit - future)
+                future_low_sum = np.sum(future_lows, axis=0)
+                future_high_sum = np.sum(future_highs, axis=0)
+            else:
+                future_low_sum = np.zeros(self._dimension, dtype=np.float64)
+                future_high_sum = np.zeros(self._dimension, dtype=np.float64)
+        feasible_low = np.maximum(
+            current_low, -debt_before - future_high_sum
+        )
+        feasible_high = np.minimum(
+            current_high, -debt_before - future_low_sum
+        )
+        if np.any(feasible_low > feasible_high + 1e-10):
+            raise RuntimeError("zero-DC headroom set became infeasible")
+        feasible_low = np.minimum(feasible_low, feasible_high)
+        direct_feasible = np.clip(value, current_low, current_high)
         effective = np.clip(value, feasible_low, feasible_high)
         self._debt += effective
         self._phase += 1
@@ -205,6 +264,7 @@ class CausalZeroDCMacroProjector:
         )
         return {
             "proposal": value.astype(np.float32, copy=True),
+            "direct_feasible": direct_feasible.astype(np.float32, copy=True),
             "effective": effective.astype(np.float32, copy=True),
             "debt_before": debt_before.astype(np.float32, copy=True),
             "debt_after": self._debt.astype(np.float32, copy=True),
@@ -212,6 +272,9 @@ class CausalZeroDCMacroProjector:
             "remaining_before": float(remaining),
             "remaining_after": float(remaining_after),
             "projection_rate": float(np.mean(np.abs(effective - value) > 1e-12)),
+            "headroom_clip_rate": float(np.mean(
+                np.abs(direct_feasible - value) > 1e-12
+            )),
             "macro_completed": float(completed),
             "macro_completion_error_rms": completion_error,
         }

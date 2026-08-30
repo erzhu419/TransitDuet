@@ -67,12 +67,16 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V17 = (
     "freq_hrl_mujoco_shared_core_v17_zero_dc_plan"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1 = (
+    "freq_hrl_mujoco_shared_core_v17_1_headroom_homotopy_promotion"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -292,6 +296,7 @@ CAUSAL_LOWER_ACTION_ROUTER_MODES = {
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
     "causal_macro_zero_dc",
+    "causal_macro_zero_dc_headroom",
 }
 FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES = {
     "causal_ema_conservative_transfer",
@@ -841,6 +846,8 @@ def _episode_row(
     upper_actions: list[np.ndarray],
     lower_actions: list[np.ndarray],
     upper_policy_actions: list[np.ndarray],
+    upper_promotion_actions: list[np.ndarray],
+    upper_promotion_contexts: list[np.ndarray],
     raw_lower_actions: list[np.ndarray],
     latent_lower_actions: list[np.ndarray],
     lower_router_removed_actions: list[np.ndarray],
@@ -851,6 +858,7 @@ def _episode_row(
     lower_router_macro_projection_rates: list[float],
     lower_router_macro_debt_rms_values: list[float],
     lower_router_macro_completion_errors: list[float],
+    lower_router_headroom_clip_values: list[float],
     responsibility_transfers: list[np.ndarray],
     requested_transfers: list[np.ndarray],
     transfer_saturation_values: list[float],
@@ -885,11 +893,16 @@ def _episode_row(
     leakage_cost_mode: str,
     lower_action_router_mode: str,
     lower_action_router_strength: float,
+    upper_promotion_gain: float,
 ) -> dict[str, Any]:
     executed = np.asarray(executed_actions, dtype=np.float64)
     upper = np.asarray(upper_actions, dtype=np.float64)
     lower = np.asarray(lower_actions, dtype=np.float64)
     upper_policy = np.asarray(upper_policy_actions, dtype=np.float64)
+    upper_promotion = np.asarray(upper_promotion_actions, dtype=np.float64)
+    upper_promotion_context = np.asarray(
+        upper_promotion_contexts, dtype=np.float64
+    )
     raw_lower = np.asarray(raw_lower_actions, dtype=np.float64)
     latent_lower = np.asarray(latent_lower_actions, dtype=np.float64)
     router_removed = np.asarray(
@@ -956,6 +969,16 @@ def _episode_row(
         "UpperActionRMS": float(np.sqrt(upper_energy)),
         "LowerActionRMS": float(np.sqrt(lower_energy)),
         "UpperPolicyActionRMS": float(np.sqrt(np.mean(np.square(upper_policy)))),
+        "UpperPromotionRMS": float(np.sqrt(
+            np.mean(np.square(upper_promotion))
+        )),
+        "UpperPromotionActivationRate": float(np.mean(
+            np.abs(upper_promotion) > 1e-12
+        )),
+        "UpperPromotionContextRMS": float(np.sqrt(
+            np.mean(np.square(upper_promotion_context))
+        )),
+        "UpperPromotionGain": float(upper_promotion_gain),
         "RawLowerActionRMS": float(np.sqrt(np.mean(np.square(raw_lower)))),
         "LatentLowerActionRMS": float(np.sqrt(
             np.mean(np.square(latent_lower))
@@ -992,6 +1015,9 @@ def _episode_row(
         )),
         "LowerRouterMacroCompletionErrorMax": float(np.max(
             lower_router_macro_completion_errors
+        )),
+        "LowerRouterHeadroomClipRate": float(np.mean(
+            lower_router_headroom_clip_values
         )),
         "EffectiveToLatentLowerEnergyRatio": float(
             np.mean(np.square(raw_lower))
@@ -1152,6 +1178,7 @@ def rollout_hierarchical(
     lower_action_router_alpha: float = DEFAULT_LOWER_ROUTER_ALPHA,
     lower_action_router_strength: float = DEFAULT_LOWER_ROUTER_STRENGTH,
     lower_action_router_observe_strength: bool = False,
+    upper_promotion_gain: float = 0.0,
     method: str = "freq_hrl",
     episode_horizon: int = 1000,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
@@ -1171,6 +1198,31 @@ def rollout_hierarchical(
         raise ValueError(
             "MuJoCo lower-action router strength must be in [0, 1]"
         )
+    if (
+        not np.isfinite(float(upper_promotion_gain))
+        or not 0.0 <= float(upper_promotion_gain) <= 1.0
+    ):
+        raise ValueError("MuJoCo upper promotion gain must be in [0, 1]")
+    headroom_zero_dc_router = (
+        str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
+    )
+    if headroom_zero_dc_router and (
+        str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "headroom zero-DC routing requires a frozen smooth upper plan"
+        )
+    if headroom_zero_dc_router and str(responsibility_mode) != "additive":
+        raise ValueError(
+            "headroom zero-DC routing requires additive responsibility"
+        )
+    if float(upper_promotion_gain) > 0.0 and not headroom_zero_dc_router:
+        raise ValueError(
+            "upper promotion requires headroom zero-DC lower routing"
+        )
+    effective_upper_promotion_gain = (
+        float(upper_promotion_gain) * float(lower_action_router_strength)
+    )
     router_strength_context = (
         float(lower_action_router_strength)
         if bool(lower_action_router_observe_strength)
@@ -1201,6 +1253,10 @@ def rollout_hierarchical(
         previous_action = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
         upper_policy_action = np.zeros(action_dim, dtype=np.float32)
+        upper_promotion_action = np.zeros(action_dim, dtype=np.float32)
+        upper_promotion_context = np.zeros(action_dim, dtype=np.float32)
+        latent_responsibility_lf = np.zeros(action_dim, dtype=np.float64)
+        latent_lower_context = np.zeros(action_dim, dtype=np.float32)
         previous_upper_anchor = np.zeros(action_dim, dtype=np.float32)
         has_previous_upper_anchor = False
         current_requested_transfer = np.zeros(action_dim, dtype=np.float32)
@@ -1234,7 +1290,33 @@ def rollout_hierarchical(
             in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
         )
 
-        def actor_filter_contexts() -> tuple[np.ndarray, np.ndarray]:
+        def actor_filter_contexts(
+            level: str,
+        ) -> tuple[np.ndarray, np.ndarray]:
+            if headroom_zero_dc_router:
+                strength = float(lower_action_router_strength)
+                baseline = (
+                    latent_responsibility_lf,
+                    latent_lower_context,
+                )
+                if str(level) == "upper":
+                    target = (
+                        lower_router.promotion_context,
+                        responsibility.raw_lower_lf,
+                    )
+                else:
+                    target = (
+                        responsibility.raw_lower_lf,
+                        lower_router.context,
+                    )
+                if strength == 0.0:
+                    return baseline
+                if strength == 1.0:
+                    return target
+                return tuple(
+                    (1.0 - strength) * left + strength * right
+                    for left, right in zip(baseline, target)
+                )
             if function_preserving_router:
                 context = lower_router.context
                 return context, context
@@ -1251,6 +1333,8 @@ def rollout_hierarchical(
         upper_actions: list[np.ndarray] = []
         lower_actions: list[np.ndarray] = []
         upper_policy_actions: list[np.ndarray] = []
+        upper_promotion_actions: list[np.ndarray] = []
+        upper_promotion_contexts: list[np.ndarray] = []
         raw_lower_actions: list[np.ndarray] = []
         latent_lower_actions: list[np.ndarray] = []
         lower_router_removed_actions: list[np.ndarray] = []
@@ -1261,6 +1345,7 @@ def rollout_hierarchical(
         lower_router_macro_projection_rates: list[float] = []
         lower_router_macro_debt_rms_values: list[float] = []
         lower_router_macro_completion_errors: list[float] = []
+        lower_router_headroom_clip_values: list[float] = []
         responsibility_transfers: list[np.ndarray] = []
         requested_transfers: list[np.ndarray] = []
         transfer_saturation_values: list[float] = []
@@ -1314,11 +1399,12 @@ def rollout_hierarchical(
             reset_exogenous = False
             if require_upper or steps_since_upper >= int(upper_period):
                 upper_decision_now = True
+                upper_promotion_context = lower_router.promotion_context
                 upper_state = _feature_state(
                     observation,
                     bands,
                     previous_action,
-                    filter_contexts=actor_filter_contexts(),
+                    filter_contexts=actor_filter_contexts("upper"),
                     router_strength_context=router_strength_context,
                     frequency_routing=frequency_routing,
                     level="upper",
@@ -1329,8 +1415,19 @@ def rollout_hierarchical(
                 upper_policy_action = (
                     float(upper_action_scale) * np.tanh(upper_raw)
                 )
-                upper_assignment = responsibility.begin_macro(
+                promoted_upper_policy_action = np.clip(
                     upper_policy_action
+                    + effective_upper_promotion_gain
+                    * upper_promotion_context,
+                    -float(upper_action_scale),
+                    float(upper_action_scale),
+                ).astype(np.float32, copy=False)
+                upper_promotion_action = np.asarray(
+                    promoted_upper_policy_action - upper_policy_action,
+                    dtype=np.float32,
+                )
+                upper_assignment = responsibility.begin_macro(
+                    promoted_upper_policy_action
                 )
                 upper_target = np.asarray(
                     upper_assignment["upper_responsibility"],
@@ -1382,7 +1479,7 @@ def rollout_hierarchical(
                     == "causal_smoothstep_plan"
                     else upper_policy_action
                 ),
-                filter_contexts=actor_filter_contexts(),
+                filter_contexts=actor_filter_contexts("lower"),
                 router_strength_context=router_strength_context,
                 frequency_routing=frequency_routing,
                 level="lower",
@@ -1416,8 +1513,13 @@ def rollout_hierarchical(
                         "causal_total_action_gauge",
                         "causal_audit_aligned_gauge",
                         "causal_macro_hold_audit_gauge",
+                        "causal_macro_zero_dc_headroom",
                     }
                     else None
+                ),
+                future_upper_actions=(
+                    upper_plan.future_values()
+                    if headroom_zero_dc_router else None
                 ),
                 action_limit=float(lower_action_scale),
                 macro_boundary=upper_decision_now,
@@ -1430,6 +1532,12 @@ def rollout_hierarchical(
             )
             responsibility_split = responsibility.split_lower(
                 raw_lower_residual
+            )
+            latent_responsibility_lf += float(lower_lf_alpha) * (
+                latent_lower_residual - latent_responsibility_lf
+            )
+            latent_lower_context = latent_lower_residual.astype(
+                np.float32, copy=True
             )
             lower_residual = np.asarray(
                 responsibility_split["lower_responsibility"],
@@ -1580,6 +1688,8 @@ def rollout_hierarchical(
             upper_actions.append(effective_upper_action.copy())
             lower_actions.append(lower_residual.copy())
             upper_policy_actions.append(upper_policy_action.copy())
+            upper_promotion_actions.append(upper_promotion_action.copy())
+            upper_promotion_contexts.append(upper_promotion_context.copy())
             raw_lower_actions.append(raw_lower_residual.copy())
             latent_lower_actions.append(latent_lower_residual.copy())
             lower_router_removed_actions.append(np.asarray(
@@ -1604,6 +1714,9 @@ def rollout_hierarchical(
             ))
             lower_router_macro_completion_errors.append(float(
                 routed_lower["macro_completion_error_rms"]
+            ))
+            lower_router_headroom_clip_values.append(float(
+                routed_lower["headroom_clip_rate"]
             ))
             responsibility_transfers.append(np.asarray(
                 responsibility.effective_transfer + router_upper_transfer,
@@ -1642,7 +1755,7 @@ def rollout_hierarchical(
                         next_observation,
                         next_bands,
                         executed,
-                        filter_contexts=actor_filter_contexts(),
+                        filter_contexts=actor_filter_contexts("upper"),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="upper",
@@ -1660,10 +1773,17 @@ def rollout_hierarchical(
                             np.asarray(next_upper["action"], dtype=np.float32)
                         )
                         next_upper_policy_action = next_upper_policy
+                        next_promoted_upper_policy = np.clip(
+                            next_upper_policy
+                            + effective_upper_promotion_gain
+                            * lower_router.promotion_context,
+                            -float(upper_action_scale),
+                            float(upper_action_scale),
+                        )
                         next_upper_anchor = np.asarray(
-                            responsibility.preview_upper(next_upper_policy)[
-                                "upper_responsibility"
-                            ],
+                            responsibility.preview_upper(
+                                next_promoted_upper_policy
+                            )["upper_responsibility"],
                             dtype=np.float32,
                         )
                     next_execution_upper = (
@@ -1685,7 +1805,7 @@ def rollout_hierarchical(
                             == "causal_smoothstep_plan"
                             else next_upper_policy_action
                         ),
-                        filter_contexts=actor_filter_contexts(),
+                        filter_contexts=actor_filter_contexts("lower"),
                         router_strength_context=router_strength_context,
                         frequency_routing=frequency_routing,
                         level="lower",
@@ -1735,6 +1855,18 @@ def rollout_hierarchical(
                 previous_action = np.zeros(action_dim, dtype=np.float32)
                 upper_anchor = np.zeros(action_dim, dtype=np.float32)
                 upper_policy_action = np.zeros(action_dim, dtype=np.float32)
+                upper_promotion_action = np.zeros(
+                    action_dim, dtype=np.float32
+                )
+                upper_promotion_context = np.zeros(
+                    action_dim, dtype=np.float32
+                )
+                latent_responsibility_lf = np.zeros(
+                    action_dim, dtype=np.float64
+                )
+                latent_lower_context = np.zeros(
+                    action_dim, dtype=np.float32
+                )
                 previous_upper_anchor = np.zeros(
                     action_dim, dtype=np.float32
                 )
@@ -1798,6 +1930,8 @@ def rollout_hierarchical(
             upper_actions=upper_actions,
             lower_actions=lower_actions,
             upper_policy_actions=upper_policy_actions,
+            upper_promotion_actions=upper_promotion_actions,
+            upper_promotion_contexts=upper_promotion_contexts,
             raw_lower_actions=raw_lower_actions,
             latent_lower_actions=latent_lower_actions,
             lower_router_removed_actions=lower_router_removed_actions,
@@ -1815,6 +1949,9 @@ def rollout_hierarchical(
             ),
             lower_router_macro_completion_errors=(
                 lower_router_macro_completion_errors
+            ),
+            lower_router_headroom_clip_values=(
+                lower_router_headroom_clip_values
             ),
             responsibility_transfers=responsibility_transfers,
             requested_transfers=requested_transfers,
@@ -1859,6 +1996,7 @@ def rollout_hierarchical(
             lower_action_router_strength=float(
                 lower_action_router_strength
             ),
+            upper_promotion_gain=effective_upper_promotion_gain,
         )
         return (
             trajectory if sample or collect_trajectory else None
@@ -2038,6 +2176,8 @@ def rollout_flat(
             upper_actions=zeros,
             lower_actions=executed_actions,
             upper_policy_actions=zeros,
+            upper_promotion_actions=zeros,
+            upper_promotion_contexts=zeros,
             raw_lower_actions=nominal_actions,
             latent_lower_actions=nominal_actions,
             lower_router_removed_actions=zeros,
@@ -2048,6 +2188,7 @@ def rollout_flat(
             lower_router_macro_projection_rates=[0.0 for _ in rewards],
             lower_router_macro_debt_rms_values=[0.0 for _ in rewards],
             lower_router_macro_completion_errors=[0.0 for _ in rewards],
+            lower_router_headroom_clip_values=[0.0 for _ in rewards],
             responsibility_transfers=zeros,
             requested_transfers=zeros,
             transfer_saturation_values=[0.0 for _ in rewards],
@@ -2082,6 +2223,7 @@ def rollout_flat(
             leakage_cost_mode="ratio_excess_squared",
             lower_action_router_mode="direct",
             lower_action_router_strength=1.0,
+            upper_promotion_gain=0.0,
         )
         return (batch if sample else None), row
     finally:
@@ -2107,6 +2249,10 @@ SUMMARY_KEYS = [
     "UpperActionRMS",
     "LowerActionRMS",
     "UpperPolicyActionRMS",
+    "UpperPromotionRMS",
+    "UpperPromotionActivationRate",
+    "UpperPromotionContextRMS",
+    "UpperPromotionGain",
     "RawLowerActionRMS",
     "LatentLowerActionRMS",
     "LowerRouterRemovedRMS",
@@ -2120,6 +2266,7 @@ SUMMARY_KEYS = [
     "LowerRouterMacroProjectionRate",
     "LowerRouterMacroDebtRMSMean",
     "LowerRouterMacroCompletionErrorMax",
+    "LowerRouterHeadroomClipRate",
     "LowerActionRouterStrength",
     "EffectiveToLatentLowerEnergyRatio",
     "UpperActionEnergyShare",
@@ -3476,6 +3623,7 @@ def train_mujoco_method(
     upper_action_scale: float = 1.0,
     lower_action_scale: float = 1.0,
     upper_action_decoder_mode: str = "hold",
+    upper_promotion_gain: float = 0.0,
     responsibility_mode: str = "additive",
     leakage_constraint_scope: str = "joint_behavior",
     upper_hf_rms_budget: float = DEFAULT_UPPER_HF_RMS_BUDGET,
@@ -3686,8 +3834,37 @@ def train_mujoco_method(
             "MuJoCo pathwise frequency robustness requires groupwise "
             "constraints"
         )
+    if (
+        not np.isfinite(float(upper_promotion_gain))
+        or not 0.0 <= float(upper_promotion_gain) <= 1.0
+    ):
+        raise ValueError("MuJoCo upper promotion gain must be in [0, 1]")
+    if (
+        str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
+        and str(upper_action_decoder_mode) != "causal_smoothstep_plan"
+    ):
+        raise ValueError(
+            "headroom zero-DC routing requires a frozen smooth upper plan"
+        )
+    if (
+        str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
+        and str(responsibility_mode) != "additive"
+    ):
+        raise ValueError(
+            "headroom zero-DC routing requires additive responsibility"
+        )
+    if (
+        float(upper_promotion_gain) > 0.0
+        and str(lower_action_router_mode)
+        != "causal_macro_zero_dc_headroom"
+    ):
+        raise ValueError(
+            "upper promotion requires headroom zero-DC lower routing"
+        )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V17
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
+        if str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V17
         if (
             str(upper_action_decoder_mode) == "causal_smoothstep_plan"
             or str(lower_action_router_mode) == "causal_macro_zero_dc"
@@ -3714,6 +3891,19 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1}
+    ):
+        raise ValueError("v17.1 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
+        and inferred_protocol_version != MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
+    ):
+        raise ValueError(
+            "the v17.1 protocol label requires headroom zero-DC routing"
+        )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17
         and selected_protocol_version
@@ -4075,6 +4265,13 @@ def train_mujoco_method(
     ):
         raise ValueError(
             "zero-DC lower routing requires a full-strength constant schedule"
+        )
+    if (
+        str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
+        and float(lower_action_router_strength) != 1.0
+    ):
+        raise ValueError(
+            "headroom zero-DC training requires a full-strength target"
         )
     if (
         str(upper_action_decoder_mode) != "hold"
@@ -4598,6 +4795,7 @@ def train_mujoco_method(
                         effective_router_observe_strength
                     ),
                     upper_action_decoder_mode=upper_action_decoder_mode,
+                    upper_promotion_gain=upper_promotion_gain,
                     sample=sample,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -4664,6 +4862,7 @@ def train_mujoco_method(
                             effective_router_observe_strength
                         ),
                         upper_action_decoder_mode=upper_action_decoder_mode,
+                        upper_promotion_gain=upper_promotion_gain,
                         sample=False,
                         method=name,
                         episode_horizon=episode_horizon,
@@ -5020,6 +5219,7 @@ def train_mujoco_method(
                     effective_router_observe_strength
                 ),
                 upper_action_decoder_mode=upper_action_decoder_mode,
+                upper_promotion_gain=upper_promotion_gain,
                 sample=sample,
                 collect_trajectory=collect_trajectory,
                 method=name,
@@ -5283,6 +5483,7 @@ def train_mujoco_method(
                         effective_router_observe_strength
                     ),
                     upper_action_decoder_mode=upper_action_decoder_mode,
+                    upper_promotion_gain=upper_promotion_gain,
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
@@ -5647,6 +5848,12 @@ def train_mujoco_method(
             if str(upper_action_decoder_mode) == "causal_smoothstep_plan"
             else "macro_target_zero_order_hold_v1"
         ),
+        "upper_promotion_gain": float(upper_promotion_gain),
+        "upper_promotion_contract": (
+            "previous_macro_causal_latent_lower_mean_promoted_into_clipped_"
+            "next_upper_target_v1"
+            if float(upper_promotion_gain) > 0.0 else "disabled"
+        ),
         "lower_action_router_mode": effective_lower_action_router_mode,
         "lower_action_router_alpha": float(lower_action_router_alpha),
         "lower_action_router_strength": float(
@@ -5707,6 +5914,12 @@ def train_mujoco_method(
         "lower_action_router_diagnostic_contract": (
             "latent_and_effective_lower_actions_both_reported_v1"
         ),
+        "lower_action_headroom_contract": (
+            "frozen_upper_macro_suffix_reserves_per_step_total_action_"
+            "headroom_before_environment_disturbance_v1"
+            if effective_lower_action_router_mode
+            == "causal_macro_zero_dc_headroom" else "disabled"
+        ),
         "responsibility_mode": str(responsibility_mode),
         "responsibility_transfer_alpha": RESPONSIBILITY_TRANSFER_ALPHA,
         "upper_to_lower_action_capacity_ratio": float(
@@ -5732,7 +5945,11 @@ def train_mujoco_method(
             else "additive_responsibility_control_v1"
         ),
         "policy_filter_state_contract": (
-            "conservative_latent_ema_context_independent_of_transfer_"
+            "causal_previous_macro_lower_mean_for_upper_replanning_and_"
+            "running_raw_lower_lf_with_zero_dc_debt_for_lower_control_v1"
+            if effective_lower_action_router_mode
+            == "causal_macro_zero_dc_headroom"
+            else "conservative_latent_ema_context_independent_of_transfer_"
             "strength_v4"
             if effective_lower_action_router_mode
             in FUNCTION_PRESERVING_LOWER_ACTION_ROUTER_MODES
@@ -5842,6 +6059,7 @@ def write_cell(
         "lower_action_router_observe_strength": payload[
             "lower_action_router_observe_strength"
         ],
+        "upper_promotion_gain": float(payload.get("upper_promotion_gain", 0.0)),
         "responsibility_mode": payload["responsibility_mode"],
     }, checkpoint_path)
     payload["checkpoint_file_sha256"] = _file_sha256(checkpoint_path)
@@ -5915,6 +6133,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=UPPER_ACTION_DECODER_MODES,
         default="hold",
     )
+    parser.add_argument("--upper-promotion-gain", type=float, default=0.0)
     parser.add_argument(
         "--responsibility-mode",
         choices=RESPONSIBILITY_MODES,
@@ -6229,6 +6448,7 @@ def main() -> None:
         upper_action_scale=args.upper_action_scale,
         lower_action_scale=args.lower_action_scale,
         upper_action_decoder_mode=args.upper_action_decoder_mode,
+        upper_promotion_gain=args.upper_promotion_gain,
         responsibility_mode=args.responsibility_mode,
         lower_action_router_mode=args.lower_action_router_mode,
         lower_action_router_alpha=args.lower_action_router_alpha,

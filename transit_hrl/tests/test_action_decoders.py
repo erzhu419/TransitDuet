@@ -48,6 +48,19 @@ def test_smoothstep_plan_reduces_upper_hpf_against_macro_hold():
     assert smooth_hf < 0.45 * held_hf
 
 
+def test_smoothstep_plan_exposes_only_the_frozen_macro_suffix():
+    plan = CausalSmoothstepMacroPlan(macro_steps=4)
+    plan.reset(1)
+    plan.activate([0.4])
+    np.testing.assert_allclose(plan.future_values(), [[0.4], [0.4], [0.4]])
+    plan.activate([0.8])
+    future = plan.future_values().reshape(-1)
+    assert future.shape == (3,)
+    assert np.all(np.diff(future) > 0.0)
+    plan.advance()
+    np.testing.assert_allclose(plan.future_values().reshape(-1), future[1:])
+
+
 def test_zero_dc_projector_is_causal_bounded_and_exact_per_macro():
     rng = np.random.default_rng(71)
     proposals = rng.normal(scale=0.9, size=(48, 3))
@@ -93,6 +106,38 @@ def test_zero_dc_projector_does_not_use_future_proposals():
     np.testing.assert_allclose(left[:4], right[:4], atol=0.0)
 
 
+def test_zero_dc_projector_reserves_frozen_upper_headroom_and_future_repayment():
+    macro_steps = 8
+    upper = np.full((macro_steps, 1), 0.8, dtype=np.float64)
+    proposals = np.full((macro_steps, 1), 0.9, dtype=np.float64)
+    projector = CausalZeroDCMacroProjector(macro_steps=macro_steps)
+    projector.reset(1)
+    effective = []
+    direct = []
+    for index, proposal in enumerate(proposals):
+        row = projector.project(
+            proposal,
+            macro_boundary=index == 0,
+            action_limit=1.0,
+            current_upper_action=upper[index],
+            future_upper_actions=upper[index + 1:],
+            total_action_limit=1.0,
+        )
+        effective.append(row["effective"])
+        direct.append(row["direct_feasible"])
+    lower = np.asarray(effective, dtype=np.float64).reshape(-1)
+    direct_lower = np.asarray(direct, dtype=np.float64).reshape(-1)
+
+    np.testing.assert_allclose(np.sum(lower), 0.0, atol=1e-7)
+    assert np.max(np.abs(upper.reshape(-1) + lower)) <= 1.0 + 1e-7
+    np.testing.assert_allclose(direct_lower, 0.2, atol=1e-7)
+    np.testing.assert_allclose(
+        upper.reshape(-1) + direct_lower,
+        np.clip(upper.reshape(-1) + proposals.reshape(-1), -1.0, 1.0),
+        atol=1e-7,
+    )
+
+
 def test_zero_dc_projector_requires_explicit_macro_boundaries():
     projector = CausalZeroDCMacroProjector(macro_steps=4)
     projector.reset(1)
@@ -123,4 +168,49 @@ def test_mujoco_zero_dc_router_exposes_debt_and_closes_each_macro():
     assert lower_action_router_contract("causal_macro_zero_dc") == (
         "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
         "upper_macro_interval_v1"
+    )
+
+
+def test_headroom_zero_dc_router_is_function_continuous_and_exact_at_full_strength():
+    upper = np.full((4, 1), 0.8, dtype=np.float64)
+    proposals = np.full((4, 1), 0.9, dtype=np.float64)
+
+    def run(strength):
+        router = CausalLowerActionRouter(
+            mode="causal_macro_zero_dc_headroom",
+            strength=strength,
+            macro_steps=4,
+        )
+        router.reset(1)
+        rows = [
+            router.route(
+                proposal,
+                upper_action=upper[index],
+                future_upper_actions=upper[index + 1:],
+                action_limit=1.0,
+                macro_boundary=index == 0,
+            )
+            for index, proposal in enumerate(proposals)
+        ]
+        return router, rows
+
+    zero_router, zero_rows = run(0.0)
+    full_router, full_rows = run(1.0)
+    zero_lower = np.asarray([row["effective"] for row in zero_rows]).reshape(-1)
+    full_lower = np.asarray([row["effective"] for row in full_rows]).reshape(-1)
+
+    np.testing.assert_allclose(
+        upper.reshape(-1) + zero_lower,
+        np.clip(upper.reshape(-1) + proposals.reshape(-1), -1.0, 1.0),
+        atol=1e-7,
+    )
+    np.testing.assert_allclose(np.sum(full_lower), 0.0, atol=1e-7)
+    assert np.max(np.abs(upper.reshape(-1) + full_lower)) <= 1.0 + 1e-7
+    assert full_rows[-1]["macro_completion_error_rms"] <= 1e-7
+    assert zero_rows[-1]["macro_completion_error_rms"] > 0.1
+    np.testing.assert_allclose(zero_router.promotion_context, [0.9])
+    np.testing.assert_allclose(full_router.promotion_context, [0.9])
+    assert lower_action_router_contract("causal_macro_zero_dc_headroom") == (
+        "causal_upper_plan_headroom_feasible_lower_homotopy_with_exact_zero_"
+        "sum_at_full_strength_and_function_continuity_at_zero_strength_v1"
     )

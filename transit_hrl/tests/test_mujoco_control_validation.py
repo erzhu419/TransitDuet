@@ -21,6 +21,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V16_2,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
     _model_parameter_sha256,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
@@ -129,6 +130,22 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
                 upper_action_decoder_mode="causal_smoothstep_plan",
                 **common,
             )
+        with self.assertRaisesRegex(ValueError, "v17.1 mechanisms"):
+            train_mujoco_method(
+                lower_action_router_mode="causal_macro_zero_dc_headroom",
+                upper_action_decoder_mode="causal_smoothstep_plan",
+                **common,
+            )
+        with self.assertRaisesRegex(ValueError, "v17.1 protocol label"):
+            train_mujoco_method(
+                control_protocol_version=(
+                    MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1
+                ),
+                **{
+                    key: value for key, value in common.items()
+                    if key != "control_protocol_version"
+                },
+            )
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V14_17.endswith(
             "native_pd_cvar"
         ))
@@ -137,6 +154,9 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
         ))
         self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V17.endswith(
             "zero_dc_plan"
+        ))
+        self.assertTrue(MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1.endswith(
+            "headroom_homotopy_promotion"
         ))
 
     @staticmethod
@@ -1304,6 +1324,75 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(constrained["protocol_valid"], 1.0)
 
+    def test_headroom_homotopy_preserves_zero_strength_closed_loop(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=128
+        )
+        torch.manual_seed(1721)
+        np.random.seed(1721)
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(observation_dim, action_dim),
+            action_dim=action_dim,
+            hidden_dim=16,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+        )
+        common = dict(
+            seed=1723,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=128,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            responsibility_mode="additive",
+            lower_action_router_alpha=0.04,
+            lower_action_router_observe_strength=False,
+            upper_action_decoder_mode="causal_smoothstep_plan",
+            upper_constraint_mode="disabled",
+            sample=False,
+            episode_horizon=128,
+        )
+        _, direct = rollout_hierarchical(
+            model,
+            lower_action_router_mode="direct",
+            lower_action_router_strength=0.0,
+            upper_promotion_gain=0.0,
+            **common,
+        )
+        _, zero = rollout_hierarchical(
+            model,
+            lower_action_router_mode="causal_macro_zero_dc_headroom",
+            lower_action_router_strength=0.0,
+            upper_promotion_gain=1.0,
+            **common,
+        )
+        _, full = rollout_hierarchical(
+            model,
+            lower_action_router_mode="causal_macro_zero_dc_headroom",
+            lower_action_router_strength=1.0,
+            upper_promotion_gain=1.0,
+            **common,
+        )
+
+        for trace in (
+            "RewardTraceSHA256",
+            "ExecutedActionTraceSHA256",
+            "LatentPolicyTraceSHA256",
+        ):
+            self.assertEqual(direct[trace], zero[trace], trace)
+        self.assertEqual(zero["UpperPromotionGain"], 0.0)
+        self.assertEqual(zero["UpperPromotionRMS"], 0.0)
+        self.assertEqual(zero["LowerRouterMacroProjectionRate"], 0.0)
+        self.assertLessEqual(full["AdditiveActionClipRate"], 1e-7)
+        self.assertLessEqual(
+            full["LowerRouterMacroCompletionErrorMax"], 1e-7
+        )
+        self.assertGreater(full["UpperPromotionContextRMS"], 0.0)
+        self.assertGreater(full["UpperPromotionRMS"], 0.0)
+        self.assertEqual(full["UpperPromotionGain"], 1.0)
+        self.assertEqual(full["protocol_valid"], 1.0)
+
     def test_hierarchical_rollout_uses_asynchronous_transitions(self):
         observation_dim, action_dim = environment_dimensions(
             "HalfCheetah-v5", episode_horizon=24
@@ -1763,6 +1852,62 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(rows[0]["LowerActionRouterStrength"], 0.1)
         self.assertTrue(payload["lower_action_router_observe_strength"])
+
+    def test_headroom_homotopy_curriculum_reaches_frozen_v171_target(self):
+        payload, rows, _ = train_mujoco_method(
+            method="freq_hrl_no_leakage",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[233],
+            selection_seeds=[239],
+            eval_seeds=[241],
+            steps=8,
+            episode_horizon=8,
+            iterations=4,
+            optimizer_seed=251,
+            upper_period=4,
+            hidden_dim=8,
+            upper_action_decoder_mode="causal_smoothstep_plan",
+            upper_promotion_gain=0.5,
+            responsibility_mode="additive",
+            lower_action_router_mode="causal_macro_zero_dc_headroom",
+            lower_action_router_strength=1.0,
+            lower_action_router_training_schedule="delayed_linear",
+            lower_action_router_warmup_fraction=0.25,
+            lower_action_router_ramp_fraction=0.5,
+            lower_action_router_observe_strength=True,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=4,
+            evaluation_disturbance_modes=["standard"],
+        )
+        expected = [0.0, 0.5, 1.0, 1.0]
+        self.assertEqual(
+            payload["protocol_version"],
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V17_1,
+        )
+        self.assertTrue(np.allclose(
+            payload["lower_action_router_training_strengths_by_iteration"],
+            expected,
+        ))
+        self.assertTrue(np.allclose(
+            [
+                row["sampled_lower_action_router_strength"]
+                for row in payload["history"][1:]
+            ],
+            expected,
+        ))
+        self.assertEqual(rows[0]["LowerActionRouterStrength"], 1.0)
+        self.assertEqual(rows[0]["UpperPromotionGain"], 0.5)
+        self.assertLessEqual(rows[0]["AdditiveActionClipRate"], 1e-7)
+        self.assertLessEqual(
+            rows[0]["LowerRouterMacroCompletionErrorMax"], 1e-7
+        )
+        self.assertEqual(
+            payload["upper_promotion_contract"],
+            "previous_macro_causal_latent_lower_mean_promoted_into_clipped_"
+            "next_upper_target_v1",
+        )
 
     def test_paired_router_continuation_starts_from_exact_baseline(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -36,6 +36,7 @@ LOWER_ACTION_ROUTER_MODES = (
     "causal_audit_aligned_gauge",
     "causal_macro_hold_audit_gauge",
     "causal_macro_zero_dc",
+    "causal_macro_zero_dc_headroom",
 )
 
 LOWER_ACTION_ROUTER_CONTRACTS = {
@@ -67,6 +68,10 @@ LOWER_ACTION_ROUTER_CONTRACTS = {
     "causal_macro_zero_dc": (
         "causal_bounded_lower_projection_with_exact_zero_sum_on_each_complete_"
         "upper_macro_interval_v1"
+    ),
+    "causal_macro_zero_dc_headroom": (
+        "causal_upper_plan_headroom_feasible_lower_homotopy_with_exact_zero_"
+        "sum_at_full_strength_and_function_continuity_at_zero_strength_v1"
     ),
 }
 
@@ -330,6 +335,10 @@ class CausalLowerActionRouter:
             | None
         ) = None
         self._zero_dc_projector: CausalZeroDCMacroProjector | None = None
+        self._homotopy_effective_debt: np.ndarray | None = None
+        self._promotion_sum: np.ndarray | None = None
+        self._promotion_context: np.ndarray | None = None
+        self._promotion_count = 0
 
     def reset(self, action_dim: int) -> None:
         if int(action_dim) < 1:
@@ -339,6 +348,10 @@ class CausalLowerActionRouter:
         self._previous_effective = zeros.copy()
         self._joint_upper_history = []
         self._joint_lower_history = []
+        self._homotopy_effective_debt = zeros.copy()
+        self._promotion_sum = zeros.copy()
+        self._promotion_context = zeros.copy()
+        self._promotion_count = 0
         self._zero_dc_projector = None
         if self.mode == "causal_total_action_gauge":
             self._gauge_fixer = CausalGaugeFixer(
@@ -364,7 +377,10 @@ class CausalLowerActionRouter:
                 adaptation_rate=self.audit_adaptation_rate,
                 strength=self.strength,
             )
-        elif self.mode == "causal_macro_zero_dc":
+        elif self.mode in {
+            "causal_macro_zero_dc",
+            "causal_macro_zero_dc_headroom",
+        }:
             self._gauge_fixer = None
             self._zero_dc_projector = CausalZeroDCMacroProjector(
                 macro_steps=self.macro_steps
@@ -390,11 +406,19 @@ class CausalLowerActionRouter:
         )
         return value.astype(np.float32, copy=True)
 
+    @property
+    def promotion_context(self) -> np.ndarray:
+        self._require_reset()
+        if self._promotion_context is None:
+            raise RuntimeError("lower-action promotion context is not initialized")
+        return self._promotion_context.astype(np.float32, copy=True)
+
     def route(
         self,
         latent_action: np.ndarray,
         *,
         upper_action: np.ndarray | None = None,
+        future_upper_actions: np.ndarray | None = None,
         action_limit: float = 1.0,
         macro_boundary: bool = False,
     ) -> dict[str, np.ndarray | float]:
@@ -417,6 +441,22 @@ class CausalLowerActionRouter:
         macro_debt_rms = 0.0
         macro_completed = 0.0
         macro_completion_error_rms = 0.0
+        headroom_clip_rate = 0.0
+        if (
+            self._promotion_sum is None
+            or self._promotion_context is None
+            or self._homotopy_effective_debt is None
+        ):
+            raise RuntimeError("lower-action macro state is not initialized")
+        if bool(macro_boundary):
+            self._promotion_sum.fill(0.0)
+            self._promotion_count = 0
+            self._homotopy_effective_debt.fill(0.0)
+        self._promotion_sum += latent
+        self._promotion_count += 1
+        self._promotion_context = (
+            self._promotion_sum / float(self._promotion_count)
+        )
         if self.mode in {
             "causal_joint_band_projection",
             "causal_total_action_gauge",
@@ -477,27 +517,59 @@ class CausalLowerActionRouter:
                 requested_transfer = self.strength * transfer_target
                 requested = latent - requested_transfer
         else:
-            if upper_action is not None:
+            if self.mode == "causal_macro_zero_dc_headroom":
+                if upper_action is None or future_upper_actions is None:
+                    raise ValueError(
+                        "headroom zero-DC routing requires the frozen upper plan"
+                    )
+            elif upper_action is not None or future_upper_actions is not None:
                 raise ValueError(
                     "upper_action is only valid for joint-band projection"
                 )
             upper = np.zeros_like(latent)
-            if self.mode == "causal_macro_zero_dc":
+            if self.mode in {
+                "causal_macro_zero_dc",
+                "causal_macro_zero_dc_headroom",
+            }:
                 if self._zero_dc_projector is None:
                     raise RuntimeError("zero-DC lower router is not initialized")
                 projected = self._zero_dc_projector.project(
                     latent,
                     macro_boundary=bool(macro_boundary),
                     action_limit=limit,
+                    current_upper_action=(
+                        upper_action
+                        if self.mode == "causal_macro_zero_dc_headroom"
+                        else None
+                    ),
+                    future_upper_actions=(
+                        future_upper_actions
+                        if self.mode == "causal_macro_zero_dc_headroom"
+                        else None
+                    ),
                 )
-                requested = np.asarray(projected["effective"], dtype=np.float64)
-                macro_projection_rate = float(projected["projection_rate"])
+                exact = np.asarray(projected["effective"], dtype=np.float64)
+                direct_feasible = np.asarray(
+                    projected["direct_feasible"], dtype=np.float64
+                )
+                requested = (
+                    (1.0 - self.strength) * direct_feasible
+                    + self.strength * exact
+                )
+                macro_projection_rate = float(np.mean(
+                    np.abs(requested - direct_feasible) > 1e-12
+                ))
+                headroom_clip_rate = float(projected["headroom_clip_rate"])
                 macro_debt_rms = float(np.sqrt(np.mean(np.square(
                     projected["debt_after"]
                 ))))
                 macro_completed = float(projected["macro_completed"])
-                macro_completion_error_rms = float(
-                    projected["macro_completion_error_rms"]
+                self._homotopy_effective_debt += requested
+                macro_completion_error_rms = (
+                    float(np.sqrt(np.mean(np.square(
+                        self._homotopy_effective_debt
+                    ))))
+                    if macro_completed else 0.0
                 )
             else:
                 requested = (
@@ -519,7 +591,10 @@ class CausalLowerActionRouter:
             self._baseline = np.asarray(
                 self._gauge_fixer.context, dtype=np.float64
             )
-        elif self.mode == "causal_macro_zero_dc":
+        elif self.mode in {
+            "causal_macro_zero_dc",
+            "causal_macro_zero_dc_headroom",
+        }:
             if self._zero_dc_projector is None:
                 raise RuntimeError("zero-DC lower router is not initialized")
             self._baseline = np.asarray(
@@ -559,6 +634,10 @@ class CausalLowerActionRouter:
             "macro_debt_rms": macro_debt_rms,
             "macro_completed": macro_completed,
             "macro_completion_error_rms": macro_completion_error_rms,
+            "headroom_clip_rate": headroom_clip_rate,
+            "promotion_context": self._promotion_context.astype(
+                np.float32, copy=True
+            ),
         }
 
     def _require_reset(self) -> None:
