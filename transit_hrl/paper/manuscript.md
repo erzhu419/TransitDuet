@@ -1,6 +1,6 @@
 # Freq-HRL: Auditing and Guarded Restoration of Frequency Responsibility in Hierarchical Reinforcement Learning
 
-Authoritative venue-neutral draft, 2026-08-30
+Authoritative venue-neutral draft, 2026-08-31
 
 Evidence source: `transit_hrl/evidence/authoritative_registry_v1.json`
 
@@ -128,16 +128,16 @@ interpreted as CPO's analytical near-constraint guarantee.
 
 ### 3.1 Two-timescale control
 
-Let an environment evolve at primitive time (t), with an upper decision every
-(K) primitive steps. At macro index (m=\lfloor t/K\rfloor), the upper policy
-samples (u_m \sim \pi_U(\cdot\mid s^U_m)); the lower policy samples
-(l_t \sim \pi_L(\cdot\mid s^L_t,u_m)). The domain adapter maps these decisions
-to an executed action (a_t). Freq-HRL stores one semi-Markov upper transition
+Let an environment evolve at primitive time $t$, with an upper decision every
+$K$ primitive steps. At macro index $m=\lfloor t/K\rfloor$, the upper policy
+samples $u_m \sim \pi_U(\cdot\mid s^U_m)$; the lower policy samples
+$l_t \sim \pi_L(\cdot\mid s^L_t,u_m)$. The domain adapter maps these decisions
+to an executed action $a_t$. Freq-HRL stores one semi-Markov upper transition
 per macro interval and one lower transition per primitive step, and applies
 independent PPO likelihood ratios to the two policies.
 
 The state adapter is causal. A slow exponential state and a faster exponential
-state are updated using observations available through time (t). Their
+state are updated using observations available through time $t$. Their
 difference and residual expose middle- and high-frequency innovations without
 future leakage. Alternative causal Fourier, state-space, neural state-space,
 Poisson harmonic, and wavelet encoders exist in the implementation, but the
@@ -148,8 +148,8 @@ confirmatory MuJoCo claim does not depend on an encoder-comparison result.
 Raw actions are not comparable across domains: holding time, inventory change,
 and motor torque have different accumulated effects. A domain action-effect
 operator therefore maps upper and lower action histories to aligned effect
-sequences (e^U_{1:T}) and (e^L_{1:T}). Let (L_w\) be the registered causal
-low-pass operator and (H_w=I-L_w\) its residual. The raw diagnostics are
+sequences $e^U_{1:T}$ and $e^L_{1:T}$. Let $L_w$ be the registered causal
+low-pass operator and $H_w=I-L_w$ its residual. The raw diagnostics are
 
 \[
 D^{\mathrm{raw}}_L = T^{-1}\lVert L_w(e^L)\rVert_2^2,
@@ -157,7 +157,7 @@ D^{\mathrm{raw}}_L = T^{-1}\lVert L_w(e^L)\rVert_2^2,
 P^{\mathrm{raw}}_U = T^{-1}\lVert H_w(e^U)\rVert_2^2.
 \]
 
-A causal responsibility operator additionally constructs (r^U_t,r^L_t) so
+A causal responsibility operator additionally constructs $(r^U_t,r^L_t)$ so
 that their sum reconstructs the registered total effect up to numerical error.
 The responsibility diagnostic is
 
@@ -166,14 +166,14 @@ D^{\mathrm{resp}}_L = T^{-1}\lVert L_w(r^L)\rVert_2^2.
 \]
 
 The distinction is substantive. A responsibility router can lower
-(D^{\mathrm{resp}}_L) while preserving every executed action. Such a transaction
+$D^{\mathrm{resp}}_L$ while preserving every executed action. Such a transaction
 repairs attribution, not physical behavior. Raw separation requires improvement
-in (D^{\mathrm{raw}}_L) and the upper high-frequency budget as separate gates.
+in $D^{\mathrm{raw}}_L$ and the upper high-frequency budget as separate gates.
 
 ### 3.3 Additive gauge non-identifiability
 
 Assume the domain adapter and transition kernel depend on the hierarchy through
-the additive total effect (a_t=e^U_t+e^L_t). For any causal transfer (g_t) that
+the additive total effect $a_t=e^U_t+e^L_t$. For any causal transfer $g_t$ that
 keeps the component actions feasible, define
 
 \[
@@ -187,10 +187,10 @@ hierarchies induce identical state, executed-action, and reward trajectories.
 Consequently, an objective or diagnostic that observes only environment
 trajectories cannot identify the raw upper/lower factorization.
 
-*Proof.* At every (t), the transformed total equals the original total. The
+*Proof.* At every $t$, the transformed total equals the original total. The
 domain adapter therefore emits the same executed action. Induction through the
 shared transition randomness gives the same next state and reward, completing
-the trajectory-wise argument. (\square)
+the trajectory-wise argument. $\square$
 
 This proposition explains why responsibility restoration and raw policy
 distillation are different estimands. Successful responsibility routing cannot
@@ -198,7 +198,7 @@ by itself imply improvement in either raw diagnostic.
 
 ### 3.4 Causal gauge fixing
 
-Let (P) be any deterministic causal operator on the total action history; the
+Let $P$ be any deterministic causal operator on the total action history; the
 implementation uses a causal exponential low pass followed, when configured,
 by a lower-component feasibility projection. Define
 
@@ -207,15 +207,15 @@ r^U_t=P(a_{1:t})_t,\qquad r^L_t=a_t-r^U_t.
 \]
 
 **Proposition 2 (canonical responsibility coordinate).** The map above is
-causal, reconstructs (a_t) exactly, and is invariant to every additive gauge
-transform of Proposition 1. If the environment consumes only (r^U_t+r^L_t), it
+causal, reconstructs $a_t$ exactly, and is invariant to every additive gauge
+transform of Proposition 1. If the environment consumes only $r^U_t+r^L_t$, it
 also preserves return pathwise.
 
-*Proof.* Causality follows from (P)'s input restriction to (a_{1:t}). Exact
+*Proof.* Causality follows from $P$'s input restriction to $a_{1:t}$. Exact
 reconstruction is immediate by definition. Gauge-transformed components have
-the same total (a), so both responsibility outputs are unchanged. Their sum is
+the same total $a$, so both responsibility outputs are unchanged. Their sum is
 the original total; Proposition 1 then gives pathwise return invariance.
-(\square)
+$\square$
 
 The shared implementation exposes this operator as `CausalGaugeFixer`. A
 partial-strength transaction interpolates toward the canonical coordinate while
@@ -227,8 +227,8 @@ claim.
 
 For each frozen path panel, the implementation converts the registered
 frequency endpoints and reward floor into three diagnostics: a non-negative
-aggregate frequency-violation merit (M), the largest normalized frequency
-violation (V), and the number of reward-floor violations (N_R). The exact
+aggregate frequency-violation merit $M$, the largest normalized frequency
+violation $V$, and the number of reward-floor violations $N_R$. The exact
 endpoint budgets and normalization are fixed by the protocol artifact rather
 than estimated from validation outcomes.
 
@@ -247,7 +247,7 @@ policy traces exactly.
 
 ### 4.2 Design-fold eligibility and selection
 
-Let candidate (c) be compared with anchor (0). On the pooled design panel and
+Let candidate $c$ be compared with anchor $0$. On the pooled design panel and
 on each of two predeclared folds, it is eligible only if
 
 \[
@@ -313,7 +313,10 @@ Every manuscript result must be present in the fail-closed authoritative
 registry. The registry stores allowed and forbidden wording, stage, decision,
 paper-use status, source artifacts, and expected file digests. Development
 screens cannot become headline evidence by being rerun at larger scale. The
-retired manuscript and legacy C1--C9 matrices are excluded.
+retired manuscript and legacy C1--C9 matrices are excluded. The 2026-08-31
+snapshot contains 47 records: 4 reportable confirmatory records, of which
+2 support positive claims and 2 are mixed or negative; 41 development-only
+records; and 2 excluded legacy records.
 
 ## 6. Results
 
@@ -469,7 +472,39 @@ the total-action spectrum on the irreducible Hopper subset. V17.6 reused
 rejected paths and is acausal, so it is mechanism diagnosis rather than
 performance evidence.
 
-### 7.3 Negative results define the claim boundary
+### 7.3 Development evidence closes three direct extensions
+
+The unchanged 120-path panel was subsequently used only for mechanism
+development. A causal fixed-total-action router sequence culminated in v17.11:
+the selected fractional-reservoir FIR recovered 62 of 81 oracle-recoverable
+failures and preserved all 32 reference-feasible Walker2d paths, but recovered
+only 14 of 33 Hopper failures. The frozen router-only line was therefore closed
+without accessing fresh validation paths.
+
+The remaining seven Hopper paths required a change to the total action rather
+than another responsibility split. The acausal v17.12 oracle found feasible
+targets for all seven with total-action correction RMS at most 0.00812. A
+grouped causal FIR adapter recovered three paths in v17.13. Exhaustive audit of
+all 900 members of that frozen linear FIR grid in v17.14 recovered six of seven
+while preserving all 113 reference-feasible paths; one Hopper `ood_chirp` path
+remained unresolved. This closes the tested linear actor-residual class, not all
+causal actor architectures.
+
+Higher-capacity and projection-based alternatives did not justify fresh-panel
+access. The state-conditioned MLP in v18.2 recovered only three of seven paths.
+The target-free instantaneous projector in v18.3 recovered all seven, but its
+maximum absolute action correction was 1.8076 and its reference-path correction
+RMS reached 0.2935, far outside the frozen trust region. Receding-horizon
+projection reduced the maximum absolute correction to 0.9888, but v18.4 was
+directly feasible on only 69 of 120 realized component traces despite an exact
+offline oracle accepting all corrected totals; it also accumulated 40,962
+prefix budget violations. Finally, no preregistered v18.5 causal actor-floor
+score passed the discrimination rule. The best score covered only five of seven
+actor-floor paths in the global top 14. No fresh validation path was accessed in
+v17.8--v18.5, and post-hoc score combinations are excluded from method
+selection. Further tuning on this panel would be development-set overfitting.
+
+### 7.4 Negative results define the claim boundary
 
 The v13 failure is not a minor ablation. It shows that responsibility-space
 success does not imply raw action separation. The Quant harm against generic
@@ -485,9 +520,10 @@ modes and validation roots. The validation paths nested within a seed are not
 independent replicates. Second, most successful transactions were
 function-preserving routers; they do not demonstrate physical control
 improvement. Third, the stricter raw behavioral claim failed in two of three
-MuJoCo tasks, and the v15--v17.6 follow-ups remain development-only; several
-used only one development optimizer seed. Fourth, Quant is a synthetic
-time-series control environment and
+MuJoCo tasks, and the v15--v18.5 follow-ups remain development-only. Several
+used only one development optimizer seed, while v17.8--v18.5 repeatedly reused
+the same 120-path panel and did not access fresh validation paths. Fourth, Quant
+is a synthetic time-series control environment and
 contains one supported performance harm. Fifth, Transit, public passenger data,
 and order-book adapters exist in the repository but currently lack reportable
 records in the authoritative ledger and are therefore excluded from the paper's
@@ -506,7 +542,9 @@ decision, and report are stored under
 `transit_hrl/results/authoritative_evidence_sources_20260830/mujoco_v14_29/`.
 The manuscript claim ledger is
 `transit_hrl/evidence/authoritative_registry_v1.json`. It verifies source-file
-digests and excludes unregistered development outputs. The fresh anchor run used
+digests and excludes unregistered development outputs. Its 2026-08-31 snapshot
+contains 47 records, but only 4 are manuscript-reportable and only 2 support
+positive claims. The fresh anchor run used
 scheduler tasks `t84875`--`t84922`; the portfolio confirmation used
 `t84930`--`t84977` with dynamic placement on node001--node006. Raw checkpoints
 and large run directories are intentionally not part of the paper source tree;
@@ -523,4 +561,7 @@ does not yet hold: raw physical separation fails in two tasks, and synthetic
 time-series performance is mixed. The defensible contribution is therefore an
 auditable responsibility contract and guarded restoration protocol. Converting
 that contract into a training-time gauge-fixed hierarchy with competitive raw
-behavior and return remains the primary algorithmic problem.
+behavior and return remains the primary algorithmic problem. The v17.8--v18.5
+development sequence closes several direct router, linear-residual, and
+projection implementations of that idea; a new architecture must be frozen
+before evaluation on a genuinely fresh panel.

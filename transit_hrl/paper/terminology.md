@@ -1,6 +1,6 @@
 # Freq-HRL terminology ledger
 
-Status: authoritative manuscript terminology, 2026-08-30
+Status: authoritative manuscript terminology, 2026-08-31
 
 This ledger fixes the vocabulary used by `manuscript.md`. Terms from retired
 drafts are not interchangeable with the definitions below.
@@ -21,6 +21,10 @@ drafts are not interchangeable with the definitions below.
 | guarded restoration portfolio | The fixed registry of router and actor transactions plus the common selection and abstention contract. | Ensemble, mixture policy, or end-to-end learned gate. |
 | frequency-violation merit | The registered non-negative aggregate excess above the frequency budgets. | Leakage loss unless referring to the training loss itself. |
 | worst frequency violation | The largest registered normalized frequency-budget excess in a snapshot. | Worst-case guarantee outside the evaluated paths. |
+| reference-feasible path | A reused development path whose frozen reference total action admits a responsibility split satisfying both registered component budgets. | A fresh validation path or an independent statistical replicate. |
+| actor-floor path | A path whose frozen total action admits no responsibility split satisfying both component budgets; feasibility therefore requires changing the total-action spectrum. | A failed router path in general; most router failures remain fixed-total-action recoverable. |
+| direct joint feasibility | Satisfaction of both component budgets by the causal realized upper/lower traces emitted online. | Feasibility of a corrected total under a separate offline decomposition. |
+| exact-oracle feasibility | Feasibility certified by the registered full-horizon convex allocation oracle for a frozen total-action trajectory. | Recursive or online feasibility. |
 | reward floor | The paired held-out return condition encoded by zero `reward_violation_count`. | Reward improvement. |
 | exact trace invariance | Equality of paired executed-action, reward, and latent-policy trace identifiers, with zero observed return and mean-reward delta. | Approximate behavioral equivalence. |
 | design paths | Frozen paths used for candidate eligibility and ranking. | Training paths or validation paths. |
@@ -31,6 +35,7 @@ drafts are not interchangeable with the definitions below.
 | noninferiority | The lower confidence bound exceeded the registered negative margin. | Equality or superiority. |
 | confirmatory | Source-bound protocol and decision rule frozen before access to the corresponding outcome. | Any large run or post-hoc analysis. |
 | development | Evidence used to design or reject mechanisms, excluded from headline confirmation. | Validation or confirmation. |
+| fresh validation paths | Paths whose outcomes were not accessed during design, candidate selection, or threshold tuning and are used once under a frozen decision rule. | Unused paths from a repeatedly analyzed development panel. |
 | Quant v7.4 | The registered synthetic time-series control comparison with 24 independent training replicates. | Real-market deployment evidence. |
 
 ## Claim hierarchy
