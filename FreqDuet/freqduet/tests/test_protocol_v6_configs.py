@@ -10,6 +10,7 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     CONFIRMATION_CONFIGS,
     EFFICIENCY_GAIN_CONFIGS,
     FLEET_EFFICIENCY_GAIN_CONFIGS,
+    HF_OPPORTUNITY_GAIN_CONFIGS,
     NORMALIZED_REGULARITY_CONFIGS,
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
@@ -712,6 +713,62 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(
             trainer.regularity_capacity_gain_mode,
             "positive_zero_hold_target_preserving_gain_v4",
+        )
+
+    def test_hf_opportunity_configs_lock_v18_geometry_and_grid(self):
+        configs = [CONFIRMED_MAIN, *HF_OPPORTUNITY_GAIN_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(HF_OPPORTUNITY_GAIN_CONFIGS),
+        )
+
+        observed = set()
+        for name in HF_OPPORTUNITY_GAIN_CONFIGS:
+            config = resolved_config(name)
+            objective = config["lower"]["causal_regularity_policy"]
+            gain = objective["capacity_gated_gain"]
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
+            )
+            self.assertEqual(
+                gain["mode"],
+                "positive_zero_hold_hf_opportunity_gain_v5",
+            )
+            self.assertEqual(config["frequency"]["lower_mode"], "high")
+            self.assertEqual(gain["hf_energy_scale"], 0.04)
+            self.assertEqual(gain["hf_energy_exponent"], 1.0)
+            self.assertEqual(gain["capacity_exponent"], 1.0)
+            self.assertEqual(gain["action_efficiency_penalty"], 0.0)
+            observed.add((
+                gain["weight"],
+                gain["hf_opportunity_cost_penalty"],
+            ))
+        self.assertEqual(observed, {
+            (weight, penalty)
+            for weight in (0.02, 0.025, 0.03)
+            for penalty in (0.5, 1.0, 2.0)
+        })
+
+        runner_config = resolved_config(HF_OPPORTUNITY_GAIN_CONFIGS[0])
+        with TemporaryDirectory() as tmp:
+            runner_config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(runner_config)
+        expected_index = (
+            runner.env._base_state_dim
+            + len(runner.env.lower_context_features)
+            + 2)
+        trainer = runner.lower_trainer
+        self.assertEqual(
+            trainer.regularity_capacity_hf_energy_feature_index,
+            expected_index,
+        )
+        self.assertEqual(
+            trainer.regularity_capacity_gain_mode,
+            "positive_zero_hold_hf_opportunity_gain_v5",
         )
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):

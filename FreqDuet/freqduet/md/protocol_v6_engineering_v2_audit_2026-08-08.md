@@ -1652,3 +1652,77 @@ same journey--CV frontier seen in V15 and V16. Another
 allocate regularity credit to causally attributable high-frequency demand
 states, as required by the lower-controller responsibility in `dev_manual.md`,
 rather than discount all actions in a state uniformly.
+
+### V17 replay allocation evidence (2026-08-31)
+
+Before designing V18, a node-side read-only audit examined the episode-39
+lower replay buffers for same-source V14, nearest V16, the V17 CV-closest row,
+and the V17 journey-best row. Scheduler task `t87275` audited all 16 requested
+checkpoints, four training seeds per configuration, without copying a
+checkpoint locally. Each replay contains 208,000 transitions; approximately
+165,000--169,000 per checkpoint have valid compact two-sided evidence. Only a
+1.1 MB JSON and 38 KB CSV were synchronized.
+
+The local positive-HF-energy distribution is stable across policies and seeds:
+its one-third and two-third quantiles are approximately `0.0209` and `0.0403`,
+with the latter varying by less than `0.0004` within every policy. HF-active
+states constitute about 30 percent of valid replay. In target-matched bands,
+holding falls as HF energy rises. Relative to V14, the V17 journey-best row
+reduces mean holding action by about `0.34 s` in HF-inactive states and
+`0.64 s` in HF-active states. The V17 CV-closest row instead increases action
+mainly in HF-inactive states. Thus the prior global state scalar mixes two
+roles: the learned passenger critic already responds to informative local HF
+demand, while the analytic regularity prior remains useful when that signal is
+weak. This evidence rejects a hard HF threshold and supports a smooth
+HF-conditioned opportunity cost on the auxiliary regularity gain.
+
+### Engineering-v18 HF-opportunity gain preregistration (2026-08-31)
+
+V18 starts from same-source V14 and preserves its compact causal target, seven
+discrete actions, conditional entropy, zero-hold regret constraint,
+remaining-seat capacity gate, and noguard execution semantics. It changes only
+the actor-side positive regularity gain. Let `e_H(s)` be the already-observed,
+causal local HF-energy feature, `s_H=0.04`, and `beta_H>0`. The registered soft
+pressure and state-scalar multiplier are
+
+`p_H(s) = (e_H(s)/s_H) / (1 + e_H(s)/s_H)` and
+`g_H(s) = 1 / (1 + beta_H p_H(s))`.
+
+For V14 gain `G(a,s)`, V18 uses `G_H(a,s)=g_H(s)G(a,s)`. At zero HF energy it
+is exactly V14. For every state, all action bins receive the same multiplier,
+so V14 gain ordering and its analytic target are unchanged. The scale is fixed
+from the stable replay two-third quantile before V18 training; there is no hard
+activation threshold, post-policy clipping, or execution adjustment.
+
+The locked grid crosses gain weights `0.020`, `0.025`, and `0.030` with HF
+opportunity penalties `0.5`, `1.0`, and `2.0`, for nine candidates. Energy
+scale/exponent are fixed to `0.04/1.0`. Controls will include historical hard
+main, `noguard`, compact context-only, confirmed main, V11, V13, same-source
+V14, nearest V15/V16, and both reported V17 frontier rows. Fresh formal
+training seeds are `22013,22031,22053,22077`; frozen common-random-number
+evaluation seeds are `55017,55041,55059,55083`.
+
+The mechanism gate requires exact V7/V5 contracts, positive and nonconstant HF
+energy pressure, the registered pressure/gate arithmetic in actor and frozen
+execution telemetry, positive realized gain, V13 causal-evidence and regret
+limits, and zero execution adjustment. An outcome pass must improve same-source
+V14 restricted journey by at least `0.05 min` and headway CV by at least
+`0.001`, without increasing mean action, holding vehicle-seconds, or denied
+dispatch. Candidate priority is lower gain weight, then lower HF penalty. A
+screen pass remains exploratory and requires fresh 200-episode confirmation;
+no pass rejects this objective family without changing thresholds.
+
+### V18 implementation smoke (2026-09-01)
+
+A two-config, two-episode smoke compared same-source V14 with the registered
+`w=0.025,beta_H=1.0,s_H=0.04` V18 row using non-formal seeds `21901/54901`.
+Training, exact checkpoint restore, and frozen evaluation completed. V18
+training telemetry reported HF energy pressure `0.13262`, state-scalar gate
+`0.91348`, and positive actor gain; frozen execution reported pressure
+`0.16201`, gate `0.89119`, positive realized gain, zero actor-update telemetry,
+and zero execution adjustment. The V14 control retained zero HF-opportunity
+parameters and an execution gate of exactly one. Unit tests independently
+verify the analytic pressure, zero-energy V14 equivalence, per-state action-bin
+ordering, runner execution arithmetic, configuration grid, and feature index.
+These are implementation checks only. The 23 MB temporary smoke directory was
+deleted after recording these values and is not used as effect evidence.

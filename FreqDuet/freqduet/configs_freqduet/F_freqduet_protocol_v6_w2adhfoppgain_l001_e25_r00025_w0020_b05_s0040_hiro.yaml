@@ -1,0 +1,18 @@
+_extends: F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adhfoppgain_l001_e25_r00025_w0020_b05_s0040_hiro
+
+protocol:
+  role: exploratory_compact_w2_hf_opportunity_gain_l001_e25_r00025_w0020_b05_s0040_v6
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_hf_opportunity_gain_regret_dual_v7
+    capacity_gated_gain:
+      mode: positive_zero_hold_hf_opportunity_gain_v5
+      weight: 0.02
+      gain_scale: 0.002
+      capacity_exponent: 1.0
+      action_efficiency_penalty: 0.0
+      hf_energy_scale: 0.04
+      hf_energy_exponent: 1.0
+      hf_opportunity_cost_penalty: 0.5

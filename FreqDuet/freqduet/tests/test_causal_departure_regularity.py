@@ -11,8 +11,10 @@ from lower.causal_departure_regularity import (
     fleet_utilization_pressure,
     holding_action_efficiency_gate,
     holding_fleet_efficiency_gate,
+    holding_hf_opportunity_gate,
     holding_target_preserving_fleet_efficiency_gate,
     holding_target_pressure,
+    local_hf_energy_pressure,
 )
 from runner_v3 import TransitDuetV2Runner
 
@@ -291,6 +293,80 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             [1.0],
         )
 
+    def test_runner_records_realized_hf_opportunity_gate(self):
+        runner = TransitDuetV2Runner.__new__(TransitDuetV2Runner)
+        runner.env = SimpleNamespace(
+            lower_context_features={
+                "regularity_hold_target_norm",
+                "regularity_hold_target_valid",
+                "capacity",
+            },
+            lower_causal_holding_action_scale_s=90.0,
+        )
+        runner.lower_trainer = SimpleNamespace(
+            regularity_policy_contract={
+                "action_target_scale_s": 90.0,
+                "cost_cap": 0.25,
+            },
+            regularity_capacity_gain_enabled=True,
+            regularity_capacity_feature_index=2,
+            regularity_capacity_exponent=2.0,
+            regularity_capacity_action_efficiency_penalty=0.0,
+            regularity_capacity_fleet_utilization_feature_index=None,
+            regularity_capacity_hf_energy_feature_index=3,
+            regularity_capacity_hf_energy_scale=0.04,
+            regularity_capacity_hf_energy_exponent=1.0,
+            regularity_capacity_hf_opportunity_cost_penalty=1.0,
+            discrete_actions=None,
+        )
+        for name in (
+            "evidence_valid",
+            "action_costs",
+            "zero_hold_action_costs",
+            "action_regrets",
+            "capacity_gates",
+            "capacity_gains",
+            "action_efficiency_gates",
+            "fleet_utilizations",
+            "fleet_pressures",
+            "target_pressures",
+            "hf_energies",
+            "hf_energy_pressures",
+            "oracle_action_costs",
+            "excess_action_costs",
+            "target_actions",
+            "abs_errors",
+        ):
+            setattr(runner, f"_ep_lower_regularity_policy_{name}", [])
+        regularity = CausalDepartureRegularityCost(enabled=False)
+        context = regularity.capture(
+            forward_headway_s=300.0,
+            target_headway_s=360.0,
+            evidence_source="matched_departure_event",
+            follower_departure_gap_s=420.0,
+            follower_evidence_source="same_time_avl_journey_speed_eta",
+        )
+
+        runner._record_causal_regularity_policy_execution(
+            context,
+            action_s=60.0,
+            state=np.asarray([0.0, 0.0, 0.5, 0.04], dtype=np.float32),
+        )
+
+        expected_zero_hold_cost = (60.0 / 360.0) ** 2
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_policy_hf_energies[0], 0.04)
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_policy_hf_energy_pressures[0], 0.5)
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_policy_action_efficiency_gates[0],
+            2.0 / 3.0,
+        )
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_policy_capacity_gains[0],
+            0.25 * (2.0 / 3.0) * expected_zero_hold_cost,
+        )
+
     def test_holding_efficiency_gate_is_smooth_and_dimensionless(self):
         self.assertEqual(holding_action_efficiency_gate(
             action_s=0.0, action_scale_s=45.0, penalty=2.0), 1.0)
@@ -359,6 +435,26 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             ),
             1.0,
         )
+
+    def test_hf_opportunity_gate_is_soft_and_recovers_v14_at_zero(self):
+        self.assertEqual(local_hf_energy_pressure(
+            energy=0.0, scale=0.04), 0.0)
+        self.assertAlmostEqual(local_hf_energy_pressure(
+            energy=0.04, scale=0.04), 0.5)
+        self.assertAlmostEqual(local_hf_energy_pressure(
+            energy=0.12, scale=0.04), 0.75)
+        self.assertEqual(holding_hf_opportunity_gate(
+            energy=0.0,
+            scale=0.04,
+            exponent=1.0,
+            penalty=2.0,
+        ), 1.0)
+        self.assertAlmostEqual(holding_hf_opportunity_gate(
+            energy=0.04,
+            scale=0.04,
+            exponent=1.0,
+            penalty=1.0,
+        ), 2.0 / 3.0)
 
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):

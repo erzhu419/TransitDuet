@@ -478,6 +478,10 @@ class RESACLagrangianTrainer:
         self.regularity_capacity_fleet_pressure_exponent = 1.0
         self.regularity_capacity_opportunity_cost_penalty = 0.0
         self.regularity_capacity_target_pressure_exponent = 0.0
+        self.regularity_capacity_hf_energy_feature_index = None
+        self.regularity_capacity_hf_energy_scale = 1.0
+        self.regularity_capacity_hf_energy_exponent = 1.0
+        self.regularity_capacity_hf_opportunity_cost_penalty = 0.0
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -487,7 +491,8 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_capacity_gain_regret_dual_v3',
                     'analytic_two_sided_efficiency_gain_regret_dual_v4',
                     'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
-                    'analytic_two_sided_target_preserving_gain_regret_dual_v6'}:
+                    'analytic_two_sided_target_preserving_gain_regret_dual_v6',
+                    'analytic_two_sided_hf_opportunity_gain_regret_dual_v7'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             if self.discrete_actions is None:
@@ -628,6 +633,8 @@ class RESACLagrangianTrainer:
                     'positive_zero_hold_fleet_efficiency_gain_v3'),
                 'analytic_two_sided_target_preserving_gain_regret_dual_v6': (
                     'positive_zero_hold_target_preserving_gain_v4'),
+                'analytic_two_sided_hf_opportunity_gain_regret_dual_v7': (
+                    'positive_zero_hold_hf_opportunity_gain_v5'),
             }
             if mode in capacity_gain_modes:
                 if not capacity_gain_enabled:
@@ -659,6 +666,9 @@ class RESACLagrangianTrainer:
                 target_preserving_mode = (
                     gain_mode
                     == 'positive_zero_hold_target_preserving_gain_v4')
+                hf_opportunity_mode = (
+                    gain_mode
+                    == 'positive_zero_hold_hf_opportunity_gain_v5')
                 fleet_efficiency_mode = gain_mode in {
                     'positive_zero_hold_fleet_efficiency_gain_v3',
                     'positive_zero_hold_target_preserving_gain_v4',
@@ -691,6 +701,30 @@ class RESACLagrangianTrainer:
                             or fleet_pressure_exponent <= 0.0):
                         raise ValueError(
                             'fleet pressure exponent must be positive')
+                hf_energy_feature_index = None
+                hf_energy_scale = 1.0
+                hf_energy_exponent = 1.0
+                hf_opportunity_cost_penalty = float(
+                    capacity_gain_cfg.get(
+                        'hf_opportunity_cost_penalty', 0.0))
+                if hf_opportunity_mode:
+                    hf_energy_feature_index = int(
+                        capacity_gain_cfg['hf_energy_feature_index'])
+                    hf_energy_scale = float(
+                        capacity_gain_cfg.get('hf_energy_scale', 0.04))
+                    hf_energy_exponent = float(
+                        capacity_gain_cfg.get('hf_energy_exponent', 1.0))
+                    if not 0 <= hf_energy_feature_index < int(state_dim):
+                        raise ValueError(
+                            'HF opportunity feature index is out of range')
+                    if (not np.isfinite(hf_energy_scale)
+                            or hf_energy_scale <= 0.0):
+                        raise ValueError(
+                            'HF opportunity energy scale must be positive')
+                    if (not np.isfinite(hf_energy_exponent)
+                            or hf_energy_exponent <= 0.0):
+                        raise ValueError(
+                            'HF opportunity energy exponent must be positive')
                 if (not np.isfinite(opportunity_cost_penalty)
                         or opportunity_cost_penalty < 0.0):
                     raise ValueError(
@@ -700,6 +734,11 @@ class RESACLagrangianTrainer:
                         or target_pressure_exponent < 0.0):
                     raise ValueError(
                         'target pressure exponent must be finite and '
+                        'non-negative')
+                if (not np.isfinite(hf_opportunity_cost_penalty)
+                        or hf_opportunity_cost_penalty < 0.0):
+                    raise ValueError(
+                        'HF opportunity-cost penalty must be finite and '
                         'non-negative')
                 if not np.isfinite(gain_weight) or gain_weight <= 0.0:
                     raise ValueError(
@@ -729,6 +768,11 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'V4 target-preserving gain requires a positive '
                         'opportunity-cost penalty and older modes require zero')
+                if hf_opportunity_mode != (
+                        hf_opportunity_cost_penalty > 0.0):
+                    raise ValueError(
+                        'V5 HF-opportunity gain requires a positive HF '
+                        'opportunity-cost penalty and older modes require zero')
                 self.regularity_capacity_gain_enabled = True
                 self.regularity_capacity_feature_index = (
                     capacity_feature_index)
@@ -750,6 +794,13 @@ class RESACLagrangianTrainer:
                     opportunity_cost_penalty)
                 self.regularity_capacity_target_pressure_exponent = (
                     target_pressure_exponent)
+                self.regularity_capacity_hf_energy_feature_index = (
+                    hf_energy_feature_index)
+                self.regularity_capacity_hf_energy_scale = hf_energy_scale
+                self.regularity_capacity_hf_energy_exponent = (
+                    hf_energy_exponent)
+                self.regularity_capacity_hf_opportunity_cost_penalty = (
+                    hf_opportunity_cost_penalty)
                 capacity_gain_contract = {
                     'enabled': True,
                     'mode': gain_mode,
@@ -774,6 +825,14 @@ class RESACLagrangianTrainer:
                             opportunity_cost_penalty),
                         'target_pressure_exponent': (
                             target_pressure_exponent),
+                    })
+                if hf_opportunity_mode:
+                    capacity_gain_contract.update({
+                        'hf_energy_feature_index': hf_energy_feature_index,
+                        'hf_energy_scale': hf_energy_scale,
+                        'hf_energy_exponent': hf_energy_exponent,
+                        'hf_opportunity_cost_penalty': (
+                            hf_opportunity_cost_penalty),
                     })
             else:
                 if capacity_gain_enabled:
@@ -935,6 +994,15 @@ class RESACLagrangianTrainer:
         if not self.regularity_capacity_gain_enabled:
             raise RuntimeError('capacity-gated regularity gain is disabled')
         if (self.regularity_capacity_gain_mode
+                == 'positive_zero_hold_hf_opportunity_gain_v5'):
+            pressure = self._regularity_policy_hf_energy_pressure(state)
+            scalar_gate = 1.0 / (
+                1.0
+                + self.regularity_capacity_hf_opportunity_cost_penalty
+                * pressure)
+            return scalar_gate.unsqueeze(-1).expand(
+                state.shape[0], self.discrete_actions.shape[0])
+        if (self.regularity_capacity_gain_mode
                 == 'positive_zero_hold_target_preserving_gain_v4'):
             target_pressure = self._regularity_policy_target_pressure(state)
             pressure = self._regularity_policy_fleet_pressure(state)
@@ -955,6 +1023,18 @@ class RESACLagrangianTrainer:
             + penalty
             * pressure.unsqueeze(-1)
             * action_fraction.unsqueeze(0))
+
+    def _regularity_policy_hf_energy_pressure(self, state):
+        """Return the bounded causal local-HF opportunity pressure."""
+        index = self.regularity_capacity_hf_energy_feature_index
+        if index is None:
+            return torch.zeros(
+                state.shape[0], dtype=state.dtype, device=state.device)
+        energy = state[:, index].clamp_min(0.0)
+        scaled = (
+            energy / self.regularity_capacity_hf_energy_scale
+        ).pow(self.regularity_capacity_hf_energy_exponent)
+        return scaled / (1.0 + scaled)
 
     def _regularity_policy_target_pressure(self, state):
         """Return the causal target magnitude used by the V6 state gate."""
@@ -1160,6 +1240,8 @@ class RESACLagrangianTrainer:
             'regularity_policy_fleet_utilization_mean': 0.0,
             'regularity_policy_fleet_pressure_mean': 0.0,
             'regularity_policy_target_pressure_mean': 0.0,
+            'regularity_policy_hf_energy_mean': 0.0,
+            'regularity_policy_hf_energy_pressure_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
@@ -1185,6 +1267,8 @@ class RESACLagrangianTrainer:
             regularity_fleet_utilization_mean = None
             regularity_fleet_pressure_mean = None
             regularity_target_pressure_mean = None
+            regularity_hf_energy_mean = None
+            regularity_hf_energy_pressure_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -1295,6 +1379,19 @@ class RESACLagrangianTrainer:
                                 regularity_target_pressure_mean = (
                                     target_pressure * valid_weights
                                 ).sum().div(valid_weight_sum)
+                        hf_index = (
+                            self.regularity_capacity_hf_energy_feature_index)
+                        if hf_index is not None:
+                            hf_energy = state[:, hf_index].clamp_min(0.0)
+                            hf_pressure = (
+                                self._regularity_policy_hf_energy_pressure(
+                                    state))
+                            regularity_hf_energy_mean = (
+                                hf_energy * valid_weights
+                            ).sum().div(valid_weight_sum)
+                            regularity_hf_energy_pressure_mean = (
+                                hf_pressure * valid_weights
+                            ).sum().div(valid_weight_sum)
                         regularity_capacity_gain_bonus = (
                             self.regularity_capacity_gain_weight
                             * regularity_scaled_capacity_gain_mean)
@@ -1459,6 +1556,12 @@ class RESACLagrangianTrainer:
                 'regularity_policy_target_pressure_mean': (
                     regularity_target_pressure_mean.item()
                     if regularity_target_pressure_mean is not None else 0.0),
+                'regularity_policy_hf_energy_mean': (
+                    regularity_hf_energy_mean.item()
+                    if regularity_hf_energy_mean is not None else 0.0),
+                'regularity_policy_hf_energy_pressure_mean': (
+                    regularity_hf_energy_pressure_mean.item()
+                    if regularity_hf_energy_pressure_mean is not None else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
                     float((

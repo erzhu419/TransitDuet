@@ -199,6 +199,9 @@ class OptimizerContractTest(unittest.TestCase):
             fleet_pressure_start=0.75,
             opportunity_cost_penalty=0.0,
             target_pressure_exponent=0.0,
+            hf_opportunity_cost_penalty=0.0,
+            hf_energy_scale=0.04,
+            hf_energy_exponent=1.0,
             action_bins=None):
         conditional = (
             {
@@ -217,6 +220,7 @@ class OptimizerContractTest(unittest.TestCase):
             "analytic_two_sided_efficiency_gain_regret_dual_v4",
             "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5",
             "analytic_two_sided_target_preserving_gain_regret_dual_v6",
+            "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
         }
         regularity = {
             "enable": True,
@@ -242,6 +246,10 @@ class OptimizerContractTest(unittest.TestCase):
                     "positive_zero_hold_target_preserving_gain_v4"
                     if policy_mode
                     == "analytic_two_sided_target_preserving_gain_regret_dual_v6"
+                    else
+                    "positive_zero_hold_hf_opportunity_gain_v5"
+                    if policy_mode
+                    == "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"
                     else
                     "positive_zero_hold_fleet_efficiency_gain_v3"
                     if policy_mode
@@ -272,12 +280,22 @@ class OptimizerContractTest(unittest.TestCase):
                     "opportunity_cost_penalty": opportunity_cost_penalty,
                     "target_pressure_exponent": target_pressure_exponent,
                 })
+            if (policy_mode
+                    == "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"):
+                regularity["capacity_gated_gain"].update({
+                    "hf_energy_feature_index": 4,
+                    "hf_energy_scale": hf_energy_scale,
+                    "hf_energy_exponent": hf_energy_exponent,
+                    "hf_opportunity_cost_penalty": (
+                        hf_opportunity_cost_penalty),
+                })
         return RESACLagrangianTrainer(
             state_dim=(
                 5 if policy_mode
                 in {
                     "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5",
                     "analytic_two_sided_target_preserving_gain_regret_dual_v6",
+                    "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
                 }
                 else 4 if capacity_mode else 3),
             action_range=45.0,
@@ -478,6 +496,47 @@ class OptimizerContractTest(unittest.TestCase):
         contract = v17.regularity_policy_contract["capacity_gated_gain"]
         self.assertEqual(contract["opportunity_cost_penalty"], 1.0)
         self.assertEqual(contract["target_pressure_exponent"], 1.0)
+
+    def test_hf_opportunity_gate_is_v14_at_zero_and_preserves_ordering(self):
+        bins = [0.0, 15.0, 30.0, 45.0]
+        v14 = self._regularity_trainer(
+            policy_mode="analytic_two_sided_capacity_gain_regret_dual_v3",
+            action_bins=bins,
+        )
+        v18 = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"),
+            hf_opportunity_cost_penalty=1.0,
+            hf_energy_scale=0.04,
+            action_bins=bins,
+        )
+        state_v14 = torch.tensor(
+            [[0.6, 2.0 / 3.0, 1.0, 1.0]], dtype=torch.float32)
+        state_v18 = torch.tensor([
+            [0.6, 2.0 / 3.0, 1.0, 1.0, 0.0],
+            [0.6, 2.0 / 3.0, 1.0, 1.0, 0.04],
+        ], dtype=torch.float32)
+        probs_v14 = torch.full((1, len(bins)), 1.0 / len(bins))
+        probs_v18 = torch.full((2, len(bins)), 1.0 / len(bins))
+
+        _, _, base_gains = v14._regularity_policy_capacity_gain(
+            state_v14, probs_v14)
+        _, _, gated_gains = v18._regularity_policy_capacity_gain(
+            state_v18, probs_v18)
+        gates = v18._regularity_policy_action_efficiency_gate(state_v18)
+
+        torch.testing.assert_close(gated_gains[0], base_gains[0])
+        torch.testing.assert_close(
+            gated_gains[1], base_gains[0] * (2.0 / 3.0))
+        self.assertTrue(torch.allclose(gates, gates[:, :1].expand_as(gates)))
+        self.assertTrue(torch.equal(
+            gated_gains.argmax(dim=-1),
+            torch.tensor([2, 2]),
+        ))
+        contract = v18.regularity_policy_contract["capacity_gated_gain"]
+        self.assertEqual(contract["hf_energy_feature_index"], 4)
+        self.assertEqual(contract["hf_energy_scale"], 0.04)
+        self.assertEqual(contract["hf_opportunity_cost_penalty"], 1.0)
 
     def test_causal_regularity_dual_uses_only_valid_evidence(self):
         torch.manual_seed(53)

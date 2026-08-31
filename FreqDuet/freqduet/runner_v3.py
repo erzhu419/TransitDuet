@@ -95,8 +95,10 @@ from lower.causal_departure_regularity import (
     fleet_utilization_pressure,
     holding_action_efficiency_gate,
     holding_fleet_efficiency_gate,
+    holding_hf_opportunity_gate,
     holding_target_preserving_fleet_efficiency_gate,
     holding_target_pressure,
+    local_hf_energy_pressure,
 )
 from coupling.holding_feedback import HoldingFeedback
 from coupling.belief_tracker import BeliefTracker, SurpriseComputer
@@ -325,6 +327,9 @@ class DiagnosticLog:
         'lower_regularity_policy_fleet_pressure_exponent',
         'lower_regularity_policy_opportunity_cost_penalty',
         'lower_regularity_policy_target_pressure_exponent',
+        'lower_regularity_policy_hf_energy_scale',
+        'lower_regularity_policy_hf_energy_exponent',
+        'lower_regularity_policy_hf_opportunity_cost_penalty',
         'lower_regularity_policy_actor_capacity_gain_mean',
         'lower_regularity_policy_actor_scaled_capacity_gain_mean',
         'lower_regularity_policy_actor_capacity_gain_bonus',
@@ -333,6 +338,8 @@ class DiagnosticLog:
         'lower_regularity_policy_actor_fleet_utilization_mean',
         'lower_regularity_policy_actor_fleet_pressure_mean',
         'lower_regularity_policy_actor_target_pressure_mean',
+        'lower_regularity_policy_actor_hf_energy_mean',
+        'lower_regularity_policy_actor_hf_energy_pressure_mean',
         'lower_regularity_policy_capacity_gain_mean',
         'lower_regularity_policy_scaled_capacity_gain_mean',
         'lower_regularity_policy_capacity_gain_bonus',
@@ -341,6 +348,8 @@ class DiagnosticLog:
         'lower_regularity_policy_fleet_utilization_mean',
         'lower_regularity_policy_fleet_pressure_mean',
         'lower_regularity_policy_target_pressure_mean',
+        'lower_regularity_policy_hf_energy_mean',
+        'lower_regularity_policy_hf_energy_pressure_mean',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
         'lower_regularity_entropy_split_enabled',
@@ -2152,7 +2161,8 @@ class TransitDuetV2Runner:
                     'analytic_two_sided_capacity_gain_regret_dual_v3',
                     'analytic_two_sided_efficiency_gain_regret_dual_v4',
                     'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
-                    'analytic_two_sided_target_preserving_gain_regret_dual_v6'}:
+                    'analytic_two_sided_target_preserving_gain_regret_dual_v6',
+                    'analytic_two_sided_hf_opportunity_gain_regret_dual_v7'}:
                 if 'capacity' not in self.env.lower_context_features:
                     raise ValueError(
                         'capacity-gated regularity gain requires the capacity '
@@ -2175,6 +2185,20 @@ class TransitDuetV2Runner:
                             base_state_dim
                             + self.env.lower_context_features.index(
                                 'fleet_utilization'))
+                if (regularity_mode
+                        == 'analytic_two_sided_hf_opportunity_gain_regret_dual_v7'):
+                    lower_frequency_mode = str(
+                        freq_cfg.get('lower_mode', 'high')).strip().lower()
+                    if (not self.env.frequency_lower_enabled
+                            or lower_frequency_mode not in {
+                                'high', 'hf', 'split'}):
+                        raise ValueError(
+                            'HF-opportunity gain requires high-mode causal '
+                            'lower frequency features')
+                    capacity_gain_cfg['hf_energy_feature_index'] = (
+                        base_state_dim
+                        + len(self.env.lower_context_features)
+                        + 2)
                 regularity_policy_cfg[
                     'capacity_gated_gain'] = capacity_gain_cfg
         if self.decouple_init_seeds and not self.randomness.isolated:
@@ -2711,6 +2735,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_fleet_utilizations = []
         self._ep_lower_regularity_policy_fleet_pressures = []
         self._ep_lower_regularity_policy_target_pressures = []
+        self._ep_lower_regularity_policy_hf_energies = []
+        self._ep_lower_regularity_policy_hf_energy_pressures = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_policy_entropies = []
@@ -5821,7 +5847,43 @@ class TransitDuetV2Runner:
                 self.lower_trainer,
                 'regularity_capacity_fleet_utilization_feature_index',
                 None)
-            if fleet_feature_index is None:
+            hf_feature_index = getattr(
+                self.lower_trainer,
+                'regularity_capacity_hf_energy_feature_index',
+                None)
+            if hf_feature_index is not None:
+                hf_feature_index = int(hf_feature_index)
+                if not 0 <= hf_feature_index < encoded_state.size:
+                    raise RuntimeError(
+                        'HF-energy regularity feature index is out of range '
+                        'during action execution')
+                hf_energy = max(float(encoded_state[hf_feature_index]), 0.0)
+                hf_pressure = local_hf_energy_pressure(
+                    energy=hf_energy,
+                    scale=float(
+                        self.lower_trainer
+                        .regularity_capacity_hf_energy_scale),
+                    exponent=float(
+                        self.lower_trainer
+                        .regularity_capacity_hf_energy_exponent),
+                )
+                action_efficiency_gate = holding_hf_opportunity_gate(
+                    energy=hf_energy,
+                    scale=float(
+                        self.lower_trainer
+                        .regularity_capacity_hf_energy_scale),
+                    exponent=float(
+                        self.lower_trainer
+                        .regularity_capacity_hf_energy_exponent),
+                    penalty=float(
+                        self.lower_trainer
+                        .regularity_capacity_hf_opportunity_cost_penalty),
+                )
+                self._ep_lower_regularity_policy_hf_energies.append(
+                    hf_energy)
+                self._ep_lower_regularity_policy_hf_energy_pressures.append(
+                    hf_pressure)
+            elif fleet_feature_index is None:
                 action_efficiency_gate = holding_action_efficiency_gate(
                     action_s=float(action_s),
                     action_scale_s=action_cap_s,
@@ -7981,6 +8043,8 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_fleet_utilizations = []
         self._ep_lower_regularity_policy_fleet_pressures = []
         self._ep_lower_regularity_policy_target_pressures = []
+        self._ep_lower_regularity_policy_hf_energies = []
+        self._ep_lower_regularity_policy_hf_energy_pressures = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_policy_entropies = []
@@ -8676,6 +8740,10 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_policy_fleet_pressures)
         lower_regularity_policy_target_pressure_stat = _stat(
             self._ep_lower_regularity_policy_target_pressures)
+        lower_regularity_policy_hf_energy_stat = _stat(
+            self._ep_lower_regularity_policy_hf_energies)
+        lower_regularity_policy_hf_energy_pressure_stat = _stat(
+            self._ep_lower_regularity_policy_hf_energy_pressures)
         lower_regularity_policy_target_stat = _stat(
             self._ep_lower_regularity_policy_target_actions)
         lower_regularity_policy_error_stat = _stat(
@@ -9191,6 +9259,13 @@ class TransitDuetV2Runner:
             'lower_regularity_policy_target_pressure_exponent': float(
                 self.lower_trainer
                 .regularity_capacity_target_pressure_exponent),
+            'lower_regularity_policy_hf_energy_scale': float(
+                self.lower_trainer.regularity_capacity_hf_energy_scale),
+            'lower_regularity_policy_hf_energy_exponent': float(
+                self.lower_trainer.regularity_capacity_hf_energy_exponent),
+            'lower_regularity_policy_hf_opportunity_cost_penalty': float(
+                self.lower_trainer
+                .regularity_capacity_hf_opportunity_cost_penalty),
             'lower_regularity_policy_actor_capacity_gain_mean': lower_m.get(
                 'regularity_policy_capacity_gain_mean', 0.),
             'lower_regularity_policy_actor_scaled_capacity_gain_mean': lower_m.get(
@@ -9209,6 +9284,11 @@ class TransitDuetV2Runner:
                 lower_m.get('regularity_policy_fleet_pressure_mean', 0.)),
             'lower_regularity_policy_actor_target_pressure_mean': (
                 lower_m.get('regularity_policy_target_pressure_mean', 0.)),
+            'lower_regularity_policy_actor_hf_energy_mean': (
+                lower_m.get('regularity_policy_hf_energy_mean', 0.)),
+            'lower_regularity_policy_actor_hf_energy_pressure_mean': (
+                lower_m.get(
+                    'regularity_policy_hf_energy_pressure_mean', 0.)),
             'lower_regularity_policy_capacity_gain_mean': round(
                 lower_regularity_policy_capacity_gain_stat['mean'], 8),
             'lower_regularity_policy_scaled_capacity_gain_mean': round(
@@ -9235,6 +9315,10 @@ class TransitDuetV2Runner:
                 lower_regularity_policy_fleet_pressure_stat['mean'], 8),
             'lower_regularity_policy_target_pressure_mean': round(
                 lower_regularity_policy_target_pressure_stat['mean'], 8),
+            'lower_regularity_policy_hf_energy_mean': round(
+                lower_regularity_policy_hf_energy_stat['mean'], 8),
+            'lower_regularity_policy_hf_energy_pressure_mean': round(
+                lower_regularity_policy_hf_energy_pressure_stat['mean'], 8),
             'lower_regularity_policy_cost_limit': float(
                 getattr(self.lower_trainer, 'regularity_cost_limit', 0.0)),
             'lower_regularity_lambda': lower_m.get(
@@ -9761,6 +9845,8 @@ class TransitDuetV2Runner:
                    'lower_regularity_policy_action_efficiency_gate_mean',
                    'lower_regularity_policy_fleet_utilization_mean',
                    'lower_regularity_policy_fleet_pressure_mean',
+                   'lower_regularity_policy_hf_energy_mean',
+                   'lower_regularity_policy_hf_energy_pressure_mean',
                    'lower_regularity_alpha',
                    'lower_policy_entropy_mean',
                    'lower_regularity_policy_entropy_valid_mean',

@@ -192,6 +192,45 @@ def holding_target_preserving_fleet_efficiency_gate(
     return float(1.0 / (1.0 + weight * pressure * target_pressure))
 
 
+def local_hf_energy_pressure(
+    *,
+    energy: float,
+    scale: float,
+    exponent: float = 1.0,
+) -> float:
+    """Map causal local HF energy to a bounded soft opportunity pressure."""
+    value = float(energy)
+    reference = float(scale)
+    power = float(exponent)
+    if not all(np.isfinite(x) for x in (value, reference, power)):
+        raise ValueError("HF energy pressure inputs must be finite")
+    if value < 0.0 or reference <= 0.0 or power <= 0.0:
+        raise ValueError(
+            "HF energy pressure requires energy >= 0, scale > 0, "
+            "exponent > 0")
+    scaled = (value / reference) ** power
+    return float(scaled / (1.0 + scaled))
+
+
+def holding_hf_opportunity_gate(
+    *,
+    energy: float,
+    scale: float,
+    exponent: float,
+    penalty: float,
+) -> float:
+    """Attenuate the regularity prior when causal HF demand is informative."""
+    weight = float(penalty)
+    if not np.isfinite(weight) or weight < 0.0:
+        raise ValueError("HF opportunity penalty must be finite and non-negative")
+    pressure = local_hf_energy_pressure(
+        energy=energy,
+        scale=scale,
+        exponent=exponent,
+    )
+    return float(1.0 / (1.0 + weight * pressure))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

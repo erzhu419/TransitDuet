@@ -226,6 +226,7 @@ ANALYSIS_FILES = [
     "scripts/analysis_provenance.py",
     "scripts/audit_protocol_v6_actiondual_screen.py",
     "scripts/audit_protocol_v6_conditional_entropy_screen.py",
+    "scripts/audit_protocol_v6_hf_opportunity_gain_screen.py",
     "scripts/audit_protocol_v6_normalized_constraint_screen.py",
     "scripts/run_freqduet_protocol_v2_matrix.py",
     "scripts/decide_freqduet_protocol_v6_screen.py",
