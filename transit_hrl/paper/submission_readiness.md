@@ -25,6 +25,12 @@ impact bar.
   records, and 2 excluded legacy records; only 2 support positive claims.
 - Additive raw-policy gauge non-identifiability and causal canonical
   responsibility fixing are now explicit in both code and the method.
+- The related-work audit now covers temporal hierarchy, adaptive decision
+  frequency, and physical action-smoothness methods, and states the novelty
+  boundary without claiming priority for filters or multiple clocks.
+- Figures 1--3 and Supplementary Figure S1 are generated from the validated
+  authoritative registry, carry source-data CSV files, and visibly separate
+  reportable confirmation from reused-path development evidence.
 
 ## Blocking scientific issue
 
@@ -110,17 +116,13 @@ Freq-HRL** architecture:
   formal gauge propositions and empirical pathwise invariance checks are already
   sufficient for the bounded responsibility claim, but they do not certify a
   physical receding-horizon controller.
-- Replacement figures generated only from the authoritative ledger. The current
-  `manuscript_figures_latest` package predates v14.29 and includes evidence that
-  is not reportable under the current registry.
-
 ## Current paper positioning
 
 The strongest honest title is **"Freq-HRL: Auditing and Guarded Restoration of
-Frequency Responsibility in Hierarchical Reinforcement Learning."** The paper
-is now coherent as a rigorous diagnostics/restoration submission once its
-figures, citations, and supplementary evidence package are rebuilt from the
-authoritative registry. It is still below the top-tier algorithmic bar without
+Frequency Responsibility in Hierarchical Reinforcement Learning."** Its
+figures, citations, and supplementary evidence package are now rebuilt from the
+authoritative registry. The paper is coherent as a rigorous
+diagnostics/restoration submission, but remains below the top-tier algorithmic bar without
 the physical training-time advance above. It should not use "domain-general,"
 "performance improvement," "no tradeoff," or "physical frequency separation"
 as an unqualified headline claim.

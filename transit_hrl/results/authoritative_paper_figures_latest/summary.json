@@ -1,0 +1,52 @@
+{
+  "backend": "python_matplotlib",
+  "development_evidence_ids": [
+    "mujoco_v17_6_full_horizon_oracle_development",
+    "mujoco_v17_11_fractional_reservoir_fir_development",
+    "mujoco_v17_14_exhaustive_actor_oracle_development",
+    "mujoco_v18_2_state_conditioned_actor_development",
+    "mujoco_v18_3_causal_joint_projection_development",
+    "mujoco_v18_4_receding_joint_projection_development",
+    "mujoco_v18_5_actor_floor_signal_development"
+  ],
+  "export_note": "SVG and PDF are editable submission sources; PNG is a review preview. TIFF is deferred until required by a selected venue.",
+  "figures": {
+    "fig1_protocol_and_estimands": [
+      "figures/fig1_protocol_and_estimands.svg",
+      "figures/fig1_protocol_and_estimands.pdf",
+      "figures/fig1_protocol_and_estimands.png"
+    ],
+    "fig2_mujoco_confirmatory_evidence": [
+      "figures/fig2_mujoco_confirmatory_evidence.svg",
+      "figures/fig2_mujoco_confirmatory_evidence.pdf",
+      "figures/fig2_mujoco_confirmatory_evidence.png"
+    ],
+    "fig3_quant_matched_baseline_forest": [
+      "figures/fig3_quant_matched_baseline_forest.svg",
+      "figures/fig3_quant_matched_baseline_forest.pdf",
+      "figures/fig3_quant_matched_baseline_forest.png"
+    ],
+    "fig_s1_development_stop_map": [
+      "figures/fig_s1_development_stop_map.svg",
+      "figures/fig_s1_development_stop_map.pdf",
+      "figures/fig_s1_development_stop_map.png"
+    ]
+  },
+  "main_figure_evidence_policy": "manuscript_reportable_only",
+  "preview_montage": "figures_preview_montage.png",
+  "registry_snapshot_date": "2026-08-31",
+  "reportable_evidence_ids": [
+    "mujoco_v12_responsibility_confirmatory",
+    "mujoco_v13_behavioral_confirmatory",
+    "mujoco_v14_29_restoration_portfolio_confirmatory",
+    "quant_v74_matched_baseline_confirmatory"
+  ],
+  "schema_version": "freq_hrl_authoritative_manuscript_figures_v1",
+  "source_data": [
+    "source_data/fig1_protocol_source.csv",
+    "source_data/fig2_mujoco_confirmatory_source.csv",
+    "source_data/fig3_quant_contrasts_source.csv",
+    "source_data/fig_s1_development_stop_map_source.csv"
+  ],
+  "supplementary_development_policy": "development_only_reused_paths_explicit"
+}

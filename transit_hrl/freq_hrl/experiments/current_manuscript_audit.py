@@ -30,6 +30,14 @@ LEGACY_SOURCE_TOKENS = (
     "manuscript_figures_latest",
 )
 
+AUTHORITATIVE_FIGURE_TOKENS = (
+    "authoritative_paper_figures_latest",
+    "fig1_protocol_and_estimands.png",
+    "fig2_mujoco_confirmatory_evidence.png",
+    "fig3_quant_matched_baseline_forest.png",
+    "fig_s1_development_stop_map.png",
+)
+
 
 def _resolve(root: Path, path: Path) -> Path:
     return path if path.is_absolute() else root / path
@@ -88,6 +96,28 @@ def _check_inline_math(manuscript: str) -> None:
         raise ValueError("parenthesized LaTeX remains outside a math delimiter")
 
 
+def _check_quant_table(manuscript: str) -> None:
+    marker = "**Table 4. Quant v7.4 pooled matched-baseline contrasts.**"
+    if marker not in manuscript:
+        raise ValueError("Quant Table 4 is missing")
+    table_block = manuscript.split(marker, 1)[1].split(
+        "![Quant matched-baseline contrasts.]", 1
+    )[0]
+    rows = []
+    for line in table_block.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|") or stripped.startswith("|---"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if cells and cells[0] != "Comparator":
+            rows.append(cells)
+    if len(rows) != 12:
+        raise ValueError(f"Quant Table 4 must contain 12 contrasts, found {len(rows)}")
+    keys = [(row[0], row[1]) for row in rows]
+    if len(set(keys)) != len(keys):
+        raise ValueError("Quant Table 4 contains a duplicate comparator-endpoint row")
+
+
 def audit_current_manuscript(
     *,
     repository_root: Path = REPOSITORY_ROOT,
@@ -110,6 +140,15 @@ def audit_current_manuscript(
         raise ValueError(f"manuscript citation keys missing from bibliography: {missing_citations}")
 
     _check_inline_math(manuscript)
+    _check_quant_table(manuscript)
+
+    missing_figures = [
+        token for token in AUTHORITATIVE_FIGURE_TOKENS if token not in manuscript
+    ]
+    if missing_figures:
+        raise ValueError(
+            f"authoritative manuscript figure references are missing: {missing_figures}"
+        )
 
     counts = _registry_counts(registry)
     _require_registry_counts(manuscript, counts, "manuscript")

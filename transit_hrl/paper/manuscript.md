@@ -302,6 +302,16 @@ two-sided 95% Wilson interval [@wilson1927interval] for the success probability
 is strictly greater than 0.5. The algorithm-level claim requires all three
 environments to pass.
 
+![Freq-HRL protocol and estimands.](../results/authoritative_paper_figures_latest/figures/fig1_protocol_and_estimands.png)
+
+**Figure 1 | Freq-HRL separates physical behavior from responsibility
+coordinates.** (a) Upper and lower policies act at different clocks but produce
+one total physical effect. (b) Raw component spectra and canonical
+responsibility spectra are distinct estimands; the latter can change while the
+executed action remains fixed. (c) The frozen restoration portfolio selects a
+trace-invariant router or a guarded actor update only after design-fold
+frequency and reward-floor gates, and otherwise abstains.
+
 ## 5. Experimental Protocol
 
 ### 5.1 MuJoCo control
@@ -409,6 +419,16 @@ that a learned policy or physical trajectory improved: selection always chose a
 function-preserving router. Walker2d required actor changes in nine cells, so the
 claim also cannot be reduced to a universal router-only mechanism.
 
+![MuJoCo confirmatory evidence.](../results/authoritative_paper_figures_latest/figures/fig2_mujoco_confirmatory_evidence.png)
+
+**Figure 2 | Confirmatory MuJoCo evidence.** (a) V12 responsibility-drift
+point estimates; horizontal ticks are registered family-wise lower bounds. (b)
+V13 gate decisions show that the stronger raw claim failed in HalfCheetah and
+Hopper. (c) V14.29 success rates over 16 fresh optimizer seeds per task with
+two-sided 95% Wilson intervals. (d) Selected transactions across 48 cells.
+Paths within an optimizer seed are nested evaluation units, not independent
+replicates.
+
 ### 6.4 Matched time-series baselines give a mixed performance result
 
 Quant v7.4 supported improvement in eight of 12 Holm-controlled contrasts
@@ -434,6 +454,14 @@ deltas favor Freq-HRL after metric orientation.
 | SAC | lower-LF drift | 0.007259 | 0.00006 | improvement |
 | TD3 | return | 0.002710 | 0.01674 | improvement |
 | TD3 | lower-LF drift | 0.012716 | 0.00006 | improvement |
+
+![Quant matched-baseline contrasts.](../results/authoritative_paper_figures_latest/figures/fig3_quant_matched_baseline_forest.png)
+
+**Figure 3 | Quant v7.4 matched-baseline contrasts.** All 12 registered
+directional contrasts are shown with 95% confidence intervals. Decisions use
+Holm-adjusted primary-family tests over 24 independent training replicates;
+positive values favor Freq-HRL after endpoint orientation. The supported harm
+against generic HRL-GRU-PPO and all three inconclusive contrasts are retained.
 
 ## 7. Discussion
 
@@ -531,6 +559,14 @@ score passed the discrimination rule. The best score covered only five of seven
 actor-floor paths in the global top 14. No fresh validation path was accessed in
 v17.8--v18.5, and post-hoc score combinations are excluded from method
 selection. Further tuning on this panel would be development-set overfitting.
+
+![Closed development route.](../results/authoritative_paper_figures_latest/figures/fig_s1_development_stop_map.png)
+
+**Supplementary Figure S1 | Closed v17--v18 development route.** Every node
+uses the unchanged 120-path development panel. No node accessed a fresh
+validation path, and none is manuscript performance evidence. The sequence
+separates router recoverability, actor-floor correction, action trust, online
+direct feasibility, and gate discrimination as distinct failure modes.
 
 ### 7.4 Negative results define the claim boundary
 

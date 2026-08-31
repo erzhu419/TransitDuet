@@ -76,6 +76,21 @@ class CurrentManuscriptAuditTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "registry count"):
                 audit_current_manuscript(repository_root=root)
 
+    def test_duplicate_quant_table_row_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self._copy_inputs(root)
+            manuscript = root / DEFAULT_MANUSCRIPT
+            text = manuscript.read_text(encoding="utf-8")
+            duplicate = (
+                "| generic HRL-PPO | lower-LF drift | -0.000006 | "
+                "0.65460 | inconclusive |\n"
+            )
+            text = text.replace(duplicate, duplicate + duplicate, 1)
+            manuscript.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "12 contrasts"):
+                audit_current_manuscript(repository_root=root)
+
 
 if __name__ == "__main__":
     unittest.main()
