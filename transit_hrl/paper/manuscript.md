@@ -97,13 +97,17 @@ domain-general performance advantage.
 
 The options framework connects temporally extended actions to semi-Markov
 decision processes [@sutton1999between]. Option-critic learns options end to end
-[@bacon2017option], while HIRO addresses off-policy correction between learned
-upper and lower policies [@nachum2018data]. Controlled-effect HRL shifts the
-hierarchical interface from primitive actions to environment transformations
-[@corcoll2022disentangling]. Freq-HRL shares the focus on effects, but asks a
-different question: whether slow and fast control effects are assigned to the
-intended levels and whether that assignment can be restored without violating a
-paired reward floor.
+[@bacon2017option]. FeUdal Networks use a slow Manager and a primitive-time
+Worker [@vezhnevets2017feudal], Hierarchical Actor-Critic trains multiple goal
+levels with hindsight [@levy2019hindsight], and HIRO addresses off-policy
+correction between learned upper and lower policies [@nachum2018data]. These
+methods establish temporal abstraction and multi-level credit assignment, but a
+slow decision clock alone does not constrain the spectrum of the resulting
+action effect. Controlled-effect HRL shifts the hierarchical interface from
+primitive actions to environment transformations [@corcoll2022disentangling].
+Freq-HRL shares the focus on effects, but asks a different question: whether
+slow and fast control effects are assigned to the intended levels and whether
+that assignment can be restored without violating a paired reward floor.
 
 ### 2.2 Frequency-aware representation
 
@@ -114,7 +118,31 @@ uses causal slow and fast state streams, but its primary object is not a spectra
 state embedding. It measures the frequency content of policy action effects and
 separates physical behavior from responsibility coordinates.
 
-### 2.3 Constrained actor-critic updates
+### 2.3 Decision frequency and action smoothness
+
+Decision-frequency methods alter when a policy refreshes its command. FiGAR
+learns how long to repeat an action [@sharma2017figar], time-discretization-aware
+Q-learning rescales learning under changing control steps [@tallec2019time],
+TAAC learns an act-or-repeat decision [@yu2021taac], and safe action repetition
+retains the ability to react under stochastic dynamics [@park2021sar]. TEMPLE
+adapts the high-level decision frequency in an HRL policy [@zhou2020temple].
+These methods change temporal resolution or command duration; they do not
+identify which level owns the slow and fast components of an additive action
+effect.
+
+Action-smoothness methods are the closest neighbors to Freq-HRL's *raw*
+frequency diagnostics. CAPS regularizes temporal and state-conditioned action
+differences [@mysore2021caps], Policy Inertia Controller discourages rapid
+policy switching [@chen2021inertia], and LipsNet constrains actor sensitivity
+through an adaptive Lipschitz architecture [@song2023lipsnet]. LipsNet++ jointly
+learns a Fourier filter and a Lipschitz controller [@song2025lipsnetpp]. These
+methods target physical action fluctuation of the total policy. Freq-HRL instead
+audits the allocation of that effect across hierarchy levels and explicitly
+reports when a responsibility-space repair leaves physical behavior unchanged.
+It does not claim that responsibility routing replaces or outperforms dedicated
+action-smoothing methods.
+
+### 2.4 Constrained actor-critic updates
 
 PPO provides the on-policy actor-critic foundation used by the shared Freq-HRL
 core [@schulman2017ppo]. CPO formalizes policy optimization under auxiliary
